@@ -42,10 +42,12 @@ export type ClipExtensionProps = {
 };
 
 const shaderFunction = glsl`
-uniform vec4 clip_bounds;
+uniform clipUniforms {
+  vec4 clip_bounds;
+} clip;
 
 bool clip_isInBounds(vec2 position) {
-  return position.x >= clip_bounds[0] && position.y >= clip_bounds[1] && position.x < clip_bounds[2] && position.y < clip_bounds[3];
+  return position.x >= clip.clip_bounds[0] && position.y >= clip.clip_bounds[1] && position.x < clip.clip_bounds[2] && position.y < clip.clip_bounds[3];
 }
 `;
 
@@ -54,8 +56,11 @@ bool clip_isInBounds(vec2 position) {
  * e.g. ScatterplotLayer - show if the center of a circle is within bounds
  */
 const shaderModuleVs: ShaderModule = {
-  name: 'clip-vs',
-  vs: shaderFunction
+  name: 'clip',
+  vs: shaderFunction,
+  uniformTypes: {
+    clip_bounds: 'vec4<f32>'
+  }
 };
 
 const injectionVs = {
@@ -78,8 +83,11 @@ in float clip_isVisible;
  * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
  */
 const shaderModuleFs: ShaderModule = {
-  name: 'clip-fs',
-  fs: shaderFunction
+  name: 'clip',
+  fs: shaderFunction,
+  uniformTypes: {
+    clip_bounds: 'vec4<f32>'
+  }
 };
 
 const injectionFs = {
@@ -126,20 +134,23 @@ export default class ClipExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<Required<ClipExtensionProps>>, {uniforms}: any): void {
+  draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
+    const clipProps = {} as any; // TODO Type !!
     if (this.state.clipByInstance) {
-      uniforms.clip_bounds = clipBounds;
+      clipProps.clip_bounds = clipBounds;
     } else {
       const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
       const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
 
-      uniforms.clip_bounds = [
+      clipProps.clip_bounds = [
         Math.min(corner0[0], corner1[0]),
         Math.min(corner0[1], corner1[1]),
         Math.max(corner0[0], corner1[0]),
         Math.max(corner0[1], corner1[1])
       ];
     }
+
+    this.setShaderModuleProps({clip: clipProps});
   }
 }
