@@ -163,7 +163,6 @@ type RasterTilesetSourceOptions = {
 type BoundaryTableSourceOptions = {
   tilesetTableName: string;
   columns?: string[];
-  matchingColumn?: string;
   propertiesTableName: string;
 }
 ```
@@ -173,7 +172,6 @@ type BoundaryTableSourceOptions = {
 ```ts
 type BoundaryQuerySourceOptions = {
   tilesetTableName: string;
-  matchingColumn?: string;
   propertiesSqlQuery: string;
   queryParameters?: QueryParameters;
 }
