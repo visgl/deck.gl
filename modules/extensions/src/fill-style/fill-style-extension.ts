@@ -1,6 +1,6 @@
 import {LayerExtension} from '@deck.gl/core';
 
-import {patternShaders} from './shader-module';
+import {FillStyleModuleSettings, patternShaders} from './shader-module';
 
 import type {
   Layer,
