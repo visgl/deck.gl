@@ -2,7 +2,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {Viewport, ProjectUniforms} from '@deck.gl/core';
 
-import type {Texture, UniformValue} from '@luma.gl/core';
+import type {Texture} from '@luma.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const uniformBlock = glsl`\
