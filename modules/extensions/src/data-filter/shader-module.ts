@@ -181,7 +181,7 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
     useSoftMargin: Boolean(opts.filterSoftRange),
     transformSize: filterEnabled && filterTransformSize,
     transformColor: filterEnabled && filterTransformColor,
-    categoryBitMask: categoryBitMask
+    categoryBitMask
   };
 }
 
