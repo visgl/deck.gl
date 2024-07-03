@@ -9,8 +9,8 @@ in float collisionPriorities;
 uniform sampler2D collision_texture;
 
 uniform collisionUniforms {
-  bool collision_sort;
-  bool collision_enabled;
+  bool sort;
+  bool enabled;
 } collision;
 
 vec2 collision_getCoords(vec4 position) {
@@ -26,7 +26,7 @@ float collision_match(vec2 tex, vec3 pickingColor) {
 }
 
 float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
-  if (!collision.collision_enabled) {
+  if (!collision.enabled) {
     return 1.0;
   }
 
@@ -58,12 +58,12 @@ const inject = {
   float collision_fade = 1.0;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': glsl`
-  if (collision.collision_sort) {
+  if (collision.sort) {
     float collisionPriority = collisionPriorities;
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
   }
 
-  if (collision.collision_enabled) {
+  if (collision.enabled) {
     vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
     vec2 collision_texCoords = collision_getCoords(collision_common_position);
     collision_fade = collision_isVisible(collision_texCoords, geometry.pickingColor / 255.0);
@@ -79,7 +79,7 @@ const inject = {
 };
 
 export type CollisionModuleSettings = {
-  collision_enabled: boolean;
+  enabled: boolean;
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
   dummyCollisionMap?: Texture;
@@ -87,8 +87,8 @@ export type CollisionModuleSettings = {
 
 /* eslint-disable camelcase */
 type CollisionUniforms = {
-  collision_enabled?: boolean;
-  collision_sort?: boolean;
+  enabled?: boolean;
+  sort?: boolean;
 };
 
 type CollisionBindings = {
@@ -101,10 +101,10 @@ const getCollisionUniforms = (
   if (!opts || !('dummyCollisionMap' in opts)) {
     return {};
   }
-  const {collision_enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
+  const {enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
-    collision_enabled,
-    collision_sort: Boolean(drawToCollisionMap),
+    enabled,
+    sort: Boolean(drawToCollisionMap),
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
@@ -118,7 +118,7 @@ export default {
   inject,
   getUniforms: getCollisionUniforms,
   uniformTypes: {
-    collision_sort: 'i32',
-    collision_enabled: 'i32'
+    sort: 'i32',
+    enabled: 'i32'
   } as const satisfies UniformTypes<CollisionUniforms>
 } as ShaderModule<CollisionModuleSettings>;

@@ -45,7 +45,7 @@ export default class CollisionFilterExtension extends LayerExtension {
   draw(this: Layer<CollisionFilterExtensionProps>, {moduleParameters}: any) {
     const {collisionEnabled} = this.props;
     const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = moduleParameters;
-    const collision_enabled = collisionEnabled && Boolean(collisionFBO);
+    const enabled = collisionEnabled && Boolean(collisionFBO);
 
     if (drawToCollisionMap) {
       // Override any props with those defined in collisionTestProps
@@ -54,7 +54,7 @@ export default class CollisionFilterExtension extends LayerExtension {
     }
 
     const collisionProps: CollisionModuleSettings = {
-      collision_enabled,
+      enabled,
       collisionFBO,
       drawToCollisionMap,
       dummyCollisionMap
