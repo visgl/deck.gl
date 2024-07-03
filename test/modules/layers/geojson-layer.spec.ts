@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
@@ -218,11 +218,11 @@ test('GeoJsonLayer#tests', t => {
         subLayers.every(_subLayer => _subLayer.props.data.attributes.getFilterValue),
         'every subLayer should receive getFilterValue binary attribute'
       );
-      const {uniforms} = subLayer.state.models[0];
-      t.is(uniforms.filter_min, 1, 'has correct uniforms');
-      t.is(uniforms.filter_max, 1, 'has correct uniforms');
-      t.is(uniforms.filter_useSoftMargin, false, 'has correct uniforms');
-      t.is(uniforms.filter_enabled, true, 'has correct uniforms');
+      const uniforms = getLayerUniforms(subLayer);
+      t.is(uniforms.min, 1, 'has correct uniforms');
+      t.is(uniforms.max, 1, 'has correct uniforms');
+      t.is(uniforms.useSoftMargin, false, 'has correct uniforms');
+      t.is(uniforms.enabled, true, 'has correct uniforms');
     },
     updateProps: {
       data: binaryDataWithGetFilterValue,
