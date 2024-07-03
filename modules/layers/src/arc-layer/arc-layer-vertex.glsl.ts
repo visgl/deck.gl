@@ -33,15 +33,6 @@ in float instanceWidths;
 in float instanceHeights;
 in float instanceTilts;
 
-uniform bool greatCircle;
-uniform bool useShortestPath;
-uniform float numSegments;
-uniform float opacity;
-uniform float widthScale;
-uniform float widthMinPixels;
-uniform float widthMaxPixels;
-uniform int widthUnits;
-
 out vec4 vColor;
 out vec2 uv;
 out float isValid;
@@ -82,7 +73,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width
 }
 
 float getSegmentRatio(float index) {
-  return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
+  return smoothstep(0.0, 1.0, index / (arc.numSegments - 1.0));
 }
 
 vec3 interpolateFlat(vec3 source, vec3 target, float segmentRatio) {
@@ -147,7 +138,7 @@ void main(void) {
   float segmentSide = mod(float(gl_VertexID), 2.) == 0. ? -1. : 1.;
   float segmentRatio = getSegmentRatio(segmentIndex);
   float prevSegmentRatio = getSegmentRatio(max(0.0, segmentIndex - 1.0));
-  float nextSegmentRatio = getSegmentRatio(min(numSegments - 1.0, segmentIndex + 1.0));
+  float nextSegmentRatio = getSegmentRatio(min(arc.numSegments - 1.0, segmentIndex + 1.0));
 
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
@@ -163,7 +154,7 @@ void main(void) {
   vec3 source;
   vec3 target;
 
-  if ((greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+  if ((arc.greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
     source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
     target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
@@ -199,7 +190,7 @@ void main(void) {
   } else {
     vec3 source_world = instanceSourcePositions;
     vec3 target_world = instanceTargetPositions;
-    if (useShortestPath) {
+    if (arc.useShortestPath) {
       source_world.x = mod(source_world.x + 180., 360.0) - 180.;
       target_world.x = mod(target_world.x + 180., 360.0) - 180.;
 
@@ -213,7 +204,7 @@ void main(void) {
     // common x at longitude=-180
     float antiMeridianX = 0.0;
 
-    if (useShortestPath) {
+    if (arc.useShortestPath) {
       if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
         antiMeridianX = -(project.coordinateOrigin.x + 180.) / 360. * TILE_SIZE;
       }
@@ -230,7 +221,7 @@ void main(void) {
     vec3 currPos = interpolateFlat(source, target, segmentRatio);
     vec3 nextPos = interpolateFlat(source, target, nextSegmentRatio);
 
-    if (useShortestPath) {
+    if (arc.useShortestPath) {
       if (nextPos.x < antiMeridianX) {
         currPos.x += TILE_SIZE;
         nextPos.x += TILE_SIZE;
@@ -245,8 +236,8 @@ void main(void) {
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
   float widthPixels = clamp(
-    project_size_to_pixel(instanceWidths * widthScale, widthUnits),
-    widthMinPixels, widthMaxPixels
+    project_size_to_pixel(instanceWidths * arc.widthScale, arc.widthUnits),
+    arc.widthMinPixels, arc.widthMaxPixels
   );
 
   // extrude
@@ -258,7 +249,7 @@ void main(void) {
   gl_Position = curr + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
-  vColor = vec4(color.rgb, color.a * opacity);
+  vColor = vec4(color.rgb, color.a * layer.opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;
