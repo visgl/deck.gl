@@ -1,4 +1,4 @@
-import {Framebuffer, Texture} from '@luma.gl/core';
+import {Framebuffer, Texture, TextureView} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, UniformTypes} from '@deck.gl/core';
 import {glsl} from '../utils/syntax-tags';
@@ -13,9 +13,6 @@ uniform collisionUniforms {
   bool collision_enabled;
 } collision;
 
-uniform bool collision_sort;
-uniform bool collision_enabled;
-
 vec2 collision_getCoords(vec4 position) {
   vec4 collision_clipspace = project_common_position_to_clipspace(position);
   return (1.0 + collision_clipspace.xy / collision_clipspace.w) / 2.0;
@@ -29,7 +26,7 @@ float collision_match(vec2 tex, vec3 pickingColor) {
 }
 
 float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
-  if (!collision_enabled) {
+  if (!collision.collision_enabled) {
     return 1.0;
   }
 
@@ -61,12 +58,12 @@ const inject = {
   float collision_fade = 1.0;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': glsl`
-  if (collision_sort) {
+  if (collision.collision_sort) {
     float collisionPriority = collisionPriorities;
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
   }
 
-  if (collision_enabled) {
+  if (collision.collision_enabled) {
     vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
     vec2 collision_texCoords = collision_getCoords(collision_common_position);
     collision_fade = collision_isVisible(collision_texCoords, geometry.pickingColor / 255.0);
@@ -81,7 +78,8 @@ const inject = {
   `
 };
 
-type CollisionModuleSettings = {
+export type CollisionModuleSettings = {
+  collision_enabled: boolean;
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
   dummyCollisionMap?: Texture;
@@ -94,25 +92,25 @@ type CollisionUniforms = {
 };
 
 type CollisionBindings = {
-  collision_texture?: Texture;
+  collision_texture?: TextureView | Texture;
 };
 
 const getCollisionUniforms = (
-  opts: CollisionModuleSettings | {},
-  uniforms: Record<string, any>
-): CollisionUniforms => {
+  opts: CollisionModuleSettings | {}
+): CollisionBindings & CollisionUniforms => {
   if (!opts || !('dummyCollisionMap' in opts)) {
     return {};
   }
-  const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
+  const {collision_enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
+    collision_enabled,
     collision_sort: Boolean(drawToCollisionMap),
-    // @ts-ignore (v9 not sure why this isn't allowed now)
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
 };
 
+// @ts-ignore
 export default {
   name: 'collision',
   dependencies: [project],
