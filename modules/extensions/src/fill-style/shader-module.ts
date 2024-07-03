@@ -7,11 +7,11 @@ import {glsl} from '../utils/syntax-tags';
 
 const uniformBlock = glsl`\
 uniform fillUniforms {
-  vec2 fill_patternTextureSize;
-  bool fill_patternEnabled;
-  bool fill_patternMask;
-  vec2 fill_uvCoordinateOrigin;
-  vec2 fill_uvCoordinateOrigin64Low;
+  vec2 patternTextureSize;
+  bool patternEnabled;
+  bool patternMask;
+  vec2 uvCoordinateOrigin;
+  vec2 uvCoordinateOrigin64Low;
 } fill;
 `;
 
@@ -54,24 +54,24 @@ const inject = {
   `,
 
   'vs:DECKGL_FILTER_COLOR': glsl`
-    if (fill.fill_patternEnabled) {
-      fill_patternBounds = fillPatternFrames / vec4(fill.fill_patternTextureSize, fill.fill_patternTextureSize);
+    if (fill.patternEnabled) {
+      fill_patternBounds = fillPatternFrames / vec4(fill.patternTextureSize, fill.patternTextureSize);
       fill_patternPlacement.xy = fillPatternOffsets;
       fill_patternPlacement.zw = fillPatternScales * fillPatternFrames.zw;
     }
   `,
 
   'fs:DECKGL_FILTER_COLOR': glsl`
-    if (fill.fill_patternEnabled) {
+    if (fill.patternEnabled) {
       vec2 scale = FILL_UV_SCALE * fill_patternPlacement.zw;
-      vec2 patternUV = mod(mod(fill.fill_uvCoordinateOrigin, scale) + fill.fill_uvCoordinateOrigin64Low + fill_uv, scale) / scale;
+      vec2 patternUV = mod(mod(fill.uvCoordinateOrigin, scale) + fill.uvCoordinateOrigin64Low + fill_uv, scale) / scale;
       patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
 
       vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
 
       vec4 patternColor = texture(fill_patternTexture, texCoords);
       color.a *= patternColor.a;
-      if (!fill.fill_patternMask) {
+      if (!fill.patternMask) {
         color.rgb = patternColor.rgb;
       }
     }
@@ -97,7 +97,7 @@ function getPatternUniforms(opts: FillStyleModuleSettings | {}): Record<string, 
   if ('fillPatternTexture' in opts) {
     const {fillPatternTexture} = opts;
     out.fill_patternTexture = fillPatternTexture;
-    out.fill_patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
+    out.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
   }
   if ('viewport' in opts) {
     const {fillPatternMask = true, fillPatternEnabled = true} = opts;
@@ -109,10 +109,10 @@ function getPatternUniforms(opts: FillStyleModuleSettings | {}): Record<string, 
       fp64LowPart(coordinateOriginCommon[1])
     ];
 
-    out.fill_uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
-    out.fill_uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
-    out.fill_patternMask = fillPatternMask;
-    out.fill_patternEnabled = fillPatternEnabled;
+    out.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
+    out.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
+    out.patternMask = fillPatternMask;
+    out.patternEnabled = fillPatternEnabled;
   }
   return out;
 }
@@ -125,10 +125,10 @@ export const patternShaders: ShaderModule<FillStyleModuleSettings> = {
   dependencies: [project],
   getUniforms: getPatternUniforms,
   uniformTypes: {
-    fill_patternTextureSize: 'vec2<f32>',
-    fill_patternEnabled: 'i32',
-    fill_patternMask: 'i32',
-    fill_uvCoordinateOrigin: 'vec2<f32>',
-    fill_uvCoordinateOrigin64Low: 'vec2<f32>'
+    patternTextureSize: 'vec2<f32>',
+    patternEnabled: 'i32',
+    patternMask: 'i32',
+    uvCoordinateOrigin: 'vec2<f32>',
+    uvCoordinateOrigin64Low: 'vec2<f32>'
   }
 };
