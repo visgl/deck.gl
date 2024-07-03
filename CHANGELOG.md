@@ -19,6 +19,17 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.21] - Jul 3 2024
+
+- CARTO: do not reduce position precision to 32bit (#8995)
+- CARTO: Remove matchingColumn prop (#8971)
+- fix(layers): Fixes line width default type description for geo and polygon layers (#8979)
+- fix(test-utils): run layer tests in Node (#8968)
+- Remove some WebGL specific code (#8967)
+- chore: Bump luma to 9.0.15 (#8970)
+- Fix highlightedObjectIndex (#8966)
+- Document additional props of the scripting interface (#8969)
+
 #### deck.gl [9.0.20] - Jun 20 2024
 
 - fix(extensions): DataFilterExtension not setting category uniforms (#8940)
