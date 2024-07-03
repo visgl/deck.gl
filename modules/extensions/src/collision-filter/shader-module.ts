@@ -1,12 +1,18 @@
 import {Framebuffer, Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project} from '@deck.gl/core';
+import {project, UniformTypes} from '@deck.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const vs = glsl`
 in float collisionPriorities;
 
 uniform sampler2D collision_texture;
+
+uniform collisionUniforms {
+  bool collision_sort;
+  bool collision_enabled;
+} collision;
+
 uniform bool collision_sort;
 uniform bool collision_enabled;
 
@@ -82,7 +88,14 @@ type CollisionModuleSettings = {
 };
 
 /* eslint-disable camelcase */
-type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Texture};
+type CollisionUniforms = {
+  collision_enabled?: boolean;
+  collision_sort?: boolean;
+};
+
+type CollisionBindings = {
+  collision_texture?: Texture;
+};
 
 const getCollisionUniforms = (
   opts: CollisionModuleSettings | {},
@@ -100,11 +113,14 @@ const getCollisionUniforms = (
   };
 };
 
-// @ts-expect-error
 export default {
   name: 'collision',
   dependencies: [project],
   vs,
   inject,
-  getUniforms: getCollisionUniforms
+  getUniforms: getCollisionUniforms,
+  uniformTypes: {
+    collision_sort: 'i32',
+    collision_enabled: 'i32'
+  } as const satisfies UniformTypes<CollisionUniforms>
 } as ShaderModule<CollisionModuleSettings>;
