@@ -23,7 +23,6 @@ import {vec3} from '@math.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters, UniformTypes} from '@deck.gl/core';
-import type {Model} from '@luma.gl/engine';
 import {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
@@ -112,7 +111,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
 
     const {inject} = result;
-    const pathStyle: ShaderModule = {
+    const pathStyle: ShaderModule<PathStyleProps> = {
       name: 'pathStyle',
       inject,
       uniformTypes: {
@@ -166,20 +165,13 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       return;
     }
 
-    const uniforms: any = {};
-
     if (extension.opts.dash) {
-      uniforms.dashAlignMode = this.props.dashJustified ? 1 : 0;
-      uniforms.dashGapPickable = Boolean(this.props.dashGapPickable);
-
       const pathStyleProps: PathStyleProps = {
         dashAlignMode: this.props.dashJustified ? 1 : 0,
         dashGapPickable: Boolean(this.props.dashGapPickable)
       };
       this.setShaderModuleProps({pathStyle: pathStyleProps});
     }
-
-    (this.state.model as Model)?.setUniforms(uniforms);
   }
 
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
