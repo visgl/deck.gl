@@ -9,7 +9,7 @@ import type {TerrainCover} from './terrain-cover';
 import {glsl} from '../utils/syntax-tags';
 
 /** Module parameters expected by the terrain shader module */
-export type TerrainModuleSettings = {
+export type TerrainModuleProps = {
   viewport: Viewport;
   picking: {isActive?: boolean};
   heightMap: Texture | null;
@@ -104,7 +104,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
     `
   },
   // eslint-disable-next-line complexity
-  getUniforms: (opts: Partial<TerrainModuleSettings> = {}) => {
+  getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
     if ('dummyHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
@@ -170,4 +170,4 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
     mode: 'f32',
     bounds: 'vec4<f32>'
   }
-} as ShaderModule<TerrainModuleSettings>;
+} as ShaderModule<TerrainModuleProps>;

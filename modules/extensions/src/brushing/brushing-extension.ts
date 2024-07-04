@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {LayerExtension} from '@deck.gl/core';
-import shaderModule, {BrushingModuleSettings} from './shader-module';
+import shaderModule, {BrushingModuleProps} from './shader-module';
 
 import type {Layer, LayerContext, Accessor} from '@deck.gl/core';
 
@@ -105,7 +105,7 @@ export default class BrushingExtension extends LayerExtension {
   draw(this: Layer<BrushingExtensionProps>, params: any, extension: this) {
     const {viewport, mousePosition} = params.context;
     const {brushingEnabled, brushingRadius, brushingTarget} = params.moduleParameters;
-    const brushingProps: BrushingModuleSettings = {
+    const brushingProps: BrushingModuleProps = {
       viewport,
       mousePosition,
       brushingEnabled,

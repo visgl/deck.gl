@@ -1,5 +1,5 @@
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
-import collision, {CollisionModuleSettings} from './shader-module';
+import collision, {CollisionModuleProps} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
 const defaultProps = {
@@ -53,7 +53,7 @@ export default class CollisionFilterExtension extends LayerExtension {
       this.props = this.clone(this.props.collisionTestProps).props;
     }
 
-    const collisionProps: CollisionModuleSettings = {
+    const collisionProps: CollisionModuleProps = {
       enabled,
       collisionFBO,
       drawToCollisionMap,

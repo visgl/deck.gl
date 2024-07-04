@@ -144,13 +144,13 @@ ${fragment}
 `;
 
 export type CategoryBitMask = Uint32Array;
-export type DataFilterModuleSettings = {
+export type DataFilterModuleProps = {
   extensions: any[]; // used to detect if layer props are present
   categoryBitMask?: CategoryBitMask;
 } & DataFilterExtensionProps;
 
 /* eslint-disable camelcase */
-function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> {
+function getUniforms(opts?: DataFilterModuleProps | {}): Record<string, any> {
   if (!opts || !('extensions' in opts)) {
     return {};
   }
@@ -185,7 +185,7 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
   };
 }
 
-function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any> {
+function getUniforms64(opts?: DataFilterModuleProps | {}): Record<string, any> {
   if (!opts || !('extensions' in opts)) {
     return {};
   }
@@ -284,7 +284,7 @@ function unifromTypesFromOptions(opts: DataFilterExtensionOptions) {
   return uniformTypes;
 }
 
-export const dataFilter: ShaderModule<DataFilterModuleSettings> & {
+export const dataFilter: ShaderModule<DataFilterModuleProps> & {
   unifromTypesFromOptions: UniformTypesFunc;
 } = {
   name: 'dataFilter',
@@ -295,7 +295,7 @@ export const dataFilter: ShaderModule<DataFilterModuleSettings> & {
   unifromTypesFromOptions
 };
 
-export const dataFilter64: ShaderModule<DataFilterModuleSettings> & {
+export const dataFilter64: ShaderModule<DataFilterModuleProps> & {
   unifromTypesFromOptions: UniformTypesFunc;
 } = {
   name: 'dataFilter',

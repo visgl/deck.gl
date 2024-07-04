@@ -78,7 +78,7 @@ const inject = {
   `
 };
 
-export type FillStyleModuleSettings = {
+export type FillStyleModuleProps = {
   viewport: Viewport;
   fillPatternEnabled?: boolean;
   fillPatternMask?: boolean;
@@ -86,7 +86,7 @@ export type FillStyleModuleSettings = {
 };
 
 /* eslint-disable camelcase */
-function getPatternUniforms(opts: FillStyleModuleSettings | {}): Record<string, any> {
+function getPatternUniforms(opts: FillStyleModuleProps | {}): Record<string, any> {
   if (!opts) {
     return {};
   }
@@ -128,4 +128,4 @@ export const patternShaders = {
     uvCoordinateOrigin: 'vec2<f32>',
     uvCoordinateOrigin64Low: 'vec2<f32>'
   }
-} as const satisfies ShaderModule<FillStyleModuleSettings>;
+} as const satisfies ShaderModule<FillStyleModuleProps>;

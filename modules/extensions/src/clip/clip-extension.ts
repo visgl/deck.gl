@@ -51,7 +51,7 @@ bool clip_isInBounds(vec2 position) {
 }
 `;
 
-export type ClipModuleSettings = {
+export type ClipModuleProps = {
   bounds: [number, number, number, number];
 };
 
@@ -59,12 +59,12 @@ export type ClipModuleSettings = {
  * The vertex-shader version clips geometries by their anchor position
  * e.g. ScatterplotLayer - show if the center of a circle is within bounds
  */
-const shaderModuleVs: ShaderModule<ClipModuleSettings> = {
+const shaderModuleVs: ShaderModule<ClipModuleProps> = {
   name: 'clip',
   vs: shaderFunction,
   uniformTypes: {
     bounds: 'vec4<f32>'
-  } as const satisfies UniformTypes<ClipModuleSettings>
+  } as const satisfies UniformTypes<ClipModuleProps>
 };
 
 const injectionVs = {
@@ -86,7 +86,7 @@ in float clip_isVisible;
  * The fragment-shader version clips pixels at the bounds
  * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
  */
-const shaderModuleFs: ShaderModule<ClipModuleSettings> = {
+const shaderModuleFs: ShaderModule<ClipModuleProps> = {
   name: 'clip',
   fs: shaderFunction,
   uniformTypes: {
@@ -140,7 +140,7 @@ export default class ClipExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as ClipModuleSettings;
+    const clipProps = {} as ClipModuleProps;
     if (this.state.clipByInstance) {
       clipProps.bounds = clipBounds;
     } else {

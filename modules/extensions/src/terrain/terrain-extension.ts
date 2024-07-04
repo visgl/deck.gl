@@ -1,6 +1,6 @@
 import {LayerExtension, UpdateParameters} from '@deck.gl/core';
 import {TerrainEffect} from './terrain-effect';
-import {terrainModule, TerrainModuleSettings} from './shader-module';
+import {terrainModule, TerrainModuleProps} from './shader-module';
 
 import type {Layer} from '@deck.gl/core';
 

@@ -78,7 +78,7 @@ const inject = {
   `
 };
 
-export type CollisionModuleSettings = {
+export type CollisionModuleProps = {
   enabled: boolean;
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
@@ -96,7 +96,7 @@ type CollisionBindings = {
 };
 
 const getCollisionUniforms = (
-  opts: CollisionModuleSettings | {}
+  opts: CollisionModuleProps | {}
 ): CollisionBindings & CollisionUniforms => {
   if (!opts || !('dummyCollisionMap' in opts)) {
     return {};
@@ -121,4 +121,4 @@ export default {
     sort: 'i32',
     enabled: 'i32'
   } as const satisfies UniformTypes<CollisionUniforms>
-} as ShaderModule<CollisionModuleSettings>;
+} as ShaderModule<CollisionModuleProps>;

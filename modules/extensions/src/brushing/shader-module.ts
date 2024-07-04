@@ -25,7 +25,7 @@ import type {Viewport} from '@deck.gl/core';
 import type {BrushingExtensionProps} from './brushing-extension';
 import {glsl} from '../utils/syntax-tags';
 
-export type BrushingModuleSettings = {
+export type BrushingModuleProps = {
   // From layer context
   viewport: Viewport;
   mousePosition?: {x: number; y: number};
@@ -122,7 +122,7 @@ export default {
   vs,
   fs,
   inject,
-  getUniforms: (opts?: BrushingModuleSettings | {}): Record<string, any> => {
+  getUniforms: (opts?: BrushingModuleProps | {}): Record<string, any> => {
     if (!opts || !('viewport' in opts)) {
       return {};
     }
@@ -148,4 +148,4 @@ export default {
     mousePos: 'vec2<f32>',
     radius: 'f32'
   }
-} as ShaderModule<BrushingModuleSettings>;
+} as ShaderModule<BrushingModuleProps>;

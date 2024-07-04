@@ -1100,7 +1100,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           terrainSkipRender
         };
         this.setShaderModuleProps({
-          // TODO do we have to do this here?
+          // TODO Revisit whether this is necessary once all layers ported to UBO
           terrain: terrainProps,
           layer: {opacity},
           picking: {isActive, isAttribute} as PickingProps,
