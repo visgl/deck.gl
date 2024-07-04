@@ -44,8 +44,8 @@ const uniformBlock =
   TERRAIN_MODE_CONSTANTS +
   glsl`
 uniform terrainUniforms {
-  float terrain_mode;
-  vec4 terrain_bounds;
+  float mode;
+  vec4 bounds;
 } terrain;
 
 uniform sampler2D terrain_map;
@@ -59,23 +59,23 @@ export const terrainModule = {
   fs: uniformBlock + glsl`in vec3 commonPos;`,
   inject: {
     'vs:#main-start': glsl`
-if (terrain.terrain_mode == TERRAIN_MODE_SKIP) {
+if (terrain.mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
   return;
 }
 `,
     'vs:DECKGL_FILTER_GL_POSITION': glsl`
 commonPos = geometry.position.xyz;
-if (terrain.terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  vec2 texCoords = (commonPos.xy - terrain.terrain_bounds.xy) / terrain.terrain_bounds.zw;
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
   commonPos.z += project.commonOrigin.z;
 }
-if (terrain.terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
-  vec2 texCoords = (anchorCommon.xy - terrain.terrain_bounds.xy) / terrain.terrain_bounds.zw;
+  vec2 texCoords = (anchorCommon.xy - terrain.bounds.xy) / terrain.bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     geometry.position.z += terrainZ;
@@ -84,16 +84,16 @@ if (terrain.terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
 }
     `,
     'fs:#main-start': glsl`
-if (terrain.terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
     'fs:DECKGL_FILTER_COLOR': glsl`
-if ((terrain.terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain.terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
-  vec2 texCoords = (commonPos.xy - terrain.terrain_bounds.xy) / terrain.terrain_bounds.zw;
+if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
+  vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain.terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
     color = pixel;
   } else {
     // pixel is premultiplied
@@ -151,10 +151,10 @@ if ((terrain.terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain.terrain_mode ==
 
       /* eslint-disable camelcase */
       return {
-        terrain_mode: mode,
+        mode,
         terrain_map: sampler,
         // Convert bounds to the common space, as [minX, minY, width, height]
-        terrain_bounds: bounds
+        bounds: bounds
           ? [
               bounds[0] - commonOrigin[0],
               bounds[1] - commonOrigin[1],
@@ -167,7 +167,7 @@ if ((terrain.terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain.terrain_mode ==
     return null;
   },
   uniformTypes: {
-    terrain_mode: 'f32',
-    terrain_bounds: 'vec4<f32>'
+    mode: 'f32',
+    bounds: 'vec4<f32>'
   }
 } as ShaderModule<TerrainModuleSettings>;
