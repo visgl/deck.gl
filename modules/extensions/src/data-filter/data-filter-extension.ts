@@ -22,7 +22,13 @@ import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
-import {Defines, shaderModule, shaderModule64} from './shader-module';
+import {
+  CategoryBitMask,
+  DataFilterModuleSettings,
+  Defines,
+  dataFilter,
+  dataFilter64
+} from './shader-module';
 import * as aggregator from './aggregator';
 
 const defaultProps = {
@@ -94,7 +100,7 @@ export type DataFilterExtensionProps<DataT = any> = {
   }) => void;
 };
 
-type DataFilterExtensionOptions = {
+export type DataFilterExtensionOptions = {
   /**
    * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Set to `0` to disable category filtering.
    * @default 0
@@ -154,7 +160,10 @@ export default class DataFilterExtension extends LayerExtension<
       defines.DATAFILTER_DOUBLE = Boolean(fp64);
     }
 
-    return {modules: [fp64 ? shaderModule64 : shaderModule], defines};
+    const module = fp64 ? dataFilter64 : dataFilter;
+    module.uniformTypes = module.uniformTypesFromOptions(extension.opts);
+
+    return {modules: [module], defines};
   }
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
@@ -276,8 +285,31 @@ export default class DataFilterExtension extends LayerExtension<
     if (!this.state.categoryBitMask) {
       extension._updateCategoryBitMask.call(this, params, extension);
     }
+
+    const {
+      extensions,
+      filterEnabled,
+      filterRange,
+      filterSoftRange,
+      filterTransformSize,
+      filterTransformColor,
+      filterCategories
+    } = params.moduleParameters;
+    const dataFilterProps: DataFilterModuleSettings = {
+      extensions,
+      filterEnabled,
+      filterRange,
+      filterSoftRange,
+      filterTransformSize,
+      filterTransformColor,
+      filterCategories
+    };
+    if (this.state.categoryBitMask) {
+      dataFilterProps.categoryBitMask = this.state.categoryBitMask as CategoryBitMask;
+    }
+    this.setShaderModuleProps({dataFilter: dataFilterProps});
+
     /* eslint-disable-next-line camelcase */
-    params.uniforms.filter_categoryBitMask = this.state.categoryBitMask;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
         attributes: {filterValues, filterCategoryValues, filterIndices}
@@ -293,7 +325,7 @@ export default class DataFilterExtension extends LayerExtension<
         ...filterCategoryValues?.getValue(),
         ...filterIndices?.getValue()
       });
-      filterModel.setUniforms(params.uniforms);
+      filterModel.shaderInputs.setProps({dataFilter: dataFilterProps});
       filterModel.device.withParametersWebGL(
         {
           framebuffer: filterFBO,
@@ -338,7 +370,7 @@ export default class DataFilterExtension extends LayerExtension<
     const {categorySize} = extension.opts;
     if (!categorySize) return;
     const {filterCategories} = this.props;
-    const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
+    const categoryBitMask: CategoryBitMask = new Uint32Array([0, 0, 0, 0]);
     const categoryFilters = (
       categorySize === 1 ? [filterCategories] : filterCategories
     ) as FilterCategory[][];

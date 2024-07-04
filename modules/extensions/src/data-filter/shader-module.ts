@@ -1,6 +1,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
-import type {DataFilterExtensionProps} from './data-filter-extension';
+import type {DataFilterExtensionOptions, DataFilterExtensionProps} from './data-filter-extension';
 import {glsl} from '../utils/syntax-tags';
+import {UniformFormat} from '@luma.gl/shadertools/dist/types';
 
 /*
  * data filter shader module
@@ -27,27 +28,35 @@ export type Defines = {
   DATAFILTER_DOUBLE?: boolean;
 };
 
-const vs = glsl`
-uniform bool filter_useSoftMargin;
-uniform bool filter_enabled;
-uniform bool filter_transformSize;
-uniform ivec4 filter_categoryBitMask;
-
+const uniformBlock = glsl`\
+uniform dataFilterUniforms {
+  bool useSoftMargin;
+  bool enabled;
+  bool transformSize;
+  bool transformColor;
 #ifdef DATAFILTER_TYPE
-  uniform DATAFILTER_TYPE filter_min;
-  uniform DATAFILTER_TYPE filter_softMin;
-  uniform DATAFILTER_TYPE filter_softMax;
-  uniform DATAFILTER_TYPE filter_max;
-
-  in DATAFILTER_TYPE filterValues;
-  #ifdef DATAFILTER_DOUBLE
-    in DATAFILTER_TYPE filterValues64Low;
-
-    uniform DATAFILTER_TYPE filter_min64High;
-    uniform DATAFILTER_TYPE filter_max64High;
-  #endif
+  DATAFILTER_TYPE min;
+  DATAFILTER_TYPE softMin;
+  DATAFILTER_TYPE softMax;
+  DATAFILTER_TYPE max;
+#ifdef DATAFILTER_DOUBLE
+  DATAFILTER_TYPE min64High;
+  DATAFILTER_TYPE max64High;
 #endif
+#endif
+#ifdef DATACATEGORY_TYPE
+  highp ivec4 categoryBitMask;
+#endif
+} dataFilter;
+`;
 
+const vertex = glsl`
+#ifdef DATAFILTER_TYPE
+  in DATAFILTER_TYPE filterValues;
+#ifdef DATAFILTER_DOUBLE
+  in DATAFILTER_TYPE filterValues64Low;
+#endif
+#endif
 
 #ifdef DATACATEGORY_TYPE
   in DATACATEGORY_TYPE filterCategoryValues;
@@ -70,23 +79,23 @@ float dataFilter_reduceValue(vec4 value) {
 
 #ifdef DATAFILTER_TYPE
   void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
-    if (filter_useSoftMargin) {
+    if (dataFilter.useSoftMargin) {
       // smoothstep results are undefined if edge0 ≥ edge1
       // Fallback to ignore filterSoftRange if it is truncated by filterRange
       DATAFILTER_TYPE leftInRange = mix(
-        smoothstep(filter_min, filter_softMin, valueFromMin),
-        step(filter_min, valueFromMin),
-        step(filter_softMin, filter_min)
+        smoothstep(dataFilter.min, dataFilter.softMin, valueFromMin),
+        step(dataFilter.min, valueFromMin),
+        step(dataFilter.softMin, dataFilter.min)
       );
       DATAFILTER_TYPE rightInRange = mix(
-        1.0 - smoothstep(filter_softMax, filter_max, valueFromMax),
-        step(valueFromMax, filter_max),
-        step(filter_max, filter_softMax)
+        1.0 - smoothstep(dataFilter.softMax, dataFilter.max, valueFromMax),
+        step(valueFromMax, dataFilter.max),
+        step(dataFilter.max, dataFilter.softMax)
       );
       dataFilter_value = dataFilter_reduceValue(leftInRange * rightInRange);
     } else {
       dataFilter_value = dataFilter_reduceValue(
-        step(filter_min, valueFromMin) * step(valueFromMax, filter_max)
+        step(dataFilter.min, valueFromMin) * step(valueFromMax, dataFilter.max)
       );
     }
   }
@@ -95,16 +104,16 @@ float dataFilter_reduceValue(vec4 value) {
 #ifdef DATACATEGORY_TYPE
   void dataFilter_setCategoryValue(DATACATEGORY_TYPE category) {
     #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
-    int dataFilter_masks = filter_categoryBitMask[int(category / 32.0)];
+    int dataFilter_masks = dataFilter.categoryBitMask[int(category / 32.0)];
     #elif DATACATEGORY_CHANNELS == 2 // Two 64-bit masks
     ivec2 dataFilter_masks = ivec2(
-      filter_categoryBitMask[int(category.x / 32.0)],
-      filter_categoryBitMask[int(category.y / 32.0) + 2]
+      dataFilter.categoryBitMask[int(category.x / 32.0)],
+      dataFilter.categoryBitMask[int(category.y / 32.0) + 2]
     );
     #elif DATACATEGORY_CHANNELS == 3 // Three 32-bit masks
-    ivec3 dataFilter_masks = filter_categoryBitMask.xyz;
+    ivec3 dataFilter_masks = dataFilter.categoryBitMask.xyz;
     #else // Four 32-bit masks
-    ivec4 dataFilter_masks = filter_categoryBitMask;
+    ivec4 dataFilter_masks = dataFilter.categoryBitMask;
     #endif
 
     // Shift mask and extract relevant bits
@@ -120,13 +129,24 @@ float dataFilter_reduceValue(vec4 value) {
 #endif
 `;
 
-const fs = glsl`
-uniform bool filter_transformColor;
+const vs = `
+${uniformBlock}
+${vertex}
+`;
+
+const fragment = glsl`
 in float dataFilter_value;
 `;
 
-type DataFilterModuleSettings = {
+const fs = `
+${uniformBlock}
+${fragment}
+`;
+
+export type CategoryBitMask = Uint32Array;
+export type DataFilterModuleSettings = {
   extensions: any[]; // used to detect if layer props are present
+  categoryBitMask?: CategoryBitMask;
 } & DataFilterExtensionProps;
 
 /* eslint-disable camelcase */
@@ -138,28 +158,30 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
     filterRange = [-1, 1],
     filterEnabled = true,
     filterTransformSize = true,
-    filterTransformColor = true
+    filterTransformColor = true,
+    categoryBitMask = [0, 0, 0, 0]
   } = opts;
   const filterSoftRange = opts.filterSoftRange || filterRange;
 
   return {
     ...(Number.isFinite(filterRange[0])
       ? {
-          filter_min: filterRange[0],
-          filter_softMin: filterSoftRange[0],
-          filter_softMax: filterSoftRange[1],
-          filter_max: filterRange[1]
+          min: filterRange[0],
+          softMin: filterSoftRange[0],
+          softMax: filterSoftRange[1],
+          max: filterRange[1]
         }
       : {
-          filter_min: filterRange.map(r => r[0]),
-          filter_softMin: filterSoftRange.map(r => r[0]),
-          filter_softMax: filterSoftRange.map(r => r[1]),
-          filter_max: filterRange.map(r => r[1])
+          min: filterRange.map(r => r[0]),
+          softMin: filterSoftRange.map(r => r[0]),
+          softMax: filterSoftRange.map(r => r[1]),
+          max: filterRange.map(r => r[1])
         }),
-    filter_enabled: filterEnabled,
-    filter_useSoftMargin: Boolean(opts.filterSoftRange),
-    filter_transformSize: filterEnabled && filterTransformSize,
-    filter_transformColor: filterEnabled && filterTransformColor
+    enabled: filterEnabled,
+    useSoftMargin: Boolean(opts.filterSoftRange),
+    transformSize: filterEnabled && filterTransformSize,
+    transformColor: filterEnabled && filterTransformColor,
+    categoryBitMask
   };
 }
 
@@ -168,26 +190,26 @@ function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any
     return {};
   }
   const uniforms = getUniforms(opts);
-  if (Number.isFinite(uniforms.filter_min)) {
-    const min64High = Math.fround(uniforms.filter_min);
-    uniforms.filter_min -= min64High;
-    uniforms.filter_softMin -= min64High;
-    uniforms.filter_min64High = min64High;
+  if (Number.isFinite(uniforms.min)) {
+    const min64High = Math.fround(uniforms.min);
+    uniforms.min -= min64High;
+    uniforms.softMin -= min64High;
+    uniforms.min64High = min64High;
 
-    const max64High = Math.fround(uniforms.filter_max);
-    uniforms.filter_max -= max64High;
-    uniforms.filter_softMax -= max64High;
-    uniforms.filter_max64High = max64High;
+    const max64High = Math.fround(uniforms.max);
+    uniforms.max -= max64High;
+    uniforms.softMax -= max64High;
+    uniforms.max64High = max64High;
   } else {
-    const min64High = uniforms.filter_min.map(Math.fround);
-    uniforms.filter_min = uniforms.filter_min.map((x, i) => x - min64High[i]);
-    uniforms.filter_softMin = uniforms.filter_softMin.map((x, i) => x - min64High[i]);
-    uniforms.filter_min64High = min64High;
+    const min64High = uniforms.min.map(Math.fround);
+    uniforms.min = uniforms.min.map((x, i) => x - min64High[i]);
+    uniforms.softMin = uniforms.softMin.map((x, i) => x - min64High[i]);
+    uniforms.min64High = min64High;
 
-    const max64High = uniforms.filter_max.map(Math.fround);
-    uniforms.filter_max = uniforms.filter_max.map((x, i) => x - max64High[i]);
-    uniforms.filter_softMax = uniforms.filter_softMax.map((x, i) => x - max64High[i]);
-    uniforms.filter_max64High = max64High;
+    const max64High = uniforms.max.map(Math.fround);
+    uniforms.max = uniforms.max.map((x, i) => x - max64High[i]);
+    uniforms.softMax = uniforms.softMax.map((x, i) => x - max64High[i]);
+    uniforms.max64High = max64High;
   }
   return uniforms;
 }
@@ -195,12 +217,12 @@ function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any
 const inject = {
   'vs:#main-start': glsl`
     dataFilter_value = 1.0;
-    if (filter_enabled) {
+    if (dataFilter.enabled) {
       #ifdef DATAFILTER_TYPE
         #ifdef DATAFILTER_DOUBLE
           dataFilter_setValue(
-            filterValues - filter_min64High + filterValues64Low,
-            filterValues - filter_max64High + filterValues64Low
+            filterValues - dataFilter.min64High + filterValues64Low,
+            filterValues - dataFilter.max64High + filterValues64Low
           );
         #else
           dataFilter_setValue(filterValues, filterValues);
@@ -220,31 +242,66 @@ const inject = {
   `,
 
   'vs:DECKGL_FILTER_SIZE': glsl`
-    if (filter_transformSize) {
+    if (dataFilter.transformSize) {
       size = size * dataFilter_value;
     }
   `,
 
   'fs:DECKGL_FILTER_COLOR': glsl`
     if (dataFilter_value == 0.0) discard;
-    if (filter_transformColor) {
+    if (dataFilter.transformColor) {
       color.a *= dataFilter_value;
     }
   `
 };
 
-export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
-  name: 'data-filter',
+type UniformTypesFunc = (opts: DataFilterExtensionOptions) => Record<string, UniformFormat>;
+function uniformTypesFromOptions(opts: DataFilterExtensionOptions) {
+  const {categorySize, filterSize, fp64} = opts;
+  const uniformTypes: Record<string, UniformFormat> = {
+    useSoftMargin: 'i32',
+    enabled: 'i32',
+    transformSize: 'i32',
+    transformColor: 'i32'
+  };
+
+  if (filterSize) {
+    const uniformFormat: UniformFormat = filterSize === 1 ? 'f32' : `vec${filterSize}<f32>`;
+    uniformTypes.min = uniformFormat;
+    uniformTypes.softMin = uniformFormat;
+    uniformTypes.softMax = uniformFormat;
+    uniformTypes.max = uniformFormat;
+    if (fp64) {
+      uniformTypes.min64High = uniformFormat;
+      uniformTypes.max64High = uniformFormat;
+    }
+  }
+
+  if (categorySize) {
+    uniformTypes.categoryBitMask = 'vec4<i32>';
+  }
+
+  return uniformTypes;
+}
+
+export const dataFilter: ShaderModule<DataFilterModuleSettings> & {
+  uniformTypesFromOptions: UniformTypesFunc;
+} = {
+  name: 'dataFilter',
   vs,
   fs,
   inject,
-  getUniforms
+  getUniforms,
+  uniformTypesFromOptions
 };
 
-export const shaderModule64: ShaderModule<DataFilterModuleSettings> = {
-  name: 'data-filter-fp64',
+export const dataFilter64: ShaderModule<DataFilterModuleSettings> & {
+  uniformTypesFromOptions: UniformTypesFunc;
+} = {
+  name: 'dataFilter',
   vs,
   fs,
   inject,
-  getUniforms: getUniforms64
+  getUniforms: getUniforms64,
+  uniformTypesFromOptions
 };
