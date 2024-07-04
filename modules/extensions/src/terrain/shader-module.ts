@@ -39,18 +39,26 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
   .join('\n');
 
+const uniformBlock =
+  TERRAIN_MODE_CONSTANTS +
+  glsl`
+uniform terrainUniforms {
+  float terrain_mode;
+  vec4 terrain_bounds;
+} terrain;
+
+uniform float terrain_mode;
+uniform sampler2D terrain_map;
+uniform vec4 terrain_bounds;
+`;
+
 // @ts-expect-error
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
+  vs: uniformBlock + glsl`out vec3 commonPos;`,
+  fs: uniformBlock + glsl`in vec3 commonPos;`,
   inject: {
-    'vs:#decl':
-      glsl`
-uniform float terrain_mode;
-uniform sampler2D terrain_map;
-uniform vec4 terrain_bounds;
-out vec3 commonPos;
-` + TERRAIN_MODE_CONSTANTS,
     'vs:#main-start': glsl`
 if (terrain_mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
@@ -76,13 +84,6 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   }
 }
     `,
-    'fs:#decl':
-      glsl`
-uniform float terrain_mode;
-uniform sampler2D terrain_map;
-uniform vec4 terrain_bounds;
-in vec3 commonPos;
-` + TERRAIN_MODE_CONSTANTS,
     'fs:#main-start': glsl`
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
