@@ -48,9 +48,7 @@ uniform terrainUniforms {
   vec4 terrain_bounds;
 } terrain;
 
-uniform float terrain_mode;
 uniform sampler2D terrain_map;
-uniform vec4 terrain_bounds;
 `;
 
 // @ts-expect-error
@@ -61,23 +59,23 @@ export const terrainModule = {
   fs: uniformBlock + glsl`in vec3 commonPos;`,
   inject: {
     'vs:#main-start': glsl`
-if (terrain_mode == TERRAIN_MODE_SKIP) {
+if (terrain.terrain_mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
   return;
 }
 `,
     'vs:DECKGL_FILTER_GL_POSITION': glsl`
 commonPos = geometry.position.xyz;
-if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
+if (terrain.terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  vec2 texCoords = (commonPos.xy - terrain.terrain_bounds.xy) / terrain.terrain_bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
   commonPos.z += project.commonOrigin.z;
 }
-if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+if (terrain.terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
-  vec2 texCoords = (anchorCommon.xy - terrain_bounds.xy) / terrain_bounds.zw;
+  vec2 texCoords = (anchorCommon.xy - terrain.terrain_bounds.xy) / terrain.terrain_bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     geometry.position.z += terrainZ;
@@ -86,16 +84,16 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
 }
     `,
     'fs:#main-start': glsl`
-if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+if (terrain.terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
     'fs:DECKGL_FILTER_COLOR': glsl`
-if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
-  vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
+if ((terrain.terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain.terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
+  vec2 texCoords = (commonPos.xy - terrain.terrain_bounds.xy) / terrain.terrain_bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
+  if (terrain.terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
     color = pixel;
   } else {
     // pixel is premultiplied
@@ -169,7 +167,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
     return null;
   },
   uniformTypes: {
-    terrain_mode: 'i32',
+    terrain_mode: 'f32',
     terrain_bounds: 'vec4<f32>'
   }
 } as ShaderModule<TerrainModuleSettings>;
