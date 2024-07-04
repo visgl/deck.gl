@@ -161,7 +161,7 @@ export default class DataFilterExtension extends LayerExtension<
     }
 
     const module = fp64 ? dataFilter64 : dataFilter;
-    module.uniformTypes = module.unifromTypesFromOptions(extension.opts);
+    module.uniformTypes = module.uniformTypesFromOptions(extension.opts);
 
     return {modules: [module], defines};
   }

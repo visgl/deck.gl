@@ -256,7 +256,8 @@ const inject = {
 };
 
 type UniformTypesFunc = (opts: DataFilterExtensionOptions) => Record<string, UniformFormat>;
-function unifromTypesFromOptions(opts: DataFilterExtensionOptions) {
+function uniformTypesFromOptions(opts: DataFilterExtensionOptions) {
+
   const {categorySize, filterSize, fp64} = opts;
   const uniformTypes: Record<string, UniformFormat> = {
     useSoftMargin: 'i32',
@@ -284,24 +285,25 @@ function unifromTypesFromOptions(opts: DataFilterExtensionOptions) {
   return uniformTypes;
 }
 
+
 export const dataFilter: ShaderModule<DataFilterModuleProps> & {
-  unifromTypesFromOptions: UniformTypesFunc;
+  uniformTypesFromOptions: UniformTypesFunc;
 } = {
   name: 'dataFilter',
   vs,
   fs,
   inject,
   getUniforms,
-  unifromTypesFromOptions
+  uniformTypesFromOptions
 };
 
 export const dataFilter64: ShaderModule<DataFilterModuleProps> & {
-  unifromTypesFromOptions: UniformTypesFunc;
+  uniformTypesFromOptions: UniformTypesFunc;
 } = {
   name: 'dataFilter',
   vs,
   fs,
   inject,
   getUniforms: getUniforms64,
-  unifromTypesFromOptions
+  uniformTypesFromOptions
 };
