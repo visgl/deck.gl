@@ -83,9 +83,11 @@ export class TerrainEffect implements Effect {
   }
 
   getModuleParameters(layer: Layer): Omit<TerrainModuleSettings, 'picking'> {
+    const {viewport} = layer.context;
     const {terrainDrawMode} = layer.state;
 
     return {
+      viewport,
       heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
       heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap!,
