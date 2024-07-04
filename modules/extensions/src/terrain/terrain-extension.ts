@@ -71,32 +71,4 @@ export default class TerrainExtension extends LayerExtension {
       state.terrainCoverNeedsRedraw = true;
     }
   }
-
-  draw(this: Layer<Required<TerrainExtensionProps>>, {context, moduleParameters}: any) {
-    const {viewport} = context;
-    const {
-      picking,
-      heightMap,
-      heightMapBounds,
-      dummyHeightMap,
-      terrainCover,
-      drawToTerrainHeightMap,
-      useTerrainHeightMap,
-      terrainSkipRender
-    } = moduleParameters;
-
-    const terrainProps: TerrainModuleSettings = {
-      viewport,
-      picking,
-      heightMap,
-      heightMapBounds,
-      dummyHeightMap,
-      terrainCover,
-      drawToTerrainHeightMap,
-      useTerrainHeightMap,
-      terrainSkipRender
-    };
-
-    this.setShaderModuleProps({terrain: terrainProps});
-  }
 }
