@@ -89,7 +89,7 @@ test('PathStyleExtension#PolygonLayer', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
-        const uniforms = getLayerUniforms(layer);
+        const uniforms = getLayerUniforms(pathLayer);
         t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
         t.ok(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
@@ -104,7 +104,7 @@ test('PathStyleExtension#PolygonLayer', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
-        const uniforms = getLayerUniforms(layer);
+        const uniforms = getLayerUniforms(pathLayer);
         t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
         t.ok(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
