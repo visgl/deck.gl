@@ -13,6 +13,12 @@ vDashOffset = instanceDashOffsets / width.x;
 `,
 
     'fs:#decl': `
+uniform pathStyleUniforms {
+  float dashAlignMode;
+  float capType;
+  bool dashGapPickable;
+} pathStyle;
+
 uniform float dashAlignMode;
 uniform float capType;
 uniform bool dashGapPickable;

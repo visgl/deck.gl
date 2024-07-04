@@ -24,6 +24,7 @@ import {dashShaders, offsetShaders} from './shaders.glsl';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import type {Model} from '@luma.gl/engine';
+import {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -97,7 +98,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
 
     // Merge shader injection
-    let result = {};
+    let result = {} as {inject: Record<string, string>};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
     }
@@ -105,7 +106,14 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       result = mergeShaders(result, offsetShaders);
     }
 
-    return result;
+    const {inject} = result;
+    const pathStyle: ShaderModule = {
+      name: 'pathStyle',
+      inject
+    };
+    return {
+      modules: [pathStyle]
+    };
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
