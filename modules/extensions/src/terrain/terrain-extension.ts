@@ -1,6 +1,6 @@
 import {LayerExtension, UpdateParameters} from '@deck.gl/core';
 import {TerrainEffect} from './terrain-effect';
-import {terrainModule} from './shader-module';
+import {terrainModule, TerrainModuleSettings} from './shader-module';
 
 import type {Layer} from '@deck.gl/core';
 
@@ -70,5 +70,33 @@ export default class TerrainExtension extends LayerExtension {
     if (state.terrainDrawMode === 'drape') {
       state.terrainCoverNeedsRedraw = true;
     }
+  }
+
+  draw(this: Layer<Required<TerrainExtensionProps>>, {context, moduleParameters}: any) {
+    const {viewport} = context;
+    const {
+      picking,
+      heightMap,
+      heightMapBounds,
+      dummyHeightMap,
+      terrainCover,
+      drawToTerrainHeightMap,
+      useTerrainHeightMap,
+      terrainSkipRender
+    } = moduleParameters;
+
+    const terrainProps: TerrainModuleSettings = {
+      viewport,
+      picking,
+      heightMap,
+      heightMapBounds,
+      dummyHeightMap,
+      terrainCover,
+      drawToTerrainHeightMap,
+      useTerrainHeightMap,
+      terrainSkipRender
+    };
+
+    this.setShaderModuleProps({terrain: terrainProps});
   }
 }

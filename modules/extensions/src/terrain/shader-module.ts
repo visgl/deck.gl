@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project} from '@deck.gl/core';
+import {project, ProjectUniforms, Viewport} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
@@ -10,6 +10,7 @@ import {glsl} from '../utils/syntax-tags';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
+  viewport: Viewport;
   picking: {isActive?: boolean};
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
@@ -105,7 +106,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
     `
   },
   // eslint-disable-next-line complexity
-  getUniforms: (opts: Partial<TerrainModuleSettings> = {}, uniforms) => {
+  getUniforms: (opts: Partial<TerrainModuleSettings> = {}) => {
     if ('dummyHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
@@ -116,7 +117,8 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      const {commonOrigin} = uniforms;
+      const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+      const {commonOrigin} = projectUniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
@@ -165,5 +167,9 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
       };
     }
     return null;
+  },
+  uniformTypes: {
+    terrain_mode: 'i32',
+    terrain_bounds: 'vec4<f32>'
   }
 } as ShaderModule<TerrainModuleSettings>;
