@@ -22,7 +22,7 @@ import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
 
-import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+import type {Layer, LayerContext, Accessor, UpdateParameters, UniformTypes} from '@deck.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {ShaderModule} from '@luma.gl/shadertools';
 
@@ -31,6 +31,11 @@ const defaultProps = {
   getOffset: {type: 'accessor', value: 0},
   dashJustified: false,
   dashGapPickable: false
+};
+
+type PathStyleProps = {
+  dashAlignMode: number;
+  dashGapPickable: boolean;
 };
 
 export type PathStyleExtensionProps<DataT = any> = {
@@ -109,7 +114,11 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     const {inject} = result;
     const pathStyle: ShaderModule = {
       name: 'pathStyle',
-      inject
+      inject,
+      uniformTypes: {
+        dashAlignMode: 'i32',
+        dashGapPickable: 'i32'
+      } as const satisfies UniformTypes<PathStyleProps>
     };
     return {
       modules: [pathStyle]
@@ -162,6 +171,12 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     if (extension.opts.dash) {
       uniforms.dashAlignMode = this.props.dashJustified ? 1 : 0;
       uniforms.dashGapPickable = Boolean(this.props.dashGapPickable);
+
+      const pathStyleProps: PathStyleProps = {
+        dashAlignMode: this.props.dashJustified ? 1 : 0,
+        dashGapPickable: Boolean(this.props.dashGapPickable)
+      };
+      this.setShaderModuleProps({pathStyle: pathStyleProps});
     }
 
     (this.state.model as Model)?.setUniforms(uniforms);
