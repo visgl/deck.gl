@@ -79,19 +79,19 @@ test('TerrainEffect', async t => {
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let model = meshLayer.state.model;
   let uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
+  t.is(uniforms.mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
   t.is(model.bindings.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   model = scatterplotLayer.state.model;
   uniforms = getLayerUniforms(scatterplotLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
+  t.is(uniforms.mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
   t.is(model.bindings.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   model = pathLayer.state.model;
   uniforms = getLayerUniforms(pathLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
+  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(model.bindings.terrain_map?.width, 1, 'Dummy height map used as sampler');
 
   // preRender#diffing
@@ -103,7 +103,7 @@ test('TerrainEffect', async t => {
 
   model = meshLayer.state.model;
   uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.NONE, 'TERRAIN_MODE.NONE');
+  t.is(uniforms.mode, TERRAIN_MODE.NONE, 'TERRAIN_MODE.NONE');
   t.is(model.bindings.terrain_map?.width, 1, 'Terrain cover using empty texture');
 
   lifecycle.finalize();
@@ -177,19 +177,19 @@ test('TerrainEffect#without draw operation', async t => {
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let model = meshLayer.state.model;
   let uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
+  t.is(uniforms.mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
   t.is(model.bindings.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   model = scatterplotLayer.state.model;
   uniforms = getLayerUniforms(scatterplotLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
+  t.is(uniforms.mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
   t.is(model.bindings.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   model = pathLayer.state.model;
   uniforms = getLayerUniforms(pathLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
+  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(model.bindings.terrain_map?.width, 1, 'Dummy height map used as sampler');
 
   // preRender#diffing
@@ -201,7 +201,7 @@ test('TerrainEffect#without draw operation', async t => {
 
   model = meshLayer.state.model;
   uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
+  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(model.bindings.terrain_map?.width, 1, 'Terrain cover using empty texture');
 
   lifecycle.finalize();
