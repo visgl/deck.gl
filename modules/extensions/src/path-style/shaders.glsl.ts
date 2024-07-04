@@ -13,9 +13,14 @@ vDashOffset = instanceDashOffsets / width.x;
 `,
 
     'fs:#decl': `
-uniform float dashAlignMode;
+uniform pathStyleUniforms {
+  float dashAlignMode;
+  bool dashGapPickable;
+} pathStyle;
+
+// TODO Defined in path-layer shader, port with PathLayer
 uniform float capType;
-uniform bool dashGapPickable;
+
 in vec2 vDashArray;
 in float vDashOffset;
 `,
@@ -36,7 +41,7 @@ in float vDashOffset;
   float offset;
 
   if (unitLength > 0.0) {
-    if (dashAlignMode == 0.0) {
+    if (pathStyle.dashAlignMode == 0.0) {
       offset = vDashOffset;
     } else {
       unitLength = vPathLength / round(vPathLength / unitLength);
@@ -47,7 +52,7 @@ in float vDashOffset;
 
     if (gapLength > 0.0 && unitOffset > solidLength) {
       if (capType <= 0.5) {
-        if (!(dashGapPickable && bool(picking.isActive))) {
+        if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
           discard;
         }
       } else {
@@ -57,7 +62,7 @@ in float vDashOffset;
           vPathPosition.x
         ));
         if (distToEnd > 1.0) {
-          if (!(dashGapPickable && bool(picking.isActive))) {
+          if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
             discard;
           }
         }

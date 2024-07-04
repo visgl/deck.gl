@@ -24,7 +24,7 @@ import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/cor
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
 import {
   CategoryBitMask,
-  DataFilterModuleSettings,
+  DataFilterModuleProps,
   Defines,
   dataFilter,
   dataFilter64
@@ -295,7 +295,7 @@ export default class DataFilterExtension extends LayerExtension<
       filterTransformColor,
       filterCategories
     } = params.moduleParameters;
-    const dataFilterProps: DataFilterModuleSettings = {
+    const dataFilterProps: DataFilterModuleProps = {
       extensions,
       filterEnabled,
       filterRange,

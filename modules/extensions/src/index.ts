@@ -20,3 +20,4 @@ export type {ClipExtensionProps} from './clip/clip-extension';
 export type {CollisionFilterExtensionProps} from './collision-filter/collision-filter-extension';
 export type {MaskExtensionProps} from './mask/mask-extension';
 export type {TerrainExtensionProps} from './terrain/terrain-extension';
+export type {TerrainModuleProps} from './terrain/shader-module';
