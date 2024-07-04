@@ -115,7 +115,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       name: 'pathStyle',
       inject,
       uniformTypes: {
-        dashAlignMode: 'i32',
+        dashAlignMode: 'f32',
         dashGapPickable: 'i32'
       } as const satisfies UniformTypes<PathStyleProps>
     };
