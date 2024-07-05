@@ -258,8 +258,6 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     };
 
     const model = this.state.model!;
-
-    model.setUniforms(uniforms);
     model.shaderInputs.setProps({arc: arcProps});
     model.setVertexCount(numSegments * 2);
     model.draw(this.context.renderPass);
