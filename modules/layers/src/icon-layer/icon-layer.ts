@@ -290,17 +290,6 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       };
 
       model.shaderInputs.setProps({icon: iconProps});
-      model.setBindings({iconsTexture});
-      model.setUniforms(uniforms);
-      model.setUniforms({
-        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-        sizeUnits: UNIT[sizeUnits],
-        sizeScale,
-        sizeMinPixels,
-        sizeMaxPixels,
-        billboard,
-        alphaCutoff
-      });
       model.draw(this.context.renderPass);
     }
   }
