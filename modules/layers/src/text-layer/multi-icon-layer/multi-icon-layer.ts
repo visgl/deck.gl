@@ -121,7 +121,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     };
 
     const sdfProps: SdfProps = {
-      sdfBuffer: DEFAULT_BUFFER,
+      buffer: DEFAULT_BUFFER,
       outlineBuffer,
       gamma: smoothing,
       enabled: Boolean(sdf),

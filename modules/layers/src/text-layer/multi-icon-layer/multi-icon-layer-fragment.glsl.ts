@@ -40,14 +40,14 @@ void main(void) {
     vec4 color = vColor;
 
     // if enable sdf (signed distance fields)
-    if (_sdf.enabled) {
+    if (sdf.enabled) {
       float distance = alpha;
-      alpha = smoothstep(_sdf.sdfBuffer - _sdf.gamma, _sdf.sdfBuffer + _sdf.gamma, distance);
+      alpha = smoothstep(sdf.buffer - sdf.gamma, sdf.buffer + sdf.gamma, distance);
 
-      if (_sdf.outlineBuffer > 0.0) {
+      if (sdf.outlineBuffer > 0.0) {
         float inFill = alpha;
-        float inBorder = smoothstep(_sdf.outlineBuffer - _sdf.gamma, _sdf.outlineBuffer + _sdf.gamma, distance);
-        color = mix(_sdf.outlineColor, vColor, inFill);
+        float inBorder = smoothstep(sdf.outlineBuffer - sdf.gamma, sdf.outlineBuffer + sdf.gamma, distance);
+        color = mix(sdf.outlineColor, vColor, inFill);
         alpha = inBorder;
       }
     }
