@@ -24,11 +24,9 @@ export default `\
 
 precision highp float;
 
-uniform float opacity;
 uniform sampler2D iconsTexture;
 uniform float gamma;
 uniform bool sdf;
-uniform float alphaCutoff;
 uniform float sdfBuffer;
 uniform float outlineBuffer;
 uniform vec4 outlineColor;
@@ -62,11 +60,11 @@ void main(void) {
     // Take the global opacity and the alpha from color into account for the alpha component
     float a = alpha * color.a;
     
-    if (a < alphaCutoff) {
+    if (a < icon.alphaCutoff) {
       discard;
     }
 
-    fragColor = vec4(color.rgb, a * opacity);
+    fragColor = vec4(color.rgb, a * layer.opacity);
   }
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
