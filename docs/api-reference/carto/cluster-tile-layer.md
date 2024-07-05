@@ -83,7 +83,7 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 
 ### Clustering Options
 
-Thee following props control how the data is grouped into clusters. The accessor methods will be called on each quadbin cell in the data to retrieve the position and weight of the cell. All of the properties are then aggregated and made available to the `GeoJsonLayer` accessors for styling.
+The following props control how the data is grouped into clusters. The accessor methods will be called on each quadbin cell in the data to retrieve the position and weight of the cell. All of the properties are then aggregated and made available to the `GeoJsonLayer` accessors for styling.
 
 #### `clusterLevel` (number, optional) {#clusterlevel}
 
@@ -113,11 +113,11 @@ Supported aggregation types are: `any`, `average`, `count`, `min`, `max`, `sum`.
 
 ### Global aggregation
 
-In addition to the aggregated values across the cluster, the features passed to the styling accessors contain a `stats` object which contains the same properties, but aggregated across all the data being displayed. The is useful for normalizing the values, such that the largest cluster has a constant value.
+In addition to the aggregated values across the cluster, the features passed to the styling accessors contain a `stats` object which contains the same properties, but aggregated across all the data being displayed. This is useful for normalizing the values, such that the largest cluster has a constant value.
 
 ### Example
 
-Display clusters using an `'cluster'` icon scaled between 20 and 80, switching to a icon defined by the `icon_any` property once the cluster only contains a single point.
+Display clusters using an `'cluster'` icon scaled between 20 and 80, switching to an icon defined by the `icon_any` property once the cluster only contains a single point.
 
 ```ts
 // Data present in quadbin cell
