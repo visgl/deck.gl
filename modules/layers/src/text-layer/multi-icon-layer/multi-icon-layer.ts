@@ -109,17 +109,6 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       : -1;
 
     const model = this.state.model!;
-    params.uniforms = {
-      ...params.uniforms,
-      // Refer the following doc about gamma and buffer
-      // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
-      sdfBuffer: DEFAULT_BUFFER,
-      outlineBuffer,
-      gamma: smoothing,
-      sdf: Boolean(sdf),
-      outlineColor
-    };
-
     const sdfProps: SdfProps = {
       buffer: DEFAULT_BUFFER,
       outlineBuffer,
@@ -136,7 +125,6 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       const iconsTexture = iconManager.getTexture();
 
       if (iconsTexture) {
-        model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
         model.shaderInputs.setProps({sdf: {...sdfProps, outlineBuffer: DEFAULT_BUFFER}});
         model.draw(this.context.renderPass);
       }
