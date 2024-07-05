@@ -21,7 +21,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {LayerExtension} from '@deck.gl/core';
 
-import type {Layer} from '@deck.gl/core';
+import type {Layer, UniformTypes} from '@deck.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const defaultProps = {
@@ -42,20 +42,29 @@ export type ClipExtensionProps = {
 };
 
 const shaderFunction = glsl`
-uniform vec4 clip_bounds;
+uniform clipUniforms {
+  vec4 bounds;
+} clip;
 
 bool clip_isInBounds(vec2 position) {
-  return position.x >= clip_bounds[0] && position.y >= clip_bounds[1] && position.x < clip_bounds[2] && position.y < clip_bounds[3];
+  return position.x >= clip.bounds[0] && position.y >= clip.bounds[1] && position.x < clip.bounds[2] && position.y < clip.bounds[3];
 }
 `;
+
+export type ClipModuleProps = {
+  bounds: [number, number, number, number];
+};
 
 /*
  * The vertex-shader version clips geometries by their anchor position
  * e.g. ScatterplotLayer - show if the center of a circle is within bounds
  */
-const shaderModuleVs: ShaderModule = {
-  name: 'clip-vs',
-  vs: shaderFunction
+const shaderModuleVs: ShaderModule<ClipModuleProps> = {
+  name: 'clip',
+  vs: shaderFunction,
+  uniformTypes: {
+    bounds: 'vec4<f32>'
+  } as const satisfies UniformTypes<ClipModuleProps>
 };
 
 const injectionVs = {
@@ -77,9 +86,12 @@ in float clip_isVisible;
  * The fragment-shader version clips pixels at the bounds
  * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
  */
-const shaderModuleFs: ShaderModule = {
-  name: 'clip-fs',
-  fs: shaderFunction
+const shaderModuleFs: ShaderModule<ClipModuleProps> = {
+  name: 'clip',
+  fs: shaderFunction,
+  uniformTypes: {
+    bounds: 'vec4<f32>'
+  }
 };
 
 const injectionFs = {
@@ -126,20 +138,23 @@ export default class ClipExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<Required<ClipExtensionProps>>, {uniforms}: any): void {
+  draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
+    const clipProps = {} as ClipModuleProps;
     if (this.state.clipByInstance) {
-      uniforms.clip_bounds = clipBounds;
+      clipProps.bounds = clipBounds;
     } else {
       const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
       const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
 
-      uniforms.clip_bounds = [
+      clipProps.bounds = [
         Math.min(corner0[0], corner1[0]),
         Math.min(corner0[1], corner1[1]),
         Math.max(corner0[0], corner1[0]),
         Math.max(corner0[1], corner1[1])
       ];
     }
+
+    this.setShaderModuleProps({clip: clipProps});
   }
 }

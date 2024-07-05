@@ -27,7 +27,7 @@ import {project, _memoize as memoize} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
 import project64Shader from './project64.glsl';
 
-type Project64ModuleSettings = {
+type Project64ModuleProps = {
   viewport: Viewport;
 };
 
@@ -42,14 +42,14 @@ export default {
     viewProjectionMatrix: 'mat4x4<f32>',
     viewProjectionMatrix64Low: 'mat4x4<f32>'
   }
-} as ShaderModule<Project64ModuleSettings>;
+} as ShaderModule<Project64ModuleProps>;
 
 // TODO - this module should calculate the 64 bit uniforms
 // It is currently done by project to minimize duplicated work
 
 const getMemoizedUniforms = memoize(calculateUniforms);
 
-function getUniforms(opts?: Project64ModuleSettings | {}): Record<string, any> {
+function getUniforms(opts?: Project64ModuleProps | {}): Record<string, any> {
   if (opts && 'viewport' in opts) {
     const {viewProjectionMatrix, scale} = opts.viewport;
     // We only need to update fp64 uniforms if fp32 projection is being updated

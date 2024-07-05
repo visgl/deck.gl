@@ -1,7 +1,7 @@
 import {Texture} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
-import {terrainModule, TerrainModuleSettings} from './shader-module';
+import {terrainModule, TerrainModuleProps} from './shader-module';
 import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
@@ -82,10 +82,12 @@ export class TerrainEffect implements Effect {
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
-  getModuleParameters(layer: Layer): Omit<TerrainModuleSettings, 'picking'> {
+  getModuleParameters(layer: Layer): Omit<TerrainModuleProps, 'picking'> {
+    const {viewport} = layer.context;
     const {terrainDrawMode} = layer.state;
 
     return {
+      viewport,
       heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
       heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap!,
