@@ -4,16 +4,16 @@ import {UniformTypes} from '@deck.gl/core';
 const uniformBlock = `\
 uniform sdfUniforms {
   float gamma;
-  bool sdf;
+  bool enabled;
   float sdfBuffer;
   float outlineBuffer;
   vec4 outlineColor;
-} sdf;
+} _sdf;
 `;
 
 export type SdfProps = {
   gamma: number;
-  sdf: boolean;
+  enabled: boolean;
   sdfBuffer: number;
   outlineBuffer: number;
   outlineColor: [number, number, number, number];
@@ -25,7 +25,7 @@ export const sdfUniforms = {
   fs: uniformBlock,
   uniformTypes: {
     gamma: 'f32',
-    sdf: 'f32',
+    enabled: 'f32',
     sdfBuffer: 'f32',
     outlineBuffer: 'f32',
     outlineColor: 'vec4<f32>'

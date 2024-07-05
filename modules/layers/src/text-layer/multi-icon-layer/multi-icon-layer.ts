@@ -21,6 +21,7 @@
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
+import {SdfProps, sdfUniforms} from './sdf-uniforms';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
@@ -57,11 +58,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
   static layerName = 'MultiIconLayer';
 
   state!: IconLayer['state'] & {
-    outlineColor: Color;
+    outlineColor: [number, number, number, number];
   };
 
   getShaders() {
-    return {...super.getShaders(), fs};
+    const shaders = super.getShaders();
+    return {...shaders, modules: [...shaders.modules, sdfUniforms], fs};
   }
 
   initializeState() {
@@ -114,6 +116,14 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       outlineBuffer,
       gamma: smoothing,
       sdf: Boolean(sdf),
+      outlineColor
+    };
+
+    const sdfProps: SdfProps = {
+      sdfBuffer: DEFAULT_BUFFER,
+      outlineBuffer,
+      gamma: smoothing,
+      enabled: Boolean(sdf),
       outlineColor
     };
 
