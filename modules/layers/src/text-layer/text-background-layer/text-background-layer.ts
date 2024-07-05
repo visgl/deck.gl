@@ -145,16 +145,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     }
 
     const model = this.state.model!;
-    model.setUniforms(uniforms);
-    model.setUniforms({
-      billboard,
-      stroked: Boolean(getLineWidth),
-      padding,
-      sizeUnits: UNIT[sizeUnits],
-      sizeScale,
-      sizeMinPixels,
-      sizeMaxPixels
-    });
     const textBackgroundProps: TextBackgroundProps = {
       billboard,
       stroked: Boolean(getLineWidth),
