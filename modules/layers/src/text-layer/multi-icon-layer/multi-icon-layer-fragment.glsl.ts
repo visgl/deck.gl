@@ -25,11 +25,6 @@ export default `\
 precision highp float;
 
 uniform sampler2D iconsTexture;
-uniform float gamma;
-uniform bool sdf;
-uniform float sdfBuffer;
-uniform float outlineBuffer;
-uniform vec4 outlineColor;
 
 in vec4 vColor;
 in vec2 vTextureCoords;
@@ -45,14 +40,14 @@ void main(void) {
     vec4 color = vColor;
 
     // if enable sdf (signed distance fields)
-    if (sdf) {
+    if (_sdf.enabled) {
       float distance = alpha;
-      alpha = smoothstep(sdfBuffer - gamma, sdfBuffer + gamma, distance);
+      alpha = smoothstep(_sdf.sdfBuffer - _sdf.gamma, _sdf.sdfBuffer + _sdf.gamma, distance);
 
-      if (outlineBuffer > 0.0) {
+      if (_sdf.outlineBuffer > 0.0) {
         float inFill = alpha;
-        float inBorder = smoothstep(outlineBuffer - gamma, outlineBuffer + gamma, distance);
-        color = mix(outlineColor, vColor, inFill);
+        float inBorder = smoothstep(_sdf.outlineBuffer - _sdf.gamma, _sdf.outlineBuffer + _sdf.gamma, distance);
+        color = mix(_sdf.outlineColor, vColor, inFill);
         alpha = inBorder;
       }
     }

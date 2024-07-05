@@ -108,6 +108,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth))
       : -1;
 
+    const model = this.state.model!;
     params.uniforms = {
       ...params.uniforms,
       // Refer the following doc about gamma and buffer
@@ -126,17 +127,17 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       enabled: Boolean(sdf),
       outlineColor
     };
-
+    model.shaderInputs.setProps({sdf: sdfProps});
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
     if (sdf && outlineWidth) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
-      const model = this.state.model!;
 
       if (iconsTexture) {
         model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
+        model.shaderInputs.setProps({sdf: {...sdfProps, outlineBuffer: DEFAULT_BUFFER}});
         model.draw(this.context.renderPass);
       }
     }
