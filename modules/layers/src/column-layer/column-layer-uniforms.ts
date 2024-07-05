@@ -21,20 +21,20 @@ uniform columnUniforms {
 `;
 
 export type ColumnProps = {
-  radius?: number;
-  angle?: number;
-  offset?: [number, number];
-  extruded?: boolean;
-  stroked?: boolean;
-  isStroke?: boolean;
-  coverage?: number;
-  elevationScale?: number;
-  edgeDistance?: number;
-  widthScale?: number;
-  widthMinPixels?: number;
-  widthMaxPixels?: number;
-  radiusUnits?: number;
-  widthUnits?: number;
+  radius: number;
+  angle: number;
+  offset: [number, number];
+  extruded: boolean;
+  stroked: boolean;
+  isStroke: boolean;
+  coverage: number;
+  elevationScale: number;
+  edgeDistance: number;
+  widthScale: number;
+  widthMinPixels: number;
+  widthMaxPixels: number;
+  radiusUnits: number;
+  widthUnits: number;
 };
 
 export const columnUniforms = {

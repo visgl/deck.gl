@@ -416,8 +416,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const wireframeModel = this.state.wireframeModel!;
     const {fillVertexCount, edgeDistance} = this.state;
 
-    const renderUniforms = {
-      ...uniforms,
+    const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
       angle: (angle / 180) * Math.PI,
       offset,
@@ -435,26 +434,21 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      wireframeModel.setUniforms(renderUniforms);
-      wireframeModel.setUniforms({isStroke: true});
       wireframeModel.shaderInputs.setProps({
         column: {
-          ...renderUniforms,
+          ...columnProps,
           isStroke: true
         }
       });
       wireframeModel.draw(this.context.renderPass);
     }
 
-    fillModel.setUniforms(renderUniforms);
-
     if (filled) {
       // model.setProps({isIndexed: false});
       fillModel.setVertexCount(fillVertexCount);
-      fillModel.setUniforms({isStroke: false});
       fillModel.shaderInputs.setProps({
         column: {
-          ...renderUniforms,
+          ...columnProps,
           isStroke: false
         }
       });
@@ -466,10 +460,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       // The width of the stroke is achieved by flattening the side of the cylinder.
       // Skip the last 1/3 of the vertices which is the top.
       fillModel.setVertexCount((fillVertexCount * 2) / 3);
-      fillModel.setUniforms({isStroke: true});
       fillModel.shaderInputs.setProps({
         column: {
-          ...renderUniforms,
+          ...columnProps,
           isStroke: true
         }
       });
