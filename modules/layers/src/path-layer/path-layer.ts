@@ -329,17 +329,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMaxPixels
     };
     model.shaderInputs.setProps({path: pathProps});
-    model.setUniforms(uniforms);
-    model.setUniforms({
-      jointType: Number(jointRounded),
-      capType: Number(capRounded),
-      billboard,
-      widthUnits: UNIT[widthUnits],
-      widthScale,
-      miterLimit,
-      widthMinPixels,
-      widthMaxPixels
-    });
     model.draw(this.context.renderPass);
   }
 

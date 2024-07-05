@@ -24,8 +24,6 @@ export default `\
 
 precision highp float;
 
-uniform float miterLimit;
-
 in vec4 vColor;
 in vec2 vCornerOffset;
 in float vMiterLength;
@@ -49,7 +47,7 @@ void main(void) {
       discard;
     }
     // trim miter
-    if (vJointType < 0.5 && vMiterLength > miterLimit + 1.0) {
+    if (vJointType < 0.5 && vMiterLength > path.miterLimit + 1.0) {
       discard;
     }
   }
