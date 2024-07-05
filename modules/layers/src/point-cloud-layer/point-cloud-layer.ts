@@ -37,6 +37,7 @@ import {
 } from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
+import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
 
@@ -140,7 +141,11 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
+    return super.getShaders({
+      vs,
+      fs,
+      modules: [project32, gouraudLighting, picking, pointCloudUniforms]
+    });
   }
 
   initializeState() {
@@ -184,12 +189,11 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
     const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const pointCloudProps: PointCloudProps = {
       sizeUnits: UNIT[sizeUnits],
       radiusPixels: pointSize
-    });
+    };
+    model.shaderInputs.setProps({pointCloud: pointCloudProps});
     model.draw(this.context.renderPass);
   }
 
