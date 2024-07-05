@@ -25,7 +25,7 @@ export type PathProps = {
   widthUnits: number;
 };
 
-export const PathUniforms = {
+export const pathUniforms = {
   name: 'path',
   vs: uniformBlock,
   fs: uniformBlock,

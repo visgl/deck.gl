@@ -23,6 +23,7 @@ import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
+import {pathUniforms, PathProps} from './path-layer-uniforms';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -150,7 +151,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [project32, picking, pathUniforms]}); // 'project' module added by default.
   }
 
   get wrapLongitude(): boolean {
@@ -317,6 +318,17 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
 
     const model = this.state.model!;
+    const pathProps: PathProps = {
+      jointType: Number(jointRounded),
+      capType: Number(capRounded),
+      billboard,
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      miterLimit,
+      widthMinPixels,
+      widthMaxPixels
+    };
+    model.shaderInputs.setProps({path: pathProps});
     model.setUniforms(uniforms);
     model.setUniforms({
       jointType: Number(jointRounded),
