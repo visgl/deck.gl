@@ -120,14 +120,11 @@ if(fadeTrail) {
 
   draw(params) {
     const {fadeTrail, trailLength, currentTime} = this.props;
+    const uniforms = {fadeTrail, trailLength, currentTime};
 
-    params.uniforms = {
-      ...params.uniforms,
-      fadeTrail,
-      trailLength,
-      currentTime
-    };
-
+    // TODO port to UBO with rest of geo-layers
+    const model = this.state.model!;
+    model.setUniforms(uniforms);
     super.draw(params);
   }
 }
