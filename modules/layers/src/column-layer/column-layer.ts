@@ -437,6 +437,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     if (extruded && wireframe) {
       wireframeModel.setUniforms(renderUniforms);
       wireframeModel.setUniforms({isStroke: true});
+      wireframeModel.shaderInputs.setProps({
+        column: {
+          ...renderUniforms,
+          isStroke: true
+        }
+      });
       wireframeModel.draw(this.context.renderPass);
     }
 
@@ -446,6 +452,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       // model.setProps({isIndexed: false});
       fillModel.setVertexCount(fillVertexCount);
       fillModel.setUniforms({isStroke: false});
+      fillModel.shaderInputs.setProps({
+        column: {
+          ...renderUniforms,
+          isStroke: false
+        }
+      });
       fillModel.draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
@@ -455,6 +467,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       // Skip the last 1/3 of the vertices which is the top.
       fillModel.setVertexCount((fillVertexCount * 2) / 3);
       fillModel.setUniforms({isStroke: true});
+      fillModel.shaderInputs.setProps({
+        column: {
+          ...renderUniforms,
+          isStroke: true
+        }
+      });
       fillModel.draw(this.context.renderPass);
     }
   }

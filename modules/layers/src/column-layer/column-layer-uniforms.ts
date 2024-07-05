@@ -9,6 +9,7 @@ uniform columnUniforms {
   bool extruded;
   bool stroked;
   bool isStroke;
+  float coverage;
   float elevationScale;
   float edgeDistance;
   float widthScale;
@@ -26,6 +27,7 @@ export type ColumnProps = {
   extruded?: boolean;
   stroked?: boolean;
   isStroke?: boolean;
+  coverage?: number;
   elevationScale?: number;
   edgeDistance?: number;
   widthScale?: number;
@@ -46,6 +48,7 @@ export const columnUniforms = {
     extruded: 'f32',
     stroked: 'f32',
     isStroke: 'f32',
+    coverage: 'f32',
     elevationScale: 'f32',
     edgeDistance: 'f32',
     widthScale: 'f32',
