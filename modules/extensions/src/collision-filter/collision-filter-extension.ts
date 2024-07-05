@@ -1,5 +1,5 @@
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
-import collision from './shader-module';
+import collision, {CollisionModuleProps} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
 const defaultProps = {
@@ -42,17 +42,24 @@ export default class CollisionFilterExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<CollisionFilterExtensionProps>, {uniforms, context, moduleParameters}: any) {
+  draw(this: Layer<CollisionFilterExtensionProps>, {moduleParameters}: any) {
     const {collisionEnabled} = this.props;
-    const {collisionFBO, drawToCollisionMap} = moduleParameters;
+    const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = moduleParameters;
     const enabled = collisionEnabled && Boolean(collisionFBO);
-    uniforms.collision_enabled = enabled;
 
     if (drawToCollisionMap) {
       // Override any props with those defined in collisionTestProps
       // @ts-ignore
       this.props = this.clone(this.props.collisionTestProps).props;
     }
+
+    const collisionProps: CollisionModuleProps = {
+      enabled,
+      collisionFBO,
+      drawToCollisionMap,
+      dummyCollisionMap
+    };
+    this.setShaderModuleProps({collision: collisionProps});
   }
 
   initializeState(

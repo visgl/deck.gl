@@ -1078,7 +1078,30 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
         const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
+        const {
+          picking,
+          heightMap,
+          heightMapBounds,
+          dummyHeightMap,
+          terrainCover,
+          drawToTerrainHeightMap,
+          useTerrainHeightMap,
+          terrainSkipRender
+        } = moduleParameters;
+        const terrainProps = {
+          viewport,
+          picking,
+          heightMap,
+          heightMapBounds,
+          dummyHeightMap,
+          terrainCover,
+          drawToTerrainHeightMap,
+          useTerrainHeightMap,
+          terrainSkipRender
+        };
         this.setShaderModuleProps({
+          // TODO Revisit whether this is necessary once all layers ported to UBO
+          terrain: terrainProps,
           layer: {opacity},
           picking: {isActive, isAttribute} as PickingProps,
           project: {

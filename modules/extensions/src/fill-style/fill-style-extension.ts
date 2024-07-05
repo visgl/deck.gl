@@ -1,6 +1,6 @@
 import {LayerExtension} from '@deck.gl/core';
 
-import {patternShaders} from './shader-module';
+import {FillStyleModuleProps, patternShaders} from './shader-module';
 
 import type {
   Layer,
@@ -156,9 +156,15 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     }
 
     const {fillPatternAtlas} = this.props;
-    this.setModuleParameters({
-      fillPatternTexture: fillPatternAtlas || this.state.emptyTexture
-    });
+    const {viewport} = params.context;
+    const {fillPatternEnabled, fillPatternMask} = params.moduleParameters;
+    const fillProps: FillStyleModuleProps = {
+      viewport,
+      fillPatternEnabled,
+      fillPatternMask,
+      fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture
+    };
+    this.setShaderModuleProps({fill: fillProps});
   }
 
   finalizeState(this: Layer<FillStyleExtensionProps>) {
