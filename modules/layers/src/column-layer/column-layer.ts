@@ -39,6 +39,7 @@ import {
 import {Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
+import {columnUniforms, ColumnProps} from './column-layer-uniforms';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
@@ -253,7 +254,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       vs,
       fs,
       defines,
-      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking]
+      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking, columnUniforms]
     });
   }
 

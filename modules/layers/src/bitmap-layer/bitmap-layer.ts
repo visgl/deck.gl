@@ -303,8 +303,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
         transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number]
       };
-      // TODO remove setUniforms() - currently DataFilterExtension needs this
-      model.setUniforms(uniforms);
       model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);
     }
