@@ -2,6 +2,7 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
+import {TextBackgroundProps, textBackgroundUniforms} from './text-background-layer-uniforms';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
 
@@ -69,7 +70,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, textBackgroundUniforms]});
   }
 
   initializeState() {
@@ -154,6 +155,16 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeMinPixels,
       sizeMaxPixels
     });
+    const textBackgroundProps: TextBackgroundProps = {
+      billboard,
+      stroked: Boolean(getLineWidth),
+      padding: padding as [number, number, number, number],
+      sizeUnits: UNIT[sizeUnits],
+      sizeScale,
+      sizeMinPixels,
+      sizeMaxPixels
+    };
+    model.shaderInputs.setProps({textBackground: textBackgroundProps});
     model.draw(this.context.renderPass);
   }
 
