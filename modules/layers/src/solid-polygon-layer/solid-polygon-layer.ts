@@ -300,30 +300,27 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {extruded, filled, wireframe, elevationScale} = this.props;
     const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
-    const renderUniforms: Omit<SolidPolygonProps, 'isWireframe'> = {
-      ...uniforms,
+    const renderUniforms: SolidPolygonProps = {
       extruded: Boolean(extruded),
-      elevationScale
+      elevationScale,
+      isWireframe: false
     };
 
     // Note - the order is important
     if (wireframeModel && wireframe) {
       wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      wireframeModel.setUniforms(renderUniforms);
-      wireframeModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+      wireframeModel.shaderInputs.setProps({solidPolygon: {...renderUniforms, isWireframe: true}});
       wireframeModel.draw(this.context.renderPass);
     }
 
     if (sideModel && filled) {
       sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      sideModel.setUniforms(renderUniforms);
       sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       sideModel.draw(this.context.renderPass);
     }
 
     if (topModel && filled) {
       topModel.setVertexCount(polygonTesselator.vertexCount);
-      topModel.setUniforms(renderUniforms);
       topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       topModel.draw(this.context.renderPass);
     }
@@ -405,9 +402,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...shaders,
         id: `${id}-top`,
         topology: 'triangle-list',
-        uniforms: {
-          isWireframe: false
-        },
         bufferLayout,
         isIndexed: true,
         userData: {
@@ -422,9 +416,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...this.getShaders('side'),
         id: `${id}-side`,
         bufferLayout,
-        uniforms: {
-          isWireframe: false
-        },
         geometry: new Geometry({
           topology: 'triangle-strip',
           attributes: {
@@ -445,9 +436,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...this.getShaders('side'),
         id: `${id}-wireframe`,
         bufferLayout,
-        uniforms: {
-          isWireframe: true
-        },
         geometry: new Geometry({
           topology: 'line-strip',
           attributes: {
