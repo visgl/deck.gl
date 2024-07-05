@@ -14,13 +14,13 @@ uniform arcUniforms {
 `;
 
 export type ArcProps = {
-  greatCircle?: boolean;
-  useShortestPath?: boolean;
-  numSegments?: number;
-  widthScale?: number;
-  widthMinPixels?: number;
-  widthMaxPixels?: number;
-  widthUnits?: number;
+  greatCircle: boolean;
+  useShortestPath: boolean;
+  numSegments: number;
+  widthScale: number;
+  widthMinPixels: number;
+  widthMaxPixels: number;
+  widthUnits: number;
 };
 
 export const arcUniforms = {
