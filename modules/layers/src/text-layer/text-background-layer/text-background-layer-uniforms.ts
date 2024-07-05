@@ -9,7 +9,6 @@ uniform textBackgroundUniforms {
   float sizeMaxPixels;
   vec4 padding;
   highp int sizeUnits;
-  float alphaCutoff;
   bool stroked;
 } textBackground;
 `;
@@ -19,8 +18,8 @@ export type TextBackgroundProps = {
   sizeScale: number;
   sizeMinPixels: number;
   sizeMaxPixels: number;
-  sizeUnits: number;
   padding: [number, number, number, number];
+  sizeUnits: number;
   stroked: boolean;
 };
 
@@ -33,8 +32,8 @@ export const textBackgroundUniforms = {
     sizeScale: 'f32',
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',
-    sizeUnits: 'i32',
     padding: 'vec4<f32>',
+    sizeUnits: 'i32',
     stroked: 'f32'
   } as const satisfies UniformTypes<Required<TextBackgroundProps>>
 } as const satisfies ShaderModule<TextBackgroundProps>;
