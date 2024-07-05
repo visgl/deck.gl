@@ -194,22 +194,11 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
       useShortestPath: wrapLongitude ? 1 : 0
     };
     model.shaderInputs.setProps({line: lineProps});
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
-      widthUnits: UNIT[widthUnits],
-      widthScale,
-      widthMinPixels,
-      widthMaxPixels,
-      useShortestPath: wrapLongitude ? 1 : 0
-    });
     model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      model.setUniforms({
-        useShortestPath: -1
-      });
+      model.shaderInputs.setProps({line: {...lineProps, useShortestPath: -1}});
       model.draw(this.context.renderPass);
     }
   }
