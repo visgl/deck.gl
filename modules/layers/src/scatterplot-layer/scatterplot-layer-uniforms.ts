@@ -19,18 +19,18 @@ uniform scatterplotUniforms {
 `;
 
 export type ScatterplotProps = {
-  radiusScale?: number;
-  radiusMinPixels?: number;
-  radiusMaxPixels?: number;
-  lineWidthScale?: number;
-  lineWidthMinPixels?: number;
-  lineWidthMaxPixels?: number;
-  stroked?: boolean;
-  filled?: boolean;
-  antialiasing?: boolean;
-  billboard?: boolean;
-  radiusUnits?: number;
-  lineWidthUnits?: number;
+  radiusScale: number;
+  radiusMinPixels: number;
+  radiusMaxPixels: number;
+  lineWidthScale: number;
+  lineWidthMinPixels: number;
+  lineWidthMaxPixels: number;
+  stroked: boolean;
+  filled: boolean;
+  antialiasing: boolean;
+  billboard: boolean;
+  radiusUnits: number;
+  lineWidthUnits: number;
 };
 
 export const scatterplotUniforms = {
