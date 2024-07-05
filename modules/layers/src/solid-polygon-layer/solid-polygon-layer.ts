@@ -24,6 +24,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
+import {solidPolygonUniforms, SolidPolygonProps} from './solid-polygon-layer-uniforms';
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
@@ -154,7 +155,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       defines: {
         RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
       },
-      modules: [project32, gouraudLighting, picking]
+      modules: [project32, gouraudLighting, picking, solidPolygonUniforms]
     });
   }
 
@@ -299,7 +300,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {extruded, filled, wireframe, elevationScale} = this.props;
     const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
-    const renderUniforms = {
+    const renderUniforms: Omit<SolidPolygonProps, 'isWireframe'> = {
       ...uniforms,
       extruded: Boolean(extruded),
       elevationScale
@@ -309,18 +310,21 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     if (wireframeModel && wireframe) {
       wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       wireframeModel.setUniforms(renderUniforms);
+      wireframeModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       wireframeModel.draw(this.context.renderPass);
     }
 
     if (sideModel && filled) {
       sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       sideModel.setUniforms(renderUniforms);
+      sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       sideModel.draw(this.context.renderPass);
     }
 
     if (topModel && filled) {
       topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.setUniforms(renderUniforms);
+      topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       topModel.draw(this.context.renderPass);
     }
   }
