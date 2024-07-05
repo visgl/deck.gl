@@ -24,9 +24,7 @@ export default `\
 
 precision highp float;
 
-uniform float opacity;
 uniform sampler2D iconsTexture;
-uniform float alphaCutoff;
 
 in float vColorMode;
 in vec4 vColor;
@@ -44,9 +42,9 @@ void main(void) {
   // if colorMode == 1 or rendering picking buffer, use texture as transparency mask
   vec3 color = mix(texColor.rgb, vColor.rgb, vColorMode);
   // Take the global opacity and the alpha from vColor into account for the alpha component
-  float a = texColor.a * opacity * vColor.a;
+  float a = texColor.a * layer.opacity * vColor.a;
 
-  if (a < alphaCutoff) {
+  if (a < icon.alphaCutoff) {
     discard;
   }
 
