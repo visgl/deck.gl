@@ -46,7 +46,7 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
     type: 'accessor',
     value: ({id}) => getQuadbinPolygon(id, 0.5).slice(2, 4) as [number, number]
   },
-  getWeight: {type: 'accessor', value: 100},
+  getWeight: {type: 'accessor', value: 1},
   refinementStrategy: 'no-overlap',
   tileSize: DEFAULT_TILE_SIZE
 };
@@ -70,7 +70,7 @@ type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
 
   /**
    * The number of aggregation levels to cluster cells by. Larger values increase
-   * the clustering radius, an increment of `clusterLevel` doubling the radius.
+   * the clustering radius, with an increment of `clusterLevel` doubling the radius.
    *
    * @default 5
    */
