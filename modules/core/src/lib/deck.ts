@@ -58,6 +58,7 @@ import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
+import {CreateDeviceProps} from '@luma.gl/core/dist/lib/luma';
 
 /* global document */
 
@@ -131,7 +132,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** luma.gl GPU device. A device will be auto-created if not supplied. */
   device?: Device | null;
   /** A device will be auto-created if not supplied using these props. */
-  deviceProps?: DeviceProps;
+  deviceProps?: CreateDeviceProps;
 
   /** WebGL context @deprecated Use props.device */
   gl?: WebGL2RenderingContext | null;
