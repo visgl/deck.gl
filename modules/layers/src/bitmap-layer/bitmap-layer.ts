@@ -39,6 +39,7 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
 
+import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
@@ -141,11 +142,11 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     model?: Model;
     mesh?: any;
     coordinateConversion: number;
-    bounds: number[];
+    bounds: [number, number, number, number];
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
   }
 
   initializeState() {
@@ -283,7 +284,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   draw(opts) {
-    const {uniforms, moduleParameters} = opts;
+    const {moduleParameters, uniforms} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
@@ -294,15 +295,17 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      model.setUniforms(uniforms);
-      model.setBindings({bitmapTexture: image as Texture});
-      model.setUniforms({
-        desaturate,
-        transparentColor: transparentColor.map(x => x / 255) as number[],
-        tintColor: tintColor.slice(0, 3).map(x => x / 255),
+      const bitmapProps: BitmapProps = {
+        bitmapTexture: image as Texture,
+        bounds,
         coordinateConversion,
-        bounds
-      });
+        desaturate,
+        tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
+        transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number]
+      };
+      // TODO remove setUniforms() - currently DataFilterExtension needs this
+      model.setUniforms(uniforms);
+      model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);
     }
   }

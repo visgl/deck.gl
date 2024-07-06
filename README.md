@@ -80,8 +80,8 @@ pip install pydeck
 
 ## Learning Resources
 
-* [API documentation](https://deck.gl/#/documentation) for the latest release
-* [Website demos](https://deck.gl/#/examples) with links to source
+* [API documentation](https://deck.gl/docs) for the latest release
+* [Website demos](https://deck.gl/examples) with links to source
 * [Interactive playground](https://deck.gl/playground)
 * [deck.gl Codepen demos](https://codepen.io/vis-gl/)
 * [deck.gl Observable demos](https://beta.observablehq.com/@pessimistress)

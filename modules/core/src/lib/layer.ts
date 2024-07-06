@@ -54,6 +54,7 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
+import {ProjectModuleSettings} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -283,6 +284,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return false;
+  }
+
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return true;
   }
 
   /** Updates selected state members and marks the layer for redraw */
@@ -1009,6 +1015,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         extension.updateState.call(this, updateParams, extension);
       }
 
+      this.setNeedsRedraw();
+      // Check if attributes need recalculation
+      this._updateAttributes();
+
       const modelChanged = this.getModels()[0] !== oldModels[0];
       this._postUpdate(updateParams, modelChanged);
       // End subclass lifecycle methods
@@ -1057,9 +1067,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const opacity = this.props.opacity;
     // apply gamma to opacity to make it visually "linear"
-    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
+    const opacity = Math.pow(this.props.opacity, 1 / 2.2);
+    uniforms.opacity = opacity; // TODO remove once layers ported to UBO
 
     try {
       // TODO/ib - hack move to luma Model.draw
@@ -1068,9 +1078,39 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
         const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
+        const {
+          picking,
+          heightMap,
+          heightMapBounds,
+          dummyHeightMap,
+          terrainCover,
+          drawToTerrainHeightMap,
+          useTerrainHeightMap,
+          terrainSkipRender
+        } = moduleParameters;
+        const terrainProps = {
+          viewport,
+          picking,
+          heightMap,
+          heightMapBounds,
+          dummyHeightMap,
+          terrainCover,
+          drawToTerrainHeightMap,
+          useTerrainHeightMap,
+          terrainSkipRender
+        };
         this.setShaderModuleProps({
-          picking: {isActive, isAttribute},
-          project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
+          // TODO Revisit whether this is necessary once all layers ported to UBO
+          terrain: terrainProps,
+          layer: {opacity},
+          picking: {isActive, isAttribute} as PickingProps,
+          project: {
+            viewport,
+            devicePixelRatio,
+            modelMatrix,
+            coordinateSystem,
+            coordinateOrigin
+          } as ProjectModuleSettings
         });
       }
 
@@ -1252,10 +1292,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
-    this.setNeedsRedraw();
-    // Check if attributes need recalculation
-    this._updateAttributes();
-
     // Note: Automatic instance count update only works for single layers
     const model = this.state.model as Model | undefined;
     if (model?.isInstanced) {
@@ -1271,16 +1307,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightColor !== highlightColor
     ) {
       const picking: PickingProps = {};
-      if (!autoHighlight) {
-        picking.highlightedObjectColor = null;
-      }
+
       if (Array.isArray(highlightColor)) {
         picking.highlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
-      if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
+      if (
+        forceUpdate ||
+        oldProps.autoHighlight !== autoHighlight ||
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+      ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)

@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {PathLayer, PolygonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -17,7 +17,7 @@ test('PathStyleExtension#PathLayer', t => {
         extensions: [new PathStyleExtension({highPrecisionDash: true, offset: true})]
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.state.model.uniforms;
+        const uniforms = getLayerUniforms(layer);
         t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
         const attributes = layer.getAttributeManager().getAttributes();
         t.deepEqual(
@@ -54,7 +54,7 @@ test('PathStyleExtension#PathLayer', t => {
         }
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.state.model.uniforms;
+        const uniforms = getLayerUniforms(layer);
         t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
         const attributes = layer.getAttributeManager().getAttributes();
         t.deepEqual(
@@ -89,7 +89,7 @@ test('PathStyleExtension#PolygonLayer', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
-        const uniforms = pathLayer.state.model.uniforms;
+        const uniforms = getLayerUniforms(pathLayer);
         t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
         t.ok(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
@@ -104,7 +104,7 @@ test('PathStyleExtension#PolygonLayer', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
-        const uniforms = pathLayer.state.model.uniforms;
+        const uniforms = getLayerUniforms(pathLayer);
         t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
         t.ok(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,

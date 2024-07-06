@@ -33,10 +33,14 @@ import './grid-aggregator.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
 // import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';
-// import './screen-grid-layer.spec';
-// import './screengrid-cell-layer.spec';
+import './screen-grid-layer.spec';
+import './screengrid-cell-layer.spec';
 import './utils/aggregation-operation-utils.spec';
 import './utils/bin-sorter.spec';
 import './utils/color-utils.spec';
 // import './utils/gpu-grid-aggregator.spec';
 import './utils/scale-utils.spec';
+
+import './aggregation-layer-v9/webgl-aggregator.spec';
+import './aggregation-layer-v9/cpu-aggregator/cpu-aggregator.spec';
+import './aggregation-layer-v9/cpu-aggregator/vertex-accessor.spec';

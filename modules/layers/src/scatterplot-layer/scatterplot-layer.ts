@@ -22,6 +22,7 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
+import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
@@ -185,7 +186,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({
+      vs,
+      fs,
+      modules: [project32, picking, scatterplotUniforms]
+    });
   }
 
   initializeState() {
@@ -251,11 +256,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     } = this.props;
-    const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
-      stroked: stroked ? 1 : 0,
+    const scatterplotProps: ScatterplotProps = {
+      stroked,
       filled,
       billboard,
       antialiasing,
@@ -267,7 +269,12 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels
-    });
+    };
+    const model = this.state.model!;
+
+    // TODO remove setUniforms() - currently DataFilterExtension needs this
+    model.setUniforms(uniforms);
+    model.shaderInputs.setProps({scatterplot: scatterplotProps});
     model.draw(this.context.renderPass);
   }
 

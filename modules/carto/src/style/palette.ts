@@ -1,7 +1,6 @@
 import * as cartoColors from 'cartocolor';
 import {assert} from '../utils';
-
-export type Color = [r: number, b: number, g: number, a?: number];
+import {Color} from '@deck.gl/core';
 
 export const DEFAULT_PALETTE = 'PurpOr';
 export const NULL_COLOR: Color = [204, 204, 204];

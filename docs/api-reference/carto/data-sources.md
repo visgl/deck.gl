@@ -157,13 +157,14 @@ type RasterTilesetSourceOptions = {
 }
 ```
 
+Boundary sources are experimental sources where both the tileset and the properties props need a specific schema to work. [Read more about Boundaries in the CARTO documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+
 #### boundaryTableSource (Experimental)
 
 ```ts
 type BoundaryTableSourceOptions = {
   tilesetTableName: string;
   columns?: string[];
-  matchingColumn?: string;
   propertiesTableName: string;
 }
 ```
@@ -173,7 +174,6 @@ type BoundaryTableSourceOptions = {
 ```ts
 type BoundaryQuerySourceOptions = {
   tilesetTableName: string;
-  matchingColumn?: string;
   propertiesSqlQuery: string;
   queryParameters?: QueryParameters;
 }

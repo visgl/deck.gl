@@ -159,10 +159,9 @@ export default class DeckPicker {
     }
 
     // Resize it to current canvas size (this is a noop if size hasn't changed)
-    // @ts-expect-error
-    const gl = this.device.gl as WebGL2RenderingContext;
-    this.pickingFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
-    this.depthFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
+    const {canvas} = this.device.getCanvasContext();
+    this.pickingFBO?.resize({width: canvas.width, height: canvas.height});
+    this.depthFBO?.resize({width: canvas.width, height: canvas.height});
   }
 
   /** Preliminary filtering of the layers list. Skid picking pass if no layer is pickable. */

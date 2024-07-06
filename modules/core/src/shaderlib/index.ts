@@ -21,6 +21,7 @@
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
+import {layerUniforms} from './misc/layer-uniforms';
 import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
@@ -49,10 +50,11 @@ export function getShaderAssembler() {
   return shaderAssembler;
 }
 
-export {picking, project, project32, gouraudLighting, phongLighting, shadow};
+export {layerUniforms, picking, project, project32, gouraudLighting, phongLighting, shadow};
 
 // Useful for custom shader modules
 export type {ProjectUniforms} from './project/viewport-uniforms';
+export type {UniformTypes} from './misc/uniform-types';
 
 // TODO - these should be imported from luma.gl
 /* eslint-disable camelcase */

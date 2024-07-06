@@ -133,7 +133,10 @@ const examples = [
 
   // Quadbin
   'abfce395-d9ec-48d4-85ad-45ec7705a921', // Quadbin - Table - 588k Spatial Features Spain
-  '8ead73bb-aa1f-4bf6-91fc-52a50c682938' // Quadbin — Tileset 14M Spatial Features USA
+  '8ead73bb-aa1f-4bf6-91fc-52a50c682938', // Quadbin — Tileset 14M Spatial Features USA
+
+  // Heatmap
+  '0b3c86ad-3c14-4c89-986a-07ba23306c3d' // Quadbin - Tileset, represented through Heatmap
 ];
 const params = new URLSearchParams(location.search.slice(1));
 const id = params.has('id') ? params.get('id')! : examples[0];
