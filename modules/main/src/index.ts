@@ -146,6 +146,12 @@ export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 export {default, DeckGL} from '@deck.gl/react';
 
+//
+// WIDGETS PACKAGE
+//
+
+export {FullscreenWidget, ZoomWidget, CompassWidget} from '@deck.gl/widgets';
+
 /* Types */
 
 export type {
