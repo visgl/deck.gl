@@ -17,11 +17,11 @@ type BitmapBindingProps = {
 };
 
 type BitmapUniformProps = {
-  bounds?: [number, number, number, number];
-  coordinateConversion?: number;
-  desaturate?: number;
-  tintColor?: [number, number, number];
-  transparentColor?: [number, number, number, number];
+  bounds: [number, number, number, number];
+  coordinateConversion: number;
+  desaturate: number;
+  tintColor: [number, number, number];
+  transparentColor: [number, number, number, number];
 };
 
 export type BitmapProps = BitmapBindingProps & BitmapUniformProps;

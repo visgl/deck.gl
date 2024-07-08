@@ -39,6 +39,7 @@ import {
 import {Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
+import {columnUniforms, ColumnProps} from './column-layer-uniforms';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
@@ -253,7 +254,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       vs,
       fs,
       defines,
-      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking]
+      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking, columnUniforms]
     });
   }
 
@@ -415,8 +416,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const wireframeModel = this.state.wireframeModel!;
     const {fillVertexCount, edgeDistance} = this.state;
 
-    const renderUniforms = {
-      ...uniforms,
+    const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
       angle: (angle / 180) * Math.PI,
       offset,
@@ -434,17 +434,24 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      wireframeModel.setUniforms(renderUniforms);
-      wireframeModel.setUniforms({isStroke: true});
+      wireframeModel.shaderInputs.setProps({
+        column: {
+          ...columnProps,
+          isStroke: true
+        }
+      });
       wireframeModel.draw(this.context.renderPass);
     }
-
-    fillModel.setUniforms(renderUniforms);
 
     if (filled) {
       // model.setProps({isIndexed: false});
       fillModel.setVertexCount(fillVertexCount);
-      fillModel.setUniforms({isStroke: false});
+      fillModel.shaderInputs.setProps({
+        column: {
+          ...columnProps,
+          isStroke: false
+        }
+      });
       fillModel.draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
@@ -453,7 +460,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       // The width of the stroke is achieved by flattening the side of the cylinder.
       // Skip the last 1/3 of the vertices which is the top.
       fillModel.setVertexCount((fillVertexCount * 2) / 3);
-      fillModel.setUniforms({isStroke: true});
+      fillModel.shaderInputs.setProps({
+        column: {
+          ...columnProps,
+          isStroke: true
+        }
+      });
       fillModel.draw(this.context.renderPass);
     }
   }

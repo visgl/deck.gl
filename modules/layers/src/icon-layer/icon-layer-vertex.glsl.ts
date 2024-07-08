@@ -35,13 +35,6 @@ in float instanceColorModes;
 in vec2 instanceOffsets;
 in vec2 instancePixelOffset;
 
-uniform float sizeScale;
-uniform vec2 iconsTextureDim;
-uniform float sizeMinPixels;
-uniform float sizeMaxPixels;
-uniform bool billboard;
-uniform int sizeUnits;
-
 out float vColorMode;
 out vec4 vColor;
 out vec2 vTextureCoords;
@@ -66,8 +59,8 @@ void main(void) {
  
   // project meters to pixels and clamp to limits 
   float sizePixels = clamp(
-    project_size_to_pixel(instanceSizes * sizeScale, sizeUnits), 
-    sizeMinPixels, sizeMaxPixels
+    project_size_to_pixel(instanceSizes * icon.sizeScale, icon.sizeUnits),
+    icon.sizeMinPixels, icon.sizeMaxPixels
   );
 
   // scale icon height to match instanceSize
@@ -79,7 +72,7 @@ void main(void) {
   pixelOffset += instancePixelOffset;
   pixelOffset.y *= -1.0;
 
-  if (billboard)  {
+  if (icon.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
@@ -97,7 +90,7 @@ void main(void) {
     instanceIconFrames.xy,
     instanceIconFrames.xy + iconSize,
     (positions.xy + 1.0) / 2.0
-  ) / iconsTextureDim;
+  ) / icon.iconsTextureDim;
 
   vColor = instanceColors;
   DECKGL_FILTER_COLOR(vColor, geometry);
