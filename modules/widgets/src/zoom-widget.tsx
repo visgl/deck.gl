@@ -43,7 +43,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   placement: WidgetPlacement = 'top-left';
   orientation: 'vertical' | 'horizontal' = 'vertical';
   viewId?: string | null = null;
-  viewport?: Viewport;
+  viewports: {[id: string]: Viewport} = {};
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
@@ -98,14 +98,14 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     Object.assign(this.props, props);
   }
 
-  onViewportChange(viewport) {
-    this.viewport = viewport;
+  onViewportChange(viewport: Viewport) {
+    this.viewports[viewport.id] = viewport;
   }
 
-  handleZoom(nextZoom: number) {
-    const viewId = this.viewId || this.viewport?.id || 'default-view';
+  handleZoom(viewport: Viewport, nextZoom: number) {
+    const viewId = this.viewId || viewport?.id || 'default-view';
     const nextViewState = {
-      ...this.viewport,
+      ...viewport,
       zoom: nextZoom,
       transitionDuration: this.props.transitionDuration,
       transitionInterpolator: new FlyToInterpolator()
@@ -115,14 +115,14 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   handleZoomIn() {
-    if (this.viewport) {
-      this.handleZoom(this.viewport.zoom + 1);
+    for (const viewport of Object.values(this.viewports)) {
+      this.handleZoom(viewport, viewport.zoom + 1);
     }
   }
 
   handleZoomOut() {
-    if (this.viewport) {
-      this.handleZoom(this.viewport.zoom - 1);
+    for (const viewport of Object.values(this.viewports)) {
+      this.handleZoom(viewport, viewport.zoom - 1);
     }
   }
 }
