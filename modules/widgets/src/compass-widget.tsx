@@ -33,7 +33,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   props: CompassWidgetProps;
   placement: WidgetPlacement = 'top-left';
   viewId?: string | null = null;
-  viewport?: Viewport;
+  viewports: {[id: string]: Viewport} = {};
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
@@ -51,8 +51,8 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     Object.assign(this.props, props);
   }
 
-  onViewportChange(viewport) {
-    this.viewport = viewport;
+  onViewportChange(viewport: Viewport) {
+    this.viewports[viewport.id] = viewport;
     this.update();
   }
 
@@ -70,17 +70,19 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     return element;
   }
 
-  getRotation() {
-    if (this.viewport instanceof WebMercatorViewport) {
-      return [-this.viewport.bearing, this.viewport.pitch];
-    } else if (this.viewport instanceof _GlobeViewport) {
-      return [0, Math.max(-80, Math.min(80, this.viewport.latitude))];
+  getRotation(viewport?: Viewport) {
+    if (viewport instanceof WebMercatorViewport) {
+      return [-viewport.bearing, viewport.pitch];
+    } else if (viewport instanceof _GlobeViewport) {
+      return [0, Math.max(-80, Math.min(80, viewport.latitude))];
     }
     return [0, 0];
   }
 
   update() {
-    const [rz, rx] = this.getRotation();
+    const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
+    const viewport = this.viewports[viewId];
+    const [rz, rx] = this.getRotation(viewport);
     const element = this.element;
     if (!element) {
       return;
@@ -89,7 +91,11 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
       <div className="deck-widget-button" style={{perspective: 100}}>
         <button
           type="button"
-          onClick={() => this.handleCompassReset()}
+          onClick={() => {
+            for (const viewport of Object.values(this.viewports)) {
+              this.handleCompassReset(viewport);
+            }
+          }}
           label={this.props.label}
           style={{transform: `rotateX(${rx}deg)`}}
         >
@@ -116,13 +122,13 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     this.element = undefined;
   }
 
-  handleCompassReset() {
-    const viewId = this.viewId || this.viewport?.id || 'default-view';
-    if (this.viewport instanceof WebMercatorViewport) {
+  handleCompassReset(viewport: Viewport) {
+    const viewId = this.viewId || viewport.id || 'default-view';
+    if (viewport instanceof WebMercatorViewport) {
       const nextViewState = {
-        ...this.viewport,
+        ...viewport,
         bearing: 0,
-        ...(this.getRotation()[0] === 0 ? {pitch: 0} : {}),
+        ...(this.getRotation(viewport)[0] === 0 ? {pitch: 0} : {}),
         transitionDuration: this.props.transitionDuration,
         transitionInterpolator: new FlyToInterpolator()
       };

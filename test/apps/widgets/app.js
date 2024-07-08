@@ -102,10 +102,17 @@ export const deck = new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget({style: widgetTheme, viewId: 'map'}),
-    new ZoomWidget({style: widgetTheme, orientation: 'horizontal', viewId: 'globe'}),
-    new CompassWidget({style: widgetTheme, viewId: 'map'}),
-    new CompassWidget({style: widgetTheme, viewId: 'globe'}),
+    new ZoomWidget({id: 'map-zoom', style: widgetTheme, viewId: 'map'}),
+    new ZoomWidget({
+      id: 'globe-zoom',
+      style: widgetTheme,
+      orientation: 'horizontal',
+      viewId: 'globe'
+    }),
+    new ZoomWidget({style: widgetTheme, placement: 'bottom-right'}),
+    new CompassWidget({id: 'map-compass', style: widgetTheme, viewId: 'map'}),
+    new CompassWidget({id: 'globe-compass', style: widgetTheme, viewId: 'globe'}),
+    new CompassWidget({style: widgetTheme, placement: 'bottom-right'}),
 
     new FullscreenWidget({}), // TODO: should viewId be on all widgets for multi-view placement?
     new FullscreenWidget({id: 'themed', style: widgetTheme}),

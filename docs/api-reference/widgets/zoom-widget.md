@@ -14,7 +14,7 @@ The `id` must be unique among all your widgets at a given time. It's recommended
 
 Default: `null`
 
-The widget is attached to the view identified by this `viewId`. When assigned, the widget is placed within the specified view, and  exclusively interacts with it. Required when using [multiple views](../../developer-guide/views.md#using-multiple-views).
+The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
 
 #### `placement` (string, optional) {#placement}
 
