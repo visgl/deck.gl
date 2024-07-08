@@ -4,8 +4,6 @@ export default `\
 
 precision highp float;
 
-uniform bool stroked;
-
 in vec4 vFillColor;
 in vec4 vLineColor;
 in float vLineWidth;
@@ -18,7 +16,7 @@ void main(void) {
   geometry.uv = uv;
 
   vec2 pixelPosition = uv * dimensions;
-  if (stroked) {
+  if (textBackground.stroked) {
     float distToEdge = min(
       min(pixelPosition.x, dimensions.x - pixelPosition.x),
       min(pixelPosition.y, dimensions.y - pixelPosition.y)

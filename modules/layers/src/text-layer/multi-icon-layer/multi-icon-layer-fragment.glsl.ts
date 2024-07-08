@@ -24,14 +24,7 @@ export default `\
 
 precision highp float;
 
-uniform float opacity;
 uniform sampler2D iconsTexture;
-uniform float gamma;
-uniform bool sdf;
-uniform float alphaCutoff;
-uniform float sdfBuffer;
-uniform float outlineBuffer;
-uniform vec4 outlineColor;
 
 in vec4 vColor;
 in vec2 vTextureCoords;
@@ -47,14 +40,14 @@ void main(void) {
     vec4 color = vColor;
 
     // if enable sdf (signed distance fields)
-    if (sdf) {
+    if (sdf.enabled) {
       float distance = alpha;
-      alpha = smoothstep(sdfBuffer - gamma, sdfBuffer + gamma, distance);
+      alpha = smoothstep(sdf.buffer - sdf.gamma, sdf.buffer + sdf.gamma, distance);
 
-      if (outlineBuffer > 0.0) {
+      if (sdf.outlineBuffer > 0.0) {
         float inFill = alpha;
-        float inBorder = smoothstep(outlineBuffer - gamma, outlineBuffer + gamma, distance);
-        color = mix(outlineColor, vColor, inFill);
+        float inBorder = smoothstep(sdf.outlineBuffer - sdf.gamma, sdf.outlineBuffer + sdf.gamma, distance);
+        color = mix(sdf.outlineColor, vColor, inFill);
         alpha = inBorder;
       }
     }
@@ -62,11 +55,11 @@ void main(void) {
     // Take the global opacity and the alpha from color into account for the alpha component
     float a = alpha * color.a;
     
-    if (a < alphaCutoff) {
+    if (a < icon.alphaCutoff) {
       discard;
     }
 
-    fragColor = vec4(color.rgb, a * opacity);
+    fragColor = vec4(color.rgb, a * layer.opacity);
   }
 
   DECKGL_FILTER_COLOR(fragColor, geometry);

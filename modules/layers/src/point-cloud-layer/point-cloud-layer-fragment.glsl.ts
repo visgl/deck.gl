@@ -30,7 +30,7 @@ in vec2 unitPosition;
 out vec4 fragColor;
 
 void main(void) {
-  geometry.uv = unitPosition;
+  geometry.uv = unitPosition.xy;
 
   float distToCenter = length(unitPosition);
 

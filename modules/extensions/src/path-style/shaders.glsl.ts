@@ -18,9 +18,6 @@ uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
 
-// TODO Defined in path-layer shader, port with PathLayer
-uniform float capType;
-
 in vec2 vDashArray;
 in float vDashOffset;
 `,
@@ -51,7 +48,7 @@ in float vDashOffset;
     float unitOffset = mod(vPathPosition.y + offset, unitLength);
 
     if (gapLength > 0.0 && unitOffset > solidLength) {
-      if (capType <= 0.5) {
+      if (path.capType <= 0.5) {
         if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
           discard;
         }

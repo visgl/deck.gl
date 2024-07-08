@@ -21,6 +21,7 @@
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
+import {SdfProps, sdfUniforms} from './sdf-uniforms';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
@@ -57,11 +58,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
   static layerName = 'MultiIconLayer';
 
   state!: IconLayer['state'] & {
-    outlineColor: Color;
+    outlineColor: [number, number, number, number];
   };
 
   getShaders() {
-    return {...super.getShaders(), fs};
+    const shaders = super.getShaders();
+    return {...shaders, modules: [...shaders.modules, sdfUniforms], fs};
   }
 
   initializeState() {
@@ -106,27 +108,24 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth))
       : -1;
 
-    params.uniforms = {
-      ...params.uniforms,
-      // Refer the following doc about gamma and buffer
-      // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
-      sdfBuffer: DEFAULT_BUFFER,
+    const model = this.state.model!;
+    const sdfProps: SdfProps = {
+      buffer: DEFAULT_BUFFER,
       outlineBuffer,
       gamma: smoothing,
-      sdf: Boolean(sdf),
+      enabled: Boolean(sdf),
       outlineColor
     };
-
+    model.shaderInputs.setProps({sdf: sdfProps});
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
     if (sdf && outlineWidth) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
-      const model = this.state.model!;
 
       if (iconsTexture) {
-        model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
+        model.shaderInputs.setProps({sdf: {...sdfProps, outlineBuffer: DEFAULT_BUFFER}});
         model.draw(this.context.renderPass);
       }
     }

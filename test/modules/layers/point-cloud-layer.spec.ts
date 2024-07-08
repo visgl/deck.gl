@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 import {UNIT} from '@deck.gl/core';
 
 import {PointCloudLayer} from '@deck.gl/layers';
@@ -39,7 +39,7 @@ test('PointCloudLayer#loaders.gl support', t => {
         sizeUnits: 'meters'
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].uniforms;
+        const uniforms = getLayerUniforms(layer);
         t.ok(uniforms.sizeUnits, UNIT.meters, 'sizeUnits uniform "meters"');
       }
     },
@@ -48,7 +48,7 @@ test('PointCloudLayer#loaders.gl support', t => {
         sizeUnits: 'pixels'
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].uniforms;
+        const uniforms = getLayerUniforms(layer);
         t.is(uniforms.sizeUnits, UNIT.pixels, 'sizeUnits uniform "pixels"');
       }
     }
