@@ -22,7 +22,7 @@ export type MapboxOverlayProps = Omit<
 > & {
   interleaved?: boolean;
 };
-type ControlPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+type ControlPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
 /**
  * Implements Mapbox [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) interface
