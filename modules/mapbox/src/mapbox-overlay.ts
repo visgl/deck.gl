@@ -22,6 +22,7 @@ export type MapboxOverlayProps = Omit<
 > & {
   interleaved?: boolean;
 };
+type ControlPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 /**
  * Implements Mapbox [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) interface
@@ -153,7 +154,7 @@ export default class MapboxOverlay implements IControl {
     removeDeckInstance(map);
   }
 
-  getDefaultPosition() {
+  getDefaultPosition(): ControlPosition {
     return 'top-left';
   }
 
