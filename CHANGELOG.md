@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.22] - Jul 14 2024
+
+- fix: mapboxOverlay's getDefaultPosition return type error (#9017)
+- fix(geo-layers): HeatmapLayer crash with constant weight (#9021)
+- fix(widgets) export package and bundle css in main (#8905)
+
 #### deck.gl [9.0.21] - Jul 3 2024
 
 - CARTO: do not reduce position precision to 32bit (#8995)
