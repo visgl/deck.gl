@@ -5,7 +5,7 @@ import {render} from 'preact';
 import {IconButton} from './components';
 
 interface FullscreenWidgetProps {
-  id: string;
+  id?: string;
   placement?: WidgetPlacement;
   /**
    * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
