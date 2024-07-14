@@ -588,10 +588,8 @@ export default class HeatmapLayer<
     const attributeManager = this.getAttributeManager()!;
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
-    const positions = attributes.positions.buffer;
     const uniforms = {radiusPixels, commonBounds, textureWidth: textureSize, weightsScale};
-    const weights = attributes.weights.buffer;
-    weightsTransform.model.setAttributes({positions, weights});
+    this._setModelAttributes(weightsTransform.model, attributes);
     weightsTransform.model.setVertexCount(this.getNumInstances());
     weightsTransform.model.setUniforms(uniforms);
     weightsTransform.model.updateModuleSettings(moduleSettings);
