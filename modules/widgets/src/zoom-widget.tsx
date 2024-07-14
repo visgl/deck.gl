@@ -5,7 +5,7 @@ import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './components';
 
 interface ZoomWidgetProps {
-  id: string;
+  id?: string;
   placement?: WidgetPlacement;
   /**
    * View to attach to and interact with. Required when using multiple views.
