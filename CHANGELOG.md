@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.23] - Jul 14 2024
+
+- fix(widgets) widget id was required, should be optional (#9026)
+
 #### deck.gl [9.0.22] - Jul 14 2024
 
 - fix: mapboxOverlay's getDefaultPosition return type error (#9017)

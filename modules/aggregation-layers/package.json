@@ -3,7 +3,7 @@
   "description": "deck.gl layers that aggregate the input data into alternative representations",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.22",
+  "version": "9.0.23",
   "publishConfig": {
     "access": "public"
   },
