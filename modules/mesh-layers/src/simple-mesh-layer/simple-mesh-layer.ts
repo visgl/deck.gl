@@ -341,7 +341,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
       flatShading: !this.state.hasNormals
     };
-    model.setUniforms(uniforms);
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     model.draw(renderPass);
   }

@@ -6,7 +6,6 @@ precision highp float;
 uniform bool hasTexture;
 uniform sampler2D sampler;
 uniform bool flatShading;
-uniform float opacity;
 
 in vec2 vTexCoord;
 in vec3 cameraPosition;
@@ -22,7 +21,7 @@ void main(void) {
 
   fragColor = vColor * pbr_filterColor(vec4(0));
   geometry.uv = pbr_vUV;
-  fragColor.a *= opacity;
+  fragColor.a *= layer.opacity;
 
 #else
 
