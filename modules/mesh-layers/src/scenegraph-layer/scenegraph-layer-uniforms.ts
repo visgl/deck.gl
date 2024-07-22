@@ -1,4 +1,5 @@
 import type {Texture} from '@luma.gl/core';
+import type {Matrix4} from '@math.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import {UniformTypes} from '@deck.gl/core';
 
@@ -12,36 +13,13 @@ uniform scenegraphUniforms {
 } scenegraph;
 `;
 
-type ScenegraphBindingProps = {
-  // u_BaseColorSampler: Texture;
-};
-
-export type ScenegraphUniformProps = {
+export type ScenegraphProps = {
   sizeScale: number;
   sizeMinPixels: number;
   sizeMaxPixels: number;
-  sceneModelMatrix: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number
-  ];
+  sceneModelMatrix: Matrix4;
   composeModelMatrix: boolean;
 };
-
-export type ScenegraphProps = ScenegraphBindingProps & ScenegraphUniformProps;
 
 export const scenegraphUniforms = {
   name: 'scenegraph',
@@ -53,5 +31,5 @@ export const scenegraphUniforms = {
     sizeMaxPixels: 'f32',
     sceneModelMatrix: 'mat4x4<f32>',
     composeModelMatrix: 'f32'
-  } as const satisfies UniformTypes<ScenegraphUniformProps>
+  } as const satisfies UniformTypes<ScenegraphProps>
 } as const satisfies ShaderModule<ScenegraphProps>;
