@@ -341,8 +341,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
       flatShading: !this.state.hasNormals
     };
-    model.setUniforms(uniforms);
-    model.setUniforms(simpleMeshProps);
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     model.draw(renderPass);
   }
@@ -362,18 +360,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;
-    model.setBindings({
-      sampler: (texture as Texture) || emptyTexture
-    });
-    model.setUniforms({
-      hasTexture: Boolean(texture)
-    });
     const simpleMeshProps: SimpleMeshProps = {
       sampler: (texture as Texture) || emptyTexture,
       hasTexture: Boolean(texture)
     };
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
-
     return model;
   }
 
@@ -383,12 +374,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
     if (model) {
-      model.setBindings({
-        sampler: texture || emptyTexture
-      });
-      model.setUniforms({
-        hasTexture: Boolean(texture)
-      });
       const simpleMeshProps: SimpleMeshProps = {
         sampler: texture || emptyTexture,
         hasTexture: Boolean(texture)
