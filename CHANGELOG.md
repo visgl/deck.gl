@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.24] - Jul 22 2024
+
+- CARTO: ClusterTileLayer (#8957)
+- CARTO: Adapt fetchMap for supporting HeatmapTileLayer (#8952)
+
 #### deck.gl [9.0.23] - Jul 14 2024
 
 - fix(widgets) widget id was required, should be optional (#9026)
