@@ -343,6 +343,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     };
     model.setUniforms(uniforms);
     model.setUniforms(simpleMeshProps);
+    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     model.draw(renderPass);
   }
 
@@ -367,6 +368,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     model.setUniforms({
       hasTexture: Boolean(texture)
     });
+    const simpleMeshProps: SimpleMeshProps = {
+      sampler: (texture as Texture) || emptyTexture,
+      hasTexture: Boolean(texture)
+    };
+    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
 
     return model;
   }
@@ -383,6 +389,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       model.setUniforms({
         hasTexture: Boolean(texture)
       });
+      const simpleMeshProps: SimpleMeshProps = {
+        sampler: texture || emptyTexture,
+        hasTexture: Boolean(texture)
+      };
+      model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     }
   }
 }

@@ -16,10 +16,10 @@ type SimpleMeshBindingProps = {
 };
 
 export type SimpleMeshUniformProps = {
-  sizeScale: number;
-  composeModelMatrix: boolean;
+  sizeScale?: number;
+  composeModelMatrix?: boolean;
   hasTexture?: boolean;
-  flatShading: boolean;
+  flatShading?: boolean;
 };
 
 export type SimpleMeshProps = SimpleMeshBindingProps & SimpleMeshUniformProps;
