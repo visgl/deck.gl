@@ -387,6 +387,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           // eslint-disable-next-line camelcase
           u_Camera: model.uniforms.cameraPosition
         });
+        model.shaderInputs.setProps({scenegraph: scenegraphProps});
 
         model.draw(renderPass);
       }
