@@ -13,7 +13,7 @@ uniform scenegraphUniforms {
 `;
 
 type ScenegraphBindingProps = {
-  u_BaseColorSampler: Texture;
+  // u_BaseColorSampler: Texture;
 };
 
 export type ScenegraphUniformProps = {

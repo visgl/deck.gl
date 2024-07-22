@@ -28,6 +28,11 @@ import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
+import {
+  scenegraphUniforms,
+  ScenegraphProps,
+  ScenegraphUniformProps
+} from './scenegraph-layer-uniforms';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
@@ -187,7 +192,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const modules = [project32, picking];
+    const modules = [project32, picking, scenegraphUniforms];
 
     if (this.props._lighting === 'pbr') {
       modules.push(pbr);
@@ -367,13 +372,17 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       if (node instanceof ModelNode) {
         const {model} = node;
         model.setInstanceCount(numInstances);
-        model.setUniforms({
+        const scenegraphProps: ScenegraphProps = {
           sizeScale,
-          opacity,
           sizeMinPixels,
           sizeMaxPixels,
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
-          sceneModelMatrix: worldMatrix,
+          // TODO improve UniformTypes
+          sceneModelMatrix: worldMatrix as unknown as ScenegraphUniformProps['sceneModelMatrix']
+        };
+        model.setUniforms({
+          ...scenegraphProps,
+          opacity,
           // Needed for PBR (TODO: find better way to get it)
           // eslint-disable-next-line camelcase
           u_Camera: model.uniforms.cameraPosition
