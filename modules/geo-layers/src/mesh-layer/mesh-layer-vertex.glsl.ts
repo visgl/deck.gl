@@ -2,8 +2,6 @@ export default `#version 300 es
 #define SHADER_NAME simple-mesh-layer-vs
 
 // Scale the model
-uniform float sizeScale;
-uniform bool composeModelMatrix;
 uniform bool pickFeatureIds;
 
 // Primitive attributes
@@ -53,7 +51,7 @@ void main(void) {
   cameraPosition = project.cameraPosition;
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
-  vec3 pos = (instanceModelMatrix * positions) * sizeScale;
+  vec3 pos = (instanceModelMatrix * positions) * simpleMesh.sizeScale;
   vec3 projectedPosition = project_position(positions);
   position_commonspace = vec4(projectedPosition, 1.0);
   gl_Position = project_common_position_to_clipspace(position_commonspace);
