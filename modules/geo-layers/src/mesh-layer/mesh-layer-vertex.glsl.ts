@@ -1,9 +1,6 @@
 export default `#version 300 es
 #define SHADER_NAME simple-mesh-layer-vs
 
-// Scale the model
-uniform bool pickFeatureIds;
-
 // Primitive attributes
 in vec3 positions;
 in vec3 normals;
@@ -39,7 +36,7 @@ void main(void) {
   vec2 uv = applyUVRegion(texCoords);
   geometry.uv = uv;
 
-  if (pickFeatureIds) {
+  if (mesh.pickFeatureIds) {
     geometry.pickingColor = featureIdsPickingColors;
   } else {
     geometry.pickingColor = instancePickingColors;
