@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
-import {fp64arithmetic} from '@luma.gl/shadertools';
+import {fp64arithmetic, ShaderModule} from '@luma.gl/shadertools';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
@@ -13,6 +13,7 @@ import {
 import {GPUTransitionBase} from './gpu-transition';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
+import {UniformTypes} from '../shaderlib/misc/uniform-types';
 import type {TypedArray} from '../types/types';
 
 export default class GPUInterpolationTransition extends GPUTransitionBase<InterpolationTransitionSettings> {
@@ -95,6 +96,8 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     }
     const {model} = this.transform;
     model.setUniforms({time: t});
+    const interpolationProps: InterpolationProps = {time: t};
+    model.shaderInputs.setProps({interpolation: interpolationProps});
 
     this.transform.run({discard: true});
   }
@@ -104,6 +107,22 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     this.transform.destroy();
   }
 }
+
+const uniformBlock = `\
+  uniform interpolationUniforms {
+    float time;
+} interpolation;
+`;
+
+type InterpolationProps = {time: number};
+
+const interpolationUniforms = {
+  name: 'interpolation',
+  vs: uniformBlock,
+  uniformTypes: {
+    time: 'f32'
+  } as const satisfies UniformTypes<Required<InterpolationProps>>
+} as const satisfies ShaderModule<InterpolationProps>;
 
 const vs = `\
 #version 300 es
@@ -115,7 +134,7 @@ in ATTRIBUTE_TYPE aTo;
 out ATTRIBUTE_TYPE vCurrent;
 
 void main(void) {
-  vCurrent = mix(aFrom, aTo, time);
+  vCurrent = mix(aFrom, aTo, interpolation.time);
   gl_Position = vec4(0.0);
 }
 `;
@@ -138,7 +157,7 @@ vec2 mix_fp64(vec2 a, vec2 b, float x) {
 
 void main(void) {
   for (int i=0; i<ATTRIBUTE_SIZE; i++) {
-    vec2 value = mix_fp64(vec2(aFrom[i], aFrom64Low[i]), vec2(aTo[i], aTo64Low[i]), time);
+    vec2 value = mix_fp64(vec2(aFrom[i], aFrom64Low[i]), vec2(aTo[i], aTo64Low[i]), interpolation.time);
     vCurrent[i] = value.x;
     vCurrent64Low[i] = value.y;
   }
@@ -177,7 +196,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
           ]
         }
       ],
-      modules: [fp64arithmetic],
+      modules: [fp64arithmetic, interpolationUniforms],
       defines: {
         ATTRIBUTE_TYPE: attributeType,
         ATTRIBUTE_SIZE: attributeSize
@@ -196,6 +215,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       {name: 'aFrom', format: inputFormat},
       {name: 'aTo', format: bufferLayout.attributes![0].format}
     ],
+    modules: [interpolationUniforms],
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },
