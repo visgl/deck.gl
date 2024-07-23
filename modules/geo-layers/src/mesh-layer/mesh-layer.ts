@@ -6,6 +6,7 @@ import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
+import {MeshProps, meshUniforms} from './mesh-layer-uniforms';
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
 
@@ -58,7 +59,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
   getShaders() {
     const shaders = super.getShaders();
     const modules = shaders.modules;
-    modules.push(pbr);
+    modules.push(pbr, meshUniforms);
     return {...shaders, vs, fs};
   }
 
@@ -92,14 +93,20 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   draw(opts) {
     const {featureIds} = this.props;
-    if (!this.state.model) {
+    const {model} = this.state;
+    if (!model) {
       return;
     }
-    this.state.model.setUniforms({
-      // Needed for PBR (TODO: find better way to get it)
-      u_Camera: this.state.model.uniforms.cameraPosition,
+    const meshProps: MeshProps = {
       pickFeatureIds: Boolean(featureIds)
+    };
+    // TODO replace with shaderInputs.setProps({pbr: u_Camera}) once
+    // luma pbr module ported to UBO
+    model.setUniforms({
+      // Needed for PBR (TODO: find better way to get it)
+      u_Camera: model.uniforms.cameraPosition
     });
+    model.shaderInputs.setProps({mesh: meshProps});
 
     super.draw(opts);
   }
