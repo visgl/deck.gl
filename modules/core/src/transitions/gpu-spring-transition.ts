@@ -143,8 +143,6 @@ const vs = `\
 
 #define EPSILON 0.00001
 
-uniform float stiffness;
-uniform float damping;
 in ATTRIBUTE_TYPE aPrev;
 in ATTRIBUTE_TYPE aCur;
 in ATTRIBUTE_TYPE aTo;
@@ -154,9 +152,9 @@ out float vIsTransitioningFlag;
 ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
   ATTRIBUTE_TYPE velocity = cur - prev;
   ATTRIBUTE_TYPE delta = dest - cur;
-  ATTRIBUTE_TYPE spring = delta * stiffness;
-  ATTRIBUTE_TYPE damper = velocity * -1.0 * damping;
-  return spring + damper + velocity + cur;
+  ATTRIBUTE_TYPE force = delta * spring.stiffness;
+  ATTRIBUTE_TYPE resistance = velocity * spring.damping;
+  return force - resistance + velocity + cur;
 }
 
 void main(void) {
