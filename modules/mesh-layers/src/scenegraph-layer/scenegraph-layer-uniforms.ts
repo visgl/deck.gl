@@ -1,4 +1,3 @@
-import type {Texture} from '@luma.gl/core';
 import type {Matrix4} from '@math.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import {UniformTypes} from '@deck.gl/core';
