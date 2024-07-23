@@ -1,3 +1,5 @@
+import type {Matrix3, Matrix4, Vector2, Vector3, Vector4} from '@math.gl/core';
+
 type UniformProps = {
   [name: string]: number | boolean | number[];
 };
@@ -43,21 +45,21 @@ type NumArray16 = [
 
 type UniformType<ValueT extends number | boolean | number[]> = ValueT extends number | boolean
   ? 'f32' | 'i32' | 'u32'
-  : ValueT extends NumArray2
+  : ValueT extends NumArray2 | Vector2
   ? 'vec2<f32>' | 'vec2<i32>' | 'vec2<u32>'
-  : ValueT extends NumArray3
+  : ValueT extends NumArray3 | Vector3
   ? 'vec3<f32>' | 'vec3<i32>' | 'vec3<u32>'
-  : ValueT extends NumArray4
+  : ValueT extends NumArray4 | Vector4
   ? 'vec4<f32>' | 'vec4<i32>' | 'vec4<u32>' | 'mat2x2<f32>'
   : ValueT extends NumArray6
   ? 'mat2x3<f32>' | 'mat3x2<f32>'
   : ValueT extends NumArray8
   ? 'mat2x4<f32>' | 'mat4x2<f32>'
-  : ValueT extends NumArray9
+  : ValueT extends NumArray9 | Matrix3
   ? 'mat3x3<f32>'
   : ValueT extends NumArray12
   ? 'mat3x4<f32>' | 'mat4x3<f32>'
-  : ValueT extends NumArray16
+  : ValueT extends NumArray16 | Matrix4
   ? 'mat4x4<f32>'
   : never;
 

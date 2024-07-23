@@ -3,9 +3,6 @@ export default `\
 
 #define SHADER_NAME scenegraph-layer-fragment-shader
 
-// Uniforms
-uniform float opacity;
-
 // Varying
 in vec4 vColor;
 
@@ -32,7 +29,7 @@ void main(void) {
     #endif
   #endif
 
-  fragColor.a *= opacity;
+  fragColor.a *= layer.opacity;
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

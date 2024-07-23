@@ -13,13 +13,6 @@ in vec3 instanceModelMatrixCol1;
 in vec3 instanceModelMatrixCol2;
 in vec3 instanceTranslation;
 
-// Scale the model
-uniform float sizeScale;
-uniform float sizeMinPixels;
-uniform float sizeMaxPixels;
-uniform mat4 sceneModelMatrix;
-uniform bool composeModelMatrix;
-
 // Primitive attributes
 in vec3 positions;
 #ifdef HAS_UV
@@ -56,15 +49,15 @@ void main(void) {
   vec3 normal = vec3(0.0, 0.0, 1.0);
   #ifdef MODULE_PBR
     #ifdef HAS_NORMALS
-      normal = instanceModelMatrix * (sceneModelMatrix * vec4(normals, 0.0)).xyz;
+      normal = instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(normals, 0.0)).xyz;
     #endif
   #endif
 
-  float originalSize = project_size_to_pixel(sizeScale);
-  float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
+  float originalSize = project_size_to_pixel(scenegraph.sizeScale);
+  float clampedSize = clamp(originalSize, scenegraph.sizeMinPixels, scenegraph.sizeMaxPixels);
 
-  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * vec4(positions, 1.0)).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
-  if(composeModelMatrix) {
+  vec3 pos = (instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(positions, 1.0)).xyz) * scenegraph.sizeScale * (clampedSize / originalSize) + instanceTranslation;
+  if(scenegraph.composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
     // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
