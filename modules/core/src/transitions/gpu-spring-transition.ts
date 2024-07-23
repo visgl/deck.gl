@@ -82,10 +82,6 @@ export default class GPUSpringTransition extends GPUTransitionBase<SpringTransit
       aCur: buffers[1]
     });
     transform.transformFeedback.setBuffers({vNext: buffers[2]});
-    transform.model.setUniforms({
-      stiffness: settings.stiffness,
-      damping: settings.damping
-    });
     const springProps: SpringProps = {
       stiffness: settings.stiffness,
       damping: settings.damping
