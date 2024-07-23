@@ -1,4 +1,4 @@
-import type {Texture} from '@luma.gl/core';
+import type {TextureView} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import {UniformTypes} from '../shaderlib/misc/uniform-types';
 
@@ -9,7 +9,7 @@ uniform screenUniforms {
 `;
 
 type ScreenBindingProps = {
-  texSrc: Texture;
+  texSrc: TextureView;
 };
 
 type ScreenUniformProps = {
@@ -20,7 +20,7 @@ export type ScreenProps = ScreenBindingProps & ScreenUniformProps;
 
 export const screenUniforms = {
   name: 'screen',
-  vs: uniformBlock,
+  fs: uniformBlock,
   uniformTypes: {
     texSize: 'vec2<f32>'
   } as const satisfies UniformTypes<Required<ScreenUniformProps>>

@@ -89,14 +89,14 @@ const FILTER_FS_TEMPLATE = (func: string) => `\
 ${FS_TEMPLATE_INPUTS}
 void main() {
   fragColor = texture(texSrc, coordinate);
-  fragColor = ${func}(fragColor, texSize, coordinate);
+  fragColor = ${func}(fragColor, screen.texSize, coordinate);
 }
 `;
 
 const SAMPLER_FS_TEMPLATE = (func: string) => `\
 ${FS_TEMPLATE_INPUTS}
 void main() {
-  fragColor = ${func}(texSrc, texSize, coordinate);
+  fragColor = ${func}(texSrc, screen.texSize, coordinate);
 }
 `;
 
