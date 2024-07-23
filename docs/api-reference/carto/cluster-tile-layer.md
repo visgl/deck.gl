@@ -69,7 +69,7 @@ new deck.carto.ClusterTileLayer({});
 
 ## Properties
 
-Inherits all properties from [`TileLayer`](./tile-layer.md) and [`GeoJsonLayer`](../core/geojson-layer.md), with exceptions indicated below.
+Inherits all properties from [`TileLayer`](../geo-layers/tile-layer.md) and [`GeoJsonLayer`](../layers/geojson-layer.md), with exceptions indicated below.
 
 #### `data` (TilejsonResult) {#data}
 
