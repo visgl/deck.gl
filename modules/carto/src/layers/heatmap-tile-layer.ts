@@ -1,6 +1,14 @@
+import {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
-import {Accessor, CompositeLayer, CompositeLayerProps, DefaultProps, Layer} from '@deck.gl/core';
+import {
+  Accessor,
+  CompositeLayer,
+  CompositeLayerProps,
+  DefaultProps,
+  Layer,
+  UniformTypes
+} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
@@ -18,6 +26,21 @@ function unitDensityForCell(cell: bigint) {
   return Math.pow(4.0, cellResolution);
 }
 
+const uniformBlock = `\
+uniform densityUniforms {
+  float factor;
+} density;
+`;
+
+type DensityProps = {factor: number};
+const densityUniforms = {
+  name: 'density',
+  vs: uniformBlock,
+  uniformTypes: {
+    factor: 'f32'
+  } as const satisfies UniformTypes<Required<DensityProps>>
+} as const satisfies ShaderModule<DensityProps>;
+
 // Modified polygon layer to draw offscreen and output value expected by heatmap
 class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   static layerName = 'RTTSolidPolygonLayer';
@@ -25,16 +48,13 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   getShaders(type) {
     const shaders = super.getShaders(type);
     shaders.inject = {
-      'vs:#decl': `
-uniform float densityFactor;
-`,
       'vs:#main-end': `
       // Value from getWeight accessor
   float weight = elevations;
 
   // Keep "power" delivered to screen constant when tiles update
   // by outputting normalized density 
-  weight *= densityFactor;
+  weight *= density.factor;
 
   // Pack float into 3 channels to pass to heatmap shader
   // SCALE value important, as we don't want to saturate
@@ -47,15 +67,18 @@ uniform float densityFactor;
   vColor = vec4(mod(vec3(weight, floor(weight / SHIFT.yz)), 256.0), 255.0) / 255.0;
 `
     };
+    shaders.modules = [...shaders.modules, densityUniforms];
     return shaders;
   }
 
   draw(this, opts: any) {
     const cell = this.props!.data[0];
     const maxDensity = this.props.elevationScale;
-    const densityFactor = unitDensityForCell(cell.id) / maxDensity;
+    const densityProps: DensityProps = {
+      factor: unitDensityForCell(cell.id) / maxDensity
+    };
     for (const model of this.state.models) {
-      model.setUniforms({densityFactor});
+      model.shaderInputs.setProps({density: densityProps});
     }
 
     super.draw(opts);
