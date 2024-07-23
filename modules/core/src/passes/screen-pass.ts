@@ -17,7 +17,7 @@ type ScreenPassRenderOptions = {
   clearCanvas?: boolean;
   inputBuffer: Framebuffer;
   outputBuffer: Framebuffer | null;
-  moduleProps: any;
+  moduleProps: ShaderModule['props'];
 };
 
 /** A base render pass. */
