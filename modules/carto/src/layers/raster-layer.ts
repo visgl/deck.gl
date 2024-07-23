@@ -98,7 +98,8 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
 
     const blockSize = data.blockSize ?? 0;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
-    const offset = [xOffset, yOffset, scale / blockSize];
+    const offset = [xOffset, yOffset];
+    const lineWidthScale = scale / blockSize;
 
     // Filled Column Layer
     const CellLayer = this.getSubLayerClass('column', RasterColumnLayer);
@@ -118,7 +119,8 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
           data, // Pass through data for getSubLayerAccessor()
           length: blockSize * blockSize
         },
-        offset
+        offset,
+        lineWidthScale // Re-use widthScale prop to pass cell scale
       }
     );
   }
