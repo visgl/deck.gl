@@ -95,7 +95,6 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
       t = easing(t);
     }
     const {model} = this.transform;
-    model.setUniforms({time: t});
     const interpolationProps: InterpolationProps = {time: t};
     model.shaderInputs.setProps({interpolation: interpolationProps});
 
@@ -128,7 +127,6 @@ const vs = `\
 #version 300 es
 #define SHADER_NAME interpolation-transition-vertex-shader
 
-uniform float time;
 in ATTRIBUTE_TYPE aFrom;
 in ATTRIBUTE_TYPE aTo;
 out ATTRIBUTE_TYPE vCurrent;
@@ -142,7 +140,6 @@ const vs64 = `\
 #version 300 es
 #define SHADER_NAME interpolation-transition-vertex-shader
 
-uniform float time;
 in ATTRIBUTE_TYPE aFrom;
 in ATTRIBUTE_TYPE aFrom64Low;
 in ATTRIBUTE_TYPE aTo;
