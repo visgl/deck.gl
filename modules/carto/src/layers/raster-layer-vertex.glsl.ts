@@ -11,14 +11,6 @@ in vec4 instanceLineColors;
 
 in vec3 instancePickingColors;
 
-uniform bool extruded;
-uniform bool stroked;
-uniform bool isStroke;
-uniform float coverage;
-uniform float elevationScale;
-uniform float widthScale;
-uniform vec3 offset;
-
 // Result
 out vec4 vColor;
 #ifdef FLAT_SHADING
