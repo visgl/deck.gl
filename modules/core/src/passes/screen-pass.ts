@@ -17,7 +17,7 @@ type ScreenPassRenderOptions = {
   clearCanvas?: boolean;
   inputBuffer: Framebuffer;
   outputBuffer: Framebuffer | null;
-  moduleSettings: any;
+  moduleProps: any;
 };
 
 /** A base render pass. */
@@ -51,15 +51,13 @@ export default class ScreenPass extends Pass {
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {clearCanvas, inputBuffer, outputBuffer} = options;
     const texSize: [number, number] = [inputBuffer.width, inputBuffer.height];
-    this.model.shaderInputs.setProps(options.moduleSettings);
-    this.model.setBindings({texSrc: inputBuffer.colorAttachments[0]});
-    this.model.setUniforms({texSize});
     const screenProps: ScreenProps = {
       texSrc: inputBuffer.colorAttachments[0],
       texSize
     };
     this.model.shaderInputs.setProps({
-      screen: screenProps
+      screen: screenProps,
+      ...options.moduleProps
     });
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
