@@ -1,5 +1,5 @@
 import type {TextureView} from '@luma.gl/core';
-import {ShaderModule} from '../shaderlib/shader-module';
+import type {ShaderModule} from '../shaderlib/shader-module';
 
 const uniformBlock = `\
 uniform screenUniforms {
@@ -24,6 +24,8 @@ export const screenUniforms = {
   }
 } as const satisfies ShaderModule<ScreenProps>;
 
-type ResolvedUniformTypes = ShaderModule<ScreenProps>['uniformTypes'];
-type ResolvedUniformTypes2 = ShaderModule<ScreenProps, RenamedUniforms>['uniformTypes'];
+type ResolvedUniformTypes = NonNullable<ShaderModule<ScreenProps>['uniformTypes']>;
+type ResolvedUniformTypes2 = NonNullable<
+  ShaderModule<ScreenProps, RenamedUniforms>['uniformTypes']
+>;
 type ResolvedBindings = NonNullable<ShaderModule<ScreenProps>['bindings']>;

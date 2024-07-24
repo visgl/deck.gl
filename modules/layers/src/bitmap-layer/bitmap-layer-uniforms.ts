@@ -34,4 +34,5 @@ export const bitmapUniforms = {
 } as const satisfies ShaderModule<BitmapProps>;
 
 // Check type
-type BitmapUniformProps = ShaderModule<BitmapProps>['uniformTypes'];
+type ResolvedUniformTypes = NonNullable<ShaderModule<BitmapProps>['uniformTypes']>;
+type ResolvedBindings = NonNullable<ShaderModule<BitmapProps>['bindings']>;

@@ -12,9 +12,10 @@ export type UniformValue = number | boolean | number[];
 import {UniformTypes} from './misc/uniform-types';
 
 // Helper types
-type FilterKeysByType<T, U> = {[K in keyof T]: T[K] extends U ? K : never}[keyof T];
-type BindingsOnly<T> = {[K in FilterKeysByType<T, BindingValue>]: T[K]};
-type UniformsOnly<T> = {[K in FilterKeysByType<T, UniformValue>]: T[K]};
+type FilterBindingKeys<T> = {[K in keyof T]: T[K] extends UniformValue ? never : K}[keyof T];
+type FilterUniformKeys<T> = {[K in keyof T]: T[K] extends UniformValue ? K : never}[keyof T];
+type BindingsOnly<T> = {[K in FilterBindingKeys<Required<T>>]: T[K]};
+type UniformsOnly<T> = {[K in FilterUniformKeys<Required<T>>]: T[K]};
 
 /**
  * A shader module definition object
@@ -22,10 +23,7 @@ type UniformsOnly<T> = {[K in FilterKeysByType<T, UniformValue>]: T[K]};
  * @note Needs to be initialized with `initializeShaderModules`
  */
 export type ShaderModule<
-  PropsT extends Record<string, UniformValue | BindingValue> = Record<
-    string,
-    UniformValue | BindingValue
-  >,
+  PropsT extends Record<string, any> = Record<string, any>,
   UniformTypesT extends Record<string, UniformFormat> = UniformTypes<UniformsOnly<PropsT>>,
   BindingsT extends Record<string, BindingValue> = BindingsOnly<PropsT>
 > = {
@@ -41,8 +39,7 @@ export type ShaderModule<
   vs?: string;
 
   /** Uniform shader types @note: Both order and types MUST match uniform block declarations in shader */
-  // uniformTypes?: Record<keyof UniformsT, UniformFormat>;
-  uniformTypes: UniformTypesT;
+  uniformTypes?: UniformTypesT;
   /** Default prop values */
   defaultProps?: Required<PropsT>;
 
