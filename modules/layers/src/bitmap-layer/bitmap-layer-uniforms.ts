@@ -1,6 +1,5 @@
-import type {Texture, UniformValue} from '@luma.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {Texture} from '@luma.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform bitmapUniforms {
@@ -21,9 +20,6 @@ export type BitmapProps = {
   bitmapTexture: Texture;
 };
 
-type FilterUniformKeys<T> = {[K in keyof T]: T[K] extends UniformValue ? K : never}[keyof T];
-type UniformsOnly<T> = {[K in FilterUniformKeys<T>]: T[K]};
-
 export const bitmapUniforms = {
   name: 'bitmap',
   vs: uniformBlock,
@@ -34,8 +30,8 @@ export const bitmapUniforms = {
     desaturate: 'f32',
     tintColor: 'vec3<f32>',
     transparentColor: 'vec4<f32>'
-  } as const satisfies UniformTypes<UniformsOnly<BitmapProps>>
+  }
 } as const satisfies ShaderModule<BitmapProps>;
 
 // Check type
-type BitmapUniformProps = UniformsOnly<BitmapProps>;
+type BitmapUniformProps = ShaderModule<BitmapProps>['uniformTypes'];

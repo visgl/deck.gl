@@ -44,7 +44,7 @@ export type ShaderModule<
 
   /** Uniform shader types @note: Both order and types MUST match uniform block declarations in shader */
   // uniformTypes?: Record<keyof UniformsT, UniformFormat>;
-  uniformTypes?: UniformTypes<UniformsOnly<PropsT>>;
+  uniformTypes: UniformTypes<UniformsOnly<PropsT>>;
   /** Default prop values */
   defaultProps?: Required<PropsT>;
 

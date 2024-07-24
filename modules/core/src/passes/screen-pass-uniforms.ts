@@ -1,6 +1,5 @@
-import type {TextureView, UniformValue} from '@luma.gl/core';
+import type {TextureView} from '@luma.gl/core';
 import {ShaderModule} from '../shaderlib/shader-module';
-import {UniformTypes} from '../shaderlib/misc/uniform-types';
 
 const uniformBlock = `\
 uniform screenUniforms {
@@ -8,19 +7,10 @@ uniform screenUniforms {
 } screen;
 `;
 
-type ScreenBindingProps = {
+type ScreenProps = {
   texSrc: TextureView;
-};
-
-type ScreenUniformProps = {
   texSize: [number, number];
 };
-
-export type ScreenProps = ScreenBindingProps & ScreenUniformProps;
-type FilterUniformKeys<T> = {[K in keyof T]: T[K] extends UniformValue ? K : never}[keyof T];
-type UniformsOnly<T> = {[K in FilterUniformKeys<T>]: T[K]};
-
-type B = UniformsOnly<ScreenProps>;
 
 export const screenUniforms = {
   name: 'screen',
