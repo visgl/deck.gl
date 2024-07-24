@@ -1,5 +1,6 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
+import {ShaderModule} from '@luma.gl/shadertools';
 import {
   padBuffer,
   matchBuffer,
@@ -11,6 +12,7 @@ import Attribute from '../lib/attribute/attribute';
 import {GPUTransitionBase} from './gpu-transition';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
+import {UniformTypes} from '../shaderlib/misc/uniform-types';
 import type {TypedArray} from '../types/types';
 
 export default class GPUSpringTransition extends GPUTransitionBase<SpringTransitionSettings> {
@@ -80,10 +82,11 @@ export default class GPUSpringTransition extends GPUTransitionBase<SpringTransit
       aCur: buffers[1]
     });
     transform.transformFeedback.setBuffers({vNext: buffers[2]});
-    transform.model.setUniforms({
+    const springProps: SpringProps = {
       stiffness: settings.stiffness,
       damping: settings.damping
-    });
+    };
+    transform.model.shaderInputs.setProps({spring: springProps});
     transform.run({
       framebuffer,
       discard: false,
@@ -109,14 +112,33 @@ export default class GPUSpringTransition extends GPUTransitionBase<SpringTransit
   }
 }
 
+const uniformBlock = `\
+uniform springUniforms {
+  float damping;
+  float stiffness;
+} spring;
+`;
+
+type SpringProps = {
+  damping: number;
+  stiffness: number;
+};
+
+const springUniforms = {
+  name: 'spring',
+  vs: uniformBlock,
+  uniformTypes: {
+    damping: 'f32',
+    stiffness: 'f32'
+  } as const satisfies UniformTypes<Required<SpringProps>>
+} as const satisfies ShaderModule<SpringProps>;
+
 const vs = `\
 #version 300 es
 #define SHADER_NAME spring-transition-vertex-shader
 
 #define EPSILON 0.00001
 
-uniform float stiffness;
-uniform float damping;
 in ATTRIBUTE_TYPE aPrev;
 in ATTRIBUTE_TYPE aCur;
 in ATTRIBUTE_TYPE aTo;
@@ -126,9 +148,9 @@ out float vIsTransitioningFlag;
 ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
   ATTRIBUTE_TYPE velocity = cur - prev;
   ATTRIBUTE_TYPE delta = dest - cur;
-  ATTRIBUTE_TYPE spring = delta * stiffness;
-  ATTRIBUTE_TYPE damper = velocity * -1.0 * damping;
-  return spring + damper + velocity + cur;
+  ATTRIBUTE_TYPE force = delta * spring.stiffness;
+  ATTRIBUTE_TYPE resistance = velocity * spring.damping;
+  return force - resistance + velocity + cur;
 }
 
 void main(void) {
@@ -168,6 +190,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       {name: 'aTo', format: attribute.getBufferLayout().attributes![0].format}
     ],
     varyings: ['vNext'],
+    modules: [springUniforms],
     defines: {ATTRIBUTE_TYPE: attributeType},
     parameters: {
       depthCompare: 'always',
