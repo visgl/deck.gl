@@ -25,14 +25,11 @@ export type ShaderModule<
     string,
     UniformValue | BindingValue
   >,
-  UniformsT extends Record<string, UniformValue> = Record<string, UniformValue>,
+  UniformTypesT extends Record<string, UniformFormat> = UniformTypes<UniformsOnly<PropsT>>,
   BindingsT extends Record<string, BindingValue> = Record<string, BindingValue>
 > = {
   /** Used for type inference not for values */
   props?: PropsT;
-  /** Used for type inference, not currently used for values */
-  uniforms?: UniformsT;
-
   name: string;
 
   /** WGSL code */
@@ -44,7 +41,7 @@ export type ShaderModule<
 
   /** Uniform shader types @note: Both order and types MUST match uniform block declarations in shader */
   // uniformTypes?: Record<keyof UniformsT, UniformFormat>;
-  uniformTypes: UniformTypes<UniformsOnly<PropsT>>;
+  uniformTypes: UniformTypesT;
   /** Default prop values */
   defaultProps?: Required<PropsT>;
 
@@ -59,3 +56,27 @@ export type ShaderModule<
   inject?: Record<string, string | {injection: string; order: number}>;
   dependencies?: ShaderModule<any, any>[];
 };
+
+// Duplicated from luma
+type UniformFormat =
+  | 'f32'
+  | 'i32'
+  | 'u32'
+  | 'vec2<f32>'
+  | 'vec3<f32>'
+  | 'vec4<f32>'
+  | 'vec2<i32>'
+  | 'vec3<i32>'
+  | 'vec4<i32>'
+  | 'vec2<u32>'
+  | 'vec3<u32>'
+  | 'vec4<u32>'
+  | 'mat2x2<f32>'
+  | 'mat2x3<f32>'
+  | 'mat2x4<f32>'
+  | 'mat3x2<f32>'
+  | 'mat3x3<f32>'
+  | 'mat3x4<f32>'
+  | 'mat4x2<f32>'
+  | 'mat4x3<f32>'
+  | 'mat4x4<f32>';

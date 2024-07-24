@@ -12,6 +12,10 @@ type ScreenProps = {
   texSize: [number, number];
 };
 
+type RenamedUniforms = {
+  texSize: 'vec4<f32>';
+};
+
 export const screenUniforms = {
   name: 'screen',
   fs: uniformBlock,
@@ -20,4 +24,6 @@ export const screenUniforms = {
   }
 } as const satisfies ShaderModule<ScreenProps>;
 
-type t = ShaderModule<ScreenProps>['uniformTypes'];
+type ResolvedUniformTypes = ShaderModule<ScreenProps>['uniformTypes'];
+type ResolvedUniformTypes2 = ShaderModule<ScreenProps, RenamedUniforms>['uniformTypes'];
+type ResolvedBindings = ShaderModule<ScreenProps>['bindings'];
