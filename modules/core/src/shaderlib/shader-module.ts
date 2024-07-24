@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {NumberArray} from '@math.gl/types';
 import {Sampler, Texture} from '@luma.gl/core';
 
-// export type BindingValue = Buffer | Texture | Sampler;
-export type BindingValue = any;
-// export type UniformValue = number | boolean | Readonly<NumberArray>; // Float32Array> | Readonly<Int32Array> | Readonly<Uint32Array> | Readonly<number[]>;
+export type BindingValue = Buffer | Texture | Sampler;
 export type UniformValue = number | boolean | number[];
 import {UniformTypes} from './misc/uniform-types';
 
@@ -39,9 +36,9 @@ export type ShaderModule<
   vs?: string;
 
   /** Uniform shader types @note: Both order and types MUST match uniform block declarations in shader */
-  uniformTypes?: Required<UniformTypes<UniformsT>>;
-  /** Default prop values */
-  defaultProps?: Required<PropsT>;
+  uniformTypes?: Required<UniformTypes<UniformsT>>; // Record<keyof UniformsT, UniformFormat>;
+  /** Default uniform values */
+  defaultUniforms?: Required<UniformsT>; // Record<keyof UniformsT, UniformValue>;
 
   /** Function that maps props to uniforms & bindings */
   getUniforms?: (props?: any, oldProps?: any) => Record<string, BindingValue | UniformValue>;
@@ -54,27 +51,3 @@ export type ShaderModule<
   inject?: Record<string, string | {injection: string; order: number}>;
   dependencies?: ShaderModule<any, any>[];
 };
-
-// Duplicated from luma
-type UniformFormat =
-  | 'f32'
-  | 'i32'
-  | 'u32'
-  | 'vec2<f32>'
-  | 'vec3<f32>'
-  | 'vec4<f32>'
-  | 'vec2<i32>'
-  | 'vec3<i32>'
-  | 'vec4<i32>'
-  | 'vec2<u32>'
-  | 'vec3<u32>'
-  | 'vec4<u32>'
-  | 'mat2x2<f32>'
-  | 'mat2x3<f32>'
-  | 'mat2x4<f32>'
-  | 'mat3x2<f32>'
-  | 'mat3x3<f32>'
-  | 'mat3x4<f32>'
-  | 'mat4x2<f32>'
-  | 'mat4x3<f32>'
-  | 'mat4x4<f32>';
