@@ -25,7 +25,6 @@ import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
 import type {ProjectProps, ProjectUniforms} from './viewport-uniforms';
-import {UniformTypes} from '../misc/uniform-types';
 
 const INITIAL_MODULE_OPTIONS = {};
 
@@ -60,12 +59,10 @@ export default {
     commonOrigin: 'vec3<f32>',
     pseudoMeters: 'f32'
   }
-} as const satisfies ShaderModule<ProjectProps, UniformTypes<ProjectUniforms>, {}>;
+} as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}>;
 
 // Check type
 type ResolvedUniformTypes = NonNullable<
-  ShaderModule<ProjectProps, UniformTypes<ProjectUniforms>, {}>['uniformTypes']
+  ShaderModule<ProjectProps, ProjectUniforms, {}>['uniformTypes']
 >;
-type ResolvedBindings = NonNullable<
-  ShaderModule<ProjectProps, UniformTypes<ProjectUniforms>, {}>['bindings']
->;
+type ResolvedBindings = NonNullable<ShaderModule<ProjectProps, ProjectUniforms, {}>['bindings']>;

@@ -13,7 +13,7 @@ export type ScreenProps = {
 };
 
 type RenamedUniforms = {
-  texSize: 'vec4<f32>';
+  texSize: [number, number, number, number];
 };
 
 export const screenUniforms = {

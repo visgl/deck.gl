@@ -24,7 +24,7 @@ type UniformsOnly<T> = {[K in FilterUniformKeys<Required<T>>]: T[K]};
  */
 export type ShaderModule<
   PropsT extends Record<string, any> = Record<string, any>,
-  UniformTypesT extends Record<string, UniformFormat> = UniformTypes<UniformsOnly<PropsT>>,
+  UniformsT extends Record<string, UniformValue> = UniformsOnly<PropsT>,
   BindingsT extends Record<string, BindingValue> = BindingsOnly<PropsT>
 > = {
   /** Used for type inference not for values */
@@ -39,7 +39,7 @@ export type ShaderModule<
   vs?: string;
 
   /** Uniform shader types @note: Both order and types MUST match uniform block declarations in shader */
-  uniformTypes?: Required<UniformTypesT>;
+  uniformTypes?: Required<UniformTypes<UniformsT>>;
   /** Default prop values */
   defaultProps?: Required<PropsT>;
 
