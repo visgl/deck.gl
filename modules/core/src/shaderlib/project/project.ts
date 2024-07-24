@@ -23,7 +23,8 @@ import geometry from '../misc/geometry';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
-import type {ProjectModuleSettings} from './viewport-uniforms';
+import type {ProjectModuleSettings, ProjectUniforms} from './viewport-uniforms';
+import {UniformTypes} from '../misc/uniform-types';
 
 const INITIAL_MODULE_OPTIONS = {};
 
@@ -45,7 +46,6 @@ export default {
     commonUnitsPerMeter: 'vec3<f32>',
     projectionMode: 'i32',
     scale: 'f32',
-
     commonUnitsPerWorldUnit: 'vec3<f32>',
     commonUnitsPerWorldUnit2: 'vec3<f32>',
     center: 'vec4<f32>',
@@ -58,5 +58,5 @@ export default {
     coordinateOrigin: 'vec3<f32>',
     commonOrigin: 'vec3<f32>',
     pseudoMeters: 'f32'
-  }
+  } as const satisfies UniformTypes<ProjectUniforms>
 } as const satisfies ShaderModule<ProjectModuleSettings>;

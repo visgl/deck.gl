@@ -12,8 +12,9 @@ export type UniformValue = number | boolean | number[];
 import {UniformTypes} from './misc/uniform-types';
 
 // Helper types
-type FilterKeysByType<T> = {[K in keyof T]: T[K] extends UniformValue ? K : never}[keyof T];
-type UniformsOnly<T> = {[K in FilterKeysByType<T>]: T[K]};
+type FilterKeysByType<T, U> = {[K in keyof T]: T[K] extends U ? K : never}[keyof T];
+type BindingsOnly<T> = {[K in FilterKeysByType<T, BindingValue>]: T[K]};
+type UniformsOnly<T> = {[K in FilterKeysByType<T, UniformValue>]: T[K]};
 
 /**
  * A shader module definition object
@@ -26,7 +27,7 @@ export type ShaderModule<
     UniformValue | BindingValue
   >,
   UniformTypesT extends Record<string, UniformFormat> = UniformTypes<UniformsOnly<PropsT>>,
-  BindingsT extends Record<string, BindingValue> = Record<string, BindingValue>
+  BindingsT extends Record<string, BindingValue> = BindingsOnly<PropsT>
 > = {
   /** Used for type inference not for values */
   props?: PropsT;

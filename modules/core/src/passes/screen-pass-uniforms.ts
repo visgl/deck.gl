@@ -7,7 +7,7 @@ uniform screenUniforms {
 } screen;
 `;
 
-type ScreenProps = {
+export type ScreenProps = {
   texSrc: TextureView;
   texSize: [number, number];
 };
@@ -26,4 +26,4 @@ export const screenUniforms = {
 
 type ResolvedUniformTypes = ShaderModule<ScreenProps>['uniformTypes'];
 type ResolvedUniformTypes2 = ShaderModule<ScreenProps, RenamedUniforms>['uniformTypes'];
-type ResolvedBindings = ShaderModule<ScreenProps>['bindings'];
+type ResolvedBindings = NonNullable<ShaderModule<ScreenProps>['bindings']>;

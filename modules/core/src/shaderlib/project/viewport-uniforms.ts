@@ -27,7 +27,7 @@ import memoize from '../../utils/memoize';
 
 import type Viewport from '../../viewports/viewport';
 import type {CoordinateSystem} from '../../lib/constants';
-import type {NumericArray} from '../../types/types';
+import type {NumArray16} from '../misc/uniform-types';
 
 type Vec3 = [number, number, number];
 type Vec4 = [number, number, number, number];
@@ -35,8 +35,8 @@ type Vec4 = [number, number, number, number];
 // To quickly set a vector to zero
 const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
-const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
-const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const VECTOR_TO_POINT_MATRIX: NumArray16 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+const IDENTITY_MATRIX: NumArray16 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2: Vec3 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
 
@@ -127,8 +127,8 @@ function calculateMatrixAndOffset(
   coordinateSystem: CoordinateSystem,
   coordinateOrigin: Vec3
 ): {
-  viewMatrix: NumericArray;
-  viewProjectionMatrix: NumericArray;
+  viewMatrix: NumArray16;
+  viewProjectionMatrix: NumArray16;
   projectionCenter: Vec4;
   originCommon: Vec4;
   cameraPosCommon: Vec3;
@@ -177,8 +177,8 @@ function calculateMatrixAndOffset(
   }
 
   return {
-    viewMatrix,
-    viewProjectionMatrix,
+    viewMatrix: viewMatrix as NumArray16,
+    viewProjectionMatrix: viewProjectionMatrix as NumArray16,
     projectionCenter,
     originCommon,
     cameraPosCommon,
@@ -209,8 +209,8 @@ export type ProjectUniforms = {
   scale: number;
   wrapLongitude: boolean;
 
-  viewProjectionMatrix: NumericArray;
-  modelMatrix: NumericArray;
+  viewProjectionMatrix: NumArray16;
+  modelMatrix: NumArray16;
 
   // This is for lighting calculations
   cameraPosition: Vec3;
@@ -219,7 +219,7 @@ export type ProjectUniforms = {
 export type ProjectModuleSettings = {
   viewport: Viewport;
   devicePixelRatio?: number;
-  modelMatrix?: NumericArray | null;
+  modelMatrix?: NumArray16 | null;
   coordinateSystem?: CoordinateSystem;
   coordinateOrigin?: Vec3;
   autoWrapLongitude?: boolean;
