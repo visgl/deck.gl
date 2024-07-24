@@ -39,7 +39,7 @@ export type ShaderModule<
   vs?: string;
 
   /** Uniform shader types @note: Both order and types MUST match uniform block declarations in shader */
-  uniformTypes?: UniformTypesT;
+  uniformTypes?: Required<UniformTypesT>;
   /** Default prop values */
   defaultProps?: Required<PropsT>;
 

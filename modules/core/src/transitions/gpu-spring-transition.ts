@@ -1,6 +1,6 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
-import {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@deck.gl/core';
 import {
   padBuffer,
   matchBuffer,
@@ -12,7 +12,6 @@ import Attribute from '../lib/attribute/attribute';
 import {GPUTransitionBase} from './gpu-transition';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
-import {UniformTypes} from '../shaderlib/misc/uniform-types';
 import type {TypedArray} from '../types/types';
 
 export default class GPUSpringTransition extends GPUTransitionBase<SpringTransitionSettings> {
@@ -130,7 +129,7 @@ const springUniforms = {
   uniformTypes: {
     damping: 'f32',
     stiffness: 'f32'
-  } as const satisfies UniformTypes<Required<SpringProps>>
+  }
 } as const satisfies ShaderModule<SpringProps>;
 
 const vs = `\

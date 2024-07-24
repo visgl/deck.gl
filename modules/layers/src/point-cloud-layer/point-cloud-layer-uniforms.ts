@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform pointCloudUniforms {
@@ -20,5 +19,5 @@ export const pointCloudUniforms = {
   uniformTypes: {
     radiusPixels: 'f32',
     sizeUnits: 'i32'
-  } as const satisfies UniformTypes<Required<PointCloudProps>>
+  }
 } as const satisfies ShaderModule<PointCloudProps>;

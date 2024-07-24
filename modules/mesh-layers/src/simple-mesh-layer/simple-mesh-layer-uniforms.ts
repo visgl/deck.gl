@@ -1,6 +1,5 @@
 import type {Texture} from '@luma.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform simpleMeshUniforms {
@@ -11,18 +10,13 @@ uniform simpleMeshUniforms {
 } simpleMesh;
 `;
 
-type SimpleMeshBindingProps = {
-  sampler?: Texture;
-};
-
-export type SimpleMeshUniformProps = {
+export type SimpleMeshProps = {
   sizeScale?: number;
   composeModelMatrix?: boolean;
   hasTexture?: boolean;
   flatShading?: boolean;
+  sampler?: Texture;
 };
-
-export type SimpleMeshProps = SimpleMeshBindingProps & SimpleMeshUniformProps;
 
 export const simpleMeshUniforms = {
   name: 'simpleMesh',
@@ -33,5 +27,5 @@ export const simpleMeshUniforms = {
     composeModelMatrix: 'f32',
     hasTexture: 'f32',
     flatShading: 'f32'
-  } as const satisfies UniformTypes<SimpleMeshUniformProps>
+  }
 } as const satisfies ShaderModule<SimpleMeshProps>;

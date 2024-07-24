@@ -1,6 +1,5 @@
 import type {Matrix4} from '@math.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform scenegraphUniforms {
@@ -30,5 +29,5 @@ export const scenegraphUniforms = {
     sizeMaxPixels: 'f32',
     sceneModelMatrix: 'mat4x4<f32>',
     composeModelMatrix: 'f32'
-  } as const satisfies UniformTypes<ScenegraphProps>
+  }
 } as const satisfies ShaderModule<ScenegraphProps>;

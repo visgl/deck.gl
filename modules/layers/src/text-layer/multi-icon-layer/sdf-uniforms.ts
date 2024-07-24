@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform sdfUniforms {
@@ -29,5 +28,5 @@ export const sdfUniforms = {
     buffer: 'f32',
     outlineBuffer: 'f32',
     outlineColor: 'vec4<f32>'
-  } as const satisfies UniformTypes<Required<SdfProps>>
+  }
 } as const satisfies ShaderModule<SdfProps>;

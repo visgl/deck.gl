@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform textBackgroundUniforms {
@@ -35,5 +34,5 @@ export const textBackgroundUniforms = {
     padding: 'vec4<f32>',
     sizeUnits: 'i32',
     stroked: 'f32'
-  } as const satisfies UniformTypes<Required<TextBackgroundProps>>
+  }
 } as const satisfies ShaderModule<TextBackgroundProps>;

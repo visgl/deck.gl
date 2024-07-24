@@ -54,7 +54,7 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
-import {ProjectModuleSettings} from '../shaderlib/project/viewport-uniforms';
+import {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -1110,7 +1110,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             modelMatrix,
             coordinateSystem,
             coordinateOrigin
-          } as ProjectModuleSettings
+          } as ProjectProps
         });
       }
 

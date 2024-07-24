@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform columnUniforms {
@@ -56,5 +55,5 @@ export const columnUniforms = {
     widthMaxPixels: 'f32',
     radiusUnits: 'i32',
     widthUnits: 'i32'
-  } as const satisfies UniformTypes<Required<ColumnProps>>
+  }
 } as const satisfies ShaderModule<ColumnProps>;

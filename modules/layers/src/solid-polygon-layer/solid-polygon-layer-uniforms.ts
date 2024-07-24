@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform solidPolygonUniforms {
@@ -23,5 +22,5 @@ export const solidPolygonUniforms = {
     extruded: 'f32',
     isWireframe: 'f32',
     elevationScale: 'f32'
-  } as const satisfies UniformTypes<Required<SolidPolygonProps>>
+  }
 } as const satisfies ShaderModule<SolidPolygonProps>;

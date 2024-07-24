@@ -216,7 +216,7 @@ export type ProjectUniforms = {
   cameraPosition: Vec3;
 };
 
-export type ProjectModuleSettings = {
+export type ProjectProps = {
   viewport: Viewport;
   devicePixelRatio?: number;
   modelMatrix?: NumArray16 | null;
@@ -242,7 +242,7 @@ export function getUniformsFromViewport({
   coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
-}: ProjectModuleSettings): ProjectUniforms {
+}: ProjectProps): ProjectUniforms {
   if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
     coordinateSystem = viewport.isGeospatial
       ? COORDINATE_SYSTEM.LNGLAT

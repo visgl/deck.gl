@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform meshUniforms {
@@ -17,5 +16,5 @@ export const meshUniforms = {
   fs: uniformBlock,
   uniformTypes: {
     pickFeatureIds: 'f32'
-  } as const satisfies UniformTypes<MeshProps>
+  }
 } as const satisfies ShaderModule<MeshProps>;
