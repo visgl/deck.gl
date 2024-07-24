@@ -139,4 +139,17 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       return accessor({properties: proxy}, info);
     };
   }
+
+  getPickingInfo(params: any) {
+    const info = super.getPickingInfo(params);
+
+    if (info.index !== -1) {
+      info.object = this.getSubLayerAccessor(x => x)(undefined, {
+        data: this.props,
+        index: info.index
+      });
+    }
+
+    return info;
+  }
 }
