@@ -60,12 +60,12 @@ export default {
     commonOrigin: 'vec3<f32>',
     pseudoMeters: 'f32'
   }
-} as const satisfies ShaderModule<ProjectModuleSettings, UniformTypes<ProjectUniforms>>;
+} as const satisfies ShaderModule<ProjectModuleSettings, UniformTypes<ProjectUniforms>, {}>;
 
 // Check type
 type ResolvedUniformTypes = NonNullable<
-  ShaderModule<ProjectModuleSettings, UniformTypes<ProjectUniforms>>['uniformTypes']
+  ShaderModule<ProjectModuleSettings, UniformTypes<ProjectUniforms>, {}>['uniformTypes']
 >;
 type ResolvedBindings = NonNullable<
-  ShaderModule<ProjectModuleSettings, UniformTypes<ProjectUniforms>>['bindings']
+  ShaderModule<ProjectModuleSettings, UniformTypes<ProjectUniforms>, {}>['bindings']
 >;
