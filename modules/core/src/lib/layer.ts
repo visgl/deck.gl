@@ -401,11 +401,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
-  encodePickingColor(i, target: number[] = []): number[] {
+  encodePickingColor(i, target: number[] = []): [number, number, number] {
     target[0] = (i + 1) & 255;
     target[1] = ((i + 1) >> 8) & 255;
     target[2] = (((i + 1) >> 8) >> 8) & 255;
-    return target;
+    return target as [number, number, number];
   }
 
   // Returns the index corresponding to a picking color that doesn't match any subfeature
@@ -750,7 +750,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = Math.floor(pickingColorCache.length / 4);
-      const pickingColor = [];
+      const pickingColor: [number, number, number] = [0, 0, 0];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 4 + 0] = pickingColor[0];
@@ -1265,10 +1265,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
     const picking: PickingProps = {
+      // @ts-ignore
       highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
+      // @ts-ignore
       picking.highlightColor = highlightColor(info);
     }
     this.setShaderModuleProps({picking});
@@ -1309,7 +1311,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const picking: PickingProps = {};
 
       if (Array.isArray(highlightColor)) {
-        picking.highlightColor = highlightColor;
+        picking.highlightColor = highlightColor as [number, number, number];
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.

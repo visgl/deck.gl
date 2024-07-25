@@ -672,11 +672,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.effectManager!.addDefaultEffect(effect);
   }
 
-  _addDefaultShaderModule(module: ShaderModule) {
+  _addDefaultShaderModule(module: ShaderModule<any>) {
     this.layerManager!.addDefaultShaderModule(module);
   }
 
-  _removeDefaultShaderModule(module: ShaderModule) {
+  _removeDefaultShaderModule(module: ShaderModule<any>) {
     this.layerManager?.removeDefaultShaderModule(module);
   }
 

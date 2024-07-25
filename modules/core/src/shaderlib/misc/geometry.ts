@@ -52,4 +52,4 @@ float smoothedge(float edge, float x) {
 }
 `;
 
-export default {name: 'geometry', vs, fs} as ShaderModule;
+export default {name: 'geometry', vs, fs} as const satisfies ShaderModule;

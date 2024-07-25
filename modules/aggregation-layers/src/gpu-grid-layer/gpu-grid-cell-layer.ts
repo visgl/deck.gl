@@ -153,6 +153,7 @@ export default class GPUGridCellLayer extends Layer<Required<_GPUGridCellLayerPr
       gridOriginLow,
       gridOffset,
       gridOffsetLow,
+      // @ts-ignore
       colorRange,
       elevationRange
     });
