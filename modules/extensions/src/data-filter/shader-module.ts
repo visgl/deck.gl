@@ -255,8 +255,8 @@ const inject = {
   `
 };
 
-type UniformTypesFunc = (opts: DataFilterExtensionOptions) => Record<string, UniformFormat>;
-function uniformTypesFromOptions(opts: DataFilterExtensionOptions) {
+type UniformTypesFunc = (opts: DataFilterExtensionOptions) => any;
+function uniformTypesFromOptions(opts: DataFilterExtensionOptions): any {
   const {categorySize, filterSize, fp64} = opts;
   const uniformTypes: Record<string, UniformFormat> = {
     useSoftMargin: 'i32',
