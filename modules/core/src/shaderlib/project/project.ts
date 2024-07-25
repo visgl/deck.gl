@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32} from '@luma.gl/shadertools';
-import type {ShaderModule} from '../shader-module';
+import {fp32, ShaderModule} from '@luma.gl/shadertools';
 import geometry from '../misc/geometry';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
@@ -60,9 +59,3 @@ export default {
     pseudoMeters: 'f32'
   }
 } as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}>;
-
-// Check type
-type ResolvedUniformTypes = NonNullable<
-  ShaderModule<ProjectProps, ProjectUniforms, {}>['uniformTypes']
->;
-type ResolvedBindings = NonNullable<ShaderModule<ProjectProps, ProjectUniforms, {}>['bindings']>;

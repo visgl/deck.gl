@@ -23,7 +23,7 @@ import {vec3} from '@math.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
-import type {ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},

@@ -141,7 +141,6 @@ export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
 export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from './lib/effect';
 export type {PickingUniforms, ProjectUniforms, UniformTypes} from './shaderlib/index';
-export type {ShaderModule} from './shaderlib/shader-module';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';

@@ -1,4 +1,4 @@
-import type {ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
 import {Accessor, CompositeLayer, CompositeLayerProps, DefaultProps, Layer} from '@deck.gl/core';

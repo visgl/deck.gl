@@ -1,5 +1,5 @@
 import type {Texture} from '@luma.gl/core';
-import type {ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform bitmapUniforms {
@@ -32,7 +32,3 @@ export const bitmapUniforms = {
     transparentColor: 'vec4<f32>'
   }
 } as const satisfies ShaderModule<BitmapProps>;
-
-// Check type
-type ResolvedUniformTypes = NonNullable<ShaderModule<BitmapProps>['uniformTypes']>;
-type ResolvedBindings = NonNullable<ShaderModule<BitmapProps>['bindings']>;

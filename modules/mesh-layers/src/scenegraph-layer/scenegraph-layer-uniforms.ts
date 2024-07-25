@@ -1,5 +1,5 @@
 import type {Matrix4} from '@math.gl/core';
-import type {ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform scenegraphUniforms {

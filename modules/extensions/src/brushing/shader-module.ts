@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 /* eslint-disable camelcase */
-import type {ShaderModule, UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
 

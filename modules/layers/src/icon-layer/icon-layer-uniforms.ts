@@ -1,4 +1,4 @@
-import type {ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
 
 const uniformBlock = `\

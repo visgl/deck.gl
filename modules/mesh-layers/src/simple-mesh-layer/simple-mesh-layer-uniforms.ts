@@ -1,5 +1,5 @@
 import type {Texture} from '@luma.gl/core';
-import type {ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform simpleMeshUniforms {
