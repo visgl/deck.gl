@@ -75,6 +75,7 @@ export default class SpatialIndexTileLayer<
       // Quick check for whether id is within tile. data.findIndex is expensive
       !this._featureInTile(tile, hoveredFeatureId!)
     ) {
+      return hoveredFeatureId;
       return -1;
     }
 

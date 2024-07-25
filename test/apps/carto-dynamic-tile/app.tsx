@@ -15,17 +15,23 @@ import datasets from './datasets';
 import {Layer} from '@deck.gl/core';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
-const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
+const INITIAL_VIEW_STATE = {
+  latitude: 50.0755,
+    longitude: 14.4378,
+      zoom: 12,
+        bearing: 0,
+          pitch: 0
+  };
 
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
-const connectionName = 'bigquery';
+const connectionName = 'carto_dw';
 
-const accessToken = 'XXX';
+const accessToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRVNGNZTHAwaThjYnVMNkd0LTE0diJ9.eyJodHRwOi8vYXBwLmNhcnRvLmNvbS9lbWFpbCI6ImZwYWxtZXJAY2FydG9kYi5jb20iLCJodHRwOi8vYXBwLmNhcnRvLmNvbS9hY2NvdW50X2lkIjoiYWNfN3hoZnd5bWwiLCJpc3MiOiJodHRwczovL2F1dGguY2FydG8uY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3OTY5NjU1OTI5NjExMjIxNDg2IiwiYXVkIjoiY2FydG8tY2xvdWQtbmF0aXZlLWFwaSIsImlhdCI6MTcyMTgxODQ2MSwiZXhwIjoxNzIxOTA0ODYxLCJhenAiOiIwZHhiOEhSM0FUWEN4SmlQT0pWSHNMb0hvQXRiUlg2dSIsInBlcm1pc3Npb25zIjpbImV4ZWN1dGU6d29ya2Zsb3dzIiwicmVhZDphY2NvdW50IiwicmVhZDphcHBzIiwicmVhZDpjb25uZWN0aW9ucyIsInJlYWQ6Y3VycmVudF91c2VyIiwicmVhZDppbXBvcnRzIiwicmVhZDpsaXN0ZWRfYXBwcyIsInJlYWQ6bWFwcyIsInJlYWQ6dGlsZXNldHMiLCJyZWFkOnRva2VucyIsInJlYWQ6d29ya2Zsb3dzIiwidXBkYXRlOmN1cnJlbnRfdXNlciIsIndyaXRlOmFwcHMiLCJ3cml0ZTpjYXJ0by1kdy1ncmFudHMiLCJ3cml0ZTpjb25uZWN0aW9ucyIsIndyaXRlOmltcG9ydHMiLCJ3cml0ZTptYXBzIiwid3JpdGU6dG9rZW5zIiwid3JpdGU6d29ya2Zsb3dzIl19.dY9SuyLMKbEQ42IqVTIFmQx5zFM4eXZ83xTyHz7J-7KQW0KnNtDXItusRU4Z5Kju-ctC4FF14ZlBy5XBvDu7h0JChebdUxbR33WRgLRQND-aBikTObRCxgnTPgua3E_Z-5Btn4qLdSpm7JkX9w3tp07OvIKou-5Q6kekOWLs6AtT1JnWZ9_cbOWNdpsNWBY6WbqbFzOhijxATDwJEqCV4TtW-Sp9GWpW0lddX-TMaTSY72jZeVFNi1wnGt-_z-vgd3eFVramfpcw1-MYyzaCjOFyNiLm0TIokaKLKCUJOFRd_n7-9xWqcQ2ROdNbv7OsyU63fSqj3jtc0K9awkL66A';
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
 function Root() {
-  const [dataset, setDataset] = useState(Object.keys(datasets)[0]);
+  const [dataset, setDataset] = useState(Object.keys(datasets)[8]);
   const datasource = datasets[dataset];
   let layers: Layer[] = [];
 
@@ -49,8 +55,8 @@ function Root() {
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
         layers={layers}
-        getTooltip={({object}) => {
-          const properties = object?.properties;
+        getTooltip={(info) => {
+          const properties = info.object?.properties;
           if (!properties) return null;
           return Object.entries(properties)
             .map(([k, v]) => `${k}: ${v}\n`)
@@ -118,6 +124,7 @@ function useRasterLayer(datasource) {
     id: 'carto',
     data: tilejson, // TODO how to correctly specify data type?
     pickable: true,
+    autoHighlight: true,
     getFillColor
   });
 }

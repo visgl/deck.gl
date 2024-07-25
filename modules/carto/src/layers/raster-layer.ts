@@ -148,6 +148,8 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
         data: this.props,
         index: info.index
       });
+      debugger;
+      info.object.id = info.index;
     }
 
     return info;
