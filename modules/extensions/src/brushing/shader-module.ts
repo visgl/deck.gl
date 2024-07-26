@@ -158,4 +158,4 @@ export default {
     mousePos: 'vec2<f32>',
     radius: 'f32'
   }
-} as ShaderModule<BrushingModuleProps, BrushingModuleUniforms>;
+} as ShaderModule<BrushingModuleProps, BrushingModuleUniforms, {}>;
