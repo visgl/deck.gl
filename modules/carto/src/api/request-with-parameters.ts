@@ -35,7 +35,9 @@ export async function requestWithParameters<T = any>({
   parameters = {...DEFAULT_PARAMETERS, ...parameters};
   baseUrl = excludeURLParameters(baseUrl, Object.keys(parameters));
   const key = createCacheKey(baseUrl, parameters, customHeaders);
-  if (REQUEST_CACHE.has(key)) {
+  const {canReadCache, canStoreInCache} = getCacheSettings(customHeaders);
+
+  if (canReadCache && REQUEST_CACHE.has(key)) {
     return REQUEST_CACHE.get(key) as Promise<T>;
   }
 
@@ -63,12 +65,25 @@ export async function requestWithParameters<T = any>({
       return json;
     })
     .catch((error: Error) => {
-      REQUEST_CACHE.delete(key);
+      if (canStoreInCache) {
+        REQUEST_CACHE.delete(key);
+      }
       throw new CartoAPIError(error, errorContext, response, responseJson);
     });
 
-  REQUEST_CACHE.set(key, jsonPromise);
+  if (canStoreInCache) {
+    REQUEST_CACHE.set(key, jsonPromise);
+  }
+
   return jsonPromise;
+}
+
+function getCacheSettings(headers: Record<string, string>) {
+  const cacheControl = headers['Cache-Control'];
+  const canReadCache = !cacheControl?.includes('no-cache');
+  const canStoreInCache = !cacheControl?.includes('no-store');
+
+  return {canReadCache, canStoreInCache};
 }
 
 function createCacheKey(
