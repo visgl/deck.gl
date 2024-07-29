@@ -1922,15 +1922,15 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@9.0.15", "@luma.gl/constants@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.15.tgz#5c9494b1d713cf10983f5ca9645b5db631437665"
-  integrity sha512-gcvQmd5Nl0rnU/lXq2Rj214Mjc2XnyBJlfcQfRUGBngvcN4AtQvVtZVUveW6wCZA6JysB0ntvi4ovZm4GhJ/lw==
+"@luma.gl/constants@9.0.17", "@luma.gl/constants@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.17.tgz#7c06cb3a8079fd9d5224de52d0ccc803218f8e7a"
+  integrity sha512-epyW9CrNuEvPfdHQ1yOe/flFfDaihmrdgzw9M7JaKR6XlLDmjL1hKdCKugJjgNQ9wWpnOiiZAlfd7LzsNYW7lA==
 
-"@luma.gl/core@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.0.15.tgz#d68951b4eccc52328dc53569ed6719ab3064979b"
-  integrity sha512-pogG6a91oM0ynSvBm0MsA7ABWu1QdqlaGyrb1mxvQrQA1NvgN/jflYlqBZ8YfckgJdJe7EZ4bNqnR5ABOu7wIA==
+"@luma.gl/core@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.0.17.tgz#683e287188fc150269b26647b20ded92c1ba87e6"
+  integrity sha512-AQJEvYcbkMBOywy/h5opZja0ay2DZ5aU88GyG5dRnA00usEocJf7qQGol2Skpm8Y258jdnV3yf2f3uzklKCnFQ==
   dependencies:
     "@math.gl/types" "^4.0.0"
     "@probe.gl/env" "^4.0.2"
@@ -1938,53 +1938,54 @@
     "@probe.gl/stats" "^4.0.2"
     "@types/offscreencanvas" "^2019.6.4"
 
-"@luma.gl/engine@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.0.15.tgz#ec2722dace12296c8cd78f1c12956eae4bb4548a"
-  integrity sha512-CTumSSnBoDbmLF4CvdDk3O8UKArv+cuWq6yiquuPNnJkpzPu1CCz8cIE21boHMNTkWzrxZNceS0RQwbATgQVRA==
+"@luma.gl/engine@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.0.17.tgz#c6fc0e353578c96c116d9aae1d16d9b63a840e34"
+  integrity sha512-pTKDdWI8Pm5bVJUY46Jlvpz3qXTubYpIFwodmd4kmrl8UDQnrUt2Yq4sYuE9oLRxer788gLxWCp2SoJZZJJcfQ==
   dependencies:
-    "@luma.gl/shadertools" "9.0.15"
+    "@luma.gl/shadertools" "9.0.17"
     "@math.gl/core" "^4.0.0"
     "@probe.gl/log" "^4.0.2"
     "@probe.gl/stats" "^4.0.2"
 
-"@luma.gl/gltf@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.0.15.tgz#d8f50945b04564f1de2725a3067ba4054d581581"
-  integrity sha512-gZsWzpYd+oj8W8Gsrr+Iq8Q05zSTyzbAHgmDvDFati4d7X++jnCUZL00KB4wwheQ755MXHU+//+10b5L1Nev1Q==
+"@luma.gl/gltf@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.0.17.tgz#7b693ed4eb88bf9f821794935c285047a3222fd2"
+  integrity sha512-25JNOJUeVPeotrJy7khgsKUphlY1ngnl1A/XFoEvoPHRBkRhGxU/CfdrkxagPh7A7KxAhH9gKTFHe58dFF4GvA==
   dependencies:
     "@loaders.gl/textures" "^4.2.0"
-    "@luma.gl/shadertools" "9.0.15"
+    "@luma.gl/shadertools" "9.0.17"
     "@math.gl/core" "^4.0.0"
 
-"@luma.gl/shadertools@9.0.15", "@luma.gl/shadertools@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.0.15.tgz#fc5467ee46f02e950ab451106f1ff13e1a46f556"
-  integrity sha512-U/W1Vh7HXlhw3T6edUMcLFPSO6OVlDZKPx8v6kSkJtjny37aFZaVeRupUgYfjsSxK1aEc5uTAN1w7+3lJMhUIg==
+"@luma.gl/shadertools@9.0.17", "@luma.gl/shadertools@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.0.17.tgz#623189fdcdb4b87dc911d2af6e8353e1867d491a"
+  integrity sha512-ph/9EKoWD8SLY9qj4F/wknRPQ6Lw/bBQg5ia2CwJPZ0jPqg3e1LzOd/AkD4epr0yg6jg7loXFs2ET7btM0CItA==
   dependencies:
     "@math.gl/core" "^4.0.0"
     "@math.gl/types" "^4.0.0"
+    wgsl_reflect "^1.0.1"
 
-"@luma.gl/test-utils@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.0.15.tgz#90c6eed368e9f15f7828eec8c2632148fe299060"
-  integrity sha512-lfmQpJcLS/1YgOFmCx56nBrbKFG0nxwn06ubaWkZpdt3F5yuwdNFl3LqKj0tfvUAZp40iWvENd9fSFL12XbyBw==
+"@luma.gl/test-utils@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.0.17.tgz#e1b4dca2a29ff19feb3ccb4d77d5c30390ad2ff4"
+  integrity sha512-xJ4NSBwhMsBVj0cqFXVaaTxVX8KyK9qPqc4MWd2akxiEybyeW2YFHBic21fyBfKHeqh27fFkVPFUQi8h9XYbjQ==
   dependencies:
     "@probe.gl/env" "^4.0.2"
     "@probe.gl/stats" "^4.0.2"
 
-"@luma.gl/webgl@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.0.15.tgz#b7d4b52c41392b9cf0688e3c71d3e42e9ddcc80d"
-  integrity sha512-hAwer8bCe3S5fL8/1Z/gWp5dinVNOxC7oFZQ7uYVr/BhUu7NbUA6P9ueVJDANtE9wAh+tl/uN43mcH9aP7YMfQ==
+"@luma.gl/webgl@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.0.17.tgz#0198f9582158cb804bed04aac016b328ff1a58ae"
+  integrity sha512-6LpqdCOFK+B3a9L/gRy9UwupEG3RWMdnn0sZusSmbjknEylugZQCdz+yjXHqxko6S6QGu8LimVPJf1QZLav8GA==
   dependencies:
-    "@luma.gl/constants" "9.0.15"
+    "@luma.gl/constants" "9.0.17"
     "@probe.gl/env" "^4.0.2"
 
-"@luma.gl/webgpu@^9.0.15":
-  version "9.0.15"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.0.15.tgz#910e2db45692cfd39d0b0ec366bccaac821d2459"
-  integrity sha512-jCbdZrmROlsZVbqsWxfbQNcxFH8CVSCIX7p/5CvNiUcAAZsUm/uZjAMfqFO94uSvUsbYNmRi3/nMiNvt8/OEtA==
+"@luma.gl/webgpu@^9.0.17":
+  version "9.0.17"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.0.17.tgz#299f63427d958c299322c0aac5a7c16754005ece"
+  integrity sha512-YG/9g2KGyVh++PLAFEFnPE2xloAelAeanlOa7zKgw5fTVat642RIyqLsXa7cZRvzAwUHBdx+XPezD9lSPD6/dQ==
   dependencies:
     "@probe.gl/env" "^4.0.2"
     "@webgpu/types" "^0.1.34"
@@ -11706,6 +11707,11 @@ webidl-conversions@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-7.0.0.tgz#256b4e1882be7debbf01d05f0aa2039778ea080a"
   integrity sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==
+
+wgsl_reflect@^1.0.1:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.0.8.tgz#7f6940ae9a49d5a125f3782ce710139357441945"
+  integrity sha512-0kdpA5H3SF2CMeCBijYqQz+ZT+uW310nJORFX8QPFOvrkfSGNPHFDE7aGPCUnsuDi1kzpj+9SEFIhqjf9iHGSQ==
 
 whatwg-encoding@^2.0.0:
   version "2.0.0"

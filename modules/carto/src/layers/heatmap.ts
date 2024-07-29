@@ -1,5 +1,4 @@
 import type {ShaderPass} from '@luma.gl/shadertools';
-import {Color} from '@deck.gl/core';
 const glsl = (s: TemplateStringsArray) => `${s}`;
 
 /**
@@ -115,7 +114,7 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
 }
 `;
 
-const defaultColorRange: Color[] = [
+const defaultColorRange: [number, number, number][] = [
   [255, 255, 178],
   [254, 217, 118],
   [254, 178, 76],
@@ -142,7 +141,7 @@ export type HeatmapProps = {
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
-  colorRange: Color[];
+  colorRange: [number, number, number][];
   /**
    * Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than 1 biases the output color towards the higher end of the spectrum, and a value less than 1 biases the output color towards the lower end of the spectrum.
    */

@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform lineUniforms {
@@ -29,5 +28,5 @@ export const lineUniforms = {
     widthMaxPixels: 'f32',
     useShortestPath: 'f32',
     widthUnits: 'i32'
-  } as const satisfies UniformTypes<Required<LineProps>>
+  }
 } as const satisfies ShaderModule<LineProps>;

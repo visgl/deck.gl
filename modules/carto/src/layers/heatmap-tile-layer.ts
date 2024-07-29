@@ -1,14 +1,7 @@
-import {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
-import {
-  Accessor,
-  CompositeLayer,
-  CompositeLayerProps,
-  DefaultProps,
-  Layer,
-  UniformTypes
-} from '@deck.gl/core';
+import {Accessor, CompositeLayer, CompositeLayerProps, DefaultProps, Layer} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
@@ -38,7 +31,7 @@ const densityUniforms = {
   vs: uniformBlock,
   uniformTypes: {
     factor: 'f32'
-  } as const satisfies UniformTypes<Required<DensityProps>>
+  }
 } as const satisfies ShaderModule<DensityProps>;
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap

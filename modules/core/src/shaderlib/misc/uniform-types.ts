@@ -24,7 +24,7 @@ type NumArray12 = [
   number,
   number
 ];
-type NumArray16 = [
+export type NumArray16 = [
   number,
   number,
   number,

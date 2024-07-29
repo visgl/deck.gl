@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
 
 const uniformBlock = `\
@@ -42,5 +41,5 @@ export const iconUniforms = {
     billboard: 'f32',
     sizeUnits: 'i32',
     alphaCutoff: 'f32'
-  } as const satisfies UniformTypes<Required<IconUniformProps>>
+  }
 } as const satisfies ShaderModule<IconProps>;

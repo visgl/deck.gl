@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from './uniform-types';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform layerUniforms {
@@ -17,5 +16,5 @@ export const layerUniforms = {
   fs: uniformBlock,
   uniformTypes: {
     opacity: 'f32'
-  } as const satisfies UniformTypes<LayerProps>
+  }
 } as const satisfies ShaderModule<LayerProps>;

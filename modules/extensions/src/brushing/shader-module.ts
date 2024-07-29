@@ -31,6 +31,13 @@ export type BrushingModuleProps = {
   mousePosition?: {x: number; y: number};
 } & BrushingExtensionProps;
 
+type BrushingModuleUniforms = {
+  enabled?: boolean;
+  target?: number;
+  mousePos?: [number, number];
+  radius?: number;
+};
+
 const uniformBlock = glsl`\
 uniform brushingUniforms {
   bool enabled;
@@ -122,7 +129,7 @@ export default {
   vs,
   fs,
   inject,
-  getUniforms: (opts?: BrushingModuleProps | {}): Record<string, any> => {
+  getUniforms: (opts?: BrushingModuleProps | {}): BrushingModuleUniforms => {
     if (!opts || !('viewport' in opts)) {
       return {};
     }
@@ -138,7 +145,10 @@ export default {
       radius: brushingRadius,
       target: TARGET[brushingTarget] || 0,
       mousePos: mousePosition
-        ? viewport.unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y])
+        ? (viewport.unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y]) as [
+            number,
+            number
+          ])
         : [0, 0]
     };
   },
@@ -148,4 +158,4 @@ export default {
     mousePos: 'vec2<f32>',
     radius: 'f32'
   }
-} as ShaderModule<BrushingModuleProps>;
+} as ShaderModule<BrushingModuleProps, BrushingModuleUniforms, {}>;

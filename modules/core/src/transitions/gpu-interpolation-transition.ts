@@ -1,6 +1,7 @@
 import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
-import {fp64arithmetic, ShaderModule} from '@luma.gl/shadertools';
+import {fp64arithmetic} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
@@ -13,7 +14,6 @@ import {
 import {GPUTransitionBase} from './gpu-transition';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
-import {UniformTypes} from '../shaderlib/misc/uniform-types';
 import type {TypedArray} from '../types/types';
 
 export default class GPUInterpolationTransition extends GPUTransitionBase<InterpolationTransitionSettings> {
@@ -120,7 +120,7 @@ const interpolationUniforms = {
   vs: uniformBlock,
   uniformTypes: {
     time: 'f32'
-  } as const satisfies UniformTypes<Required<InterpolationProps>>
+  }
 } as const satisfies ShaderModule<InterpolationProps>;
 
 const vs = `\

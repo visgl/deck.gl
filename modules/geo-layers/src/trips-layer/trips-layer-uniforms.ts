@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform tripsUniforms {
@@ -23,5 +22,5 @@ export const tripsUniforms = {
     fadeTrail: 'f32',
     trailLength: 'f32',
     currentTime: 'f32'
-  } as const satisfies UniformTypes<Required<TripsProps>>
+  }
 } as const satisfies ShaderModule<TripsProps>;
