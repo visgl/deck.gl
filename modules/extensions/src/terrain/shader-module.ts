@@ -21,6 +21,15 @@ export type TerrainModuleProps = {
   terrainSkipRender?: boolean;
 };
 
+type TerrainModuleUniforms = {
+  mode: number;
+  bounds: [number, number, number, number];
+};
+
+type TerrainModuleBindings = {
+  terrain_map: Texture;
+};
+
 /** A model can have one of the following modes */
 export const TERRAIN_MODE = {
   NONE: 0,
@@ -51,7 +60,6 @@ uniform terrainUniforms {
 uniform sampler2D terrain_map;
 `;
 
-// @ts-expect-error
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
@@ -164,10 +172,10 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           : [0, 0, 0, 0]
       };
     }
-    return null;
+    return {};
   },
   uniformTypes: {
     mode: 'f32',
     bounds: 'vec4<f32>'
   }
-} as ShaderModule<TerrainModuleProps>;
+} as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
