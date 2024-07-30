@@ -105,18 +105,31 @@ vec4 shadow_filterShadowColor(vec4 color) {
 const getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
 const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
 
-const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
+const DEFAULT_SHADOW_COLOR: [number, number, number, number] = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
-type ShadowModuleSettings = {
+type ShadowModuleProps = {
   viewport: Viewport;
   shadowEnabled?: boolean;
   drawToShadowMap?: boolean;
   shadowMaps?: Texture[];
-  dummyShadowMap?: Texture;
-  shadowColor?: number[];
+  dummyShadowMap: Texture;
+  shadowColor?: [number, number, number, number];
   shadowMatrices?: Matrix4[];
   shadowLightId?: number;
+};
+
+type ShadowModuleUniforms = {
+  shadow_uDrawShadowMap: boolean;
+  shadow_uUseShadowMap: boolean;
+  shadow_uColor?: [number, number, number, number];
+  shadow_uLightId?: number;
+  shadow_uLightCount?: number;
+};
+
+type ShadowModuleBindings = {
+  shadow_uShadowMap0: Texture;
+  shadow_uShadowMap1: Texture;
 };
 
 function screenToCommonSpace(xyz: number[], pixelUnprojectionMatrix: number[]): number[] {
@@ -183,9 +196,9 @@ function getViewProjectionMatrices({
 
 // eslint-disable-next-line complexity
 function createShadowUniforms(
-  opts: ShadowModuleSettings,
+  opts: ShadowModuleProps,
   context: ProjectUniforms
-): Record<string, any> {
+): ShadowModuleBindings & ShadowModuleUniforms {
   const {shadowEnabled = true} = opts;
   if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
     return {
@@ -195,14 +208,6 @@ function createShadowUniforms(
       shadow_uShadowMap1: opts.dummyShadowMap
     };
   }
-  const uniforms = {
-    shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
-    shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
-    shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
-    shadow_uLightId: opts.shadowLightId || 0,
-    shadow_uLightCount: opts.shadowMatrices.length
-  };
-
   const center = getMemoizedViewportCenterPosition({
     viewport: opts.viewport,
     center: context.center
@@ -233,6 +238,16 @@ function createShadowUniforms(
       projectCenters[i] = viewProjectionMatrixCentered.transform(center);
     }
   }
+
+  const uniforms = {
+    shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
+    shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
+    shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
+    shadow_uLightId: opts.shadowLightId || 0,
+    shadow_uLightCount: opts.shadowMatrices.length,
+    shadow_uShadowMap0: opts.dummyShadowMap,
+    shadow_uShadowMap1: opts.dummyShadowMap
+  };
 
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
     uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
@@ -272,4 +287,4 @@ export default {
     }
     return {};
   }
-} as const satisfies ShaderModule<ShadowModuleSettings>;
+} as const satisfies ShaderModule<ShadowModuleProps, ShadowModuleUniforms, ShadowModuleBindings>;
