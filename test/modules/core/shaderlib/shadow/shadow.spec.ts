@@ -127,25 +127,22 @@ test('shadow#getUniforms', t => {
     eye: new Vector3([-1, -1, -1]).negate()
   });
 
-  let uniforms = shadow.getUniforms(
-    {
-      viewport,
-      shadowMatrices: [viewMatrix],
-      drawToShadowMap: true,
-      dummyShadowMaps: [true]
-    },
-    project.getUniforms({viewport})
-  );
+  let uniforms = shadow.getUniforms({
+    viewport,
+    shadowMatrices: [viewMatrix],
+    drawToShadowMap: true,
+    dummyShadowMaps: [true]
+  });
 
-  t.equal(uniforms.shadow_uLightCount, 1, `Shadow light count is correct!`);
+  t.equal(uniforms.lightCount, 1, `Shadow light count is correct!`);
   t.deepEqual(
-    uniforms[`shadow_uProjectCenters[0]`],
+    uniforms.projectCenter0,
     [0, 0, 0, 0],
     `Shadow projection center in LNG_LAT mode is correct!`
   );
 
   for (const value of TEST_CASE1) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
+    const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
     t.equal(
       insideClipSpace(result),
       value.result,
@@ -167,8 +164,8 @@ test('shadow#getUniforms', t => {
   );
 
   for (const value of TEST_CASE2) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
-    const center = uniforms[`shadow_uProjectCenters[0]`];
+    const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
+    const center = uniforms.projectCenter0;
     t.equal(
       insideClipSpace([
         (result[0] + center[0]) / center[3],
@@ -197,7 +194,7 @@ test('shadow#getUniforms', t => {
   );
 
   for (const value of TEST_CASE3) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
+    const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
     t.equal(
       insideClipSpace(result),
       value.result,
