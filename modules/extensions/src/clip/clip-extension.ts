@@ -21,7 +21,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {LayerExtension} from '@deck.gl/core';
 
-import type {Layer, UniformTypes} from '@deck.gl/core';
+import type {Layer} from '@deck.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const defaultProps = {
@@ -64,7 +64,7 @@ const shaderModuleVs: ShaderModule<ClipModuleProps> = {
   vs: shaderFunction,
   uniformTypes: {
     bounds: 'vec4<f32>'
-  } as const satisfies UniformTypes<ClipModuleProps>
+  }
 };
 
 const injectionVs = {
