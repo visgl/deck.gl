@@ -54,6 +54,7 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
+import {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -285,6 +286,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return false;
   }
 
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return true;
+  }
+
   /** Updates selected state members and marks the layer for redraw */
   setState(partialState: any): void {
     this.setChangeFlags({stateChanged: true});
@@ -395,11 +401,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
-  encodePickingColor(i, target: number[] = []): number[] {
+  encodePickingColor(i, target: number[] = []): [number, number, number] {
     target[0] = (i + 1) & 255;
     target[1] = ((i + 1) >> 8) & 255;
     target[2] = (((i + 1) >> 8) >> 8) & 255;
-    return target;
+    return target as [number, number, number];
   }
 
   // Returns the index corresponding to a picking color that doesn't match any subfeature
@@ -744,7 +750,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = Math.floor(pickingColorCache.length / 4);
-      const pickingColor = [];
+      const pickingColor: [number, number, number] = [0, 0, 0];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 4 + 0] = pickingColor[0];
@@ -1009,6 +1015,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         extension.updateState.call(this, updateParams, extension);
       }
 
+      this.setNeedsRedraw();
+      // Check if attributes need recalculation
+      this._updateAttributes();
+
       const modelChanged = this.getModels()[0] !== oldModels[0];
       this._postUpdate(updateParams, modelChanged);
       // End subclass lifecycle methods
@@ -1057,9 +1067,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const opacity = this.props.opacity;
     // apply gamma to opacity to make it visually "linear"
-    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
+    const opacity = Math.pow(this.props.opacity, 1 / 2.2);
+    uniforms.opacity = opacity; // TODO remove once layers ported to UBO
 
     try {
       // TODO/ib - hack move to luma Model.draw
@@ -1068,9 +1078,39 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
         const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
+        const {
+          picking,
+          heightMap,
+          heightMapBounds,
+          dummyHeightMap,
+          terrainCover,
+          drawToTerrainHeightMap,
+          useTerrainHeightMap,
+          terrainSkipRender
+        } = moduleParameters;
+        const terrainProps = {
+          viewport,
+          picking,
+          heightMap,
+          heightMapBounds,
+          dummyHeightMap,
+          terrainCover,
+          drawToTerrainHeightMap,
+          useTerrainHeightMap,
+          terrainSkipRender
+        };
         this.setShaderModuleProps({
-          picking: {isActive, isAttribute},
-          project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
+          // TODO Revisit whether this is necessary once all layers ported to UBO
+          terrain: terrainProps,
+          layer: {opacity},
+          picking: {isActive, isAttribute} as PickingProps,
+          project: {
+            viewport,
+            devicePixelRatio,
+            modelMatrix,
+            coordinateSystem,
+            coordinateOrigin
+          } as ProjectProps
         });
       }
 
@@ -1225,10 +1265,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
     const picking: PickingProps = {
+      // @ts-ignore
       highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
+      // @ts-ignore
       picking.highlightColor = highlightColor(info);
     }
     this.setShaderModuleProps({picking});
@@ -1252,10 +1294,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
-    this.setNeedsRedraw();
-    // Check if attributes need recalculation
-    this._updateAttributes();
-
     // Note: Automatic instance count update only works for single layers
     const model = this.state.model as Model | undefined;
     if (model?.isInstanced) {
@@ -1271,16 +1309,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightColor !== highlightColor
     ) {
       const picking: PickingProps = {};
-      if (!autoHighlight) {
-        picking.highlightedObjectColor = null;
-      }
+
       if (Array.isArray(highlightColor)) {
-        picking.highlightColor = highlightColor;
+        picking.highlightColor = highlightColor as [number, number, number];
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
-      if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
+      if (
+        forceUpdate ||
+        oldProps.autoHighlight !== autoHighlight ||
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+      ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)

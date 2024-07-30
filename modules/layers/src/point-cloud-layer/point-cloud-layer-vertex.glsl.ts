@@ -29,10 +29,6 @@ in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec3 instancePickingColors;
 
-uniform float opacity;
-uniform float radiusPixels;
-uniform int sizeUnits;
-
 out vec4 vColor;
 out vec2 unitPosition;
 
@@ -46,7 +42,7 @@ void main(void) {
   geometry.pickingColor = instancePickingColors;
 
   // Find the center of the point and add the current vertex
-  vec3 offset = vec3(positions.xy * project_size_to_pixel(radiusPixels, sizeUnits), 0.0);
+  vec3 offset = vec3(positions.xy * project_size_to_pixel(pointCloud.radiusPixels, pointCloud.sizeUnits), 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
@@ -57,7 +53,7 @@ void main(void) {
   vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
 
   // Apply opacity to instance color, or return instance picking color
-  vColor = vec4(lightColor, instanceColors.a * opacity);
+  vColor = vec4(lightColor, instanceColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;

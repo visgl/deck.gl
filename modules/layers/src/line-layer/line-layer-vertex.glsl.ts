@@ -31,13 +31,6 @@ in vec4 instanceColors;
 in vec3 instancePickingColors;
 in float instanceWidths;
 
-uniform float opacity;
-uniform float widthScale;
-uniform float widthMinPixels;
-uniform float widthMaxPixels;
-uniform float useShortestPath;
-uniform int widthUnits;
-
 out vec4 vColor;
 out vec2 uv;
 
@@ -66,20 +59,20 @@ void main(void) {
   vec3 source_world_64low = instanceSourcePositions64Low;
   vec3 target_world_64low = instanceTargetPositions64Low;
 
-  if (useShortestPath > 0.5 || useShortestPath < -0.5) {
+  if (line.useShortestPath > 0.5 || line.useShortestPath < -0.5) {
     source_world.x = mod(source_world.x + 180., 360.0) - 180.;
     target_world.x = mod(target_world.x + 180., 360.0) - 180.;
     float deltaLng = target_world.x - source_world.x;
 
-    if (deltaLng * useShortestPath > 180.) {
-      source_world.x += 360. * useShortestPath;
-      source_world = splitLine(source_world, target_world, 180. * useShortestPath);
+    if (deltaLng * line.useShortestPath > 180.) {
+      source_world.x += 360. * line.useShortestPath;
+      source_world = splitLine(source_world, target_world, 180. * line.useShortestPath);
       source_world_64low = vec3(0.0);
-    } else if (deltaLng * useShortestPath < -180.) {
-      target_world.x += 360. * useShortestPath;
-      target_world = splitLine(source_world, target_world, 180. * useShortestPath);
+    } else if (deltaLng * line.useShortestPath < -180.) {
+      target_world.x += 360. * line.useShortestPath;
+      target_world = splitLine(source_world, target_world, 180. * line.useShortestPath);
       target_world_64low = vec3(0.0);
-    } else if (useShortestPath < 0.) {
+    } else if (line.useShortestPath < 0.) {
       // Line is not split, abort
       gl_Position = vec4(0.);
       return;
@@ -102,8 +95,8 @@ void main(void) {
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(
-    project_size_to_pixel(instanceWidths * widthScale, widthUnits),
-    widthMinPixels, widthMaxPixels
+    project_size_to_pixel(instanceWidths * line.widthScale, line.widthUnits),
+    line.widthMinPixels, line.widthMaxPixels
   );
 
   // extrude
@@ -115,7 +108,7 @@ void main(void) {
   gl_Position = p + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
 
   // Color
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
+  vColor = vec4(instanceColors.rgb, instanceColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;

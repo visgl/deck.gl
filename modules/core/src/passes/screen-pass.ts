@@ -5,6 +5,7 @@ import type {Device, Framebuffer} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import Pass from './pass';
+import {ScreenProps, screenUniforms} from './screen-pass-uniforms';
 
 type ScreenPassProps = {
   module: ShaderModule;
@@ -16,7 +17,7 @@ type ScreenPassRenderOptions = {
   clearCanvas?: boolean;
   inputBuffer: Framebuffer;
   outputBuffer: Framebuffer | null;
-  moduleSettings: any;
+  moduleProps: ShaderModule['props'];
 };
 
 /** A base render pass. */
@@ -27,7 +28,7 @@ export default class ScreenPass extends Pass {
     super(device, props);
     const {module, fs, id} = props;
     const parameters = {depthWriteEnabled: false, depthCompare: 'always' as const};
-    this.model = new ClipSpace(device, {id, fs, modules: [module], parameters});
+    this.model = new ClipSpace(device, {id, fs, modules: [module, screenUniforms], parameters});
   }
 
   render(params: ScreenPassRenderOptions): void {
@@ -49,10 +50,15 @@ export default class ScreenPass extends Pass {
    */
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {clearCanvas, inputBuffer, outputBuffer} = options;
-    const texSize = [inputBuffer.width, inputBuffer.height];
-    this.model.shaderInputs.setProps(options.moduleSettings);
-    this.model.setBindings({texSrc: inputBuffer.colorAttachments[0]});
-    this.model.setUniforms({texSize});
+    const texSize: [number, number] = [inputBuffer.width, inputBuffer.height];
+    const screenProps: ScreenProps = {
+      texSrc: inputBuffer.colorAttachments[0],
+      texSize
+    };
+    this.model.shaderInputs.setProps({
+      screen: screenProps,
+      ...options.moduleProps
+    });
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
       parameters: {viewport: [0, 0, ...texSize]},

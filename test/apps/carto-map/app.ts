@@ -1,38 +1,43 @@
-import {fetchMap, FetchMapOptions} from '@deck.gl/carto';
+import {
+  BASEMAP,
+  fetchMap,
+  FetchMapOptions,
+  _GoogleBasemap as GoogleBasemap,
+  _MapLibreBasemap as MapLibreBasemap
+} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import {Loader} from '@googlemaps/js-api-loader';
+
+import {_getStyleUrl} from '@deck.gl/carto';
+import {FetchMapResult} from 'modules/carto/src/api/fetch-map';
+import {GoogleMapsOverlay} from '@deck.gl/google-maps';
+import {MapboxOverlay} from '@deck.gl/mapbox';
 
 // // Simplest instantiation
 // const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 // fetchMap({cartoMapId}).then(map => new Deck(map));
 
+// Get proper API key to be able to render Google basemaps, otherwise we
+// render on maplibre/positron style
+const GOOGLE_MAPS_API_KEY = '';
+
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
 
-async function createMap(cartoMapId: string) {
+async function createMapWithDeckController(result: FetchMapResult) {
   const deck = new Deck({canvas: 'deck-canvas'});
-  const options: FetchMapOptions = {apiBaseUrl, cartoMapId};
-
-  // Auto-refresh (optional)
-  const autoRefresh = false;
-  if (autoRefresh) {
-    // Autorefresh the data every 5 seconds
-    options.autoRefresh = 5;
-    options.onNewData = ({layers}) => {
-      deck.setProps({layers});
-    };
-  }
-
   // Get map info from CARTO and update deck
-  const {initialViewState, mapStyle, layers} = await fetchMap(options);
+  const {initialViewState, layers} = result;
   deck.setProps({initialViewState, layers});
 
-  // Mapbox basemap (optional)
-  const {label} = mapStyle.visibleLayerGroups;
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}${
-    label ? '' : '-nolabels'
-  }-gl-style/style.json`;
-  const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
+  const basemap = result.basemap as MapLibreBasemap;
+  const map = new mapboxgl.Map({
+    container: 'map',
+    ...basemap.props,
+    interactive: false
+  });
   deck.setProps({
     controller: true,
     onViewStateChange: ({viewState}) => {
@@ -40,6 +45,73 @@ async function createMap(cartoMapId: string) {
       map.jumpTo({center: [longitude, latitude], ...rest});
     }
   });
+  return deck;
+}
+
+async function createMapWithMapboxOverlay(result: FetchMapResult) {
+  document.getElementById('deck-canvas')!.style.display = 'none';
+
+  const basemap = result.basemap as MapLibreBasemap;
+  const map = new mapboxgl.Map({
+    container: 'map',
+    ...basemap?.props,
+    style: basemap?.props.style || BASEMAP.POSITRON,
+    interactive: true,
+    attributionControl: false
+  }).addControl(
+    new mapboxgl.AttributionControl({
+      customAttribution: basemap?.attribution
+    })
+  );
+
+  const overlay = new MapboxOverlay({layers: result.layers});
+  map.addControl(overlay);
+
+  return overlay;
+}
+
+async function createMapWithGoogleMapsOverlay(result: FetchMapResult) {
+  document.getElementById('deck-canvas')!.style.display = 'none';
+  const loader = new Loader({apiKey: GOOGLE_MAPS_API_KEY});
+  const googlemaps = await loader.importLibrary('maps');
+
+  const basemap = result.basemap as GoogleBasemap;
+  const map = new googlemaps.Map(document.getElementById('map')!, {
+    ...basemap.props,
+    isFractionalZoomEnabled: true,
+    disableDefaultUI: true
+  });
+
+  const overlay = new GoogleMapsOverlay({layers: result.layers});
+  overlay.setMap(map);
+
+  return overlay;
+}
+
+async function createMap(cartoMapId: string) {
+  const options: FetchMapOptions = {apiBaseUrl, cartoMapId};
+
+  let deck: Deck | GoogleMapsOverlay | MapboxOverlay | undefined;
+
+  // Auto-refresh (optional)
+  const autoRefresh = false;
+  if (autoRefresh) {
+    // Autorefresh the data every 5 seconds
+    options.autoRefresh = 5;
+    options.onNewData = ({layers}) => {
+      deck?.setProps({layers});
+    };
+  }
+
+  // Get map info from CARTO and update deck
+  const result = await fetchMap(options);
+
+  if (GOOGLE_MAPS_API_KEY && result.basemap?.type === 'google-maps') {
+    deck = await createMapWithGoogleMapsOverlay(result);
+  } else {
+    deck = await createMapWithMapboxOverlay(result);
+    // deck = await createMapWithDeckController(result);
+  }
 }
 
 // Helper UI for dev
@@ -61,7 +133,10 @@ const examples = [
 
   // Quadbin
   'abfce395-d9ec-48d4-85ad-45ec7705a921', // Quadbin - Table - 588k Spatial Features Spain
-  '8ead73bb-aa1f-4bf6-91fc-52a50c682938' // Quadbin — Tileset 14M Spatial Features USA
+  '8ead73bb-aa1f-4bf6-91fc-52a50c682938', // Quadbin — Tileset 14M Spatial Features USA
+
+  // Heatmap
+  '0b3c86ad-3c14-4c89-986a-07ba23306c3d' // Quadbin - Tileset, represented through Heatmap
 ];
 const params = new URLSearchParams(location.search.slice(1));
 const id = params.has('id') ? params.get('id')! : examples[0];

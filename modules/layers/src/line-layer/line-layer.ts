@@ -35,6 +35,7 @@ import {
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
+import {lineUniforms, LineProps} from './line-layer-uniforms';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
@@ -128,7 +129,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, lineUniforms]});
   }
 
   // This layer has its own wrapLongitude logic
@@ -185,22 +186,19 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
     const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
       useShortestPath: wrapLongitude ? 1 : 0
-    });
+    };
+    model.shaderInputs.setProps({line: lineProps});
     model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      model.setUniforms({
-        useShortestPath: -1
-      });
+      model.shaderInputs.setProps({line: {...lineProps, useShortestPath: -1}});
       model.draw(this.context.renderPass);
     }
   }

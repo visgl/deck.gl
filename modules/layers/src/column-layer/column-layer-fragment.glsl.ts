@@ -23,9 +23,6 @@ export default `#version 300 es
 
 precision highp float;
 
-uniform bool extruded;
-uniform bool isStroke;
-
 out vec4 fragColor;
 
 in vec4 vColor;
@@ -39,7 +36,7 @@ void main(void) {
   // Fails to compile on some Android devices if geometry is never assigned (#8411)
   geometry.uv = vec2(0.);
 #ifdef FLAT_SHADING
-  if (extruded && !isStroke && !bool(picking.isActive)) {
+  if (column.extruded && !column.isStroke && !bool(picking.isActive)) {
     vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
     fragColor.rgb = lighting_getLightColor(vColor.rgb, cameraPosition, position_commonspace.xyz, normal);
   }

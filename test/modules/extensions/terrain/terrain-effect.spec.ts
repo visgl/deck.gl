@@ -8,7 +8,7 @@ import {TerrainLayer} from '@deck.gl/geo-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
 import {makeSpy} from '@probe.gl/test-utils';
-import {device} from '@deck.gl/test-utils';
+import {device, getLayerUniforms} from '@deck.gl/test-utils';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
 
@@ -78,17 +78,20 @@ test('TerrainEffect', async t => {
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let model = meshLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
+  let uniforms = getLayerUniforms(meshLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
   t.is(model.bindings.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   model = scatterplotLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
+  uniforms = getLayerUniforms(scatterplotLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
   t.is(model.bindings.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   model = pathLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
+  uniforms = getLayerUniforms(pathLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(model.bindings.terrain_map?.width, 1, 'Dummy height map used as sampler');
 
   // preRender#diffing
@@ -99,7 +102,8 @@ test('TerrainEffect', async t => {
   renderTerrainCover.reset();
 
   model = meshLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.NONE, 'TERRAIN_MODE.NONE');
+  uniforms = getLayerUniforms(meshLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.NONE, 'TERRAIN_MODE.NONE');
   t.is(model.bindings.terrain_map?.width, 1, 'Terrain cover using empty texture');
 
   lifecycle.finalize();
@@ -172,17 +176,20 @@ test('TerrainEffect#without draw operation', async t => {
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let model = meshLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
+  let uniforms = getLayerUniforms(meshLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
   t.is(model.bindings.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   model = scatterplotLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
+  uniforms = getLayerUniforms(scatterplotLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
   t.is(model.bindings.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   model = pathLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
+  uniforms = getLayerUniforms(pathLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(model.bindings.terrain_map?.width, 1, 'Dummy height map used as sampler');
 
   // preRender#diffing
@@ -193,7 +200,8 @@ test('TerrainEffect#without draw operation', async t => {
   renderTerrainCover.reset();
 
   model = meshLayer.state.model;
-  t.is(model.uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
+  uniforms = getLayerUniforms(meshLayer);
+  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(model.bindings.terrain_map?.width, 1, 'Terrain cover using empty texture');
 
   lifecycle.finalize();

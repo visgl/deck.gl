@@ -28,6 +28,7 @@ import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
+import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
@@ -187,7 +188,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const modules = [project32, picking];
+    const modules = [project32, picking, scenegraphUniforms];
 
     if (this.props._lighting === 'pbr') {
       modules.push(pbr);
@@ -360,25 +361,29 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
 
     const {viewport, renderPass} = this.context;
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, coordinateSystem} = this.props;
 
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
       if (node instanceof ModelNode) {
         const {model} = node;
         model.setInstanceCount(numInstances);
-        model.setUniforms({
+        const scenegraphProps: ScenegraphProps = {
           sizeScale,
-          opacity,
           sizeMinPixels,
           sizeMaxPixels,
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
-          sceneModelMatrix: worldMatrix,
+          sceneModelMatrix: worldMatrix
+        };
+        // TODO replace with shaderInputs.setProps({pbr: u_Camera}) once
+        // luma pbr module ported to UBO
+        model.setUniforms({
           // Needed for PBR (TODO: find better way to get it)
           // eslint-disable-next-line camelcase
           u_Camera: model.uniforms.cameraPosition
         });
 
+        model.shaderInputs.setProps({scenegraph: scenegraphProps});
         model.draw(renderPass);
       }
     });

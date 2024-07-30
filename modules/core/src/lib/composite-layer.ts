@@ -41,6 +41,11 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
     return true;
   }
 
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return false;
+  }
+
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     return super.isLoaded && this.getSubLayers().every(layer => layer.isLoaded);

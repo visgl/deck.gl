@@ -23,13 +23,18 @@ import {vec3} from '@math.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
-import type {Model} from '@luma.gl/engine';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   getOffset: {type: 'accessor', value: 0},
   dashJustified: false,
   dashGapPickable: false
+};
+
+type PathStyleProps = {
+  dashAlignMode: number;
+  dashGapPickable: boolean;
 };
 
 export type PathStyleExtensionProps<DataT = any> = {
@@ -97,7 +102,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
 
     // Merge shader injection
-    let result = {};
+    let result = {} as {inject: Record<string, string>};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
     }
@@ -105,7 +110,18 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       result = mergeShaders(result, offsetShaders);
     }
 
-    return result;
+    const {inject} = result;
+    const pathStyle: ShaderModule<PathStyleProps> = {
+      name: 'pathStyle',
+      inject,
+      uniformTypes: {
+        dashAlignMode: 'f32',
+        dashGapPickable: 'i32'
+      }
+    };
+    return {
+      modules: [pathStyle]
+    };
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
@@ -149,14 +165,13 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       return;
     }
 
-    const uniforms: any = {};
-
     if (extension.opts.dash) {
-      uniforms.dashAlignMode = this.props.dashJustified ? 1 : 0;
-      uniforms.dashGapPickable = Boolean(this.props.dashGapPickable);
+      const pathStyleProps: PathStyleProps = {
+        dashAlignMode: this.props.dashJustified ? 1 : 0,
+        dashGapPickable: Boolean(this.props.dashGapPickable)
+      };
+      this.setShaderModuleProps({pathStyle: pathStyleProps});
     }
-
-    (this.state.model as Model)?.setUniforms(uniforms);
   }
 
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {

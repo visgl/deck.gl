@@ -16,12 +16,12 @@ test('h3TableSource', async t => {
     const [initCall, tilesetCall] = calls;
 
     t.match(initCall.url, /v3\/maps\/carto_dw\/table/, 'connection');
-    t.match(initCall.url, /aggregationExp=SUM\(population\)%20as%20pop/, 'aggregationExp');
+    t.match(initCall.url, /aggregationExp=SUM%28population%29\+as\+pop/, 'aggregationExp');
     t.match(initCall.url, /spatialDataColumn=h3/, 'spatialDataColumn');
     t.match(initCall.url, /spatialDataType=h3/, 'spatialDataType');
     t.match(initCall.url, /name=a.b.h3_table/, 'table');
 
-    t.match(tilesetCall.url, /^https:\/\/xyz\.com\?format\=tilejson\&cache\=/, 'tileset URL');
+    t.match(tilesetCall.url, /^https:\/\/xyz\.com\/\?format\=tilejson\&cache\=/, 'tileset URL');
 
     t.ok(tilejson, 'returns tilejson');
     t.deepEqual(

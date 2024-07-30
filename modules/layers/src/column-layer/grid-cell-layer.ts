@@ -22,6 +22,7 @@ import type {DefaultProps} from '@deck.gl/core';
 import {UNIT} from '@deck.gl/core';
 import {CubeGeometry} from '@luma.gl/engine';
 import ColumnLayer, {ColumnLayerProps} from './column-layer';
+import {ColumnProps} from './column-layer-uniforms';
 
 const defaultProps: DefaultProps<GridCellLayerProps> = {
   cellSize: {type: 'number', min: 0, value: 1000},
@@ -54,18 +55,23 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle, radiusUnits} = this.props;
     const fillModel = this.state.fillModel!;
-    fillModel.setUniforms(uniforms);
-    fillModel.setUniforms({
+    const columnProps: ColumnProps = {
       radius: cellSize / 2,
       radiusUnits: UNIT[radiusUnits],
       angle,
       offset,
       extruded,
+      stroked: false,
       coverage,
       elevationScale,
       edgeDistance: 1,
-      isStroke: false
-    });
+      isStroke: false,
+      widthUnits: 0,
+      widthScale: 0,
+      widthMinPixels: 0,
+      widthMaxPixels: 0
+    };
+    fillModel.shaderInputs.setProps({column: columnProps});
     fillModel.draw(this.context.renderPass);
   }
 }

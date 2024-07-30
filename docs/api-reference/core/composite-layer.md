@@ -26,7 +26,7 @@ Inherits from all [Base Layer](./layer.md) properties.
 
 Key is the id of a sublayer and value is an object used to override the props of the sublayer. For a list of ids rendered by each composite layer, consult the *Sub Layers* section in each layer's documentation.
 
-Example: make only the point features in a GeoJsonLayer respond to hover and click
+Example: make only the [point features](../layers/geojson-layer#sub-layers) in a GeoJsonLayer respond to hover and click
 
 ```ts
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -35,7 +35,7 @@ const layer = new GeoJsonLayer({
   // ...
   pickable: false,
   _subLayerProps: {
-    points: {
+    'points-circle': {
       pickable: true
     }
   }

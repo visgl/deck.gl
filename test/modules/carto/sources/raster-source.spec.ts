@@ -17,7 +17,7 @@ test('rasterSource', async t => {
     t.match(initCall.url, /v3\/maps\/carto_dw\/raster/, 'connection');
     t.match(initCall.url, /name=a\.b\.raster_table/, 'table');
 
-    t.match(tilesetCall.url, /^https:\/\/xyz\.com\?format\=tilejson\&cache\=/, 'tileset URL');
+    t.match(tilesetCall.url, /^https:\/\/xyz\.com\/\?format\=tilejson\&cache\=/, 'tileset URL');
 
     t.ok(tilejson, 'returns tilejson');
     t.deepEqual(
@@ -26,6 +26,20 @@ test('rasterSource', async t => {
       'tilejson.tiles'
     );
     t.equal(tilejson.accessToken, '<token>', 'tilejson.accessToken');
+  }).catch(t.fail);
+  t.end();
+});
+
+test('rasterSource - filters', async t => {
+  await withMockFetchMapsV3(async calls => {
+    const tilejson = await rasterSource({
+      connectionName: 'carto_dw',
+      accessToken: '<token>',
+      tableName: 'a.b.raster_table',
+      filters: {type: {in: [1, 2, 3]}}
+    });
+    const url = new URL(calls[0].url);
+    t.is(url.searchParams.get('filters'), '{"type":{"in":[1,2,3]}}');
   }).catch(t.fail);
   t.end();
 });

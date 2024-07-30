@@ -1,3 +1,4 @@
+export {getLayerUniforms} from './utils/layer';
 export {toLowPrecision} from './utils/precision';
 export {gl, device} from './utils/setup-gl';
 

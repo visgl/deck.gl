@@ -37,15 +37,6 @@ in float instanceStrokeWidths;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
 
-uniform float widthScale;
-uniform float widthMinPixels;
-uniform float widthMaxPixels;
-uniform float jointType;
-uniform float capType;
-uniform float miterLimit;
-uniform bool billboard;
-uniform int widthUnits;
-
 uniform float opacity;
 
 out vec4 vColor;
@@ -76,7 +67,7 @@ vec3 getLineJoinOffset(
   vec3 deltaB3 = (nextPoint - currPoint);
 
   mat3 rotationMatrix;
-  bool needsRotation = !billboard && project_needs_rotation(currPoint, rotationMatrix);
+  bool needsRotation = !path.billboard && project_needs_rotation(currPoint, rotationMatrix);
   if (needsRotation) {
     deltaA3 = deltaA3 * rotationMatrix;
     deltaB3 = deltaB3 * rotationMatrix;
@@ -136,10 +127,10 @@ vec3 getLineJoinOffset(
 
   // extend out a triangle to envelope the round cap
   if (isCap) {
-    offsetVec = mix(perp * sideOfPath, dir * capType * 4.0 * flipIfTrue(isStartCap), isJoint);
-    vJointType = capType;
+    offsetVec = mix(perp * sideOfPath, dir * path.capType * 4.0 * flipIfTrue(isStartCap), isJoint);
+    vJointType = path.capType;
   } else {
-    vJointType = jointType;
+    vJointType = path.jointType;
   }
 
   // Generate variables for fragment shader
@@ -175,7 +166,7 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 void main() {
   geometry.pickingColor = instancePickingColors;
 
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
+  vColor = vec4(instanceColors.rgb, instanceColors.a * layer.opacity);
 
   float isEnd = positions.x;
 
@@ -190,11 +181,11 @@ void main() {
 
   geometry.worldPosition = currPosition;
   vec2 widthPixels = vec2(clamp(
-    project_size_to_pixel(instanceStrokeWidths * widthScale, widthUnits),
-    widthMinPixels, widthMaxPixels) / 2.0);
+    project_size_to_pixel(instanceStrokeWidths * path.widthScale, path.widthUnits),
+    path.widthMinPixels, path.widthMaxPixels) / 2.0);
   vec3 width;
 
-  if (billboard) {
+  if (path.billboard) {
     // Extrude in clipspace
     vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
     vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET, geometry.position);

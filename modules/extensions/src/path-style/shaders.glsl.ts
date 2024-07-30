@@ -13,9 +13,11 @@ vDashOffset = instanceDashOffsets / width.x;
 `,
 
     'fs:#decl': `
-uniform float dashAlignMode;
-uniform float capType;
-uniform bool dashGapPickable;
+uniform pathStyleUniforms {
+  float dashAlignMode;
+  bool dashGapPickable;
+} pathStyle;
+
 in vec2 vDashArray;
 in float vDashOffset;
 `,
@@ -36,7 +38,7 @@ in float vDashOffset;
   float offset;
 
   if (unitLength > 0.0) {
-    if (dashAlignMode == 0.0) {
+    if (pathStyle.dashAlignMode == 0.0) {
       offset = vDashOffset;
     } else {
       unitLength = vPathLength / round(vPathLength / unitLength);
@@ -46,8 +48,8 @@ in float vDashOffset;
     float unitOffset = mod(vPathPosition.y + offset, unitLength);
 
     if (gapLength > 0.0 && unitOffset > solidLength) {
-      if (capType <= 0.5) {
-        if (!(dashGapPickable && bool(picking.isActive))) {
+      if (path.capType <= 0.5) {
+        if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
           discard;
         }
       } else {
@@ -57,7 +59,7 @@ in float vDashOffset;
           vPathPosition.x
         ));
         if (distToEnd > 1.0) {
-          if (!(dashGapPickable && bool(picking.isActive))) {
+          if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
             discard;
           }
         }

@@ -120,7 +120,9 @@ export {
   GridLayer,
   GPUGridLayer,
   AGGREGATION_OPERATION,
-  HeatmapLayer
+  HeatmapLayer,
+  WebGLAggregator,
+  CPUAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {
@@ -145,6 +147,12 @@ export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 //
 
 export {default, DeckGL} from '@deck.gl/react';
+
+//
+// WIDGETS PACKAGE
+//
+
+export {FullscreenWidget, ZoomWidget, CompassWidget} from '@deck.gl/widgets';
 
 /* Types */
 

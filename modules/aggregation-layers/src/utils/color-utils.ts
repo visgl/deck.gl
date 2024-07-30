@@ -17,8 +17,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import type {Color} from '@deck.gl/core';
+import type {Device, Texture} from '@luma.gl/core';
+import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/types';
 
-export const defaultColorRange: [number, number, number][] = [
+export const defaultColorRange: Color[] = [
   [255, 255, 178],
   [254, 217, 118],
   [254, 178, 76],
@@ -28,12 +31,16 @@ export const defaultColorRange: [number, number, number][] = [
 ];
 
 // Converts a colorRange array to a flat array with 4 components per color
-export function colorRangeToFlatArray(colorRange, normalize = false, ArrayType = Float32Array) {
-  let flatArray;
+export function colorRangeToFlatArray(
+  colorRange: Color[] | NumericArray,
+  normalize = false,
+  ArrayType: TypedArrayConstructor = Float32Array
+): TypedArray {
+  let flatArray: TypedArray;
 
   if (Number.isFinite(colorRange[0])) {
     // its already a flat array.
-    flatArray = new ArrayType(colorRange);
+    flatArray = new ArrayType(colorRange as NumericArray);
   } else {
     // flatten it
     flatArray = new ArrayType(colorRange.length * 4);
@@ -54,4 +61,22 @@ export function colorRangeToFlatArray(colorRange, normalize = false, ArrayType =
     }
   }
   return flatArray;
+}
+
+export function colorRangeToTexture(device: Device, colorRange: Color[] | NumericArray): Texture {
+  const colors = colorRangeToFlatArray(colorRange, false, Uint8Array);
+
+  return device.createTexture({
+    format: 'rgba8unorm',
+    mipmaps: false,
+    sampler: {
+      minFilter: 'linear',
+      magFilter: 'linear',
+      addressModeU: 'clamp-to-edge',
+      addressModeV: 'clamp-to-edge'
+    },
+    data: colors,
+    width: colors.length / 4,
+    height: 1
+  });
 }

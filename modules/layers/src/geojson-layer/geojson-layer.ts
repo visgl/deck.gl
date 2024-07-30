@@ -122,7 +122,7 @@ type _GeoJsonLayerStrokeProps<FeaturePropertiesT> = {
   /**
    * Line width value or accessor.
    *
-   * @default [0, 0, 0, 255]
+   * @default 1
    */
   getLineWidth?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
 

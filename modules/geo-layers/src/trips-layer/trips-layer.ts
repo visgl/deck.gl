@@ -22,6 +22,8 @@ import type {NumericArray} from '@math.gl/core';
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
+import {tripsUniforms, TripsProps} from './trips-layer-uniforms';
+
 const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
@@ -67,7 +69,6 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
     const shaders = super.getShaders();
     shaders.inject = {
       'vs:#decl': `\
-uniform float trailLength;
 in float instanceTimestamps;
 in float instanceNextTimestamps;
 out float vTime;
@@ -77,24 +78,22 @@ out float vTime;
 vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
 `,
       'fs:#decl': `\
-uniform bool fadeTrail;
-uniform float trailLength;
-uniform float currentTime;
 in float vTime;
 `,
       // Drop the segments outside of the time window
       'fs:#main-start': `\
-if(vTime > currentTime || (fadeTrail && (vTime < currentTime - trailLength))) {
+if(vTime > trips.currentTime || (trips.fadeTrail && (vTime < trips.currentTime - trips.trailLength))) {
   discard;
 }
 `,
       // Fade the color (currentTime - 100%, end of trail - 0%)
       'fs:DECKGL_FILTER_COLOR': `\
-if(fadeTrail) {
-  color.a *= 1.0 - (currentTime - vTime) / trailLength;
+if(trips.fadeTrail) {
+  color.a *= 1.0 - (trips.currentTime - vTime) / trips.trailLength;
 }
 `
     };
+    shaders.modules = [...shaders.modules, tripsUniforms];
     return shaders;
   }
 
@@ -120,14 +119,10 @@ if(fadeTrail) {
 
   draw(params) {
     const {fadeTrail, trailLength, currentTime} = this.props;
+    const tripsProps: TripsProps = {fadeTrail, trailLength, currentTime};
 
-    params.uniforms = {
-      ...params.uniforms,
-      fadeTrail,
-      trailLength,
-      currentTime
-    };
-
+    const model = this.state.model!;
+    model.shaderInputs.setProps({trips: tripsProps});
     super.draw(params);
   }
 }

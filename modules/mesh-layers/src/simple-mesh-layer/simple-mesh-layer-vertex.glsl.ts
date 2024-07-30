@@ -1,10 +1,6 @@
 export default `#version 300 es
 #define SHADER_NAME simple-mesh-layer-vs
 
-// Scale the model
-uniform float sizeScale;
-uniform bool composeModelMatrix;
-
 // Primitive attributes
 in vec3 positions;
 in vec3 normals;
@@ -38,9 +34,9 @@ void main(void) {
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
-  vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
+  vec3 pos = (instanceModelMatrix * positions) * simpleMesh.sizeScale + instanceTranslation;
 
-  if (composeModelMatrix) {
+  if (simpleMesh.composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
     // when using globe mode, this branch does not re-orient the model to align with the surface of the earth

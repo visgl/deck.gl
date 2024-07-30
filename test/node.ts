@@ -39,3 +39,4 @@ _global.cancelAnimationFrame = t => clearTimeout(t);
 // device.canvasContext.canvas = canvas;
 
 import './modules/imports-spec';
+import './modules/layers/core-layers.spec';

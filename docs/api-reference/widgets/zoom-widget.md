@@ -4,17 +4,17 @@ This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1
 
 ## Props
 
-#### `id` (string) {#id}
+#### `id` (string, optional) {#id}
 
 Default: `'zoom'`
 
-Unique identifier of the widget.
+The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly. The `id` is used to match widgets between updates, ensuring deck.gl can distinguish between them. A default `id` is assigned based on widget type, so if you have multiple widgets of the same type (e.g., two `compass` widgets), you need to provide a custom `id` for at least one.
 
 #### `viewId` (string, optional) {#viewid}
 
 Default: `null`
 
-The widget is attached to the view identified by this `viewId`. When assigned, the widget is placed within the specified view, and  exclusively interacts with it. Required when using [multiple views](../../developer-guide/views.md#using-multiple-views).
+The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
 
 #### `placement` (string, optional) {#placement}
 

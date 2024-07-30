@@ -20,11 +20,6 @@
 
 export default `\
 
-uniform bool extruded;
-uniform bool isWireframe;
-uniform float elevationScale;
-uniform float opacity;
-
 in vec4 fillColors;
 in vec4 lineColors;
 in vec3 pickingColors;
@@ -51,19 +46,19 @@ void calculatePosition(PolygonProps props) {
   vec3 pos = props.positions;
   vec3 pos64Low = props.positions64Low;
   vec3 normal = props.normal;
-  vec4 colors = isWireframe ? lineColors : fillColors;
+  vec4 colors = solidPolygon.isWireframe ? lineColors : fillColors;
 
   geometry.worldPosition = props.positions;
   geometry.pickingColor = pickingColors;
 
-  if (extruded) {
-    pos.z += props.elevations * elevationScale;
+  if (solidPolygon.extruded) {
+    pos.z += props.elevations * solidPolygon.elevationScale;
   }
   gl_Position = project_position_to_clipspace(pos, pos64Low, vec3(0.), geometry.position);
 
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  if (extruded) {
+  if (solidPolygon.extruded) {
   #ifdef IS_SIDE_VERTEX
     normal = project_offset_normal(normal);
   #else
@@ -71,9 +66,9 @@ void calculatePosition(PolygonProps props) {
   #endif
     geometry.normal = normal;
     vec3 lightColor = lighting_getLightColor(colors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
-    vColor = vec4(lightColor, colors.a * opacity);
+    vColor = vec4(lightColor, colors.a * layer.opacity);
   } else {
-    vColor = vec4(colors.rgb, colors.a * opacity);
+    vColor = vec4(colors.rgb, colors.a * layer.opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
 }

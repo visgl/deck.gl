@@ -35,7 +35,7 @@ import {
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
 
 const GRID = [
   {position: [37, 122]},
@@ -73,7 +73,7 @@ test('ScatterplotLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.getModels()[0].uniforms.radiusScale,
+        getLayerUniforms(layer).radiusScale,
         layer.props.radiusScale,
         'should update radiusScale'
       );
@@ -112,11 +112,7 @@ test('PointCloudLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.is(
-        layer.getModels()[0].uniforms.pointSize,
-        layer.props.radiusPixels,
-        'should update pointSize'
-      );
+      t.is(getLayerUniforms(layer).pointSize, layer.props.radiusPixels, 'should update pointSize');
     }
   });
 
@@ -215,7 +211,7 @@ test('PathLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.getModels()[0].uniforms.widthMinPixels,
+        getLayerUniforms(layer).widthMinPixels,
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );

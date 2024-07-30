@@ -21,6 +21,7 @@ import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
+import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
 import IconManager from './icon-manager';
@@ -148,7 +149,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, iconUniforms]});
   }
 
   initializeState() {
@@ -277,10 +278,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
       const model = this.state.model!;
-
-      model.setBindings({iconsTexture});
-      model.setUniforms(uniforms);
-      model.setUniforms({
+      const iconProps: IconProps = {
+        iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
@@ -288,7 +287,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         sizeMaxPixels,
         billboard,
         alphaCutoff
-      });
+      };
+
+      model.shaderInputs.setProps({icon: iconProps});
       model.draw(this.context.renderPass);
     }
   }

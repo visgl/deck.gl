@@ -36,6 +36,7 @@ import {
 
 import {Model} from '@luma.gl/engine';
 
+import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
@@ -163,7 +164,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [project32, picking, arcUniforms]}); // 'project' module added by default.
   }
 
   // This layer has its own wrapLongitude logic
@@ -246,18 +247,18 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       wrapLongitude,
       numSegments
     } = this.props;
-    const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const arcProps: ArcProps = {
       numSegments,
-      greatCircle,
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
+      greatCircle,
       useShortestPath: wrapLongitude
-    });
+    };
+
+    const model = this.state.model!;
+    model.shaderInputs.setProps({arc: arcProps});
     model.setVertexCount(numSegments * 2);
     model.draw(this.context.renderPass);
   }
