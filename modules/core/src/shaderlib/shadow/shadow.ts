@@ -36,24 +36,29 @@ uniform shadowUniforms {
   vec4 color;
   highp int lightId;
   float lightCount;
+  mat4 viewProjectionMatrix0;
+  mat4 viewProjectionMatrix1;
 } shadow;
 `;
 
 const vertex = glsl`
 const int max_lights = 2;
-uniform mat4 shadow_uViewProjectionMatrices[max_lights];
 uniform vec4 shadow_uProjectCenters[max_lights];
 
 out vec3 shadow_vPosition[max_lights];
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
+  mat4 viewProjectionMatrices[2];
+  viewProjectionMatrices[0] = shadow.viewProjectionMatrix0;
+  viewProjectionMatrices[1] = shadow.viewProjectionMatrix1;
+
   if (shadow.drawShadowMap) {
-    return project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[shadow.lightId], shadow_uProjectCenters[shadow.lightId]);
+    return project_common_position_to_clipspace(position_commonspace, viewProjectionMatrices[shadow.lightId], shadow_uProjectCenters[shadow.lightId]);
   }
   if (shadow.useShadowMap) {
     for (int i = 0; i < max_lights; i++) {
       if(i < int(shadow.lightCount)) {
-        vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[i], shadow_uProjectCenters[i]);
+        vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, viewProjectionMatrices[i], shadow_uProjectCenters[i]);
         shadow_vPosition[i] = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;
       }
     }
@@ -137,6 +142,8 @@ type ShadowModuleUniforms = {
   color?: [number, number, number, number];
   lightId?: number;
   lightCount?: number;
+  viewProjectionMatrix0?: NumberArray16;
+  viewProjectionMatrix1?: NumberArray16;
 };
 
 type ShadowModuleBindings = {
@@ -262,7 +269,7 @@ function createShadowUniforms(
   };
 
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
-    uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
+    uniforms[`viewProjectionMatrix${i}`] = viewProjectionMatrices[i];
     uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
   }
 
@@ -304,6 +311,28 @@ export default {
     useShadowMap: 'f32',
     color: 'vec4<f32>',
     lightId: 'i32',
-    lightCount: 'f32'
+    lightCount: 'f32',
+    viewProjectionMatrix0: 'mat4x4<f32>',
+    viewProjectionMatrix1: 'mat4x4<f32>'
   }
 } as const satisfies ShaderModule<ShadowModuleProps, ShadowModuleUniforms, ShadowModuleBindings>;
+
+// TODO replace with type from math.gl
+type NumberArray16 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number
+];
