@@ -1079,6 +1079,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
         const {
+          // shadow
+          shadowEnabled,
+          drawToShadowMap,
+          shadowMaps,
+          dummyShadowMap,
+          shadowColor,
+          shadowMatrices,
+          shadowLightId,
+          // terrain
           picking,
           heightMap,
           heightMapBounds,
@@ -1088,6 +1097,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           useTerrainHeightMap,
           terrainSkipRender
         } = moduleParameters;
+        const shadowProps = {
+          viewport,
+          shadowEnabled,
+          drawToShadowMap,
+          shadowMaps,
+          dummyShadowMap,
+          shadowColor,
+          shadowMatrices,
+          shadowLightId
+        };
         const terrainProps = {
           viewport,
           picking,
@@ -1101,6 +1120,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         };
         this.setShaderModuleProps({
           // TODO Revisit whether this is necessary once all layers ported to UBO
+          shadow: shadowProps,
           terrain: terrainProps,
           layer: {opacity},
           picking: {isActive, isAttribute} as PickingProps,

@@ -25,7 +25,7 @@ import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import {glsl, type ShaderModule} from '@luma.gl/shadertools';
+import {glsl, ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
 
@@ -216,8 +216,7 @@ function getViewProjectionMatrices({
 
 // eslint-disable-next-line complexity
 function createShadowUniforms(
-  opts: ShadowModuleProps,
-  context: ProjectUniforms
+  opts: ShadowModuleProps
 ): ShadowModuleBindings & ShadowModuleUniforms {
   const {shadowEnabled = true} = opts;
   if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
@@ -228,9 +227,10 @@ function createShadowUniforms(
       shadow_uShadowMap1: opts.dummyShadowMap
     };
   }
+  const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
   const center = getMemoizedViewportCenterPosition({
     viewport: opts.viewport,
-    center: context.center
+    center: projectUniforms.center
   });
 
   const projectCenters: NumericArray[] = [];
@@ -246,8 +246,8 @@ function createShadowUniforms(
       .translate(new Vector3(opts.viewport.center).negate());
 
     if (
-      context.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
-      context.projectionMode === PROJECTION_MODE.WEB_MERCATOR
+      projectUniforms.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+      projectUniforms.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;
       projectCenters[i] = center;
@@ -306,5 +306,12 @@ export default {
       return createShadowUniforms(opts, context);
     }
     return {};
+  },
+  uniformTypes: {
+    shadow_uDrawShadowMap: 'f32',
+    shadow_uUseShadowMap: 'f32',
+    shadow_uColor: 'vec4<f32>',
+    shadow_uLightId: 'i32',
+    shadow_uLightCount: 'f32'
   }
 } as const satisfies ShaderModule<ShadowModuleProps, ShadowModuleUniforms, ShadowModuleBindings>;
