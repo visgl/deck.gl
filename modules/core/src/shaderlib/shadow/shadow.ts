@@ -31,11 +31,11 @@ import type {ProjectUniforms} from '../project/viewport-uniforms';
 
 const uniformBlock = glsl`
 uniform shadowUniforms {
-  bool shadow_uDrawShadowMap;
-  bool shadow_uUseShadowMap;
-  vec4 shadow_uColor;
-  highp int shadow_uLightId;
-  float shadow_uLightCount;
+  bool drawShadowMap;
+  bool useShadowMap;
+  vec4 color;
+  highp int lightId;
+  float lightCount;
 } shadow;
 `;
 
@@ -47,12 +47,12 @@ uniform vec4 shadow_uProjectCenters[max_lights];
 out vec3 shadow_vPosition[max_lights];
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
-  if (shadow.shadow_uDrawShadowMap) {
-    return project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[shadow.shadow_uLightId], shadow_uProjectCenters[shadow.shadow_uLightId]);
+  if (shadow.drawShadowMap) {
+    return project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[shadow.lightId], shadow_uProjectCenters[shadow.lightId]);
   }
-  if (shadow.shadow_uUseShadowMap) {
+  if (shadow.useShadowMap) {
     for (int i = 0; i < max_lights; i++) {
-      if(i < int(shadow.shadow_uLightCount)) {
+      if(i < int(shadow.lightCount)) {
         vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[i], shadow_uProjectCenters[i]);
         shadow_vPosition[i] = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;
       }
@@ -86,22 +86,22 @@ float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
 }
 
 vec4 shadow_filterShadowColor(vec4 color) {
-  if (shadow.shadow_uDrawShadowMap) {
+  if (shadow.drawShadowMap) {
     vec4 rgbaDepth = fract(gl_FragCoord.z * bitPackShift);
     rgbaDepth -= rgbaDepth.gbaa * bitMask;
     return rgbaDepth;
   }
-  if (shadow.shadow_uUseShadowMap) {
+  if (shadow.useShadowMap) {
     float shadowAlpha = 0.0;
     shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0);
-    if(shadow.shadow_uLightCount > 1.0) {
+    if(shadow.lightCount > 1.0) {
       shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1);
     }
-    shadowAlpha *= shadow.shadow_uColor.a / shadow.shadow_uLightCount;
+    shadowAlpha *= shadow.color.a / shadow.lightCount;
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
 
     return vec4(
-      mix(color.rgb, shadow.shadow_uColor.rgb, shadowAlpha / blendedAlpha),
+      mix(color.rgb, shadow.color.rgb, shadowAlpha / blendedAlpha),
       blendedAlpha
     );
   }
@@ -132,11 +132,11 @@ type ShadowModuleProps = {
 };
 
 type ShadowModuleUniforms = {
-  shadow_uDrawShadowMap: boolean;
-  shadow_uUseShadowMap: boolean;
-  shadow_uColor?: [number, number, number, number];
-  shadow_uLightId?: number;
-  shadow_uLightCount?: number;
+  drawShadowMap: boolean;
+  useShadowMap: boolean;
+  color?: [number, number, number, number];
+  lightId?: number;
+  lightCount?: number;
 };
 
 type ShadowModuleBindings = {
@@ -213,8 +213,8 @@ function createShadowUniforms(
   const {shadowEnabled = true} = opts;
   if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
     return {
-      shadow_uDrawShadowMap: false,
-      shadow_uUseShadowMap: false,
+      drawShadowMap: false,
+      useShadowMap: false,
       shadow_uShadowMap0: opts.dummyShadowMap,
       shadow_uShadowMap1: opts.dummyShadowMap
     };
@@ -252,11 +252,11 @@ function createShadowUniforms(
   }
 
   const uniforms = {
-    shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
-    shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
-    shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
-    shadow_uLightId: opts.shadowLightId || 0,
-    shadow_uLightCount: opts.shadowMatrices.length,
+    drawShadowMap: Boolean(opts.drawToShadowMap),
+    useShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
+    color: opts.shadowColor || DEFAULT_SHADOW_COLOR,
+    lightId: opts.shadowLightId || 0,
+    lightCount: opts.shadowMatrices.length,
     shadow_uShadowMap0: opts.dummyShadowMap,
     shadow_uShadowMap1: opts.dummyShadowMap
   };
@@ -300,10 +300,10 @@ export default {
     return {};
   },
   uniformTypes: {
-    shadow_uDrawShadowMap: 'f32',
-    shadow_uUseShadowMap: 'f32',
-    shadow_uColor: 'vec4<f32>',
-    shadow_uLightId: 'i32',
-    shadow_uLightCount: 'f32'
+    drawShadowMap: 'f32',
+    useShadowMap: 'f32',
+    color: 'vec4<f32>',
+    lightId: 'i32',
+    lightCount: 'f32'
   }
 } as const satisfies ShaderModule<ShadowModuleProps, ShadowModuleUniforms, ShadowModuleBindings>;
