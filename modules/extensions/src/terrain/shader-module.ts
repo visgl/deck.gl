@@ -111,6 +111,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
 }
     `
   },
+  // @ts-expect-error TODO - fix typings
   // eslint-disable-next-line complexity
   getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
     if ('dummyHeightMap' in opts) {
