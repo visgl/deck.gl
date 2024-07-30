@@ -25,11 +25,21 @@ import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import {glsl, type ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
 
-const vs = `
+const uniformBlock = glsl`
+uniform shadowUniforms {
+  bool shadow_uDrawShadowMap;
+  bool shadow_uUseShadowMap;
+  vec4 shadow_uColor;
+  highp int shadow_uLightId;
+  float shadow_uLightCount;
+} shadow;
+`;
+
+const vertex = glsl`
 const int max_lights = 2;
 uniform mat4 shadow_uViewProjectionMatrices[max_lights];
 uniform vec4 shadow_uProjectCenters[max_lights];
@@ -56,7 +66,12 @@ vec4 shadow_setVertexPosition(vec4 position_commonspace) {
 }
 `;
 
-const fs = `
+const vs = `
+${uniformBlock}
+${vertex}
+`;
+
+const fragment = glsl`
 const int max_lights = 2;
 uniform bool shadow_uDrawShadowMap;
 uniform bool shadow_uUseShadowMap;
@@ -100,6 +115,11 @@ vec4 shadow_filterShadowColor(vec4 color) {
   }
   return color;
 }
+`;
+
+const fs = `
+${uniformBlock}
+${fragment}
 `;
 
 const getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
