@@ -4,7 +4,8 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  DefaultProps
+  DefaultProps,
+  PickingInfo
 } from '@deck.gl/core';
 import {ColumnLayer, ColumnLayerProps} from '@deck.gl/layers';
 import {quadbinToOffset} from './quadbin-utils';
@@ -83,6 +84,11 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
   static layerName = 'RasterLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    highlightedObjectIndex: number;
+    highlightColor: number[];
+  };
+
   renderLayers(): Layer | null | LayersList {
     // Rendering props underlying layer
     const {
@@ -103,6 +109,7 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
 
     // Filled Column Layer
     const CellLayer = this.getSubLayerClass('column', RasterColumnLayer);
+    const {highlightedObjectIndex, highlightColor} = this.state;
     return new CellLayer(
       this.props,
       this.getSubLayerProps({
@@ -120,7 +127,9 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
           length: blockSize * blockSize
         },
         offset,
-        lineWidthScale // Re-use widthScale prop to pass cell scale
+        lineWidthScale, // Re-use widthScale prop to pass cell scale,
+        highlightedObjectIndex,
+        highlightColor
       }
     );
   }
@@ -144,14 +153,33 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
     const info = super.getPickingInfo(params);
 
     if (info.index !== -1) {
-      info.object = this.getSubLayerAccessor(x => x)(undefined, {
+      info.object = this.getSubLayerAccessor((x: any) => x)(undefined, {
         data: this.props,
         index: info.index
       });
-      debugger;
-      info.object.id = info.index;
     }
 
     return info;
+  }
+
+  _updateAutoHighlight(info: PickingInfo) {
+    const {highlightedObjectIndex} = this.state;
+    let newHighlightedObjectIndex: number = -1;
+
+    if (info.index !== -1) {
+      newHighlightedObjectIndex = info.index;
+    }
+
+    if (highlightedObjectIndex !== newHighlightedObjectIndex) {
+      let {highlightColor} = this.props;
+      if (typeof highlightColor === 'function') {
+        highlightColor = highlightColor(info);
+      }
+
+      this.setState({
+        highlightColor,
+        highlightedObjectIndex: newHighlightedObjectIndex
+      });
+    }
   }
 }
