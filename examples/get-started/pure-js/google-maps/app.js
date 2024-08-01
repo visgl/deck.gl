@@ -1,28 +1,54 @@
 /* global document */
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
-import {fetchMap} from '@deck.gl/carto';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
-const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
+
+const initialViewState = {
+  longitude: -74,
+  latitude: 40.7,
+  zoom: 11,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0,
+  maxPitch: 0 // Tilt not supported in Apple Maps
+};
+const maleColor = [0, 128, 255];
+const femaleColor = [255, 0, 128];
 
 async function init() {
   await setupMapKitJs();
-
-  fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-    initialViewState.maxPitch = 0; // lock tilt
-    const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
-    const {region, rotation} = viewPropsFromViewState(initialViewState);
-    const map = new mapkit.Map('map', {region, rotation});
-
-    deck.setProps({
-      onViewStateChange: ({viewState}) => {
-        const {region, rotation} = viewPropsFromViewState(viewState);
-        map.setRegionAnimated(region, false);
-        map.setRotationAnimated(rotation, false);
+  const layers = [
+    new ScatterplotLayer({
+      id: 'scatter-plot',
+      data: DATA_URL,
+      radiusScale: 30,
+      radiusMinPixels: 0.25,
+      getPosition: d => [d[0], d[1], 0],
+      getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
+      getRadius: 1,
+      updateTriggers: {
+        getFillColor: [maleColor, femaleColor]
       }
-    });
+    })
+  ];
+
+  const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
+
+  // Sync deck view state with Apple Maps
+  const {region, rotation} = viewPropsFromViewState(initialViewState);
+  const map = new mapkit.Map('map', {region, rotation});
+  deck.setProps({
+    onViewStateChange: ({viewState}) => {
+      const {region, rotation} = viewPropsFromViewState(viewState);
+      map.setRegionAnimated(region, false);
+      map.setRotationAnimated(rotation, false);
+    }
   });
 }
+init();
 
 /**
  * Converts deck.gl viewState into {region, rotation} used for Apple Maps
@@ -40,9 +66,9 @@ function viewPropsFromViewState(viewState) {
   return {region, rotation};
 }
 
-init();
-
-// Wait for MapKit JS to be ready to use.
+/**
+ * Wait for MapKit JS to be ready to use
+ */
 async function setupMapKitJs() {
   // If MapKit JS is not yet loaded...
   if (!window.mapkit || window.mapkit.loadedLibraries.length === 0) {
