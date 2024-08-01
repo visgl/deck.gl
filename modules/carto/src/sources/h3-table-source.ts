@@ -3,13 +3,17 @@ import {DEFAULT_AGGREGATION_RES_LEVEL_H3} from '../constants';
 import {baseSource} from './base-source';
 import type {
   AggregationOptions,
+  FilterOptions,
   SourceOptions,
   SpatialDataType,
   TableSourceOptions,
   TilejsonResult
 } from './types';
 
-export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
+export type H3TableSourceOptions = SourceOptions &
+  TableSourceOptions &
+  AggregationOptions &
+  FilterOptions;
 
 type UrlParameters = {
   aggregationExp: string;
@@ -17,6 +21,7 @@ type UrlParameters = {
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   name: string;
+  filters?: Record<string, unknown>;
 };
 
 export const h3TableSource = async function (
@@ -26,7 +31,8 @@ export const h3TableSource = async function (
     aggregationExp,
     aggregationResLevel = DEFAULT_AGGREGATION_RES_LEVEL_H3,
     spatialDataColumn = 'h3',
-    tableName
+    tableName,
+    filters
   } = options;
   const urlParameters: UrlParameters = {
     aggregationExp,
@@ -37,6 +43,9 @@ export const h3TableSource = async function (
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
+  }
+  if (filters) {
+    urlParameters.filters = filters;
   }
   return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
