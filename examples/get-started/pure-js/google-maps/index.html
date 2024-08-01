@@ -4,7 +4,19 @@
     <meta charset='UTF-8' />
     <title>deck.gl w/ Apple Maps example</title>
     <style>
-      #map {
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: UberMove, Helvetica, Arial, sans-serif;
+      }
+      #container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      #container > * {
         position: absolute;
         top: 0;
         left: 0;
@@ -20,7 +32,10 @@
           data-token="XXX"
   ></script>
   <body>
-    <div id="map"></div>
+    <div id="container">
+      <div id="map"></div>
+      <canvas id="deck-canvas"></canvas>
+    </div>
     <script type="module" src='app.js'></script>
   </body>
 </html>
