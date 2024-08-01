@@ -10,7 +10,10 @@ import type {
   TilejsonResult
 } from './types';
 
-export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions & FilterOptions;
+export type H3TableSourceOptions = SourceOptions &
+  TableSourceOptions &
+  AggregationOptions &
+  FilterOptions;
 
 type UrlParameters = {
   aggregationExp: string;
@@ -35,7 +38,7 @@ export const h3TableSource = async function (
     aggregationExp,
     name: tableName,
     spatialDataColumn,
-    spatialDataType: 'h3',
+    spatialDataType: 'h3'
   };
 
   if (aggregationResLevel) {
