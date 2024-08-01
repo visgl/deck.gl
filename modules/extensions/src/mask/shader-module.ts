@@ -1,5 +1,5 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project, UniformTypes} from '@deck.gl/core';
+import {project} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
@@ -122,5 +122,5 @@ export default {
     enabled: 'i32',
     inverted: 'i32',
     maskByInstance: 'i32'
-  } as const satisfies UniformTypes<MaskUniformProps>
+  }
 } as const satisfies ShaderModule<MaskProps>;
