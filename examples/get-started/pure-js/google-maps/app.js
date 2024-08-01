@@ -5,30 +5,52 @@ import {fetchMap} from '@deck.gl/carto';
 
 const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 
-let map;
-function initMapKit() {
-  map = new mapkit.Map('map', {center: new mapkit.Coordinate(37.334883, -122.008977)});
+async function init() {
+  await setupMapKitJs();
+
+  fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
+    initialViewState.maxPitch = 0; // lock tilt
+    const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
+    const {region, rotation} = viewPropsFromViewState(initialViewState);
+    const map = new mapkit.Map('map', {region, rotation});
+
+    deck.setProps({
+      onViewStateChange: ({viewState}) => {
+        const {region, rotation} = viewPropsFromViewState(viewState);
+        map.setRegionAnimated(region, false);
+        map.setRotationAnimated(rotation, false);
+      }
+    });
+  });
 }
 
-setTimeout(initMapKit, 1000);
+/**
+ * Converts deck.gl viewState into {region, rotation} used for Apple Maps
+ */
+function viewPropsFromViewState(viewState) {
+  const {longitude, latitude, bearing, ...rest} = viewState;
+  const viewport = new WebMercatorViewport({...viewState, bearing: 0});
+  const bounds = viewport.getBounds();
 
-fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-  initialViewState.maxPitch = 0; // lock tilt
-  const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
+  const center = new mapkit.Coordinate(latitude, longitude);
+  const span = new mapkit.CoordinateSpan(bounds[3] - bounds[1], bounds[2] - bounds[0]);
+  const region = new mapkit.CoordinateRegion(center, span);
+  const rotation = -bearing;
 
-  deck.setProps({
-    onViewStateChange: ({viewState}) => {
-      if (!map) return;
-      const {longitude, latitude, bearing, ...rest} = viewState;
-      const viewport = new WebMercatorViewport({...viewState, bearing: 0});
-      const bounds = viewport.getBounds();
+  return {region, rotation};
+}
 
-      const center = new mapkit.Coordinate(latitude, longitude);
-      const span = new mapkit.CoordinateSpan(bounds[3] - bounds[1], bounds[2] - bounds[0]);
-      const region = new mapkit.CoordinateRegion(center, span);
+init();
 
-      map.setRegionAnimated(region, false);
-      map.setRotationAnimated(-bearing, false);
-    }
-  });
-});
+// Wait for MapKit JS to be ready to use.
+async function setupMapKitJs() {
+  // If MapKit JS is not yet loaded...
+  if (!window.mapkit || window.mapkit.loadedLibraries.length === 0) {
+    // ...await <script>'s data-callback (window.initMapKit).
+    await new Promise(resolve => {
+      window.initMapKit = resolve;
+    });
+    // Clean up.
+    delete window.initMapKit;
+  }
+}
