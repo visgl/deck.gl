@@ -1,10 +1,10 @@
 import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
+import {TileLayer, TileLayerProps} from '@deck.gl/geo-layers';
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;
@@ -23,7 +23,7 @@ export type RasterTileLayerProps<DataT = unknown> = _RasterTileLayerProps<DataT>
 
 /** Properties added by RasterTileLayer. */
 type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> &
-  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+  Omit<TileLayerProps<DataT>, 'data'> & {
     data: null | TilejsonResult | Promise<TilejsonResult>;
   };
 
@@ -48,7 +48,7 @@ export default class RasterTileLayer<
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
     return [
       // @ts-ignore
-      new SpatialIndexTileLayer(this.props, {
+      new TileLayer(this.props, {
         id: `raster-tile-layer-${this.props.id}`,
         data,
         // TODO: Tileset2D should be generic over TileIndex type
