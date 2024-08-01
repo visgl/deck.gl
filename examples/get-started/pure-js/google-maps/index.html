@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset='UTF-8' />
-    <title>deck.gl w/ Google Maps example</title>
+    <title>deck.gl w/ Apple Maps example</title>
     <style>
       #map {
         position: absolute;
@@ -13,6 +13,12 @@
       }
     </style>
   </head>
+  <script src="https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js"
+          crossorigin async
+          data-callback="initMapKit"
+          data-libraries="full-map"
+          data-token="XXX"
+  ></script>
   <body>
     <div id="map"></div>
     <script type="module" src='app.js'></script>
