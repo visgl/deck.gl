@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.25] - Aug 2 2024
+
+- CARTO: support filters in spatial index sources (#9065)
+- CARTO: Implement picking & autohighlight in RasterLayer (#9062)
+- CARTO: Only clip polygon/line layers (#9060)
+- feat(widgets) affect all views if not attached to specific view (#9009)
+
 #### deck.gl [9.0.24] - Jul 22 2024
 
 - CARTO: ClusterTileLayer (#8957)
