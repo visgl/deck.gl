@@ -51,6 +51,7 @@ import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
 import maxFs from './max-fs.glsl';
+import {maxWeightUniforms} from './heatmap-layer-uniforms';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const TEXTURE_PROPS: TextureProps = {
@@ -203,7 +204,12 @@ export default class HeatmapLayer<
   };
 
   getShaders(shaders: any) {
-    return super.getShaders({...shaders, modules: [project32]});
+    let modules = [project32];
+    if (shaders.modules) {
+      modules = [...modules, ...shaders.modules];
+    }
+
+    return super.getShaders({...shaders, modules});
   }
 
   initializeState() {
@@ -433,12 +439,16 @@ export default class HeatmapLayer<
     });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders({vs: maxVs, fs: maxFs});
+    const maxWeightsTransformShaders = this.getShaders({
+      vs: maxVs,
+      fs: maxFs,
+      modules: [maxWeightUniforms]
+    });
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
       bindings: {inTexture: weightsTexture},
       uniforms: {textureSize},
-      targetTexture: maxWeightsTexture,
+      targetTexture: maxWeightsTexture!,
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
       topology: 'point-list',
