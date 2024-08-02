@@ -23,11 +23,12 @@ import {Model} from '@luma.gl/engine';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
+import {TriangleProps, triangleUniforms} from './triangle-layer-uniforms';
 
 type _TriangleLayerProps = {
   data: {attributes: {positions: Buffer; texCoords: Buffer}};
-  colorDomain: number[];
-  aggregationMode: string;
+  colorDomain: [number, number];
+  aggregationMode: number;
   threshold: number;
   intensity: number;
   vertexCount: number;
@@ -46,7 +47,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   };
 
   getShaders() {
-    return {vs, fs, modules: [project32]};
+    return {vs, fs, modules: [project32, triangleUniforms]};
   }
 
   initializeState({device}: LayerContext): void {
@@ -72,7 +73,24 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
   draw({uniforms}): void {
     const {model} = this.state;
-    const {intensity, threshold, aggregationMode, colorDomain} = this.props;
+    const {
+      aggregationMode,
+      colorDomain,
+      intensity,
+      threshold,
+      colorTexture,
+      maxTexture,
+      weightsTexture
+    } = this.props;
+    const triangleProps: TriangleProps = {
+      aggregationMode,
+      colorDomain,
+      intensity,
+      threshold,
+      colorTexture,
+      maxTexture,
+      weightsTexture
+    };
     model.setUniforms({
       ...uniforms,
       intensity,
@@ -80,6 +98,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       aggregationMode,
       colorDomain
     });
+    model.shaderInputs.setProps({triangle: triangleProps});
     model.draw(this.context.renderPass);
   }
 }
