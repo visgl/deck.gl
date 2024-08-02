@@ -46,7 +46,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     texCoords: Buffer;
   };
 
-  getShaders(shaders: any) {
+  getShaders() {
     return super.getShaders({vs, fs, modules: [project32, triangleUniforms]});
   }
 
@@ -55,12 +55,11 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   }
 
   _getModel(device: Device): Model {
-    const {vertexCount, data, weightsTexture, maxTexture, colorTexture} = this.props;
+    const {vertexCount, data} = this.props;
 
     return new Model(device, {
       ...this.getShaders(),
       id: this.props.id,
-      bindings: {weightsTexture, maxTexture, colorTexture},
       attributes: data.attributes,
       bufferLayout: [
         {name: 'positions', format: 'float32x3'},
@@ -71,7 +70,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     });
   }
 
-  draw({uniforms}): void {
+  draw(): void {
     const {model} = this.state;
     const {
       aggregationMode,
@@ -91,13 +90,6 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       maxTexture,
       weightsTexture
     };
-    model.setUniforms({
-      ...uniforms,
-      intensity,
-      threshold,
-      aggregationMode,
-      colorDomain
-    });
     model.shaderInputs.setProps({triangle: triangleProps});
     model.draw(this.context.renderPass);
   }
