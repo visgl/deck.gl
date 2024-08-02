@@ -1,3 +1,4 @@
+import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
@@ -7,6 +8,7 @@ uniform maxWeightUniforms {
 `;
 
 export type MaxWeightProps = {
+  inTexture: Texture;
   textureSize: number;
 };
 
