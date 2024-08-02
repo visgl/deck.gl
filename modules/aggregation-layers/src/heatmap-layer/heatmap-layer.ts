@@ -51,7 +51,12 @@ import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
 import maxFs from './max-fs.glsl';
-import {MaxWeightProps, maxWeightUniforms} from './heatmap-layer-uniforms';
+import {
+  MaxWeightProps,
+  maxWeightUniforms,
+  WeightProps,
+  weightUniforms
+} from './heatmap-layer-uniforms';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const TEXTURE_PROPS: TextureProps = {
@@ -422,7 +427,8 @@ export default class HeatmapLayer<
         blendAlphaDstFactor: 'one'
       },
       topology: 'point-list',
-      ...shaders
+      ...shaders,
+      modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
     this.setState({weightsTransform});
@@ -583,7 +589,7 @@ export default class HeatmapLayer<
 
   _updateWeightmap() {
     const {radiusPixels, colorDomain, aggregation} = this.props;
-    const {worldBounds, textureSize, weightsScale} = this.state;
+    const {worldBounds, textureSize, weightsScale, weightsTexture} = this.state;
     const weightsTransform = this.state.weightsTransform!;
     this.state.isWeightMapDirty = false;
 
@@ -609,13 +615,15 @@ export default class HeatmapLayer<
     const uniforms = {radiusPixels, commonBounds, textureWidth: textureSize, weightsScale};
     this._setModelAttributes(weightsTransform.model, attributes);
     weightsTransform.model.setVertexCount(this.getNumInstances());
-    weightsTransform.model.setUniforms(uniforms);
     weightsTransform.model.updateModuleSettings(moduleSettings);
 
+    // TODO tidy and remove uniforms
+    const weightProps: WeightProps = {...uniforms, weightsTexture: weightsTexture!};
     const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleSettings;
     const {modelMatrix} = this.props;
     weightsTransform.model.shaderInputs.setProps({
-      project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
+      project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin},
+      weight: weightProps
     });
     weightsTransform.run({
       parameters: {viewport: [0, 0, textureSize, textureSize]},
