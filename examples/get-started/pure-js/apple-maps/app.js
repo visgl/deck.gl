@@ -1,5 +1,4 @@
-/* global document */
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+/* global mapkit, window */
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -38,8 +37,7 @@ async function init() {
   const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
 
   // Sync deck view state with Apple Maps
-  const {region, rotation} = viewPropsFromViewState(initialViewState);
-  const map = new mapkit.Map('map', {region, rotation});
+  const map = new mapkit.Map('map', viewPropsFromViewState(initialViewState));
   deck.setProps({
     onViewStateChange: ({viewState}) => {
       const {region, rotation} = viewPropsFromViewState(viewState);
@@ -54,7 +52,7 @@ init();
  * Converts deck.gl viewState into {region, rotation} used for Apple Maps
  */
 function viewPropsFromViewState(viewState) {
-  const {longitude, latitude, bearing, ...rest} = viewState;
+  const {longitude, latitude, bearing} = viewState;
   const viewport = new WebMercatorViewport({...viewState, bearing: 0});
   const bounds = viewport.getBounds();
 
