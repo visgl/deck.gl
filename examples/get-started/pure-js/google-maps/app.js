@@ -1,82 +1,56 @@
 /* global document */
+import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {Loader} from '@googlemaps/js-api-loader';
 
-const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
+// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
+const AIR_PORTS =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const initialViewState = {
-  longitude: -74,
-  latitude: 40.7,
-  zoom: 11,
-  maxZoom: 16,
-  pitch: 0,
-  bearing: 0,
-  maxPitch: 0 // Tilt not supported in Apple Maps
-};
-const maleColor = [0, 128, 255];
-const femaleColor = [255, 0, 128];
+// Set your Google Maps API key here or via environment variable
+const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
+const GOOGLE_MAP_ID = process.env.GoogleMapsMapId; // eslint-disable-line
 
-async function init() {
-  await setupMapKitJs();
-  const layers = [
-    new ScatterplotLayer({
-      id: 'scatter-plot',
-      data: DATA_URL,
-      radiusScale: 30,
-      radiusMinPixels: 0.25,
-      getPosition: d => [d[0], d[1], 0],
-      getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
-      getRadius: 1,
-      updateTriggers: {
-        getFillColor: [maleColor, femaleColor]
-      }
-    })
-  ];
+const loader = new Loader({apiKey: GOOGLE_MAPS_API_KEY});
 
-  const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
-
-  // Sync deck view state with Apple Maps
-  const {region, rotation} = viewPropsFromViewState(initialViewState);
-  const map = new mapkit.Map('map', {region, rotation});
-  deck.setProps({
-    onViewStateChange: ({viewState}) => {
-      const {region, rotation} = viewPropsFromViewState(viewState);
-      map.setRegionAnimated(region, false);
-      map.setRotationAnimated(rotation, false);
-    }
+loader.importLibrary('maps').then(googlemaps => {
+  const map = new googlemaps.Map(document.getElementById('map'), {
+    center: {lat: 51.47, lng: 0.45},
+    zoom: 5,
+    mapId: GOOGLE_MAP_ID
   });
-}
-init();
 
-/**
- * Converts deck.gl viewState into {region, rotation} used for Apple Maps
- */
-function viewPropsFromViewState(viewState) {
-  const {longitude, latitude, bearing, ...rest} = viewState;
-  const viewport = new WebMercatorViewport({...viewState, bearing: 0});
-  const bounds = viewport.getBounds();
+  const overlay = new DeckOverlay({
+    layers: [
+      new GeoJsonLayer({
+        id: 'airports',
+        data: AIR_PORTS,
+        // Styles
+        filled: true,
+        pointRadiusMinPixels: 2,
+        pointRadiusScale: 2000,
+        getPointRadius: f => 11 - f.properties.scalerank,
+        getFillColor: [200, 0, 80, 180],
+        // Interactive props
+        pickable: true,
+        autoHighlight: true,
+        onClick: info =>
+          // eslint-disable-next-line
+          info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      }),
+      new ArcLayer({
+        id: 'arcs',
+        data: AIR_PORTS,
+        dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+        // Styles
+        getSourcePosition: f => [-0.4531566, 51.4709959], // London
+        getTargetPosition: f => f.geometry.coordinates,
+        getSourceColor: [0, 128, 200],
+        getTargetColor: [200, 0, 80],
+        getWidth: 1
+      })
+    ]
+  });
 
-  const center = new mapkit.Coordinate(latitude, longitude);
-  const span = new mapkit.CoordinateSpan(bounds[3] - bounds[1], bounds[2] - bounds[0]);
-  const region = new mapkit.CoordinateRegion(center, span);
-  const rotation = -bearing;
-
-  return {region, rotation};
-}
-
-/**
- * Wait for MapKit JS to be ready to use
- */
-async function setupMapKitJs() {
-  // If MapKit JS is not yet loaded...
-  if (!window.mapkit || window.mapkit.loadedLibraries.length === 0) {
-    // ...await <script>'s data-callback (window.initMapKit).
-    await new Promise(resolve => {
-      window.initMapKit = resolve;
-    });
-    // Clean up.
-    delete window.initMapKit;
-  }
-}
+  overlay.setMap(map);
+});
