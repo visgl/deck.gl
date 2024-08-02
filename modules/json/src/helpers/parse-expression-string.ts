@@ -1,8 +1,7 @@
 import {get} from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
-import * as expressionEval from 'expression-eval';
-const {parse, eval: evaluate} = expressionEval;
+import {parse, eval as evaluate} from '../utils/expression-eval';
 
 const cachedExpressionMap = {
   '-': object => object
