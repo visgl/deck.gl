@@ -447,7 +447,6 @@ export default class HeatmapLayer<
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
       bindings: {inTexture: weightsTexture},
-      uniforms: {textureSize},
       targetTexture: maxWeightsTexture!,
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
@@ -462,6 +461,7 @@ export default class HeatmapLayer<
         blendAlphaDstFactor: 'one'
       }
     });
+    maxWeightTransform.model.shaderInputs.setProps({maxWeight: {textureSize}});
 
     this.setState({
       weightsTexture,
