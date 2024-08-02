@@ -46,8 +46,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     texCoords: Buffer;
   };
 
-  getShaders() {
-    return {vs, fs, modules: [project32, triangleUniforms]};
+  getShaders(shaders: any) {
+    return super.getShaders({vs, fs, modules: [project32, triangleUniforms]});
   }
 
   initializeState({device}: LayerContext): void {
