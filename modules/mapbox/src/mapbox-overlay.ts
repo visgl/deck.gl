@@ -42,6 +42,11 @@ export default class MapboxOverlay implements IControl {
     this._props = otherProps;
   }
 
+  /** Equivalent of `deck.isInitialized`. */
+  get isInitialized(): boolean {
+    return Boolean(this._deck?.isInitialized);
+  }
+
   /** Update (partial) props of the underlying Deck instance. */
   setProps(props: MapboxOverlayProps): void {
     if (this._interleaved && props.layers) {
@@ -158,13 +163,13 @@ export default class MapboxOverlay implements IControl {
     return 'top-left';
   }
 
-  /** Forwards the Deck.pickObject method */
+  /** Equivalent of `pickObject`. */
   pickObject(params: Parameters<Deck['pickObject']>[0]): ReturnType<Deck['pickObject']> {
     assert(this._deck);
     return this._deck.pickObject(params);
   }
 
-  /** Forwards the Deck.pickMultipleObjects method */
+  /** Equivalent of `pickMultipleObjects`. */
   pickMultipleObjects(
     params: Parameters<Deck['pickMultipleObjects']>[0]
   ): ReturnType<Deck['pickMultipleObjects']> {
@@ -172,7 +177,7 @@ export default class MapboxOverlay implements IControl {
     return this._deck.pickMultipleObjects(params);
   }
 
-  /** Forwards the Deck.pickObjects method */
+  /** Equivalent of `pickObjects`. */
   pickObjects(params: Parameters<Deck['pickObjects']>[0]): ReturnType<Deck['pickObjects']> {
     assert(this._deck);
     return this._deck.pickObjects(params);
