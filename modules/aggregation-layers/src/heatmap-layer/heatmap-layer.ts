@@ -407,7 +407,7 @@ export default class HeatmapLayer<
     }
   }
 
-  _createWeightsTransform(shaders: {vs: string; fs?: string}) {
+  _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     const attributeManager = this.getAttributeManager()!;
@@ -612,13 +612,18 @@ export default class HeatmapLayer<
     const attributeManager = this.getAttributeManager()!;
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
-    const uniforms = {radiusPixels, commonBounds, textureWidth: textureSize, weightsScale};
     this._setModelAttributes(weightsTransform.model, attributes);
     weightsTransform.model.setVertexCount(this.getNumInstances());
     weightsTransform.model.updateModuleSettings(moduleSettings);
 
     // TODO tidy and remove uniforms
-    const weightProps: WeightProps = {...uniforms, weightsTexture: weightsTexture!};
+    const weightProps: WeightProps = {
+      radiusPixels,
+      commonBounds,
+      textureWidth: textureSize,
+      weightsScale,
+      weightsTexture: weightsTexture!
+    };
     const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleSettings;
     const {modelMatrix} = this.props;
     weightsTransform.model.shaderInputs.setProps({
@@ -655,7 +660,10 @@ export default class HeatmapLayer<
   // input: worldBounds: [minLong, minLat, maxLong, maxLat]
   // input: opts.useLayerCoordinateSystem : layers coordiante system is used
   // optput: commonBounds: [minX, minY, maxX, maxY] scaled to fit the current texture
-  _worldToCommonBounds(worldBounds, opts: {useLayerCoordinateSystem?: boolean} = {}) {
+  _worldToCommonBounds(
+    worldBounds,
+    opts: {useLayerCoordinateSystem?: boolean} = {}
+  ): [number, number, number, number] {
     const {useLayerCoordinateSystem = false} = opts;
     const [minLong, minLat, maxLong, maxLat] = worldBounds;
     const {viewport} = this.context;
