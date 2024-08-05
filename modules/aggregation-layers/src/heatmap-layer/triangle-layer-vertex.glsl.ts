@@ -25,10 +25,6 @@ export default `\
 #define SHADER_NAME heatp-map-layer-vertex-shader
 
 uniform sampler2D maxTexture;
-uniform float intensity;
-uniform vec2 colorDomain;
-uniform float threshold;
-uniform float aggregationMode;
 
 in vec3 positions;
 in vec2 texCoords;
@@ -41,14 +37,14 @@ void main(void) {
   gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0));
   vTexCoords = texCoords;
   vec4 maxTexture = texture(maxTexture, vec2(0.5));
-  float maxValue = aggregationMode < 0.5 ? maxTexture.r : maxTexture.g;
-  float minValue = maxValue * threshold;
-  if (colorDomain[1] > 0.) {
+  float maxValue = triangle.aggregationMode < 0.5 ? maxTexture.r : maxTexture.g;
+  float minValue = maxValue * triangle.threshold;
+  if (triangle.colorDomain[1] > 0.) {
     // if user specified custom domain use it.
-    maxValue = colorDomain[1];
-    minValue = colorDomain[0];
+    maxValue = triangle.colorDomain[1];
+    minValue = triangle.colorDomain[0];
   }
-  vIntensityMax = intensity / maxValue;
-  vIntensityMin = intensity / minValue;
+  vIntensityMax = triangle.intensity / maxValue;
+  vIntensityMin = triangle.intensity / minValue;
 }
 `;
