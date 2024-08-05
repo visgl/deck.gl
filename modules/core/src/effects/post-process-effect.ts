@@ -43,10 +43,10 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
         outputBuffer = target;
       }
       const clearCanvas = !renderToTarget || Boolean(params.clearCanvas);
-      const moduleSettings = {};
+      const moduleProps = {};
       const uniforms = this.module.passes[index].uniforms;
-      moduleSettings[this.module.name] = {...this.props, ...uniforms};
-      passes[index].render({clearCanvas, inputBuffer, outputBuffer, moduleSettings});
+      moduleProps[this.module.name] = {...this.props, ...uniforms};
+      passes[index].render({clearCanvas, inputBuffer, outputBuffer, moduleProps});
 
       const switchBuffer = outputBuffer as Framebuffer;
       outputBuffer = inputBuffer;
@@ -76,7 +76,6 @@ function createPasses(device: Device, module: ShaderPass, id: string): ScreenPas
 const FS_TEMPLATE_INPUTS = `\
 #version 300 es
 uniform sampler2D texSrc;
-uniform vec2 texSize;
 
 in vec2 position;
 in vec2 coordinate;
@@ -89,14 +88,14 @@ const FILTER_FS_TEMPLATE = (func: string) => `\
 ${FS_TEMPLATE_INPUTS}
 void main() {
   fragColor = texture(texSrc, coordinate);
-  fragColor = ${func}(fragColor, texSize, coordinate);
+  fragColor = ${func}(fragColor, screen.texSize, coordinate);
 }
 `;
 
 const SAMPLER_FS_TEMPLATE = (func: string) => `\
 ${FS_TEMPLATE_INPUTS}
 void main() {
-  fragColor = ${func}(texSrc, texSize, coordinate);
+  fragColor = ${func}(texSrc, screen.texSize, coordinate);
 }
 `;
 

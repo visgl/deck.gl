@@ -4,7 +4,8 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  DefaultProps
+  DefaultProps,
+  PickingInfo
 } from '@deck.gl/core';
 import {ColumnLayer, ColumnLayerProps} from '@deck.gl/layers';
 import {quadbinToOffset} from './quadbin-utils';
@@ -83,6 +84,11 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
   static layerName = 'RasterLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    highlightedObjectIndex: number;
+    highlightColor: number[];
+  };
+
   renderLayers(): Layer | null | LayersList {
     // Rendering props underlying layer
     const {
@@ -98,10 +104,12 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
 
     const blockSize = data.blockSize ?? 0;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
-    const offset = [xOffset, yOffset, scale / blockSize];
+    const offset = [xOffset, yOffset];
+    const lineWidthScale = scale / blockSize;
 
     // Filled Column Layer
     const CellLayer = this.getSubLayerClass('column', RasterColumnLayer);
+    const {highlightedObjectIndex, highlightColor} = this.state;
     return new CellLayer(
       this.props,
       this.getSubLayerProps({
@@ -118,7 +126,10 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
           data, // Pass through data for getSubLayerAccessor()
           length: blockSize * blockSize
         },
-        offset
+        offset,
+        lineWidthScale, // Re-use widthScale prop to pass cell scale,
+        highlightedObjectIndex,
+        highlightColor
       }
     );
   }
@@ -136,5 +147,39 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       // @ts-ignore (TS2349) accessor is always function
       return accessor({properties: proxy}, info);
     };
+  }
+
+  getPickingInfo(params: any) {
+    const info = super.getPickingInfo(params);
+
+    if (info.index !== -1) {
+      info.object = this.getSubLayerAccessor((x: any) => x)(undefined, {
+        data: this.props,
+        index: info.index
+      });
+    }
+
+    return info;
+  }
+
+  _updateAutoHighlight(info: PickingInfo) {
+    const {highlightedObjectIndex} = this.state;
+    let newHighlightedObjectIndex: number = -1;
+
+    if (info.index !== -1) {
+      newHighlightedObjectIndex = info.index;
+    }
+
+    if (highlightedObjectIndex !== newHighlightedObjectIndex) {
+      let {highlightColor} = this.props;
+      if (typeof highlightColor === 'function') {
+        highlightColor = highlightColor(info);
+      }
+
+      this.setState({
+        highlightColor,
+        highlightedObjectIndex: newHighlightedObjectIndex
+      });
+    }
   }
 }

@@ -134,11 +134,20 @@ export default class VectorTileLayer<
     const tileBbox = props.tile.bbox as any;
     const {west, south, east, north} = tileBbox;
 
+    const clipProps = {
+      extensions: [new ClipExtension(), ...(props.extensions || [])],
+      clipBounds: [west, south, east, north]
+    };
+
     const subLayerProps = {
       ...props,
       autoHighlight: false,
-      extensions: [new ClipExtension(), ...(props.extensions || [])],
-      clipBounds: [west, south, east, north]
+      // Do not perform clipping on points (#9059)
+      _subLayerProps: {
+        'polygons-fill': clipProps,
+        'polygons-stroke': clipProps,
+        linestrings: clipProps
+      }
     };
 
     const subLayer = new GeoJsonLayer(subLayerProps);

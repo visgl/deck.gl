@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform arcUniforms {
@@ -35,5 +34,5 @@ export const arcUniforms = {
     widthMinPixels: 'f32',
     widthMaxPixels: 'f32',
     widthUnits: 'i32'
-  } as const satisfies UniformTypes<ArcProps>
+  }
 } as const satisfies ShaderModule<ArcProps>;

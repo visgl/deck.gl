@@ -11,16 +11,6 @@ in vec4 instanceLineColors;
 
 in vec3 instancePickingColors;
 
-// Custom uniforms
-uniform float opacity;
-uniform bool extruded;
-uniform bool stroked;
-uniform bool isStroke;
-uniform float coverage;
-uniform float elevationScale;
-uniform float widthScale;
-uniform vec3 offset;
-
 // Result
 out vec4 vColor;
 #ifdef FLAT_SHADING
@@ -29,18 +19,18 @@ out vec4 position_commonspace;
 
 void main(void) {
   // Rather than positioning using attribute, layout pixel grid using gl_InstanceID
-  vec2 common_position = offset.xy;
-  float scale = offset.z;
+  vec2 common_position = column.offset.xy;
+  float scale = column.widthScale; // Re-use widthScale prop to pass cell scale
 
   int yIndex = - (gl_InstanceID / BLOCK_WIDTH);
   int xIndex = gl_InstanceID + (yIndex * BLOCK_WIDTH);
   common_position += scale * vec2(float(xIndex), float(yIndex));
 
-  vec4 color = isStroke ? instanceLineColors : instanceFillColors;
+  vec4 color = column.isStroke ? instanceLineColors : instanceFillColors;
 
   // if alpha == 0.0 or z < 0.0, do not render element
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
-  float cellWidth = coverage * scale;
+  float cellWidth = column.coverage * scale;
 
   // Get position directly from quadbin, rather than projecting
   // Important to set geometry.position before using project_ methods below
@@ -56,11 +46,11 @@ void main(void) {
   // calculate stroke offset
   float strokeOffsetRatio = 1.0;
 
-  if (extruded) {
-    elevation = instanceElevations * (positions.z + 1.0) / 2.0 * elevationScale;
-  } else if (stroked) {
-    float halfOffset = project_pixel_size(widthScale) / cellWidth;
-    if (isStroke) {
+  if (column.extruded) {
+    elevation = instanceElevations * (positions.z + 1.0) / 2.0 * column.elevationScale;
+  } else if (column.stroked) {
+    float halfOffset = project_pixel_size(column.widthScale) / cellWidth;
+    if (column.isStroke) {
       strokeOffsetRatio -= sign(positions.z) * halfOffset;
     } else {
       strokeOffsetRatio -= halfOffset;
@@ -81,16 +71,16 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Light calculations
-  if (extruded && !isStroke) {
+  if (column.extruded && !column.isStroke) {
 #ifdef FLAT_SHADING
     position_commonspace = geometry.position;
-    vColor = vec4(color.rgb, color.a * opacity);
+    vColor = vec4(color.rgb, color.a * layer.opacity);
 #else
     vec3 lightColor = lighting_getLightColor(color.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
-    vColor = vec4(lightColor, color.a * opacity);
+    vColor = vec4(lightColor, color.a * layer.opacity);
 #endif
   } else {
-    vColor = vec4(color.rgb, color.a * opacity);
+    vColor = vec4(color.rgb, color.a * layer.opacity);
   }
 
   DECKGL_FILTER_COLOR(vColor, geometry);

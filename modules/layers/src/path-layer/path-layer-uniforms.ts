@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform pathUniforms {
@@ -38,5 +37,5 @@ export const pathUniforms = {
     miterLimit: 'f32',
     billboard: 'f32',
     widthUnits: 'i32'
-  } as const satisfies UniformTypes<Required<PathProps>>
+  }
 } as const satisfies ShaderModule<PathProps>;

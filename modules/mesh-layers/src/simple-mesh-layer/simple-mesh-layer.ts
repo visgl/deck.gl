@@ -38,6 +38,7 @@ import {ParsedPBRMaterial} from '@luma.gl/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
+import {simpleMeshUniforms, SimpleMeshProps} from './simple-mesh-layer-uniforms';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
 
@@ -228,7 +229,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking]
+      modules: [project32, phongLighting, picking, simpleMeshUniforms]
     });
   }
 
@@ -335,12 +336,12 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {viewport, renderPass} = this.context;
     const {sizeScale, coordinateSystem, _instanced} = this.props;
 
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
       composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
       flatShading: !this.state.hasNormals
-    });
+    };
+    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     model.draw(renderPass);
   }
 
@@ -359,13 +360,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;
-    model.setBindings({
-      sampler: (texture as Texture) || emptyTexture
-    });
-    model.setUniforms({
+    const simpleMeshProps: SimpleMeshProps = {
+      sampler: (texture as Texture) || emptyTexture,
       hasTexture: Boolean(texture)
-    });
-
+    };
+    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     return model;
   }
 
@@ -375,12 +374,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
     if (model) {
-      model.setBindings({
-        sampler: texture || emptyTexture
-      });
-      model.setUniforms({
+      const simpleMeshProps: SimpleMeshProps = {
+        sampler: texture || emptyTexture,
         hasTexture: Boolean(texture)
-      });
+      };
+      model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     }
   }
 }

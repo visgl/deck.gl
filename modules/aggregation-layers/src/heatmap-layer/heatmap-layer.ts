@@ -41,7 +41,8 @@ import {
   log,
   Position,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
@@ -200,6 +201,10 @@ export default class HeatmapLayer<
     visibleWorldBounds: number[];
     viewportCorners: number[][];
   };
+
+  getShaders(shaders: any) {
+    return super.getShaders({...shaders, modules: [project32]});
+  }
 
   initializeState() {
     super.initializeAggregationLayer(DIMENSIONS);
@@ -593,6 +598,12 @@ export default class HeatmapLayer<
     weightsTransform.model.setVertexCount(this.getNumInstances());
     weightsTransform.model.setUniforms(uniforms);
     weightsTransform.model.updateModuleSettings(moduleSettings);
+
+    const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleSettings;
+    const {modelMatrix} = this.props;
+    weightsTransform.model.shaderInputs.setProps({
+      project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
+    });
     weightsTransform.run({
       parameters: {viewport: [0, 0, textureSize, textureSize]},
       clearColor: [0, 0, 0, 0]

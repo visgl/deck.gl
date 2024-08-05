@@ -85,12 +85,26 @@ export type FillStyleModuleProps = {
   fillPatternTexture: Texture;
 };
 
+type FillStyleModuleUniforms = {
+  patternTextureSize?: [number, number];
+  patternEnabled?: boolean;
+  patternMask?: boolean;
+  uvCoordinateOrigin?: [number, number];
+  uvCoordinateOrigin64Low?: [number, number];
+};
+
+type FillStyleModuleBindings = {
+  fill_patternTexture?: Texture;
+};
+
 /* eslint-disable camelcase */
-function getPatternUniforms(opts: FillStyleModuleProps | {}): Record<string, any> {
+function getPatternUniforms(
+  opts?: FillStyleModuleProps | {}
+): FillStyleModuleBindings & FillStyleModuleUniforms {
   if (!opts) {
     return {};
   }
-  const uniforms = {} as Record<string, any>;
+  const uniforms: FillStyleModuleBindings & FillStyleModuleUniforms = {};
   if ('fillPatternTexture' in opts) {
     const {fillPatternTexture} = opts;
     uniforms.fill_patternTexture = fillPatternTexture;
@@ -101,12 +115,12 @@ function getPatternUniforms(opts: FillStyleModuleProps | {}): Record<string, any
     const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
     const {commonOrigin: coordinateOriginCommon} = projectUniforms;
 
-    const coordinateOriginCommon64Low = [
+    const coordinateOriginCommon64Low: [number, number] = [
       fp64LowPart(coordinateOriginCommon[0]),
       fp64LowPart(coordinateOriginCommon[1])
     ];
 
-    uniforms.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
+    uniforms.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2) as [number, number];
     uniforms.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
     uniforms.patternMask = fillPatternMask;
     uniforms.patternEnabled = fillPatternEnabled;
@@ -128,4 +142,8 @@ export const patternShaders = {
     uvCoordinateOrigin: 'vec2<f32>',
     uvCoordinateOrigin64Low: 'vec2<f32>'
   }
-} as const satisfies ShaderModule<FillStyleModuleProps>;
+} as const satisfies ShaderModule<
+  FillStyleModuleProps,
+  FillStyleModuleUniforms,
+  FillStyleModuleBindings
+>;
