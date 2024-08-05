@@ -73,7 +73,7 @@ test('WebGLAggregator#resources', t => {
   t.end();
 });
 
-test.skip('WebGLAggregator#1D', t => {
+test('WebGLAggregator#1D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income [2] highest education, grouped by age
   const aggregator = new WebGLAggregator(device, {
@@ -175,7 +175,7 @@ test.skip('WebGLAggregator#1D', t => {
   t.end();
 });
 
-test.skip('WebGLAggregator#2D', t => {
+test('WebGLAggregator#2D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income, grouped by [age, education]
   const aggregator = new WebGLAggregator(device, {
