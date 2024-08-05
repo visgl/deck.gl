@@ -616,7 +616,6 @@ export default class HeatmapLayer<
     weightsTransform.model.setVertexCount(this.getNumInstances());
     weightsTransform.model.updateModuleSettings(moduleSettings);
 
-    // TODO tidy and remove uniforms
     const weightProps: WeightProps = {
       radiusPixels,
       commonBounds,
