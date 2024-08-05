@@ -1,5 +1,5 @@
 import {BufferTransform} from '@luma.gl/engine';
-import {glsl, createRenderTarget} from './utils';
+import {createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Buffer, Texture} from '@luma.gl/core';
 import type {WebGLAggregatorProps} from './webgl-aggregator';
@@ -113,7 +113,7 @@ export class WebGLAggregationTransform {
 }
 
 function createTransform(device: Device, props: WebGLAggregatorProps): BufferTransform {
-  const vs = glsl`\
+  const vs = /* glsl */ `\
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-vertex
 
@@ -174,7 +174,7 @@ void main() {
 }
 `;
 
-  const fs = glsl`\
+  const fs = /* glsl */ `\
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-fragment
 
