@@ -149,6 +149,7 @@ export class WebGLBinSorter {
       clearStencil: false
     });
     model.setParameters({
+      blend: true,
       blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one',
       blendAlphaSrcFactor: 'one',

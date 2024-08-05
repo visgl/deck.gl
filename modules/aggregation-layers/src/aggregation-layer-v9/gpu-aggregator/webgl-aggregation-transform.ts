@@ -220,6 +220,7 @@ void main() {
     fs,
     topology: 'point-list',
     parameters: {
+      blend: true,
       blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one',
       blendColorOperation: 'max',
