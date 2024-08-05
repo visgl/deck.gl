@@ -21,8 +21,6 @@
 import {
   Layer,
   project32,
-  gouraudLighting,
-  phongLighting,
   picking,
   UNIT,
   LayerProps,
