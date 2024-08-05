@@ -74,13 +74,13 @@ export default class LayersPass extends Pass {
       parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
-      parameters.scissorRect = options.scissorRect;
+      parameters.scissorRect = options.scissorRect as [number, number, number, number];
     }
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters,
-      clearColor,
+      clearColor: clearColor as [number, number, number, number],
       clearDepth,
       clearStencil
     });

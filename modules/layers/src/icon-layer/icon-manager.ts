@@ -84,7 +84,7 @@ function resizeImage(
   maxWidth: number,
   maxHeight: number
 ): {
-  data: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
+  image: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
   width: number;
   height: number;
 } {
@@ -94,7 +94,7 @@ function resizeImage(
 
   if (resizeRatio === 1) {
     // No resizing required
-    return {data: imageData, width, height};
+    return {image: imageData, width, height};
   }
 
   ctx.canvas.height = height;
@@ -104,7 +104,7 @@ function resizeImage(
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
   ctx.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
-  return {data: ctx.canvas, width, height};
+  return {image: ctx.canvas, width, height};
 }
 
 function getIconId(icon: UnpackedIcon): string {
@@ -448,16 +448,15 @@ export default class IconManager {
           const iconDef = this._mapping[id];
           const {x, y, width: maxWidth, height: maxHeight} = iconDef;
 
-          const {data, width, height} = resizeImage(
+          const {image, width, height} = resizeImage(
             ctx,
             imageData as ImageBitmap,
             maxWidth,
             maxHeight
           );
 
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.setTexture2DData({
-            data,
+          this._texture?.copyExternalImage({
+            image,
             x: x + (maxWidth - width) / 2,
             y: y + (maxHeight - height) / 2,
             width,
