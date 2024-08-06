@@ -19,10 +19,15 @@ import {TilejsonPropType} from './utils';
 import {TilejsonResult} from '../sources';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Texture, TextureProps} from '@luma.gl/core';
-import {
-  defaultColorRange,
-  colorRangeToFlatArray
-} from '../../../aggregation-layers/src/utils/color-utils';
+
+const defaultColorRange: Color[] = [
+  [255, 255, 178],
+  [254, 217, 118],
+  [254, 178, 76],
+  [253, 141, 60],
+  [240, 59, 32],
+  [189, 0, 38]
+];
 
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
@@ -40,6 +45,24 @@ const TEXTURE_PROPS: TextureProps = {
 function unitDensityForCell(cell: bigint) {
   const cellResolution = Number(getResolution(cell));
   return Math.pow(4.0, cellResolution);
+}
+
+/**
+ * Converts a colorRange array to a flat array with 4 components per color
+ */
+function colorRangeToFlatArray(colorRange: Color[]): Uint8Array {
+  const flatArray = new Uint8Array(colorRange.length * 4);
+  let index = 0;
+
+  for (let i = 0; i < colorRange.length; i++) {
+    const color = colorRange[i];
+    flatArray[index++] = color[0];
+    flatArray[index++] = color[1];
+    flatArray[index++] = color[2];
+    flatArray[index++] = Number.isFinite(color[3]) ? (color[3] as number) : 255;
+  }
+
+  return flatArray;
 }
 
 const uniformBlock = `\
@@ -180,7 +203,6 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
       data,
       getWeight,
       colorDomain,
-      colorRange,
       intensity,
       radiusPixels,
       _subLayerProps,
@@ -239,7 +261,6 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
         colorDomain,
 
-        // colorRange,
         radiusPixels,
         intensity,
         _subLayerProps: subLayerProps,
@@ -293,7 +314,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
   _updateColorTexture(opts) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
+    const colors = colorRangeToFlatArray(colorRange);
 
     if (colorTexture && colorTexture?.width === colorRange.length) {
       // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
