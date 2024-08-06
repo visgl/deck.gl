@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.26] - Aug 6 2024
+
+- CARTO: fix subLayerProps overriding in VectorTileLayer (#9075)
+
 #### deck.gl [9.0.25] - Aug 2 2024
 
 - CARTO: support filters in spatial index sources (#9065)
