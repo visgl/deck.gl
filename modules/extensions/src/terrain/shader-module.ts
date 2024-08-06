@@ -49,6 +49,7 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .join('\n');
 
 const uniformBlock =
+  // eslint-disable-next-line prefer-template
   TERRAIN_MODE_CONSTANTS +
   /* glsl */ `
 uniform terrainUniforms {
@@ -62,7 +63,9 @@ uniform sampler2D terrain_map;
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
+  // eslint-disable-next-line prefer-template
   vs: uniformBlock + /* glsl */ `out vec3 commonPos;`,
+  // eslint-disable-next-line prefer-template
   fs: uniformBlock + /* glsl */ `in vec3 commonPos;`,
   inject: {
     'vs:#main-start': /* glsl */ `
