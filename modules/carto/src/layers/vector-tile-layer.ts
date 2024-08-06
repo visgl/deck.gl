@@ -134,9 +134,19 @@ export default class VectorTileLayer<
     const tileBbox = props.tile.bbox as any;
     const {west, south, east, north} = tileBbox;
 
+    const extensions = [new ClipExtension(), ...(props.extensions || [])];
     const clipProps = {
-      extensions: [new ClipExtension(), ...(props.extensions || [])],
       clipBounds: [west, south, east, north]
+    };
+
+    const applyClipExtensionToSublayerProps = (subLayerId: string) => {
+      return {
+        [subLayerId]: {
+          ...clipProps,
+          ...props?._subLayerProps?.[subLayerId],
+          extensions: [...extensions, ...(props?._subLayerProps?.[subLayerId]?.extensions || [])]
+        }
+      };
     };
 
     const subLayerProps = {
@@ -144,9 +154,10 @@ export default class VectorTileLayer<
       autoHighlight: false,
       // Do not perform clipping on points (#9059)
       _subLayerProps: {
-        'polygons-fill': clipProps,
-        'polygons-stroke': clipProps,
-        linestrings: clipProps
+        ...props._subLayerProps,
+        ...applyClipExtensionToSublayerProps('polygons-fill'),
+        ...applyClipExtensionToSublayerProps('polygons-stroke'),
+        ...applyClipExtensionToSublayerProps('linestrings')
       }
     };
 
