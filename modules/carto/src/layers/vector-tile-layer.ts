@@ -144,9 +144,10 @@ export default class VectorTileLayer<
       autoHighlight: false,
       // Do not perform clipping on points (#9059)
       _subLayerProps: {
-        'polygons-fill': clipProps,
-        'polygons-stroke': clipProps,
-        linestrings: clipProps
+        ...props._subLayerProps,
+        'polygons-fill': {...clipProps, ...props?._subLayerProps?.['polygons-fill']},
+        'polygons-stroke': {...clipProps, ...props?._subLayerProps?.['polygons-stroke']},
+        linestrings: {...clipProps, ...props?._subLayerProps?.linestrings}
       }
     };
 
