@@ -139,33 +139,25 @@ export default class VectorTileLayer<
       clipBounds: [west, south, east, north]
     };
 
+    const applyClipExtensionToSublayerProps = (subLayerId: string) => {
+      return {
+        [subLayerId]: {
+          ...clipProps,
+          ...props?._subLayerProps?.[subLayerId],
+          extensions: [...extensions, ...(props?._subLayerProps?.[subLayerId]?.extensions || [])]
+        }
+      };
+    };
+
     const subLayerProps = {
       ...props,
       autoHighlight: false,
       // Do not perform clipping on points (#9059)
       _subLayerProps: {
         ...props._subLayerProps,
-        'polygons-fill': {
-          ...clipProps,
-          ...props?._subLayerProps?.['polygons-fill'],
-          extensions: [
-            ...extensions,
-            ...(props?._subLayerProps?.['polygons-fill']?.extensions || [])
-          ]
-        },
-        'polygons-stroke': {
-          ...clipProps,
-          ...props?._subLayerProps?.['polygons-stroke'],
-          extensions: [
-            ...extensions,
-            ...(props?._subLayerProps?.['polygons-stroke']?.extensions || [])
-          ]
-        },
-        linestrings: {
-          ...clipProps,
-          ...props?._subLayerProps?.linestrings,
-          extensions: [...extensions, ...(props?._subLayerProps?.linestrings?.extensions || [])]
-        }
+        ...applyClipExtensionToSublayerProps('polygons-fill'),
+        ...applyClipExtensionToSublayerProps('polygons-stroke'),
+        ...applyClipExtensionToSublayerProps('linestrings')
       }
     };
 
