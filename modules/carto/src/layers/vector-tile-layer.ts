@@ -134,8 +134,8 @@ export default class VectorTileLayer<
     const tileBbox = props.tile.bbox as any;
     const {west, south, east, north} = tileBbox;
 
+    const extensions = [new ClipExtension(), ...(props.extensions || [])];
     const clipProps = {
-      extensions: [new ClipExtension(), ...(props.extensions || [])],
       clipBounds: [west, south, east, north]
     };
 
@@ -145,9 +145,27 @@ export default class VectorTileLayer<
       // Do not perform clipping on points (#9059)
       _subLayerProps: {
         ...props._subLayerProps,
-        'polygons-fill': {...clipProps, ...props?._subLayerProps?.['polygons-fill']},
-        'polygons-stroke': {...clipProps, ...props?._subLayerProps?.['polygons-stroke']},
-        linestrings: {...clipProps, ...props?._subLayerProps?.linestrings}
+        'polygons-fill': {
+          ...clipProps,
+          ...props?._subLayerProps?.['polygons-fill'],
+          extensions: [
+            ...extensions,
+            ...(props?._subLayerProps?.['polygons-fill']?.extensions || [])
+          ]
+        },
+        'polygons-stroke': {
+          ...clipProps,
+          ...props?._subLayerProps?.['polygons-stroke'],
+          extensions: [
+            ...extensions,
+            ...(props?._subLayerProps?.['polygons-stroke']?.extensions || [])
+          ]
+        },
+        linestrings: {
+          ...clipProps,
+          ...props?._subLayerProps?.linestrings,
+          extensions: [...extensions, ...(props?._subLayerProps?.linestrings?.extensions || [])]
+        }
       }
     };
 
