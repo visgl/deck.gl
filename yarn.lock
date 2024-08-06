@@ -1927,7 +1927,7 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.17.tgz#7c06cb3a8079fd9d5224de52d0ccc803218f8e7a"
   integrity sha512-epyW9CrNuEvPfdHQ1yOe/flFfDaihmrdgzw9M7JaKR6XlLDmjL1hKdCKugJjgNQ9wWpnOiiZAlfd7LzsNYW7lA==
 
-"@luma.gl/core@~9.0.17":
+"@luma.gl/core@~9.0.0", "@luma.gl/core@~9.0.17":
   version "9.0.17"
   resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.0.17.tgz#683e287188fc150269b26647b20ded92c1ba87e6"
   integrity sha512-AQJEvYcbkMBOywy/h5opZja0ay2DZ5aU88GyG5dRnA00usEocJf7qQGol2Skpm8Y258jdnV3yf2f3uzklKCnFQ==
@@ -1938,7 +1938,7 @@
     "@probe.gl/stats" "^4.0.2"
     "@types/offscreencanvas" "^2019.6.4"
 
-"@luma.gl/engine@~9.0.17":
+"@luma.gl/engine@~9.0.0", "@luma.gl/engine@~9.0.17":
   version "9.0.17"
   resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.0.17.tgz#c6fc0e353578c96c116d9aae1d16d9b63a840e34"
   integrity sha512-pTKDdWI8Pm5bVJUY46Jlvpz3qXTubYpIFwodmd4kmrl8UDQnrUt2Yq4sYuE9oLRxer788gLxWCp2SoJZZJJcfQ==
