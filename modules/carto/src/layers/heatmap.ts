@@ -1,54 +1,29 @@
 import type {ShaderPass} from '@luma.gl/shadertools';
-import {Color} from '@deck.gl/core';
+import {Texture} from '@luma.gl/core';
 const glsl = (s: TemplateStringsArray) => `${s}`;
 
 /**
  * @filter       Heatmap
  * @param radiusPixels Blur radius in pixels, controls smoothness of heatmap
  * @param colorDomain Domain to apply to values prior to applying color scale
- * @param color1-6 Colors to use in color scale
+ * @param colorTexture 1D RGB lookup texture for color scale
+ * @param intensity Multiplier to apply to value
+ * @param opacity Output opacity
  */
 
 const fs = glsl`\
 uniform heatmapUniforms {
-  vec2 delta;
-  float radiusPixels;
   vec2 colorDomain;
-  vec3 color1;
-  vec3 color2;
-  vec3 color3;
-  vec3 color4;
-  vec3 color5;
-  vec3 color6;
+  vec2 delta;
   float intensity;
   float opacity;
+  float radiusPixels;
 } heatmap;
 
-const vec4 STOPS = vec4(0.2, 0.4, 0.6, 0.8);
+uniform sampler2D colorTexture;
 
 vec3 colorGradient(float value) {
-  vec3 c1;
-  vec3 c2;
-  vec2 range;
-  if (value < STOPS.x) {
-    range = vec2(0.0, STOPS.x);
-    c1 = heatmap.color1; c2 = heatmap.color2;
-  } else if (value < STOPS.y) {
-    range = STOPS.xy;
-    c1 = heatmap.color2; c2 = heatmap.color3;
-  } else if (value < STOPS.z) {
-    range = STOPS.yz;
-    c1 = heatmap.color3; c2 = heatmap.color4;
-  } else if (value < STOPS.w) {
-    range = STOPS.zw;
-    c1 = heatmap.color4; c2 = heatmap.color5;
-  } else {
-    range = vec2(STOPS.w, 1.0);
-    c1 = heatmap.color5; c2 = heatmap.color6;
-  }
-
-  float f = (clamp(value, 0.0, 1.0) - range.x) / (range.y - range.x);
-  return mix(c1, c2, f) / 255.0;
+  return texture(colorTexture, vec2(value, 0.5)).rgb;
 }
 
 const vec3 SHIFT = vec3(1.0, 256.0, 256.0 * 256.0);
@@ -115,15 +90,6 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
 }
 `;
 
-const defaultColorRange: Color[] = [
-  [255, 255, 178],
-  [254, 217, 118],
-  [254, 178, 76],
-  [253, 141, 60],
-  [240, 59, 32],
-  [189, 0, 38]
-];
-
 export type HeatmapProps = {
   /**
    * Radius of the heatmap blur in pixels, to which the weight of a cell is distributed.
@@ -132,89 +98,59 @@ export type HeatmapProps = {
    */
   radiusPixels?: number;
   /**
-   * Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
+   * Controls how weight values are mapped to the colors in `colorTexture`, as an array of two numbers [`minValue`, `maxValue`].
    *
    * @default [0, 1]
    */
   colorDomain?: [number, number];
   /**
-   * Specified as an array of colors [color1, color2, ...].
-   *
-   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
-   */
-  colorRange: Color[];
-  /**
    * Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than 1 biases the output color towards the higher end of the spectrum, and a value less than 1 biases the output color towards the lower end of the spectrum.
    */
   intensity?: number;
+  /**
+   * Color LUT for color gradient
+   */
+  colorTexture: Texture;
   opacity: number;
 };
 
-export type HeatmapUniforms = {
-  delta?: [number, number];
-  radiusPixels?: number;
-  colorDomain?: [number, number];
-  color1?: [number, number, number];
-  color2?: [number, number, number];
-  color3?: [number, number, number];
-  color4?: [number, number, number];
-  color5?: [number, number, number];
-  color6?: [number, number, number];
-  intensity: number;
-  opacity?: number;
+type PassProps = {
+  delta: [number, number];
 };
 
-export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
+export const heatmap = {
   name: 'heatmap',
   uniformPropTypes: {
-    delta: {value: [0, 1]},
-    radiusPixels: {value: 20, min: 0, softMax: 100},
     colorDomain: {value: [0, 1]},
-    color1: {value: [0, 0, 0]},
-    color2: {value: [0, 0, 0]},
-    color3: {value: [0, 0, 0]},
-    color4: {value: [0, 0, 0]},
-    color5: {value: [0, 0, 0]},
-    color6: {value: [0, 0, 0]},
+    delta: {value: [0, 1]},
     intensity: {value: 1, min: 0.1, max: 10},
-    opacity: {value: 1, min: 0, max: 1}
+    opacity: {value: 1, min: 0, max: 1},
+    radiusPixels: {value: 20, min: 0, softMax: 100}
   },
   uniformTypes: {
-    delta: 'vec2<f32>',
-    radiusPixels: 'f32',
     colorDomain: 'vec2<f32>',
-    color1: 'vec3<f32>',
-    color2: 'vec3<f32>',
-    color3: 'vec3<f32>',
-    color4: 'vec3<f32>',
-    color5: 'vec3<f32>',
-    color6: 'vec3<f32>',
+    delta: 'vec2<f32>',
     intensity: 'f32',
-    opacity: 'f32'
+    opacity: 'f32',
+    radiusPixels: 'f32'
   },
-  // @ts-expect-error stricter luma gl types
   getUniforms: opts => {
+    if (!opts) return {};
     const {
-      delta = [1, 0],
-      colorRange = defaultColorRange,
-      radiusPixels = 20,
       colorDomain = [0, 1],
+      colorTexture,
+      delta = [1, 0],
       intensity = 1,
-      opacity = 1
-    } = opts as HeatmapProps & {delta: [number, number]};
-    const [color1, color2, color3, color4, color5, color6] = colorRange;
+      opacity = 1,
+      radiusPixels = 20
+    } = opts;
     return {
-      delta,
-      color1,
-      color2,
-      color3,
-      color4,
-      color5,
-      color6,
-      radiusPixels,
       colorDomain,
+      colorTexture,
+      delta,
       intensity,
-      opacity
+      opacity,
+      radiusPixels
     };
   },
   fs,
@@ -222,4 +158,4 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     {sampler: true, uniforms: {delta: [1, 0]}},
     {sampler: true, uniforms: {delta: [0, 1]}}
   ]
-};
+} as const satisfies ShaderPass<HeatmapProps & PassProps>;
