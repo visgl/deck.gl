@@ -1076,7 +1076,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (moduleParameters) {
         const {isActive, isAttribute} = moduleParameters.picking;
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
-        const {modelMatrix} = this.props;
+        const {material, modelMatrix} = this.props;
 
         // Do not pass picking module to avoid crash
         // TODO remove `setModuleParameters` from codebase
@@ -1134,8 +1134,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           layer: {opacity},
           lighting: lightSources,
           // TODO pass through material props
-          phongMaterial: {},
-          gouraudMaterial: {},
+          phongMaterial: material,
+          gouraudMaterial: material,
           picking: {isActive, isAttribute} as PickingProps,
           project: {
             viewport,
