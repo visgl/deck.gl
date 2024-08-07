@@ -44,9 +44,10 @@ test('ShadowPass#render', t => {
     effectProps: {shadow_lightId: 0}
   });
 
+  // These will likely fail locally due to DPR (200, 200)
   const shadowMap = shadowPass.fbo.colorAttachments[0].texture;
-  t.equal(shadowMap.width, 200, `ShadowPass resize shadow map width`);
-  t.equal(shadowMap.height, 200, `ShadowPass resize shadow map height`);
+  t.equal(shadowMap.width, 100, `ShadowPass resize shadow map width`);
+  t.equal(shadowMap.height, 100, `ShadowPass resize shadow map height`);
   shadowPass.delete();
   t.end();
 });
