@@ -182,7 +182,7 @@ export default class LightingEffect implements Effect {
     for (let i = 0; i < this.directionalLights.length; i++) {
       const shadowPass = new ShadowPass(device);
       this.shadowPasses[i] = shadowPass;
-      this.shadowMaps[i] = shadowPass.shadowMap;
+      this.shadowMaps[i] = shadowPass.getShadowMap();
     }
   }
 

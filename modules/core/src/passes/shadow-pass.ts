@@ -44,6 +44,17 @@ export default class ShadowPass extends LayersPass {
     });
   }
 
+  delete() {
+    if (this.fbo) {
+      this.fbo.destroy();
+      this.fbo = null!;
+    }
+  }
+
+  getShadowMap(): Texture {
+    return this.fbo.colorAttachments[0].texture;
+  }
+
   render(params) {
     const target = this.fbo;
 
@@ -73,12 +84,5 @@ export default class ShadowPass extends LayersPass {
     return {
       drawToShadowMap: true
     };
-  }
-
-  delete() {
-    if (this.fbo) {
-      this.fbo.destroy();
-      this.fbo = null!;
-    }
   }
 }
