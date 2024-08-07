@@ -1076,6 +1076,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (moduleParameters) {
         const {isActive, isAttribute} = moduleParameters.picking;
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
+        // @ts-expect-error material is not a Layer prop
         const {material, modelMatrix} = this.props;
 
         // Do not pass picking module to avoid crash
