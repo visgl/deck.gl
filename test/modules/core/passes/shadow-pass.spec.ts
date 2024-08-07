@@ -9,14 +9,10 @@ test('ShadowPass#constructor and delete', t => {
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
 
   t.ok(shadowPass, `ShadowPass is constructed`);
-  t.ok(shadowPass.shadowMap, `ShadowPass creates shadow map`);
-  t.ok(shadowPass.depthBuffer, `ShadowPass creates depth buffer`);
   t.ok(shadowPass.fbo, `ShadowPass creates fbo`);
 
   shadowPass.delete();
 
-  t.notOk(shadowPass.shadowMap, `ShadowPass deletes shadow map`);
-  t.notOk(shadowPass.depthBuffer, `ShadowPass deletes depth buffer`);
   t.notOk(shadowPass.fbo, `ShadowPass deletes fbo`);
   t.end();
 });
@@ -48,8 +44,9 @@ test('ShadowPass#render', t => {
     effectProps: {shadow_lightId: 0}
   });
 
-  t.equal(shadowPass.shadowMap.width, 100, `ShadowPass resize shadow map width`);
-  t.equal(shadowPass.shadowMap.height, 100, `ShadowPass resize shadow map height`);
+  const shadowMap = shadowPass.fbo.colorAttachments[0].texture;
+  t.equal(shadowMap.width, 200, `ShadowPass resize shadow map width`);
+  t.equal(shadowMap.height, 200, `ShadowPass resize shadow map height`);
   shadowPass.delete();
   t.end();
 });

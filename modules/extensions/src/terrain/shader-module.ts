@@ -64,9 +64,9 @@ export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
   // eslint-disable-next-line prefer-template
-  vs: uniformBlock + /* glsl */ `out vec3 commonPos;`,
+  vs: uniformBlock + /* glsl */ 'out vec3 commonPos;',
   // eslint-disable-next-line prefer-template
-  fs: uniformBlock + /* glsl */ `in vec3 commonPos;`,
+  fs: uniformBlock + /* glsl */ 'in vec3 commonPos;',
   inject: {
     'vs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_SKIP) {
