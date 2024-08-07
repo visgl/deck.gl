@@ -122,18 +122,26 @@ class ClusterGeoJsonLayer<
 
     const properties = extractAggregationProperties(visibleTiles[0]);
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
+    let needsUpdate = false;
     for (const tile of visibleTiles) {
       // Calculate aggregation based on viewport zoom
       const overZoom = Math.round(zoom - tile.zoom);
       const aggregationLevels = Math.round(clusterLevel) - overZoom;
-      aggregateTile(tile, aggregationLevels, properties, getPosition, getWeight);
+      const didAggregate = aggregateTile(
+        tile,
+        aggregationLevels,
+        properties,
+        getPosition,
+        getWeight
+      );
+      needsUpdate ||= didAggregate;
       data.push(...tile.userData![aggregationLevels]);
     }
 
     data.sort((a, b) => Number(b.count - a.count));
 
     const clusterIds = data?.map((tile: any) => tile.id);
-    const needsUpdate = !deepEqual(clusterIds, this.state.clusterIds, 1);
+    needsUpdate ||= !deepEqual(clusterIds, this.state.clusterIds, 1);
     this.setState({clusterIds});
 
     if (needsUpdate) {
