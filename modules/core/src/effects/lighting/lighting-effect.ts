@@ -9,6 +9,7 @@ import shadow from '../../shaderlib/shadow/shadow';
 
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
+import {LightingProps} from '@luma.gl/shadertools';
 
 const DEFAULT_AMBIENT_LIGHT_PROPS = {color: [255, 255, 255], intensity: 1.0};
 const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
@@ -35,7 +36,7 @@ export default class LightingEffect implements Effect {
   context?: EffectContext;
 
   private shadow: boolean = false;
-  private ambientLight?: AmbientLight | null = null;
+  private ambientLight?: AmbientLight;
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
@@ -64,7 +65,7 @@ export default class LightingEffect implements Effect {
   }
 
   setProps(props: LightingEffectProps) {
-    this.ambientLight = null;
+    this.ambientLight = undefined;
     this.directionalLights = [];
     this.pointLights = [];
 
@@ -73,7 +74,7 @@ export default class LightingEffect implements Effect {
 
       switch (lightSource.type) {
         case 'ambient':
-          this.ambientLight = lightSource;
+          this.ambientLight = lightSource as AmbientLight;
           break;
 
         case 'directional':
@@ -121,11 +122,7 @@ export default class LightingEffect implements Effect {
 
   getModuleParameters(layer: Layer) {
     const parameters: {
-      lightSources?: {
-        ambientLight?: AmbientLight | null;
-        directionalLights: DirectionalLight[];
-        pointLights: PointLight[];
-      };
+      lightSources?: LightingProps;
       shadowMaps?: Texture[];
       dummyShadowMap?: Texture | null;
       shadowColor?: number[];
