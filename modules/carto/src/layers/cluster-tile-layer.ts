@@ -147,7 +147,6 @@ class ClusterGeoJsonLayer<
     if (needsUpdate) {
       const stats = computeAggregationStats(data, properties);
       const binaryData = clustersToBinary(data);
-      // @ts-expect-error extending BinaryFeatureCollection with attributes
       binaryData.points.attributes = {stats};
       this.setState({data: binaryData});
     }
