@@ -12,7 +12,6 @@ export type ClusteredFeaturePropertiesT<FeaturePropertiesT> = FeaturePropertiesT
   id: bigint;
   count: number;
   position: [number, number];
-  stats: Record<keyof FeaturePropertiesT, {min: number; max: number}>;
 };
 export type ParsedQuadbinCell<FeaturePropertiesT> = {id: bigint; properties: FeaturePropertiesT};
 export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePropertiesT>[];
@@ -142,9 +141,20 @@ const EMPTY_BINARY_PROPS = {
   globalFeatureIds: {value: EMPTY_UINT16ARRAY, size: 1}
 };
 
+type BinaryFeatureCollectionWithStats<FeaturePropertiesT> = Omit<
+  BinaryFeatureCollection,
+  'points'
+> & {
+  points: BinaryFeatureCollection['points'] & {
+    attributes?: {
+      stats: Record<keyof FeaturePropertiesT, {min: number; max: number}>;
+    };
+  };
+};
+
 export function clustersToBinary<FeaturePropertiesT>(
   data: ClusteredFeaturePropertiesT<FeaturePropertiesT>[]
-): BinaryFeatureCollection {
+): BinaryFeatureCollectionWithStats<FeaturePropertiesT> {
   const positions = new Float32Array(data.length * 2);
   const featureIds = new Uint16Array(data.length);
   for (let i = 0; i < data.length; i++) {

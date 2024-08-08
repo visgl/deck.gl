@@ -42,8 +42,8 @@ export default function colorBins<DataT = Feature>({
 
   const color = scaleThreshold<number, Color>().domain(domain).range(palette);
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return typeof value === 'number' && Number.isFinite(value) ? color(value) : nullColor;
   };
 }
