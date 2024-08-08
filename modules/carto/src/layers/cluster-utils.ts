@@ -12,7 +12,6 @@ export type ClusteredFeaturePropertiesT<FeaturePropertiesT> = FeaturePropertiesT
   id: bigint;
   count: number;
   position: [number, number];
-  stats: Record<keyof FeaturePropertiesT, {min: number; max: number}>;
 };
 export type ParsedQuadbinCell<FeaturePropertiesT> = {id: bigint; properties: FeaturePropertiesT};
 export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePropertiesT>[];
