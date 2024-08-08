@@ -39,10 +39,10 @@ export function aggregateTile<FeaturePropertiesT>(
     if (properties.every(property => property.name in cell0)) {
       // Use cached result
       return false;
-    } else {
-      // Aggregated properties have changed, re-aggregate
-      tile.userData = {};
     }
+
+    // Aggregated properties have changed, re-aggregate
+    tile.userData = {};
   }
 
   const out: Record<number, any> = {};
