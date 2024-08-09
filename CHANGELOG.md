@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.27] - Aug 9 2024
+
+- CARTO: Move cluster stats into data.points.attributes (#9081)
+- CARTO: Re-aggregate properties on change (#9078)
+
 #### deck.gl [9.0.26] - Aug 6 2024
 
 - CARTO: fix subLayerProps overriding in VectorTileLayer (#9075)
