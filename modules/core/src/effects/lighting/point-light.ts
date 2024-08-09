@@ -25,7 +25,7 @@ export type PointLightOptions = {
    */
   position?: [number, number, number];
   /** Light attenuation
-   * @default [0.0, 0.0, 1.0]
+   * @default [1.0, 0.0, 0.0]
    */
   attenuation?: [number, number, number];
 };
@@ -77,9 +77,6 @@ export class PointLight {
 function getAttenuation(props: PointLightOptions): [number, number, number] {
   if (props.attenuation) {
     return props.attenuation;
-  }
-  if ('intensity' in props) {
-    return [0, 0, props.intensity || 0];
   }
   return DEFAULT_ATTENUATION;
 }
