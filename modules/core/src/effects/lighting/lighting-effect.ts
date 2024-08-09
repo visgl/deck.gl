@@ -77,15 +77,15 @@ export default class LightingEffect implements Effect {
 
       switch (lightSource.type) {
         case 'ambient':
-          this.ambientLight = lightSource as AmbientLight;
+          this.ambientLight = lightSource;
           break;
 
         case 'directional':
-          this.directionalLights.push(lightSource as DirectionalLight);
+          this.directionalLights.push(lightSource);
           break;
 
         case 'point':
-          this.pointLights.push(lightSource as PointLight);
+          this.pointLights.push(lightSource);
           break;
         default:
       }
