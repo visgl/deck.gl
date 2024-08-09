@@ -5,7 +5,7 @@ import type Layer from '../../lib/layer';
 
 const DEFAULT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
 const DEFAULT_LIGHT_INTENSITY = 1.0;
-const DEFAULT_ATTENUATION = [0, 0, 1] as [number, number, number];
+const DEFAULT_ATTENUATION = [1, 0, 0] as [number, number, number];
 const DEFAULT_LIGHT_POSITION = [0.0, 0.0, 1.0] as [number, number, number];
 
 let idCount = 0;
