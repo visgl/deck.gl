@@ -1134,7 +1134,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           terrain: terrainProps,
           layer: {opacity},
           lighting: lightSources,
-          // TODO pass through material props
           phongMaterial: material,
           gouraudMaterial: material,
           picking: {isActive, isAttribute} as PickingProps,
