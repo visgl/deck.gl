@@ -38,7 +38,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.0.21",
+    "@luma.gl/constants": "^9.0.23",
     "@math.gl/web-mercator": "^4.0.0"
   },
   "peerDependencies": {
