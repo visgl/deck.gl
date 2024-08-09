@@ -32,7 +32,7 @@ export type GoogleMapsOverlayProps = Omit<
   | 'width'
   | 'height'
   | 'gl'
-  | 'glOptions'
+  | 'deviceProps'
   | 'parent'
   | 'canvas'
   | '_customRender'
