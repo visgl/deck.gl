@@ -1,6 +1,6 @@
 # PointLight
 
-Create a point light source which emits from a point in all directions.Point lights attenuation is not available. At most 5 directional lights can be supported.
+Create a point light source which emits from a point in all directions. At most 5 directional lights can be supported.
 
 <div align="center">
   <div>
@@ -33,6 +33,12 @@ const pointLight = new PointLight({color, intensity, position});
 * `color` - (number[3],)  RGB color of point light source, default value is `[255, 255, 255]`.
 * `intensity` - (number) Strength of point light source, default value is `1.0`.
 * `position` - (number[3])  Location of point light source, default value is `[0, 0, 1]`.The coordinate system of the position depends on the current [view](./deck.md#views): `[longitude, latitude, altitude]` in geospatial views and world position in non-geospatial views.
+* `attenuation` = (number[3]) Light attenuation coefficients: `[C_constant, C_linear, C_quadratic]`. Reduces the intensity based on the distance `D` from the light:
+   ```
+   Intensity = Intensity / (C_constant + C_linear * D + C_quadratic * D * D)
+   ```
+     * For (approximately) physically correct attenuation, use `attenuation: [1, 0, n]`.
+     * Default: `[1, 0, 0]` (no attenuation due to distance).
 
 ## Source
 

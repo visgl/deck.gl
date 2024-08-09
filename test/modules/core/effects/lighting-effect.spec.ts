@@ -66,7 +66,7 @@ test('LightingEffect#getModuleParameters', t => {
   );
   t.deepEqual(lightSources.pointLights[1].color, [255, 0, 0], 'point light color is ok');
 
-  t.equal(lightSources.ambientLight, null, 'Lighting effect getGLParameters is ok');
+  t.equal(lightSources.ambientLight, undefined, 'Lighting effect getGLParameters is ok');
   t.deepEqual(lightSources.directionalLights, [], 'Lighting effect getGLParameters is ok');
 
   lightingEffect.cleanup(effectContext);

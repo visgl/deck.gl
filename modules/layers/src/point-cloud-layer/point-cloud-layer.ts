@@ -21,7 +21,6 @@
 import {
   Layer,
   project32,
-  gouraudLighting,
   picking,
   UNIT,
   LayerProps,
@@ -36,6 +35,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
+import {gouraudMaterial} from '@luma.gl/shadertools';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
@@ -144,7 +144,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, gouraudLighting, picking, pointCloudUniforms]
+      modules: [project32, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
 

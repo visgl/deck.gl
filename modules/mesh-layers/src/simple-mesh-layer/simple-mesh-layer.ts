@@ -22,19 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {
-  Layer,
-  project32,
-  phongLighting,
-  picking,
-  DefaultProps,
-  log,
-  LayerContext,
-  Material
-} from '@deck.gl/core';
+import {Layer, project32, picking, DefaultProps, log, LayerContext, Material} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
+import {phongMaterial} from '@luma.gl/shadertools';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -229,7 +221,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking, simpleMeshUniforms]
+      modules: [project32, phongMaterial, picking, simpleMeshUniforms]
     });
   }
 
