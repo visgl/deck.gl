@@ -25,11 +25,11 @@ import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import {glsl, ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
 
-const uniformBlock = glsl`
+const uniformBlock = /* glsl */ `
 uniform shadowUniforms {
   bool drawShadowMap;
   bool useShadowMap;
@@ -43,7 +43,7 @@ uniform shadowUniforms {
 } shadow;
 `;
 
-const vertex = glsl`
+const vertex = /* glsl */ `
 const int max_lights = 2;
 
 out vec3 shadow_vPosition[max_lights];
@@ -76,7 +76,7 @@ ${uniformBlock}
 ${vertex}
 `;
 
-const fragment = glsl`
+const fragment = /* glsl */ `
 const int max_lights = 2;
 uniform sampler2D shadow_uShadowMap0;
 uniform sampler2D shadow_uShadowMap1;

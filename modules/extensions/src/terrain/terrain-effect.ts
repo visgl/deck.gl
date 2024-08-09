@@ -43,6 +43,7 @@ export class TerrainEffect implements Effect {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
+    // @ts-expect-error TODO - seems terrainModule is not fully type compatible with ShaderModule?
     deck._addDefaultShaderModule(terrainModule);
   }
 
@@ -113,6 +114,7 @@ export class TerrainEffect implements Effect {
     }
     this.terrainCovers.clear();
 
+    // @ts-expect-error TODO - seems terrainModule is not fully type compatible with ShaderModule?
     deck._removeDefaultShaderModule(terrainModule);
   }
 

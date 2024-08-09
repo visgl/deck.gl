@@ -267,8 +267,8 @@ export class WebGLAggregator implements Aggregator {
     this.needsUpdate.fill(false);
 
     // Uncomment to debug
-    // console.log('binsFBO', new Float32Array(this.device.readPixelsToArrayWebGL(this.binSorter.texture!).buffer));
-    // console.log('binsBuffer', new Float32Array(this.aggregationTransform.binBuffer?.readSyncWebGL().buffer!));
-    // console.log('resultBuffer', new Float32Array(this.aggregationTransform.valueBuffer?.readSyncWebGL().buffer!));
+    console.log('binsFBO', new Float32Array(this.device.readPixelsToArrayWebGL(this.binSorter.texture!).buffer));
+    console.log('binsBuffer', new Float32Array(this.aggregationTransform.binBuffer?.readSyncWebGL().buffer!));
+    console.log('resultBuffer', new Float32Array(this.aggregationTransform.valueBuffer?.readSyncWebGL().buffer!));
   }
 }

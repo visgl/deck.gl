@@ -6,8 +6,8 @@ import {luma} from '@luma.gl/core';
 export const {
   stats,
   registerDevices,
-  getAvailableDevices,
-  getSupportedDevices,
+  getSupportedAdapters,
+  getBestAvailableAdapter,
   setDefaultDeviceProps,
   attachDevice,
   createDevice,

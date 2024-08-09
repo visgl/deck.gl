@@ -321,6 +321,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
       (colorTexture as any).setSubImageData({data: colors});
     } else {
       colorTexture?.destroy();
+      // @ts-ignore TODO v9.1
       colorTexture = this.context.device.createTexture({
         ...TEXTURE_PROPS,
         data: colors,
