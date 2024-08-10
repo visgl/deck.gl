@@ -49,6 +49,7 @@
     "@luma.gl/webgl": "^9.1.0-alpha.15",
     "@math.gl/core": "^4.1.0-alpha.3",
     "@math.gl/sun": "^4.1.0-alpha.3",
+    "@math.gl/types": "^4.1.0-alpha.3",
     "@math.gl/web-mercator": "^4.1.0-alpha.3",
     "@probe.gl/env": "^4.0.9",
     "@probe.gl/log": "^4.0.9",

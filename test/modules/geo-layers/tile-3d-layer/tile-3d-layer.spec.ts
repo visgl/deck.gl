@@ -24,7 +24,7 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 test.skip('Tile3DLayer', async t => {
-  debugger
+  debugger;
   const testCases = [
     {
       props: {

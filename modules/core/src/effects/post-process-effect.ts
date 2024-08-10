@@ -99,7 +99,10 @@ void main() {
 }
 `;
 
-function getFragmentShaderForRenderPass(module: ShaderPass, pass: NonNullable<ShaderPass['passes']>[0]): string {
+function getFragmentShaderForRenderPass(
+  module: ShaderPass,
+  pass: NonNullable<ShaderPass['passes']>[0]
+): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);

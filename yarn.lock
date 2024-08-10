@@ -2237,7 +2237,7 @@
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-4.0.1.tgz#a6f8539f6de39e5483a305d70f8bfa44b3248b69"
   integrity sha512-E9qBKAjVBiZD8Is7TbygiLGtYBP3GSLus6RUJSuzFQegdYXeVagvrs4UkBJxhrRAxw4crfH0Tq7IhTMKuuJNQw==
 
-"@math.gl/types@4.1.0-alpha.3":
+"@math.gl/types@4.1.0-alpha.3", "@math.gl/types@^4.1.0-alpha.3":
   version "4.1.0-alpha.3"
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-4.1.0-alpha.3.tgz#ecffc5280d7c55d1b03663b85ea61892e57e5492"
   integrity sha512-ZQzaAhDz14y9s6SscXZWjU51UnwpTPuWuRzdTvcwhWPZ2QbnYwyyGXO7OzlCPrqlh9pJCm8kcEOcrwvL5AJ91w==
