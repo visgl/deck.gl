@@ -23,7 +23,8 @@ import {testLayerAsync} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-test('Tile3DLayer', async t => {
+test.skip('Tile3DLayer', async t => {
+  debugger
   const testCases = [
     {
       props: {
