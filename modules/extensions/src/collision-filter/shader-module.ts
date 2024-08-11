@@ -1,6 +1,6 @@
 import {Framebuffer, Texture, TextureView} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project, UniformTypes} from '@deck.gl/core';
+import {project} from '@deck.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const vs = glsl`
@@ -120,5 +120,5 @@ export default {
   uniformTypes: {
     sort: 'i32',
     enabled: 'i32'
-  } as const satisfies UniformTypes<CollisionUniforms>
+  }
 } as ShaderModule<CollisionModuleProps>;

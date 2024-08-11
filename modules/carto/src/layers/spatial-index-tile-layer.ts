@@ -1,5 +1,5 @@
 import {registerLoaders} from '@loaders.gl/core';
-import {DefaultProps} from '@deck.gl/core';
+import {DefaultProps, LayerProps} from '@deck.gl/core';
 import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
@@ -57,7 +57,7 @@ export default class SpatialIndexTileLayer<
     }
   }
 
-  getSubLayerPropsByTile(tile: Tile2DHeader) {
+  getSubLayerPropsByTile(tile: Tile2DHeader): Partial<LayerProps> | null {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
       highlightColor: this.state.highlightColor

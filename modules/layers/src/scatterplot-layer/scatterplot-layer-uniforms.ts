@@ -1,5 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
 uniform scatterplotUniforms {
@@ -50,5 +49,5 @@ export const scatterplotUniforms = {
     billboard: 'f32',
     radiusUnits: 'i32',
     lineWidthUnits: 'i32'
-  } as const satisfies UniformTypes<ScatterplotProps>
+  }
 } as const satisfies ShaderModule<ScatterplotProps>;

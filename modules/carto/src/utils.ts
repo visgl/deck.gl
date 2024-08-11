@@ -22,6 +22,14 @@ export function createBinaryProxy(
 
     has(target, property) {
       return property in numericProps || property in target;
+    },
+
+    ownKeys(target) {
+      return [...Object.keys(numericProps), ...Reflect.ownKeys(target)];
+    },
+
+    getOwnPropertyDescriptor(target, prop) {
+      return {enumerable: true, configurable: true};
     }
   });
 }
