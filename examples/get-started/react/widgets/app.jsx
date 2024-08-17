@@ -45,40 +45,45 @@ function Root() {
         new CompassWidget({style: widgetTheme}),
         new FullscreenWidget({style: widgetTheme})
       ]}
-    >
-      <GeoJsonLayer
-        id="base-map"
-        data={COUNTRIES}
-        stroked={true}
-        filled={true}
-        lineWidthMinPixels={2}
-        opacity={0.4}
-        getLineColor={[60, 60, 60]}
-        getFillColor={[200, 200, 200]}
-      />
-      <GeoJsonLayer
-        id="airports"
-        data={AIR_PORTS}
-        filled={true}
-        pointRadiusMinPixels={2}
-        pointRadiusScale={2000}
-        getPointRadius={f => 11 - f.properties.scalerank}
-        getFillColor={[200, 0, 80, 180]}
-        pickable={true}
-        autoHighlight={true}
-        onClick={onClick}
-      />
-      <ArcLayer
-        id="arcs"
-        data={AIR_PORTS}
-        dataTransform={d => d.features.filter(f => f.properties.scalerank < 4)}
-        getSourcePosition={f => [-0.4531566, 51.4709959]}
-        getTargetPosition={f => f.geometry.coordinates}
-        getSourceColor={[0, 128, 200]}
-        getTargetColor={[200, 0, 80]}
-        getWidth={1}
-      />
-    </DeckGL>
+      layers={[
+        new GeoJsonLayer({
+          id: 'base-map',
+          data: COUNTRIES,
+          // Styles
+          stroked: true,
+          filled: true,
+          lineWidthMinPixels: 2,
+          opacity: 0.4,
+          getLineColor: [60, 60, 60],
+          getFillColor: [200, 200, 200]
+        }),
+        new GeoJsonLayer({
+          id: 'airports',
+          data: AIR_PORTS,
+          // Styles
+          filled: true,
+          pointRadiusMinPixels: 2,
+          pointRadiusScale: 2000,
+          getPointRadius: f => 11 - f.properties.scalerank,
+          getFillColor: [200, 0, 80, 180],
+          // Interactive props
+          pickable: true,
+          autoHighlight: true,
+          onClick
+        }),
+        new ArcLayer({
+          id: 'arcs',
+          data: AIR_PORTS,
+          dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+          // Styles
+          getSourcePosition: f => [-0.4531566, 51.4709959], // London
+          getTargetPosition: f => f.geometry.coordinates,
+          getSourceColor: [0, 128, 200],
+          getTargetColor: [200, 0, 80],
+          getWidth: 1
+        })
+      ]}
+    />
   );
 }
 
