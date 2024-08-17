@@ -1,6 +1,6 @@
 import {cellToParent} from 'quadbin';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
-import {Accessor} from '@deck.gl/core';
+import {Accessor, log} from '@deck.gl/core';
 import {BinaryFeatureCollection} from '@loaders.gl/schema';
 
 export type Aggregation = 'any' | 'average' | 'count' | 'min' | 'max' | 'sum';
@@ -12,23 +12,37 @@ export type ClusteredFeaturePropertiesT<FeaturePropertiesT> = FeaturePropertiesT
   id: bigint;
   count: number;
   position: [number, number];
-  stats: Record<keyof FeaturePropertiesT, {min: number; max: number}>;
 };
 export type ParsedQuadbinCell<FeaturePropertiesT> = {id: bigint; properties: FeaturePropertiesT};
 export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePropertiesT>[];
 
+/**
+ * Aggregates tile by specified properties, caching result in tile.userData
+ *
+ * @returns true if data was aggregated, false if cache used
+ */
 export function aggregateTile<FeaturePropertiesT>(
   tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>,
   aggregationLevels: number,
   properties: AggregationProperties<FeaturePropertiesT> = [],
   getPosition: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>,
   getWeight: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, number>
-): void {
-  if (!tile.content) return;
+): boolean {
+  if (!tile.content) return false;
 
   // Aggregate on demand and cache result
   if (!tile.userData) tile.userData = {};
-  if (tile.userData[aggregationLevels]) return;
+  const cell0 = tile.userData[aggregationLevels]?.[0];
+  if (cell0) {
+    // Have already aggregated this tile
+    if (properties.every(property => property.name in cell0)) {
+      // Use cached result
+      return false;
+    }
+
+    // Aggregated properties have changed, re-aggregate
+    tile.userData = {};
+  }
 
   const out: Record<number, any> = {};
   for (const cell of tile.content) {
@@ -80,6 +94,7 @@ export function aggregateTile<FeaturePropertiesT>(
   }
 
   tile.userData[aggregationLevels] = Object.values(out);
+  return true;
 }
 
 export function extractAggregationProperties<FeaturePropertiesT extends {}>(
@@ -90,6 +105,7 @@ export function extractAggregationProperties<FeaturePropertiesT extends {}>(
   for (const name of Object.keys(tile.content![0].properties)) {
     let aggregation = name.split('_').pop()!.toLowerCase() as Aggregation;
     if (!validAggregations.includes(aggregation)) {
+      log.warn(`No valid aggregation present in ${name} property`)();
       aggregation = 'any';
     }
     properties.push({name: name as keyof FeaturePropertiesT, aggregation});
@@ -125,9 +141,20 @@ const EMPTY_BINARY_PROPS = {
   globalFeatureIds: {value: EMPTY_UINT16ARRAY, size: 1}
 };
 
+type BinaryFeatureCollectionWithStats<FeaturePropertiesT> = Omit<
+  BinaryFeatureCollection,
+  'points'
+> & {
+  points: BinaryFeatureCollection['points'] & {
+    attributes?: {
+      stats: Record<keyof FeaturePropertiesT, {min: number; max: number}>;
+    };
+  };
+};
+
 export function clustersToBinary<FeaturePropertiesT>(
   data: ClusteredFeaturePropertiesT<FeaturePropertiesT>[]
-): BinaryFeatureCollection {
+): BinaryFeatureCollectionWithStats<FeaturePropertiesT> {
   const positions = new Float32Array(data.length * 2);
   const featureIds = new Uint16Array(data.length);
   for (let i = 0; i < data.length; i++) {

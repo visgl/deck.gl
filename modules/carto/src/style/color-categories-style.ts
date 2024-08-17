@@ -48,8 +48,8 @@ export default function colorCategories<DataT = Feature>({
     colorsByCategory[c] = palette[i];
   }
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return (typeof value === 'number' && Number.isFinite(value)) || typeof value === 'string'
       ? colorsByCategory[value] || othersColor
       : nullColor;

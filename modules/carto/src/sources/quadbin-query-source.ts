@@ -3,13 +3,17 @@ import {DEFAULT_AGGREGATION_RES_LEVEL_QUADBIN} from '../constants';
 import {baseSource} from './base-source';
 import type {
   AggregationOptions,
+  FilterOptions,
   QuerySourceOptions,
   SourceOptions,
   SpatialDataType,
   TilejsonResult
 } from './types';
 
-export type QuadbinQuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
+export type QuadbinQuerySourceOptions = SourceOptions &
+  QuerySourceOptions &
+  AggregationOptions &
+  FilterOptions;
 
 type UrlParameters = {
   aggregationExp: string;
@@ -18,6 +22,7 @@ type UrlParameters = {
   spatialDataColumn?: string;
   q: string;
   queryParameters?: Record<string, unknown> | unknown[];
+  filters?: Record<string, unknown>;
 };
 
 export const quadbinQuerySource = async function (
@@ -28,7 +33,8 @@ export const quadbinQuerySource = async function (
     aggregationResLevel = DEFAULT_AGGREGATION_RES_LEVEL_QUADBIN,
     sqlQuery,
     spatialDataColumn = 'quadbin',
-    queryParameters
+    queryParameters,
+    filters
   } = options;
   const urlParameters: UrlParameters = {
     aggregationExp,
@@ -42,6 +48,9 @@ export const quadbinQuerySource = async function (
   }
   if (queryParameters) {
     urlParameters.queryParameters = queryParameters;
+  }
+  if (filters) {
+    urlParameters.filters = filters;
   }
   return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };

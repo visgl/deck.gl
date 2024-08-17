@@ -102,10 +102,10 @@ export default {
   },
   raster: {
     source: rasterSource,
-    tableName: 'cartodb-data-engineering-team.jarroyo_raster.sdsc23_5_quadbin',
+    tableName: 'cartobq.public_account.temperature_raster_int8_new',
     getFillColor: colorBins({
       attr: 'band_1',
-      domain: [0, 5, 10, 15, 20, 25, 30],
+      domain: [15, 18, 22, 25, 28, 30, 35],
       colors: 'Temps'
     })
   },

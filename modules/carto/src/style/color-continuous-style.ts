@@ -41,8 +41,8 @@ export default function colorContinuous<DataT = Feature>({
   const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
   const color = scaleLinear<Color>().domain(domain).range(palette);
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return typeof value === 'number' && Number.isFinite(value) ? color(value) : nullColor;
   };
 }
