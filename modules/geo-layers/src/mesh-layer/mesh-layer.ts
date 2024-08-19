@@ -146,18 +146,16 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       this.setState({parsedPBRMaterial});
 
       const {u_BaseColorSampler} = parsedPBRMaterial.bindings;
-      if (u_BaseColorSampler) {
-        model.shaderInputs.setProps({
-          simpleMesh: {
-            sampler: u_BaseColorSampler,
-            hasTexture: true
-          },
-          pbrMaterial: {
-            ...parsedPBRMaterial.bindings,
-            ...parsedPBRMaterial.uniforms
-          }
-        });
-      }
+      const {emptyTexture} = this.state;
+      const simpleMeshProps = {
+        sampler: u_BaseColorSampler || emptyTexture,
+        hasTexture: Boolean(u_BaseColorSampler)
+      };
+      const pbrMaterialProps = {
+        ...parsedPBRMaterial.bindings,
+        ...parsedPBRMaterial.uniforms
+      };
+      model.shaderInputs.setProps({simpleMesh: simpleMeshProps, pbrMaterial: pbrMaterialProps});
     }
   }
 
