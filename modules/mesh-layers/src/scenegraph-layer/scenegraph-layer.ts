@@ -188,13 +188,21 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const modules = [project32, picking, scenegraphUniforms, pbrMaterial];
+    const modules = [project32, picking, scenegraphUniforms];
+    const defines: {LIGHTING_PBR?: 1} = {};
 
     if (this.props._lighting === 'pbr') {
+      // @ts-ignore
       modules.push(pbrMaterial);
+      defines.LIGHTING_PBR = 1;
+    } else {
+      // Dummy shader module needed to handle
+      // pbrMaterial.u_BaseColorSampler binding
+      const dummyPbrMaterial = {name: 'pbrMaterial'};
+      modules.push(dummyPbrMaterial);
     }
 
-    return super.getShaders({vs, fs, modules});
+    return super.getShaders({defines, vs, fs, modules});
   }
 
   initializeState() {

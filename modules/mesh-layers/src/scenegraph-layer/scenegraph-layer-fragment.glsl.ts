@@ -8,8 +8,8 @@ in vec4 vColor;
 
 out vec4 fragColor;
 
-// MODULE_PBRMATERIAL contains all the varying definitions needed
-#ifndef MODULE_PBRMATERIAL
+// pbrMaterial contains all the varying definitions needed
+#ifndef LIGHTING_PBR
   #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
     in vec2 vTEXCOORD_0;
     uniform sampler2D u_BaseColorSampler;
@@ -17,7 +17,7 @@ out vec4 fragColor;
 #endif
 
 void main(void) {
-  #ifdef MODULE_PBRMATERIAL
+  #ifdef LIGHTING_PBR
     fragColor = vColor * pbr_filterColor(vec4(0));
     geometry.uv = pbr_vUV;
   #else
