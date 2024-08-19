@@ -24,10 +24,8 @@ export default `\
 
 precision highp float;
 
-uniform float opacity;
 uniform sampler2D weightsTexture;
 uniform sampler2D colorTexture;
-uniform float aggregationMode;
 
 in vec2 vTexCoords;
 in float vIntensityMin;
@@ -46,7 +44,7 @@ void main(void) {
   vec4 weights = texture(weightsTexture, vTexCoords);
   float weight = weights.r;
 
-  if (aggregationMode > 0.5) {
+  if (triangle.aggregationMode > 0.5) {
     weight /= max(1.0, weights.a);
   }
 
@@ -56,7 +54,7 @@ void main(void) {
   }
 
   vec4 linearColor = getLinearColor(weight);
-  linearColor.a *= opacity;
+  linearColor.a *= layer.opacity;
   fragColor = linearColor;
 }
 `;
