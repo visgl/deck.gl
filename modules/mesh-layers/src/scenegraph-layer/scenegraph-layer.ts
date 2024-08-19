@@ -377,7 +377,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         const {model} = node;
         model.setInstanceCount(numInstances);
 
-        const pbrProjectionProps: PBRProjectionProps = {
+        const pbrProjectionProps: Partial<PBRProjectionProps> = {
           // Needed for PBR (TODO: find better way to get it)
           // eslint-disable-next-line camelcase
           u_Camera: model.uniforms.cameraPosition as [number, number, number]

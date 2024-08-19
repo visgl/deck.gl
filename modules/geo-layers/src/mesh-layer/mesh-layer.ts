@@ -100,7 +100,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     const meshProps: MeshProps = {
       pickFeatureIds: Boolean(featureIds)
     };
-    const pbrProjectionProps: PBRProjectionProps = {
+    const pbrProjectionProps: Partial<PBRProjectionProps> = {
       // Needed for PBR (TODO: find better way to get it)
       // eslint-disable-next-line camelcase
       u_Camera: model.uniforms.cameraPosition as [number, number, number]
