@@ -1,5 +1,11 @@
 # Upgrade Guide
 
+## Upgrading to v9.1
+
+### LightingEffect
+
+- `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).
+
 ## Upgrading to v9.0
 
 **Before you upgrade: known issues**

@@ -390,22 +390,20 @@ test('Layer#Async Iterable Data', async t => {
 });
 
 test('Layer#uniformTransitions', t => {
-  const drawCalls = [];
+  const drawCalls: {opacity: number; modelMatrix: number[]}[] = [];
   const timeline = new Timeline();
 
   class TestLayer extends Layer {
     initializeState() {}
 
-    setModuleParameters(params) {
-      super.setModuleParameters(params);
-      this.state.moduleParameters = params;
+    setShaderModuleProps(props) {
+      super.setShaderModuleProps(props);
+      this.state.shaderModuleProps = props;
     }
 
     draw() {
-      drawCalls.push({
-        opacity: this.props.opacity,
-        modelMatrix: this.state.moduleParameters.modelMatrix
-      });
+      let {layer, project} = this.state.shaderModuleProps as any;
+      drawCalls.push({opacity: layer.opacity, modelMatrix: project.modelMatrix});
     }
   }
 
@@ -467,7 +465,7 @@ test('Layer#uniformTransitions', t => {
       onAfterUpdate: () =>
         t.deepEquals(
           drawCalls.pop(),
-          {opacity: 0.5, modelMatrix: scale2Mat4},
+          {opacity: Math.pow(0.5, 1 / 2.2), modelMatrix: scale2Mat4},
           'layer drawn with opacity in transition'
         )
     },

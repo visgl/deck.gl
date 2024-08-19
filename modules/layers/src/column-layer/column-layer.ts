@@ -21,8 +21,6 @@
 import {
   Layer,
   project32,
-  gouraudLighting,
-  phongLighting,
   picking,
   UNIT,
   LayerProps,
@@ -36,6 +34,7 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
+import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
@@ -254,7 +253,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       vs,
       fs,
       defines,
-      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking, columnUniforms]
+      modules: [project32, flatShading ? phongMaterial : gouraudMaterial, picking, columnUniforms]
     });
   }
 
