@@ -210,6 +210,9 @@ export default [
         widthMinPixels: 4
       })
     ],
+    imageDiffOptions: {
+      threshold: 0.985
+    },
     goldenImage: './test/render/golden-images/polygon-globe-extruded.png'
   }
 ];
