@@ -1031,7 +1031,7 @@ function App() {
 </Tabs>
 
 
-Also note that by directly calling `queryObject`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
+Also note that by directly calling `pickObject`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
 
 ### Under The Hood
 
