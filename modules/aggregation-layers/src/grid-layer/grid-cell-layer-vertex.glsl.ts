@@ -23,8 +23,6 @@ uniform vec2 elevationRange;
 
 // Result
 out vec4 vColor;
-out vec3 cameraPosition;
-out vec4 position_commonspace;
 
 float interp(float value, vec2 domain, vec2 range) {
   float r = min(max((value - domain.x) / (domain.y - domain.x), 0.), 1.);
@@ -44,7 +42,7 @@ void main(void) {
     return;
   }
   
-  vec2 commonPosition = (instancePositions + positions.xy * coverage / 2.0) * cellSizeCommon + cellOriginCommon - project.commonOrigin.xy;
+  vec2 commonPosition = (instancePositions + (positions.xy + 1.0) / 2.0 * coverage) * cellSizeCommon + cellOriginCommon - project.commonOrigin.xy;
   geometry.position = vec4(commonPosition, 0.0, 1.0);
   geometry.normal = project_normal(normals);
 
@@ -63,9 +61,7 @@ void main(void) {
   vColor = interp(instanceColorValues, colorDomain, colorRange);
   vColor.a *= opacity;
   if (extruded) {
-    // Light calculations
-    cameraPosition = project.cameraPosition;
-    position_commonspace = geometry.position;
+    vColor.rgb = lighting_getLightColor(vColor.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
 }

@@ -25,8 +25,8 @@ import GridCellLayer from './grid-cell-layer';
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
-const defaultProps: DefaultProps<CPUGridLayerProps> = {
-  gpuAggregation: true,
+const defaultProps: DefaultProps<GridLayerProps> = {
+  gpuAggregation: false,
 
   // color
   colorDomain: null,
@@ -61,7 +61,7 @@ const defaultProps: DefaultProps<CPUGridLayerProps> = {
 };
 
 /** All properties supported by CPUGridLayer. */
-export type CPUGridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
+export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
 
 /** Properties added by CPUGridLayer. */
 type _GridLayerProps<DataT> = {
@@ -483,9 +483,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       const maxX = Math.max(...corners.map(p => p[0]));
       const maxY = Math.max(...corners.map(p => p[1]));
       binIdRange[0][0] = Math.floor((minX - cellOriginCommon[0]) / cellSizeCommon[0]);
-      binIdRange[0][1] = Math.floor((maxX - cellOriginCommon[0]) / cellSizeCommon[0]);
+      binIdRange[0][1] = Math.floor((maxX - cellOriginCommon[0]) / cellSizeCommon[0]) + 1;
       binIdRange[1][0] = Math.floor((minY - cellOriginCommon[1]) / cellSizeCommon[1]);
-      binIdRange[1][1] = Math.floor((maxY - cellOriginCommon[1]) / cellSizeCommon[1]);
+      binIdRange[1][1] = Math.floor((maxY - cellOriginCommon[1]) / cellSizeCommon[1]) + 1;
     }
 
     this.setState({cellSizeCommon, cellOriginCommon, binIdRange});
@@ -560,7 +560,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getColorValue: [colorsAttribute],
           getElevationValue: [elevationsAttribute]
         },
-        flatShading: true,
         cellOriginCommon,
         cellSizeCommon,
         // Evaluate domain at draw() time

@@ -28,7 +28,7 @@ import './contour-layer/marching-squares.spec';
 // import './gpu-grid-layer/gpu-grid-layer.spec';
 // import './grid-aggregation-layer.spec';
 import './grid-aggregator.spec';
-// import './grid-layer.spec';
+import './grid-layer.spec';
 // import './heatmap-layer/heatmap-layer.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
 // import './hexagon-layer.spec';
