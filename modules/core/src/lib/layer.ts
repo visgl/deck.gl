@@ -1076,9 +1076,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (moduleParameters) {
         const {isActive, isAttribute} = moduleParameters.picking;
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
-        const {modelMatrix} = this.props;
-        this.setModuleParameters(moduleParameters);
+        // @ts-expect-error material is not a Layer prop
+        const {material, modelMatrix} = this.props;
+
+        // Do not pass picking module to avoid crash
+        // TODO remove `setModuleParameters` from codebase
+        const {picking: _, ...rest} = moduleParameters;
+        this.setModuleParameters(rest);
+
         const {
+          // shadow
+          shadowEnabled,
+          drawToShadowMap,
+          shadowMaps,
+          dummyShadowMap,
+          shadowColor,
+          shadowMatrices,
+          shadowLightId,
+          // terrain
           picking,
           heightMap,
           heightMapBounds,
@@ -1086,8 +1101,21 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           terrainCover,
           drawToTerrainHeightMap,
           useTerrainHeightMap,
-          terrainSkipRender
+          terrainSkipRender,
+          // lighting
+          lightSources
         } = moduleParameters;
+
+        const shadowProps = {
+          viewport,
+          shadowEnabled,
+          drawToShadowMap,
+          shadowMaps,
+          dummyShadowMap,
+          shadowColor,
+          shadowMatrices,
+          shadowLightId
+        };
         const terrainProps = {
           viewport,
           picking,
@@ -1099,10 +1127,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           useTerrainHeightMap,
           terrainSkipRender
         };
+
         this.setShaderModuleProps({
           // TODO Revisit whether this is necessary once all layers ported to UBO
+          shadow: shadowProps,
           terrain: terrainProps,
           layer: {opacity},
+          lighting: lightSources,
+          phongMaterial: material,
+          gouraudMaterial: material,
           picking: {isActive, isAttribute} as PickingProps,
           project: {
             viewport,

@@ -54,7 +54,6 @@ export {layerUniforms, picking, project, project32, gouraudLighting, phongLighti
 
 // Useful for custom shader modules
 export type {ProjectUniforms} from './project/viewport-uniforms';
-export type {UniformTypes} from './misc/uniform-types';
 
 // TODO - these should be imported from luma.gl
 /* eslint-disable camelcase */

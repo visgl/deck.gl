@@ -9,21 +9,25 @@ import shadow from '../../shaderlib/shadow/shadow';
 
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
+import {LightingProps} from '@luma.gl/shadertools';
 
-const DEFAULT_AMBIENT_LIGHT_PROPS = {color: [255, 255, 255], intensity: 1.0};
+const DEFAULT_AMBIENT_LIGHT_PROPS = {
+  color: [255, 255, 255] as [number, number, number],
+  intensity: 1.0
+};
 const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
   {
-    color: [255, 255, 255],
+    color: [255, 255, 255] as [number, number, number],
     intensity: 1.0,
-    direction: [-1, 3, -1]
+    direction: [-1, 3, -1] as [number, number, number]
   },
   {
-    color: [255, 255, 255],
+    color: [255, 255, 255] as [number, number, number],
     intensity: 0.9,
-    direction: [1, -8, -2.5]
+    direction: [1, -8, -2.5] as [number, number, number]
   }
 ];
-const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
+const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255] as [number, number, number, number];
 
 export type LightingEffectProps = Record<string, PointLight | DirectionalLight | AmbientLight>;
 
@@ -31,11 +35,11 @@ export type LightingEffectProps = Record<string, PointLight | DirectionalLight |
 export default class LightingEffect implements Effect {
   id = 'lighting-effect';
   props!: LightingEffectProps;
-  shadowColor: number[] = DEFAULT_SHADOW_COLOR;
+  shadowColor: [number, number, number, number] = DEFAULT_SHADOW_COLOR;
   context?: EffectContext;
 
   private shadow: boolean = false;
-  private ambientLight?: AmbientLight | null = null;
+  private ambientLight?: AmbientLight;
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
@@ -64,7 +68,7 @@ export default class LightingEffect implements Effect {
   }
 
   setProps(props: LightingEffectProps) {
-    this.ambientLight = null;
+    this.ambientLight = undefined;
     this.directionalLights = [];
     this.pointLights = [];
 
@@ -77,11 +81,11 @@ export default class LightingEffect implements Effect {
           break;
 
         case 'directional':
-          this.directionalLights.push(lightSource as DirectionalLight);
+          this.directionalLights.push(lightSource);
           break;
 
         case 'point':
-          this.pointLights.push(lightSource as PointLight);
+          this.pointLights.push(lightSource);
           break;
         default:
       }
@@ -121,14 +125,10 @@ export default class LightingEffect implements Effect {
 
   getModuleParameters(layer: Layer) {
     const parameters: {
-      lightSources?: {
-        ambientLight?: AmbientLight | null;
-        directionalLights: DirectionalLight[];
-        pointLights: PointLight[];
-      };
+      lightSources?: LightingProps;
       shadowMaps?: Texture[];
       dummyShadowMap?: Texture | null;
-      shadowColor?: number[];
+      shadowColor?: [number, number, number, number];
       shadowMatrices?: Matrix4[];
     } = this.shadow
       ? {
