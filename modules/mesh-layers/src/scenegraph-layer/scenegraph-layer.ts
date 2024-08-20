@@ -20,7 +20,7 @@
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
-import {pbrMaterial, PBRProjectionProps} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
@@ -197,7 +197,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       defines.LIGHTING_PBR = 1;
     } else {
       // Dummy shader module needed to handle
-      // pbrMaterial.u_BaseColorSampler binding
+      // pbrMaterial.pbr_baseColorSampler binding
       const dummyPbrMaterial = {name: 'pbrMaterial'};
       modules.push(dummyPbrMaterial);
     }
@@ -377,10 +377,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         const {model} = node;
         model.setInstanceCount(numInstances);
 
-        const pbrProjectionProps: Partial<PBRProjectionProps> = {
+        const pbrProjectionProps = {
           // Needed for PBR (TODO: find better way to get it)
           // eslint-disable-next-line camelcase
-          u_Camera: model.uniforms.cameraPosition as [number, number, number]
+          camera: model.uniforms.cameraPosition as [number, number, number]
         };
         const scenegraphProps: ScenegraphProps = {
           sizeScale,

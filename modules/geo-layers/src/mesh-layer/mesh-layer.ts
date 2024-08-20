@@ -1,6 +1,6 @@
 import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
-import {pbrMaterial, PBRProjectionProps} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
@@ -100,10 +100,10 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     const meshProps: MeshProps = {
       pickFeatureIds: Boolean(featureIds)
     };
-    const pbrProjectionProps: Partial<PBRProjectionProps> = {
+    const pbrProjectionProps = {
       // Needed for PBR (TODO: find better way to get it)
       // eslint-disable-next-line camelcase
-      u_Camera: model.uniforms.cameraPosition as [number, number, number]
+      camera: model.uniforms.cameraPosition as [number, number, number]
     };
     model.shaderInputs.setProps({
       pbrProjection: pbrProjectionProps,
@@ -145,13 +145,13 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       // Keep material to explicitly remove textures
       this.setState({parsedPBRMaterial});
 
-      const {u_BaseColorSampler} = parsedPBRMaterial.bindings;
+      const {pbr_baseColorSampler} = parsedPBRMaterial.bindings;
       const {emptyTexture} = this.state;
       const simpleMeshProps = {
-        sampler: u_BaseColorSampler || emptyTexture,
-        hasTexture: Boolean(u_BaseColorSampler)
+        sampler: pbr_baseColorSampler || emptyTexture,
+        hasTexture: Boolean(pbr_baseColorSampler)
       };
-      const pbrMaterialProps = {
+      const {camera, ...pbrMaterialProps} = {
         ...parsedPBRMaterial.bindings,
         ...parsedPBRMaterial.uniforms
       };

@@ -12,7 +12,7 @@ out vec4 fragColor;
 #ifndef LIGHTING_PBR
   #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
     in vec2 vTEXCOORD_0;
-    uniform sampler2D u_BaseColorSampler;
+    uniform sampler2D pbr_baseColorSampler;
   #endif
 #endif
 
@@ -22,7 +22,7 @@ void main(void) {
     geometry.uv = pbr_vUV;
   #else
     #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
-      fragColor = vColor * texture(u_BaseColorSampler, vTEXCOORD_0);
+      fragColor = vColor * texture(pbr_baseColorSampler, vTEXCOORD_0);
       geometry.uv = vTEXCOORD_0;
     #else
       fragColor = vColor;
