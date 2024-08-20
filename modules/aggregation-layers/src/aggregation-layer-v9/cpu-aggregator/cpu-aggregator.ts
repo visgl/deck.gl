@@ -1,7 +1,7 @@
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
 import {sortBins, packBinIds} from './sort-bins';
-import {aggregate} from './aggregate';
+import {aggregate, AggregationFunc} from './aggregate';
 import {VertexAccessor, evaluateVertexAccessor} from './vertex-accessor';
 
 /** Options used to construct a new CPUAggregator */
@@ -19,7 +19,10 @@ export type CPUAggregatorProps = {
 } & Partial<CPUAggregationProps>;
 
 /** Props used to run CPU aggregation, can be changed at any time */
-type CPUAggregationProps = AggregationProps & {};
+type CPUAggregationProps = AggregationProps & {
+  /** Custom callback to aggregate points, overrides the built-in operations */
+  customOperations: (AggregationFunc | null | undefined)[];
+};
 
 export type Bin = {
   id: number[];
@@ -56,6 +59,7 @@ export class CPUAggregator implements Aggregator {
       binOptions: {},
       pointCount: 0,
       operations: [],
+      customOperations: [],
       attributes: {}
     };
     this.needsUpdate = true;
@@ -80,6 +84,15 @@ export class CPUAggregator implements Aggregator {
     if (props.operations) {
       for (let channel = 0; channel < this.channelCount; channel++) {
         if (props.operations[channel] !== oldProps.operations[channel]) {
+          this.setNeedsUpdate(channel);
+        }
+      }
+    }
+    if (props.customOperations) {
+      for (let channel = 0; channel < this.channelCount; channel++) {
+        if (
+          Boolean(props.customOperations[channel]) !== Boolean(oldProps.customOperations[channel])
+        ) {
           this.setNeedsUpdate(channel);
         }
       }
@@ -136,11 +149,12 @@ export class CPUAggregator implements Aggregator {
             this.props.attributes,
             undefined
           ),
-          operation: this.props.operations[channel],
+          operation: this.props.customOperations[channel] || this.props.operations[channel],
           // Reuse allocated typed array
           target: this.results[channel]?.value
         });
         this.results[channel] = {value, domain, type: 'float32', size: 1};
+        this.props.onUpdate?.(channel);
       }
     }
     this.needsUpdate = false;
