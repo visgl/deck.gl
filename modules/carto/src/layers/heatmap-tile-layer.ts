@@ -1,7 +1,15 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
-import {Accessor, CompositeLayer, CompositeLayerProps, DefaultProps, Layer} from '@deck.gl/core';
+import {
+  Accessor,
+  Color,
+  CompositeLayer,
+  CompositeLayerProps,
+  DefaultProps,
+  Layer,
+  UpdateParameters
+} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
@@ -10,13 +18,51 @@ import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
 import {TilejsonPropType} from './utils';
 import {TilejsonResult} from '../sources';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
+import {Texture, TextureProps} from '@luma.gl/core';
 
+const defaultColorRange: Color[] = [
+  [255, 255, 178],
+  [254, 217, 118],
+  [254, 178, 76],
+  [253, 141, 60],
+  [240, 59, 32],
+  [189, 0, 38]
+];
+
+const TEXTURE_PROPS: TextureProps = {
+  format: 'rgba8unorm',
+  mipmaps: false,
+  sampler: {
+    minFilter: 'linear',
+    magFilter: 'linear',
+    addressModeU: 'clamp-to-edge',
+    addressModeV: 'clamp-to-edge'
+  }
+};
 /**
  * Computes the unit density (inverse of cell area)
  */
 function unitDensityForCell(cell: bigint) {
   const cellResolution = Number(getResolution(cell));
   return Math.pow(4.0, cellResolution);
+}
+
+/**
+ * Converts a colorRange array to a flat array with 4 components per color
+ */
+function colorRangeToFlatArray(colorRange: Color[]): Uint8Array {
+  const flatArray = new Uint8Array(colorRange.length * 4);
+  let index = 0;
+
+  for (let i = 0; i < colorRange.length; i++) {
+    const color = colorRange[i];
+    flatArray[index++] = color[0];
+    flatArray[index++] = color[1];
+    flatArray[index++] = color[2];
+    flatArray[index++] = Number.isFinite(color[3]) ? (color[3] as number) : 255;
+  }
+
+  return flatArray;
 }
 
 const uniformBlock = `\
@@ -86,6 +132,7 @@ const defaultProps: DefaultProps<HeatmapTileLayerProps> = {
   getWeight: {type: 'accessor', value: 1},
   onMaxDensityChange: {type: 'function', optional: true, value: null},
   colorDomain: {type: 'array', value: [0, 1]},
+  colorRange: defaultColorRange,
   intensity: {type: 'number', value: 1},
   radiusPixels: {type: 'number', min: 0, max: 100, value: 20}
 };
@@ -99,6 +146,13 @@ export type HeatmapTileLayerProps<DataT = unknown> = _HeatmapTileLayerProps<Data
 /** Properties added by HeatmapTileLayer. */
 type _HeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &
   HeatmapProps & {
+    /**
+     * Specified as an array of colors [color1, color2, ...].
+     *
+     * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+     */
+    colorRange: Color[];
+
     /**
      * The weight of each object.
      *
@@ -117,6 +171,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
   static defaultProps = defaultProps;
 
   state!: {
+    colorTexture?: Texture;
     isLoaded: boolean;
     tiles: Set<Tile2DHeader>;
     viewportChanged?: boolean;
@@ -135,12 +190,19 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     return changeFlags.somethingChanged;
   }
 
+  updateState(opts: UpdateParameters<this>) {
+    const {props, oldProps} = opts;
+    super.updateState(opts);
+    if (props.colorRange !== oldProps.colorRange) {
+      this._updateColorTexture(opts);
+    }
+  }
+
   renderLayers(): Layer {
     const {
       data,
       getWeight,
       colorDomain,
-      colorRange,
       intensity,
       radiusPixels,
       _subLayerProps,
@@ -199,11 +261,12 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
         colorDomain,
 
-        colorRange,
         radiusPixels,
         intensity,
         _subLayerProps: subLayerProps,
         refinementStrategy: 'no-overlap',
+
+        colorTexture: this.state.colorTexture,
 
         // Disable line rendering
         extruded: false,
@@ -246,6 +309,26 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
         transitions: {elevationScale: {type: 'spring', stiffness: 0.3, damping: 0.5}}
       })
     );
+  }
+
+  _updateColorTexture(opts) {
+    const {colorRange} = opts.props;
+    let {colorTexture} = this.state;
+    const colors = colorRangeToFlatArray(colorRange);
+
+    if (colorTexture && colorTexture?.width === colorRange.length) {
+      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
+      (colorTexture as any).setSubImageData({data: colors});
+    } else {
+      colorTexture?.destroy();
+      colorTexture = this.context.device.createTexture({
+        ...TEXTURE_PROPS,
+        data: colors,
+        width: colorRange.length,
+        height: 1
+      });
+    }
+    this.setState({colorTexture});
   }
 }
 

@@ -20,7 +20,7 @@
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
-import {pbr} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
@@ -188,13 +188,20 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const modules = [project32, picking, scenegraphUniforms];
+    const defines: {LIGHTING_PBR?: 1} = {};
+    let pbr;
 
     if (this.props._lighting === 'pbr') {
-      modules.push(pbr);
+      pbr = pbrMaterial;
+      defines.LIGHTING_PBR = 1;
+    } else {
+      // Dummy shader module needed to handle
+      // pbrMaterial.pbr_baseColorSampler binding
+      pbr = {name: 'pbrMaterial'};
     }
 
-    return super.getShaders({vs, fs, modules});
+    const modules = [project32, picking, scenegraphUniforms, pbr];
+    return super.getShaders({defines, vs, fs, modules});
   }
 
   initializeState() {
@@ -368,6 +375,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       if (node instanceof ModelNode) {
         const {model} = node;
         model.setInstanceCount(numInstances);
+
+        const pbrProjectionProps = {
+          // Needed for PBR (TODO: find better way to get it)
+          camera: model.uniforms.cameraPosition as [number, number, number]
+        };
         const scenegraphProps: ScenegraphProps = {
           sizeScale,
           sizeMinPixels,
@@ -375,15 +387,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
           sceneModelMatrix: worldMatrix
         };
-        // TODO replace with shaderInputs.setProps({pbr: u_Camera}) once
-        // luma pbr module ported to UBO
-        model.setUniforms({
-          // Needed for PBR (TODO: find better way to get it)
-          // eslint-disable-next-line camelcase
-          u_Camera: model.uniforms.cameraPosition
-        });
 
-        model.shaderInputs.setProps({scenegraph: scenegraphProps});
+        model.shaderInputs.setProps({
+          pbrProjection: pbrProjectionProps,
+          scenegraph: scenegraphProps
+        });
         model.draw(renderPass);
       }
     });

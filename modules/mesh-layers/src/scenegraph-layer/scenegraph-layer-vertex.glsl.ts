@@ -18,7 +18,7 @@ in vec3 positions;
 #ifdef HAS_UV
   in vec2 texCoords;
 #endif
-#ifdef MODULE_PBR
+#ifdef LIGHTING_PBR
   #ifdef HAS_NORMALS
     in vec3 normals;
   #endif
@@ -27,8 +27,8 @@ in vec3 positions;
 // Varying
 out vec4 vColor;
 
-// MODULE_PBR contains all the varying definitions needed
-#ifndef MODULE_PBR
+// pbrMaterial contains all the varying definitions needed
+#ifndef LIGHTING_PBR
   #ifdef HAS_UV
     out vec2 vTEXCOORD_0;
   #endif
@@ -36,7 +36,7 @@ out vec4 vColor;
 
 // Main
 void main(void) {
-  #if defined(HAS_UV) && !defined(MODULE_PBR)
+  #if defined(HAS_UV) && !defined(LIGHTING_PBR)
     vTEXCOORD_0 = texCoords;
     geometry.uv = texCoords;
   #endif
@@ -47,7 +47,7 @@ void main(void) {
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
 
   vec3 normal = vec3(0.0, 0.0, 1.0);
-  #ifdef MODULE_PBR
+  #ifdef LIGHTING_PBR
     #ifdef HAS_NORMALS
       normal = instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(normals, 0.0)).xyz;
     #endif
@@ -74,7 +74,7 @@ void main(void) {
   }
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  #ifdef MODULE_PBR
+  #ifdef LIGHTING_PBR
     // set PBR data
     pbr_vPosition = geometry.position.xyz;
     #ifdef HAS_NORMALS

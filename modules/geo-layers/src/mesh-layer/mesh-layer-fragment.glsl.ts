@@ -15,7 +15,7 @@ out vec4 fragColor;
 
 void main(void) {
   
-#ifdef MODULE_PBR
+#ifdef MODULE_PBRMATERIAL
 
   fragColor = vColor * pbr_filterColor(vec4(0));
   geometry.uv = pbr_vUV;
@@ -35,7 +35,7 @@ void main(void) {
 
   vec4 color = simpleMesh.hasTexture ? texture(sampler, vTexCoord) : vColor;
   vec3 lightColor = lighting_getLightColor(color.rgb, cameraPosition, position_commonspace.xyz, normal);
-  fragColor = vec4(lightColor, color.a * opacity);
+  fragColor = vec4(lightColor, color.a * layer.opacity);
 
 #endif
 
