@@ -102,7 +102,6 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     };
     const pbrProjectionProps = {
       // Needed for PBR (TODO: find better way to get it)
-      // eslint-disable-next-line camelcase
       camera: model.uniforms.cameraPosition as [number, number, number]
     };
     model.shaderInputs.setProps({

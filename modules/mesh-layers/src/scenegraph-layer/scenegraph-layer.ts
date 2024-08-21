@@ -378,7 +378,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
         const pbrProjectionProps = {
           // Needed for PBR (TODO: find better way to get it)
-          // eslint-disable-next-line camelcase
           camera: model.uniforms.cameraPosition as [number, number, number]
         };
         const scenegraphProps: ScenegraphProps = {
