@@ -1,88 +1,72 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-
 import {
   Accessor,
-  AccessorFunction,
   Color,
-  log,
-  Position,
+  GetPickingInfoParams,
+  CompositeLayerProps,
+  createIterable,
+  Layer,
   Material,
+  project32,
+  LayersList,
+  PickingInfo,
+  Position,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {ColumnLayer} from '@deck.gl/layers';
-
-import {defaultColorRange} from '../utils/color-utils';
-
-import {pointToHexbin} from './hexagon-aggregator';
-import CPUAggregator from '../utils/cpu-aggregator';
-import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
-
+import {getDistanceScales} from '@math.gl/web-mercator';
+import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
+import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
+import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
+import {AggregationOperation} from '../aggregation-layer-v9/aggregator';
 import {AggregateAccessor} from '../types';
 
+import HexagonCellLayer from './hexagon-cell-layer';
+import {pointToHexbin, HexbinVertices, getHexbinCentroid} from './hexbin';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-function nop() {}
+function noop() {}
 
 const defaultProps: DefaultProps<HexagonLayerProps> = {
+  gpuAggregation: false,
+
   // color
   colorDomain: null,
-  colorRange: defaultColorRange,
-  getColorValue: {type: 'accessor', value: null}, // default value is calcuated from `getColorWeight` and `colorAggregation`
+  getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
   getColorWeight: {type: 'accessor', value: 1},
   colorAggregation: 'SUM',
-  lowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
-  upperPercentile: {type: 'number', value: 100, min: 0, max: 100},
-  colorScaleType: 'quantize',
-  onSetColorDomain: nop,
+  // lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
+  // upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
+  // colorScaleType: 'quantize',
+  onSetColorDomain: noop,
 
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: {type: 'accessor', value: null}, // default value is calcuated from `getElevationWeight` and `elevationAggregation`
+  getElevationValue: {type: 'accessor', value: null}, // default value is calculated from `getElevationWeight` and `elevationAggregation`
   getElevationWeight: {type: 'accessor', value: 1},
   elevationAggregation: 'SUM',
-  elevationLowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
-  elevationUpperPercentile: {type: 'number', value: 100, min: 0, max: 100},
   elevationScale: {type: 'number', min: 0, value: 1},
-  elevationScaleType: 'linear',
-  onSetElevationDomain: nop,
+  // elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
+  // elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
+  // elevationScaleType: 'linear',
+  onSetElevationDomain: noop,
 
-  radius: {type: 'number', value: 1000, min: 1},
+  // hexbin
+  radius: {type: 'number', min: 1, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  extruded: false,
-  hexagonAggregator: pointToHexbin,
   getPosition: {type: 'accessor', value: (x: any) => x.position},
-  // Optional material for 'lighting' shader module
-  material: true,
+  hexagonAggregator: {type: 'function', optional: true, value: null},
+  extruded: false,
 
-  // data filter
-  _filterData: {type: 'function', value: null, optional: true}
+  // Optional material for 'lighting' shader module
+  material: true
 };
 
-/** All properties supported by by HexagonLayer. */
-export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> &
-  AggregationLayerProps<DataT>;
+/** All properties supported by HexagonLayer. */
+export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> & CompositeLayerProps;
 
 /** Properties added by HexagonLayer. */
-type _HexagonLayerProps<DataT = unknown> = {
+type _HexagonLayerProps<DataT> = {
   /**
    * Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
    * @default 1000
@@ -90,31 +74,30 @@ type _HexagonLayerProps<DataT = unknown> = {
   radius?: number;
 
   /**
-   * Function to aggregate data into hexagonal bins.
+   * Accessor to retrieve a hexagonal bin index from each data object.
    * @default d3-hexbin
    */
-  hexagonAggregator?: (props: any, params: any) => any;
+  hexagonAggregator?: ((position: number[], radius: number) => [number, number]) | null;
 
   /**
-   * Color scale input domain.
+   * Color scale domain, default is set to the extent of aggregated weights in each cell.
    * @default [min(colorWeight), max(colorWeight)]
    */
   colorDomain?: [number, number] | null;
 
   /**
-   * Specified as an array of colors [color1, color2, ...].
-   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
    */
   colorRange?: Color[];
 
   /**
-   * Hexagon radius multiplier, clamped between 0 - 1.
+   * Cell size multiplier, clamped between 0 - 1.
    * @default 1
    */
   coverage?: number;
 
   /**
-   * Elevation scale input domain. The elevation scale is a linear scale that maps number of counts to elevation.
+   * Elevation scale input domain, default is set to between 0 and the max of aggregated weights in each cell.
    * @default [0, max(elevationWeight)]
    */
   elevationDomain?: [number, number] | null;
@@ -126,56 +109,60 @@ type _HexagonLayerProps<DataT = unknown> = {
   elevationRange?: [number, number];
 
   /**
-   * Hexagon elevation multiplier.
+   * Cell elevation multiplier.
    * @default 1
    */
   elevationScale?: number;
 
   /**
    * Whether to enable cell elevation. If set to false, all cell will be flat.
-   * @default false
+   * @default true
    */
   extruded?: boolean;
 
+  // TODO - v9
   /**
-   * Filter bins and re-calculate color by `upperPercentile`.
-   * Hexagons with color value larger than the `upperPercentile` will be hidden.
+   * Filter cells and re-calculate color by `upperPercentile`.
+   * Cells with value larger than the upperPercentile will be hidden.
    * @default 100
    */
-  upperPercentile?: number;
+  // upperPercentile?: number;
 
+  // TODO - v9
   /**
-   * Filter bins and re-calculate color by `lowerPercentile`.
-   * Hexagons with color value smaller than the `lowerPercentile` will be hidden.
+   * Filter cells and re-calculate color by `lowerPercentile`.
+   * Cells with value smaller than the lowerPercentile will be hidden.
    * @default 0
    */
-  lowerPercentile?: number;
+  // lowerPercentile?: number;
 
   /**
-   * Filter bins and re-calculate elevation by `elevationUpperPercentile`.
-   * Hexagons with elevation value larger than the `elevationUpperPercentile` will be hidden.
+   * Filter cells and re-calculate elevation by `elevationUpperPercentile`.
+   * Cells with elevation value larger than the `elevationUpperPercentile` will be hidden.
    * @default 100
    */
   elevationUpperPercentile?: number;
 
   /**
-   * Filter bins and re-calculate elevation by `elevationLowerPercentile`.
-   * Hexagons with elevation value larger than the `elevationLowerPercentile` will be hidden.
+   * Filter cells and re-calculate elevation by `elevationLowerPercentile`.
+   * Cells with elevation value larger than the `elevationLowerPercentile` will be hidden.
    * @default 0
    */
   elevationLowerPercentile?: number;
 
+  // TODO - v9
   /**
    * Scaling function used to determine the color of the grid cell, default value is 'quantize'.
-   * Supported Values are 'quantize', 'quantile' and 'ordinal'.
+   * Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
    * @default 'quantize'
    */
-  colorScaleType?: 'quantize' | 'quantile' | 'ordinal';
+  // colorScaleType?: 'quantize' | 'linear' | 'quantile' | 'ordinal';
 
+  // TODO - v9
   /**
    * Scaling function used to determine the elevation of the grid cell, only supports 'linear'.
    */
-  elevationScaleType?: 'linear';
+  // elevationScaleType?: 'linear';
 
   /**
    * Material settings for lighting effect. Applies if `extruded: true`.
@@ -187,207 +174,458 @@ type _HexagonLayerProps<DataT = unknown> = {
 
   /**
    * Defines the operation used to aggregate all data object weights to calculate a cell's color value.
+   * Valid values are 'SUM', 'MEAN', 'MIN', 'MAX', 'COUNT'.
+   *
    * @default 'SUM'
    */
-  colorAggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+  colorAggregation?: AggregationOperation;
 
   /**
    * Defines the operation used to aggregate all data object weights to calculate a cell's elevation value.
+   * Valid values are 'SUM', 'MEAN', 'MIN', 'MAX', 'COUNT'.
+   *
    * @default 'SUM'
    */
-  elevationAggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+  elevationAggregation?: AggregationOperation;
 
   /**
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: Accessor<DataT, Position>;
 
   /**
-   * The weight of a data object used to calculate the color value for a bin.
+   * The weight of a data object used to calculate the color value for a cell.
    * @default 1
    */
   getColorWeight?: Accessor<DataT, number>;
 
   /**
-   * After data objects are aggregated into bins, this accessor is called on each cell to get the value that its color is based on.
+   * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its color is based on.
+   * Not supported by GPU aggregation.
    * @default null
    */
   getColorValue?: AggregateAccessor<DataT> | null;
 
   /**
-   * The weight of a data object used to calculate the elevation value for a bin.
+   * The weight of a data object used to calculate the elevation value for a cell.
    * @default 1
    */
   getElevationWeight?: Accessor<DataT, number>;
 
   /**
-   * After data objects are aggregated into bins, this accessor is called on each cell to get the value that its elevation is based on.
+   * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its elevation is based on.
+   * Not supported by GPU aggregation.
    * @default null
    */
   getElevationValue?: AggregateAccessor<DataT> | null;
 
   /**
-   * This callback will be called when cell color domain has been calculated.
+   * This callback will be called when bin color domain has been calculated.
    * @default () => {}
    */
   onSetColorDomain?: (minMax: [number, number]) => void;
 
   /**
-   * This callback will be called when cell elevation domain has been calculated.
+   * This callback will be called when bin elevation domain has been calculated.
    * @default () => {}
    */
   onSetElevationDomain?: (minMax: [number, number]) => void;
 
   /**
-   * (Experimental) Filter data objects
+   * When set to true, aggregation is performed on GPU, provided other conditions are met.
+   * @default false
    */
-  _filterData: null | ((d: DataT) => boolean);
+  gpuAggregation?: boolean;
 };
 
-/** Aggregates data into a hexagon-based heatmap. The color and height of a hexagon are determined based on the objects it contains. */
-export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends AggregationLayer<
-  DataT,
-  ExtraPropsT & Required<_HexagonLayerProps<DataT>>
-> {
+export type HexagonLayerPickingInfo<DataT> = PickingInfo<{
+  /** Column index of the picked cell, starting from 0 at the left of the viewport */
+  col: number;
+  /** Row index of the picked cell, starting from 0 at the top of the viewport */
+  row: number;
+  /** Aggregated color value */
+  colorValue: number;
+  /** Aggregated elevation value */
+  elevationValue: number;
+  /** Number of data points in the picked cell */
+  count: number;
+  /** Centroid of the hexagon */
+  position: [number, number];
+  /** Indices of the data objects in the picked cell. Only available if using CPU aggregation. */
+  pointIndices?: number[];
+  /** The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array. */
+  points?: DataT[];
+}>;
+
+/** Aggregate data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains. */
+export default class HexagonLayer<
+  DataT = any,
+  ExtraPropsT extends {} = {}
+> extends AggregationLayer<DataT, ExtraPropsT & Required<_HexagonLayerProps<DataT>>> {
   static layerName = 'HexagonLayer';
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    cpuAggregator: CPUAggregator;
-    aggregatorState: CPUAggregator['state'];
-    vertices: number[][] | null;
+    // Needed if getColorValue, getElevationValue are used
+    dataAsArray?: DataT[];
+    radiusCommon: number;
+    binIdRange: [number, number][];
   };
-  initializeState() {
-    const cpuAggregator = new CPUAggregator({
-      getAggregator: props => props.hexagonAggregator,
-      getCellSize: props => props.radius
-    });
 
-    this.state = {
-      cpuAggregator,
-      aggregatorState: cpuAggregator.state,
-      vertices: null
-    };
+  getAggregatorType(): string {
+    const {
+      gpuAggregation,
+      hexagonAggregator,
+      // lowerPercentile,
+      // upperPercentile,
+      getColorValue,
+      getElevationValue
+      // colorScaleType
+    } = this.props;
+    if (
+      // GPU aggregation is requested
+      gpuAggregation &&
+      // GPU aggregation is supported by the device
+      WebGLAggregator.isSupported(this.context.device) &&
+      // Default hexbin
+      !hexagonAggregator &&
+      // Does not need custom aggregation operation
+      !getColorValue &&
+      !getElevationValue
+      // Does not need CPU-only scale
+      // && lowerPercentile === 0 &&
+      // && upperPercentile === 100 &&
+      // && colorScaleType !== 'quantile'
+      // && colorScaleType !== 'ordinal'
+    ) {
+      return 'gpu';
+    }
+    return 'cpu';
+  }
+
+  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+    if (type === 'cpu') {
+      const {hexagonAggregator, radius} = this.props;
+      return new CPUAggregator({
+        dimensions: 2,
+        getBin: {
+          sources: ['positions'],
+          getValue: (
+            {positions}: {positions: number[]},
+            index: number,
+            opts: {
+              radiusCommon: number;
+            }
+          ) => {
+            if (hexagonAggregator) {
+              return hexagonAggregator(positions, radius);
+            }
+            const viewport = this.context.viewport;
+            // project to common space
+            const p = viewport.projectPosition(positions);
+            return pointToHexbin(p as number[] as [number, number], opts.radiusCommon);
+          }
+        },
+        getValue: [
+          {sources: ['colorWeights'], getValue: ({colorWeights}) => colorWeights},
+          {sources: ['elevationWeights'], getValue: ({elevationWeights}) => elevationWeights}
+        ]
+      });
+    }
+    return new WebGLAggregator(this.context.device, {
+      dimensions: 2,
+      channelCount: 2,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
+      ...super.getShaders({
+        modules: [project32],
+        vs: `
+  uniform float radiusCommon;
+  in vec3 positions;
+  in vec3 positions64Low;
+  in float colorWeights;
+  in float elevationWeights;
+
+  const float DIST_X = 1.7320508075688772;
+  const float DIST_Y = 1.5;
+  
+  void getBin(out ivec2 binId) {
+    vec2 positionCommon;
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT && (
+      project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET ||
+      project.projectionMode == PROJECTION_MODE_WEB_MERCATOR
+    )) {
+      // Ignore auto offset so that result is not dependent on initial zoom
+      positionCommon = project_mercator_(positions.xy);
+    } else {
+      positionCommon = project_position(positions, positions64Low).xy;
+    }
+
+    float py = positionCommon.y / radiusCommon / DIST_Y;
+    float pj = floor(py + 0.5);
+    float px = positionCommon.x / radiusCommon / DIST_X - mod(pj, 2.0) * 0.5;
+    float pi = floor(px + 0.5);
+    float py1 = py - pj;
+  
+    if (abs(py1) * 3. > 1.) {
+      float px1 = px - pi;
+      float pi2 = pi + (px < pi ? -1. : 1.) * 0.5;
+      float pj2 = pj + (py < pj ? -1. : 1.);
+      float px2 = px - pi2;
+      float py2 = py - pj2;
+      if (px1 * px1 + py1 * py1 > px2 * px2 + py2 * py2) {
+        pi = pi2 + mod(pj, 2.0) - 0.5;
+        pj = pj2;
+      }
+    }
+    binId = ivec2(pi, pj);
+  }
+  void getValue(out vec2 value) {
+    value = vec2(colorWeights, elevationWeights);
+  }
+  `
+      })
+    });
+  }
+
+  initializeState() {
+    super.initializeState();
+
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
-      positions: {size: 3, type: 'float64', accessor: 'getPosition'}
+      positions: {
+        size: 3,
+        accessor: 'getPosition',
+        type: 'float64',
+        fp64: this.use64bitPositions()
+      },
+      colorWeights: {size: 1, accessor: 'getColorWeight'},
+      elevationWeights: {size: 1, accessor: 'getElevationWeight'}
     });
-    // color and elevation attributes can't be added as attributes
-    // they are calculated using 'getValue' accessor that takes an array of pints.
   }
 
-  updateState(opts: UpdateParameters<this>) {
-    super.updateState(opts);
+  updateState(params: UpdateParameters<this>) {
+    const aggregatorChanged = super.updateState(params);
 
-    if (opts.changeFlags.propsOrDataChanged) {
-      const aggregatorState = this.state.cpuAggregator.updateState(opts, {
-        viewport: this.context.viewport,
-        attributes: this.getAttributes()
+    const {props, oldProps, changeFlags} = params;
+    const {aggregator} = this.state;
+    if (
+      (changeFlags.dataChanged || !this.state.dataAsArray) &&
+      (props.getColorValue || props.getElevationValue)
+    ) {
+      // Convert data to array
+      this.state.dataAsArray = Array.from(createIterable(props.data).iterable);
+    }
+    if (
+      aggregatorChanged ||
+      changeFlags.dataChanged ||
+      props.radius !== oldProps.radius ||
+      props.getColorValue !== oldProps.getColorValue ||
+      props.getElevationValue !== oldProps.getElevationValue ||
+      props.colorAggregation !== oldProps.colorAggregation ||
+      props.elevationAggregation !== oldProps.elevationAggregation
+    ) {
+      this._updateBinOptions();
+      const {radiusCommon, binIdRange, dataAsArray} = this.state;
+
+      aggregator.setProps({
+        // @ts-expect-error only used by GPUAggregator
+        binIdRange,
+        pointCount: this.getNumInstances(),
+        operations: [props.colorAggregation, props.elevationAggregation],
+        binOptions: {
+          radiusCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
       });
-      if (this.state.aggregatorState.layerData !== aggregatorState.layerData) {
-        // if user provided custom aggregator and returns hexagonVertices,
-        // Need to recalculate radius and angle based on vertices
-        // @ts-expect-error
-        const {hexagonVertices} = aggregatorState.layerData || {};
-        this.setState({
-          vertices: hexagonVertices && this.convertLatLngToMeterOffset(hexagonVertices)
+
+      if (dataAsArray) {
+        const {getColorValue, getElevationValue} = this.props;
+        aggregator.setProps({
+          // @ts-expect-error only used by CPUAggregator
+          customOperations: [
+            getColorValue &&
+              ((indices: number[]) =>
+                getColorValue(
+                  indices.map(i => dataAsArray[i]),
+                  {indices, data: props.data}
+                )),
+            getElevationValue &&
+              ((indices: number[]) =>
+                getElevationValue(
+                  indices.map(i => dataAsArray[i]),
+                  {indices, data: props.data}
+                ))
+          ]
         });
       }
+    }
+    if (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getColorValue) {
+      aggregator.setNeedsUpdate(0);
+    }
+    if (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getElevationValue) {
+      aggregator.setNeedsUpdate(1);
+    }
 
-      this.setState({
-        // make a copy of the internal state of cpuAggregator for testing
-        aggregatorState
-      });
+    return aggregatorChanged;
+  }
+
+  private _updateBinOptions() {
+    const bounds = this.getBounds();
+    let radiusCommon = 1;
+    const binIdRange: [number, number][] = [
+      [0, 1],
+      [0, 1]
+    ];
+
+    if (bounds && Number.isFinite(bounds[0][0])) {
+      const centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      const {radius} = this.props;
+      const {viewport} = this.context;
+      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+      radiusCommon = unitsPerMeter[0] * radius;
+
+      const corners = [
+        bounds[0],
+        bounds[1],
+        [bounds[0][0], bounds[1][1]],
+        [bounds[1][0], bounds[0][1]]
+      ].map(p => pointToHexbin(viewport.projectFlat(p), radiusCommon));
+
+      const minX = Math.min(...corners.map(p => p[0]));
+      const minY = Math.min(...corners.map(p => p[1]));
+      const maxX = Math.max(...corners.map(p => p[0]));
+      const maxY = Math.max(...corners.map(p => p[1]));
+
+      binIdRange[0] = [minX - 1, maxX + 2]; // i range
+      binIdRange[1] = [minY - 1, maxY + 2]; // j range
+    }
+
+    this.setState({radiusCommon, binIdRange});
+  }
+
+  private _onAggregationUpdate(channel: number) {
+    const props = this.getCurrentLayer()!.props;
+    const {aggregator} = this.state;
+    if (channel === 0) {
+      props.onSetColorDomain(aggregator.getResultDomain(0));
+    } else if (channel === 1) {
+      props.onSetElevationDomain(aggregator.getResultDomain(1));
     }
   }
 
-  convertLatLngToMeterOffset(hexagonVertices) {
-    const {viewport} = this.context;
-    if (Array.isArray(hexagonVertices) && hexagonVertices.length === 6) {
-      // get centroid of hexagons
-      const vertex0 = hexagonVertices[0];
-      const vertex3 = hexagonVertices[3];
+  onAttributeChange(id: string) {
+    const {aggregator} = this.state;
+    switch (id) {
+      case 'positions':
+        aggregator.setNeedsUpdate();
 
-      const centroid = [(vertex0[0] + vertex3[0]) / 2, (vertex0[1] + vertex3[1]) / 2];
-      const centroidFlat = viewport.projectFlat(centroid);
+        this._updateBinOptions();
+        const {radiusCommon, binIdRange} = this.state;
+        aggregator.setProps({
+          // @ts-expect-error only used by GPUAggregator
+          binIdRange,
+          binOptions: {
+            radiusCommon
+          }
+        });
+        break;
 
-      const {metersPerUnit} = viewport.getDistanceScales(centroid);
+      case 'colorWeights':
+        aggregator.setNeedsUpdate(0);
+        break;
 
-      // offset all points by centroid to meter offset
-      const vertices = hexagonVertices.map(vt => {
-        const vtFlat = viewport.projectFlat(vt);
+      case 'elevationWeights':
+        aggregator.setNeedsUpdate(1);
+        break;
 
-        return [
-          (vtFlat[0] - centroidFlat[0]) * metersPerUnit[0],
-          (vtFlat[1] - centroidFlat[1]) * metersPerUnit[1]
-        ];
-      });
-
-      return vertices;
+      default:
+      // This should not happen
     }
-
-    log.error('HexagonLayer: hexagonVertices needs to be an array of 6 points')();
-    return null;
   }
 
-  getPickingInfo({info}) {
-    return this.state.cpuAggregator.getPickingInfo({info});
-  }
+  renderLayers(): LayersList | Layer | null {
+    const {aggregator, radiusCommon} = this.state;
+    const {elevationScale, colorRange, elevationRange, extruded, coverage, material, transitions} =
+      this.props;
+    const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
+    const binAttribute = aggregator.getBins();
+    const colorsAttribute = aggregator.getResult(0);
+    const elevationsAttribute = aggregator.getResult(1);
 
-  // create a method for testing
-  _onGetSublayerColor(cell) {
-    return this.state.cpuAggregator.getAccessor('fillColor')(cell);
-  }
-
-  // create a method for testing
-  _onGetSublayerElevation(cell) {
-    return this.state.cpuAggregator.getAccessor('elevation')(cell);
-  }
-
-  _getSublayerUpdateTriggers() {
-    return this.state.cpuAggregator.getUpdateTriggers(this.props);
-  }
-
-  renderLayers() {
-    const {elevationScale, extruded, coverage, material, transitions} = this.props;
-    const {aggregatorState, vertices} = this.state;
-
-    const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
-    const updateTriggers = this._getSublayerUpdateTriggers();
-
-    const geometry = vertices
-      ? {vertices, radius: 1}
-      : {
-          // default geometry
-          // @ts-expect-error TODO - undefined property?
-          radius: aggregatorState.layerData.radiusCommon || 1,
-          radiusUnits: 'common',
-          angle: 90
-        };
-    return new SubLayerClass(
+    return new CellLayerClass(
+      this.getSubLayerProps({
+        id: 'cells'
+      }),
       {
-        ...geometry,
+        data: {
+          length: aggregator.binCount,
+          attributes: {
+            getBin: binAttribute,
+            getColorValue: colorsAttribute,
+            getElevationValue: elevationsAttribute
+          }
+        },
+        // Data has changed shallowly, but we likely don't need to update the attributes
+        dataComparator: (data, oldData) => data.length === oldData.length,
+        updateTriggers: {
+          getBin: [binAttribute],
+          getColorValue: [colorsAttribute],
+          getElevationValue: [elevationsAttribute]
+        },
         diskResolution: 6,
+        vertices: HexbinVertices,
+        radius: radiusCommon,
         elevationScale,
+        colorRange,
+        elevationRange,
         extruded,
         coverage,
         material,
-
-        getFillColor: this._onGetSublayerColor.bind(this),
-        getElevation: this._onGetSublayerElevation.bind(this),
+        // Evaluate domain at draw() time
+        colorDomain: () => this.props.colorDomain || aggregator.getResultDomain(0),
+        elevationDomain: () => this.props.elevationDomain || aggregator.getResultDomain(1),
         transitions: transitions && {
           getFillColor: transitions.getColorValue || transitions.getColorWeight,
           getElevation: transitions.getElevationValue || transitions.getElevationWeight
-        }
-      },
-      this.getSubLayerProps({
-        id: 'hexagon-cell',
-        updateTriggers
-      }),
-      {
-        data: aggregatorState.layerData.data
+        },
+        // Extensions are already handled by the GPUAggregator, do not pass it down
+        extensions: []
       }
     );
+  }
+
+  getPickingInfo(params: GetPickingInfoParams): HexagonLayerPickingInfo<DataT> {
+    const info: HexagonLayerPickingInfo<DataT> = params.info;
+    const {index} = info;
+    if (index >= 0) {
+      const bin = this.state.aggregator.getBin(index);
+      let object: HexagonLayerPickingInfo<DataT>['object'];
+      if (bin) {
+        const centroidCommon = getHexbinCentroid(
+          bin.id as [number, number],
+          this.state.radiusCommon
+        );
+        const centroid = this.context.viewport.unprojectFlat(centroidCommon);
+
+        object = {
+          col: bin.id[0],
+          row: bin.id[1],
+          position: centroid,
+          colorValue: bin.value[0],
+          elevationValue: bin.value[1],
+          count: bin.count
+        };
+        if (bin.pointIndices) {
+          object.pointIndices = bin.pointIndices;
+          object.points = Array.isArray(this.props.data)
+            ? bin.pointIndices.map(i => (this.props.data as DataT[])[i])
+            : [];
+        }
+      }
+      info.object = object;
+    }
+
+    return info;
   }
 }
