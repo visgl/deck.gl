@@ -37,7 +37,7 @@ test('GridLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.aggregator, 'should update state.useGPUAggregation');
+      t.ok(layer.state.aggregator, 'should have aggregator');
     }
   });
 

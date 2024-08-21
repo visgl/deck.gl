@@ -22,13 +22,8 @@ import {Texture} from '@luma.gl/core';
 import {UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
-import {defaultColorRange, colorRangeToTexture} from '../utils/color-utils';
+import {colorRangeToTexture} from '../utils/color-utils';
 import vs from './grid-cell-layer-vertex.glsl';
-
-const defaultProps: DefaultProps<_GridCellLayerProps> = {
-  colorRange: defaultColorRange,
-  elevationRange: [0, 1000]
-};
 
 /** Proprties added by GridCellLayer. */
 export type _GridCellLayerProps = {
@@ -45,7 +40,6 @@ export default class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLa
   ExtraPropsT & Required<_GridCellLayerProps>
 > {
   static layerName = 'GridCellLayer';
-  static defaultProps = defaultProps as any;
 
   state!: ColumnLayer['state'] & {
     colorTexture: Texture;

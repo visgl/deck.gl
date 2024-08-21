@@ -19,6 +19,7 @@ import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregat
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
 import {AggregationOperation} from '../aggregation-layer-v9/aggregator';
 import {AggregateAccessor} from '../types';
+import {defaultColorRange} from '../utils/color-utils';
 
 import GridCellLayer from './grid-cell-layer';
 
@@ -30,6 +31,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
 
   // color
   colorDomain: null,
+  colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
   getColorWeight: {type: 'accessor', value: 1},
   colorAggregation: 'SUM',
