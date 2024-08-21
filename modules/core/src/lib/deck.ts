@@ -396,7 +396,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       deviceOrPromise = luma.createDevice({
         type: 'best-available',
         ...props.deviceProps,
-        canvas: this._createCanvas(props)
+        createCanvasContext: {canvas: this._createCanvas(props)}
       });
     }
 

@@ -123,8 +123,8 @@ function resizeTexture(
   const newTexture = device.createTexture({format: 'rgba8unorm', width, height, sampler});
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
-    source: texture,
-    destination: newTexture,
+    sourceTexture: texture,
+    destinationTexture: newTexture,
     width: oldWidth,
     height: oldHeight
   });
