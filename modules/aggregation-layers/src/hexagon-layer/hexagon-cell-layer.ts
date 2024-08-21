@@ -21,13 +21,8 @@
 import {Texture} from '@luma.gl/core';
 import {UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
-import {defaultColorRange, colorRangeToTexture} from '../utils/color-utils';
+import {colorRangeToTexture} from '../utils/color-utils';
 import vs from './hexagon-cell-layer-vertex.glsl';
-
-const defaultProps: DefaultProps<_HexagonCellLayerProps> = {
-  colorRange: defaultColorRange,
-  elevationRange: [0, 1000]
-};
 
 /** Proprties added by HexagonCellLayer. */
 export type _HexagonCellLayerProps = {
@@ -44,7 +39,6 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
   ExtraPropsT & Required<_HexagonCellLayerProps>
 > {
   static layerName = 'HexagonCellLayer';
-  static defaultProps = defaultProps as any;
 
   state!: ColumnLayer['state'] & {
     colorTexture: Texture;

@@ -1,3 +1,5 @@
+import {getHexbinCentroidGlsl} from './hexbin';
+
 export default `#version 300 es
 
 #define SHADER_NAME hexagon-cell-layer-vertex-shader
@@ -23,15 +25,7 @@ uniform vec2 elevationRange;
 // Result
 out vec4 vColor;
 
-const float DIST_X = 1.7320508075688772;
-const float DIST_Y = 1.5;
-
-vec2 hexbinCentroid(vec2 binId) {
-  return vec2(
-    (binId.x + mod(binId.y, 2.0) * 0.5) * DIST_X,
-    binId.y * DIST_Y
-  ) * radius;
-}
+${getHexbinCentroidGlsl}
 
 float interp(float value, vec2 domain, vec2 range) {
   float r = min(max((value - domain.x) / (domain.y - domain.x), 0.), 1.);
@@ -51,7 +45,7 @@ void main(void) {
     return;
   }
   
-  vec2 commonPosition = hexbinCentroid(instancePositions) - project.commonOrigin.xy;
+  vec2 commonPosition = hexbinCentroid(instancePositions, radius) - project.commonOrigin.xy;
   commonPosition += positions.xy * radius * coverage;
   geometry.position = vec4(commonPosition, 0.0, 1.0);
   geometry.normal = project_normal(normals);

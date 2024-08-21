@@ -36,6 +36,39 @@ export function pointToHexbin([px, py]: Point, radius: number): HexBin {
   return [pi, pj];
 }
 
+export const pointToHexbinGlsl = `
+const vec2 DIST = vec2(${DIST_X}, ${DIST_Y});
+
+ivec2 pointToHexbin(vec2 p, float radius) {
+  p /= radius * DIST;
+  float pj = round(p.y);
+  float pjm2 = mod(pj, 2.0);
+  p.x -= pjm2 * 0.5;
+  float pi = round(p.x);
+  vec2 d1 = p - vec2(pi, pj);
+
+  if (abs(d1.y) * 3. > 1.) {
+    vec2 v2 = step(0.0, d1) - 0.5;
+    v2.y *= 2.0;
+    vec2 d2 = d1 - v2;
+    if (dot(d1, d1) > dot(d2, d2)) {
+      pi += v2.x + pjm2 - 0.5;
+      pj += v2.y;
+    }
+  }
+  return ivec2(pi, pj);
+}
+`;
+
 export function getHexbinCentroid([i, j]: HexBin, radius: number): Point {
   return [(i + (j & 1) / 2) * radius * DIST_X, j * radius * DIST_Y];
 }
+
+export const getHexbinCentroidGlsl = `
+const vec2 DIST = vec2(${DIST_X}, ${DIST_Y});
+
+vec2 hexbinCentroid(vec2 binId, float radius) {
+  binId.x += fract(binId.y * 0.5);
+  return binId * DIST * radius;
+}
+`;

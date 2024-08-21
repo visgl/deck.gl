@@ -19,9 +19,10 @@ import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregat
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
 import {AggregationOperation} from '../aggregation-layer-v9/aggregator';
 import {AggregateAccessor} from '../types';
+import {defaultColorRange} from '../utils/color-utils';
 
 import HexagonCellLayer from './hexagon-cell-layer';
-import {pointToHexbin, HexbinVertices, getHexbinCentroid} from './hexbin';
+import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGlsl} from './hexbin';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -31,6 +32,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
 
   // color
   colorDomain: null,
+  colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
   getColorWeight: {type: 'accessor', value: 1},
   colorAggregation: 'SUM',
@@ -345,10 +347,9 @@ export default class HexagonLayer<
   in vec3 positions64Low;
   in float colorWeights;
   in float elevationWeights;
-
-  const float DIST_X = 1.7320508075688772;
-  const float DIST_Y = 1.5;
   
+  ${pointToHexbinGlsl}
+
   void getBin(out ivec2 binId) {
     vec2 positionCommon;
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT && (
@@ -360,25 +361,7 @@ export default class HexagonLayer<
     } else {
       positionCommon = project_position(positions, positions64Low).xy;
     }
-
-    float py = positionCommon.y / radiusCommon / DIST_Y;
-    float pj = floor(py + 0.5);
-    float px = positionCommon.x / radiusCommon / DIST_X - mod(pj, 2.0) * 0.5;
-    float pi = floor(px + 0.5);
-    float py1 = py - pj;
-  
-    if (abs(py1) * 3. > 1.) {
-      float px1 = px - pi;
-      float pi2 = pi + (px < pi ? -1. : 1.) * 0.5;
-      float pj2 = pj + (py < pj ? -1. : 1.);
-      float px2 = px - pi2;
-      float py2 = py - pj2;
-      if (px1 * px1 + py1 * py1 > px2 * px2 + py2 * py2) {
-        pi = pi2 + mod(pj, 2.0) - 0.5;
-        pj = pj2;
-      }
-    }
-    binId = ivec2(pi, pj);
+    binId = pointToHexbin(positionCommon, radiusCommon);
   }
   void getValue(out vec2 value) {
     value = vec2(colorWeights, elevationWeights);
