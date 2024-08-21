@@ -104,7 +104,7 @@ function getFragmentShaderForRenderPass(
   pass: NonNullable<ShaderPass['passes']>[0]
 ): string {
   if (pass.filter) {
-    const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
+    const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor_ext`;
     return FILTER_FS_TEMPLATE(func);
   }
 
