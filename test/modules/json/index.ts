@@ -1,3 +1,4 @@
+import './utils/expression-eval.spec';
 import './utils/get.spec';
 import './utils/shallow-equal-objects.spec';
 
