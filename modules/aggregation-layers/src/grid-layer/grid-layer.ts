@@ -60,10 +60,10 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   material: true
 };
 
-/** All properties supported by CPUGridLayer. */
+/** All properties supported by GridLayer. */
 export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
 
-/** Properties added by CPUGridLayer. */
+/** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = {
   /**
    * Size of each cell in meters.
@@ -336,18 +336,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   in float colorWeights;
   in float elevationWeights;
 
-  vec4 _project_position(vec4 position, vec3 position64Low) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
-      return vec4(
-        project_mercator_(position.xy),
-        project_size_at_latitude(position.z, position.y),
-        position.w
-      );
-    }
-
-    return project_position(position, position64Low);
-  }
-  
   void getBin(out ivec2 binId) {
     vec2 positionCommon;
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT && (
@@ -534,13 +522,14 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   renderLayers(): LayersList | Layer | null {
     const {aggregator, cellOriginCommon, cellSizeCommon} = this.state;
+    const {elevationScale, colorRange, elevationRange, extruded, coverage, material, transitions} =
+      this.props;
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
     const colorsAttribute = aggregator.getResult(0);
     const elevationsAttribute = aggregator.getResult(1);
 
     return new CellLayerClass(
-      this.props,
       this.getSubLayerProps({
         id: 'cells'
       }),
@@ -562,9 +551,19 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         },
         cellOriginCommon,
         cellSizeCommon,
+        elevationScale,
+        colorRange,
+        elevationRange,
+        extruded,
+        coverage,
+        material,
         // Evaluate domain at draw() time
         colorDomain: () => this.props.colorDomain || aggregator.getResultDomain(0),
         elevationDomain: () => this.props.elevationDomain || aggregator.getResultDomain(1),
+        transitions: transitions && {
+          getFillColor: transitions.getColorValue || transitions.getColorWeight,
+          getElevation: transitions.getElevationValue || transitions.getElevationWeight
+        },
         // Extensions are already handled by the GPUAggregator, do not pass it down
         extensions: []
       }

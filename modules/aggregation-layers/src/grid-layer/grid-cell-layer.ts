@@ -30,7 +30,7 @@ const defaultProps: DefaultProps<_GridCellLayerProps> = {
   elevationRange: [0, 1000]
 };
 
-/** Proprties added by ScreenGridCellLayer. */
+/** Proprties added by GridCellLayer. */
 export type _GridCellLayerProps = {
   cellSizeCommon: [number, number];
   cellOriginCommon: [number, number];
@@ -44,7 +44,7 @@ export default class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLa
   null,
   ExtraPropsT & Required<_GridCellLayerProps>
 > {
-  static layerName = 'ScreenGridCellLayer';
+  static layerName = 'GridCellLayer';
   static defaultProps = defaultProps as any;
 
   state!: ColumnLayer['state'] & {
