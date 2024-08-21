@@ -78,6 +78,7 @@ test('GridLayer#getAggregatorType', t => {
           );
         }
       },
+      // v9 TODO - enable after implementing upperPercentile
       // {
       //   updateProps: {
       //     upperPercentile: 90
@@ -124,6 +125,7 @@ test('GridLayer#getAggregatorType', t => {
           );
         }
       }
+      // v9 TODO - enable after implementing colorScaleType
       // {
       //   updateProps: {
       //     colorScaleType: 'quantile'

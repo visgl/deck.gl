@@ -44,6 +44,7 @@ export function getMax(pts, key) {
 }
 
 export default [
+  // v9 TODO - enable after implementing colorScaleType
   // {
   //   name: 'cpu-grid-layer:quantile',
   //   viewState: VIEW_STATE,

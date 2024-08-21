@@ -1,8 +1,11 @@
 import type {Bin} from './cpu-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
+/** A reducer function that takes a list of data points and outputs one measurement */
 export type AggregationFunc = (
+  /** Indices of the points */
   pointIndices: number[],
+  /** Accessor to the value for each point */
   getValue: (index: number) => number
 ) => number;
 
@@ -47,7 +50,7 @@ const max: AggregationFunc = (pointIndices, getValue) => {
   return result;
 };
 
-const AGGREGATION_FUNC: Record<AggregationOperation, AggregationFunc> = {
+export const BUILT_IN_OPERATIONS: Record<AggregationOperation, AggregationFunc> = {
   COUNT: count,
   SUM: sum,
   MEAN: mean,
@@ -70,7 +73,7 @@ export function aggregate({
   /** Given the index of a data point, returns its value */
   getValue: (index: number) => number;
   /** Method used to reduce a list of values to one number */
-  operation: AggregationOperation | AggregationFunc;
+  operation: AggregationFunc;
   /** Array to write the output into */
   target?: Float32Array | null;
 }): {
@@ -83,12 +86,9 @@ export function aggregate({
   let min = Infinity;
   let max = -Infinity;
 
-  const aggregationFunc: AggregationFunc =
-    typeof operation === 'function' ? operation : AGGREGATION_FUNC[operation];
-
   for (let j = 0; j < bins.length; j++) {
     const {points} = bins[j];
-    target[j] = aggregationFunc(points, getValue);
+    target[j] = operation(points, getValue);
     if (target[j] < min) min = target[j];
     if (target[j] > max) max = target[j];
   }

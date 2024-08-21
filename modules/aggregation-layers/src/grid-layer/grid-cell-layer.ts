@@ -19,14 +19,14 @@
 // THE SOFTWARE.
 
 import {Texture} from '@luma.gl/core';
-import {UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
+import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
 import {colorRangeToTexture} from '../utils/color-utils';
 import vs from './grid-cell-layer-vertex.glsl';
 
 /** Proprties added by GridCellLayer. */
-export type _GridCellLayerProps = {
+type GridCellLayerProps = {
   cellSizeCommon: [number, number];
   cellOriginCommon: [number, number];
   colorDomain: () => [number, number];
@@ -35,9 +35,9 @@ export type _GridCellLayerProps = {
   elevationRange: [number, number];
 };
 
-export default class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
+export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   null,
-  ExtraPropsT & Required<_GridCellLayerProps>
+  ExtraPropsT & Required<GridCellLayerProps>
 > {
   static layerName = 'GridCellLayer';
 

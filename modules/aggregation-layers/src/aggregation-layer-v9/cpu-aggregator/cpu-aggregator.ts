@@ -1,7 +1,7 @@
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
 import {sortBins, packBinIds} from './sort-bins';
-import {aggregate, AggregationFunc} from './aggregate';
+import {aggregate, AggregationFunc, BUILT_IN_OPERATIONS} from './aggregate';
 import {VertexAccessor, evaluateVertexAccessor} from './vertex-accessor';
 
 /** Options used to construct a new CPUAggregator */
@@ -142,6 +142,9 @@ export class CPUAggregator implements Aggregator {
     }
     for (let channel = 0; channel < this.channelCount; channel++) {
       if (this.needsUpdate === true || this.needsUpdate[channel]) {
+        const operation =
+          this.props.customOperations[channel] ||
+          BUILT_IN_OPERATIONS[this.props.operations[channel]];
         const {value, domain} = aggregate({
           bins: this.bins,
           getValue: evaluateVertexAccessor(
@@ -149,7 +152,7 @@ export class CPUAggregator implements Aggregator {
             this.props.attributes,
             undefined
           ),
-          operation: this.props.customOperations[channel] || this.props.operations[channel],
+          operation,
           // Reuse allocated typed array
           target: this.results[channel]?.value
         });

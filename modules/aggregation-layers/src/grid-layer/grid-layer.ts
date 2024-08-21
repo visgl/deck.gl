@@ -10,6 +10,8 @@ import {
   LayersList,
   PickingInfo,
   Position,
+  Viewport,
+  WebMercatorViewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
@@ -21,7 +23,7 @@ import {AggregationOperation} from '../aggregation-layer-v9/aggregator';
 import {AggregateAccessor} from '../types';
 import {defaultColorRange} from '../utils/color-utils';
 
-import GridCellLayer from './grid-cell-layer';
+import {GridCellLayer} from './grid-cell-layer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -264,6 +266,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     cellSizeCommon: [number, number];
     cellOriginCommon: [number, number];
     binIdRange: [number, number][];
+    aggregatorViewport: Viewport;
   };
 
   getAggregatorType(): string {
@@ -308,7 +311,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               cellOriginCommon: [number, number];
             }
           ) => {
-            const viewport = this.context.viewport;
+            const viewport = this.state.aggregatorViewport;
             // project to common space
             const p = viewport.projectPosition(positions);
             const {cellSizeCommon, cellOriginCommon} = opts;
@@ -339,17 +342,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   in float elevationWeights;
 
   void getBin(out ivec2 binId) {
-    vec2 positionCommon;
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT && (
-      project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET ||
-      project.projectionMode == PROJECTION_MODE_WEB_MERCATOR
-    )) {
-      // Ignore auto offset so that result is not dependent on initial zoom
-      positionCommon = project_mercator_(positions.xy);
-    } else {
-      positionCommon = project_position(positions, positions64Low).xy;
-    }
-    vec2 gridCoords = floor((positionCommon - cellOriginCommon) / cellSizeCommon);
+    vec3 positionCommon = project_position(positions, positions64Low);
+    vec2 gridCoords = floor(positionCommon.xy / cellSizeCommon);
     binId = ivec2(gridCoords);
   }
   void getValue(out vec2 value) {
@@ -451,15 +445,24 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       [0, 1],
       [0, 1]
     ];
+    let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
       const centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {cellSize} = this.props;
-      const {viewport} = this.context;
-      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+
+      const ViewportType = viewport.constructor as any;
+      // We construct a viewport for the GPU aggregator's project module
+      // This viewport is determined by data
+      // removes arbitrary precision variance that depends on initial view state
+      viewport = viewport.isGeospatial
+        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+
+      const {unitsPerMeter} = viewport.getDistanceScales();
       cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
       cellSizeCommon[1] = unitsPerMeter[1] * cellSize;
-      cellOriginCommon = viewport.projectFlat(centroid);
+      cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
       const corners = [
         bounds[0],
@@ -478,7 +481,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       binIdRange[1][1] = Math.floor((maxY - cellOriginCommon[1]) / cellSizeCommon[1]) + 1;
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange});
+    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+  }
+
+  override draw(opts) {
+    // Replaces render time viewport with our own
+    if (opts.moduleParameters.viewport) {
+      opts.moduleParameters.viewport = this.state.aggregatorViewport;
+    }
+    super.draw(opts);
   }
 
   private _onAggregationUpdate(channel: number) {
