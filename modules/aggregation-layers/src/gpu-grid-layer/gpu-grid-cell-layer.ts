@@ -18,17 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {
-  Layer,
-  fp64LowPart,
-  project32,
-  gouraudLighting,
-  picking,
-  LayerProps,
-  DefaultProps
-} from '@deck.gl/core';
+import {Layer, fp64LowPart, project32, picking, LayerProps, DefaultProps} from '@deck.gl/core';
 import {CubeGeometry} from '@luma.gl/engine';
-import {fp64arithmetic} from '@luma.gl/shadertools';
+import {fp64arithmetic, gouraudMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
@@ -89,7 +81,7 @@ export default class GPUGridCellLayer extends Layer<Required<_GPUGridCellLayerPr
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, gouraudLighting, picking, fp64arithmetic]
+      modules: [project32, gouraudMaterial, picking, fp64arithmetic]
     });
   }
 

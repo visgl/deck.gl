@@ -218,7 +218,7 @@ test('GeoJsonLayer#tests', t => {
         subLayers.every(_subLayer => _subLayer.props.data.attributes.getFilterValue),
         'every subLayer should receive getFilterValue binary attribute'
       );
-      const uniforms = getLayerUniforms(subLayer);
+      const uniforms = getLayerUniforms(subLayer, 'dataFilter');
       t.is(uniforms.min, 1, 'has correct uniforms');
       t.is(uniforms.max, 1, 'has correct uniforms');
       t.is(uniforms.useSoftMargin, false, 'has correct uniforms');
