@@ -264,7 +264,12 @@ export class WebGLAggregator implements Aggregator {
     // Read to buffer and calculate domain
     this.aggregationTransform.update(this.binSorter.texture, operations);
 
-    this.needsUpdate.fill(false);
+    for (let i = 0; i < this.channelCount; i++) {
+      if (this.needsUpdate[i]) {
+        this.needsUpdate[i] = false;
+        this.props.onUpdate?.({channel: i});
+      }
+    }
 
     // Uncomment to debug
     // console.log('binsFBO', new Float32Array(this.device.readPixelsToArrayWebGL(this.binSorter.texture!).buffer));

@@ -57,7 +57,7 @@ void main(void) {
       }
       fragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (!scatterplot.filled) {
+  } else if (scatterplot.filled == false) {
     discard;
   } else {
     fragColor = vFillColor;

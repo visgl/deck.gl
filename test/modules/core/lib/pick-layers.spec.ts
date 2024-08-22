@@ -21,24 +21,24 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
 import test from 'tape-promise/tape';
+import {Deck} from '@deck.gl/core';
 import {
-  MapView,
   ScatterplotLayer,
   ColumnLayer,
-  Deck,
   PolygonLayer,
   PathLayer,
-  GeoJsonLayer,
-  GridLayer
-} from 'deck.gl';
+  GeoJsonLayer
+} from '@deck.gl/layers';
+import {GridLayer} from '@deck.gl/aggregation-layers';
+
 import {MaskExtension} from '@deck.gl/extensions';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 import type {DeckProps} from '@deck.gl/core';
 import {equals} from '@math.gl/core';
 
 const VIEW_STATE = {
-  latitude: 37.751537058389985,
   longitude: -122.42694203247012,
+  latitude: 37.751537058389985,
   zoom: 11.5,
   pitch: 0,
   bearing: 0
@@ -47,18 +47,17 @@ const VIEW_STATE = {
 const DECK_PROPS: DeckProps = {
   width: 500,
   height: 550,
-  views: [new MapView()],
   viewState: VIEW_STATE,
   useDevicePixels: false,
   layerFilter: null
 };
 
-const NEW_GRID_LAYER_PICK_METHODS = {
+const GRID_LAYER_PICK_METHODS = {
   pickObject: [
     {
       parameters: {
         x: 60,
-        y: 160
+        y: 1
       },
       results: {
         count: 0
@@ -66,13 +65,13 @@ const NEW_GRID_LAYER_PICK_METHODS = {
     },
     {
       parameters: {
-        x: 300,
-        y: 209
+        x: 120,
+        y: 120
       },
       results: {
         count: 1,
         // point count in the aggregated cell for each pickInfo object
-        cellCounts: [8]
+        cellCounts: [7]
       }
     }
   ],
@@ -81,12 +80,12 @@ const NEW_GRID_LAYER_PICK_METHODS = {
       parameters: {
         x: 300,
         y: 300,
-        width: 100,
-        height: 100
+        width: 50,
+        height: 50
       },
       results: {
-        count: 23,
-        cellCounts: [1, 3, 1, 2, 3, 1, 1, 1, 1, 2, 2, 5, 1, 2, 5, 1, 3, 4, 1, 2, 1, 1, 1]
+        count: 8,
+        cellCounts: [1, 2, 11, 2, 1, 4, 4, 1]
       }
     },
     {
@@ -104,22 +103,13 @@ const NEW_GRID_LAYER_PICK_METHODS = {
   pickMultipleObjects: [
     {
       parameters: {
-        x: 86,
-        y: 215,
+        x: 350,
+        y: 60,
         radius: 1
       },
       results: {
-        count: 4,
-        cellCounts: [4, 22, 3, 4]
-      }
-    },
-    {
-      parameters: {
-        x: 90,
-        y: 350
-      },
-      results: {
-        count: 0
+        count: 2,
+        cellCounts: [43, 26]
       }
     }
   ]
@@ -162,7 +152,6 @@ const TEST_CASES = [
           }
         }
       ],
-      /* luma.gl v9 test disable 
       pickObjects: [
         {
           parameters: {
@@ -187,7 +176,6 @@ const TEST_CASES = [
           }
         }
       ],
-      */
       pickMultipleObjects: [
         {
           parameters: {
@@ -719,37 +707,37 @@ const TEST_CASES = [
     }
   },
   {
-    id: 'newgridlayer - cpu',
+    id: 'Gridlayer - cpu',
     props: {
       layers: [
         new GridLayer({
           data: DATA.points,
           getPosition: d => d.COORDINATES,
           pickable: true,
-          cellSize: 200,
+          cellSize: 400,
           gpuAggregation: false,
           extruded: true
         })
       ]
     },
-    pickingMethods: NEW_GRID_LAYER_PICK_METHODS
+    pickingMethods: GRID_LAYER_PICK_METHODS
   },
   {
-    id: 'newgridlayer - gpu',
+    id: 'Gridlayer - gpu',
     props: {
       layers: [
         new GridLayer({
           data: DATA.points,
           getPosition: d => d.COORDINATES,
           pickable: true,
-          cellSize: 200,
+          cellSize: 400,
           gpuAggregation: true,
           extruded: true,
           fp64: true
         })
       ]
     },
-    pickingMethods: NEW_GRID_LAYER_PICK_METHODS
+    pickingMethods: GRID_LAYER_PICK_METHODS
   }
 ];
 
@@ -781,15 +769,14 @@ test(`pickingTest`, async t => {
           );
         }
 
-        // TODO - fix aggregation layers
-        // if (pickingCase.results.cellCounts) {
-        //   const cellCounts = pickInfos.map(x => x.object.count);
-        //   t.deepEqual(
-        //     cellCounts,
-        //     pickingCase.results.cellCounts,
-        //     'Aggregation count for individual cells should match'
-        //   );
-        // }
+        if (pickingCase.results.cellCounts) {
+          const cellCounts = pickInfos.map(x => x.object.count);
+          t.deepEqual(
+            cellCounts,
+            pickingCase.results.cellCounts,
+            'Aggregation count for individual cells should match'
+          );
+        }
       }
     }
   }
@@ -815,10 +802,10 @@ test('pickingTest#unproject3D', async t => {
   });
 
   let pickInfo = deck.pickObject({x: 250, y: 275, unproject3D: true});
-  t.is(pickInfo.object, VIEW_STATE, 'object is picked');
-  t.comment(`pickInfo.coordinate: ${pickInfo.coordinate}`);
+  t.is(pickInfo?.object, VIEW_STATE, 'object is picked');
+  t.comment(`pickInfo.coordinate: ${pickInfo?.coordinate}`);
   t.ok(
-    equals(pickInfo.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 0.0001),
+    equals(pickInfo?.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 0.0001),
     'unprojects to 3D coordinate'
   );
 

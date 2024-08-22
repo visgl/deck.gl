@@ -756,6 +756,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         pickingColorCache[i * 4 + 0] = pickingColor[0];
         pickingColorCache[i * 4 + 1] = pickingColor[1];
         pickingColorCache[i * 4 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 3] = 0;
       }
     }
 
