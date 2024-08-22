@@ -1,6 +1,6 @@
 import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
-import {pbr} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
@@ -59,7 +59,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
   getShaders() {
     const shaders = super.getShaders();
     const modules = shaders.modules;
-    modules.push(pbr, meshUniforms);
+    modules.push(pbrMaterial, meshUniforms);
     return {...shaders, vs, fs};
   }
 
@@ -100,20 +100,21 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     const meshProps: MeshProps = {
       pickFeatureIds: Boolean(featureIds)
     };
-    // TODO replace with shaderInputs.setProps({pbr: u_Camera}) once
-    // luma pbr module ported to UBO
-    model.setUniforms({
+    const pbrProjectionProps = {
       // Needed for PBR (TODO: find better way to get it)
-      u_Camera: model.uniforms.cameraPosition
+      camera: model.uniforms.cameraPosition as [number, number, number]
+    };
+    model.shaderInputs.setProps({
+      pbrProjection: pbrProjectionProps,
+      mesh: meshProps
     });
-    model.shaderInputs.setProps({mesh: meshProps});
 
     super.draw(opts);
   }
 
   protected getModel(mesh: Mesh): Model {
-    const {id, pbrMaterial} = this.props;
-    const parsedPBRMaterial = this.parseMaterial(pbrMaterial, mesh);
+    const {id} = this.props;
+    const parsedPBRMaterial = this.parseMaterial(this.props.pbrMaterial, mesh);
     // Keep material to explicitly remove textures
     this.setState({parsedPBRMaterial});
     const shaders = this.getShaders();
@@ -135,26 +136,36 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     return model;
   }
 
-  updatePbrMaterialUniforms(pbrMaterial) {
+  updatePbrMaterialUniforms(material) {
     const {model} = this.state;
     if (model) {
       const {mesh} = this.props;
-      const parsedPBRMaterial = this.parseMaterial(pbrMaterial, mesh as Mesh);
+      const parsedPBRMaterial = this.parseMaterial(material, mesh as Mesh);
       // Keep material to explicitly remove textures
       this.setState({parsedPBRMaterial});
-      model.setBindings(parsedPBRMaterial.bindings);
-      model.setUniforms(parsedPBRMaterial.uniforms);
+
+      const {pbr_baseColorSampler} = parsedPBRMaterial.bindings;
+      const {emptyTexture} = this.state;
+      const simpleMeshProps = {
+        sampler: pbr_baseColorSampler || emptyTexture,
+        hasTexture: Boolean(pbr_baseColorSampler)
+      };
+      const {camera, ...pbrMaterialProps} = {
+        ...parsedPBRMaterial.bindings,
+        ...parsedPBRMaterial.uniforms
+      };
+      model.shaderInputs.setProps({simpleMesh: simpleMeshProps, pbrMaterial: pbrMaterialProps});
     }
   }
 
-  parseMaterial(pbrMaterial, mesh: Mesh): ParsedPBRMaterial {
+  parseMaterial(material, mesh: Mesh): ParsedPBRMaterial {
     const unlit = Boolean(
-      pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
+      material.pbrMetallicRoughness && material.pbrMetallicRoughness.baseColorTexture
     );
 
     return parsePBRMaterial(
       this.context.device,
-      {unlit, ...pbrMaterial},
+      {unlit, ...material},
       {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
       {
         pbrDebug: false,
