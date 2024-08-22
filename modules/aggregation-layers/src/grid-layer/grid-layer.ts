@@ -11,7 +11,6 @@ import {
   PickingInfo,
   Position,
   Viewport,
-  WebMercatorViewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
@@ -448,8 +447,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      const centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {cellSize} = this.props;
+      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+      cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
+      cellSizeCommon[1] = unitsPerMeter[1] * cellSize;
+
+      // Offset common space to center at the origin of the grid cell where the data center is in
+      // This improves precision without affecting the cell positions
+      const centroidCommon = viewport.projectFlat(centroid);
+      cellOriginCommon = [
+        Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
+        Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1],
+      ];
+      centroid = viewport.unprojectFlat(cellOriginCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
@@ -459,9 +470,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
         : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
-      const {unitsPerMeter} = viewport.getDistanceScales();
-      cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
-      cellSizeCommon[1] = unitsPerMeter[1] * cellSize;
+      // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
       const corners = [
