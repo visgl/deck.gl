@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Accessor,
   Color,
@@ -14,6 +18,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
+import {getDistanceScales} from '@math.gl/web-mercator';
 import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
@@ -22,7 +27,7 @@ import {AggregateAccessor} from '../types';
 import {defaultColorRange} from '../utils/color-utils';
 
 import HexagonCellLayer from './hexagon-cell-layer';
-import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGlsl} from './hexbin';
+import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGLSL} from './hexbin';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -348,14 +353,14 @@ export default class HexagonLayer<
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
         modules: [project32],
-        vs: `
+        vs: /* glsl */ `
   uniform float radiusCommon;
   in vec3 positions;
   in vec3 positions64Low;
   in float colorWeights;
   in float elevationWeights;
   
-  ${pointToHexbinGlsl}
+  ${pointToHexbinGLSL}
 
   void getBin(out ivec2 binId) {
     vec3 positionCommon = project_position(positions, positions64Low);
@@ -463,8 +468,15 @@ export default class HexagonLayer<
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      const centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {radius} = this.props;
+      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+      radiusCommon = unitsPerMeter[0] * radius;
+
+      // Use the centroid of the hex at the center of the data
+      // This offsets the common space without changing the bins
+      const centerHex = pointToHexbin(viewport.projectFlat(centroid), radiusCommon);
+      centroid = viewport.unprojectFlat(getHexbinCentroid(centerHex, radiusCommon));
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
@@ -474,8 +486,6 @@ export default class HexagonLayer<
         ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
         : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
-      const {unitsPerMeter} = viewport.getDistanceScales();
-      radiusCommon = unitsPerMeter[0] * radius;
       hexOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
       const corners = [
@@ -510,7 +520,7 @@ export default class HexagonLayer<
     super.draw(opts);
   }
 
-  private _onAggregationUpdate(channel: number) {
+  private _onAggregationUpdate({channel}: {channel: number}) {
     const props = this.getCurrentLayer()!.props;
     const {aggregator} = this.state;
     if (channel === 0) {

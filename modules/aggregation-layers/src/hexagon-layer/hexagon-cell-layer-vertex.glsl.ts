@@ -1,7 +1,11 @@
-import {getHexbinCentroidGlsl} from './hexbin';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-export default `#version 300 es
+import {getHexbinCentroidGLSL} from './hexbin';
 
+export default /* glsl */ `\
+#version 300 es
 #define SHADER_NAME hexagon-cell-layer-vertex-shader
 
 in vec3 positions;
@@ -26,7 +30,7 @@ uniform vec2 elevationRange;
 // Result
 out vec4 vColor;
 
-${getHexbinCentroidGlsl}
+${getHexbinCentroidGLSL}
 
 float interp(float value, vec2 domain, vec2 range) {
   float r = min(max((value - domain.x) / (domain.y - domain.x), 0.), 1.);

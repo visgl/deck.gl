@@ -1,9 +1,7 @@
-/**
- * Adapted from d3-hexbin
- * Copyright Mike Bostock, 2012-2016
-   All rights reserved.
- * https://github.com/d3/d3-hexbin/blob/master/src/hexbin.js
- */
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const THIRD_PI = Math.PI / 3;
 const DIST_X = 2 * Math.sin(THIRD_PI);
 const DIST_Y = 1.5;
@@ -16,7 +14,14 @@ export const HexbinVertices = Array.from({length: 6}, (_, i) => {
   return [Math.sin(angle), -Math.cos(angle)];
 });
 
-/** Returns the hexbin that a point (x,y) falls into */
+/**
+ * Adapted from d3-hexbin
+ * Copyright Mike Bostock, 2012-2016
+   All rights reserved.
+ * https://github.com/d3/d3-hexbin/blob/master/src/hexbin.js
+ *
+ * Returns the hexbin that a point (x,y) falls into
+ */
 export function pointToHexbin([px, py]: Point, radius: number): HexBin {
   let pj = Math.round((py = py / radius / DIST_Y));
   let pi = Math.round((px = px / radius / DIST_X - (pj & 1) / 2));
@@ -36,7 +41,7 @@ export function pointToHexbin([px, py]: Point, radius: number): HexBin {
   return [pi, pj];
 }
 
-export const pointToHexbinGlsl = `
+export const pointToHexbinGLSL = /* glsl */ `
 const vec2 DIST = vec2(${DIST_X}, ${DIST_Y});
 
 ivec2 pointToHexbin(vec2 p, float radius) {
@@ -64,7 +69,7 @@ export function getHexbinCentroid([i, j]: HexBin, radius: number): Point {
   return [(i + (j & 1) / 2) * radius * DIST_X, j * radius * DIST_Y];
 }
 
-export const getHexbinCentroidGlsl = `
+export const getHexbinCentroidGLSL = `
 const vec2 DIST = vec2(${DIST_X}, ${DIST_Y});
 
 vec2 hexbinCentroid(vec2 binId, float radius) {
