@@ -1,4 +1,8 @@
-export default `#version 300 es
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+export default /* glsl */ `#version 300 es
 
 #define SHADER_NAME grid-cell-layer-vertex-shader
 

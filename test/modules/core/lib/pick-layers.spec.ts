@@ -65,13 +65,13 @@ const GRID_LAYER_PICK_METHODS = {
     },
     {
       parameters: {
-        x: 300,
-        y: 209
+        x: 120,
+        y: 120
       },
       results: {
         count: 1,
         // point count in the aggregated cell for each pickInfo object
-        cellCounts: [26]
+        cellCounts: [7]
       }
     }
   ],
@@ -80,12 +80,12 @@ const GRID_LAYER_PICK_METHODS = {
       parameters: {
         x: 300,
         y: 300,
-        width: 100,
-        height: 100
+        width: 50,
+        height: 50
       },
       results: {
-        count: 16,
-        cellCounts: [1, 3, 2, 9, 1, 3, 1, 1, 10, 2, 5, 1, 4, 1, 2, 1]
+        count: 8,
+        cellCounts: [1, 2, 11, 2, 1, 4, 4, 1]
       }
     },
     {
@@ -103,13 +103,13 @@ const GRID_LAYER_PICK_METHODS = {
   pickMultipleObjects: [
     {
       parameters: {
-        x: 86,
-        y: 215,
+        x: 350,
+        y: 60,
         radius: 1
       },
       results: {
         count: 2,
-        cellCounts: [34, 12]
+        cellCounts: [43, 26]
       }
     }
   ]

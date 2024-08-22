@@ -267,7 +267,7 @@ export class WebGLAggregator implements Aggregator {
     for (let i = 0; i < this.channelCount; i++) {
       if (this.needsUpdate[i]) {
         this.needsUpdate[i] = false;
-        this.props.onUpdate?.(i);
+        this.props.onUpdate?.({channel: i});
       }
     }
 

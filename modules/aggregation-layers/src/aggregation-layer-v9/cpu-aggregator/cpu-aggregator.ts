@@ -157,7 +157,7 @@ export class CPUAggregator implements Aggregator {
           target: this.results[channel]?.value
         });
         this.results[channel] = {value, domain, type: 'float32', size: 1};
-        this.props.onUpdate?.(channel);
+        this.props.onUpdate?.({channel});
       }
     }
     this.needsUpdate = false;

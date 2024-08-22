@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Accessor,
   Color,
@@ -57,6 +61,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
+  gridAggregator: {type: 'function', optional: true, value: null},
   extruded: false,
 
   // Optional material for 'lighting' shader module
@@ -68,6 +73,11 @@ export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & Composite
 
 /** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = {
+  /**
+   * Accessor to retrieve a grid bin index from each data object.
+   */
+  gridAggregator?: ((position: number[], cellSize: number) => [number, number]) | null;
+
   /**
    * Size of each cell in meters.
    * @default 1000
@@ -271,6 +281,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   getAggregatorType(): string {
     const {
       gpuAggregation,
+      gridAggregator,
       // lowerPercentile,
       // upperPercentile,
       getColorValue,
@@ -282,6 +293,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       gpuAggregation &&
       // GPU aggregation is supported by the device
       WebGLAggregator.isSupported(this.context.device) &&
+      // Default grid
+      !gridAggregator &&
       // Does not need custom aggregation operation
       !getColorValue &&
       !getElevationValue
@@ -298,6 +311,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator {
     if (type === 'cpu') {
+      const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
         dimensions: 2,
         getBin: {
@@ -310,6 +324,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               cellOriginCommon: [number, number];
             }
           ) => {
+            if (gridAggregator) {
+              return gridAggregator(positions, cellSize);
+            }
             const viewport = this.state.aggregatorViewport;
             // project to common space
             const p = viewport.projectPosition(positions);
@@ -332,7 +349,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
         modules: [project32],
-        vs: `
+        vs: /* glsl */ `
   uniform vec2 cellOriginCommon;
   uniform vec2 cellSizeCommon;
   in vec3 positions;
@@ -458,7 +475,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       const centroidCommon = viewport.projectFlat(centroid);
       cellOriginCommon = [
         Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
-        Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1],
+        Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1]
       ];
       centroid = viewport.unprojectFlat(cellOriginCommon);
 
@@ -501,7 +518,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     super.draw(opts);
   }
 
-  private _onAggregationUpdate(channel: number) {
+  private _onAggregationUpdate({channel}: {channel: number}) {
     const props = this.getCurrentLayer()!.props;
     const {aggregator} = this.state;
     if (channel === 0) {
