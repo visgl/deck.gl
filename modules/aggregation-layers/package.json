@@ -40,6 +40,7 @@
   "dependencies": {
     "@luma.gl/constants": "^9.0.24",
     "@luma.gl/shadertools": "^9.0.24",
+    "@math.gl/core": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
     "d3-hexbin": "^0.2.1"
   },

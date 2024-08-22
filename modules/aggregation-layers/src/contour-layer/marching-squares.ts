@@ -1,24 +1,15 @@
 // All utility methods needed to implement Marching Squares algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 
-import {log} from '@deck.gl/core';
 import {ISOLINES_CODE_OFFSET_MAP, ISOBANDS_CODE_OFFSET_MAP} from './marching-squares-codes';
-
-export const CONTOUR_TYPE = {
-  ISO_LINES: 1,
-  ISO_BANDS: 2
-};
-
-const DEFAULT_THRESHOLD_DATA = {
-  zIndex: 0,
-  zOffset: 0.005
-};
 
 // Utility methods
 
 function getVertexCode(weight: number, threshold: number | number[]): number {
   // threshold must be a single value or a range (array of size 2)
-
+  if (Number.isNaN(weight)) {
+    return 0;
+  }
   // Iso-bands
   if (Array.isArray(threshold)) {
     if (weight < threshold[0]) {
@@ -32,22 +23,27 @@ function getVertexCode(weight: number, threshold: number | number[]): number {
 
 // Returns marching square code for given cell
 /* eslint-disable complexity, max-statements*/
-export function getCode(opts) {
+export function getCode(opts: {
+  getValue: (x: number, y: number) => number;
+  threshold: number | number[];
+  x: number;
+  xRange: [number, number];
+  y: number;
+  yRange: [number, number];
+}): {
+  code: number;
+  meanCode: number;
+} {
   // Assumptions
   // Origin is on bottom-left , and X increase to right, Y to top
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
   // to create a 2X2 cell grid
-  const {cellWeights, x, y, width, height} = opts;
-  let threshold = opts.threshold;
-  if (opts.thresholdValue) {
-    log.deprecated('thresholdValue', 'threshold')();
-    threshold = opts.thresholdValue;
-  }
+  const {x, y, xRange, yRange, getValue, threshold} = opts;
 
-  const isLeftBoundary = x < 0;
-  const isRightBoundary = x >= width - 1;
-  const isBottomBoundary = y < 0;
-  const isTopBoundary = y >= height - 1;
+  const isLeftBoundary = x < xRange[0];
+  const isRightBoundary = x >= xRange[1] - 1;
+  const isBottomBoundary = y < yRange[0];
+  const isTopBoundary = y >= yRange[1] - 1;
   const isBoundary = isLeftBoundary || isRightBoundary || isBottomBoundary || isTopBoundary;
 
   const weights: Record<string, number> = {};
@@ -57,7 +53,7 @@ export function getCode(opts) {
   if (isLeftBoundary || isTopBoundary) {
     codes.top = 0;
   } else {
-    weights.top = cellWeights[(y + 1) * width + x];
+    weights.top = getValue(x, y + 1);
     codes.top = getVertexCode(weights.top, threshold);
   }
 
@@ -65,7 +61,7 @@ export function getCode(opts) {
   if (isRightBoundary || isTopBoundary) {
     codes.topRight = 0;
   } else {
-    weights.topRight = cellWeights[(y + 1) * width + x + 1];
+    weights.topRight = getValue(x + 1, y + 1);
     codes.topRight = getVertexCode(weights.topRight, threshold);
   }
 
@@ -73,7 +69,7 @@ export function getCode(opts) {
   if (isRightBoundary || isBottomBoundary) {
     codes.right = 0;
   } else {
-    weights.right = cellWeights[y * width + x + 1];
+    weights.right = getValue(x + 1, y);
     codes.right = getVertexCode(weights.right, threshold);
   }
 
@@ -81,7 +77,7 @@ export function getCode(opts) {
   if (isLeftBoundary || isBottomBoundary) {
     codes.current = 0;
   } else {
-    weights.current = cellWeights[y * width + x];
+    weights.current = getValue(x, y);
     codes.current = getVertexCode(weights.current, threshold);
   }
 
@@ -110,13 +106,15 @@ export function getCode(opts) {
 
 // Returns intersection vertices for given cellindex
 // [x, y] refers current marching cell, reference vertex is always top-right corner
-export function getVertices(opts) {
-  const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES} = opts;
-  const thresholdData = {...DEFAULT_THRESHOLD_DATA, ...opts.thresholdData};
-  let offsets =
-    type === CONTOUR_TYPE.ISO_BANDS
-      ? ISOBANDS_CODE_OFFSET_MAP[code]
-      : ISOLINES_CODE_OFFSET_MAP[code];
+export function getPolygons(opts: {
+  x: number;
+  y: number;
+  z: number;
+  code: number;
+  meanCode: number;
+}) {
+  const {x, y, z, code, meanCode} = opts;
+  let offsets: any = ISOBANDS_CODE_OFFSET_MAP[code];
 
   // handle saddle cases
   if (!Array.isArray(offsets)) {
@@ -124,49 +122,55 @@ export function getVertices(opts) {
   }
 
   // Reference vertex is at top-right move to top-right corner
-
-  const vZ = thresholdData.zIndex * thresholdData.zOffset;
-  const rX = (x + 1) * cellSize[0];
-  const rY = (y + 1) * cellSize[1];
-
-  const refVertexX = gridOrigin[0] + rX;
-  const refVertexY = gridOrigin[1] + rY;
+  const rX = x + 1;
+  const rY = y + 1;
 
   // offsets format
-  // ISO_LINES: [[1A, 1B], [2A, 2B]],
-  // ISO_BANDS: [[1A, 1B, 1C, ...], [2A, 2B, 2C, ...]],
-
+  // [[1A, 1B, 1C, ...], [2A, 2B, 2C, ...]],
   // vertices format
-
-  // ISO_LINES: [[x1A, y1A], [x1B, y1B], [x2A, x2B], ...],
-
-  // ISO_BANDS:  => confirms to SolidPolygonLayer's simple polygon format
-  //      [
-  //        [[x1A, y1A], [x1B, y1B], [x1C, y1C] ... ],
+  // [
+  //   [[x1A, y1A], [x1B, y1B], [x1C, y1C] ... ],
   //        ...
-  //      ]
+  // ]
 
-  if (type === CONTOUR_TYPE.ISO_BANDS) {
-    const polygons: number[][][] = [];
-    offsets.forEach(polygonOffsets => {
-      const polygon: number[][] = [];
-      polygonOffsets.forEach(xyOffset => {
-        const vX = refVertexX + xyOffset[0] * cellSize[0];
-        const vY = refVertexY + xyOffset[1] * cellSize[1];
-        polygon.push([vX, vY, vZ]);
-      });
-      polygons.push(polygon);
+  const polygons: number[][][] = [];
+  offsets.forEach(polygonOffsets => {
+    const polygon: number[][] = [];
+    polygonOffsets.forEach(xyOffset => {
+      const vX = rX + xyOffset[0];
+      const vY = rY + xyOffset[1];
+      polygon.push([vX, vY, z]);
     });
-    return polygons;
+    polygons.push(polygon);
+  });
+  return polygons;
+}
+
+// Returns intersection vertices for given cellindex
+// [x, y] refers current marching cell, reference vertex is always top-right corner
+export function getLines(opts: {x: number; y: number; z: number; code: number; meanCode: number}) {
+  const {x, y, z, code, meanCode} = opts;
+  let offsets = ISOLINES_CODE_OFFSET_MAP[code];
+
+  // handle saddle cases
+  if (!Array.isArray(offsets)) {
+    offsets = offsets[meanCode];
   }
 
-  // default case is ISO_LINES
+  // Reference vertex is at top-right move to top-right corner
+  const rX = x + 1;
+  const rY = y + 1;
+
+  // offsets format
+  // [[1A, 1B], [2A, 2B]],
+  // vertices format
+  // [[x1A, y1A], [x1B, y1B], [x2A, x2B], ...],
   const lines: number[][] = [];
   offsets.forEach(xyOffsets => {
     xyOffsets.forEach(offset => {
-      const vX = refVertexX + offset[0] * cellSize[0];
-      const vY = refVertexY + offset[1] * cellSize[1];
-      lines.push([vX, vY, vZ]);
+      const vX = rX + offset[0];
+      const vY = rY + offset[1];
+      lines.push([vX, vY, z]);
     });
   });
   return lines;
