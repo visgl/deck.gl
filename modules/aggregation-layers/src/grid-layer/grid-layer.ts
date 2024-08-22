@@ -18,7 +18,6 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {getDistanceScales} from '@math.gl/web-mercator';
 import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';

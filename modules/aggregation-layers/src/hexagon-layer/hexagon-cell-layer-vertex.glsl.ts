@@ -17,6 +17,7 @@ uniform float opacity;
 uniform bool extruded;
 uniform float coverage;
 uniform float radius;
+uniform vec2 hexOriginCommon;
 uniform vec2 colorDomain;
 uniform sampler2D colorRange;
 uniform vec2 elevationDomain;
@@ -45,7 +46,7 @@ void main(void) {
     return;
   }
   
-  vec2 commonPosition = hexbinCentroid(instancePositions, radius) - project.commonOrigin.xy;
+  vec2 commonPosition = hexbinCentroid(instancePositions, radius) + (hexOriginCommon - project.commonOrigin.xy);
   commonPosition += positions.xy * radius * coverage;
   geometry.position = vec4(commonPosition, 0.0, 1.0);
   geometry.normal = project_normal(normals);

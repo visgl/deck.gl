@@ -19,15 +19,14 @@
 // THE SOFTWARE.
 
 import {Texture} from '@luma.gl/core';
-import {UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
+import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {colorRangeToTexture} from '../utils/color-utils';
 import vs from './hexagon-cell-layer-vertex.glsl';
 
 /** Proprties added by HexagonCellLayer. */
 export type _HexagonCellLayerProps = {
-  cellSizeCommon: [number, number];
-  cellOriginCommon: [number, number];
+  hexOriginCommon: [number, number];
   colorDomain: () => [number, number];
   colorRange?: Color[];
   elevationDomain: () => [number, number];
@@ -103,7 +102,8 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     // Use dynamic domain from the aggregator
     const colorDomain = this.props.colorDomain();
     const elevationDomain = this.props.elevationDomain();
-    const {radius, elevationRange, elevationScale, extruded, coverage} = this.props;
+    const {radius, hexOriginCommon, elevationRange, elevationScale, extruded, coverage} =
+      this.props;
     const fillModel = this.state.fillModel!;
 
     if (fillModel.vertexArray.indexBuffer) {
@@ -119,6 +119,7 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
       colorDomain,
       elevationDomain,
       radius,
+      hexOriginCommon,
       elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
     });
     fillModel.draw(this.context.renderPass);

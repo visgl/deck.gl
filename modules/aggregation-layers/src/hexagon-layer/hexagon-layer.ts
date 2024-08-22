@@ -10,10 +10,10 @@ import {
   LayersList,
   PickingInfo,
   Position,
+  Viewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {getDistanceScales} from '@math.gl/web-mercator';
 import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
@@ -272,7 +272,9 @@ export default class HexagonLayer<
     // Needed if getColorValue, getElevationValue are used
     dataAsArray?: DataT[];
     radiusCommon: number;
+    hexOriginCommon: [number, number];
     binIdRange: [number, number][];
+    aggregatorViewport: Viewport;
   };
 
   getAggregatorType(): string {
@@ -318,15 +320,20 @@ export default class HexagonLayer<
             index: number,
             opts: {
               radiusCommon: number;
+              hexOriginCommon: [number, number];
             }
           ) => {
             if (hexagonAggregator) {
               return hexagonAggregator(positions, radius);
             }
-            const viewport = this.context.viewport;
+            const viewport = this.state.aggregatorViewport;
             // project to common space
             const p = viewport.projectPosition(positions);
-            return pointToHexbin(p as number[] as [number, number], opts.radiusCommon);
+            const {radiusCommon, hexOriginCommon} = opts;
+            return pointToHexbin(
+              [p[0] - hexOriginCommon[0], p[1] - hexOriginCommon[1]],
+              radiusCommon
+            );
           }
         },
         getValue: [
@@ -351,17 +358,8 @@ export default class HexagonLayer<
   ${pointToHexbinGlsl}
 
   void getBin(out ivec2 binId) {
-    vec2 positionCommon;
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT && (
-      project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET ||
-      project.projectionMode == PROJECTION_MODE_WEB_MERCATOR
-    )) {
-      // Ignore auto offset so that result is not dependent on initial zoom
-      positionCommon = project_mercator_(positions.xy);
-    } else {
-      positionCommon = project_position(positions, positions64Low).xy;
-    }
-    binId = pointToHexbin(positionCommon, radiusCommon);
+    vec3 positionCommon = project_position(positions, positions64Low);
+    binId = pointToHexbin(positionCommon.xy, radiusCommon);
   }
   void getValue(out vec2 value) {
     value = vec2(colorWeights, elevationWeights);
@@ -409,7 +407,7 @@ export default class HexagonLayer<
       props.elevationAggregation !== oldProps.elevationAggregation
     ) {
       this._updateBinOptions();
-      const {radiusCommon, binIdRange, dataAsArray} = this.state;
+      const {radiusCommon, hexOriginCommon, binIdRange, dataAsArray} = this.state;
 
       aggregator.setProps({
         // @ts-expect-error only used by GPUAggregator
@@ -417,7 +415,8 @@ export default class HexagonLayer<
         pointCount: this.getNumInstances(),
         operations: [props.colorAggregation, props.elevationAggregation],
         binOptions: {
-          radiusCommon
+          radiusCommon,
+          hexOriginCommon
         },
         onUpdate: this._onAggregationUpdate.bind(this)
       });
@@ -456,24 +455,40 @@ export default class HexagonLayer<
   private _updateBinOptions() {
     const bounds = this.getBounds();
     let radiusCommon = 1;
+    let hexOriginCommon: [number, number] = [0, 0];
     const binIdRange: [number, number][] = [
       [0, 1],
       [0, 1]
     ];
+    let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
       const centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {radius} = this.props;
-      const {viewport} = this.context;
-      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+
+      const ViewportType = viewport.constructor as any;
+      // We construct a viewport for the GPU aggregator's project module
+      // This viewport is determined by data
+      // removes arbitrary precision variance that depends on initial view state
+      viewport = viewport.isGeospatial
+        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+
+      const {unitsPerMeter} = viewport.getDistanceScales();
       radiusCommon = unitsPerMeter[0] * radius;
+      hexOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
       const corners = [
         bounds[0],
         bounds[1],
         [bounds[0][0], bounds[1][1]],
         [bounds[1][0], bounds[0][1]]
-      ].map(p => pointToHexbin(viewport.projectFlat(p), radiusCommon));
+      ].map(p => {
+        const positionCommon = viewport.projectFlat(p);
+        positionCommon[0] -= hexOriginCommon[0];
+        positionCommon[1] -= hexOriginCommon[1];
+        return pointToHexbin(positionCommon, radiusCommon);
+      });
 
       const minX = Math.min(...corners.map(p => p[0]));
       const minY = Math.min(...corners.map(p => p[1]));
@@ -484,7 +499,15 @@ export default class HexagonLayer<
       binIdRange[1] = [minY - 1, maxY + 2]; // j range
     }
 
-    this.setState({radiusCommon, binIdRange});
+    this.setState({radiusCommon, hexOriginCommon, binIdRange, aggregatorViewport: viewport});
+  }
+
+  override draw(opts) {
+    // Replaces render time viewport with our own
+    if (opts.moduleParameters.viewport) {
+      opts.moduleParameters.viewport = this.state.aggregatorViewport;
+    }
+    super.draw(opts);
   }
 
   private _onAggregationUpdate(channel: number) {
@@ -504,12 +527,13 @@ export default class HexagonLayer<
         aggregator.setNeedsUpdate();
 
         this._updateBinOptions();
-        const {radiusCommon, binIdRange} = this.state;
+        const {radiusCommon, hexOriginCommon, binIdRange} = this.state;
         aggregator.setProps({
           // @ts-expect-error only used by GPUAggregator
           binIdRange,
           binOptions: {
-            radiusCommon
+            radiusCommon,
+            hexOriginCommon
           }
         });
         break;
@@ -528,7 +552,7 @@ export default class HexagonLayer<
   }
 
   renderLayers(): LayersList | Layer | null {
-    const {aggregator, radiusCommon} = this.state;
+    const {aggregator, radiusCommon, hexOriginCommon} = this.state;
     const {elevationScale, colorRange, elevationRange, extruded, coverage, material, transitions} =
       this.props;
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
@@ -559,6 +583,7 @@ export default class HexagonLayer<
         diskResolution: 6,
         vertices: HexbinVertices,
         radius: radiusCommon,
+        hexOriginCommon,
         elevationScale,
         colorRange,
         elevationRange,
