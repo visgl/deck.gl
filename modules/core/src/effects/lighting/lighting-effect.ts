@@ -143,9 +143,11 @@ export default class LightingEffect implements Effect {
     // lights shader module relies on the `lightSources` to turn on/off lighting
     parameters.lightSources = {
       ambientLight: this.ambientLight,
+      // @ts-expect-error luma v9 was ahead of alpha
       directionalLights: this.directionalLights.map(directionalLight =>
         directionalLight.getProjectedLight({layer})
       ),
+      // @ts-expect-error luma v9 was ahead of alpha
       pointLights: this.pointLights.map(pointLight => pointLight.getProjectedLight({layer}))
     };
 
