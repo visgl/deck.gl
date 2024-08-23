@@ -19,12 +19,10 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {getDistanceScales} from '@math.gl/web-mercator';
-import {WebGLAggregator} from '../common/gpu-aggregator/webgl-aggregator';
-import {CPUAggregator} from '../common/cpu-aggregator/cpu-aggregator';
+import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
-import {AggregationOperation} from '../common/aggregator';
-import {AggregateAccessor} from '../types';
-import {defaultColorRange} from '../utils/color-utils';
+import {AggregateAccessor} from '../common/types';
+import {defaultColorRange} from '../common/utils/color-utils';
 
 import HexagonCellLayer from './hexagon-cell-layer';
 import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGLSL} from './hexbin';

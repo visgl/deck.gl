@@ -3,7 +3,7 @@ import {Attribute} from '@deck.gl/core';
 import {
   VertexAccessor,
   evaluateVertexAccessor
-} from '@deck.gl/aggregation-layers/common/cpu-aggregator/vertex-accessor';
+} from '@deck.gl/aggregation-layers/common/aggregator/cpu-aggregator/vertex-accessor';
 import {device} from '@deck.gl/test-utils';
 
 test('evaluateVertexAccessor#sources', t => {

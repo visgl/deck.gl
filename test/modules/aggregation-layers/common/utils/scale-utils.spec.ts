@@ -4,7 +4,7 @@ import {
   getQuantileScale,
   getOrdinalScale,
   getLinearScale
-} from '@deck.gl/aggregation-layers/utils/scale-utils';
+} from '@deck.gl/aggregation-layers/common/utils/scale-utils';
 
 const RANGE = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 const LINEAR_SCALE_TEST_CASES = [

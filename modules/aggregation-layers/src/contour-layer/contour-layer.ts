@@ -16,11 +16,9 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {WebGLAggregator} from '../common/gpu-aggregator/webgl-aggregator';
-import {CPUAggregator} from '../common/cpu-aggregator/cpu-aggregator';
+import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import {AggregationLayerProps} from '../common/aggregation-layer';
-import {AggregationOperation} from '../common/aggregator';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
 import {Matrix4} from '@math.gl/core';

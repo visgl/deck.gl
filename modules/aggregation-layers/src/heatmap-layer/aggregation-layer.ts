@@ -27,7 +27,7 @@ import {
   CompositeLayerProps,
   Attribute
 } from '@deck.gl/core';
-import {filterProps} from '../utils/prop-utils';
+import {filterProps} from '../common/utils/prop-utils';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;

@@ -27,9 +27,8 @@ import './hexagon-layer.spec';
 import './hexbin.spec';
 import './screen-grid-layer.spec';
 import './screengrid-cell-layer.spec';
-import './utils/color-utils.spec';
-import './utils/scale-utils.spec';
-
+import './common/utils/color-utils.spec';
+import './common/utils/scale-utils.spec';
 import './common/webgl-aggregator.spec';
 import './common/cpu-aggregator/cpu-aggregator.spec';
 import './common/cpu-aggregator/vertex-accessor.spec';

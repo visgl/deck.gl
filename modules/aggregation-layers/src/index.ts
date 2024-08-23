@@ -25,8 +25,7 @@ export {default as GridLayer} from './grid-layer/grid-layer';
 export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
 
 export {default as _AggregationLayer} from './common/aggregation-layer';
-export {WebGLAggregator} from './common/gpu-aggregator/webgl-aggregator';
-export {CPUAggregator} from './common/cpu-aggregator/cpu-aggregator';
+export {WebGLAggregator, CPUAggregator} from './common/aggregator/index';
 
 // types
 export type {ContourLayerProps, ContourLayerPickingInfo} from './contour-layer/contour-layer';
@@ -38,6 +37,10 @@ export type {
   ScreenGridLayerPickingInfo
 } from './screen-grid-layer/screen-grid-layer';
 
-export type {Aggregator, AggregationOperation, AggregationProps} from './common/aggregator';
-export type {WebGLAggregatorProps} from './common/gpu-aggregator/webgl-aggregator';
-export type {CPUAggregatorProps} from './common/cpu-aggregator/cpu-aggregator';
+export type {
+  Aggregator,
+  AggregationOperation,
+  AggregationProps,
+  WebGLAggregatorProps,
+  CPUAggregatorProps
+} from './common/aggregator/index';

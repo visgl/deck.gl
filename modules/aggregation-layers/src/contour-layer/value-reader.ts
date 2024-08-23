@@ -1,6 +1,4 @@
-import {Aggregator} from '../common/aggregator';
-import {WebGLAggregator} from '../common/gpu-aggregator/webgl-aggregator';
-import {CPUAggregator} from '../common/cpu-aggregator/cpu-aggregator';
+import {Aggregator, CPUAggregator, WebGLAggregator} from '../common/aggregator/index';
 import type {TypedArray} from '@luma.gl/core';
 
 type ValueReader = (x: number, y: number) => number;

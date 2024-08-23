@@ -31,10 +31,8 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {WebGLAggregator} from '../common/gpu-aggregator/webgl-aggregator';
-import {CPUAggregator} from '../common/cpu-aggregator/cpu-aggregator';
+import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
-import {AggregationOperation} from '../common/aggregator';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
