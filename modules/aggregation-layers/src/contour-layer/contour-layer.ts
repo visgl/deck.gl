@@ -16,7 +16,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {getDistanceScales} from '@math.gl/web-mercator';
 import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
@@ -32,6 +31,7 @@ const DEFAULT_STROKE_WIDTH = 1;
 const defaultProps: DefaultProps<ContourLayerProps> = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, value: 1000},
+  gridOrigin: {type: 'array', compare: true, value: [0, 0]},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
   gpuAggregation: true,
@@ -59,6 +59,12 @@ type _ContourLayerProps<DataT> = {
    * @default 1000
    */
   cellSize?: number;
+
+  /**
+   * The grid origin
+   * @default [0, 0]
+   */
+  gridOrigin?: [number, number];
 
   /**
    * When set to true, aggregation is performed on GPU, provided other conditions are met.
@@ -125,7 +131,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getAggregatorType(): string {
-    return this.props.gpuAggregation ? 'gpu' : 'cpu';
+    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
+      ? 'gpu'
+      : 'cpu';
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator {
@@ -207,6 +215,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       aggregatorChanged ||
       changeFlags.dataChanged ||
       props.cellSize !== oldProps.cellSize ||
+      !_deepEqual(props.gridOrigin, oldProps.gridOrigin, 1) ||
       props.aggregation !== oldProps.aggregation
     ) {
       this._updateBinOptions();
@@ -244,8 +253,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     if (bounds && Number.isFinite(bounds[0][0])) {
       let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
-      const {cellSize} = this.props;
-      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+      const {cellSize, gridOrigin} = this.props;
+      const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
       cellSizeCommon[1] = unitsPerMeter[1] * cellSize;
 
@@ -253,8 +262,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // This improves precision without affecting the cell positions
       const centroidCommon = viewport.projectFlat(centroid);
       cellOriginCommon = [
-        Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
-        Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1]
+        Math.floor((centroidCommon[0] - gridOrigin[0]) / cellSizeCommon[0]) * cellSizeCommon[0] +
+          gridOrigin[0],
+        Math.floor((centroidCommon[1] - gridOrigin[1]) / cellSizeCommon[1]) * cellSizeCommon[1] +
+          gridOrigin[1]
       ];
       centroid = viewport.unprojectFlat(cellOriginCommon);
 

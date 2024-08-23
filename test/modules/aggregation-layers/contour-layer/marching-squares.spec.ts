@@ -1,8 +1,8 @@
 import test from 'tape-promise/tape';
 import {
   getCode,
-  getVertices,
-  CONTOUR_TYPE
+  getLines,
+  getPolygons
 } from '@deck.gl/aggregation-layers/contour-layer/marching-squares';
 
 const GETCODE_TESTS = [
@@ -212,250 +212,219 @@ const GETCODE_TESTS = [
   }
 ];
 
-const GETVERTEX_TESTS = [
+const GETLINES_TESTS = [
   // ISO-LINES
   {
-    gridOrigin: [100, 200],
     code: 4,
     vertices: [
-      [110, 230],
-      [115, 220]
+      [1, 1.5, 0],
+      [1.5, 1, 0]
     ]
   },
   {
-    gridOrigin: [100, 200],
     code: 0,
     vertices: []
   },
   {
-    gridOrigin: [100, 200],
     code: 6,
     vertices: [
-      [110, 230],
-      [110, 210]
+      [1, 1.5, 0],
+      [1, 0.5, 0]
     ]
   },
   {
-    gridOrigin: [100, 200],
     code: 15,
     vertices: []
   },
 
   // non zero cellIndex
   {
-    gridOrigin: [100, 200],
     code: 12,
     x: 1,
     y: 1,
     vertices: [
-      [115, 240],
-      [125, 240]
-    ],
-    gridSize: [3, 3]
+      [1.5, 2, 0],
+      [2.5, 2, 0]
+    ]
   },
   {
-    gridOrigin: [100, 200],
     code: 9,
     x: 0,
     y: 1,
     vertices: [
-      [110, 250],
-      [110, 230]
-    ],
-    gridSize: [3, 3]
+      [1, 2.5, 0],
+      [1, 1.5, 0]
+    ]
   },
 
   // saddle cases
   {
-    gridOrigin: [100, 200],
     code: 5,
     meanCode: 1,
     x: 0,
     y: 0,
     vertices: [
-      [105, 220],
-      [110, 230],
-      [110, 210],
-      [115, 220]
-    ],
-    gridSize: [3, 3]
+      [0.5, 1, 0],
+      [1, 1.5, 0],
+      [1, 0.5, 0],
+      [1.5, 1, 0]
+    ]
   },
   {
-    gridOrigin: [100, 200],
     code: 5,
     meanCode: 0,
     x: 0,
     y: 0,
     vertices: [
-      [105, 220],
-      [110, 210],
-      [110, 230],
-      [115, 220]
-    ],
-    gridSize: [3, 3]
-  },
+      [0.5, 1, 0],
+      [1, 0.5, 0],
+      [1, 1.5, 0],
+      [1.5, 1, 0]
+    ]
+  }
+];
 
+const GETPOLYGONS_TESTS = [
   // ISO-BANDS
   {
     // 2222
-    gridOrigin: [100, 200],
     code: 170,
-    vertices: [],
-    type: CONTOUR_TYPE.ISO_BANDS
+    vertices: []
   },
   {
     // 2122
     name: 'single-triangle',
-    gridOrigin: [100, 200],
     code: 154,
     vertices: [
       [
-        [115, 220],
-        [115, 230],
-        [110, 230]
+        [1.5, 1, 0],
+        [1.5, 1.5, 0],
+        [1, 1.5, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   {
     // 0020
     name: 'single-trapezoid',
-    gridOrigin: [100, 200],
     code: 8,
     cellSize: [12, 24],
     vertices: [
       [
-        [110, 212],
-        [114, 212],
-        [118, 220],
-        [118, 228]
+        [5 / 6, 0.5, 0],
+        [7 / 6, 0.5, 0],
+        [1.5, 5 / 6, 0],
+        [1.5, 7 / 6, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   {
     // 0220
     name: 'single-rectangle',
-    gridOrigin: [100, 200],
     code: 40,
     cellSize: [12, 24],
     vertices: [
       [
-        [110, 212],
-        [114, 212],
-        [114, 236],
-        [110, 236]
+        [5 / 6, 0.5, 0],
+        [7 / 6, 0.5, 0],
+        [7 / 6, 1.5, 0],
+        [5 / 6, 1.5, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   {
     // 1111
     name: 'single-rectangle',
-    gridOrigin: [100, 200],
     code: 85,
-    cellSize: [12, 24],
     vertices: [
       [
-        [106, 236],
-        [106, 212],
-        [118, 212],
-        [118, 236]
+        [0.5, 1.5, 0],
+        [0.5, 0.5, 0],
+        [1.5, 0.5, 0],
+        [1.5, 1.5, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   {
     // 2001
     name: 'single-pentagon',
-    gridOrigin: [100, 200],
     code: 129,
-    cellSize: [12, 24],
     vertices: [
       [
-        [106, 224],
-        [106, 212],
-        [112, 212],
-        [114, 236],
-        [110, 236]
+        [0.5, 1, 0],
+        [0.5, 0.5, 0],
+        [1, 0.5, 0],
+        [7 / 6, 1.5, 0],
+        [5 / 6, 1.5, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   {
     // 0211
     name: 'single-hexagon',
-    gridOrigin: [100, 200],
     code: 37,
-    cellSize: [12, 24],
     vertices: [
       [
-        [106, 224],
-        [106, 212],
-        [118, 212],
-        [118, 224],
-        [114, 236],
-        [110, 236]
+        [0.5, 1, 0],
+        [0.5, 0.5, 0],
+        [1.5, 0.5, 0],
+        [1.5, 1, 0],
+        [7 / 6, 1.5, 0],
+        [5 / 6, 1.5, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   // saddle cases
   {
     // 1010
     name: 'saddle-6-sided-mean-0',
-    gridOrigin: [100, 200],
     code: 68,
     meanCode: 0,
-    cellSize: [12, 24],
     vertices: [
       [
-        [106, 236],
-        [106, 224],
-        [112, 236]
+        [0.5, 1.5, 0],
+        [0.5, 1, 0],
+        [1, 1.5, 0]
       ],
       [
-        [112, 212],
-        [118, 212],
-        [118, 224]
+        [1, 0.5, 0],
+        [1.5, 0.5, 0],
+        [1.5, 1, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   },
   {
     // 1010
     name: 'saddle-6-sided-mean-0',
-    gridOrigin: [100, 200],
     code: 68,
     meanCode: 2, // merged with mean-code 1
-    cellSize: [12, 24],
     vertices: [
       [
-        [106, 236],
-        [106, 224],
-        [112, 212],
-        [118, 212],
-        [118, 224],
-        [112, 236]
+        [0.5, 1.5, 0],
+        [0.5, 1, 0],
+        [1, 0.5, 0],
+        [1.5, 0.5, 0],
+        [1.5, 1, 0],
+        [1, 1.5, 0]
       ]
-    ],
-    type: CONTOUR_TYPE.ISO_BANDS
+    ]
   }
 ];
 
+function getValueReader(cellWeights: number[], gridSize: number[]) {
+  return (x: number, y: number) => cellWeights[y * gridSize[0] + x];
+}
+
 test('MarchingSquares#getCode', t => {
-  const threshold = 6;
-  const x = 0;
-  const y = 0;
-  const gridSize = [2, 2];
-  GETCODE_TESTS.forEach(testCase => {
+  for (const testCase of GETCODE_TESTS) {
+    const {cellWeights, threshold = 6, x = 0, y = 0, gridSize = [2, 2]} = testCase;
+
     const {code, meanCode} = getCode({
-      cellWeights: testCase.cellWeights,
+      getValue: getValueReader(cellWeights, gridSize),
       threshold: testCase.threshold || threshold,
-      x: testCase.x || x,
-      y: testCase.y || y,
-      width: testCase.gridSize ? testCase.gridSize[0] : gridSize[0],
-      height: testCase.gridSize ? testCase.gridSize[1] : gridSize[1]
+      x: x,
+      y: y,
+      xRange: [0, gridSize[0]],
+      yRange: [0, gridSize[1]]
     });
     t.equals(code, testCase.code, `Code: expected=${testCase.code}, actual=${code}`);
     if (testCase.meanCode) {
@@ -463,51 +432,27 @@ test('MarchingSquares#getCode', t => {
       t.equals(
         meanCode,
         testCase.meanCode,
-        `manCoode: expected=${testCase.meanCode}, actual=${meanCode}`
+        `meanCode: expected=${testCase.meanCode}, actual=${meanCode}`
       );
     }
-  });
+  }
   t.end();
 });
 
-/* eslint-disable max-nested-callbacks */
-test('MarchingSquares#getVertices', t => {
-  const x = 0;
-  const y = 0;
-  const cellSize = [10, 20];
-  GETVERTEX_TESTS.forEach(testCase => {
-    const vertices = getVertices({
-      gridOrigin: testCase.gridOrigin,
-      x: testCase.x || x,
-      y: testCase.y || y,
-      cellSize: testCase.cellSize || cellSize,
-      code: testCase.code,
-      meanCode: testCase.meanCode,
-      type: testCase.type || CONTOUR_TYPE.ISO_LINES
-    });
-    // Set z coordinate to 0 if not present.
-    let expectedVertices = [];
-    if (testCase.type === CONTOUR_TYPE.ISO_BANDS) {
-      testCase.vertices.forEach(polygon => {
-        if (!polygon) {
-          return;
-        }
-        const expectedPolygon = polygon.map(vertex =>
-          vertex.length === 2 ? vertex.concat(0) : vertex
-        );
-        expectedVertices.push(expectedPolygon);
-      });
-    } else {
-      expectedVertices = testCase.vertices.map(vertex =>
-        vertex.length === 2 ? vertex.concat(0) : vertex
-      );
-    }
-    t.deepEquals(
-      vertices,
-      expectedVertices,
-      `Vertices: expected=${expectedVertices}, actual=${vertices}`
-    );
-  });
+test('MarchingSquares#getLines', t => {
+  for (const testCase of GETLINES_TESTS) {
+    const {x = 0, y = 0, code, meanCode} = testCase;
+    const vertices = getLines({x, y, z: 0, code, meanCode});
+    t.deepEquals(vertices, testCase.vertices, 'Returns expected vertices');
+  }
   t.end();
 });
-/* eslint-enable max-nested-callbacks */
+
+test('MarchingSquares#getPolygons', t => {
+  for (const testCase of GETPOLYGONS_TESTS) {
+    const {code, meanCode} = testCase;
+    const vertices = getPolygons({x: 0, y: 0, z: 0, code, meanCode});
+    t.deepEquals(vertices, testCase.vertices, 'Returns expected vertices');
+  }
+  t.end();
+});

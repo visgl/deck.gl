@@ -42,7 +42,7 @@ export default [].concat(
   polygonLayerTests,
   iconLayerTests,
   textLayerTests,
-  // contourLayerTests,
+  contourLayerTests,
   gridLayerTests,
   hexagonLayerTests,
   screenGridLayerTests,

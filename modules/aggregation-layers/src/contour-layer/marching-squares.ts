@@ -46,42 +46,48 @@ export function getCode(opts: {
   const isTopBoundary = y >= yRange[1] - 1;
   const isBoundary = isLeftBoundary || isRightBoundary || isBottomBoundary || isTopBoundary;
 
-  const weights: Record<string, number> = {};
-  const codes: Record<string, number> = {};
+  let weights: number = 0;
+  let current: number;
+  let right: number;
+  let top: number;
+  let topRight: number;
 
   // TOP
   if (isLeftBoundary || isTopBoundary) {
-    codes.top = 0;
+    top = 0;
   } else {
-    weights.top = getValue(x, y + 1);
-    codes.top = getVertexCode(weights.top, threshold);
+    const w = getValue(x, y + 1);
+    top = getVertexCode(w, threshold);
+    weights += w;
   }
 
   // TOP-RIGHT
   if (isRightBoundary || isTopBoundary) {
-    codes.topRight = 0;
+    topRight = 0;
   } else {
-    weights.topRight = getValue(x + 1, y + 1);
-    codes.topRight = getVertexCode(weights.topRight, threshold);
+    const w = getValue(x + 1, y + 1);
+    topRight = getVertexCode(w, threshold);
+    weights += w;
   }
 
   // RIGHT
   if (isRightBoundary || isBottomBoundary) {
-    codes.right = 0;
+    right = 0;
   } else {
-    weights.right = getValue(x + 1, y);
-    codes.right = getVertexCode(weights.right, threshold);
+    const w = getValue(x + 1, y);
+    right = getVertexCode(w, threshold);
+    weights += w;
   }
 
   // CURRENT
   if (isLeftBoundary || isBottomBoundary) {
-    codes.current = 0;
+    current = 0;
   } else {
-    weights.current = getValue(x, y);
-    codes.current = getVertexCode(weights.current, threshold);
+    const w = getValue(x, y);
+    current = getVertexCode(w, threshold);
+    weights += w;
   }
 
-  const {top, topRight, right, current} = codes;
   let code = -1;
   if (Number.isFinite(threshold)) {
     code = (top << 3) | (topRight << 2) | (right << 1) | current;
@@ -95,10 +101,7 @@ export function getCode(opts: {
   // only occur when we are not processing a cell on boundary
   // because when on a boundary either, bottom-row, top-row, left-column or right-column will have both 0 codes
   if (!isBoundary) {
-    meanCode = getVertexCode(
-      (weights.top + weights.topRight + weights.right + weights.current) / 4,
-      threshold
-    );
+    meanCode = getVertexCode(weights / 4, threshold);
   }
   return {code, meanCode};
 }
