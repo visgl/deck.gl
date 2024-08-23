@@ -3,7 +3,7 @@ import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3TileLayer, QuadbinTileLayer, VectorTileLayer, HeatmapTileLayer} from '@deck.gl/carto';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {GridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const METADATA = {
   id: 1234,
@@ -1384,11 +1384,11 @@ test(`parseMap#visState Grid layer`, async t => {
 
   t.deepEquals(
     map.layers.map(l => l.toString()),
-    [`CPUGridLayer({id: 'ij06t3e'})`],
+    [`GridLayer({id: 'ij06t3e'})`],
     'layer names'
   );
 
-  const layer = map.layers[0] as CPUGridLayer;
+  const layer = map.layers[0] as GridLayer;
   t.equal(layer.props.id, 'ij06t3e', 'id');
   t.equal(layer.props.pickable, true, 'pickable');
   t.equal(layer.props.visible, true, 'visible');

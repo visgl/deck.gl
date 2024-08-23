@@ -18,16 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './aggregation-layer.spec';
 import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
-// import './cpu-grid-layer/cpu-grid-layer.spec';
-// import './gpu-cpu-aggregator.spec';
-// import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
-// import './gpu-grid-layer/gpu-grid-cell-layer.spec';
-// import './gpu-grid-layer/gpu-grid-layer.spec';
-// import './grid-aggregation-layer.spec';
-import './grid-aggregator.spec';
 import './grid-layer.spec';
 // import './heatmap-layer/heatmap-layer.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
@@ -35,12 +27,9 @@ import './hexagon-layer.spec';
 import './hexbin.spec';
 import './screen-grid-layer.spec';
 import './screengrid-cell-layer.spec';
-import './utils/aggregation-operation-utils.spec';
-import './utils/bin-sorter.spec';
 import './utils/color-utils.spec';
-// import './utils/gpu-grid-aggregator.spec';
 import './utils/scale-utils.spec';
 
-import './aggregation-layer-v9/webgl-aggregator.spec';
-import './aggregation-layer-v9/cpu-aggregator/cpu-aggregator.spec';
-import './aggregation-layer-v9/cpu-aggregator/vertex-accessor.spec';
+import './common/webgl-aggregator.spec';
+import './common/cpu-aggregator/cpu-aggregator.spec';
+import './common/cpu-aggregator/vertex-accessor.spec';

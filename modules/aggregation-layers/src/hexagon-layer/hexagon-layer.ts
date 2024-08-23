@@ -19,10 +19,10 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {getDistanceScales} from '@math.gl/web-mercator';
-import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
-import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
-import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
-import {AggregationOperation} from '../aggregation-layer-v9/aggregator';
+import {WebGLAggregator} from '../common/gpu-aggregator/webgl-aggregator';
+import {CPUAggregator} from '../common/cpu-aggregator/cpu-aggregator';
+import AggregationLayer from '../common/aggregation-layer';
+import {AggregationOperation} from '../common/aggregator';
 import {AggregateAccessor} from '../types';
 import {defaultColorRange} from '../utils/color-utils';
 

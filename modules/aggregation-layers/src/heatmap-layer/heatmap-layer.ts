@@ -45,7 +45,7 @@ import {
   project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
+import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
