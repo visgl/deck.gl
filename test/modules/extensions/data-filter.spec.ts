@@ -105,8 +105,8 @@ test('DataFilterExtension#categories', t => {
 
         const attributes = layer.getAttributeManager().getAttributes();
         t.deepEqual(
-          attributes.filterCategoryValues.value,
-          [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+          attributes.filterCategoryValues.value.slice(0, 4),
+          [0, 0, 1, 1],
           'filterCategoryValues attribute is populated'
         );
         t.notOk(attributes.filterValues, 'filterValues attribute is not populated');

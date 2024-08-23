@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import './aggregation-layer.spec';
-// import './contour-layer/contour-layer.spec';
+import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
 // import './cpu-grid-layer/cpu-grid-layer.spec';
 // import './gpu-cpu-aggregator.spec';
