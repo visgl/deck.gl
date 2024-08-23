@@ -38,7 +38,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "expression-eval": "^5.0.0"
+    "jsep": "^0.3.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0"

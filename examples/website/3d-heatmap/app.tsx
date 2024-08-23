@@ -59,7 +59,7 @@ function getTooltip({object}: PickingInfo) {
   }
   const lat = object.position[1];
   const lng = object.position[0];
-  const count = object.points.length;
+  const count = object.count;
 
   return `\
     latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}
@@ -85,6 +85,7 @@ export default function App({
   const layers = [
     new HexagonLayer<DataPoint>({
       id: 'heatmap',
+      // gpuAggregation: true,
       colorRange,
       coverage,
       data,
@@ -126,6 +127,8 @@ export async function renderToDOM(container: HTMLDivElement) {
   root.render(<App />);
 
   const data = (await load(DATA_URL, CSVLoader)).data;
-  const points: DataPoint[] = data.map(d => [d.lng, d.lat]);
+  const points: DataPoint[] = data
+    .map(d => (Number.isFinite(d.lng) ? [d.lng, d.lat] : null))
+    .filter(Boolean);
   root.render(<App data={points} />);
 }

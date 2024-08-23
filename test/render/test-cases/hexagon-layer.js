@@ -25,32 +25,47 @@ const GOLDEN_IMAGE = './test/render/golden-images/hexagon-lnglat.png';
 
 export default [
   {
-    name: 'hexagon-lnglat:value-accessors',
+    name: 'hexagon#cpu:value-accessors',
     viewState: VIEW_STATE,
     layers: [
-      new HexagonLayer(
-        Object.assign({}, PROPS, {
-          id: 'hexagon-lnglat:value-accessors',
-          getColorValue: points => getMean(points, 'SPACES'),
-          getElevationValue: points => getMax(points, 'SPACES')
-        })
-      )
+      new HexagonLayer({
+        ...PROPS,
+        id: 'hexagon#cpu-1',
+        getColorValue: points => getMean(points, 'SPACES'),
+        getElevationValue: points => getMax(points, 'SPACES')
+      })
     ],
     goldenImage: GOLDEN_IMAGE
   },
   {
-    name: 'hexagon:weight-accessors and operation',
+    name: 'hexagon#cpu:weight-accessors and operation',
     viewState: VIEW_STATE,
     layers: [
-      new HexagonLayer(
-        Object.assign({}, PROPS, {
-          id: 'hexagon-lnglat:weight-accessors and operation',
-          getColorWeight: x => x.SPACES,
-          colorAggregation: 'MEAN',
-          getElevationWeight: x => x.SPACES,
-          elevationAggregation: 'MAX'
-        })
-      )
+      new HexagonLayer({
+        ...PROPS,
+        id: 'hexagon#cpu-2',
+        gpuAggregation: false,
+        getColorWeight: x => x.SPACES,
+        colorAggregation: 'MEAN',
+        getElevationWeight: x => x.SPACES,
+        elevationAggregation: 'MAX'
+      })
+    ],
+    goldenImage: GOLDEN_IMAGE
+  },
+  {
+    name: 'hexagon#gpu',
+    viewState: VIEW_STATE,
+    layers: [
+      new HexagonLayer({
+        ...PROPS,
+        id: 'hexagon#gpu',
+        gpuAggregation: true,
+        getColorWeight: x => x.SPACES,
+        colorAggregation: 'MEAN',
+        getElevationWeight: x => x.SPACES,
+        elevationAggregation: 'MAX'
+      })
     ],
     goldenImage: GOLDEN_IMAGE
   }
