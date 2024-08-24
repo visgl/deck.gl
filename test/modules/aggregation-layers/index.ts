@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import './aggregation-layer.spec';
 import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
 import './grid-layer.spec';
