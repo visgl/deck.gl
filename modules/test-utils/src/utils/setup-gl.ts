@@ -6,7 +6,7 @@ export const device = webglDevice || new NullDevice({});
 /** Test context */
 const testDevice = createTestDevice();
 
-export const gl = testDevice?.gl!;
+export const gl = webglDevice?.gl || 1;
 
 //   // TODO - Seems to be an issue in luma.gl
 //   (createContext && createContext(100, 100, {}));
