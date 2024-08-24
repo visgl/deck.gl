@@ -140,6 +140,7 @@ export class SnapshotTestRunner extends TestRunner<
     };
     // Take screenshot and compare
     const result = await window.browserTestDriver_captureAndDiffScreen(diffOptions);
+    // debugger
     // invoke user callback
     if (result.success) {
       this.pass(result);

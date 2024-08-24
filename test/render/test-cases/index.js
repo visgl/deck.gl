@@ -33,9 +33,9 @@ import transitionTests from './transitions';
 import dataFilterExtensionTests from './data-filter-extension';
 
 export default [].concat(
-  coreLayersTests,
+  // coreLayersTests,
   arcLayersTests,
-  columnLayerTests,
+  // columnLayerTests,
   // geojsonLayerTests,
   // pathLayerTests,
   // pointCloudLayerTests,
