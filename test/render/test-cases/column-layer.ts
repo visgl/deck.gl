@@ -1,6 +1,7 @@
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import {GL} from '@luma.gl/constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
+import type {SnapshotTestCase} from '@deck.gl/test-utils';
 
 const cullBackParameters = {
   cull: true,
@@ -15,7 +16,7 @@ export const polygonCCW = [
   [0, -1, 0]
 ];
 
-function genColumnLayerTestCase(settings, props = {}, visState = {}) {
+function genColumnLayerTestCase(settings, props = {}, visState = {}): SnapshotTestCase {
   return {
     name: settings.name,
     viewState: {

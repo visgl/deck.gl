@@ -24,7 +24,7 @@ import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
 import './jupyter-widget';
 
-test('Render Test', t => {
+test.only('Render Test', t => {
   // FOR DEBUGGING
   const testCases = TEST_CASES; // .filter(testCase => testCase.name === 'geojson-icon');
 
