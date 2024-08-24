@@ -389,14 +389,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Create a new device
     if (!deviceOrPromise) {
-      // TODO - we can supply adapters as a parameter to createDevice to avoid global registration
-      luma.registerAdapters([webgl2Adapter]);
-
       // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
         type: 'best-available',
+        adapters: [webgl2Adapter],
         ...props.deviceProps,
-        createCanvasContext: {canvas: this._createCanvas(props)}
+        createCanvasContext: {canvas: this._createCanvas(props)},
+        _resourceDefaults: {
+          texture: {mipmaps: true},
+          sampler: {mipmapFilter: 'nearest'},
+          renderPass: {clearDepth: true},
+        }
+
       });
     }
 

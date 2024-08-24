@@ -155,7 +155,9 @@ export const heatmap = {
   },
   fs,
   passes: [
+    // @ts-expect-error Seems typing in luma.gl should be Partial<>
     {sampler: true, uniforms: {delta: [1, 0]}},
+    // @ts-expect-error Seems typing in luma.gl should be Partial<>
     {sampler: true, uniforms: {delta: [0, 1]}}
   ]
 } as const satisfies ShaderPass<HeatmapProps & PassProps>;
