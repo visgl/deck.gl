@@ -21,21 +21,16 @@ import test from 'tape-promise/tape';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, testLayerAsync, generateLayerTests} from '@deck.gl/test-utils';
 
-import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {ContourLayer} from '@deck.gl/aggregation-layers';
+import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {ContourLayer, ContourLayerProps} from '@deck.gl/aggregation-layers';
 
 const getPosition = d => d.COORDINATES;
-const CONTOURS1 = [
+const CONTOURS: ContourLayerProps['contours'] = [
   {threshold: 1, color: [255, 0, 0]}, // => Isoline for threshold 1
   {threshold: 5, color: [0, 255, 0]}, // => Isoline for threshold 5
   {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
-];
-const CONTOURS2 = [
-  // contours count changed
-  {threshold: 5, color: [0, 255, 0]},
-  {threshold: [6, 10], color: [0, 0, 255]}
 ];
 
 test('ContourLayer', t => {
@@ -48,10 +43,7 @@ test('ContourLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      if (layer.getNumInstances() > 0) {
-        const {aggregationData} = layer.state.weights.count;
-        t.ok(aggregationData, 'should create aggregationData');
-      }
+      t.ok(layer.state.aggregator, 'should create aggregator');
     }
   });
 
@@ -60,114 +52,137 @@ test('ContourLayer', t => {
   t.end();
 });
 
-test('ContourLayer#renderSubLayer', t => {
-  const layer = new ContourLayer({
-    id: 'contourLayer',
-    data: FIXTURES.points,
-    contours: CONTOURS1,
-    cellSize: 200,
-    getPosition
-  });
-
-  testInitializeLayer({layer, onError: t.notOk});
-
-  // render sublayer
-  const subLayers = layer.renderLayers();
-  testInitializeLayer({layer: subLayers[0], onError: t.notOk});
-  testInitializeLayer({layer: subLayers[1], onError: t.notOk});
-
-  t.ok(subLayers[0] instanceof LineLayer, 'Sublayer Line layer rendered');
-  t.ok(subLayers[1] instanceof SolidPolygonLayer, 'Sublayer SolidPolygon layer rendered');
-
-  t.end();
-});
-
-test('ContourLayer#updates', t => {
-  testLayer({
+test('ContourLayer#updates', async t => {
+  let prevState: ContourLayer['state'];
+  await testLayerAsync({
     Layer: ContourLayer,
-    onError: t.notOk,
     testCases: [
       {
+        title: 'Render sublayers for both iso-lines and iso-bands',
         props: {
           data: FIXTURES.points,
-          cellSize: 400,
-          contours: CONTOURS1,
-          getPosition,
-          pickable: true
+          gpuAggregation: true,
+          contours: CONTOURS,
+          cellSize: 200,
+          getPosition
         },
-        onAfterUpdate({layer}) {
-          const {aggregationData} = layer.state.weights.count;
-          const {contourData, thresholdData} = layer.state;
-
-          t.ok(aggregationData.length > 0, 'ContourLayer data is aggregated');
-          t.ok(
-            Array.isArray(contourData.contourSegments) && contourData.contourSegments.length > 1,
-            'ContourLayer iso-lines calculated'
+        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onAfterUpdate: ({layer, subLayers}) => {
+          t.ok(subLayers[0] instanceof PathLayer, 'Sublayer Line layer rendered');
+          t.ok(subLayers[1] instanceof SolidPolygonLayer, 'Sublayer SolidPolygon layer rendered');
+          prevState = {...layer.state};
+        }
+      },
+      {
+        title: 'Update zOffset',
+        updateProps: {
+          zOffset: 0.1
+        },
+        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onAfterUpdate: ({layer}) => {
+          t.is(
+            prevState.aggregatedValueReader,
+            (layer as ContourLayer).state.aggregatedValueReader,
+            'aggregation not updated'
           );
-          t.ok(
-            Array.isArray(contourData.contourPolygons) && contourData.contourPolygons.length > 1,
-            'ContourLayer iso-bands calculated'
-          );
-          // contours array prop has 3 elements
-          t.ok(
-            Array.isArray(thresholdData) && thresholdData.length === 3,
-            'ContourLayer threshold data is calculated'
+          t.is(
+            prevState.contourData,
+            (layer as ContourLayer).state.contourData,
+            'contour data not updated'
           );
         }
       },
       {
+        title: 'Update cellSize',
         updateProps: {
-          gpuAggregation: false // default value is true
+          cellSize: 300
         },
-        spies: ['_updateAggregation'],
-        onAfterUpdate({spies, layer, oldState}) {
-          if (oldState.gpuAggregation) {
-            // Under WebGL1, gpuAggregation will be false
-            t.ok(
-              spies._updateAggregation.called,
-              'should re-aggregate data on gpuAggregation change'
-            );
-          }
+        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onAfterUpdate: ({layer}) => {
+          t.not(
+            prevState.aggregatedValueReader,
+            (layer as ContourLayer).state.aggregatedValueReader,
+            'aggregation is updated'
+          );
+          t.not(
+            prevState.contourData,
+            (layer as ContourLayer).state.contourData,
+            'contour data is recalculated'
+          );
+          prevState = {...layer.state};
         }
       },
       {
+        title: 'Render sublayer for iso-lines',
         updateProps: {
-          cellSize: 500 // changed from 400 to 500
+          contours: CONTOURS.slice(0, 1)
         },
-        spies: ['_updateAggregation', '_generateContours'],
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(subLayers.length === 2, 'Sublayers rendered');
-
-          t.ok(spies._updateAggregation.called, 'should re-aggregate data on cellSize change');
-          t.ok(spies._generateContours.called, 'should re-generate contours on cellSize change');
-          spies._updateAggregation.restore();
-          spies._generateContours.restore();
+        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onAfterUpdate: ({layer, subLayers}) => {
+          t.is(
+            prevState.aggregatedValueReader,
+            (layer as ContourLayer).state.aggregatedValueReader,
+            'aggregation not updated'
+          );
+          t.not(
+            prevState.contourData,
+            (layer as ContourLayer).state.contourData,
+            'contour data is recalculated'
+          );
+          t.ok(subLayers[0] instanceof PathLayer, 'Sublayer Line layer rendered');
+          t.is(subLayers.length, 1, 'Sublayer SolidPolygon layer not rendered');
+          prevState = {...layer.state};
         }
       },
       {
+        title: 'Render sublayer for iso-bands',
         updateProps: {
-          contours: CONTOURS2
+          contours: CONTOURS.slice(2, 3)
         },
-        spies: ['_updateThresholdData', '_generateContours', '_updateAggregation'],
-        onAfterUpdate({subLayers, spies}) {
-          t.ok(subLayers.length === 2, 'Sublayers rendered');
-
-          t.ok(
-            spies._updateThresholdData.called,
-            'should update threshold data on countours change'
+        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onAfterUpdate: ({layer, subLayers}) => {
+          t.is(
+            prevState.aggregatedValueReader,
+            (layer as ContourLayer).state.aggregatedValueReader,
+            'aggregation not updated'
           );
-          t.ok(spies._generateContours.called, 'should re-generate contours  on countours  change');
-          t.ok(
-            !spies._updateAggregation.called,
-            'should NOT re-aggregate data  on countours count change'
+          t.not(
+            prevState.contourData,
+            (layer as ContourLayer).state.contourData,
+            'contour data is recalculated'
           );
-
-          spies._updateThresholdData.restore();
-          spies._generateContours.restore();
-          spies._updateAggregation.restore();
+          t.is(subLayers.length, 1, 'Sublayer Line layer not rendered');
+          t.ok(subLayers[0] instanceof SolidPolygonLayer, 'Sublayer SolidPolygon layer rendered');
+          prevState = {...layer.state};
+        }
+      },
+      {
+        title: 'Use CPU aggregation',
+        updateProps: {
+          gpuAggregation: false
+        },
+        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onAfterUpdate: ({layer}) => {
+          t.not(
+            prevState.aggregator,
+            (layer as ContourLayer).state.aggregator,
+            'aggregator changed'
+          );
+          t.not(
+            prevState.aggregatedValueReader,
+            (layer as ContourLayer).state.aggregatedValueReader,
+            'aggregation is updated'
+          );
+          t.not(
+            prevState.contourData,
+            (layer as ContourLayer).state.contourData,
+            'contour data is recalculated'
+          );
+          prevState = {...layer.state};
         }
       }
-    ]
+    ],
+    onError: t.notOk
   });
 
   t.end();

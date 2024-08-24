@@ -13,6 +13,8 @@ export type AggregationProps = {
   operations: AggregationOperation[];
   /** Additional options to control bin sorting, e.g. bin size */
   binOptions: Record<string, number | number[]>;
+  /** Callback after a channel is updated */
+  onUpdate?: (event: {channel: number}) => void;
 };
 
 /** Descriptor of an aggregated bin */

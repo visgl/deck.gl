@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import './aggregation-layer.spec';
-// import './contour-layer/contour-layer.spec';
+import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
 // import './cpu-grid-layer/cpu-grid-layer.spec';
 // import './gpu-cpu-aggregator.spec';
@@ -28,11 +28,11 @@ import './contour-layer/marching-squares.spec';
 // import './gpu-grid-layer/gpu-grid-layer.spec';
 // import './grid-aggregation-layer.spec';
 import './grid-aggregator.spec';
-// import './grid-layer.spec';
+import './grid-layer.spec';
 // import './heatmap-layer/heatmap-layer.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
-// import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
+import './hexagon-layer.spec';
+import './hexbin.spec';
 import './screen-grid-layer.spec';
 import './screengrid-cell-layer.spec';
 import './utils/aggregation-operation-utils.spec';

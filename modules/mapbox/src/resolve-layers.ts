@@ -42,8 +42,10 @@ export function resolveLayers(
   for (const layer of layers) {
     const mapboxLayer = map.getLayer(layer.id) as MapboxLayer<Layer>;
     if (mapboxLayer) {
+      // Mapbox's map.getLayer() had a breaking change in v3.6.0, see https://github.com/visgl/deck.gl/issues/9086
       // @ts-expect-error not typed
-      mapboxLayer.implementation.setProps(layer.props);
+      const layerInstance = mapboxLayer.implementation || mapboxLayer;
+      layerInstance.setProps(layer.props);
     } else {
       map.addLayer(
         new MapboxLayer({id: layer.id, deck}),
