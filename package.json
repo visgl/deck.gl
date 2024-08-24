@@ -15,7 +15,8 @@
     "url": "https://github.com/visgl/deck.gl.git"
   },
   "workspaces": [
-    "modules/*"
+    "modules/*",
+    "examples/layer-browser"
   ],
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap",
