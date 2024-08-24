@@ -396,11 +396,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         ...props.deviceProps,
         createCanvasContext: {canvas: this._createCanvas(props)},
         _resourceDefaults: {
+          // TODO - override default props that have changed in v9
           texture: {mipmaps: true},
           sampler: {mipmapFilter: 'nearest'},
-          renderPass: {clearDepth: true},
+          renderPass: {clearDepth: true}
         }
-
       });
     }
 
