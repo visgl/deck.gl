@@ -35,7 +35,7 @@ import dataFilterExtensionTests from './data-filter-extension';
 export default [].concat(
   // coreLayersTests,
   // arcLayersTests
-  columnLayerTests,
+  columnLayerTests
   // geojsonLayerTests,
   // pathLayerTests,
   // pointCloudLayerTests,
