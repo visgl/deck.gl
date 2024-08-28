@@ -29,24 +29,20 @@ in float instanceWeights;
 in vec3 instancePickingColors;
 
 uniform float opacity;
-uniform ivec2 binCount;
-uniform vec2 gridSizeClipspace;
-uniform vec2 cellSizeClipspace;
-uniform vec2 colorDomain;
 uniform sampler2D colorRange;
 
 out vec4 vColor;
 flat out int vIsValid;
 
 void main(void) {
-  vec2 pos = instancePositions * gridSizeClipspace + positions * cellSizeClipspace;
+  vec2 pos = instancePositions * screenGrid.gridSizeClipspace + positions * screenGrid.cellSizeClipspace;
   pos.x = pos.x - 1.0;
   pos.y = 1.0 - pos.y;
 
   gl_Position = vec4(pos, 0., 1.);
 
   vIsValid = isnan(instanceWeights) ? 0 : 1;
-  float r = min(max((instanceWeights - colorDomain.x) / (colorDomain.y - colorDomain.x), 0.), 1.);
+  float r = min(max((instanceWeights - screenGrid.colorDomain.x) / (screenGrid.colorDomain.y - screenGrid.colorDomain.x), 0.), 1.);
   vec4 rangeColor = texture(colorRange, vec2(r, 0.5));
 
   vColor = vec4(rangeColor.rgb, rangeColor.a * opacity);

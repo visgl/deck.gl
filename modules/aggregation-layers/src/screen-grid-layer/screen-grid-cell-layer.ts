@@ -24,6 +24,7 @@ import {Layer, picking, UpdateParameters, DefaultProps, Color} from '@deck.gl/co
 import {defaultColorRange, colorRangeToTexture} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
 import {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps: DefaultProps<_ScreenGridCellLayerProps> = {
@@ -52,7 +53,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   };
 
   getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
-    return {vs, fs, modules: [picking]};
+    return {vs, fs, modules: [picking, screenGridUniforms]};
   }
 
   initializeState() {
@@ -82,6 +83,11 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
       this.state.colorTexture?.destroy();
       this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
       model.setBindings({colorRange: this.state.colorTexture});
+      const screenGridProps: Partial<ScreenGridProps> = {
+        colorRange: this.state.colorTexture
+      };
+
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
 
     if (
@@ -97,6 +103,13 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
         gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
         cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
       });
+
+      const screenGridProps: Partial<ScreenGridProps> = {
+        gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
+        cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
+      };
+
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
   }
 
@@ -111,6 +124,9 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     const colorDomain = this.props.colorDomain();
     const model = this.state.model!;
 
+    const screenGridProps: Partial<ScreenGridProps> = {colorDomain};
+
+    model.shaderInputs.setProps({screenGrid: screenGridProps});
     model.setUniforms(uniforms);
     model.setUniforms({colorDomain});
     model.draw(this.context.renderPass);
