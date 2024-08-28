@@ -28,7 +28,6 @@ in vec2 instancePositions;
 in float instanceWeights;
 in vec3 instancePickingColors;
 
-uniform float opacity;
 uniform sampler2D colorRange;
 
 out vec4 vColor;
@@ -45,7 +44,7 @@ void main(void) {
   float r = min(max((instanceWeights - screenGrid.colorDomain.x) / (screenGrid.colorDomain.y - screenGrid.colorDomain.x), 0.), 1.);
   vec4 rangeColor = texture(colorRange, vec2(r, 0.5));
 
-  vColor = vec4(rangeColor.rgb, rangeColor.a * opacity);
+  vColor = vec4(rangeColor.rgb, rangeColor.a * layer.opacity);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);

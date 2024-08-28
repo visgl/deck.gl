@@ -53,7 +53,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   };
 
   getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
-    return {vs, fs, modules: [picking, screenGridUniforms]};
+    return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
   }
 
   initializeState() {
@@ -82,11 +82,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
-      const screenGridProps: Partial<ScreenGridProps> = {
-        colorRange: this.state.colorTexture
-      };
-
+      const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
 
@@ -99,16 +95,10 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
       const {cellSizePixels: gridSize, cellMarginPixels} = this.props;
       const cellSize = Math.max(gridSize - cellMarginPixels, 0);
 
-      model.setUniforms({
-        gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
-        cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
-      });
-
       const screenGridProps: Partial<ScreenGridProps> = {
         gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
         cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
       };
-
       model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
   }
@@ -125,10 +115,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     const model = this.state.model!;
 
     const screenGridProps: Partial<ScreenGridProps> = {colorDomain};
-
     model.shaderInputs.setProps({screenGrid: screenGridProps});
-    model.setUniforms(uniforms);
-    model.setUniforms({colorDomain});
     model.draw(this.context.renderPass);
   }
 
