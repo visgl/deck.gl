@@ -72,7 +72,9 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+
+      const hexagonProps: Partial<HexagonProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({hexagon: hexagonProps});
     }
   }
 
@@ -96,16 +98,6 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
       fillModel.setIndexBuffer(null);
     }
     fillModel.setVertexCount(this.state.fillVertexCount);
-    fillModel.setUniforms(uniforms);
-    fillModel.setUniforms({
-      extruded,
-      coverage,
-      colorDomain,
-      elevationDomain,
-      radius,
-      hexOriginCommon,
-      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
-    });
 
     const hexagonProps: Omit<HexagonProps, 'colorRange'> = {
       colorDomain,
