@@ -106,6 +106,10 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
       hexOriginCommon,
       elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
     });
+
+    fillModel.shaderInputs.setProps({
+      column: {extruded, coverage, radius}
+    });
     fillModel.draw(this.context.renderPass);
   }
 }
