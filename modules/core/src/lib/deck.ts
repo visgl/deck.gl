@@ -394,14 +394,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         type: 'best-available',
         adapters: [webgl2Adapter],
         ...props.deviceProps,
-        createCanvasContext: {canvas: this._createCanvas(props)},
+        createCanvasContext: {canvas: this._createCanvas(props)}
         // @ts-ignore
-        _resourceDefaults: {
-          // TODO - override default props that have changed in v9
-          // texture: {mipmaps: true},
-          // sampler: {mipmapFilter: 'nearest'},
-          renderPass: {clearDepth: true}
-        }
+        // _resourceDefaults: {
+        //   // TODO - override default props that have changed in v9
+        //   texture: {mipmaps: true},
+        //   sampler: {mipmapFilter: 'nearest'},
+        //   renderPass: {clearDepth: true}
+        // }
       });
     }
 
