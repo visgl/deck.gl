@@ -7,6 +7,7 @@ import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {colorRangeToTexture} from '../utils/color-utils';
 import vs from './hexagon-cell-layer-vertex.glsl';
+import {HexagonProps, hexagonUniforms} from './hexagon-layer-uniforms';
 
 /** Proprties added by HexagonCellLayer. */
 export type _HexagonCellLayerProps = {
@@ -28,10 +29,9 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
   };
 
   getShaders() {
-    return {
-      ...super.getShaders(),
-      vs
-    };
+    const shaders = super.getShaders();
+    shaders.modules.push(hexagonUniforms);
+    return {...shaders, vs};
   }
 
   initializeState() {
@@ -107,8 +107,16 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
       elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
     });
 
+    const hexagonProps: Omit<HexagonProps, 'colorRange'> = {
+      colorDomain,
+      elevationDomain,
+      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale],
+      originCommon: hexOriginCommon
+    };
+
     fillModel.shaderInputs.setProps({
-      column: {extruded, coverage, radius}
+      column: {extruded, coverage, radius},
+      hexagon: hexagonProps
     });
     fillModel.draw(this.context.renderPass);
   }

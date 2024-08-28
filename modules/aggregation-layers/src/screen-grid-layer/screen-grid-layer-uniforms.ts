@@ -5,12 +5,13 @@ const uniformBlock = `\
 uniform screenGridUniforms {
   vec2 cellSizeClipspace;
   vec2 gridSizeClipspace;
+  vec2 colorDomain;
 } screenGrid;
 `;
 
 export type ScreenGridProps = {
-  cellSizeGridspace: [number, number];
-  gridSizeGridspace: [number, number];
+  cellSizeClipspace: [number, number];
+  gridSizeClipspace: [number, number];
   colorDomain: [number, number];
   colorRange: Texture;
 };
@@ -18,10 +19,9 @@ export type ScreenGridProps = {
 export const screenGridUniforms = {
   name: 'screenGrid',
   vs: uniformBlock,
-  fs: uniformBlock,
   uniformTypes: {
-    cellSizeGridspace: 'vec2<f32>',
-    gridSizeGridspace: 'vec2<f32>',
+    cellSizeClipspace: 'vec2<f32>',
+    gridSizeClipspace: 'vec2<f32>',
     colorDomain: 'vec2<f32>'
   }
 } as const satisfies ShaderModule<ScreenGridProps>;
