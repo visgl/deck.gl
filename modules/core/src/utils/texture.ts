@@ -49,7 +49,8 @@ export function createTexture(
       ...DEFAULT_TEXTURE_PARAMETERS,
       ...samplerParameters,
       ...sampler
-    }
+    },
+    mipmaps: true
   });
   // Track this texture
   internalTextures[texture.id] = owner;
