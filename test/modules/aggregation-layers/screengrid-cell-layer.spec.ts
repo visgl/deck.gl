@@ -25,7 +25,7 @@ import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/s
 import {testLayer} from '@deck.gl/test-utils';
 let cellSize;
 
-test.only('ScreenGridCellLayer#constructor', t => {
+test('ScreenGridCellLayer#constructor', t => {
   const SAMPLE_BUFFER = device.createBuffer({});
 
   testLayer({
