@@ -100,11 +100,11 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
     const fillModel = this.state.fillModel!;
 
     const gridProps: Omit<GridProps, 'colorRange'> = {
-      cellOriginCommon,
-      cellSizeCommon,
       colorDomain,
       elevationDomain,
-      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
+      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale],
+      originCommon: cellOriginCommon,
+      sizeCommon: cellSizeCommon
     };
     fillModel.shaderInputs.setProps({
       column: {extruded, coverage},

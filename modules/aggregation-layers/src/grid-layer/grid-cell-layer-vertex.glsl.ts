@@ -37,7 +37,7 @@ void main(void) {
     return;
   }
   
-  vec2 commonPosition = (instancePositions + (positions.xy + 1.0) / 2.0 * column.coverage) * grid.cellSizeCommon + grid.cellOriginCommon - project.commonOrigin.xy;
+  vec2 commonPosition = (instancePositions + (positions.xy + 1.0) / 2.0 * column.coverage) * grid.sizeCommon + grid.originCommon - project.commonOrigin.xy;
   geometry.position = vec4(commonPosition, 0.0, 1.0);
   geometry.normal = project_normal(normals);
 
