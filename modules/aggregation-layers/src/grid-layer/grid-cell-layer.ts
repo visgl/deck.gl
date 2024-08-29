@@ -106,6 +106,10 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
       cellSizeCommon,
       elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
     });
+
+    fillModel.shaderInputs.setProps({
+      column: {extruded, coverage}
+    });
     fillModel.draw(this.context.renderPass);
   }
 }
