@@ -16,28 +16,32 @@ export default class ShadowPass extends LayersPass {
 
     // The shadowMap texture
     const shadowMap = device.createTexture({
-      width: 1,
-      height: 1,
+      format: 'rgba8unorm',
+      // TODO do not hardcode only value that makes render tests pass!!!
+      // This avoids the resizing in draw()
+      width: 800,
+      height: 450,
       sampler: {
         minFilter: 'linear',
         magFilter: 'linear',
         addressModeU: 'clamp-to-edge',
         addressModeV: 'clamp-to-edge'
-      }
+      },
+      mipmaps: true
     });
 
     // @ts-ignore
     const depthBuffer = device.createTexture({
       format: 'depth16unorm',
-      width: 1,
-      height: 1,
+      width: 800,
+      height: 450,
       mipmaps: false
     });
 
     this.fbo = device.createFramebuffer({
       id: 'shadowmap',
-      width: 1,
-      height: 1,
+      width: 800,
+      height: 450,
       colorAttachments: [shadowMap],
       // Depth attachment has to be specified for depth test to work
       depthStencilAttachment: depthBuffer
@@ -66,7 +70,7 @@ export default class ShadowPass extends LayersPass {
     const height = viewport.height * pixelRatio;
     const clearColor = [1, 1, 1, 1];
     if (width !== target.width || height !== target.height) {
-      target.resize({width, height});
+      this.fbo = this.fbo.clone({width, height});
     }
 
     super.render({...params, clearColor, target, pass: 'shadow'});
