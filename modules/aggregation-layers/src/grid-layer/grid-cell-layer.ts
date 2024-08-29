@@ -74,7 +74,9 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+
+      const gridProps: Partial<GridProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({grid: gridProps});
     }
   }
 
@@ -96,16 +98,6 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
     const {cellOriginCommon, cellSizeCommon, elevationRange, elevationScale, extruded, coverage} =
       this.props;
     const fillModel = this.state.fillModel!;
-    fillModel.setUniforms(uniforms);
-    fillModel.setUniforms({
-      extruded,
-      coverage,
-      colorDomain,
-      elevationDomain,
-      cellOriginCommon,
-      cellSizeCommon,
-      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
-    });
 
     const gridProps: Omit<GridProps, 'colorRange'> = {
       cellOriginCommon,
