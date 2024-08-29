@@ -8,6 +8,7 @@ import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
 import {colorRangeToTexture} from '../utils/color-utils';
 import vs from './grid-cell-layer-vertex.glsl';
+import {GridProps, gridUniforms} from './grid-layer-uniforms';
 
 /** Proprties added by GridCellLayer. */
 type GridCellLayerProps = {
@@ -30,10 +31,9 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   };
 
   getShaders() {
-    return {
-      ...super.getShaders(),
-      vs
-    };
+    const shaders = super.getShaders();
+    shaders.modules.push(gridUniforms);
+    return {...shaders, vs};
   }
 
   initializeState() {
@@ -107,8 +107,16 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
       elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
     });
 
+    const gridProps: Omit<GridProps, 'colorRange'> = {
+      cellOriginCommon,
+      cellSizeCommon,
+      colorDomain,
+      elevationDomain,
+      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
+    };
     fillModel.shaderInputs.setProps({
-      column: {extruded, coverage}
+      column: {extruded, coverage},
+      grid: gridProps
     });
     fillModel.draw(this.context.renderPass);
   }

@@ -14,14 +14,7 @@ in float instanceElevationValues;
 in float instanceColorValues;
 in vec3 instancePickingColors;
 
-// Custom uniforms
-uniform float opacity;
-uniform vec2 cellOriginCommon;
-uniform vec2 cellSizeCommon;
-uniform vec2 colorDomain;
 uniform sampler2D colorRange;
-uniform vec2 elevationDomain;
-uniform vec2 elevationRange;
 
 // Result
 out vec4 vColor;
@@ -44,14 +37,14 @@ void main(void) {
     return;
   }
   
-  vec2 commonPosition = (instancePositions + (positions.xy + 1.0) / 2.0 * column.coverage) * cellSizeCommon + cellOriginCommon - project.commonOrigin.xy;
+  vec2 commonPosition = (instancePositions + (positions.xy + 1.0) / 2.0 * column.coverage) * grid.cellSizeCommon + grid.cellOriginCommon - project.commonOrigin.xy;
   geometry.position = vec4(commonPosition, 0.0, 1.0);
   geometry.normal = project_normal(normals);
 
   // calculate z, if 3d not enabled set to 0
   float elevation = 0.0;
   if (column.extruded) {
-    elevation = interp(instanceElevationValues, elevationDomain, elevationRange);
+    elevation = interp(instanceElevationValues, grid.elevationDomain, grid.elevationRange);
     elevation = project_size(elevation);
     // cylindar gemoetry height are between -1.0 to 1.0, transform it to between 0, 1
     geometry.position.z = (positions.z + 1.0) / 2.0 * elevation;
@@ -60,8 +53,8 @@ void main(void) {
   gl_Position = project_common_position_to_clipspace(geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  vColor = interp(instanceColorValues, colorDomain, colorRange);
-  vColor.a *= opacity;
+  vColor = interp(instanceColorValues, grid.colorDomain, colorRange);
+  vColor.a *= layer.opacity;
   if (column.extruded) {
     vColor.rgb = lighting_getLightColor(vColor.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
   }

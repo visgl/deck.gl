@@ -1,7 +1,7 @@
 import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const uniformBlock = /* glsl */ `\
 uniform screenGridUniforms {
   vec2 cellSizeClipspace;
   vec2 gridSizeClipspace;
