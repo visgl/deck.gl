@@ -114,12 +114,9 @@ export {
 
 export {
   ScreenGridLayer,
-  CPUGridLayer,
   HexagonLayer,
   ContourLayer,
   GridLayer,
-  GPUGridLayer,
-  AGGREGATION_OPERATION,
   HeatmapLayer,
   WebGLAggregator,
   CPUAggregator
@@ -204,9 +201,7 @@ export type {
 
 export type {
   ContourLayerProps,
-  CPUGridLayerProps,
   GridLayerProps,
-  GPUGridLayerProps,
   HeatmapLayerProps,
   HexagonLayerProps,
   ScreenGridLayerProps

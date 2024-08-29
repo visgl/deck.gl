@@ -7,7 +7,7 @@ import {
   Attribute,
   AttributeManager
 } from '@deck.gl/core';
-import {Aggregator} from './aggregator';
+import {Aggregator} from './aggregator/aggregator';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;

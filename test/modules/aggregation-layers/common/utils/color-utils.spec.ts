@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {colorRangeToFlatArray} from '@deck.gl/aggregation-layers/utils/color-utils';
+import {colorRangeToFlatArray} from '@deck.gl/aggregation-layers/common/utils/color-utils';
 
 test('color-utils#colorRangeToFlatArray', t => {
   const TESTS = [

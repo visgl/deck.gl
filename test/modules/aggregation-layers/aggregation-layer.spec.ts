@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import AggregationLayer from '@deck.gl/aggregation-layers/aggregation-layer';
+import AggregationLayer from '@deck.gl/aggregation-layers/heatmap-layer/aggregation-layer';
 import {Layer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayer} from '@deck.gl/test-utils';
