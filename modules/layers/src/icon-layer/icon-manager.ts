@@ -120,7 +120,13 @@ function resizeTexture(
 ): Texture {
   const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = device.createTexture({format: 'rgba8unorm', width, height, sampler});
+  const newTexture = device.createTexture({
+    format: 'rgba8unorm',
+    width,
+    height,
+    sampler,
+    mipmaps: true
+  });
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
     sourceTexture: texture,
@@ -407,7 +413,8 @@ export default class IconManager {
           format: 'rgba8unorm',
           width: this._canvasWidth,
           height: this._canvasHeight,
-          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS
+          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
+          mipmaps: true
         });
       }
 
