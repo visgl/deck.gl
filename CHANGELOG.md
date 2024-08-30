@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.28] - Aug 29 2024
+
+- fix(mapbox): interleaved mode in Mapbox@3.6.0 (#9103)
+
 #### deck.gl [9.0.27] - Aug 9 2024
 
 - CARTO: Move cluster stats into data.points.attributes (#9081)
