@@ -43,7 +43,6 @@ export default class LightingEffect implements Effect {
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
-  private shadowMaps: Texture[] = [];
   private dummyShadowMap: Texture | null = null;
   private shadowMatrices?: Matrix4[];
 
@@ -132,7 +131,7 @@ export default class LightingEffect implements Effect {
       shadowMatrices?: Matrix4[];
     } = this.shadow
       ? {
-          shadowMaps: this.shadowMaps,
+          shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
           dummyShadowMap: this.dummyShadowMap,
           shadowColor: this.shadowColor,
           shadowMatrices: this.shadowMatrices
@@ -142,6 +141,7 @@ export default class LightingEffect implements Effect {
     // when not rendering to screen, turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
     parameters.lightSources = {
+      enabled: true,
       ambientLight: this.ambientLight,
       directionalLights: this.directionalLights.map(directionalLight =>
         directionalLight.getProjectedLight({layer})
@@ -157,7 +157,6 @@ export default class LightingEffect implements Effect {
       shadowPass.delete();
     }
     this.shadowPasses.length = 0;
-    this.shadowMaps.length = 0;
 
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
@@ -182,7 +181,6 @@ export default class LightingEffect implements Effect {
     for (let i = 0; i < this.directionalLights.length; i++) {
       const shadowPass = new ShadowPass(device);
       this.shadowPasses[i] = shadowPass;
-      this.shadowMaps[i] = shadowPass.shadowMap;
     }
   }
 

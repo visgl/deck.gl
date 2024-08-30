@@ -50,8 +50,8 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "@loaders.gl/polyfills": "^4.2.0",
-    "@luma.gl/webgpu": "^9.0.24",
-    "@math.gl/proj4": "^4.0.0",
+    "@luma.gl/webgpu": "^9.1.0-alpha.19",
+    "@math.gl/proj4": "^4.1.0-alpha.3",
     "@probe.gl/bench": "^4.0.9",
     "jsdom": "^20.0.0",
     "ocular-dev-tools": "2.0.0-alpha.33",
