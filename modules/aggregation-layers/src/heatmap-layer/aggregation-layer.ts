@@ -27,12 +27,13 @@ import {
   CompositeLayerProps,
   Attribute
 } from '@deck.gl/core';
-import {filterProps} from './utils/prop-utils';
+import {filterProps} from '../common/utils/prop-utils';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
 };
 
+/** Legacy AggregationLayer, to be removed in v9.1 */
 export default abstract class AggregationLayer<
   DataT,
   ExtraPropsT extends {} = {}

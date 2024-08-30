@@ -5,7 +5,7 @@
 import {Texture} from '@luma.gl/core';
 import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
-import {colorRangeToTexture} from '../utils/color-utils';
+import {colorRangeToTexture} from '../common/utils/color-utils';
 import vs from './hexagon-cell-layer-vertex.glsl';
 import {HexagonProps, hexagonUniforms} from './hexagon-layer-uniforms';
 

@@ -6,7 +6,7 @@ import {Texture} from '@luma.gl/core';
 import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
-import {colorRangeToTexture} from '../utils/color-utils';
+import {colorRangeToTexture} from '../common/utils/color-utils';
 import vs from './grid-cell-layer-vertex.glsl';
 import {GridProps, gridUniforms} from './grid-layer-uniforms';
 
