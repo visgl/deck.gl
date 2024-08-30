@@ -137,6 +137,8 @@ export class WidgetManager {
     }
 
     for (let widget of nextWidgets) {
+      if (!widget) continue;
+      console.log(widget)
       const oldWidget = oldWidgetMap[widget.id];
       if (!oldWidget) {
         // Widget is new

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, forwardRef, useImperativeHandle, useMemo, useRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {
@@ -29,40 +29,66 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-function Root() {
-  const [widgetContainer, setWidgetContainer] = useState();
+function useWidget(props = {}) {
+  const [container, setContainer] = useState(null);
 
   class ReactWidget {
-    constructor(props) {
-      this.id = props.id || 'react';
-      this.placement = props.placement || 'top-left';
-      this.viewId = props.viewId;
-      this.props = props;
-    }
+      constructor(props) {
+          this.id = props.id || 'react';
+          this.placement = props.placement || 'top-left';
+          this.viewId = props.viewId;
+          this.props = props;
+      }
 
-    onAdd() {
-      const el = document.createElement('div');
-      setWidgetContainer(el);
-      return el;
-    }
+      onAdd() {
+          const el = document.createElement('div');
+          // Defer state update to avoid conflicts with rendering
+          requestAnimationFrame(() => setContainer(el));
+          return el;
+      }
 
-    onRemove() {
-      setWidgetContainer(undefined);
-    }
+      onRemove() {
+        requestAnimationFrame(() => setContainer(null));
+      }
 
-    setProps(props) {
-      this.props = props;
-    }
+      setProps(props) {
+          this.props = props;
+          this.placement = props.placement || this.placement;
+          this.viewId = props.viewId || this.viewId;
+      }
   }
 
-  const reactWidget = new ReactWidget({});
+  const widget = useMemo(() => new ReactWidget(props), [props]);
+
+  return {
+      widget,
+      container
+  };
+}
+
+function DeckWidgetWithRef(props, ref) {
+  const { widget, container } = useWidget(props);
+
+  useImperativeHandle(ref, () => widget, [widget]);
+
+  return container ? createPortal(props.children, container) : null;
+}
+
+const DeckWidget = forwardRef(DeckWidgetWithRef);
+
+function Root() {
+  const [placement, setPlacement] = useState('top-left');
+  const infoWidget = useWidget({id: 'hook'});
+  const buttonWidget = useRef(null);
+  console.log(infoWidget, buttonWidget)
 
   const onClick = () => {
     // eslint-disable-next-line
-    alert('React widget!');
+    // alert('React widget!');
+    setPlacement('top-right');
   };
 
-  const widget = (
+  const infoWidgetEl = (
     <div className="deck-widget" style={widgetTheme}>
       <div className="deck-widget-button">
         <button className="deck-widget-icon-button" onClick={onClick}>
@@ -74,15 +100,19 @@ function Root() {
 
   return (
     <>
-      {widgetContainer && createPortal(widget, widgetContainer)}
+      {infoWidget.container && createPortal(infoWidgetEl, infoWidget.container)}
+      <DeckWidget ref={buttonWidget} id="component" placement={placement}>
+        {infoWidgetEl}
+      </DeckWidget>
       <DeckGL
         controller={true}
         initialViewState={INITIAL_VIEW_STATE}
         widgets={[
-          new ZoomWidget({style: widgetTheme}),
-          new CompassWidget({style: widgetTheme}),
-          new FullscreenWidget({style: widgetTheme}),
-          reactWidget
+          // new ZoomWidget({style: widgetTheme}),
+          // new CompassWidget({style: widgetTheme}),
+          // new FullscreenWidget({style: widgetTheme}),
+          infoWidget.widget,
+          buttonWidget.current
         ]}
         layers={[
           new GeoJsonLayer({
