@@ -142,6 +142,7 @@ export default class LightingEffect implements Effect {
     // when not rendering to screen, turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
     parameters.lightSources = {
+      enabled: true,
       ambientLight: this.ambientLight,
       directionalLights: this.directionalLights.map(directionalLight =>
         directionalLight.getProjectedLight({layer})
