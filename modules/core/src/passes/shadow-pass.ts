@@ -17,8 +17,6 @@ export default class ShadowPass extends LayersPass {
     // The shadowMap texture
     const shadowMap = device.createTexture({
       format: 'rgba8unorm',
-      // TODO do not hardcode only value that makes render tests pass!!!
-      // This avoids the resizing in draw()
       width: 1,
       height: 1,
       sampler: {
@@ -30,7 +28,6 @@ export default class ShadowPass extends LayersPass {
       mipmaps: true
     });
 
-    // @ts-ignore
     const depthBuffer = device.createTexture({
       format: 'depth16unorm',
       width: 1,
@@ -70,7 +67,7 @@ export default class ShadowPass extends LayersPass {
     const height = viewport.height * pixelRatio;
     const clearColor = [1, 1, 1, 1];
     if (width !== target.width || height !== target.height) {
-      this.fbo.resize({width, height});
+      target.resize({width, height});
     }
 
     super.render({...params, clearColor, target, pass: 'shadow'});

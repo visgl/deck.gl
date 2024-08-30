@@ -150,7 +150,6 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
         sampler: pbr_baseColorSampler || emptyTexture,
         hasTexture: Boolean(pbr_baseColorSampler)
       };
-      // @ts-ignore TODO - luma v9 was ahead of 9.1 alpha
       const {camera, ...pbrMaterialProps} = {
         ...parsedPBRMaterial.bindings,
         ...parsedPBRMaterial.uniforms
