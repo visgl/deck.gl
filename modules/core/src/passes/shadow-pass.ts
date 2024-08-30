@@ -1,4 +1,4 @@
-import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import type Layer from '../lib/layer';
 import type Viewport from '../viewports/viewport';
 import LayersPass from './layers-pass';
@@ -19,8 +19,8 @@ export default class ShadowPass extends LayersPass {
       format: 'rgba8unorm',
       // TODO do not hardcode only value that makes render tests pass!!!
       // This avoids the resizing in draw()
-      width: 800,
-      height: 450,
+      width: 1,
+      height: 1,
       sampler: {
         minFilter: 'linear',
         magFilter: 'linear',
@@ -33,15 +33,15 @@ export default class ShadowPass extends LayersPass {
     // @ts-ignore
     const depthBuffer = device.createTexture({
       format: 'depth16unorm',
-      width: 800,
-      height: 450,
+      width: 1,
+      height: 1,
       mipmaps: false
     });
 
     this.fbo = device.createFramebuffer({
       id: 'shadowmap',
-      width: 800,
-      height: 450,
+      width: 1,
+      height: 1,
       colorAttachments: [shadowMap],
       // Depth attachment has to be specified for depth test to work
       depthStencilAttachment: depthBuffer
@@ -70,7 +70,7 @@ export default class ShadowPass extends LayersPass {
     const height = viewport.height * pixelRatio;
     const clearColor = [1, 1, 1, 1];
     if (width !== target.width || height !== target.height) {
-      this.fbo = this.fbo.clone({width, height});
+      this.fbo.resize({width, height});
     }
 
     super.render({...params, clearColor, target, pass: 'shadow'});
