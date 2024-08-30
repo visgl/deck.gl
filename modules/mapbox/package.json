@@ -38,12 +38,12 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.1.0-alpha.18",
+    "@luma.gl/constants": "^9.1.0-alpha.19",
     "@math.gl/web-mercator": "^4.1.0-alpha.3"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-alpha",
-    "@luma.gl/core": "^9.1.0-alpha.18"
+    "@luma.gl/core": "^9.1.0-alpha.19"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
