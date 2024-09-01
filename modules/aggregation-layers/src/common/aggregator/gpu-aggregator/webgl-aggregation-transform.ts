@@ -130,11 +130,11 @@ out vec2 binIds;
 #endif
 
 #if NUM_CHANNELS == 1
-out float values;
+flat out float values;
 #elif NUM_CHANNELS == 2
-out vec2 values;
+flat out vec2 values;
 #else
-out vec3 values;
+flat out vec3 values;
 #endif
 
 void main() {
@@ -181,11 +181,11 @@ void main() {
 precision highp float;
 
 #if NUM_CHANNELS == 1
-in float values;
+flat in float values;
 #elif NUM_CHANNELS == 2
-in vec2 values;
+flat in vec2 values;
 #else
-in vec3 values;
+flat in vec3 values;
 #endif
 
 out vec4 fragColor;
