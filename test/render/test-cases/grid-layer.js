@@ -44,37 +44,36 @@ export function getMax(pts, key) {
 }
 
 export default [
-  // v9 TODO - enable after implementing colorScaleType
-  // {
-  //   name: 'cpu-grid-layer:quantile',
-  //   viewState: VIEW_STATE,
-  //   layers: [
-  //     new CPUGridLayer(
-  //       Object.assign({}, PROPS, {
-  //         id: 'cpu-grid-layer:quantile',
-  //         getColorValue: points => getMean(points, 'SPACES'),
-  //         getElevationValue: points => getMax(points, 'SPACES'),
-  //         colorScaleType: 'quantile'
-  //       })
-  //     )
-  //   ],
-  //   goldenImage: './test/render/golden-images/cpu-layer-quantile.png'
-  // },
-  // {
-  //   name: 'cpu-grid-layer:ordinal',
-  //   viewState: VIEW_STATE,
-  //   layers: [
-  //     new CPUGridLayer(
-  //       Object.assign({}, PROPS, {
-  //         id: 'cpu-grid-layer:ordinal',
-  //         getColorValue: points => getMean(points, 'SPACES'),
-  //         getElevationValue: points => getMax(points, 'SPACES'),
-  //         colorScaleType: 'ordinal'
-  //       })
-  //     )
-  //   ],
-  //   goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
-  // },
+  {
+    name: 'cpu-grid-layer:quantile',
+    viewState: VIEW_STATE,
+    layers: [
+      new GridLayer({
+        ...PROPS,
+        gpuAggregation: false,
+        id: 'cpu-grid-layer:quantile',
+        getColorValue: points => getMean(points, 'SPACES'),
+        getElevationValue: points => getMax(points, 'SPACES'),
+        colorScaleType: 'quantile'
+      })
+    ],
+    goldenImage: './test/render/golden-images/cpu-layer-quantile.png'
+  },
+  {
+    name: 'cpu-grid-layer:ordinal',
+    viewState: VIEW_STATE,
+    layers: [
+      new GridLayer({
+        ...PROPS,
+        gpuAggregation: false,
+        id: 'cpu-grid-layer:ordinal',
+        getColorValue: points => getMean(points, 'SPACES'),
+        getElevationValue: points => getMax(points, 'SPACES'),
+        colorScaleType: 'ordinal'
+      })
+    ],
+    goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
+  },
   {
     name: 'grid-layer#cpu:value-accessors',
     viewState: VIEW_STATE,

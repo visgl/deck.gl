@@ -21,7 +21,7 @@
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Layer, picking, UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
-import {defaultColorRange, colorRangeToTexture} from '../common/utils/color-utils';
+import {defaultColorRange, createColorRangeTexture} from '../common/utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
@@ -81,7 +81,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
 
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
-      this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
+      this.state.colorTexture = createColorRangeTexture(this.context.device, props.colorRange);
       const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
