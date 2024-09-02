@@ -24,6 +24,7 @@ import AggregationLayer from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
+import {getBinIdRange} from '../common/utils/bounds-utils';
 
 import HexagonCellLayer from './hexagon-cell-layer';
 import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGLSL} from './hexbin';
@@ -443,7 +444,7 @@ export default class HexagonLayer<
     const bounds = this.getBounds();
     let radiusCommon = 1;
     let hexOriginCommon: [number, number] = [0, 0];
-    const binIdRange: [number, number][] = [
+    let binIdRange: [number, number][] = [
       [0, 1],
       [0, 1]
     ];
@@ -470,25 +471,16 @@ export default class HexagonLayer<
 
       hexOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
-      const corners = [
-        bounds[0],
-        bounds[1],
-        [bounds[0][0], bounds[1][1]],
-        [bounds[1][0], bounds[0][1]]
-      ].map(p => {
-        const positionCommon = viewport.projectFlat(p);
-        positionCommon[0] -= hexOriginCommon[0];
-        positionCommon[1] -= hexOriginCommon[1];
-        return pointToHexbin(positionCommon, radiusCommon);
+      binIdRange = getBinIdRange({
+        dataBounds: bounds,
+        getBinId: (p: number[]) => {
+          const positionCommon = viewport.projectFlat(p);
+          positionCommon[0] -= hexOriginCommon[0];
+          positionCommon[1] -= hexOriginCommon[1];
+          return pointToHexbin(positionCommon, radiusCommon);
+        },
+        padding: 1
       });
-
-      const minX = Math.min(...corners.map(p => p[0]));
-      const minY = Math.min(...corners.map(p => p[1]));
-      const maxX = Math.max(...corners.map(p => p[0]));
-      const maxY = Math.max(...corners.map(p => p[1]));
-
-      binIdRange[0] = [minX - 1, maxX + 2]; // i range
-      binIdRange[1] = [minY - 1, maxY + 2]; // j range
     }
 
     this.setState({radiusCommon, hexOriginCommon, binIdRange, aggregatorViewport: viewport});

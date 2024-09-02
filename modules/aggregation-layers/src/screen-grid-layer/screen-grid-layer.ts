@@ -141,7 +141,9 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    return this.props.gpuAggregation ? 'gpu' : 'cpu';
+    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
+      ? 'gpu'
+      : 'cpu';
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator {
