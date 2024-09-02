@@ -1,5 +1,5 @@
 import type {Device, Framebuffer} from '@luma.gl/core';
-import {normalizeShaderModule, ShaderPass} from '@luma.gl/shadertools';
+import {initializeShaderModule, ShaderPass} from '@luma.gl/shadertools';
 
 import ScreenPass from '../passes/screen-pass';
 
@@ -14,7 +14,7 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
   constructor(module: ShaderPassT, props: ShaderPassT['props']) {
     this.id = `${module.name}-pass`;
     this.props = props;
-    normalizeShaderModule(module);
+    initializeShaderModule(module);
     this.module = module;
   }
 
@@ -44,7 +44,7 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
       }
       const clearCanvas = !renderToTarget || Boolean(params.clearCanvas);
       const moduleProps = {};
-      const uniforms = this.module.passes[index].uniforms;
+      const uniforms = this.module.passes![index].uniforms;
       moduleProps[this.module.name] = {...this.props, ...uniforms};
       passes[index].render({clearCanvas, inputBuffer, outputBuffer, moduleProps});
 
@@ -66,7 +66,7 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
 }
 
 function createPasses(device: Device, module: ShaderPass, id: string): ScreenPass[] {
-  return module.passes.map((pass, index) => {
+  return module.passes!.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
     return new ScreenPass(device, {id: idn, module, fs});
@@ -99,9 +99,12 @@ void main() {
 }
 `;
 
-function getFragmentShaderForRenderPass(module: ShaderPass, pass: ShaderPass['passes'][0]): string {
+function getFragmentShaderForRenderPass(
+  module: ShaderPass,
+  pass: NonNullable<ShaderPass['passes']>[0]
+): string {
   if (pass.filter) {
-    const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
+    const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor_ext`;
     return FILTER_FS_TEMPLATE(func);
   }
 

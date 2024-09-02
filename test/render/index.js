@@ -25,11 +25,13 @@ import {SnapshotTestRunner} from '@deck.gl/test-utils';
 import './jupyter-widget';
 
 test('Render Test', t => {
+  const testCases = TEST_CASES; // .filter(testCase => testCase.name === 'geojson-icon');
+
   // tape's default timeout is 500ms
-  t.timeoutAfter(TEST_CASES.length * 10000 + 10000);
+  t.timeoutAfter(testCases.length * 10000 + 10000);
 
   new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
-    .add(TEST_CASES)
+    .add(testCases)
     .run({
       onTestStart: testCase => t.comment(testCase.name),
       onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),

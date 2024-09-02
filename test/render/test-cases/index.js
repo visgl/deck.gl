@@ -46,7 +46,7 @@ export default [].concat(
   gridLayerTests,
   hexagonLayerTests,
   screenGridLayerTests,
-  // heatmapLayerTests,
+  heatmapLayerTests,
   h3LayersTests,
   quadkeyLayerTests,
   s2LayerTests,

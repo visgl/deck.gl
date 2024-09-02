@@ -32,7 +32,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {WebGLDevice} from '@luma.gl/webgl';
+import {WebGLDevice, webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -375,21 +375,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // See if we already have a device
     if (props.device) {
       this.device = props.device;
-    } else if (props.gl) {
-      if (props.gl instanceof WebGLRenderingContext) {
-        log.error('WebGL1 context not supported.')();
-      }
-      this.device = WebGLDevice.attach(props.gl);
     }
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
-    if (!deviceOrPromise) {
-      // TODO v9 should we install WebGL backend as default for now?
-      luma.registerDevices([WebGLDevice]);
 
+    // Attach a new luma.gl device to a WebGL2 context if supplied
+    if (!deviceOrPromise && props.gl) {
+      if (props.gl instanceof WebGLRenderingContext) {
+        log.error('WebGL1 context not supported.')();
+      }
+      deviceOrPromise = webgl2Adapter.attach(props.gl);
+    }
+
+    // Create a new device
+    if (!deviceOrPromise) {
+      // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
+        type: 'best-available',
+        adapters: [webgl2Adapter],
         ...props.deviceProps,
-        canvas: this._createCanvas(props)
+        createCanvasContext: {canvas: this._createCanvas(props)}
       });
     }
 

@@ -1,5 +1,5 @@
 import {Model, ModelProps} from '@luma.gl/engine';
-import {glsl, createRenderTarget} from './utils';
+import {createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import type {WebGLAggregatorProps} from './webgl-aggregator';
@@ -149,6 +149,7 @@ export class WebGLBinSorter {
       clearStencil: false
     });
     model.setParameters({
+      blend: true,
       blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one',
       blendAlphaSrcFactor: 'one',
@@ -180,7 +181,7 @@ function createModel(device: Device, props: WebGLAggregatorProps): Model {
 
   if (props.dimensions === 2) {
     // If user provides 2d bin IDs, convert them to 1d indices for data packing
-    userVs += glsl`
+    userVs += /* glsl */ `
 void getBin(out int binId) {
   ivec2 binId2;
   getBin(binId2);
@@ -227,7 +228,7 @@ void main() {
 #endif
 }
 `;
-  const fs = glsl`\
+  const fs = /* glsl */ `\
 #version 300 es
 #define SHADER_NAME gpu-aggregation-sort-bins-fragment
 

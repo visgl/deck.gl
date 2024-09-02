@@ -117,9 +117,7 @@ export default class PickLayersPass extends LayersPass {
         isActive: 1,
         isAttribute: this.pickZ
       },
-      // turn off lighting by adding empty light source object
-      // lights shader module relies on the `lightSources` to turn on/off lighting
-      lightSources: {}
+      lightSources: {enabled: false}
     };
   }
 
