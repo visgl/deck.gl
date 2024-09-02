@@ -91,9 +91,6 @@ export class WebGLBinSorter {
     >
   ) {
     const model = this.model;
-    if (props.uniforms) {
-      model.setUniforms(props.uniforms);
-    }
     if (props.attributes) {
       model.setAttributes(props.attributes);
     }
