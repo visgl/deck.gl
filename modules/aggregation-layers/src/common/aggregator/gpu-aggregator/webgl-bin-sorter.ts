@@ -4,6 +4,7 @@ import {createRenderTarget} from './utils';
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import type {WebGLAggregatorProps} from './webgl-aggregator';
 import type {AggregationOperation} from '../aggregator';
+import {BinSorterProps, binSorterUniforms} from './bin-sorter-uniforms';
 
 const COLOR_CHANNELS = [0x1, 0x2, 0x4, 0x8]; // GPU color mask RED, GREEN, BLUE, ALPHA
 const MAX_FLOAT32 = 3e38;
@@ -71,7 +72,7 @@ export class WebGLBinSorter {
       this.binsFBO.resize({width, height});
     }
 
-    this.model.setUniforms({
+    const binSorterProps: BinSorterProps = {
       binIdRange: [
         binIdRange[0][0],
         binIdRange[0][1],
@@ -79,7 +80,8 @@ export class WebGLBinSorter {
         binIdRange[1]?.[1] || 0
       ],
       targetSize: [this.binsFBO.width, this.binsFBO.height]
-    });
+    };
+    this.model.shaderInputs.setProps({binSorter: binSorterProps});
   }
 
   setModelProps(
@@ -185,10 +187,10 @@ function createModel(device: Device, props: WebGLAggregatorProps): Model {
 void getBin(out int binId) {
   ivec2 binId2;
   getBin(binId2);
-  if (binId2.x < binIdRange.x || binId2.x >= binIdRange.y) {
+  if (binId2.x < binSorter.binIdRange.x || binId2.x >= binSorter.binIdRange.y) {
     binId = -1;
   } else {
-    binId = (binId2.y - binIdRange.z) * (binIdRange.y - binIdRange.x) + binId2.x;
+    binId = (binId2.y - binSorter.binIdRange.z) * (binSorter.binIdRange.y - binSorter.binIdRange.x) + binId2.x;
   }
 }
 `;
@@ -198,9 +200,6 @@ void getBin(out int binId) {
 #version 300 es
 #define SHADER_NAME gpu-aggregation-sort-bins-vertex
 
-uniform ivec4 binIdRange;
-uniform ivec2 targetSize;
-
 ${userVs}
 
 out vec3 v_Value;
@@ -208,14 +207,14 @@ out vec3 v_Value;
 void main() {
   int binIndex;
   getBin(binIndex);
-  binIndex = binIndex - binIdRange.x;
+  binIndex = binIndex - binSorter.binIdRange.x;
   if (binIndex < 0) {
     gl_Position = vec4(0.);
     return;
   }
-  int row = binIndex / targetSize.x;
-  int col = binIndex - row * targetSize.x;
-  vec2 position = (vec2(col, row) + 0.5) / vec2(targetSize) * 2.0 - 1.0;
+  int row = binIndex / binSorter.targetSize.x;
+  int col = binIndex - row * binSorter.targetSize.x;
+  vec2 position = (vec2(col, row) + 0.5) / vec2(binSorter.targetSize) * 2.0 - 1.0;
   gl_Position = vec4(position, 0.0, 1.0);
   gl_PointSize = 1.0;
 
@@ -250,7 +249,7 @@ void main() {
 `;
   const model = new Model(device, {
     bufferLayout: props.bufferLayout,
-    modules: props.modules,
+    modules: [...(props.modules || []), binSorterUniforms],
     defines: {...props.defines, NON_INSTANCED_MODEL: 1, NUM_CHANNELS: props.channelCount},
     isInstanced: false,
     vs,
