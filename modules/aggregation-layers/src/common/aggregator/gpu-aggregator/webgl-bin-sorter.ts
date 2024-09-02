@@ -85,10 +85,7 @@ export class WebGLBinSorter {
   }
 
   setModelProps(
-    props: Pick<
-      ModelProps,
-      'moduleSettings' | 'vertexCount' | 'uniforms' | 'attributes' | 'constantAttributes'
-    >
+    props: Pick<ModelProps, 'vertexCount' | 'uniforms' | 'attributes' | 'constantAttributes'>
   ) {
     const model = this.model;
     if (props.attributes) {
@@ -99,11 +96,6 @@ export class WebGLBinSorter {
     }
     if (props.vertexCount !== undefined) {
       model.setVertexCount(props.vertexCount);
-    }
-    if (props.moduleSettings) {
-      // TODO v9.1 - remove after migrate to UBO
-      model.updateModuleSettings(props.moduleSettings);
-      model.shaderInputs.setProps({project: props.moduleSettings});
     }
   }
 

@@ -252,7 +252,17 @@ export class WebGLAggregator implements Aggregator {
     }
 
     if (opts.moduleSettings) {
-      this.binSorter.setModelProps(opts);
+      const {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin} =
+        opts.moduleSettings;
+      this.binSorter.model.shaderInputs.setProps({
+        project: {
+          viewport,
+          devicePixelRatio,
+          modelMatrix,
+          coordinateSystem,
+          coordinateOrigin
+        }
+      });
     }
 
     const {operations} = this.props;
