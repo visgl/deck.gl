@@ -25,6 +25,7 @@ import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
+import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -267,14 +268,13 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'GridLayer';
   static defaultProps = defaultProps;
 
-  state!: AggregationLayer<DataT>['state'] & {
-    // Needed if getColorValue, getElevationValue are used
-    dataAsArray?: DataT[];
-    cellSizeCommon: [number, number];
-    cellOriginCommon: [number, number];
-    binIdRange: [number, number][];
-    aggregatorViewport: Viewport;
-  };
+  state!: AggregationLayer<DataT>['state'] &
+    BinOptions & {
+      // Needed if getColorValue, getElevationValue are used
+      dataAsArray?: DataT[];
+      binIdRange: [number, number][];
+      aggregatorViewport: Viewport;
+    };
 
   getAggregatorType(): string {
     const {
@@ -314,14 +314,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: (
-            {positions}: {positions: number[]},
-            index: number,
-            opts: {
-              cellSizeCommon: [number, number];
-              cellOriginCommon: [number, number];
-            }
-          ) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             if (gridAggregator) {
               return gridAggregator(positions, cellSize);
             }
@@ -346,10 +339,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       channelCount: 2,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
-        modules: [project32],
+        modules: [project32, binOptionsUniforms],
         vs: /* glsl */ `
-  uniform vec2 cellOriginCommon;
-  uniform vec2 cellSizeCommon;
   in vec3 positions;
   in vec3 positions64Low;
   in float colorWeights;
@@ -357,7 +348,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   void getBin(out ivec2 binId) {
     vec3 positionCommon = project_position(positions, positions64Low);
-    vec2 gridCoords = floor(positionCommon.xy / cellSizeCommon);
+    vec2 gridCoords = floor(positionCommon.xy / binOptions.cellSizeCommon);
     binId = ivec2(gridCoords);
   }
   void getValue(out vec2 value) {
