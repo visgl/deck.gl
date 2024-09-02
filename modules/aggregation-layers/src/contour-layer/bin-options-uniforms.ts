@@ -1,22 +1,22 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = /* glsl */ `\
-uniform aggregatorUniforms {
+uniform binOptionsUniforms {
   vec2 cellOriginCommon;
   vec2 cellSizeCommon;
-} aggregator;
+} binOptions;
 `;
 
-export type AggregatorProps = {
+export type BinOptions = {
   cellOriginCommon: [number, number];
   cellSizeCommon: [number, number];
 };
 
-export const aggregatorUniforms = {
-  name: 'aggregator',
+export const binOptionsUniforms = {
+  name: 'binOptions',
   vs: uniformBlock,
   uniformTypes: {
     cellOriginCommon: 'vec2<f32>',
     cellSizeCommon: 'vec2<f32>'
   }
-} as const satisfies ShaderModule<AggregatorProps>;
+} as const satisfies ShaderModule<BinOptions>;

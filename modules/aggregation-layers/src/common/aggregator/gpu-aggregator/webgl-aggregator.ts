@@ -201,9 +201,7 @@ export class WebGLAggregator implements Aggregator {
         this.setNeedsUpdate();
       }
       this.binSorter.setModelProps({uniforms: props.binOptions});
-      this.binSorter.model.shaderInputs.setProps({
-        aggregator: props.binOptions
-      });
+      this.binSorter.model.shaderInputs.setProps({binOptions: props.binOptions});
     }
     if (props.attributes) {
       const attributeBuffers: Record<string, Buffer> = {};
