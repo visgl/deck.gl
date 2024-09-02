@@ -7,6 +7,7 @@ import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {colorRangeToTexture} from '../common/utils/color-utils';
 import vs from './hexagon-cell-layer-vertex.glsl';
+import {HexagonProps, hexagonUniforms} from './hexagon-layer-uniforms';
 
 /** Proprties added by HexagonCellLayer. */
 export type _HexagonCellLayerProps = {
@@ -28,10 +29,9 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
   };
 
   getShaders() {
-    return {
-      ...super.getShaders(),
-      vs
-    };
+    const shaders = super.getShaders();
+    shaders.modules.push(hexagonUniforms);
+    return {...shaders, vs};
   }
 
   initializeState() {
@@ -72,7 +72,9 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+
+      const hexagonProps: Partial<HexagonProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({hexagon: hexagonProps});
     }
   }
 
@@ -96,15 +98,17 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
       fillModel.setIndexBuffer(null);
     }
     fillModel.setVertexCount(this.state.fillVertexCount);
-    fillModel.setUniforms(uniforms);
-    fillModel.setUniforms({
-      extruded,
-      coverage,
+
+    const hexagonProps: Omit<HexagonProps, 'colorRange'> = {
       colorDomain,
       elevationDomain,
-      radius,
-      hexOriginCommon,
-      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
+      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale],
+      originCommon: hexOriginCommon
+    };
+
+    fillModel.shaderInputs.setProps({
+      column: {extruded, coverage, radius},
+      hexagon: hexagonProps
     });
     fillModel.draw(this.context.renderPass);
   }

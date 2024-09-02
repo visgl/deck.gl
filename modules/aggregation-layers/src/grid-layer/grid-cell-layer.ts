@@ -8,6 +8,7 @@ import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
 import {colorRangeToTexture} from '../common/utils/color-utils';
 import vs from './grid-cell-layer-vertex.glsl';
+import {GridProps, gridUniforms} from './grid-layer-uniforms';
 
 /** Proprties added by GridCellLayer. */
 type GridCellLayerProps = {
@@ -30,10 +31,9 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   };
 
   getShaders() {
-    return {
-      ...super.getShaders(),
-      vs
-    };
+    const shaders = super.getShaders();
+    shaders.modules.push(gridUniforms);
+    return {...shaders, vs};
   }
 
   initializeState() {
@@ -74,7 +74,9 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+
+      const gridProps: Partial<GridProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({grid: gridProps});
     }
   }
 
@@ -96,15 +98,17 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
     const {cellOriginCommon, cellSizeCommon, elevationRange, elevationScale, extruded, coverage} =
       this.props;
     const fillModel = this.state.fillModel!;
-    fillModel.setUniforms(uniforms);
-    fillModel.setUniforms({
-      extruded,
-      coverage,
+
+    const gridProps: Omit<GridProps, 'colorRange'> = {
       colorDomain,
       elevationDomain,
-      cellOriginCommon,
-      cellSizeCommon,
-      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
+      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale],
+      originCommon: cellOriginCommon,
+      sizeCommon: cellSizeCommon
+    };
+    fillModel.shaderInputs.setProps({
+      column: {extruded, coverage},
+      grid: gridProps
     });
     fillModel.draw(this.context.renderPass);
   }
