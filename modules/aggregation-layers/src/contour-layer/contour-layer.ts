@@ -22,6 +22,7 @@ import {AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
 import {Matrix4} from '@math.gl/core';
+import {AggregatorProps, aggregatorUniforms} from './contour-layer-uniforms';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -113,20 +114,18 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'ContourLayer';
   static defaultProps = defaultProps;
 
-  state!: AggregationLayer<DataT>['state'] & {
-    // Aggregator result
-    aggregatedValueReader?: (x: number, y: number) => number;
-    contourData?: {
-      lines: ContourLine[];
-      polygons: ContourPolygon[];
-    };
+  state!: AggregationLayer<DataT>['state'] &
+    AggregatorProps & {
+      // Aggregator result
+      aggregatedValueReader?: (x: number, y: number) => number;
+      contourData?: {
+        lines: ContourLine[];
+        polygons: ContourPolygon[];
+      };
 
-    // Aggregator bin options
-    cellSizeCommon: [number, number];
-    cellOriginCommon: [number, number];
-    binIdRange: [number, number][];
-    aggregatorViewport: Viewport;
-  };
+      binIdRange: [number, number][];
+      aggregatorViewport: Viewport;
+    };
 
   getAggregatorType(): string {
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
@@ -140,14 +139,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: (
-            {positions}: {positions: number[]},
-            index: number,
-            opts: {
-              cellSizeCommon: [number, number];
-              cellOriginCommon: [number, number];
-            }
-          ) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: AggregatorProps) => {
             const viewport = this.state.aggregatorViewport;
             // project to common space
             const p = viewport.projectPosition(positions);
@@ -167,17 +159,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       channelCount: 1,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
-        modules: [project32],
+        modules: [project32, aggregatorUniforms],
         vs: /* glsl */ `
-  uniform vec2 cellOriginCommon;
-  uniform vec2 cellSizeCommon;
   in vec3 positions;
   in vec3 positions64Low;
   in float counts;
 
   void getBin(out ivec2 binId) {
     vec3 positionCommon = project_position(positions, positions64Low);
-    vec2 gridCoords = floor(positionCommon.xy / cellSizeCommon);
+    vec2 gridCoords = floor(positionCommon.xy / aggregator.cellSizeCommon);
     binId = ivec2(gridCoords);
   }
   void getValue(out float value) {
