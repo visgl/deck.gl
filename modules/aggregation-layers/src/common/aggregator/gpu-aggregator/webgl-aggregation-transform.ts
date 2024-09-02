@@ -6,6 +6,11 @@ import type {WebGLAggregatorProps} from './webgl-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
 import {TEXTURE_WIDTH} from './webgl-bin-sorter';
+import {
+  AggregatorTransformProps,
+  aggregatorTransformUniforms
+} from './aggregation-transform-uniforms';
+import {NumberArray3} from '@math.gl/core';
 
 const MAX_FLOAT32 = 3e38;
 
@@ -30,6 +35,9 @@ export class WebGLAggregationTransform {
     this.device = device;
     this.channelCount = props.channelCount;
     this.transform = createTransform(device, props);
+    // Passed in as uniform because 1) there is no GLSL symbol for NaN 2) any expression that exploits undefined behavior to produces NaN
+    // will subject to platform differences and shader optimization
+    this.transform.model.shaderInputs.setProps({aggregatorTransform: {naN: NaN}});
     this.domainFBO = createRenderTarget(device, 2, 1);
   }
 
@@ -58,14 +66,15 @@ export class WebGLAggregationTransform {
   setDimensions(binCount: number, binIdRange: [number, number][]) {
     const {model, transformFeedback} = this.transform;
     model.setVertexCount(binCount);
-    model.setUniforms({
+    const aggregatorTransformProps: Partial<AggregatorTransformProps> = {
       binIdRange: [
         binIdRange[0][0],
         binIdRange[0][1],
         binIdRange[1]?.[0] || 0,
         binIdRange[1]?.[1] || 0
       ]
-    });
+    };
+    model.shaderInputs.setProps({aggregatorTransform: aggregatorTransformProps});
 
     // Only destroy existing buffer if it is not large enough
     const binBufferByteLength = binCount * binIdRange.length * 4;
@@ -90,11 +99,14 @@ export class WebGLAggregationTransform {
     const transform = this.transform;
     const target = this.domainFBO;
 
-    transform.model.setUniforms({
-      isCount: Array.from({length: 3}, (_, i) => (operations[i] === 'COUNT' ? 1 : 0)),
-      isMean: Array.from({length: 3}, (_, i) => (operations[i] === 'MEAN' ? 1 : 0))
-    });
-    transform.model.setBindings({bins});
+    const aggregatorTransformProps: Partial<AggregatorTransformProps> = {
+      isCount: Array.from({length: 3}, (_, i) =>
+        operations[i] === 'COUNT' ? 1 : 0
+      ) as NumberArray3,
+      isMean: Array.from({length: 3}, (_, i) => (operations[i] === 'MEAN' ? 1 : 0)) as NumberArray3,
+      bins
+    };
+    transform.model.shaderInputs.setProps({aggregatorTransform: aggregatorTransformProps});
 
     transform.run({
       id: 'gpu-aggregation-domain',
@@ -117,10 +129,6 @@ function createTransform(device: Device, props: WebGLAggregatorProps): BufferTra
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-vertex
 
-uniform ivec4 binIdRange;
-uniform bvec3 isCount;
-uniform bvec3 isMean;
-uniform float naN;
 uniform sampler2D bins;
 
 #if NUM_DIMS == 1
@@ -142,21 +150,21 @@ void main() {
   int col = gl_VertexID - row * SAMPLER_WIDTH;
   vec4 weights = texelFetch(bins, ivec2(col, row), 0);
   vec3 value3 = mix(
-    mix(weights.rgb, vec3(weights.a), isCount),
+    mix(weights.rgb, vec3(weights.a), aggregatorTransform.isCount),
     weights.rgb / max(weights.a, 1.0),
-    isMean
+    aggregatorTransform.isMean
   );
   if (weights.a == 0.0) {
-    value3 = vec3(naN);
+    value3 = vec3(aggregatorTransform.naN);
   }
 
 #if NUM_DIMS == 1
-  binIds = float(gl_VertexID + binIdRange.x);
+  binIds = float(gl_VertexID + aggregatorTransform.binIdRange.x);
 #else
-  int y = gl_VertexID / (binIdRange.y - binIdRange.x);
-  int x = gl_VertexID - y * (binIdRange.y - binIdRange.x);
-  binIds.y = float(y + binIdRange.z);
-  binIds.x = float(x + binIdRange.x);
+  int y = gl_VertexID / (aggregatorTransform.binIdRange.y - aggregatorTransform.binIdRange.x);
+  int x = gl_VertexID - y * (aggregatorTransform.binIdRange.y - aggregatorTransform.binIdRange.x);
+  binIds.y = float(y + aggregatorTransform.binIdRange.z);
+  binIds.x = float(x + aggregatorTransform.binIdRange.x);
 #endif
 
 #if NUM_CHANNELS == 3
@@ -219,6 +227,7 @@ void main() {
     vs,
     fs,
     topology: 'point-list',
+    modules: [aggregatorTransformUniforms],
     parameters: {
       blend: true,
       blendColorSrcFactor: 'one',
@@ -232,11 +241,6 @@ void main() {
       NUM_DIMS: props.dimensions,
       NUM_CHANNELS: props.channelCount,
       SAMPLER_WIDTH: TEXTURE_WIDTH
-    },
-    uniforms: {
-      // Passed in as uniform because 1) there is no GLSL symbol for NaN 2) any expression that exploits undefined behavior to produces NaN
-      // will subject to platform differences and shader optimization
-      naN: NaN
     },
     varyings: ['binIds', 'values'],
     disableWarnings: true
