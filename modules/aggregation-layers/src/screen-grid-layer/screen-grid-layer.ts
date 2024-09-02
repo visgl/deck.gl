@@ -141,7 +141,7 @@ export default class ScreenGridLayer<
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             const viewport = this.context.viewport;
-            const p = viewport.project(positions as number[]);
+            const p = viewport.project(positions);
             const cellSizePixels: number = opts.cellSizePixels;
             if (p[0] < 0 || p[0] >= viewport.width || p[1] < 0 || p[1] >= viewport.height) {
               // Not on screen
