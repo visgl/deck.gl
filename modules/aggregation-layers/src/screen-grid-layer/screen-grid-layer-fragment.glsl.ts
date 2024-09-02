@@ -19,21 +19,17 @@
 // THE SOFTWARE.
 
 /* fragment shader for the grid-layer */
-export default `\
+export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME screen-grid-layer-fragment-shader
 
 precision highp float;
 
 in vec4 vColor;
-flat in int vIsValid;
 
 out vec4 fragColor;
 
 void main(void) {
-  if (vIsValid == 0) {
-    discard;
-  }
   fragColor = vColor;
 
   DECKGL_FILTER_COLOR(fragColor, geometry);

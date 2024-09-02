@@ -35,13 +35,17 @@ import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/ag
 import AggregationLayer from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
+import {defaultColorRange} from '../common/utils/color-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps>),
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0},
+  colorRange: defaultColorRange,
+  colorScaleType: 'quantize',
   getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
+  gpuAggregation: false,
   aggregation: 'SUM'
 };
 
@@ -75,6 +79,13 @@ export type _ScreenGridLayerProps<DataT> = {
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange?: Color[];
+
+  /**
+   * Scaling function used to determine the color of the grid cell.
+   * Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
+   * @default 'quantize'
+   */
+  colorScaleType?: 'linear' | 'quantize';
 
   /**
    * Method called to retrieve the position of each object.
