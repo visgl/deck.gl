@@ -62,7 +62,7 @@ deck.gl layers typically expect `data` to be one of the following types:
 - `Promise`: the resolved value will be used as the value of the `data` prop.
 - `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. The default implementation expects each batch to be an array of data objects; one may change this behavior by supplying a custom `dataTransform` callback.
 
-**data.attributes**
+##### data.attributes
 
 When using a non-iterable `data` object, the object may optionally contain a field `attributes`, if the application wishes to supply binary buffers directly to the layer. This use case is discussed in detail in the [performance developer guide](../../developer-guide/performance.md#supply-attributes-directly).
 

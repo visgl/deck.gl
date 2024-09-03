@@ -244,13 +244,13 @@ type _GridLayerProps<DataT> = {
 };
 
 export type GridLayerPickingInfo<DataT> = PickingInfo<{
-  /** Column index of the picked cell, starting from 0 at the left of the viewport */
+  /** Column index of the picked cell */
   col: number;
-  /** Row index of the picked cell, starting from 0 at the top of the viewport */
+  /** Row index of the picked cell */
   row: number;
-  /** Aggregated color value */
+  /** Aggregated color value, as determined by `getColorWeight` and `colorAggregation` */
   colorValue: number;
-  /** Aggregated elevation value */
+  /** Aggregated elevation value, as determined by `getElevationWeight` and `elevationAggregation` */
   elevationValue: number;
   /** Number of data points in the picked cell */
   count: number;
