@@ -99,11 +99,11 @@ export class WebGLAggregationTransform {
     const transform = this.transform;
     const target = this.domainFBO;
 
+    const isCount = [0, 1, 2].map(i => (operations[i] === 'COUNT' ? 1 : 0));
+    const isMean = [0, 1, 2].map(i => (operations[i] === 'MEAN' ? 1 : 0));
     const aggregatorTransformProps: Partial<AggregatorTransformProps> = {
-      isCount: Array.from({length: 3}, (_, i) =>
-        operations[i] === 'COUNT' ? 1 : 0
-      ) as NumberArray3,
-      isMean: Array.from({length: 3}, (_, i) => (operations[i] === 'MEAN' ? 1 : 0)) as NumberArray3,
+      isCount: isCount as NumberArray3,
+      isMean: isMean as NumberArray3,
       bins
     };
     transform.model.shaderInputs.setProps({aggregatorTransform: aggregatorTransformProps});

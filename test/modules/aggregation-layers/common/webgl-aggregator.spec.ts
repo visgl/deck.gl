@@ -1,3 +1,4 @@
+import type {ShaderModule} from '@luma.gl/shadertools';
 import test from 'tape-promise/tape';
 import {Attribute} from '@deck.gl/core';
 import {WebGLAggregator} from '@deck.gl/aggregation-layers';
@@ -73,6 +74,19 @@ test('WebGLAggregator#resources', t => {
   t.end();
 });
 
+const uniformBlock = /* glsl */ `\
+uniform binOptionsUniforms {
+  float ageGroupSize;
+} binOptions;
+`;
+
+type BinOptions = {ageGroupSize: number};
+const binOptionsUniforms = {
+  name: 'binOptions',
+  vs: uniformBlock,
+  uniformTypes: {ageGroupSize: 'f32'}
+} as const satisfies ShaderModule<BinOptions>;
+
 test('WebGLAggregator#1D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income [2] highest education, grouped by age
@@ -84,14 +98,14 @@ test('WebGLAggregator#1D', t => {
       {name: 'income', format: 'float32', stepMode: 'vertex'},
       {name: 'education', format: 'float32', stepMode: 'vertex'}
     ],
+    modules: [binOptionsUniforms],
     vs: `
-      uniform float ageGroupSize;
       in float age;
       in float income;
       in float education;
 
       void getBin(out int binId) {
-        binId = int(floor(age / ageGroupSize));
+        binId = int(floor(age / binOptions.ageGroupSize));
       }
       void getValue(out vec3 value) {
         value = vec3(1.0, income, education);
@@ -139,9 +153,7 @@ test('WebGLAggregator#1D', t => {
     [NaN, 1, 5, 5, 3, 2, 3, 2, 2, 2, 1, 2, 1, 1, 2],
     'getResult() - total counts'
   );
-  if (device.info.gpu !== 'apple') {
-    t.deepEqual(aggregator.getResultDomain(0), [1, 5], 'getResultDomain() - counts');
-  }
+  t.deepEqual(aggregator.getResultDomain(0), [1, 5], 'getResultDomain() - counts');
 
   t.deepEqual(
     binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
@@ -150,9 +162,7 @@ test('WebGLAggregator#1D', t => {
     'getResult() - mean income'
   );
 
-  if (device.info.gpu !== 'apple') {
-    t.deepEqual(aggregator.getResultDomain(1), [0, 252.5], 'getResultDomain() - mean income');
-  }
+  t.deepEqual(aggregator.getResultDomain(1), [0, 252.5], 'getResultDomain() - mean income');
 
   t.deepEqual(
     binaryAttributeToArray(aggregator.getResult(2), aggregator.binCount),
@@ -160,9 +170,7 @@ test('WebGLAggregator#1D', t => {
     [NaN, 1, 3, 4, 5, 4, 5, 3, 3, 5, 3, 4, 1, 2, 3],
     'getResult() - max education'
   );
-  if (device.info.gpu !== 'apple') {
-    t.deepEqual(aggregator.getResultDomain(2), [1, 5], 'getResultDomain() - max education');
-  }
+  t.deepEqual(aggregator.getResultDomain(2), [1, 5], 'getResultDomain() - max education');
 
   // Empty bin
   t.deepEqual(
@@ -193,14 +201,14 @@ test('WebGLAggregator#2D', t => {
       {name: 'income', format: 'float32', stepMode: 'vertex'},
       {name: 'education', format: 'float32', stepMode: 'vertex'}
     ],
+    modules: [binOptionsUniforms],
     vs: `
-      uniform float ageGroupSize;
       in float age;
       in float income;
       in float education;
 
       void getBin(out ivec2 binId) {
-        binId.x = int(floor(age / ageGroupSize));
+        binId.x = int(floor(age / binOptions.ageGroupSize));
         binId.y = int(education);
       }
       void getValue(out vec2 value) {
@@ -259,9 +267,7 @@ test('WebGLAggregator#2D', t => {
       NaN, NaN, 1, 1, 1 ],
     'getResult() - total counts'
   );
-  if (device.info.gpu !== 'apple') {
-    t.deepEqual(aggregator.getResultDomain(0), [1, 4], 'getResultDomain() - counts');
-  }
+  t.deepEqual(aggregator.getResultDomain(0), [1, 4], 'getResultDomain() - counts');
 
   t.deepEqual(
     binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
@@ -272,9 +278,7 @@ test('WebGLAggregator#2D', t => {
       NaN, NaN, 60, 110, 120 ],
     'getResult() - mean income'
   );
-  if (device.info.gpu !== 'apple') {
-    t.deepEqual(aggregator.getResultDomain(1), [10, 320], 'getResultDomain() - mean income');
-  }
+  t.deepEqual(aggregator.getResultDomain(1), [10, 320], 'getResultDomain() - mean income');
 
   // Empty bin
   t.deepEqual(aggregator.getBin(0), {id: [2, 1], count: 0, value: [0, NaN]}, 'getBin() - empty');
@@ -298,14 +302,14 @@ test('CPUAggregator#setNeedsUpdate', t => {
       {name: 'income', format: 'float32', stepMode: 'vertex'},
       {name: 'education', format: 'float32', stepMode: 'vertex'}
     ],
+    modules: [binOptionsUniforms],
     vs: `
-      uniform float ageGroupSize;
       in float age;
       in float income;
       in float education;
 
       void getBin(out int binId) {
-        binId = int(floor(age / ageGroupSize));
+        binId = int(floor(age / binOptions.ageGroupSize));
       }
       void getValue(out vec2 value) {
         value = vec2(income, education);
