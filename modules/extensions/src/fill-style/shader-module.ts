@@ -115,5 +115,6 @@ export const patternShaders: ShaderModule<FillStyleModuleSettings> = {
   fs: patternFs,
   inject,
   dependencies: [project],
+  // @ts-expect-error stricter luma gl types
   getUniforms: getPatternUniforms
 };

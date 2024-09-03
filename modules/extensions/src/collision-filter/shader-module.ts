@@ -100,7 +100,6 @@ const getCollisionUniforms = (
   };
 };
 
-// @ts-expect-error
 export default {
   name: 'collision',
   dependencies: [project],

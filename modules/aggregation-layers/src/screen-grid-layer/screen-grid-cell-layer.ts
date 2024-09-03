@@ -108,7 +108,9 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
       maxTexture
     });
     model.setUniforms({
+      // @ts-expect-error stricter luma gl types
       minColor,
+      // @ts-expect-error stricter luma gl types
       maxColor,
       colorDomain
     });
@@ -201,6 +203,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
         (-(cellSizePixels - margin) / height) * 2,
         1
       ]);
+      // @ts-expect-error stricter luma gl types
       model.setUniforms({cellScale});
     }
   }

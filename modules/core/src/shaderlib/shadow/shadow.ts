@@ -259,6 +259,7 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
+  // @ts-expect-error stricter luma gl types
   getUniforms: (opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {}, context = {}) => {
     if (
       'viewport' in opts &&

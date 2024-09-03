@@ -1220,10 +1220,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
     const picking: PickingProps = {
+      // @ts-expect-error stricter luma gl types
       highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
+      // @ts-expect-error stricter luma gl types
       picking.highlightColor = highlightColor(info);
     }
     this.setShaderModuleProps({picking});
@@ -1268,6 +1270,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const picking: PickingProps = {};
 
       if (Array.isArray(highlightColor)) {
+        // @ts-expect-error stricter luma gl types
         picking.highlightColor = highlightColor;
       }
 
@@ -1278,6 +1281,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         oldProps.autoHighlight !== autoHighlight ||
         highlightedObjectIndex !== oldProps.highlightedObjectIndex
       ) {
+        // @ts-expect-error stricter luma gl types
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)

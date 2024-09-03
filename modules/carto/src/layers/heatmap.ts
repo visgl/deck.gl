@@ -192,6 +192,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     intensity: 'f32',
     opacity: 'f32'
   },
+  // @ts-expect-error stricter luma gl types
   getUniforms: opts => {
     const {
       delta = [1, 0],

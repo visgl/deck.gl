@@ -54,6 +54,7 @@ export default class LightingEffect implements Effect {
     if (this.shadow && !this.dummyShadowMap) {
       this._createShadowPasses(device);
 
+      // @ts-expect-error stricter luma gl types
       deck._addDefaultShaderModule(shadow);
 
       this.dummyShadowMap = device.createTexture({
@@ -162,6 +163,7 @@ export default class LightingEffect implements Effect {
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
       this.dummyShadowMap = null;
+      // @ts-expect-error stricter luma gl types
       context.deck._removeDefaultShaderModule(shadow);
     }
   }

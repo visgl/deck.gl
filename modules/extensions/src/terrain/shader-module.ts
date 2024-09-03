@@ -39,7 +39,6 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
   .join('\n');
 
-// @ts-expect-error
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
@@ -115,6 +114,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
+      // @ts-expect-error stricter luma gl types
       const {project_uCommonOrigin} = uniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;

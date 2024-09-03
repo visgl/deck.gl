@@ -43,6 +43,7 @@ export class TerrainEffect implements Effect {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
+    // @ts-expect-error stricter luma gl types
     deck._addDefaultShaderModule(terrainModule);
   }
 
@@ -111,6 +112,7 @@ export class TerrainEffect implements Effect {
     }
     this.terrainCovers.clear();
 
+    // @ts-expect-error stricter luma gl types
     deck._removeDefaultShaderModule(terrainModule);
   }
 
