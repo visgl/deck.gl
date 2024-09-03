@@ -39,6 +39,7 @@ export function getShaderAssembler() {
   const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
+    // @ts-expect-error stricter luma gl types
     shaderAssembler.addDefaultModule(shaderModule);
   }
   for (const shaderHook of SHADER_HOOKS) {
