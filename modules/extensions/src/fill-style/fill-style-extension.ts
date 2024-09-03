@@ -69,7 +69,7 @@ export type FillStyleExtensionProps<DataT = any> = {
   getFillPatternOffset?: Accessor<DataT, [number, number]>;
 };
 
-type FillStyleExtensionOptions = {
+export type FillStyleExtensionOptions = {
   /** If `true`, adds the ability to tile the filled area with a pattern.
    * @default false
    */
