@@ -11709,9 +11709,9 @@ webidl-conversions@^7.0.0:
   integrity sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==
 
 wgsl_reflect@^1.0.1:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.0.8.tgz#7f6940ae9a49d5a125f3782ce710139357441945"
-  integrity sha512-0kdpA5H3SF2CMeCBijYqQz+ZT+uW310nJORFX8QPFOvrkfSGNPHFDE7aGPCUnsuDi1kzpj+9SEFIhqjf9iHGSQ==
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.0.10.tgz#51bc9e6dd3735cf41650676c6c32c597b0996400"
+  integrity sha512-70yzTaAhLFvasD+awEdHmgqKk3Qm2y6CVUU4OiS1rokB/TGi8CFEweUzDIfYn5pt6qhRdi9uArNykKaJy+CnwQ==
 
 whatwg-encoding@^2.0.0:
   version "2.0.0"
