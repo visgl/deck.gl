@@ -170,6 +170,7 @@ test('WebGLAggregator#1D', t => {
     [NaN, 1, 3, 4, 5, 4, 5, 3, 3, 5, 3, 4, 1, 2, 3],
     'getResult() - max education'
   );
+
   t.deepEqual(aggregator.getResultDomain(2), [1, 5], 'getResultDomain() - max education');
 
   // Empty bin
