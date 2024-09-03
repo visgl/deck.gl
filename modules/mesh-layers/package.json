@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@loaders.gl/gltf": "^4.2.0",
-    "@luma.gl/gltf": "~9.0.17",
-    "@luma.gl/shadertools": "~9.0.17"
+    "@luma.gl/gltf": "~9.0.27",
+    "@luma.gl/shadertools": "~9.0.27"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0",
