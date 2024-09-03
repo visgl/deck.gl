@@ -200,7 +200,7 @@ export class WebGLAggregator implements Aggregator {
       if (!deepEqual(props.binOptions, oldProps.binOptions, 2)) {
         this.setNeedsUpdate();
       }
-      this.binSorter.setModelProps({uniforms: props.binOptions});
+      this.binSorter.model.shaderInputs.setProps({binOptions: props.binOptions});
     }
     if (props.attributes) {
       const attributeBuffers: Record<string, Buffer> = {};
@@ -252,7 +252,7 @@ export class WebGLAggregator implements Aggregator {
     }
 
     if (opts.moduleSettings) {
-      this.binSorter.setModelProps(opts);
+      this.binSorter.setModelProps({moduleSettings: opts.moduleSettings});
     }
 
     const {operations} = this.props;
