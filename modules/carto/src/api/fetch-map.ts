@@ -206,6 +206,7 @@ async function fillInTileStats(
 }
 
 export type FetchMapOptions = {
+  accessToken?: string;
   apiBaseUrl?: string;
   cartoMapId: string;
   clientId?: string;
@@ -224,6 +225,7 @@ export type FetchMapResult = ParseMapResult & {
 
 /* eslint-disable max-statements */
 export async function fetchMap({
+  accessToken,
   apiBaseUrl = DEFAULT_API_BASE_URL,
   cartoMapId,
   clientId = DEFAULT_CLIENT,
@@ -233,6 +235,10 @@ export async function fetchMap({
 }: FetchMapOptions): Promise<FetchMapResult> {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
   assert(apiBaseUrl, 'Must define apiBaseUrl');
+
+  if (accessToken) {
+    headers = {Authorization: `Bearer ${accessToken}`, ...headers};
+  }
 
   if (autoRefresh || onNewData) {
     assert(onNewData, 'Must define `onNewData` when using autoRefresh');
