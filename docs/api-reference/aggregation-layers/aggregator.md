@@ -6,7 +6,7 @@ The `Aggregator` interface describes a type of class that performs aggregation.
 
 _Aggregation_ is a 2-step process:
 
-1. **Sort**: Group a collection of _data points_ by some property into bins_.
+1. **Sort**: Group a collection of _data points_ by some property into _bins_.
 2. **Aggregate**: for each _bin_, calculate a numeric output (_result_) from some metrics (_values_) from all its members. Multiple results can be obtained independently (_channels_).
 
 An implementation of the _Aggregator_ interface takes the following inputs:
@@ -56,7 +56,7 @@ aggregator.setProps({
 
 Arguments:
 - `pointCount` (number) - number of data points.
-- `attributes` ([attributes](../core/layer.md#dataattributes)) - the input data in binary format.
+- `attributes` ([Attribute](../core/attribute.md)[]) - the input data.
 - `operations` (string[]) - How to aggregate the values inside a bin, defined per channel.
 - `binOptions` (object) - arbitrary settings that affect bin sorting.
 - `onUpdate` (Function) - callback when a channel has been recalculated. Receives the following arguments:

@@ -10,7 +10,7 @@ Any layer subclassing the `AggregationLayer` must implement the following method
 
 #### `getAggregatorType` {#getaggregatortype}
 
-Returns a string that indicates the type of aggregator that this layer uses, for example `'gpu'`. This method is invoked with each `updateState` lifecycle. If the type string does not match its previous value, the existing aggregator will be disposed and recreated.
+Returns a string that indicates the type of aggregator that this layer uses, for example `'gpu'`. The aggregator type is re-evaluated every time the layer updates (usually due to props or state change). If the type string does not match its previous value, any existing aggregator will be disposed,and `createAggregator` is called to create a new instance.
 
 #### `createAggregator` {#createaggregator}
 
