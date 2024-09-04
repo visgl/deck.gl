@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.29] - Sep 04 2024
+
+- CARTO: Support private maps in fetchMap (#9139)
+- chore: Lock luma.gl dependencies to 9.0 patches (#9077)
+
 #### deck.gl [9.0.28] - Aug 29 2024
 
 - fix(mapbox): interleaved mode in Mapbox@3.6.0 (#9103)
