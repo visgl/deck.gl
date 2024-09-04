@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import {Deck} from '@deck.gl/core';
-import {fetchMap, BASEMAP} from '@deck.gl/carto';
+import {fetchMap} from '@deck.gl/carto';
 
 const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 
