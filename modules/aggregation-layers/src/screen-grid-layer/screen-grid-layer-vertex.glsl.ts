@@ -50,7 +50,7 @@ void main(void) {
   gl_Position = vec4(pos, 0., 1.);
 
   vColor = interp(instanceWeights, screenGrid.colorDomain, colorRange);
-  vColor.a *= opacity;
+  vColor.a *= layer.opacity;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
