@@ -9,3 +9,5 @@ export type AggregateAccessor<DataT = any> = (
     data: any;
   }
 ) => number;
+
+export type ScaleType = 'linear' | 'quantize' | 'quantile' | 'ordinal';

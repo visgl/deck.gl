@@ -78,29 +78,6 @@ test('GridLayer#getAggregatorType', t => {
           );
         }
       },
-      // v9 TODO - enable after implementing upperPercentile
-      // {
-      //   updateProps: {
-      //     upperPercentile: 90
-      //   },
-      //   onAfterUpdate({layer, subLayers, spies}) {
-      //     t.ok(
-      //       layer.state.useGPUAggregation === false,
-      //       'Should use CPU Aggregation (upperPercentile: 90)'
-      //     );
-      //   }
-      // },
-      // {
-      //   updateProps: {
-      //     upperPercentile: 100
-      //   },
-      //   onAfterUpdate({layer, subLayers, spies}) {
-      //     t.ok(
-      //       layer.state.useGPUAggregation === true,
-      //       'Should use GPU Aggregation (upperPercentile: 100)'
-      //     );
-      //   }
-      // },
       {
         title: 'fallback to CPU aggregation',
         updateProps: {
@@ -125,29 +102,6 @@ test('GridLayer#getAggregatorType', t => {
           );
         }
       }
-      // v9 TODO - enable after implementing colorScaleType
-      // {
-      //   updateProps: {
-      //     colorScaleType: 'quantile'
-      //   },
-      //   onAfterUpdate({layer, subLayers, spies}) {
-      //     t.ok(
-      //       layer.state.useGPUAggregation === false,
-      //       "Should use CPU Aggregation (colorScaleType: 'quantile')"
-      //     );
-      //   }
-      // },
-      // {
-      //   updateProps: {
-      //     colorScaleType: 'ordinal'
-      //   },
-      //   onAfterUpdate({layer, subLayers, spies}) {
-      //     t.ok(
-      //       layer.state.useGPUAggregation === false,
-      //       "Should use CPU Aggregation (colorScaleType: 'ordinal')"
-      //     );
-      //   }
-      // }
     ]
   });
   t.end();
