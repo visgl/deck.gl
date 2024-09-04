@@ -41,10 +41,11 @@ export type AggregatedBin = {
  * - The number of data points
  * - The group that each data point belongs to, by mapping each data point to a _binId_ (integer or array of integers)
  * - The values to aggregate, by mapping each data point in each channel to one _value_ (number)
- * - The method (_aggregationOperation_) to reduce a list of values to one number, such as SUM
+ * - The method (_operation_) to reduce a list of values to one number, such as SUM
  *
  * And yields the following outputs:
- * - The aggregated values (_result_) as a list of numbers for each channel, comprised of one number per bin
+ * - A list of _binId_ that data points get sorted into
+ * - The aggregated values (_result_) as a list of numbers, comprised of one number per bin per channel
  * - The [min, max] among all aggregated values (_domain_) for each channel
  *
  */
