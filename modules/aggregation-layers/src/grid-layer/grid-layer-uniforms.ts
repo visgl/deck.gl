@@ -3,8 +3,8 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = /* glsl */ `\
 uniform gridUniforms {
-  vec2 colorDomain;
-  vec2 elevationDomain;
+  vec4 colorDomain;
+  vec4 elevationDomain;
   vec2 elevationRange;
   vec2 originCommon;
   vec2 sizeCommon;
@@ -12,9 +12,9 @@ uniform gridUniforms {
 `;
 
 export type GridProps = {
-  colorDomain: [number, number];
+  colorDomain: [number, number, number, number];
   colorRange: Texture;
-  elevationDomain: [number, number];
+  elevationDomain: [number, number, number, number];
   elevationRange: [number, number];
   originCommon: [number, number];
   sizeCommon: [number, number];
@@ -24,8 +24,8 @@ export const gridUniforms = {
   name: 'grid',
   vs: uniformBlock,
   uniformTypes: {
-    colorDomain: 'vec2<f32>',
-    elevationDomain: 'vec2<f32>',
+    colorDomain: 'vec4<f32>',
+    elevationDomain: 'vec4<f32>',
     elevationRange: 'vec2<f32>',
     originCommon: 'vec2<f32>',
     sizeCommon: 'vec2<f32>'
