@@ -123,10 +123,10 @@ export const RECOGNIZERS = {
 } as const;
 export type RecognizerOptions = {
   pinch?: Omit<PinchRecognizerOptions, 'event' | 'enable'>;
-  dblpan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  multipan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
   pan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
-  dblclick?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
-  click?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  doubletap?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  tap?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
 };
 
 /**
