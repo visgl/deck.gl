@@ -61,9 +61,9 @@ Called by the event manager to handle pointer events. This method delegate to th
 * `_onPinchStart(event)`
 * `_onPinch(event)`
 * `_onPinchEnd(event)`
-* `_onTriplePanStart(event)`
-* `_onTriplePan(event)`
-* `_onTriplePanEnd(event)`
+* `_onMultiPanStart(event)`
+* `_onMultiPan(event)`
+* `_onMultiPanEnd(event)`
 * `_onDoubleTap(event)`
 * `_onWheel(event)`
 * `_onKeyDown(event)`
@@ -126,7 +126,7 @@ Note that the following events are always toggled on/off by user options:
 * `scrollZoom` - `['wheel']`
 * `dragPan` and `dragRotate` - `['pan']`
 * `touchZoom` - `['pinch']`
-* `touchRotate` - `['pinch', 'tripan']`
+* `touchRotate` - `['pinch', 'multipan']`
 * `doubleClickZoom` - `['doubletap']`
 * `keyboard` - `['keydown']`
 
