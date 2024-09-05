@@ -110,23 +110,23 @@ const TEST_CASES = [
   },
 
   {
-    title: 'tripan',
+    title: 'multipan',
     props: {},
-    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
     viewStateChanges: 3,
     interactionStates: 2 // isDragging, isRotating
   },
   {
-    title: 'tripan#out of bounds',
+    title: 'multipan#out of bounds',
     props: {x: 200},
-    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
     viewStateChanges: 0,
     interactionStates: 0
   },
   {
-    title: 'tripan#disabled',
+    title: 'multipan#disabled',
     props: {touchRotate: false},
-    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
     viewStateChanges: 2,
     interactionStates: 1 // isDragging
   },
