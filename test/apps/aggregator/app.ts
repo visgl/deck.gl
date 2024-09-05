@@ -25,7 +25,7 @@ function generateData(count: number, mean: number, stdev: number) {
     // Gaussian random
     const u = 1 - Math.random();
     const v = Math.random();
-    const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     result.push(z * stdev + mean);
   }
   return result;

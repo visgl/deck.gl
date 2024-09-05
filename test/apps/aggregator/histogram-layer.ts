@@ -5,12 +5,7 @@ import {
   _AggregationLayer
 } from '@deck.gl/aggregation-layers';
 import {GridCellLayer} from '@deck.gl/layers';
-import type {
-  Accessor,
-  Color,
-  DefaultProps,
-  UpdateParameters
-} from '@deck.gl/core';
+import type {Accessor, Color, DefaultProps, UpdateParameters} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 
 export type HistogramLayerProps<DataT = unknown> = {
@@ -34,12 +29,17 @@ const defaultProps: DefaultProps<HistogramLayerProps> = {
   heightScale: {type: 'number', min: 0, value: 1}
 };
 
-export class HistogramLayer<DataT = unknown> extends _AggregationLayer<DataT, Required<HistogramLayerProps<DataT>>> {
+export class HistogramLayer<DataT = unknown> extends _AggregationLayer<
+  DataT,
+  Required<HistogramLayerProps<DataT>>
+> {
   static layerName = 'HistogramLayer';
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device) ? 'gpu' : 'cpu';
+    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
+      ? 'gpu'
+      : 'cpu';
   }
 
   createAggregator(type: string) {
@@ -66,7 +66,9 @@ export class HistogramLayer<DataT = unknown> extends _AggregationLayer<DataT, Re
       dimensions: 1,
       getBin: {
         sources: ['position'],
-        getValue: (data: {position: number}, index: number, options: {binSize: number}) => [Math.floor(data.position / options.binSize)]
+        getValue: (data: {position: number}, index: number, options: {binSize: number}) => [
+          Math.floor(data.position / options.binSize)
+        ]
       },
       getValue: [
         {
@@ -96,11 +98,7 @@ export class HistogramLayer<DataT = unknown> extends _AggregationLayer<DataT, Re
     const aggregatorChanged = super.updateState(params);
 
     const {changeFlags, props, oldProps} = params;
-    if (
-      aggregatorChanged ||
-      changeFlags.dataChanged ||
-      props.binSize !== oldProps.binSize
-    ) {
+    if (aggregatorChanged || changeFlags.dataChanged || props.binSize !== oldProps.binSize) {
       const {aggregator} = this.state;
 
       aggregator.setProps({
@@ -167,6 +165,6 @@ export class HistogramLayer<DataT = unknown> extends _AggregationLayer<DataT, Re
       extruded: true,
       elevationScale: heightScale,
       getFillColor: fillColor
-    })
+    });
   }
 }
