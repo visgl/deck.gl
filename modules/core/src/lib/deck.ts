@@ -43,14 +43,14 @@ import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
-import {EVENTS} from './constants';
+import {EVENTS, RECOGNIZERS, RecognizerOptions} from './constants';
 
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
-import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
+import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
@@ -167,11 +167,11 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Allow browser default touch actions.
    * @default `'none'`
    */
-  touchAction?: string;
-  /** Set Hammer.js recognizer options for gesture recognition. See documentation for details. */
-  eventRecognizerOptions?: {
-    [type: string]: RecognizerOptions;
-  };
+  touchAction?: EventManagerOptions['touchAction'];
+  /**
+   * Optional mjolnir.js recognizer options
+   */
+  eventRecognizerOptions?: RecognizerOptions;
 
   /** (Experimental) Render to a custom frame buffer other than to screen. */
   _framebuffer?: Framebuffer | null;
@@ -234,7 +234,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   drawPickingColors?: boolean;
 };
 
-const defaultProps = {
+const defaultProps: DeckProps = {
   id: '',
   width: '100%',
   height: '100%',
@@ -969,7 +969,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,
-      recognizerOptions: this.props.eventRecognizerOptions,
+      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+        // Resolve recognizer settings
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
+          RECOGNIZERS[eventName];
+        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
+        const options = {...defaultOptions, ...optionsOverride, event: eventName};
+        return {
+          recognizer: new RecognizerConstructor(options),
+          recognizeWith,
+          requestFailure
+        };
+      }),
       events: {
         pointerdown: this._onPointerDown,
         pointermove: this._onPointerMove,

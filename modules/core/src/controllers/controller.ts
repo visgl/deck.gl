@@ -40,7 +40,7 @@ const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
-  TRIPLE_PAN: ['tripanstart', 'tripanmove', 'tripanend'],
+  DOUBLE_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
   DOUBLE_TAP: ['doubletap'],
   KEYBOARD: ['keydown']
 } as const;
@@ -228,13 +228,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         return this._onPinch(event);
       case 'pinchend':
         return this._onPinchEnd(event);
-      case 'tripanstart':
-        return eventStartBlocked ? false : this._onTriplePanStart(event);
-      case 'tripanmove':
-        return this._onTriplePan(event);
-      case 'tripanend':
-        return this._onTriplePanEnd(event);
-      case 'doubletap':
+      case 'multipanstart':
+        return eventStartBlocked ? false : this._onDoublePanStart(event);
+      case 'multipanmove':
+        return this._onDoublePan(event);
+      case 'multipanend':
+        return this._onDoublePanEnd(event);
+      case 'dblclick':
         return this._onDoubleTap(event);
       case 'wheel':
         return this._onWheel(event);
@@ -333,7 +333,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     // We always need the pan events to set the correct isDragging state, even if dragPan & dragRotate are both false
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
-    this.toggleEvents(EVENT_TYPES.TRIPLE_PAN, isInteractive && touchRotate);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
@@ -561,7 +561,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onTriplePanStart(event: MjolnirGestureEvent): boolean {
+  protected _onDoublePanStart(event: MjolnirGestureEvent): boolean {
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -571,7 +571,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onTriplePan(event: MjolnirGestureEvent): boolean {
+  protected _onDoublePan(event: MjolnirGestureEvent): boolean {
     if (!this.touchRotate) {
       return false;
     }
@@ -590,7 +590,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onTriplePanEnd(event: MjolnirGestureEvent): boolean {
+  protected _onDoublePanEnd(event: MjolnirGestureEvent): boolean {
     if (!this.isDragging()) {
       return false;
     }
@@ -713,7 +713,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  // Default handler for the `doubletap` event.
+  // Default handler for the `dblclick` event.
   protected _onDoubleTap(event: MjolnirGestureEvent): boolean {
     if (!this.doubleClickZoom) {
       return false;

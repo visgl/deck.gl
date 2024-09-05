@@ -22,6 +22,13 @@
 // "project" and "project64" shader modules. Both places need to be
 // updated.
 import log from '../utils/log';
+import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
+import type {
+  PanRecognizerOptions,
+  RotateRecognizerOptions,
+  PinchRecognizerOptions,
+  TapRecognizerOptions
+} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
@@ -101,11 +108,26 @@ export const UNIT = {
 } as const;
 
 export const EVENTS = {
-  click: {handler: 'onClick'},
+  tap: {handler: 'onClick'},
   panstart: {handler: 'onDragStart'},
   panmove: {handler: 'onDrag'},
   panend: {handler: 'onDragEnd'}
 } as const;
+
+export const RECOGNIZERS = {
+  multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
+  pinch: [Pinch, {}, null, ['doublepan']],
+  pan: [Pan, {threshold: 1}, ['pinch'], ['doublepan']],
+  doubletap: [Tap, {taps: 2}],
+  tap: [Tap, {}, null, ['doubletap']]
+} as const;
+export type RecognizerOptions = {
+  pinch?: Omit<PinchRecognizerOptions, 'event' | 'enable'>;
+  dblpan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  pan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  dblclick?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  click?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+};
 
 /**
  * @deprecated Use string constants directly
