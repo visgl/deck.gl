@@ -477,8 +477,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         getBinId: (p: number[]) => {
           const positionCommon = viewport.projectFlat(p);
           return [
-            (positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0],
-            (positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1]
+            Math.floor((positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+            Math.floor((positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1])
           ];
         }
       });
