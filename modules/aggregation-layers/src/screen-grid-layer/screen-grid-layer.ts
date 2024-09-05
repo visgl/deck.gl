@@ -41,7 +41,7 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
   cellMarginPixels: {type: 'number', value: 2, min: 0},
   colorRange: defaultColorRange,
-  colorScaleType: 'quantize',
+  colorScaleType: 'linear',
   getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
