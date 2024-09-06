@@ -1,57 +1,45 @@
-// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {generateContours} from './contour-utils';
 import {
   Accessor,
-  AccessorFunction,
-  Color,
-  log,
+  COORDINATE_SYSTEM,
+  GetPickingInfoParams,
+  project32,
+  LayersList,
+  PickingInfo,
   Position,
+  Viewport,
+  _deepEqual,
   UpdateParameters,
-  DefaultProps,
-  LayersList
+  DefaultProps
 } from '@deck.gl/core';
-
-import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
-import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
-import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
+import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
+import AggregationLayer from '../common/aggregation-layer';
+import {AggregationLayerProps} from '../common/aggregation-layer';
+import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
+import {getAggregatorValueReader} from './value-reader';
+import {Matrix4} from '@math.gl/core';
+import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
-const DEFAULT_THRESHOLD = 1;
 
 const defaultProps: DefaultProps<ContourLayerProps> = {
   // grid aggregation
-  cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
+  cellSize: {type: 'number', min: 1, value: 1000},
+  gridOrigin: {type: 'array', compare: true, value: [0, 0]},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
-  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
+  gpuAggregation: true,
   aggregation: 'SUM',
 
   // contour lines
   contours: {
     type: 'object',
-    value: [{threshold: DEFAULT_THRESHOLD}],
+    value: [{threshold: 1}],
     optional: true,
     compare: 3
   },
@@ -59,24 +47,12 @@ const defaultProps: DefaultProps<ContourLayerProps> = {
   zOffset: 0.005
 };
 
-const POSITION_ATTRIBUTE_NAME = 'positions';
-
-const DIMENSIONS = {
-  data: {
-    props: ['cellSize']
-  },
-  weights: {
-    props: ['aggregation'],
-    accessors: ['getWeight']
-  }
-};
-
-/** All properties supported by ContourLayer. */
+/** All properties supported by GridLayer. */
 export type ContourLayerProps<DataT = unknown> = _ContourLayerProps<DataT> &
-  GridAggregationLayerProps<DataT>;
+  AggregationLayerProps<DataT>;
 
-/** Properties added by ContourLayer. */
-export type _ContourLayerProps<DataT> = {
+/** Properties added by GridLayer. */
+type _ContourLayerProps<DataT> = {
   /**
    * Size of each cell in meters.
    * @default 1000
@@ -84,8 +60,14 @@ export type _ContourLayerProps<DataT> = {
   cellSize?: number;
 
   /**
+   * The grid origin
+   * @default [0, 0]
+   */
+  gridOrigin?: [number, number];
+
+  /**
    * When set to true, aggregation is performed on GPU, provided other conditions are met.
-   * @default true
+   * @default false
    */
   gpuAggregation?: boolean;
 
@@ -93,35 +75,13 @@ export type _ContourLayerProps<DataT> = {
    * Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'.
    * @default 'SUM'
    */
-  aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+  aggregation?: AggregationOperation;
 
   /**
    * Definition of contours to be drawn.
    * @default [{threshold: 1}]
    */
-  contours: {
-    /**
-     * Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
-     *
-     * Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
-     */
-    threshold: number | number[];
-
-    /**
-     * RGBA color array to be used to render the contour.
-     * @default [255, 255, 255, 255]
-     */
-    color?: Color;
-
-    /**
-     * Applicable for `Isoline`s only, width of the Isoline in pixels.
-     * @default 1
-     */
-    strokeWidth?: number;
-
-    /** Defines z order of the contour. */
-    zIndex?: number;
-  }[];
+  contours?: Contour[];
 
   /**
    * A very small z offset that is added for each vertex of a contour (Isoline or Isoband).
@@ -133,7 +93,7 @@ export type _ContourLayerProps<DataT> = {
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: Accessor<DataT, Position>;
 
   /**
    * The weight of each object.
@@ -142,243 +102,322 @@ export type _ContourLayerProps<DataT> = {
   getWeight?: Accessor<DataT, number>;
 };
 
-/** Aggregate data into iso-lines or iso-bands for a given threshold and cell size. */
-export default class ContourLayer<
-  DataT = any,
-  ExtraPropsT extends {} = {}
-> extends GridAggregationLayer<DataT, ExtraPropsT & Required<_ContourLayerProps<DataT>>> {
+export type ContourLayerPickingInfo = PickingInfo<{
+  contour: Contour;
+}>;
+
+/** Aggregate data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains. */
+export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends AggregationLayer<
+  DataT,
+  ExtraPropsT & Required<_ContourLayerProps<DataT>>
+> {
   static layerName = 'ContourLayer';
   static defaultProps = defaultProps;
 
-  state!: GridAggregationLayer<DataT>['state'] & {
-    contourData: {
-      contourSegments: {
-        start: number[];
-        end: number[];
-        contour: any;
-      }[];
-      contourPolygons: {
-        vertices: number[][];
-        contour: any;
-      }[];
-    };
-    thresholdData: any;
-  };
+  state!: AggregationLayer<DataT>['state'] &
+    BinOptions & {
+      // Aggregator result
+      aggregatedValueReader?: (x: number, y: number) => number;
+      contourData?: {
+        lines: ContourLine[];
+        polygons: ContourPolygon[];
+      };
 
-  initializeState(): void {
-    super.initializeAggregationLayer({
-      dimensions: DIMENSIONS
+      binIdRange: [number, number][];
+      aggregatorViewport: Viewport;
+    };
+
+  getAggregatorType(): string {
+    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
+      ? 'gpu'
+      : 'cpu';
+  }
+
+  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+    if (type === 'cpu') {
+      return new CPUAggregator({
+        dimensions: 2,
+        getBin: {
+          sources: ['positions'],
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
+            const viewport = this.state.aggregatorViewport;
+            // project to common space
+            const p = viewport.projectPosition(positions);
+            const {cellSizeCommon, cellOriginCommon} = opts;
+            return [
+              Math.floor((p[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+              Math.floor((p[1] - cellOriginCommon[1]) / cellSizeCommon[1])
+            ];
+          }
+        },
+        getValue: [{sources: ['counts'], getValue: ({counts}) => counts}],
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    return new WebGLAggregator(this.context.device, {
+      dimensions: 2,
+      channelCount: 1,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
+      ...super.getShaders({
+        modules: [project32, binOptionsUniforms],
+        vs: /* glsl */ `
+  in vec3 positions;
+  in vec3 positions64Low;
+  in float counts;
+
+  void getBin(out ivec2 binId) {
+    vec3 positionCommon = project_position(positions, positions64Low);
+    vec2 gridCoords = floor(positionCommon.xy / binOptions.cellSizeCommon);
+    binId = ivec2(gridCoords);
+  }
+  void getValue(out float value) {
+    value = counts;
+  }
+  `
+      }),
+      onUpdate: this._onAggregationUpdate.bind(this)
     });
-    this.setState({
-      contourData: {},
-      projectPoints: false,
-      weights: {
-        count: {
-          size: 1,
-          operation: AGGREGATION_OPERATION.SUM
-        }
-      }
-    });
+  }
+
+  initializeState() {
+    super.initializeState();
+
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
-      [POSITION_ATTRIBUTE_NAME]: {
+      positions: {
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
         fp64: this.use64bitPositions()
       },
-      // this attribute is used in gpu aggregation path only
-      count: {size: 3, accessor: 'getWeight'}
+      counts: {size: 1, accessor: 'getWeight'}
     });
   }
 
-  updateState(opts: UpdateParameters<this>): void {
-    super.updateState(opts);
-    let contoursChanged = false;
-    const {oldProps, props} = opts;
-    const {aggregationDirty} = this.state;
+  updateState(params: UpdateParameters<this>) {
+    const aggregatorChanged = super.updateState(params);
 
-    if (oldProps.contours !== props.contours || oldProps.zOffset !== props.zOffset) {
-      contoursChanged = true;
-      this._updateThresholdData(opts.props);
+    const {props, oldProps, changeFlags} = params;
+    const {aggregator} = this.state;
+    if (
+      aggregatorChanged ||
+      changeFlags.dataChanged ||
+      props.cellSize !== oldProps.cellSize ||
+      !_deepEqual(props.gridOrigin, oldProps.gridOrigin, 1) ||
+      props.aggregation !== oldProps.aggregation
+    ) {
+      this._updateBinOptions();
+      const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
+
+      aggregator.setProps({
+        // @ts-expect-error only used by GPUAggregator
+        binIdRange,
+        pointCount: this.getNumInstances(),
+        operations: [props.aggregation],
+        binOptions: {
+          cellSizeCommon,
+          cellOriginCommon
+        }
+      });
     }
 
-    if (this.getNumInstances() > 0 && (aggregationDirty || contoursChanged)) {
-      this._generateContours();
+    if (!_deepEqual(oldProps.contours, props.contours, 2)) {
+      // Recalculate contours
+      this.setState({contourData: null});
+    }
+
+    return aggregatorChanged;
+  }
+
+  private _updateBinOptions() {
+    const bounds = this.getBounds();
+    const cellSizeCommon: [number, number] = [1, 1];
+    let cellOriginCommon: [number, number] = [0, 0];
+    const binIdRange: [number, number][] = [
+      [0, 1],
+      [0, 1]
+    ];
+    let viewport = this.context.viewport;
+
+    if (bounds && Number.isFinite(bounds[0][0])) {
+      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      const {cellSize, gridOrigin} = this.props;
+      const {unitsPerMeter} = viewport.getDistanceScales(centroid);
+      cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
+      cellSizeCommon[1] = unitsPerMeter[1] * cellSize;
+
+      // Offset common space to center at the origin of the grid cell where the data center is in
+      // This improves precision without affecting the cell positions
+      const centroidCommon = viewport.projectFlat(centroid);
+      cellOriginCommon = [
+        Math.floor((centroidCommon[0] - gridOrigin[0]) / cellSizeCommon[0]) * cellSizeCommon[0] +
+          gridOrigin[0],
+        Math.floor((centroidCommon[1] - gridOrigin[1]) / cellSizeCommon[1]) * cellSizeCommon[1] +
+          gridOrigin[1]
+      ];
+      centroid = viewport.unprojectFlat(cellOriginCommon);
+
+      const ViewportType = viewport.constructor as any;
+      // We construct a viewport for the GPU aggregator's project module
+      // This viewport is determined by data
+      // removes arbitrary precision variance that depends on initial view state
+      viewport = viewport.isGeospatial
+        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+
+      // Round to the nearest 32-bit float to match CPU and GPU results
+      cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
+
+      const corners = [
+        bounds[0],
+        bounds[1],
+        [bounds[0][0], bounds[1][1]],
+        [bounds[1][0], bounds[0][1]]
+      ].map(p => viewport.projectFlat(p));
+
+      const minX = Math.min(...corners.map(p => p[0]));
+      const minY = Math.min(...corners.map(p => p[1]));
+      const maxX = Math.max(...corners.map(p => p[0]));
+      const maxY = Math.max(...corners.map(p => p[1]));
+      binIdRange[0][0] = Math.floor((minX - cellOriginCommon[0]) / cellSizeCommon[0]);
+      binIdRange[0][1] = Math.floor((maxX - cellOriginCommon[0]) / cellSizeCommon[0]) + 1;
+      binIdRange[1][0] = Math.floor((minY - cellOriginCommon[1]) / cellSizeCommon[1]);
+      binIdRange[1][1] = Math.floor((maxY - cellOriginCommon[1]) / cellSizeCommon[1]) + 1;
+    }
+
+    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+  }
+
+  override draw(opts) {
+    // Replaces render time viewport with our own
+    if (opts.moduleParameters.viewport) {
+      opts.moduleParameters.viewport = this.state.aggregatorViewport;
+    }
+    super.draw(opts);
+  }
+
+  private _onAggregationUpdate() {
+    const {aggregator, binIdRange} = this.state;
+    this.setState({
+      aggregatedValueReader: getAggregatorValueReader({aggregator, binIdRange, channel: 0}),
+      contourData: null
+    });
+  }
+
+  private _getContours(): {
+    lines: ContourLine[];
+    polygons: ContourPolygon[];
+  } | null {
+    const {aggregatedValueReader} = this.state;
+    if (!aggregatedValueReader) {
+      return null;
+    }
+
+    if (!this.state.contourData) {
+      const {binIdRange} = this.state;
+      const {contours} = this.props;
+      const contourData = generateContours({
+        contours,
+        getValue: aggregatedValueReader,
+        xRange: binIdRange[0],
+        yRange: binIdRange[1]
+      });
+
+      this.state.contourData = contourData;
+    }
+    return this.state.contourData;
+  }
+
+  onAttributeChange(id: string) {
+    const {aggregator} = this.state;
+    switch (id) {
+      case 'positions':
+        aggregator.setNeedsUpdate();
+
+        this._updateBinOptions();
+        const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
+        aggregator.setProps({
+          // @ts-expect-error only used by GPUAggregator
+          binIdRange,
+          binOptions: {
+            cellSizeCommon,
+            cellOriginCommon
+          }
+        });
+        break;
+
+      case 'counts':
+        aggregator.setNeedsUpdate(0);
+        break;
+
+      default:
+      // This should not happen
     }
   }
 
-  renderLayers(): LayersList {
-    const {contourSegments, contourPolygons} = this.state.contourData;
+  renderLayers(): LayersList | null {
+    const contourData = this._getContours();
+    if (!contourData) {
+      return null;
+    }
+    const {lines, polygons} = contourData;
+    const {zOffset} = this.props;
+    const {cellOriginCommon, cellSizeCommon} = this.state;
 
-    const LinesSubLayerClass = this.getSubLayerClass('lines', LineLayer);
+    const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
+    const modelMatrix = new Matrix4()
+      .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
+      .scale([cellSizeCommon[0], cellSizeCommon[1], zOffset]);
 
     // Contour lines layer
     const lineLayer =
-      contourSegments &&
-      contourSegments.length > 0 &&
+      lines &&
+      lines.length > 0 &&
       new LinesSubLayerClass(
         this.getSubLayerProps({
           id: 'lines'
         }),
         {
-          data: this.state.contourData.contourSegments,
-          getSourcePosition: d => d.start,
-          getTargetPosition: d => d.end,
-          getColor: d => d.contour.color || DEFAULT_COLOR,
-          getWidth: d => d.contour.strokeWidth || DEFAULT_STROKE_WIDTH
+          data: lines,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          modelMatrix,
+          getPath: d => d.vertices,
+          getColor: d => d.contour.color ?? DEFAULT_COLOR,
+          getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
+          widthUnits: 'pixels'
         }
       );
 
     // Contour bands layer
     const bandsLayer =
-      contourPolygons &&
-      contourPolygons.length > 0 &&
+      polygons &&
+      polygons.length > 0 &&
       new BandsSubLayerClass(
         this.getSubLayerProps({
           id: 'bands'
         }),
         {
-          data: this.state.contourData.contourPolygons,
+          data: polygons,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          modelMatrix,
           getPolygon: d => d.vertices,
-          getFillColor: d => d.contour.color || DEFAULT_COLOR
+          getFillColor: d => d.contour.color ?? DEFAULT_COLOR
         }
       );
 
     return [lineLayer, bandsLayer];
   }
 
-  // Aggregation Overrides
-
-  /* eslint-disable max-statements, complexity */
-  updateAggregationState(opts: UpdateParameters<this>) {
-    const {props, oldProps} = opts;
-    const {cellSize, coordinateSystem} = props;
-    const {viewport} = this.context;
-    const cellSizeChanged = oldProps.cellSize !== cellSize;
-    let gpuAggregation = props.gpuAggregation;
-    if (this.state.gpuAggregation !== props.gpuAggregation) {
-      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.device)) {
-        log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
-        gpuAggregation = false;
-      }
-    }
-    const gpuAggregationChanged = gpuAggregation !== this.state.gpuAggregation;
-    this.setState({
-      gpuAggregation
-    });
-
-    const {dimensions} = this.state;
-    const positionsChanged = this.isAttributeChanged(POSITION_ATTRIBUTE_NAME);
-    const {data, weights} = dimensions;
-
-    let {boundingBox} = this.state;
-    if (positionsChanged) {
-      boundingBox = getBoundingBox(this.getAttributes(), this.getNumInstances());
-      this.setState({boundingBox});
-    }
-    if (positionsChanged || cellSizeChanged) {
-      const {gridOffset, translation, width, height, numCol, numRow} = getGridParams(
-        boundingBox,
-        cellSize,
-        viewport,
-        coordinateSystem
-      );
-      this.allocateResources(numRow, numCol);
-      this.setState({
-        gridOffset,
-        boundingBox,
-        translation,
-        posOffset: translation.slice(), // Used for CPU aggregation, to offset points
-        gridOrigin: [-1 * translation[0], -1 * translation[1]],
-        width,
-        height,
-        numCol,
-        numRow
-      });
-    }
-
-    const aggregationDataDirty =
-      positionsChanged ||
-      gpuAggregationChanged ||
-      this.isAggregationDirty(opts, {
-        dimension: data,
-        compareAll: gpuAggregation // check for all (including extentions props) when using gpu aggregation
-      });
-    const aggregationWeightsDirty = this.isAggregationDirty(opts, {
-      dimension: weights
-    });
-
-    if (aggregationWeightsDirty) {
-      this._updateAccessors(opts);
-    }
-    if (aggregationDataDirty || aggregationWeightsDirty) {
-      this._resetResults();
-    }
-    this.setState({
-      aggregationDataDirty,
-      aggregationWeightsDirty
-    });
-  }
-  /* eslint-enable max-statements, complexity */
-
-  // Private (Aggregation)
-
-  private _updateAccessors(opts: UpdateParameters<this>) {
-    const {getWeight, aggregation, data} = opts.props;
-    const {count} = this.state.weights;
-    if (count) {
-      count.getWeight = getWeight;
-      count.operation = AGGREGATION_OPERATION[aggregation];
-    }
-    this.setState({getValue: getValueFunc(aggregation, getWeight, {data})});
-  }
-
-  private _resetResults() {
-    const {count} = this.state.weights;
-    if (count) {
-      count.aggregationData = null;
-    }
-  }
-
-  // Private (Contours)
-
-  private _generateContours() {
-    const {numCol, numRow, gridOrigin, gridOffset, thresholdData} = this.state;
-    const {count} = this.state.weights;
-    let {aggregationData} = count;
-    if (!aggregationData) {
-      // @ts-ignore
-      aggregationData = count.aggregationBuffer!.readSyncWebGL() as Float32Array;
-      count.aggregationData = aggregationData;
-    }
-
-    const {cellWeights} = GPUGridAggregator.getCellData({countsData: aggregationData});
-    const contourData = generateContours({
-      thresholdData,
-      cellWeights,
-      gridSize: [numCol, numRow],
-      gridOrigin,
-      cellSize: [gridOffset.xOffset, gridOffset.yOffset]
-    });
-
-    // contourData contains both iso-lines and iso-bands if requested.
-    this.setState({contourData});
-  }
-
-  private _updateThresholdData(props) {
-    const {contours, zOffset} = props;
-    const count = contours.length;
-    const thresholdData = new Array(count);
-    for (let i = 0; i < count; i++) {
-      const contour = contours[i];
-      thresholdData[i] = {
-        contour,
-        zIndex: contour.zIndex || i,
-        zOffset
+  getPickingInfo(params: GetPickingInfoParams): ContourLayerPickingInfo {
+    const info: ContourLayerPickingInfo = params.info;
+    const {object} = info;
+    if (object) {
+      info.object = {
+        contour: (object as ContourLine | ContourPolygon).contour
       };
     }
-    this.setState({thresholdData});
+
+    return info;
   }
 }

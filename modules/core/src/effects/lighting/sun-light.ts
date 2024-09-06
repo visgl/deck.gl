@@ -8,7 +8,7 @@ export type SunLightOptions = {
   /** Light color, [r, g, b] in the 0-255 range
    * @default [255, 255, 255]
    */
-  color?: number[];
+  color?: [number, number, number];
   /** Light intensity, higher number is brighter
    * @default 1.0
    */
@@ -43,7 +43,11 @@ export default class SunLight extends DirectionalLight {
     } else {
       // @ts-expect-error longitude and latitude are not defined on all viewports
       const {latitude, longitude} = viewport;
-      this.direction = getSunDirection(this.timestamp, latitude, longitude);
+      this.direction = getSunDirection(this.timestamp, latitude, longitude) as [
+        number,
+        number,
+        number
+      ];
     }
 
     return this;

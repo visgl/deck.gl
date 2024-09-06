@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
+import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -155,7 +156,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       defines: {
         RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
       },
-      modules: [project32, gouraudLighting, picking, solidPolygonUniforms]
+      modules: [project32, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 

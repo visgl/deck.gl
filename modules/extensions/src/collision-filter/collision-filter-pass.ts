@@ -24,7 +24,7 @@ export default class CollisionFilterPass extends LayersPass {
         isActive: 1,
         isAttribute: false
       },
-      lightSources: {}
+      lightSources: {enabled: false}
     };
   }
 }

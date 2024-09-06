@@ -147,7 +147,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 
 ```ts
 import {ContourLayer} from '@deck.gl/aggregation-layers';
-import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
+import type {ContourLayerProps, ContourLayerPickingInfo} from '@deck.gl/aggregation-layers';
 
 new ContourLayer<DataT>(...props: ContourLayerProps<DataT>[]);
 ```
@@ -171,7 +171,7 @@ new deck.ContourLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) properties.
 
-### Render Options
+### Aggregation Options
 
 #### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
@@ -183,19 +183,27 @@ Size of each cell in meters
 
 * Default: true
 
-When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
+When set to `true` and the browser supports it, aggregation is performed on GPU.
+
+In the right context, enabling GPU aggregation can significantly speed up your application. However, depending on the nature of input data and required application features, there are pros and cons in leveraging this functionality. See [CPU vs GPU aggregation](./overview.md#cpu-vs-gpu-aggregation) for an in-depth discussion.
+
 
 #### `aggregation` (string, optional) {#aggregation}
 
-* Default: 'SUM'
+* Default: `'SUM'`
 
-Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. When no value or an invalid value is set, 'SUM' is used as aggregation.
+Defines the operation used to aggregate all data object weights to calculate a cell's value. Valid values are:
 
-* SUM : Grid cell contains sum of all weights that fall into it.
-* MEAN : Grid cell contains mean of all weights that fall into it.
-* MIN : Grid cell contains minimum of all weights that fall into it.
-* MAX : Grid cell contains maximum of all weights that fall into it.
+- `'SUM'`: The sum of weights across all points that fall into a cell.
+- `'MEAN'`: The mean weight across all points that fall into a cell.
+- `'MIN'`: The minimum weight across all points that fall into a cell.
+- `'MAX'`: The maximum weight across all points that fall into a cell.
+- `'COUNT'`: The number of points that fall into a cell.
 
+`getWeight` and `aggregation` together determine the elevation value of each cell. 
+
+
+### Render Options
 
 #### `contours` (object[], optional) {#contours}
 
@@ -240,11 +248,18 @@ The weight of each object.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
+## Picking
+
+The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-object) field returned by hover/click events of this layer represents a path (isoline) or a polygon (isoband). The object contains the following fields:
+
+- `contour` (object) - one of the contour configurations passed to the `contours` prop.
+
+
 ## Sub Layers
 
 The `ContourLayer` renders the following sublayers:
 
-* `lines` - For Isolines, rendered by [LineLayer](../layers/line-layer.md)
+* `lines` - For Isolines, rendered by [PathLayer](../layers/path-layer.md)
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 

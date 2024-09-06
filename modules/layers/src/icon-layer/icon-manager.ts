@@ -84,7 +84,7 @@ function resizeImage(
   maxWidth: number,
   maxHeight: number
 ): {
-  data: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
+  image: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
   width: number;
   height: number;
 } {
@@ -94,7 +94,7 @@ function resizeImage(
 
   if (resizeRatio === 1) {
     // No resizing required
-    return {data: imageData, width, height};
+    return {image: imageData, width, height};
   }
 
   ctx.canvas.height = height;
@@ -104,7 +104,7 @@ function resizeImage(
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
   ctx.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
-  return {data: ctx.canvas, width, height};
+  return {image: ctx.canvas, width, height};
 }
 
 function getIconId(icon: UnpackedIcon): string {
@@ -120,11 +120,17 @@ function resizeTexture(
 ): Texture {
   const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = device.createTexture({format: 'rgba8unorm', width, height, sampler});
+  const newTexture = device.createTexture({
+    format: 'rgba8unorm',
+    width,
+    height,
+    sampler,
+    mipmaps: true
+  });
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
-    source: texture,
-    destination: newTexture,
+    sourceTexture: texture,
+    destinationTexture: newTexture,
     width: oldWidth,
     height: oldHeight
   });
@@ -407,7 +413,8 @@ export default class IconManager {
           format: 'rgba8unorm',
           width: this._canvasWidth,
           height: this._canvasHeight,
-          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS
+          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
+          mipmaps: true
         });
       }
 
@@ -448,16 +455,15 @@ export default class IconManager {
           const iconDef = this._mapping[id];
           const {x, y, width: maxWidth, height: maxHeight} = iconDef;
 
-          const {data, width, height} = resizeImage(
+          const {image, width, height} = resizeImage(
             ctx,
             imageData as ImageBitmap,
             maxWidth,
             maxHeight
           );
 
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.setSubImageData({
-            data,
+          this._texture?.copyExternalImage({
+            image,
             x: x + (maxWidth - width) / 2,
             y: y + (maxHeight - height) / 2,
             width,

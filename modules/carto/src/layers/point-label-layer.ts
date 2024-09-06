@@ -24,10 +24,10 @@ class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
 
     // Modify shader so that the padding is offset by the pixel offset to ensure the padding
     // always captures the anchor point. As padding is uniform we cannot pass it a per-label value
-    vs = vs.replaceAll('padding.', '_padding.');
+    vs = vs.replaceAll('textBackground.padding.', '_padding.');
     vs = vs.replace(
       'void main(void) {',
-      'void main(void) {\n  vec4 _padding = padding + instancePixelOffsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0);'
+      'void main(void) {\n  vec4 _padding = textBackground.padding + instancePixelOffsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0);'
     );
 
     return {...shaders, vs};

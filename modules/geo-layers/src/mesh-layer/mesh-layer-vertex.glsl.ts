@@ -59,7 +59,7 @@ void main(void) {
 
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  #ifdef MODULE_PBR
+  #ifdef MODULE_PBRMATERIAL
     // set PBR data
     pbr_vPosition = geometry.position.xyz;
     #ifdef HAS_NORMALS

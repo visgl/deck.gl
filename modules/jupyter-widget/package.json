@@ -2,7 +2,7 @@
   "name": "@deck.gl/jupyter-widget",
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
-  "version": "9.0.0-beta.11",
+  "version": "9.1.0-alpha.0",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -29,17 +29,17 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "9.0.0-beta.11",
-    "@deck.gl/geo-layers": "9.0.0-beta.11",
-    "@deck.gl/google-maps": "9.0.0-beta.11",
-    "@deck.gl/json": "9.0.0-beta.11",
-    "@deck.gl/layers": "9.0.0-beta.11",
-    "@deck.gl/mesh-layers": "9.0.0-beta.11",
+    "@deck.gl/aggregation-layers": "9.1.0-alpha.0",
+    "@deck.gl/geo-layers": "9.1.0-alpha.0",
+    "@deck.gl/google-maps": "9.1.0-alpha.0",
+    "@deck.gl/json": "9.1.0-alpha.0",
+    "@deck.gl/layers": "9.1.0-alpha.0",
+    "@deck.gl/mesh-layers": "9.1.0-alpha.0",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4",
     "@loaders.gl/3d-tiles": "^4.2.0",
     "@loaders.gl/core": "^4.2.0",
     "@loaders.gl/csv": "^4.2.0",
-    "@luma.gl/core": "^9.0.17",
+    "@luma.gl/core": "^9.1.0-alpha.19",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2"
   },

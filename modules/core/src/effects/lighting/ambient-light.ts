@@ -1,4 +1,4 @@
-const DEFAULT_LIGHT_COLOR = [255, 255, 255];
+const DEFAULT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
 const DEFAULT_LIGHT_INTENSITY = 1.0;
 
 let idCount = 0;
@@ -8,7 +8,7 @@ export type AmbientLightOptions = {
   /** Light color, [r, g, b] in the 0-255 range
    * @default [255, 255, 255]
    */
-  color?: number[];
+  color?: [number, number, number];
   /** Light intensity, higher number is brighter
    * @default 1.0
    */
@@ -17,9 +17,9 @@ export type AmbientLightOptions = {
 
 export class AmbientLight {
   id: string;
-  color: number[];
+  color: [number, number, number];
   intensity: number;
-  type = 'ambient';
+  type = 'ambient' as const;
 
   constructor(props: AmbientLightOptions = {}) {
     const {color = DEFAULT_LIGHT_COLOR} = props;

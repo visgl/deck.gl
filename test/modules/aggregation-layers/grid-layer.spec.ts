@@ -20,7 +20,7 @@
 
 import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
-import {GridLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
+import {GridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils';
 
@@ -37,7 +37,7 @@ test('GridLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.useGPUAggregation !== undefined, 'should update state.useGPUAggregation');
+      t.ok(layer.state.aggregator, 'should have aggregator');
     }
   });
 
@@ -46,9 +46,9 @@ test('GridLayer', t => {
   t.end();
 });
 
-test('GridLayer#updates', t => {
-  if (!GPUGridAggregator.isSupported(device)) {
-    t.comment('GPUGridLayer not supported, skipping');
+test('GridLayer#getAggregatorType', t => {
+  if (!WebGLAggregator.isSupported(device)) {
+    t.comment('GPU aggregation not supported, skipping');
     t.end();
     return;
   }
@@ -57,110 +57,48 @@ test('GridLayer#updates', t => {
     onError: t.notOk,
     testCases: [
       {
+        title: 'Default',
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
-          t.ok(layer.state.useGPUAggregation === false, 'By default should use CPU Aggregation');
+          t.ok(
+            layer.state.aggregator instanceof CPUAggregator,
+            'By default should use CPU Aggregation'
+          );
         }
       },
       {
+        title: 'Enable gpuAggregation',
         updateProps: {
           gpuAggregation: true
         },
         onAfterUpdate({layer}) {
           t.ok(
-            layer.state.useGPUAggregation === true,
+            layer.state.aggregator instanceof WebGLAggregator,
             'Should use GPU Aggregation (gpuAggregation: true)'
           );
         }
       },
       {
+        title: 'fallback to CPU aggregation',
         updateProps: {
-          upperPercentile: 90
+          getColorValue: points => points.length
         },
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(
-            layer.state.useGPUAggregation === false,
-            'Should use CPU Aggregation (upperPercentile: 90)'
+            layer.state.aggregator instanceof CPUAggregator,
+            'Should use CPU Aggregation (getColorValue)'
           );
         }
       },
       {
+        title: 'fallback to CPU aggregation',
         updateProps: {
-          upperPercentile: 100
+          getElevationValue: points => points.length
         },
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(
-            layer.state.useGPUAggregation === true,
-            'Should use GPU Aggregation (upperPercentile: 100)'
-          );
-        }
-      },
-      {
-        updateProps: {
-          gpuAggregation: false
-        },
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
-            layer.state.useGPUAggregation === false,
-            'Should use CPU Aggregation (gpuAggregation: false)'
-          );
-        }
-      },
-      {
-        updateProps: {
-          gpuAggregation: true
-        },
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
-            layer.state.useGPUAggregation === true,
-            'Should use GPU Aggregation (gpuAggregation: true)'
-          );
-        }
-      },
-      {
-        updateProps: {
-          colorAggregation: 'MEAN'
-        },
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
-            layer.state.useGPUAggregation === true,
-            'Should use GPU Aggregation (gpuAggregation: true)'
-          );
-        }
-      },
-      {
-        updateProps: {
-          getElevationValue: points => points.length,
-          updateTriggers: {
-            getElevationValue: 1
-          }
-        },
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
-            layer.state.useGPUAggregation === false,
+            layer.state.aggregator instanceof CPUAggregator,
             'Should use CPU Aggregation (getElevationValue)'
-          );
-        }
-      },
-      {
-        updateProps: {
-          colorScaleType: 'quantile'
-        },
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
-            layer.state.useGPUAggregation === false,
-            "Should use CPU Aggregation (colorScaleType: 'quantile')"
-          );
-        }
-      },
-      {
-        updateProps: {
-          colorScaleType: 'ordinal'
-        },
-        onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
-            layer.state.useGPUAggregation === false,
-            "Should use CPU Aggregation (colorScaleType: 'ordinal')"
           );
         }
       }
@@ -174,19 +112,20 @@ test('GridLayer#non-iterable data', t => {
     length: 3,
     positions: FIXTURES.points.slice(0, 3).flatMap(d => d.COORDINATES),
     weights: FIXTURES.points.slice(0, 3).map(d => d.SPACES)
-  };
+  } as const;
 
   testLayer({
     Layer: GridLayer,
     onError: t.notOk,
     testCases: [
       {
+        title: 'Non-iterable data with constant weights',
         props: {
           data: dataNonIterable,
-          radius: 400,
-          getPosition: (_, {index, data}) => [
-            data.positions[index * 2],
-            data.positions[index * 2 + 1]
+          cellSize: 400,
+          getPosition: (_, {index}) => [
+            dataNonIterable.positions[index * 2],
+            dataNonIterable.positions[index * 2 + 1]
           ],
           getColorWeight: 1,
           getElevationWeight: 1
@@ -196,14 +135,15 @@ test('GridLayer#non-iterable data', t => {
         }
       },
       {
+        title: 'Non-iterable data with accessors',
         updateProps: {
           getColorWeight: (_, {index, data}) => {
             t.ok(Number.isFinite(index) && data, 'point index and context are populated');
-            return data.weights[index * 2];
+            return (data as any).weights[index * 2];
           },
           getElevationWeight: (_, {index, data}) => {
             t.ok(Number.isFinite(index) && data, 'point index and context are populated');
-            return data.weights[index * 2];
+            return (data as any).weights[index * 2];
           },
           updateTriggers: {
             getColorWeight: 1,
@@ -215,6 +155,7 @@ test('GridLayer#non-iterable data', t => {
         }
       },
       {
+        title: 'Non-iterable data with custom aggregation',
         updateProps: {
           getColorValue: (points, {indices, data: {weights}}) => {
             t.ok(indices && weights, 'context is populated');

@@ -23,7 +23,6 @@ import {project} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
 
 import type {BrushingExtensionProps} from './brushing-extension';
-import {glsl} from '../utils/syntax-tags';
 
 export type BrushingModuleProps = {
   // From layer context
@@ -38,7 +37,7 @@ type BrushingModuleUniforms = {
   radius?: number;
 };
 
-const uniformBlock = glsl`\
+const uniformBlock = /* glsl */ `\
 uniform brushingUniforms {
   bool enabled;
   highp int target;
@@ -47,7 +46,7 @@ uniform brushingUniforms {
 } brushing;
 `;
 
-const vertex = glsl`
+const vertex = /* glsl */ `
   in vec2 brushingTargets;
 
   out float brushing_isVisible;
@@ -77,7 +76,7 @@ ${uniformBlock}
 ${vertex}
 `;
 
-const fragment = glsl`
+const fragment = /* glsl */ `
   in float brushing_isVisible;
 `;
 
@@ -94,7 +93,7 @@ const TARGET = {
 };
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': glsl`
+  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     vec2 brushingTarget;
     vec2 brushingSource;
     if (brushing.target == 3) {

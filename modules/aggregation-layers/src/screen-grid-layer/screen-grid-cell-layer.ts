@@ -21,9 +21,10 @@
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Layer, picking, UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
-import {defaultColorRange, colorRangeToTexture} from '../utils/color-utils';
+import {defaultColorRange, createColorRangeTexture} from '../common/utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
 import {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps: DefaultProps<_ScreenGridCellLayerProps> = {
@@ -52,7 +53,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   };
 
   getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
-    return {vs, fs, modules: [picking]};
+    return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
   }
 
   initializeState() {
@@ -80,8 +81,9 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
 
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
-      this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+      this.state.colorTexture = createColorRangeTexture(this.context.device, props.colorRange);
+      const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
 
     if (
@@ -93,10 +95,11 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
       const {cellSizePixels: gridSize, cellMarginPixels} = this.props;
       const cellSize = Math.max(gridSize - cellMarginPixels, 0);
 
-      model.setUniforms({
+      const screenGridProps: Partial<ScreenGridProps> = {
         gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
         cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
-      });
+      };
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
   }
 
@@ -111,8 +114,8 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     const colorDomain = this.props.colorDomain();
     const model = this.state.model!;
 
-    model.setUniforms(uniforms);
-    model.setUniforms({colorDomain});
+    const screenGridProps: Partial<ScreenGridProps> = {colorDomain};
+    model.shaderInputs.setProps({screenGrid: screenGridProps});
     model.draw(this.context.renderPass);
   }
 

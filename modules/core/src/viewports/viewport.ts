@@ -367,7 +367,7 @@ export default class Viewport {
   }
 
   getDistanceScales(coordinateOrigin?: number[]): DistanceScales {
-    if (coordinateOrigin) {
+    if (coordinateOrigin && this.isGeospatial) {
       return getDistanceScales({
         longitude: coordinateOrigin[0],
         latitude: coordinateOrigin[1],

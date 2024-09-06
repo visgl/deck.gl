@@ -1,5 +1,21 @@
 # Upgrade Guide
 
+## Upgrading to v9.1
+
+### Aggregation layers
+
+Breaking changes:
+
+- `GPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: true`.
+- `CPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: false`.
+- If you are supplying a custom [haxagonAggregator](./api-reference/aggregation-layers/hexagon-layer.md#haxagonaggregator) to `HexagonLayer`, its function signiature has changed.
+- `HexagonLayer`'s sub layer is renamed `<id>-cells` and is no longer a vanilla `ColumnLayer`. If you were overriding the sub layer class with your own, please open a Discussion on GitHub for support.
+
+
+### LightingEffect
+
+- `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).
+
 ## Upgrading to v9.0
 
 **Before you upgrade: known issues**
