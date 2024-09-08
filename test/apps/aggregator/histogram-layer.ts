@@ -7,6 +7,7 @@ import {
 import {GridCellLayer} from '@deck.gl/layers';
 import type {Accessor, Color, DefaultProps, UpdateParameters} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 export type HistogramLayerProps<DataT = unknown> = {
   data: DataT[];
@@ -29,6 +30,22 @@ const defaultProps: DefaultProps<HistogramLayerProps> = {
   heightScale: {type: 'number', min: 0, value: 1}
 };
 
+type BinOptions = {
+  binSize: number;
+};
+
+const binOptionsUniforms = {
+  name: 'binOptions',
+  vs: /* glsl */ `\
+  uniform binOptionsUniforms {
+    float binSize;
+  } binOptions;
+  `,
+  uniformTypes: {
+    binSize: 'f32'
+  }
+} as const satisfies ShaderModule<BinOptions>;
+
 export class HistogramLayer<DataT = unknown> extends _AggregationLayer<
   DataT,
   Required<HistogramLayerProps<DataT>>
@@ -48,13 +65,14 @@ export class HistogramLayer<DataT = unknown> extends _AggregationLayer<
         dimensions: 1,
         channelCount: 1,
         bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
+        modules: [binOptionsUniforms],
         vs: `
   uniform float binSize;
   in float position;
   in float weight;
 
   void getBin(out int binId) {
-    binId = int(floor(position / binSize));
+    binId = int(floor(position / binOptions.binSize));
   }
   void getValue(out float value) {
     value = weight;
@@ -145,7 +163,7 @@ export class HistogramLayer<DataT = unknown> extends _AggregationLayer<
 
   renderLayers() {
     const {aggregator} = this.state;
-    const {heightScale, fillColor} = this.props;
+    const {heightScale, fillColor, binSize} = this.props;
     const binAttribute = aggregator.getBins();
     const valueAttribute = aggregator.getResult(0);
 
@@ -160,8 +178,8 @@ export class HistogramLayer<DataT = unknown> extends _AggregationLayer<
           getElevation: valueAttribute
         }
       },
-      modelMatrix: new Matrix4().rotateX(Math.PI / 2),
-      cellSize: 0.9,
+      modelMatrix: new Matrix4().rotateX(Math.PI / 2).scale([binSize, 1, 1]),
+      cellSize: 0.9 * binSize,
       extruded: true,
       elevationScale: heightScale,
       getFillColor: fillColor

@@ -1,23 +1,29 @@
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {HistogramLayer} from './histogram-layer';
 
-new Deck({
+const deckgl = new Deck({
   views: new OrthographicView(),
   initialViewState: {
     target: [0, 0, 0],
     zoom: 1
   },
-  controller: true,
-  layers: [
-    new HistogramLayer({
-      data: generateData(10000, 0, 100),
-      getPosition: d => d,
-      gpuAggregation: true,
-      binSize: 1,
-      heightScale: 1
-    })
-  ]
+  controller: true
 });
+
+const slider = document.getElementById('bin-size-slider') as HTMLInputElement;
+slider.oninput = updateLayer;
+updateLayer();
+
+function updateLayer() {
+  const layer = new HistogramLayer({
+    data: generateData(10000, 0, 100),
+    getPosition: d => d,
+    gpuAggregation: true,
+    binSize: Number(slider.value),
+    heightScale: 1
+  });
+  deckgl.setProps({layers: [layer]});
+}
 
 function generateData(count: number, mean: number, stdev: number) {
   const result: number[] = [];
