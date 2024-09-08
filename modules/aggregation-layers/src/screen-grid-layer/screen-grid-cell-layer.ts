@@ -21,22 +21,18 @@
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Layer, picking, UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
-import {defaultColorRange, createColorRangeTexture} from '../common/utils/color-utils';
+import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
 import {ShaderModule} from '@luma.gl/shadertools';
-
-const defaultProps: DefaultProps<_ScreenGridCellLayerProps> = {
-  cellSizePixels: {type: 'number', value: 100, min: 1},
-  cellMarginPixels: {type: 'number', value: 2, min: 0},
-  colorRange: defaultColorRange
-};
+import type {ScaleType} from '../common/types';
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps = {
-  cellSizePixels?: number;
-  cellMarginPixels?: number;
+  cellSizePixels: number;
+  cellMarginPixels: number;
+  colorScaleType: ScaleType;
   colorDomain: () => [number, number];
   colorRange?: Color[];
 };
@@ -45,7 +41,6 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   ExtraPropsT & Required<_ScreenGridCellLayerProps>
 > {
   static layerName = 'ScreenGridCellLayer';
-  static defaultProps = defaultProps;
 
   state!: {
     model?: Model;
@@ -81,9 +76,15 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
 
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
-      this.state.colorTexture = createColorRangeTexture(this.context.device, props.colorRange);
+      this.state.colorTexture = createColorRangeTexture(
+        this.context.device,
+        props.colorRange,
+        props.colorScaleType
+      );
       const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({screenGrid: screenGridProps});
+    } else if (oldProps.colorScaleType !== props.colorScaleType) {
+      updateColorRangeTexture(this.state.colorTexture, props.colorScaleType);
     }
 
     if (
@@ -110,7 +111,6 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   }
 
   draw({uniforms}) {
-    // If colorDomain not specified we use dynamic domain from the aggregator
     const colorDomain = this.props.colorDomain();
     const model = this.state.model!;
 

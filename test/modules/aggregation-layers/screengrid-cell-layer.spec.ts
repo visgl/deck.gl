@@ -41,6 +41,8 @@ test('ScreenGridCellLayer#constructor', t => {
               instancePositions: SAMPLE_BUFFER
             }
           },
+          cellSizePixels: 100,
+          cellMarginPixels: 2,
           numInstances: 1,
           colorDomain: () => [0, 1]
         }
