@@ -6,7 +6,6 @@ import {project, ProjectUniforms, Viewport} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
-import {glsl} from '../utils/syntax-tags';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleProps = {
@@ -50,8 +49,9 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .join('\n');
 
 const uniformBlock =
+  // eslint-disable-next-line prefer-template
   TERRAIN_MODE_CONSTANTS +
-  glsl`
+  /* glsl */ `
 uniform terrainUniforms {
   float mode;
   vec4 bounds;
@@ -63,16 +63,18 @@ uniform sampler2D terrain_map;
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
-  vs: uniformBlock + glsl`out vec3 commonPos;`,
-  fs: uniformBlock + glsl`in vec3 commonPos;`,
+  // eslint-disable-next-line prefer-template
+  vs: uniformBlock + /* glsl */ 'out vec3 commonPos;',
+  // eslint-disable-next-line prefer-template
+  fs: uniformBlock + /* glsl */ 'in vec3 commonPos;',
   inject: {
-    'vs:#main-start': glsl`
+    'vs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
   return;
 }
 `,
-    'vs:DECKGL_FILTER_GL_POSITION': glsl`
+    'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
 commonPos = geometry.position.xyz;
 if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
@@ -91,13 +93,13 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   }
 }
     `,
-    'fs:#main-start': glsl`
+    'fs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
-    'fs:DECKGL_FILTER_COLOR': glsl`
+    'fs:DECKGL_FILTER_COLOR': /* glsl */ `
 if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
   vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);

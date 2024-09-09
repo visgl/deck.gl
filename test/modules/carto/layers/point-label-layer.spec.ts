@@ -28,7 +28,7 @@ test('PointLabelLayer', t => {
 
         const {vs} = textBackgroundLayer.getShaders();
         t.ok(
-          vs.includes('_padding = padding + instancePixelOffsets.xyxy'),
+          vs.includes('_padding = textBackground.padding + instancePixelOffsets.xyxy'),
           'text background layer shader patched'
         );
 

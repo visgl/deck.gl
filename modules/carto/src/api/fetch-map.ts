@@ -1,7 +1,4 @@
 /* eslint-disable camelcase */
-/**
- * Maps API Client for Carto 3
- */
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from './common';
 import {buildPublicMapUrl, buildStatsUrl} from './endpoints';
@@ -206,11 +203,39 @@ async function fillInTileStats(
 }
 
 export type FetchMapOptions = {
+  /**
+   * CARTO platform access token. Only required for private maps.
+   */
+  accessToken?: string;
+
+  /**
+   * Base URL of the CARTO Maps API.
+   *
+   * Example for account located in EU-west region: `https://gcp-eu-west1.api.carto.com`
+   *
+   * @default https://gcp-us-east1.api.carto.com
+   */
   apiBaseUrl?: string;
+
+  /**
+   * Identifier of map created in CARTO Builder.
+   */
   cartoMapId: string;
   clientId?: string;
+
+  /**
+   * Custom HTTP headers added to map instantiation and data requests.
+   */
   headers?: Record<string, string>;
+
+  /**
+   * Interval in seconds at which to autoRefresh the data. If provided, `onNewData` must also be provided.
+   */
   autoRefresh?: number;
+
+  /**
+   * Callback function that will be invoked whenever data in layers is changed. If provided, `autoRefresh` must also be provided.
+   */
   onNewData?: (map: any) => void;
 };
 
@@ -224,6 +249,7 @@ export type FetchMapResult = ParseMapResult & {
 
 /* eslint-disable max-statements */
 export async function fetchMap({
+  accessToken,
   apiBaseUrl = DEFAULT_API_BASE_URL,
   cartoMapId,
   clientId = DEFAULT_CLIENT,
@@ -233,6 +259,10 @@ export async function fetchMap({
 }: FetchMapOptions): Promise<FetchMapResult> {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
   assert(apiBaseUrl, 'Must define apiBaseUrl');
+
+  if (accessToken) {
+    headers = {Authorization: `Bearer ${accessToken}`, ...headers};
+  }
 
   if (autoRefresh || onNewData) {
     assert(onNewData, 'Must define `onNewData` when using autoRefresh');

@@ -1,11 +1,9 @@
-import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import type Layer from '../lib/layer';
 import type Viewport from '../viewports/viewport';
 import LayersPass from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
-  shadowMap: Texture;
-  depthBuffer: Texture;
   fbo: Framebuffer;
 
   constructor(
@@ -17,7 +15,8 @@ export default class ShadowPass extends LayersPass {
     super(device, props);
 
     // The shadowMap texture
-    this.shadowMap = device.createTexture({
+    const shadowMap = device.createTexture({
+      format: 'rgba8unorm',
       width: 1,
       height: 1,
       sampler: {
@@ -25,11 +24,11 @@ export default class ShadowPass extends LayersPass {
         magFilter: 'linear',
         addressModeU: 'clamp-to-edge',
         addressModeV: 'clamp-to-edge'
-      }
+      },
+      mipmaps: true
     });
 
-    // @ts-ignore
-    this.depthBuffer = device.createTexture({
+    const depthBuffer = device.createTexture({
       format: 'depth16unorm',
       width: 1,
       height: 1,
@@ -40,10 +39,21 @@ export default class ShadowPass extends LayersPass {
       id: 'shadowmap',
       width: 1,
       height: 1,
-      colorAttachments: [this.shadowMap],
+      colorAttachments: [shadowMap],
       // Depth attachment has to be specified for depth test to work
-      depthStencilAttachment: this.depthBuffer
+      depthStencilAttachment: depthBuffer
     });
+  }
+
+  delete() {
+    if (this.fbo) {
+      this.fbo.destroy();
+      this.fbo = null!;
+    }
+  }
+
+  getShadowMap(): Texture {
+    return this.fbo.colorAttachments[0].texture;
   }
 
   render(params) {
@@ -75,22 +85,5 @@ export default class ShadowPass extends LayersPass {
     return {
       drawToShadowMap: true
     };
-  }
-
-  delete() {
-    if (this.fbo) {
-      this.fbo.destroy();
-      this.fbo = null!;
-    }
-
-    if (this.shadowMap) {
-      this.shadowMap.destroy();
-      this.shadowMap = null!;
-    }
-
-    if (this.depthBuffer) {
-      this.depthBuffer.destroy();
-      this.depthBuffer = null!;
-    }
   }
 }

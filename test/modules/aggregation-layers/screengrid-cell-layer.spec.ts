@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-promise/tape';
-import {device} from '@deck.gl/test-utils';
+import {device, getLayerUniforms} from '@deck.gl/test-utils';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 
 import {testLayer} from '@deck.gl/test-utils';
@@ -41,6 +41,8 @@ test('ScreenGridCellLayer#constructor', t => {
               instancePositions: SAMPLE_BUFFER
             }
           },
+          cellSizePixels: 100,
+          cellMarginPixels: 2,
           numInstances: 1,
           colorDomain: () => [0, 1]
         }
@@ -50,12 +52,14 @@ test('ScreenGridCellLayer#constructor', t => {
           cellSizePixels: 50 // default 100
         },
         onBeforeUpdate({layer}) {
-          cellSize = layer.state.model.uniforms.cellSizeClipspace;
+          const uniforms = getLayerUniforms(layer);
+          cellSize = uniforms.cellSizeClipspace;
         },
         onAfterUpdate({layer}) {
           t.ok(layer.state, 'should update layer state');
+          const uniforms = getLayerUniforms(layer);
           t.notDeepEqual(
-            layer.state.model.uniforms.cellSizeClipspace,
+            uniforms.cellSizeClipspace,
             cellSize,
             'should update cellSizeClipspace uniform'
           );
@@ -66,11 +70,8 @@ test('ScreenGridCellLayer#constructor', t => {
           colorDomain: () => [5, 50]
         },
         onAfterUpdate({layer, oldState}) {
-          t.deepEqual(
-            layer.state.model.uniforms.colorDomain,
-            [5, 50],
-            'should update colorDomain uniform'
-          );
+          const uniforms = getLayerUniforms(layer);
+          t.deepEqual(uniforms.colorDomain, [5, 50], 'should update colorDomain uniform');
         }
       }
     ]
