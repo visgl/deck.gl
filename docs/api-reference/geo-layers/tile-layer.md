@@ -281,6 +281,8 @@ If not supplied, the `maxCacheSize` is calculated as `5` times the number of til
 
 The maximum memory used for caching tiles. If this limit is supplied, `getTileData` must return an object that contains a `byteLength` field.
 
+If not supplied, the `maxCacheByteSize` is set to `Infinity`.
+
 - Default: `null`
 
 
