@@ -147,7 +147,7 @@ export class Tileset2D {
 
     this.onTileLoad = tile => {
       this.opts.onTileLoad?.(tile);
-      if (this.opts.maxCacheByteSize) {
+      if (this.opts.maxCacheByteSize != null) {
         this._cacheByteSize += tile.byteLength;
         this._resizeCache();
       }
@@ -469,10 +469,10 @@ export class Tileset2D {
     const {_cache, opts} = this;
 
     const maxCacheSize =
-      opts.maxCacheSize ||
+      opts.maxCacheSize ??
       // @ts-expect-error called only when selectedTiles is initialized
-      (opts.maxCacheByteSize ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
-    const maxCacheByteSize = opts.maxCacheByteSize || Infinity;
+      (opts.maxCacheByteSize != null ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
+    const maxCacheByteSize = opts.maxCacheByteSize ?? Infinity;
 
     const overflown = _cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
@@ -480,7 +480,7 @@ export class Tileset2D {
       for (const [id, tile] of _cache) {
         if (!tile.isVisible && !tile.isSelected) {
           // delete tile
-          this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
+          this._cacheByteSize -= opts.maxCacheByteSize != null ? tile.byteLength : 0;
           _cache.delete(id);
           this.opts.onTileUnload?.(tile);
         }
