@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Framebuffer} from '@luma.gl/core';
+import type {Buffer, Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
@@ -312,17 +312,20 @@ export default class DataFilterExtension extends LayerExtension<
 
     /* eslint-disable-next-line camelcase */
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
+      const attributeManager = this.getAttributeManager()!;
       const {
         attributes: {filterValues, filterCategoryValues, filterIndices}
-      } = this.getAttributeManager()!;
+      } = attributeManager;
       filterModel.setVertexCount(this.getNumInstances());
+      filterModel.setBufferLayout(attributeManager.getBufferLayouts(filterModel));
 
       // @ts-expect-error filterValue and filterIndices should always have buffer value
-      filterModel.setAttributes({
+      const attributes: Record<string, Buffer> = {
         ...filterValues?.getValue(),
         ...filterCategoryValues?.getValue(),
         ...filterIndices?.getValue()
-      });
+      };
+      filterModel.setAttributes(attributes);
       filterModel.shaderInputs.setProps({
         dataFilter: dataFilterProps
       });
