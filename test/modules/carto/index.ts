@@ -1,5 +1,6 @@
 import './api/basemap.spec';
 import './api/carto-api-error.spec';
+import './api/common.spec';
 import './api/fetch-map.spec';
 import './api/layer-map.spec';
 import './api/parse-map.spec';
