@@ -94,7 +94,7 @@ export function getModel(device: Device, shaderOptions: any, useFloatTarget: boo
     id: 'data-filter-aggregation-model',
     vertexCount: 1,
     isInstanced: false,
-    drawMode: GL.POINTS,
+    topology: 'point-list',
     vs: AGGREGATE_VS,
     fs: AGGREGATE_FS,
     ...shaderOptions
