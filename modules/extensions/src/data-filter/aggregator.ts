@@ -19,7 +19,8 @@ const float component = 1.0 / 255.0;
 
 void main() {
   #ifdef FLOAT_TARGET
-    dataFilter_value *= float(filterIndices != filterPrevIndices);
+    // BUG: always 0 for some reason
+    // dataFilter_value *= float(filterIndices != filterPrevIndices);
     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
     vColor = vec4(0.0, 0.0, 0.0, 1.0);
   #else
