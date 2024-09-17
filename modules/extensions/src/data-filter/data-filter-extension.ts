@@ -30,6 +30,7 @@ import {
   dataFilter64
 } from './shader-module';
 import * as aggregator from './aggregator';
+import {NumberArray4} from '@math.gl/core';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -316,27 +317,40 @@ export default class DataFilterExtension extends LayerExtension<
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
-      this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
-
-      filterModel.updateModuleSettings(params.moduleParameters);
       // @ts-expect-error filterValue and filterIndices should always have buffer value
       filterModel.setAttributes({
         ...filterValues?.getValue(),
         ...filterCategoryValues?.getValue(),
         ...filterIndices?.getValue()
       });
-      filterModel.shaderInputs.setProps({dataFilter: dataFilterProps});
-      filterModel.device.withParametersWebGL(
-        {
-          framebuffer: filterFBO,
-          // ts-ignore 'readonly' cannot be assigned to the mutable type '[GLBlendEquation, GLBlendEquation]'
-          ...(aggregator.parameters as any),
-          viewport: [0, 0, filterFBO.width, filterFBO.height]
+      filterModel.shaderInputs.setProps({
+        dataFilter: dataFilterProps
+      });
+
+      const viewport = [0, 0, filterFBO.width, filterFBO.height] as NumberArray4;
+
+      const renderPass = filterModel.device.beginRenderPass({
+        id: 'data-filter-count',
+        framebuffer: filterFBO,
+        parameters: {
+          viewport
         },
-        () => {
-          filterModel.draw(this.context.renderPass);
-        }
-      );
+        clearColor: [0, 0, 0, 0],
+        clearDepth: 1
+      });
+      filterModel.setParameters({
+        blend: true,
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one',
+        blendColorOperation: 'add',
+        blendAlphaOperation: 'add',
+        depthCompare: 'never'
+      });
+      filterModel.draw(renderPass);
+      renderPass.end();
+
       const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
       let count = 0;
       for (let i = 0; i < color.length; i++) {
