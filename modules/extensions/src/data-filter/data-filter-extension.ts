@@ -333,24 +333,12 @@ export default class DataFilterExtension extends LayerExtension<
       const viewport = [0, 0, filterFBO.width, filterFBO.height] as NumberArray4;
 
       const renderPass = filterModel.device.beginRenderPass({
-        id: 'data-filter-count',
+        id: 'data-filter-aggregation',
         framebuffer: filterFBO,
-        parameters: {
-          viewport
-        },
-        clearColor: [0, 0, 0, 0],
-        clearDepth: 1
+        parameters: {viewport},
+        clearColor: [0, 0, 0, 0]
       });
-      filterModel.setParameters({
-        blend: true,
-        blendColorSrcFactor: 'one',
-        blendColorDstFactor: 'one',
-        blendAlphaSrcFactor: 'one',
-        blendAlphaDstFactor: 'one',
-        blendColorOperation: 'add',
-        blendAlphaOperation: 'add',
-        depthCompare: 'never'
-      });
+      filterModel.setParameters(aggregator.parameters);
       filterModel.draw(renderPass);
       renderPass.end();
 

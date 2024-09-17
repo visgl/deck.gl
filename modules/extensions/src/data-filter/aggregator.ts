@@ -1,6 +1,5 @@
-import {Device, DeviceFeature, Framebuffer} from '@luma.gl/core';
+import {Device, DeviceFeature, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 const AGGREGATE_VS = `\
 #version 300 es
@@ -102,9 +101,13 @@ export function getModel(device: Device, shaderOptions: any, useFloatTarget: boo
   });
 }
 
-export const parameters = {
+export const parameters: RenderPipelineParameters = {
   blend: true,
-  blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-  blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
-  depthTest: false
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one',
+  blendColorOperation: 'add',
+  blendAlphaOperation: 'add',
+  depthCompare: 'never'
 } as const;
