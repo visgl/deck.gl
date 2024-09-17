@@ -230,6 +230,7 @@ export default class DataFilterExtension extends LayerExtension<
         extension.getShaders.call(this, extension),
         useFloatTarget
       );
+      filterModel.setBufferLayout(attributeManager.getBufferLayouts(filterModel));
       this.setState({filterFBO, filterModel});
     }
   }
@@ -317,7 +318,6 @@ export default class DataFilterExtension extends LayerExtension<
         attributes: {filterValues, filterCategoryValues, filterIndices}
       } = attributeManager;
       filterModel.setVertexCount(this.getNumInstances());
-      filterModel.setBufferLayout(attributeManager.getBufferLayouts(filterModel));
 
       // @ts-expect-error filterValue and filterIndices should always have buffer value
       const attributes: Record<string, Buffer> = {
