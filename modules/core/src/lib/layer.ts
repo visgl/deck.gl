@@ -1083,7 +1083,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         // Do not pass picking module to avoid crash
         // TODO remove `setModuleParameters` from codebase
         const {picking: _, ...rest} = moduleParameters;
-        this.setModuleParameters(rest);
 
         const {
           // shadow
