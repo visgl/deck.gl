@@ -36,7 +36,7 @@ export {
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {CartoAPIError, fetchMap, query, getRequestURLLimit, setRequestURLLimit} from './api/index';
+export {CartoAPIError, fetchMap, query} from './api/index';
 export {fetchBasemapProps} from './api/basemap';
 export type {
   APIErrorContext,

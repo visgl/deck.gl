@@ -32,7 +32,7 @@ export async function baseSource<UrlParameters extends Record<string, unknown>>(
     }
   }
   const baseUrl = buildSourceUrl(mergedOptions);
-  const {clientId, format} = mergedOptions;
+  const {clientId, maxLengthURL, format} = mergedOptions;
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
   const parameters = {client: clientId, ...urlParameters};
 
@@ -46,7 +46,8 @@ export async function baseSource<UrlParameters extends Record<string, unknown>>(
     baseUrl,
     parameters,
     headers,
-    errorContext
+    errorContext,
+    maxLengthURL
   });
 
   const dataUrl = mapInstantiation[format].url[0];
@@ -59,7 +60,8 @@ export async function baseSource<UrlParameters extends Record<string, unknown>>(
     const json = await requestWithParameters<TilejsonResult>({
       baseUrl: dataUrl,
       headers,
-      errorContext
+      errorContext,
+      maxLengthURL
     });
     if (accessToken) {
       json.accessToken = accessToken;
@@ -70,6 +72,7 @@ export async function baseSource<UrlParameters extends Record<string, unknown>>(
   return await requestWithParameters<GeojsonResult | JsonResult>({
     baseUrl: dataUrl,
     headers,
-    errorContext
+    errorContext,
+    maxLengthURL
   });
 }
