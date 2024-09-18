@@ -37,7 +37,7 @@ jobs:
       - name: Run browser tests and generate coverage
         run: yarn cover
 
-      - name: Run tests
+      - name: Run lint and prettier
         run: yarn lint
 
       - name: Upload to Coveralls

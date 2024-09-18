@@ -318,7 +318,7 @@ export default class DataFilterExtension extends LayerExtension<
 
       this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
 
-      filterModel.updateModuleSettings(params.moduleParameters);
+      filterModel.updateModuleSettingsWebGL(params.moduleParameters);
       // @ts-expect-error filterValue and filterIndices should always have buffer value
       filterModel.setAttributes({
         ...filterValues?.getValue(),

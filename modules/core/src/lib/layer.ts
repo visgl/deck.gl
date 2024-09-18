@@ -341,7 +341,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
+      model.updateModuleSettingsWebGL(moduleParameters);
     }
   }
 
