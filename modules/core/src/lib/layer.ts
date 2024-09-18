@@ -1084,6 +1084,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         this.setModuleParameters({});
 
         const {
+          // mask
+          maskChannels,
+          maskMap,
+          maskSources,
           // shadow
           shadowEnabled,
           drawToShadowMap,
@@ -1104,6 +1108,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           // lighting
           lightSources
         } = moduleParameters;
+
+        const maskProps = {
+          maskChannels,
+          maskMap,
+          maskSources
+        };
 
         const shadowProps = {
           viewport,
@@ -1137,6 +1147,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
         this.setShaderModuleProps({
           // TODO Revisit whether this is necessary once all layers ported to UBO
+          mask: maskProps,
           shadow: shadowProps,
           terrain: terrainProps,
           layer: {opacity},
