@@ -341,7 +341,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
+      // HACK as fp64 is not yet ported to UBO
+      model.uniforms = {ONE: 1};
     }
   }
 
@@ -1079,6 +1080,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
         // @ts-expect-error material is not a Layer prop
         const {material, modelMatrix} = this.props;
+
+        this.setModuleParameters({});
 
         const {
           // shadow
