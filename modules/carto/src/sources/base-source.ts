@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from '../api/common';
+import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT, DEFAULT_MAX_LENGTH_URL} from '../api/common';
 import {buildSourceUrl} from '../api/endpoints';
 import {requestWithParameters} from '../api/request-with-parameters';
 import type {APIErrorContext, MapType} from '../api/types';
@@ -16,7 +16,8 @@ export const SOURCE_DEFAULTS: SourceOptionalOptions = {
   apiBaseUrl: DEFAULT_API_BASE_URL,
   clientId: DEFAULT_CLIENT,
   format: 'tilejson',
-  headers: {}
+  headers: {},
+  maxLengthURL: DEFAULT_MAX_LENGTH_URL
 };
 
 export async function baseSource<UrlParameters extends Record<string, unknown>>(
