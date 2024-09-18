@@ -29,13 +29,13 @@ jobs:
         run: yarn
 
       - name: Build
-        run: yarn build
-
-      - name: Run browser tests and generate coverage
-        run: yarn cover
+        run: yarn bootstrap
 
       - name: Run node tests
         run: yarn test node
+
+      - name: Run browser tests and generate coverage
+        run: yarn cover
 
       - name: Run lint and prettier
         run: yarn lint
