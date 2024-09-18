@@ -31,11 +31,11 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Run node tests
-        run: yarn test node
-
       - name: Run browser tests and generate coverage
         run: yarn cover
+
+      - name: Run node tests
+        run: yarn test node
 
       - name: Run lint and prettier
         run: yarn lint
