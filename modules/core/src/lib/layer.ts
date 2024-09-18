@@ -1080,10 +1080,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         // @ts-expect-error material is not a Layer prop
         const {material, modelMatrix} = this.props;
 
-        // Do not pass picking module to avoid crash
-        // TODO remove `setModuleParameters` from codebase
-        const {picking: _, ...rest} = moduleParameters;
-
         const {
           // shadow
           shadowEnabled,
@@ -1128,6 +1124,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           terrainSkipRender
         };
 
+        const projectProps = {
+          viewport,
+          devicePixelRatio,
+          modelMatrix,
+          coordinateSystem,
+          coordinateOrigin
+        } as ProjectProps;
+
         this.setShaderModuleProps({
           // TODO Revisit whether this is necessary once all layers ported to UBO
           shadow: shadowProps,
@@ -1137,13 +1141,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           phongMaterial: material,
           gouraudMaterial: material,
           picking: {isActive, isAttribute} as PickingProps,
-          project: {
-            viewport,
-            devicePixelRatio,
-            modelMatrix,
-            coordinateSystem,
-            coordinateOrigin
-          } as ProjectProps
+          project: projectProps
         });
       }
 

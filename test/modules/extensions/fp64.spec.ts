@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 import {Fp64Extension} from '@deck.gl/extensions';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 
 test('Fp64Extension', t => {
   const testCases = [
@@ -22,7 +22,7 @@ test('Fp64Extension', t => {
         extensions: [new Fp64Extension()]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model;
+        const uniforms = getLayerUniforms(layer);
         t.ok(uniforms.viewProjectionMatrix, 'has fp64 uniforms');
         t.ok(uniforms.viewProjectionMatrix64Low, 'has fp64 uniforms');
       }
