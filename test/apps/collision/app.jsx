@@ -8,7 +8,7 @@ import {GeoJsonLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
 
-const accessToken = 'XXX';
+const accessToken = 'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiJkOTU4OWMyZiJ9.78MdzU2J6y-J6Far71_Mh7IQO9eYIZD9nECUiZJAVL4';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
@@ -19,8 +19,8 @@ const US_STATES =
 
 const cartoData = vectorTableSource({
   accessToken,
-  connectionName: 'bigquery',
-  tableName: 'cartobq.public_account.populated_places'
+  connectionName: 'carto_dw',
+  tableName: 'carto-demo-data.demo_tables.populated_places'
 });
 
 /* eslint-disable react/no-deprecated */
