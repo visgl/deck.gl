@@ -106,7 +106,13 @@ class ClusterGeoJsonLayer<
     clusterIds: bigint[];
     hoveredFeatureId: bigint | number | null;
     highlightColor: number[];
+    aggregationCache: WeakMap<any, Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>>;
   };
+
+  initializeState() {
+    super.initializeState();
+    this.state.aggregationCache = new WeakMap();
+  }
 
   renderLayers(): Layer | null | LayersList {
     const visibleTiles = this.state.tileset?.tiles.filter((tile: Tile2DHeader) => {
@@ -119,6 +125,7 @@ class ClusterGeoJsonLayer<
 
     const {zoom} = this.context.viewport;
     const {clusterLevel, getPosition, getWeight} = this.props;
+    const {aggregationCache} = this.state;
 
     const properties = extractAggregationProperties(visibleTiles[0]);
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
@@ -127,15 +134,21 @@ class ClusterGeoJsonLayer<
       // Calculate aggregation based on viewport zoom
       const overZoom = Math.round(zoom - tile.zoom);
       const aggregationLevels = Math.round(clusterLevel) - overZoom;
+      let tileAggregationCache = aggregationCache.get(tile.content);
+      if (!tileAggregationCache) {
+        tileAggregationCache = new Map();
+        aggregationCache.set(tile.content, tileAggregationCache);
+      }
       const didAggregate = aggregateTile(
         tile,
+        tileAggregationCache,
         aggregationLevels,
         properties,
         getPosition,
         getWeight
       );
       needsUpdate ||= didAggregate;
-      data.push(...tile.userData![aggregationLevels]);
+      data.push(...tileAggregationCache.get(aggregationLevels)!);
     }
 
     data.sort((a, b) => Number(b.count - a.count));
