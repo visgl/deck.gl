@@ -1948,15 +1948,15 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@9.1.0-beta.4", "@luma.gl/constants@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.1.0-beta.4.tgz#c01e87a07afd9d8a3b9c9dbaa9deddfd35c53c2b"
-  integrity sha512-4vMdAz3x6bOENy8K46wovFbYiVmb9IV0M+PUEmC5D+x0DFT4GBfsJpe6u3NVfBP/TlyrKzOryp519dhu3Kj3Eg==
+"@luma.gl/constants@9.1.0-beta.5", "@luma.gl/constants@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.1.0-beta.5.tgz#c30122736c3057cf7442ac70122fd63588f2e716"
+  integrity sha512-EUMNJyOiiIgU27ZLAnviFI8RfBIVMGBTxx/VxU7gU+1H7xqoPlCv/OdrefxDyi9QCxUJRUqeJQA+WcXBPyU1pQ==
 
-"@luma.gl/core@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.1.0-beta.4.tgz#113b18f56c28001eb4b01ebd8c27669739046f87"
-  integrity sha512-ipEfb9jA9zyLX5lNUVUDX+n5n2NzlcGjOM07KI4wFkQhPRiA/xM5m7VB34PfrbxAEQFDP/3YyAwxSZ8ZKHvgpA==
+"@luma.gl/core@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.1.0-beta.5.tgz#8a10e2e855a744e42fbb7014f2bc31b6b7fda39a"
+  integrity sha512-Xi/ERcNtpTo/CzOn0JeyFNUZLbsQCUO49lvHhrNz/6UTpq5P35ppb6kBAbT2jzUKtrmkd0E3MmdW+b/0xjxbcw==
   dependencies:
     "@math.gl/types" "^4.1.0"
     "@probe.gl/env" "^4.0.8"
@@ -1964,55 +1964,55 @@
     "@probe.gl/stats" "^4.0.8"
     "@types/offscreencanvas" "^2019.6.4"
 
-"@luma.gl/engine@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.1.0-beta.4.tgz#196e11d68a1aa7c4d562d441ade2b67af32ecc14"
-  integrity sha512-U9adot4FgcpGvQxp9e+Qw+nKVBaUL5HzGfl2IhwTXwX1hrtjbL8JCd61OYbIBSnw+JSgjbykuoCi3xd3iz/X8g==
+"@luma.gl/engine@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.1.0-beta.5.tgz#7fae0db4fbe6150872b9587b6aec25cb56aebd7e"
+  integrity sha512-15+F3vtOQLDSEkzDD7lzdJ0aaKhCW3vkJd4gdFUXj3DCyj8W2d9rVCsfXFROQMZY/u9WS/S6jKWe0j+xiNIloQ==
   dependencies:
     "@math.gl/core" "^4.1.0"
     "@math.gl/types" "^4.1.0"
     "@probe.gl/log" "^4.0.8"
     "@probe.gl/stats" "^4.0.8"
 
-"@luma.gl/gltf@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.1.0-beta.4.tgz#c720a9d5de8abfef778258affd258295074d2a06"
-  integrity sha512-Wd2GO3Uf9+fKwKcd+GNFccIVBECY0SB2oAzwK6lt9XzSS50FuyNYwV/c6YQ+fzSleSGsR5Z+iuW4gi0y+XANVg==
+"@luma.gl/gltf@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.1.0-beta.5.tgz#a79f0c457e3d6a7ec0bb8ce646f5af868ff2ed68"
+  integrity sha512-afyDGW7z9krcloYlHnUA0v1nQk5PwNbzmAIVZmVK4MSO1aRvVPoXPVF3h2P6QlDzD16xGk8c6xUcbNjnMKpYEA==
   dependencies:
     "@loaders.gl/core" "^4.2.0"
     "@loaders.gl/textures" "^4.2.0"
     "@math.gl/core" "^4.1.0"
 
-"@luma.gl/shadertools@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.1.0-beta.4.tgz#4785f3d760f15138dad0a24ff45724b58f9df4ed"
-  integrity sha512-SJlcJepUCOeKAhSZwgTgWYvEayzIXjkbelfi64r7bvY30SmprT2ngSAUZjInD6V2TwDr5/ZnsVfYrxq5WBu9Vg==
+"@luma.gl/shadertools@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.1.0-beta.5.tgz#a7deda335f261082bfc6aa4517624e08f318fe4b"
+  integrity sha512-NjTEUfcG0dZOyLxVun4mehzkQyFdKvc7jTKp+8kRSEcmGlTJaneMRWGlTydIFLXSnhj4XN460lYPuMAQ6RpUNA==
   dependencies:
     "@math.gl/core" "^4.1.0"
     "@math.gl/types" "^4.1.0"
     wgsl_reflect "^1.0.1"
 
-"@luma.gl/test-utils@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.1.0-beta.4.tgz#d85d2a439c07244f6a934a5eafd85fe0d27f189c"
-  integrity sha512-aK+eYKkNO6fdZ/ahm6YqXUJ1nwryxEbgdcYuOSzml4EoFx9bV/2notMwWSg3ycI9BnH2rRAum5+TrY00NQ315g==
+"@luma.gl/test-utils@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.1.0-beta.5.tgz#22d27a3ac426b3ed6b790b6c566462c7d066ff2f"
+  integrity sha512-2Z1AYVt24vTigZ/kIwpkWzVDX7sMPPLp0fW/cxZwi0Vli6T5sI+wSc5vhJmz9dxUJ1O3nqwtd2azXOyQx4VNSw==
   dependencies:
     "@probe.gl/env" "^4.0.8"
     "@probe.gl/stats" "^4.0.8"
 
-"@luma.gl/webgl@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.1.0-beta.4.tgz#149d5dc56faf4cb95719f56950b1946cc1443b5a"
-  integrity sha512-Sn21ZnjPhBbgmjxV9YqDd2+OevVPuBbqjU8SW/eye11qZneawMVwoLZ+Wjk4RJA2rbAJHxL2oRlGE7vVeDBQ0g==
+"@luma.gl/webgl@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.1.0-beta.5.tgz#61f4f7494da012ba42eeb703b4538dd78021450e"
+  integrity sha512-snvSO3zWaWsAXC+FMyQwuvf6hDKa9brTu2g6ZZp6M7L8VSAPGb4LWPZVB3Z0QMe8IXNBXzUuBCD/N3BbR5Ai3g==
   dependencies:
-    "@luma.gl/constants" "9.1.0-beta.4"
+    "@luma.gl/constants" "9.1.0-beta.5"
     "@math.gl/types" "^4.1.0"
     "@probe.gl/env" "^4.0.8"
 
-"@luma.gl/webgpu@^9.1.0-beta.4":
-  version "9.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.1.0-beta.4.tgz#b8daf20b0a2ad191eec493517ebb399b9eae59bf"
-  integrity sha512-3+yeba/khSVtG+OCetx3xi7Rl1iil4ST7ZolBXN6iZbIboM5nLyA7cnR3ccTa3Js4vI0YVsy3KNuMWuuEPVW8Q==
+"@luma.gl/webgpu@^9.1.0-beta.5":
+  version "9.1.0-beta.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.1.0-beta.5.tgz#47e801e91e46cf171239061eee53fb6a23ff6905"
+  integrity sha512-w7NCv5hBG+SZxVZsHPyYih+yM1RK2H1N7p9TgFLzdrS5mTqn6o/NAgCut6knPQOCWYLpFG9KLMiaTFIEjVPTrw==
   dependencies:
     "@probe.gl/env" "^4.0.8"
     "@webgpu/types" "^0.1.34"
