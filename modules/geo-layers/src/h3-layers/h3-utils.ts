@@ -1,5 +1,8 @@
 import {CoordPair, H3IndexInput, cellToBoundary, cellToLatLng} from 'h3-js';
 import {lerp} from '@math.gl/core';
+import type {AccessorFunction} from '@deck.gl/core';
+
+export type HexagonAccessor<DataT> = AccessorFunction<DataT, string | [string, number]>;
 
 // normalize longitudes w.r.t center (refLng), when not provided first vertex
 export function normalizeLongitudes(vertices: CoordPair[], refLng?: number): void {
@@ -31,14 +34,32 @@ export function scalePolygon(hexId: H3IndexInput, vertices: CoordPair[], factor:
   }
 }
 
-// gets hexagon centroid
-export function getHexagonCentroid(getHexagon, object, objectInfo) {
-  const hexagonId = getHexagon(object, objectInfo);
-  const [lat, lng] = cellToLatLng(hexagonId);
-  return [lng, lat];
+// gets hexagon id
+export function getIndexAndBaseElevation<DataT>(
+  getHexagon: HexagonAccessor<DataT>,
+  object,
+  objectInfo
+): [string, number] {
+  const hexagon = getHexagon(object, objectInfo);
+  return typeof hexagon === 'string' ? [hexagon, 0] : hexagon;
 }
 
-export function h3ToPolygon(hexId: H3IndexInput, coverage: number = 1): number[][] {
+// gets hexagon centroid
+export function getHexagonCentroid<DataT>(getHexagon: HexagonAccessor<DataT>, object, objectInfo) {
+  const [hexagonId, baseElevation] = getIndexAndBaseElevation(getHexagon, object, objectInfo);
+  const [lat, lng] = cellToLatLng(hexagonId);
+  return [lng, lat, baseElevation];
+}
+
+export function h3ToPolygon(hex: string | [string, number], coverage: number = 1): number[][] {
+  let baseElevation: number;
+  let hexId: string;
+
+  if (typeof hex === 'string') {
+    baseElevation = 0;
+    hexId = hex;
+  } else [hexId, baseElevation] = hex;
+
   const vertices = cellToBoundary(hexId, true);
 
   if (coverage !== 1) {
@@ -49,15 +70,18 @@ export function h3ToPolygon(hexId: H3IndexInput, coverage: number = 1): number[]
     normalizeLongitudes(vertices);
   }
 
+  for (const vtx of vertices) vtx.push(baseElevation);
+
   return vertices;
 }
 
 export function flattenPolygon(vertices: number[][]): Float64Array {
-  const positions = new Float64Array(vertices.length * 2);
+  const positions = new Float64Array(vertices.length * 3);
   let i = 0;
   for (const pt of vertices) {
     positions[i++] = pt[0];
     positions[i++] = pt[1];
+    positions[i++] = pt[2];
   }
   return positions;
 }
