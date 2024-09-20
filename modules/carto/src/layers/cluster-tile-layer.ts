@@ -106,7 +106,7 @@ class ClusterGeoJsonLayer<
     clusterIds: bigint[];
     hoveredFeatureId: bigint | number | null;
     highlightColor: number[];
-    aggregationCache: WeakMap<any, Map<number, any>>; // tile.content => Record<number, aggregationResultWhateverItIs>
+    aggregationCache: WeakMap<any, Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>>;
   };
 
   initializeState() {
@@ -148,7 +148,7 @@ class ClusterGeoJsonLayer<
         getWeight
       );
       needsUpdate ||= didAggregate;
-      data.push(...tileAggregationCache.get(aggregationLevels));
+      data.push(...tileAggregationCache.get(aggregationLevels)!);
     }
 
     data.sort((a, b) => Number(b.count - a.count));

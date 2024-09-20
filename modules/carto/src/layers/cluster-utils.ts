@@ -23,7 +23,7 @@ export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePro
  */
 export function aggregateTile<FeaturePropertiesT>(
   tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>,
-  tileAggregationCache: Map<number, any>,
+  tileAggregationCache: Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>,
   aggregationLevels: number,
   properties: AggregationProperties<FeaturePropertiesT> = [],
   getPosition: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>,
@@ -42,7 +42,7 @@ export function aggregateTile<FeaturePropertiesT>(
     }
 
     // Aggregated properties have changed, re-aggregate
-    tileAggregationCache.clear()
+    tileAggregationCache.clear();
   }
 
   const out: Record<number, any> = {};
