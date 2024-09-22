@@ -35,9 +35,6 @@ export class WebGLAggregationTransform {
     this.device = device;
     this.channelCount = props.channelCount;
     this.transform = createTransform(device, props);
-    // Passed in as uniform because 1) there is no GLSL symbol for NaN 2) any expression that exploits undefined behavior to produces NaN
-    // will subject to platform differences and shader optimization
-    this.transform.model.shaderInputs.setProps({aggregatorTransform: {naN: NaN}});
     this.domainFBO = createRenderTarget(device, 2, 1);
   }
 
@@ -145,6 +142,8 @@ flat out vec2 values;
 flat out vec3 values;
 #endif
 
+const float NAN = intBitsToFloat(-1);
+
 void main() {
   int row = gl_VertexID / SAMPLER_WIDTH;
   int col = gl_VertexID - row * SAMPLER_WIDTH;
@@ -155,7 +154,7 @@ void main() {
     aggregatorTransform.isMean
   );
   if (weights.a == 0.0) {
-    value3 = vec3(aggregatorTransform.naN);
+    value3 = vec3(NAN);
   }
 
 #if NUM_DIMS == 1
@@ -199,11 +198,6 @@ flat in vec3 values;
 out vec4 fragColor;
 
 void main() {
-#if NUM_CHANNELS > 1
-  if (isnan(values.x)) discard;
-#else
-  if (isnan(values)) discard;
-#endif
   vec3 value3;
 #if NUM_CHANNELS == 3
   value3 = values;
@@ -212,6 +206,7 @@ void main() {
 #else
   value3.x = values;
 #endif
+  if (isnan(values.x)) discard;
   // This shader renders into a 2x1 texture with blending=max
   // The left pixel yields the max value of each channel
   // The right pixel yields the min value of each channel
