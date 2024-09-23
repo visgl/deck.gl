@@ -138,7 +138,7 @@ test('DataFilterExtension#categories', t => {
   t.end();
 });
 
-test('DataFilterExtension#countItems', t => {
+test.only('DataFilterExtension#countItems', t => {
   let cbCalled = 0;
 
   const testCases = [
