@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.30] - Sep 23 2024
+
+- carto: Allow configuring max URL length for GET requests (#9159)
+- carto: Fix caching in ClusterTileLayer (#9167)
+- feat: Allow 0s for maxCacheSize and maxCacheByteSize (#9156)
+
 #### deck.gl [9.0.29] - Sep 04 2024
 
 - CARTO: Support private maps in fetchMap (#9139)
