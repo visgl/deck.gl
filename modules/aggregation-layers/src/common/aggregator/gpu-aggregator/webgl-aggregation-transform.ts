@@ -206,7 +206,7 @@ void main() {
 #else
   value3.x = values;
 #endif
-  if (isnan(values.x)) discard;
+  if (isnan(value3.x)) discard;
   // This shader renders into a 2x1 texture with blending=max
   // The left pixel yields the max value of each channel
   // The right pixel yields the min value of each channel
