@@ -33,6 +33,7 @@ type ImageDiffOptions = {
   tolerance?: number; // 0.1,
   includeAA?: boolean; // false,
   includeEmpty?: boolean; // true
+  platform?: string;
 };
 
 type DiffImageResult = {
@@ -140,8 +141,20 @@ export class SnapshotTestRunner extends TestRunner<
     };
     // Take screenshot and compare
     const result = await window.browserTestDriver_captureAndDiffScreen(diffOptions);
+
+    // If failed, try if we have a platform specific golden image
+    let resultOverride;
+    const platform = this.testOptions.imageDiffOptions?.platform;
+    if (!result.success) {
+      diffOptions.goldenImage = diffOptions.goldenImage.replace(
+        'golden-images/',
+        `golden-images/platform-overrides/${platform}/`
+      );
+      resultOverride = await window.browserTestDriver_captureAndDiffScreen(diffOptions);
+    }
+
     // invoke user callback
-    if (result.success) {
+    if (result.success || resultOverride.success) {
       this.pass(result);
     } else {
       this.fail(result);
