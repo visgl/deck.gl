@@ -38,13 +38,13 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.1.0-beta.5",
+    "@luma.gl/constants": "^9.1.0-beta.6",
     "@math.gl/core": "^4.1.0",
     "@types/google.maps": "^3.48.6"
   },
   "peerDependencies": {
     "@deck.gl/core": "9.0.0-alpha.0",
-    "@luma.gl/core": "^9.1.0-beta.5"
+    "@luma.gl/core": "^9.1.0-beta.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

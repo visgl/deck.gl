@@ -1,5 +1,5 @@
 import {PostProcessEffect, LightingEffect, AmbientLight, DirectionalLight} from '@deck.gl/core';
-import {zoomBlur, vignette} from '@luma.gl/shadertools';
+import {zoomBlur, vignette} from '@luma.gl/effects';
 import {hexagons, points} from 'deck.gl-test/data';
 
 import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
