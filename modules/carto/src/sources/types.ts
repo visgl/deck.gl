@@ -35,6 +35,13 @@ export type SourceOptionalOptions = {
   clientId: string;
   /** @deprecated  use `query` instead **/
   format: Format;
+
+  /**
+   * Maximum URL character length. Above this limit, requests use POST.
+   * Used to avoid browser and CDN limits.
+   * @default {@link DEFAULT_MAX_LENGTH_URL}
+   */
+  maxLengthURL?: number;
 };
 
 export type SourceOptions = SourceRequiredOptions & Partial<SourceOptionalOptions>;

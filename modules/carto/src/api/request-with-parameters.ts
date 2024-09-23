@@ -1,7 +1,7 @@
 import {VERSION} from '@deck.gl/core';
 import {isPureObject} from '../utils';
 import {CartoAPIError} from './carto-api-error';
-import {MAX_GET_LENGTH, V3_MINOR_VERSION} from './common';
+import {DEFAULT_MAX_LENGTH_URL, V3_MINOR_VERSION} from './common';
 import type {APIErrorContext} from './types';
 
 /**
@@ -25,12 +25,14 @@ export async function requestWithParameters<T = any>({
   baseUrl,
   parameters = {},
   headers: customHeaders = {},
-  errorContext
+  errorContext,
+  maxLengthURL = DEFAULT_MAX_LENGTH_URL
 }: {
   baseUrl: string;
   parameters?: Record<string, unknown>;
   headers?: Record<string, string>;
   errorContext: APIErrorContext;
+  maxLengthURL?: number;
 }): Promise<T> {
   parameters = {...DEFAULT_PARAMETERS, ...parameters};
   baseUrl = excludeURLParameters(baseUrl, Object.keys(parameters));
@@ -44,7 +46,7 @@ export async function requestWithParameters<T = any>({
 
   /* global fetch */
   const fetchPromise =
-    url.length > MAX_GET_LENGTH
+    url.length > maxLengthURL
       ? fetch(baseUrl, {method: 'POST', body: JSON.stringify(parameters), headers})
       : fetch(url, {headers});
 
