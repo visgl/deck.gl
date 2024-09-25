@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {
+  log,
   Accessor,
   Color,
   GetPickingInfoParams,
@@ -18,13 +19,15 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {getDistanceScales} from '@math.gl/web-mercator';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
+import {AttributeWithScale} from '../common/utils/scale-utils';
+import {getBinIdRange} from '../common/utils/bounds-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
+import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -38,9 +41,9 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
   getColorWeight: {type: 'accessor', value: 1},
   colorAggregation: 'SUM',
-  // lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
-  // upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
-  // colorScaleType: 'quantize',
+  lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
+  upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
+  colorScaleType: 'quantize',
   onSetColorDomain: noop,
 
   // elevation
@@ -50,9 +53,9 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   getElevationWeight: {type: 'accessor', value: 1},
   elevationAggregation: 'SUM',
   elevationScale: {type: 'number', min: 0, value: 1},
-  // elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
-  // elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
-  // elevationScaleType: 'linear',
+  elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
+  elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
+  elevationScaleType: 'linear',
   onSetElevationDomain: noop,
 
   // grid
@@ -72,7 +75,8 @@ export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & Composite
 /** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = {
   /**
-   * Accessor to retrieve a grid bin index from each data object.
+   * Custom accessor to retrieve a grid bin index from each data object.
+   * Not supported by GPU aggregation.
    */
   gridAggregator?: ((position: number[], cellSize: number) => [number, number]) | null;
 
@@ -123,21 +127,19 @@ type _GridLayerProps<DataT> = {
    */
   extruded?: boolean;
 
-  // TODO - v9
   /**
    * Filter cells and re-calculate color by `upperPercentile`.
    * Cells with value larger than the upperPercentile will be hidden.
    * @default 100
    */
-  // upperPercentile?: number;
+  upperPercentile?: number;
 
-  // TODO - v9
   /**
    * Filter cells and re-calculate color by `lowerPercentile`.
    * Cells with value smaller than the lowerPercentile will be hidden.
    * @default 0
    */
-  // lowerPercentile?: number;
+  lowerPercentile?: number;
 
   /**
    * Filter cells and re-calculate elevation by `elevationUpperPercentile`.
@@ -153,19 +155,19 @@ type _GridLayerProps<DataT> = {
    */
   elevationLowerPercentile?: number;
 
-  // TODO - v9
   /**
-   * Scaling function used to determine the color of the grid cell, default value is 'quantize'.
+   * Scaling function used to determine the color of the grid cell.
    * Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
    * @default 'quantize'
    */
-  // colorScaleType?: 'quantize' | 'linear' | 'quantile' | 'ordinal';
+  colorScaleType?: 'quantize' | 'linear' | 'quantile' | 'ordinal';
 
-  // TODO - v9
   /**
-   * Scaling function used to determine the elevation of the grid cell, only supports 'linear'.
+   * Scaling function used to determine the elevation of the grid cell.
+   * Supported Values are 'linear' and 'quantile'.
+   * @default 'linear'
    */
-  // elevationScaleType?: 'linear';
+  elevationScaleType?: 'linear' | 'quantile';
 
   /**
    * Material settings for lighting effect. Applies if `extruded: true`.
@@ -243,13 +245,13 @@ type _GridLayerProps<DataT> = {
 };
 
 export type GridLayerPickingInfo<DataT> = PickingInfo<{
-  /** Column index of the picked cell, starting from 0 at the left of the viewport */
+  /** Column index of the picked cell */
   col: number;
-  /** Row index of the picked cell, starting from 0 at the top of the viewport */
+  /** Row index of the picked cell */
   row: number;
-  /** Aggregated color value */
+  /** Aggregated color value, as determined by `getColorWeight` and `colorAggregation` */
   colorValue: number;
-  /** Aggregated elevation value */
+  /** Aggregated elevation value, as determined by `getElevationWeight` and `elevationAggregation` */
   elevationValue: number;
   /** Number of data points in the picked cell */
   count: number;
@@ -267,40 +269,31 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'GridLayer';
   static defaultProps = defaultProps;
 
-  state!: AggregationLayer<DataT>['state'] & {
-    // Needed if getColorValue, getElevationValue are used
-    dataAsArray?: DataT[];
-    cellSizeCommon: [number, number];
-    cellOriginCommon: [number, number];
-    binIdRange: [number, number][];
-    aggregatorViewport: Viewport;
-  };
+  state!: AggregationLayer<DataT>['state'] &
+    BinOptions & {
+      // Needed if getColorValue, getElevationValue are used
+      dataAsArray?: DataT[];
+
+      colors?: AttributeWithScale;
+      elevations?: AttributeWithScale;
+
+      binIdRange: [number, number][];
+      aggregatorViewport: Viewport;
+    };
 
   getAggregatorType(): string {
-    const {
-      gpuAggregation,
-      gridAggregator,
-      // lowerPercentile,
-      // upperPercentile,
-      getColorValue,
-      getElevationValue
-      // colorScaleType
-    } = this.props;
+    const {gpuAggregation, gridAggregator, getColorValue, getElevationValue} = this.props;
+    if (gpuAggregation && (gridAggregator || getColorValue || getElevationValue)) {
+      // If these features are desired by the app, the user should explicitly use CPU aggregation
+      log.warn('Features not supported by GPU aggregation, falling back to CPU')();
+      return 'cpu';
+    }
+
     if (
       // GPU aggregation is requested
       gpuAggregation &&
       // GPU aggregation is supported by the device
-      WebGLAggregator.isSupported(this.context.device) &&
-      // Default grid
-      !gridAggregator &&
-      // Does not need custom aggregation operation
-      !getColorValue &&
-      !getElevationValue
-      // Does not need CPU-only scale
-      // && lowerPercentile === 0 &&
-      // && upperPercentile === 100 &&
-      // && colorScaleType !== 'quantile'
-      // && colorScaleType !== 'ordinal'
+      WebGLAggregator.isSupported(this.context.device)
     ) {
       return 'gpu';
     }
@@ -314,14 +307,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: (
-            {positions}: {positions: number[]},
-            index: number,
-            opts: {
-              cellSizeCommon: [number, number];
-              cellOriginCommon: [number, number];
-            }
-          ) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             if (gridAggregator) {
               return gridAggregator(positions, cellSize);
             }
@@ -346,10 +332,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       channelCount: 2,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
-        modules: [project32],
+        modules: [project32, binOptionsUniforms],
         vs: /* glsl */ `
-  uniform vec2 cellOriginCommon;
-  uniform vec2 cellSizeCommon;
   in vec3 positions;
   in vec3 positions64Low;
   in float colorWeights;
@@ -357,7 +341,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   void getBin(out ivec2 binId) {
     vec3 positionCommon = project_position(positions, positions64Low);
-    vec2 gridCoords = floor(positionCommon.xy / cellSizeCommon);
+    vec2 gridCoords = floor(positionCommon.xy / binOptions.cellSizeCommon);
     binId = ivec2(gridCoords);
   }
   void getValue(out vec2 value) {
@@ -455,7 +439,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const bounds = this.getBounds();
     const cellSizeCommon: [number, number] = [1, 1];
     let cellOriginCommon: [number, number] = [0, 0];
-    const binIdRange: [number, number][] = [
+    let binIdRange: [number, number][] = [
       [0, 1],
       [0, 1]
     ];
@@ -464,7 +448,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (bounds && Number.isFinite(bounds[0][0])) {
       let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {cellSize} = this.props;
-      const {unitsPerMeter} = getDistanceScales({longitude: centroid[0], latitude: centroid[1]});
+      const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
       cellSizeCommon[1] = unitsPerMeter[1] * cellSize;
 
@@ -488,21 +472,16 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
-      const corners = [
-        bounds[0],
-        bounds[1],
-        [bounds[0][0], bounds[1][1]],
-        [bounds[1][0], bounds[0][1]]
-      ].map(p => viewport.projectFlat(p));
-
-      const minX = Math.min(...corners.map(p => p[0]));
-      const minY = Math.min(...corners.map(p => p[1]));
-      const maxX = Math.max(...corners.map(p => p[0]));
-      const maxY = Math.max(...corners.map(p => p[1]));
-      binIdRange[0][0] = Math.floor((minX - cellOriginCommon[0]) / cellSizeCommon[0]);
-      binIdRange[0][1] = Math.floor((maxX - cellOriginCommon[0]) / cellSizeCommon[0]) + 1;
-      binIdRange[1][0] = Math.floor((minY - cellOriginCommon[1]) / cellSizeCommon[1]);
-      binIdRange[1][1] = Math.floor((maxY - cellOriginCommon[1]) / cellSizeCommon[1]) + 1;
+      binIdRange = getBinIdRange({
+        dataBounds: bounds,
+        getBinId: (p: number[]) => {
+          const positionCommon = viewport.projectFlat(p);
+          return [
+            Math.floor((positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+            Math.floor((positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1])
+          ];
+        }
+      });
     }
 
     this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
@@ -520,8 +499,16 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const props = this.getCurrentLayer()!.props;
     const {aggregator} = this.state;
     if (channel === 0) {
+      const result = aggregator.getResult(0)!;
+      this.setState({
+        colors: new AttributeWithScale(result, aggregator.binCount)
+      });
       props.onSetColorDomain(aggregator.getResultDomain(0));
     } else if (channel === 1) {
+      const result = aggregator.getResult(1)!;
+      this.setState({
+        elevations: new AttributeWithScale(result, aggregator.binCount)
+      });
       props.onSetElevationDomain(aggregator.getResultDomain(1));
     }
   }
@@ -559,12 +546,40 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   renderLayers(): LayersList | Layer | null {
     const {aggregator, cellOriginCommon, cellSizeCommon} = this.state;
-    const {elevationScale, colorRange, elevationRange, extruded, coverage, material, transitions} =
-      this.props;
+    const {
+      elevationScale,
+      colorRange,
+      elevationRange,
+      extruded,
+      coverage,
+      material,
+      transitions,
+      colorScaleType,
+      lowerPercentile,
+      upperPercentile,
+      colorDomain,
+      elevationScaleType,
+      elevationLowerPercentile,
+      elevationUpperPercentile,
+      elevationDomain
+    } = this.props;
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
-    const colorsAttribute = aggregator.getResult(0);
-    const elevationsAttribute = aggregator.getResult(1);
+
+    const colors = this.state.colors?.update({
+      scaleType: colorScaleType,
+      lowerPercentile,
+      upperPercentile
+    });
+    const elevations = this.state.elevations?.update({
+      scaleType: elevationScaleType,
+      lowerPercentile: elevationLowerPercentile,
+      upperPercentile: elevationUpperPercentile
+    });
+
+    if (!colors || !elevations) {
+      return null;
+    }
 
     return new CellLayerClass(
       this.getSubLayerProps({
@@ -575,28 +590,30 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           length: aggregator.binCount,
           attributes: {
             getBin: binAttribute,
-            getColorValue: colorsAttribute,
-            getElevationValue: elevationsAttribute
+            getColorValue: colors.attribute,
+            getElevationValue: elevations.attribute
           }
         },
         // Data has changed shallowly, but we likely don't need to update the attributes
         dataComparator: (data, oldData) => data.length === oldData.length,
         updateTriggers: {
           getBin: [binAttribute],
-          getColorValue: [colorsAttribute],
-          getElevationValue: [elevationsAttribute]
+          getColorValue: [colors.attribute],
+          getElevationValue: [elevations.attribute]
         },
         cellOriginCommon,
         cellSizeCommon,
         elevationScale,
         colorRange,
+        colorScaleType,
         elevationRange,
         extruded,
         coverage,
         material,
-        // Evaluate domain at draw() time
-        colorDomain: () => this.props.colorDomain || aggregator.getResultDomain(0),
-        elevationDomain: () => this.props.elevationDomain || aggregator.getResultDomain(1),
+        colorDomain: colors.domain || colorDomain || aggregator.getResultDomain(0),
+        elevationDomain: elevations.domain || elevationDomain || aggregator.getResultDomain(1),
+        colorCutoff: colors.cutoff,
+        elevationCutoff: elevations.cutoff,
         transitions: transitions && {
           getFillColor: transitions.getColorValue || transitions.getColorWeight,
           getElevation: transitions.getElevationValue || transitions.getElevationWeight

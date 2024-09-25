@@ -21,7 +21,9 @@ import AggregationLayer from '../common/aggregation-layer';
 import {AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
+import {getBinIdRange} from '../common/utils/bounds-utils';
 import {Matrix4} from '@math.gl/core';
+import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -113,20 +115,18 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'ContourLayer';
   static defaultProps = defaultProps;
 
-  state!: AggregationLayer<DataT>['state'] & {
-    // Aggregator result
-    aggregatedValueReader?: (x: number, y: number) => number;
-    contourData?: {
-      lines: ContourLine[];
-      polygons: ContourPolygon[];
-    };
+  state!: AggregationLayer<DataT>['state'] &
+    BinOptions & {
+      // Aggregator result
+      aggregatedValueReader?: (x: number, y: number) => number;
+      contourData?: {
+        lines: ContourLine[];
+        polygons: ContourPolygon[];
+      };
 
-    // Aggregator bin options
-    cellSizeCommon: [number, number];
-    cellOriginCommon: [number, number];
-    binIdRange: [number, number][];
-    aggregatorViewport: Viewport;
-  };
+      binIdRange: [number, number][];
+      aggregatorViewport: Viewport;
+    };
 
   getAggregatorType(): string {
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
@@ -140,14 +140,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: (
-            {positions}: {positions: number[]},
-            index: number,
-            opts: {
-              cellSizeCommon: [number, number];
-              cellOriginCommon: [number, number];
-            }
-          ) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             const viewport = this.state.aggregatorViewport;
             // project to common space
             const p = viewport.projectPosition(positions);
@@ -167,17 +160,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       channelCount: 1,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
-        modules: [project32],
+        modules: [project32, binOptionsUniforms],
         vs: /* glsl */ `
-  uniform vec2 cellOriginCommon;
-  uniform vec2 cellSizeCommon;
   in vec3 positions;
   in vec3 positions64Low;
   in float counts;
 
   void getBin(out ivec2 binId) {
     vec3 positionCommon = project_position(positions, positions64Low);
-    vec2 gridCoords = floor(positionCommon.xy / cellSizeCommon);
+    vec2 gridCoords = floor(positionCommon.xy / binOptions.cellSizeCommon);
     binId = ivec2(gridCoords);
   }
   void getValue(out float value) {
@@ -243,7 +234,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const bounds = this.getBounds();
     const cellSizeCommon: [number, number] = [1, 1];
     let cellOriginCommon: [number, number] = [0, 0];
-    const binIdRange: [number, number][] = [
+    let binIdRange: [number, number][] = [
       [0, 1],
       [0, 1]
     ];
@@ -278,21 +269,16 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
-      const corners = [
-        bounds[0],
-        bounds[1],
-        [bounds[0][0], bounds[1][1]],
-        [bounds[1][0], bounds[0][1]]
-      ].map(p => viewport.projectFlat(p));
-
-      const minX = Math.min(...corners.map(p => p[0]));
-      const minY = Math.min(...corners.map(p => p[1]));
-      const maxX = Math.max(...corners.map(p => p[0]));
-      const maxY = Math.max(...corners.map(p => p[1]));
-      binIdRange[0][0] = Math.floor((minX - cellOriginCommon[0]) / cellSizeCommon[0]);
-      binIdRange[0][1] = Math.floor((maxX - cellOriginCommon[0]) / cellSizeCommon[0]) + 1;
-      binIdRange[1][0] = Math.floor((minY - cellOriginCommon[1]) / cellSizeCommon[1]);
-      binIdRange[1][1] = Math.floor((maxY - cellOriginCommon[1]) / cellSizeCommon[1]) + 1;
+      binIdRange = getBinIdRange({
+        dataBounds: bounds,
+        getBinId: (p: number[]) => {
+          const positionCommon = viewport.projectFlat(p);
+          return [
+            Math.floor((positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+            Math.floor((positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1])
+          ];
+        }
+      });
     }
 
     this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});

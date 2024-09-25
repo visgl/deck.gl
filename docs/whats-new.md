@@ -2,6 +2,30 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.1
+
+Release date: TBD (targeting September 2024)
+
+### WebGPU readiness
+
+- luma.gl v9.1
+- All layers migrated to UBO
+
+### Aggregation layers upgrade
+
+v9.1 restores the GPU aggregation functionality that was temporarily disabled in v9.0. It brings a major refactor of the aggregation layers, with full TypeScript and unit test coverage.
+A new generic `Aggregator` interface makes it much easier to support custom aggregation operations. The current implementations of this interface include `CPUAggregator` and `WebGLAggregator`, with `WebGPUAggregator` on the roadmap.
+
+Highlights:
+
+- `GridLayer` now utilized both CPU and GPU aggregators in the same code path.
+- `HexagonLayer` now supports GPU aggregation. Enable with `gpuAggregation: true`.
+- `GridLayer` and `HexagonLayer` can use `*ScaleType`, `*UpperPercentile`, `*LowerPercentile`, `onSet*Domain` props along with GPU aggregation.
+- `GridLayer` and `HexagonLayer` now support non-geospatial views.
+- New picking info types for each aggregation layer.
+
+See [upgrade guide](./upgrade-guide.md) for more details.
+
 ## deck.gl v9.0
 
 Release date: March 21, 2024

@@ -823,7 +823,12 @@ function updateDeckProps(deck: Deck, props: DeckProps): Promise<void> {
     deck.setProps({
       ...DECK_PROPS,
       ...props,
-      onAfterRender: () => resolve()
+      onAfterRender: () => {
+        // @ts-expect-error private member
+        if (!deck.layerManager.needsUpdate()) {
+          resolve();
+        }
+      }
     });
   });
 }

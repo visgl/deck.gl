@@ -34,13 +34,18 @@ import {
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
+import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
+import {defaultColorRange} from '../common/utils/color-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps>),
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0},
+  colorRange: defaultColorRange,
+  colorScaleType: 'linear',
   getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
+  gpuAggregation: false,
   aggregation: 'SUM'
 };
 
@@ -74,6 +79,13 @@ export type _ScreenGridLayerProps<DataT> = {
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange?: Color[];
+
+  /**
+   * Scaling function used to determine the color of the grid cell.
+   * Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
+   * @default 'quantize'
+   */
+  colorScaleType?: 'linear' | 'quantize';
 
   /**
    * Method called to retrieve the position of each object.
@@ -129,7 +141,9 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    return this.props.gpuAggregation ? 'gpu' : 'cpu';
+    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
+      ? 'gpu'
+      : 'cpu';
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator {
@@ -138,9 +152,9 @@ export default class ScreenGridLayer<
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: ({positions}, index, opts) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             const viewport = this.context.viewport;
-            const p = viewport.project(positions as number[]);
+            const p = viewport.project(positions);
             const cellSizePixels: number = opts.cellSizePixels;
             if (p[0] < 0 || p[0] >= viewport.width || p[1] < 0 || p[1] >= viewport.height) {
               // Not on screen
@@ -157,9 +171,8 @@ export default class ScreenGridLayer<
       channelCount: 1,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
-        modules: [project32],
+        modules: [project32, binOptionsUniforms],
         vs: `
-  uniform float cellSizePixels;
   in vec3 positions;
   in vec3 positions64Low;
   in float counts;
@@ -167,7 +180,7 @@ export default class ScreenGridLayer<
   void getBin(out ivec2 binId) {
     vec4 pos = project_position_to_clipspace(positions, positions64Low, vec3(0.0));
     vec2 screenCoords = vec2(pos.x / pos.w + 1.0, 1.0 - pos.y / pos.w) / 2.0 * project.viewportSize / project.devicePixelRatio;
-    vec2 gridCoords = floor(screenCoords / cellSizePixels);
+    vec2 gridCoords = floor(screenCoords / binOptions.cellSizePixels);
     binId = ivec2(gridCoords);
   }
   void getValue(out float weight) {

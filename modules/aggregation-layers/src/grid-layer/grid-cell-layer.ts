@@ -6,16 +6,21 @@ import {Texture} from '@luma.gl/core';
 import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
-import {colorRangeToTexture} from '../common/utils/color-utils';
+import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
 import vs from './grid-cell-layer-vertex.glsl';
+import {GridProps, gridUniforms} from './grid-layer-uniforms';
+import type {ScaleType} from '../common/types';
 
 /** Proprties added by GridCellLayer. */
 type GridCellLayerProps = {
   cellSizeCommon: [number, number];
   cellOriginCommon: [number, number];
-  colorDomain: () => [number, number];
-  colorRange?: Color[];
-  elevationDomain: () => [number, number];
+  colorDomain: [number, number];
+  colorCutoff: [number, number] | null;
+  colorRange: Color[];
+  colorScaleType: ScaleType;
+  elevationDomain: [number, number];
+  elevationCutoff: [number, number] | null;
   elevationRange: [number, number];
 };
 
@@ -30,10 +35,9 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   };
 
   getShaders() {
-    return {
-      ...super.getShaders(),
-      vs
-    };
+    const shaders = super.getShaders();
+    shaders.modules.push(gridUniforms);
+    return {...shaders, vs};
   }
 
   initializeState() {
@@ -73,8 +77,15 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
 
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
-      this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+      this.state.colorTexture = createColorRangeTexture(
+        this.context.device,
+        props.colorRange,
+        props.colorScaleType
+      );
+      const gridProps: Partial<GridProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({grid: gridProps});
+    } else if (oldProps.colorScaleType !== props.colorScaleType) {
+      updateColorRangeTexture(this.state.colorTexture, props.colorScaleType);
     }
   }
 
@@ -90,21 +101,40 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   }
 
   draw({uniforms}) {
-    // Use dynamic domain from the aggregator
-    const colorDomain = this.props.colorDomain();
-    const elevationDomain = this.props.elevationDomain();
-    const {cellOriginCommon, cellSizeCommon, elevationRange, elevationScale, extruded, coverage} =
-      this.props;
-    const fillModel = this.state.fillModel!;
-    fillModel.setUniforms(uniforms);
-    fillModel.setUniforms({
+    const {
+      cellOriginCommon,
+      cellSizeCommon,
+      elevationRange,
+      elevationScale,
       extruded,
       coverage,
       colorDomain,
-      elevationDomain,
-      cellOriginCommon,
-      cellSizeCommon,
-      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale]
+      elevationDomain
+    } = this.props;
+    const colorCutoff = this.props.colorCutoff || [-Infinity, Infinity];
+    const elevationCutoff = this.props.elevationCutoff || [-Infinity, Infinity];
+    const fillModel = this.state.fillModel!;
+
+    const gridProps: Omit<GridProps, 'colorRange'> = {
+      colorDomain: [
+        Math.max(colorDomain[0], colorCutoff[0]), // instanceColorValue that maps to colorRange[0]
+        Math.min(colorDomain[1], colorCutoff[1]), // instanceColorValue that maps to colorRange[colorRange.length - 1]
+        Math.max(colorDomain[0] - 1, colorCutoff[0]), // hide cell if instanceColorValue is less than this
+        Math.min(colorDomain[1] + 1, colorCutoff[1]) // hide cell if instanceColorValue is greater than this
+      ],
+      elevationDomain: [
+        Math.max(elevationDomain[0], elevationCutoff[0]), // instanceElevationValue that maps to elevationRange[0]
+        Math.min(elevationDomain[1], elevationCutoff[1]), // instanceElevationValue that maps to elevationRange[elevationRange.length - 1]
+        Math.max(elevationDomain[0] - 1, elevationCutoff[0]), // hide cell if instanceElevationValue is less than this
+        Math.min(elevationDomain[1] + 1, elevationCutoff[1]) // hide cell if instanceElevationValue is greater than this
+      ],
+      elevationRange: [elevationRange[0] * elevationScale, elevationRange[1] * elevationScale],
+      originCommon: cellOriginCommon,
+      sizeCommon: cellSizeCommon
+    };
+    fillModel.shaderInputs.setProps({
+      column: {extruded, coverage},
+      grid: gridProps
     });
     fillModel.draw(this.context.renderPass);
   }

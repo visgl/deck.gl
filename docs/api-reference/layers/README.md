@@ -32,8 +32,6 @@ The [Aggregation Layers](https://www.npmjs.com/package/@deck.gl/aggregation-laye
 
   - [ContourLayer](../aggregation-layers/contour-layer.md)
   - [GridLayer](../aggregation-layers/grid-layer.md)
-  - [GPUGridLayer](../aggregation-layers/gpu-grid-layer.md)
-  - [CPUGridLayer](../aggregation-layers/cpu-grid-layer.md)
   - [HeatmapLayer](../aggregation-layers/heatmap-layer.md)
   - [HexagonLayer](../aggregation-layers/hexagon-layer.md)
   - [ScreenGridLayer](../aggregation-layers/screen-grid-layer.md)
