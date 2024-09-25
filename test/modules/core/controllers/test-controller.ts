@@ -154,23 +154,23 @@ const TEST_CASES = [
   },
 
   {
-    title: 'doubletap',
+    title: 'dblclick',
     props: {},
-    events: () => makeEvents(['doubletap']),
+    events: () => makeEvents(['dblclick']),
     viewStateChanges: 1,
     interactionStates: 2
   },
   {
-    title: 'doubletap#out of bounds',
+    title: 'dblclick#out of bounds',
     props: {x: 200},
-    events: () => makeEvents(['doubletap']),
+    events: () => makeEvents(['dblclick']),
     viewStateChanges: 0,
     interactionStates: 0
   },
   {
-    title: 'doubletap#disabled',
+    title: 'dblclick#disabled',
     props: {doubleClickZoom: false},
-    events: () => makeEvents(['doubletap']),
+    events: () => makeEvents(['dblclick']),
     viewStateChanges: 0,
     interactionStates: 0
   },

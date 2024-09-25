@@ -4,7 +4,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
 
-import {EVENTS} from './constants';
+import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
 
 export interface Widget<PropsT = any> {
@@ -278,14 +278,14 @@ export class WidgetManager {
   }
 
   onEvent(info: PickingInfo, event: MjolnirGestureEvent) {
-    const eventOptions = EVENTS[event.type];
-    if (!eventOptions) {
+    const eventHandlerProp = EVENT_HANDLERS[event.type];
+    if (!eventHandlerProp) {
       return;
     }
     for (const widget of this.getWidgets()) {
       const {viewId} = widget;
       if (!viewId || viewId === info.viewport?.id) {
-        widget[eventOptions.handler]?.(info, event);
+        widget[eventHandlerProp]?.(info, event);
       }
     }
   }

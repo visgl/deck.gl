@@ -41,7 +41,7 @@ const EVENT_TYPES = {
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
   MULTI_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
-  DOUBLE_TAP: ['doubletap'],
+  DOUBLE_CLICK: ['dblclick'],
   KEYBOARD: ['keydown']
 } as const;
 
@@ -234,8 +234,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         return this._onMultiPan(event);
       case 'multipanend':
         return this._onMultiPanEnd(event);
-      case 'doubletap':
-        return this._onDoubleTap(event);
+      case 'dblclick':
+        return this._onDoubleClick(event);
       case 'wheel':
         return this._onWheel(event);
       case 'keydown':
@@ -334,7 +334,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
     this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && touchRotate);
-    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
     // Interaction toggles
@@ -714,7 +714,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   // Default handler for the `dblclick` event.
-  protected _onDoubleTap(event: MjolnirGestureEvent): boolean {
+  protected _onDoubleClick(event: MjolnirGestureEvent): boolean {
     if (!this.doubleClickZoom) {
       return false;
     }

@@ -325,11 +325,11 @@ test('WidgetManager#onHover, onEvent#without viewId', t => {
   // Trigger onHover event
   widgetManager.onHover(pickedInfo, {});
   // Trigger onClick event
-  widgetManager.onEvent(pickedInfo, {type: 'tap'});
+  widgetManager.onEvent(pickedInfo, {type: 'click'});
   // Trigger onDragStart event
   widgetManager.onEvent(pickedInfo, {type: 'panstart'});
   // Event not defined
-  widgetManager.onEvent(pickedInfo, {type: 'doubletap'});
+  widgetManager.onEvent(pickedInfo, {type: 'dblclick'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is called');
   t.is(onClickCalledCount, 1, 'widget.onClick is called');
@@ -358,11 +358,11 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
   // Trigger onHover event
   widgetManager.onHover(pickedInfo, {});
   // Trigger onClick event
-  widgetManager.onEvent(pickedInfo, {type: 'tap'});
+  widgetManager.onEvent(pickedInfo, {type: 'click'});
   // Trigger onDragStart event
   widgetManager.onEvent(pickedInfo, {type: 'panstart'});
   // Event not defined
-  widgetManager.onEvent(pickedInfo, {type: 'doubletap'});
+  widgetManager.onEvent(pickedInfo, {type: 'dblclick'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is called');
   t.is(onClickCalledCount, 1, 'widget.onClick is called');
@@ -375,7 +375,7 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
   // Trigger onHover event
   widgetManager.onHover(pickedInfo, {});
   // Trigger onClick event
-  widgetManager.onEvent(pickedInfo, {type: 'tap'});
+  widgetManager.onEvent(pickedInfo, {type: 'click'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is not called');
   t.is(onClickCalledCount, 1, 'widget.onClick is not called');

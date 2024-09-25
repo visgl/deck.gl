@@ -13,6 +13,11 @@
   }
   ```
 
+- If your app already uses Deck's `eventRecognizerOptions` prop or implement a custom [Controller](./api-reference/core/controller.md), some events have been renamed:
+  + `tripan` -> `multipan`
+  + `tap` -> `click`
+  + `doubletap` -> `dblclick`
+
 ### Aggregation layers
 
 Breaking changes:

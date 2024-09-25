@@ -107,26 +107,26 @@ export const UNIT = {
   pixels: 2
 } as const;
 
-export const EVENTS = {
-  tap: {handler: 'onClick'},
-  panstart: {handler: 'onDragStart'},
-  panmove: {handler: 'onDrag'},
-  panend: {handler: 'onDragEnd'}
+export const EVENT_HANDLERS: {[eventName: string]: string} = {
+  click: 'onClick',
+  panstart: 'onDragStart',
+  panmove: 'onDrag',
+  panend: 'onDragEnd'
 } as const;
 
 export const RECOGNIZERS = {
   multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
-  pinch: [Pinch, {}, null, ['doublepan']],
-  pan: [Pan, {threshold: 1}, ['pinch'], ['doublepan']],
-  doubletap: [Tap, {taps: 2}],
-  tap: [Tap, {}, null, ['doubletap']]
+  pinch: [Pinch, {}, null, ['multipan']],
+  pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
+  dblclick: [Tap, {event: 'dblclick', taps: 2}],
+  click: [Tap, {event: 'click'}, null, ['dblclick']]
 } as const;
 export type RecognizerOptions = {
   pinch?: Omit<PinchRecognizerOptions, 'event' | 'enable'>;
   multipan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
   pan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
-  doubletap?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
-  tap?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  dblclick?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  click?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
 };
 
 /**

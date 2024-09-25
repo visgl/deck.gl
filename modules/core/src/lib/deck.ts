@@ -43,7 +43,7 @@ import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
-import {EVENTS, RECOGNIZERS, RecognizerOptions} from './constants';
+import {EVENT_HANDLERS, RECOGNIZERS, RecognizerOptions} from './constants';
 
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
@@ -987,8 +987,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         pointerleave: this._onPointerMove
       }
     });
-    for (const eventType in EVENTS) {
-      this.eventManager.on(eventType as keyof typeof EVENTS, this._onEvent);
+    for (const eventType in EVENT_HANDLERS) {
+      this.eventManager.on(eventType, this._onEvent);
     }
 
     this.viewManager = new ViewManager({
@@ -1142,10 +1142,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: event handler for click & drag */
   _onEvent = (event: MjolnirGestureEvent) => {
-    const eventOptions = EVENTS[event.type];
+    const eventHandlerProp = EVENT_HANDLERS[event.type];
     const pos = event.offsetCenter;
 
-    if (!eventOptions || !pos || !this.layerManager) {
+    if (!eventHandlerProp || !pos || !this.layerManager) {
       return;
     }
 
@@ -1162,9 +1162,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     ) as PickingInfo;
 
     const {layer} = info;
-    const layerHandler =
-      layer && (layer[eventOptions.handler] || layer.props[eventOptions.handler]);
-    const rootHandler = this.props[eventOptions.handler];
+    const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
+    const rootHandler = this.props[eventHandlerProp];
     let handled = false;
 
     if (layerHandler) {
