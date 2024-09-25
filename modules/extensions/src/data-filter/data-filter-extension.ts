@@ -316,27 +316,30 @@ export default class DataFilterExtension extends LayerExtension<
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
-      this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
-
-      filterModel.updateModuleSettings(params.moduleParameters);
       // @ts-expect-error filterValue and filterIndices should always have buffer value
       filterModel.setAttributes({
         ...filterValues?.getValue(),
         ...filterCategoryValues?.getValue(),
         ...filterIndices?.getValue()
       });
-      filterModel.shaderInputs.setProps({dataFilter: dataFilterProps});
-      filterModel.device.withParametersWebGL(
-        {
-          framebuffer: filterFBO,
-          // ts-ignore 'readonly' cannot be assigned to the mutable type '[GLBlendEquation, GLBlendEquation]'
-          ...(aggregator.parameters as any),
-          viewport: [0, 0, filterFBO.width, filterFBO.height]
-        },
-        () => {
-          filterModel.draw(this.context.renderPass);
+      filterModel.shaderInputs.setProps({dataFilter: dataFilterProps, ...params.moduleParameters});
+      filterModel.setParameters({
+        blend: true,
+        blendColorOperation: 'add',
+        blendAlphaOperation: 'add',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
+      });
+      const renderPass = this.context.device.beginRenderPass({
+        framebuffer: filterFBO,
+        clearColor: [0, 0, 0, 0],
+        parameters: {
+          viewport: [0, 0, filterFBO.width, filterFBO.height],
         }
-      );
+      })
+      filterModel.draw(this.context.renderPass);
       const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
       let count = 0;
       for (let i = 0; i < color.length; i++) {
