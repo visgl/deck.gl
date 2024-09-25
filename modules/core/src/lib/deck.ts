@@ -948,13 +948,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    this.device.setParametersWebGL({
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthTest: true,
-      depthFunc: GL.LEQUAL
-    });
+    if (this.device instanceof WebGLDevice) {
+      this.device.setParametersWebGL({
+        blend: true,
+        blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+        polygonOffsetFill: true,
+        depthTest: true,
+        depthFunc: GL.LEQUAL
+      });
+    }
 
     this.props.onDeviceInitialized(this.device);
     if (this.device instanceof WebGLDevice) {
