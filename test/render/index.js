@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import test from 'tape';
 import TEST_CASES from './test-cases';
-import {WIDTH, HEIGHT} from './constants';
+import {WIDTH, HEIGHT, OS} from './constants';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
 import './jupyter-widget';
@@ -40,6 +40,7 @@ test('Render Test', t => {
       timeout: 10000,
 
       imageDiffOptions: {
+        platform: OS,
         threshold: 0.99,
         includeEmpty: false
         // uncomment to save screenshot to disk

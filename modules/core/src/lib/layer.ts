@@ -20,6 +20,7 @@
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -1164,14 +1165,27 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      context.device.setParametersWebGL({polygonOffset: offsets});
+      if (context.device instanceof WebGLDevice) {
+        context.device.setParametersWebGL({polygonOffset: offsets});
+      }
 
       for (const model of this.getModels()) {
         model.setParameters(parameters);
       }
 
       // Call subclass lifecycle method
-      context.device.withParametersWebGL(parameters, () => {
+      if (context.device instanceof WebGLDevice) {
+        context.device.withParametersWebGL(parameters, () => {
+          const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+
+          // extensions
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
+
+          this.draw(opts);
+        });
+      } else {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions
@@ -1180,7 +1194,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         }
 
         this.draw(opts);
-      });
+      }
     } finally {
       this.props = currentProps;
     }
