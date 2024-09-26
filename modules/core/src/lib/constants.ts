@@ -22,6 +22,13 @@
 // "project" and "project64" shader modules. Both places need to be
 // updated.
 import log from '../utils/log';
+import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
+import type {
+  PanRecognizerOptions,
+  RotateRecognizerOptions,
+  PinchRecognizerOptions,
+  TapRecognizerOptions
+} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
@@ -100,12 +107,27 @@ export const UNIT = {
   pixels: 2
 } as const;
 
-export const EVENTS = {
-  click: {handler: 'onClick'},
-  panstart: {handler: 'onDragStart'},
-  panmove: {handler: 'onDrag'},
-  panend: {handler: 'onDragEnd'}
+export const EVENT_HANDLERS: {[eventName: string]: string} = {
+  click: 'onClick',
+  panstart: 'onDragStart',
+  panmove: 'onDrag',
+  panend: 'onDragEnd'
 } as const;
+
+export const RECOGNIZERS = {
+  multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
+  pinch: [Pinch, {}, null, ['multipan']],
+  pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
+  dblclick: [Tap, {event: 'dblclick', taps: 2}],
+  click: [Tap, {event: 'click'}, null, ['dblclick']]
+} as const;
+export type RecognizerOptions = {
+  pinch?: Omit<PinchRecognizerOptions, 'event' | 'enable'>;
+  multipan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  pan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  dblclick?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  click?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+};
 
 /**
  * @deprecated Use string constants directly
