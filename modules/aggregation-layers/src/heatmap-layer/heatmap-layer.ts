@@ -615,7 +615,6 @@ export default class HeatmapLayer<
     const moduleSettings = this.getModuleSettings();
     this._setModelAttributes(weightsTransform.model, attributes);
     weightsTransform.model.setVertexCount(this.getNumInstances());
-    weightsTransform.model.updateModuleSettingsWebGL(moduleSettings);
 
     const weightProps: WeightProps = {
       radiusPixels,

@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable complexity, camelcase */
 
-import {mat4, vec4} from '@math.gl/core';
-import type {NumberArray16} from '@math.gl/types';
+import {mat4, Matrix4Like, vec4} from '@math.gl/core';
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
@@ -35,8 +34,8 @@ type Vec4 = [number, number, number, number];
 // To quickly set a vector to zero
 const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
-const VECTOR_TO_POINT_MATRIX: NumberArray16 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
-const IDENTITY_MATRIX: NumberArray16 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const VECTOR_TO_POINT_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+const IDENTITY_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2: Vec3 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
 
@@ -127,8 +126,8 @@ function calculateMatrixAndOffset(
   coordinateSystem: CoordinateSystem,
   coordinateOrigin: Vec3
 ): {
-  viewMatrix: NumberArray16;
-  viewProjectionMatrix: NumberArray16;
+  viewMatrix: Matrix4Like;
+  viewProjectionMatrix: Matrix4Like;
   projectionCenter: Vec4;
   originCommon: Vec4;
   cameraPosCommon: Vec3;
@@ -177,8 +176,8 @@ function calculateMatrixAndOffset(
   }
 
   return {
-    viewMatrix: viewMatrix as NumberArray16,
-    viewProjectionMatrix: viewProjectionMatrix as NumberArray16,
+    viewMatrix: viewMatrix as Matrix4Like,
+    viewProjectionMatrix: viewProjectionMatrix as Matrix4Like,
     projectionCenter,
     originCommon,
     cameraPosCommon,
@@ -209,8 +208,8 @@ export type ProjectUniforms = {
   scale: number;
   wrapLongitude: boolean;
 
-  viewProjectionMatrix: NumberArray16;
-  modelMatrix: NumberArray16;
+  viewProjectionMatrix: Matrix4Like;
+  modelMatrix: Matrix4Like;
 
   // This is for lighting calculations
   cameraPosition: Vec3;
@@ -219,7 +218,7 @@ export type ProjectUniforms = {
 export type ProjectProps = {
   viewport: Viewport;
   devicePixelRatio?: number;
-  modelMatrix?: NumberArray16 | null;
+  modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
   coordinateOrigin?: Vec3;
   autoWrapLongitude?: boolean;

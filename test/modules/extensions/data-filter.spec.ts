@@ -140,6 +140,7 @@ test('DataFilterExtension#categories', t => {
 
 test.only('DataFilterExtension#countItems', t => {
   let cbCalled = 0;
+  let cbCount = -1;
 
   const testCases = [
     {
@@ -150,12 +151,16 @@ test.only('DataFilterExtension#countItems', t => {
         ],
         getPosition: d => d.position,
         getFilterValue: d => d.timestamp,
-        onFilteredItemsChange: () => cbCalled++,
+        onFilteredItemsChange: event => {
+          cbCalled++;
+          cbCount = event.count;
+        },
         filterRange: [80, 160],
         extensions: [new DataFilterExtension({filterSize: 1, countItems: true})]
       },
       onAfterUpdate: () => {
         t.is(cbCalled, 1, 'onFilteredItemsChange is called');
+        t.is(cbCount, 2, 'count is correct');
       }
     },
     {
@@ -172,6 +177,7 @@ test.only('DataFilterExtension#countItems', t => {
       },
       onAfterUpdate: () => {
         t.is(cbCalled, 2, 'onFilteredItemsChange is called');
+        t.is(cbCount, 0, 'count is correct');
       }
     }
   ];

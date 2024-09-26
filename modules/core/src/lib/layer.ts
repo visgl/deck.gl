@@ -342,7 +342,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
-      model.updateModuleSettingsWebGL(moduleParameters);
+      // HACK as fp64 is not yet ported to UBO
+      model.uniforms = {ONE: 1};
     }
   }
 
@@ -1081,12 +1082,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         // @ts-expect-error material is not a Layer prop
         const {material, modelMatrix} = this.props;
 
-        // Do not pass picking module to avoid crash
-        // TODO remove `setModuleParameters` from codebase
-        const {picking: _, ...rest} = moduleParameters;
-        this.setModuleParameters(rest);
+        this.setModuleParameters({});
 
         const {
+          // mask
+          maskChannels,
+          maskMap,
+          maskSources,
           // shadow
           shadowEnabled,
           drawToShadowMap,
@@ -1107,6 +1109,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           // lighting
           lightSources
         } = moduleParameters;
+
+        const maskProps = {
+          maskChannels,
+          maskMap,
+          maskSources
+        };
 
         const shadowProps = {
           viewport,
@@ -1130,22 +1138,25 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           terrainSkipRender
         };
 
+        const projectProps = {
+          viewport,
+          devicePixelRatio,
+          modelMatrix,
+          coordinateSystem,
+          coordinateOrigin
+        } as ProjectProps;
+
         this.setShaderModuleProps({
           // TODO Revisit whether this is necessary once all layers ported to UBO
+          mask: maskProps,
           shadow: shadowProps,
           terrain: terrainProps,
           layer: {opacity},
           lighting: lightSources,
           phongMaterial: material,
           gouraudMaterial: material,
-          picking: {isActive, isAttribute} as PickingProps,
-          project: {
-            viewport,
-            devicePixelRatio,
-            modelMatrix,
-            coordinateSystem,
-            coordinateOrigin
-          } as ProjectProps
+          picking: {isActive, isAttribute} as const satisfies PickingProps,
+          project: projectProps
         });
       }
 

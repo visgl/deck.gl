@@ -4,7 +4,6 @@ import {createTestDevice, webglDevice, NullDevice} from '@luma.gl/test-utils';
 export const device = webglDevice || new NullDevice({});
 
 /** Test context */
-debugger
 const testDevice = createTestDevice();
 
 export const gl = webglDevice?.gl || 1;

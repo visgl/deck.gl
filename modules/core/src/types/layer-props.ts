@@ -10,6 +10,7 @@ import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
+import type {Matrix4Like} from '@math.gl/core';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -169,7 +170,7 @@ export type LayerProps = {
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
-  modelMatrix?: NumericArray | null;
+  modelMatrix?: Matrix4Like | null;
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Framebuffer} from '@luma.gl/core';
+import type {Buffer, Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
@@ -30,6 +30,7 @@ import {
   dataFilter64
 } from './shader-module';
 import * as aggregator from './aggregator';
+import {NumberArray4} from '@math.gl/core';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -204,7 +205,7 @@ export default class DataFilterExtension extends LayerExtension<
       // The vertex shader checks if a vertex has the same "index" as the previous vertex
       // so that we only write one count cross multiple vertices of the same object
       attributeManager.add({
-        filterIndices: {
+        filterVertexIndices: {
           size: useFloatTarget ? 1 : 2,
           vertexOffset: 1,
           type: 'unorm8',
@@ -226,6 +227,7 @@ export default class DataFilterExtension extends LayerExtension<
       const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
         device,
+        attributeManager.getBufferLayouts({isInstanced: false}),
         extension.getShaders.call(this, extension),
         useFloatTarget
       );
@@ -311,32 +313,35 @@ export default class DataFilterExtension extends LayerExtension<
 
     /* eslint-disable-next-line camelcase */
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
+      const attributeManager = this.getAttributeManager()!;
       const {
-        attributes: {filterValues, filterCategoryValues, filterIndices}
-      } = this.getAttributeManager()!;
+        attributes: {filterValues, filterCategoryValues, filterVertexIndices}
+      } = attributeManager;
       filterModel.setVertexCount(this.getNumInstances());
 
-      this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
-
-      filterModel.updateModuleSettingsWebGL(params.moduleParameters);
-      // @ts-expect-error filterValue and filterIndices should always have buffer value
-      filterModel.setAttributes({
+      // @ts-expect-error filterValue and filterVertexIndices should always have buffer value
+      const attributes: Record<string, Buffer> = {
         ...filterValues?.getValue(),
         ...filterCategoryValues?.getValue(),
-        ...filterIndices?.getValue()
+        ...filterVertexIndices?.getValue()
+      };
+      filterModel.setAttributes(attributes);
+      filterModel.shaderInputs.setProps({
+        dataFilter: dataFilterProps
       });
-      filterModel.shaderInputs.setProps({dataFilter: dataFilterProps});
-      filterModel.device.withParametersWebGL(
-        {
-          framebuffer: filterFBO,
-          // ts-ignore 'readonly' cannot be assigned to the mutable type '[GLBlendEquation, GLBlendEquation]'
-          ...(aggregator.parameters as any),
-          viewport: [0, 0, filterFBO.width, filterFBO.height]
-        },
-        () => {
-          filterModel.draw(this.context.renderPass);
-        }
-      );
+
+      const viewport = [0, 0, filterFBO.width, filterFBO.height] as NumberArray4;
+
+      const renderPass = filterModel.device.beginRenderPass({
+        id: 'data-filter-aggregation',
+        framebuffer: filterFBO,
+        parameters: {viewport},
+        clearColor: [0, 0, 0, 0]
+      });
+      filterModel.setParameters(aggregator.parameters);
+      filterModel.draw(renderPass);
+      renderPass.end();
+
       const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
       let count = 0;
       for (let i = 0; i < color.length; i++) {
