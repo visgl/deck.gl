@@ -205,7 +205,7 @@ export default class DataFilterExtension extends LayerExtension<
       // The vertex shader checks if a vertex has the same "index" as the previous vertex
       // so that we only write one count cross multiple vertices of the same object
       attributeManager.add({
-        filterIndices: {
+        filterVertexIndices: {
           size: useFloatTarget ? 1 : 2,
           vertexOffset: 1,
           type: 'unorm8',
@@ -227,10 +227,10 @@ export default class DataFilterExtension extends LayerExtension<
       const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
         device,
+        attributeManager.getBufferLayouts({isInstanced: false}),
         extension.getShaders.call(this, extension),
         useFloatTarget
       );
-      filterModel.setBufferLayout(attributeManager.getBufferLayouts(filterModel));
       this.setState({filterFBO, filterModel});
     }
   }
@@ -315,15 +315,15 @@ export default class DataFilterExtension extends LayerExtension<
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const attributeManager = this.getAttributeManager()!;
       const {
-        attributes: {filterValues, filterCategoryValues, filterIndices}
+        attributes: {filterValues, filterCategoryValues, filterVertexIndices}
       } = attributeManager;
       filterModel.setVertexCount(this.getNumInstances());
 
-      // @ts-expect-error filterValue and filterIndices should always have buffer value
+      // @ts-expect-error filterValue and filterVertexIndices should always have buffer value
       const attributes: Record<string, Buffer> = {
         ...filterValues?.getValue(),
         ...filterCategoryValues?.getValue(),
-        ...filterIndices?.getValue()
+        ...filterVertexIndices?.getValue()
       };
       filterModel.setAttributes(attributes);
       filterModel.shaderInputs.setProps({

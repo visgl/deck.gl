@@ -1,5 +1,5 @@
 import {Device, DeviceFeature, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
-import {Model} from '@luma.gl/engine';
+import {Model, ModelProps} from '@luma.gl/engine';
 
 const AGGREGATE_VS = `\
 #version 300 es
@@ -18,8 +18,7 @@ const float component = 1.0 / 255.0;
 
 void main() {
   #ifdef FLOAT_TARGET
-    // BUG: always 0 for some reason
-    // dataFilter_value *= float(filterIndices != filterPrevIndices);
+    dataFilter_value *= float(filterIndices != filterPrevIndices);
     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
     vColor = vec4(0.0, 0.0, 0.0, 1.0);
   #else
@@ -84,7 +83,12 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
 }
 
 // Increments the counter based on dataFilter_value
-export function getModel(device: Device, shaderOptions: any, useFloatTarget: boolean): Model {
+export function getModel(
+  device: Device,
+  bufferLayout: ModelProps['bufferLayout'],
+  shaderOptions: any,
+  useFloatTarget: boolean
+): Model {
   shaderOptions.defines.NON_INSTANCED_MODEL = 1;
   if (useFloatTarget) {
     shaderOptions.defines.FLOAT_TARGET = 1;
@@ -97,6 +101,7 @@ export function getModel(device: Device, shaderOptions: any, useFloatTarget: boo
     topology: 'point-list',
     vs: AGGREGATE_VS,
     fs: AGGREGATE_FS,
+    bufferLayout,
     ...shaderOptions
   });
 }
