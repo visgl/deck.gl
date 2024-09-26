@@ -42,10 +42,7 @@ export default class Fp64Extension extends LayerExtension {
   }
 
   draw(this: Layer, params: any, extension: this): void {
-    const {moduleParameters} = params;
-    if (moduleParameters) {
-      const {viewport} = moduleParameters;
-      this.setShaderModuleProps({project64: {viewport}});
-    }
+    const {viewport} = params.context;
+    this.setShaderModuleProps({project64: {viewport}});
   }
 }
