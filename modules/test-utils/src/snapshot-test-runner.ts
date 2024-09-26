@@ -144,7 +144,7 @@ export class SnapshotTestRunner extends TestRunner<
 
     // If failed, try if we have a platform specific golden image
     let resultOverride;
-    const platform = this.testOptions.imageDiffOptions?.platform;
+    const platform = this.testOptions.imageDiffOptions?.platform?.toLowerCase();
     if (!result.success) {
       diffOptions.goldenImage = diffOptions.goldenImage.replace(
         'golden-images/',
