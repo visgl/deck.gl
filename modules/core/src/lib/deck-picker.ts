@@ -159,7 +159,7 @@ export default class DeckPicker {
     }
 
     // Resize it to current canvas size (this is a noop if size hasn't changed)
-    const {canvas} = this.device.getCanvasContext();
+    const {canvas} = this.device.getDefaultCanvasContext();
     this.pickingFBO?.resize({width: canvas.width, height: canvas.height});
     this.depthFBO?.resize({width: canvas.width, height: canvas.height});
   }

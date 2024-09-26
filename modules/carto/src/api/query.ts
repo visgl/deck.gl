@@ -11,6 +11,7 @@ export const query = async function (options: QueryOptions): Promise<QueryResult
   const {
     apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
     clientId = SOURCE_DEFAULTS.clientId,
+    maxLengthURL = SOURCE_DEFAULTS.maxLengthURL,
     connectionName,
     sqlQuery,
     queryParameters
@@ -35,6 +36,7 @@ export const query = async function (options: QueryOptions): Promise<QueryResult
     baseUrl,
     parameters,
     headers,
-    errorContext
+    errorContext,
+    maxLengthURL
   });
 };

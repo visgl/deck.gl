@@ -192,3 +192,36 @@ test('requestWithParameters#precedence', async t => {
   });
   t.end();
 });
+
+test('requestWithParameters#maxLengthURL', async t => {
+  await withMockFetchMapsV3(async calls => {
+    t.equals(calls.length, 0, '0 initial calls');
+
+    await Promise.all([
+      requestWithParameters({
+        baseUrl: 'https://example.com/v1/item/1'
+      }),
+      requestWithParameters({
+        baseUrl: 'https://example.com/v1/item/2',
+        maxLengthURL: 10
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/item/3`,
+        parameters: {content: 'long'.padEnd(10_000, 'g')} // > default limit
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/item/4`,
+        parameters: {content: 'long'.padEnd(10_000, 'g')},
+        maxLengthURL: 15_000
+      })
+    ]);
+
+    t.equals(calls.length, 4, '4 requests');
+    t.deepEquals(
+      calls.map(({method}) => method ?? 'GET'),
+      ['GET', 'POST', 'POST', 'GET'],
+      'request method'
+    );
+  });
+  t.end();
+});
