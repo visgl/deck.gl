@@ -1155,7 +1155,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           lighting: lightSources,
           phongMaterial: material,
           gouraudMaterial: material,
-          picking: {isActive, isAttribute} as PickingProps,
+          picking: {isActive, isAttribute} as const satisfies PickingProps,
           project: projectProps
         });
       }
