@@ -1,9 +1,10 @@
 /* eslint-disable no-invalid-this */
 
 import {GL} from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/engine';
-import {Deck} from '@deck.gl/core';
 import type {Device, Texture, Framebuffer} from '@luma.gl/core';
+import {Deck} from '@deck.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {WebGLDevice} from '@luma.gl/webgl';
 
 interface Renderer {
   redraw: () => void;
@@ -146,33 +147,35 @@ export function render(
 ) {
   const {model, deck, fbo} = resources;
   const device = model.device;
-  // @ts-ignore device.getParametersWebGL should return `any` not `void`?
-  const screenFbo: Framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
-  const {width, height, ...viewState} = viewport;
+  if (device instanceof WebGLDevice) {
+    // @ts-ignore device.getParametersWebGL should return `any` not `void`?
+    const screenFbo: Framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+    const {width, height, ...viewState} = viewport;
 
-  /* global window */
-  const dpr = window.devicePixelRatio;
-  const pixelWidth = Math.round(width * dpr);
-  const pixelHeight = Math.round(height * dpr);
+    /* global window */
+    const dpr = window.devicePixelRatio;
+    const pixelWidth = Math.round(width * dpr);
+    const pixelHeight = Math.round(height * dpr);
 
-  fbo.resize({width: pixelWidth, height: pixelHeight});
+    fbo.resize({width: pixelWidth, height: pixelHeight});
 
-  deck.setProps({viewState});
-  // redraw deck immediately into deckFbo
-  deck.redraw('arcgis');
+    deck.setProps({viewState});
+    // redraw deck immediately into deckFbo
+    deck.redraw('arcgis');
 
-  // We overlay the texture on top of the map using the full-screen quad.
+    // We overlay the texture on top of the map using the full-screen quad.
 
-  const textureToScreenPass = device.beginRenderPass({
-    framebuffer: screenFbo,
-    parameters: {viewport: [0, 0, pixelWidth, pixelHeight]},
-    clearColor: false,
-    clearDepth: false
-  });
-  try {
-    model.draw(textureToScreenPass);
-  } finally {
-    textureToScreenPass.end();
+    const textureToScreenPass = device.beginRenderPass({
+      framebuffer: screenFbo,
+      parameters: {viewport: [0, 0, pixelWidth, pixelHeight]},
+      clearColor: false,
+      clearDepth: false
+    });
+    try {
+      model.draw(textureToScreenPass);
+    } finally {
+      textureToScreenPass.end();
+    }
   }
 }
 

@@ -15,7 +15,6 @@ export type AggregatorTransformProps = {
   binIdRange: NumberArray4;
   isCount: NumberArray3;
   isMean: NumberArray3;
-  naN: number;
   bins: Texture;
 };
 
@@ -25,7 +24,6 @@ export const aggregatorTransformUniforms = {
   uniformTypes: {
     binIdRange: 'vec4<i32>',
     isCount: 'vec3<f32>',
-    isMean: 'vec3<f32>',
-    naN: 'f32'
+    isMean: 'vec3<f32>'
   }
 } as const satisfies ShaderModule<AggregatorTransformProps>;
