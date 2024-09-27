@@ -8,8 +8,9 @@
     "transpileOnly": true
   },
   "compilerOptions": {
-    "target": "es2022",
+    "target": "es2020",
     "module": "es2020",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "jsx": "react",
     "strict": true,
     "noImplicitAny": false,
