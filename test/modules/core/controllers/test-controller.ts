@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Timeline} from '@luma.gl/engine';
 
 function makeEvents(events, opts = {}) {

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 // https://epsg.io/3857

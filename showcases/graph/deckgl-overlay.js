@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import DeckGL, {OrthographicView} from 'deck.gl';
 import GraphLayoutLayer from './graph-layer/graph-layout-layer';

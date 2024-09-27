@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Texture2D, Texture2DProps, Buffer, readPixelsToBuffer} from '@luma.gl/webgl';
 import {isWebGL2} from '@luma.gl/gltools';
 import * as tf from '@tensorflow/tfjs';

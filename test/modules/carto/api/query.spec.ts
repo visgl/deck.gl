@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {query} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3, QUERY_RESPONSE} from '../mock-fetch';

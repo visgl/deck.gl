@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const utils = require('./utils');
 const path = require('path');
 const fs = require('fs');

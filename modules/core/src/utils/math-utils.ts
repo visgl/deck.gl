@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Extensions to math.gl library. Intended to be folded back.
 import typedArrayManager from './typed-array-manager';
 import {Vector3, NumericArray} from '@math.gl/core';

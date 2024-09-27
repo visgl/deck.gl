@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default {
   ScatterplotLayer: {
     data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',

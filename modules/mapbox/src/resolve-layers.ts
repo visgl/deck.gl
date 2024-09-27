@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {_flatten as flatten} from '@deck.gl/core';
 import MapboxLayer from './mapbox-layer';
 

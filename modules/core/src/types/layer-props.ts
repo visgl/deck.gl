@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type LayerExtension from '../lib/layer-extension';

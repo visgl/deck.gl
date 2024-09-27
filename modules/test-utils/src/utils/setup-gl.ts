@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {createTestDevice, webglDevice, NullDevice} from '@luma.gl/test-utils';
 
 /** Test device */

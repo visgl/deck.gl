@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Attribute, BinaryAttribute} from '@deck.gl/core';
 
 /** Method used to reduce a list of values to one number */

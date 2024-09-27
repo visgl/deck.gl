@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';

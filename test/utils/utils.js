@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const EPSILON = 0.0001;
 
 export function floatEquals(x, y) {

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import CollisionFilterPass from '@deck.gl/extensions/collision-filter/collision-filter-pass';

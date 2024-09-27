@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import View, {CommonViewState, CommonViewProps} from './view';
 import OrthographicViewport from '../viewports/orthographic-viewport';
 import OrthographicController from '../controllers/orthographic-controller';

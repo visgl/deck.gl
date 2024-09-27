@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';

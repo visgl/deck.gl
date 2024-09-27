@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {Deck} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';

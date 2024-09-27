@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export {CPUAggregator} from './cpu-aggregator/cpu-aggregator';
 export {WebGLAggregator} from './gpu-aggregator/webgl-aggregator';
 

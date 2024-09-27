@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type Deck from './deck';
 import type Viewport from '../viewports/viewport';
 import type {PickingInfo} from './picking/pick-info';

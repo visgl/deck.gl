@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer, UpdateParameters} from '@deck.gl/core';
 import AnimatedArcLayer, {AnimatedArcLayerProps} from './animated-arc-layer';
 

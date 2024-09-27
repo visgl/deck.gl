@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {geomEach, along, rhumbBearing, lineDistance, lineString, booleanEqual} from '@turf/turf';
 import type {FeatureCollection, Geometry, Feature, LineString} from 'geojson';
 

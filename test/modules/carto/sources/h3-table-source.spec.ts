@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {h3TableSource} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3} from '../mock-fetch';

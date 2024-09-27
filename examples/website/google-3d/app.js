@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global fetch, requestAnimationFrame, cancelAnimationFrame */
 import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {pushContextState, popContextState, getParameters, setParameters} from '@luma.gl/gltools';
 import * as tf from '@tensorflow/tfjs';
 import * as tfgl from '@tensorflow/tfjs-backend-webgl';

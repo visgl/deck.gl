@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // This layer allows any deck.gl app to support user-defined JSON layers
 import {CompositeLayer} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration} from '@deck.gl/json';

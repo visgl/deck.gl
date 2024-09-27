@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable camelcase */
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT, DEFAULT_MAX_LENGTH_URL} from './common';

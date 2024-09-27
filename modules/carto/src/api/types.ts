@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {SCALE_TYPE} from './layer-map';
 
 export type Format = 'json' | 'geojson' | 'tilejson';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';

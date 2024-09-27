@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {ModelProps} from '@luma.gl/engine';
 import {WebGLBinSorter} from './webgl-bin-sorter';
 import {WebGLAggregationTransform} from './webgl-aggregation-transform';

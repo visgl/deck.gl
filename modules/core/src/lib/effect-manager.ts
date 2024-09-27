@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {deepEqual} from '../utils/deep-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
 import type {Effect, EffectContext} from './effect';

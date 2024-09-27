@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // This attempts to execute a function
 export function executeFunction(targetFunction, props, configuration) {
   // Find the function

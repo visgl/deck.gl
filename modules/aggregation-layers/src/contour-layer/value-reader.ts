@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Aggregator, CPUAggregator, WebGLAggregator} from '../common/aggregator/index';
 import type {TypedArray} from '@luma.gl/core';
 

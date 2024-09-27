@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, WebMercatorViewport, MapView, _flatten as flatten} from '@deck.gl/core';
 import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
 import type MapboxLayer from './mapbox-layer';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {createTexture, destroyTexture} from '../utils/texture';
 import {deepEqual} from '../utils/deep-equal';
 

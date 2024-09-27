@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /**
  * This file should be included in another bundle if @deck.gl/layers is expected as a peer dependency
  */
