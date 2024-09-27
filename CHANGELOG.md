@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.31] - Sep 27 2024
+
+- Move publish target to es2020 (#9188)
+
 #### deck.gl [9.0.30] - Sep 23 2024
 
 - carto: Allow configuring max URL length for GET requests (#9159)
