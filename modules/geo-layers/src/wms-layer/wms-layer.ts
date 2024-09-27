@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // deck.gl, MIT license
 // Attributions:
 // Copyright 2022 Foursquare Labs, Inc.

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {MapViewState} from '@deck.gl/core';
 import {
   GOOGLE_BASEMAPS,

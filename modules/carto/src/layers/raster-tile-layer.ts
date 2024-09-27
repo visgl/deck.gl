@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';

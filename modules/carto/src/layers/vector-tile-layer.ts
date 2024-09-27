@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {registerLoaders} from '@loaders.gl/core';
 import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';

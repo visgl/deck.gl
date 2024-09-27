@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export {default as BrushingExtension} from './brushing/brushing-extension';
 export {default as DataFilterExtension} from './data-filter/data-filter-extension';
 export {default as Fp64Extension} from './fp64/fp64-extension';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {createProps} from '@deck.gl/core/lifecycle/create-props';
 import {compareProps} from '@deck.gl/core/lifecycle/props';

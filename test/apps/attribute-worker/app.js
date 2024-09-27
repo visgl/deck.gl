@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import {Deck} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';

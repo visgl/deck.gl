@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {getResolution, cellToChildren} from 'h3-js';
 import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';

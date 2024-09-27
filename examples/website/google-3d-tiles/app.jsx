@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useState} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';

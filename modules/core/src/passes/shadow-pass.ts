@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import type Layer from '../lib/layer';
 import type Viewport from '../viewports/viewport';

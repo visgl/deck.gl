@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {baseSource} from './base-source';
 import type {FilterOptions, SourceOptions, TilejsonResult, TilesetSourceOptions} from './types';
 

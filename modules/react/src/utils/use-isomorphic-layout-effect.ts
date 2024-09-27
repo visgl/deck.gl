@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // From https://github.com/streamich/react-use/blob/master/src/useIsomorphicLayoutEffect.ts
 // useLayoutEffect but does not trigger warning in server-side rendering
 import {useEffect, useLayoutEffect} from 'react';

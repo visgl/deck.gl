@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/ascii';

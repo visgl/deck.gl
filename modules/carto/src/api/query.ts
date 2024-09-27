@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {SOURCE_DEFAULTS} from '../sources/index';
 import type {SourceOptions, QuerySourceOptions, QueryResult} from '../sources/types';
 import {buildQueryUrl} from './endpoints';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Feature} from 'geojson';
 import type {Filters, Format, MapInstantiation, QueryParameters} from '../api/types';
 

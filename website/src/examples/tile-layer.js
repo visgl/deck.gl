@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global requestAnimationFrame */
 import React, {Component} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';

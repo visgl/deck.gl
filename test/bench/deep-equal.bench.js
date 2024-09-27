@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {deepEqual} from '@deck.gl/core/utils/deep-equal';
 
 const obj = {a: 123, b: 44, c: 'asd', d: false, e: true};

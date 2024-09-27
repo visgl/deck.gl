@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';

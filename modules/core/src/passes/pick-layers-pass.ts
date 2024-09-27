@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
 import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';

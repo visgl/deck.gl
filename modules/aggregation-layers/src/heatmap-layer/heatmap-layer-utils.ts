@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)
   const x = points.map(p => p[0]);

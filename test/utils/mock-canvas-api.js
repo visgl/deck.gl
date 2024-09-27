@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Mock Canvas/Context2D calls for node tests
 // https://github.com/jsdom/jsdom/issues/1782#issuecomment-337656878
 export function mockCanvasApi(JSDOMCanvasElement) {

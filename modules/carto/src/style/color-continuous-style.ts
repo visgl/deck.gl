@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {AccessorFunction, Color} from '@deck.gl/core';
 import {scaleLinear} from 'd3-scale';
 import {Feature} from 'geojson';

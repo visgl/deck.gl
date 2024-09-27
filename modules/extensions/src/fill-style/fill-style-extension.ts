@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LayerExtension} from '@deck.gl/core';
 
 import {FillStyleModuleProps, patternShaders} from './shader-module';

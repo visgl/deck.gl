@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 // Note: this is internal API and may change in a future release
 // https://github.com/facebook/docusaurus/discussions/7457

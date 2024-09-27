@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type Deck from './deck';
 import type Layer from './layer';
 import type {LayersPassRenderOptions} from '../passes/layers-pass';

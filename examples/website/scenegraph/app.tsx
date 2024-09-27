@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global fetch, setTimeout, clearTimeout */
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';

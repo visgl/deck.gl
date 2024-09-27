@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {Viewport, ProjectUniforms} from '@deck.gl/core';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import createDeckProps from './deck-props';
 import createDeckLayer from './deck-layer';
 import createDeckLayerView2D from './deck-layer-view-2d';

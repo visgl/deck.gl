@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export type ZRange = [minZ: number, maxZ: number];
 
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];

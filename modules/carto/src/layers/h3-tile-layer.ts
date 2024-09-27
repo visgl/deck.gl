@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';

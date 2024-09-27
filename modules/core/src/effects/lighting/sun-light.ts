@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {DirectionalLight} from './directional-light';
 import {getSunDirection} from '@math.gl/sun';
 

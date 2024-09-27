@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import convertFunctions from './convert-functions';
 
 // This attempts to instantiate a class, either as a class or as a React component

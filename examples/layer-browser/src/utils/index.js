@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // generate points in a grid
 export function pointGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {_Tileset2D as Tileset2D, GeoBoundingBox} from '@deck.gl/geo-layers';
 import {
   polygonToCells,

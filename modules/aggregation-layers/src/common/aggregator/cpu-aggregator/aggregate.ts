@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Bin} from './cpu-aggregator';
 import type {AggregationOperation} from '../aggregator';
 

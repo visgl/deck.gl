@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
 import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';

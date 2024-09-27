@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable */
 import test from 'tape-promise/tape';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport, PolygonLayer} from 'deck.gl';

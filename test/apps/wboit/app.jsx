@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {PureComponent, Fragment} from 'react';
 import DeckGL from '@deck.gl/react';
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';

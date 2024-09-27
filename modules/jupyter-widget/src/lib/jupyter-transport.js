@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Jupyter Widget based Transport implementation
 
 import {Transport} from '@deck.gl/json';

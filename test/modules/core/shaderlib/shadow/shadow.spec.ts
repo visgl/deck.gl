@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import earcut from 'earcut';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection, BinaryPolygonFeature, TypedArray} from '@loaders.gl/schema';

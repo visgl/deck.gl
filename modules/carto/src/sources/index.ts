@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export {SOURCE_DEFAULTS} from './base-source';
 export type {TilejsonResult, GeojsonResult, JsonResult} from './types';
 

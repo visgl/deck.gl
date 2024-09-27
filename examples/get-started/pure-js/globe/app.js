@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {SolidPolygonLayer, GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 

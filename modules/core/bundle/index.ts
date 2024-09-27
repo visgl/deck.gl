@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // @ts-nocheck
 // Luma and deck core must be imported before `global`
 /* eslint-disable import/no-extraneous-dependencies */
