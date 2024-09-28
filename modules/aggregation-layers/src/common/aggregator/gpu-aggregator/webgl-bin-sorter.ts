@@ -105,17 +105,7 @@ export class WebGLBinSorter {
       model.setVertexCount(props.vertexCount);
     }
     if (props.moduleSettings) {
-      const {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin} =
-        props.moduleSettings;
-      model.shaderInputs.setProps({
-        project: {
-          viewport,
-          devicePixelRatio,
-          modelMatrix,
-          coordinateSystem,
-          coordinateOrigin
-        }
-      });
+      model.shaderInputs.setProps(props.moduleSettings);
     }
   }
 
