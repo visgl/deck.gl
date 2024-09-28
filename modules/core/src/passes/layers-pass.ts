@@ -369,7 +369,7 @@ export default class LayersPass extends Pass {
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
         coordinateOrigin: layerProps.coordinateOrigin,
-        autoWrapLongitude: layerProps.wrapLongitude
+        autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps
     };
 

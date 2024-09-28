@@ -88,7 +88,7 @@ export default class ShadowPass extends LayersPass {
   getModuleParameters(layer: Layer) {
     return {
       shadow: {
-        viewport: layer.context.viewport,
+        viewport: null, // will be populated by LayersPass at render time
         drawToShadowMap: true
       }
     };

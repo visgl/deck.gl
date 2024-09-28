@@ -308,7 +308,9 @@ test('LayersPass#GLViewport', t => {
       target: framebuffer,
       viewport: {},
       moduleParameters: {
-        devicePixelRatio: 2
+        project: {
+          devicePixelRatio: 2
+        }
       },
       expectedGLViewport: [0, 98, 2, 2]
     },
@@ -329,7 +331,9 @@ test('LayersPass#GLViewport', t => {
       target: framebuffer,
       viewport: {x: 5, y: 10, width: 30, height: 30},
       moduleParameters: {
-        devicePixelRatio: 2
+        project: {
+          devicePixelRatio: 2
+        }
       },
       expectedGLViewport: [10, 20, 60, 60]
     }

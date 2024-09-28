@@ -12,7 +12,7 @@ test('CollisionFilterPass#getModuleParameters', t => {
   const moduleParameters = collisionFilterPass.getModuleParameters();
 
   t.equal(
-    moduleParameters.drawToCollisionMap,
+    moduleParameters.collision.drawToCollisionMap,
     true,
     `CollisionFilterPass has drawToCollisionMap module parameter`
   );
@@ -27,7 +27,7 @@ test('CollisionFilterPass#getModuleParameters', t => {
     `CollisionFilterPass has picking.isAttribute module parameter`
   );
   t.deepEqual(
-    moduleParameters.lightSources,
+    moduleParameters.lighting,
     {enabled: false},
     `CollisionFilterPass disables lighting module`
   );

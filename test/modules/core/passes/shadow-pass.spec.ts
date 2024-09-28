@@ -66,7 +66,7 @@ test('ShadowPass#getModuleParameters', t => {
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
   const moduleParameters = shadowPass.getModuleParameters(layer);
 
-  t.equal(moduleParameters.drawToShadowMap, true, `ShadowPass has module parameters`);
+  t.equal(moduleParameters.shadow.drawToShadowMap, true, `ShadowPass has module parameters`);
   shadowPass.delete();
   t.end();
 });
