@@ -86,18 +86,21 @@ export class TerrainEffect implements Effect {
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
-  getModuleParameters(layer: Layer): Omit<TerrainModuleProps, 'picking'> {
+  getModuleParameters(layer: Layer): {terrain: TerrainModuleProps} {
     const {viewport} = layer.context;
     const {terrainDrawMode} = layer.state;
 
     return {
-      viewport,
-      heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
-      heightMapBounds: this.heightMap?.bounds,
-      dummyHeightMap: this.dummyHeightMap!,
-      terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
-      useTerrainHeightMap: terrainDrawMode === 'offset',
-      terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
+      terrain: {
+        viewport,
+        isPicking: this.isPicking,
+        heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
+        heightMapBounds: this.heightMap?.bounds,
+        dummyHeightMap: this.dummyHeightMap!,
+        terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
+        useTerrainHeightMap: terrainDrawMode === 'offset',
+        terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
+      }
     };
   }
 
@@ -135,10 +138,15 @@ export class TerrainEffect implements Effect {
       ...opts,
       layers: terrainLayers,
       moduleParameters: {
-        heightMapBounds: this.heightMap.bounds,
-        dummyHeightMap: this.dummyHeightMap,
-        devicePixelRatio: 1,
-        drawToTerrainHeightMap: true
+        terrain: {
+          viewport,
+          heightMapBounds: this.heightMap.bounds,
+          dummyHeightMap: this.dummyHeightMap,
+          drawToTerrainHeightMap: true
+        },
+        project: {
+          devicePixelRatio: 1
+        }
       }
     });
   }
@@ -193,9 +201,14 @@ export class TerrainEffect implements Effect {
           ...opts,
           layers: drapeLayers,
           moduleParameters: {
-            dummyHeightMap: this.dummyHeightMap,
-            terrainSkipRender: false,
-            devicePixelRatio: 1
+            terrain: {
+              viewport,
+              dummyHeightMap: this.dummyHeightMap,
+              terrainSkipRender: false
+            },
+            project: {
+              devicePixelRatio: 1
+            }
           }
         });
 

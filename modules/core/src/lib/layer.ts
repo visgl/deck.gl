@@ -39,7 +39,6 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
-import {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -1061,87 +1060,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
-        const {isActive, isAttribute} = moduleParameters.picking;
-        const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
-        // @ts-expect-error material is not a Layer prop
-        const {material, modelMatrix} = this.props;
-
         this.setModuleParameters({});
-
-        const {
-          // mask
-          maskChannels,
-          maskMap,
-          maskSources,
-          // shadow
-          shadowEnabled,
-          drawToShadowMap,
-          shadowMaps,
-          dummyShadowMap,
-          shadowColor,
-          shadowMatrices,
-          shadowLightId,
-          // terrain
-          picking,
-          heightMap,
-          heightMapBounds,
-          dummyHeightMap,
-          terrainCover,
-          drawToTerrainHeightMap,
-          useTerrainHeightMap,
-          terrainSkipRender,
-          // lighting
-          lightSources
-        } = moduleParameters;
-
-        const maskProps = {
-          maskChannels,
-          maskMap,
-          maskSources
-        };
-
-        const shadowProps = {
-          viewport,
-          shadowEnabled,
-          drawToShadowMap,
-          shadowMaps,
-          dummyShadowMap,
-          shadowColor,
-          shadowMatrices,
-          shadowLightId
-        };
-        const terrainProps = {
-          viewport,
-          picking,
-          heightMap,
-          heightMapBounds,
-          dummyHeightMap,
-          terrainCover,
-          drawToTerrainHeightMap,
-          useTerrainHeightMap,
-          terrainSkipRender
-        };
-
-        const projectProps = {
-          viewport,
-          devicePixelRatio,
-          modelMatrix,
-          coordinateSystem,
-          coordinateOrigin
-        } as ProjectProps;
-
-        this.setShaderModuleProps({
-          // TODO Revisit whether this is necessary once all layers ported to UBO
-          mask: maskProps,
-          shadow: shadowProps,
-          terrain: terrainProps,
-          layer: {opacity},
-          lighting: lightSources,
-          phongMaterial: material,
-          gouraudMaterial: material,
-          picking: {isActive, isAttribute} as const satisfies PickingProps,
-          project: projectProps
-        });
+        this.setShaderModuleProps(moduleParameters);
       }
 
       // Apply polygon offset to avoid z-fighting

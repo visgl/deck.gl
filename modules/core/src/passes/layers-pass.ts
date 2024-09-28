@@ -10,6 +10,9 @@ import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
 import type {Effect} from '../lib/effect';
+import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
+import type {LayerProps} from '../shaderlib/misc/layer-uniforms';
+import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
@@ -263,7 +266,12 @@ export default class LayersPass extends Pass {
         this._lastRenderIndex = Math.max(this._lastRenderIndex, layerRenderIndex);
 
         // overwrite layer.context.viewport with the sub viewport
-        moduleParameters.viewport = viewport;
+        for (const moduleName in moduleParameters) {
+          const moduleProps = moduleParameters[moduleName];
+          if (moduleProps && typeof moduleProps === 'object' && 'viewport' in moduleProps) {
+            moduleProps.viewport = viewport;
+          }
+        }
 
         // TODO v9 - we are sending renderPass both as a parameter and through the context.
         // Long-term, it is likely better not to have user defined layer methods have to access
@@ -349,27 +357,36 @@ export default class LayersPass extends Pass {
   ): any {
     // @ts-expect-error TODO - assuming WebGL context
     const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    const layerProps = layer.internalState?.propsInTransition || layer.props;
 
-    const moduleParameters = Object.assign(
-      Object.create(layer.internalState?.propsInTransition || layer.props),
-      {
-        autoWrapLongitude: layer.wrapLongitude,
+    const moduleParameters = {
+      layer: {
+        opacity: layerProps.opacity
+      } satisfies LayerProps,
+      picking: {
+        isActive: false
+      } satisfies PickingProps,
+      project: {
         viewport: layer.context.viewport,
-        mousePosition: layer.context.mousePosition,
-        picking: {
-          isActive: 0
-        },
-        devicePixelRatio
-      }
-    );
+        devicePixelRatio,
+        modelMatrix: layerProps.modelMatrix,
+        coordinateSystem: layerProps.coordinateSystem,
+        coordinateOrigin: layerProps.coordinateOrigin,
+        autoWrapLongitude: layerProps.wrapLongitude
+      } satisfies ProjectProps
+    };
 
     if (effects) {
       for (const effect of effects) {
-        Object.assign(moduleParameters, effect.getModuleParameters?.(layer));
+        mergeModuleParameters(moduleParameters, effect.getModuleParameters?.(layer));
       }
     }
 
-    return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), overrides);
+    return mergeModuleParameters(
+      moduleParameters,
+      this.getModuleParameters(layer, effects),
+      overrides
+    );
   }
 }
 
@@ -435,7 +452,7 @@ function getGLViewport(
   }
 ): [number, number, number, number] {
   const pixelRatio =
-    (moduleParameters && moduleParameters.devicePixelRatio) ||
+    moduleParameters?.project?.devicePixelRatio ??
     // @ts-expect-error TODO - assuming WebGL context
     device.canvasContext.cssToDeviceRatio();
 
@@ -452,4 +469,22 @@ function getGLViewport(
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];
+}
+
+function mergeModuleParameters(
+  target: Record<string, any>,
+  ...sources: Record<string, any>[]
+): Record<string, any> {
+  for (const source of sources) {
+    if (source) {
+      for (const key in source) {
+        if (target[key]) {
+          Object.assign(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      }
+    }
+  }
+  return target;
 }

@@ -206,34 +206,34 @@ function getViewProjectionMatrices({
 
 // eslint-disable-next-line complexity
 function createShadowUniforms(
-  opts: ShadowModuleProps
+  opts: Partial<ShadowModuleProps>
 ): ShadowModuleBindings & ShadowModuleUniforms {
   const {shadowEnabled = true} = opts;
   if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
     return {
       drawShadowMap: false,
       useShadowMap: false,
-      shadow_uShadowMap0: opts.dummyShadowMap,
-      shadow_uShadowMap1: opts.dummyShadowMap
+      shadow_uShadowMap0: opts.dummyShadowMap!,
+      shadow_uShadowMap1: opts.dummyShadowMap!
     };
   }
   const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
   const center = getMemoizedViewportCenterPosition({
-    viewport: opts.viewport,
+    viewport: opts.viewport!,
     center: projectUniforms.center
   });
 
   const projectCenters: NumericArray[] = [];
   const viewProjectionMatrices = getMemoizedViewProjectionMatrices({
     shadowMatrices: opts.shadowMatrices,
-    viewport: opts.viewport
+    viewport: opts.viewport!
   }).slice();
 
   for (let i = 0; i < opts.shadowMatrices.length; i++) {
     const viewProjectionMatrix = viewProjectionMatrices[i];
     const viewProjectionMatrixCentered = viewProjectionMatrix
       .clone()
-      .translate(new Vector3(opts.viewport.center).negate());
+      .translate(new Vector3(opts.viewport!.center).negate());
 
     if (
       projectUniforms.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
@@ -249,14 +249,14 @@ function createShadowUniforms(
     }
   }
 
-  const uniforms = {
+  const uniforms: ShadowModuleUniforms & ShadowModuleBindings = {
     drawShadowMap: Boolean(opts.drawToShadowMap),
     useShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
     color: opts.shadowColor || DEFAULT_SHADOW_COLOR,
     lightId: opts.shadowLightId || 0,
     lightCount: opts.shadowMatrices.length,
-    shadow_uShadowMap0: opts.dummyShadowMap,
-    shadow_uShadowMap1: opts.dummyShadowMap
+    shadow_uShadowMap0: opts.dummyShadowMap!,
+    shadow_uShadowMap1: opts.dummyShadowMap!
   };
 
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
@@ -284,19 +284,7 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
-  getUniforms: (
-    opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {},
-    context: any = {}
-  ) => {
-    if (
-      'viewport' in opts &&
-      (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))
-    ) {
-      // @ts-expect-error if opts.viewport is defined, context should contain the project module's uniforms
-      return createShadowUniforms(opts, context);
-    }
-    return {};
-  },
+  getUniforms: createShadowUniforms,
   uniformTypes: {
     drawShadowMap: 'f32',
     useShadowMap: 'f32',

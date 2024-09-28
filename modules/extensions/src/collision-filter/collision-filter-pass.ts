@@ -23,12 +23,14 @@ export default class CollisionFilterPass extends LayersPass {
   getModuleParameters() {
     // Draw picking colors into collision FBO
     return {
-      drawToCollisionMap: true,
+      collision: {
+        drawToCollisionMap: true
+      },
       picking: {
         isActive: 1,
         isAttribute: false
       },
-      lightSources: {enabled: false}
+      lighting: {enabled: false}
     };
   }
 }

@@ -121,7 +121,7 @@ export default class PickLayersPass extends LayersPass {
         isActive: 1,
         isAttribute: this.pickZ
       },
-      lightSources: {enabled: false}
+      lighting: {enabled: false}
     };
   }
 

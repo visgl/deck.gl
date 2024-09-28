@@ -13,7 +13,7 @@ import shadow from '../../shaderlib/shadow/shadow';
 
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
-import {LightingProps} from '@luma.gl/shadertools';
+import type Viewport from '../../viewports/viewport';
 
 const DEFAULT_AMBIENT_LIGHT_PROPS = {
   color: [255, 255, 255] as [number, number, number],
@@ -118,23 +118,26 @@ export default class LightingEffect implements Effect {
         onViewportActive,
         views,
         moduleParameters: {
-          shadowLightId: i,
-          dummyShadowMap: this.dummyShadowMap,
-          shadowMatrices: this.shadowMatrices
+          shadow: {
+            shadowLightId: i,
+            dummyShadowMap: this.dummyShadowMap,
+            shadowMatrices: this.shadowMatrices
+          }
         }
       });
     }
   }
 
   getModuleParameters(layer: Layer) {
-    const parameters: {
-      lightSources?: LightingProps;
+    const shadowProps: {
+      viewport?: Viewport;
       shadowMaps?: Texture[];
       dummyShadowMap?: Texture | null;
       shadowColor?: [number, number, number, number];
       shadowMatrices?: Matrix4[];
     } = this.shadow
       ? {
+          viewport: layer.context.viewport,
           shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
           dummyShadowMap: this.dummyShadowMap,
           shadowColor: this.shadowColor,
@@ -144,7 +147,7 @@ export default class LightingEffect implements Effect {
 
     // when not rendering to screen, turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
-    parameters.lightSources = {
+    const lightingProps = {
       enabled: true,
       ambientLight: this.ambientLight,
       directionalLights: this.directionalLights.map(directionalLight =>
@@ -152,8 +155,15 @@ export default class LightingEffect implements Effect {
       ),
       pointLights: this.pointLights.map(pointLight => pointLight.getProjectedLight({layer}))
     };
+    // @ts-expect-error material is not a Layer prop
+    const materialProps = layer.props.material;
 
-    return parameters;
+    return {
+      shadow: shadowProps,
+      lighting: lightingProps,
+      phongMaterial: materialProps,
+      gouraudMaterial: materialProps
+    };
   }
 
   cleanup(context: EffectContext): void {

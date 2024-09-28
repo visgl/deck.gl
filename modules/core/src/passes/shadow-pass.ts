@@ -85,9 +85,12 @@ export default class ShadowPass extends LayersPass {
     return layer.props.shadowEnabled !== false;
   }
 
-  getModuleParameters() {
+  getModuleParameters(layer: Layer) {
     return {
-      drawToShadowMap: true
+      shadow: {
+        viewport: layer.context.viewport,
+        drawToShadowMap: true
+      }
     };
   }
 }

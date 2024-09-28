@@ -57,7 +57,7 @@ export default class MaskExtension extends LayerExtension {
     const maskProps = {} as MaskProps;
     maskProps.maskByInstance = Boolean(this.state.maskByInstance);
     const {maskId, maskInverted} = this.props;
-    const {maskChannels} = moduleParameters;
+    const {maskChannels} = moduleParameters.mask || {};
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
       const {index, bounds, coordinateOrigin: fromCoordinateOrigin} = maskChannels[maskId];
