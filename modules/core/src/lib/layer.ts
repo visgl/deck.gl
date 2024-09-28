@@ -1053,10 +1053,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    // apply gamma to opacity to make it visually "linear"
-    const opacity = Math.pow(this.props.opacity, 1 / 2.2);
-    uniforms.opacity = opacity; // TODO remove once layers ported to UBO
-
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {

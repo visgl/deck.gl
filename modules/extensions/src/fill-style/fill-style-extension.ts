@@ -159,9 +159,8 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       return;
     }
 
-    const {fillPatternAtlas} = this.props;
+    const {fillPatternAtlas, fillPatternEnabled, fillPatternMask} = this.props;
     const {viewport} = params.context;
-    const {fillPatternEnabled, fillPatternMask} = params.moduleParameters;
     const fillProps: FillStyleModuleProps = {
       viewport,
       fillPatternEnabled,

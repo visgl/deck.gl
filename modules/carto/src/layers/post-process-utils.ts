@@ -136,8 +136,9 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
       // TODO we could likely render to a smaller buffer for better perf
       const {moduleParameters} = opts;
       const {viewport} = this.context;
-      const width = moduleParameters.devicePixelRatio * viewport.width;
-      const height = moduleParameters.devicePixelRatio * viewport.height;
+      const {devicePixelRatio} = moduleParameters.project;
+      const width = devicePixelRatio * viewport.width;
+      const height = devicePixelRatio * viewport.height;
       this.internalState.renderBuffers.forEach((fbo: Framebuffer) => fbo.resize({width, height}));
     }
 

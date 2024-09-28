@@ -11,7 +11,6 @@ import type View from '../views/view';
 import type Layer from '../lib/layer';
 import type {Effect} from '../lib/effect';
 import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
-import type {LayerProps} from '../shaderlib/misc/layer-uniforms';
 import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
@@ -360,9 +359,7 @@ export default class LayersPass extends Pass {
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const moduleParameters = {
-      layer: {
-        opacity: layerProps.opacity
-      } satisfies LayerProps,
+      layer: layerProps,
       picking: {
         isActive: false
       } satisfies PickingProps,
