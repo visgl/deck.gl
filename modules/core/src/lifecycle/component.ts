@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   COMPONENT_SYMBOL,
   PROP_TYPES_SYMBOL,

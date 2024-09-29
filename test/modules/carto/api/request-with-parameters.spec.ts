@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-catch';
 import {requestWithParameters} from '@deck.gl/carto/api/request-with-parameters';
 import {V3_MINOR_VERSION} from '@deck.gl/carto/api/common';
@@ -189,6 +193,39 @@ test('requestWithParameters#precedence', async t => {
     t.equals(url1.searchParams.get('v'), V3_MINOR_VERSION, 'unset');
     t.equals(url2.searchParams.get('v'), V3_MINOR_VERSION, 'default overrides url');
     t.equals(url3.searchParams.get('v'), '3.2', 'param overrides default');
+  });
+  t.end();
+});
+
+test('requestWithParameters#maxLengthURL', async t => {
+  await withMockFetchMapsV3(async calls => {
+    t.equals(calls.length, 0, '0 initial calls');
+
+    await Promise.all([
+      requestWithParameters({
+        baseUrl: 'https://example.com/v1/item/1'
+      }),
+      requestWithParameters({
+        baseUrl: 'https://example.com/v1/item/2',
+        maxLengthURL: 10
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/item/3`,
+        parameters: {content: 'long'.padEnd(10_000, 'g')} // > default limit
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/item/4`,
+        parameters: {content: 'long'.padEnd(10_000, 'g')},
+        maxLengthURL: 15_000
+      })
+    ]);
+
+    t.equals(calls.length, 4, '4 requests');
+    t.deepEquals(
+      calls.map(({method}) => method ?? 'GET'),
+      ['GET', 'POST', 'POST', 'GET'],
+      'request method'
+    );
   });
   t.end();
 });

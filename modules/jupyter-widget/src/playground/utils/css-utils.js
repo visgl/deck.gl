@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 // TODO - make sure this can be called multiple times without adding elements
 export function loadCSS(url) {

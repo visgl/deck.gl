@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global deck, document */
 /* eslint-disable no-unused-vars */
 import 'deck.gl/../bundle';

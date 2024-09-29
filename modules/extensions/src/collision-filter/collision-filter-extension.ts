@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
 import collision, {CollisionModuleProps} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';

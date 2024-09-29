@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 import {points} from 'deck.gl-test/data';

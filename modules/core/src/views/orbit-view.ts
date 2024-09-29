@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import View, {CommonViewState, CommonViewProps} from './view';
 import OrbitViewport from '../viewports/orbit-viewport';
 import OrbitController from '../controllers/orbit-controller';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global setTimeout */
 import {Device} from '@luma.gl/core';
 import Resource from './resource';

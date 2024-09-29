@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import {GL} from '@luma.gl/constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';

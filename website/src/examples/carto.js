@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {GITHUB_TREE, MAPBOX_STYLES} from '../constants/defaults';
 import App from 'website-examples/carto-sql/app';

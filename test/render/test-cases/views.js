@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {SphereGeometry} from '@luma.gl/engine';
 import {
   COORDINATE_SYSTEM,

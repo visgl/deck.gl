@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Color} from '@deck.gl/core';
 import {getCode, getLines, getPolygons} from './marching-squares';
 

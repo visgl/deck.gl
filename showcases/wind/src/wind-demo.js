@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global, window */
 import React, {Component} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';

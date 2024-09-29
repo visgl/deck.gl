@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {Attribute, BinaryAttribute, _deepEqual} from '@deck.gl/core';
 import {CPUAggregator} from '@deck.gl/aggregation-layers';

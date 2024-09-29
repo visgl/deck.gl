@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // All utility methods needed to implement Marching Squares algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 

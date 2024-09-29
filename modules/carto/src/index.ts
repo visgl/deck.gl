@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {default as ClusterTileLayer} from './layers/cluster-tile-layer';
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as HeatmapTileLayer} from './layers/heatmap-tile-layer';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global requestAnimationFrame, cancelAnimationFrame */
 import React, {useEffect, useState} from 'react';
 import {styled, withStyles} from '@material-ui/core/styles';

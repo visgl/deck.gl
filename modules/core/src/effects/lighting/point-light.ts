@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {projectPosition} from '../../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 

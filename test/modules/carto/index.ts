@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import './api/basemap.spec';
 import './api/carto-api-error.spec';
 import './api/fetch-map.spec';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CartoAPIError} from './api/carto-api-error';
 import {APIErrorContext, GoogleBasemapProps} from './api/types';
 

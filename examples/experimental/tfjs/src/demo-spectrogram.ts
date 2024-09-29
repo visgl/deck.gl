@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {SpectrogramLayer, SpectrogramSettings} from './layers/spectrogram-layer';

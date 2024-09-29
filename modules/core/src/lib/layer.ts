@@ -1,25 +1,10 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -341,7 +326,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
+      // HACK as fp64 is not yet ported to UBO
+      model.uniforms = {ONE: 1};
     }
   }
 
@@ -1080,12 +1066,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         // @ts-expect-error material is not a Layer prop
         const {material, modelMatrix} = this.props;
 
-        // Do not pass picking module to avoid crash
-        // TODO remove `setModuleParameters` from codebase
-        const {picking: _, ...rest} = moduleParameters;
-        this.setModuleParameters(rest);
+        this.setModuleParameters({});
 
         const {
+          // mask
+          maskChannels,
+          maskMap,
+          maskSources,
           // shadow
           shadowEnabled,
           drawToShadowMap,
@@ -1106,6 +1093,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           // lighting
           lightSources
         } = moduleParameters;
+
+        const maskProps = {
+          maskChannels,
+          maskMap,
+          maskSources
+        };
 
         const shadowProps = {
           viewport,
@@ -1129,22 +1122,25 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           terrainSkipRender
         };
 
+        const projectProps = {
+          viewport,
+          devicePixelRatio,
+          modelMatrix,
+          coordinateSystem,
+          coordinateOrigin
+        } as ProjectProps;
+
         this.setShaderModuleProps({
           // TODO Revisit whether this is necessary once all layers ported to UBO
+          mask: maskProps,
           shadow: shadowProps,
           terrain: terrainProps,
           layer: {opacity},
           lighting: lightSources,
           phongMaterial: material,
           gouraudMaterial: material,
-          picking: {isActive, isAttribute} as PickingProps,
-          project: {
-            viewport,
-            devicePixelRatio,
-            modelMatrix,
-            coordinateSystem,
-            coordinateOrigin
-          } as ProjectProps
+          picking: {isActive, isAttribute} as const satisfies PickingProps,
+          project: projectProps
         });
       }
 
@@ -1153,14 +1149,27 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      context.device.setParametersWebGL({polygonOffset: offsets});
+      if (context.device instanceof WebGLDevice) {
+        context.device.setParametersWebGL({polygonOffset: offsets});
+      }
 
       for (const model of this.getModels()) {
         model.setParameters(parameters);
       }
 
       // Call subclass lifecycle method
-      context.device.withParametersWebGL(parameters, () => {
+      if (context.device instanceof WebGLDevice) {
+        context.device.withParametersWebGL(parameters, () => {
+          const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+
+          // extensions
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
+
+          this.draw(opts);
+        });
+      } else {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions
@@ -1169,7 +1178,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         }
 
         this.draw(opts);
-      });
+      }
     } finally {
       this.props = currentProps;
     }

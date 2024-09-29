@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
 import {_PointLabelLayer as PointLabelLayer} from '@deck.gl/carto';

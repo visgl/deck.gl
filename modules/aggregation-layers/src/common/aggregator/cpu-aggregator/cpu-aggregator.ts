@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
 import {sortBins, packBinIds} from './sort-bins';
@@ -9,9 +13,7 @@ export type CPUAggregatorProps = {
   /** Size of bin IDs */
   dimensions: number;
   /** Accessor to map each data point to a bin ID.
-   * If dimensions=1, bin ID should be a number;
-   * If dimensions>1, bin ID should be an array with [dimensions] elements;
-   * The data point will be skipped if bin ID is null.
+   * Bin ID should be an array with [dimensions] elements; or null if the data point should be skipped
    */
   getBin: VertexAccessor<number[] | null, any>;
   /** Accessor to map each data point to a weight value, defined per channel */

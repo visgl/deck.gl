@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {initializeResources, render, finalizeResources} from './commons';
 
 export default function createDeckLayerView2D(BaseLayerViewGL2D) {

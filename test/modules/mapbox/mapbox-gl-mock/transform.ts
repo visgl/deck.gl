@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default class Transform {
   constructor({
     center = {lng: 0, lat: 0},

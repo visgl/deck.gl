@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import './project/project-glsl.spec';
 import './project/project-functions.spec';
 import './project/viewport-uniforms.spec';

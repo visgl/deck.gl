@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
 export * from '../core/bundle';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Attribute} from '@deck.gl/core';
 import type {TypedArray} from '@luma.gl/core';
 

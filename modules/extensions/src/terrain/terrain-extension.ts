@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LayerExtension, UpdateParameters} from '@deck.gl/core';
 import {TerrainEffect} from './terrain-effect';
 import {terrainModule, TerrainModuleProps} from './shader-module';

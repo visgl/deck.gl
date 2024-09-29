@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {SOURCE_DEFAULTS} from '../sources/index';
 import type {SourceOptions, QuerySourceOptions, QueryResult} from '../sources/types';
 import {buildQueryUrl} from './endpoints';
@@ -11,6 +15,7 @@ export const query = async function (options: QueryOptions): Promise<QueryResult
   const {
     apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
     clientId = SOURCE_DEFAULTS.clientId,
+    maxLengthURL = SOURCE_DEFAULTS.maxLengthURL,
     connectionName,
     sqlQuery,
     queryParameters
@@ -35,6 +40,7 @@ export const query = async function (options: QueryOptions): Promise<QueryResult
     baseUrl,
     parameters,
     headers,
-    errorContext
+    errorContext,
+    maxLengthURL
   });
 };

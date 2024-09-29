@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Loader} from '@loaders.gl/loader-utils';
 
 function isJSON(text: string): boolean {

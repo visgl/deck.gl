@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {cellToParent} from 'quadbin';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Accessor, log} from '@deck.gl/core';
@@ -23,6 +27,7 @@ export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePro
  */
 export function aggregateTile<FeaturePropertiesT>(
   tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>,
+  tileAggregationCache: Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>,
   aggregationLevels: number,
   properties: AggregationProperties<FeaturePropertiesT> = [],
   getPosition: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>,
@@ -32,7 +37,7 @@ export function aggregateTile<FeaturePropertiesT>(
 
   // Aggregate on demand and cache result
   if (!tile.userData) tile.userData = {};
-  const cell0 = tile.userData[aggregationLevels]?.[0];
+  const cell0 = tileAggregationCache.get(aggregationLevels)?.[0];
   if (cell0) {
     // Have already aggregated this tile
     if (properties.every(property => property.name in cell0)) {
@@ -41,7 +46,7 @@ export function aggregateTile<FeaturePropertiesT>(
     }
 
     // Aggregated properties have changed, re-aggregate
-    tile.userData = {};
+    tileAggregationCache.clear();
   }
 
   const out: Record<number, any> = {};
@@ -49,7 +54,7 @@ export function aggregateTile<FeaturePropertiesT>(
     let id = cell.id;
     const position = typeof getPosition === 'function' ? getPosition(cell, {} as any) : getPosition;
 
-    // Aggregate by parent id
+    // Aggregate by parent rid
     for (let i = 0; i < aggregationLevels - 1; i++) {
       id = cellToParent(id);
     }
@@ -93,7 +98,7 @@ export function aggregateTile<FeaturePropertiesT>(
     }
   }
 
-  tile.userData[aggregationLevels] = Object.values(out);
+  tileAggregationCache.set(aggregationLevels, Object.values(out));
   return true;
 }
 

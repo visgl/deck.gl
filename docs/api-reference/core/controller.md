@@ -53,22 +53,9 @@ The constructor takes one argument:
 
 #### `handleEvent(event)` {#handleevent}
 
-Called by the event manager to handle pointer events. This method delegate to the following methods to handle the default events:
+Called by the event manager to handle pointer events.
 
-* `_onPanStart(event)`
-* `_onPan(event)`
-* `_onPanEnd(event)`
-* `_onPinchStart(event)`
-* `_onPinch(event)`
-* `_onPinchEnd(event)`
-* `_onTriplePanStart(event)`
-* `_onTriplePan(event)`
-* `_onTriplePanEnd(event)`
-* `_onDoubleTap(event)`
-* `_onWheel(event)`
-* `_onKeyDown(event)`
-
-See [Event object documentation](https://uber-web.github.io/mjolnir.js/docs/api-reference/event).
+See [Event object documentation](https://visgl.github.io/mjolnir.js/docs/api-reference/event).
 
 
 #### `setProps(props)` {#setprops}
@@ -98,6 +85,39 @@ If `event` is provided, returns `false` if the event is already handled, and mar
 Returns `true` if the user is dragging the view.
 
 
+## Members
+
+#### `events` (string[])
+
+In its constructor, a controller class can optionally specify a list of event names that it subscribes to with the `events` field. 
+Supported events are:
+
+* `click`
+* `dblclick`
+* `pan`
+* `pinch`: 2-finger free-form manipulation, used for touch zooming and rotation
+* `multipan`: 2-finger vertical panning, used for touch pitching in `MapController`
+* `keydown`
+* `keyup`
+* `pointerdown`
+* `pointermove`
+* `pointerup`
+* `pointerover`
+* `pointerout`
+* `pointerleave`
+* `wheel`
+* `contextmenu`
+
+Note that the following events are always toggled on/off by user options:
+
+* `scrollZoom` - `['wheel']`
+* `dragPan` and `dragRotate` - `['pan']`
+* `touchZoom` - `['pinch']`
+* `touchRotate` - `['pinch', 'multipan']`
+* `doubleClickZoom` - `['dblclick']`
+* `keyboard` - `['keydown']`
+
+
 ## Example: Implementing A Custom Controller
 
 ```js
@@ -118,18 +138,6 @@ class MyController extends Controller{
   }
 }
 ```
-
-In its constructor, a controller class can optionally specify a list of event names that it subscribes to with the `events` field. A full list of supported events can be found [here](https://uber-web.github.io/mjolnir.js/docs/api-reference/event-manager#supported-events-and-gestures).
-
-Note that the following events are always toggled on/off by user options:
-
-* `scrollZoom` - `['wheel']`
-* `dragPan` and `dragRotate` - `['pan']`
-* `touchZoom` - `['pinch']`
-* `touchRotate` - `['pinch', 'tripan']`
-* `doubleClickZoom` - `['doubletap']`
-* `keyboard` - `['keydown']`
-
 
 ## Source
 

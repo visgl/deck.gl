@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import React, {PureComponent} from 'react';
 import {MIN_SIZE_SCALE, MAX_SIZE_SCALE, FONTS, VIDEOS} from './constants';

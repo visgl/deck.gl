@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {log} from '@deck.gl/core';
 import {Tile as PropertiesTile} from './schema/carto-properties-tile';
 import {Tile as VectorTile} from './schema/carto-tile';

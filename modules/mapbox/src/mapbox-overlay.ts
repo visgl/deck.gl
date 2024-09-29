@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, assert} from '@deck.gl/core';
 import {getViewState, getDeckInstance, removeDeckInstance, getInterleavedProps} from './deck-utils';
 

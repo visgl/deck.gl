@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-catch';
 import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';

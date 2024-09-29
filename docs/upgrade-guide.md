@@ -2,6 +2,32 @@
 
 ## Upgrading to v9.1
 
+### User input handling
+
+- The main gesture recognition library, [mjolnir.js](https://visgl.github.io/mjolnir.js), is upgraded to v3.0. Hammer.js is no longer an (indirect) dependency, due to its lack of maintenance and various issues with SSR and test environments.
+- The default gesture to manipulate viewport `pitch` by touch has been changed from three-finger to two-finger dragging vertically. You can revert this behavior by setting the [eventRecognizerOptions](./api-reference/core/deck.md#eventrecognizeroptions) prop of `Deck`:
+
+  ```ts
+  eventRecognizerOptions: {
+    multipan: {pointers: 3}
+  }
+  ```
+
+- If your app already uses Deck's `eventRecognizerOptions` prop or implement a custom [Controller](./api-reference/core/controller.md), some events have been renamed:
+  + `tripan` -> `multipan`
+  + `tap` -> `click`
+  + `doubletap` -> `dblclick`
+
+### Aggregation layers
+
+Breaking changes:
+
+- `GPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: true`.
+- `CPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: false`.
+- If you are supplying a custom [haxagonAggregator](./api-reference/aggregation-layers/hexagon-layer.md#haxagonaggregator) to `HexagonLayer`, its function signiature has changed.
+- `HexagonLayer`'s sub layer is renamed `<id>-cells` and is no longer a vanilla `ColumnLayer`. If you were overriding the sub layer class with your own, please open a Discussion on GitHub for support.
+
+
 ### LightingEffect
 
 - `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).

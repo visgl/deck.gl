@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Viewport from '../viewports/viewport';
 import {getMeterZoom} from '@math.gl/web-mercator';
 import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from '@math.gl/core';

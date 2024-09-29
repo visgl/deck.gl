@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /**
  * Pack the top 12 bits of two normalized floats into 3 8-bit (rgb) values
  * This enables addressing 4096x4096 individual pixels

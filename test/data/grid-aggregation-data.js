@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GL} from '@luma.gl/constants';
 import {WebMercatorViewport} from 'deck.gl';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';

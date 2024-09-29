@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable max-statements */
 import test from 'tape-promise/tape';
 import {Timeline} from '@luma.gl/engine';

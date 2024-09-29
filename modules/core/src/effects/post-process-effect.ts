@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device, Framebuffer} from '@luma.gl/core';
 import {initializeShaderModule, ShaderPass} from '@luma.gl/shadertools';
 

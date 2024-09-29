@@ -270,7 +270,7 @@ def h3_table_source(**kwargs: Unpack[H3TableSourceOptions]):
         Fully-qualified name of table.
     spatial_data_column : str, optional
         Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
-    aggregation_exp : str, optional
+    aggregation_exp : str
         Aggregation SQL expression. Only used for spatial index datasets.
     aggregation_res_level : int, optional
         Aggregation resolution level. Only used for spatial index datasets,

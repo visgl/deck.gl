@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import * as dataSamples from 'deck.gl-test/data';
 

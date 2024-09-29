@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Transition from './transition';
 import {cloneAttribute, getAttributeBufferLength} from './gpu-transition-utils';
 

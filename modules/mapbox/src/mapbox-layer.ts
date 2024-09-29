@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
 import type {Map, CustomLayerInterface} from 'mapbox-gl';
 import type {Deck, Layer} from '@deck.gl/core';
