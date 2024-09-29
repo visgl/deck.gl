@@ -321,15 +321,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
-  // TODO deprecate in favour of setShaderModuleProps
-  /** Update shader module parameters */
-  setModuleParameters(moduleParameters: any): void {
-    for (const model of this.getModels()) {
-      // HACK as fp64 is not yet ported to UBO
-      model.uniforms = {ONE: 1};
-    }
-  }
-
   /** Update shader input parameters */
   setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
     for (const model of this.getModels()) {
@@ -1035,12 +1026,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Calculates uniforms
   _drawLayer({
     renderPass,
-    moduleParameters = null,
+    shaderModuleProps = null,
     uniforms = {},
     parameters = {}
   }: {
     renderPass: RenderPass;
-    moduleParameters: any;
+    shaderModuleProps: any;
     uniforms: any;
     parameters: any;
   }): void {
@@ -1055,9 +1046,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     try {
       // TODO/ib - hack move to luma Model.draw
-      if (moduleParameters) {
-        this.setModuleParameters({});
-        this.setShaderModuleProps(moduleParameters);
+      if (shaderModuleProps) {
+        this.setShaderModuleProps(shaderModuleProps);
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1076,7 +1066,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
         context.device.withParametersWebGL(parameters, () => {
-          const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+          const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
           for (const extension of this.props.extensions) {
@@ -1086,7 +1076,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+        const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {

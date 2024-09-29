@@ -20,7 +20,7 @@ export default class CollisionFilterPass extends LayersPass {
     return {...layer.props.parameters, blend: false, depthRange: [0, 1], depthTest: true};
   }
 
-  getModuleParameters() {
+  getShaderModuleProps() {
     // Draw picking colors into collision FBO
     return {
       collision: {

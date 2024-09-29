@@ -307,7 +307,7 @@ test('LayersPass#GLViewport', t => {
       name: 'external framebuffer pixel ratio 2',
       target: framebuffer,
       viewport: {},
-      moduleParameters: {
+      shaderModuleProps: {
         project: {
           devicePixelRatio: 2
         }
@@ -330,7 +330,7 @@ test('LayersPass#GLViewport', t => {
       name: 'external framebuffer offset pixel ratio 2',
       target: framebuffer,
       viewport: {x: 5, y: 10, width: 30, height: 30},
-      moduleParameters: {
+      shaderModuleProps: {
         project: {
           devicePixelRatio: 2
         }
@@ -339,13 +339,13 @@ test('LayersPass#GLViewport', t => {
     }
   ];
 
-  for (const {name, target, viewport, moduleParameters, expectedGLViewport} of testCases) {
+  for (const {name, target, viewport, shaderModuleProps, expectedGLViewport} of testCases) {
     layersPass.render({
       target,
       viewports: [new Viewport({id: 'A', ...viewport})],
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
-      moduleParameters,
+      shaderModuleProps,
       onError: t.notOk
     });
 

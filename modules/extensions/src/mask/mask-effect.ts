@@ -190,7 +190,7 @@ export default class MaskEffect implements Effect {
           viewports: maskViewport ? [maskViewport] : [],
           onViewportActive,
           views,
-          moduleParameters: {
+          shaderModuleProps: {
             project: {
               devicePixelRatio: 1
             }
@@ -263,7 +263,7 @@ export default class MaskEffect implements Effect {
     return channelMap;
   }
 
-  getModuleParameters(): {
+  getShaderModuleProps(): {
     mask: {
       maskMap: Texture;
       maskChannels: Record<string, Mask> | null;

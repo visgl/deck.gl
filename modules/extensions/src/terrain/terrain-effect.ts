@@ -86,13 +86,15 @@ export class TerrainEffect implements Effect {
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
-  getModuleParameters(layer: Layer): {terrain: TerrainModuleProps} {
-    const {viewport} = layer.context;
+  getShaderModuleProps(
+    layer: Layer,
+    otherShaderModuleProps: Record<string, any>
+  ): {terrain: TerrainModuleProps} {
     const {terrainDrawMode} = layer.state;
 
     return {
       terrain: {
-        viewport,
+        project: otherShaderModuleProps.project,
         isPicking: this.isPicking,
         heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
         heightMapBounds: this.heightMap?.bounds,
@@ -137,7 +139,7 @@ export class TerrainEffect implements Effect {
     this.terrainPass.renderHeightMap(this.heightMap, {
       ...opts,
       layers: terrainLayers,
-      moduleParameters: {
+      shaderModuleProps: {
         terrain: {
           viewport,
           heightMapBounds: this.heightMap.bounds,
@@ -200,7 +202,7 @@ export class TerrainEffect implements Effect {
         renderPass.renderTerrainCover(terrainCover, {
           ...opts,
           layers: drapeLayers,
-          moduleParameters: {
+          shaderModuleProps: {
             terrain: {
               viewport,
               dummyHeightMap: this.dummyHeightMap,

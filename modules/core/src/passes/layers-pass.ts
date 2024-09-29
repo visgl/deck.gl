@@ -33,7 +33,7 @@ export type LayersPassRenderOptions = {
   colorMask?: number;
   scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
-  moduleParameters?: any;
+  shaderModuleProps?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
 };
@@ -41,7 +41,7 @@ export type LayersPassRenderOptions = {
 type DrawLayerParameters = {
   shouldDrawLayer: boolean;
   layerRenderIndex?: number;
-  moduleParameters?: any;
+  shaderModuleProps?: any;
   layerParameters?: any;
 };
 
@@ -102,7 +102,7 @@ export default class LayersPass extends Pass {
   private _drawLayers(renderPass: RenderPass, options: LayersPassRenderOptions) {
     const {
       target,
-      moduleParameters,
+      shaderModuleProps,
       viewports,
       views,
       onViewportActive,
@@ -131,7 +131,7 @@ export default class LayersPass extends Pass {
           renderPass,
           {
             target,
-            moduleParameters,
+            shaderModuleProps,
             viewport: subViewport,
             view,
             pass: options.pass,
@@ -157,7 +157,7 @@ export default class LayersPass extends Pass {
       layerFilter,
       cullRect,
       effects,
-      moduleParameters
+      shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
     evaluateShouldDrawOnly: boolean = false
@@ -192,11 +192,11 @@ export default class LayersPass extends Pass {
         // It can be the same as another layer
         layerParam.layerRenderIndex = indexResolver(layer, shouldDrawLayer);
 
-        layerParam.moduleParameters = this._getModuleParameters(
+        layerParam.shaderModuleProps = this._getShaderModuleProps(
           layer,
           effects,
           pass,
-          moduleParameters
+          shaderModuleProps
         );
         layerParam.layerParameters = {
           ...layer.context.deck?.props.parameters,
@@ -214,11 +214,11 @@ export default class LayersPass extends Pass {
   /* eslint-disable max-depth, max-statements */
   private _drawLayersInViewport(
     renderPass: RenderPass,
-    {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view},
+    {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},
     drawLayerParams
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
-      moduleParameters: globalModuleParameters,
+      shaderModuleProps: globalModuleParameters,
       target,
       viewport
     });
@@ -248,7 +248,7 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex] as Layer;
-      const {shouldDrawLayer, layerRenderIndex, moduleParameters, layerParameters} =
+      const {shouldDrawLayer, layerRenderIndex, shaderModuleProps, layerParameters} =
         drawLayerParams[layerIndex];
 
       // Calculate stats
@@ -265,11 +265,8 @@ export default class LayersPass extends Pass {
         this._lastRenderIndex = Math.max(this._lastRenderIndex, layerRenderIndex);
 
         // overwrite layer.context.viewport with the sub viewport
-        for (const moduleName in moduleParameters) {
-          const moduleProps = moduleParameters[moduleName];
-          if (moduleProps && typeof moduleProps === 'object' && 'viewport' in moduleProps) {
-            moduleProps.viewport = viewport;
-          }
+        if (shaderModuleProps.project) {
+          shaderModuleProps.project.viewport = viewport;
         }
 
         // TODO v9 - we are sending renderPass both as a parameter and through the context.
@@ -280,7 +277,7 @@ export default class LayersPass extends Pass {
         try {
           layer._drawLayer({
             renderPass,
-            moduleParameters,
+            shaderModuleProps,
             uniforms: {layerIndex: layerRenderIndex},
             parameters: layerParameters
           });
@@ -299,7 +296,11 @@ export default class LayersPass extends Pass {
     return true;
   }
 
-  protected getModuleParameters(layer: Layer, effects?: Effect[]): any {
+  protected getShaderModuleProps(
+    layer: Layer,
+    effects: Effect[] | undefined,
+    otherShaderModuleProps: Record<string, any>
+  ): any {
     return null;
   }
 
@@ -348,7 +349,7 @@ export default class LayersPass extends Pass {
     return true;
   }
 
-  private _getModuleParameters(
+  private _getShaderModuleProps(
     layer: Layer,
     effects: Effect[] | undefined,
     pass: string,
@@ -358,7 +359,7 @@ export default class LayersPass extends Pass {
     const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
-    const moduleParameters = {
+    const shaderModuleProps = {
       layer: layerProps,
       picking: {
         isActive: false
@@ -375,13 +376,16 @@ export default class LayersPass extends Pass {
 
     if (effects) {
       for (const effect of effects) {
-        mergeModuleParameters(moduleParameters, effect.getModuleParameters?.(layer));
+        mergeModuleParameters(
+          shaderModuleProps,
+          effect.getShaderModuleProps?.(layer, shaderModuleProps)
+        );
       }
     }
 
     return mergeModuleParameters(
-      moduleParameters,
-      this.getModuleParameters(layer, effects),
+      shaderModuleProps,
+      this.getShaderModuleProps(layer, effects, shaderModuleProps),
       overrides
     );
   }
@@ -439,17 +443,17 @@ export function layerIndexResolver(
 function getGLViewport(
   device: Device,
   {
-    moduleParameters,
+    shaderModuleProps,
     target,
     viewport
   }: {
-    moduleParameters: any;
+    shaderModuleProps: any;
     target?: Framebuffer;
     viewport: Viewport;
   }
 ): [number, number, number, number] {
   const pixelRatio =
-    moduleParameters?.project?.devicePixelRatio ??
+    shaderModuleProps?.project?.devicePixelRatio ??
     // @ts-expect-error TODO - assuming WebGL context
     device.canvasContext.cssToDeviceRatio();
 

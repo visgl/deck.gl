@@ -11,9 +11,10 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
 
+import type {LightingProps} from '@luma.gl/shadertools';
+import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
-import type Viewport from '../../viewports/viewport';
 
 const DEFAULT_AMBIENT_LIGHT_PROPS = {
   color: [255, 255, 255] as [number, number, number],
@@ -117,7 +118,7 @@ export default class LightingEffect implements Effect {
         viewports,
         onViewportActive,
         views,
-        moduleParameters: {
+        shaderModuleProps: {
           shadow: {
             shadowLightId: i,
             dummyShadowMap: this.dummyShadowMap,
@@ -128,26 +129,20 @@ export default class LightingEffect implements Effect {
     }
   }
 
-  getModuleParameters(layer: Layer) {
-    const shadowProps: {
-      viewport?: Viewport;
-      shadowMaps?: Texture[];
-      dummyShadowMap?: Texture | null;
-      shadowColor?: [number, number, number, number];
-      shadowMatrices?: Matrix4[];
-    } = this.shadow
-      ? {
-          viewport: layer.context.viewport,
+  getShaderModuleProps(layer: Layer, otherShaderModuleProps: Record<string, any>) {
+    const shadowProps = this.shadow
+      ? ({
+          project: otherShaderModuleProps.project,
           shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
-          dummyShadowMap: this.dummyShadowMap,
+          dummyShadowMap: this.dummyShadowMap!,
           shadowColor: this.shadowColor,
           shadowMatrices: this.shadowMatrices
-        }
+        } satisfies ShadowModuleProps)
       : {};
 
     // when not rendering to screen, turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
-    const lightingProps = {
+    const lightingProps: LightingProps = {
       enabled: true,
       ambientLight: this.ambientLight,
       directionalLights: this.directionalLights.map(directionalLight =>

@@ -69,7 +69,7 @@ export default class PickLayersPass extends LayersPass {
     effects,
     pass = 'picking',
     pickZ,
-    moduleParameters
+    shaderModuleProps
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
@@ -94,7 +94,7 @@ export default class PickLayersPass extends LayersPass {
       effects: effects?.filter(e => e.useInPicking),
       pass,
       isPicking: true,
-      moduleParameters,
+      shaderModuleProps,
       clearColor: [0, 0, 0, 0],
       colorMask: 0xf,
       scissorRect
@@ -115,7 +115,7 @@ export default class PickLayersPass extends LayersPass {
     );
   }
 
-  protected getModuleParameters() {
+  protected getShaderModuleProps() {
     return {
       picking: {
         isActive: 1,

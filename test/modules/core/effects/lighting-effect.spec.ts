@@ -35,7 +35,7 @@ test('LightingEffect#constructor', t => {
   t.end();
 });
 
-test('LightingEffect#getModuleParameters', t => {
+test('LightingEffect#getShaderModuleProps', t => {
   const cameraLight = new CameraLight();
   const pointLight = new PointLight();
   const lightingEffect = new LightingEffect({cameraLight, pointLight});
@@ -62,7 +62,7 @@ test('LightingEffect#getModuleParameters', t => {
     pixelRatio: 1
   });
 
-  const {lighting} = lightingEffect.getModuleParameters(layer);
+  const {lighting} = lightingEffect.getShaderModuleProps(layer);
   t.is(lighting.pointLights.length, 2, 'Lights are exported');
   t.ok(
     equals(lighting.pointLights[0].position, [0, 0, 0.018310546875]),

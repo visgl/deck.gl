@@ -5,7 +5,7 @@
 /* eslint-disable camelcase */
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project, ProjectUniforms, Viewport} from '@deck.gl/core';
+import {project, ProjectProps, ProjectUniforms, Viewport} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
@@ -13,7 +13,7 @@ import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleProps = {
-  viewport: Viewport;
+  project: ProjectProps;
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
@@ -129,7 +129,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+      const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
       const {commonOrigin} = projectUniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;

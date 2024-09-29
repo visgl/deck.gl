@@ -157,7 +157,7 @@ export default class CollisionFilterEffect implements Effect {
         viewports: viewport ? [viewport] : [],
         onViewportActive,
         views,
-        moduleParameters: {
+        shaderModuleProps: {
           collision: {
             enabled: true,
             // To avoid feedback loop forming between Framebuffer and active Texture.
@@ -213,7 +213,7 @@ export default class CollisionFilterEffect implements Effect {
     return channelMap;
   }
 
-  getModuleParameters(layer: Layer): {
+  getShaderModuleProps(layer: Layer): {
     collision: CollisionModuleProps;
   } {
     const {collisionGroup, collisionEnabled} = (layer as Layer<CollisionFilterExtensionProps>)

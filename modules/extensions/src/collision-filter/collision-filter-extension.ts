@@ -46,8 +46,8 @@ export default class CollisionFilterExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<CollisionFilterExtensionProps>, {moduleParameters}: any) {
-    if (moduleParameters.collision?.drawToCollisionMap) {
+  draw(this: Layer<CollisionFilterExtensionProps>, {shaderModuleProps}: any) {
+    if (shaderModuleProps.collision?.drawToCollisionMap) {
       // Override any props with those defined in collisionTestProps
       // @ts-ignore
       this.props = this.clone(this.props.collisionTestProps).props;

@@ -56,7 +56,7 @@ test('ShadowPass#render', t => {
   t.end();
 });
 
-test('ShadowPass#getModuleParameters', t => {
+test('ShadowPass#getShaderModuleProps', t => {
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
     getPolygon: f => f,
@@ -64,9 +64,9 @@ test('ShadowPass#getModuleParameters', t => {
   });
 
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
-  const moduleParameters = shadowPass.getModuleParameters(layer);
+  const shaderModuleProps = shadowPass.getShaderModuleProps(layer);
 
-  t.equal(moduleParameters.shadow.drawToShadowMap, true, `ShadowPass has module parameters`);
+  t.equal(shaderModuleProps.shadow.drawToShadowMap, true, `ShadowPass has module parameters`);
   shadowPass.delete();
   t.end();
 });

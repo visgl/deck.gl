@@ -37,7 +37,7 @@ export function getShaderAssembler() {
 export {layerUniforms, picking, project, project32, gouraudLighting, phongLighting, shadow};
 
 // Useful for custom shader modules
-export type {ProjectUniforms} from './project/viewport-uniforms';
+export type {ProjectProps, ProjectUniforms} from './project/viewport-uniforms';
 
 // TODO - these should be imported from luma.gl
 /* eslint-disable camelcase */
