@@ -82,4 +82,12 @@ export class TerrainPickingPass extends PickLayersPass {
     }
     return {...parameters, depthTest: false};
   }
+
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    return {
+      terrain: {
+        project: otherShaderModuleProps.project
+      }
+    };
+  }
 }

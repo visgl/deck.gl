@@ -64,9 +64,11 @@ test('ShadowPass#getShaderModuleProps', t => {
   });
 
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
-  const shaderModuleProps = shadowPass.getShaderModuleProps(layer);
+  const shaderModuleProps = shadowPass.getShaderModuleProps(layer, [], {
+    project: {}
+  });
 
-  t.equal(shaderModuleProps.shadow.drawToShadowMap, true, `ShadowPass has module parameters`);
+  t.equal(shaderModuleProps.shadow.drawToShadowMap, true, `ShadowPass has module props`);
   shadowPass.delete();
   t.end();
 });

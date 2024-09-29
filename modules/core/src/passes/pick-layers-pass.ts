@@ -6,6 +6,7 @@ import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-p
 import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
+import type {Effect} from '../lib/effect';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
@@ -115,7 +116,11 @@ export default class PickLayersPass extends LayersPass {
     );
   }
 
-  protected getShaderModuleProps() {
+  protected getShaderModuleProps(
+    layer: Layer,
+    effects: Effect[] | undefined,
+    otherShaderModuleProps: Record<string, any>
+  ): any {
     return {
       picking: {
         isActive: 1,

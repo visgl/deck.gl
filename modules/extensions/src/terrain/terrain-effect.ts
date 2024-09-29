@@ -141,7 +141,6 @@ export class TerrainEffect implements Effect {
       layers: terrainLayers,
       shaderModuleProps: {
         terrain: {
-          viewport,
           heightMapBounds: this.heightMap.bounds,
           dummyHeightMap: this.dummyHeightMap,
           drawToTerrainHeightMap: true
@@ -204,7 +203,6 @@ export class TerrainEffect implements Effect {
           layers: drapeLayers,
           shaderModuleProps: {
             terrain: {
-              viewport,
               dummyHeightMap: this.dummyHeightMap,
               terrainSkipRender: false
             },

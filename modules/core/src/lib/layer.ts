@@ -321,6 +321,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
+  // TODO deprecate in favour of setShaderModuleProps
+  /** Update shader module parameters */
+  setModuleParameters(moduleParameters: any): void {
+    for (const model of this.getModels()) {
+      // HACK as fp64 is not yet ported to UBO
+      model.uniforms = {ONE: 1};
+    }
+  }
+
   /** Update shader input parameters */
   setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
     for (const model of this.getModels()) {
@@ -1047,6 +1056,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (shaderModuleProps) {
+        this.setModuleParameters({});
         this.setShaderModuleProps(shaderModuleProps);
       }
 
