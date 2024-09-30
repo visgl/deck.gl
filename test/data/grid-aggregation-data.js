@@ -81,7 +81,7 @@ const fixture = {
     }
   },
   cellSize: [25, 25],
-  moduleSettings: {viewport},
+  shaderModuleProps: {viewport},
   projectPoints: true,
   translation: [1, -1],
   scaling: [width / 2, -height / 2, 1],

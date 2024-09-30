@@ -140,7 +140,7 @@ test('WebGLAggregator#1D', t => {
   });
 
   aggregator.update();
-  aggregator.preDraw({moduleSettings: {}});
+  aggregator.preDraw();
 
   t.is(aggregator.binCount, 15, 'binCount');
 
@@ -248,7 +248,7 @@ test('WebGLAggregator#2D', t => {
   });
 
   aggregator.update();
-  aggregator.preDraw({moduleSettings: {}});
+  aggregator.preDraw();
 
   t.is(aggregator.binCount, 20, 'binCount');
 
