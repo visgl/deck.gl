@@ -32,14 +32,14 @@ const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
 export type TestCase = {
   title: string;
   position: NumberArray3;
-  params: ProjectProps & {fromCoordinateSystem: number};
+  projectProps: ProjectProps & {fromCoordinateSystem: number};
   result: NumberArray3;
 };
 const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT:WEB_MERCATOR',
     position: [-70, 41, 1000],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT_2,
       coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
@@ -48,7 +48,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT:WEB_MERCATOR_AUTO_OFFSET',
     position: [-122.46, 37.8, 1000],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
@@ -57,7 +57,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'CARTESIAN:IDENTITY',
     position: [-10, 10, 10],
-    params: {
+    projectProps: {
       viewport: new OrthographicViewport({
         width: 1,
         height: 1,
@@ -71,7 +71,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'CARTESIAN:WEB_MERCATOR',
     position: [256, 256, 0],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT_2,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       coordinateOrigin: [0, 0, 0]
@@ -81,7 +81,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'CARTESIAN:WEB_MERCATOR_AUTO_OFFSET',
     position: [0, 0, 0],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       coordinateOrigin: [256, 256, 0]
@@ -91,7 +91,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT_OFFSETS',
     position: [-0.05, 0.06, 50],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
       coordinateOrigin: [-122.5, 38.8]
@@ -101,7 +101,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'METER_OFFSETS',
     position: [-100, 300, 50],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
       coordinateOrigin: [-122.5, 38.8]
@@ -111,7 +111,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT to METER_OFFSETS',
     position: [-122.46, 37.8, 1000],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
@@ -122,7 +122,7 @@ const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT to LNGLAT_OFFSETS',
     position: [-122.46, 37.8, 1000],
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
@@ -136,7 +136,7 @@ test('project#projectPosition', t => {
   config.EPSILON = 1e-7;
 
   TEST_CASES.forEach(testCase => {
-    const result = projectPosition(testCase.position, testCase.params);
+    const result = projectPosition(testCase.position, testCase.projectProps);
     t.comment(result);
     t.comment(testCase.result);
     t.ok(equals(result, testCase.result), testCase.title);
@@ -145,7 +145,7 @@ test('project#projectPosition', t => {
   t.end();
 });
 
-test.only('project#projectPosition vs project_position', async t => {
+test('project#projectPosition vs project_position', async t => {
   config.EPSILON = 1e-5;
 
   const vs = `\
@@ -160,10 +160,10 @@ void main()
 }
 `;
 
-  for (const {title, position, params} of TEST_CASES.filter(
-    testCase => !testCase.params.fromCoordinateSystem
+  for (const {title, position, projectProps} of TEST_CASES.filter(
+    testCase => !testCase.projectProps.fromCoordinateSystem
   )) {
-    const cpuResult = projectPosition(position, params);
+    const cpuResult = projectPosition(position, projectProps);
     const testProps: TestProps = {
       uPos: position,
       uPos64Low: position.map(fp64LowPart) as NumberArray3
@@ -173,7 +173,7 @@ void main()
       varying: 'outValue',
       modules: [project, testUniforms],
       vertexCount: 1,
-      shaderInputProps: {project: params, test: testProps}
+      shaderInputProps: {project: projectProps, test: testProps}
     });
 
     t.is(verifyGPUResult(shaderResult, cpuResult), true, title);

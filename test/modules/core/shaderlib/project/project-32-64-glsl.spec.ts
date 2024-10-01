@@ -70,7 +70,7 @@ void main()
 const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
@@ -78,20 +78,20 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: {uPos: [-122.45, 37.78, 0]},
+        testProps: {uPos: [-122.45, 37.78, 0]},
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1])
       },
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: {uPos: [-122.45, 37.78, 0]},
+        testProps: {uPos: [-122.45, 37.78, 0]},
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
         precision: PIXEL_TOLERANCE
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: {uPos: [-122.45, 37.78, 100]},
+        testProps: {uPos: [-122.45, 37.78, 100]},
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
         precision: PIXEL_TOLERANCE
       }
@@ -99,7 +99,7 @@ const TEST_CASES: TestCase[] = [
   },
   {
     title: 'LNGLAT mode - high zoom',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
@@ -107,7 +107,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: {uPos: [-122.05, 37.92, 0]},
+        testProps: {uPos: [-122.05, 37.92, 0]},
         output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92])
           .map((x, i) => x - TEST_VIEWPORT_HIGH_ZOOM.center[i])
           .concat([0, 1]),
@@ -116,7 +116,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: {uPos: [-122.05, 37.92, 0]},
+        testProps: {uPos: [-122.05, 37.92, 0]},
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
         precision: PIXEL_TOLERANCE
       }
@@ -124,7 +124,7 @@ const TEST_CASES: TestCase[] = [
   },
   {
     title: 'LNGLAT_OFFSETS mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
       coordinateOrigin: [-122.05, 37.92, 0]
@@ -133,7 +133,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: {uPos: [0.05, 0.08, 0]},
+        testProps: {uPos: [0.05, 0.08, 0]},
         output: getPixelOffset(
           TEST_VIEWPORT.projectPosition([-122, 38, 0]),
           TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
@@ -142,7 +142,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: {uPos: [0.05, 0.08, 0]},
+        testProps: {uPos: [0.05, 0.08, 0]},
         output: TEST_VIEWPORT.project([-122, 38, 0]),
         precision: PIXEL_TOLERANCE
       }
@@ -156,7 +156,7 @@ test('project32&64#vs', async t => {
   for (const usefp64 of [false, true]) {
     /* eslint-disable max-nested-callbacks, complexity */
     for (const testCase of TEST_CASES) {
-      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
+      if (usefp64 && testCase.projectProps.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
         // Apply 64 bit projection only for LNGLAT_DEPRECATED
         return;
       }
@@ -178,11 +178,11 @@ test('project32&64#vs', async t => {
           varying: 'outValue',
           vertexCount: 1,
           shaderInputProps: {
-            project: testCase.params,
-            project64: testCase.params,
+            project: testCase.projectProps,
+            project64: testCase.projectProps,
             test: {
-              uPos: c.input.uPos!,
-              uPos64Low: c.input.uPos!.map(fp64LowPart) as NumberArray3
+              uPos: c.testProps.uPos!,
+              uPos64Low: c.testProps.uPos!.map(fp64LowPart) as NumberArray3
             }
           },
           uniforms

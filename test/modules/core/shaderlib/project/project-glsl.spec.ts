@@ -97,12 +97,12 @@ void main()
 
 export type TestCase = {
   title: string;
-  params: ProjectProps;
+  projectProps: ProjectProps;
   tests: {
     name: string;
     vs: string;
     precision?: number;
-    input: TestProps;
+    testProps: TestProps;
     output: any;
     output64?: any;
   }[];
@@ -110,7 +110,7 @@ export type TestCase = {
 const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
@@ -118,7 +118,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_size(float)',
         vs: TRANSFORM_VS.project_size(1),
-        input: {
+        testProps: {
           uWorldPos: [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0],
           uCommonPos: [0, 0, 0, 0],
           uMeterSize1: 1
@@ -128,7 +128,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_size(vec2)',
         vs: TRANSFORM_VS.project_size(2),
-        input: {
+        testProps: {
           uWorldPos: [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0],
           uCommonPos: [0, 0, 0, 0],
           uMeterSize2: [1, 1]
@@ -138,7 +138,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_size(vec3)',
         vs: TRANSFORM_VS.project_size(3),
-        input: {
+        testProps: {
           uWorldPos: [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0],
           uCommonPos: [0, 0, 0, 0],
           uMeterSize3: [1, 1, 1]
@@ -148,7 +148,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position',
         vs: TRANSFORM_VS.project_position,
-        input: {
+        testProps: {
           uPos: [-122.45, 37.78, 0],
           uPos64Low: [fp64LowPart(-122.45), fp64LowPart(37.78), 0]
         },
@@ -158,7 +158,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [-122.45, 37.78, 0]
         },
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
@@ -167,7 +167,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace (vec4, non-zero z)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [-122.45, 37.78, 100]
         },
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
@@ -177,7 +177,7 @@ const TEST_CASES: TestCase[] = [
   },
   {
     title: 'LNGLAT mode - auto offset',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
@@ -185,7 +185,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position',
         vs: TRANSFORM_VS.project_position,
-        input: {
+        testProps: {
           uPos: [-122.05, 37.92, 0],
           uPos64Low: [0, 0, 0]
         },
@@ -203,7 +203,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [-122.05, 37.92, 0]
         },
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
@@ -212,7 +212,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace (vec4, non-zero z)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [-122.05, 37.92, 100]
         },
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 100]),
@@ -222,7 +222,7 @@ const TEST_CASES: TestCase[] = [
   },
   {
     title: 'METER_OFFSETS mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
       coordinateOrigin: [-122.05, 37.92, 0],
@@ -232,7 +232,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position',
         vs: TRANSFORM_VS.project_position,
-        input: {
+        testProps: {
           uPos: [1000, 1000, 0],
           uPos64Low: [0, 0, 0]
         },
@@ -248,7 +248,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [1000, 1000, 0]
         },
         output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 100]),
@@ -258,7 +258,7 @@ const TEST_CASES: TestCase[] = [
   },
   {
     title: 'LNGLAT_OFFSETS mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
       coordinateOrigin: [-122.05, 37.92, 0]
@@ -267,7 +267,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position',
         vs: TRANSFORM_VS.project_position,
-        input: {
+        testProps: {
           uPos: [0.05, 0.08, 0],
           uPos64Low: [0, 0, 0]
         },
@@ -281,7 +281,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [0.05, 0.08, 0]
         },
         output: TEST_VIEWPORT.project([-122, 38, 0]),
@@ -291,7 +291,7 @@ const TEST_CASES: TestCase[] = [
   },
   {
     title: 'IDENTITY mode with modelMatrix',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT_ORTHO,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       modelMatrix: new Matrix4().rotateZ(Math.PI / 2).translate([0, 0, 10])
@@ -300,7 +300,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_position',
         vs: TRANSFORM_VS.project_position,
-        input: {
+        testProps: {
           uPos: [200, 200, 0],
           uPos64Low: [0, 0, 0]
         },
@@ -314,7 +314,7 @@ const TEST_CASES: TestCase[] = [
       {
         name: 'project_common_position_to_clipspace(vec4)',
         vs: TRANSFORM_VS.project_common_position_to_clipspace,
-        input: {
+        testProps: {
           uPos: [200, 200, 0]
         },
         output: TEST_VIEWPORT_ORTHO.project([-200, 200, 10]),
@@ -330,7 +330,7 @@ test('project#vs', async t => {
   for (const testCase of TEST_CASES) {
     t.comment(testCase.title);
 
-    for (const {name, vs, input, output, precision = 1e-7} of testCase.tests) {
+    for (const {name, vs, testProps, output, precision = 1e-7} of testCase.tests) {
       config.EPSILON = precision;
       let actual: NumericArray = await runOnGPU({
         vs,
@@ -338,8 +338,8 @@ test('project#vs', async t => {
         modules: [project, testUniforms],
         vertexCount: 1,
         shaderInputProps: {
-          project: testCase.params,
-          test: input
+          project: testCase.projectProps,
+          test: testProps
         }
       });
 
