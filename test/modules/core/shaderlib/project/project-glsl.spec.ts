@@ -9,8 +9,7 @@ import {Matrix4, Vector3, config, equals, NumericArray} from '@math.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
-import {getPixelOffset, runOnGPU, verifyGPUResult} from './project-glsl-test-utils';
-import {UniformValue} from '@luma.gl/shadertools/dist/lib/shader-module/shader-module';
+import {getPixelOffset, runOnGPU, TestOptions, verifyGPUResult} from './project-glsl-test-utils';
 const PIXEL_TOLERANCE = 1e-4;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
@@ -41,17 +40,16 @@ const TEST_VIEWPORT_ORTHO = new OrthographicViewport({
 });
 
 const TRANSFORM_VS = {
-  project_size: (type: 'float' | 'vec2' | 'vec3') => `\
+  project_size: (dimension: 1 | 2 | 3) => `\
 #version 300 es
 
-uniform ${type} uMeterSize;
-out ${type} outValue;
+out ${dimension === 1 ? 'float' : `vec${dimension}`} outValue;
 
 void main()
 {
   geometry.worldPosition = test.uWorldPos;
   geometry.position = test.uCommonPos;
-  outValue = project_size(uMeterSize);
+  outValue = project_size(test.uMeterSize${dimension});
 }
 `,
   project_position: `\
@@ -92,7 +90,7 @@ type TestCase = {
     name: string;
     vs: string;
     precision?: number;
-    input: Record<string, UniformValue>;
+    input: TestOptions;
     output: any;
   }[];
 };
@@ -106,31 +104,31 @@ const TEST_CASES: TestCase[] = [
     tests: [
       {
         name: 'project_size(float)',
-        vs: TRANSFORM_VS.project_size('float'),
+        vs: TRANSFORM_VS.project_size(1),
         input: {
           uWorldPos: [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0],
           uCommonPos: [0, 0, 0, 0],
-          uMeterSize: 1
+          uMeterSize1: 1
         },
         output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter[2]
       },
       {
         name: 'project_size(vec2)',
-        vs: TRANSFORM_VS.project_size('vec2'),
+        vs: TRANSFORM_VS.project_size(2),
         input: {
           uWorldPos: [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0],
           uCommonPos: [0, 0, 0, 0],
-          uMeterSize: [1, 1]
+          uMeterSize2: [1, 1]
         },
         output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter.slice(0, 2)
       },
       {
         name: 'project_size(vec3)',
-        vs: TRANSFORM_VS.project_size('vec3'),
+        vs: TRANSFORM_VS.project_size(3),
         input: {
           uWorldPos: [TEST_VIEWPORT.longitude, TEST_VIEWPORT.latitude, 0],
           uCommonPos: [0, 0, 0, 0],
-          uMeterSize: [1, 1, 1]
+          uMeterSize3: [1, 1, 1]
         },
         output: TEST_VIEWPORT.getDistanceScales().unitsPerMeter
       },

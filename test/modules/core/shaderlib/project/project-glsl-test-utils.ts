@@ -21,6 +21,9 @@ uniform testUniforms {
   vec4 uCommonPos;
   vec3 uDirUp;
   vec3 uInput;
+  float uMeterSize1;
+  vec2 uMeterSize2;
+  vec3 uMeterSize3;
   vec3 uPos;
   vec3 uPos64Low;
   vec3 uWorldPos;
@@ -31,6 +34,9 @@ export type TestOptions = {
   uCommonPos?: NumberArray4;
   uDirUp?: NumberArray3;
   uInput?: NumberArray3;
+  uMeterSize1?: number;
+  uMeterSize2?: NumberArray2;
+  uMeterSize3?: NumberArray3;
   uPos?: NumberArray3;
   uPos64Low?: NumberArray3;
   uWorldPos?: NumberArray3;
@@ -43,6 +49,9 @@ export const testUniforms = {
     uCommonPos: 'vec4<f32>',
     uDirUp: 'vec3<f32>',
     uInput: 'vec3<f32>',
+    uMeterSize1: 'f32',
+    uMeterSize2: 'vec2<f32>',
+    uMeterSize3: 'vec3<f32>',
     uPos: 'vec3<f32>',
     uPos64Low: 'vec3<f32>',
     uWorldPos: 'vec3<f32>'
