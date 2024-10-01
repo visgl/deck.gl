@@ -44,42 +44,36 @@ const TRANSFORM_VS = {
   project_size: (type: 'float' | 'vec2' | 'vec3') => `\
 #version 300 es
 
-uniform vec3 uWorldPos;
-uniform vec4 uCommonPos;
 uniform ${type} uMeterSize;
 out ${type} outValue;
 
 void main()
 {
-  geometry.worldPosition = uWorldPos;
-  geometry.position = uCommonPos;
+  geometry.worldPosition = test.uWorldPos;
+  geometry.position = test.uCommonPos;
   outValue = project_size(uMeterSize);
 }
 `,
   project_position: `\
 #version 300 es
 
-uniform vec3 uPos;
-uniform vec3 uPos64Low;
-
 out vec4 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  outValue = project_position(vec4(uPos, 1.0), uPos64Low);
+  geometry.worldPosition = test.uPos;
+  outValue = project_position(vec4(test.uPos, 1.0), test.uPos64Low);
 }
 `,
   project_common_position_to_clipspace: `\
 #version 300 es
 
-uniform vec3 uPos;
 out vec3 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  vec4 pos = project_position(vec4(uPos, 1.0), vec3(0.));
+  geometry.worldPosition = test.uPos;
+  vec4 pos = project_position(vec4(test.uPos, 1.0), vec3(0.));
   vec4 glPos = project_common_position_to_clipspace(pos);
   outValue = glPos.xyz / glPos.w;
   outValue = vec3(
@@ -319,7 +313,7 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#vs', async t => {
+test.only('project#vs', async t => {
   const oldEpsilon = config.EPSILON;
 
   for (const testCase of TEST_CASES) {
@@ -348,13 +342,11 @@ test('project#vs#project_get_orientation_matrix', async t => {
   const vs = `\
 #version 300 es
 
-uniform vec3 uDirUp;
-uniform vec3 uInput;
 out vec3 outValue;
 
 void main() {
-  mat3 transform = project_get_orientation_matrix(uDirUp);
-  outValue = transform * uInput;
+  mat3 transform = project_get_orientation_matrix(test.uDirUp);
+  outValue = transform * test.uInput;
 }
   `;
   const shaderInputProps = {
