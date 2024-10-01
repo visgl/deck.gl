@@ -8,10 +8,11 @@ import test from 'tape-promise/tape';
 import {COORDINATE_SYSTEM, WebMercatorViewport, project, project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
-import {config} from '@math.gl/core';
+import {config, NumberArray3} from '@math.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
-import {getPixelOffset, runOnGPU, verifyGPUResult} from './project-glsl-test-utils';
+import {getPixelOffset, runOnGPU, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
+import {TestCase} from './project-glsl.spec';
 
 const PIXEL_TOLERANCE = 0.001;
 
@@ -39,14 +40,12 @@ const TRANSFORM_VS = {
   project_position_to_clipspace: `\
 #version 300 es
 
-uniform vec3 uPos;
-uniform vec3 uPos64Low;
 out vec3 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  vec4 glPos = project_position_to_clipspace(uPos, uPos64Low, vec3(0, 0, 0));
+  geometry.worldPosition = test.uPos;
+  vec4 glPos = project_position_to_clipspace(test.uPos, test.uPos64Low, vec3(0, 0, 0));
   outValue = glPos.xyz / glPos.w;
   outValue = vec3(
     (1.0 + outValue.x) / 2.0 * project.viewportSize.x,
@@ -58,19 +57,17 @@ void main()
   project_position_to_clipspace_world_position: `\
 #version 300 es
 
-uniform vec3 uPos;
-uniform vec3 uPos64Low;
 out vec4 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  project_position_to_clipspace(uPos, uPos64Low, vec3(0, 0, 0), outValue);
+  geometry.worldPosition = test.uPos;
+  project_position_to_clipspace(test.uPos, test.uPos64Low, vec3(0, 0, 0), outValue);
 }
 `
 };
 
-const TEST_CASES = [
+const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT mode',
     params: {
@@ -81,20 +78,20 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: [-122.45, 37.78, 0],
+        input: {uPos: [-122.45, 37.78, 0]},
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1])
       },
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [-122.45, 37.78, 0],
+        input: {uPos: [-122.45, 37.78, 0]},
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
         precision: PIXEL_TOLERANCE
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [-122.45, 37.78, 100],
+        input: {uPos: [-122.45, 37.78, 100]},
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
         precision: PIXEL_TOLERANCE
       }
@@ -110,7 +107,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: [-122.05, 37.92, 0],
+        input: {uPos: [-122.05, 37.92, 0]},
         output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92])
           .map((x, i) => x - TEST_VIEWPORT_HIGH_ZOOM.center[i])
           .concat([0, 1]),
@@ -119,7 +116,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [-122.05, 37.92, 0],
+        input: {uPos: [-122.05, 37.92, 0]},
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
         precision: PIXEL_TOLERANCE
       }
@@ -136,7 +133,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: [0.05, 0.08, 0],
+        input: {uPos: [0.05, 0.08, 0]},
         output: getPixelOffset(
           TEST_VIEWPORT.projectPosition([-122, 38, 0]),
           TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
@@ -145,7 +142,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [0.05, 0.08, 0],
+        input: {uPos: [0.05, 0.08, 0]},
         output: TEST_VIEWPORT.project([-122, 38, 0]),
         precision: PIXEL_TOLERANCE
       }
@@ -153,7 +150,7 @@ const TEST_CASES = [
   }
 ];
 
-test('project32&64#vs', async t => {
+test.only('project32&64#vs', async t => {
   const oldEpsilon = config.EPSILON;
 
   for (const usefp64 of [false, true]) {
@@ -176,15 +173,18 @@ test('project32&64#vs', async t => {
         const expected = (usefp64 && c.output64) || c.output;
         const actual = await runOnGPU({
           vs: c.vs,
-          modules: usefp64 ? [project64] : [project32],
+          modules: usefp64 ? [project64, testUniforms] : [project32, testUniforms],
           varying: 'outValue',
           vertexCount: 1,
-          shaderInputProps: {project: testCase.params, project64: testCase.params},
-          uniforms: {
-            ...uniforms,
-            uPos: c.input,
-            uPos64Low: c.input.map(fp64LowPart)
-          }
+          shaderInputProps: {
+            project: testCase.params,
+            project64: testCase.params,
+            test: {
+              uPos: c.input.uPos!,
+              uPos64Low: c.input.uPos!.map(fp64LowPart) as NumberArray3
+            }
+          },
+          uniforms
         });
         config.EPSILON = c.precision ?? 1e-5;
 

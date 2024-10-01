@@ -95,7 +95,7 @@ void main()
 `
 };
 
-type TestCase = {
+export type TestCase = {
   title: string;
   params: ProjectProps;
   tests: {
@@ -323,7 +323,7 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test.only('project#vs', async t => {
+test('project#vs', async t => {
   const oldEpsilon = config.EPSILON;
 
   for (const testCase of TEST_CASES) {
