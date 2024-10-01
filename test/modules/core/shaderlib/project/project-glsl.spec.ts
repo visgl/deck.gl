@@ -4,12 +4,18 @@
 
 import test from 'tape-promise/tape';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicViewport, project} from '@deck.gl/core';
-import {Matrix4, Vector3, config, equals, NumericArray} from '@math.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  WebMercatorViewport,
+  OrthographicViewport,
+  project,
+  ProjectProps
+} from '@deck.gl/core';
+import {Matrix4, Vector3, config, equals, NumericArray, NumberArray3} from '@math.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
-import {getPixelOffset, runOnGPU, TestOptions, verifyGPUResult} from './project-glsl-test-utils';
+import {getPixelOffset, runOnGPU, TestProps, verifyGPUResult} from './project-glsl-test-utils';
 const PIXEL_TOLERANCE = 1e-4;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
@@ -85,12 +91,12 @@ void main()
 
 type TestCase = {
   title: string;
-  params: Record<string, any>;
+  params: ProjectProps;
   tests: {
     name: string;
     vs: string;
     precision?: number;
-    input: TestOptions;
+    input: TestProps;
     output: any;
   }[];
 };
@@ -212,7 +218,7 @@ const TEST_CASES: TestCase[] = [
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-      coordinateOrigin: [-122.05, 37.92],
+      coordinateOrigin: [-122.05, 37.92, 0],
       modelMatrix: new Matrix4().translate([0, 0, 100])
     },
     tests: [
@@ -248,7 +254,7 @@ const TEST_CASES: TestCase[] = [
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
-      coordinateOrigin: [-122.05, 37.92]
+      coordinateOrigin: [-122.05, 37.92, 0]
     },
     tests: [
       {
@@ -324,8 +330,11 @@ test.only('project#vs', async t => {
         varying: 'outValue',
         modules: [project],
         vertexCount: 1,
-        shaderInputProps: {project: testCase.params},
-        uniforms: input
+        shaderInputProps: {
+          project: testCase.params,
+          test: input
+        },
+        uniforms: {}
       });
 
       t.is(verifyGPUResult(actual, output), true, name);
@@ -347,21 +356,20 @@ void main() {
   outValue = transform * test.uInput;
 }
   `;
-  const shaderInputProps = {
-    project: {
-      viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
-    }
-  };
-
   const runTransform = async (up: NumericArray, v: NumericArray): Promise<Vector3> => {
     const result = await runOnGPU({
       vs,
       varying: 'outValue',
       modules: [project],
       vertexCount: 1,
-      shaderInputProps,
-      uniforms: {uDirUp: up, uInput: v}
+      shaderInputProps: {
+        project: {
+          viewport: TEST_VIEWPORT,
+          coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        },
+        test: {uDirUp: up as NumberArray3, uInput: v as NumberArray3}
+      },
+      uniforms: {}
     });
     return new Vector3(result.slice(0, 3));
   };

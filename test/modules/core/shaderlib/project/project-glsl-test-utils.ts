@@ -67,6 +67,7 @@ export async function runOnGPU({
 }: BufferTransformProps & {
   shaderInputProps: {
     project: ProjectProps;
+    test: TestProps;
   };
   uniforms: Record<string, UniformValue>;
   varying: string;
@@ -78,7 +79,7 @@ export async function runOnGPU({
     modules: [...transformProps.modules, testUniforms]
   });
   transform.model.setUniforms(uniforms); // TODO delete
-  transform.model.shaderInputs.setProps({...shaderInputProps, test: uniforms});
+  transform.model.shaderInputs.setProps(shaderInputProps);
   transform.run({
     discard: true
   });
