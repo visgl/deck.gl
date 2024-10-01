@@ -4,12 +4,18 @@
 
 import test from 'tape-promise/tape';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicViewport, project} from '@deck.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  WebMercatorViewport,
+  OrthographicViewport,
+  project,
+  ProjectProps
+} from '@deck.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
-import {equals, config} from '@math.gl/core';
-import {runOnGPU, verifyGPUResult} from './project-glsl-test-utils';
+import {equals, config, NumberArray3} from '@math.gl/core';
+import {runOnGPU, TestProps, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122.45,
@@ -21,9 +27,15 @@ const TEST_VIEWPORT_2 = new WebMercatorViewport({
   latitude: 40.7,
   zoom: 8
 });
-const TEST_COORDINATE_ORIGIN = [-122.45, 37.78, 0];
+const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
 
-const TEST_CASES = [
+export type TestCase = {
+  title: string;
+  position: NumberArray3;
+  params: ProjectProps & {fromCoordinateSystem: number};
+  result: NumberArray3;
+};
+const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT:WEB_MERCATOR',
     position: [-70, 41, 1000],
@@ -133,21 +145,18 @@ test('project#projectPosition', t => {
   t.end();
 });
 
-test('project#projectPosition vs project_position', async t => {
+test.only('project#projectPosition vs project_position', async t => {
   config.EPSILON = 1e-5;
 
   const vs = `\
 #version 300 es
 
-uniform vec3 uPos;
-uniform vec3 uPos64Low;
-
 out vec4 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  outValue = project_position(vec4(uPos, 1.0), uPos64Low);
+  geometry.worldPosition = test.uPos;
+  outValue = project_position(vec4(test.uPos, 1.0), test.uPos64Low);
 }
 `;
 
@@ -155,16 +164,16 @@ void main()
     testCase => !testCase.params.fromCoordinateSystem
   )) {
     const cpuResult = projectPosition(position, params);
+    const testProps: TestProps = {
+      uPos: position,
+      uPos64Low: position.map(fp64LowPart) as NumberArray3
+    };
     const shaderResult = await runOnGPU({
       vs,
       varying: 'outValue',
-      modules: [project],
+      modules: [project, testUniforms],
       vertexCount: 1,
-      shaderInputProps: {project: params},
-      uniforms: {
-        uPos: position,
-        uPos64Low: position.map(fp64LowPart)
-      }
+      shaderInputProps: {project: params, test: testProps}
     });
 
     t.is(verifyGPUResult(shaderResult, cpuResult), true, title);

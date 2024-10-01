@@ -340,8 +340,7 @@ test('project#vs', async t => {
         shaderInputProps: {
           project: testCase.params,
           test: input
-        },
-        uniforms: {}
+        }
       });
 
       t.is(verifyGPUResult(actual, output), true, name);
@@ -375,8 +374,7 @@ void main() {
           coordinateSystem: COORDINATE_SYSTEM.LNGLAT
         },
         test: {uDirUp: up as NumberArray3, uInput: v as NumberArray3}
-      },
-      uniforms: {}
+      }
     });
     return new Vector3(result.slice(0, 3));
   };

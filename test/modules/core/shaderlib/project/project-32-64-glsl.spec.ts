@@ -150,7 +150,7 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test.only('project32&64#vs', async t => {
+test('project32&64#vs', async t => {
   const oldEpsilon = config.EPSILON;
 
   for (const usefp64 of [false, true]) {
