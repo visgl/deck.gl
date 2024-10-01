@@ -7,6 +7,7 @@ import type {UniformValue} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {BufferTransform, BufferTransformProps} from '@luma.gl/engine';
+import {ProjectProps} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
 
 export function getPixelOffset(p1, p2) {
@@ -30,7 +31,7 @@ uniform testUniforms {
 } test;
 `;
 
-export type TestOptions = {
+export type TestProps = {
   uCommonPos?: NumberArray4;
   uDirUp?: NumberArray3;
   uInput?: NumberArray3;
@@ -56,7 +57,7 @@ export const testUniforms = {
     uPos64Low: 'vec3<f32>',
     uWorldPos: 'vec3<f32>'
   }
-} as const satisfies ShaderModule<TestOptions>;
+} as const satisfies ShaderModule<TestProps>;
 
 export async function runOnGPU({
   shaderInputProps,
@@ -64,7 +65,9 @@ export async function runOnGPU({
   varying,
   ...transformProps
 }: BufferTransformProps & {
-  shaderInputProps: Record<string, Record<string, any>>;
+  shaderInputProps: {
+    project: ProjectProps;
+  };
   uniforms: Record<string, UniformValue>;
   varying: string;
 }): Promise<Float32Array> {
@@ -74,7 +77,7 @@ export async function runOnGPU({
     varyings: [varying],
     modules: [...transformProps.modules, testUniforms]
   });
-  transform.model.setUniforms(uniforms);
+  transform.model.setUniforms(uniforms); // TODO delete
   transform.model.shaderInputs.setProps({...shaderInputProps, test: uniforms});
   transform.run({
     discard: true
