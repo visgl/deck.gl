@@ -104,6 +104,7 @@ export type TestCase = {
     precision?: number;
     input: TestProps;
     output: any;
+    output64?: any;
   }[];
 };
 const TEST_CASES: TestCase[] = [

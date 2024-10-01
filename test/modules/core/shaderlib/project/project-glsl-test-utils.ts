@@ -66,6 +66,7 @@ export async function runOnGPU({
 }: BufferTransformProps & {
   shaderInputProps: {
     project: ProjectProps;
+    project64?: ProjectProps;
     test: TestProps;
   };
   varying: string;

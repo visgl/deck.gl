@@ -5,7 +5,7 @@
 import test from 'tape-promise/tape';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
-import {COORDINATE_SYSTEM, WebMercatorViewport, project, project32} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, WebMercatorViewport, project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
 import {config, NumberArray3} from '@math.gl/core';
@@ -127,7 +127,7 @@ const TEST_CASES: TestCase[] = [
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
-      coordinateOrigin: [-122.05, 37.92]
+      coordinateOrigin: [-122.05, 37.92, 0]
     },
     tests: [
       {
@@ -166,7 +166,8 @@ test.only('project32&64#vs', async t => {
       let uniforms = {};
       if (usefp64) {
         // fp64arithmetic uniform
-        uniforms = {...uniforms, ONE: 1.0};
+        // TODO remove when https://github.com/visgl/luma.gl/pull/2262 landed
+        uniforms = {ONE: 1.0};
       }
 
       for (const c of testCase.tests) {
