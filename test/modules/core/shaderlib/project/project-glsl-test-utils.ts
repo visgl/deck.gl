@@ -61,7 +61,6 @@ export const testUniforms = {
 
 export async function runOnGPU({
   shaderInputProps,
-  uniforms,
   varying,
   ...transformProps
 }: BufferTransformProps & {
@@ -69,20 +68,15 @@ export async function runOnGPU({
     project: ProjectProps;
     test: TestProps;
   };
-  uniforms: Record<string, UniformValue>;
   varying: string;
 }): Promise<Float32Array> {
   const transform = new BufferTransform(device, {
     ...transformProps,
     feedbackBuffers: {[varying]: OUT_BUFFER},
-    varyings: [varying],
-    modules: [...transformProps.modules, testUniforms]
+    varyings: [varying]
   });
-  transform.model.setUniforms(uniforms); // TODO delete
   transform.model.shaderInputs.setProps(shaderInputProps);
-  transform.run({
-    discard: true
-  });
+  transform.run({discard: true});
 
   const result: Uint8Array = await OUT_BUFFER.readAsync();
   return new Float32Array(result.buffer);

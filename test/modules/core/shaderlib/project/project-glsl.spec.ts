@@ -15,7 +15,13 @@ import {Matrix4, Vector3, config, equals, NumericArray, NumberArray3} from '@mat
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
-import {getPixelOffset, runOnGPU, TestProps, verifyGPUResult} from './project-glsl-test-utils';
+import {
+  getPixelOffset,
+  runOnGPU,
+  TestProps,
+  testUniforms,
+  verifyGPUResult
+} from './project-glsl-test-utils';
 const PIXEL_TOLERANCE = 1e-4;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
@@ -328,7 +334,7 @@ test.only('project#vs', async t => {
       let actual: NumericArray = await runOnGPU({
         vs,
         varying: 'outValue',
-        modules: [project],
+        modules: [project, testUniforms],
         vertexCount: 1,
         shaderInputProps: {
           project: testCase.params,
@@ -360,7 +366,7 @@ void main() {
     const result = await runOnGPU({
       vs,
       varying: 'outValue',
-      modules: [project],
+      modules: [project, testUniforms],
       vertexCount: 1,
       shaderInputProps: {
         project: {
