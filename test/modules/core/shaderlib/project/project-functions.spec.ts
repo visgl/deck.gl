@@ -32,7 +32,7 @@ const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
 export type TestCase = {
   title: string;
   position: NumberArray3;
-  projectProps: ProjectProps & {fromCoordinateSystem: number};
+  projectProps: ProjectProps & {fromCoordinateSystem?: number};
   result: NumberArray3;
 };
 const TEST_CASES: TestCase[] = [
@@ -94,7 +94,7 @@ const TEST_CASES: TestCase[] = [
     projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
-      coordinateOrigin: [-122.5, 38.8]
+      coordinateOrigin: [-122.5, 38.8, 0]
     },
     result: [-0.07111111111110802, 0.10954078583623073, 0.0008212863345433337]
   },
@@ -104,7 +104,7 @@ const TEST_CASES: TestCase[] = [
     projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-      coordinateOrigin: [-122.5, 38.8]
+      coordinateOrigin: [-122.5, 38.8, 0]
     },
     result: [-0.0016412509100689476, 0.00492356632304336, 0.0008206254565218747]
   },

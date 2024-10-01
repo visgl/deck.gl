@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {equals, NumericArray, NumberArray2, NumberArray3, NumberArray4} from '@math.gl/core';
-import type {UniformValue} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {BufferTransform, BufferTransformProps} from '@luma.gl/engine';
@@ -16,7 +15,6 @@ export function getPixelOffset(p1, p2) {
 
 const OUT_BUFFER = device.createBuffer({byteLength: 4 * 16});
 
-// TODO move to separate file?
 const uniformBlock = /* glsl */ `\
 uniform testUniforms {
   vec4 uCommonPos;
