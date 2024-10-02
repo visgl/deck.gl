@@ -102,6 +102,8 @@ export type VisualChannels = {
 
   heightField?: VisualChannelField;
   heightScale?: SCALE_TYPE;
+
+  weightField?: VisualChannelField;
 };
 
 export type ColorRange = {
@@ -144,6 +146,8 @@ export type VisConfig = {
 
   heightRange?: any;
   heightAggregation?: any;
+
+  weightAggregation?: any;
 };
 
 export type TextLabel = {

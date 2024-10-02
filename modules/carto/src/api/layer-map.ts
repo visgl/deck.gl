@@ -136,6 +136,13 @@ const customMarkersPropsMap = {
   }
 };
 
+const heatmapTilePropsMap = {
+  visConfig: {
+    colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
+    radius: 'radiusPixels'
+  }
+};
+
 const aggregationVisConfig = {
   colorAggregation: x => ({colorAggregation: AGGREGATION[x] || AGGREGATION.sum}),
   colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
@@ -164,7 +171,10 @@ export function getLayer(
   let basePropMap: any = sharedPropMap;
 
   if (config.visConfig?.customMarkers) {
-    basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
+    basePropMap = mergePropMaps(basePropMap, customMarkersPropsMap);
+  }
+  if (type === 'heatmapTile') {
+    basePropMap = mergePropMaps(basePropMap, heatmapTilePropsMap);
   }
   if (TILE_LAYER_TYPE_TO_LAYER[type]) {
     return getTileLayer(dataset, basePropMap, type);
