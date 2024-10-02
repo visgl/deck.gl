@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.32] - Oct 2 2024
+
+- CARTO: parseMap support for HeatmapTileLayer (#9196)
+- Export types for extension constructor options (#9137)
+
 #### deck.gl [9.0.31] - Sep 27 2024
 
 - Move publish target to es2020 (#9188)
