@@ -56,7 +56,7 @@ export type PathStyleExtensionProps<DataT = any> = {
   dashGapPickable?: boolean;
 };
 
-type PathStyleExtensionOptions = {
+export type PathStyleExtensionOptions = {
   /**
    * Add capability to render dashed lines.
    * @default false

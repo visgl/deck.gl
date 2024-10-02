@@ -94,7 +94,7 @@ export type DataFilterExtensionProps<DataT = any> = {
   }) => void;
 };
 
-type DataFilterExtensionOptions = {
+export type DataFilterExtensionOptions = {
   /**
    * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Set to `0` to disable category filtering.
    * @default 0
