@@ -106,7 +106,7 @@ const getCollisionUniforms = (
   }
   const {enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
-    enabled,
+    enabled: enabled && !drawToCollisionMap,
     sort: Boolean(drawToCollisionMap),
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap

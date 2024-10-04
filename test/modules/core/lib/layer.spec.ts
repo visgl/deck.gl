@@ -449,7 +449,7 @@ test('Layer#uniformTransitions', t => {
       onAfterUpdate: () =>
         t.deepEquals(
           drawCalls.pop(),
-          {opacity: Math.pow(0.5, 1 / 2.2), modelMatrix: scale2Mat4},
+          {opacity: 0.5, modelMatrix: scale2Mat4},
           'layer drawn with opacity in transition'
         )
     },

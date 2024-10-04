@@ -10,10 +10,8 @@ import CollisionFilterPass from './collision-filter-pass';
 import {MaskPreRenderStats} from '../mask/mask-effect';
 // import {debugFBO} from '../utils/debug';
 
-type CollisionFilterExtensionProps = {
-  collisionTestProps?: {};
-  collisionGroup: string;
-};
+import type {CollisionFilterExtensionProps} from './collision-filter-extension';
+import type {CollisionModuleProps} from './shader-module';
 
 // Factor by which to downscale Collision FBO relative to canvas
 const DOWNSCALE = 2;
@@ -159,11 +157,16 @@ export default class CollisionFilterEffect implements Effect {
         viewports: viewport ? [viewport] : [],
         onViewportActive,
         views,
-        moduleParameters: {
-          // To avoid feedback loop forming between Framebuffer and active Texture.
-          dummyCollisionMap: this.dummyCollisionMap,
-          // @ts-expect-error TODO - assuming WebGL context
-          devicePixelRatio: collisionFBO.device.canvasContext.getDevicePixelRatio() / DOWNSCALE
+        shaderModuleProps: {
+          collision: {
+            enabled: true,
+            // To avoid feedback loop forming between Framebuffer and active Texture.
+            dummyCollisionMap: this.dummyCollisionMap
+          },
+          project: {
+            // @ts-expect-error TODO - assuming WebGL context
+            devicePixelRatio: collisionFBO.device.canvasContext.getDevicePixelRatio() / DOWNSCALE
+          }
         }
       });
     }
@@ -179,7 +182,7 @@ export default class CollisionFilterEffect implements Effect {
   ): Record<string, RenderInfo> {
     const channelMap = {};
     for (const layer of collisionLayers) {
-      const {collisionGroup} = layer.props;
+      const collisionGroup = layer.props.collisionGroup!;
       let channelInfo = channelMap[collisionGroup];
       if (!channelInfo) {
         channelInfo = {collisionGroup, layers: [], layerBounds: [], allLayersLoaded: true};
@@ -210,13 +213,21 @@ export default class CollisionFilterEffect implements Effect {
     return channelMap;
   }
 
-  getModuleParameters(layer: Layer): {
-    collisionFBO: Framebuffer;
-    dummyCollisionMap: Texture;
+  getShaderModuleProps(layer: Layer): {
+    collision: CollisionModuleProps;
   } {
-    const {collisionGroup} = (layer as Layer<CollisionFilterExtensionProps>).props;
+    const {collisionGroup, collisionEnabled} = (layer as Layer<CollisionFilterExtensionProps>)
+      .props;
     const {collisionFBOs, dummyCollisionMap} = this;
-    return {collisionFBO: collisionFBOs[collisionGroup], dummyCollisionMap: dummyCollisionMap!};
+    const collisionFBO = collisionFBOs[collisionGroup!];
+    const enabled = collisionEnabled && Boolean(collisionFBO);
+    return {
+      collision: {
+        enabled,
+        collisionFBO,
+        dummyCollisionMap: dummyCollisionMap!
+      }
+    };
   }
 
   cleanup(): void {

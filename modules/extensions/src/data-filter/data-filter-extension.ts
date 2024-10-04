@@ -266,13 +266,12 @@ export default class DataFilterExtension extends LayerExtension<
     const filterModel = this.state.filterModel as Model;
     const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
 
-    const {onFilteredItemsChange} = this.props;
-
     if (!this.state.categoryBitMask) {
       extension._updateCategoryBitMask.call(this, params, extension);
     }
 
     const {
+      onFilteredItemsChange,
       extensions,
       filterEnabled,
       filterRange,
@@ -280,7 +279,7 @@ export default class DataFilterExtension extends LayerExtension<
       filterTransformSize,
       filterTransformColor,
       filterCategories
-    } = params.moduleParameters;
+    } = this.props;
     const dataFilterProps: DataFilterModuleProps = {
       extensions,
       filterEnabled,

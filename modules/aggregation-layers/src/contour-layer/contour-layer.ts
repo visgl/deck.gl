@@ -286,8 +286,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   override draw(opts) {
     // Replaces render time viewport with our own
-    if (opts.moduleParameters.viewport) {
-      opts.moduleParameters.viewport = this.state.aggregatorViewport;
+    if (opts.shaderModuleProps.project) {
+      opts.shaderModuleProps.project.viewport = this.state.aggregatorViewport;
     }
     super.draw(opts);
   }

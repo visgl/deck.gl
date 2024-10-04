@@ -66,7 +66,7 @@ export interface Aggregator {
   update(): void;
 
   /** Called before layer is drawn to screen. */
-  preDraw(params?: {moduleSettings: any}): void;
+  preDraw(): void;
 
   /** Dispose all allocated resources */
   destroy(): void;

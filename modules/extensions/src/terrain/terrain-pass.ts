@@ -87,4 +87,12 @@ export class TerrainPass extends LayersPass {
       ...(layer.props.operation.includes('terrain') && TERRAIN_BLENDING)
     };
   }
+
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    return {
+      terrain: {
+        project: otherShaderModuleProps.project
+      }
+    };
+  }
 }

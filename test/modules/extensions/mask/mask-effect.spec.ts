@@ -95,7 +95,7 @@ test('MaskEffect#update', t => {
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
 
-  let parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
   let mask = parameters.maskChannels['test-mask-layer'];
   t.is(mask?.index, 0, 'Mask is rendered in channel 0');
@@ -104,7 +104,7 @@ test('MaskEffect#update', t => {
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER, TEST_MASK_LAYER2], 'Add second mask');
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   t.is(mask?.index, 0, 'Mask is rendered in channel 0');
   t.is(mask?.bounds, bounds, 'Using cached mask bounds');
@@ -115,7 +115,7 @@ test('MaskEffect#update', t => {
 
   preRenderWithLayers([TEST_LAYER, TEST_MASK_LAYER2], 'Remove first mask');
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   t.notOk(mask, 'Mask is removed');
   mask = parameters.maskChannels['test-mask-layer-2'];
@@ -127,7 +127,7 @@ test('MaskEffect#update', t => {
     'Update second mask, add third'
   );
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer-2'];
   t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
   t.not(mask?.bounds, bounds, 'Second mask is updated');
@@ -165,14 +165,14 @@ test('MaskEffect#coordinates', t => {
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
 
-  let parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   let mask = parameters.maskChannels['test-mask-layer'];
   t.same(mask?.coordinateOrigin, [0, 0, 0], 'Mask has correct coordinate origin');
   t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.DEFAULT, 'Mask has correct coordinate system');
 
   preRenderWithLayers([TEST_MASK_LAYER_CARTESIAN, TEST_LAYER], 'Update to cartesion coordinates');
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   t.same(mask?.coordinateOrigin, [1, 2, 3], 'Mask has correct coordinate origin');
   t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.CARTESIAN, 'Mask has correct coordinate system');

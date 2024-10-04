@@ -68,7 +68,7 @@ export default abstract class AggregationLayer<
   getModuleSettings() {
     // For regular layer draw this happens during draw cycle (_drawLayersInViewport) not during update cycle
     // For aggregation layers this is called during updateState to update aggregation data
-    // NOTE: it is similar to LayerPass._getModuleParameters() but doesn't inlcude `effects` it is not needed for aggregation
+    // NOTE: it is similar to LayerPass._getShaderModuleProps() but doesn't inlcude `effects` it is not needed for aggregation
     const {viewport, mousePosition, device} = this.context;
     const moduleSettings = Object.assign(Object.create(this.props), {
       viewport,

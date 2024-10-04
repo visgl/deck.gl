@@ -42,7 +42,7 @@ type WebGLAggregationProps = AggregationProps & {
    */
   binIdRange: [start: number, end: number][];
   /** Context props passed to the shader modules */
-  moduleSettings?: ModelProps['moduleSettings'];
+  shaderModuleProps?: Record<string, any>;
 };
 
 /** An Aggregator implementation that calculates aggregation on the GPU */
@@ -221,8 +221,8 @@ export class WebGLAggregator implements Aggregator {
       }
       this.binSorter.setModelProps({attributes: attributeBuffers, constantAttributes});
     }
-    if (props.moduleSettings) {
-      this.binSorter.setModelProps({moduleSettings: props.moduleSettings});
+    if (props.shaderModuleProps) {
+      this.binSorter.setModelProps({shaderModuleProps: props.shaderModuleProps});
     }
 
     Object.assign(this.props, props);
@@ -245,18 +245,9 @@ export class WebGLAggregator implements Aggregator {
   update() {}
 
   /** Run aggregation */
-  preDraw(
-    /** Parameters only available at runtime  */
-    opts: {
-      moduleSettings: any;
-    }
-  ) {
+  preDraw() {
     if (!this.needsUpdate.some(Boolean)) {
       return;
-    }
-
-    if (opts.moduleSettings) {
-      this.binSorter.setModelProps({moduleSettings: opts.moduleSettings});
     }
 
     const {operations} = this.props;

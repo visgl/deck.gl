@@ -6,6 +6,7 @@ import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-p
 import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
+import type {Effect} from '../lib/effect';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
@@ -69,7 +70,7 @@ export default class PickLayersPass extends LayersPass {
     effects,
     pass = 'picking',
     pickZ,
-    moduleParameters
+    shaderModuleProps
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
@@ -94,7 +95,7 @@ export default class PickLayersPass extends LayersPass {
       effects: effects?.filter(e => e.useInPicking),
       pass,
       isPicking: true,
-      moduleParameters,
+      shaderModuleProps,
       clearColor: [0, 0, 0, 0],
       colorMask: 0xf,
       scissorRect
@@ -115,13 +116,17 @@ export default class PickLayersPass extends LayersPass {
     );
   }
 
-  protected getModuleParameters() {
+  protected getShaderModuleProps(
+    layer: Layer,
+    effects: Effect[] | undefined,
+    otherShaderModuleProps: Record<string, any>
+  ): any {
     return {
       picking: {
         isActive: 1,
         isAttribute: this.pickZ
       },
-      lightSources: {enabled: false}
+      lighting: {enabled: false}
     };
   }
 

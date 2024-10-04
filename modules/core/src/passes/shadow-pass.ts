@@ -85,9 +85,12 @@ export default class ShadowPass extends LayersPass {
     return layer.props.shadowEnabled !== false;
   }
 
-  getModuleParameters() {
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
     return {
-      drawToShadowMap: true
+      shadow: {
+        project: otherShaderModuleProps.project,
+        drawToShadowMap: true
+      }
     };
   }
 }
