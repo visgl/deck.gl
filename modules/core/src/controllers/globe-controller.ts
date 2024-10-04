@@ -9,6 +9,9 @@ import {MapState, MapStateProps} from './map-controller';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
+// matches Web Mercator projection limit
+const MAX_VALID_LATITUDE = 85.051129;
+
 class GlobeState extends MapState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
@@ -20,7 +23,7 @@ class GlobeState extends MapState {
     if (longitude < -180 || longitude > 180) {
       props.longitude = mod(longitude + 180, 360) - 180;
     }
-    props.latitude = clamp(latitude, -89, 89);
+    props.latitude = clamp(latitude, -MAX_VALID_LATITUDE, MAX_VALID_LATITUDE);
 
     return props;
   }

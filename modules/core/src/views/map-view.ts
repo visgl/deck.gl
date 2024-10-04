@@ -55,7 +55,7 @@ export default class MapView extends View<MapViewState, MapViewProps> {
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return WebMercatorViewport;
   }
 

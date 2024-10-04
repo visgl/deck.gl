@@ -149,7 +149,7 @@ export default [
     viewState: {
       latitude: 0,
       longitude: 50,
-      zoom: 0
+      zoom: 1.5
     },
     layers: [
       new PolygonLayer({
@@ -184,7 +184,7 @@ export default [
     viewState: {
       latitude: 0,
       longitude: 50,
-      zoom: 0
+      zoom: 1.5
     },
     layers: [
       new PolygonLayer({
