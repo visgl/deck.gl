@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {
+  FlyToInterpolator,
+  WebMercatorViewport,
+  _GlobeViewport,
+  _applyStyles as applyStyles
+} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
@@ -65,9 +70,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
+    applyStyles(element, style);
     this.deck = deck;
     this.element = element;
     this.update();
