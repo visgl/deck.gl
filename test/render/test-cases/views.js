@@ -101,9 +101,7 @@ export default [
       viewState: {
         longitude: -100,
         latitude: 80,
-        zoom: 0,
-        pitch: 0,
-        bearing: 0
+        zoom: -1
       },
       layers: [
         new SimpleMeshLayer({

@@ -17,7 +17,7 @@ const TEST_VIEWPORTS = [
   {
     width: 800,
     height: 600,
-    latitude: 90,
+    latitude: 80,
     longitude: 0,
     zoom: 1
   }

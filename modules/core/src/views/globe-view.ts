@@ -4,6 +4,7 @@
 
 import View, {CommonViewState, CommonViewProps} from './view';
 import GlobeViewport from '../viewports/globe-viewport';
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import GlobeController from '../controllers/globe-controller';
 
 export type GlobeViewState = {
@@ -37,8 +38,8 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
     super(props);
   }
 
-  get ViewportType() {
-    return GlobeViewport;
+  getViewportType(viewState: GlobeViewState) {
+    return viewState.zoom > 12 ? WebMercatorViewport : GlobeViewport;
   }
 
   get ControllerType() {

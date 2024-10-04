@@ -45,7 +45,7 @@ export default class FirstPersonView extends View<FirstPersonViewState, FirstPer
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return FirstPersonViewport;
   }
 
