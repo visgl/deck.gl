@@ -42,6 +42,7 @@ import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
+import {CreateDeviceProps} from '@luma.gl/core/dist/lib/luma';
 
 /* global document */
 
@@ -115,12 +116,10 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** luma.gl GPU device. A device will be auto-created if not supplied. */
   device?: Device | null;
   /** A device will be auto-created if not supplied using these props. */
-  deviceProps?: DeviceProps;
+  deviceProps?: CreateDeviceProps;
 
   /** WebGL context @deprecated Use props.device */
   gl?: WebGL2RenderingContext | null;
-  /** Options used when creating a WebGL context. @deprecated Use props.deviceProps */
-  glOptions?: WebGLContextAttributes;
 
   /**
    * The array of Layer instances to be rendered.
@@ -232,7 +231,6 @@ const defaultProps: DeckProps = {
   device: null,
   deviceProps: {type: 'webgl'} as DeviceProps,
   gl: null,
-  glOptions: {},
   canvas: null,
   layers: [],
   effects: [],
@@ -455,7 +453,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const resolvedProps: Omit<Required<DeckProps>, 'glOptions'> & {
+    const resolvedProps: Required<DeckProps> & {
       width: number;
       height: number;
       views: View[];
@@ -783,8 +781,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // width,
       // height,
       gl,
-      // deviceProps,
-      // glOptions,
       // debug,
       onError,
       // onBeforeRender,
