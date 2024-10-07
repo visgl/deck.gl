@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
 
 const DEFAULT_TEXTURE_PARAMETERS: SamplerProps = {

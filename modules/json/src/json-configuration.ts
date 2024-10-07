@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // TODO - default parsing code should not be part of the configuration.
 import parseExpressionString from './helpers/parse-expression-string';
 import assert from './utils/assert';

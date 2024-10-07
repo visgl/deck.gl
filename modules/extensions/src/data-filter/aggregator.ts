@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Device, DeviceFeature, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import {Model, ModelProps} from '@luma.gl/engine';
 

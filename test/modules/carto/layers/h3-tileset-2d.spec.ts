@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import H3Tileset2D from '@deck.gl/carto/layers/h3-tileset-2d';
 import {Viewport, WebMercatorViewport} from '@deck.gl/core';

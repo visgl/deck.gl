@@ -1,22 +1,7 @@
-// Copyright (c) 2015-2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 import project from '../project/project';
 import {Vector3, Matrix4} from '@math.gl/core';
@@ -27,7 +12,7 @@ import {pixelsToWorld} from '@math.gl/web-mercator';
 import type {Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
-import type {ProjectUniforms} from '../project/viewport-uniforms';
+import type {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
 uniform shadowUniforms {
@@ -129,8 +114,8 @@ const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
 const DEFAULT_SHADOW_COLOR: NumberArray4 = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
-type ShadowModuleProps = {
-  viewport: Viewport;
+export type ShadowModuleProps = {
+  project: ProjectProps;
   shadowEnabled?: boolean;
   drawToShadowMap?: boolean;
   shadowMaps?: Texture[];
@@ -221,34 +206,34 @@ function getViewProjectionMatrices({
 
 // eslint-disable-next-line complexity
 function createShadowUniforms(
-  opts: ShadowModuleProps
+  opts: Partial<ShadowModuleProps>
 ): ShadowModuleBindings & ShadowModuleUniforms {
-  const {shadowEnabled = true} = opts;
-  if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
+  const {shadowEnabled = true, project: projectProps} = opts;
+  if (!shadowEnabled || !projectProps || !opts.shadowMatrices || !opts.shadowMatrices.length) {
     return {
       drawShadowMap: false,
       useShadowMap: false,
-      shadow_uShadowMap0: opts.dummyShadowMap,
-      shadow_uShadowMap1: opts.dummyShadowMap
+      shadow_uShadowMap0: opts.dummyShadowMap!,
+      shadow_uShadowMap1: opts.dummyShadowMap!
     };
   }
-  const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+  const projectUniforms = project.getUniforms(projectProps) as ProjectUniforms;
   const center = getMemoizedViewportCenterPosition({
-    viewport: opts.viewport,
+    viewport: projectProps.viewport,
     center: projectUniforms.center
   });
 
   const projectCenters: NumericArray[] = [];
   const viewProjectionMatrices = getMemoizedViewProjectionMatrices({
     shadowMatrices: opts.shadowMatrices,
-    viewport: opts.viewport
+    viewport: projectProps.viewport
   }).slice();
 
   for (let i = 0; i < opts.shadowMatrices.length; i++) {
     const viewProjectionMatrix = viewProjectionMatrices[i];
     const viewProjectionMatrixCentered = viewProjectionMatrix
       .clone()
-      .translate(new Vector3(opts.viewport.center).negate());
+      .translate(new Vector3(projectProps.viewport.center).negate());
 
     if (
       projectUniforms.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
@@ -264,14 +249,14 @@ function createShadowUniforms(
     }
   }
 
-  const uniforms = {
+  const uniforms: ShadowModuleUniforms & ShadowModuleBindings = {
     drawShadowMap: Boolean(opts.drawToShadowMap),
     useShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
     color: opts.shadowColor || DEFAULT_SHADOW_COLOR,
     lightId: opts.shadowLightId || 0,
     lightCount: opts.shadowMatrices.length,
-    shadow_uShadowMap0: opts.dummyShadowMap,
-    shadow_uShadowMap1: opts.dummyShadowMap
+    shadow_uShadowMap0: opts.dummyShadowMap!,
+    shadow_uShadowMap1: opts.dummyShadowMap!
   };
 
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
@@ -299,19 +284,7 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
-  getUniforms: (
-    opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {},
-    context: any = {}
-  ) => {
-    if (
-      'viewport' in opts &&
-      (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))
-    ) {
-      // @ts-expect-error if opts.viewport is defined, context should contain the project module's uniforms
-      return createShadowUniforms(opts, context);
-    }
-    return {};
-  },
+  getUniforms: createShadowUniforms,
   uniformTypes: {
     drawShadowMap: 'f32',
     useShadowMap: 'f32',

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Station, StationGroup} from './app';
 
 export function sortData(data: Station[], groupBy: 'Country' | 'Latitude'): StationGroup[] {

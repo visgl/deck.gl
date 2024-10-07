@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {BitmapLayer} from '@deck.gl/layers';
 import type {GetPickingInfoParams, TextureSource} from '@deck.gl/core';
 import type {Texture2D} from '@luma.gl/webgl';

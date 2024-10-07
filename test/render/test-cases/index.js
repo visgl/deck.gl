@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // core layers
 import coreLayersTests from './core-layers';
 import arcLayersTests from './arc-layer';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {PostProcessEffect, LightingEffect, AmbientLight, DirectionalLight} from '@deck.gl/core';
 import {zoomBlur, vignette} from '@luma.gl/effects';
 import {hexagons, points} from 'deck.gl-test/data';

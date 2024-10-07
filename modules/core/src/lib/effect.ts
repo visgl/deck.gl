@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type Deck from './deck';
 import type Layer from './layer';
 import type {LayersPassRenderOptions} from '../passes/layers-pass';
@@ -28,7 +32,7 @@ export interface Effect {
   /** Called after layers are rendered to screen */
   postRender?(opts: PostRenderOptions): Framebuffer | null;
   /** Module settings passed to models */
-  getModuleParameters?(layer: Layer): any;
+  getShaderModuleProps?(layer: Layer, otherShaderModuleProps: Record<string, any>): any;
 
   // / Lifecycle methods
   /** Called when this effect is added */

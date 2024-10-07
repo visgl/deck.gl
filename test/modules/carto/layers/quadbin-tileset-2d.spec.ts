@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import QuadbinTileset2D from '@deck.gl/carto/layers/quadbin-tileset-2d';
 import {

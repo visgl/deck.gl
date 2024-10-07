@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
 import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
@@ -49,11 +53,11 @@ export default class MaskExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<Required<MaskExtensionProps>>, {context, moduleParameters}: any) {
+  draw(this: Layer<Required<MaskExtensionProps>>, {context, shaderModuleProps}: any) {
     const maskProps = {} as MaskProps;
     maskProps.maskByInstance = Boolean(this.state.maskByInstance);
     const {maskId, maskInverted} = this.props;
-    const {maskChannels} = moduleParameters;
+    const {maskChannels} = shaderModuleProps.mask || {};
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
       const {index, bounds, coordinateOrigin: fromCoordinateOrigin} = maskChannels[maskId];

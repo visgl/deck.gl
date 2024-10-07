@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /** Utility to estimate binIdRange as expected by AggregatorProps */
 export function getBinIdRange({
   dataBounds,

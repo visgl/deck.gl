@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable camelcase */
 import {DEFAULT_AGGREGATION_RES_LEVEL_H3} from '../constants';
 import {baseSource} from './base-source';

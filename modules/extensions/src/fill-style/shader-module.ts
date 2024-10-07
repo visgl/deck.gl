@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
-import type {Viewport, ProjectUniforms} from '@deck.gl/core';
+import type {ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 
@@ -78,7 +82,7 @@ const inject = {
 };
 
 export type FillStyleModuleProps = {
-  viewport: Viewport;
+  project: ProjectProps;
   fillPatternEnabled?: boolean;
   fillPatternMask?: boolean;
   fillPatternTexture: Texture;
@@ -109,9 +113,9 @@ function getPatternUniforms(
     uniforms.fill_patternTexture = fillPatternTexture;
     uniforms.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
   }
-  if ('viewport' in opts) {
+  if ('project' in opts) {
     const {fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+    const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
     const {commonOrigin: coordinateOriginCommon} = projectUniforms;
 
     const coordinateOriginCommon64Low: [number, number] = [

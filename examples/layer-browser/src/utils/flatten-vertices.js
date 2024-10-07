@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Flattens nested array of vertices, padding third coordinate as needed
 export default function flattenVertices(nestedArray, {result = [], dimensions = 3} = {}) {
   let index = -1;

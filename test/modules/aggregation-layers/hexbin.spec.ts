@@ -9,6 +9,7 @@ import {
   getHexbinCentroid,
   getHexbinCentroidGLSL
 } from '@deck.gl/aggregation-layers/hexagon-layer/hexbin';
+import {binOptionsUniforms} from '@deck.gl/aggregation-layers/hexagon-layer/bin-options-uniforms';
 import {hexbin} from 'd3-hexbin';
 import {device} from '@deck.gl/test-utils';
 import {BufferTransform} from '@luma.gl/engine';
@@ -42,16 +43,15 @@ test('pointToHexbin vs d3-hexbin', t => {
 test('pointToHexbin CPU vs GPU', t => {
   const transform = new BufferTransform(device, {
     vs: `#version 300 es
-    uniform vec2 position;
-    uniform float radius;
     out vec2 binId;
     ${pointToHexbinGLSL}
     void main() {
-      binId = vec2(pointToHexbin(position, radius));
+      binId = vec2(pointToHexbin(binOptions.hexOriginCommon, binOptions.radiusCommon));
     }
     `,
     topology: 'point-list',
-    varyings: ['binId']
+    varyings: ['binId'],
+    modules: [binOptionsUniforms]
   });
   transform.model.setVertexCount(1);
   const outputBuffer = device.createBuffer({
@@ -61,7 +61,8 @@ test('pointToHexbin CPU vs GPU', t => {
 
   for (const d of TestData) {
     const expected = pointToHexbin(d.p, d.radius);
-    transform.model.setUniforms({position: d.p, radius: d.radius});
+    const binOptions = {hexOriginCommon: d.p, radiusCommon: d.radius};
+    transform.model.shaderInputs.setProps({binOptions});
     transform.run({discard: true});
     const result = new Float32Array(outputBuffer.readSyncWebGL().buffer);
     // tape does not consider -0 == 0
@@ -80,16 +81,15 @@ test('pointToHexbin CPU vs GPU', t => {
 test('getHexbinCentroid CPU vs GPU', t => {
   const transform = new BufferTransform(device, {
     vs: `#version 300 es
-    uniform vec2 binId;
-    uniform float radius;
     out vec2 position;
     ${getHexbinCentroidGLSL}
     void main() {
-      position = hexbinCentroid(binId, radius);
+      position = hexbinCentroid(binOptions.hexOriginCommon, binOptions.radiusCommon);
     }
     `,
     topology: 'point-list',
-    varyings: ['position']
+    varyings: ['position'],
+    modules: [binOptionsUniforms]
   });
   transform.model.setVertexCount(1);
   const outputBuffer = device.createBuffer({
@@ -99,7 +99,8 @@ test('getHexbinCentroid CPU vs GPU', t => {
 
   for (const d of TestData) {
     const bin = pointToHexbin(d.p, d.radius);
-    transform.model.setUniforms({binId: bin, radius: d.radius});
+    const binOptions = {hexOriginCommon: bin, radiusCommon: d.radius};
+    transform.model.shaderInputs.setProps({binOptions});
     transform.run({discard: true});
     const expected = getHexbinCentroid(bin, d.radius);
     const result = new Float32Array(outputBuffer.readSyncWebGL().buffer);

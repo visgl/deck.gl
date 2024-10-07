@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global window, fetch */
 import {Deck, GeoJsonLayer, MapController} from 'deck.gl';
 import TimeSlicedScatterplotLayer from './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer';

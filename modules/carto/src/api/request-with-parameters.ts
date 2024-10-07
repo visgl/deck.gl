@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {VERSION} from '@deck.gl/core';
 import {isPureObject} from '../utils';
 import {CartoAPIError} from './carto-api-error';

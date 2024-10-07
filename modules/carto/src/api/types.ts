@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {SCALE_TYPE} from './layer-map';
 
 export type Format = 'json' | 'geojson' | 'tilejson';
@@ -102,6 +106,8 @@ export type VisualChannels = {
 
   heightField?: VisualChannelField;
   heightScale?: SCALE_TYPE;
+
+  weightField?: VisualChannelField;
 };
 
 export type ColorRange = {
@@ -144,6 +150,8 @@ export type VisConfig = {
 
   heightRange?: any;
   heightAggregation?: any;
+
+  weightAggregation?: any;
 };
 
 export type TextLabel = {

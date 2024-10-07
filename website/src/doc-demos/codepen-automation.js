@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const PROP_BLACK_LIST = ['dataComparator', 'fetch'];
 const BASE_LAYER_PROP_WHITE_LIST = [
   'autoHighlight',

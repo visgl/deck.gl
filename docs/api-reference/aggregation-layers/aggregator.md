@@ -86,7 +86,7 @@ aggregator.update();
 Called before the result buffers are drawn to screen. Certain types of aggregations are dependent on render time context and this is alternative opportunity to update just-in-time.
 
 ```ts
-aggregator.preDraw({moduleSettings: ...});
+aggregator.preDraw();
 ```
 
 #### `getBin` {#getbin}

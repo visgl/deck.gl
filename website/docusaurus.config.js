@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 

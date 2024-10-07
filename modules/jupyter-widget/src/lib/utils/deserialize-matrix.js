@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Functions to wrangle data from pydeck's row major order matrix dataframe to the deck.gl binary data format.
 // The format used is described here:
 // https://deck.gl/#/documentation/developer-guide/performance-optimization?section=supply-attributes-directly

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-catch';
 import {requestWithParameters} from '@deck.gl/carto/api/request-with-parameters';
 import {V3_MINOR_VERSION} from '@deck.gl/carto/api/common';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, Position} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';

@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
@@ -55,7 +39,6 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
-import {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -1052,12 +1035,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Calculates uniforms
   _drawLayer({
     renderPass,
-    moduleParameters = null,
+    shaderModuleProps = null,
     uniforms = {},
     parameters = {}
   }: {
     renderPass: RenderPass;
-    moduleParameters: any;
+    shaderModuleProps: any;
     uniforms: any;
     parameters: any;
   }): void {
@@ -1070,94 +1053,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    // apply gamma to opacity to make it visually "linear"
-    const opacity = Math.pow(this.props.opacity, 1 / 2.2);
-    uniforms.opacity = opacity; // TODO remove once layers ported to UBO
-
     try {
       // TODO/ib - hack move to luma Model.draw
-      if (moduleParameters) {
-        const {isActive, isAttribute} = moduleParameters.picking;
-        const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
-        // @ts-expect-error material is not a Layer prop
-        const {material, modelMatrix} = this.props;
-
+      if (shaderModuleProps) {
         this.setModuleParameters({});
-
-        const {
-          // mask
-          maskChannels,
-          maskMap,
-          maskSources,
-          // shadow
-          shadowEnabled,
-          drawToShadowMap,
-          shadowMaps,
-          dummyShadowMap,
-          shadowColor,
-          shadowMatrices,
-          shadowLightId,
-          // terrain
-          picking,
-          heightMap,
-          heightMapBounds,
-          dummyHeightMap,
-          terrainCover,
-          drawToTerrainHeightMap,
-          useTerrainHeightMap,
-          terrainSkipRender,
-          // lighting
-          lightSources
-        } = moduleParameters;
-
-        const maskProps = {
-          maskChannels,
-          maskMap,
-          maskSources
-        };
-
-        const shadowProps = {
-          viewport,
-          shadowEnabled,
-          drawToShadowMap,
-          shadowMaps,
-          dummyShadowMap,
-          shadowColor,
-          shadowMatrices,
-          shadowLightId
-        };
-        const terrainProps = {
-          viewport,
-          picking,
-          heightMap,
-          heightMapBounds,
-          dummyHeightMap,
-          terrainCover,
-          drawToTerrainHeightMap,
-          useTerrainHeightMap,
-          terrainSkipRender
-        };
-
-        const projectProps = {
-          viewport,
-          devicePixelRatio,
-          modelMatrix,
-          coordinateSystem,
-          coordinateOrigin
-        } as ProjectProps;
-
-        this.setShaderModuleProps({
-          // TODO Revisit whether this is necessary once all layers ported to UBO
-          mask: maskProps,
-          shadow: shadowProps,
-          terrain: terrainProps,
-          layer: {opacity},
-          lighting: lightSources,
-          phongMaterial: material,
-          gouraudMaterial: material,
-          picking: {isActive, isAttribute} as const satisfies PickingProps,
-          project: projectProps
-        });
+        this.setShaderModuleProps(shaderModuleProps);
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1176,7 +1076,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
         context.device.withParametersWebGL(parameters, () => {
-          const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+          const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
           for (const extension of this.props.extensions) {
@@ -1186,7 +1086,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+        const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {

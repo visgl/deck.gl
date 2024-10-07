@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Framebuffer, TextureProps} from '@luma.gl/core';
 import {
   CompositeLayer,
@@ -64,8 +68,8 @@ export function RTTModifier(BaseLayer) {
     static layerName = `RTT-${BaseLayer.layerName}`;
 
     draw(this: RTTLayer, opts: any) {
-      const {moduleParameters} = opts;
-      const {picking} = moduleParameters;
+      const {shaderModuleProps} = opts;
+      const {picking} = shaderModuleProps;
       const postProcessLayer = getPostProcessLayer(this);
 
       if (!picking.isActive) {
@@ -130,10 +134,11 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
 
     _resizeBuffers(this: PostProcessLayer, opts: any) {
       // TODO we could likely render to a smaller buffer for better perf
-      const {moduleParameters} = opts;
+      const {shaderModuleProps} = opts;
       const {viewport} = this.context;
-      const width = moduleParameters.devicePixelRatio * viewport.width;
-      const height = moduleParameters.devicePixelRatio * viewport.height;
+      const {devicePixelRatio} = shaderModuleProps.project;
+      const width = devicePixelRatio * viewport.width;
+      const height = devicePixelRatio * viewport.height;
       this.internalState.renderBuffers.forEach((fbo: Framebuffer) => fbo.resize({width, height}));
     }
 

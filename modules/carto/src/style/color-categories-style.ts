@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {AccessorFunction, Color} from '@deck.gl/core';
 import {Feature} from 'geojson';
 import getPalette, {DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';

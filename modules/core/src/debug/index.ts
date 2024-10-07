@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import deckLog from '../utils/log';
 import {getLoggers} from './loggers';
 

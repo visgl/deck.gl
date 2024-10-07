@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import {
   _GeoCellLayer as GeoCellLayer,

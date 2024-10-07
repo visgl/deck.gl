@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Framebuffer, Texture, TextureView} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
@@ -102,7 +106,7 @@ const getCollisionUniforms = (
   }
   const {enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
-    enabled,
+    enabled: enabled && !drawToCollisionMap,
     sort: Boolean(drawToCollisionMap),
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap

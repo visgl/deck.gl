@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import test from 'tape-promise/tape';
 import {Attribute} from '@deck.gl/core';
@@ -136,7 +140,7 @@ test('WebGLAggregator#1D', t => {
   });
 
   aggregator.update();
-  aggregator.preDraw({moduleSettings: {}});
+  aggregator.preDraw();
 
   t.is(aggregator.binCount, 15, 'binCount');
 
@@ -244,7 +248,7 @@ test('WebGLAggregator#2D', t => {
   });
 
   aggregator.update();
-  aggregator.preDraw({moduleSettings: {}});
+  aggregator.preDraw();
 
   t.is(aggregator.binCount, 20, 'binCount');
 

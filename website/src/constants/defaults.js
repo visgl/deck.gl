@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export const MAPBOX_STYLES = {
   LIGHT: 'https://deck.gl/mapstyle/deck-light.json',
   LIGHT_LABEL: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',

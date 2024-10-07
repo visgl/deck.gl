@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {RenderPipelineParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 import type {HeightMapBuilder} from './height-map-builder';
@@ -81,6 +85,14 @@ export class TerrainPass extends LayersPass {
       blend: true,
       depthTest: false,
       ...(layer.props.operation.includes('terrain') && TERRAIN_BLENDING)
+    };
+  }
+
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    return {
+      terrain: {
+        project: otherShaderModuleProps.project
+      }
     };
   }
 }

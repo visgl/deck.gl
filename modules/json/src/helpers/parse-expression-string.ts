@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {get} from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing

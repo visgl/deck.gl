@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export const IncomeSurvey = [
   {age: 19, household: 1, income: 25, education: 1},
   {age: 20, household: 1, income: 0, education: 2},

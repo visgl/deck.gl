@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable callback-return */
 import {IconLayer} from '@deck.gl/layers';
 import {points, iconAtlas as iconMapping} from 'deck.gl-test/data';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {scalePow} from 'd3-scale';
 import {extent} from 'd3-array';
 

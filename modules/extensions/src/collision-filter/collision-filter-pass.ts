@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Framebuffer} from '@luma.gl/core';
 import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} from '@deck.gl/core';
 
@@ -16,15 +20,17 @@ export default class CollisionFilterPass extends LayersPass {
     return {...layer.props.parameters, blend: false, depthRange: [0, 1], depthTest: true};
   }
 
-  getModuleParameters() {
+  getShaderModuleProps() {
     // Draw picking colors into collision FBO
     return {
-      drawToCollisionMap: true,
+      collision: {
+        drawToCollisionMap: true
+      },
       picking: {
         isActive: 1,
         isAttribute: false
       },
-      lightSources: {enabled: false}
+      lighting: {enabled: false}
     };
   }
 }

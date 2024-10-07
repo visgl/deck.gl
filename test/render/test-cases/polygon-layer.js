@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {OrthographicView, COORDINATE_SYSTEM, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {Fp64Extension, PathStyleExtension, FillStyleExtension} from '@deck.gl/extensions';

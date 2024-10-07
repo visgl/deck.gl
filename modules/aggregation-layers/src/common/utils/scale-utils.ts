@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {BinaryAttribute} from '@deck.gl/core';
 import type {ScaleType} from '../types';
 

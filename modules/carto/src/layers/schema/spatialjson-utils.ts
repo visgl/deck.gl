@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {bigIntToHex} from 'quadbin';
 
 export type IndexScheme = 'h3' | 'quadbin';

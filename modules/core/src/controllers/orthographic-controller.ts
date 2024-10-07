@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {clamp} from '@math.gl/core';
 import Controller from './controller';
 import {OrbitState} from './orbit-controller';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
 // Rename so that unused constants are not stripped at end of build
 import {GL as GLConstants} from '@luma.gl/constants';

@@ -2,6 +2,22 @@
 
 ## Upgrading to v9.1
 
+### User input handling
+
+- The main gesture recognition library, [mjolnir.js](https://visgl.github.io/mjolnir.js), is upgraded to v3.0. Hammer.js is no longer an (indirect) dependency, due to its lack of maintenance and various issues with SSR and test environments.
+- The default gesture to manipulate viewport `pitch` by touch has been changed from three-finger to two-finger dragging vertically. You can revert this behavior by setting the [eventRecognizerOptions](./api-reference/core/deck.md#eventrecognizeroptions) prop of `Deck`:
+
+  ```ts
+  eventRecognizerOptions: {
+    multipan: {pointers: 3}
+  }
+  ```
+
+- If your app already uses Deck's `eventRecognizerOptions` prop or implement a custom [Controller](./api-reference/core/controller.md), some events have been renamed:
+  + `tripan` -> `multipan`
+  + `tap` -> `click`
+  + `doubletap` -> `dblclick`
+
 ### Aggregation layers
 
 Breaking changes:

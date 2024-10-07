@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type Viewport from '../viewports/viewport';
 
 export default abstract class ViewState<

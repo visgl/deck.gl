@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {calculatePickingColors} from '@deck.gl/layers/geojson-layer/geojson-binary';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {forceCenter, forceLink, forceManyBody, forceSimulation} from 'd3-force';
 
 /**

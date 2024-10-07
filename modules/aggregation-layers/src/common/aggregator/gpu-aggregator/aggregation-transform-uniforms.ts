@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {NumberArray3, NumberArray4} from '@math.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
 import {sortBins, packBinIds} from './sort-bins';

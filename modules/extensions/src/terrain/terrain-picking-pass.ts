@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Layer,
   Viewport,
@@ -77,5 +81,13 @@ export class TerrainPickingPass extends PickLayersPass {
       parameters.blend = true;
     }
     return {...parameters, depthTest: false};
+  }
+
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    return {
+      terrain: {
+        project: otherShaderModuleProps.project
+      }
+    };
   }
 }
