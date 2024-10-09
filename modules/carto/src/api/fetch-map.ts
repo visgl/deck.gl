@@ -2,26 +2,30 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* eslint-disable camelcase */
-import {CartoAPIError} from './carto-api-error';
-import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT, DEFAULT_MAX_LENGTH_URL} from './common';
-import {buildPublicMapUrl, buildStatsUrl} from './endpoints';
 import {
+  SOURCE_DEFAULTS,
+  APIErrorContext,
+  CartoAPIError,
   GeojsonResult,
   JsonResult,
   TilejsonResult,
+  Format,
+  MapType,
+  QueryParameters,
+  buildPublicMapUrl,
+  buildStatsUrl,
   h3QuerySource,
   h3TableSource,
   quadbinQuerySource,
   quadbinTableSource,
   vectorQuerySource,
   vectorTableSource,
-  vectorTilesetSource
-} from '../sources/index';
+  vectorTilesetSource,
+  requestWithParameters
+} from '@carto/api-client';
 import {ParseMapResult, parseMap} from './parse-map';
-import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';
-import type {APIErrorContext, Basemap, Format, MapType, QueryParameters} from './types';
+import type {Basemap} from './types';
 import {fetchBasemapProps} from './basemap';
 
 type Dataset = {
@@ -47,7 +51,7 @@ async function _fetchMapDataset(
   apiBaseUrl: string,
   clientId?: string,
   headers?: Record<string, string>,
-  maxLengthURL = DEFAULT_MAX_LENGTH_URL
+  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
 ) {
   const {
     aggregationExp,
@@ -121,7 +125,7 @@ async function _fetchTilestats(
   dataset: Dataset,
   accessToken: string,
   apiBaseUrl: string,
-  maxLengthURL = DEFAULT_MAX_LENGTH_URL
+  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
 ) {
   const {connectionName, data, id, source, type, queryParameters} = dataset;
   const errorContext: APIErrorContext = {
@@ -167,7 +171,7 @@ async function fillInMapDatasets(
   clientId: string,
   apiBaseUrl: string,
   headers?: Record<string, string>,
-  maxLengthURL = DEFAULT_MAX_LENGTH_URL
+  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
 ) {
   const promises = datasets.map(dataset =>
     _fetchMapDataset(dataset, token, apiBaseUrl, clientId, headers, maxLengthURL)
@@ -178,7 +182,7 @@ async function fillInMapDatasets(
 async function fillInTileStats(
   {datasets, keplerMapConfig, token}: {datasets: Dataset[]; keplerMapConfig: any; token: string},
   apiBaseUrl: string,
-  maxLengthURL = DEFAULT_MAX_LENGTH_URL
+  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
 ) {
   const attributes: {attribute: string; dataset: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
@@ -267,13 +271,13 @@ export type FetchMapResult = ParseMapResult & {
 /* eslint-disable max-statements */
 export async function fetchMap({
   accessToken,
-  apiBaseUrl = DEFAULT_API_BASE_URL,
+  apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
   cartoMapId,
-  clientId = DEFAULT_CLIENT,
+  clientId = SOURCE_DEFAULTS.clientId,
   headers = {},
   autoRefresh,
   onNewData,
-  maxLengthURL = DEFAULT_MAX_LENGTH_URL
+  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
 }: FetchMapOptions): Promise<FetchMapResult> {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
   assert(apiBaseUrl, 'Must define apiBaseUrl');

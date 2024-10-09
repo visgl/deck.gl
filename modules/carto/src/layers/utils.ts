@@ -6,7 +6,7 @@ import {log} from '@deck.gl/core';
 import {Tile as PropertiesTile} from './schema/carto-properties-tile';
 import {Tile as VectorTile} from './schema/carto-tile';
 import {_deepEqual as deepEqual} from '@deck.gl/core';
-import type {TilejsonResult} from '../sources/types';
+import type {TilejsonResult} from '@carto/api-client';
 
 /**
  * Adds access token to Authorization header in loadOptions

@@ -7,7 +7,7 @@ import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
-import type {TilejsonResult} from '../sources/types';
+import type {TilejsonResult} from '@carto/api-client';
 import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 

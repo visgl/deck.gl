@@ -40,17 +40,11 @@ export {
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {CartoAPIError, fetchMap, query} from './api/index';
+export {fetchMap} from './api/index';
 export {fetchBasemapProps} from './api/basemap';
 export type {
-  APIErrorContext,
   FetchMapOptions,
   FetchMapResult,
-  Format,
-  MapType,
-  RequestType,
-  QueryParameters,
-  QueryOptions,
   Basemap as _Basemap,
   MapLibreBasemap as _MapLibreBasemap,
   GoogleBasemap as _GoogleBasemap
@@ -70,7 +64,7 @@ import {
   vectorTableSource,
   vectorTilesetSource,
   SOURCE_DEFAULTS
-} from './sources/index';
+} from '@carto/api-client';
 
 const CARTO_SOURCES = {
   boundaryQuerySource,
@@ -124,4 +118,4 @@ export type {
   VectorQuerySourceOptions,
   VectorTableSourceOptions,
   VectorTilesetSourceOptions
-} from './sources/index';
+} from '@carto/api-client';
