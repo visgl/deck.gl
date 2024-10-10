@@ -6,7 +6,8 @@ import {
   Layer,
   Viewport,
   LayersPassRenderOptions,
-  _PickLayersPass as PickLayersPass
+  _PickLayersPass as PickLayersPass,
+  _isDrawableLayerParameters as isDrawableLayerParameters
 } from '@deck.gl/core';
 import type {TerrainCover} from './terrain-cover';
 
@@ -32,9 +33,10 @@ export class TerrainPickingPass extends PickLayersPass {
     const drawParamsByIndex = this._getDrawLayerParams(viewport, opts);
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
-      if (!layer.isComposite && drawParamsByIndex[i].shouldDrawLayer) {
+      const drawLayerParameters = drawParamsByIndex[i];
+      if (!layer.isComposite && isDrawableLayerParameters(drawLayerParameters)) {
         result.push(layer);
-        this.drawParameters[layer.id] = drawParamsByIndex[i].layerParameters;
+        this.drawParameters[layer.id] = drawLayerParameters.layerParameters;
       }
     }
 

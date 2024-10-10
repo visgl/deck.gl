@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
-import {Buffer, TypedArray} from '@luma.gl/core';
+import {Buffer, RenderPipelineParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
@@ -1042,7 +1042,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     renderPass: RenderPass;
     shaderModuleProps: any;
     uniforms: any;
-    parameters: any;
+    parameters: RenderPipelineParameters;
   }): void {
     this._updateAttributeTransition();
 
