@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {
-  Device,
-  Parameters,
-  RenderPassParameters,
-  RenderPipelineParameters
-} from '@luma.gl/core';
+import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -47,7 +42,7 @@ export type DrawableLayerParameters = {
   shouldDrawLayer: true;
   layerRenderIndex: number;
   shaderModuleProps: any;
-  layerParameters: RenderPipelineParameters;
+  layerParameters: Parameters;
 };
 
 export type DrawLayerParameters =
@@ -55,7 +50,7 @@ export type DrawLayerParameters =
       shouldDrawLayer: true;
       layerRenderIndex: number;
       shaderModuleProps: any;
-      layerParameters: RenderPipelineParameters;
+      layerParameters: Parameters;
     }
   | {shouldDrawLayer: false};
 
