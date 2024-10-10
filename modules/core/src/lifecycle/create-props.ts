@@ -98,6 +98,10 @@ function createPropsPrototypeAndTypes(
   }
 
   const parentClass = Object.getPrototypeOf(componentClass);
+  if (parentClass === Function.prototype) {
+    // don't add props to the global function prototype
+    return null;
+  }
   const parentDefaultProps = getPropsPrototype(parentClass);
 
   // Parse propTypes from Component.defaultProps
