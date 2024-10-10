@@ -6,9 +6,11 @@ import {
   Layer,
   Viewport,
   LayersPassRenderOptions,
-  _PickLayersPass as PickLayersPass
+  _PickLayersPass as PickLayersPass,
+  _isDrawableLayerParameters as isDrawableLayerParameters
 } from '@deck.gl/core';
 import type {TerrainCover} from './terrain-cover';
+import {Parameters} from '@luma.gl/core';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
   pickZ: boolean;
@@ -32,9 +34,10 @@ export class TerrainPickingPass extends PickLayersPass {
     const drawParamsByIndex = this._getDrawLayerParams(viewport, opts);
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
-      if (!layer.isComposite && drawParamsByIndex[i].shouldDrawLayer) {
+      const drawLayerParameters = drawParamsByIndex[i];
+      if (!layer.isComposite && isDrawableLayerParameters(drawLayerParameters)) {
         result.push(layer);
-        this.drawParameters[layer.id] = drawParamsByIndex[i].layerParameters;
+        this.drawParameters[layer.id] = drawLayerParameters.layerParameters;
       }
     }
 
@@ -72,7 +75,7 @@ export class TerrainPickingPass extends PickLayersPass {
     });
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     let parameters: any;
     if (this.drawParameters[layer.id]) {
       parameters = this.drawParameters[layer.id];

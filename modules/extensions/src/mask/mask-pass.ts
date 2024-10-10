@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, Framebuffer, RenderPipelineParameters, Texture} from '@luma.gl/core';
+import type {
+  Device,
+  Framebuffer,
+  Parameters,
+  RenderPipelineParameters,
+  Texture
+} from '@luma.gl/core';
 import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
@@ -54,7 +60,11 @@ export default class MaskPass extends LayersPass {
     super.render({...options, clearColor, colorMask, target: this.fbo, pass: 'mask'});
   }
 
-  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): Parameters {
     return {
       ...layer.props.parameters,
       blend: true,
