@@ -10,6 +10,7 @@ import {
   _isDrawableLayerParameters as isDrawableLayerParameters
 } from '@deck.gl/core';
 import type {TerrainCover} from './terrain-cover';
+import {Parameters} from '@luma.gl/core';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
   pickZ: boolean;
@@ -74,7 +75,7 @@ export class TerrainPickingPass extends PickLayersPass {
     });
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     let parameters: any;
     if (this.drawParameters[layer.id]) {
       parameters = this.drawParameters[layer.id];

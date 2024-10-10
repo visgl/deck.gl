@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, RenderPassParameters, RenderPipelineParameters} from '@luma.gl/core';
+import type {
+  Device,
+  Parameters,
+  RenderPassParameters,
+  RenderPipelineParameters
+} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -320,7 +325,7 @@ export default class LayersPass extends Pass {
     return null;
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return layer.props.parameters;
   }
 

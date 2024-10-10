@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
+import type {Framebuffer, Parameters, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
 import type {Effect} from '../lib/effect';
@@ -130,7 +130,7 @@ export default class PickLayersPass extends LayersPass {
     };
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     const pickParameters: any = {
       // TODO - When used as a custom layer in older Mapbox versions, context
       // state was dirty. Mapbox fixed that; we should test and remove the workaround.
