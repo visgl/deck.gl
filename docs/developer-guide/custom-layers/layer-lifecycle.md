@@ -54,7 +54,7 @@ If the layer does need to be updated,
 is called to perform any necessary operation before the layer is rendered.
 This usually involves recalculating an attribute by calling
 [`state.attributeManager.invalidate`](../../api-reference/core/attribute-manager.md#invalidate)
-and updating uniforms by calling `model.setUniforms`.
+and updating uniforms by calling `model.shaderInputs.setProps({...})`.
 By default, when `props.data` changes, all attributes are invalidated and recalculated.
 
 A composite layer may use

@@ -10,26 +10,43 @@ Consider a hypothetical use case: in a `ScatterplotLayer`, we inject a piece of 
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
+import type {ShaderModule} from '@luma.gl/shadertools';
+
+// Declare uniform block & custom shader module
+const uniformBlock = `\
+uniform highlightUniforms {
+  bool enabled;
+} highlight;
+`;
+
+type HighlightProps = {enabled: boolean};
+
+const highlightUniforms = {
+  name: 'trips',
+  fs: uniformBlock, // Only need to add block to fragment stage in this example
+  uniformTypes: {enabled: 'f32'}
+} as const satisfies ShaderModule<TripsProps>;
 
 class FilteredScatterplotLayer extends ScatterplotLayer {
   getShaders() {
-    return {
-      ...super.getShaders(),
-      inject: {
-        // Declare custom uniform
-        'fs:#decl': 'uniform bool highlightRed;',
-        // Standard injection hook - see "Writing Shaders"
-        'fs:DECKGL_FILTER_COLOR': `
-          if (highlightRed) {
-            if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
-              // is red
-              color = vec4(1.0, 0.0, 0.0, 1.0);
-            } else {
-              discard;
-            }
+    const shaders = super.getShaders();
+    shaders.inject = {
+      // Standard injection hook - see "Writing Shaders"
+      'fs:DECKGL_FILTER_COLOR': `
+        if (highlight.enabled) {
+          if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
+            // is red
+            color = vec4(1.0, 0.0, 0.0, 1.0);
+          } else {
+            discard;
           }
-        `
-      }
+        }
+      `
+    };
+
+    // Add uniform binding to shader modules
+    shaders.modules = [...shaders.modules, highlightUniforms];
+    return shaders;
     };
   }
 
@@ -38,9 +55,8 @@ class FilteredScatterplotLayer extends ScatterplotLayer {
 
     if (props.highlightRed !== oldProps.highlightRed) {
       // Set the custom uniform
-      this.state.model.setUniforms({
-        highlightRed: props.highlightRed
-      });
+      const highlightProps: HighlightProps = {enabled: props.highlightRed};
+      model.shaderInputs.setProps({highlight: highlightProps});
     }
   }
 }
@@ -185,31 +201,49 @@ Back to our example use case. We can implement the red filter with the following
 ```js
 import {LayerExtension} from '@deck.gl/core';
 
+// Declare uniform block & custom shader module
+const uniformBlock = `\
+uniform highlightUniforms {
+  bool enabled;
+} highlight;
+`;
+
+type HighlightProps = {enabled: boolean};
+
+const highlightUniforms = {
+  name: 'trips',
+  fs: uniformBlock, // Only need to add block to fragment stage in this example
+  uniformTypes: {enabled: 'f32'}
+} as const satisfies ShaderModule<TripsProps>;
+
+
 class RedFilter extends LayerExtension {
   getShaders() {
-    return {
-      inject: {
-        // Declare custom uniform
-        'fs:#decl': 'uniform bool highlightRed;',
-        // Standard injection hook - see "Writing Shaders"
-        'fs:DECKGL_FILTER_COLOR': `
-          if (highlightRed) {
-            if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
-              // is red
-              color = vec4(1.0, 0.0, 0.0, 1.0);
-            } else {
-              discard;
-            }
+    const shaders = super.getShaders();
+    shaders.inject = {
+      // Standard injection hook - see "Writing Shaders"
+      'fs:DECKGL_FILTER_COLOR': `
+        if (highlight.enabled) {
+          if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
+            // is red
+            color = vec4(1.0, 0.0, 0.0, 1.0);
+          } else {
+            discard;
           }
-        `
-      }
+        }
+      `
     };
+
+    // Add uniform binding to shader modules
+    shaders.modules = [...shaders.modules, highlightUniforms];
+    return shaders;
   }
 
   updateState(params) {
     const {highlightRed = true} = params.props;
     for (const model of this.getModels()) {
-      model.setUniforms({highlightRed});
+      const highlightProps: HighlightProps = {enabled: props.highlightRed};
+      model.shaderInputs.setProps({highlight: highlightProps});
     }
   }
 

@@ -63,6 +63,7 @@
           "developer-guide/custom-layers/picking",
           "developer-guide/custom-layers/composite-layers",
           "developer-guide/custom-layers/subclassed-layers",
+          "developer-guide/custom-layers/layer-extensions",
           "developer-guide/custom-layers/primitive-layers",
           "developer-guide/custom-layers/prop-types",
           "developer-guide/custom-layers/attribute-management",
