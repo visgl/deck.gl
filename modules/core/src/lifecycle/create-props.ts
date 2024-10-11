@@ -69,9 +69,9 @@ function getPropsPrototype(componentClass, extensions?: any[]) {
   // Bail out if we're not looking at a component - for two reasons:
   // 1. There's no reason for an ancestor of component to have props
   // 2. If we don't bail out, we'll follow the prototype chain all the way back to the global
-  // function prototype and add _mergedDefaultProps to it, which may break other frameworks 
+  // function prototype and add _mergedDefaultProps to it, which may break other frameworks
   // (e.g. the react-three-fiber reconciler)
-  if (!(componentClass instanceof Component.constructor)) return {}
+  if (!(componentClass instanceof Component.constructor)) return {};
 
   // A string that uniquely identifies the extensions involved
   let cacheKey = MergedDefaultPropsCacheKey;
