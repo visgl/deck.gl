@@ -17,7 +17,12 @@ export default class CollisionFilterPass extends LayersPass {
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
-    return {...layer.props.parameters, blend: false, depthCompare: 'always'};
+    return {
+      ...layer.props.parameters,
+      blend: false,
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal'
+    };
   }
 
   getShaderModuleProps() {
