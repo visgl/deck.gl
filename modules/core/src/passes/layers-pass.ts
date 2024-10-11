@@ -38,27 +38,12 @@ export type LayersPassRenderOptions = {
   preRenderStats?: Record<string, any>;
 };
 
-export type DrawableLayerParameters = {
-  shouldDrawLayer: true;
+export type DrawLayerParameters = {
+  shouldDrawLayer: boolean;
   layerRenderIndex: number;
   shaderModuleProps: any;
   layerParameters: Parameters;
 };
-
-export type DrawLayerParameters =
-  | {
-      shouldDrawLayer: true;
-      layerRenderIndex: number;
-      shaderModuleProps: any;
-      layerParameters: Parameters;
-    }
-  | {shouldDrawLayer: false};
-
-export function isDrawableLayerParameters(
-  parameters: DrawLayerParameters
-): parameters is DrawableLayerParameters {
-  return parameters.shouldDrawLayer;
-}
 
 export type FilterContext = {
   layer: Layer;
@@ -197,27 +182,28 @@ export default class LayersPass extends Pass {
         layerFilterCache
       );
 
-      let layerParam: DrawLayerParameters;
+      const layerParam = {shouldDrawLayer} as DrawLayerParameters;
 
       if (shouldDrawLayer && !evaluateShouldDrawOnly) {
-        layerParam = {
-          shouldDrawLayer: true,
-          // This is the "logical" index for ordering this layer in the stack
-          // used to calculate polygon offsets
-          // It can be the same as another layer
-          layerRenderIndex: indexResolver(layer, shouldDrawLayer),
+        layerParam.shouldDrawLayer = true;
 
-          shaderModuleProps: this._getShaderModuleProps(layer, effects, pass, shaderModuleProps),
-          layerParameters: {
-            ...layer.context.deck?.props.parameters,
-            ...this.getLayerParameters(layer, layerIndex, viewport)
-          }
-        };
-      } else {
-        layerParam = {
-          shouldDrawLayer: false
+        // This is the "logical" index for ordering this layer in the stack
+        // used to calculate polygon offsets
+        // It can be the same as another layer
+        layerParam.layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+
+        layerParam.shaderModuleProps = this._getShaderModuleProps(
+          layer,
+          effects,
+          pass,
+          shaderModuleProps
+        );
+        layerParam.layerParameters = {
+          ...layer.context.deck?.props.parameters,
+          ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
+
       drawLayerParams[layerIndex] = layerParam;
     }
     return drawLayerParams;
@@ -273,7 +259,7 @@ export default class LayersPass extends Pass {
       if (layer.isComposite) {
         renderStatus.compositeCount++;
       }
-      if (layer.isDrawable && isDrawableLayerParameters(drawLayerParameters)) {
+      if (layer.isDrawable && drawLayerParameters.shouldDrawLayer) {
         const {layerRenderIndex, shaderModuleProps, layerParameters} = drawLayerParameters;
         // Draw the layer
         renderStatus.visibleCount++;

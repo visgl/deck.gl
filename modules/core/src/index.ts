@@ -23,10 +23,7 @@ export {default as _SunLight} from './effects/lighting/sun-light';
 export {default as PostProcessEffect} from './effects/post-process-effect';
 
 // Passes
-export {
-  default as _LayersPass,
-  isDrawableLayerParameters as _isDrawableLayerParameters
-} from './passes/layers-pass';
+export {default as _LayersPass} from './passes/layers-pass';
 export {default as _PickLayersPass} from './passes/pick-layers-pass';
 
 // Experimental Pure JS (non-React) bindings
@@ -123,11 +120,7 @@ export type {
   TextureSource,
   Material
 } from './types/layer-props';
-export type {
-  DrawableLayerParameters,
-  DrawLayerParameters,
-  FilterContext
-} from './passes/layers-pass';
+export type {DrawLayerParameters, FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
