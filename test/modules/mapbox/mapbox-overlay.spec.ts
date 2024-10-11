@@ -281,7 +281,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
     t.ok(
-      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
+      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthMask: false}),
       'Parameters are updated correctly'
     );
     t.ok(
