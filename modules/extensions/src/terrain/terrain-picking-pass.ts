@@ -83,7 +83,7 @@ export class TerrainPickingPass extends PickLayersPass {
       parameters = super.getLayerParameters(layer, layerIndex, viewport);
       parameters.blend = true;
     }
-    return {...parameters, depthTest: false};
+    return {...parameters, depthCompare: 'always'};
   }
 
   getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {

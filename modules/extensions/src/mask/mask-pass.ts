@@ -68,7 +68,7 @@ export default class MaskPass extends LayersPass {
     return {
       ...layer.props.parameters,
       blend: true,
-      depthTest: false,
+      depthCompare: 'always',
       ...MASK_BLENDING
     };
   }
