@@ -197,6 +197,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
           ]
         }
       ],
+      // @ts-expect-error
       modules: [fp64arithmetic, interpolationUniforms],
       defines: {
         ATTRIBUTE_TYPE: attributeType,
@@ -205,7 +206,6 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       // Default uniforms are not set without this
       moduleSettings: {},
       varyings: ['vCurrent', 'vCurrent64Low'],
-      // @ts-expect-error WebGLRenderPipeline only prop TODO - support in RenderPipeline?
       bufferMode: GL.INTERLEAVED_ATTRIBS,
       disableWarnings: true
     });
