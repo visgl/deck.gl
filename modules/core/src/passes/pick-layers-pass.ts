@@ -137,7 +137,6 @@ export default class PickLayersPass extends LayersPass {
       // https://github.com/mapbox/mapbox-gl-js/issues/7801
       depthMask: true,
       depthTest: true,
-      depthRange: [0, 1],
       ...layer.props.parameters
     };
     const {pickable, operation} = layer.props;

@@ -82,7 +82,7 @@ export default class ShadowPass extends LayersPass {
     layerIndex: number,
     viewport: Viewport
   ): Parameters {
-    return {...layer.props.parameters, blend: false, depthRange: [0, 1], depthTest: true};
+    return {...layer.props.parameters, blend: false, depthTest: true};
   }
 
   shouldDrawLayer(layer) {
