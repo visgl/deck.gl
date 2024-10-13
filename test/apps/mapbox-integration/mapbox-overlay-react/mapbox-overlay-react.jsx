@@ -97,7 +97,7 @@ function App() {
         interleaved
         layers={layers}
         views={[mapboxView, widgetView]}
-        glOptions={{stencil: true}}
+        deviceProps={{type: 'webgl', stencil: true}}
         layerFilter={layerFilter}
       />
     </Map>
