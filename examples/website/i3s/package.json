@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/i3s": "^4.3.0-beta.1",
+    "@loaders.gl/i3s": "^4.3.0-beta.2",
     "maplibre-gl": "^3.0.0",
     "react-map-gl": "^7.1.0",
     "deck.gl": "^9.0.0"
