@@ -21,7 +21,7 @@ import {
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
-import type {ImageSourceType} from '@loaders.gl/wms';
+import type {ImageServiceType} from '@loaders.gl/wms';
 import {ImageSource, createImageSource} from '@loaders.gl/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
@@ -31,7 +31,7 @@ export type WMSLayerProps = CompositeLayerProps & _WMSLayerProps;
 /** Props added by the TileLayer */
 type _WMSLayerProps = {
   data: string | ImageSource;
-  serviceType?: ImageSourceType | 'auto';
+  serviceType?: ImageServiceType | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
   onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
@@ -166,7 +166,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     }
 
     if (typeof props.data === 'string') {
-      return createImageSource(props.data, {
+      return createImageSource({
+        url: props.data,
         loadOptions: props.loadOptions,
         type: props.serviceType
       });
