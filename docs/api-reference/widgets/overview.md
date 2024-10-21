@@ -75,6 +75,12 @@ Apply styles to a single instance of a widget using inline styles.
 new FullscreenWidget({ style: {'--button-size': '48px'}})
 ```
 
+To style hyphenated CSS properties (e.g. `background-color`, `border-color`, etc.), use the camelCase equivalent.
+
+```js
+new FullscreenWidget({ style: {'backgroundColor': '#fff'}})
+```
+
 ### Custom Class Theming
 
 Define a custom class with your desired styles and apply it to a widget.
