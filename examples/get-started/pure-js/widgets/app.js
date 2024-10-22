@@ -6,6 +6,7 @@ import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
+  PopupWidget,
   ZoomWidget,
   FullscreenWidget,
   DarkGlassTheme,
@@ -31,9 +32,29 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-new Deck({
+const UI_WIDGETS = [
+  new ZoomWidget({style: widgetTheme}),
+  new CompassWidget({style: widgetTheme}),
+  new FullscreenWidget({style: widgetTheme})
+];
+
+function updatePopup(object) {
+  const widgets = [...UI_WIDGETS];
+  if (object) {
+    const position = object.geometry.coordinates;
+    const text = `${object.properties.name} (${object.properties.abbrev})`;
+    const style = {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'};
+    widgets.push(new PopupWidget({position, text, style}));
+  }
+
+  deck.setProps({widgets});
+  return true;
+}
+
+const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
+  onClick: () => updatePopup(),
   layers: [
     new GeoJsonLayer({
       id: 'base-map',
@@ -58,9 +79,7 @@ new Deck({
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      onClick: info => updatePopup(info.object)
     }),
     new ArcLayer({
       id: 'arcs',
@@ -74,9 +93,5 @@ new Deck({
       getWidth: 1
     })
   ],
-  widgets: [
-    new ZoomWidget({style: widgetTheme}),
-    new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme})
-  ]
+  widgets: UI_WIDGETS
 });
