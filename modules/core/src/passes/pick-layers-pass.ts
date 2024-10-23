@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
+import type {Framebuffer, Parameters, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
 import type {Effect} from '../lib/effect';
@@ -130,14 +130,9 @@ export default class PickLayersPass extends LayersPass {
     };
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
+    // TODO use Parameters type
     const pickParameters: any = {
-      // TODO - When used as a custom layer in older Mapbox versions, context
-      // state was dirty. Mapbox fixed that; we should test and remove the workaround.
-      // https://github.com/mapbox/mapbox-gl-js/issues/7801
-      depthMask: true,
-      depthTest: true,
-      depthRange: [0, 1],
       ...layer.props.parameters
     };
     const {pickable, operation} = layer.props;
@@ -147,6 +142,7 @@ export default class PickLayersPass extends LayersPass {
     } else if (pickable && operation.includes('draw')) {
       Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
+      // TODO: blendColor no longer part of luma.gl API
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
     }
 
