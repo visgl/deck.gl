@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.34] - Oct 24 2024
+
+- carto: Fix performance regression in RasterLayer (#9218)
+
 #### deck.gl [9.0.33] - Oct 8 2024
 
 - chore: Remove deprecated expression-eval dependency (#9070)
