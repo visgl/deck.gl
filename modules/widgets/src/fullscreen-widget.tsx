@@ -6,6 +6,9 @@ import {IconButton} from './components';
 
 interface FullscreenWidgetProps {
   id?: string;
+  /**
+   * Widget positioning within the view. Default 'top-left'.
+   */
   placement?: WidgetPlacement;
   /**
    * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.

@@ -5,6 +5,9 @@ import {render} from 'preact';
 
 interface CompassWidgetProps {
   id?: string;
+  /**
+   * Widget positioning within the view. Default 'top-left'.
+   */
   placement?: WidgetPlacement;
   /**
    * View to attach to and interact with. Required when using multiple views.
