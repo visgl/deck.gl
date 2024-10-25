@@ -8,7 +8,7 @@ import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './components';
 
-interface FullscreenWidgetProps {
+export interface FullscreenWidgetProps {
   id?: string;
   placement?: WidgetPlacement;
   /**

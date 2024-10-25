@@ -7,7 +7,7 @@ import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/c
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-interface CompassWidgetProps {
+export interface CompassWidgetProps {
   id?: string;
   placement?: WidgetPlacement;
   /**
