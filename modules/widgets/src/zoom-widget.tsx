@@ -56,11 +56,14 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
     this.orientation = props.orientation || 'vertical';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.zoomInLabel = props.zoomInLabel || 'Zoom In';
-    props.zoomOutLabel = props.zoomOutLabel || 'Zoom Out';
-    props.style = props.style || {};
-    this.props = props;
+
+    this.props = {
+      ...props,
+      transitionDuration: props.transitionDuration || 200,
+      zoomInLabel: props.zoomInLabel || 'Zoom In',
+      zoomOutLabel: props.zoomOutLabel || 'Zoom Out',
+      style: props.style || {}
+    };
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
