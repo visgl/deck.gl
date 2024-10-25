@@ -105,7 +105,8 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
           params.viewId = viewId;
           // @ts-expect-error accessing protected method
           deck._onViewStateChange(params);
-        }
+        },
+        widgets: []
       };
       return createElement(ContextProvider, {key, value: contextValue}, viewElement);
     }
