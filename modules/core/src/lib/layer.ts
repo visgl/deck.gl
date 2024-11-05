@@ -169,6 +169,14 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
+type DrawOptions = {
+  renderPass: RenderPass;
+  shaderModuleProps: any;
+  uniforms: any;
+  parameters: any;
+  context: LayerContext;
+};
+
 type SharedLayerState = {
   [key: string]: unknown;
 };
@@ -531,9 +539,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw(opts) {
+  draw(opts: DrawOptions) {
     for (const model of this.getModels()) {
-      model.draw(opts);
+      model.draw(opts.renderPass);
     }
   }
 
@@ -1076,7 +1084,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
         context.device.withParametersWebGL(parameters, () => {
-          const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
           for (const extension of this.props.extensions) {
@@ -1086,7 +1094,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {
