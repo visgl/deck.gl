@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+// CARTO Layers
 import {default as ClusterTileLayer} from './layers/cluster-tile-layer';
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as HeatmapTileLayer} from './layers/heatmap-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
 import {default as RasterTileLayer} from './layers/raster-tile-layer';
+import {default as _SpatialIndexTileLayer} from './layers/spatial-index-tile-layer';
 import {default as VectorTileLayer} from './layers/vector-tile-layer';
+
 const CARTO_LAYERS = {
   ClusterTileLayer,
   H3TileLayer,
@@ -16,6 +19,7 @@ const CARTO_LAYERS = {
   _PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
+  _SpatialIndexTileLayer,
   VectorTileLayer
 };
 export {
@@ -26,9 +30,21 @@ export {
   _PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
+  _SpatialIndexTileLayer,
   VectorTileLayer
 };
 
+// Types
+export type {ClusterTileLayerProps} from './layers/cluster-tile-layer';
+export type {H3TileLayerProps} from './layers/h3-tile-layer';
+export type {HeatmapTileLayerProps} from './layers/heatmap-tile-layer';
+export type {PointLabelLayerProps} from './layers/point-label-layer';
+export type {QuadbinTileLayerProps} from './layers/quadbin-tile-layer';
+export type {RasterTileLayerProps} from './layers/raster-tile-layer';
+export type {SpatialIndexTileLayerProps} from './layers/spatial-index-tile-layer';
+export type {VectorTileLayerProps} from './layers/vector-tile-layer';
+
+// Helpers
 export {
   default as BASEMAP,
   GOOGLE_BASEMAPS as _GOOGLE_BASEMAPS,
