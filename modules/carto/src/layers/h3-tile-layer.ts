@@ -54,7 +54,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return loadOptions;
   }
 
-  renderLayers(): Layer | null | LayersList {
+  renderLayers(): SpatialIndexTileLayer | null {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
@@ -75,21 +75,19 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       );
     }
 
+    const SubLayerClass = this.getSubLayerClass('spatial-index-tile', SpatialIndexTileLayer);
     // The naming is unfortunate, but minZoom & maxZoom in the context
     // of a Tileset2D refer to the resolution levels, not the Mercator zooms
-    return [
-      // @ts-ignore
-      new SpatialIndexTileLayer(this.props, {
-        id: `h3-tile-layer-${this.props.id}`,
-        data,
-        // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: H3Tileset2D as any,
-        renderSubLayers,
-        // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
-        minZoom: minresolution,
-        maxZoom: maxresolution,
-        loadOptions: this.getLoadOptions()
-      })
-    ];
+    return new SubLayerClass(this.props, {
+      id: `h3-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: H3Tileset2D as any,
+      renderSubLayers,
+      // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
+      minZoom: minresolution,
+      maxZoom: maxresolution,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }
