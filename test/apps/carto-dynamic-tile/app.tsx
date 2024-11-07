@@ -12,9 +12,10 @@ import {
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
-  query,
   VectorTileLayer
 } from '@deck.gl/carto';
+
+import {query} from '@carto/api-client';
 import datasets from './datasets';
 import {Layer} from '@deck.gl/core';
 
