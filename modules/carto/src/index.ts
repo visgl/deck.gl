@@ -9,9 +9,9 @@ import {default as HeatmapTileLayer} from './layers/heatmap-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
 import {default as RasterTileLayer} from './layers/raster-tile-layer';
-import {default as _SpatialIndexTileLayer} from './layers/spatial-index-tile-layer';
 import {default as VectorTileLayer} from './layers/vector-tile-layer';
 
+// Exports for playground/bindings
 const CARTO_LAYERS = {
   ClusterTileLayer,
   H3TileLayer,
@@ -19,7 +19,6 @@ const CARTO_LAYERS = {
   _PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
-  _SpatialIndexTileLayer,
   VectorTileLayer
 };
 export {
@@ -30,9 +29,13 @@ export {
   _PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
-  _SpatialIndexTileLayer,
   VectorTileLayer
 };
+
+// Internal Layers
+export {default as _QuadbinLayer} from './layers/quadbin-layer';
+export {default as _RasterLayer} from './layers/raster-layer';
+export {default as _SpatialIndexTileLayer} from './layers/spatial-index-tile-layer';
 
 // Types
 export type {ClusterTileLayerProps} from './layers/cluster-tile-layer';
