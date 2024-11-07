@@ -8,12 +8,7 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {
-  H3TileLayer,
-  RasterTileLayer,
-  QuadbinTileLayer,
-  VectorTileLayer
-} from '@deck.gl/carto';
+import {H3TileLayer, RasterTileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
 
 import {query} from '@carto/api-client';
 import datasets from './datasets';
