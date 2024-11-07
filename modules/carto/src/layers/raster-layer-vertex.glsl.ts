@@ -34,7 +34,7 @@ void main(void) {
 
   int yIndex = - (gl_InstanceID / BLOCK_WIDTH);
   int xIndex = gl_InstanceID + (yIndex * BLOCK_WIDTH);
-  common_position += scale * vec2(float(xIndex), float(yIndex));
+  common_position += scale * vec2(float(xIndex), float(yIndex - 1));
 
   vec4 color = isStroke ? instanceLineColors : instanceFillColors;
 
