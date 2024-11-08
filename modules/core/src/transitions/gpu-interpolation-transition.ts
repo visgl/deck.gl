@@ -197,7 +197,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
           ]
         }
       ],
-      // @ts-expect-error
+      // @ts-expect-error fp64 module only sets ONE uniform via defaultUniforms
       modules: [fp64arithmetic, interpolationUniforms],
       defines: {
         ATTRIBUTE_TYPE: attributeType,
