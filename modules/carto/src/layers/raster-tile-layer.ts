@@ -46,18 +46,16 @@ export default class RasterTileLayer<
     if (!tileJSON) return null;
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
-    return [
-      // @ts-ignore
-      new TileLayer(this.props, {
-        id: `raster-tile-layer-${this.props.id}`,
-        data,
-        // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: QuadbinTileset2D as any,
-        renderSubLayers,
-        minZoom,
-        maxZoom,
-        loadOptions: this.getLoadOptions()
-      })
-    ];
+    const SubLayerClass = this.getSubLayerClass('tile', TileLayer);
+    return new SubLayerClass(this.props, {
+      id: `raster-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: QuadbinTileset2D as any,
+      renderSubLayers,
+      minZoom,
+      maxZoom,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }
