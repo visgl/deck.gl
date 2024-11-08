@@ -26,21 +26,12 @@ jobs:
           node-version: '18.x'
 
       - name: Install dependencies
-        run: yarn
-
-      - name: Build
         run: yarn bootstrap
 
-      - name: Run node tests
-        run: yarn test node
+      - name: Run tests
+        run: yarn test-ci
 
-      - name: Run browser tests and generate coverage
-        run: yarn cover
-
-      - name: Run lint and prettier
-        run: yarn lint
-
-      - name: Upload to Coveralls
+      - name: Coveralls
         uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # v1.2.5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
