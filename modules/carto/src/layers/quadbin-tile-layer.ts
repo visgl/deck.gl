@@ -7,7 +7,7 @@ import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
-import type {TilejsonResult} from '../sources/types';
+import type {TilejsonResult} from '@carto/api-client';
 import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 
@@ -50,22 +50,20 @@ export default class QuadbinTileLayer<
     return loadOptions;
   }
 
-  renderLayers(): Layer | null | LayersList {
+  renderLayers(): SpatialIndexTileLayer | null {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
     const {tiles: data, maxresolution: maxZoom} = tileJSON;
-    return [
-      // @ts-ignore
-      new SpatialIndexTileLayer(this.props, {
-        id: `quadbin-tile-layer-${this.props.id}`,
-        data,
-        // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: QuadbinTileset2D as any,
-        renderSubLayers,
-        maxZoom,
-        loadOptions: this.getLoadOptions()
-      })
-    ];
+    const SubLayerClass = this.getSubLayerClass('spatial-index-tile', SpatialIndexTileLayer);
+    return new SubLayerClass(this.props, {
+      id: `quadbin-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: QuadbinTileset2D as any,
+      renderSubLayers,
+      maxZoom,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }
