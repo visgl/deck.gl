@@ -790,9 +790,9 @@ const deck = new Deck({
       // ...
     })
   ],
-  layerFilter: ({layer, viewport} => {
+  layerFilter: ({layer, viewport}) => {
     return layer.id === `tiles-for-${viewport.id}`;
-  });
+  }
 });
 ```
 
@@ -819,9 +819,9 @@ const deck = new Deck<[MapView, MapView]>({
       // ...
     })
   ],
-  layerFilter: ({layer, viewport} => {
+  layerFilter: ({layer, viewport}) => {
     return layer.id === `tiles-for-${viewport.id}`;
-  });
+  }
 });
 ```
 
