@@ -810,14 +810,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const externalColorAttribute =
       colors && data.attributes && (data.attributes[colors.id] as BinaryAttribute);
     if (externalColorAttribute && externalColorAttribute.value) {
-      const values = externalColorAttribute.value;
+      const {value, size = 1} = externalColorAttribute;
       const objectColor = this.encodePickingColor(objectIndex);
       for (let index = 0; index < data.length; index++) {
-        const i = colors.getVertexOffset(index);
+        const i = (colors.getVertexOffset(index) * size) / colors.size;
         if (
-          values[i] === objectColor[0] &&
-          values[i + 1] === objectColor[1] &&
-          values[i + 2] === objectColor[2]
+          value[i] === objectColor[0] &&
+          value[i + 1] === objectColor[1] &&
+          value[i + 2] === objectColor[2]
         ) {
           this._disablePickingIndex(index);
         }
@@ -1018,7 +1018,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
   /* eslint-enable max-statements */
 
-  /** (Internal) Called by manager when layer is about to be disposed 
+  /** (Internal) Called by manager when layer is about to be disposed
       Note: not guaranteed to be called on application shutdown */
   _finalize(): void {
     debug(TRACE_FINALIZE, this);
