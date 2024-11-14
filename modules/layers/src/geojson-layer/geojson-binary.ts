@@ -70,13 +70,14 @@ export function calculatePickingColors(
   };
   for (const key in pickingColors) {
     const featureIds = geojsonBinary[key].globalFeatureIds.value;
-    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 3);
+    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 4);
     const pickingColor = [];
     for (let i = 0; i < featureIds.length; i++) {
       encodePickingColor(featureIds[i], pickingColor);
-      pickingColors[key]![i * 3 + 0] = pickingColor[0];
-      pickingColors[key]![i * 3 + 1] = pickingColor[1];
-      pickingColors[key]![i * 3 + 2] = pickingColor[2];
+      pickingColors[key][i * 4 + 0] = pickingColor[0];
+      pickingColors[key][i * 4 + 1] = pickingColor[1];
+      pickingColors[key][i * 4 + 2] = pickingColor[2];
+      pickingColors[key][i * 4 + 3] = 255;
     }
   }
 

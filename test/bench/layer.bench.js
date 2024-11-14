@@ -127,8 +127,8 @@ export default function layerBench(suite) {
     })
     .add('calculate instance picking colors', () => {
       const numInstances = 1e6;
-      const target = new Uint8ClampedArray(numInstances * 3);
+      const target = new Uint8ClampedArray(numInstances * 4);
       testLayer.internalState = {};
-      testLayer.calculateInstancePickingColors({value: target, size: 3}, {numInstances});
+      testLayer.calculateInstancePickingColors({value: target, size: 4}, {numInstances});
     });
 }
