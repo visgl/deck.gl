@@ -113,8 +113,12 @@ To run the Node tests, you need to set up OpenGL support via X11 forwarding:
     ```bash
     # WSL 1
     export DISPLAY=localhost:0
-    # WSL 2
+    # WSL 2 + Windows 10
     export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk '{print $2}'):0.0
+    # WSL 2 + Windows 11
+    echo $DISPLAY
+    # if result of above command is NOT ":0"
+    export $DISPLAY=":0"
     ```
 
 You can test that it is set up successfully with:
