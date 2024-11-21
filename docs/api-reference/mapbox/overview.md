@@ -66,7 +66,7 @@ The following table details renderer support across different versions of mapbox
 | Library                       | Overlaid (default) | Interleaved       |
 |-------------------------------|--------------------|-------------------|
 | mapbox-gl-js (before v2.13)   | ✓                  |                   |
-| mapbox-gl-js v2.13+           | ✓                  | ✓ with `useWebGl2: true` |
+| mapbox-gl-js v2.13+           | ✓                  | ✓ with `useWebGL2: true` |
 | mapbox-gl-js v3+              | ✓                  | ✓                 |
 | maplibre-gl-js (before v3)    | ✓                  |                   |
 | maplibre-gl-js v3+            | ✓                  | ✓*                |
