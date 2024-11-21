@@ -3,7 +3,7 @@
   "description": "Use deck.gl as a custom ArcGIS API for JavaScript layer",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.35",
+  "version": "9.0.36",
   "publishConfig": {
     "access": "public"
   },
