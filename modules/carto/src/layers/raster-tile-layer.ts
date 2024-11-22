@@ -5,7 +5,7 @@
 import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import type {TilejsonResult} from '../sources/types';
+import type {TilejsonResult} from '@carto/api-client';
 import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import {TileLayer, TileLayerProps} from '@deck.gl/geo-layers';
@@ -50,18 +50,16 @@ export default class RasterTileLayer<
     if (!tileJSON) return null;
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
-    return [
-      // @ts-ignore
-      new TileLayer(this.props, {
-        id: `raster-tile-layer-${this.props.id}`,
-        data,
-        // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: QuadbinTileset2D as any,
-        renderSubLayers,
-        minZoom,
-        maxZoom,
-        loadOptions: this.getLoadOptions()
-      })
-    ];
+    const SubLayerClass = this.getSubLayerClass('tile', TileLayer);
+    return new SubLayerClass(this.props, {
+      id: `raster-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: QuadbinTileset2D as any,
+      renderSubLayers,
+      minZoom,
+      maxZoom,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }

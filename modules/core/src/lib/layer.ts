@@ -169,6 +169,14 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
+type DrawOptions = {
+  renderPass: RenderPass;
+  shaderModuleProps: any;
+  uniforms: any;
+  parameters: any;
+  context: LayerContext;
+};
+
 type SharedLayerState = {
   [key: string]: unknown;
 };
@@ -319,15 +327,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       model: Model;
     };
     return (state && (state.models || (state.model && [state.model]))) || [];
-  }
-
-  // TODO deprecate in favour of setShaderModuleProps
-  /** Update shader module parameters */
-  setModuleParameters(moduleParameters: any): void {
-    for (const model of this.getModels()) {
-      // HACK as fp64 is not yet ported to UBO
-      model.uniforms = {ONE: 1};
-    }
   }
 
   /** Update shader input parameters */
@@ -531,9 +530,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw(opts) {
+  draw(opts: DrawOptions) {
     for (const model of this.getModels()) {
-      model.draw(opts);
+      model.draw(opts.renderPass);
     }
   }
 
@@ -1056,7 +1055,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (shaderModuleProps) {
-        this.setModuleParameters({});
         this.setShaderModuleProps(shaderModuleProps);
       }
 
@@ -1076,7 +1074,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
         context.device.withParametersWebGL(parameters, () => {
-          const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
           for (const extension of this.props.extensions) {
@@ -1086,7 +1084,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        const opts = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {
