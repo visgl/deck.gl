@@ -74,10 +74,10 @@ export function calculatePickingColors(
     const pickingColor = [];
     for (let i = 0; i < featureIds.length; i++) {
       encodePickingColor(featureIds[i], pickingColor);
-      pickingColors[key][i * 4 + 0] = pickingColor[0];
-      pickingColors[key][i * 4 + 1] = pickingColor[1];
-      pickingColors[key][i * 4 + 2] = pickingColor[2];
-      pickingColors[key][i * 4 + 3] = 255;
+      pickingColors[key]![i * 4 + 0] = pickingColor[0];
+      pickingColors[key]![i * 4 + 1] = pickingColor[1];
+      pickingColors[key]![i * 4 + 2] = pickingColor[2];
+      pickingColors[key]![i * 4 + 3] = 255;
     }
   }
 

@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.36] - Nov 21 2024
+
+- fix(layers): Fix MVTLayer + pickMultipleObjects (#9246)
+
 #### deck.gl [9.0.35] - Nov 8 2024
 
 - CARTO: Add Layer exports to ease subclassing (#9235)
