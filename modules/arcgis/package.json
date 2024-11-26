@@ -42,8 +42,8 @@
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
     "@deck.gl/core": "^9.1.0-beta",
-    "@luma.gl/core": "^9.1.0-beta.11",
-    "@luma.gl/engine": "^9.1.0-beta.11"
+    "@luma.gl/core": "^9.1.0-beta",
+    "@luma.gl/engine": "^9.1.0-beta"
   },
   "devDependencies": {
     "@arcgis/core": "^4.21.0"
