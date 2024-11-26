@@ -45,10 +45,10 @@
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
-    "@deck.gl/core": "9.0.0-alpha.0",
-    "@deck.gl/layers": "9.0.0-alpha.0",
-    "@luma.gl/core": "^9.1.0-beta.11",
-    "@luma.gl/engine": "^9.1.0-beta.11"
+    "@deck.gl/core": "^9.1.0-beta",
+    "@deck.gl/layers": "^9.1.0-beta",
+    "@luma.gl/core": "^9.1.0-beta",
+    "@luma.gl/engine": "^9.1.0-beta"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
