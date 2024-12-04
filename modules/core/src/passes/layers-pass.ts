@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, RenderPassParameters} from '@luma.gl/core';
+import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -38,11 +38,11 @@ export type LayersPassRenderOptions = {
   preRenderStats?: Record<string, any>;
 };
 
-type DrawLayerParameters = {
+export type DrawLayerParameters = {
   shouldDrawLayer: boolean;
-  layerRenderIndex?: number;
-  shaderModuleProps?: any;
-  layerParameters?: any;
+  layerRenderIndex: number;
+  shaderModuleProps: any;
+  layerParameters: Parameters;
 };
 
 export type FilterContext = {
@@ -182,11 +182,11 @@ export default class LayersPass extends Pass {
         layerFilterCache
       );
 
-      const layerParam: DrawLayerParameters = {
-        shouldDrawLayer
-      };
+      const layerParam = {shouldDrawLayer} as DrawLayerParameters;
 
       if (shouldDrawLayer && !evaluateShouldDrawOnly) {
+        layerParam.shouldDrawLayer = true;
+
         // This is the "logical" index for ordering this layer in the stack
         // used to calculate polygon offsets
         // It can be the same as another layer
@@ -203,6 +203,7 @@ export default class LayersPass extends Pass {
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
+
       drawLayerParams[layerIndex] = layerParam;
     }
     return drawLayerParams;
@@ -215,7 +216,7 @@ export default class LayersPass extends Pass {
   private _drawLayersInViewport(
     renderPass: RenderPass,
     {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},
-    drawLayerParams
+    drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
       shaderModuleProps: globalModuleParameters,
@@ -248,8 +249,8 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex] as Layer;
-      const {shouldDrawLayer, layerRenderIndex, shaderModuleProps, layerParameters} =
-        drawLayerParams[layerIndex];
+      const drawLayerParameters = drawLayerParams[layerIndex];
+      const {shouldDrawLayer} = drawLayerParameters;
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -258,7 +259,8 @@ export default class LayersPass extends Pass {
       if (layer.isComposite) {
         renderStatus.compositeCount++;
       }
-      if (layer.isDrawable && shouldDrawLayer) {
+      if (layer.isDrawable && drawLayerParameters.shouldDrawLayer) {
+        const {layerRenderIndex, shaderModuleProps, layerParameters} = drawLayerParameters;
         // Draw the layer
         renderStatus.visibleCount++;
 
@@ -304,7 +306,7 @@ export default class LayersPass extends Pass {
     return null;
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return layer.props.parameters;
   }
 

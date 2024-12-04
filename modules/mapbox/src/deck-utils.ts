@@ -118,10 +118,11 @@ export function removeDeckInstance(map: Map & {__deck?: Deck | null}) {
 export function getInterleavedProps(currProps: DeckProps) {
   const nextProps: DeckProps = {
     ...currProps,
-    // TODO: remove with withParametersWebGL
+    // TODO: remove 'any' cast
     parameters: {
       depthMask: true,
-      depthTest: true,
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal',
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,
