@@ -42,4 +42,5 @@ export default {
     commonOrigin: 'vec3<f32>',
     pseudoMeters: 'f32'
   }
+  // @ts-ignore TODO v9.1
 } as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}>;
