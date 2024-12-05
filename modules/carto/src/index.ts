@@ -71,6 +71,8 @@ export type {
   GoogleBasemap as _GoogleBasemap
 } from './api/index';
 
+// TODO(v10): Consider removing re-exports from '@carto/api-client' below.
+
 import {
   boundaryQuerySource,
   boundaryTableSource,
@@ -83,11 +85,10 @@ import {
   quadbinTilesetSource,
   vectorQuerySource,
   vectorTableSource,
-  vectorTilesetSource,
-  SOURCE_DEFAULTS
+  vectorTilesetSource
 } from '@carto/api-client';
 
-const CARTO_SOURCES = {
+export const CARTO_SOURCES = {
   boundaryQuerySource,
   boundaryTableSource,
   h3QuerySource,
@@ -115,9 +116,10 @@ export {
   vectorQuerySource,
   vectorTableSource,
   vectorTilesetSource,
-  CARTO_SOURCES,
+  query,
+  CartoAPIError,
   SOURCE_DEFAULTS
-};
+} from '@carto/api-client';
 
 export type {
   GeojsonResult,
@@ -138,5 +140,6 @@ export type {
   QuadbinTilesetSourceOptions,
   VectorQuerySourceOptions,
   VectorTableSourceOptions,
-  VectorTilesetSourceOptions
+  VectorTilesetSourceOptions,
+  QueryParameters
 } from '@carto/api-client';
