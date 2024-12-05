@@ -1083,10 +1083,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@carto/api-client@^0.4.0-alpha.4":
-  version "0.4.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.4.0-alpha.4.tgz#32af6a903624a1cf1c930002a6640116d756750d"
-  integrity sha512-Bm+hoKfMwzruFMvbowypB/CoBQUOl8zqE3XmBHodU0akE341xdSLx8B9w7f4jtqYylXh0wk1irz2sFfW37N2HQ==
+"@carto/api-client@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.4.0.tgz#853469e70dcfa5ce14083f6ad9348911d08046fa"
+  integrity sha512-zFn4/cBBVNvpSqS9di72XuRUl5qrWHEW2KsuWK3fzR5Sng8jXoTFESf6poY0nyhxlAutkMNZIAhpHm+wdc7y/w==
   dependencies:
     "@turf/bbox-clip" "^7.1.0"
     "@turf/bbox-polygon" "^7.1.0"
@@ -7775,10 +7775,10 @@ mitt@3.0.1:
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.1.tgz#ea36cf0cc30403601ae074c8f77b7092cdab36d1"
   integrity sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==
 
-mjolnir.js@^3.0.0-alpha.3:
-  version "3.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-3.0.0-alpha.4.tgz#c37d3c2b20a6eeff709509ecc282263359839642"
-  integrity sha512-FVfy5kc3umt8mvwTtJqnuOUSLF1rMgqO/tXva4V0XPfSTYmfbVxP8CjIBE1H0I1dAPTktaUriwBf2YRnfSr55Q==
+mjolnir.js@^3.0.0-beta.1:
+  version "3.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-3.0.0-beta.1.tgz#32cc50d94e3fe56f3b7d8f7602c46f5c15407661"
+  integrity sha512-Y43qrsczJjovlDXJrtNFDTQcwKPgcxTNckpyoy7jUdM2n/H8Sh5FOhB7Rbp8sf1SvRXSRg8GOUJ6lj3jHq3F4A==
 
 mkdirp@^1.0.3:
   version "1.0.4"

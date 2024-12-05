@@ -34,8 +34,8 @@
   "sideEffects": false,
   "scripts": {},
   "peerDependencies": {
-    "@deck.gl/core": "9.0.0-alpha.0",
-    "@deck.gl/widgets": "9.0.0-alpha.0",
+    "@deck.gl/core": "^9.1.0-beta",
+    "@deck.gl/widgets": "^9.1.0-beta",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0"
   },
