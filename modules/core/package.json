@@ -56,7 +56,7 @@
     "@probe.gl/stats": "^4.0.9",
     "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
-    "mjolnir.js": "^3.0.0-alpha.3"
+    "mjolnir.js": "^3.0.0-beta.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
