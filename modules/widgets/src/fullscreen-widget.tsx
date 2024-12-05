@@ -8,7 +8,7 @@ import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './components';
 
-interface FullscreenWidgetProps {
+export interface FullscreenWidgetProps {
   id?: string;
   placement?: WidgetPlacement;
   /**
@@ -48,10 +48,13 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   constructor(props: FullscreenWidgetProps) {
     this.id = props.id || 'fullscreen';
     this.placement = props.placement || 'top-left';
-    props.enterLabel = props.enterLabel || 'Enter Fullscreen';
-    props.exitLabel = props.exitLabel || 'Exit Fullscreen';
-    props.style = props.style || {};
-    this.props = props;
+
+    this.props = {
+      ...props,
+      enterLabel: props.enterLabel || 'Enter Fullscreen',
+      exitLabel: props.exitLabel || 'Exit Fullscreen',
+      style: props.style || {}
+    };
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
