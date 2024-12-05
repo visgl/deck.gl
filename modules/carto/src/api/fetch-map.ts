@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {
-  SOURCE_DEFAULTS,
+  DEFAULT_API_BASE_URL,
   APIErrorContext,
   CartoAPIError,
   GeojsonResult,
@@ -12,6 +12,7 @@ import {
   Format,
   MapType,
   QueryParameters,
+  SourceOptions,
   buildPublicMapUrl,
   buildStatsUrl,
   h3QuerySource,
@@ -45,14 +46,7 @@ type Dataset = {
 
 /* global clearInterval, setInterval, URL */
 /* eslint-disable complexity, max-statements, max-params */
-async function _fetchMapDataset(
-  dataset: Dataset,
-  accessToken: string,
-  apiBaseUrl: string,
-  clientId?: string,
-  headers?: Record<string, string>,
-  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
-) {
+async function _fetchMapDataset(dataset: Dataset, context: _FetchMapContext) {
   const {
     aggregationExp,
     aggregationResLevel,
@@ -66,16 +60,12 @@ async function _fetchMapDataset(
   } = dataset;
 
   const cache: {value?: number} = {};
-  const globalOptions: any = {
-    accessToken,
-    apiBaseUrl,
+  const globalOptions = {
+    ...context,
     cache,
-    clientId,
     connectionName,
-    format,
-    headers,
-    maxLengthURL
-  };
+    format
+  } as SourceOptions;
 
   if (type === 'tileset') {
     // TODO do we want a generic tilesetSource?
@@ -120,14 +110,9 @@ async function _fetchMapDataset(
   return cacheChanged;
 }
 
-async function _fetchTilestats(
-  attribute: string,
-  dataset: Dataset,
-  accessToken: string,
-  apiBaseUrl: string,
-  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
-) {
+async function _fetchTilestats(attribute: string, dataset: Dataset, context: _FetchMapContext) {
   const {connectionName, data, id, source, type, queryParameters} = dataset;
+  const {apiBaseUrl} = context;
   const errorContext: APIErrorContext = {
     requestType: 'Tile stats',
     connection: connectionName,
@@ -140,7 +125,7 @@ async function _fetchTilestats(
 
   const baseUrl = buildStatsUrl({attribute, apiBaseUrl, ...dataset});
   const client = new URLSearchParams(data.tiles[0]).get('client');
-  const headers = {Authorization: `Bearer ${accessToken}`};
+  const headers = {Authorization: `Bearer ${context.accessToken}`};
   const parameters: Record<string, string> = {};
   if (client) {
     parameters.client = client;
@@ -156,7 +141,7 @@ async function _fetchTilestats(
     headers,
     parameters,
     errorContext,
-    maxLengthURL
+    maxLengthURL: context.maxLengthURL
   });
 
   // Replace tilestats for attribute with value from API
@@ -166,23 +151,14 @@ async function _fetchTilestats(
   return true;
 }
 
-async function fillInMapDatasets(
-  {datasets, token}: {datasets: Dataset[]; token: string},
-  clientId: string,
-  apiBaseUrl: string,
-  headers?: Record<string, string>,
-  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
-) {
-  const promises = datasets.map(dataset =>
-    _fetchMapDataset(dataset, token, apiBaseUrl, clientId, headers, maxLengthURL)
-  );
+async function fillInMapDatasets({datasets}: {datasets: Dataset[]}, context: _FetchMapContext) {
+  const promises = datasets.map(dataset => _fetchMapDataset(dataset, context));
   return await Promise.all(promises);
 }
 
 async function fillInTileStats(
-  {datasets, keplerMapConfig, token}: {datasets: Dataset[]; keplerMapConfig: any; token: string},
-  apiBaseUrl: string,
-  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
+  {datasets, keplerMapConfig}: {datasets: Dataset[]; keplerMapConfig: any},
+  context: _FetchMapContext
 ) {
   const attributes: {attribute: string; dataset: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
@@ -211,7 +187,7 @@ async function fillInTileStats(
   }
 
   const promises = filteredAttributes.map(({attribute, dataset}) =>
-    _fetchTilestats(attribute, dataset, token, apiBaseUrl, maxLengthURL)
+    _fetchTilestats(attribute, dataset, context)
   );
   return await Promise.all(promises);
 }
@@ -260,6 +236,14 @@ export type FetchMapOptions = {
   maxLengthURL?: number;
 };
 
+/**
+ * Context reused while fetching and updating a map with fetchMap().
+ */
+type _FetchMapContext = {apiBaseUrl: string} & Pick<
+  FetchMapOptions,
+  'accessToken' | 'clientId' | 'headers' | 'maxLengthURL'
+>;
+
 export type FetchMapResult = ParseMapResult & {
   /**
    * Basemap properties.
@@ -271,16 +255,15 @@ export type FetchMapResult = ParseMapResult & {
 /* eslint-disable max-statements */
 export async function fetchMap({
   accessToken,
-  apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
+  apiBaseUrl = DEFAULT_API_BASE_URL,
   cartoMapId,
-  clientId = SOURCE_DEFAULTS.clientId,
-  headers = {},
+  clientId,
+  headers,
   autoRefresh,
   onNewData,
-  maxLengthURL = SOURCE_DEFAULTS.maxLengthURL
+  maxLengthURL
 }: FetchMapOptions): Promise<FetchMapResult> {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
-  assert(apiBaseUrl, 'Must define apiBaseUrl');
 
   if (accessToken) {
     headers = {Authorization: `Bearer ${accessToken}`, ...headers};
@@ -298,6 +281,13 @@ export async function fetchMap({
   const baseUrl = buildPublicMapUrl({apiBaseUrl, cartoMapId});
   const errorContext: APIErrorContext = {requestType: 'Public map', mapId: cartoMapId};
   const map = await requestWithParameters({baseUrl, headers, errorContext, maxLengthURL});
+  const context: _FetchMapContext = {
+    accessToken: map.token || accessToken,
+    apiBaseUrl,
+    clientId,
+    headers,
+    maxLengthURL
+  };
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
@@ -305,16 +295,13 @@ export async function fetchMap({
   if (autoRefresh) {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(
-        map,
-        clientId,
-        apiBaseUrl,
-        {
+      const changed = await fillInMapDatasets(map, {
+        ...context,
+        headers: {
           ...headers,
           'If-Modified-Since': new Date().toUTCString()
-        },
-        maxLengthURL
-      );
+        }
+      });
       if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -343,11 +330,11 @@ export async function fetchMap({
     fetchBasemapProps({config: map.keplerMapConfig.config, errorContext}),
 
     // Mutates map.datasets so that dataset.data contains data
-    fillInMapDatasets(map, clientId, apiBaseUrl, headers, maxLengthURL)
+    fillInMapDatasets(map, context)
   ]);
 
   // Mutates attributes in visualChannels to contain tile stats
-  await fillInTileStats(map, apiBaseUrl, maxLengthURL);
+  await fillInTileStats(map, context);
 
   const out = {...parseMap(map), basemap, ...{stopAutoRefresh}};
 
