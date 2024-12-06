@@ -5,7 +5,7 @@
 import {Deck, WebMercatorViewport, MapView, _flatten as flatten} from '@deck.gl/core';
 import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
 import type MapboxLayer from './mapbox-layer';
-import type {Map} from 'mapbox-gl';
+import type {Map} from './types';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 import {GL} from '@luma.gl/constants';
