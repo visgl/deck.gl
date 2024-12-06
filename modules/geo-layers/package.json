@@ -3,7 +3,7 @@
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.36",
+  "version": "9.0.37",
   "publishConfig": {
     "access": "public"
   },

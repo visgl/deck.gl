@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.37] - Dec 6 2024
+
+- fix(mapbox) Remove type dependency on mapbox-gl (#9279)
+
 #### deck.gl [9.0.36] - Nov 21 2024
 
 - fix(layers): Fix MVTLayer + pickMultipleObjects (#9246)
