@@ -255,7 +255,7 @@ export default class MapboxOverlay implements IControl {
 
     switch (mockEvent.type) {
       case 'mousedown':
-        deck._onPointerDown(mockEvent as any as MjolnirPointerEvent);
+        deck._onPointerDown(mockEvent as unknown as MjolnirPointerEvent);
         this._lastMouseDownPoint = {
           ...event.point,
           clientX: event.originalEvent.clientX,
@@ -265,38 +265,38 @@ export default class MapboxOverlay implements IControl {
 
       case 'dragstart':
         mockEvent.type = 'panstart';
-        deck._onEvent(mockEvent as any as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'drag':
         mockEvent.type = 'panmove';
-        deck._onEvent(mockEvent as any as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'dragend':
         mockEvent.type = 'panend';
-        deck._onEvent(mockEvent as any as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'click':
         mockEvent.tapCount = 1;
-        deck._onEvent(mockEvent as any as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'dblclick':
         mockEvent.type = 'click';
         mockEvent.tapCount = 2;
-        deck._onEvent(mockEvent as any as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'mousemove':
         mockEvent.type = 'pointermove';
-        deck._onPointerMove(mockEvent as any as MjolnirPointerEvent);
+        deck._onPointerMove(mockEvent as unknown as MjolnirPointerEvent);
         break;
 
       case 'mouseout':
         mockEvent.type = 'pointerleave';
-        deck._onPointerMove(mockEvent as any as MjolnirPointerEvent);
+        deck._onPointerMove(mockEvent as unknown as MjolnirPointerEvent);
         break;
 
       default:
