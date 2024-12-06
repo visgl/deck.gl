@@ -72,7 +72,7 @@ const sidebars = {
         {
           type: 'link',
           label: 'Playground',
-          href: `playground`
+          href: `/playground`
         }
       ]
     }
