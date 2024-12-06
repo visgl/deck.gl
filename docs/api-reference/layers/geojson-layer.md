@@ -421,7 +421,7 @@ The following props are forwarded to an `IconLayer` if `pointType` is `'icon'`.
 | `iconSizeMinPixels` | `0` | [sizeMinPixels](./icon-layer.md#sizeminpixels) |
 | `iconSizeMaxPixels` | `Number.MAX_SAFE_INTEGER` | [sizeMaxPixels](./icon-layer.md#sizemaxpixels) |
 | `iconBillboard` | `true` | [billboard](./icon-layer.md#billboard) |
-| `iconAlphaCutoff` | `0.05` | [alphaCutoff](./icon-layer.md#alphaCutoff) |
+| `iconAlphaCutoff` | `0.05` | [alphaCutoff](./icon-layer.md#alphacutoff) |
 
 ### pointType:text Options
 
@@ -454,7 +454,7 @@ The following props are forwarded to a `TextLayer` if `pointType` is `'text'`.
 | `textOutlineColor` | `[0, 0, 0, 255]` | [outlineColor](./text-layer.md#outlinecolor) |
 | `textOutlineWidth` | `0` | [outlineWidth](./text-layer.md#outlinewidth) |
 | `textBillboard` | `true` | [billboard](./text-layer.md#billboard) |
-| `textFontSettings` | `{}` | [fontSettings](./text-layer.md#fontSettings) |
+| `textFontSettings` | `{}` | [fontSettings](./text-layer.md#fontsettings) |
 
 ## Sub Layers
 

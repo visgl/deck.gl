@@ -332,7 +332,7 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
 * `pointcloud` - a [PointCloudLayer](../layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
 * `mesh` - a [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md) rendering all the tiles ESRI `MeshPyramids` data.
 
-Follow [CompositeLayer](../core/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
+Follow [CompositeLayer](../core/composite-layer.md#_sublayerprops) and example in this layer doc to see how to override sub layer props.
 
 ## Remarks
 

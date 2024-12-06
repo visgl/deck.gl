@@ -68,7 +68,7 @@ Inherits all properties from [`ColumnLayer`](../layers/column-layer.md) and [`Ti
 
 Required. A valid `TilejsonResult` object.
 
-Use the [rasterTilesetSource](./data-sources.md#rastertilesetsource) to fetch this from the CARTO API.
+Use the [rasterTilesetSource](./data-sources.md#rastertilesetsource-experimental) to fetch this from the CARTO API.
 
 ## Source
 

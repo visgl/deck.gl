@@ -161,7 +161,7 @@ The new experimental [`WMSLayer`](./api-reference/geo-layers/wms-layer.md) simpl
 
 ### Other Enhancements
 
-- [MapLibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deck.md#map).
+- [MapLibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deckgl.md#map).
 - `BitmapLayer` now mixes translucent pixels correctly (Note: [breaking change](./upgrade-guide.md))
 - `TextLayer` handles text outlines better in sdf mode. Outlines are no longer clipped and responds to `outlineWidth` as expected.
 - `TextLayer`'s `maxWidth` is changed to use a more intuitive unit. See upgrade guide for details.
@@ -199,7 +199,7 @@ In v8.x, the types will not be exposed by default to prevent any typing errors f
 
 The [TileLayer](./api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
 
-Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](./api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
+Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](./api-reference/geo-layers/tile-layer.md#tileset2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
 
 Due to this generalization, there is a breaking change affecting indexing properties (`x`, `y` and `z`) in the `TileLayer` API. See [upgrade guide](./upgrade-guide.md) for details.
 
@@ -426,7 +426,7 @@ The `DeckGL` React component is rewritten using functional component and hooks.
 
 - Integration with **CARTO 3 platform**. With deck.gl and the CARTO 3 platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). You don't need to move your data to CARTO plaform.
 - A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are migration guides for both: [CartoSQLLayer](https://github.com/visgl/deck.gl/blob/8.5-release/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer#migration-to-cartolayer) and [CartoBQTilerLayer](https://github.com/visgl/deck.gl/blob/8.5-release/docs/api-reference/carto/carto-bqtiler-layer.md#migration-to-cartolayer#migration-to-cartolayer).
-- New `getData` method in CARTO 3 [to support other deck.gl layers](./api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
+- New `getData` method in CARTO 3 [to support other deck.gl layers](./api-reference/carto/overview.md#support-for-other-deckgl-layers). 
 
 ## deck.gl v8.4
 
@@ -1186,7 +1186,7 @@ We are releasing [loaders.gl](https://loaders.gl/) as a major new companion fram
 A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](./api-reference/core/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers. See [Using Lighting](./developer-guide/using-effects.md#lighting) for details.
 ### Layer API
 
-* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](./developer-guide/performance.md#on-using-binary-data).
+* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](./developer-guide/performance.md#use-binary-data).
 * **Size units**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
 * **Billboard**: Prior this v7.0, `IconLayer` and `TextLayer` are rendered as billboards (i.e. always facing the camera). A prop `billboard` is added to these layers so that you can place icons and texts relative to the world.
 
