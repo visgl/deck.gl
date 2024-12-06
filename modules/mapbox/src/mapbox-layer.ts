@@ -1,5 +1,5 @@
 import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
-import type {Map, CustomLayerInterface} from 'mapbox-gl';
+import type {Map, CustomLayerInterface} from './types';
 import type {Deck, Layer} from '@deck.gl/core';
 
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
@@ -54,6 +54,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   }
 
   render() {
-    drawLayer(this.deck!, this.map, this);
+    drawLayer(this.deck!, this.map!, this);
   }
 }
