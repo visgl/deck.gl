@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator} from '@deck.gl/core';
+import {FlyToInterpolator, _applyStyles as applyStyles} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './components';
@@ -68,9 +68,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-zoom');
     if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
+    applyStyles(element, style);
     const ui = (
       <ButtonGroup orientation={this.orientation}>
         <GroupedIconButton
