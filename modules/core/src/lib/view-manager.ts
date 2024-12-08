@@ -20,14 +20,14 @@ type ViewStateOf<ViewT> = ViewT extends View<infer ViewStateT> ? ViewStateT : ne
 type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapView
   : ViewsT extends View[]
-  ? ViewsT[number]
-  : ViewsT;
+    ? ViewsT[number]
+    : ViewsT;
 export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStateOf<OneOfViews<ViewsT>>;
 export type ViewStateMap<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapViewState
   : ViewsT extends View
-  ? ViewStateOf<ViewsT>
-  : {[viewId: string]: AnyViewStateOf<ViewsT>};
+    ? ViewStateOf<ViewsT>
+    : {[viewId: string]: AnyViewStateOf<ViewsT>};
 
 /** This is a very lose type of all "acceptable" viewState
  * It's not good for type hinting but matches what may exist internally

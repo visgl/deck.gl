@@ -268,7 +268,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   draw(opts) {
-    const {shaderModuleProps, uniforms} = opts;
+    const {shaderModuleProps} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
