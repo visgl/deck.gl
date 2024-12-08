@@ -5,7 +5,7 @@
 /* eslint-disable camelcase */
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project, ProjectProps, ProjectUniforms, Viewport} from '@deck.gl/core';
+import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';

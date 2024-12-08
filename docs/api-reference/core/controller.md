@@ -87,7 +87,7 @@ Returns `true` if the user is dragging the view.
 
 ## Members
 
-#### `events` (string[])
+#### `events` (string[]) {#events}
 
 In its constructor, a controller class can optionally specify a list of event names that it subscribes to with the `events` field. 
 Supported events are:
