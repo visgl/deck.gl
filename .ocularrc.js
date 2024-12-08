@@ -1,4 +1,4 @@
-/** @typedef {import('ocular-dev-tools').OcularConfig} OcularConfig */
+/** @typedef {import('@vis.gl/dev-tools').OcularConfig} OcularConfig */
 import {dirname, join} from 'path';
 import {fileURLToPath} from 'url';
 
@@ -38,10 +38,6 @@ const config = {
       '@loaders.gl/core': 'globalThis.loaders',
       'h3-js': 'globalThis.h3 || {}'
     }
-  },
-
-  typescript: {
-    project: 'tsconfig.build.json'
   },
 
   aliases: {
