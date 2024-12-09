@@ -3,7 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {Framebuffer, TextureProps} from '@luma.gl/core';
+import type {ShaderPass} from '@luma.gl/shadertools';
 import {
+  _ConstructorOf,
   CompositeLayer,
   Layer,
   LayerContext,
@@ -63,8 +65,10 @@ class DrawCallbackLayer extends Layer {
  * Resulting layer must be used as a sublayer of a layer created
  * with `PostProcessModifier`
  */
-export function RTTModifier(BaseLayer) {
+export function RTTModifier<T extends _ConstructorOf<Layer>>(BaseLayer: T): T {
+  // @ts-expect-error initializeState is abstract
   return class RTTLayer extends BaseLayer {
+    // @ts-expect-error typescript doesn't see static property
     static layerName = `RTT-${BaseLayer.layerName}`;
 
     draw(this: RTTLayer, opts: any) {
@@ -183,3 +187,20 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
     }
   };
 }
+
+const fs = /* glsl */ `\
+vec4 copy_filterColor_ext(vec4 color, vec2 texSize, vec2 texCoord) {
+  return color;
+}
+`;
+
+/**
+ * Copy
+ * Simple module that just copies input color to output
+ */
+export const copy = {
+  name: 'copy',
+  fs,
+  getUniforms: () => ({}),
+  passes: [{filter: true}]
+} as const satisfies ShaderPass<{}>;
