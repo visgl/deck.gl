@@ -16,6 +16,7 @@ import {quadbinToOffset} from './quadbin-utils';
 import {Raster} from './schema/carto-raster-tile-loader';
 import vs from './raster-layer-vertex.glsl';
 import {createBinaryProxy} from '../utils';
+import {RTTModifier} from './post-process-utils';
 
 const defaultProps: DefaultProps<RasterLayerProps> = {
   ...ColumnLayer.defaultProps,
@@ -30,7 +31,8 @@ const defaultProps: DefaultProps<RasterLayerProps> = {
 };
 
 // Modified ColumnLayer with custom vertex shader
-class RasterColumnLayer extends ColumnLayer {
+// Use RTT to avoid inter-tile seams
+class RasterColumnLayer extends RTTModifier(ColumnLayer) {
   static layerName = 'RasterColumnLayer';
 
   getShaders() {
@@ -143,7 +145,18 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
         offset,
         lineWidthScale, // Re-use widthScale prop to pass cell scale,
         highlightedObjectIndex,
-        highlightColor
+        highlightColor,
+
+        // RTT requires blending otherwise opacity < 1 blends with black
+        // render target
+        parameters: {
+          blendColorSrcFactor: 'one',
+          blendAlphaSrcFactor: 'one',
+          blendColorDstFactor: 'zero',
+          blendAlphaDstFactor: 'zero',
+          blendColorOperation: 'add',
+          blendAlphaOperation: 'add'
+        }
       }
     );
   }

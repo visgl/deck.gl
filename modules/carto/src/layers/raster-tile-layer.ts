@@ -2,13 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  CompositeLayerProps,
+  DefaultProps,
+  FilterContext,
+  Layer,
+  LayersList
+} from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import type {TilejsonResult} from '@carto/api-client';
 import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import {TileLayer, TileLayerProps} from '@deck.gl/geo-layers';
+import {copy, PostProcessModifier} from './post-process-utils';
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;
@@ -18,6 +26,7 @@ export const renderSubLayers = props => {
 
 const defaultProps: DefaultProps<RasterTileLayerProps> = {
   data: TilejsonPropType,
+  refinementStrategy: 'no-overlap',
   tileSize: DEFAULT_TILE_SIZE
 };
 
@@ -30,6 +39,16 @@ type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> &
   Omit<TileLayerProps<DataT>, 'data'> & {
     data: null | TilejsonResult | Promise<TilejsonResult>;
   };
+
+class PostProcessTileLayer extends PostProcessModifier(TileLayer, copy) {
+  filterSubLayer(context: FilterContext) {
+    // Handle DrawCallbackLayer
+    const {tile} = (context.layer as Layer<{tile: any}>).props;
+    if (!tile) return true;
+
+    return super.filterSubLayer(context);
+  }
+}
 
 export default class RasterTileLayer<
   DataT = any,
@@ -50,7 +69,7 @@ export default class RasterTileLayer<
     if (!tileJSON) return null;
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
-    const SubLayerClass = this.getSubLayerClass('tile', TileLayer);
+    const SubLayerClass = this.getSubLayerClass('tile', PostProcessTileLayer);
     return new SubLayerClass(this.props, {
       id: `raster-tile-layer-${this.props.id}`,
       data,
