@@ -1004,7 +1004,7 @@ A new [PostProcessEffect](./api-reference/core/post-process-effect.md) class, wo
 
 #### GridLayer
 
-`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](./api-reference/aggregation-layers/grid-layer.md). Two new layers [GPUGridLayer](./api-reference/aggregation-layers/gpu-grid-layer.md) and [CPUGridLayer](./api-reference/aggregation-layers/cpu-grid-layer.md) are also offered, which perform aggregation on CPU and GPU respectively.
+`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](./api-reference/aggregation-layers/grid-layer.md). Two new layers GPUGridLayer and CPUGridLayer are also offered, which perform aggregation on CPU and GPU respectively.
 
 The following table compares the performance between CPU and GPU aggregations using random data points:
 
@@ -1133,7 +1133,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
   - [TextLayer](./api-reference/layers/text-layer.md)
 * ` @deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
   - [ContourLayer](./api-reference/aggregation-layers/contour-layer.md)
-  - [GPUGridLayer](./api-reference/aggregation-layers/gpu-grid-layer.md)
+  - GPUGridLayer
   - [GridLayer](./api-reference/aggregation-layers/grid-layer.md)
   - [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md)
   - [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md)
