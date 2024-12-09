@@ -235,9 +235,9 @@ The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 2
 The [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
 
 - `bitmap`
-  + `pixel` `([x: number, y: number])` Integer coordinates into the bitmap
-  + `size` `({width: number; height: number})` Size of bitmap in pixels
-  + `uv` `([u: number, v: number])` Normalized (0-1) floating point coordinates
+  + `pixel` (`[x: number, y: number]`) Integer coordinates into the bitmap
+  + `size` (`{width: number; height: number}`) Size of bitmap in pixels
+  + `uv` (`[u: number, v: number]`) Normalized (0-1) floating point coordinates
 
 Note that the `bitmap` field can be `null` if on mouse leave or if the bitmap has not yet loaded.
 
