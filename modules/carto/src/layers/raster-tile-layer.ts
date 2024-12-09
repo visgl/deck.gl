@@ -78,11 +78,7 @@ export default class RasterTileLayer<
       renderSubLayers,
       minZoom,
       maxZoom,
-      loadOptions: this.getLoadOptions(),
-      borderWidthPixels: 4,
-      zoom: 2,
-      radiusPixels: 250,
-      screenXY: [0.5, 0.5]
+      loadOptions: this.getLoadOptions()
     });
   }
 }
