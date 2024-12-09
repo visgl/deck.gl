@@ -5,7 +5,7 @@
 import React from 'react';
 // Note: this is internal API and may change in a future release
 // https://github.com/facebook/docusaurus/discussions/7457
-import {useDocsSidebar} from '@docusaurus/theme-common/internal';
+import {useDocsSidebar} from '@docusaurus/plugin-content-docs/client';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
 import {MainExamples, ExamplesGroup, ExampleCard, ExampleHeader, ExampleTitle} from './styled';
