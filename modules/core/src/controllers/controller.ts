@@ -221,9 +221,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       case 'dblclick':
         return this._onDoubleClick(event);
       case 'wheel':
-        return this._onWheel(event);
+        return this._onWheel(event as MjolnirWheelEvent);
       case 'keydown':
-        return this._onKeyDown(event);
+        return this._onKeyDown(event as MjolnirKeyEvent);
       default:
         return false;
     }
