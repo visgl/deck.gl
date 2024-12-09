@@ -37,7 +37,7 @@ If any of the callback functions return `true`, the event is marked handled and 
 Whenever the pointer moves over the canvas, deck.gl performs a new picking pass, yielding a picking info object describing the result. This object is used for multiple purposes:
 
 - The `onHover` callbacks are called with it
-- To update the picked layer if [autoHighlight](../../api-reference/core/layer.md#autohighlight-boolean-optional) is enabled
+- To update the picked layer if [autoHighlight](../../api-reference/core/layer.md#autohighlight) is enabled
 - Saved for later use
 
 When other gestures (click, drag, etc.) are detected, deck.gl does not repeat picking. Instead, their callbacks are called with the last picked info from `hover`.

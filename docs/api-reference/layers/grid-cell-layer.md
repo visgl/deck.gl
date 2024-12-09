@@ -8,7 +8,7 @@ import {GridCellLayerDemo} from '@site/src/doc-demos/layers';
 The `GridCellLayer` can render a grid-based heatmap.
 It is a variation of the [ColumnLayer](./column-layer.md).
 It takes the constant width / height of all cells and bottom-left coordinate of each cell.
-This is the primitive layer rendered by [CPUGridLayer](../aggregation-layers/cpu-grid-layer.md) after aggregation. Unlike the CPUGridLayer, it renders one column for each data object.
+This is the primitive layer rendered by [GridLayer](../aggregation-layers/grid-layer.md) after aggregation. Unlike the GridLayer, it renders one column for each data object.
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';

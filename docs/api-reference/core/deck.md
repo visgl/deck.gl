@@ -136,7 +136,7 @@ Controls the resolution of drawing buffer used for rendering.
 
 Note:
 
-* Consider setting to `false` or to a number <=1 if better rendering performance is needed.
+* Consider setting to `false` or to a number `<=1` if better rendering performance is needed.
 * When it is set to a high Number (like, 4 or more), it is possible to hit the system limit for allocating drawing buffer, such cases will log a warning and fallback to system allowed resolution.
 
 #### `parameters` (object) {#parameters}
