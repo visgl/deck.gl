@@ -51,7 +51,7 @@ jobs:
         run: yarn
 
       - name: Build packages
-        run: npm run build
+        run: yarn build
       
       - name: Run tests from transpiled code
         run: npx ocular-test dist

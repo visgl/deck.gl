@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: yarn bootstrap
 
+      - name: Build packages
+        run: yarn build
+
       - name: Run tests
         run: |
           yarn lint
