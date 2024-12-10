@@ -184,7 +184,7 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
 }
 
 const fs = /* glsl */ `\
-vec4 copy_filterColor_ext(vec4 color, vec2 texSize, vec2 texCoord) {
+vec4 copy_filterColor(vec4 color, vec2 texSize, vec2 texCoord) {
   return color;
 }
 `;
