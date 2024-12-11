@@ -180,6 +180,14 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
 
       this.internalState.renderInProgress = false;
     }
+
+    _finalize(): void {
+      this.internalState.renderBuffers.forEach((fbo: Framebuffer) => {
+        fbo.destroy();
+      });
+      this.internalState.renderBuffers = null;
+      this.internalState.postProcess.cleanup();
+    }
   };
 }
 
