@@ -275,7 +275,7 @@ const TEST_CASES = [
       viewState: {
         longitude: -6,
         latitude: 58,
-        zoom: 1.5 + 0.7353406094252244 // Math.log2(1 / Math.PI / Math.cos(58 / 180 * Math.PI))
+        zoom: 2
       }
     }),
     tileSize: 512,

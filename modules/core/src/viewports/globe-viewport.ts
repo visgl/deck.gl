@@ -6,6 +6,7 @@ import {Matrix4} from '@math.gl/core';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import {vec3, vec4} from '@math.gl/core';
 
@@ -53,9 +54,9 @@ export type GlobeViewportOptions = {
   orthographic?: boolean;
   /** Camera fovy in degrees. If provided, overrides `altitude` */
   fovy?: number;
-  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.1` */
+  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.5` */
   nearZMultiplier?: number;
-  /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `2` */
+  /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1` */
   farZMultiplier?: number;
   /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
   resolution?: number;
@@ -68,15 +69,19 @@ export default class GlobeViewport extends Viewport {
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
-      latitude = 0,
       longitude = 0,
       zoom = 0,
+      // Matches Maplibre defaults
+      // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
       nearZMultiplier = 0.5,
       farZMultiplier = 1,
       resolution = 10
     } = opts;
 
-    let {height, altitude = 1.5, fovy} = opts;
+    let {latitude = 0, height, altitude = 1.5, fovy} = opts;
+
+    // Clamp to web mercator limit to prevent bad inputs
+    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
 
     height = height || 1;
     if (fovy) {
@@ -84,7 +89,9 @@ export default class GlobeViewport extends Viewport {
     } else {
       fovy = altitudeToFovy(altitude);
     }
-    // Used to match globe and web mercator projection at high zoom
+    // Exagerate distance by latitude to match the Web Mercator distortion
+    // The goal is that globe and web mercator projection results converge at high zoom
+    // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
     const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
     const scale = Math.pow(2, zoom) * scaleAdjust;
     const farZ = altitude + (GLOBE_RADIUS * 2 * scale) / height;
