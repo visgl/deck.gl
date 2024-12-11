@@ -275,7 +275,7 @@ const TEST_CASES = [
       viewState: {
         longitude: -6,
         latitude: 58,
-        zoom: 1.5
+        zoom: 2
       }
     }),
     tileSize: 512,
