@@ -4,6 +4,8 @@
 
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
+import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
+import {Map} from '@vis.gl/react-maplibre';
 
 import {createRoot} from 'react-dom/client';
 
@@ -15,7 +17,6 @@ import {
   AmbientLight,
   _SunLight as SunLight
 } from '@deck.gl/core';
-import {GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {SphereGeometry} from '@luma.gl/engine';
@@ -32,11 +33,14 @@ const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/ex
 const INITIAL_VIEW_STATE: GlobeViewState = {
   longitude: 0,
   latitude: 20,
-  zoom: 0
+  zoom: 2,
+  minZoom: 1,
+  maxZoom: 3,
 };
 
-const TIME_WINDOW = 900; // 15 minutes
-const EARTH_RADIUS_METERS = 6.3e6;
+const ANIMATION_SPEED = 60;
+const TIME_WINDOW = 1800; // 30 minutes
+const EARTH_RADIUS_METERS = 6370972;
 const SEC_PER_DAY = 60 * 60 * 24;
 
 const ambientLight = new AmbientLight({
@@ -89,16 +93,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
         mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: [0, 0, 0],
-        getColor: [255, 255, 255]
-      }),
-      new GeoJsonLayer({
-        id: 'earth-land',
-        data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson',
-        // Styles
-        stroked: false,
-        filled: true,
-        opacity: 0.1,
-        getFillColor: [30, 80, 120]
+        getColor: [255, 255, 255, 0],
       })
     ],
     []
@@ -115,11 +110,11 @@ export default function App({data}: {data?: DailyFlights[]}) {
           getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
           getSourceTimestamp: d => d.time1,
           getTargetTimestamp: d => d.time2,
-          getHeight: 0.5,
-          getWidth: 1,
+          getHeight: 0.3,
+          getWidth: 2,
           timeRange,
-          getSourceColor: [255, 0, 128],
-          getTargetColor: [0, 128, 255]
+          getSourceColor: [63, 81, 181],
+          getTargetColor: [63, 181, 173]
         })
     );
 
@@ -131,13 +126,20 @@ export default function App({data}: {data?: DailyFlights[]}) {
         controller={true}
         effects={[lightingEffect]}
         layers={[backgroundLayers, dataLayers]}
-      />
+      >
+        <Map
+          reuseMaps
+          mapLib={maplibregl}
+          projection={'globe'}
+          mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        />
+      </DeckGL>
       {data && (
         <RangeInput
           min={0}
           max={data.length * SEC_PER_DAY}
           value={currentTime}
-          animationSpeed={TIME_WINDOW * 0.2}
+          animationSpeed={ANIMATION_SPEED}
           formatLabel={formatLabel}
           onChange={setCurrentTime}
         />
