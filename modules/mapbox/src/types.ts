@@ -9,7 +9,7 @@ type Listener = (event?: any) => any;
 export interface Evented {
   on(type: string, listener: Listener);
 
-  off(type?: string | any, listener?: Listener);
+  off(type: string, listener?: Listener);
 
   once(type: string, listener: Listener);
 }

@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {createTestDevice, webglDevice, NullDevice} from '@luma.gl/test-utils';
+import {webglDevice, NullDevice} from '@luma.gl/test-utils';
 
 /** Test device */
 export const device = webglDevice || new NullDevice({});
 
 /** Test context */
-const testDevice = createTestDevice();
+// const testDevice = createTestDevice();
 
 export const gl = webglDevice?.gl || 1;
 
