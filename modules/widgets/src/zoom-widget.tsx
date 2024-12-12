@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator, _applyStyles as applyStyles} from '@deck.gl/core';
+import {
+  FlyToInterpolator,
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './components';
@@ -97,6 +102,20 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   setProps(props: Partial<ZoomWidgetProps>) {
+    const oldProps = this.props;
+    const el = this.element;
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
+
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
+      }
+    }
+
     Object.assign(this.props, props);
   }
 

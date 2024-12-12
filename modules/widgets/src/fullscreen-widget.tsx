@@ -3,7 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {_deepEqual as deepEqual, _applyStyles as applyStyles} from '@deck.gl/core';
+import {
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './components';
@@ -100,17 +104,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
       }
 
       if (!deepEqual(oldProps.style, props.style, 1)) {
-        if (oldProps.style) {
-          Object.entries(oldProps.style).map(([key]) => {
-            if (key.startsWith('--')) {
-              // Assume CSS variable
-              el.style.removeProperty(key);
-            } else {
-              // Assume camelCase
-              el.style[key] = '';
-            }
-          });
-        }
+        removeStyles(el, oldProps.style);
         applyStyles(el, props.style);
       }
     }

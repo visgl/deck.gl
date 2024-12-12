@@ -11,3 +11,17 @@ export function applyStyles(element: HTMLElement, style?: Partial<CSSStyleDeclar
     });
   }
 }
+
+export function removeStyles(element: HTMLElement, style?: Partial<CSSStyleDeclaration>): void {
+  if (style) {
+    Object.keys(style).map(key => {
+      if (key.startsWith('--')) {
+        // Assume CSS variable
+        element.style.removeProperty(key);
+      } else {
+        // Assume camelCase
+        element.style[key] = '';
+      }
+    });
+  }
+}
