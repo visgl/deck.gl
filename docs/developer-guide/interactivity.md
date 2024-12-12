@@ -517,7 +517,7 @@ const layer = new ScatterplotLayer<DataType>({
 </Tabs>
 
 
-* Specify callbacks for all pickable layers by setting [event handler props](../api-reference/react/deckgl.md#event-callbacks) of the `Deck`/`DeckGL` component:
+* Specify callbacks for all pickable layers by setting [event handler props](../api-reference/core/deck.md#event-callbacks) of the `Deck`/`DeckGL` component:
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
