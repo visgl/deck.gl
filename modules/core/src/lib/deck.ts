@@ -368,7 +368,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
-      deviceOrPromise = webgl2Adapter.attach(props.gl);
+      deviceOrPromise = luma.createDevice({
+        type: 'best-available',
+        adapters: [webgl2Adapter],
+        ...props.deviceProps,
+        createCanvasContext: {canvas: props.gl.canvas}
+      });
     }
 
     // Create a new device
