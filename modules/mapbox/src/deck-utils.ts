@@ -122,14 +122,14 @@ export function getDefaultParameters(map: Map, interleaved: boolean): Parameters
     ? {
         depthWriteEnabled: true,
         depthCompare: 'less-equal',
+        depthBias: 0,
         blend: true,
         blendColorSrcFactor: 'src-alpha',
         blendColorDstFactor: 'one-minus-src-alpha',
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one-minus-src-alpha',
         blendColorOperation: 'add',
-        blendAlphaOperation: 'add',
-        polygonOffsetLine: true
+        blendAlphaOperation: 'add'
       }
     : {};
   if (getProjection(map) === 'globe') {
