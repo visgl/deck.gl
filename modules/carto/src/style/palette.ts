@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as cartoColors from 'cartocolor';
 import {assert} from '../utils';
 import {Color} from '@deck.gl/core';

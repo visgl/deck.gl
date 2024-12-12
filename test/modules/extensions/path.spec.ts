@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {PathLayer, PolygonLayer} from '@deck.gl/layers';

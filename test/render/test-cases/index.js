@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // core layers
 import coreLayersTests from './core-layers';
 import arcLayersTests from './arc-layer';
@@ -42,11 +46,11 @@ export default [].concat(
   polygonLayerTests,
   iconLayerTests,
   textLayerTests,
-  // contourLayerTests,
-  // gridLayerTests,
+  contourLayerTests,
+  gridLayerTests,
   hexagonLayerTests,
   screenGridLayerTests,
-  // heatmapLayerTests,
+  heatmapLayerTests,
   h3LayersTests,
   quadkeyLayerTests,
   s2LayerTests,

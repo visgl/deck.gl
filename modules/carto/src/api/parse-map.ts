@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {ColorParameters} from '@luma.gl/core';
 import {Layer, log} from '@deck.gl/core';
 import {
@@ -168,7 +172,8 @@ function createChannelProps(
     sizeField,
     sizeScale,
     strokeColorField,
-    strokeColorScale
+    strokeColorScale,
+    weightField
   } = visualChannels;
   let {heightField, heightScale} = visualChannels;
   if (type === 'hexagonId') {
@@ -242,7 +247,6 @@ function createChannelProps(
       data
     );
   }
-
   if (heightField && visConfig.enable3d) {
     result.getElevation = getSizeAccessor(
       heightField,
@@ -250,6 +254,16 @@ function createChannelProps(
       heightScale,
       visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
+      data
+    );
+  }
+
+  if (weightField) {
+    result.getWeight = getSizeAccessor(
+      weightField,
+      undefined,
+      visConfig.weightAggregation,
+      undefined,
       data
     );
   }

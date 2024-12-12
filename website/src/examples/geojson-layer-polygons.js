@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';

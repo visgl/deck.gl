@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {RequestScheduler} from '@loaders.gl/loader-utils';

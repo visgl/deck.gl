@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LayerExtension} from '@deck.gl/core';
 
 import {FillStyleModuleProps, patternShaders} from './shader-module';
@@ -69,7 +73,7 @@ export type FillStyleExtensionProps<DataT = any> = {
   getFillPatternOffset?: Accessor<DataT, [number, number]>;
 };
 
-type FillStyleExtensionOptions = {
+export type FillStyleExtensionOptions = {
   /** If `true`, adds the ability to tile the filled area with a pattern.
    * @default false
    */
@@ -155,11 +159,9 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       return;
     }
 
-    const {fillPatternAtlas} = this.props;
-    const {viewport} = params.context;
-    const {fillPatternEnabled, fillPatternMask} = params.moduleParameters;
+    const {fillPatternAtlas, fillPatternEnabled, fillPatternMask} = this.props;
     const fillProps: FillStyleModuleProps = {
-      viewport,
+      project: params.shaderModuleProps.project,
       fillPatternEnabled,
       fillPatternMask,
       fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture

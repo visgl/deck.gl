@@ -1,41 +1,22 @@
-// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Layer, picking, UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
-import {defaultColorRange, colorRangeToTexture} from '../utils/color-utils';
+import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
 import {ShaderModule} from '@luma.gl/shadertools';
-
-const defaultProps: DefaultProps<_ScreenGridCellLayerProps> = {
-  cellSizePixels: {type: 'number', value: 100, min: 1},
-  cellMarginPixels: {type: 'number', value: 2, min: 0},
-  colorRange: defaultColorRange
-};
+import type {ScaleType} from '../common/types';
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps = {
-  cellSizePixels?: number;
-  cellMarginPixels?: number;
+  cellSizePixels: number;
+  cellMarginPixels: number;
+  colorScaleType: ScaleType;
   colorDomain: () => [number, number];
   colorRange?: Color[];
 };
@@ -44,7 +25,6 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   ExtraPropsT & Required<_ScreenGridCellLayerProps>
 > {
   static layerName = 'ScreenGridCellLayer';
-  static defaultProps = defaultProps;
 
   state!: {
     model?: Model;
@@ -52,7 +32,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   };
 
   getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
-    return {vs, fs, modules: [picking]};
+    return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
   }
 
   initializeState() {
@@ -80,8 +60,15 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
 
     if (oldProps.colorRange !== props.colorRange) {
       this.state.colorTexture?.destroy();
-      this.state.colorTexture = colorRangeToTexture(this.context.device, props.colorRange);
-      model.setBindings({colorRange: this.state.colorTexture});
+      this.state.colorTexture = createColorRangeTexture(
+        this.context.device,
+        props.colorRange,
+        props.colorScaleType
+      );
+      const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
+    } else if (oldProps.colorScaleType !== props.colorScaleType) {
+      updateColorRangeTexture(this.state.colorTexture, props.colorScaleType);
     }
 
     if (
@@ -93,10 +80,11 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
       const {cellSizePixels: gridSize, cellMarginPixels} = this.props;
       const cellSize = Math.max(gridSize - cellMarginPixels, 0);
 
-      model.setUniforms({
+      const screenGridProps: Partial<ScreenGridProps> = {
         gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
         cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
-      });
+      };
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
   }
 
@@ -107,12 +95,11 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   }
 
   draw({uniforms}) {
-    // If colorDomain not specified we use dynamic domain from the aggregator
     const colorDomain = this.props.colorDomain();
     const model = this.state.model!;
 
-    model.setUniforms(uniforms);
-    model.setUniforms({colorDomain});
+    const screenGridProps: Partial<ScreenGridProps> = {colorDomain};
+    model.shaderInputs.setProps({screenGrid: screenGridProps});
     model.draw(this.context.renderPass);
   }
 

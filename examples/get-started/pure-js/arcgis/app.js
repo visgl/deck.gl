@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {DeckLayer} from '@deck.gl/arcgis';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import ArcGISMap from '@arcgis/core/Map';

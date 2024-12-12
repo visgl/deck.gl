@@ -1,5 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Framebuffer, TextureProps} from '@luma.gl/core';
+import type {ShaderPass} from '@luma.gl/shadertools';
 import {
+  _ConstructorOf,
   CompositeLayer,
   Layer,
   LayerContext,
@@ -59,13 +65,15 @@ class DrawCallbackLayer extends Layer {
  * Resulting layer must be used as a sublayer of a layer created
  * with `PostProcessModifier`
  */
-export function RTTModifier(BaseLayer) {
+export function RTTModifier<T extends _ConstructorOf<Layer>>(BaseLayer: T): T {
+  // @ts-expect-error initializeState is abstract
   return class RTTLayer extends BaseLayer {
+    // @ts-expect-error typescript doesn't see static property
     static layerName = `RTT-${BaseLayer.layerName}`;
 
     draw(this: RTTLayer, opts: any) {
-      const {moduleParameters} = opts;
-      const {picking} = moduleParameters;
+      const {shaderModuleProps} = opts;
+      const {picking} = shaderModuleProps;
       const postProcessLayer = getPostProcessLayer(this);
 
       if (!picking.isActive) {
@@ -130,10 +138,11 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
 
     _resizeBuffers(this: PostProcessLayer, opts: any) {
       // TODO we could likely render to a smaller buffer for better perf
-      const {moduleParameters} = opts;
+      const {shaderModuleProps} = opts;
       const {viewport} = this.context;
-      const width = moduleParameters.devicePixelRatio * viewport.width;
-      const height = moduleParameters.devicePixelRatio * viewport.height;
+      const {devicePixelRatio} = shaderModuleProps.project;
+      const width = devicePixelRatio * viewport.width;
+      const height = devicePixelRatio * viewport.height;
       this.internalState.renderBuffers.forEach((fbo: Framebuffer) => fbo.resize({width, height}));
     }
 
@@ -176,5 +185,30 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
 
       this.internalState.renderInProgress = false;
     }
+
+    _finalize(): void {
+      this.internalState.renderBuffers.forEach((fbo: Framebuffer) => {
+        fbo.destroy();
+      });
+      this.internalState.renderBuffers = null;
+      this.internalState.postProcess.cleanup();
+    }
   };
 }
+
+const fs = /* glsl */ `\
+vec4 copy_filterColor_ext(vec4 color, vec2 texSize, vec2 texCoord) {
+  return color;
+}
+`;
+
+/**
+ * Copy
+ * Simple module that just copies input color to output
+ */
+export const copy = {
+  name: 'copy',
+  fs,
+  getUniforms: () => ({}),
+  passes: [{filter: true}]
+} as const satisfies ShaderPass<{}>;

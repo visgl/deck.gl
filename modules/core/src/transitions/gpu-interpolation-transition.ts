@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
@@ -193,6 +197,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
           ]
         }
       ],
+      // @ts-expect-error fp64 module only sets ONE uniform via defaultUniforms
       modules: [fp64arithmetic, interpolationUniforms],
       defines: {
         ATTRIBUTE_TYPE: attributeType,
@@ -201,7 +206,6 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       // Default uniforms are not set without this
       moduleSettings: {},
       varyings: ['vCurrent', 'vCurrent64Low'],
-      // @ts-expect-error WebGLRenderPipeline only prop TODO - support in RenderPipeline?
       bufferMode: GL.INTERLEAVED_ATTRIBS,
       disableWarnings: true
     });

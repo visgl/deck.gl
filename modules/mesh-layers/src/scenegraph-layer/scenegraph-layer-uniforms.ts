@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Matrix4} from '@math.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 

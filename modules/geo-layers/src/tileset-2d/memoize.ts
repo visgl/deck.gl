@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // deck.gl, MIT license
 // @note - this is a duplicate of the deck.gl core export (because Tileset2D should be deck.gl independent)
 

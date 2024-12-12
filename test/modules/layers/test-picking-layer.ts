@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {device} from '@deck.gl/test-utils';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {

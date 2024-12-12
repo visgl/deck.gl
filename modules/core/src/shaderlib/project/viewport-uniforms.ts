@@ -1,25 +1,10 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable complexity, camelcase */
 
-import {mat4, vec4} from '@math.gl/core';
+import {mat4, Matrix4Like, vec4} from '@math.gl/core';
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
@@ -27,7 +12,6 @@ import memoize from '../../utils/memoize';
 
 import type Viewport from '../../viewports/viewport';
 import type {CoordinateSystem} from '../../lib/constants';
-import type {NumArray16} from '../misc/uniform-types';
 
 type Vec3 = [number, number, number];
 type Vec4 = [number, number, number, number];
@@ -35,8 +19,8 @@ type Vec4 = [number, number, number, number];
 // To quickly set a vector to zero
 const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
-const VECTOR_TO_POINT_MATRIX: NumArray16 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
-const IDENTITY_MATRIX: NumArray16 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const VECTOR_TO_POINT_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+const IDENTITY_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2: Vec3 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
 
@@ -127,8 +111,8 @@ function calculateMatrixAndOffset(
   coordinateSystem: CoordinateSystem,
   coordinateOrigin: Vec3
 ): {
-  viewMatrix: NumArray16;
-  viewProjectionMatrix: NumArray16;
+  viewMatrix: Matrix4Like;
+  viewProjectionMatrix: Matrix4Like;
   projectionCenter: Vec4;
   originCommon: Vec4;
   cameraPosCommon: Vec3;
@@ -177,8 +161,8 @@ function calculateMatrixAndOffset(
   }
 
   return {
-    viewMatrix: viewMatrix as NumArray16,
-    viewProjectionMatrix: viewProjectionMatrix as NumArray16,
+    viewMatrix: viewMatrix as Matrix4Like,
+    viewProjectionMatrix: viewProjectionMatrix as Matrix4Like,
     projectionCenter,
     originCommon,
     cameraPosCommon,
@@ -209,8 +193,8 @@ export type ProjectUniforms = {
   scale: number;
   wrapLongitude: boolean;
 
-  viewProjectionMatrix: NumArray16;
-  modelMatrix: NumArray16;
+  viewProjectionMatrix: Matrix4Like;
+  modelMatrix: Matrix4Like;
 
   // This is for lighting calculations
   cameraPosition: Vec3;
@@ -219,7 +203,7 @@ export type ProjectUniforms = {
 export type ProjectProps = {
   viewport: Viewport;
   devicePixelRatio?: number;
-  modelMatrix?: NumArray16 | null;
+  modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
   coordinateOrigin?: Vec3;
   autoWrapLongitude?: boolean;

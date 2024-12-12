@@ -1,52 +1,30 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export {default as ScreenGridLayer} from './screen-grid-layer/screen-grid-layer';
-export {default as CPUGridLayer} from './cpu-grid-layer/cpu-grid-layer';
 export {default as HexagonLayer} from './hexagon-layer/hexagon-layer';
 export {default as ContourLayer} from './contour-layer/contour-layer';
 export {default as GridLayer} from './grid-layer/grid-layer';
-export {default as GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
-export {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';
-
-// experimental export
 export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
-export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
-export {default as _CPUAggregator} from './utils/cpu-aggregator';
-export {default as _AggregationLayer} from './aggregation-layer';
-export {default as _BinSorter} from './utils/bin-sorter';
 
-export {WebGLAggregator} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
-export {CPUAggregator} from './aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
+export {default as _AggregationLayer} from './common/aggregation-layer';
+export {WebGLAggregator, CPUAggregator} from './common/aggregator/index';
 
 // types
-export type {ContourLayerProps} from './contour-layer/contour-layer';
+export type {ContourLayerProps, ContourLayerPickingInfo} from './contour-layer/contour-layer';
 export type {HeatmapLayerProps} from './heatmap-layer/heatmap-layer';
-export type {HexagonLayerProps} from './hexagon-layer/hexagon-layer';
-export type {CPUGridLayerProps} from './cpu-grid-layer/cpu-grid-layer';
-export type {GridLayerProps} from './grid-layer/grid-layer';
-export type {GPUGridLayerProps} from './gpu-grid-layer/gpu-grid-layer';
+export type {HexagonLayerProps, HexagonLayerPickingInfo} from './hexagon-layer/hexagon-layer';
+export type {GridLayerProps, GridLayerPickingInfo} from './grid-layer/grid-layer';
 export type {
   ScreenGridLayerProps,
   ScreenGridLayerPickingInfo
 } from './screen-grid-layer/screen-grid-layer';
 
-export type {WebGLAggregatorProps} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
-export type {CPUAggregatorProps} from './aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
+export type {
+  Aggregator,
+  AggregationOperation,
+  AggregationProps,
+  WebGLAggregatorProps,
+  CPUAggregatorProps
+} from './common/aggregator/index';

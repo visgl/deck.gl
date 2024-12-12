@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useCallback, useState, useRef, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {MapboxOverlay} from '@deck.gl/mapbox';

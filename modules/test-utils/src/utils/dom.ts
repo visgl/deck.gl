@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global window */
 // Get the bounding box of a DOMElement relative to the page
 export function getBoundingBoxInPage(domElement: HTMLElement): {

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import View, {CommonViewState, CommonViewProps} from './view';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import MapController from '../controllers/map-controller';
@@ -51,7 +55,7 @@ export default class MapView extends View<MapViewState, MapViewProps> {
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return WebMercatorViewport;
   }
 

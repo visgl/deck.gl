@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
@@ -9,14 +13,10 @@ test('ShadowPass#constructor and delete', t => {
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
 
   t.ok(shadowPass, `ShadowPass is constructed`);
-  t.ok(shadowPass.shadowMap, `ShadowPass creates shadow map`);
-  t.ok(shadowPass.depthBuffer, `ShadowPass creates depth buffer`);
   t.ok(shadowPass.fbo, `ShadowPass creates fbo`);
 
   shadowPass.delete();
 
-  t.notOk(shadowPass.shadowMap, `ShadowPass deletes shadow map`);
-  t.notOk(shadowPass.depthBuffer, `ShadowPass deletes depth buffer`);
   t.notOk(shadowPass.fbo, `ShadowPass deletes fbo`);
   t.end();
 });
@@ -48,13 +48,15 @@ test('ShadowPass#render', t => {
     effectProps: {shadow_lightId: 0}
   });
 
-  t.equal(shadowPass.shadowMap.width, 100, `ShadowPass resize shadow map width`);
-  t.equal(shadowPass.shadowMap.height, 100, `ShadowPass resize shadow map height`);
+  // These will likely fail locally due to DPR (200, 200)
+  const shadowMap = shadowPass.fbo.colorAttachments[0].texture;
+  t.equal(shadowMap.width, 100, `ShadowPass resize shadow map width`);
+  t.equal(shadowMap.height, 100, `ShadowPass resize shadow map height`);
   shadowPass.delete();
   t.end();
 });
 
-test('ShadowPass#getModuleParameters', t => {
+test('ShadowPass#getShaderModuleProps', t => {
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
     getPolygon: f => f,
@@ -62,9 +64,11 @@ test('ShadowPass#getModuleParameters', t => {
   });
 
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
-  const moduleParameters = shadowPass.getModuleParameters(layer);
+  const shaderModuleProps = shadowPass.getShaderModuleProps(layer, [], {
+    project: {}
+  });
 
-  t.equal(moduleParameters.drawToShadowMap, true, `ShadowPass has module parameters`);
+  t.equal(shaderModuleProps.shadow.drawToShadowMap, true, `ShadowPass has module props`);
   shadowPass.delete();
   t.end();
 });

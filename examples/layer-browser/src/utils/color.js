@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Parse array or string color
 export function parseColor(color) {
   if (Array.isArray(color)) {

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {MapViewState} from '@deck.gl/core';
 import {
   GOOGLE_BASEMAPS,
@@ -7,7 +11,8 @@ import {
   getStyleUrl,
   someLayerGroupsDisabled
 } from '../basemap';
-import {APIErrorContext, Basemap, KeplerMapConfig, MapLibreBasemapProps} from './types';
+import {Basemap, KeplerMapConfig, MapLibreBasemapProps} from './types';
+import {APIErrorContext} from '@carto/api-client';
 
 const CUSTOM_STYLE_ID_PREFIX = 'custom:';
 const DEFAULT_CARTO_STYLE = 'positron';

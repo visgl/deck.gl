@@ -1,11 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
-import type {Viewport, ProjectUniforms} from '@deck.gl/core';
+import type {ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
-import {glsl} from '../utils/syntax-tags';
 
-const uniformBlock = glsl`\
+const uniformBlock = /* glsl */ `\
 uniform fillUniforms {
   vec2 patternTextureSize;
   bool patternEnabled;
@@ -18,7 +21,7 @@ uniform fillUniforms {
 /*
  * fill pattern shader module
  */
-const patternVs = glsl`
+const patternVs = /* glsl */ `
 in vec4 fillPatternFrames;
 in float fillPatternScales;
 in vec2 fillPatternOffsets;
@@ -33,7 +36,7 @@ ${uniformBlock}
 ${patternVs}
 `;
 
-const patternFs = glsl`
+const patternFs = /* glsl */ `
 uniform sampler2D fill_patternTexture;
 
 in vec4 fill_patternBounds;
@@ -49,11 +52,11 @@ ${patternFs}
 `;
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': glsl`
+  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     fill_uv = geometry.position.xy;
   `,
 
-  'vs:DECKGL_FILTER_COLOR': glsl`
+  'vs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       fill_patternBounds = fillPatternFrames / vec4(fill.patternTextureSize, fill.patternTextureSize);
       fill_patternPlacement.xy = fillPatternOffsets;
@@ -61,7 +64,7 @@ const inject = {
     }
   `,
 
-  'fs:DECKGL_FILTER_COLOR': glsl`
+  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       vec2 scale = FILL_UV_SCALE * fill_patternPlacement.zw;
       vec2 patternUV = mod(mod(fill.uvCoordinateOrigin, scale) + fill.uvCoordinateOrigin64Low + fill_uv, scale) / scale;
@@ -79,7 +82,7 @@ const inject = {
 };
 
 export type FillStyleModuleProps = {
-  viewport: Viewport;
+  project: ProjectProps;
   fillPatternEnabled?: boolean;
   fillPatternMask?: boolean;
   fillPatternTexture: Texture;
@@ -110,9 +113,9 @@ function getPatternUniforms(
     uniforms.fill_patternTexture = fillPatternTexture;
     uniforms.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
   }
-  if ('viewport' in opts) {
+  if ('project' in opts) {
     const {fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+    const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
     const {commonOrigin: coordinateOriginCommon} = projectUniforms;
 
     const coordinateOriginCommon64Low: [number, number] = [

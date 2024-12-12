@@ -1,33 +1,18 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
-import {COORDINATE_SYSTEM, WebMercatorViewport, project, project32} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, WebMercatorViewport, project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
-import {config} from '@math.gl/core';
+import {config, NumberArray3} from '@math.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
-import {getPixelOffset, runOnGPU, verifyGPUResult} from './project-glsl-test-utils';
+import {getPixelOffset, runOnGPU, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
+import {TestCase} from './project-glsl.spec';
 
 const PIXEL_TOLERANCE = 0.001;
 
@@ -55,14 +40,12 @@ const TRANSFORM_VS = {
   project_position_to_clipspace: `\
 #version 300 es
 
-uniform vec3 uPos;
-uniform vec3 uPos64Low;
 out vec3 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  vec4 glPos = project_position_to_clipspace(uPos, uPos64Low, vec3(0, 0, 0));
+  geometry.worldPosition = test.uPos;
+  vec4 glPos = project_position_to_clipspace(test.uPos, test.uPos64Low, vec3(0, 0, 0));
   outValue = glPos.xyz / glPos.w;
   outValue = vec3(
     (1.0 + outValue.x) / 2.0 * project.viewportSize.x,
@@ -74,22 +57,20 @@ void main()
   project_position_to_clipspace_world_position: `\
 #version 300 es
 
-uniform vec3 uPos;
-uniform vec3 uPos64Low;
 out vec4 outValue;
 
 void main()
 {
-  geometry.worldPosition = uPos;
-  project_position_to_clipspace(uPos, uPos64Low, vec3(0, 0, 0), outValue);
+  geometry.worldPosition = test.uPos;
+  project_position_to_clipspace(test.uPos, test.uPos64Low, vec3(0, 0, 0), outValue);
 }
 `
 };
 
-const TEST_CASES = [
+const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
@@ -97,20 +78,20 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: [-122.45, 37.78, 0],
+        testProps: {uPos: [-122.45, 37.78, 0]},
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1])
       },
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [-122.45, 37.78, 0],
+        testProps: {uPos: [-122.45, 37.78, 0]},
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
         precision: PIXEL_TOLERANCE
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [-122.45, 37.78, 100],
+        testProps: {uPos: [-122.45, 37.78, 100]},
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
         precision: PIXEL_TOLERANCE
       }
@@ -118,7 +99,7 @@ const TEST_CASES = [
   },
   {
     title: 'LNGLAT mode - high zoom',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
@@ -126,7 +107,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: [-122.05, 37.92, 0],
+        testProps: {uPos: [-122.05, 37.92, 0]},
         output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92])
           .map((x, i) => x - TEST_VIEWPORT_HIGH_ZOOM.center[i])
           .concat([0, 1]),
@@ -135,7 +116,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [-122.05, 37.92, 0],
+        testProps: {uPos: [-122.05, 37.92, 0]},
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
         precision: PIXEL_TOLERANCE
       }
@@ -143,16 +124,16 @@ const TEST_CASES = [
   },
   {
     title: 'LNGLAT_OFFSETS mode',
-    params: {
+    projectProps: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
-      coordinateOrigin: [-122.05, 37.92]
+      coordinateOrigin: [-122.05, 37.92, 0]
     },
     tests: [
       {
         name: 'project_position_to_clipspace_world_position',
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position,
-        input: [0.05, 0.08, 0],
+        testProps: {uPos: [0.05, 0.08, 0]},
         output: getPixelOffset(
           TEST_VIEWPORT.projectPosition([-122, 38, 0]),
           TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
@@ -161,7 +142,7 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace',
         vs: TRANSFORM_VS.project_position_to_clipspace,
-        input: [0.05, 0.08, 0],
+        testProps: {uPos: [0.05, 0.08, 0]},
         output: TEST_VIEWPORT.project([-122, 38, 0]),
         precision: PIXEL_TOLERANCE
       }
@@ -175,7 +156,7 @@ test('project32&64#vs', async t => {
   for (const usefp64 of [false, true]) {
     /* eslint-disable max-nested-callbacks, complexity */
     for (const testCase of TEST_CASES) {
-      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
+      if (usefp64 && testCase.projectProps.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
         // Apply 64 bit projection only for LNGLAT_DEPRECATED
         return;
       }
@@ -185,22 +166,26 @@ test('project32&64#vs', async t => {
       let uniforms = {};
       if (usefp64) {
         // fp64arithmetic uniform
-        uniforms = {...uniforms, ONE: 1.0};
+        // TODO remove when https://github.com/visgl/luma.gl/pull/2262 landed
+        uniforms = {ONE: 1.0};
       }
 
       for (const c of testCase.tests) {
         const expected = (usefp64 && c.output64) || c.output;
         const actual = await runOnGPU({
           vs: c.vs,
-          modules: usefp64 ? [project64] : [project32],
+          modules: usefp64 ? [project64, testUniforms] : [project32, testUniforms],
           varying: 'outValue',
           vertexCount: 1,
-          shaderInputProps: {project: testCase.params, project64: testCase.params},
-          uniforms: {
-            ...uniforms,
-            uPos: c.input,
-            uPos64Low: c.input.map(fp64LowPart)
-          }
+          shaderInputProps: {
+            project: testCase.projectProps,
+            project64: testCase.projectProps,
+            test: {
+              uPos: c.testProps.uPos!,
+              uPos64Low: c.testProps.uPos!.map(fp64LowPart) as NumberArray3
+            }
+          },
+          uniforms
         });
         config.EPSILON = c.precision ?? 1e-5;
 

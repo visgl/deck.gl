@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer, IconLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {makeFontAtlas} from '@deck.gl/layers/dist/esm/text-layer/font-atlas';
 import AsciiFilter from './ascii-filter';

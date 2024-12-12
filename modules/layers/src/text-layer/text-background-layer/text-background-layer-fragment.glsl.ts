@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `\
 #version 300 es
 #define SHADER_NAME text-background-layer-fragment-shader

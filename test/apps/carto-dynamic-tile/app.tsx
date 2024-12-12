@@ -1,16 +1,16 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 /* eslint-disable no-console */
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {
-  H3TileLayer,
-  RasterTileLayer,
-  QuadbinTileLayer,
-  query,
-  VectorTileLayer
-} from '@deck.gl/carto';
+import {H3TileLayer, RasterTileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
+
+import {query} from '@carto/api-client';
 import datasets from './datasets';
 import {Layer} from '@deck.gl/core';
 

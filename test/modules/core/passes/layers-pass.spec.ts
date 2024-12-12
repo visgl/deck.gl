@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
@@ -303,8 +307,10 @@ test('LayersPass#GLViewport', t => {
       name: 'external framebuffer pixel ratio 2',
       target: framebuffer,
       viewport: {},
-      moduleParameters: {
-        devicePixelRatio: 2
+      shaderModuleProps: {
+        project: {
+          devicePixelRatio: 2
+        }
       },
       expectedGLViewport: [0, 98, 2, 2]
     },
@@ -324,20 +330,22 @@ test('LayersPass#GLViewport', t => {
       name: 'external framebuffer offset pixel ratio 2',
       target: framebuffer,
       viewport: {x: 5, y: 10, width: 30, height: 30},
-      moduleParameters: {
-        devicePixelRatio: 2
+      shaderModuleProps: {
+        project: {
+          devicePixelRatio: 2
+        }
       },
       expectedGLViewport: [10, 20, 60, 60]
     }
   ];
 
-  for (const {name, target, viewport, moduleParameters, expectedGLViewport} of testCases) {
+  for (const {name, target, viewport, shaderModuleProps, expectedGLViewport} of testCases) {
     layersPass.render({
       target,
       viewports: [new Viewport({id: 'A', ...viewport})],
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
-      moduleParameters,
+      shaderModuleProps,
       onError: t.notOk
     });
 

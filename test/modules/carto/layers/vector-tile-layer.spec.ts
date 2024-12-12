@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
 import {geojsonToBinary} from '@loaders.gl/gis';

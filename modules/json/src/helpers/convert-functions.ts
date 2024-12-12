@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import parseExpressionString from './parse-expression-string';
 
 import {FUNCTION_IDENTIFIER} from '../syntactic-sugar';

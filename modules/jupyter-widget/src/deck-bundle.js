@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /**
  * Pulls together all deck.gl dependencies used
  * in @deck.gl/jupyter-widget

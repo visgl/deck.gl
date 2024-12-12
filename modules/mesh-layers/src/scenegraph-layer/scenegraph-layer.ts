@@ -1,26 +1,10 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
-import {pbr} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
@@ -188,13 +172,20 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const modules = [project32, picking, scenegraphUniforms];
+    const defines: {LIGHTING_PBR?: 1} = {};
+    let pbr;
 
     if (this.props._lighting === 'pbr') {
-      modules.push(pbr);
+      pbr = pbrMaterial;
+      defines.LIGHTING_PBR = 1;
+    } else {
+      // Dummy shader module needed to handle
+      // pbrMaterial.pbr_baseColorSampler binding
+      pbr = {name: 'pbrMaterial'};
     }
 
-    return super.getShaders({vs, fs, modules});
+    const modules = [project32, picking, scenegraphUniforms, pbr];
+    return super.getShaders({defines, vs, fs, modules});
   }
 
   initializeState() {
@@ -368,6 +359,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       if (node instanceof ModelNode) {
         const {model} = node;
         model.setInstanceCount(numInstances);
+
+        const pbrProjectionProps = {
+          // Needed for PBR (TODO: find better way to get it)
+          camera: model.uniforms.cameraPosition as [number, number, number]
+        };
         const scenegraphProps: ScenegraphProps = {
           sizeScale,
           sizeMinPixels,
@@ -375,15 +371,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
           sceneModelMatrix: worldMatrix
         };
-        // TODO replace with shaderInputs.setProps({pbr: u_Camera}) once
-        // luma pbr module ported to UBO
-        model.setUniforms({
-          // Needed for PBR (TODO: find better way to get it)
-          // eslint-disable-next-line camelcase
-          u_Camera: model.uniforms.cameraPosition
-        });
 
-        model.shaderInputs.setProps({scenegraph: scenegraphProps});
+        model.shaderInputs.setProps({
+          pbrProjection: pbrProjectionProps,
+          scenegraph: scenegraphProps
+        });
         model.draw(renderPass);
       }
     });

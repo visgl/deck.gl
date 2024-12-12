@@ -1,9 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
-import {glsl} from '../utils/syntax-tags';
 
-const uniformBlock = glsl`\
+const uniformBlock = /* glsl */ `\
 uniform maskUniforms {
   vec4 bounds;
   highp int channel;
@@ -13,7 +16,7 @@ uniform maskUniforms {
 } mask;
 `;
 
-const vertex = glsl`
+const vertex = /* glsl */ `
 vec2 mask_getCoords(vec4 position) {
   return (position.xy - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
 }
@@ -24,7 +27,7 @@ ${uniformBlock}
 ${vertex}
 `;
 
-const fragment = glsl`
+const fragment = /* glsl */ `
 uniform sampler2D mask_texture;
 
 bool mask_isInBounds(vec2 texCoords) {
@@ -57,10 +60,10 @@ ${fragment}
 `;
 
 const inject = {
-  'vs:#decl': glsl`
+  'vs:#decl': /* glsl */ `
 out vec2 mask_texCoords;
 `,
-  'vs:#main-end': glsl`
+  'vs:#main-end': /* glsl */ `
    vec4 mask_common_position;
    if (mask.maskByInstance) {
      mask_common_position = project_position(vec4(geometry.worldPosition, 1.0));
@@ -69,16 +72,16 @@ out vec2 mask_texCoords;
    }
    mask_texCoords = mask_getCoords(mask_common_position);
 `,
-  'fs:#decl': glsl`
+  'fs:#decl': /* glsl */ `
 in vec2 mask_texCoords;
 `,
-  'fs:#main-start': glsl`
+  'fs:#main-start': /* glsl */ `
   if (mask.enabled) {
     bool mask = mask_isInBounds(mask_texCoords);
 
     // Debug: show extent of render target
     // fragColor = vec4(mask_texCoords, 0.0, 1.0);
-    fragColor = texture(mask_texture, mask_texCoords);
+    // fragColor = texture(mask_texture, mask_texCoords);
 
     if (!mask) discard;
   }

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GL} from '@luma.gl/constants';
 import {WebMercatorViewport} from 'deck.gl';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
@@ -77,7 +81,7 @@ const fixture = {
     }
   },
   cellSize: [25, 25],
-  moduleSettings: {viewport},
+  shaderModuleProps: {viewport},
   projectPoints: true,
   translation: [1, -1],
   scaling: [width / 2, -height / 2, 1],

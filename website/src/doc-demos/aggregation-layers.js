@@ -1,10 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-template-curly-in-string */
 import {
   ContourLayer,
-  CPUGridLayer,
   HexagonLayer,
   ScreenGridLayer,
-  GPUGridLayer,
   GridLayer,
   HeatmapLayer
 } from '@deck.gl/aggregation-layers';
@@ -31,7 +33,7 @@ export const ContourLayerDemo = makeLayerDemo({
 });
 
 const GRID_LAYER_INFO = {
-  getTooltip: "({object}) => object && `Count: ${object.elevationValue}`",
+  getTooltip: '({object}) => object && `Count: ${object.elevationValue}`',
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,
@@ -44,25 +46,14 @@ const GRID_LAYER_INFO = {
   }`
 };
 
-export const GPUGridLayerDemo = makeLayerDemo({
-  Layer: GPUGridLayer,
-  ...GRID_LAYER_INFO
-});
-
 export const GridLayerDemo = makeLayerDemo({
   Layer: GridLayer,
   ...GRID_LAYER_INFO
 });
 
-export const CPUGridLayerDemo = makeLayerDemo({
-  Layer: CPUGridLayer,
-  ...GRID_LAYER_INFO
-});
-
 export const HexagonLayerDemo = makeLayerDemo({
   Layer: HexagonLayer,
-  getTooltip:
-    "({object}) => object && `Count: ${object.elevationValue}`",
+  getTooltip: '({object}) => object && `Count: ${object.elevationValue}`',
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,

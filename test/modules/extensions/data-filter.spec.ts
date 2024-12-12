@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -105,8 +109,8 @@ test('DataFilterExtension#categories', t => {
 
         const attributes = layer.getAttributeManager().getAttributes();
         t.deepEqual(
-          attributes.filterCategoryValues.value,
-          [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+          attributes.filterCategoryValues.value.slice(0, 4),
+          [0, 0, 1, 1],
           'filterCategoryValues attribute is populated'
         );
         t.notOk(attributes.filterValues, 'filterValues attribute is not populated');
@@ -140,6 +144,7 @@ test('DataFilterExtension#categories', t => {
 
 test('DataFilterExtension#countItems', t => {
   let cbCalled = 0;
+  let cbCount = -1;
 
   const testCases = [
     {
@@ -150,12 +155,16 @@ test('DataFilterExtension#countItems', t => {
         ],
         getPosition: d => d.position,
         getFilterValue: d => d.timestamp,
-        onFilteredItemsChange: () => cbCalled++,
+        onFilteredItemsChange: event => {
+          cbCalled++;
+          cbCount = event.count;
+        },
         filterRange: [80, 160],
         extensions: [new DataFilterExtension({filterSize: 1, countItems: true})]
       },
       onAfterUpdate: () => {
         t.is(cbCalled, 1, 'onFilteredItemsChange is called');
+        t.is(cbCount, 2, 'count is correct');
       }
     },
     {
@@ -172,6 +181,7 @@ test('DataFilterExtension#countItems', t => {
       },
       onAfterUpdate: () => {
         t.is(cbCalled, 2, 'onFilteredItemsChange is called');
+        t.is(cbCount, 0, 'count is correct');
       }
     }
   ];

@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* global setTimeout clearTimeout */
 import {
@@ -45,8 +29,8 @@ import {
   project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
-import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
+import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
+import {defaultColorRange, colorRangeToFlatArray} from '../common/utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
@@ -574,9 +558,10 @@ export default class HeatmapLayer<
 
     if (colorTexture && colorTexture?.width === colorRange.length) {
       // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setSubImageData({data: colors});
+      (colorTexture as any).setTexture2DData({data: colors});
     } else {
       colorTexture?.destroy();
+      // @ts-expect-error TODO(ib) - texture API change
       colorTexture = this.context.device.createTexture({
         ...TEXTURE_PROPS,
         data: colors,
@@ -614,7 +599,6 @@ export default class HeatmapLayer<
     const moduleSettings = this.getModuleSettings();
     this._setModelAttributes(weightsTransform.model, attributes);
     weightsTransform.model.setVertexCount(this.getNumInstances());
-    weightsTransform.model.updateModuleSettings(moduleSettings);
 
     const weightProps: WeightProps = {
       radiusPixels,

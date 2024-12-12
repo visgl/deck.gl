@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Optimized (100X speed improvement) reading function for binary data
 export function readPackedTypedArray(TypedArray, pbf, obj) {
   const end = pbf.type === 2 ? pbf.readVarint() + pbf.pos : pbf.pos + 1;

@@ -1,6 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderPass} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
-const glsl = (s: TemplateStringsArray) => `${s}`;
 
 /**
  * @filter       Heatmap
@@ -11,7 +14,7 @@ const glsl = (s: TemplateStringsArray) => `${s}`;
  * @param opacity Output opacity
  */
 
-const fs = glsl`\
+const fs = /* glsl */ `\
 uniform heatmapUniforms {
   vec2 colorDomain;
   vec2 delta;
@@ -134,6 +137,7 @@ export const heatmap = {
     opacity: 'f32',
     radiusPixels: 'f32'
   },
+  // @ts-ignore TODO v9.1
   getUniforms: opts => {
     if (!opts) return {};
     const {
@@ -155,7 +159,9 @@ export const heatmap = {
   },
   fs,
   passes: [
+    // @ts-expect-error Seems typing in luma.gl should be Partial<>
     {sampler: true, uniforms: {delta: [1, 0]}},
+    // @ts-expect-error Seems typing in luma.gl should be Partial<>
     {sampler: true, uniforms: {delta: [0, 1]}}
   ]
 } as const satisfies ShaderPass<HeatmapProps & PassProps>;

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {Banner, BannerContainer, HeroExampleContainer, ProjectName, GetStartedLink} from './styled';

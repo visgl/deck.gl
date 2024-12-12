@@ -1,9 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-catch';
 import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3TileLayer, QuadbinTileLayer, VectorTileLayer, HeatmapTileLayer} from '@deck.gl/carto';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {GridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const METADATA = {
   id: 1234,
@@ -1384,11 +1388,11 @@ test(`parseMap#visState Grid layer`, async t => {
 
   t.deepEquals(
     map.layers.map(l => l.toString()),
-    [`CPUGridLayer({id: 'ij06t3e'})`],
+    [`GridLayer({id: 'ij06t3e'})`],
     'layer names'
   );
 
-  const layer = map.layers[0] as CPUGridLayer;
+  const layer = map.layers[0] as GridLayer;
   t.equal(layer.props.id, 'ij06t3e', 'id');
   t.equal(layer.props.pickable, true, 'pickable');
   t.equal(layer.props.visible, true, 'visible');
@@ -1925,7 +1929,7 @@ test(`parseMap#visState HeatmapTileLayer`, async t => {
               ],
               visConfig: {
                 filled: true,
-                radius: 2,
+                radius: 17.3,
                 opacity: 0.8,
                 stroked: false,
                 enable3d: false,
@@ -1935,7 +1939,7 @@ test(`parseMap#visState HeatmapTileLayer`, async t => {
                 colorRange: {
                   name: 'Global Warming',
                   type: 'sequential',
-                  colors: ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'],
+                  colors: ['#ff0000', '#00ff00', '#0000ff', '#fc8d59', '#e34a33', '#b30000'],
                   category: 'Uber'
                 },
                 heightRange: [0, 500],
@@ -1964,7 +1968,8 @@ test(`parseMap#visState HeatmapTileLayer`, async t => {
               radiusField: null,
               radiusScale: 'linear',
               strokeColorField: null,
-              strokeColorScale: 'quantile'
+              strokeColorScale: 'quantile',
+              weightField: {name: 'ride_count', type: 'integer'}
             }
           }
         ],
@@ -2011,11 +2016,20 @@ test(`parseMap#visState HeatmapTileLayer`, async t => {
   t.equal(heatmapTileLayer.props.visible, true, 'heatmapTileLayer - visible');
   t.equal(heatmapTileLayer.props.filled, true, 'heatmapTileLayer - filled');
   t.equal(heatmapTileLayer.props.stroked, false, 'heatmapTileLayer - stroked');
+  t.equal(heatmapTileLayer.props.radiusPixels, 17.3, 'heatmapTileLayer - radiusPixels');
   t.deepEqual(
-    heatmapTileLayer.props.getFillColor,
-    [246, 209, 138, 230],
-    'heatmapTileLayer - getFillColor'
+    heatmapTileLayer.props.colorRange,
+    [
+      [255, 0, 0, 255],
+      [0, 255, 0, 255],
+      [0, 0, 255, 255],
+      [252, 141, 89, 255],
+      [227, 74, 51, 255],
+      [179, 0, 0, 255]
+    ],
+    'heatmapTileLayer - colorRange'
   );
+  t.equal(typeof heatmapTileLayer.props.getWeight, 'function', 'heatmapTileLayer - getWeight');
   t.equal((heatmapTileLayer.props as any).cartoLabel, 'Layer 2', 'heatmapTileLayer - cartoLabel');
   t.end();
 });

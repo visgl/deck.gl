@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
@@ -128,7 +132,7 @@ test('shadow#getUniforms', t => {
   });
 
   let uniforms = shadow.getUniforms({
-    viewport,
+    project: {viewport},
     shadowMatrices: [viewMatrix],
     drawToShadowMap: true,
     dummyShadowMaps: [true]
@@ -153,15 +157,12 @@ test('shadow#getUniforms', t => {
   // LNGLAT_AUTO_OFFSET mode
   viewport = TEST_VIEWPORT2;
 
-  uniforms = shadow.getUniforms(
-    {
-      viewport,
-      shadowMatrices: [viewMatrix],
-      drawToShadowMap: true,
-      dummyShadowMaps: [true]
-    },
-    project.getUniforms({viewport})
-  );
+  uniforms = shadow.getUniforms({
+    project: {viewport},
+    shadowMatrices: [viewMatrix],
+    drawToShadowMap: true,
+    dummyShadowMaps: [true]
+  });
 
   for (const value of TEST_CASE2) {
     const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
@@ -180,18 +181,15 @@ test('shadow#getUniforms', t => {
   // Non-Geospatial Identity Mode
   viewport = TEST_VIEWPORT3;
 
-  uniforms = shadow.getUniforms(
-    {
+  uniforms = shadow.getUniforms({
+    project: {
       viewport,
-      shadowMatrices: [viewMatrix],
-      drawToShadowMap: true,
-      dummyShadowMaps: [true]
-    },
-    {
-      center: [0, 0, 0, 0],
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
-    }
-  );
+    },
+    shadowMatrices: [viewMatrix],
+    drawToShadowMap: true,
+    dummyShadowMaps: [true]
+  });
 
   for (const value of TEST_CASE3) {
     const result = uniforms.viewProjectionMatrix0.transform(value.xyz);

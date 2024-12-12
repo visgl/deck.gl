@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global window, document */
 /* eslint-disable max-statements, import/no-extraneous-dependencies */
 import {MapWrapper} from './map-wrapper';

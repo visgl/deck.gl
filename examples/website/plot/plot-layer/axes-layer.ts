@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Color, DefaultProps, Layer, UpdateParameters, Attribute, LayerProps} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Texture} from '@luma.gl/core';

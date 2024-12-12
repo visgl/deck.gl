@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
 // Lightly processes `json` props, transform string values, and extract `views` and `layers`
 // See: https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md

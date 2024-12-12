@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
@@ -289,7 +293,7 @@ export default [
     viewState: {
       latitude: 0,
       longitude: 0,
-      zoom: 0
+      zoom: 1.5
     },
     layers: [
       new PathLayer({

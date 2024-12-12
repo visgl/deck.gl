@@ -1,9 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Framebuffer, Texture, TextureView} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import {glsl} from '../utils/syntax-tags';
 
-const vs = glsl`
+const vs = /* glsl */ `
 in float collisionPriorities;
 
 uniform sampler2D collision_texture;
@@ -54,10 +57,10 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 `;
 
 const inject = {
-  'vs:#decl': glsl`
+  'vs:#decl': /* glsl */ `
   float collision_fade = 1.0;
 `,
-  'vs:DECKGL_FILTER_GL_POSITION': glsl`
+  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   if (collision.sort) {
     float collisionPriority = collisionPriorities;
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
@@ -73,7 +76,7 @@ const inject = {
     }
   }
   `,
-  'vs:DECKGL_FILTER_COLOR': glsl`
+  'vs:DECKGL_FILTER_COLOR': /* glsl */ `
   color.a *= collision_fade;
   `
 };
@@ -103,7 +106,7 @@ const getCollisionUniforms = (
   }
   const {enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
-    enabled,
+    enabled: enabled && !drawToCollisionMap,
     sort: Boolean(drawToCollisionMap),
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap

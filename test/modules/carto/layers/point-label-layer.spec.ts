@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
 import {_PointLabelLayer as PointLabelLayer} from '@deck.gl/carto';
@@ -28,7 +32,7 @@ test('PointLabelLayer', t => {
 
         const {vs} = textBackgroundLayer.getShaders();
         t.ok(
-          vs.includes('_padding = padding + instancePixelOffsets.xyxy'),
+          vs.includes('_padding = textBackground.padding + instancePixelOffsets.xyxy'),
           'text background layer shader patched'
         );
 

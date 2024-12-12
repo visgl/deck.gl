@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable callback-return */
 import {GL} from '@luma.gl/constants';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';

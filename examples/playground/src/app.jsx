@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component, Fragment} from 'react';
 import {createRoot} from 'react-dom/client';
 import AutoSizer from 'react-virtualized-auto-sizer';

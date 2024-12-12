@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {request, json} from 'd3-request';
 import {voronoi} from 'd3-voronoi';
 import DelaunayInterpolation from '../layers/delaunay-interpolation/delaunay-interpolation';

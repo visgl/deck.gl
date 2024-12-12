@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document console */
 /* eslint-disable no-console */
 import React, {useMemo, useState, useCallback} from 'react';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const FUNCTION_IDENTIFIER = '@@=';
 const CONSTANT_IDENTIFIER = '@@#';
 const TYPE_KEY = '@@type';

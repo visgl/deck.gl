@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-template-curly-in-string */
 import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {OBJLoader} from '@loaders.gl/obj';

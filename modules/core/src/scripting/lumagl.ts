@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /**
  * Re-exported luma.gl API in the pre-built bundle
  */
@@ -6,8 +10,8 @@ import {luma} from '@luma.gl/core';
 export const {
   stats,
   registerDevices,
-  getAvailableDevices,
-  getSupportedDevices,
+  getSupportedAdapters,
+  getBestAvailableAdapter,
   setDefaultDeviceProps,
   attachDevice,
   createDevice,
