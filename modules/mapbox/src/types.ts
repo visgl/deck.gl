@@ -111,6 +111,8 @@ export interface Map extends Evented {
 
   // mapbox v2+, maplibre v3+
   getTerrain?(): any;
+  // mapbox v2+, maplibre v5+
+  getProjection?(): any;
   // mapbox v2+
   getFreeCameraOptions?(): FreeCameraOptions;
 
