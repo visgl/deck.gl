@@ -49,7 +49,7 @@ export default function RangeInput({
   formatLabel: (x: number) => string;
   onChange: (newValue: number) => void;
 }) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   // prettier-ignore
   useEffect(() => {
