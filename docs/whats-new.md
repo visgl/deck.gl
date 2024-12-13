@@ -14,11 +14,11 @@ Release date: TBD (targeting December 2024)
         <p><i>WebGPU readiness</i></p>
       </td>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
         <p><i>Aggregation Layers</i></p>
       </td>
       <td>
-        <img style={{maxHeight:200}} src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/480px-Typescript_logo_2020.svg.png" />
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/e522d961-600a-4405-9f09-c247b42f7e62" />
         <p><i>Maplibre Globe View</i></p>
       </td>
       <td>

@@ -22,7 +22,7 @@ Layers need to be modified:
 - `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
 - Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
 
-For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([https://www.youtube.com/watch?v=ei6scnRpNhU](recording))
+For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
 
 ### User input handling
 
