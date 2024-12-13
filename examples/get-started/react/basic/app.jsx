@@ -5,7 +5,8 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {CompassWidget} from '@deck.gl/react';
+import {CompassWidget, ZoomWidget} from '@deck.gl/react';
+import {FullscreenWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -31,8 +32,13 @@ function Root() {
   };
 
   return (
-    <DeckGL controller={true} initialViewState={INITIAL_VIEW_STATE}>
+    <DeckGL 
+      controller={true} 
+      initialViewState={INITIAL_VIEW_STATE} 
+      // widgets={[new FullscreenWidget({})]}
+    >
       <CompassWidget />
+      <ZoomWidget />
       <GeoJsonLayer
         id="base-map"
         data={COUNTRIES}
