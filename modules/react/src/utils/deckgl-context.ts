@@ -7,7 +7,7 @@ export type DeckGLContextValue = {
   container: HTMLElement;
   eventManager: EventManager;
   onViewStateChange: DeckProps['onViewStateChange'];
-  deck?: Deck;
+  deck?: Deck<any>;
   widgets?: Widget[];
 };
 

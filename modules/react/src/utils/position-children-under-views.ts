@@ -96,6 +96,7 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
 
     if (ContextProvider) {
       const contextValue: DeckGLContextValue = {
+        deck,
         viewport,
         // @ts-expect-error accessing protected property
         container: deck.canvas.offsetParent,
