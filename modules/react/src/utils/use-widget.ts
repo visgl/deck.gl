@@ -16,6 +16,15 @@ function useWidget<T extends Widget, PropsT extends {}>(
     if (deck?.props.widgets.length !== 0) {
       log.warn('Detected deck "widgets" prop used simultaneously with React widgets. Vanilla widgets will be ignored.')();
     }
+
+    return () => {
+      // Remove widget from context when it is unmounted
+      const index = widgets?.indexOf(widget);
+      if (index !== -1) {
+        widgets?.splice(index, 1);
+        deck?.setProps({widgets});
+      }
+    };
   }, []);
   const widget = useMemo(() => new WidgetClass(props), [WidgetClass]);
 
