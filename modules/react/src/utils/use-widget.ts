@@ -9,11 +9,10 @@ function useWidget<T extends Widget, PropsT extends {}>(
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
   useEffect(() => {
-    // warn if the user supplied a vanilla prop, since it will be ignored
-    // NOTE: effect runs once per widget after the first render
-    // TODO: this doesn't work since the widgets override the deck prop. Can't tell which are user set.
-    // if (!deepEqual(deck?.props.widgets, widgets, 1)) {
-    if (deck?.props.widgets.length !== 0) {
+    // warn if the user supplied a vanilla widget, since it will be ignored
+    // NOTE: This effect runs once per widget. Context widgets and deck widget props are synced after first effect runs.
+    const internalWidgets = deck?.props.widgets;
+    if (widgets?.length && internalWidgets && !deepEqual(deck?.props.widgets, widgets, 1)) {
       log.warn('Detected deck "widgets" prop used simultaneously with React widgets. Vanilla widgets will be ignored.')();
     }
 
