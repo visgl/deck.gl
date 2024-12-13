@@ -13,7 +13,9 @@ function useWidget<T extends Widget, PropsT extends {}>(
     // NOTE: This effect runs once per widget. Context widgets and deck widget props are synced after first effect runs.
     const internalWidgets = deck?.props.widgets;
     if (widgets?.length && internalWidgets && !deepEqual(deck?.props.widgets, widgets, 1)) {
-      log.warn('Detected deck "widgets" prop used simultaneously with React widgets. Vanilla widgets will be ignored.')();
+      log.warn(
+        'Detected deck "widgets" prop used simultaneously with React widgets. Vanilla widgets will be ignored.'
+      )();
     }
 
     return () => {

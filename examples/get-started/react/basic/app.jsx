@@ -11,12 +11,12 @@ import '@deck.gl/widgets/stylesheet.css';
 import {FlyToInterpolator} from '@deck.gl/core';
 
 class CustomWidget {
-  id = 'custom';
-  placement = 'top-right';
-  props = {
-    // ref: React.RefObject<HTMLDivElement>;
-  };
-  viewports = {};
+  // id = 'custom';
+  // placement = 'top-right';
+  // props = {
+  //   ref: React.RefObject<HTMLDivElement>;
+  // };
+  // viewports = {};
 
   constructor(props) {
     this.id = props.id || 'custom';
@@ -28,9 +28,7 @@ class CustomWidget {
     this.deck = deck;
     return this.props.ref.current;
   }
-  onRemove() {
-
-  }
+  onRemove() {}
   setProps(props) {
     Object.assign(this.props, props);
   }
@@ -66,19 +64,21 @@ class CustomWidget {
   }
 }
 
-export const CustomReactWidget = (props) => {
+export const CustomReactWidget = props => {
   const ref = React.useRef();
   const widget = useWidget(CustomWidget, {ref, ...props});
   return (
     <div style={{padding: 24, backgroundColor: 'green'}} ref={ref}>
       React Widget!
-      <button style={{pointerEvents: 'auto', cursor: 'pointer'}}  onClick={() => widget.handleZoomOut()}>
+      <button
+        style={{pointerEvents: 'auto', cursor: 'pointer'}}
+        onClick={() => widget.handleZoomOut()}
+      >
         Zoom Out!
       </button>
     </div>
   );
 };
-
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -104,9 +104,9 @@ function Root() {
   };
 
   return (
-    <DeckGL 
-      controller={true} 
-      initialViewState={INITIAL_VIEW_STATE} 
+    <DeckGL
+      controller={true}
+      initialViewState={INITIAL_VIEW_STATE}
       widgets={[new FullscreenWidget({})]}
     >
       <CompassWidget />
