@@ -4,12 +4,35 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.1
 
-Release date: TBD (targeting September 2024)
+Release date: TBD (targeting December 2024)
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
+        <p><i>WebGPU readiness</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>Aggregation Layers</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/480px-Typescript_logo_2020.svg.png" />
+        <p><i>Maplibre Globe View</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>React Widgets</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 
 ### WebGPU readiness
 
-- luma.gl v9.1
-- All layers migrated to UBO
+All layers have been migrated to UBO, which is a necessary step in order to support WebGL & WebGPU. luma.gl has been updated to v9.1. For most users this change should be transparent, but custom layers that add `uniforms` will [need to be migrated](./upgrade-guide.md).
 
 ### Aggregation layers upgrade
 
@@ -25,6 +48,17 @@ Highlights:
 - New picking info types for each aggregation layer.
 
 See [upgrade guide](./upgrade-guide.md) for more details.
+
+
+### Maplibre Globe View
+
+MapLibre v5 recently launched a [globe view](https://github.com/maplibre/maplibre-gl-js/issues/307), and in collaboration with the MapLibre team, we have add support for seamlessly integrating deck.gl layers with the globe using the existing [GlobeView](./api-reference/core/globe-view). The integration works for all three [Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
+
+
+### React Widgets
+
+deck.gl v9.0 added support for widgets, with v9.1 they can now be defined in React. A major benefit is the ablility to define custom widgets with UI built in React.
+
 
 ## deck.gl v9.0
 
