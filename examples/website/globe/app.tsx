@@ -35,7 +35,7 @@ const INITIAL_VIEW_STATE: GlobeViewState = {
   latitude: 20,
   zoom: 2,
   minZoom: 1,
-  maxZoom: 3,
+  maxZoom: 3
 };
 
 const ANIMATION_SPEED = 60;
@@ -93,7 +93,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
         mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: [0, 0, 0],
-        getColor: [255, 255, 255, 0],
+        getColor: [255, 255, 255, 0]
       })
     ],
     []
