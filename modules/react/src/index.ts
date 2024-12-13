@@ -9,6 +9,7 @@ export {default} from './deckgl';
 export {CompassWidget} from './widgets/compass-widget';
 export {FullscreenWidget} from './widgets/fullscreen-widget';
 export {ZoomWidget} from './widgets/zoom-widget';
+export {default as useWidget} from './utils/use-widget';
 
 // Types
 export type {DeckGLContextValue} from './utils/deckgl-context';
