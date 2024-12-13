@@ -38,7 +38,7 @@ function Root() {
       // widgets={[new FullscreenWidget({})]}
     >
       <CompassWidget />
-      <ZoomWidget />
+      <ZoomWidget orientation="horizontal" />
       <GeoJsonLayer
         id="base-map"
         data={COUNTRIES}
