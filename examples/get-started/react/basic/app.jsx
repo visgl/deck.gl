@@ -59,6 +59,7 @@ class CustomWidget {
   }
 
   handleZoomOut() {
+    this.props.onClick();
     for (const viewport of Object.values(this.viewports)) {
       this.handleZoom(viewport, viewport.zoom - 1);
     }
@@ -67,7 +68,7 @@ class CustomWidget {
 
 export const CustomReactWidget = (props) => {
   const ref = React.useRef();
-  const widget = useWidget(CustomWidget, {ref});
+  const widget = useWidget(CustomWidget, {ref, ...props});
   return (
     <div style={{padding: 24, backgroundColor: 'green'}} ref={ref}>
       React Widget!
@@ -94,6 +95,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 function Root() {
+  const [zoomToggle, setZoomToggle] = React.useState(true);
   const onClick = info => {
     if (info.object) {
       // eslint-disable-next-line
@@ -105,11 +107,11 @@ function Root() {
     <DeckGL 
       controller={true} 
       initialViewState={INITIAL_VIEW_STATE} 
-      // widgets={[new FullscreenWidget({})]}
+      widgets={[new FullscreenWidget({})]}
     >
       <CompassWidget />
-      <CustomReactWidget />
-      <ZoomWidget orientation="horizontal" />
+      <CustomReactWidget onClick={() => setZoomToggle(!zoomToggle)} />
+      {zoomToggle && <ZoomWidget orientation="horizontal" />}
       <GeoJsonLayer
         id="base-map"
         data={COUNTRIES}
