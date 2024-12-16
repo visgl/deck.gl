@@ -10,14 +10,6 @@ Release date: TBD (targeting December 2024)
   <tbody>
     <tr>
       <td>
-        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
-        <p><i>WebGPU readiness</i></p>
-      </td>
-      <td>
-        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
-        <p><i>Aggregation Layers</i></p>
-      </td>
-      <td>
         <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/e522d961-600a-4405-9f09-c247b42f7e62" />
         <p><i>Maplibre Globe View</i></p>
       </td>
@@ -25,18 +17,26 @@ Release date: TBD (targeting December 2024)
         <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
         <p><i>React Widgets</i></p>
       </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
+        <p><i>Aggregation Layers</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
+        <p><i>WebGPU readiness</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
 
 
-### WebGPU readiness
+### Maplibre Globe View
 
-- luma.gl has been updated to v9.1 which focuses on building out WebGPU support. For details see [release notes](https://luma.gl/docs/whats-new#version-91-in-development) and [upgrade-guide](https://luma.gl/docs/upgrade-guide#upgrading-to-v91).
-- As part of WebGPU readiness, all shader code in deck.gl v9.1 (layers and extensions) have been migrated to use uniform buffers instead of WebGL1 style uniforms. 
-- For most users this change should be transparent, but custom layers that add `uniforms` should [start migrating asap](./upgrade-guide.md) as WebGL1 style uniform support is being actively phased out.
+MapLibre v5 recently launched a [globe view](https://github.com/maplibre/maplibre-gl-js/issues/307), and in collaboration with the MapLibre team, we have add support for seamlessly integrating deck.gl layers with the globe using the existing [GlobeView](./api-reference/core/globe-view). The integration works for all three [Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
 
+### React Widgets
 
+deck.gl v9.0 added support for widgets, with v9.1 they can now be defined in React. A major benefit is the ablility to define custom widgets with UI built in React.
 
 ### Aggregation layers upgrade
 
@@ -53,16 +53,11 @@ Highlights:
 
 See [upgrade guide](./upgrade-guide.md) for more details.
 
+### WebGPU readiness
 
-### Maplibre Globe View
-
-MapLibre v5 recently launched a [globe view](https://github.com/maplibre/maplibre-gl-js/issues/307), and in collaboration with the MapLibre team, we have add support for seamlessly integrating deck.gl layers with the globe using the existing [GlobeView](./api-reference/core/globe-view). The integration works for all three [Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
-
-
-### React Widgets
-
-deck.gl v9.0 added support for widgets, with v9.1 they can now be defined in React. A major benefit is the ablility to define custom widgets with UI built in React.
-
+- luma.gl has been updated to v9.1 which focuses on building out WebGPU support. For details see [release notes](https://luma.gl/docs/whats-new#version-91-in-development) and [upgrade-guide](https://luma.gl/docs/upgrade-guide#upgrading-to-v91).
+- As part of WebGPU readiness, all shader code in deck.gl v9.1 (layers and extensions) have been migrated to use uniform buffers instead of WebGL1 style uniforms. 
+- For most users this change should be transparent, but custom layers that add `uniforms` should [start migrating asap](./upgrade-guide.md) as WebGL1 style uniform support is being actively phased out.
 
 ## deck.gl v9.0
 
