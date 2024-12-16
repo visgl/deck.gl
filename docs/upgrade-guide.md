@@ -2,9 +2,9 @@
 
 ## Upgrading to v9.1
 
-### Uniform buffer objects
+### Uniform buffers
 
-All shaders that use global uniform defitions need to be migrated to Uniform Buffer Objects and the shader references updated, for example:
+GLSL shaders that take inputs via WebGL1-style uniforms need to be migrated to use uniform buffers instead. For example:
 
 ```glsl
 // Global uniform
