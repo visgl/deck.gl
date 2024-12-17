@@ -3,7 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {
+  FlyToInterpolator,
+  WebMercatorViewport,
+  _GlobeViewport,
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
@@ -52,6 +59,20 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
+    const oldProps = this.props;
+    const el = this.element;
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
+
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
+      }
+    }
+
     Object.assign(this.props, props);
   }
 
@@ -65,9 +86,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
+    applyStyles(element, style);
     this.deck = deck;
     this.element = element;
     this.update();
