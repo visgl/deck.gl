@@ -22,6 +22,7 @@ class CustomWidget {
     this.id = props.id || 'custom';
     this.placement = props.placement || 'top-right';
     this.props = props;
+    this.viewports = {};
   }
 
   onAdd({deck}) {
