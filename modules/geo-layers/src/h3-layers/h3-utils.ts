@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CoordPair, H3IndexInput, cellToBoundary, cellToLatLng} from 'h3-js';
 import {lerp} from '@math.gl/core';
 

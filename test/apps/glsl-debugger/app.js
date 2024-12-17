@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import {Deck, MapController} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import maplibregl from 'maplibre-gl';
 import {Deck} from '@deck.gl/core';
 import {fetchMap} from '@deck.gl/carto';

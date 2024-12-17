@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {PickingInfo} from '@deck.gl/core';
 
 export type Vec3 = [x: number, y: number, z: number];

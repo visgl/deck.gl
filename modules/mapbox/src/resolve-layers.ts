@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {_flatten as flatten} from '@deck.gl/core';
 import MapboxLayer from './mapbox-layer';
 
 import type {Deck, LayersList, Layer} from '@deck.gl/core';
-import type {Map} from 'mapbox-gl';
+import type {Map} from './types';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 

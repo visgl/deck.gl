@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {MVTLayer} from '@deck.gl/geo-layers';
 
 function createMVTLayer(id, {highlight = false, binary = false, holes = false} = {}) {

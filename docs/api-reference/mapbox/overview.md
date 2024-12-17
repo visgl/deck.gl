@@ -12,8 +12,6 @@ When you use this module, Mapbox is the root HTML element and deck.gl is the chi
 
 It may be easier to understand the concepts of the module if you are already a mapbox-gl developer.
 
-> This module is compatible with Mapbox GL JS forks. Known exceptions will be clearly marked. For more, see [Compatibility with Mapbox GL JS forks](../../developer-guide/base-maps/using-with-mapbox.md#compatibility-with-mapbox-gl-js-forks)
-
 <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
 
 
@@ -66,7 +64,7 @@ The following table details renderer support across different versions of mapbox
 | Library                       | Overlaid (default) | Interleaved       |
 |-------------------------------|--------------------|-------------------|
 | mapbox-gl-js (before v2.13)   | ✓                  |                   |
-| mapbox-gl-js v2.13+           | ✓                  | ✓ with `useWebGl2: true` |
+| mapbox-gl-js v2.13+           | ✓                  | ✓ with `useWebGL2: true` |
 | mapbox-gl-js v3+              | ✓                  | ✓                 |
 | maplibre-gl-js (before v3)    | ✓                  |                   |
 | maplibre-gl-js v3+            | ✓                  | ✓*                |
@@ -75,7 +73,7 @@ The following table details renderer support across different versions of mapbox
 
 ## Alternative Mapbox Integrations
 
-If you're using deck.gl in a React or Scripting environment, you just want the base map as a back drop, and do not need mapbox-gl's UI controls or need to mix deck.gl and Mapbox layers, it is recommended that you do not use this module and instead use deck.gl as the root HTML element. Visit [Using Deck.gl as the root HTML element](../../developer-guide/base-maps/using-with-mapbox.md#using-deckgl-as-the-root-html-element) for an example.
+If you're using deck.gl in a React or Scripting environment, you just want the base map as a back drop, and do not need mapbox-gl's UI controls or need to mix deck.gl and Mapbox layers, it is recommended that you do not use this module and instead use deck.gl as the root HTML element. Visit [Using Deck.gl as the root HTML element](../../developer-guide/base-maps/using-with-mapbox.md#reverse-controlled) for an example.
 
 ## Limitations
 

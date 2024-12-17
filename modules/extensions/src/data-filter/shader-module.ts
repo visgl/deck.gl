@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import type {DataFilterExtensionOptions, DataFilterExtensionProps} from './data-filter-extension';
 import {UniformFormat} from '@luma.gl/shadertools/dist/types';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component, createRef} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
 import {renderToDOM} from 'website-examples/google-3d/app';

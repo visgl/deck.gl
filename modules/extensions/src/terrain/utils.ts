@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 

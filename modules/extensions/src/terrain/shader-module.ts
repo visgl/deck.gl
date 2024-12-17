@@ -1,7 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable camelcase */
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project, ProjectUniforms, Viewport} from '@deck.gl/core';
+import {project, ProjectProps, ProjectUniforms, Viewport} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
@@ -9,8 +13,8 @@ import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleProps = {
-  viewport: Viewport;
-  picking: {isActive?: boolean};
+  project: ProjectProps;
+  isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture;
@@ -125,7 +129,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+      const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
       const {commonOrigin} = projectUniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
@@ -142,12 +146,11 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         bounds = heightMapBounds!;
       } else if (terrainCover) {
         // This is a terrain layer
-        const isPicking = opts.picking?.isActive;
-        const fbo = isPicking
+        const fbo = opts.isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
         sampler = fbo?.colorAttachments[0].texture;
-        if (isPicking) {
+        if (opts.isPicking) {
           // Never render the layer itself in picking pass
           mode = TERRAIN_MODE.SKIP;
         }

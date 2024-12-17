@@ -229,7 +229,7 @@ Note that setting this prop does not affect how points are binned.
 
 #### `colorScaleType` (string, optional) {#colorscaletype}
 
-* Default: `'quantize'`
+* Default: `'linear'`
 
 The color scale converts from a continuous numeric stretch (`colorDomain`) into a list of colors (`colorRange`). Cells with value of `colorDomain[0]` will be rendered with the color of `colorRange[0]`, and cells with value of `colorDomain[1]` will be rendered with the color of `colorRange[colorRange.length - 1]`.
 

@@ -135,7 +135,7 @@ Called when this layer encounters an error, with the following arguments:
 
 - `error` - a JavaScript `Error` object.
 
-If this callback is supplied and returns `true`, the error is marked as handled and will not bubble up to the [`onError`](../react/deckgl.md#onerror) callback of the `Deck` instance.
+If this callback is supplied and returns `true`, the error is marked as handled and will not bubble up to the [`onError`](./deck.md#onerror) callback of the `Deck` instance.
 
 
 ### Interaction Properties
@@ -155,7 +155,7 @@ This callback will be called when the mouse enters/leaves an object of this deck
 * [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onHover`](../react/deckgl.md#onhover) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onHover`](./deck.md#onhover) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -166,7 +166,7 @@ This callback will be called when the mouse clicks over an object of this deck.g
 * [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `click` event is marked as handled and will not bubble up to the [`onClick`](../react/deckgl.md#onclick) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `click` event is marked as handled and will not bubble up to the [`onClick`](./deck.md#onclick) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -177,7 +177,7 @@ This callback will be called when the mouse starts dragging an object of this de
 * [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `dragstart` event is marked as handled and will not bubble up to the [`onDragStart`](../react/deckgl.md#ondragstart) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `dragstart` event is marked as handled and will not bubble up to the [`onDragStart`](./deck.md#ondragstart) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -188,7 +188,7 @@ This callback will be called when the mouse drags an object of this deck.gl laye
 * [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `drag` event is marked as handled and will not bubble up to the [`onDrag`](../react/deckgl.md#ondrag) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `drag` event is marked as handled and will not bubble up to the [`onDrag`](./deck.md#ondrag) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -199,7 +199,7 @@ This callback will be called when the mouse releases an object of this deck.gl l
 * [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
-If this callback returns a truthy value, the `dragend` event is marked as handled and will not bubble up to the [`onDragEnd`](../react/deckgl.md#ondragend) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `dragend` event is marked as handled and will not bubble up to the [`onDragEnd`](./deck.md#ondragend) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 

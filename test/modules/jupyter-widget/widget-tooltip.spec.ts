@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // eslint-disable-next-line
 /* global document */
 import test from 'tape-promise/tape';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import getDistance from '@turf/rhumb-distance';
 import getBearing from '@turf/rhumb-bearing';
 

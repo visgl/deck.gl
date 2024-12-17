@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

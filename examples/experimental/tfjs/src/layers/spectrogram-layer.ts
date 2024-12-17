@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as tf from '@tensorflow/tfjs';
 
 import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default function createDeckLayer(DeckProps, Layer, DeckLayerView2D) {
   // A layer that displays inside a MapView using an instance
   // of the layer view defined above.

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable */
 import * as L from 'leaflet';
 import {LeafletLayer} from 'deck.gl-leaflet';

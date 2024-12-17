@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global deck, requestAnimationFrame, setTimeout */
 const lng = -3.7082998;
 const lat = 40.4205556;

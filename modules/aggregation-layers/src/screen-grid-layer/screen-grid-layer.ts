@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Accessor,
@@ -35,13 +19,17 @@ import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/ag
 import AggregationLayer from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
+import {defaultColorRange} from '../common/utils/color-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps>),
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0},
+  colorRange: defaultColorRange,
+  colorScaleType: 'linear',
   getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
+  gpuAggregation: false,
   aggregation: 'SUM'
 };
 
@@ -75,6 +63,13 @@ export type _ScreenGridLayerProps<DataT> = {
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange?: Color[];
+
+  /**
+   * Scaling function used to determine the color of the grid cell.
+   * Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
+   * @default 'quantize'
+   */
+  colorScaleType?: 'linear' | 'quantize';
 
   /**
    * Method called to retrieve the position of each object.
@@ -130,7 +125,9 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    return this.props.gpuAggregation ? 'gpu' : 'cpu';
+    return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
+      ? 'gpu'
+      : 'cpu';
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator {

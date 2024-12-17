@@ -1,4 +1,8 @@
-import {Device, Framebuffer, Texture} from '@luma.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Device, Framebuffer, Parameters, Texture} from '@luma.gl/core';
 import type Layer from '../lib/layer';
 import type Viewport from '../viewports/viewport';
 import LayersPass from './layers-pass';
@@ -73,17 +77,29 @@ export default class ShadowPass extends LayersPass {
     super.render({...params, clearColor, target, pass: 'shadow'});
   }
 
-  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
-    return {...layer.props.parameters, blend: false, depthRange: [0, 1], depthTest: true};
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): Parameters {
+    return {
+      ...layer.props.parameters,
+      blend: false,
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal'
+    };
   }
 
   shouldDrawLayer(layer) {
     return layer.props.shadowEnabled !== false;
   }
 
-  getModuleParameters() {
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
     return {
-      drawToShadowMap: true
+      shadow: {
+        project: otherShaderModuleProps.project,
+        drawToShadowMap: true
+      }
     };
   }
 }

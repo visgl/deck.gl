@@ -1,8 +1,13 @@
-import {BASEMAP, CartoAPIError, _MapLibreBasemap as MapLibreBasemap} from '@deck.gl/carto';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {BASEMAP, _MapLibreBasemap as MapLibreBasemap} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
 import {fetchBasemapProps} from '@deck.gl/carto';
+import {CartoAPIError} from '@carto/api-client';
 
 const mockedMapConfig: KeplerMapConfig = {
   mapState: {

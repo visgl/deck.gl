@@ -19,7 +19,6 @@
   ],
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap",
-    "postinstall": "./scripts/postinstall.sh",
     "clean": "ocular-clean",
     "build": "npm run clean && ocular-build && lerna run build",
     "version": "node scripts/verify-changelog.js && git add CHANGELOG.md",
@@ -50,8 +49,9 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "@loaders.gl/polyfills": "^4.2.0",
-    "@luma.gl/webgpu": "^9.1.0-alpha.19",
-    "@math.gl/proj4": "^4.1.0-alpha.3",
+    "@luma.gl/webgpu": "^9.1.0-beta.11",
+    "@luma.gl/effects": "^9.1.0-beta.11",
+    "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.0.9",
     "jsdom": "^20.0.0",
     "ocular-dev-tools": "2.0.0-alpha.33",

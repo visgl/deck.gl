@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-unused-vars */
 import test from 'tape-promise/tape';
 import React, {createElement, Fragment} from 'react';

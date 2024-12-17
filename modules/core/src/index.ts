@@ -1,22 +1,7 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable max-len */
 
 // Intialize globals, extract version
@@ -107,6 +92,7 @@ export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
+export {applyStyles as _applyStyles, removeStyles as _removeStyles} from './utils/apply-styles';
 
 // Types
 export type {CoordinateSystem} from './lib/constants';
@@ -135,12 +121,12 @@ export type {
   TextureSource,
   Material
 } from './types/layer-props';
-export type {FilterContext} from './passes/layers-pass';
+export type {DrawLayerParameters, FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
 export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from './lib/effect';
-export type {PickingUniforms, ProjectUniforms} from './shaderlib/index';
+export type {PickingUniforms, ProjectProps, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';

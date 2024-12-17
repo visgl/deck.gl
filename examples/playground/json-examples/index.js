@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import heatmap from './3d-heatmap.json';
 import heatmapMinimap from './3d-heatmap-minimap.json';
 import geojson from './geojson.json';

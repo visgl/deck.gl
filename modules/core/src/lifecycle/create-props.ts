@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
@@ -10,7 +14,7 @@ import {
   ASYNC_DEFAULTS_SYMBOL
 } from './constants';
 import {StatefulComponentProps} from './component';
-import type Component from './component';
+import Component from './component';
 
 // Create a property object
 export function createProps<PropsT extends {}>(
@@ -62,6 +66,13 @@ const MergedDefaultPropsCacheKey = '_mergedDefaultProps';
 // Return precalculated defaultProps and propType objects if available
 // build them if needed
 function getPropsPrototype(componentClass, extensions?: any[]) {
+  // Bail out if we're not looking at a component - for two reasons:
+  // 1. There's no reason for an ancestor of component to have props
+  // 2. If we don't bail out, we'll follow the prototype chain all the way back to the global
+  // function prototype and add _mergedDefaultProps to it, which may break other frameworks
+  // (e.g. the react-three-fiber reconciler)
+  if (!(componentClass instanceof Component.constructor)) return {};
+
   // A string that uniquely identifies the extensions involved
   let cacheKey = MergedDefaultPropsCacheKey;
   if (extensions) {

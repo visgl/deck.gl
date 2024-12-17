@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global Headers */
 
 // See test/modules/carto/responseToJson for details for creating test data

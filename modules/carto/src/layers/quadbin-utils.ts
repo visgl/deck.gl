@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {worldToLngLat} from '@math.gl/web-mercator';
 import {cellToTile} from 'quadbin';
 

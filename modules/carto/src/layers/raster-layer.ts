@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Accessor,
   CompositeLayer,
@@ -12,6 +16,7 @@ import {quadbinToOffset} from './quadbin-utils';
 import {Raster} from './schema/carto-raster-tile-loader';
 import vs from './raster-layer-vertex.glsl';
 import {createBinaryProxy} from '../utils';
+import {RTTModifier} from './post-process-utils';
 
 const defaultProps: DefaultProps<RasterLayerProps> = {
   ...ColumnLayer.defaultProps,
@@ -26,7 +31,8 @@ const defaultProps: DefaultProps<RasterLayerProps> = {
 };
 
 // Modified ColumnLayer with custom vertex shader
-class RasterColumnLayer extends ColumnLayer {
+// Use RTT to avoid inter-tile seams
+class RasterColumnLayer extends RTTModifier(ColumnLayer) {
   static layerName = 'RasterColumnLayer';
 
   getShaders() {
@@ -77,6 +83,15 @@ type _RasterLayerProps = {
   tileIndex: bigint;
 };
 
+type RasterColumnLayerData = {
+  data: Raster;
+  length: number;
+};
+
+function wrappedDataComparator(oldData: RasterColumnLayerData, newData: RasterColumnLayerData) {
+  return oldData.data === newData.data && oldData.length === newData.length;
+}
+
 // Adapter layer around RasterColumnLayer that converts data & accessors into correct format
 export default class RasterLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
   Required<RasterLayerProps<DataT>> & ExtraProps
@@ -126,10 +141,22 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
           data, // Pass through data for getSubLayerAccessor()
           length: blockSize * blockSize
         },
+        dataComparator: wrappedDataComparator,
         offset,
         lineWidthScale, // Re-use widthScale prop to pass cell scale,
         highlightedObjectIndex,
-        highlightColor
+        highlightColor,
+
+        // RTT requires blending otherwise opacity < 1 blends with black
+        // render target
+        parameters: {
+          blendColorSrcFactor: 'one',
+          blendAlphaSrcFactor: 'one',
+          blendColorDstFactor: 'zero',
+          blendAlphaDstFactor: 'zero',
+          blendColorOperation: 'add',
+          blendAlphaOperation: 'add'
+        }
       }
     );
   }

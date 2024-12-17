@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {compile, compileAsync, addUnaryOp, addBinaryOp} from '@deck.gl/json/utils/expression-eval';
 

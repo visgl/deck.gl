@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -277,7 +281,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
     t.ok(
-      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
+      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthMask: false}),
       'Parameters are updated correctly'
     );
     t.ok(

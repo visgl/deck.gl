@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer} from '@deck.gl/core';
 import {IconLayer, IconLayerProps} from '@deck.gl/layers';
 import Supercluster from 'supercluster';

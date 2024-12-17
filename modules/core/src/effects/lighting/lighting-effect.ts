@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device} from '@luma.gl/core';
 import {Texture} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';
@@ -7,9 +11,10 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
 
+import type {LightingProps} from '@luma.gl/shadertools';
+import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
-import {LightingProps} from '@luma.gl/shadertools';
 
 const DEFAULT_AMBIENT_LIGHT_PROPS = {
   color: [255, 255, 255] as [number, number, number],
@@ -113,34 +118,31 @@ export default class LightingEffect implements Effect {
         viewports,
         onViewportActive,
         views,
-        moduleParameters: {
-          shadowLightId: i,
-          dummyShadowMap: this.dummyShadowMap,
-          shadowMatrices: this.shadowMatrices
+        shaderModuleProps: {
+          shadow: {
+            shadowLightId: i,
+            dummyShadowMap: this.dummyShadowMap,
+            shadowMatrices: this.shadowMatrices
+          }
         }
       });
     }
   }
 
-  getModuleParameters(layer: Layer) {
-    const parameters: {
-      lightSources?: LightingProps;
-      shadowMaps?: Texture[];
-      dummyShadowMap?: Texture | null;
-      shadowColor?: [number, number, number, number];
-      shadowMatrices?: Matrix4[];
-    } = this.shadow
-      ? {
+  getShaderModuleProps(layer: Layer, otherShaderModuleProps: Record<string, any>) {
+    const shadowProps = this.shadow
+      ? ({
+          project: otherShaderModuleProps.project,
           shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
-          dummyShadowMap: this.dummyShadowMap,
+          dummyShadowMap: this.dummyShadowMap!,
           shadowColor: this.shadowColor,
           shadowMatrices: this.shadowMatrices
-        }
+        } satisfies ShadowModuleProps)
       : {};
 
     // when not rendering to screen, turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
-    parameters.lightSources = {
+    const lightingProps: LightingProps = {
       enabled: true,
       ambientLight: this.ambientLight,
       directionalLights: this.directionalLights.map(directionalLight =>
@@ -148,8 +150,15 @@ export default class LightingEffect implements Effect {
       ),
       pointLights: this.pointLights.map(pointLight => pointLight.getProjectedLight({layer}))
     };
+    // @ts-expect-error material is not a Layer prop
+    const materialProps = layer.props.material;
 
-    return parameters;
+    return {
+      shadow: shadowProps,
+      lighting: lightingProps,
+      phongMaterial: materialProps,
+      gouraudMaterial: materialProps
+    };
   }
 
   cleanup(context: EffectContext): void {

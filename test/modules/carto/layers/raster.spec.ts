@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import CartoRasterTileLoader from '@deck.gl/carto/layers/schema/carto-raster-tile-loader';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
 import {AccessorFunction, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';

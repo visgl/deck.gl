@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {PROP_TYPES_SYMBOL} from './constants';
 
 export function validateProps(props) {

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import './utils/expression-eval.spec';
 import './utils/get.spec';
 import './utils/shallow-equal-objects.spec';

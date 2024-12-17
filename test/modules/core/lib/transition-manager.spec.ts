@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';

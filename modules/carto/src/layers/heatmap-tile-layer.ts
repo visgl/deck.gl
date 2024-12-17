@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
@@ -16,7 +20,7 @@ import {HeatmapProps, heatmap} from './heatmap';
 import {RTTModifier, PostProcessModifier} from './post-process-utils';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
 import {TilejsonPropType} from './utils';
-import {TilejsonResult} from '../sources';
+import {TilejsonResult} from '@carto/api-client';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Texture, TextureProps} from '@luma.gl/core';
 
@@ -92,7 +96,7 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   float weight = elevations;
 
   // Keep "power" delivered to screen constant when tiles update
-  // by outputting normalized density 
+  // by outputting normalized density
   weight *= density.factor;
 
   // Pack float into 3 channels to pass to heatmap shader

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // This configuration object determines which deck.gl classes are accessible in Playground
 
 import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';

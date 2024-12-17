@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable callback-return */
 import {OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

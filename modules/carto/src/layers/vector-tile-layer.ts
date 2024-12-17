@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {registerLoaders} from '@loaders.gl/core';
 import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
@@ -15,7 +19,7 @@ import {
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-import type {TilejsonResult} from '../sources/types';
+import type {TilejsonResult} from '@carto/api-client';
 import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 

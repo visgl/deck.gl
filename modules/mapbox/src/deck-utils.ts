@@ -1,7 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, WebMercatorViewport, MapView, _flatten as flatten} from '@deck.gl/core';
 import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
 import type MapboxLayer from './mapbox-layer';
-import type {Map} from 'mapbox-gl';
+import type {Map} from './types';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 import {GL} from '@luma.gl/constants';
@@ -114,10 +118,11 @@ export function removeDeckInstance(map: Map & {__deck?: Deck | null}) {
 export function getInterleavedProps(currProps: DeckProps) {
   const nextProps: DeckProps = {
     ...currProps,
-    // TODO: remove with withParametersWebGL
+    // TODO: remove 'any' cast
     parameters: {
       depthMask: true,
-      depthTest: true,
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal',
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,

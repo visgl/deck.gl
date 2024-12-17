@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint import/namespace: ['error', { allowComputed: true }] */
 import React, {useState} from 'react';
 import styled from 'styled-components';

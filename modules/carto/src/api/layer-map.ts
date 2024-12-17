@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {deviation, extent, groupSort, median, variance} from 'd3-array';
 import {rgb} from 'd3-color';
 import {
@@ -136,6 +140,13 @@ const customMarkersPropsMap = {
   }
 };
 
+const heatmapTilePropsMap = {
+  visConfig: {
+    colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
+    radius: 'radiusPixels'
+  }
+};
+
 const aggregationVisConfig = {
   colorAggregation: x => ({colorAggregation: AGGREGATION[x] || AGGREGATION.sum}),
   colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
@@ -164,7 +175,10 @@ export function getLayer(
   let basePropMap: any = sharedPropMap;
 
   if (config.visConfig?.customMarkers) {
-    basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
+    basePropMap = mergePropMaps(basePropMap, customMarkersPropsMap);
+  }
+  if (type === 'heatmapTile') {
+    basePropMap = mergePropMaps(basePropMap, heatmapTilePropsMap);
   }
   if (TILE_LAYER_TYPE_TO_LAYER[type]) {
     return getTileLayer(dataset, basePropMap, type);
@@ -183,7 +197,7 @@ export function getLayer(
       Layer: GeoJsonLayer,
       propMap: {
         columns: {
-          altitude: x => ({parameters: {depthTest: Boolean(x)}})
+          altitude: x => ({parameters: {depthWriteEnabled: Boolean(x)}})
         },
         visConfig: {outline: 'stroked'}
       }

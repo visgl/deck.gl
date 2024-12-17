@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import LayerManager from './layer-manager';
 import ViewManager from './view-manager';
@@ -43,14 +27,14 @@ import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
-import {EVENTS} from './constants';
+import {EVENT_HANDLERS, RECOGNIZERS, RecognizerOptions} from './constants';
 
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
-import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
+import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
@@ -167,11 +151,11 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Allow browser default touch actions.
    * @default `'none'`
    */
-  touchAction?: string;
-  /** Set Hammer.js recognizer options for gesture recognition. See documentation for details. */
-  eventRecognizerOptions?: {
-    [type: string]: RecognizerOptions;
-  };
+  touchAction?: EventManagerOptions['touchAction'];
+  /**
+   * Optional mjolnir.js recognizer options
+   */
+  eventRecognizerOptions?: RecognizerOptions;
 
   /** (Experimental) Render to a custom frame buffer other than to screen. */
   _framebuffer?: Framebuffer | null;
@@ -234,7 +218,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   drawPickingColors?: boolean;
 };
 
-const defaultProps = {
+const defaultProps: DeckProps = {
   id: '',
   width: '100%',
   height: '100%',
@@ -948,13 +932,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    this.device.setParametersWebGL({
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthTest: true,
-      depthFunc: GL.LEQUAL
-    });
+    if (this.device instanceof WebGLDevice) {
+      this.device.setParametersWebGL({
+        blend: true,
+        blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+        polygonOffsetFill: true,
+        depthTest: true,
+        depthFunc: GL.LEQUAL
+      });
+    }
 
     this.props.onDeviceInitialized(this.device);
     if (this.device instanceof WebGLDevice) {
@@ -969,15 +955,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,
-      recognizerOptions: this.props.eventRecognizerOptions,
+      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+        // Resolve recognizer settings
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
+          RECOGNIZERS[eventName];
+        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
+        const options = {...defaultOptions, ...optionsOverride, event: eventName};
+        return {
+          recognizer: new RecognizerConstructor(options),
+          recognizeWith,
+          requestFailure
+        };
+      }),
       events: {
         pointerdown: this._onPointerDown,
         pointermove: this._onPointerMove,
         pointerleave: this._onPointerMove
       }
     });
-    for (const eventType in EVENTS) {
-      this.eventManager.on(eventType as keyof typeof EVENTS, this._onEvent);
+    for (const eventType in EVENT_HANDLERS) {
+      this.eventManager.on(eventType, this._onEvent);
     }
 
     this.viewManager = new ViewManager({
@@ -1131,10 +1128,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: event handler for click & drag */
   _onEvent = (event: MjolnirGestureEvent) => {
-    const eventOptions = EVENTS[event.type];
+    const eventHandlerProp = EVENT_HANDLERS[event.type];
     const pos = event.offsetCenter;
 
-    if (!eventOptions || !pos || !this.layerManager) {
+    if (!eventHandlerProp || !pos || !this.layerManager) {
       return;
     }
 
@@ -1151,9 +1148,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     ) as PickingInfo;
 
     const {layer} = info;
-    const layerHandler =
-      layer && (layer[eventOptions.handler] || layer.props[eventOptions.handler]);
-    const rootHandler = this.props[eventOptions.handler];
+    const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
+    const rootHandler = this.props[eventHandlerProp];
     let handled = false;
 
     if (layerHandler) {

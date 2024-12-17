@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Transition, {TransitionSettings as BaseTransitionSettings} from '../transitions/transition';
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import type {IViewState} from './view-state';

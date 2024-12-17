@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Check if one JavaScript class inherits from another
 export function inheritsFrom<T>(Type: any, ParentType: T): Type is T {
   while (Type) {

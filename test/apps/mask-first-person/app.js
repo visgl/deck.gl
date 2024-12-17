@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import TurfCircle from '@turf/circle';
 import {Deck, FirstPersonView, MapView, GeoJsonLayer, BitmapLayer, TileLayer} from 'deck.gl';

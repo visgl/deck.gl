@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // OL
 import Map from 'ol/Map';
 import {OSM} from 'ol/source';

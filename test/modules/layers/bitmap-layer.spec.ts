@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';

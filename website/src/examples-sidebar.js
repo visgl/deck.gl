@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /**
  * Creating a sidebar enables you to:
  - create an ordered group of docs
@@ -68,7 +72,7 @@ const sidebars = {
         {
           type: 'link',
           label: 'Playground',
-          href: `playground`
+          href: `/playground`
         }
       ]
     }

@@ -1,5 +1,9 @@
-import {CartoAPIError} from './api/carto-api-error';
-import {APIErrorContext, GoogleBasemapProps} from './api/types';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {CartoAPIError, APIErrorContext} from '@carto/api-client';
+import {GoogleBasemapProps} from './api/types';
 
 const cartoStyleUrlTemplate = 'https://basemaps.cartocdn.com/gl/{basemap}-gl-style/style.json';
 

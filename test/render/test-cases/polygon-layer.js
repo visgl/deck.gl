@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {OrthographicView, COORDINATE_SYSTEM, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {Fp64Extension, PathStyleExtension, FillStyleExtension} from '@deck.gl/extensions';
@@ -145,7 +149,7 @@ export default [
     viewState: {
       latitude: 0,
       longitude: 50,
-      zoom: 0
+      zoom: 1.5
     },
     layers: [
       new PolygonLayer({
@@ -180,7 +184,7 @@ export default [
     viewState: {
       latitude: 0,
       longitude: 50,
-      zoom: 0
+      zoom: 1.5
     },
     layers: [
       new PolygonLayer({

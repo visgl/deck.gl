@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {UniformValue} from '@luma.gl/core';
 import {Layer} from '@deck.gl/core';
 

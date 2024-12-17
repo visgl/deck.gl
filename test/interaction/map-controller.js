@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {MapView} from '@deck.gl/core';
 // import {toLowPrecision} from '@deck.gl/test-utils';
 

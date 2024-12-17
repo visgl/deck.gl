@@ -17,6 +17,53 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.1
+
+### deck.gl v9.1 Prereleases
+
+#### deck.gl [9.1.0-beta.1] - Nov 21 2024
+
+- Generic module props handling in Layer class (#9192)
+- Update license headers (#9191)
+- Upgrade mjolnir.js to v3 (#9144)
+- Remove updateModuleSettings from codebase (#9160)
+- Fix countItems in DataFilterExtension (#9158)
+- chore: Use WebGLDevice when using webgl-only APIs
+- Remove NaN uniform (#9174)
+- GPU Aggregation: miscellaneous clean up (#9142)
+- GPU Aggregation: Support *ScaleType and *Percentile props (#9130)
+- Aggregation UBO 2/2 (#9133)
+- Fix GPUAggregator on M chips (#9128)
+- Aggregation layers UBO (#9114)
+- GPU Aggregation (8/8): Remove legacy aggregator (#9100)
+- GPU Aggregation (7/8): ContourLayer (#9099)
+- GPU Aggregation (6/8): HexagonLayer (#9098)
+- GPU Aggregation (5/8): GridLayer (#9096)
+- refactor(json): Remove expression-eval dependency (#9070)
+- Update PBR code to use luma pbrMaterial (#9093)
+- Lighting UBO (#9074)
+- CARTO: HeatmapTileLayer full colorRange (#9068)
+- HeatmapLayer UBO (#9071)
+- shadow module UBO (#9054)
+- ShaderModule type update (#9044)
+- core module UBO (#9040)
+- carto module UBO (#9038)
+- HeatmapLayer fix to work with project UBO (#9037)
+- geo-layers UBO (#9036)
+- mesh-layers UBO (#9035)
+- refactor: Layers UBO (#9008)
+- Extensions UBOs (#9001)
+- DataFilterExtension UBOs (#8998)
+- Move ScatterplotLayer & BitmapLayer to UBOs (#8875)
+- GPU Aggregation (4/8): ScreenGridLayer (#8942)
+- GPU Aggregation (3/8): CPUAggregator (#8888)
+- GPU Aggregation (2/8): GPUAggregator (#8887)
+- GPU Aggregation (1/8): Aggregator and AggregationLayer (#8886)
+- Use UBOs in project module (#8782)
+- Remove WebGL-only triangle-fan topology (#8860)
+- feat(layers): Simplify ArcLayer (#8859)
+- chore: Remove internal texture parameters (v9.1) (#8851)
+
 ## deck.gl v9.0
 
 ### deck.gl v9.0 Prereleases

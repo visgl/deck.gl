@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LayerData, LayerProps} from '@deck.gl/core';
 import {PolygonLayerProps, ScatterplotLayerProps} from '..';
 import {calculatePickingColors} from './geojson-binary';
@@ -74,7 +78,7 @@ export function createLayerPropsFromBinary(
       ...points.attributes,
       getPosition: points.positions,
       instancePickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.points!
       }
     },
@@ -90,7 +94,7 @@ export function createLayerPropsFromBinary(
       ...lines.attributes,
       getPath: lines.positions,
       instancePickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.lines!
       }
     },
@@ -107,7 +111,7 @@ export function createLayerPropsFromBinary(
       ...polygons.attributes,
       getPolygon: polygons.positions,
       pickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.polygons!
       }
     },
@@ -127,7 +131,7 @@ export function createLayerPropsFromBinary(
       ...polygons.attributes,
       getPath: polygons.positions,
       instancePickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.polygons!
       }
     },

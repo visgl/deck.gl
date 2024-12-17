@@ -136,7 +136,7 @@ Controls the resolution of drawing buffer used for rendering.
 
 Note:
 
-* Consider setting to `false` or to a number <=1 if better rendering performance is needed.
+* Consider setting to `false` or to a number `<=1` if better rendering performance is needed.
 * When it is set to a high Number (like, 4 or more), it is possible to hit the system limit for allocating drawing buffer, such cases will log a warning and fallback to system allowed resolution.
 
 #### `parameters` (object) {#parameters}
@@ -401,11 +401,11 @@ By default, the deck canvas captures all touch interactions. This prop is useful
 
 Set options for gesture recognition. May contain the following fields:
 
-- `pan` - an object that is [Hammer.Pan](http://hammerjs.github.io/recognizer-pan/) options. This gesture is used for drag events.
-- `pinch` - an object that is [Hammer.Pinch](http://hammerjs.github.io/recognizer-pinch/) options This gesture is used for two-finger touch events.
-- `tripan` - an object that is [Hammer.Pan](http://hammerjs.github.io/recognizer-pan/) options.  This gesture is used for three-finger touch events.
-- `tap` - an object that is [Hammer.Tap](http://hammerjs.github.io/recognizer-tap/) options. This gesture is used for the `onClick` callback.
-- `doubletap` - an object that is [Hammer.Tap](http://hammerjs.github.io/recognizer-tap/) options. This gesture is used for double click events.
+- `pan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for `onDrag` events, viewport panning (mouse/touch) and rotating (mouse+ctrl). Default `{threshold: 1}`.
+- `pinch` - an object that is [Pinch](https://visgl.github.io/mjolnir.js/docs/api-reference/pinch) options This gesture is used for multi-touch zooming/rotating.
+- `multipan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for multi-touch pitching. Default `{threshold: 10, direction: InputDirection.Vertical, pointers: 2}`.
+- `click` - an object that is [Tap](https://visgl.github.io/mjolnir.js/docs/api-reference/tap) options. This gesture is used for the `onClick` event.
+- `dblclick` - an object that is [Tap](https://visgl.github.io/mjolnir.js/docs/api-reference/tap) options. This gesture is used for double-click zooming.
 
 For example, the following setting makes panning less sensitive and clicking easier on mobile:
 

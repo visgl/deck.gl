@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
