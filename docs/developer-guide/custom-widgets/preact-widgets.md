@@ -72,11 +72,9 @@ interface LayerListWidgetProps {
   className?: string;
 }
 
-class LayerListWidget implements Widget {
+class LayerListWidget implements Widget<LayerListWidgetProps> {
   id = 'layer-list-widget';
-  props: LayerListWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
   layers: Layer[] = [];
   deck?: Deck<any>;
@@ -110,7 +108,7 @@ class LayerListWidget implements Widget {
     this.update();
   }
 
-  onViewportChange(viewport: Viewport) {
+  onViewportChange(viewport) {
     this.viewports[viewport.id] = viewport
   }
 

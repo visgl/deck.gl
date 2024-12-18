@@ -44,8 +44,8 @@ interface RotateWidgetProps {
     ref: RefObject<HTMLDivElement>
 }
 
-class RotateWidget {
-  constructor(props: BearingWidgetProps) {
+class RotateWidget implements Widget<RotateWidgetProps> {
+  constructor(props: RotateWidgetProps) {
     this.id = props.id || 'bearing-widget';
     this.placement = props.placement || 'top-right';
     this.props = props;

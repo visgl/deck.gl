@@ -24,11 +24,11 @@ class AwesomeWidget implements Widget {
 
 ### Updating Properties
 
-[`setProps(props)`](../../api-reference/core/widget.md#setprops) - This method is called whenever widget properties are updated. Use this to apply changes dynamically.
+[`setProps(props: Partial<PropsT>)`](../../api-reference/core/widget.md#setprops) - This method is called whenever widget properties are updated. Use this to apply changes dynamically.
 
 ```ts
-class AwesomeWidget implements Widget {
-  setProps(props: Partial<ZoomWidgetProps>) {
+class AwesomeWidget implements Widget<AwesomeWidgetProps> {
+  setProps(props) {
     Object.assign(this.props, props);
   }
 }
@@ -44,7 +44,7 @@ Specific viewport:
 class AwesomeWidget implements Widget {
   viewId = 'minimap'
 
-  onViewportChange(viewport: Viewport) {
+  onViewportChange(viewport) {
     // Handle updates for the "minimap" viewport
   }
 }
@@ -56,7 +56,7 @@ All viewports:
 class AwesomeWidget implements Widget {
   viewId = null
 
-  onViewportChange(viewport: Viewport) {
+  onViewportChange(viewport) {
     // Handle updates for all viewports
   }
 }
@@ -132,7 +132,7 @@ import {
   _removeStyles as removeStyles
 } from '@deck.gl/core'
 
-class AwesomeWidget implements Widget {
+class AwesomeWidget implements Widget<AwesomeWidgetProps> {
 
   constructor(props: AwesomeWidgetProps) {
     ...
@@ -149,7 +149,7 @@ class AwesomeWidget implements Widget {
     ...
   }
   
-  setProps(props: Partial<AwesomeWidgetProps>) { 
+  setProps(props) { 
     const el = this.element;
     if (el) {
       if (!deepEqual(oldProps.style, props.style, 1)) {
@@ -181,7 +181,7 @@ Apply the CSS class to your widget
 ```ts
 import { type Widget } from '@deck.gl/core'
 
-class AwesomeWidget implements Widget {
+class AwesomeWidget implements Widget<AwesomeWidgetProps> {
 
   onAdd() {
     const {className} = this.props;
@@ -190,7 +190,7 @@ class AwesomeWidget implements Widget {
     ...
   }
   
-  setProps(props: Partial<AwesomeWidgetProps>) {
+  setProps(props) {
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -256,9 +256,8 @@ interface LayerLoadingWidgetProps {
   className?: string;
 }
 
-class LayerListWidget implements Widget {
+class LayerListWidget implements Widget<LayerLoadingWidgetProps> {
   id = 'layer-loading-widget';
-  props: LayerLoadingWidgetProps;
   placement: WidgetPlacement = 'top-left';
   layers: Layer[] = [];
   deck?: Deck<any>;
