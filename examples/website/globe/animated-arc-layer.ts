@@ -5,6 +5,27 @@
 import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
 import {Accessor, DefaultProps} from '@deck.gl/core';
 
+import type {ShaderModule} from '@luma.gl/shadertools';
+
+const uniformBlock = `\
+uniform tripsUniforms {
+  vec2 timeRange;
+} trips;
+`;
+
+export type TripsProps = {
+  timeRange: [number, number];
+};
+
+export const tripsUniforms = {
+  name: 'trips',
+  vs: uniformBlock,
+  fs: uniformBlock,
+  uniformTypes: {
+    timeRange: 'vec2<f32>'
+  }
+} as const satisfies ShaderModule<TripsProps>;
+
 export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> &
   ArcLayerProps<DataT>;
 
@@ -31,7 +52,6 @@ export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcL
     const shaders = super.getShaders();
     shaders.inject = {
       'vs:#decl': `\
-uniform vec2 timeRange;
 in float instanceSourceTimestamp;
 in float instanceTargetTimestamp;
 out float vTimestamp;
@@ -40,18 +60,18 @@ out float vTimestamp;
 vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
 `,
       'fs:#decl': `\
-uniform vec2 timeRange;
 in float vTimestamp;
 `,
       'fs:#main-start': `\
-if (vTimestamp < timeRange.x || vTimestamp > timeRange.y) {
+if (vTimestamp < trips.timeRange.x || vTimestamp > trips.timeRange.y) {
   discard;
 }
 `,
       'fs:DECKGL_FILTER_COLOR': `\
-color.a *= (vTimestamp - timeRange.x) / (timeRange.y - timeRange.x);
+color.a *= (vTimestamp - trips.timeRange.x) / (trips.timeRange.y - trips.timeRange.x);
 `
     };
+    shaders.modules = [...shaders.modules, tripsUniforms];
     return shaders;
   }
 
@@ -70,10 +90,10 @@ color.a *= (vTimestamp - timeRange.x) / (timeRange.y - timeRange.x);
   }
 
   draw(params) {
-    params.uniforms = {
-      ...params.uniforms,
-      timeRange: this.props.timeRange
-    };
+    const {timeRange} = this.props;
+    const tripsProps: TripsProps = {timeRange};
+    const model = this.state.model!;
+    model.shaderInputs.setProps({trips: tripsProps});
     super.draw(params);
   }
 }
