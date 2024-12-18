@@ -64,7 +64,7 @@ class AwesomeWidget implements Widget {
 
 ### Redrawing Widget
 
-[`onRedraw({viewports, layers})`] - This method is invoked during rendering. This is useful for responding to changes in layers or viewports, such as a `HeatmapLayer`'s `colorRange` prop.
+[`onRedraw({viewports, layers})`] - This method is invoked when deck.gl performs rendering. This is useful for updating the widget UI to correspond to changes in layers or viewports, such as a `HeatmapLayer`'s `colorRange` prop.
 
 ```ts
 class AwesomeWidget implements Widget {
