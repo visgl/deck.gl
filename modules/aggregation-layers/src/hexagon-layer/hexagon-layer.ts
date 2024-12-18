@@ -34,7 +34,7 @@ import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 function noop() {}
 
 const defaultProps: DefaultProps<HexagonLayerProps> = {
-  gpuAggregation: false,
+  gpuAggregation: true,
 
   // color
   colorDomain: null,
@@ -241,7 +241,7 @@ type _HexagonLayerProps<DataT> = {
 
   /**
    * When set to true, aggregation is performed on GPU, provided other conditions are met.
-   * @default false
+   * @default true
    */
   gpuAggregation?: boolean;
 };

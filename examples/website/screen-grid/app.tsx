@@ -39,7 +39,7 @@ type DataPoint = [longitude: number, latitude: number, count: number];
 export default function App({
   data = DATA_URL,
   cellSize = 20,
-  gpuAggregation = false, // TODO(v9): Re-enable GPU aggregation.
+  gpuAggregation = true,
   aggregation = 'SUM',
   mapStyle = MAP_STYLE
 }: {
