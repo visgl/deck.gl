@@ -11,9 +11,6 @@ in vec3 positions64Low;
 in vec4 colors;
 in vec4 pickingColors;
 
-uniform float lightStrength;
-uniform float opacity;
-
 out vec4 vColor;
 out float shouldDiscard;
 
@@ -25,9 +22,9 @@ void main(void) {
   // Note: clipsspace depth is nonlinear and deltaZ depends on the near and far values
   // when creating the perspective projection matrix.
   vec4 position_vector = project_common_position_to_clipspace(vec4(position_commonspace, 0.0));
-  float fadeFactor = 1.0 - position_vector.z * lightStrength;
+  float fadeFactor = 1.0 - position_vector.z * surface.lightStrength;
 
-  vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;;
+  vColor = vec4(colors.rgb * fadeFactor, colors.a * layer.opacity) / 255.0;;
 
   picking_setPickingColor(pickingColors.xyz);
 
