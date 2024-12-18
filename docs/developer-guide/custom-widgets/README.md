@@ -25,7 +25,7 @@ class AwesomeWidget implements Widget {
 }
 ```
 
-It's most convenient to use TypeScript, but it can also be implemented in JavaScript.
+It's most convenient to use TypeScript, but widgets can also be implemented in JavaScript.
 
 ### Defining Widget Properties
 
