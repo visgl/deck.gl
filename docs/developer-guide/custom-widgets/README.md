@@ -5,7 +5,8 @@
 There are a many ways to build a widget in deck.gl, and it is helpful to consider what approach will serve you best before starting. We've provided guides for commonly used approaches: 
 
 * **[Implement a universal widget](./universal-widgets.md)** - A universal widget is compatible with any deck.gl application and is UI framework agnostic. This option is best for developing widgets to be used throughout the deck.gl ecosystem.
-* **[Create a react widget](./react-widgets.md)** - A React widget utilizes the convenience of react to develop the UI for your widget. It is tightly coupled to your react application, being mounted in the same root as the rest of your UI. This option is best for developing widgets custom to your React application. 
+* **[Use Preact in a universal widget](./preact-widgets.md)** - Preact is a lightweight virtual DOM commonly used to implement dynamic widgets without tightly coupling widget internals to an application's UI framework.
+* **[Create a React widget](./react-widgets.md)** - A React widget utilizes the convenience of React to develop the UI for your widget. It is tightly coupled to your React application, being mounted in the same root as the rest of your UI. This option is best for developing widgets custom to your React application. 
 
 
 ## Creating The Widget class

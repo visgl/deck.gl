@@ -222,11 +222,11 @@ Override in user's application
 }
 ```
 
-## Example: Layer List Widget with Preact
+## Example: Layer Loading Widget in Vanilla JS
 
-Below is a comprehensive example demonstrating a layer list widget implemented using Preact for dynamic UI rendering:
+Below is a comprehensive example demonstrating a widget indicating whether or not all asynchronous layers are loading implemented without any UI framework. 
 
-```tsx
+```ts
 import {
   _deepEqual as deepEqual,
   _applyStyles as applyStyles,
@@ -235,9 +235,8 @@ import {
 import type {
   Deck, Viewport, Widget, WidgetPlacement, Layer
 } from '@deck.gl/core'
-import {render} from 'preact';
 
-interface LayerListWidgetProps {
+interface LayerLoadingWidgetProps {
   id?: string;
   /**
    * Widget positioning within the view. Default: 'top-left'.
@@ -258,19 +257,16 @@ interface LayerListWidgetProps {
 }
 
 class LayerListWidget implements Widget {
-  id = 'layer-list-widget';
-  props: ZoomWidgetProps;
+  id = 'layer-loading-widget';
+  props: LayerLoadingWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
-  viewports: {[id: string]: Viewport} = {};
   layers: Layer[] = [];
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: AwesomeWidgetProps) {
-    this.id = props.id || 'layer-list-widget';
+  constructor(props: LayerLoadingWidgetProps) {
+    this.id = props.id || 'layer-loading-widget';
     this.placement = props.placement || 'top-left';
-    this.viewId = props.viewId || null;
 
     this.props = { 
       ...props,
@@ -281,7 +277,7 @@ class LayerListWidget implements Widget {
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
     const {style, className} = this.props;
     const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-zoom');
+    element.classList.add('deck-widget', 'deck-widget-layer-loading');
     if (className) element.classList.add(className);
     applyStyles(element, style);
     this.deck = deck;
@@ -295,45 +291,37 @@ class LayerListWidget implements Widget {
     this.update();
   }
 
-  onViewportChange(viewport) {
-    this.viewports[viewport.id] = viewport
-  }
-
   update() {
     const element = this.element;
     if (!element) {
       return;
     }
-    let layers = this.layers
-    if (this.deck?.props.layerFilter) {
-      const ui = (
-        {viewports.values().map(viewport => (
-          <div>
-            {viewport.id}
-            <ul>
-              {layers.filter(layer => (
-                this.deck?.props.layerFilter({layer, viewport})
-              )).map((layer) => {
-                <li key={layer.id}>{layer.id}</li>
-              })}
-            </ul>
-          </div>
-        ))}
-      );
-      render(ui, element);
-    } else {
-      const ui = (
-        <ul>
-          {this.layers.map((layer) => (
-            <li key={layer.id}>{layer.id}</li>
-          ))}
-        </ul>
-      )
-      render(ui, element);
+
+    // Clear the element content
+    element.innerHTML = '';
+
+    // Check if all layers are loaded
+    let loaded = this.layers?.every(layer => layer.isLoaded);
+
+    // Add a status indicator
+    const statusIndicator = document.createElement('div');
+    statusIndicator.textContent = loaded ? 'All layers loaded' : 'Loading layers...';
+    statusIndicator.style.fontWeight = 'bold';
+    statusIndicator.style.color = loaded ? 'green' : 'red';
+    element.appendChild(statusIndicator);
+
+    // Add a list of layers with their load status
+    const layerList = document.createElement('ul');
+    for (const layer of this.layers) {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${layer.id}: ${layer.isLoaded ? 'Loaded' : 'Loading'}`;
+      listItem.style.color = layer.isLoaded ? 'green' : 'red';
+      layerList.appendChild(listItem);
     }
+
+    element.appendChild(layerList);
   }
 }
-
 ```
 
-This widget dynamically renders a list of layers and updates as the deck.gl state changes.
+This widget provides a visual representation of layer load statuses and updates as the deck.gl state changes.
