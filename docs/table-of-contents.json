@@ -76,6 +76,7 @@
         "items": [
           "developer-guide/custom-widgets/README",
           "developer-guide/custom-widgets/universal-widgets",
+          "developer-guide/custom-widgets/preact-widgets",
           "developer-guide/custom-widgets/react-widgets"
         ]
       }
