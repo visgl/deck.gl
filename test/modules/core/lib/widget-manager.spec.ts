@@ -162,7 +162,7 @@ test('WidgetManager#onRedraw#without viewId', t => {
     layers: []
   });
 
-  t.is(onViewportChangeCalledCount, 1, 'widget.onViewportChange not called');
+  t.is(onViewportChangeCalledCount, 2, 'widget.onViewportChange called');
   t.is(onRedrawCalledCount, 2, 'widget.onRedraw called');
 
   widgetManager.onRedraw({
@@ -188,7 +188,7 @@ test('WidgetManager#onRedraw#without viewId', t => {
     ],
     layers: []
   });
-  t.is(onViewportChangeCalledCount, 3, 'widget.onViewportChange called');
+  t.is(onViewportChangeCalledCount, 4, 'widget.onViewportChange called');
   t.is(onRedrawCalledCount, 3, 'widget.onRedraw called');
 
   widgetManager.finalize();
