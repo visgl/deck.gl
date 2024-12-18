@@ -14,7 +14,7 @@ import {
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-interface CompassWidgetProps {
+export interface CompassWidgetProps {
   id?: string;
   placement?: WidgetPlacement;
   /**
@@ -52,10 +52,13 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     this.id = props.id || 'compass';
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.label = props.label || 'Compass';
-    props.style = props.style || {};
-    this.props = props;
+
+    this.props = {
+      ...props,
+      transitionDuration: props.transitionDuration || 200,
+      label: props.label || 'Compass',
+      style: props.style || {}
+    };
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
