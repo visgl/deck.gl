@@ -138,6 +138,17 @@
       },
       {
         "type": "category",
+        "label": "Aggregation Layers",
+        "items": [
+          "api-reference/aggregation-layers/overview",
+          "api-reference/aggregation-layers/aggregation-layer",
+          "api-reference/aggregation-layers/aggregator",
+          "api-reference/aggregation-layers/cpu-aggregator",
+          "api-reference/aggregation-layers/webgl-aggregator"
+        ]
+      },
+      {
+        "type": "category",
         "label": "Scripting Interface",
         "items": [
           "api-reference/core/deckgl"
@@ -219,17 +230,6 @@
     "type": "category",
     "label": "Submodule API Reference",
     "items": [
-      {
-        "type": "category",
-        "label": "@deck.gl/extensions",
-        "items": [
-          "api-reference/aggregation-layers/overview",
-          "api-reference/aggregation-layers/aggregation-layer",
-          "api-reference/aggregation-layers/aggregator",
-          "api-reference/aggregation-layers/cpu-aggregator",
-          "api-reference/aggregation-layers/webgl-aggregator"
-        ]
-      },
       {
         "type": "category",
         "label": "@deck.gl/arcgis",
