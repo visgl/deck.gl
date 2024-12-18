@@ -90,11 +90,7 @@ export const RotateReactWidget = (props: RotateWidgetProps) => {
   const widget = useWidget(RotateWidget, { ref, ...props });
 
   return (
-    <div 
-        ref={ref} 
-        style={{ padding: '10px', backgroundColor: '#f0f0f0', ...props.style }}
-        className='custom-rotate-widget'
-    >
+    <div ref={ref} style={{ padding: '10px', backgroundColor: '#f0f0f0' }}>
       <button onClick={() => widget.handleCCWRotate()} style={{ marginRight: '5px' }}>
         Rotate CCW
       </button>
@@ -108,24 +104,71 @@ export const RotateReactWidget = (props: RotateWidgetProps) => {
 
 This widget controls the bearing of the view its attached to.
 
-### Styling Your React Widget
+#### Styling Your React Widget
 
-#### Inline Styles
+##### Adding Inline Styles
 
-React widgets can be written to accept `style` props for inline styling.
+Add the `style` prop in your React component for inline styling overrides.
+
+```tsx
+export const RotateReactWidget = (props: RotateWidgetProps) => {
+  ...
+  return <div style={{...props.style}}>...</div>
+}
+```
 
 ```tsx
 <RotateReactWidget style={{ backgroundColor: 'blue', color: 'white' }} />
 ```
 
-#### CSS Classes
+##### Adding CSS Classes
 
-React widgets can use `className` and add styles to their stylesheet.
+Add `className` to your React component and styles to your stylesheet.
+
+```tsx
+import 'style.css';
+
+export const RotateReactWidget = (props: RotateWidgetProps) => {
+  ...
+  return <div className="custom-rotate-widget">...</div>
+}
+```
 
 ```css
+/* style.css */
 .custom-rotate-widget {
   padding: 10px;
   background-color: #333;
   color: white;
+}
+```
+
+##### Applying the deck.gl widget design system
+
+Reuse the built-in deck.gl widget [stylesheet](https://unpkg.com/deck.gl@latest/dist/stylesheet.css) by importing them into your application. This can be useful if you're already theming deck.gl widgets and want to reuse CSS styles and variables. See [Widget Overview](../../api-reference/widgets/overview.md#custom-class-theming) for a full list of built-in variables.
+
+```tsx
+import '@deck.gl/widgets/stylesheet.css';
+import 'style.css';
+
+export const RotateReactWidget = (props: RotateWidgetProps) => {
+  const ref = useRef();
+  const widget = useWidget(RotateWidget, { ref, ...props });
+  return (
+    <div ref={ref} className="deck-widget">
+      <div className="deck-widget-button">
+        <button className="deck-widget-icon-button">
+          ...
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+```css
+/* style.css */
+.deck-widget {
+    --button-corner-radius: 4px;
 }
 ```
