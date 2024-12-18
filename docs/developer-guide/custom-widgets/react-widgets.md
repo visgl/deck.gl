@@ -1,8 +1,8 @@
 # React Widgets
 
-React widgets are a powerful way to integrate custom UI elements into deck.gl applications using the React framework. This guide will walk you through the process of building React-based widgets and best practices.
+React widgets are a powerful way to integrate custom UI elements into deck.gl applications using the [React](https://react.dev/) framework. This guide will walk you through the process of building React-based widgets and best practices.
 
-We recommend users writing their own react widgets be familiar with implementing the `Widget` interface, consider reviewing the [Universal Widgets](./universal-widgets.md) guide.
+We recommend users writing their own React widgets be familiar with implementing the `Widget` interface, consider reviewing the [Universal Widgets](./universal-widgets.md) guide.
 
 ## Why Use React Widgets?
 
@@ -34,7 +34,7 @@ Below is a step-by-step example of implementing a simple React widget.
 Start by creating the core widget class, which must implement the [Widget](../../api-reference/core/widget.md) interface.
 
 ```ts
-import type { Widget, WidgetPlacement } from '@deck.gl/react';=
+import type { Widget, WidgetPlacement } from '@deck.gl/core';
 import { useWidget } from '@deck.gl/react';
 import React, { useRef, RefObject } from 'react';
 
@@ -85,7 +85,7 @@ class RotateWidget {
 Wrap the widget class in a React component using the [`useWidget`](../../api-reference/react/use-widget.md) hook.
 
 ```tsx
-export const RotateReactWidget = (props) => {
+export const RotateReactWidget = (props: RotateWidgetProps) => {
   const ref = useRef();
   const widget = useWidget(RotateWidget, { ref, ...props });
 
