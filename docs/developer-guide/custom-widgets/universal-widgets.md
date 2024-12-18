@@ -36,7 +36,7 @@ class AwesomeWidget implements Widget {
 
 ### Handling Viewport Changes
 
-[`onViewportChange(viewport: Viewport)`](../../api-reference/core/widget.md#onviewportchange) - Widgets can listen to viewport updates via the `onViewportChange` method. You can target specific viewports or listen to all. 
+[`onViewportChange(viewport: Viewport)`](../../api-reference/core/widget.md#onviewportchange) - Widgets can listen to viewport updates via the `onViewportChange` method. A widget writer can target specific viewports by setting `viewId` or listen to all. Using props, an author could also choose to allow users to configure this targeting.
 
 Specific viewport:
 
