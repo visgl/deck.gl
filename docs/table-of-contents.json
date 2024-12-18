@@ -69,6 +69,15 @@
           "developer-guide/custom-layers/attribute-management",
           "developer-guide/custom-layers/writing-shaders"
         ]
+      },
+      {
+        "type": "category",
+        "label": "Writing Custom Widgets",
+        "items": [
+          "developer-guide/custom-widgets/README",
+          "developer-guide/custom-widgets/universal-widgets",
+          "developer-guide/custom-widgets/react-widgets"
+        ]
       }
     ]
   },

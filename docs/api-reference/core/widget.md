@@ -21,6 +21,7 @@ class LoadingIndicator implements Widget {
   constructor(options: {
     size: number;
   }) {
+    this.id = 'loading-indicator'
     this.size = options.size;
   }
 
@@ -48,7 +49,7 @@ deckgl.addWidget(new LoadingIndicator({size: 48}));
 
 ## Widget Interface
 
-When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
 
 ### Members
 
