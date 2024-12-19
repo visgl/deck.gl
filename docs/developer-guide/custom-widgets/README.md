@@ -17,12 +17,14 @@ Your widget class must implement the [Widget](../../api-reference/core/widget.md
 import type {Widget} from '@deck.gl/core';
 
 class AwesomeWidget implements Widget {
-    constructor(props) {
-        this.id = props.id || 'awesome-widget';
-        this.props = { ...props };
-    }
-    onAdd() {...}
-    onRemove() {...}
+  id = 'awesome-widget';
+  props;
+  constructor(props) {
+      this.id = props.id ?? this.id;
+      this.props = { ...props };
+  }
+  onAdd() {...}
+  onRemove() {...}
 }
 ```
 
@@ -52,11 +54,16 @@ interface AwesomeWidgetProps {
   ...
 }
 
-class AwesomeWidget implements Widget {
+class AwesomeWidget implements Widget<AwesomeWidgetProps> {
+  id = 'awesome-widget';
+  props: AwesomeWidgetProps;
+  placement: WidgetPlacement = 'top-left';
+  viewId?: string | null = null;
+
   constructor(props: AwesomeWidgetProps) {
-    this.id = props.id || 'awesome-widget';
-    this.placement = props.placement || 'top-left';
-    this.viewId = props.viewId || null;
+    this.id = props.id ?? this.id;
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
 
     this.props = { ...props }
   }

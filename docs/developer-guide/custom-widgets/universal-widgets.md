@@ -6,6 +6,37 @@ Widgets in deck.gl allow developers to create custom UI elements that are deeply
 
 The widget lifecycle functions define how a widget initializes, updates, and cleans up its integration with deck.gl.
 
+### Constructing a Widget
+
+[`constructor(props: PropsT`)] - Initialize the widget's members with a constructor.
+
+```ts
+import type { Widget, WidgetPlacement } from '@deck.gl/core'
+
+class AwesomeWidget implements Widget<AwesomeWidgetProps> {
+  id = 'awesome-widget';
+  props: AwesomeWidgetProps;
+  placement: WidgetPlacement = 'top-left';
+  viewId?: string | null = null;
+
+  constructor(props: AwesomeWidgetProps) {
+    // Required members
+    this.id = props.id ?? this.id;
+    this.props = {
+      ...props,
+      // Apply additional defaults
+      style: props.style ?? {}
+    }
+
+    // Optional members
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
+  }
+}
+```
+
+> Warning: Avoid directly mutating the `props` object. Instead, apply modifications to a copy, e.g. `this.props = {...props, props.style || {}}` 
+
 ### Adding a Widget
 
 [`onAdd({deck, viewId}): HTMLElement?`](../../api-reference/core/widget.md#onadd) - This method provides deck.gl with the root DOM element of your widget. This element is positioned based on `placement` and `viewId` members.
@@ -13,7 +44,7 @@ The widget lifecycle functions define how a widget initializes, updates, and cle
 ```ts
 import { type Widget } from '@deck.gl/core'
 
-class AwesomeWidget implements Widget {
+class AwesomeWidget implements Widget<AwesomeWidgetProps> {
   onAdd({ deck, viewId }) {
     const element = document.createElement('div');
     // Initialize and style your element
@@ -258,18 +289,19 @@ interface LayerLoadingWidgetProps {
 
 class LayerListWidget implements Widget<LayerLoadingWidgetProps> {
   id = 'layer-loading-widget';
+  props: LayerLoadingWidgetProps;
   placement: WidgetPlacement = 'top-left';
   layers: Layer[] = [];
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
   constructor(props: LayerLoadingWidgetProps) {
-    this.id = props.id || 'layer-loading-widget';
-    this.placement = props.placement || 'top-left';
+    this.id = props.id ?? this.id;
+    this.placement = props.placement ?? this.placement;
 
     this.props = { 
       ...props,
-      style: props.style || {}
+      style: props.style ?? {}
     }
   }
 
@@ -283,6 +315,11 @@ class LayerListWidget implements Widget<LayerLoadingWidgetProps> {
     this.element = element;
     this.update();
     return element;
+  }
+
+  setProps(props: Partial<LayerLoadingWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.props = {...props};
   }
 
   onRedraw({layers}: {layers: Layer[]}) {

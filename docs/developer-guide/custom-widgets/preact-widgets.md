@@ -74,6 +74,7 @@ interface LayerListWidgetProps {
 
 class LayerListWidget implements Widget<LayerListWidgetProps> {
   id = 'layer-list-widget';
+  props: LayerListWidgetProps;
   placement: WidgetPlacement = 'top-left';
   viewports: {[id: string]: Viewport} = {};
   layers: Layer[] = [];
@@ -81,13 +82,13 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
   element?: HTMLDivElement;
 
   constructor(props: LayerListWidgetProps) {
-    this.id = props.id || 'layer-list-widget';
-    this.placement = props.placement || 'top-left';
-    this.viewId = props.viewId || null;
+    this.id = props.id ?? this.id;
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
 
     this.props = { 
       ...props,
-      style: props.style || {}
+      style: props.style ?? {}
     }
   }
 

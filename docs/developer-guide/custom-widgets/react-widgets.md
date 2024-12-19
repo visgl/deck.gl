@@ -45,11 +45,16 @@ interface RotateWidgetProps {
 }
 
 class RotateWidget implements Widget<RotateWidgetProps> {
+  id = 'bearing-widget';
+  props: RotateWidgetProps;
+  placement: WidgetPlacement = 'top-right';
+  viewports: {[id: string]: Viewport} = {};
+  deck?: Deck<any>;
+
   constructor(props: RotateWidgetProps) {
-    this.id = props.id || 'bearing-widget';
-    this.placement = props.placement || 'top-right';
-    this.props = props;
-    this.viewports = {};
+    this.id = props.id ?? this.id;
+    this.placement = props.placement || this.placement;
+    this.props = { ...props };
   }
 
   onAdd({ deck }) {
