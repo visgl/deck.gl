@@ -27,7 +27,8 @@ Like any React component, `DeckGL` can accept child components. Child components
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 const App = (data) => (
   <DeckGL
@@ -35,9 +36,7 @@ const App = (data) => (
     controller={true}
     layers={[new ScatterplotLayer({data})]}
   >
-    <StaticMap
-      mapStyle="mapbox://styles/mapbox/dark-v9"
-      mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+    <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
   </DeckGL>
 );
 
@@ -81,7 +80,7 @@ The following semantics of the standard React `children` property are considered
 It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop.
 
 ```jsx
-  <DeckGL {...viewState}>
+  <DeckGL initialViewState={...viewState}>
     <LineLayer id="line-layer" data={data} />
   <DeckGL />
 ```
@@ -117,6 +116,15 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
   <DeckGL />
 ```
 
+#### JSX Widgets
+
+It is possible tp use JSX syntax to create deck.gl widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `widgets` props.
+
+```jsx
+  <DeckGL initialViewState={...viewState}>
+    <ZoomWidget id="zoom-widget" placement="top-right" />
+  <DeckGL />
+```
 
 #### Position Children in Views
 
