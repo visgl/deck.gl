@@ -9,22 +9,15 @@ import {inheritsFrom} from './inherits-from';
 import evaluateChildren, {isComponent} from './evaluate-children';
 
 import type {ViewOrViews} from '../deckgl';
-import type {Deck, DeckProps, Viewport} from '@deck.gl/core';
-import type {EventManager} from 'mjolnir.js';
-
-export type DeckGLContextValue = {
-  viewport: Viewport;
-  container: HTMLElement;
-  eventManager: EventManager;
-  onViewStateChange: DeckProps['onViewStateChange'];
-};
+import type {Deck, Viewport} from '@deck.gl/core';
+import {DeckGlContext, type DeckGLContextValue} from './deckgl-context';
 
 // Iterate over views and reposition children associated with views
 // TODO - Can we supply a similar function for the non-React case?
 export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
   children,
   deck,
-  ContextProvider
+  ContextProvider = DeckGlContext.Provider
 }: {
   children: React.ReactNode[];
   deck?: Deck<ViewsT>;
@@ -103,6 +96,7 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
 
     if (ContextProvider) {
       const contextValue: DeckGLContextValue = {
+        deck,
         viewport,
         // @ts-expect-error accessing protected property
         container: deck.canvas.offsetParent,
@@ -112,7 +106,8 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
           params.viewId = viewId;
           // @ts-expect-error accessing protected method
           deck._onViewStateChange(params);
-        }
+        },
+        widgets: []
       };
       return createElement(ContextProvider, {key, value: contextValue}, viewElement);
     }
