@@ -293,7 +293,8 @@
         "type": "category",
         "label": "@deck.gl/react",
         "items": [
-          "api-reference/react/deckgl"
+          "api-reference/react/deckgl",
+          "api-reference/react/use-widget"
         ]
       },
       {
