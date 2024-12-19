@@ -80,8 +80,11 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   }
 
   onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-    this.update();
+    // no need to update if viewport is the same
+    if (!viewport.equals(this.viewports[viewport.id])) {
+      this.viewports[viewport.id] = viewport;
+      this.update();
+    }
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
