@@ -32,6 +32,30 @@ Breaking changes:
 
 - `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).
 
+### Uniform buffers
+
+GLSL shaders that take inputs via WebGL1-style uniforms need to be migrated to use uniform buffers instead. For example:
+
+```glsl
+// Global uniform
+uniform float opacity;
+
+// UBO
+uniform layerUniforms {
+  uniform float opacity;
+} layer;
+```
+
+The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module) class is used to encapsulate and inject the uniforms, as well as providing using useful type checks. It maps (typed) props to bindings and uniforms defined in the UBO block, which [ShaderInputs](https://luma.gl/docs/api-reference/engine/shader-inputs) uses to update bindings and uniform buffers on the GPU.
+
+See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
+
+Layers need to be modified:
+- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
+
+For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
+
 ## Upgrading to v9.0
 
 **Before you upgrade: known issues**
