@@ -16,6 +16,7 @@ help:
 init:
 	. $(BIN)/activate; \
 	yarn bootstrap; \
+	yarn build; \
 	$(BIN)pip install -r requirements/requirements.txt; \
 	$(BIN)pip install -r requirements/requirements-dev.txt; \
 	python setup.py develop
