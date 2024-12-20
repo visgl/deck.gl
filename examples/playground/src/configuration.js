@@ -16,6 +16,7 @@ import {
   colorCategories,
   colorContinuous
 } from '@deck.gl/carto';
+import * as Widgets from '@deck.gl/widgets';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {GL as GLConstants} from '@luma.gl/constants';
@@ -39,6 +40,8 @@ export default {
     CARTO_LAYERS,
     GeoLayers,
     MeshLayers,
+    // Support `@deck.gl/widgets` Widgets
+    Widgets,
     // Any non-standard views
     {}
   ),
