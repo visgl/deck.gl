@@ -12,11 +12,6 @@ in vec2 instancePositions;
 in vec3 instanceNormals;
 in float instanceIsTitle;
 
-uniform vec3 gridDims;
-uniform vec3 gridCenter;
-uniform float gridOffset;
-uniform vec4 strokeColor;
-
 out vec4 vColor;
 out float shouldDiscard;
 
@@ -51,14 +46,14 @@ void main(void) {
   shouldDiscard = frontFacing(gridLineNormal) + instanceIsTitle;
 
   vec3 position_modelspace = vec3(instancePositions.x) *
-    instanceNormals + gridVertexOffset * gridDims / 2.0 + gridCenter * abs(gridVertexOffset);
+    instanceNormals + gridVertexOffset * axes.gridDims / 2.0 + axes.gridCenter * abs(gridVertexOffset);
 
   // apply offsets
-  position_modelspace += gridOffset * gridLineNormal;
+  position_modelspace += axes.gridOffset * gridLineNormal;
 
   vec3 position_commonspace = project_position(position_modelspace);
   gl_Position = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
 
-  vColor = strokeColor / 255.0;
+  vColor = axes.strokeColor / 255.0;
 }
 `;

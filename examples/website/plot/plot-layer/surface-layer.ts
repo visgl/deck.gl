@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, picking} from '@deck.gl/core';
+import {Layer, picking, project32} from '@deck.gl/core';
 import type {
   Color,
   Accessor,
@@ -17,6 +17,7 @@ import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './surface-fragment.glsl';
 
 import type {Axis, Vec3, PlotLayerPickingInfo} from './types';
+import {SurfaceProps, surfaceUniforms} from './surface-layer-uniforms';
 
 const defaultProps: DefaultProps<SurfaceLayerProps> = {
   data: [],
@@ -105,27 +106,33 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
     }
   }
 
+  getShaders() {
+    return super.getShaders({
+      vs: surfaceVertex,
+      fs: fragmentShader,
+      modules: [project32, picking, surfaceUniforms]
+    });
+  }
+
   getModel() {
     // 3d surface
     return new Model(this.context.device, {
+      ...this.getShaders(),
       id: `${this.props.id}-surface`,
-      vs: surfaceVertex,
-      fs: fragmentShader,
       disableWarnings: true,
-      modules: [picking],
       topology: 'triangle-list',
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       vertexCount: 0
     });
   }
 
-  draw({uniforms}) {
+  draw(params) {
     const {lightStrength} = this.props;
-    const {model} = this.state;
+    const surfaceProps: SurfaceProps = {lightStrength};
 
-    model.setUniforms(uniforms);
-    model.setUniforms({lightStrength});
-    model.draw(this.context.renderPass);
+    const {model} = this.state;
+    model.shaderInputs.setProps({surface: surfaceProps});
+    super.draw(params);
   }
 
   /*

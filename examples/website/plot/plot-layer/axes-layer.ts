@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Color, DefaultProps, Layer, UpdateParameters, Attribute, LayerProps} from '@deck.gl/core';
+import {
+  Color,
+  DefaultProps,
+  Layer,
+  UpdateParameters,
+  Attribute,
+  LayerProps,
+  project32
+} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Texture} from '@luma.gl/core';
 
@@ -13,6 +21,7 @@ import gridVertex from './grid-vertex.glsl';
 import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
 import {Axis, TickFormat, Vec3} from './types';
+import {AxesProps, axesUniforms} from './axes-layer-uniforms';
 
 type Tick = {
   axis: 'x' | 'y' | 'z';
@@ -23,7 +32,7 @@ type Tick = {
 
 interface LabelTexture {
   labelHeight: number;
-  labelWidths: number[];
+  labelWidths: [number, number, number];
   labelTexture: Texture;
 }
 
@@ -56,7 +65,6 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
 
   state!: {
     models: [Model, Model];
-    modelsByName: {grids: Model; labels: Model};
     ticks: Tick[];
     gridDims: Vec3;
     gridCenter: Vec3;
@@ -112,34 +120,34 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
     }
   }
 
-  draw({uniforms}) {
-    const {gridDims, gridCenter, modelsByName, ticks} = this.state;
-    const {labelTexture, ...labelTextureUniforms} = this.state.labelTexture!;
+  getShaders() {
+    return super.getShaders({
+      modules: [project32, axesUniforms]
+    });
+  }
+
+  draw(params) {
+    if (!this.state.labelTexture) {
+      return;
+    }
+
+    const {gridDims, gridCenter, models, ticks} = this.state;
     const {fontSize, color, padding} = this.props;
 
-    if (labelTexture) {
-      const baseUniforms = {
-        fontSize,
-        gridDims,
-        gridCenter,
-        gridOffset: padding,
-        strokeColor: color
-      };
+    const axesProps: AxesProps = {
+      ...this.state.labelTexture,
+      fontSize,
+      gridDims,
+      gridCenter,
+      gridOffset: padding,
+      strokeColor: color as [number, number, number, number]
+    };
 
-      modelsByName.grids.setInstanceCount(ticks.length);
-      modelsByName.labels.setInstanceCount(ticks.length);
-
-      modelsByName.grids.setUniforms({...uniforms, ...baseUniforms});
-      modelsByName.labels.setBindings({labelTexture});
-      modelsByName.labels.setUniforms({
-        ...uniforms,
-        ...baseUniforms,
-        ...labelTextureUniforms
-      });
-
-      modelsByName.grids.draw(this.context.renderPass);
-      modelsByName.labels.draw(this.context.renderPass);
-    }
+    models.forEach(model => {
+      model.setInstanceCount(ticks.length);
+      model.shaderInputs.setProps({axes: axesProps});
+    });
+    super.draw(params);
   }
 
   _getModels() {
@@ -187,6 +195,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
     const {device} = this.context;
 
     const grids = new Model(device, {
+      ...this.getShaders(),
       id: `${this.props.id}-grids`,
       vs: gridVertex,
       fs: gridFragment,
@@ -237,6 +246,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
     }
 
     const labels = new Model(device, {
+      ...this.getShaders(),
       id: `${this.props.id}-labels`,
       vs: labelVertex,
       fs: labelFragment,
@@ -254,8 +264,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
     });
 
     return {
-      models: [grids, labels].filter(Boolean),
-      modelsByName: {grids, labels}
+      models: [grids, labels].filter(Boolean)
     };
   }
 
