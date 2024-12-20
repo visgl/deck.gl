@@ -58,6 +58,10 @@ export type GlobeViewportOptions = {
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1` */
   farZMultiplier?: number;
+  /** Optionally override the near plane position. `nearZMultiplier` is ignored if `nearZ` is supplied. */
+  nearZ?: number;
+  /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
+  farZ?: number;
   /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
   resolution?: number;
 };
@@ -94,7 +98,8 @@ export default class GlobeViewport extends Viewport {
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
     const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
     const scale = Math.pow(2, zoom) * scaleAdjust;
-    const farZ = altitude + (GLOBE_RADIUS * 2 * scale) / height;
+    const nearZ = opts.nearZ ?? nearZMultiplier;
+    const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
 
     // Calculate view matrix
     const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
@@ -117,8 +122,8 @@ export default class GlobeViewport extends Viewport {
       distanceScales: getDistanceScales(),
       fovy,
       focalDistance: altitude,
-      near: nearZMultiplier,
-      far: farZ * farZMultiplier
+      near: nearZ,
+      far: farZ
     });
 
     this.scale = scale;
