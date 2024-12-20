@@ -36,7 +36,11 @@ MapLibre v5 recently launched a [globe view](https://github.com/maplibre/maplibr
 
 ### React Widgets
 
-deck.gl v9.0 added support for widgets, with v9.1 they can now be defined in React. A major benefit is the ablility to define custom widgets with UI built in React.
+deck.gl v9.0 added support for widgets, with v9.1 they can now be defined in React. All of our built-in widgets are now react-compatible and available from the `@deck.gl/react` package. To try it out, check out our new [getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/widgets) for widgets in React.
+
+### Widgets Developer Guide
+
+A major benefit of React support is the ability to define custom widgets with UI built in React in your own applications. Learn how to write your own deck.gl widgets with our new [Custom Widgets Developer Guide](./docs/developer-guide/custom-widgets).
 
 ### Aggregation layers upgrade
 
