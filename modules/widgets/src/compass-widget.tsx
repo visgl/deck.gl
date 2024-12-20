@@ -49,13 +49,16 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   element?: HTMLDivElement;
 
   constructor(props: CompassWidgetProps) {
-    this.id = props.id || 'compass';
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.label = props.label || 'Compass';
-    props.style = props.style || {};
-    this.props = props;
+    this.id = props.id ?? this.id;
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
+
+    this.props = {
+      ...props,
+      transitionDuration: props.transitionDuration ?? 200,
+      label: props.label ?? 'Reset Compass',
+      style: props.style ?? {}
+    };
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
@@ -119,7 +122,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
               this.handleCompassReset(viewport);
             }
           }}
-          label={this.props.label}
+          title={this.props.label}
           style={{transform: `rotateX(${rx}deg)`}}
         >
           <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
