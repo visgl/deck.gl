@@ -104,6 +104,14 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
     return element;
   }
 
+  setProps(props: Partial<LayerListWidgetProps>) {
+    // Handle when props change here.
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    this.props = {...props};
+    this.update();
+  }
+
   onRedraw({layers}: {layers: Layer[]}) {
     this.layers = layers;
     this.update();
@@ -113,7 +121,7 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
     this.viewports[viewport.id] = viewport
   }
 
-  update() {
+  private update() {
     const element = this.element;
     if (!element) {
       return;
@@ -121,7 +129,7 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
     let layers = this.layers
     if (this.deck?.props.layerFilter) {
       const ui = (
-        {viewports.values().map(viewport => (
+        {this.viewports.values().map(viewport => (
           <div>
             {viewport.id}
             <ul>

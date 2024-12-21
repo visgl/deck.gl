@@ -287,7 +287,7 @@ interface LayerLoadingWidgetProps {
   className?: string;
 }
 
-class LayerListWidget implements Widget<LayerLoadingWidgetProps> {
+class LayerLoadingWidget implements Widget<LayerLoadingWidgetProps> {
   id = 'layer-loading-widget';
   props: LayerLoadingWidgetProps;
   placement: WidgetPlacement = 'top-left';
@@ -318,8 +318,11 @@ class LayerListWidget implements Widget<LayerLoadingWidgetProps> {
   }
 
   setProps(props: Partial<LayerLoadingWidgetProps>) {
+    // Handle when props change here.
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     this.props = {...props};
+    this.update();
   }
 
   onRedraw({layers}: {layers: Layer[]}) {
@@ -327,7 +330,7 @@ class LayerListWidget implements Widget<LayerLoadingWidgetProps> {
     this.update();
   }
 
-  update() {
+  private update() {
     const element = this.element;
     if (!element) {
       return;

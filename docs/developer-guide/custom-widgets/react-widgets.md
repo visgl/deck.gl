@@ -53,13 +53,20 @@ class RotateWidget implements Widget<RotateWidgetProps> {
 
   constructor(props: RotateWidgetProps) {
     this.id = props.id ?? this.id;
-    this.placement = props.placement || this.placement;
+    this.placement = props.placement ?? this.placement;
     this.props = { ...props };
   }
 
   onAdd({ deck }) {
     this.deck = deck;
     return this.props.ref.current;
+  }
+
+  setProps(props: Partial<LayerLoadingWidgetProps>) {
+    // Handle when props change here.
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    this.props = {...props};
   }
 
   onViewportChange(viewport) {
