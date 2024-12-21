@@ -59,16 +59,16 @@ export default {
     CesiumIonLoader
   },
   
-  postProcess: (json) => {
-    // Filter out invalid props. Typically, this happens when a user is typing out their value.
+  postProcessConvertedJson: json => {
+    // Filter out invalid props. Typically, props will be invalid while the user is typing.
     if (json.layers) {
-      json.layers = json.layers.filter((layer) => layer instanceof Layer);
+      json.layers = json.layers.filter(layer => layer instanceof Layer);
     }
     if (json.widgets) {
-      json.widgets = json.widgets.filter((widget) => typeof widget.onAdd === "function");
+      json.widgets = json.widgets.filter(widget => typeof widget.onAdd === "function");
     }
     if (json.views && !json.views instanceof View) {
-      json.views = json.views.filter((view) => view instanceof View);
+      json.views = json.views.filter(view => view instanceof View);
     }
     return json;
   }
