@@ -4,7 +4,7 @@
 
 // This configuration object determines which deck.gl classes are accessible in Playground
 
-import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
+import {MapView, FirstPersonView, OrbitView, OrthographicView, View, Layer} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
@@ -57,5 +57,19 @@ export default {
   constants: {
     Tiles3DLoader,
     CesiumIonLoader
+  },
+  
+  postProcess: (json) => {
+    // Filter out invalid props. Typically, this happens when a user is typing out their value.
+    if (json.layers) {
+      json.layers = json.layers.filter((layer) => layer instanceof Layer);
+    }
+    if (json.widgets) {
+      json.widgets = json.widgets.filter((widget) => typeof widget.onAdd === "function");
+    }
+    if (json.views && !json.views instanceof View) {
+      json.views = json.views.filter((view) => view instanceof View);
+    }
+    return json;
   }
 };
