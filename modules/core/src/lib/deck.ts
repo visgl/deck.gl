@@ -42,7 +42,7 @@ import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
-import {CreateDeviceProps} from '@luma.gl/core/dist/lib/luma';
+import {CreateDeviceProps} from '@luma.gl/core';
 
 /* global document */
 
@@ -107,18 +107,20 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * @default `document.body`
    */
   parent?: HTMLDivElement | null;
+
   /** The canvas to render into.
    * Can be either a HTMLCanvasElement or the element id.
    * Will be auto-created if not supplied.
    */
   canvas?: HTMLCanvasElement | string | null;
 
-  /** luma.gl GPU device. A device will be auto-created if not supplied. */
+  /** Use an existing luma.gl GPU device. @note If not supplied, a new device will be created using props.deviceProps */
   device?: Device | null;
-  /** A device will be auto-created if not supplied using these props. */
+
+  /** A new device will be created using these props, assuming that an existing device is not supplied using props.device) */
   deviceProps?: CreateDeviceProps;
 
-  /** WebGL context @deprecated Use props.device */
+  /** WebGL context @deprecated Use props.deviceProps.webgl. Also note that preserveDrawingBuffers is true by default */
   gl?: WebGL2RenderingContext | null;
 
   /**

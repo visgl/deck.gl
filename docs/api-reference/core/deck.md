@@ -54,7 +54,9 @@ luma.gl Device used to manage the application's connection with the GPU. Will be
 
 #### `deviceProps` ([DeviceProps](https://luma.gl/docs/api-reference/core/device#deviceprops) | [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)) {#deviceprops}
 
-Additional options used when creating the luma.gl [Device](https://luma.gl/docs/api-reference/core/device). When using WebGL, can be used to specify [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes).
+Options used for creating a new luma.gl GPU [Device](https://luma.gl/docs/api-reference/core/device). 
+
+Note that when using WebGL, `props.deviceProps.webgl` can be used to specify [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes).
 
 #### `gl` (WebGLContext) {#gl}
 

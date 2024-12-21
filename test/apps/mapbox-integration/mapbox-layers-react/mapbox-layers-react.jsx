@@ -87,7 +87,7 @@ function App() {
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       onWebGLInitialized={setGLContext}
-      deviceProps={{type: 'webgl', stencil: true}}
+      deviceProps={{type: 'webgl', webgl: {stencil: true}}}
       layerFilter={layerFilter}
     >
       {glContext && (
