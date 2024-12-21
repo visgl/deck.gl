@@ -96,7 +96,6 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   setProps(props: Partial<FullscreenWidgetProps>) {
     this.placement = props.placement ?? this.placement;
-    this.viewId = props.viewId ?? this.viewId;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
