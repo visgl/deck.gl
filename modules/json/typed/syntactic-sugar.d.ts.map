@@ -1,0 +1,1 @@
+{"version":3,"file":"syntactic-sugar.d.ts","sourceRoot":"","sources":["../src/syntactic-sugar.ts"],"names":[],"mappings":"AAAA,QAAA,MAAM,mBAAmB,QAAQ,CAAC;AAClC,QAAA,MAAM,mBAAmB,QAAQ,CAAC;AAClC,QAAA,MAAM,QAAQ,WAAW,CAAC;AAC1B,QAAA,MAAM,YAAY,eAAe,CAAC;AAElC,OAAO,EAAC,mBAAmB,EAAE,mBAAmB,EAAE,QAAQ,EAAE,YAAY,EAAC,CAAC"}
