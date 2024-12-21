@@ -58,16 +58,16 @@ export default {
     Tiles3DLoader,
     CesiumIonLoader
   },
-  
+
   postProcessConvertedJson: json => {
     // Filter out invalid props. Typically, props will be invalid while the user is typing.
     if (json.layers) {
       json.layers = json.layers.filter(layer => layer instanceof Layer);
     }
     if (json.widgets) {
-      json.widgets = json.widgets.filter(widget => typeof widget.onAdd === "function");
+      json.widgets = json.widgets.filter(widget => typeof widget.onAdd === 'function');
     }
-    if (json.views && !json.views instanceof View) {
+    if (json.views && !(json.views instanceof View)) {
       json.views = json.views.filter(view => view instanceof View);
     }
     return json;
