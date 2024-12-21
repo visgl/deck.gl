@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {scaleThreshold} from 'd3-scale';
 import {AccessorFunction, Color} from '@deck.gl/core';
 import {Feature} from 'geojson';
@@ -42,8 +46,8 @@ export default function colorBins<DataT = Feature>({
 
   const color = scaleThreshold<number, Color>().domain(domain).range(palette);
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return typeof value === 'number' && Number.isFinite(value) ? color(value) : nullColor;
   };
 }

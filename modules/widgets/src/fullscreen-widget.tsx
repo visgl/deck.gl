@@ -1,11 +1,19 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
-import {_deepEqual as deepEqual} from '@deck.gl/core';
+import {
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './components';
 
 interface FullscreenWidgetProps {
-  id: string;
+  id?: string;
   placement?: WidgetPlacement;
   /**
    * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
@@ -55,9 +63,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     const el = document.createElement('div');
     el.classList.add('deck-widget', 'deck-widget-fullscreen');
     if (className) el.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
-    }
+    applyStyles(el, style);
     this.deck = deck;
     this.element = el;
     this.update();
@@ -98,14 +104,8 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
       }
 
       if (!deepEqual(oldProps.style, props.style, 1)) {
-        if (oldProps.style) {
-          Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
-        }
-        if (props.style) {
-          Object.entries(props.style).map(([key, value]) =>
-            el.style.setProperty(key, value as string)
-          );
-        }
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
       }
     }
 

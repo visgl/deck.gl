@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {AccessorFunction, Color} from '@deck.gl/core';
 import {Feature} from 'geojson';
 import getPalette, {DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';
@@ -48,8 +52,8 @@ export default function colorCategories<DataT = Feature>({
     colorsByCategory[c] = palette[i];
   }
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return (typeof value === 'number' && Number.isFinite(value)) || typeof value === 'string'
       ? colorsByCategory[value] || othersColor
       : nullColor;

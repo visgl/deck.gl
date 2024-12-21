@@ -63,6 +63,7 @@
           "developer-guide/custom-layers/picking",
           "developer-guide/custom-layers/composite-layers",
           "developer-guide/custom-layers/subclassed-layers",
+          "developer-guide/custom-layers/layer-extensions",
           "developer-guide/custom-layers/primitive-layers",
           "developer-guide/custom-layers/prop-types",
           "developer-guide/custom-layers/attribute-management",
@@ -95,10 +96,8 @@
           "api-reference/layers/bitmap-layer",
           "api-reference/layers/column-layer",
           "api-reference/aggregation-layers/contour-layer",
-          "api-reference/aggregation-layers/cpu-grid-layer",
           "api-reference/geo-layers/geohash-layer",
           "api-reference/layers/geojson-layer",
-          "api-reference/aggregation-layers/gpu-grid-layer",
           "api-reference/geo-layers/great-circle-layer",
           "api-reference/layers/grid-cell-layer",
           "api-reference/aggregation-layers/grid-layer",
@@ -125,6 +124,17 @@
           "api-reference/geo-layers/tile-3d-layer",
           "api-reference/geo-layers/trips-layer",
           "api-reference/geo-layers/wms-layer"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Aggregation Layers",
+        "items": [
+          "api-reference/aggregation-layers/overview",
+          "api-reference/aggregation-layers/aggregation-layer",
+          "api-reference/aggregation-layers/aggregator",
+          "api-reference/aggregation-layers/cpu-aggregator",
+          "api-reference/aggregation-layers/webgl-aggregator"
         ]
       },
       {
@@ -228,6 +238,7 @@
           "api-reference/carto/basemap",
           "api-reference/carto/fetch-map",
           "api-reference/carto/data-sources",
+          "api-reference/carto/cluster-tile-layer",
           "api-reference/carto/h3-tile-layer",
           "api-reference/carto/heatmap-tile-layer",
           "api-reference/carto/quadbin-tile-layer",

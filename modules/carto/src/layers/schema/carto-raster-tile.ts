@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {readPackedTypedArray} from './fast-pbf';
 
 const ARRAY_TYPES = {

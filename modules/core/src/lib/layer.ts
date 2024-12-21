@@ -1,25 +1,10 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
-import {Buffer, TypedArray} from '@luma.gl/core';
+import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -184,6 +169,14 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
+type DrawOptions = {
+  renderPass: RenderPass;
+  shaderModuleProps: any;
+  uniforms: any;
+  parameters: any;
+  context: LayerContext;
+};
+
 type SharedLayerState = {
   [key: string]: unknown;
 };
@@ -336,14 +329,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
-  // TODO deprecate in favour of setShaderModuleProps
-  /** Update shader module parameters */
-  setModuleParameters(moduleParameters: any): void {
-    for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
-    }
-  }
-
   /** Update shader input parameters */
   setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
     for (const model of this.getModels()) {
@@ -400,11 +385,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
-  encodePickingColor(i, target: number[] = []): number[] {
+  encodePickingColor(i, target: number[] = []): [number, number, number] {
     target[0] = (i + 1) & 255;
     target[1] = ((i + 1) >> 8) & 255;
     target[2] = (((i + 1) >> 8) >> 8) & 255;
-    return target;
+    return target as [number, number, number];
   }
 
   // Returns the index corresponding to a picking color that doesn't match any subfeature
@@ -545,9 +530,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw(opts) {
+  draw(opts: DrawOptions) {
     for (const model of this.getModels()) {
-      model.draw(opts);
+      model.draw(opts.renderPass);
     }
   }
 
@@ -749,12 +734,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = Math.floor(pickingColorCache.length / 4);
-      const pickingColor = [];
+      const pickingColor: [number, number, number] = [0, 0, 0];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 4 + 0] = pickingColor[0];
         pickingColorCache[i * 4 + 1] = pickingColor[1];
         pickingColorCache[i * 4 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 3] = 0;
       }
     }
 
@@ -1048,14 +1034,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Calculates uniforms
   _drawLayer({
     renderPass,
-    moduleParameters = null,
+    shaderModuleProps = null,
     uniforms = {},
     parameters = {}
   }: {
     renderPass: RenderPass;
-    moduleParameters: any;
+    shaderModuleProps: any;
     uniforms: any;
-    parameters: any;
+    parameters: LumaParameters;
   }): void {
     this._updateAttributeTransition();
 
@@ -1066,21 +1052,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const opacity = this.props.opacity;
-    // apply gamma to opacity to make it visually "linear"
-    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
-
     try {
       // TODO/ib - hack move to luma Model.draw
-      if (moduleParameters) {
-        const {isActive, isAttribute} = moduleParameters.picking;
-        const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
-        const {modelMatrix} = this.props;
-        this.setModuleParameters(moduleParameters);
-        this.setShaderModuleProps({
-          picking: {isActive, isAttribute},
-          project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
-        });
+      if (shaderModuleProps) {
+        this.setShaderModuleProps(shaderModuleProps);
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1088,15 +1063,28 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      context.device.setParametersWebGL({polygonOffset: offsets});
+      if (context.device instanceof WebGLDevice) {
+        context.device.setParametersWebGL({polygonOffset: offsets});
+      }
 
       for (const model of this.getModels()) {
         model.setParameters(parameters);
       }
 
       // Call subclass lifecycle method
-      context.device.withParametersWebGL(parameters, () => {
-        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+      if (context.device instanceof WebGLDevice) {
+        context.device.withParametersWebGL(parameters, () => {
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+
+          // extensions
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
+
+          this.draw(opts);
+        });
+      } else {
+        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {
@@ -1104,7 +1092,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         }
 
         this.draw(opts);
-      });
+      }
     } finally {
       this.props = currentProps;
     }
@@ -1234,10 +1222,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
     const picking: PickingProps = {
+      // @ts-ignore
       highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
+      // @ts-ignore
       picking.highlightColor = highlightColor(info);
     }
     this.setShaderModuleProps({picking});
@@ -1276,16 +1266,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightColor !== highlightColor
     ) {
       const picking: PickingProps = {};
-      if (!autoHighlight) {
-        picking.highlightedObjectColor = null;
-      }
+
       if (Array.isArray(highlightColor)) {
-        picking.highlightColor = highlightColor;
+        picking.highlightColor = highlightColor as [number, number, number];
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
-      if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
+      if (
+        forceUpdate ||
+        oldProps.autoHighlight !== autoHighlight ||
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+      ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)

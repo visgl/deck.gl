@@ -3,7 +3,7 @@
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.0-beta.11",
+  "version": "9.1.0-beta.1",
   "keywords": [
     "webgl",
     "visualization",
@@ -22,6 +22,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./stylesheet.css": {
+      "import": "./dist/stylesheet.css"
     }
   },
   "files": [
@@ -31,27 +34,27 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "npm run build-bundle",
+    "build": "npm run build-bundle && mkdir -p ./dist && cp ../widgets/src/stylesheet.css ./dist",
     "build-bundle": "ocular-bundle ./bundle.ts",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "9.0.0-beta.11",
-    "@deck.gl/arcgis": "9.0.0-beta.11",
-    "@deck.gl/carto": "9.0.0-beta.11",
-    "@deck.gl/core": "9.0.0-beta.11",
-    "@deck.gl/extensions": "9.0.0-beta.11",
-    "@deck.gl/geo-layers": "9.0.0-beta.11",
-    "@deck.gl/google-maps": "9.0.0-beta.11",
-    "@deck.gl/json": "9.0.0-beta.11",
-    "@deck.gl/layers": "9.0.0-beta.11",
-    "@deck.gl/mapbox": "9.0.0-beta.11",
-    "@deck.gl/mesh-layers": "9.0.0-beta.11",
-    "@deck.gl/react": "9.0.0-beta.11",
-    "@deck.gl/widgets": "9.0.0-beta.11",
+    "@deck.gl/aggregation-layers": "9.1.0-beta.1",
+    "@deck.gl/arcgis": "9.1.0-beta.1",
+    "@deck.gl/carto": "9.1.0-beta.1",
+    "@deck.gl/core": "9.1.0-beta.1",
+    "@deck.gl/extensions": "9.1.0-beta.1",
+    "@deck.gl/geo-layers": "9.1.0-beta.1",
+    "@deck.gl/google-maps": "9.1.0-beta.1",
+    "@deck.gl/json": "9.1.0-beta.1",
+    "@deck.gl/layers": "9.1.0-beta.1",
+    "@deck.gl/mapbox": "9.1.0-beta.1",
+    "@deck.gl/mesh-layers": "9.1.0-beta.1",
+    "@deck.gl/react": "9.1.0-beta.1",
+    "@deck.gl/widgets": "9.1.0-beta.1",
     "@loaders.gl/core": "^4.2.0",
-    "@luma.gl/core": "^9.0.14",
-    "@luma.gl/engine": "^9.0.14"
+    "@luma.gl/core": "^9.1.0-beta.11",
+    "@luma.gl/engine": "^9.1.0-beta.11"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",

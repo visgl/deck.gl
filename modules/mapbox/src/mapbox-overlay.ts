@@ -1,7 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, assert} from '@deck.gl/core';
 import {getViewState, getDeckInstance, removeDeckInstance, getInterleavedProps} from './deck-utils';
 
-import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
+import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {DeckProps} from '@deck.gl/core';
 import {log} from '@deck.gl/core';
@@ -153,7 +157,7 @@ export default class MapboxOverlay implements IControl {
     removeDeckInstance(map);
   }
 
-  getDefaultPosition() {
+  getDefaultPosition(): ControlPosition {
     return 'top-left';
   }
 
@@ -251,7 +255,7 @@ export default class MapboxOverlay implements IControl {
 
     switch (mockEvent.type) {
       case 'mousedown':
-        deck._onPointerDown(mockEvent as MjolnirPointerEvent);
+        deck._onPointerDown(mockEvent as unknown as MjolnirPointerEvent);
         this._lastMouseDownPoint = {
           ...event.point,
           clientX: event.originalEvent.clientX,
@@ -261,38 +265,38 @@ export default class MapboxOverlay implements IControl {
 
       case 'dragstart':
         mockEvent.type = 'panstart';
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'drag':
         mockEvent.type = 'panmove';
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'dragend':
         mockEvent.type = 'panend';
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'click':
         mockEvent.tapCount = 1;
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'dblclick':
         mockEvent.type = 'click';
         mockEvent.tapCount = 2;
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'mousemove':
         mockEvent.type = 'pointermove';
-        deck._onPointerMove(mockEvent as MjolnirPointerEvent);
+        deck._onPointerMove(mockEvent as unknown as MjolnirPointerEvent);
         break;
 
       case 'mouseout':
         mockEvent.type = 'pointerleave';
-        deck._onPointerMove(mockEvent as MjolnirPointerEvent);
+        deck._onPointerMove(mockEvent as unknown as MjolnirPointerEvent);
         break;
 
       default:

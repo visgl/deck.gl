@@ -86,7 +86,7 @@ import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 
 function DeckGLOverlay(props: DeckProps) {
   const map = useMap();
-  const overlay = useMemo(() => new GoogleMapsOverlay(props));
+  const overlay = useMemo(() => new GoogleMapsOverlay(props), []);
 
   useEffect(() => {
     overlay.setMap(map);

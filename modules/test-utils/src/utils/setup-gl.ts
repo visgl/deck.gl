@@ -1,16 +1,16 @@
-import {createTestContext, webglDevice} from '@luma.gl/test-utils';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {createTestDevice, webglDevice, NullDevice} from '@luma.gl/test-utils';
 
 /** Test device */
-export const device = webglDevice;
+export const device = webglDevice || new NullDevice({});
 
 /** Test context */
-export const gl = createTestContext({
-  width: 1,
-  height: 1,
-  debug: true
-  // throwOnFailure: false,
-  // throwOnError: false
-});
+const testDevice = createTestDevice();
+
+export const gl = webglDevice?.gl || 1;
 
 //   // TODO - Seems to be an issue in luma.gl
 //   (createContext && createContext(100, 100, {}));

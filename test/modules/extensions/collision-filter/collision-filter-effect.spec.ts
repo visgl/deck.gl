@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {MapView, LayerManager} from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -113,20 +117,20 @@ test('CollisionFilterEffect#update', t => {
   };
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
-  let parameters = collisionFilterEffect.getModuleParameters(TEST_LAYER);
+  let parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER).collision;
   t.ok(parameters.collisionFBO, 'collision map is in parameters');
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
 
   preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'Add second collision layer');
-  parameters = collisionFilterEffect.getModuleParameters(TEST_LAYER);
+  parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER).collision;
   t.ok(parameters.collisionFBO, 'collision map is in parameters');
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
-  parameters = collisionFilterEffect.getModuleParameters(TEST_LAYER_2);
+  parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_2).collision;
   t.ok(parameters.collisionFBO, 'collision map is in parameters');
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
 
   preRenderWithLayers([TEST_LAYER_2], 'Remove first layer');
-  parameters = collisionFilterEffect.getModuleParameters(TEST_LAYER_2);
+  parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_2).collision;
   t.ok(parameters.collisionFBO, 'collision map is in parameters');
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
 
@@ -134,10 +138,10 @@ test('CollisionFilterEffect#update', t => {
     [TEST_LAYER_2, TEST_LAYER_DIFFERENT_GROUP],
     'Add layer with different collision group'
   );
-  parameters = collisionFilterEffect.getModuleParameters(TEST_LAYER_2);
+  parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_2).collision;
   t.ok(parameters.collisionFBO, 'collision map is in parameters');
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
-  parameters = collisionFilterEffect.getModuleParameters(TEST_LAYER_DIFFERENT_GROUP);
+  parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_DIFFERENT_GROUP).collision;
   t.ok(parameters.collisionFBO, 'collision map is in parameters');
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
 

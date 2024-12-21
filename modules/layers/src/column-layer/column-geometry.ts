@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {log, BinaryAttribute} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 

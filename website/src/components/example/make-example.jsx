@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useState, useEffect, useCallback} from 'react';
 import styled from 'styled-components';
 import InfoPanel from '../info-panel';

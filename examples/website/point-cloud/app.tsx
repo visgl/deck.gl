@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-unused-vars */
 import React, {useState, useEffect, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';

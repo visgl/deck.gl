@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {load} from '@loaders.gl/core';
 
 import type {ResourceManagerContext} from './resource-manager';

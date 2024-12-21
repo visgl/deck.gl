@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {PureComponent} from 'react';
 import {getColorArray, getColorHex} from './color-picker';
 import colorbrewer from 'colorbrewer';

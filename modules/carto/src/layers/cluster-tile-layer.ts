@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {
   TileLayer,
@@ -35,7 +39,7 @@ import QuadbinTileset2D from './quadbin-tileset-2d';
 import {getQuadbinPolygon} from './quadbin-utils';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 import {injectAccessToken, TilejsonPropType} from './utils';
-import type {TilejsonResult} from '../sources/types';
+import type {TilejsonResult} from '@carto/api-client';
 
 registerLoaders([CartoSpatialTileLoader]);
 
@@ -46,7 +50,7 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
     type: 'accessor',
     value: ({id}) => getQuadbinPolygon(id, 0.5).slice(2, 4) as [number, number]
   },
-  getWeight: {type: 'accessor', value: 100},
+  getWeight: {type: 'accessor', value: 1},
   refinementStrategy: 'no-overlap',
   tileSize: DEFAULT_TILE_SIZE
 };
@@ -70,7 +74,7 @@ type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
 
   /**
    * The number of aggregation levels to cluster cells by. Larger values increase
-   * the clustering radius, an increment of `clusterLevel` doubling the radius.
+   * the clustering radius, with an increment of `clusterLevel` doubling the radius.
    *
    * @default 5
    */
@@ -106,8 +110,15 @@ class ClusterGeoJsonLayer<
     clusterIds: bigint[];
     hoveredFeatureId: bigint | number | null;
     highlightColor: number[];
+    aggregationCache: WeakMap<any, Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>>;
   };
 
+  initializeState() {
+    super.initializeState();
+    this.state.aggregationCache = new WeakMap();
+  }
+
+  // eslint-disable-next-line max-statements
   renderLayers(): Layer | null | LayersList {
     const visibleTiles = this.state.tileset?.tiles.filter((tile: Tile2DHeader) => {
       return tile.isLoaded && tile.content && this.state.tileset!.isTileVisible(tile);
@@ -119,29 +130,43 @@ class ClusterGeoJsonLayer<
 
     const {zoom} = this.context.viewport;
     const {clusterLevel, getPosition, getWeight} = this.props;
+    const {aggregationCache} = this.state;
 
     const properties = extractAggregationProperties(visibleTiles[0]);
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
+    let needsUpdate = false;
     for (const tile of visibleTiles) {
       // Calculate aggregation based on viewport zoom
       const overZoom = Math.round(zoom - tile.zoom);
       const aggregationLevels = Math.round(clusterLevel) - overZoom;
-      aggregateTile(tile, aggregationLevels, properties, getPosition, getWeight);
-      data.push(...tile.userData![aggregationLevels]);
+      let tileAggregationCache = aggregationCache.get(tile.content);
+      if (!tileAggregationCache) {
+        tileAggregationCache = new Map();
+        aggregationCache.set(tile.content, tileAggregationCache);
+      }
+      const didAggregate = aggregateTile(
+        tile,
+        tileAggregationCache,
+        aggregationLevels,
+        properties,
+        getPosition,
+        getWeight
+      );
+      needsUpdate ||= didAggregate;
+      data.push(...tileAggregationCache.get(aggregationLevels)!);
     }
 
     data.sort((a, b) => Number(b.count - a.count));
 
     const clusterIds = data?.map((tile: any) => tile.id);
-    const needsUpdate = !deepEqual(clusterIds, this.state.clusterIds, 1);
+    needsUpdate ||= !deepEqual(clusterIds, this.state.clusterIds, 1);
     this.setState({clusterIds});
 
     if (needsUpdate) {
       const stats = computeAggregationStats(data, properties);
-      for (const d of data) {
-        d.stats = stats;
-      }
-      this.setState({data: clustersToBinary(data)});
+      const binaryData = clustersToBinary(data);
+      binaryData.points.attributes = {stats};
+      this.setState({data: binaryData});
     }
 
     const props = {

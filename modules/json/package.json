@@ -3,7 +3,7 @@
   "description": "JSON format rendering components for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.0-beta.11",
+  "version": "9.1.0-beta.1",
   "publishConfig": {
     "access": "public"
   },
@@ -38,10 +38,10 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "expression-eval": "^5.0.0"
+    "jsep": "^0.3.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.0.0"
+    "@deck.gl/core": "^9.1.0-beta"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

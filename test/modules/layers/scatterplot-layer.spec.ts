@@ -1,5 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 import {UNIT, Layer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -18,7 +22,7 @@ test('ScatterplotLayer points radiusUnits prop', t => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
 
         const scatterplotLayer = filteredLayers[0] as Layer;
-        const uniforms = scatterplotLayer.getModels()[0].uniforms;
+        const uniforms = getLayerUniforms(scatterplotLayer);
         t.is(uniforms.radiusUnits, UNIT.meters, 'radiusUnits "meters"');
       }
     },
@@ -32,7 +36,7 @@ test('ScatterplotLayer points radiusUnits prop', t => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
 
         const scatterplotLayer = filteredLayers[0] as Layer;
-        const uniforms = scatterplotLayer.getModels()[0].uniforms;
+        const uniforms = getLayerUniforms(scatterplotLayer);
         t.is(uniforms.radiusUnits, UNIT.pixels, 'radiusUnits "pixels"');
       }
     },
@@ -46,7 +50,7 @@ test('ScatterplotLayer points radiusUnits prop', t => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
 
         const scatterplotLayer = filteredLayers[0] as Layer;
-        const uniforms = scatterplotLayer.getModels()[0].uniforms;
+        const uniforms = getLayerUniforms(scatterplotLayer);
         t.is(uniforms.radiusUnits, UNIT.common, 'radiusUnits "common"');
       }
     }

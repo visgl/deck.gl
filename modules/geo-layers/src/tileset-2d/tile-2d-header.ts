@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-env browser */
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {TileBoundingBox, TileIndex, TileLoadProps} from './types';

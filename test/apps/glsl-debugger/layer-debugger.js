@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {_DebugContext as DebugContext, COLOR_MODE} from '@luma.gl/debug';
 
 const DEFAULT_OPTIONS = {

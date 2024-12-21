@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 function decodeNumberArr(str, b, shift, length) {
   const result = [];
   for (let j = 0; j < str.length; j += length) {

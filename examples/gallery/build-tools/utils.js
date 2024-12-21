@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const fs = require('fs');
 const path = require('path');
 const Mustache = require('mustache');

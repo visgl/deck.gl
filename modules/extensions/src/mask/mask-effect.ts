@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Layer,
   Viewport,
@@ -186,8 +190,10 @@ export default class MaskEffect implements Effect {
           viewports: maskViewport ? [maskViewport] : [],
           onViewportActive,
           views,
-          moduleParameters: {
-            devicePixelRatio: 1
+          shaderModuleProps: {
+            project: {
+              devicePixelRatio: 1
+            }
           }
         });
 
@@ -257,13 +263,17 @@ export default class MaskEffect implements Effect {
     return channelMap;
   }
 
-  getModuleParameters(): {
-    maskMap: Texture;
-    maskChannels: Record<string, Mask> | null;
+  getShaderModuleProps(): {
+    mask: {
+      maskMap: Texture;
+      maskChannels: Record<string, Mask> | null;
+    };
   } {
     return {
-      maskMap: this.masks ? this.maskMap! : this.dummyMaskMap!,
-      maskChannels: this.masks
+      mask: {
+        maskMap: this.masks ? this.maskMap! : this.dummyMaskMap!,
+        maskChannels: this.masks
+      }
     };
   }
 

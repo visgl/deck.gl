@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)
   const x = points.map(p => p[0]);
@@ -38,7 +42,11 @@ export function packVertices(points: number[][], dimensions: number = 2): Float3
 }
 
 // Expands boundingBox:[xMin, yMin, xMax, yMax] to match aspect ratio of given width and height
-export function scaleToAspectRatio(boundingBox: number[], width: number, height: number): number[] {
+export function scaleToAspectRatio(
+  boundingBox: [number, number, number, number],
+  width: number,
+  height: number
+): [number, number, number, number] {
   const [xMin, yMin, xMax, yMax] = boundingBox;
 
   const currentWidth = xMax - xMin;

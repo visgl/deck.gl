@@ -1,10 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type Deck from './deck';
 import type Viewport from '../viewports/viewport';
 import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
 
-import {EVENTS} from './constants';
+import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
 
 export interface Widget<PropsT = any> {
@@ -238,7 +242,6 @@ export class WidgetManager {
       acc[v.id] = v;
       return acc;
     }, {});
-    const {lastViewports} = this;
 
     for (const widget of this.getWidgets()) {
       const {viewId} = widget;
@@ -246,7 +249,7 @@ export class WidgetManager {
         // Attached to a specific view
         const viewport = viewportsById[viewId];
         if (viewport) {
-          if (widget.onViewportChange && !viewport.equals(lastViewports[viewId])) {
+          if (widget.onViewportChange) {
             widget.onViewportChange(viewport);
           }
           widget.onRedraw?.({viewports: [viewport], layers});
@@ -255,10 +258,7 @@ export class WidgetManager {
         // Not attached to a specific view
         if (widget.onViewportChange) {
           for (const viewport of viewports) {
-            // eslint-disable-next-line max-depth
-            if (!viewport.equals(lastViewports[viewport.id])) {
-              widget.onViewportChange(viewport);
-            }
+            widget.onViewportChange(viewport);
           }
         }
         widget.onRedraw?.({viewports, layers});
@@ -278,14 +278,14 @@ export class WidgetManager {
   }
 
   onEvent(info: PickingInfo, event: MjolnirGestureEvent) {
-    const eventOptions = EVENTS[event.type];
-    if (!eventOptions) {
+    const eventHandlerProp = EVENT_HANDLERS[event.type];
+    if (!eventHandlerProp) {
       return;
     }
     for (const widget of this.getWidgets()) {
       const {viewId} = widget;
       if (!viewId || viewId === info.viewport?.id) {
-        widget[eventOptions.handler]?.(info, event);
+        widget[eventHandlerProp]?.(info, event);
       }
     }
   }

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
 import {WebMercatorViewport} from '@deck.gl/core';

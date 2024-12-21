@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import coreLayerExamples from './core-layers';
 // import meshLayerExamples from './mesh-layers';
 import aggregationLayerExamples from './aggregation-layers';

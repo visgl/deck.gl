@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import 
 import {createGLContext, Texture2D, Transform, Buffer} from 'luma.gl';

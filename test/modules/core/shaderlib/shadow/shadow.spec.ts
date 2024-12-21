@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
@@ -127,25 +131,22 @@ test('shadow#getUniforms', t => {
     eye: new Vector3([-1, -1, -1]).negate()
   });
 
-  let uniforms = shadow.getUniforms(
-    {
-      viewport,
-      shadowMatrices: [viewMatrix],
-      drawToShadowMap: true,
-      dummyShadowMaps: [true]
-    },
-    project.getUniforms({viewport})
-  );
+  let uniforms = shadow.getUniforms({
+    project: {viewport},
+    shadowMatrices: [viewMatrix],
+    drawToShadowMap: true,
+    dummyShadowMaps: [true]
+  });
 
-  t.equal(uniforms.shadow_uLightCount, 1, `Shadow light count is correct!`);
+  t.equal(uniforms.lightCount, 1, `Shadow light count is correct!`);
   t.deepEqual(
-    uniforms[`shadow_uProjectCenters[0]`],
+    uniforms.projectCenter0,
     [0, 0, 0, 0],
     `Shadow projection center in LNG_LAT mode is correct!`
   );
 
   for (const value of TEST_CASE1) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
+    const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
     t.equal(
       insideClipSpace(result),
       value.result,
@@ -156,19 +157,16 @@ test('shadow#getUniforms', t => {
   // LNGLAT_AUTO_OFFSET mode
   viewport = TEST_VIEWPORT2;
 
-  uniforms = shadow.getUniforms(
-    {
-      viewport,
-      shadowMatrices: [viewMatrix],
-      drawToShadowMap: true,
-      dummyShadowMaps: [true]
-    },
-    project.getUniforms({viewport})
-  );
+  uniforms = shadow.getUniforms({
+    project: {viewport},
+    shadowMatrices: [viewMatrix],
+    drawToShadowMap: true,
+    dummyShadowMaps: [true]
+  });
 
   for (const value of TEST_CASE2) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
-    const center = uniforms[`shadow_uProjectCenters[0]`];
+    const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
+    const center = uniforms.projectCenter0;
     t.equal(
       insideClipSpace([
         (result[0] + center[0]) / center[3],
@@ -183,21 +181,18 @@ test('shadow#getUniforms', t => {
   // Non-Geospatial Identity Mode
   viewport = TEST_VIEWPORT3;
 
-  uniforms = shadow.getUniforms(
-    {
+  uniforms = shadow.getUniforms({
+    project: {
       viewport,
-      shadowMatrices: [viewMatrix],
-      drawToShadowMap: true,
-      dummyShadowMaps: [true]
-    },
-    {
-      center: [0, 0, 0, 0],
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
-    }
-  );
+    },
+    shadowMatrices: [viewMatrix],
+    drawToShadowMap: true,
+    dummyShadowMaps: [true]
+  });
 
   for (const value of TEST_CASE3) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
+    const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
     t.equal(
       insideClipSpace(result),
       value.result,

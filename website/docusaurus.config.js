@@ -1,8 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/nightOwlLight');
-const darkCodeTheme = require('prism-react-renderer/themes/nightOwl');
+import {themes as prismThemes} from 'prism-react-renderer';
+const lightCodeTheme = prismThemes.nightOwlLight;
+const darkCodeTheme = prismThemes.nightOwl;
+
 const webpack = require('webpack');
 const {resolve} = require('path');
 
@@ -226,7 +232,7 @@ const config = {
         // Optional: see doc section below
         contextualSearch: true,
         // Optional: path for search page that enabled by default (`false` to disable it)
-        searchPagePath: 'search'
+        searchPagePath: false
       },
       prism: {
         theme: lightCodeTheme,

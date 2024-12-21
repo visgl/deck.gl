@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
 import {fp64} from '@luma.gl/shadertools';
@@ -27,7 +11,7 @@ import {project, _memoize as memoize} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
 import project64Shader from './project64.glsl';
 
-type Project64ModuleSettings = {
+type Project64ModuleProps = {
   viewport: Viewport;
 };
 
@@ -42,14 +26,14 @@ export default {
     viewProjectionMatrix: 'mat4x4<f32>',
     viewProjectionMatrix64Low: 'mat4x4<f32>'
   }
-} as ShaderModule<Project64ModuleSettings>;
+} as ShaderModule<Project64ModuleProps>;
 
 // TODO - this module should calculate the 64 bit uniforms
 // It is currently done by project to minimize duplicated work
 
 const getMemoizedUniforms = memoize(calculateUniforms);
 
-function getUniforms(opts?: Project64ModuleSettings | {}): Record<string, any> {
+function getUniforms(opts?: Project64ModuleProps | {}): Record<string, any> {
   if (opts && 'viewport' in opts) {
     const {viewProjectionMatrix, scale} = opts.viewport;
     // We only need to update fp64 uniforms if fp32 projection is being updated

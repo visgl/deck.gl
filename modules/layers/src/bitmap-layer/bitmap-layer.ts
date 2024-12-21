@@ -1,22 +1,6 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Layer,
@@ -39,6 +23,7 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
 
+import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
@@ -141,11 +126,11 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     model?: Model;
     mesh?: any;
     coordinateConversion: number;
-    bounds: number[];
+    bounds: [number, number, number, number];
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
   }
 
   initializeState() {
@@ -283,26 +268,26 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   draw(opts) {
-    const {uniforms, moduleParameters} = opts;
+    const {shaderModuleProps, uniforms} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
-    if (moduleParameters.picking.isActive && disablePicking) {
+    if (shaderModuleProps.picking.isActive && disablePicking) {
       return;
     }
 
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      model.setUniforms(uniforms);
-      model.setBindings({bitmapTexture: image as Texture});
-      model.setUniforms({
-        desaturate,
-        transparentColor: transparentColor.map(x => x / 255) as number[],
-        tintColor: tintColor.slice(0, 3).map(x => x / 255),
+      const bitmapProps: BitmapProps = {
+        bitmapTexture: image as Texture,
+        bounds,
         coordinateConversion,
-        bounds
-      });
+        desaturate,
+        tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
+        transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number]
+      };
+      model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);
     }
   }

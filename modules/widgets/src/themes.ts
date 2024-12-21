@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export const LightTheme = {
   '--button-background': '#fff',
   '--button-stroke': 'rgba(255, 255, 255, 0.3)',

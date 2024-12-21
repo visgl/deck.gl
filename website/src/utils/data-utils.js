@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {request, json, text} from 'd3-request';
 import {StreamParser} from './worker-utils';
 

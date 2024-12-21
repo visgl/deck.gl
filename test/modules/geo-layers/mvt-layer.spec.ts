@@ -1,5 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
@@ -203,14 +207,11 @@ test('ClipExtension', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
-          const uniforms = layer.getModels()[0].uniforms;
+          const uniforms = getLayerUniforms(layer);
           if (layer.id.includes('-points-')) {
-            t.ok(uniforms.clip_bounds && uniforms.clip_bounds[0] === 0, 'has clip_bounds uniform');
+            t.ok(uniforms.bounds && uniforms.bounds[0] === 0, 'has bounds uniform');
           } else {
-            t.ok(
-              uniforms.clip_bounds && uniforms.clip_bounds[0] === 256,
-              'has clip_bounds uniform'
-            );
+            t.ok(uniforms.bounds && uniforms.bounds[0] === 256, 'has bounds uniform');
           }
         }
       }

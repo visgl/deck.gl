@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // TODO - can we reuse the core util? Assuming we don't want to export it
 
 /* eslint-disable complexity */

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';

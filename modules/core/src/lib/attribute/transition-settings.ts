@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {NumericArray} from '../../types/types';
 
 export interface TransitionSettings {

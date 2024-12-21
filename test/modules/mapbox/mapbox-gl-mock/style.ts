@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Adapted from https://github.com/mapbox/mapbox-gl-js-mock/
 // BSD 3-Clause License
 // Copyright (c) 2017, Mapbox

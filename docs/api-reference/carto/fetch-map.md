@@ -50,13 +50,19 @@ const map = await fetchMap({cartoMapId, credentials, autoRefresh, onNewData});
 
 Required. Identifier of map created in CARTO Builder.
 
-#### `credentials` (object, optional) {#credentials}
+#### `accessToken` (string, optional) {#accesstoken}
 
-[CARTO Credentials](./overview.md#carto-credentials) to use in API requests.
+CARTO platform access token. Only required for private maps.
+
+#### `apiBaseUrl` (string, optional) {#apibaseurl}
+
+Base URL of the CARTO Maps API.
+  
+Example for account located in EU-west region: `https://gcp-eu-west1.api.carto.com`
 
 #### `headers` (object, optional) {#headers}
 
-Custom headers to include in the map instantiation requests.
+Custom HTTP headers to include in the map instantiation requests.
 
 #### `autoRefresh` (number, optional) {#autorefresh}
 

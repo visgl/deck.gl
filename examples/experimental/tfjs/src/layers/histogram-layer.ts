@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global console */
 /* eslint-disable no-console */
 import * as tf from '@tensorflow/tfjs';

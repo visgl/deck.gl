@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 import {points} from 'deck.gl-test/data';
@@ -23,6 +27,7 @@ export default [
         getPosition: d => d,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         cellSize: 40,
+        gridOrigin: [0, 15],
         contours: [
           {threshold: 1, color: [50, 50, 50]},
           {threshold: 2, color: [100, 100, 100]},
@@ -49,6 +54,7 @@ export default [
         getPosition: d => d,
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         cellSize: 40,
+        gridOrigin: [0, 15],
         contours: [
           {threshold: [1, 2], color: [150, 0, 0]},
           {threshold: [2, 5], color: [0, 150, 0]}
