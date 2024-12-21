@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator} from '@deck.gl/core';
+import {
+  FlyToInterpolator,
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './components';
@@ -68,9 +73,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-zoom');
     if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
+    applyStyles(element, style);
     const ui = (
       <ButtonGroup orientation={this.orientation}>
         <GroupedIconButton
@@ -99,6 +102,20 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   setProps(props: Partial<ZoomWidgetProps>) {
+    const oldProps = this.props;
+    const el = this.element;
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
+
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
+      }
+    }
+
     Object.assign(this.props, props);
   }
 
