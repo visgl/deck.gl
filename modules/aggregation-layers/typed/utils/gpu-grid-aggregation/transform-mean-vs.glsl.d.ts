@@ -1,0 +1,3 @@
+declare const _default: '#define SHADER_NAME gpu-aggregation-transform-mean-vs\nattribute vec4 aggregationValues;\nvarying vec4 meanValues;\n\nvoid main()\n{\n  // TODO: Use 64-bit division ?? not needed given this is aggregation ??\n  bool isCellValid = bool(aggregationValues.w > 0.);\n  // aggregationValues:  XYZ contain aggregated values, W contains count\n  meanValues.xyz = isCellValid ? aggregationValues.xyz/aggregationValues.w : vec3(0, 0, 0);\n  meanValues.w = aggregationValues.w;\n\n  // Enforce default value for ANGLE issue (https://bugs.chromium.org/p/angleproject/issues/detail?id=3941)\n  gl_PointSize = 1.0;\n}\n';
+export default _default;
+// # sourceMappingURL=transform-mean-vs.glsl.d.ts.map

@@ -89,7 +89,7 @@ export default function App({
   const layers = [
     new HexagonLayer<DataPoint>({
       id: 'heatmap',
-      // gpuAggregation: true,
+      gpuAggregation: true,
       colorRange,
       coverage,
       data,
