@@ -62,7 +62,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
 
     this.props = {
       ...props,
-      orientation: props.orientation ?? this.orientation,
+      orientation: props.orientation ?? 'vertical',
       transitionDuration: props.transitionDuration ?? 200,
       zoomInLabel: props.zoomInLabel ?? 'Zoom In',
       zoomOutLabel: props.zoomOutLabel ?? 'Zoom Out',
