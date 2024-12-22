@@ -79,8 +79,8 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   private update() {
     const {enterLabel, exitLabel} = this.props;
-    const el = this.element;
-    if (!el) {
+    const element = this.element;
+    if (!element) {
       return;
     }
 
@@ -91,10 +91,11 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />
     );
-    render(ui, el);
+    render(ui, element);
   }
 
   setProps(props: Partial<FullscreenWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -110,6 +111,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     }
 
     Object.assign(this.props, props);
+    this.update();
   }
 
   getContainer() {
