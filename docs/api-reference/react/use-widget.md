@@ -1,6 +1,6 @@
 # useWidget
 
-The `useWidget` hook is used to create React wrappers for custom deck.gl widgets.
+The `useWidget` hook is used to create React wrappers for normal (non-React) deck.gl widgets.
 
 ```tsx
 import DeckGL, {useControl} from '@deck.gl/react';
