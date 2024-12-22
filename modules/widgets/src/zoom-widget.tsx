@@ -101,7 +101,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
       }
     }
 
-    this.props = {...props};
+    Object.assign(this.props, props);
     this.update();
   }
 

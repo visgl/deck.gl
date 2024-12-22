@@ -110,7 +110,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
       }
     }
 
-    this.props = {...props};
+    Object.assign(this.props, props);
     this.update();
   }
 

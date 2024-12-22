@@ -75,7 +75,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
       }
     }
 
-    this.props = {...props};
+    Object.assign(this.props, props);
     this.update();
   }
 
