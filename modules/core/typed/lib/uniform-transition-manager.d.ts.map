@@ -1,1 +1,0 @@
-{"version":3,"file":"uniform-transition-manager.d.ts","sourceRoot":"","sources":["../../src/lib/uniform-transition-manager.ts"],"names":[],"mappings":"AAUA,MAAM,CAAC,OAAO,OAAO,wBAAwB;IAC3C,WAAW,gBAAa;IACxB,QAAQ,MAAC;gBAEG,QAAQ,KAAA;IAIpB,IAAI,MAAM,YAET;IAED,GAAG,CAAC,GAAG,KAAA,EAAE,SAAS,KAAA,EAAE,OAAO,KAAA,EAAE,QAAQ,KAAA;IA8BrC,MAAM,CAAC,GAAG,KAAA;IAQV,MAAM;IAeN,KAAK;CAKN"}
