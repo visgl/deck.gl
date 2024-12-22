@@ -13,12 +13,6 @@ in vec2 instancePositions;
 in vec3 instanceNormals;
 in float instanceOffsets;
 
-uniform vec3 gridDims;
-uniform vec3 gridCenter;
-uniform float gridOffset;
-uniform vec3 labelWidths;
-uniform float fontSize;
-uniform float labelHeight;
 uniform sampler2D labelTexture;
 
 out vec2 vTexCoords;
@@ -71,18 +65,18 @@ void main(void) {
   //  +----------+----------+----------+
   //  | ...      | ...      | ...      |
   vec2 textureOrigin = vec2(
-    sum3(vec3(0.0, labelWidths.x, sum2(labelWidths.xy)) * instanceNormals),
-    instancePositions.y * labelHeight
+    sum3(vec3(0.0, axes.labelWidths.x, sum2(axes.labelWidths.xy)) * instanceNormals),
+    instancePositions.y * axes.labelHeight
   );
-  vec2 labelSize = vec2(sum3(labelWidths * instanceNormals), labelHeight);
+  vec2 labelSize = vec2(sum3(axes.labelWidths * instanceNormals), axes.labelHeight);
   vTexCoords = (textureOrigin + labelSize * texCoords) / vec2(textureSize(labelTexture, 0));
 
   vec3 position_modelspace = vec3(instancePositions.x) *
-    instanceNormals + gridVertexOffset * gridDims / 2.0 + gridCenter * abs(gridVertexOffset);
+    instanceNormals + gridVertexOffset * axes.gridDims / 2.0 + axes.gridCenter * abs(gridVertexOffset);
 
   // apply offsets
-  position_modelspace += gridOffset * gridLineNormal;
-  position_modelspace += project_pixel_size(fontSize * instanceOffsets) * gridVertexOffset;
+  position_modelspace += axes.gridOffset * gridLineNormal;
+  position_modelspace += project_pixel_size(axes.fontSize * instanceOffsets) * gridVertexOffset;
 
   vec3 position_commonspace = project_position(position_modelspace);
   vec4 position_clipspace = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
@@ -91,7 +85,7 @@ void main(void) {
   // project to clipspace
   labelVertexOffset = project_pixel_size_to_clipspace(labelVertexOffset).xy;
   // scale label to be constant size in pixels
-  labelVertexOffset *= fontSize / labelHeight * position_clipspace.w;
+  labelVertexOffset *= axes.fontSize / axes.labelHeight * position_clipspace.w;
 
   gl_Position = position_clipspace + vec4(labelVertexOffset, 0.0, 0.0);
 
