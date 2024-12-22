@@ -29,7 +29,7 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: false,
+  gpuAggregation: true,
   aggregation: 'SUM'
 };
 

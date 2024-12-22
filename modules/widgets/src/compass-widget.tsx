@@ -62,6 +62,8 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -77,11 +79,15 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     }
 
     Object.assign(this.props, props);
+    this.update();
   }
 
   onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-    this.update();
+    // no need to update if viewport is the same
+    if (!viewport.equals(this.viewports[viewport.id])) {
+      this.viewports[viewport.id] = viewport;
+      this.update();
+    }
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -105,7 +111,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     return [0, 0];
   }
 
-  update() {
+  private update() {
     const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
     const viewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(viewport);
