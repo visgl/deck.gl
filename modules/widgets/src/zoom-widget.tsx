@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator} from '@deck.gl/core';
+import {
+  FlyToInterpolator,
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './components';
@@ -45,22 +50,24 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   id = 'zoom';
   props: ZoomWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  orientation: 'vertical' | 'horizontal' = 'vertical';
   viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
   constructor(props: ZoomWidgetProps) {
-    this.id = props.id || 'zoom';
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    this.orientation = props.orientation || 'vertical';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.zoomInLabel = props.zoomInLabel || 'Zoom In';
-    props.zoomOutLabel = props.zoomOutLabel || 'Zoom Out';
-    props.style = props.style || {};
-    this.props = props;
+    this.id = props.id ?? this.id;
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
+
+    this.props = {
+      ...props,
+      orientation: props.orientation ?? 'vertical',
+      transitionDuration: props.transitionDuration ?? 200,
+      zoomInLabel: props.zoomInLabel ?? 'Zoom In',
+      zoomOutLabel: props.zoomOutLabel ?? 'Zoom Out',
+      style: props.style ?? {}
+    };
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -68,28 +75,10 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-zoom');
     if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
-    const ui = (
-      <ButtonGroup orientation={this.orientation}>
-        <GroupedIconButton
-          onClick={() => this.handleZoomIn()}
-          label={this.props.zoomInLabel}
-          className="deck-widget-zoom-in"
-        />
-        <GroupedIconButton
-          onClick={() => this.handleZoomOut()}
-          label={this.props.zoomOutLabel}
-          className="deck-widget-zoom-out"
-        />
-      </ButtonGroup>
-    );
-    render(ui, element);
-
+    applyStyles(element, style);
     this.deck = deck;
     this.element = element;
-
+    this.update();
     return element;
   }
 
@@ -99,7 +88,24 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   setProps(props: Partial<ZoomWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    const oldProps = this.props;
+    const el = this.element;
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
+
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
+      }
+    }
+
     Object.assign(this.props, props);
+    this.update();
   }
 
   onViewportChange(viewport: Viewport) {
@@ -128,5 +134,27 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     for (const viewport of Object.values(this.viewports)) {
       this.handleZoom(viewport, viewport.zoom - 1);
     }
+  }
+
+  private update() {
+    const element = this.element;
+    if (!element) {
+      return;
+    }
+    const ui = (
+      <ButtonGroup orientation={this.props.orientation}>
+        <GroupedIconButton
+          onClick={() => this.handleZoomIn()}
+          label={this.props.zoomInLabel}
+          className="deck-widget-zoom-in"
+        />
+        <GroupedIconButton
+          onClick={() => this.handleZoomOut()}
+          label={this.props.zoomOutLabel}
+          className="deck-widget-zoom-out"
+        />
+      </ButtonGroup>
+    );
+    render(ui, element);
   }
 }

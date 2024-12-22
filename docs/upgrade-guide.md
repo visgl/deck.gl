@@ -50,11 +50,13 @@ The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. 
 
 Quick summary:
 
-- All references to `gl: WebGLRenderingContext` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
-- Layer props `parameters` and `textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
-- Deck class prop `onWebGLInitialized` is now `onDeviceInitialized`.
+- `DeckProps.gl (WebGLRenderingContext)` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
+- `DeckProps.glOptions (WebGLContextAttributes)` should be replaced with `DeckProps.deviceProps.webgl`: `deviceProps: {type: 'webgl', webgl: ...glOptions}`: [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)
+- `DeckProps.glOptions.preserveDrawingBuffers` is now set by default, and does not need to be overridden.
+- `DeckProps.onWebGLInitialized` callback is now `DeckProps.onDeviceInitialized`.
+- `LayerProps.parameters` and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
 - When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
-- GPU resources should no longer be initiated from classes. For example, instead of `new Buffer()` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
+- GPU resources should no longer be created by directly instantiating classes. For example, instead of `new Buffer(gl)` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
 
 #### Custom Layers
 

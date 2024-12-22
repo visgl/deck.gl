@@ -3,7 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {_deepEqual as deepEqual} from '@deck.gl/core';
+import {
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './components';
@@ -46,12 +50,15 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps) {
-    this.id = props.id || 'fullscreen';
-    this.placement = props.placement || 'top-left';
-    props.enterLabel = props.enterLabel || 'Enter Fullscreen';
-    props.exitLabel = props.exitLabel || 'Exit Fullscreen';
-    props.style = props.style || {};
-    this.props = props;
+    this.id = props.id ?? this.id;
+    this.placement = props.placement ?? this.placement;
+
+    this.props = {
+      ...props,
+      enterLabel: props.enterLabel ?? 'Enter Fullscreen',
+      exitLabel: props.exitLabel ?? 'Exit Fullscreen',
+      style: props.style ?? {}
+    };
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -59,9 +66,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     const el = document.createElement('div');
     el.classList.add('deck-widget', 'deck-widget-fullscreen');
     if (className) el.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
-    }
+    applyStyles(el, style);
     this.deck = deck;
     this.element = el;
     this.update();
@@ -77,8 +82,8 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   private update() {
     const {enterLabel, exitLabel} = this.props;
-    const el = this.element;
-    if (!el) {
+    const element = this.element;
+    if (!element) {
       return;
     }
 
@@ -89,10 +94,11 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />
     );
-    render(ui, el);
+    render(ui, element);
   }
 
   setProps(props: Partial<FullscreenWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -102,18 +108,13 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
       }
 
       if (!deepEqual(oldProps.style, props.style, 1)) {
-        if (oldProps.style) {
-          Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
-        }
-        if (props.style) {
-          Object.entries(props.style).map(([key, value]) =>
-            el.style.setProperty(key, value as string)
-          );
-        }
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
       }
     }
 
     Object.assign(this.props, props);
+    this.update();
   }
 
   getContainer() {

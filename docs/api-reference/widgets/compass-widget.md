@@ -38,7 +38,7 @@ Bearing and pitch reset transition duration in milliseconds.
 
 Default: `{}`
 
-Additional CSS styles for the canvas.
+Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
 
 #### `className` (string, optional) {#classname}
 

@@ -1,0 +1,1 @@
+{"version":3,"file":"fp64.d.ts","sourceRoot":"","sources":["../../src/fp64/fp64.ts"],"names":[],"mappings":"AAoBA,OAAO,EAAC,cAAc,EAAoB,MAAM,eAAe,CAAC;AAGhE,OAAO,KAAK,EAAC,KAAK,EAAC,MAAM,eAAe,CAAC;AAEzC,yEAAyE;AACzE,MAAM,CAAC,OAAO,OAAO,aAAc,SAAQ,cAAc;IACvD,MAAM,CAAC,aAAa,SAAmB;IAEvC,UAAU,CAAC,IAAI,EAAE,KAAK,GAAG,GAAG;CAa7B"}
