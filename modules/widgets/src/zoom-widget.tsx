@@ -50,24 +50,23 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   id = 'zoom';
   props: ZoomWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  orientation: 'vertical' | 'horizontal' = 'vertical';
   viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
   constructor(props: ZoomWidgetProps) {
-    this.id = props.id || 'zoom';
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    this.orientation = props.orientation || 'vertical';
+    this.id = props.id ?? this.id;
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
 
     this.props = {
       ...props,
-      transitionDuration: props.transitionDuration || 200,
-      zoomInLabel: props.zoomInLabel || 'Zoom In',
-      zoomOutLabel: props.zoomOutLabel || 'Zoom Out',
-      style: props.style || {}
+      orientation: props.orientation ?? 'vertical',
+      transitionDuration: props.transitionDuration ?? 200,
+      zoomInLabel: props.zoomInLabel ?? 'Zoom In',
+      zoomOutLabel: props.zoomOutLabel ?? 'Zoom Out',
+      style: props.style ?? {}
     };
   }
 
@@ -77,25 +76,9 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     element.classList.add('deck-widget', 'deck-widget-zoom');
     if (className) element.classList.add(className);
     applyStyles(element, style);
-    const ui = (
-      <ButtonGroup orientation={this.orientation}>
-        <GroupedIconButton
-          onClick={() => this.handleZoomIn()}
-          label={this.props.zoomInLabel}
-          className="deck-widget-zoom-in"
-        />
-        <GroupedIconButton
-          onClick={() => this.handleZoomOut()}
-          label={this.props.zoomOutLabel}
-          className="deck-widget-zoom-out"
-        />
-      </ButtonGroup>
-    );
-    render(ui, element);
-
     this.deck = deck;
     this.element = element;
-
+    this.update();
     return element;
   }
 
@@ -105,6 +88,8 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   setProps(props: Partial<ZoomWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -120,6 +105,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     }
 
     Object.assign(this.props, props);
+    this.update();
   }
 
   onViewportChange(viewport: Viewport) {
@@ -148,5 +134,27 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     for (const viewport of Object.values(this.viewports)) {
       this.handleZoom(viewport, viewport.zoom - 1);
     }
+  }
+
+  private update() {
+    const element = this.element;
+    if (!element) {
+      return;
+    }
+    const ui = (
+      <ButtonGroup orientation={this.props.orientation}>
+        <GroupedIconButton
+          onClick={() => this.handleZoomIn()}
+          label={this.props.zoomInLabel}
+          className="deck-widget-zoom-in"
+        />
+        <GroupedIconButton
+          onClick={() => this.handleZoomOut()}
+          label={this.props.zoomOutLabel}
+          className="deck-widget-zoom-out"
+        />
+      </ButtonGroup>
+    );
+    render(ui, element);
   }
 }
