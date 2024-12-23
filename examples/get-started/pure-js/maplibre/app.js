@@ -21,7 +21,7 @@ const map = new maplibregl.Map({
 });
 
 const deckOverlay = new DeckOverlay({
-  // interleaved: true,
+  interleaved: true,
   layers: [
     new GeoJsonLayer({
       id: 'airports',
