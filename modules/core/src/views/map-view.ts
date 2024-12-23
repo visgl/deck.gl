@@ -27,8 +27,8 @@ export type MapViewState = {
   minPitch?: number;
   /** Max pitch, default `60` */
   maxPitch?: number;
-  /** Viewport center offsets from lng, lat in meters */
-  position?: number[];
+  /** Viewport center offsets from lng, lat, and elevation in meters */
+  position?: [number, number, number];
 } & CommonViewState;
 
 export type MapViewProps = {
