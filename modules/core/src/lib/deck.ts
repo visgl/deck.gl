@@ -820,9 +820,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const normalizedViews: View[] = Array.isArray(views)
       ? views
       : // If null, default to a full screen map view port
-      views
-      ? [views]
-      : [new MapView({id: 'default-view'})];
+        views
+        ? [views]
+        : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
       normalizedViews[0].props.controller = this.props.controller;
