@@ -38,5 +38,13 @@
         255
       ]
     }
+  ],
+  "widgets": [
+    {
+      "@@type": "ZoomWidget"
+    },
+    {
+      "@@type": "CompassWidget"
+    }
   ]
 }

@@ -30,5 +30,13 @@
       ],
       "getSize": 12
     }
+  ],
+  "widgets": [
+    {
+      "@@type": "ZoomWidget"
+    },
+    {
+      "@@type": "CompassWidget"
+    }
   ]
 }

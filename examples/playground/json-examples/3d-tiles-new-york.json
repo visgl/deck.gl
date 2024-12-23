@@ -31,5 +31,13 @@
         }
       }
     }
+  ],
+  "widgets": [
+    {
+      "@@type": "ZoomWidget"
+    },
+    {
+      "@@type": "CompassWidget"
+    }
   ]
 }

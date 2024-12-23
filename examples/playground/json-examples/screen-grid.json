@@ -65,5 +65,13 @@
       "getPosition": "@@=-",
       "gpuAggregation": true
     }
+  ],
+  "widgets": [
+    {
+      "@@type": "ZoomWidget"
+    },
+    {
+      "@@type": "CompassWidget"
+    }
   ]
 }
