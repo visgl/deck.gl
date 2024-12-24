@@ -11,7 +11,7 @@ import extractJSXLayers, {DeckGLRenderCallback} from './utils/extract-jsx-layers
 import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
-import type {DeckGLContextValue} from './utils/position-children-under-views';
+import type {DeckGLContextValue} from './utils/deckgl-context';
 import type {DeckProps, View, Viewport} from '@deck.gl/core';
 
 export type ViewOrViews = View | View[] | null;

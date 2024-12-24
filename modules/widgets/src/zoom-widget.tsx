@@ -13,7 +13,7 @@ import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './components';
 
-interface ZoomWidgetProps {
+export interface ZoomWidgetProps {
   id?: string;
   placement?: WidgetPlacement;
   /**

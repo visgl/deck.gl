@@ -14,7 +14,7 @@ import {
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-interface CompassWidgetProps {
+export interface CompassWidgetProps {
   id?: string;
   placement?: WidgetPlacement;
   /**
