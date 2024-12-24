@@ -4,82 +4,8 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {FullscreenWidget} from '@deck.gl/widgets';
-import {CompassWidget, ZoomWidget, useWidget} from '@deck.gl/react';
+import DeckGL, {GeoJsonLayer, ArcLayer, CompassWidget} from 'deck.gl';
 import '@deck.gl/widgets/stylesheet.css';
-import {FlyToInterpolator} from '@deck.gl/core';
-
-class CustomWidget {
-  // id = 'custom';
-  // placement = 'top-right';
-  // props = {
-  //   ref: React.RefObject<HTMLDivElement>;
-  // };
-  // viewports = {};
-
-  constructor(props) {
-    this.id = props.id || 'custom';
-    this.placement = props.placement || 'top-right';
-    this.props = props;
-    this.viewports = {};
-  }
-
-  onAdd({deck}) {
-    this.deck = deck;
-    return this.props.ref.current;
-  }
-  onRemove() {}
-  setProps(props) {
-    Object.assign(this.props, props);
-  }
-
-  onViewportChange(viewport) {
-    // debugger;
-    this.viewports[viewport.id] = viewport;
-  }
-
-  handleZoom(viewport, nextZoom) {
-    const viewId = viewport?.id || 'default-view';
-    const nextViewState = {
-      ...viewport,
-      zoom: nextZoom,
-      transitionDuration: this.props.transitionDuration,
-      transitionInterpolator: new FlyToInterpolator()
-    };
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
-  }
-
-  handleZoomIn() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom + 1);
-    }
-  }
-
-  handleZoomOut() {
-    this.props.onClick();
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom - 1);
-    }
-  }
-}
-
-export const CustomReactWidget = props => {
-  const ref = React.useRef();
-  const widget = useWidget(CustomWidget, {ref, ...props});
-  return (
-    <div style={{padding: 24, backgroundColor: 'green'}} ref={ref}>
-      React Widget!
-      <button
-        style={{pointerEvents: 'auto', cursor: 'pointer'}}
-        onClick={() => widget.handleZoomOut()}
-      >
-        Zoom Out!
-      </button>
-    </div>
-  );
-};
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -96,7 +22,6 @@ const INITIAL_VIEW_STATE = {
 };
 
 function Root() {
-  const [zoomToggle, setZoomToggle] = React.useState(true);
   const onClick = info => {
     if (info.object) {
       // eslint-disable-next-line
@@ -105,14 +30,7 @@ function Root() {
   };
 
   return (
-    <DeckGL
-      controller={true}
-      initialViewState={INITIAL_VIEW_STATE}
-      widgets={[new FullscreenWidget({})]}
-    >
-      <CompassWidget />
-      <CustomReactWidget onClick={() => setZoomToggle(!zoomToggle)} />
-      {zoomToggle && <ZoomWidget orientation="horizontal" />}
+    <DeckGL controller={true} initialViewState={INITIAL_VIEW_STATE}>
       <GeoJsonLayer
         id="base-map"
         data={COUNTRIES}
@@ -145,6 +63,7 @@ function Root() {
         getTargetColor={[200, 0, 80]}
         getWidth={1}
       />
+      <CompassWidget />
     </DeckGL>
   );
 }
