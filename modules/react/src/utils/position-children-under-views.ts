@@ -94,24 +94,21 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
     // a key" warning. Sending each child as separate arguments removes this requirement.
     const viewElement = createElement('div', {key, id: key, style}, ...viewChildren);
 
-    if (ContextProvider) {
-      const contextValue: DeckGLContextValue = {
-        deck,
-        viewport,
-        // @ts-expect-error accessing protected property
-        container: deck.canvas.offsetParent,
-        // @ts-expect-error accessing protected property
-        eventManager: deck.eventManager,
-        onViewStateChange: params => {
-          params.viewId = viewId;
-          // @ts-expect-error accessing protected method
-          deck._onViewStateChange(params);
-        },
-        widgets: []
-      };
-      return createElement(ContextProvider, {key, value: contextValue}, viewElement);
-    }
-
-    return viewElement;
+    const contextValue: DeckGLContextValue = {
+      deck,
+      viewport,
+      // @ts-expect-error accessing protected property
+      container: deck.canvas.offsetParent,
+      // @ts-expect-error accessing protected property
+      eventManager: deck.eventManager,
+      onViewStateChange: params => {
+        params.viewId = viewId;
+        // @ts-expect-error accessing protected method
+        deck._onViewStateChange(params);
+      },
+      widgets: []
+    };
+    const providerKey = `view-${viewId}-context`;
+    return createElement(ContextProvider, {key: providerKey, value: contextValue}, viewElement);
   });
 }
