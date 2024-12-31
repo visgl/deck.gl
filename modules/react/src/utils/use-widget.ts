@@ -27,6 +27,7 @@ function useWidget<T extends Widget, PropsT extends {}>(
   }, []);
   const widget = useMemo(() => new WidgetClass(props), [WidgetClass]);
 
+  // Hook rebuilds widgets on every render: [] then [FirstWidget] then [FirstWidget, SecondWidget]
   widgets?.push(widget);
   widget.setProps(props);
 

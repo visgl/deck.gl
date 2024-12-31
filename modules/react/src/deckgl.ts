@@ -157,6 +157,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
     const forwardProps: DeckProps<ViewsT> = {
+      widgets: [],
       ...props,
       // Override user styling props. We will set the canvas style in render()
       style: null,
