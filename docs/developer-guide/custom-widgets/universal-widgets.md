@@ -231,6 +231,7 @@ class AwesomeWidget implements Widget<AwesomeWidgetProps> {
       }
     }
     ...
+    Object.assign(this.props, props);
   }
 }
 ```
@@ -321,7 +322,7 @@ class LayerLoadingWidget implements Widget<LayerLoadingWidgetProps> {
     // Handle when props change here.
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
-    this.props = {...props};
+    Object.assign(this.props, props);
     this.update();
   }
 
