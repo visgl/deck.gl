@@ -4,6 +4,7 @@
 
 import {Deck, WebMercatorViewport, MapView, _flatten as flatten} from '@deck.gl/core';
 import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 import type MapboxLayer from './mapbox-layer';
 import type {Map} from './types';
 
@@ -54,7 +55,7 @@ export function getDeckInstance({
 
   let deckInstance: Deck;
 
-  if (!deck || deck.props.gl === gl) {
+  if (!deck || (deck.props.device instanceof WebGLDevice && deck.props.device.gl === gl)) {
     // If deck isn't defined (Internal MapboxLayer use case),
     // or if deck is defined and is using the WebGLContext created by mapbox (MapboxOverlay and External MapboxLayer use case),
     // block deck from setting the canvas size, and use the map's viewState to drive deck.
