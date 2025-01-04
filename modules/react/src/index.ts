@@ -6,9 +6,9 @@ export {default as DeckGL} from './deckgl';
 export {default} from './deckgl';
 
 // Widgets
-export {CompassWidget} from './widgets/compass-widget';
-export {FullscreenWidget} from './widgets/fullscreen-widget';
-export {ZoomWidget} from './widgets/zoom-widget';
+export {Compass} from './widgets/compass';
+export {Fullscreen} from './widgets/fullscreen';
+export {Zoom} from './widgets/zoom';
 export {default as useWidget} from './utils/use-widget';
 
 // Types
