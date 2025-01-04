@@ -8,6 +8,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   Layer,
+  LayerData,
   PickingInfo,
   Unit,
   Material,
@@ -542,7 +543,7 @@ export default class GeoJsonLayer<
           pointsLayerProps = {
             ...pointsLayerProps,
             // @ts-expect-error TODO - type binary data
-            data: {...pointsLayerProps.data, attributes: rest}
+            data: {...(pointsLayerProps.data as LayerData), attributes: rest}
           };
         }
 
