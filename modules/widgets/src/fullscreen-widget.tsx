@@ -50,12 +50,15 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps) {
-    this.id = props.id || 'fullscreen';
-    this.placement = props.placement || 'top-left';
-    props.enterLabel = props.enterLabel || 'Enter Fullscreen';
-    props.exitLabel = props.exitLabel || 'Exit Fullscreen';
-    props.style = props.style || {};
-    this.props = props;
+    this.id = props.id ?? this.id;
+    this.placement = props.placement ?? this.placement;
+
+    this.props = {
+      ...props,
+      enterLabel: props.enterLabel ?? 'Enter Fullscreen',
+      exitLabel: props.exitLabel ?? 'Exit Fullscreen',
+      style: props.style ?? {}
+    };
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -79,8 +82,8 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   private update() {
     const {enterLabel, exitLabel} = this.props;
-    const el = this.element;
-    if (!el) {
+    const element = this.element;
+    if (!element) {
       return;
     }
 
@@ -91,10 +94,11 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />
     );
-    render(ui, el);
+    render(ui, element);
   }
 
   setProps(props: Partial<FullscreenWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -110,6 +114,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     }
 
     Object.assign(this.props, props);
+    this.update();
   }
 
   getContainer() {

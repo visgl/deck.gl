@@ -1,1 +1,0 @@
-{"version":3,"file":"tile-loader-utils.d.ts","sourceRoot":"","sources":["../../../src/layers/schema/tile-loader-utils.ts"],"names":[],"mappings":"AACA,OAAO,EAAC,kBAAkB,EAAC,MAAM,cAAc,CAAC;AAChD,OAAO,EAAC,UAAU,EAAC,MAAM,qBAAqB,CAAC;AAE/C,wBAAgB,QAAQ,CAAC,MAAM,EAAE,WAAW,EAAE,UAAU,KAAA,OAIvD;AAED,wBAAgB,gBAAgB,CAAC,UAAU,EAAE,kBAAkB,EAAE,GAAG,UAAU,EAAE,CAW/E"}
