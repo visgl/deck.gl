@@ -42,6 +42,7 @@ import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
+import {CreateDeviceProps} from '@luma.gl/core';
 
 /* global document */
 
@@ -106,21 +107,21 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * @default `document.body`
    */
   parent?: HTMLDivElement | null;
+
   /** The canvas to render into.
    * Can be either a HTMLCanvasElement or the element id.
    * Will be auto-created if not supplied.
    */
   canvas?: HTMLCanvasElement | string | null;
 
-  /** luma.gl GPU device. A device will be auto-created if not supplied. */
+  /** Use an existing luma.gl GPU device. @note If not supplied, a new device will be created using props.deviceProps */
   device?: Device | null;
-  /** A device will be auto-created if not supplied using these props. */
-  deviceProps?: DeviceProps;
 
-  /** WebGL context @deprecated Use props.device */
+  /** A new device will be created using these props, assuming that an existing device is not supplied using props.device) */
+  deviceProps?: CreateDeviceProps;
+
+  /** WebGL context @deprecated Use props.deviceProps.webgl. Also note that preserveDrawingBuffers is true by default */
   gl?: WebGL2RenderingContext | null;
-  /** Options used when creating a WebGL context. @deprecated Use props.deviceProps */
-  glOptions?: WebGLContextAttributes;
 
   /**
    * The array of Layer instances to be rendered.
@@ -232,7 +233,6 @@ const defaultProps: DeckProps = {
   device: null,
   deviceProps: {type: 'webgl'} as DeviceProps,
   gl: null,
-  glOptions: {},
   canvas: null,
   layers: [],
   effects: [],
@@ -455,7 +455,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const resolvedProps: Omit<Required<DeckProps>, 'glOptions'> & {
+    const resolvedProps: Required<DeckProps> & {
       width: number;
       height: number;
       views: View[];
@@ -783,8 +783,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // width,
       // height,
       gl,
-      // deviceProps,
-      // glOptions,
       // debug,
       onError,
       // onBeforeRender,
@@ -822,9 +820,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const normalizedViews: View[] = Array.isArray(views)
       ? views
       : // If null, default to a full screen map view port
-      views
-      ? [views]
-      : [new MapView({id: 'default-view'})];
+        views
+        ? [views]
+        : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
       normalizedViews[0].props.controller = this.props.controller;

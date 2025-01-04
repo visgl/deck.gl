@@ -37,7 +37,7 @@ export interface Widget<PropsT = any> {
     viewId: string | null;
   }) => HTMLDivElement | null;
   /** Called when the widget is removed */
-  onRemove: () => void;
+  onRemove?: () => void;
   /** Called to update widget options */
   setProps: (props: Partial<PropsT>) => void;
 
@@ -184,7 +184,7 @@ export class WidgetManager {
   }
 
   private _remove(widget: Widget) {
-    widget.onRemove();
+    widget.onRemove?.();
 
     if (widget._element) {
       widget._element.remove();
@@ -242,7 +242,6 @@ export class WidgetManager {
       acc[v.id] = v;
       return acc;
     }, {});
-    const {lastViewports} = this;
 
     for (const widget of this.getWidgets()) {
       const {viewId} = widget;
@@ -250,7 +249,7 @@ export class WidgetManager {
         // Attached to a specific view
         const viewport = viewportsById[viewId];
         if (viewport) {
-          if (widget.onViewportChange && !viewport.equals(lastViewports[viewId])) {
+          if (widget.onViewportChange) {
             widget.onViewportChange(viewport);
           }
           widget.onRedraw?.({viewports: [viewport], layers});
@@ -259,10 +258,7 @@ export class WidgetManager {
         // Not attached to a specific view
         if (widget.onViewportChange) {
           for (const viewport of viewports) {
-            // eslint-disable-next-line max-depth
-            if (!viewport.equals(lastViewports[viewport.id])) {
-              widget.onViewportChange(viewport);
-            }
+            widget.onViewportChange(viewport);
           }
         }
         widget.onRedraw?.({viewports, layers});

@@ -37,7 +37,7 @@ export type GoogleMapsOverlayProps = Omit<
   | 'width'
   | 'height'
   | 'gl'
-  | 'glOptions'
+  | 'deviceProps'
   | 'parent'
   | 'canvas'
   | '_customRender'
@@ -264,10 +264,8 @@ export default class GoogleMapsOverlay {
       // which we need to pass onto deck
       if (device instanceof WebGLDevice) {
         const _framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+        deck.setProps({_framebuffer});
       }
-
-      // @ts-expect-error
-      deck.setProps({_framebuffer});
 
       // With external gl context, animation loop doesn't resize webgl-canvas and thus fails to
       // calculate corrext pixel ratio. Force this manually.

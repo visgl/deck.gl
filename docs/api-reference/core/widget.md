@@ -34,10 +34,6 @@ class LoadingIndicator implements Widget {
     return el;
   }
 
-  onRemove() {
-    this.element = undefined;
-  }
-
   onRedraw({layers}) {
     const isVisible = layers.some(layer => !layer.isLoaded);
     this.element.style.display = isVisible ? 'block' : 'none';
@@ -97,7 +93,7 @@ Returns an optional UI element that should be appended to the Deck container.
 
 #### `onRemove` {#onremove}
 
-Required. Called when the widget is removed.
+Optional. Called when the widget is removed.
 
 #### `setProps` {#setprops}
 

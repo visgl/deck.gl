@@ -49,16 +49,21 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   element?: HTMLDivElement;
 
   constructor(props: CompassWidgetProps) {
-    this.id = props.id || 'compass';
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.label = props.label || 'Compass';
-    props.style = props.style || {};
-    this.props = props;
+    this.id = props.id ?? this.id;
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
+
+    this.props = {
+      ...props,
+      transitionDuration: props.transitionDuration ?? 200,
+      label: props.label ?? 'Reset Compass',
+      style: props.style ?? {}
+    };
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -74,11 +79,15 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     }
 
     Object.assign(this.props, props);
+    this.update();
   }
 
   onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-    this.update();
+    // no need to update if viewport is the same
+    if (!viewport.equals(this.viewports[viewport.id])) {
+      this.viewports[viewport.id] = viewport;
+      this.update();
+    }
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -102,7 +111,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     return [0, 0];
   }
 
-  update() {
+  private update() {
     const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
     const viewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(viewport);
@@ -119,7 +128,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
               this.handleCompassReset(viewport);
             }
           }}
-          label={this.props.label}
+          title={this.props.label}
           style={{transform: `rotateX(${rx}deg)`}}
         >
           <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
