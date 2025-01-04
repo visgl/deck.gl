@@ -128,7 +128,7 @@ export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 // REACT BINDINGS PACKAGE
 //
 
-export {default, DeckGL} from '@deck.gl/react';
+export {default, DeckGL, useWidget} from '@deck.gl/react';
 
 //
 // WIDGETS PACKAGE
@@ -194,12 +194,4 @@ export type {
 
 export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
 
-export type {
-  DeckGLProps,
-  DeckGLRef,
-  DeckGLContextValue,
-  Compass,
-  Fullscreen,
-  Zoom,
-  useWidget
-} from '@deck.gl/react';
+export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';

@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {Compass} from '@deck.gl/react';
+import {CompassWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -64,7 +64,7 @@ function Root() {
         getTargetColor={[200, 0, 80]}
         getWidth={1}
       />
-      <Compass />
+      <CompassWidget />
     </DeckGL>
   );
 }
