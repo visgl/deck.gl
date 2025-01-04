@@ -38,7 +38,7 @@
     "@deck.gl/core": "^9.1.0-beta",
     "@luma.gl/core": "^9.1.0-beta",
     "@luma.gl/engine": "^9.1.0-beta",
-    "@probe.gl/test-utils": "^4.0.0"
+    "@probe.gl/test-utils": "^4.1.0-alpha.2"
   },
   "scripts": {},
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
