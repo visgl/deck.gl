@@ -40,7 +40,7 @@ You also need to define the default values of the widget's properties.
 ```ts
 import type {WidgetPlacement} from '@deck.gl/core'
 
-interface AwesomeWidgetProps {
+type AwesomeWidgetProps = {
   id?: string;
   /**
    * Widget positioning within the view. Default: 'top-left'.

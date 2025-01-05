@@ -38,10 +38,10 @@ import type { Widget, WidgetPlacement } from '@deck.gl/core';
 import { useWidget } from '@deck.gl/react';
 import React, { useRef, RefObject } from 'react';
 
-interface RotateWidgetProps {
-    id?: string
-    placement?: WidgetPlacement
-    ref: RefObject<HTMLDivElement>
+type RotateWidgetProps = {
+  id?: string
+  placement?: WidgetPlacement
+  ref: RefObject<HTMLDivElement>
 }
 
 class RotateWidget implements Widget<RotateWidgetProps> {
@@ -62,7 +62,7 @@ class RotateWidget implements Widget<RotateWidgetProps> {
     return this.props.ref.current;
   }
 
-  setProps(props: Partial<LayerLoadingWidgetProps>) {
+  setProps(props: Partial<RotateWidgetProps>) {
     // Handle when props change here.
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;

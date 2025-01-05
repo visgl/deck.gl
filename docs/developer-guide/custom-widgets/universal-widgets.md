@@ -13,6 +13,13 @@ The widget lifecycle functions define how a widget initializes, updates, and cle
 ```ts
 import type { Widget, WidgetPlacement } from '@deck.gl/core'
 
+type AwesomeWidgetProps = {
+  id?: string;
+  placement?: WidgetPlacement;
+  viewId?: string | null;
+  style?: Partial<CSSStyleDeclaration>;
+}
+
 class AwesomeWidget implements Widget<AwesomeWidgetProps> {
   id = 'awesome-widget';
   props: AwesomeWidgetProps;
@@ -148,7 +155,7 @@ A good universal widget provides users with ways to customize the styles of any 
 Define a prop for overriding styles inline
 
 ```ts
-interface AwesomeWidgetProps {
+type AwesomeWidgetProps = {
   style?: Partial<CSSStyleDeclaration>;
 }
 ```
@@ -199,7 +206,7 @@ class AwesomeWidget implements Widget<AwesomeWidgetProps> {
 Define a prop for adding a CSS class
 
 ```ts
-interface AwesomeWidgetProps {
+type AwesomeWidgetProps = {
   /**
    * Additional CSS class.
    */
@@ -268,7 +275,7 @@ import type {
   Deck, Viewport, Widget, WidgetPlacement, Layer
 } from '@deck.gl/core'
 
-interface LayerLoadingWidgetProps {
+type LayerLoadingWidgetProps = {
   id?: string;
   /**
    * Widget positioning within the view. Default: 'top-left'.

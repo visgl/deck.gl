@@ -14,7 +14,7 @@ Preact widgets are suitable when you are working with any UI framework and is li
 
 > Tip: Read more about the differences between Preact and React [here](https://preactjs.com/guide/v10/differences-to-react/).
 
-## Writing a React Widget
+## Writing a Preact Widget
 
 ### Prerequisites
 
@@ -52,7 +52,7 @@ import type {
 } from '@deck.gl/core'
 import {render} from 'preact';
 
-interface LayerListWidgetProps {
+type LayerListWidgetProps = {
   id?: string;
   /**
    * Widget positioning within the view. Default: 'top-left'.
