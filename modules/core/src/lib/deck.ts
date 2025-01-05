@@ -380,9 +380,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         ...props.deviceProps,
         createCanvasContext: {
           canvas: this._createCanvas(props),
-          // Disable primitive auto-resizing provided by the CanvasContext class
-          // which does not take `useDevicePixels` into account
-          // Resizing is instead handled by AnimationLoop's `autoResizeDrawingBuffer` setting on every frame
+          useDevicePixels: this.props.useDevicePixels,
+          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
           autoResize: false
         }
       });
