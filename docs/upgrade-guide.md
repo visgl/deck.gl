@@ -32,7 +32,7 @@ Breaking changes:
 
 - `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).
 
-### MapViewState
+### MapViewState / ViewportOptions
 
 - The `position` property changed from `number[]` to `[number, number, number]` (lat, lng, elevation).
 
