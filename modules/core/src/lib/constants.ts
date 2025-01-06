@@ -7,12 +7,7 @@
 // updated.
 import log from '../utils/log';
 import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
-import type {
-  PanRecognizerOptions,
-  RotateRecognizerOptions,
-  PinchRecognizerOptions,
-  TapRecognizerOptions
-} from 'mjolnir.js';
+import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
