@@ -1,18 +1,48 @@
 # useWidget
 
-The `useWidget` hook is used to create React wrappers for normal (non-React) deck.gl widgets.
+The `useWidget` hook is used to create React wrappers for normal (non-React) deck.gl widgets, or to create custom widgets with UI rendered by React.
+
+## Usage
 
 ```tsx
-import DeckGL, {useControl} from '@deck.gl/react';
-import {CompassWidget as VanillaCompassWidget, CompassWidgetProps} from '@deck.gl/widgets';
+// React wrapper usage
+import DeckGL, {useWidget} from '@deck.gl/react';
+import {CompassWidget, type CompassWidgetProps} from '@deck.gl/react';
 
-export const CompassWidget = (props: CompassWidgetProps = {}) => {
-  const widget = useWidget(VanillaCompassWidget, props);
+const ReactWrappedCompass = (props: CompassWidgetProps) => {
+  const widget = useWidget(CompassWidget, props);
   return null;
+}
+
+<DeckGL>
+  <ReactWrappedCompass/>
+</DeckGL>
+```
+
+For a custom widget, React can be used to implement the UI itself. A widget class is used to hook into updates, and a React [`ref`](https://react.dev/reference/react/useRef) is utilized to layout the widget UI along-side other widgets.
+
+```tsx
+import type {Widget} from '@deck.gl/core';
+import DeckGL, {useWidget} from '@deck.gl/react';
+
+class MyWidget implements Widget {
+  constructor(props) {
+    this.props = { ...props };
+  }
+
+  onAdd() {
+    return this.props.ref.current;
+  }
+}
+
+const MyReactWidget = (props) => {
+  const ref = useRef();
+  const widget = useWidget(MyWidget, {...props, ref});
+  return <div ref={ref}>Hello World</div>;
 };
 
 <DeckGL>
-  <CompassWidget/>
+  <MyReactWidget/>
 </DeckGL>
 ```
 

@@ -23,7 +23,7 @@ const App = (data) => (
 );
 ```
 
-Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `StaticMap` component from react-map-gl), but can be any React components.
+Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `Map` component from react-map-gl), but can be any React components.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -54,7 +54,10 @@ A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) comp
 
 - `viewport` ([Viewport](../core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
-- `eventManager` ([EventManager](https://uber-web.github.io/mjolnir.js/docs/api-reference/event-manager))
+- `eventManager` ([EventManager](https://visgl.github.io/mjolnir.js/docs/api-reference/event-manager))
+- `onViewStateChange` ([onViewStateChange](../core/deck.md#onviewstatechange)) - the view state change handler 
+- `deck` ([Deck](../core/deck.md)) - the current deck instance, if present
+- `widgets` ([Widget](../core/widget.md)[]) - the current jsx widgets, if any
 
 ```jsx
 /// Example using react-map-gl v6 controls with deck.gl
