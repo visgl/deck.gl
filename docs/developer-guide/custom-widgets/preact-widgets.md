@@ -76,6 +76,7 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
   id = 'layer-list-widget';
   props: LayerListWidgetProps;
   placement: WidgetPlacement = 'top-left';
+  viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
   layers: Layer[] = [];
   deck?: Deck<any>;
@@ -105,10 +106,23 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
   }
 
   setProps(props: Partial<LayerListWidgetProps>) {
-    // Handle when props change here.
+    const oldProps = this.props;
+    const el = this.element;
+    // Handle when CSS changes.
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
+      }
+    }
+    // Handle when props change.
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
-    this.props = {...props};
+    Object.assign(this.props, props);
     this.update();
   }
 
@@ -129,18 +143,20 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
     let layers = this.layers
     if (this.deck?.props.layerFilter) {
       const ui = (
-        {this.viewports.values().map(viewport => (
-          <div>
-            {viewport.id}
-            <ul>
-              {layers.filter(layer => (
-                this.deck?.props.layerFilter({layer, viewport})
-              )).map((layer) => {
-                <li key={layer.id}>{layer.id}</li>
-              })}
-            </ul>
-          </div>
-        ))}
+        <>
+          {Object.values(this.viewports).map(viewport => (
+            <div>
+              {viewport.id}
+              <ul>
+                {layers.filter(layer => (
+                  this.deck?.props.layerFilter({layer, viewport})
+                )).map((layer) => {
+                  <li key={layer.id}>{layer.id}</li>
+                })}
+              </ul>
+            </div>
+          ))}
+        </>
       );
       render(ui, element);
     } else {
