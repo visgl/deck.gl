@@ -44,8 +44,8 @@ export type WebMercatorViewportOptions = {
   altitude?: number;
   /** Camera fovy in degrees. If provided, overrides `altitude` */
   fovy?: number;
-  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat */
-  position?: number[];
+  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
+  position?: [number, number, number];
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */

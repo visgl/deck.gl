@@ -21,7 +21,7 @@ export type FirstPersonViewportOptions = {
   longitude?: number;
   /** Latitude of the camera, in the geospatial case. */
   latitude?: number;
-  /** Meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`. */
+  /** Meter offsets of the camera from the lng-lat-elevation anchor point. Default `[0, 0, 0]`. */
   position?: [number, number, number];
   /** Bearing (heading) of the camera in degrees. Default `0` (north). */
   bearing?: number;

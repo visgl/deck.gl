@@ -45,8 +45,8 @@ export type ViewportOptions = {
   longitude?: number;
   /** Latitude in degrees (geospatial only) */
   latitude?: number;
-  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat */
-  position?: number[];
+  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
+  position?: [number, number, number];
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
@@ -76,7 +76,7 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const IDENTITY = createMat4();
 
-const ZERO_VECTOR = [0, 0, 0];
+const ZERO_VECTOR: [number, number, number] = [0, 0, 0];
 
 const DEFAULT_DISTANCE_SCALES: DistanceScales = {
   unitsPerMeter: [1, 1, 1],
@@ -138,7 +138,7 @@ export default class Viewport {
   isGeospatial: boolean;
   zoom: number;
   focalDistance: number;
-  position: number[];
+  position: [number, number, number];
   modelMatrix: number[] | null;
 
   /** Derived parameters */
@@ -149,7 +149,7 @@ export default class Viewport {
   distanceScales: DistanceScales; /** scale factors between world space and common space */
   scale!: number; /** scale factor, equals 2^zoom */
   center!: number[]; /** viewport center in common space */
-  cameraPosition!: number[]; /** Camera position in common space */
+  cameraPosition!: [number, number, number]; /** Camera position in common space */
   projectionMatrix!: number[];
   viewMatrix!: number[];
   viewMatrixUncentered!: number[];

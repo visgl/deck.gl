@@ -81,7 +81,7 @@ function normalizeParameters(opts: {
 
 /** Get the common space position from world coordinates in the given coordinate system */
 export function getWorldPosition(
-  position: number[],
+  position: [number, number, number],
   {
     viewport,
     modelMatrix,
@@ -134,7 +134,7 @@ export function getWorldPosition(
  * a reference coordinate system
  */
 export function projectPosition(
-  position: number[],
+  position: [number, number, number],
   params: {
     /** The current viewport */
     viewport: Viewport;
