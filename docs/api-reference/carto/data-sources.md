@@ -64,6 +64,7 @@ type VectorTableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
   tableName: string;
+  aggregationExp?: string;
 };
 ```
 
@@ -74,6 +75,7 @@ type VectorQuerySourceOptions = {
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
+  aggregationExp?: string;
 };
 ```
 

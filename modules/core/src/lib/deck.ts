@@ -378,7 +378,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         type: 'best-available',
         adapters: [webgl2Adapter],
         ...props.deviceProps,
-        createCanvasContext: {canvas: this._createCanvas(props)}
+        createCanvasContext: {
+          canvas: this._createCanvas(props),
+          useDevicePixels: this.props.useDevicePixels,
+          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
+          autoResize: false
+        }
       });
     }
 
