@@ -70,7 +70,7 @@ type LayerListWidgetProps = {
    * Additional CSS class.
    */
   className?: string;
-}
+};
 
 class LayerListWidget implements Widget<LayerListWidgetProps> {
   id = 'layer-list-widget';
@@ -87,10 +87,10 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
 
-    this.props = { 
+    this.props = {
       ...props,
       style: props.style ?? {}
-    }
+    };
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -132,7 +132,7 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
   }
 
   onViewportChange(viewport) {
-    this.viewports[viewport.id] = viewport
+    this.viewports[viewport.id] = viewport;
   }
 
   private update() {
@@ -140,33 +140,44 @@ class LayerListWidget implements Widget<LayerListWidgetProps> {
     if (!element) {
       return;
     }
-    let layers = this.layers
+    const layers = this.layers;
     if (this.deck?.props.layerFilter) {
       const ui = (
         <>
           {Object.values(this.viewports).map(viewport => (
-            <div>
-              {viewport.id}
+            <>
+              <h4>Layers in {viewport.id}</h4>
               <ul>
-                {layers.filter(layer => (
-                  this.deck?.props.layerFilter({layer, viewport})
-                )).map((layer) => {
-                  <li key={layer.id}>{layer.id}</li>
-                })}
+                {layers
+                  .filter(layer =>
+                    this.deck?.props.layerFilter?.({
+                      layer,
+                      viewport,
+                      isPicking: false,
+                      renderPass: 'widget'
+                    })
+                  )
+                  .map(layer => (
+                    <li key={layer.id}>{layer.id}</li>
+                  ))}
               </ul>
-            </div>
+            </>
           ))}
         </>
       );
       render(ui, element);
     } else {
+      const viewportNames = Object.keys(this.viewports).join(', ');
       const ui = (
-        <ul>
-          {this.layers.map((layer) => (
-            <li key={layer.id}>{layer.id}</li>
-          ))}
-        </ul>
-      )
+        <>
+          <h4>Layers in {viewportNames} view</h4>
+          <ul>
+            {this.layers.map(layer => (
+              <li key={layer.id}>{layer.id}</li>
+            ))}
+          </ul>
+        </>
+      );
       render(ui, element);
     }
   }
