@@ -191,6 +191,9 @@ function getProjection(map: Map): 'mercator' | 'globe' {
   if (type === 'globe') {
     return 'globe';
   }
+  if (type && type !== 'mercator') {
+    throw new Error('Unsupported projection');
+  }
   return 'mercator';
 }
 
