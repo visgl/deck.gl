@@ -45,8 +45,20 @@ test('HexagonLayer#getAggregatorType', t => {
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
           t.ok(
+            layer.state.aggregator instanceof WebGLAggregator,
+            'By default should use GPU Aggregation'
+          );
+        }
+      },
+      {
+        title: 'Disable gpuAggregation',
+        updateProps: {
+          gpuAggregation: false
+        },
+        onAfterUpdate({layer}) {
+          t.ok(
             layer.state.aggregator instanceof CPUAggregator,
-            'By default should use CPU Aggregation'
+            'Should use CPU Aggregation (gpuAggregation: false)'
           );
         }
       },
