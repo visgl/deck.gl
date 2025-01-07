@@ -40,7 +40,7 @@ class LoadingIndicator implements Widget {
 }
 
 new Deck({
-  widgets=[new LoadingIndicator({size: 48})]
+  widgets: [new LoadingIndicator({size: 48})]
 });
 ```
 
