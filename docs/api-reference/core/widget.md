@@ -12,7 +12,7 @@ You may find many ready-to-use widgets in the `@deck.gl/widgets` module.
 A widget is expected to implement the `Widget` interface. Here is a custom widget that shows a spinner while layers are loading:
 
 ```ts
-import {Widget} from '@deck.gl/core';
+import {Deck, Widget} from '@deck.gl/core';
 
 class LoadingIndicator implements Widget {
   element?: HTMLDivElement;
@@ -39,12 +39,14 @@ class LoadingIndicator implements Widget {
   }
 }
 
-deckgl.addWidget(new LoadingIndicator({size: 48}));
+new Deck({
+  widgets: [new LoadingIndicator({size: 48})]
+});
 ```
 
 ## Widget Interface
 
-When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
 
 ### Members
 

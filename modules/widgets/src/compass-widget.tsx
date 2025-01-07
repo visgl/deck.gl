@@ -14,8 +14,11 @@ import {
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-export interface CompassWidgetProps {
+export type CompassWidgetProps = {
   id?: string;
+  /**
+   * Widget positioning within the view. Default 'top-left'.
+   */
   placement?: WidgetPlacement;
   /**
    * View to attach to and interact with. Required when using multiple views.
@@ -37,7 +40,7 @@ export interface CompassWidgetProps {
    * Additional CSS class.
    */
   className?: string;
-}
+};
 
 export class CompassWidget implements Widget<CompassWidgetProps> {
   id = 'compass';

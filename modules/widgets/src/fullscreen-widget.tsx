@@ -12,8 +12,11 @@ import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './components';
 
-export interface FullscreenWidgetProps {
+export type FullscreenWidgetProps = {
   id?: string;
+  /**
+   * Widget positioning within the view. Default 'top-left'.
+   */
   placement?: WidgetPlacement;
   /**
    * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
@@ -37,7 +40,7 @@ export interface FullscreenWidgetProps {
    * Additional CSS class.
    */
   className?: string;
-}
+};
 
 export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   id = 'fullscreen';
