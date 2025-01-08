@@ -39,25 +39,28 @@ import { useWidget } from '@deck.gl/react';
 import React, { useRef, RefObject } from 'react';
 
 type RotateWidgetProps = {
-  id?: string
-  placement?: WidgetPlacement
-  ref: RefObject<HTMLDivElement>
-}
+  id?: string;
+  placement?: WidgetPlacement;
+  viewId?: string | null;
+  ref: RefObject<HTMLDivElement>;
+};
 
 class RotateWidget implements Widget<RotateWidgetProps> {
   id = 'rotate-widget';
   props: RotateWidgetProps;
   placement: WidgetPlacement = 'top-right';
+  viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
   deck?: Deck<any>;
 
   constructor(props: RotateWidgetProps) {
     this.id = props.id ?? this.id;
     this.placement = props.placement ?? this.placement;
-    this.props = { ...props };
+    this.viewId = props.viewId ?? this.viewId;
+    this.props = {...props};
   }
 
-  onAdd({ deck }) {
+  onAdd({deck}) {
     this.deck = deck;
     return this.props.ref.current;
   }
@@ -79,7 +82,7 @@ class RotateWidget implements Widget<RotateWidgetProps> {
       ...viewport,
       bearing: nextBearing
     };
-    this.deck.setProps({ viewState });
+    this.deck?.setProps({viewState});
   }
 
   handleCWRotate() {
