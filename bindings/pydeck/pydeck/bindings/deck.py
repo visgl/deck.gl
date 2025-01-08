@@ -39,6 +39,7 @@ class Deck(JSONMixin):
         effects=None,
         map_provider=BaseMapProvider.CARTO.value,
         parameters=None,
+        widgets=None
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/docs/api-reference/core/deck>`_ class from deck.gl.
@@ -87,6 +88,7 @@ class Deck(JSONMixin):
         else:
             self.layers = layers or []
         self.views = views
+        self.widgets = widgets
         # Use passed view state
         self.initial_view_state = initial_view_state
 
