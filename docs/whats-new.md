@@ -45,7 +45,7 @@ deck.gl v9.0 added support for widgets, with v9.1 users can now create React com
 
 ### Widgets Developer Guide
 
-A major benefit of React support is the ability to define custom widgets with UI built in React in your own applications. Learn how to write your own deck.gl widgets with our new [Custom Widgets Developer Guide](./docs/developer-guide/custom-widgets).
+deck.gl v9.1 provides the ability to for applications to write React component that integrate with deck.gl using the widget interface. Learn how to write such React components with our new [Custom Widgets Developer Guide](./docs/developer-guide/custom-widgets).
 
 ### Aggregation layers upgrade
 
