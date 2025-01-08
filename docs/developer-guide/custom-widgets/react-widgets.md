@@ -34,16 +34,14 @@ Below is a step-by-step example of implementing a simple widget UI with React.
 Start by creating the core widget class, which must implement the [Widget](../../api-reference/core/widget.md) interface.
 
 ```ts
-import { WebMercatorViewport } from '@deck.gl/core';
-import type { Widget, WidgetPlacement, Viewport } from '@deck.gl/core';
-import DeckGL, { useWidget } from '@deck.gl/react';
-import React, { useRef, RefObject } from 'react';
+import {WebMercatorViewport} from '@deck.gl/core';
+import type {Widget, WidgetPlacement, Viewport} from '@deck.gl/core';
 
 type RotateWidgetProps = {
   id?: string;
   placement?: WidgetPlacement;
   viewId?: string | null;
-  ref: RefObject<HTMLDivElement>;
+  element: HTMLDivElement;
 };
 
 class RotateWidget implements Widget<RotateWidgetProps> {
@@ -63,7 +61,7 @@ class RotateWidget implements Widget<RotateWidgetProps> {
 
   onAdd({deck}) {
     this.deck = deck;
-    return this.props.ref.current;
+    return this.props.element;
   }
 
   setProps(props: Partial<RotateWidgetProps>) {
@@ -103,19 +101,22 @@ class RotateWidget implements Widget<RotateWidgetProps> {
 Wrap the widget class in a React component using the [`useWidget`](../../api-reference/react/use-widget.md) hook.
 
 ```tsx
-const Rotate = (props: RotateWidgetProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const widget = useWidget(RotateWidget, { ...props, ref });
+import React, {useMemo} from 'react';
+import {createPortal} from 'react-dom';
+import DeckGL, {useWidget} from '@deck.gl/react';
 
-  return (
-    <div ref={ref} style={{ padding: '10px', backgroundColor: '#f0f0f0', pointerEvents: 'auto' }}>
-      <button onClick={() => widget.handleCCWRotate()} style={{ marginRight: '5px' }}>
+const Rotate = (props: RotateWidgetProps) => {
+  const element = useMemo(() => document.createElement('div'), []);
+  const widget = useWidget(RotateWidget, {...props, element});
+
+  return createPortal(
+    <div style={{padding: '10px', backgroundColor: '#f0f0f0', pointerEvents: 'auto'}}>
+      <button onClick={() => widget.handleCCWRotate()} style={{marginRight: '5px'}}>
         Rotate CCW
       </button>
-      <button onClick={() => widget.handleCWRotate()}>
-        Rotate CW
-      </button>
-    </div>
+      <button onClick={() => widget.handleCWRotate()}>Rotate CW</button>
+    </div>,
+    element
   );
 };
 ```
@@ -124,7 +125,7 @@ This widget controls the bearing of the view its attached to.
 
 #### Mount the Component as a Deck Child
 
-The `<DeckGL/>` component needs to be the root component of any react components wrapping a widget in order to provide a context and render the component within deck's view system.
+The [`<DeckGL/>`](../../api-reference/react/deckgl.md) component needs to be the root component of any react components wrapping a widget in order to provide a context and render the component within deck's view system.
 
 ```tsx
 <DeckGL>
@@ -150,10 +151,10 @@ The `<DeckGL/>` component needs to be the root component of any react components
 A typical `style` prop in your React component could be used for inline styling overrides.
 
 ```tsx
-export const Rotate = (props: RotateWidgetProps & {style: CSSProperties}) => {
+const Rotate = (props: RotateWidgetProps & {style: CSSProperties}) => {
   ...
   return <div style={{...props.style}}>...</div>
-}
+};
 ```
 
 ```tsx
@@ -167,10 +168,10 @@ Alternatively, you could add a `className` to your React component along with st
 ```tsx
 import 'style.css';
 
-export const Rotate = (props: RotateWidgetProps) => {
+const Rotate = (props: RotateWidgetProps) => {
   ...
   return <div className="custom-rotate-widget">...</div>
-}
+};
 ```
 
 ```css
@@ -190,19 +191,20 @@ Deck.gl ships a widget stylesheet as well. You can use this built-in [stylesheet
 import '@deck.gl/widgets/stylesheet.css';
 import 'style.css';
 
-export const Rotate = (props: RotateWidgetProps) => {
-  const ref = useRef();
-  const widget = useWidget(RotateWidget, { ref, ...props });
-  return (
-    <div ref={ref} className="deck-widget">
+const Rotate = (props: RotateWidgetProps) => {
+  const element = useMemo(() => document.createElement('div'), []);
+  const widget = useWidget(RotateWidget, {...props, element});
+  return createPortal(
+    <div className="deck-widget">
       <div className="deck-widget-button">
         <button className="deck-widget-icon-button">
           ...
         </button>
       </div>
-    </div>
-  )
-}
+    </div>,
+    element
+  );
+};
 ```
 
 ```css
