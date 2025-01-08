@@ -19,11 +19,13 @@ const ReactWrappedCompass = (props: CompassWidgetProps) => {
 </DeckGL>
 ```
 
-For a custom widget, React can be used to implement the UI itself. A widget class is used to hook into updates, and a React [`ref`](https://react.dev/reference/react/useRef) is utilized to layout the widget UI along-side other widgets.
+For a custom widget, React can be used to implement the UI itself. A widget class is used to hook into deck.gl apis, and a React [`portal`](https://react.dev/reference/react-dom/createPortal) is utilized to render the widget UI along-side other widgets.
 
 ```tsx
+import React, {useMemo} from 'react';
 import type {Widget} from '@deck.gl/core';
 import DeckGL, {useWidget} from '@deck.gl/react';
+import {createPortal} from 'react-dom';
 
 class MyWidget implements Widget {
   constructor(props) {
@@ -31,14 +33,17 @@ class MyWidget implements Widget {
   }
 
   onAdd() {
-    return this.props.ref.current;
+    return this.props.element; // HTMLDivElement
   }
 }
 
 const MyReactWidget = (props) => {
-  const ref = useRef();
-  const widget = useWidget(MyWidget, {...props, ref});
-  return <div ref={ref}>Hello World</div>;
+  const element = useMemo(() => document.createElement('div'), []);
+  const widget = useWidget(MyWidget, {...props, element});
+  return createPortal(
+    <div>Hello World</div>,
+    element
+  );
 };
 
 <DeckGL>
