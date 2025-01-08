@@ -128,7 +128,7 @@ export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 // REACT BINDINGS PACKAGE
 //
 
-export {default, DeckGL, useWidget} from '@deck.gl/react';
+export {default, DeckGL} from '@deck.gl/react';
 
 //
 // WIDGETS PACKAGE
