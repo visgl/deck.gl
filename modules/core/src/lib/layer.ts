@@ -219,7 +219,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Public API for users
 
   /** Projects a point with current view state from the current layer's coordinate system to screen */
-  project(xyz: number[]): number[] {
+  project(xyz: [number, number, number]): [number, number, number] {
     assert(this.internalState);
     const viewport = this.internalState.viewport || this.context.viewport;
 
@@ -230,12 +230,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       coordinateSystem: this.props.coordinateSystem
     });
     const [x, y, z] = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
-    return xyz.length === 2 ? [x, y] : [x, y, z];
+    return [x, y, z];
   }
 
   /** Unprojects a screen pixel to the current view's default coordinate system
       Note: this does not reverse `project`. */
-  unproject(xy: number[]): number[] {
+  unproject(xy: [number, number, number]): [number, number, number] {
     assert(this.internalState);
     const viewport = this.internalState.viewport || this.context.viewport;
     return viewport.unproject(xy);
@@ -243,7 +243,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Projects a point with current view state from the current layer's coordinate system to the world space */
   projectPosition(
-    xyz: number[],
+    xyz: [number, number, number],
     params?: {
       /** The viewport to use */
       viewport?: Viewport;

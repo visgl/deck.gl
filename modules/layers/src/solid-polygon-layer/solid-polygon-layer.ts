@@ -160,13 +160,16 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
     }
 
-    let preproject: ((xy: number[]) => number[]) | undefined;
+    let preproject: ((xyz: [number, number, number]) => number[]) | undefined;
 
     if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {
-        preproject = viewport.projectFlat.bind(viewport);
+        preproject = (xyz: [number, number, number]) => {
+          const [x, y] = viewport.projectFlat([xyz[0], xyz[1]]);
+          return [x, y, 0];
+        };
       }
     }
 

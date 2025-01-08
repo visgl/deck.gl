@@ -53,9 +53,9 @@ export function getEmptyPickingInfo({
     // Find the viewport that contain the picked pixel
     pickedViewport = getViewportFromCoordinates(pickInfo?.pickedViewports || viewports, {x, y});
   }
-  let coordinate: number[] | undefined;
+  let coordinate: [number, number, number] | undefined;
   if (pickedViewport) {
-    const point = [x - pickedViewport.x, y - pickedViewport.y];
+    const point: [number, number, number] = [x - pickedViewport.x, y - pickedViewport.y, 0];
     if (z !== undefined) {
       point[2] = z;
     }

@@ -317,7 +317,7 @@ export default class HexagonLayer<
             }
             const viewport = this.state.aggregatorViewport;
             // project to common space
-            const p = viewport.projectPosition(positions);
+            const p = viewport.projectPosition([positions[0], positions[1], positions[2] || 0]);
             const {radiusCommon, hexOriginCommon} = opts;
             return pointToHexbin(
               [p[0] - hexOriginCommon[0], p[1] - hexOriginCommon[1]],
@@ -451,7 +451,10 @@ export default class HexagonLayer<
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      let centroid: [number, number] = [
+        (bounds[0][0] + bounds[1][0]) / 2,
+        (bounds[0][1] + bounds[1][1]) / 2
+      ];
       const {radius} = this.props;
       const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       radiusCommon = unitsPerMeter[0] * radius;
@@ -474,7 +477,7 @@ export default class HexagonLayer<
       binIdRange = getBinIdRange({
         dataBounds: bounds,
         getBinId: (p: number[]) => {
-          const positionCommon = viewport.projectFlat(p);
+          const positionCommon = viewport.projectFlat([p[0], p[1]]);
           positionCommon[0] -= hexOriginCommon[0];
           positionCommon[1] -= hexOriginCommon[1];
           return pointToHexbin(positionCommon, radiusCommon);

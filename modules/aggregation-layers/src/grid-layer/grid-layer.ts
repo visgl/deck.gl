@@ -313,7 +313,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             }
             const viewport = this.state.aggregatorViewport;
             // project to common space
-            const p = viewport.projectPosition(positions);
+            const p = viewport.projectPosition([positions[0], positions[1], positions[2] || 0]);
             const {cellSizeCommon, cellOriginCommon} = opts;
             return [
               Math.floor((p[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
@@ -446,7 +446,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      let centroid: [number, number] = [
+        (bounds[0][0] + bounds[1][0]) / 2,
+        (bounds[0][1] + bounds[1][1]) / 2
+      ];
       const {cellSize} = this.props;
       const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
@@ -475,7 +478,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       binIdRange = getBinIdRange({
         dataBounds: bounds,
         getBinId: (p: number[]) => {
-          const positionCommon = viewport.projectFlat(p);
+          const positionCommon = viewport.projectFlat([p[0], p[1]]);
           return [
             Math.floor((positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
             Math.floor((positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1])

@@ -148,7 +148,7 @@ export default class Viewport {
 
   distanceScales: DistanceScales; /** scale factors between world space and common space */
   scale!: number; /** scale factor, equals 2^zoom */
-  center!: number[]; /** viewport center in common space */
+  center!: [number, number, number]; /** viewport center in common space */
   cameraPosition!: [number, number, number]; /** Camera position in common space */
   projectionMatrix!: number[];
   viewMatrix!: number[];
@@ -234,22 +234,21 @@ export default class Viewport {
   /**
    * Projects xyz (possibly latitude and longitude) to pixel coordinates in window
    * using viewport projection parameters
-   * - [longitude, latitude] to [x, y]
    * - [longitude, latitude, Z] => [x, y, z]
    * Note: By default, returns top-left coordinates for canvas/SVG type render
    *
-   * @param {Array} lngLatZ - [lng, lat] or [lng, lat, Z]
+   * @param {Array} xyz - [lng, lat, Z]
    * @param {Object} opts - options
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz: number[], {topLeft = true}: {topLeft?: boolean} = {}): number[] {
+  project(xyz: [number, number, number], {topLeft = true}: {topLeft?: boolean} = {}): number[] {
     const worldPosition = this.projectPosition(xyz);
     const coord = worldToPixels(worldPosition, this.pixelProjectionMatrix);
 
     const [x, y] = coord;
     const y2 = topLeft ? y : this.height - y;
-    return xyz.length === 2 ? [x, y2] : [x, y2, coord[2]];
+    return [x, y2, coord[2]];
   }
 
   /**
@@ -263,33 +262,37 @@ export default class Viewport {
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
   unproject(
-    xyz: number[],
+    xyz: [number, number, number],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
-  ): number[] {
+  ): [number, number, number] {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
     const targetZWorld = targetZ && targetZ * this.distanceScales.unitsPerMeter[2];
-    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
+    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld) as [
+      number,
+      number,
+      number
+    ];
     const [X, Y, Z] = this.unprojectPosition(coord);
 
     if (Number.isFinite(z)) {
       return [X, Y, Z];
     }
-    return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
+    return [X, Y, targetZ as number];
   }
 
   // NON_LINEAR PROJECTION HOOKS
   // Used for web meractor projection
 
-  projectPosition(xyz: number[]): [number, number, number] {
-    const [X, Y] = this.projectFlat(xyz);
+  projectPosition(xyz: [number, number, number]): [number, number, number] {
+    const [X, Y] = this.projectFlat([xyz[0], xyz[1]]);
     const Z = (xyz[2] || 0) * this.distanceScales.unitsPerMeter[2];
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: number[]): [number, number, number] {
-    const [X, Y] = this.unprojectFlat(xyz);
+  unprojectPosition(xyz: [number, number, number]): [number, number, number] {
+    const [X, Y] = this.unprojectFlat([xyz[0], xyz[1]]);
     const Z = (xyz[2] || 0) * this.distanceScales.metersPerUnit[2];
     return [X, Y, Z];
   }
@@ -303,16 +306,16 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  projectFlat(xyz: number[]): [number, number] {
+  projectFlat(xy: [number, number]): [number, number] {
     if (this.isGeospatial) {
       // Shader clamps latitude to +-89.9, see /shaderlib/project/project.glsl.js
       // lngLatToWorld([0, -89.9])[1] = -317.9934163758329
       // lngLatToWorld([0, 89.9])[1] = 829.9934163758271
-      const result = lngLatToWorld(xyz);
+      const result = lngLatToWorld(xy);
       result[1] = clamp(result[1], -318, 830);
-      return result;
+      return [result[0], result[1]];
     }
-    return xyz as [number, number];
+    return xy;
   }
 
   /**
@@ -323,11 +326,11 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  unprojectFlat(xyz: number[]): [number, number] {
+  unprojectFlat(xy: [number, number]): [number, number] {
     if (this.isGeospatial) {
-      return worldToLngLat(xyz);
+      return worldToLngLat(xy);
     }
-    return xyz as [number, number];
+    return xy;
   }
 
   /**
@@ -337,10 +340,10 @@ export default class Viewport {
   getBounds(options: {z?: number} = {}): [number, number, number, number] {
     const unprojectOption = {targetZ: options.z || 0};
 
-    const topLeft = this.unproject([0, 0], unprojectOption);
-    const topRight = this.unproject([this.width, 0], unprojectOption);
-    const bottomLeft = this.unproject([0, this.height], unprojectOption);
-    const bottomRight = this.unproject([this.width, this.height], unprojectOption);
+    const topLeft = this.unproject([0, 0, 0], unprojectOption);
+    const topRight = this.unproject([this.width, 0, 0], unprojectOption);
+    const bottomLeft = this.unproject([0, this.height, 0], unprojectOption);
+    const bottomRight = this.unproject([this.width, this.height, 0], unprojectOption);
 
     return [
       Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
@@ -431,10 +434,10 @@ export default class Viewport {
     this.scale = scale;
 
     const {position, modelMatrix} = opts;
-    let meterOffset: number[] = ZERO_VECTOR;
+    let meterOffset: [number, number, number] = ZERO_VECTOR;
     if (position) {
       meterOffset = modelMatrix
-        ? (new Matrix4(modelMatrix).transformAsVector(position, []) as number[])
+        ? (new Matrix4(modelMatrix).transformAsVector(position, []) as [number, number, number])
         : position;
     }
 
@@ -445,7 +448,7 @@ export default class Viewport {
       this.center = new Vector3(meterOffset)
         // Convert to pixels in current zoom
         .scale(this.distanceScales.unitsPerMeter)
-        .add(center);
+        .toArray() as [number, number, number];
     } else {
       this.center = this.projectPosition(meterOffset);
     }

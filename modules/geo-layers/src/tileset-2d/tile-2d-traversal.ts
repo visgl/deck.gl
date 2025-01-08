@@ -70,7 +70,7 @@ class OSMNode {
   // eslint-disable-next-line complexity
   update(params: {
     viewport: Viewport;
-    project: ((xyz: number[]) => number[]) | null;
+    project: ((xyz: [number, number, number]) => [number, number, number]) | null;
     cullingVolume: CullingVolume;
     elevationBounds: ZRange;
     minZ: number;
@@ -144,7 +144,7 @@ class OSMNode {
   getBoundingVolume(
     zRange: ZRange,
     worldOffset: number,
-    project: ((xyz: number[]) => number[]) | null
+    project: ((xyz: [number, number, number]) => [number, number, number]) | null
   ) {
     if (project) {
       // Custom projection
@@ -155,7 +155,11 @@ class OSMNode {
       // Convert from tile-relative coordinates to common space
       const refPointPositions: number[][] = [];
       for (const p of refPoints) {
-        const lngLat: number[] = osmTile2lngLat(this.x + p[0], this.y + p[1], this.z);
+        const lngLat: [number, number, number] = osmTile2lngLat(
+          this.x + p[0],
+          this.y + p[1],
+          this.z
+        );
         lngLat[2] = zRange[0];
         refPointPositions.push(project(lngLat));
 
@@ -190,7 +194,7 @@ export function getOSMTileIndices(
   zRange: ZRange | null,
   bounds?: Bounds
 ): TileIndex[] {
-  const project: ((xyz: number[]) => number[]) | null =
+  const project: ((xyz: [number, number, number]) => [number, number, number]) | null =
     viewport instanceof _GlobeViewport && viewport.resolution
       ? // eslint-disable-next-line @typescript-eslint/unbound-method
         viewport.projectPosition

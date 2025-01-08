@@ -129,10 +129,9 @@ export default {
       radius: brushingRadius,
       target: TARGET[brushingTarget] || 0,
       mousePos: mousePosition
-        ? (viewport.unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y]) as [
-            number,
-            number
-          ])
+        ? (viewport
+            .unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y, 0])
+            .slice(0, 2) as [number, number])
         : [0, 0]
     };
   },

@@ -136,7 +136,7 @@ export default class OrbitViewport extends Viewport {
     return [X, Y, Z];
   }
 
-  panByPosition(coords: number[], pixel: number[]): OrbitViewportOptions {
+  panByPosition(coords: [number, number, number], pixel: number[]): OrbitViewportOptions {
     const p0 = this.project(coords);
     const nextCenter = [
       this.width / 2 + p0[0] - pixel[0],

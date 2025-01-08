@@ -11,7 +11,7 @@ const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
 
 type PropsWithAnchor = {
-  around?: number[];
+  around?: [number, number, number];
   aroundPosition?: number[];
   [key: string]: any;
 };
@@ -21,7 +21,7 @@ type PropsWithAnchor = {
  */
 export default class LinearInterpolator extends TransitionInterpolator {
   opts: {
-    around?: number[];
+    around?: [number, number, number];
     makeViewport?: (props: Record<string, any>) => Viewport;
   };
 
@@ -42,7 +42,7 @@ export default class LinearInterpolator extends TransitionInterpolator {
                 extract?: string[];
                 required?: string[];
               };
-          around?: number[];
+          around?: [number, number, number];
           makeViewport?: (props: Record<string, any>) => Viewport;
         } = {}
   ) {

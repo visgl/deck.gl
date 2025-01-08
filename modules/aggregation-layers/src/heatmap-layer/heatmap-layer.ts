@@ -492,10 +492,10 @@ export default class HeatmapLayer<
     // Unproject all 4 corners of the current screen coordinates into world coordinates (lng/lat)
     // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
     const viewportCorners = [
-      viewport.unproject([0, 0]),
-      viewport.unproject([viewport.width, 0]),
-      viewport.unproject([0, viewport.height]),
-      viewport.unproject([viewport.width, viewport.height])
+      viewport.unproject([0, 0, 0]),
+      viewport.unproject([viewport.width, 0, 0]),
+      viewport.unproject([0, viewport.height, 0]),
+      viewport.unproject([viewport.width, viewport.height, 0])
     ].map(p => p.map(Math.fround));
 
     // #1: get world bounds for current viewport extends
@@ -546,7 +546,10 @@ export default class HeatmapLayer<
     triPositionBuffer!.write(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
+      getTextureCoordinates(
+        viewport.projectPosition([p[0], p[1], p[2] || 0]),
+        normalizedCommonBounds!
+      )
     );
     triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
@@ -691,8 +694,8 @@ export default class HeatmapLayer<
   _commonToWorldBounds(commonBounds) {
     const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
-    const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin]);
-    const topRightWorld = viewport.unprojectPosition([xMax, yMax]);
+    const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin, 0]);
+    const topRightWorld = viewport.unprojectPosition([xMax, yMax, 0]);
 
     return bottomLeftWorld.slice(0, 2).concat(topRightWorld.slice(0, 2));
   }

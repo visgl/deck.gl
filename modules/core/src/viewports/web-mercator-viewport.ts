@@ -236,22 +236,22 @@ export default class WebMercatorViewport extends Viewport {
     return this._subViewports;
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: [number, number, number]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.projectPosition(xyz);
     }
-    const [X, Y] = this.projectFlat(xyz);
+    const [X, Y] = this.projectFlat([xyz[0], xyz[1]]);
     const Z = (xyz[2] || 0) * unitsPerMeter(xyz[1]);
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: number[]): [number, number, number] {
+  unprojectPosition(xyz: [number, number, number]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.unprojectPosition(xyz);
     }
-    const [X, Y] = this.unprojectFlat(xyz);
+    const [X, Y] = this.unprojectFlat([xyz[0], xyz[1]]);
     const Z = (xyz[2] || 0) / unitsPerMeter(Y);
     return [X, Y, Z];
   }
@@ -270,7 +270,7 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords: number[], pixel: number[]): WebMercatorViewportOptions {
+  panByPosition(coords: [number, number], pixel: number[]): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 

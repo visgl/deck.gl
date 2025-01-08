@@ -60,7 +60,7 @@ export type OrthographicViewportOptions = {
   /** Viewport height in pixels */
   height?: number;
   /** The world position at the center of the viewport. Default `[0, 0, 0]`. */
-  target?: [number, number, number] | [number, number];
+  target?: [number, number, number];
   /**  The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large.
    *   To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`. */
   zoom?: number | [number, number];
@@ -121,24 +121,24 @@ export default class OrthographicViewport extends Viewport {
     });
   }
 
-  projectFlat([X, Y]: number[]): [number, number] {
+  projectFlat([X, Y]: [number, number]): [number, number] {
     const {unitsPerMeter} = this.distanceScales;
     return [X * unitsPerMeter[0], Y * unitsPerMeter[1]];
   }
 
-  unprojectFlat([x, y]: number[]): [number, number] {
+  unprojectFlat([x, y]: [number, number]): [number, number] {
     const {metersPerUnit} = this.distanceScales;
     return [x * metersPerUnit[0], y * metersPerUnit[1]];
   }
 
   /* Needed by LinearInterpolator */
-  panByPosition(coords: number[], pixel: number[]): OrthographicViewportOptions {
+  panByPosition(coords: [number, number], pixel: number[]): OrthographicViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 
     const translate = vec2.add([], toLocation, vec2.negate([], fromLocation));
     const newCenter = vec2.add([], this.center, translate);
-
-    return {target: this.unprojectFlat(newCenter)};
+    const target = this.unprojectFlat(newCenter);
+    return {target: [target[0], target[1], 0]};
   }
 }

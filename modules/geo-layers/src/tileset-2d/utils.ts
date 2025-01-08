@@ -165,10 +165,10 @@ function getCullBoundsInViewport(
 
     const unprojectOption = {targetZ: z};
 
-    const topLeft = viewport.unproject([x, y], unprojectOption);
-    const topRight = viewport.unproject([x + width, y], unprojectOption);
-    const bottomLeft = viewport.unproject([x, y + height], unprojectOption);
-    const bottomRight = viewport.unproject([x + width, y + height], unprojectOption);
+    const topLeft = viewport.unproject([x, y, 0], unprojectOption);
+    const topRight = viewport.unproject([x + width, y, 0], unprojectOption);
+    const bottomLeft = viewport.unproject([x, y + height, 0], unprojectOption);
+    const bottomRight = viewport.unproject([x + width, y + height, 0], unprojectOption);
 
     return [
       Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
@@ -204,12 +204,12 @@ function getScale(z: number, tileSize: number): number {
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
-export function osmTile2lngLat(x: number, y: number, z: number): [number, number] {
+export function osmTile2lngLat(x: number, y: number, z: number): [number, number, number] {
   const scale = getScale(z, TILE_SIZE);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-  return [lng, lat];
+  return [lng, lat, 0];
 }
 
 function tile2XY(x: number, y: number, z: number, tileSize: number): [number, number] {

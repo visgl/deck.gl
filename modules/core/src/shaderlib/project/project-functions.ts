@@ -17,7 +17,7 @@ import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import type {NumericArray} from '../../types/types';
 
-const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
+const DEFAULT_COORDINATE_ORIGIN: [number, number, number] = [0, 0, 0];
 
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z

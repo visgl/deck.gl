@@ -117,8 +117,16 @@ export class TerrainCover {
         shouldRedraw = true;
         this.targetBounds = this.tile.boundingBox;
 
-        const bottomLeftCommon = viewport.projectPosition(this.targetBounds[0]);
-        const topRightCommon = viewport.projectPosition(this.targetBounds[1]);
+        const bottomLeftCommon = viewport.projectPosition([
+          this.targetBounds[0][0],
+          this.targetBounds[0][1],
+          this.targetBounds[0][2] || 0
+        ]);
+        const topRightCommon = viewport.projectPosition([
+          this.targetBounds[1][0],
+          this.targetBounds[1][1],
+          this.targetBounds[1][2] || 0
+        ]);
         this.targetBoundsCommon = [
           bottomLeftCommon[0],
           bottomLeftCommon[1],

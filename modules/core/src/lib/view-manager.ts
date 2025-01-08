@@ -20,14 +20,14 @@ type ViewStateOf<ViewT> = ViewT extends View<infer ViewStateT> ? ViewStateT : ne
 type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapView
   : ViewsT extends View[]
-    ? ViewsT[number]
-    : ViewsT;
+  ? ViewsT[number]
+  : ViewsT;
 export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStateOf<OneOfViews<ViewsT>>;
 export type ViewStateMap<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapViewState
   : ViewsT extends View
-    ? ViewStateOf<ViewsT>
-    : {[viewId: string]: AnyViewStateOf<ViewsT>};
+  ? ViewStateOf<ViewsT>
+  : {[viewId: string]: AnyViewStateOf<ViewsT>};
 
 /** This is a very lose type of all "acceptable" viewState
  * It's not good for type hinting but matches what may exist internally
@@ -195,13 +195,13 @@ export default class ViewManager<ViewsT extends View[]> {
    * @param {Object} opts.topLeft=true - Whether origin is top left
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz: number[], opts?: {topLeft?: boolean}): number[] | null {
+  unproject(xyz: [number, number, number], opts?: {topLeft?: boolean}): number[] | null {
     const viewports = this.getViewports();
     const pixel = {x: xyz[0], y: xyz[1]};
     for (let i = viewports.length - 1; i >= 0; --i) {
       const viewport = viewports[i];
       if (viewport.containsPixel(pixel)) {
-        const p = xyz.slice();
+        const p = xyz.slice() as [number, number, number];
         p[0] -= viewport.x;
         p[1] -= viewport.y;
         return viewport.unproject(p, opts);
