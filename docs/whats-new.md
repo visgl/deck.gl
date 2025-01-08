@@ -32,7 +32,9 @@ Release date: TBD (targeting December 2024)
 
 ### Maplibre Globe View
 
-MapLibre v5 recently launched a [globe view](https://github.com/maplibre/maplibre-gl-js/issues/307), and in collaboration with the MapLibre team, we have add support for seamlessly integrating deck.gl layers with the globe using the existing [GlobeView](./api-reference/core/globe-view). The integration works for all three [Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
+- The deck.gl [`GlobeView`](./api-reference/core/globe-view) now integrates seamlessly with the MapLibre v5 [globe view](https://maplibre.org/roadmap/globe-view/). 
+- The Maplibre globe view integration was done in close collaboration with the MapLibre team, and works for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
+- The deck.gl `GlobeView` is no longer considered experimental, and can now be imported without a leading underscore.
 
 ### React Widgets
 
