@@ -34,7 +34,7 @@ Breaking changes:
 
 ### MapViewState / ViewportOptions
 
-- The `position` property changed from `number[]` to `[number, number, number]` (lat, lng, elevation).
+- The `position` property changed from `number[]` to `[number, number, number]` (lng, lat, elevation).
 
 ## Upgrading to v9.0
 
