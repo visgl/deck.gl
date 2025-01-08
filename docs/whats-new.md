@@ -64,7 +64,7 @@ See [upgrade guide](./upgrade-guide.md) for more details.
 
 ### WebGPU readiness
 
-- luma.gl has been updated to v9.1 which focuses on building out WebGPU support. For details see [release notes](https://luma.gl/docs/whats-new#version-91-in-development) and [upgrade-guide](https://luma.gl/docs/upgrade-guide#upgrading-to-v91).
+- luma.gl has been updated to v9.1 which focuses on improved WebGPU support. For details see [release notes](https://luma.gl/docs/whats-new#version-91-in-development) and [upgrade-guide](https://luma.gl/docs/upgrade-guide#upgrading-to-v91).
 - As part of WebGPU readiness, all shader code in deck.gl v9.1 (layers and extensions) have been migrated to use uniform buffers instead of WebGL1 style uniforms. 
 - For most users this change should be transparent, but custom layers that add `uniforms` should [start migrating asap](./upgrade-guide.md) as WebGL1 style uniform support is being actively phased out.
 
