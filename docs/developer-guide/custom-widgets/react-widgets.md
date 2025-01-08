@@ -34,8 +34,9 @@ Below is a step-by-step example of implementing a simple widget UI with React.
 Start by creating the core widget class, which must implement the [Widget](../../api-reference/core/widget.md) interface.
 
 ```ts
-import type { Widget, WidgetPlacement } from '@deck.gl/core';
-import { useWidget } from '@deck.gl/react';
+import { WebMercatorViewport } from '@deck.gl/core';
+import type { Widget, WidgetPlacement, Viewport } from '@deck.gl/core';
+import DeckGL, { useWidget } from '@deck.gl/react';
 import React, { useRef, RefObject } from 'react';
 
 type RotateWidgetProps = {
@@ -50,7 +51,7 @@ class RotateWidget implements Widget<RotateWidgetProps> {
   props: RotateWidgetProps;
   placement: WidgetPlacement = 'top-right';
   viewId?: string | null = null;
-  viewports: {[id: string]: Viewport} = {};
+  viewports: {[id: string]: WebMercatorViewport} = {};
   deck?: Deck<any>;
 
   constructor(props: RotateWidgetProps) {
@@ -72,17 +73,19 @@ class RotateWidget implements Widget<RotateWidgetProps> {
     Object.assign(this.props, props);
   }
 
-  onViewportChange(viewport) {
-    this.viewports[viewport.id] = viewport;
+  onViewportChange(viewport: Viewport) {
+    if (viewport instanceof WebMercatorViewport) {
+      this.viewports[viewport.id] = viewport;
+    }
   }
 
-  handleRotate(viewport, bearingDelta) {
+  handleRotate(viewport: WebMercatorViewport, bearingDelta: number) {
     const nextBearing = viewport.bearing + bearingDelta;
-    const viewState = {
+    const initialViewState = {
       ...viewport,
       bearing: nextBearing
     };
-    this.deck?.setProps({viewState});
+    this.deck?.setProps({initialViewState});
   }
 
   handleCWRotate() {
@@ -100,12 +103,12 @@ class RotateWidget implements Widget<RotateWidgetProps> {
 Wrap the widget class in a React component using the [`useWidget`](../../api-reference/react/use-widget.md) hook.
 
 ```tsx
-export const Rotate = (props: RotateWidgetProps) => {
-  const ref = useRef();
-  const widget = useWidget(RotateWidget, { ref, ...props });
+const Rotate = (props: RotateWidgetProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const widget = useWidget(RotateWidget, { ...props, ref });
 
   return (
-    <div ref={ref} style={{ padding: '10px', backgroundColor: '#f0f0f0' }}>
+    <div ref={ref} style={{ padding: '10px', backgroundColor: '#f0f0f0', pointerEvents: 'auto' }}>
       <button onClick={() => widget.handleCCWRotate()} style={{ marginRight: '5px' }}>
         Rotate CCW
       </button>
