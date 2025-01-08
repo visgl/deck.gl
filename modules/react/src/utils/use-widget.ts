@@ -2,7 +2,7 @@ import {useContext, useMemo, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
 import {log, type Widget, _deepEqual as deepEqual} from '@deck.gl/core';
 
-function useWidget<T extends Widget, PropsT extends {}>(
+export function useWidget<T extends Widget, PropsT extends {}>(
   WidgetClass: {new (props: PropsT): T},
   props: PropsT
 ): T {
@@ -37,5 +37,3 @@ function useWidget<T extends Widget, PropsT extends {}>(
 
   return widget;
 }
-
-export default useWidget;
