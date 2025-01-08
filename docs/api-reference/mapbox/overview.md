@@ -39,7 +39,7 @@ npm install @deck.gl/mapbox
 import {MapboxOverlay} from '@deck.gl/mapbox';
 ```
 
-### Camera Syncronization between deck.gl and Mapbox
+### Camera Synchronization between deck.gl and Mapbox
 
 This module keeps a deck.gl `MapView` in sync with the mapbox-gl camera so that the base map and deck layers are always geospactially aligned. Some `Deck` props, such as `viewState`, are ignored or have different behavior. See `MapboxOverlay` constructor notes. Also, some camera features are unable to be fully synchronized due to mapbox-gl API limitations, see [limitations](#limitations).
 
