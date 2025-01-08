@@ -20,7 +20,7 @@ class ScreenGridDemo extends Component {
   };
 
   static parameters = {
-    gpuAggregation: {displayName: 'GPU Acceleration', type: 'checkbox', value: false},
+    gpuAggregation: {displayName: 'GPU Acceleration', type: 'checkbox', value: true},
     cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
   };
 

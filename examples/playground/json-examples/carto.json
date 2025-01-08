@@ -32,5 +32,13 @@
       "pointRadiusMinPixels": 2,
       "stroked": false
     }
+  ],
+  "widgets": [
+    {
+      "@@type": "ZoomWidget"
+    },
+    {
+      "@@type": "CompassWidget"
+    }
   ]
 }

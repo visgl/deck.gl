@@ -1,4 +1,4 @@
-# @deck.gl/aggregation-layers
+# Aggregation Layers
 
 Layers that aggregate the input data and visualize them in alternative representations, such as grid and hexagon binning, contour, and heatmap.
 
