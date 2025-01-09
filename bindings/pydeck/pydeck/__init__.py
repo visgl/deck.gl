@@ -1,4 +1,4 @@
-from .bindings import map_styles, Deck, Layer, LightSettings, View, ViewState  # noqa
+from .bindings import map_styles, Deck, Layer, LightSettings, View, ViewState, Widget  # noqa
 
 from .nbextension import _jupyter_nbextension_paths  # noqa
 
