@@ -18,6 +18,10 @@ export type GlobeViewState = {
   minZoom?: number;
   /** Max zoom, default `20` */
   maxZoom?: number;
+  /** The near plane position */
+  nearZ?: number;
+  /** The far plane position */
+  farZ?: number;
 } & CommonViewState;
 
 export type GlobeViewProps = {
