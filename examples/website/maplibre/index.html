@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body, body > div {margin: 0; width: 100vw; height: 100vh; overflow: hidden;}
+    body {font-family: sans-serif; background: linear-gradient(0, #000, #222);}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+</body>
+<script type="module">
+  import {renderToDOM} from './app.tsx';
+  renderToDOM(document.getElementById('app'));
+</script>
+</html>

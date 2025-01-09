@@ -1,0 +1,27 @@
+{
+  "name": "deckgl-examples-maplibre",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@loaders.gl/csv": "^4.2.0",
+    "@material-ui/core": "^4.10.2",
+    "@material-ui/icons": "^4.9.1",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "deck.gl": "^9.0.0",
+    "maplibre-gl": "5.0.0-pre.1",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@vis.gl/react-maplibre": "^1.0.0-alpha.4"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
+  }
+}
