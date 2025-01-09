@@ -4,19 +4,18 @@
 
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
-import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
-import {Map, useControl} from '@vis.gl/react-maplibre';
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {createRoot} from 'react-dom/client';
 
+import DeckGL from '@deck.gl/react';
 import {
   COORDINATE_SYSTEM,
+  _GlobeView as GlobeView,
   LightingEffect,
   AmbientLight,
   _SunLight as SunLight
 } from '@deck.gl/core';
+import {GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {SphereGeometry} from '@luma.gl/engine';
@@ -25,21 +24,19 @@ import {CSVLoader} from '@loaders.gl/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
+import type {GlobeViewState} from '@deck.gl/core';
 
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: GlobeViewState = {
   longitude: 0,
   latitude: 20,
-  zoom: 2,
-  minZoom: 1,
-  maxZoom: 3
+  zoom: 0
 };
 
-const ANIMATION_SPEED = 60;
-const TIME_WINDOW = 1800; // 30 minutes
-const EARTH_RADIUS_METERS = 6370972;
+const TIME_WINDOW = 900; // 15 minutes
+const EARTH_RADIUS_METERS = 6.3e6;
 const SEC_PER_DAY = 60 * 60 * 24;
 
 const ambientLight = new AmbientLight({
@@ -73,12 +70,6 @@ type DailyFlights = {
   flights: Flight[];
 };
 
-function DeckGLOverlay(props) {
-  const overlay = useControl(() => new DeckOverlay(props));
-  overlay.setProps(props);
-  return null;
-}
-
 export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -98,7 +89,16 @@ export default function App({data}: {data?: DailyFlights[]}) {
         mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         getPosition: [0, 0, 0],
-        getColor: [255, 255, 255, 0]
+        getColor: [255, 255, 255]
+      }),
+      new GeoJsonLayer({
+        id: 'earth-land',
+        data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson',
+        // Styles
+        stroked: false,
+        filled: true,
+        opacity: 0.1,
+        getFillColor: [30, 80, 120]
       })
     ],
     []
@@ -115,33 +115,29 @@ export default function App({data}: {data?: DailyFlights[]}) {
           getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
           getSourceTimestamp: d => d.time1,
           getTargetTimestamp: d => d.time2,
-          getHeight: 0.3,
-          getWidth: 2,
+          getHeight: 0.5,
+          getWidth: 1,
           timeRange,
-          getSourceColor: [63, 81, 181],
-          getTargetColor: [63, 181, 173],
-          parameters: { cullMode: 'none' }
+          getSourceColor: [255, 0, 128],
+          getTargetColor: [0, 128, 255]
         })
     );
 
-  const layers = [backgroundLayers, dataLayers];
   return (
     <>
-      <Map
-        reuseMaps
-        mapLib={maplibregl}
-        projection="globe"
+      <DeckGL
+        views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-      >
-        <DeckGLOverlay layers={layers} effects={[lightingEffect]} interleaved={true} />
-      </Map>
+        controller={true}
+        effects={[lightingEffect]}
+        layers={[backgroundLayers, dataLayers]}
+      />
       {data && (
         <RangeInput
           min={0}
           max={data.length * SEC_PER_DAY}
           value={currentTime}
-          animationSpeed={ANIMATION_SPEED}
+          animationSpeed={TIME_WINDOW * 0.2}
           formatLabel={formatLabel}
           onChange={setCurrentTime}
         />
