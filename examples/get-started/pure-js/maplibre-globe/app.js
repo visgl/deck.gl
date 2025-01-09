@@ -15,9 +15,7 @@ const map = new maplibregl.Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   center: [0.45, 51.47],
-  zoom: 4,
-  bearing: 0,
-  pitch: 30
+  zoom: 0
 });
 
 const deckOverlay = new DeckOverlay({
@@ -43,6 +41,9 @@ const deckOverlay = new DeckOverlay({
     new ArcLayer({
       id: 'arcs',
       data: AIR_PORTS,
+      parameters: {
+        cullMode: 'none'
+      },
       dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
       // Styles
       getSourcePosition: f => [-0.4531566, 51.4709959], // London
@@ -54,5 +55,8 @@ const deckOverlay = new DeckOverlay({
   ]
 });
 
-map.addControl(deckOverlay);
-map.addControl(new maplibregl.NavigationControl());
+map.on('load', () => {
+  map.setProjection({type: 'globe'});
+  map.addControl(deckOverlay);
+  map.addControl(new maplibregl.NavigationControl());
+});

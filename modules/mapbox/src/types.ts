@@ -9,7 +9,7 @@ type Listener = (event?: any) => any;
 export interface Evented {
   on(type: string, listener: Listener);
 
-  off(type?: string | any, listener?: Listener);
+  off(type: string, listener?: Listener);
 
   once(type: string, listener: Listener);
 }
@@ -111,6 +111,8 @@ export interface Map extends Evented {
 
   // mapbox v2+, maplibre v3+
   getTerrain?(): any;
+  // mapbox v2+, maplibre v5+
+  getProjection?(): any;
   // mapbox v2+
   getFreeCameraOptions?(): FreeCameraOptions;
 
