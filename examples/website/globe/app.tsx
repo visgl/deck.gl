@@ -5,14 +5,14 @@
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
 import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
-import {Map} from '@vis.gl/react-maplibre';
+import {Map, useControl} from '@vis.gl/react-maplibre';
+import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {createRoot} from 'react-dom/client';
 
-import DeckGL from '@deck.gl/react';
 import {
   COORDINATE_SYSTEM,
-  _GlobeView as GlobeView,
   LightingEffect,
   AmbientLight,
   _SunLight as SunLight
@@ -25,12 +25,11 @@ import {CSVLoader} from '@loaders.gl/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
-import type {GlobeViewState} from '@deck.gl/core';
 
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
 
-const INITIAL_VIEW_STATE: GlobeViewState = {
+const INITIAL_VIEW_STATE = {
   longitude: 0,
   latitude: 20,
   zoom: 2,
@@ -74,6 +73,12 @@ type DailyFlights = {
   flights: Flight[];
 };
 
+function DeckGLOverlay(props) {
+  const overlay = useControl(() => new DeckOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
 export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -114,26 +119,23 @@ export default function App({data}: {data?: DailyFlights[]}) {
           getWidth: 2,
           timeRange,
           getSourceColor: [63, 81, 181],
-          getTargetColor: [63, 181, 173]
+          getTargetColor: [63, 181, 173],
+          parameters: { cullMode: 'none' }
         })
     );
 
+  const layers = [backgroundLayers, dataLayers];
   return (
     <>
-      <DeckGL
-        views={new GlobeView()}
+      <Map
+        reuseMaps
+        mapLib={maplibregl}
+        projection="globe"
         initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        effects={[lightingEffect]}
-        layers={[backgroundLayers, dataLayers]}
+        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
-        <Map
-          reuseMaps
-          mapLib={maplibregl}
-          projection={'globe'}
-          mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-        />
-      </DeckGL>
+        <DeckGLOverlay layers={layers} effects={[lightingEffect]} interleaved={true} />
+      </Map>
       {data && (
         <RangeInput
           min={0}
