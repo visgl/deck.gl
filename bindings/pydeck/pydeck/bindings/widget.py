@@ -5,7 +5,7 @@ TYPE_IDENTIFIER = "@@type"
 
 class Widget(JSONMixin):
     """
-    Represents a deck.gl widget, which are UI components around the WebGL2/WebGPU canvas 
+    Represents a deck.gl widget, which are UI components around the WebGL2/WebGPU canvas
     to offer controls and information for a better user experience.
 
     Parameters
