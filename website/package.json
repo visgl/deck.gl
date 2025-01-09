@@ -31,7 +31,7 @@
     "d3-scale": "^4.0.0",
     "expr-eval": "^2.0.2",
     "mapbox-gl": "^3.0.0",
-    "maplibre-gl": "^5.0.0-pre.1",
+    "maplibre-gl": "5.0.0-pre.1",
     "popmotion": "^11.0.0",
     "react": "^18.0.0",
     "react-ace": "^6.1.4",
