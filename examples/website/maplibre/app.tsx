@@ -81,7 +81,6 @@ function DeckGLOverlay(props) {
 
 export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
-
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
 
   const formatLabel = useCallback((t: number) => getDate(data, t).toUTCString(), [data]);
@@ -124,9 +123,17 @@ export default function App({data}: {data?: DailyFlights[]}) {
         })
     );
 
-  const layers = [backgroundLayers, dataLayers];
+  const layers = [...backgroundLayers, ...(dataLayers || [])];
+
   return (
-    <>
+    <div style={{
+      position: 'absolute',
+      height: '100%',
+      width: '100%',
+      top: 0,
+      left: 0,
+      background: 'linear-gradient(0, #000, #223)'
+    }}>
       <Map
         reuseMaps
         mapLib={maplibregl}
@@ -146,7 +153,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
           onChange={setCurrentTime}
         />
       )}
-    </>
+    </div>
   );
 }
 
