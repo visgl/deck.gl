@@ -1,6 +1,8 @@
 # Preact Widgets
 
-Preact widgets are an easy way to add dynamic UI elements into universal deck.gl widgets using the [Preact](https://preactjs.com/) UI library. This guide will walk you through the process of building Preact-based widgets and best practices.
+Normally we want to to create a reusable, universal widget that can work with any JavaScript UI framework, we would implement it using the "raw" HTML DOM APIs. While this is the canonical approach, these APIs are quite verbose. 
+Instead, the core widgets provided by deck.gl widgets are internally using the [Preact](https://preactjs.com/) UI library, which lets us develop widgets with the clarity of JSX and react style code, while remaining completely framework agnostic in their external APIs. 
+This guide will walk you through the process of using Preact to implement universal widgets and best practices.
 
 ## Why Use Preact Widgets?
 
