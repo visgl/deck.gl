@@ -48,7 +48,7 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 
 The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.
 
-#### `device` ([Device](https://luma.gl/docs/api-reference/core/device))
+#### `device` ([Device](https://luma.gl/docs/api-reference/core/device)) {#device}
 
 luma.gl Device used to manage the application's connection with the GPU. Will be auto-created if not supplied.
 
