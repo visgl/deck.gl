@@ -35,6 +35,7 @@
     "@deck.gl/json": "9.1.0-beta.1",
     "@deck.gl/layers": "9.1.0-beta.1",
     "@deck.gl/mesh-layers": "9.1.0-beta.1",
+    "@deck.gl/widgets": "9.1.0-beta.1",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4",
     "@loaders.gl/3d-tiles": "^4.2.0",
     "@loaders.gl/core": "^4.2.0",
