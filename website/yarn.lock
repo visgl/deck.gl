@@ -4305,10 +4305,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@vis.gl/react-maplibre@^1.0.0-alpha.4":
-  version "1.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@vis.gl/react-maplibre/-/react-maplibre-1.0.0-alpha.4.tgz#5009384867f1d7e2e419ed400c812ea7c8cda413"
-  integrity sha512-MWz0lNaSJVHQYgZDZv72GdtHly6ySg2UhqW4JkluH7dtUZ//MFMzd3mfcxZvlwG9mNhnxjL+wfYTXKEaDub3Gw==
+"@vis.gl/react-maplibre@^1.0.0-alpha.5":
+  version "1.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@vis.gl/react-maplibre/-/react-maplibre-1.0.0-alpha.5.tgz#d02eed6a4056b0c52ed4d901481c8e7bcc9e8a77"
+  integrity sha512-Nk0wNx04kNwvGpIYtllGqjbeX9iSXB0OesVlb48A+BSdOmyanXYgAQjJKC+0pllTAauL9A/EqjbtWONAXAC11g==
   dependencies:
     "@maplibre/maplibre-gl-style-spec" "^19.2.1"
 
