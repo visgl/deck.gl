@@ -33,10 +33,7 @@ const INITIAL_VIEW_STATE: ViewState & {width: number; height: number} = {
 
 const ANIMATION_SPEED = 60;
 const TIME_WINDOW = 1800; // 30 minutes
-const EARTH_RADIUS_METERS = 6370972;
 const SEC_PER_DAY = 60 * 60 * 24;
-
-const DEGREES_PER_SECOND = 5; // Degrees per second
 
 type Flight = {
   // Departure
@@ -65,37 +62,7 @@ function DeckGLOverlay(props) {
 
 export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
-  const [viewState, setViewState] = useState<ViewState & {width: number; height: number}>(INITIAL_VIEW_STATE);
-  const [isAutoRotating, setIsAutoRotating] = useState(true);
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
-
-  // Smooth rotation using requestAnimationFrame
-  useEffect(() => {
-    if (!isAutoRotating) return;
-
-    let animationFrameId: number;
-    let lastTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const deltaTime = currentTime - lastTime;
-      lastTime = currentTime;
-
-      setViewState(currentView => ({
-        ...currentView,
-        longitude: (currentView.longitude + (DEGREES_PER_SECOND * deltaTime) / 1000) % 360
-      }));
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [isAutoRotating]);
-
-  const handleMapInteraction = useCallback((evt) => {
-    setIsAutoRotating(false);
-    setViewState({...evt.viewState, width: window.innerWidth, height: window.innerHeight});
-  }, []);
 
   const formatLabel = useCallback((t: number) => getDate(data, t).toUTCString(), [data]);
   const layers =
@@ -134,11 +101,6 @@ export default function App({data}: {data?: DailyFlights[]}) {
         mapLib={maplibregl}
         projection="globe"
         initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
-        onMouseDown={handleMapInteraction}
-        onTouchStart={handleMapInteraction}
-        onZoomStart={handleMapInteraction}
-        onWheel={handleMapInteraction}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
         <DeckGLOverlay layers={layers} interleaved/>
