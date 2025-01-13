@@ -119,21 +119,23 @@ export default function App({data}: {data?: DailyFlights[]}) {
           timeRange,
           getSourceColor: [63, 81, 181],
           getTargetColor: [63, 181, 173],
-          parameters: { cullMode: 'none' }
+          parameters: {cullMode: 'none'}
         })
     );
 
   const layers = [...backgroundLayers, ...(dataLayers || [])];
 
   return (
-    <div style={{
-      position: 'absolute',
-      height: '100%',
-      width: '100%',
-      top: 0,
-      left: 0,
-      background: 'linear-gradient(0, #000, #223)'
-    }}>
+    <div
+      style={{
+        position: 'absolute',
+        height: '100%',
+        width: '100%',
+        top: 0,
+        left: 0,
+        background: 'linear-gradient(0, #000, #223)'
+      }}
+    >
       <Map
         reuseMaps
         mapLib={maplibregl}
