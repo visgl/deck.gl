@@ -56,19 +56,15 @@ type DailyFlights = {
 
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
-  overlay.setProps(props);
-  return null;
-}
-
-function MapController() {
   const {current: map} = useMap();
 
   useEffect(() => {
     if (map) {
-      map.flyTo({ center: [-90, 20], curve: 0.1, speed: 0.002, });
+      map.flyTo({ center: [-90, 20], curve: 0.1, speed: 0.002 });
     }
   }, [map]);
 
+  overlay.setProps(props);
   return null;
 }
 
@@ -116,7 +112,6 @@ export default function App({data}: {data?: DailyFlights[]}) {
         initialViewState={INITIAL_VIEW_STATE}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
-        <MapController />
         <DeckGLOverlay layers={layers} interleaved/>
       </Map>
       {data && (
