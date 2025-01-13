@@ -8,15 +8,9 @@ import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
 import {Map, useControl} from '@vis.gl/react-maplibre';
 import type {ViewState} from '@vis.gl/react-maplibre';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import {LinearInterpolator} from '@deck.gl/core';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {createRoot} from 'react-dom/client';
-
-import { COORDINATE_SYSTEM } from '@deck.gl/core';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-
-import {SphereGeometry} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 
@@ -104,22 +98,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
   }, []);
 
   const formatLabel = useCallback((t: number) => getDate(data, t).toUTCString(), [data]);
-
-  const backgroundLayers = useMemo(
-    () => [
-      new SimpleMeshLayer({
-        id: 'earth-sphere',
-        data: [0],
-        mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-        getPosition: [0, 0, 0],
-        getColor: [255, 255, 255, 0]
-      })
-    ],
-    []
-  );
-
-  const dataLayers =
+  const layers =
     data &&
     data.map(
       ({date, flights}) =>
@@ -138,8 +117,6 @@ export default function App({data}: {data?: DailyFlights[]}) {
           parameters: {cullMode: 'none'}
         })
     );
-
-  const layers = [...backgroundLayers, ...(dataLayers || [])];
 
   return (
     <div
@@ -164,7 +141,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
         onWheel={handleMapInteraction}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
-        <DeckGLOverlay layers={layers} interleaved={true} />
+        <DeckGLOverlay layers={layers} interleaved/>
       </Map>
       {data && (
         <RangeInput
