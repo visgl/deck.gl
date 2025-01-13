@@ -224,16 +224,18 @@ export default class LayersPass extends Pass {
       viewport
     });
 
-    // TODO v9 - remove WebGL specific logic
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      this.device.withParametersWebGL(
-        {
-          scissorTest: true,
-          scissor: glViewport
+      const clearRenderPass = this.device.beginRenderPass({
+        framebuffer: target,
+        parameters: {
+          viewport: glViewport,
+          scissorRect: glViewport
         },
-        () => this.device.clearWebGL(clearOpts)
-      );
+        clearColor: clearOpts.color ? [0, 0, 0, 0] : false,
+        clearDepth: clearOpts.depth ? 1 : false
+      });
+      clearRenderPass.end();
     }
 
     // render layers in normal colors
