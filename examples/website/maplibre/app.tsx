@@ -20,15 +20,13 @@ import RangeInput from './range-input';
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
 
-const INITIAL_VIEW_STATE: ViewState & {width: number; height: number} = {
+const INITIAL_VIEW_STATE: ViewState = {
   longitude: 90,
   latitude: 20,
   zoom: 2,
   pitch: 0,
   bearing: 0,
-  padding: {top: 0, bottom: 0, left: 0, right: 0},
-  width: window.innerWidth,
-  height: window.innerHeight
+  padding: {top: 0, bottom: 0, left: 0, right: 0}
 };
 
 const ANIMATION_SPEED = 60;
@@ -60,7 +58,7 @@ function DeckGLOverlay(props) {
 
   useEffect(() => {
     if (map) {
-      map.flyTo({ center: [-90, 20], curve: 0.1, speed: 0.002 });
+      map.flyTo({center: [-90, 20], curve: 0.1, speed: 0.002});
     }
   }, [map]);
 
@@ -68,7 +66,13 @@ function DeckGLOverlay(props) {
   return null;
 }
 
-export default function App({data, interleaveLabels = true}: {data?: DailyFlights[], interleaveLabels?: boolean}) {
+export default function App({
+  data,
+  interleaveLabels = true
+}: {
+  data?: DailyFlights[];
+  interleaveLabels?: boolean;
+}) {
   const [currentTime, setCurrentTime] = useState(0);
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
 
@@ -113,7 +117,7 @@ export default function App({data, interleaveLabels = true}: {data?: DailyFlight
         initialViewState={INITIAL_VIEW_STATE}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
-        <DeckGLOverlay layers={layers} interleaved/>
+        <DeckGLOverlay layers={layers} interleaved />
       </Map>
       {data && (
         <RangeInput
@@ -158,7 +162,8 @@ export async function renderToDOM(container: HTMLDivElement) {
   const data: DailyFlights[] = [];
   for (const date of dates) {
     const url = `${DATA_URL}/${date}.csv`;
-    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data as Flight[];
+    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}}))
+      .data as Flight[];
 
     // Join flight data from multiple dates into one continuous animation
     const offset = SEC_PER_DAY * data.length;
