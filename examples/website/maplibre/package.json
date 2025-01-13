@@ -15,7 +15,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "deck.gl": "^9.0.0",
-    "maplibre-gl": "5.0.0-pre.1",
+    "maplibre-gl": "^5.0.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "@vis.gl/react-maplibre": "^1.0.0-alpha.5"
