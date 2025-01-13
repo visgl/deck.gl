@@ -13,12 +13,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {createRoot} from 'react-dom/client';
 
-import {
-  COORDINATE_SYSTEM,
-  LightingEffect,
-  AmbientLight,
-  _SunLight as SunLight
-} from '@deck.gl/core';
+import { COORDINATE_SYSTEM } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {SphereGeometry} from '@luma.gl/engine';
@@ -48,18 +43,6 @@ const EARTH_RADIUS_METERS = 6370972;
 const SEC_PER_DAY = 60 * 60 * 24;
 
 const DEGREES_PER_SECOND = 5; // Degrees per second
-
-const ambientLight = new AmbientLight({
-  color: [255, 255, 255],
-  intensity: 0.5
-});
-const sunLight = new SunLight({
-  color: [255, 255, 255],
-  intensity: 2.0,
-  timestamp: 0
-});
-// create lighting effect with light sources
-const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
 type Flight = {
   // Departure
@@ -122,10 +105,6 @@ export default function App({data}: {data?: DailyFlights[]}) {
 
   const formatLabel = useCallback((t: number) => getDate(data, t).toUTCString(), [data]);
 
-  if (data) {
-    sunLight.timestamp = getDate(data, currentTime);
-  }
-
   const backgroundLayers = useMemo(
     () => [
       new SimpleMeshLayer({
@@ -185,7 +164,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
         onWheel={handleMapInteraction}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
-        <DeckGLOverlay layers={layers} effects={[lightingEffect]} interleaved={true} />
+        <DeckGLOverlay layers={layers} interleaved={true} />
       </Map>
       {data && (
         <RangeInput
@@ -230,7 +209,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const data: DailyFlights[] = [];
   for (const date of dates) {
     const url = `${DATA_URL}/${date}.csv`;
-    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data;
+    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data as Flight[];
 
     // Join flight data from multiple dates into one continuous animation
     const offset = SEC_PER_DAY * data.length;
