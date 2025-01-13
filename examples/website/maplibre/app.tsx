@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import React from 'react';
-import {useState, useMemo, useCallback, useEffect} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
-import {Map, useControl} from '@vis.gl/react-maplibre';
+import {Map, useControl, useMap} from '@vis.gl/react-maplibre';
 import type {ViewState} from '@vis.gl/react-maplibre';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -21,7 +21,7 @@ import RangeInput from './range-input';
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
 
 const INITIAL_VIEW_STATE: ViewState & {width: number; height: number} = {
-  longitude: 0,
+  longitude: 90,
   latitude: 20,
   zoom: 2,
   pitch: 0,
@@ -57,6 +57,18 @@ type DailyFlights = {
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);
+  return null;
+}
+
+function MapController() {
+  const {current: map} = useMap();
+
+  useEffect(() => {
+    if (map) {
+      map.flyTo({ center: [-90, 20], curve: 0.1, speed: 0.002, });
+    }
+  }, [map]);
+
   return null;
 }
 
@@ -100,9 +112,11 @@ export default function App({data}: {data?: DailyFlights[]}) {
         reuseMaps
         mapLib={maplibregl}
         projection="globe"
+        id="map"
         initialViewState={INITIAL_VIEW_STATE}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
+        <MapController />
         <DeckGLOverlay layers={layers} interleaved/>
       </Map>
       {data && (
