@@ -155,8 +155,8 @@ test('MapboxOverlay#interleaved', t => {
     interleaved: true,
     layers: [new ScatterplotLayer({id: 'poi'})],
     parameters: {
-      depthMask: false,
-      cull: true
+      depthWriteEnabled: false,
+      cullMode: 'back'
     },
     useDevicePixels: 1
   });
@@ -181,15 +181,15 @@ test('MapboxOverlay#interleaved', t => {
     t.ok(
       objectEqual(overlay._deck.props.parameters, {
         ...DEFAULT_PARAMETERS,
-        depthMask: false,
-        cull: true
+        depthWriteEnabled: false,
+        cullMode: 'back'
       }),
       'Parameters are set correctly'
     );
     t.ok(
       objectEqual(overlay._props.parameters, {
-        depthMask: false, // User defined parameters should override defaults.
-        cull: true // Expected to merge in.
+        depthWriteEnabled: false,
+        cullMode: 'back'
       }),
       'Overlay parameters are intact'
     );
@@ -223,8 +223,8 @@ test('MapboxOverlay#interleaved#remove and add', t => {
     interleaved: true,
     layers: [new ScatterplotLayer({id: 'poi'})],
     parameters: {
-      depthMask: false,
-      cull: true
+      depthWriteEnabled: false,
+      cullMode: 'back'
     },
     useDevicePixels: 1
   });
@@ -274,19 +274,22 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})],
       parameters: {
-        depthMask: false
+        depthWriteEnabled: false
       }
     });
     await sleep(100);
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
     t.ok(
-      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthMask: false}),
+      objectEqual(overlay._deck.props.parameters, {
+        ...DEFAULT_PARAMETERS,
+        depthWriteEnabled: false
+      }),
       'Parameters are updated correctly'
     );
     t.ok(
       objectEqual(overlay._props.parameters, {
-        depthMask: false
+        depthWriteEnabled: false
       }),
       'Overlay parameters are updated correctly'
     );
