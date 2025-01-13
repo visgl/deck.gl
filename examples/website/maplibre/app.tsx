@@ -3,10 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import React from 'react';
-import {useState, useMemo, useCallback} from 'react';
+import {useState, useMemo, useCallback, useEffect} from 'react';
 import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
 import {Map, useControl} from '@vis.gl/react-maplibre';
+import type {ViewState} from '@vis.gl/react-maplibre';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {LinearInterpolator} from '@deck.gl/core';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {createRoot} from 'react-dom/client';
@@ -29,18 +31,23 @@ import RangeInput from './range-input';
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: ViewState & {width: number; height: number} = {
   longitude: 0,
   latitude: 20,
   zoom: 2,
-  minZoom: 1,
-  maxZoom: 3
+  pitch: 0,
+  bearing: 0,
+  padding: {top: 0, bottom: 0, left: 0, right: 0},
+  width: window.innerWidth,
+  height: window.innerHeight
 };
 
 const ANIMATION_SPEED = 60;
 const TIME_WINDOW = 1800; // 30 minutes
 const EARTH_RADIUS_METERS = 6370972;
 const SEC_PER_DAY = 60 * 60 * 24;
+
+const DEGREES_PER_SECOND = 5; // Degrees per second
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -81,7 +88,37 @@ function DeckGLOverlay(props) {
 
 export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
+  const [viewState, setViewState] = useState<ViewState & {width: number; height: number}>(INITIAL_VIEW_STATE);
+  const [isAutoRotating, setIsAutoRotating] = useState(true);
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
+
+  // Smooth rotation using requestAnimationFrame
+  useEffect(() => {
+    if (!isAutoRotating) return;
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+
+      setViewState(currentView => ({
+        ...currentView,
+        longitude: (currentView.longitude + (DEGREES_PER_SECOND * deltaTime) / 1000) % 360
+      }));
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isAutoRotating]);
+
+  const handleMapInteraction = useCallback((evt) => {
+    setIsAutoRotating(false);
+    setViewState({...evt.viewState, width: window.innerWidth, height: window.innerHeight});
+  }, []);
 
   const formatLabel = useCallback((t: number) => getDate(data, t).toUTCString(), [data]);
 
@@ -141,6 +178,11 @@ export default function App({data}: {data?: DailyFlights[]}) {
         mapLib={maplibregl}
         projection="globe"
         initialViewState={INITIAL_VIEW_STATE}
+        viewState={viewState}
+        onMouseDown={handleMapInteraction}
+        onTouchStart={handleMapInteraction}
+        onZoomStart={handleMapInteraction}
+        onWheel={handleMapInteraction}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
         <DeckGLOverlay layers={layers} effects={[lightingEffect]} interleaved={true} />
