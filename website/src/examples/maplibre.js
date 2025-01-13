@@ -21,9 +21,13 @@ class MapLibreDemo extends React.Component {
   static renderInfo() {
     return (
       <div>
+        <p>The development of air traffic on selected dates between Feburary and October, 2020.</p>
         <p>
-          Integration with MapLibre GL JS using the MapboxOverlay API.
-          This example demonstrates how to use deck.gl with MapLibre GL JS for base maps.
+          Interleaved integration with MapLibre GL JS using the globe projection.
+        </p>
+        <p>
+          Data source: <a href="https://zenodo.org/record/3974209">Crowdsourced air traffic data</a>{' '}
+          from <a href="http://www.opensky-network.org"> The OpenSky Network</a>
         </p>
       </div>
     );
