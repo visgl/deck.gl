@@ -45,8 +45,8 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "@loaders.gl/polyfills": "^4.2.0",
-    "@luma.gl/webgpu": "^9.1.0-beta.12",
-    "@luma.gl/effects": "^9.1.0-beta.12",
+    "@luma.gl/webgpu": "^9.1.0-beta.16",
+    "@luma.gl/effects": "^9.1.0-beta.16",
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.0-alpha.2",
     "jsdom": "^20.0.0",
