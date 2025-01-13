@@ -68,7 +68,7 @@ function DeckGLOverlay(props) {
   return null;
 }
 
-export default function App({data}: {data?: DailyFlights[]}) {
+export default function App({data, interleaveLabels = true}: {data?: DailyFlights[], interleaveLabels?: boolean}) {
   const [currentTime, setCurrentTime] = useState(0);
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
 
@@ -89,7 +89,8 @@ export default function App({data}: {data?: DailyFlights[]}) {
           timeRange,
           getSourceColor: [63, 81, 181],
           getTargetColor: [63, 181, 173],
-          parameters: {cullMode: 'none'}
+          parameters: {cullMode: 'none'},
+          ...(interleaveLabels ? {beforeId: 'watername_ocean'} : {})
         })
     );
 

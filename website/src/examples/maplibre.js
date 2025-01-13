@@ -13,6 +13,10 @@ class MapLibreDemo extends React.Component {
 
   static code = `${GITHUB_TREE}/examples/website/maplibre`;
 
+  static parameters = {
+    interleaveLabels: {displayName: 'Interleaved Labels', type: 'checkbox', value: true}
+  };
+
   static data = {
     url: `${DATA_URI}/air-traffic.txt`,
     worker: '/workers/air-traffic-decoder.js'
@@ -34,7 +38,8 @@ class MapLibreDemo extends React.Component {
   }
 
   render() {
-    return <App {...this.props} />;
+    const {params} = this.props;
+    return <App {...this.props} interleaveLabels={params.interleaveLabels.value} />;
   }
 }
 
