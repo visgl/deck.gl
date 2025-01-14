@@ -17,7 +17,13 @@ function App({viewState}) {
 
   const layer = new HeatmapTileLayer({
     data,
-    getWeight: d => d.properties.count
+    getWeight: d => d.properties.count,
+    // Customize appearance
+    radiusPixels: 30,
+    intensity: 1.5,
+    colorDomain: [0, 2],
+    // Optional: Track density changes
+    onMaxDensityChange: (density) => console.log('Max density:', density)
   })
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
@@ -75,8 +81,9 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 #### `radiusPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radiuspixels}
 
 * Default: `20`
+* Range: `[0, 100]`
 
-Radius of the heatmap blur in pixels, to which the weight of a cell is distributed.
+Radius of the heatmap blur in pixels, to which the weight of a cell is distributed. Larger values create a smoother heatmap but may impact performance.
 
 #### `colorDomain` (number[2], optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#colordomain}
 
@@ -84,19 +91,25 @@ Radius of the heatmap blur in pixels, to which the weight of a cell is distribut
 
 Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`]. The values are normalized, with a value of `1` corresponding to the maximum density present in the viewport.
 
-When `colorDomain` is specified, a pixel with `minValue` is assigned the first color in `colorRange`, a pixel with `maxValue` is assigned the last color in `colorRange`, and any value in between is interpolated. Pixels in the bottom 10% of the range defined by `colorDomain` are gradually faded out by reducing alpha, until 100% transparency at `minValue`. Pixels with weight more than `maxValue` are capped to the last color in `colorRange`.
+When `colorDomain` is specified:
+- Values below `minValue` are gradually faded out (alpha transitions from 0 to 1)
+- Values between `minValue` and `maxValue` are linearly mapped to colors in `colorRange`
+- Values above `maxValue` are capped to the last color in `colorRange`
 
 #### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
-The color palette used in the heatmap, as an array of colors [color1, color2, ...]. Each color is in the format of `[r, g, b]`. Each channel is a number between 0-255.
+The color palette used in the heatmap, as an array of colors [color1, color2, ...]. Each color is in the format of `[r, g, b]` or `[r, g, b, a]`. Each channel is a number between 0-255.
 
 #### `intensity` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#intensity}
 
 * Default: `1`
 
-Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than `1` biases the output color towards the higher end of the spectrum, and a value less than `1` biases the output color towards the lower end of the spectrum.
+Value that is multiplied with the total weight at a pixel to obtain the final weight:
+- Values > 1 emphasize high-density areas
+- Values < 1 emphasize low-density areas
+- Value of 1 provides linear mapping
 
 ### Data Accessors
 

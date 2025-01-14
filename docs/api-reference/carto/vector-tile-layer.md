@@ -1,6 +1,6 @@
 # VectorTileLayer
 
-`VectorTileLayer` is a layer for visualizing tiled vector data. It inherits all the properties from the [`MVTLayer`](../geo-layers/mvt-layer.md).
+`VectorTileLayer` is a layer for visualizing tiled vector data. It extends the [`MVTLayer`](../geo-layers/mvt-layer.md) with CARTO-specific optimizations for efficient vector tile rendering, including binary data format support and separate geometry/attribute loading.
 
 ## Usage 
 
