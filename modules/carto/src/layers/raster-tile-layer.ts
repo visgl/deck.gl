@@ -65,7 +65,9 @@ export default class RasterTileLayer<
   }
 
   renderLayers(): Layer | null | LayersList {
-    const tileJSON = this.props.data as TilejsonResult & {raster_metadata: {compression: 'gzip' | null}};
+    const tileJSON = this.props.data as TilejsonResult & {
+      raster_metadata: {compression: 'gzip' | null};
+    };
     if (!tileJSON) return null;
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom, raster_metadata: metadata} = tileJSON;

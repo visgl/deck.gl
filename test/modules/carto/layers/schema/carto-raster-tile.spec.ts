@@ -7,11 +7,14 @@ import {BandReader, TileReader} from '@deck.gl/carto/layers/schema/carto-raster-
 import Pbf from 'pbf';
 
 // GZIP compressed data for [1, 2, 3, 4]
-export const BAND = [1, 2, 3, 4]
-export const COMPRESSED_BAND = [31, 139, 8, 0, 0, 0, 0, 0, 0, 3, 99, 100, 98, 102, 1, 0, 205, 251, 60, 182, 4, 0, 0, 0];
+export const BAND = [1, 2, 3, 4];
+export const COMPRESSED_BAND = [
+  31, 139, 8, 0, 0, 0, 0, 0, 0, 3, 99, 100, 98, 102, 1, 0, 205, 251, 60, 182, 4, 0, 0, 0
+];
 const buffer = new Pbf();
 buffer.writeVarintField(1, 256); // blockSize
-buffer.writeMessage(2, (_, pbf) => { // bands
+buffer.writeMessage(2, (_, pbf) => {
+  // bands
   pbf.writeStringField(1, 'band1');
   pbf.writeStringField(2, 'uint8');
   pbf.writeBytesField(3, new Uint8Array(COMPRESSED_BAND));

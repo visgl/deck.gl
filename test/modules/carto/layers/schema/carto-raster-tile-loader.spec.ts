@@ -15,14 +15,20 @@ test('CartoRasterTileLoader', t => {
   t.equals(typeof loader.parse, 'function', 'Should have parse method');
   t.equals(typeof loader.parseSync, 'function', 'Should have parseSync method');
 
-  const result = loader.parseSync!(TEST_DATA, { cartoRasterTile: { metadata: { compression: null } } });
+  const result = loader.parseSync!(TEST_DATA, {cartoRasterTile: {metadata: {compression: null}}});
   t.equals(result.blockSize, 256, 'Should return correct blockSize');
   t.ok(result.cells, 'Should return cells');
   t.ok(result.cells.numericProps, 'Should return numericProps');
-  t.deepEqual(result.cells.numericProps.band1.value, COMPRESSED_BAND, 'Should return compressed band');
+  t.deepEqual(
+    result.cells.numericProps.band1.value,
+    COMPRESSED_BAND,
+    'Should return compressed band'
+  );
 
   // Repeat with compressed data
-  const result2 = loader.parseSync!(TEST_DATA, { cartoRasterTile: { metadata: { compression: 'gzip' } } });
+  const result2 = loader.parseSync!(TEST_DATA, {
+    cartoRasterTile: {metadata: {compression: 'gzip'}}
+  });
   t.equals(result2.blockSize, 256, 'Should return correct blockSize');
   t.ok(result2.cells, 'Should return cells');
   t.ok(result2.cells.numericProps, 'Should return numericProps');
