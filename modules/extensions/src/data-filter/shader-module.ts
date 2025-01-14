@@ -14,7 +14,7 @@ export type Defines = {
   /**
    * Primitive type of parameter used for category filtering. If undefined, category filtering disabled.
    */
-  DATACATEGORY_TYPE?: 'float' | 'vec2' | 'vec3' | 'vec4';
+  DATACATEGORY_TYPE?: 'int' | 'ivec2' | 'ivec3' | 'ivec4';
   /**
    * Number of category filtering channels. Must match dimension of `DATACATEGORY_TYPE`
    */
@@ -107,11 +107,11 @@ float dataFilter_reduceValue(vec4 value) {
 #ifdef DATACATEGORY_TYPE
   void dataFilter_setCategoryValue(DATACATEGORY_TYPE category) {
     #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
-    int dataFilter_masks = dataFilter.categoryBitMask[int(category / 32.0)];
+    int dataFilter_masks = dataFilter.categoryBitMask[category / 32];
     #elif DATACATEGORY_CHANNELS == 2 // Two 64-bit masks
     ivec2 dataFilter_masks = ivec2(
-      dataFilter.categoryBitMask[int(category.x / 32.0)],
-      dataFilter.categoryBitMask[int(category.y / 32.0) + 2]
+      dataFilter.categoryBitMask[category.x / 32],
+      dataFilter.categoryBitMask[category.y / 32 + 2]
     );
     #elif DATACATEGORY_CHANNELS == 3 // Three 32-bit masks
     ivec3 dataFilter_masks = dataFilter.categoryBitMask.xyz;
@@ -120,13 +120,13 @@ float dataFilter_reduceValue(vec4 value) {
     #endif
 
     // Shift mask and extract relevant bits
-    DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) / pow(DATACATEGORY_TYPE(2.0), mod(category, 32.0));
-    dataFilter_bits = mod(floor(dataFilter_bits), 2.0);
+    DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) >> (category & 31);
+    dataFilter_bits &= 1;
 
     #if DATACATEGORY_CHANNELS == 1
-    if(dataFilter_bits == 0.0) dataFilter_value = 0.0;
+    if(dataFilter_bits == 0) dataFilter_value = 0.0;
     #else
-    if(any(equal(dataFilter_bits, DATACATEGORY_TYPE(0.0)))) dataFilter_value = 0.0;
+    if(any(equal(dataFilter_bits, DATACATEGORY_TYPE(0)))) dataFilter_value = 0.0;
     #endif
   }
 #endif
