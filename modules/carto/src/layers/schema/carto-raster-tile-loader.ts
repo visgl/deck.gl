@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {RasterMetadata} from '@carto/api-client';
 
 import {TileReader} from './carto-raster-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -14,8 +15,7 @@ const id = 'cartoRasterTile';
 
 type CartoRasterTileLoaderOptions = LoaderOptions & {
   cartoRasterTile?: {
-    // TODO Add full RasterMetadata type to carto-api-client and import
-    metadata: {compression: 'gzip' | null} | null;
+    metadata: RasterMetadata | null;
     workerUrl: string;
   };
 };
@@ -57,6 +57,7 @@ function parseCartoRasterTile(
 ): Raster | null {
   const metadata = options?.cartoRasterTile?.metadata;
   if (!arrayBuffer || !metadata) return null;
+  // @ts-expect-error Upstream type needs to be updated
   TileReader.compression = metadata.compression;
   const out = parsePbf(arrayBuffer, TileReader);
   const {bands, blockSize} = out;

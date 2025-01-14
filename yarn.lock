@@ -44,10 +44,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@carto/api-client@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.4.0.tgz#853469e70dcfa5ce14083f6ad9348911d08046fa"
-  integrity sha512-zFn4/cBBVNvpSqS9di72XuRUl5qrWHEW2KsuWK3fzR5Sng8jXoTFESf6poY0nyhxlAutkMNZIAhpHm+wdc7y/w==
+"@carto/api-client@^0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.4.4.tgz#53e4c5886db642f2b79968e02a5efa07e49caa58"
+  integrity sha512-XeKYgmBIUIBHW+KiRylHvb5pY4VBaRst5ZaqS2q+BPBLY9Dtse3q8kPLcpEIYVEQoYcIz9Z5rPHOuGs4pPOYKg==
   dependencies:
     "@turf/bbox-clip" "^7.1.0"
     "@turf/bbox-polygon" "^7.1.0"
