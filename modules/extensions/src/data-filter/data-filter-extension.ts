@@ -116,10 +116,10 @@ const defaultOptions: Required<DataFilterExtensionOptions> = {
 };
 
 const CATEGORY_TYPE_FROM_SIZE = {
-  1: 'int' as const,
-  2: 'ivec2' as const,
-  3: 'ivec3' as const,
-  4: 'ivec4' as const
+  1: 'uint' as const,
+  2: 'uvec2' as const,
+  3: 'uvec3' as const,
+  4: 'uvec4' as const
 };
 const DATA_TYPE_FROM_SIZE = {
   1: 'float' as const,
@@ -179,7 +179,7 @@ export default class DataFilterExtension extends LayerExtension<
             size: categorySize,
             stepMode: 'dynamic',
             accessor: 'getFilterCategory',
-            type: 'sint32',
+            type: 'uint32',
             transform:
               categorySize === 1
                 ? d => extension._getCategoryKey.call(this, d, 0)

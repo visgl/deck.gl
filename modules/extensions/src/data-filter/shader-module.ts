@@ -14,7 +14,7 @@ export type Defines = {
   /**
    * Primitive type of parameter used for category filtering. If undefined, category filtering disabled.
    */
-  DATACATEGORY_TYPE?: 'int' | 'ivec2' | 'ivec3' | 'ivec4';
+  DATACATEGORY_TYPE?: 'uint' | 'uvec2' | 'uvec3' | 'uvec4';
   /**
    * Number of category filtering channels. Must match dimension of `DATACATEGORY_TYPE`
    */
@@ -48,7 +48,7 @@ uniform dataFilterUniforms {
 #endif
 #endif
 #ifdef DATACATEGORY_TYPE
-  highp ivec4 categoryBitMask;
+  highp uvec4 categoryBitMask;
 #endif
 } dataFilter;
 `;
@@ -107,26 +107,26 @@ float dataFilter_reduceValue(vec4 value) {
 #ifdef DATACATEGORY_TYPE
   void dataFilter_setCategoryValue(DATACATEGORY_TYPE category) {
     #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
-    int dataFilter_masks = dataFilter.categoryBitMask[category / 32];
+    uint dataFilter_masks = dataFilter.categoryBitMask[category / 32u];
     #elif DATACATEGORY_CHANNELS == 2 // Two 64-bit masks
-    ivec2 dataFilter_masks = ivec2(
-      dataFilter.categoryBitMask[category.x / 32],
-      dataFilter.categoryBitMask[category.y / 32 + 2]
+    uvec2 dataFilter_masks = uvec2(
+      dataFilter.categoryBitMask[category.x / 32u],
+      dataFilter.categoryBitMask[category.y / 32u + 2u]
     );
     #elif DATACATEGORY_CHANNELS == 3 // Three 32-bit masks
-    ivec3 dataFilter_masks = dataFilter.categoryBitMask.xyz;
+    uvec3 dataFilter_masks = dataFilter.categoryBitMask.xyz;
     #else // Four 32-bit masks
-    ivec4 dataFilter_masks = dataFilter.categoryBitMask;
+    uvec4 dataFilter_masks = dataFilter.categoryBitMask;
     #endif
 
     // Shift mask and extract relevant bits
-    DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) >> (category & 31);
-    dataFilter_bits &= 1;
+    DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) >> (category & 31u);
+    dataFilter_bits &= 1u;
 
     #if DATACATEGORY_CHANNELS == 1
-    if(dataFilter_bits == 0) dataFilter_value = 0.0;
+    if(dataFilter_bits == 0u) dataFilter_value = 0.0;
     #else
-    if(any(equal(dataFilter_bits, DATACATEGORY_TYPE(0)))) dataFilter_value = 0.0;
+    if(any(equal(dataFilter_bits, DATACATEGORY_TYPE(0u)))) dataFilter_value = 0.0;
     #endif
   }
 #endif
