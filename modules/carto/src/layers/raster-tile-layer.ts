@@ -65,10 +65,10 @@ export default class RasterTileLayer<
   }
 
   renderLayers(): Layer | null | LayersList {
-    const tileJSON = this.props.data as TilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult & {raster_metadata: {compression: 'gzip' | null}};
     if (!tileJSON) return null;
 
-    const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
+    const {tiles: data, minzoom: minZoom, maxzoom: maxZoom, raster_metadata: metadata} = tileJSON;
     const SubLayerClass = this.getSubLayerClass('tile', PostProcessTileLayer);
     return new SubLayerClass(this.props, {
       id: `raster-tile-layer-${this.props.id}`,
@@ -78,7 +78,10 @@ export default class RasterTileLayer<
       renderSubLayers,
       minZoom,
       maxZoom,
-      loadOptions: this.getLoadOptions()
+      loadOptions: {
+        cartoRasterTile: {metadata},
+        ...this.getLoadOptions()
+      }
     });
   }
 }

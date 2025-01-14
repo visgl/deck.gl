@@ -14,12 +14,15 @@ const id = 'cartoRasterTile';
 
 type CartoRasterTileLoaderOptions = LoaderOptions & {
   cartoRasterTile?: {
+    // TODO Add full RasterMetadata type to carto-api-client and import
+    metadata: {compression: 'gzip' | null} | null;
     workerUrl: string;
   };
 };
 
 const DEFAULT_OPTIONS: CartoRasterTileLoaderOptions = {
   cartoRasterTile: {
+    metadata: null,
     workerUrl: getWorkerUrl(id, VERSION)
   }
 };
@@ -35,7 +38,7 @@ const CartoRasterTileLoader: LoaderWithParser = {
   parse: async (arrayBuffer, options?: CartoRasterTileLoaderOptions) =>
     parseCartoRasterTile(arrayBuffer, options),
   parseSync: parseCartoRasterTile,
-  worker: true,
+  worker: false,
   options: DEFAULT_OPTIONS
 };
 
@@ -52,8 +55,11 @@ function parseCartoRasterTile(
   arrayBuffer: ArrayBuffer,
   options?: CartoRasterTileLoaderOptions
 ): Raster | null {
-  if (!arrayBuffer) return null;
-  const {bands, blockSize} = parsePbf(arrayBuffer, TileReader);
+  const metadata = options?.cartoRasterTile?.metadata;
+  if (!arrayBuffer || !metadata) return null;
+  TileReader.compression = metadata.compression;
+  const out = parsePbf(arrayBuffer, TileReader);
+  const {bands, blockSize} = out;
 
   const numericProps = {};
   for (let i = 0; i < bands.length; i++) {
