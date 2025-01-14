@@ -39,7 +39,8 @@ const config = {
         theme: {
           customCss: [
             resolve('./src/styles.css'),
-            resolve('./node_modules/maplibre-gl/dist/maplibre-gl.css')
+            resolve('./node_modules/maplibre-gl/dist/maplibre-gl.css'),
+            resolve('../modules/widgets/dist/stylesheet.css')
           ]
         }
       })
