@@ -1,4 +1,4 @@
-# HeatmapTileLayer (Experimental)
+# HeatmapTileLayer
 
 `HeatmapTileLayer` is a layer for visualizing point data aggregated using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using a heatmap. 
 
