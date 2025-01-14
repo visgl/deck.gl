@@ -21,6 +21,33 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.1 Prereleases
 
+#### deck.gl [v9.1.0-beta.2] - Jan 14 2025
+
+- LayersPass: remove deprecated clearWebGL() call (#9338)
+- chore: bump luma to 9.1.0-beta.16 (#9345)
+- add(pydeck) support for deck.gl widgets (#9342)
+- feat(mapbox): support Maplibre globe projection (#9296)
+- chore(widgets) props should be types rather than interfaces (#9333)
+- fix(core): conflicting resize logic when using non-default useDevicePixels (#9326)
+- feat(json) support for deck.gl widgets (#9314)
+- Upgrade to the latest dev tools (#9284)
+- chore: bump luma.gl (#9295)
+- Revert added type declarations from #8945 (#9318)
+- feat(widgets) onRemove can be optional (#9308)
+- chore(widgets) cleanup widget constructors (#9312)
+- fix(widgets) Widgets should be reactive to prop changes (#9315)
+- chore: gpuAggregation set to true (#9301)
+- feat(widgets): Remove `onViewportChange` Update Guard for Widgets (#9303)
+- fix(widgets): widget style prop keys should accept camelCase css properties and dashed css variables (#8991)
+- Match GlobeView projection parameters with Maplibre v5 (#9201)
+- CARTO: Fix seams between tiles in RasterTileLayer (#9286)
+- fix(mapbox) Remove type dependency on mapbox-gl (#9279)
+- refactor(carto): Refactor fetchMap() for deck.gl v9.1 (#9232)
+- Bump mjolnir.js (#9275)
+- chore: fix peer dependency versions (#9266)
+- Types: luma.gl Parameters (#9209)
+- fix(carto): Add missing re-exports from API client in v9.1 (#9267)
+
 #### deck.gl [9.1.0-beta.1] - Nov 21 2024
 
 - Generic module props handling in Layer class (#9192)
