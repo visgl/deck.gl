@@ -105,7 +105,7 @@ The weight of each cell used for clustering.
 
 When using the `GeoJsonLayer` accessors to style the clusters, aggregated values will be passed to the styling accessor functions.
 
-### Valid aggregation types
+### Aggregation types
 
 The type aggregation is infered based on the property name, for example `population_average` will be aggregated using a (mean) average operation across all the quadbin cells that are present in the cluster, while `age_min` will give the minimum value present in the cluster.
 
