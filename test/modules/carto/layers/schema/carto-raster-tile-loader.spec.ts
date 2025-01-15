@@ -14,6 +14,7 @@ test('CartoRasterTileLoader', t => {
   t.equals(loader.name, 'CARTO Raster Tile', 'Should have correct name');
   t.equals(typeof loader.parse, 'function', 'Should have parse method');
   t.equals(typeof loader.parseSync, 'function', 'Should have parseSync method');
+  t.equals(CartoRasterTileLoader.worker, true, 'worker property should be true');
 
   const result = loader.parseSync!(TEST_DATA, {cartoRasterTile: {metadata: {compression: null}}});
   t.equals(result.blockSize, 256, 'Should return correct blockSize');
