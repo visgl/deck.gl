@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.1 Prereleases
 
+#### deck.gl [v9.1.0-beta.3] - Jan 15 2025
+
+- CARTO: Support gzip compression in RasterLayer (#9352)
+- DataFilterExtension category filtering uint32 attribute (#9350)
+
 #### deck.gl [v9.1.0-beta.2] - Jan 14 2025
 
 - LayersPass: remove deprecated clearWebGL() call (#9338)
