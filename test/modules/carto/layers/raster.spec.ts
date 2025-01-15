@@ -9,7 +9,9 @@ import binaryRasterTileData from '../data/binaryRasterTile.json';
 const BINARY_RASTER_TILE = new Uint8Array(binaryRasterTileData).buffer;
 
 test('Parse Carto Raster Tile', async t => {
-  const converted = CartoRasterTileLoader.parseSync(BINARY_RASTER_TILE, {});
+  const converted = CartoRasterTileLoader.parseSync(BINARY_RASTER_TILE, {
+    cartoRasterTile: {metadata: {}}
+  });
   const {numericProps} = converted.cells;
 
   const {band_1} = numericProps;

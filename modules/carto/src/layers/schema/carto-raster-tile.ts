@@ -29,12 +29,14 @@ export class BandReader {
         throw Error(`Invalid data type: ${obj.type}`);
       }
       obj.data = {};
-      readPackedTypedArray(TypedArray, pbf, obj.data);
+      const {compression} = TileReader;
+      readPackedTypedArray(TypedArray, pbf, obj.data, {compression});
     }
   }
 }
 
 export class TileReader {
+  public static compression: null | 'gzip';
   static read(pbf, end) {
     return pbf.readFields(TileReader._readField, {blockSize: 0, bands: []}, end);
   }
