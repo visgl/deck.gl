@@ -46,7 +46,7 @@ export default function Playground() {
       <Container>
         <Suspense>
           <BrowserOnly>
-            <App />
+            {() => <App />}
           </BrowserOnly>
         </Suspense>
       </Container>

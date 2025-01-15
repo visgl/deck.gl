@@ -3,7 +3,7 @@
   "description": "Use deck.gl as a custom ArcGIS API for JavaScript layer",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-beta.1",
+  "version": "9.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -36,7 +36,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.1.0-beta.12",
+    "@luma.gl/constants": "^9.1.0-beta.16",
     "esri-loader": "^3.7.0"
   },
   "peerDependencies": {
