@@ -9,7 +9,7 @@ export function useWidget<T extends Widget, PropsT extends {}>(
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
   useEffect(() => {
-    // warn if the user supplied a vanilla widget, since it will be ignored
+    // warn if the user supplied a pure-js widget, since it will be ignored
     // NOTE: This effect runs once per widget. Context widgets and deck widget props are synced after first effect runs.
     const internalWidgets = deck?.props.widgets;
     if (widgets?.length && internalWidgets?.length && !deepEqual(internalWidgets, widgets, 1)) {
