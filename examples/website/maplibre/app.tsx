@@ -4,11 +4,12 @@
 
 import React from 'react';
 import {useState, useCallback, useEffect} from 'react';
-import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
+// TODO remove alias from package.json once v5 available via react-map-gl
+import maplibregl from 'maplibre-gl-v5/dist/maplibre-gl-dev';
+import 'maplibre-gl-v5/dist/maplibre-gl.css';
 import {Map, useControl, useMap} from '@vis.gl/react-maplibre';
 import type {ViewState} from '@vis.gl/react-maplibre';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {createRoot} from 'react-dom/client';
 import {load} from '@loaders.gl/core';
