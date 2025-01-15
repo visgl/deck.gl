@@ -7,8 +7,8 @@ import test from 'tape-promise/tape';
 import CartoVectoTileLoader from '@deck.gl/carto/layers/schema/carto-vector-tile-loader';
 
 // See test/modules/carto/responseToJson for details for creating test data
-import binaryVectorTileData from '../data/binaryTilePolygon.json';
-import binaryNoTrianglesTileData from '../data/binaryTilePolygonNoTri.json';
+import binaryVectorTileData from '../../data/binaryTilePolygon.json';
+import binaryNoTrianglesTileData from '../../data/binaryTilePolygonNoTri.json';
 const BINARY_VECTOR_TILE = new Uint8Array(binaryVectorTileData).buffer;
 const BINARY_VECTOR_TILE_NOTRI = new Uint8Array(binaryNoTrianglesTileData).buffer;
 
