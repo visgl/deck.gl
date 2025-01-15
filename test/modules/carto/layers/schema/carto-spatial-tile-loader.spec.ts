@@ -15,4 +15,4 @@ test('CartoSpatialTileLoader', t => {
   t.equals(typeof loader.parseSync, 'function', 'Should have parseSync method');
   t.equals(loader.worker, true, 'worker property should be true');
   t.end();
-}); 
+});
