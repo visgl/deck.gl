@@ -1,4 +1,4 @@
-# RasterTileLayer (Experimental)
+# RasterTileLayer
 
 `RasterTileLayer` is a layer for visualizing tiled raster data.
 
