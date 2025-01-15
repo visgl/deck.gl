@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.40] - Jan 15 2025
+
+- chore: pin ubuntu CI version to fix release workflow (#9351)
+
 #### deck.gl [9.0.39] - Jan 15 2025
 
 - CARTO: Support gzip compression in RasterLayer (#9352)
