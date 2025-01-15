@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {BandReader, TileReader} from '@deck.gl/carto/layers/schema/carto-raster-tile';
+import {TileReader} from '@deck.gl/carto/layers/schema/carto-raster-tile';
 import Pbf from 'pbf';
 
 // GZIP compressed data for [1, 2, 3, 4]
