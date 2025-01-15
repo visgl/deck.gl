@@ -15,7 +15,7 @@ const CartoPropertiesTileLoader: LoaderWithParser = {
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-properties-tile'],
   category: 'geometry',
-  worker: false,
+  worker: true,
   parse: async (arrayBuffer, options) => parseCartoPropertiesTile(arrayBuffer, options),
   parseSync: parseCartoPropertiesTile,
   options: {}
