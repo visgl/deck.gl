@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.39] - Jan 15 2025
+
+- CARTO: Support gzip compression in RasterLayer (#9352)
+- fix(widgets): widget style prop keys should accept camelCase css properties and dashed css variables (#8991)
+
 #### deck.gl [9.0.38] - Dec 11 2024
 
 - CARTO: Fix seams between tiles in RasterTileLayer (#9292)
