@@ -8,7 +8,7 @@ There are many ways to build a widget in deck.gl, and it’s helpful to consider
 * **[Use Preact in a universal widget](./preact-widgets.md)** - Preact is a lightweight virtual DOM library commonly used to implement dynamic widget UI. It enables you to create highly interactive widgets without tightly coupling their internals to an application’s UI framework.
 * **[Wrap widgets in a React component](./react-widgets.md)** - If you are developing a custom Widget for a React application, you can use React to build the UI. This approach allows you to use React components and can coexist alongside other widgets.
 
-## Creating The Widget class
+## Creating a new Widget
 
 Your widget class must implement the [Widget](../../api-reference/core/widget.md) interface.
 
