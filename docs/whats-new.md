@@ -39,13 +39,13 @@ Release date: TBD (targeting December 2024)
 ### React Widgets
 
 deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
-- All the official deck.gl widgets can now be easily wrapped into React components with the new `useWidget` hook.
-- Pre-wrapped React components for existing widget are available from the `@deck.gl/react` package. 
+- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
+- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
 - To try it out, check out our new [getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/widgets) for using widgets in React.
 
 ### Widgets Developer Guide
 
-deck.gl v9.1 provides the ability to for applications to write React component that integrate with deck.gl using the widget interface. Learn how to write such React components with our new [Custom Widgets Developer Guide](./docs/developer-guide/custom-widgets).
+deck.gl v9.1 provides the ability to for applications to write React component that integrate with deck.gl using the widget interface. Learn how to write such React components with our new [Custom Widgets Developer Guide](./developer-guide/custom-widgets).
 
 ### Aggregation layers upgrade
 
