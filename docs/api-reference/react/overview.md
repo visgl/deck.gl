@@ -53,4 +53,4 @@ React props are passed to the widget:
 
 ### Authoring Custom Widgets with React
 
-Learn how author your own custom widgets in React with the `useWidget` hook by reading the [Custom Widget Developer Guide](../../developer-guide/custom-widgets/).
+Learn how author your own custom widgets in React with the `useWidget` hook by reading the [Custom Widget Developer Guide](../../developer-guide/custom-widgets).
