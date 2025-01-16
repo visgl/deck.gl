@@ -151,7 +151,7 @@ type QuadbinTilesetSourceOptions = {
 };
 ```
 
-#### rasterTilesetSource (Experimental)
+#### rasterTilesetSource
 
 ```ts
 type RasterTilesetSourceOptions = {
@@ -159,9 +159,9 @@ type RasterTilesetSourceOptions = {
 };
 ```
 
-Boundary sources are experimental sources where both the tileset and the properties props need a specific schema to work. [Read more about Boundaries in the CARTO documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+Boundary sources are sources where both the tileset and the properties props need a specific schema to work. [Read more about Boundaries in the CARTO documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
 
-#### boundaryTableSource (Experimental)
+#### boundaryTableSource
 
 ```ts
 type BoundaryTableSourceOptions = {
@@ -171,7 +171,7 @@ type BoundaryTableSourceOptions = {
 };
 ```
 
-#### boundaryQuerySource (Experimental)
+#### boundaryQuerySource
 
 ```ts
 type BoundaryQuerySourceOptions = {

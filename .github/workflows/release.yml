@@ -30,7 +30,7 @@ jobs:
           echo "result=${result}" >> "$GITHUB_OUTPUT"
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: check_branch
     permissions:
       contents: write

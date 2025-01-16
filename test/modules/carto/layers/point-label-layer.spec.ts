@@ -4,7 +4,7 @@
 
 import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
-import {_PointLabelLayer as PointLabelLayer} from '@deck.gl/carto';
+import {PointLabelLayer} from '@deck.gl/carto';
 import * as FIXTURES from 'deck.gl-test/data';
 
 test('PointLabelLayer', t => {

@@ -29,7 +29,11 @@ export default function App({
     new Tile3DLayer({
       id: 'tile-3d-layer',
       data,
-      loader: I3SLoader
+      loader: I3SLoader,
+      loadOptions: {
+        // v9 TODO use compressed textures again
+        i3s: {useCompressedTextures: false}
+      }
     })
   ];
 
