@@ -103,6 +103,7 @@ export function getModel(
     vertexCount: 1,
     isInstanced: false,
     topology: 'point-list',
+    disableWarnings: true,
     vs: AGGREGATE_VS,
     fs: AGGREGATE_FS,
     bufferLayout,
