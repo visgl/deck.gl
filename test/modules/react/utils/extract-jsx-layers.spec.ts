@@ -34,6 +34,19 @@ const TEST_CASES = [
   },
   {
     input: {
+      children: null,
+      views: null,
+      layers: null
+    },
+    output: {
+      children: [],
+      views: null,
+      layers: null
+    },
+    title: 'empty layers'
+  },
+  {
+    input: {
       children: noop,
       views: null,
       layers: []
