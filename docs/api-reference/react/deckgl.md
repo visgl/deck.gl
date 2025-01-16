@@ -23,7 +23,10 @@ const App = (data) => (
 );
 ```
 
-Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `Map` component from react-map-gl), but can be any React components, like deck.gl [Widgets](./overview.md#using-react-wrapped-widgets).
+Like any React component, `DeckGL` can accept child components. Typical React components include:
+
+- Base maps such as the [`Map`](https://visgl.github.io/react-map-gl/docs/api-reference/map) component from `react-map-gl`, which can synchronize with deck.gl's view state.
+- [Widgets](./overview.md#using-react-wrapped-widgets), which can display and control deck.gl state.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -98,7 +101,7 @@ It is possible to use JSX syntax to create deck.gl views as React children of th
 ```jsx
   <DeckGL initialViewState={...viewState} layers={layers} >
     <MapView id="map" width="50%" controller={true} >
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
     </MapView>
     <FirstPersonView width="50%" x="50%" fovy={50} />
   <DeckGL />
@@ -114,7 +117,7 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
 
   <DeckGL initialViewState={...viewState} layers={layers} views={views} >
     <View id="map">
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
     </View>
   <DeckGL />
 ```

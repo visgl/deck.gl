@@ -27,7 +27,7 @@ npm install @deck.gl/core @deck.gl/react
 ```jsx
 import DeckGL from '@deck.gl/react';
 
-<DeckGL/>
+<DeckGL initialViewState={{longitude: -122.45, latitude: 37.78, zoom: 12}}/>
 ```
 
 ## Using React-wrapped Widgets
