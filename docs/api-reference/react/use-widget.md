@@ -7,15 +7,15 @@ The `useWidget` hook is used to create React wrappers for normal (non-React) dec
 ```tsx
 // React wrapper usage
 import DeckGL, {useWidget} from '@deck.gl/react';
-import {CompassWidget, type CompassWidgetProps} from '@deck.gl/react';
+import {CompassWidget as UniversalCompassWidget, type CompassWidgetProps} from '@deck.gl/react';
 
-const ReactWrappedCompass = (props: CompassWidgetProps) => {
-  const widget = useWidget(CompassWidget, props);
+const CompassWidget = (props: CompassWidgetProps) => {
+  const widget = useWidget(UniversalCompassWidget, props);
   return null;
 }
 
 <DeckGL>
-  <ReactWrappedCompass/>
+  <CompassWidget/>
 </DeckGL>
 ```
 

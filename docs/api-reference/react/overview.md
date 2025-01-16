@@ -32,7 +32,7 @@ import DeckGL from '@deck.gl/react';
 
 ## Using React-wrapped Widgets
 
-Here's a typical example of how to switch from using pure-js widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module their React-equivalent:
+Here's a typical example of how to switch from using pure-js widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module to their React-equivalent:
 
 ```diff
 -import { ZoomWidget } from '@deck.gl/widgets';
@@ -43,5 +43,14 @@ Here's a typical example of how to switch from using pure-js widgets in the [`@d
 +  <ZoomWidget/>
 </DeckGL>
 ```
+
+React props are passed to the widget:
+
+```diff
+-new ZoomWidget({ id: 'zoom', placement: 'top-right' })
++<ZoomWidget id='zoom' placement='top-right'/>
+```
+
+### Authoring Custom Widgets with React
 
 Learn how author your own custom widgets in React with the `useWidget` hook by reading the [Custom Widget Developer Guide](../../developer-guide/custom-widgets/).

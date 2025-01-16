@@ -23,7 +23,7 @@ const App = (data) => (
 );
 ```
 
-Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `Map` component from react-map-gl), but can be any React components.
+Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `Map` component from react-map-gl), but can be any React components, like deck.gl Widgets.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -121,13 +121,15 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
 
 #### JSX Widgets
 
-It is possible tp use JSX syntax to create deck.gl widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `widgets` props.
+It is possible to use JSX syntax to create deck.gl widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `widgets` props.
 
 ```jsx
   <DeckGL initialViewState={...viewState}>
     <ZoomWidget id="zoom-widget" placement="top-right" />
   <DeckGL />
 ```
+
+Learn how author your own custom widgets in React with the `useWidget` hook by reading the [Custom Widget Developer Guide](../../developer-guide/custom-widgets/). 
 
 #### Position Children in Views
 
