@@ -34,6 +34,7 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./tem
 j2_loader = jinja2.FileSystemLoader(TEMPLATES_PATH)
 j2_env = jinja2.Environment(loader=j2_loader, trim_blocks=True)
 CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(DECKGL_SEMVER)
+CDN_CSS_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/widgets@{}/dist/stylesheet.css".format(DECKGL_SEMVER)
 
 
 def cdn_picker(offline=False):
@@ -72,6 +73,7 @@ def render_json_to_html(
         google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
+        deckgl_widget_css_url=CDN_CSS_URL,
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
         custom_libraries=custom_libraries,

@@ -66,6 +66,11 @@ like plotting in flat plane instead of plotting on a mercator projection
 
 Configure the lighting within a visualization.
 
+`Widgets <widget.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configure one of the many deck.gl UI widgets for displaying and controlling deck.gl state in pydeck.
+
 .. note::
    The pydeck library assumes Internet access. You will need an Internet connection or the visualization will not render.
 
@@ -99,6 +104,7 @@ Index
    view_state
    view
    light_settings
+   widget
 
 .. toctree::
    :maxdepth: 1
