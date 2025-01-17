@@ -8,6 +8,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
 
 0.9.2 - Jan XX 2025
 ^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v9.1
 - Add support for deck.gl widgets (#9342)
 
 0.9.1 - May 10 2024
