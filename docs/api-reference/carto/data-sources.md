@@ -151,10 +151,10 @@ type QuadbinTilesetSourceOptions = {
 };
 ```
 
-#### rasterTilesetSource
+#### rasterSource
 
 ```ts
-type RasterTilesetSourceOptions = {
+type RasterSourceOptions = {
   tableName: string;
 };
 ```
