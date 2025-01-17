@@ -162,7 +162,7 @@ function getUniforms(opts?: DataFilterModuleProps | {}): Record<string, any> {
     filterEnabled = true,
     filterTransformSize = true,
     filterTransformColor = true,
-    categoryBitMask = [0, 0, 0, 0]
+    categoryBitMask
   } = opts;
   const filterSoftRange = opts.filterSoftRange || filterRange;
 
@@ -184,7 +184,7 @@ function getUniforms(opts?: DataFilterModuleProps | {}): Record<string, any> {
     useSoftMargin: Boolean(opts.filterSoftRange),
     transformSize: filterEnabled && filterTransformSize,
     transformColor: filterEnabled && filterTransformColor,
-    categoryBitMask
+    ...(categoryBitMask && {categoryBitMask})
   };
 }
 

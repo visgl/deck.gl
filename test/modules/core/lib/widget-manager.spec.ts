@@ -96,10 +96,24 @@ test('WidgetManager#setProps', t => {
   t.notOk(widgetB.isVisible, 'widget.onRemove is called');
   t.ok(widgetB2.isVisible, 'widget.onAdd is called');
 
+  widgetManager.setProps({widgets: []});
+  t.is(widgetManager.getWidgets().length, 0, 'all widgets are removed');
+  t.notOk(widgetB2.isVisible, 'widget.onRemove is called');
+
+  t.end();
+});
+
+test('WidgetManager#finalize', t => {
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widgetA = new TestWidget({id: 'A'});
+  widgetManager.setProps({widgets: [widgetA]});
+
   widgetManager.finalize();
   t.is(widgetManager.getWidgets().length, 0, 'all widgets are removed');
   t.is(container.childElementCount, 0, 'all widget containers are removed');
-  t.notOk(widgetB2.isVisible, 'widget.onRemove is called');
+  t.notOk(widgetA.isVisible, 'widget.onRemove is called');
 
   t.end();
 });
