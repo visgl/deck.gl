@@ -88,7 +88,7 @@ export default class BrushingExtension extends LayerExtension {
 
   draw(this: Layer<BrushingExtensionProps>, params: any, extension: this) {
     const {viewport, mousePosition} = params.context;
-    const {brushingEnabled, brushingRadius, brushingTarget} = params.moduleParameters;
+    const {brushingEnabled, brushingRadius, brushingTarget} = this.props;
     const brushingProps: BrushingModuleProps = {
       viewport,
       mousePosition,

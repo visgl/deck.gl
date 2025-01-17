@@ -156,7 +156,7 @@ Passing string constants
 
 Strings most often in pydeck indicate a data set variable name, like ``lng`` or ``lat`` in the previous examples.
 Some pydeck arguments require a string constant, however.
-In order to indiciate to the library that you're passing a string constant, you must wrap your strings in the ``pydeck.String`` constructor.
+In order to indicate to the library that you're passing a string constant, you must wrap your strings in the ``pydeck.String`` constructor.
 For example, below
 we plot the mean of billions of dollars of profit per employee by passing ``'MEAN'`` to ``aggregation``,
 giving us the average for that statistic within an area:

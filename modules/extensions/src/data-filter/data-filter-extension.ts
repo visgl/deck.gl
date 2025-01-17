@@ -115,6 +115,12 @@ const defaultOptions: Required<DataFilterExtensionOptions> = {
   countItems: false
 };
 
+const CATEGORY_TYPE_FROM_SIZE = {
+  1: 'uint' as const,
+  2: 'uvec2' as const,
+  3: 'uvec3' as const,
+  4: 'uvec4' as const
+};
 const DATA_TYPE_FROM_SIZE = {
   1: 'float' as const,
   2: 'vec2' as const,
@@ -137,7 +143,7 @@ export default class DataFilterExtension extends LayerExtension<
     const {categorySize, filterSize, fp64} = extension.opts;
     const defines: Defines = {};
     if (categorySize) {
-      defines.DATACATEGORY_TYPE = DATA_TYPE_FROM_SIZE[categorySize];
+      defines.DATACATEGORY_TYPE = CATEGORY_TYPE_FROM_SIZE[categorySize];
       defines.DATACATEGORY_CHANNELS = categorySize;
     }
     if (filterSize) {
@@ -173,6 +179,7 @@ export default class DataFilterExtension extends LayerExtension<
             size: categorySize,
             stepMode: 'dynamic',
             accessor: 'getFilterCategory',
+            type: 'uint32',
             transform:
               categorySize === 1
                 ? d => extension._getCategoryKey.call(this, d, 0)
@@ -266,13 +273,12 @@ export default class DataFilterExtension extends LayerExtension<
     const filterModel = this.state.filterModel as Model;
     const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
 
-    const {onFilteredItemsChange} = this.props;
-
     if (!this.state.categoryBitMask) {
       extension._updateCategoryBitMask.call(this, params, extension);
     }
 
     const {
+      onFilteredItemsChange,
       extensions,
       filterEnabled,
       filterRange,
@@ -280,7 +286,7 @@ export default class DataFilterExtension extends LayerExtension<
       filterTransformSize,
       filterTransformColor,
       filterCategories
-    } = params.moduleParameters;
+    } = this.props;
     const dataFilterProps: DataFilterModuleProps = {
       extensions,
       filterEnabled,

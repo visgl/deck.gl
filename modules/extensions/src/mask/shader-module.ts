@@ -81,7 +81,7 @@ in vec2 mask_texCoords;
 
     // Debug: show extent of render target
     // fragColor = vec4(mask_texCoords, 0.0, 1.0);
-    fragColor = texture(mask_texture, mask_texCoords);
+    // fragColor = texture(mask_texture, mask_texCoords);
 
     if (!mask) discard;
   }

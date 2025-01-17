@@ -23,12 +23,14 @@ out vec4 position_commonspace;
 
 void main(void) {
   // Rather than positioning using attribute, layout pixel grid using gl_InstanceID
-  vec2 common_position = column.offset.xy;
+  vec2 tileOrigin = column.offset.xy;
   float scale = column.widthScale; // Re-use widthScale prop to pass cell scale
 
   int yIndex = - (gl_InstanceID / BLOCK_WIDTH);
   int xIndex = gl_InstanceID + (yIndex * BLOCK_WIDTH);
-  common_position += scale * vec2(float(xIndex), float(yIndex));
+
+  // Avoid precision issues by applying 0.5 offset here, rather than when laying out vertices
+  vec2 cellCenter = scale * vec2(float(xIndex) + 0.5, float(yIndex) - 0.5);
 
   vec4 color = column.isStroke ? instanceLineColors : instanceFillColors;
 
@@ -39,7 +41,7 @@ void main(void) {
   // Get position directly from quadbin, rather than projecting
   // Important to set geometry.position before using project_ methods below
   // as geometry.worldPosition is not set (we don't know our lat/long)
-  geometry.position = vec4(common_position, 0.0, 1.0);
+  geometry.position = vec4(tileOrigin + cellCenter, 0.0, 1.0);
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
     geometry.position.xyz -= project.commonOrigin;
   }
@@ -63,12 +65,12 @@ void main(void) {
 
   geometry.pickingColor = instancePickingColors;
 
-  // project center of column
-  vec2 offset = (vec2(0.5) + positions.xy * strokeOffsetRatio) * cellWidth * shouldRender;
-  vec3 pos = vec3(offset, project_size(elevation));
-  DECKGL_FILTER_SIZE(pos, geometry);
+  // Cell coordinates centered on origin
+  vec2 base = positions.xy * scale * strokeOffsetRatio * column.coverage * shouldRender;
+  vec3 cell = vec3(base, project_size(elevation));
+  DECKGL_FILTER_SIZE(cell, geometry);
 
-  geometry.position.xyz += pos;
+  geometry.position.xyz += cell;
   gl_Position = project_common_position_to_clipspace(geometry.position);
 
   geometry.normal = project_normal(normals);

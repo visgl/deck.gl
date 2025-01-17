@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
-import {Buffer, TypedArray} from '@luma.gl/core';
+import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
@@ -39,7 +39,6 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
-import {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -168,6 +167,14 @@ export type UpdateParameters<LayerT extends Layer> = {
   oldProps: LayerT['props'];
   context: LayerContext;
   changeFlags: ChangeFlags;
+};
+
+type DrawOptions = {
+  renderPass: RenderPass;
+  shaderModuleProps: any;
+  uniforms: any;
+  parameters: any;
+  context: LayerContext;
 };
 
 type SharedLayerState = {
@@ -320,15 +327,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       model: Model;
     };
     return (state && (state.models || (state.model && [state.model]))) || [];
-  }
-
-  // TODO deprecate in favour of setShaderModuleProps
-  /** Update shader module parameters */
-  setModuleParameters(moduleParameters: any): void {
-    for (const model of this.getModels()) {
-      // HACK as fp64 is not yet ported to UBO
-      model.uniforms = {ONE: 1};
-    }
   }
 
   /** Update shader input parameters */
@@ -532,9 +530,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw(opts) {
+  draw(opts: DrawOptions) {
     for (const model of this.getModels()) {
-      model.draw(opts);
+      model.draw(opts.renderPass);
     }
   }
 
@@ -1036,14 +1034,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Calculates uniforms
   _drawLayer({
     renderPass,
-    moduleParameters = null,
+    shaderModuleProps = null,
     uniforms = {},
     parameters = {}
   }: {
     renderPass: RenderPass;
-    moduleParameters: any;
+    shaderModuleProps: any;
     uniforms: any;
-    parameters: any;
+    parameters: LumaParameters;
   }): void {
     this._updateAttributeTransition();
 
@@ -1054,94 +1052,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    // apply gamma to opacity to make it visually "linear"
-    const opacity = Math.pow(this.props.opacity, 1 / 2.2);
-    uniforms.opacity = opacity; // TODO remove once layers ported to UBO
-
     try {
       // TODO/ib - hack move to luma Model.draw
-      if (moduleParameters) {
-        const {isActive, isAttribute} = moduleParameters.picking;
-        const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
-        // @ts-expect-error material is not a Layer prop
-        const {material, modelMatrix} = this.props;
-
-        this.setModuleParameters({});
-
-        const {
-          // mask
-          maskChannels,
-          maskMap,
-          maskSources,
-          // shadow
-          shadowEnabled,
-          drawToShadowMap,
-          shadowMaps,
-          dummyShadowMap,
-          shadowColor,
-          shadowMatrices,
-          shadowLightId,
-          // terrain
-          picking,
-          heightMap,
-          heightMapBounds,
-          dummyHeightMap,
-          terrainCover,
-          drawToTerrainHeightMap,
-          useTerrainHeightMap,
-          terrainSkipRender,
-          // lighting
-          lightSources
-        } = moduleParameters;
-
-        const maskProps = {
-          maskChannels,
-          maskMap,
-          maskSources
-        };
-
-        const shadowProps = {
-          viewport,
-          shadowEnabled,
-          drawToShadowMap,
-          shadowMaps,
-          dummyShadowMap,
-          shadowColor,
-          shadowMatrices,
-          shadowLightId
-        };
-        const terrainProps = {
-          viewport,
-          picking,
-          heightMap,
-          heightMapBounds,
-          dummyHeightMap,
-          terrainCover,
-          drawToTerrainHeightMap,
-          useTerrainHeightMap,
-          terrainSkipRender
-        };
-
-        const projectProps = {
-          viewport,
-          devicePixelRatio,
-          modelMatrix,
-          coordinateSystem,
-          coordinateOrigin
-        } as ProjectProps;
-
-        this.setShaderModuleProps({
-          // TODO Revisit whether this is necessary once all layers ported to UBO
-          mask: maskProps,
-          shadow: shadowProps,
-          terrain: terrainProps,
-          layer: {opacity},
-          lighting: lightSources,
-          phongMaterial: material,
-          gouraudMaterial: material,
-          picking: {isActive, isAttribute} as const satisfies PickingProps,
-          project: projectProps
-        });
+      if (shaderModuleProps) {
+        this.setShaderModuleProps(shaderModuleProps);
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1160,7 +1074,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
         context.device.withParametersWebGL(parameters, () => {
-          const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
           for (const extension of this.props.extensions) {
@@ -1170,7 +1084,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {

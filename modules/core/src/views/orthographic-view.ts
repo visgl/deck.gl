@@ -34,7 +34,7 @@ export default class OrthographicView extends View<OrthographicViewState, Orthog
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return OrthographicViewport;
   }
 

@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Suspense} from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import Layout from '@theme/Layout';
 import styled from 'styled-components';
 
@@ -44,7 +45,9 @@ export default function Playground() {
     <Layout>
       <Container>
         <Suspense>
-          <App />
+          <BrowserOnly>
+            {() => <App />}
+          </BrowserOnly>
         </Suspense>
       </Container>
     </Layout>

@@ -4,12 +4,48 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.1
 
-Release date: TBD (targeting September 2024)
+Release date: TBD (targeting December 2024)
 
-### WebGPU readiness
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/e522d961-600a-4405-9f09-c247b42f7e62" />
+        <p><i>Maplibre Globe View</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>React Widgets</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
+        <p><i>Aggregation Layers</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
+        <p><i>WebGPU readiness</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-- luma.gl v9.1
-- All layers migrated to UBO
+
+### Maplibre Globe View
+
+- The deck.gl [`GlobeView`](./api-reference/core/globe-view) now integrates seamlessly with the MapLibre v5 [globe view](https://maplibre.org/roadmap/globe-view/). 
+- The Maplibre globe view integration was done in close collaboration with the MapLibre team, and works for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
+- The deck.gl `GlobeView` is no longer considered experimental, and can now be imported without a leading underscore.
+
+### React Widgets
+
+deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
+- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
+- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
+- To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
+
+### Widgets Developer Guide
+
+deck.gl v9.1 provides the ability to for applications to write React component that integrate with deck.gl using the widget interface. Learn how to write such React components with our new [Custom Widgets Developer Guide](./developer-guide/custom-widgets).
 
 ### Aggregation layers upgrade
 
@@ -25,6 +61,12 @@ Highlights:
 - New picking info types for each aggregation layer.
 
 See [upgrade guide](./upgrade-guide.md) for more details.
+
+### WebGPU readiness
+
+- luma.gl has been updated to v9.1 which focuses on improved WebGPU support. For details see [release notes](https://luma.gl/docs/whats-new#version-91-in-development) and [upgrade-guide](https://luma.gl/docs/upgrade-guide#upgrading-to-v91).
+- As part of WebGPU readiness, all shader code in deck.gl v9.1 (layers and extensions) have been migrated to use uniform buffers instead of WebGL1 style uniforms. 
+- For most users this change should be transparent, but custom layers that add `uniforms` should [start migrating asap](./upgrade-guide.md) as WebGL1 style uniform support is being actively phased out.
 
 ## deck.gl v9.0
 
@@ -161,7 +203,7 @@ The new experimental [`WMSLayer`](./api-reference/geo-layers/wms-layer.md) simpl
 
 ### Other Enhancements
 
-- [MapLibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deck.md#map).
+- [MapLibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deckgl.md#map).
 - `BitmapLayer` now mixes translucent pixels correctly (Note: [breaking change](./upgrade-guide.md))
 - `TextLayer` handles text outlines better in sdf mode. Outlines are no longer clipped and responds to `outlineWidth` as expected.
 - `TextLayer`'s `maxWidth` is changed to use a more intuitive unit. See upgrade guide for details.
@@ -199,7 +241,7 @@ In v8.x, the types will not be exposed by default to prevent any typing errors f
 
 The [TileLayer](./api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
 
-Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](./api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
+Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](./api-reference/geo-layers/tile-layer.md#tileset2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
 
 Due to this generalization, there is a breaking change affecting indexing properties (`x`, `y` and `z`) in the `TileLayer` API. See [upgrade guide](./upgrade-guide.md) for details.
 
@@ -426,7 +468,7 @@ The `DeckGL` React component is rewritten using functional component and hooks.
 
 - Integration with **CARTO 3 platform**. With deck.gl and the CARTO 3 platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). You don't need to move your data to CARTO plaform.
 - A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are migration guides for both: [CartoSQLLayer](https://github.com/visgl/deck.gl/blob/8.5-release/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer#migration-to-cartolayer) and [CartoBQTilerLayer](https://github.com/visgl/deck.gl/blob/8.5-release/docs/api-reference/carto/carto-bqtiler-layer.md#migration-to-cartolayer#migration-to-cartolayer).
-- New `getData` method in CARTO 3 [to support other deck.gl layers](./api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
+- New `getData` method in CARTO 3 [to support other deck.gl layers](./api-reference/carto/overview.md#support-for-other-deckgl-layers). 
 
 ## deck.gl v8.4
 
@@ -1004,7 +1046,7 @@ A new [PostProcessEffect](./api-reference/core/post-process-effect.md) class, wo
 
 #### GridLayer
 
-`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](./api-reference/aggregation-layers/grid-layer.md). Two new layers [GPUGridLayer](./api-reference/aggregation-layers/gpu-grid-layer.md) and [CPUGridLayer](./api-reference/aggregation-layers/cpu-grid-layer.md) are also offered, which perform aggregation on CPU and GPU respectively.
+`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](./api-reference/aggregation-layers/grid-layer.md). Two new layers GPUGridLayer and CPUGridLayer are also offered, which perform aggregation on CPU and GPU respectively.
 
 The following table compares the performance between CPU and GPU aggregations using random data points:
 
@@ -1133,7 +1175,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
   - [TextLayer](./api-reference/layers/text-layer.md)
 * ` @deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
   - [ContourLayer](./api-reference/aggregation-layers/contour-layer.md)
-  - [GPUGridLayer](./api-reference/aggregation-layers/gpu-grid-layer.md)
+  - GPUGridLayer
   - [GridLayer](./api-reference/aggregation-layers/grid-layer.md)
   - [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md)
   - [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md)
@@ -1186,7 +1228,7 @@ We are releasing [loaders.gl](https://loaders.gl/) as a major new companion fram
 A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](./api-reference/core/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers. See [Using Lighting](./developer-guide/using-effects.md#lighting) for details.
 ### Layer API
 
-* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](./developer-guide/performance.md#on-using-binary-data).
+* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](./developer-guide/performance.md#use-binary-data).
 * **Size units**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
 * **Billboard**: Prior this v7.0, `IconLayer` and `TextLayer` are rendered as billboards (i.e. always facing the camera). A prop `billboard` is added to these layers so that you can place icons and texts relative to the world.
 

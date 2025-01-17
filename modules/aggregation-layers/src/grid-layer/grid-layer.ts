@@ -33,7 +33,7 @@ import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 function noop() {}
 
 const defaultProps: DefaultProps<GridLayerProps> = {
-  gpuAggregation: false,
+  gpuAggregation: true,
 
   // color
   colorDomain: null,
@@ -239,7 +239,7 @@ type _GridLayerProps<DataT> = {
 
   /**
    * When set to true, aggregation is performed on GPU, provided other conditions are met.
-   * @default false
+   * @default true
    */
   gpuAggregation?: boolean;
 };
@@ -489,8 +489,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   override draw(opts) {
     // Replaces render time viewport with our own
-    if (opts.moduleParameters.viewport) {
-      opts.moduleParameters.viewport = this.state.aggregatorViewport;
+    if (opts.shaderModuleProps.project) {
+      opts.shaderModuleProps.project.viewport = this.state.aggregatorViewport;
     }
     super.draw(opts);
   }

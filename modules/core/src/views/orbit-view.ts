@@ -48,7 +48,7 @@ export default class OrbitView extends View<OrbitViewState, OrbitViewProps> {
     this.props.orbitAxis = props.orbitAxis || 'Z';
   }
 
-  get ViewportType() {
+  getViewportType() {
     return OrbitViewport;
   }
 

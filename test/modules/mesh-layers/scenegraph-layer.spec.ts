@@ -89,7 +89,8 @@ test('ScenegraphLayer#tests', t => {
               geometry: new CubeGeometry(),
               vs,
               fs,
-              modules: [project32]
+              modules: [project32],
+              disableWarnings: true
             })
           })
         ]);

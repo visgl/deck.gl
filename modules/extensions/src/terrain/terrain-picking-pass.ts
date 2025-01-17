@@ -9,6 +9,7 @@ import {
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
 import type {TerrainCover} from './terrain-cover';
+import {Parameters} from '@luma.gl/core';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
   pickZ: boolean;
@@ -72,7 +73,7 @@ export class TerrainPickingPass extends PickLayersPass {
     });
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     let parameters: any;
     if (this.drawParameters[layer.id]) {
       parameters = this.drawParameters[layer.id];
@@ -80,6 +81,14 @@ export class TerrainPickingPass extends PickLayersPass {
       parameters = super.getLayerParameters(layer, layerIndex, viewport);
       parameters.blend = true;
     }
-    return {...parameters, depthTest: false};
+    return {...parameters, depthCompare: 'always'};
+  }
+
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    return {
+      terrain: {
+        project: otherShaderModuleProps.project
+      }
+    };
   }
 }

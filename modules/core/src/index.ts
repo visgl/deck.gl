@@ -92,6 +92,7 @@ export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
+export {applyStyles as _applyStyles, removeStyles as _removeStyles} from './utils/apply-styles';
 
 // Types
 export type {CoordinateSystem} from './lib/constants';
@@ -120,12 +121,12 @@ export type {
   TextureSource,
   Material
 } from './types/layer-props';
-export type {FilterContext} from './passes/layers-pass';
+export type {DrawLayerParameters, FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
 export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from './lib/effect';
-export type {PickingUniforms, ProjectUniforms} from './shaderlib/index';
+export type {PickingUniforms, ProjectProps, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';

@@ -3,12 +3,22 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {
+  FlyToInterpolator,
+  WebMercatorViewport,
+  _GlobeViewport,
+  _deepEqual as deepEqual,
+  _applyStyles as applyStyles,
+  _removeStyles as removeStyles
+} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-interface CompassWidgetProps {
+export type CompassWidgetProps = {
   id?: string;
+  /**
+   * Widget positioning within the view. Default 'top-left'.
+   */
   placement?: WidgetPlacement;
   /**
    * View to attach to and interact with. Required when using multiple views.
@@ -30,7 +40,7 @@ interface CompassWidgetProps {
    * Additional CSS class.
    */
   className?: string;
-}
+};
 
 export class CompassWidget implements Widget<CompassWidgetProps> {
   id = 'compass';
@@ -42,22 +52,45 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   element?: HTMLDivElement;
 
   constructor(props: CompassWidgetProps) {
-    this.id = props.id || 'compass';
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.label = props.label || 'Compass';
-    props.style = props.style || {};
-    this.props = props;
+    this.id = props.id ?? this.id;
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
+
+    this.props = {
+      ...props,
+      transitionDuration: props.transitionDuration ?? 200,
+      label: props.label ?? 'Reset Compass',
+      style: props.style ?? {}
+    };
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    const oldProps = this.props;
+    const el = this.element;
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
+
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        removeStyles(el, oldProps.style);
+        applyStyles(el, props.style);
+      }
+    }
+
     Object.assign(this.props, props);
+    this.update();
   }
 
   onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-    this.update();
+    // no need to update if viewport is the same
+    if (!viewport.equals(this.viewports[viewport.id])) {
+      this.viewports[viewport.id] = viewport;
+      this.update();
+    }
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -65,9 +98,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
+    applyStyles(element, style);
     this.deck = deck;
     this.element = element;
     this.update();
@@ -83,7 +114,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     return [0, 0];
   }
 
-  update() {
+  private update() {
     const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
     const viewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(viewport);
@@ -100,7 +131,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
               this.handleCompassReset(viewport);
             }
           }}
-          label={this.props.label}
+          title={this.props.label}
           style={{transform: `rotateX(${rx}deg)`}}
         >
           <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">

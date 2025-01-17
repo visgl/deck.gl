@@ -86,12 +86,15 @@ export default abstract class AggregationLayer<
     aggregator.update();
   }
 
-  draw({moduleParameters}) {
-    // GPU aggregation needs `moduleSettings` for projection/filter uniforms which are only accessible at draw time
+  draw({shaderModuleProps}) {
+    // GPU aggregation needs `shaderModuleProps` for projection/filter uniforms which are only accessible at draw time
     // GPUAggregator's Buffers are pre-allocated during `update()` and passed down to the sublayer attributes in renderLayers()
     // Although the Buffers have been bound to the sublayer's Model, their content are not populated yet
     // GPUAggregator.preDraw() is called in the draw cycle here right before Buffers are used by sublayer.draw()
-    this.state.aggregator.preDraw({moduleSettings: moduleParameters});
+    const {aggregator} = this.state;
+    // @ts-expect-error only used by GPU aggregators
+    aggregator.setProps({shaderModuleProps});
+    aggregator.preDraw();
   }
 
   // override CompositeLayer._getAttributeManager to create AttributeManager instance

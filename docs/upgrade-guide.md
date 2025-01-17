@@ -24,13 +24,37 @@ Breaking changes:
 
 - `GPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: true`.
 - `CPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: false`.
-- If you are supplying a custom [haxagonAggregator](./api-reference/aggregation-layers/hexagon-layer.md#haxagonaggregator) to `HexagonLayer`, its function signiature has changed.
+- If you are supplying a custom [hexagonAggregator](./api-reference/aggregation-layers/hexagon-layer.md#hexagonaggregator) to `HexagonLayer`, its function signiature has changed.
 - `HexagonLayer`'s sub layer is renamed `<id>-cells` and is no longer a vanilla `ColumnLayer`. If you were overriding the sub layer class with your own, please open a Discussion on GitHub for support.
 
 
 ### LightingEffect
 
 - `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).
+
+### Uniform buffers
+
+GLSL shaders that take inputs via WebGL1-style uniforms need to be migrated to use uniform buffers instead. For example:
+
+```glsl
+// Global uniform
+uniform float opacity;
+
+// UBO
+uniform layerUniforms {
+  uniform float opacity;
+} layer;
+```
+
+The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module) class is used to encapsulate and inject the uniforms, as well as providing using useful type checks. It maps (typed) props to bindings and uniforms defined in the UBO block, which [ShaderInputs](https://luma.gl/docs/api-reference/engine/shader-inputs) uses to update bindings and uniform buffers on the GPU.
+
+See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
+
+Layers need to be modified:
+- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
+
+For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
 
 ## Upgrading to v9.0
 
@@ -50,11 +74,13 @@ The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. 
 
 Quick summary:
 
-- All references to `gl: WebGLRenderingContext` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
-- Layer props `parameters` and `textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
-- Deck class prop `onWebGLInitialized` is now `onDeviceInitialized`.
+- `DeckProps.gl (WebGLRenderingContext)` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
+- `DeckProps.glOptions (WebGLContextAttributes)` should be replaced with `DeckProps.deviceProps.webgl`: `deviceProps: {type: 'webgl', webgl: ...glOptions}`: [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)
+- `DeckProps.glOptions.preserveDrawingBuffers` is now set by default, and does not need to be overridden.
+- `DeckProps.onWebGLInitialized` callback is now `DeckProps.onDeviceInitialized`.
+- `LayerProps.parameters` and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
 - When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
-- GPU resources should no longer be initiated from classes. For example, instead of `new Buffer()` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
+- GPU resources should no longer be created by directly instantiating classes. For example, instead of `new Buffer(gl)` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
 
 #### Custom Layers
 
@@ -218,7 +244,7 @@ Note that this flag may be removed in a future release.
 
 ### Layer filtering
 
-- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](./api-reference/geo-layers/h3-hexagon-layer.md#highprecision-boolean-optional) for details.
+- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](./api-reference/geo-layers/h3-hexagon-layer.md#highprecision) for details.
 - `layerFilter` is now only called with top-level layers. For example, if you have a `GeoJsonLayer` with `id: 'regions'`, in previous versions the callback would look like:
 
   ```js
@@ -243,7 +269,7 @@ Note that this flag may be removed in a future release.
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_subLayerProps) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 - If a composite layer has `visible: false`, all of the layers generated by it will also be hidden regardless of their own `visible` prop. In previous versions, a descendant layer may be visible as long as it has `visible: true`, which often led to confusing behavior if a composite layer does not propagate its props correctly.
 
@@ -493,7 +519,7 @@ new Model({
 
 ##### Auto view state update
 
-A bug was fixed where initial view state tracking could sometimes overwrite user-provided `viewState` prop. Apps that rely on auto view state update by specifying `initialViewState` should make sure that `viewState` is never assigned. If manual view state update is desired, use `viewState` and `onViewStateChange` instead. See [developer guide](./developer-guide/views.md#using-a-view-class-with-view-state) for examples.
+A bug was fixed where initial view state tracking could sometimes overwrite user-provided `viewState` prop. Apps that rely on auto view state update by specifying `initialViewState` should make sure that `viewState` is never assigned. If manual view state update is desired, use `viewState` and `onViewStateChange` instead. See [developer guide](./developer-guide/views.md#using-a-view-with-view-state) for examples.
 
 We have fixed a bug when using `initialViewState` with multiple views. In the past, the state change in one view is unintendedly propagated to all views. As a result of this fix, multiple views (e.g. mini map) are no longer synchronized by default. To synchronize them, define the views with an explicit `viewState.id`:
 
@@ -941,7 +967,7 @@ Following WebGL parameters are set during DeckGL component initialization.
 
 All our layers enable depth test so we are going set this state during initialization. We are also changing blend function for more appropriate rendering when multiple elements are blended.
 
-For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](./api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
+For any custom needs, these parameters can be overwritten by updating them in `onWebGLInitialized` callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
 
 
 ### assembleShaders

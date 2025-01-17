@@ -58,7 +58,7 @@ new deck.carto.QuadbinTileLayer({});
 
 ## Properties
 
-Inherits all properties from [`QuadkeyLayer`](../geo-layers/quadkey-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
+Inherits all properties from [`QuadkeyLayer`](../geo-layers/quadkey-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions and additions noted below.
 
 
 #### `data` (TilejsonResult) {#data}

@@ -5,6 +5,8 @@
 import {Matrix4} from '@math.gl/core';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
+import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import {vec3, vec4} from '@math.gl/core';
 
@@ -50,45 +52,60 @@ export type GlobeViewportOptions = {
   zoom?: number;
   /** Use orthographic projection */
   orthographic?: boolean;
-  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.1` */
+  /** Camera fovy in degrees. If provided, overrides `altitude` */
+  fovy?: number;
+  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.5` */
   nearZMultiplier?: number;
-  /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `2` */
+  /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1` */
   farZMultiplier?: number;
+  /** Optionally override the near plane position. `nearZMultiplier` is ignored if `nearZ` is supplied. */
+  nearZ?: number;
+  /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
+  farZ?: number;
   /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
   resolution?: number;
 };
 
 export default class GlobeViewport extends Viewport {
-  // @ts-ignore
-  longitude: number;
-  // @ts-ignore
-  latitude: number;
-  resolution: number;
+  longitude!: number;
+  latitude!: number;
+  resolution!: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
-      latitude = 0,
       longitude = 0,
       zoom = 0,
-      nearZMultiplier = 0.1,
-      farZMultiplier = 2,
+      // Matches Maplibre defaults
+      // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
+      nearZMultiplier = 0.5,
+      farZMultiplier = 1,
       resolution = 10
     } = opts;
 
-    let {height, altitude = 1.5} = opts;
+    let {latitude = 0, height, altitude = 1.5, fovy} = opts;
+
+    // Clamp to web mercator limit to prevent bad inputs
+    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
 
     height = height || 1;
-    altitude = Math.max(0.75, altitude);
+    if (fovy) {
+      altitude = fovyToAltitude(fovy);
+    } else {
+      fovy = altitudeToFovy(altitude);
+    }
+    // Exagerate distance by latitude to match the Web Mercator distortion
+    // The goal is that globe and web mercator projection results converge at high zoom
+    // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
+    const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
+    const scale = Math.pow(2, zoom) * scaleAdjust;
+    const nearZ = opts.nearZ ?? nearZMultiplier;
+    const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
 
     // Calculate view matrix
     const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
-    const scale = Math.pow(2, zoom);
     viewMatrix.rotateX(latitude * DEGREES_TO_RADIANS);
     viewMatrix.rotateZ(-longitude * DEGREES_TO_RADIANS);
     viewMatrix.scale(scale / height);
-
-    const halfFov = Math.atan(0.5 / altitude);
-    const relativeScale = (GLOBE_RADIUS * 2 * scale) / height;
 
     super({
       ...opts,
@@ -103,12 +120,13 @@ export default class GlobeViewport extends Viewport {
 
       // projection matrix parameters
       distanceScales: getDistanceScales(),
-      fovyRadians: halfFov * 2,
+      fovy,
       focalDistance: altitude,
-      near: nearZMultiplier,
-      far: Math.min(2, 1 / relativeScale + 1) * altitude * farZMultiplier
+      near: nearZ,
+      far: farZ
     });
 
+    this.scale = scale;
     this.latitude = latitude;
     this.longitude = longitude;
     this.resolution = resolution;

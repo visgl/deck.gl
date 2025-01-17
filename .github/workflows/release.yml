@@ -22,14 +22,15 @@ jobs:
         id: permitted
         run: |
           result=
-          branchName=$(git branch -a --contains $GITHUB_SHA | grep 'remotes/origin/' || echo "")
-          if [[ $branchName == *"master" || $branchName == *"-release" ]]; then
+          if git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/master$'; then
+            result=true
+          elif git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/.*-release$'; then
             result=true
           fi
           echo "result=${result}" >> "$GITHUB_OUTPUT"
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: check_branch
     permissions:
       contents: write
@@ -42,27 +43,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-      - name: Use Node.js
-        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
+      - uses: volta-cli/action@2d68418f32546fd191eb666e232b321d5726484d # v4.1.1
         with:
-          node-version: '18.x'
+          cache: 'yarn'
 
-      - name: Create GitHub release entry
-        run: |
-          body=$(node scripts/github-release.js) &&
-          curl \
-            -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/visgl/deck.gl/releases \
-            -d "${body}" \
-            -H "Authorization: token ${GITHUB_TOKEN}"
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build packages
+        run: yarn build
+      
+      - name: Run tests from transpiled code
+        run: npx ocular-test dist
 
       - name: Login to NPM
         run: npm config set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
 
-      - name: Install dependencies
-        run: yarn
-      
       - name: Publish to NPM
         run: npx ocular-publish from-git

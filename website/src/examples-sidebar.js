@@ -47,7 +47,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox']
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox', 'maplibre']
     },
     {
       type: 'category',
@@ -72,7 +72,7 @@ const sidebars = {
         {
           type: 'link',
           label: 'Playground',
-          href: `playground`
+          href: `/playground`
         }
       ]
     }

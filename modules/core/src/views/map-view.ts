@@ -29,6 +29,10 @@ export type MapViewState = {
   maxPitch?: number;
   /** Viewport center offsets from lng, lat in meters */
   position?: number[];
+  /** The near plane position */
+  nearZ?: number;
+  /** The far plane position */
+  farZ?: number;
 } & CommonViewState;
 
 export type MapViewProps = {
@@ -55,7 +59,7 @@ export default class MapView extends View<MapViewState, MapViewProps> {
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return WebMercatorViewport;
   }
 

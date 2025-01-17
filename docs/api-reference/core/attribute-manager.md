@@ -147,7 +147,7 @@ Notes:
 * Any preallocated buffers in "buffers" matching registered attribute names will be used. No update will happen in this case.
 * Calls onUpdateStart and onUpdateEnd log callbacks before and after.
 
-#### `getBufferLayouts`
+#### `getBufferLayouts` {#getbufferlayouts}
 
 Returns WebGPU-style buffer layout descriptors.
 
