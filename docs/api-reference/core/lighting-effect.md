@@ -56,4 +56,4 @@ Array of [PointLight](./point-light.md) source which emits from a point in all d
 
 ## Source
 
-[/modules/core/src/effects/lighting/lighting-effect.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/lighting/lighting-effect.ts)
+[/modules/core/src/effects/lighting/lighting-effect.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/effects/lighting/lighting-effect.ts)

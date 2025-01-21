@@ -281,4 +281,4 @@ Receives arguments:
 
 ## Source
 
-[modules/geo-layers/src/wms-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/wms-layer)
+[modules/geo-layers/src/wms-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/geo-layers/src/wms-layer)

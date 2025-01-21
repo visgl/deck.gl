@@ -161,4 +161,4 @@ The layer includes built-in collision detection that:
 
 ## Source
 
-[modules/carto/src/layers/point-label-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/point-label-layer.ts) 
+[modules/carto/src/layers/point-label-layer.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/carto/src/layers/point-label-layer.ts) 

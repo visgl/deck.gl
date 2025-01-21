@@ -78,7 +78,7 @@ export default class MyLayer extends Layer {
 }
 ```
 
-It is sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/visgl/deck.gl/tree/master/examples/website/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
+It is sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/website/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
 
 
 #### Defining Attributes

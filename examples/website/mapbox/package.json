@@ -11,7 +11,7 @@
   "dependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "d3-scale": "^4.0.0",
-    "deck.gl": "^9.0.0",
+    "deck.gl": "^9.1.0",
     "mapbox-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

@@ -41,7 +41,7 @@ Release date: TBD (targeting December 2024)
 deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
 - All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
 - Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
-- To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
+- To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/react/basic) for using widgets in React.
 
 ### Widgets Developer Guide
 
@@ -140,7 +140,7 @@ The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has 
 
 ### `@deck.gl/widgets` (New module)
 
-You can now add UI components to deck.gl. This new module lets apps add controls and information that can interact with deck.gl's cameras and layers for a better user experience. To get started, check out [the example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/widgets) and [the documentation](./api-reference/widgets/overview.md).
+You can now add UI components to deck.gl. This new module lets apps add controls and information that can interact with deck.gl's cameras and layers for a better user experience. To get started, check out [the example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/widgets) and [the documentation](./api-reference/widgets/overview.md).
 
 This module initially contains the following widgets:
 
@@ -247,7 +247,7 @@ Due to this generalization, there is a breaking change affecting indexing proper
 
 ### MapboxOverlay
 
-The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/).
+The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/maplibre/).
 
 If you are using react-map-gl v7, this is the only solution to use deck.gl with React map control components (`Navigationcontrol`, `GeolocateControl`, etc.). See [example](https://github.com/visgl/react-map-gl/blob/master/examples/deckgl-overlay/src/app.tsx).
 
@@ -308,7 +308,7 @@ The [GoogleMapsOverlay class](./api-reference/google-maps/google-maps-overlay.md
 
 See blog posts from [Google Cloud](https://cloud.google.com/blog/products/maps-platform/richer-data-visualization-google-maps-platform-using-deckgl) and [our own](https://medium.com/vis-gl/deck-gl-v8-6-now-available-with-deeper-google-maps-support-b734719076a7) for the potentials of this feature.
 
-Visit the new [Google Maps integration example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) to get started.
+Visit the new [Google Maps integration example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/google-maps) to get started.
 
 ### OrthographicView
 
@@ -668,7 +668,7 @@ For geospatial data, a new projection mode -- globe projection is now available 
 
 Currently there is no base map provider under this view. You may use the `BitmapLayer` or `GeoJsonLayer` to render a backdrop for your data.
 
-Before getting started with [this example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/globe), make sure you check out the [docs](./api-reference/core/globe-view.md) for the limitations of the current implementation.
+Before getting started with [this example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/globe), make sure you check out the [docs](./api-reference/core/globe-view.md) for the limitations of the current implementation.
 
 
 ### Antimeridian Handling
@@ -722,7 +722,7 @@ The `@deck.gl/geo-layers` module added many new features to address popular tile
 
 Multiple bugs have been fixed in the [TileLayer](./api-reference/geo-layers/tile-layer.md) regarding data fetching and tree traversal.
 
-The layer now supports non-geospatial views. Check out this [example](https://github.com/visgl/deck.gl/tree/master/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
+The layer now supports non-geospatial views. Check out this [example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
 
 New props are added to better control the layer's behavior:
 
@@ -738,7 +738,7 @@ This effort is led by contributors from [CARTO](https://carto.com/).
 
 #### TerrainLayer
 
-[TerrainLayer](./api-reference/geo-layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/master/examples/website/terrain).
+[TerrainLayer](./api-reference/geo-layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/website/terrain).
 
 ### ESRI + deck.gl
 

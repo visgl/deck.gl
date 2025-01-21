@@ -905,4 +905,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/lib/layer.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/layer.ts)
+[modules/core/src/lib/layer.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/lib/layer.ts)

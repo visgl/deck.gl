@@ -73,4 +73,4 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 
 ## Source
 
-[modules/carto/src/layers/vector-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/vector-tile-layer.ts)
+[modules/carto/src/layers/vector-tile-layer.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/carto/src/layers/vector-tile-layer.ts)

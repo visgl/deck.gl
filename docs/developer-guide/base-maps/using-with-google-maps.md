@@ -2,7 +2,7 @@
 
 | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- |
-| ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) |
+| ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) |
 
 ![deck.gl as a Google Maps overlay](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg)
 
@@ -124,7 +124,7 @@ function App() {
   </TabItem>
 </Tabs>
 
-You can find full project setups in the [react get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/google-maps/) and [pure js get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps/).
+You can find full project setups in the [react get-started example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/react/google-maps/) and [pure js get-started example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/google-maps/).
 
 
 ### Example: reverse controlled

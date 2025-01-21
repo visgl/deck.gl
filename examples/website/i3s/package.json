@@ -12,7 +12,7 @@
     "@loaders.gl/i3s": "^4.2.0",
     "maplibre-gl": "^3.0.0",
     "react-map-gl": "^7.1.0",
-    "deck.gl": "^9.0.0"
+    "deck.gl": "^9.1.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

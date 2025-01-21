@@ -35,4 +35,4 @@ const cameraLight = new CameraLight({color, intensity});
 
 ## Source
 
-[/modules/core/src/effects/lighting/camera-light.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/lighting/camera-light.ts)
+[/modules/core/src/effects/lighting/camera-light.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/effects/lighting/camera-light.ts)

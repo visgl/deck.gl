@@ -2,7 +2,7 @@
 
 The deck.gl core library and layers have no dependencies on React, Mapbox GL, or MapLibre GL and can be used by any JavaScript application.
 
-Our [get-started examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started) contains vanilla JavaScript templates that serve as a starting point for your application.
+Our [get-started examples](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started) contains vanilla JavaScript templates that serve as a starting point for your application.
 
 
 ## Using @deck.gl/core

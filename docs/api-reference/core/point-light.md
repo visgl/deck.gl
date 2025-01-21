@@ -42,4 +42,4 @@ const pointLight = new PointLight({color, intensity, position});
 
 ## Source
 
-[/modules/core/src/effects/lighting/point-light.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/lighting/point-light.ts)
+[/modules/core/src/effects/lighting/point-light.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/effects/lighting/point-light.ts)

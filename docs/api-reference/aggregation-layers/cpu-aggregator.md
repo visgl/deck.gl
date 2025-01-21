@@ -89,4 +89,4 @@ aggregator.setProps({
 
 ## Source
 
-[modules/aggregation-layers/src/common/aggregator/cpu-aggregator/cpu-aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/cpu-aggregator/cpu-aggregator.ts)
+[modules/aggregation-layers/src/common/aggregator/cpu-aggregator/cpu-aggregator.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/common/aggregator/cpu-aggregator/cpu-aggregator.ts)

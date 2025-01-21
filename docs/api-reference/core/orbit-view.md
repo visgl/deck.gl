@@ -75,4 +75,4 @@ Visit the [OrbitController](./orbit-controller.md) documentation for a full list
 
 ## Source
 
-[modules/core/src/views/orbit-view.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/orbit-view.ts)
+[modules/core/src/views/orbit-view.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/views/orbit-view.ts)

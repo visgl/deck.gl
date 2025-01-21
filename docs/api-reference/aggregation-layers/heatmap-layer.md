@@ -237,4 +237,4 @@ The `HeatmapLayer` performs aggregation on the GPU. This feature is fully suppor
 
 ## Source
 
-[modules/aggregation-layers/src/heatmap-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/heatmap-layer)
+[modules/aggregation-layers/src/heatmap-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/heatmap-layer)

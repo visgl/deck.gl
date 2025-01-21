@@ -524,4 +524,4 @@ The GridLayer renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/grid-layer)
+[modules/aggregation-layers/src/grid-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/grid-layer)

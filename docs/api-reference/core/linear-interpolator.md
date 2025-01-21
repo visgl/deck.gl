@@ -22,4 +22,4 @@ Parameters:
 
 ## Source
 
-[modules/core/src/transitions/linear-interpolator.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/transitions/linear-interpolator.ts)
+[modules/core/src/transitions/linear-interpolator.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/transitions/linear-interpolator.ts)

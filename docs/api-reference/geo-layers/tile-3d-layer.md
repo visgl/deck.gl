@@ -340,4 +340,4 @@ Follow [CompositeLayer](../core/composite-layer.md#_sublayerprops) and example i
 
 ## Source
 
-[modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/geo-layers/src/tile-3d-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/geo-layers/src/tile-3d-layer)

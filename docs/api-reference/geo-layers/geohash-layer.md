@@ -177,4 +177,4 @@ The `GeohashLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/geohash-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/geohash-layer)
+[modules/geo-layers/src/geohash-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/geo-layers/src/geohash-layer)

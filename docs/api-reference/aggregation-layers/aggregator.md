@@ -165,4 +165,4 @@ The number of bins in the aggregated result.
 
 ## Source
 
-[modules/aggregation-layers/src/common/aggregator/aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/aggregator.ts)
+[modules/aggregation-layers/src/common/aggregator/aggregator.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/common/aggregator/aggregator.ts)

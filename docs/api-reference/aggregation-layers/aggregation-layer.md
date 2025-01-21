@@ -35,4 +35,4 @@ Aggregation results can be obtained here with `aggregator.getBins`, `aggregator.
 
 ## Source
 
-[modules/aggregation-layers/src/common/aggregation-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregation-layer.ts)
+[modules/aggregation-layers/src/common/aggregation-layer.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/common/aggregation-layer.ts)

@@ -2,7 +2,7 @@
 
 | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- |
-|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/maplibre-overlay) |
+|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/maplibre-overlay) |
 
 [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) is a powerful open-source library that uses WebGL to render interactive maps from vector tiles in a browser. deck.gl's `MapView` can sync perfectly with the camera of MapLibre, at every zoom level and rotation angle.
 
@@ -128,7 +128,7 @@ function App() {
 </Tabs>
 
 
-You can find full project setups in the [react get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/maplibre/) and [pure js get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/).
+You can find full project setups in the [react get-started example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/react/maplibre/) and [pure js get-started example](https://github.com/visgl/deck.gl/tree/9.1-release/examples/get-started/pure-js/maplibre/).
 
 
 ### Example: reverse controlled
@@ -218,7 +218,7 @@ function App() {
 
 [react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around maplibre-gl maintained by the vis.gl community. If you'd like to use deck.gl together with maplibre-gl and React, this library is the recommended companion.
 
-All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration.
+All the [examples on this website](https://github.com/visgl/deck.gl/tree/9.1-release/examples/website) are implemented using the React integration.
 
 When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#example) is used with react-map-gl's `useControl` hook. 
 

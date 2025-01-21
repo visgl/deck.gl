@@ -347,4 +347,4 @@ new MVTLayer({
 
 ## Source
 
-[modules/geo-layers/src/mvt-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/mvt-layer)
+[modules/geo-layers/src/mvt-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/geo-layers/src/mvt-layer)

@@ -48,7 +48,7 @@ uniform layerUniforms {
 
 The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module) class is used to encapsulate and inject the uniforms, as well as providing using useful type checks. It maps (typed) props to bindings and uniforms defined in the UBO block, which [ShaderInputs](https://luma.gl/docs/api-reference/engine/shader-inputs) uses to update bindings and uniform buffers on the GPU.
 
-See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
+See [layerUniforms](https://github.com/visgl/deck.gl/tree/9.1-release/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
 
 Layers need to be modified:
 - `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO

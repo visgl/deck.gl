@@ -93,4 +93,4 @@ When using `TestLayerAsync`, `onAfterUpdate` is called multiple times until all 
 
 ## Source
 
-[modules/test-utils/src/lifecycle-test.ts](https://github.com/visgl/deck.gl/blob/master/modules/test-utils/src/lifecycle-test.ts)
+[modules/test-utils/src/lifecycle-test.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/test-utils/src/lifecycle-test.ts)

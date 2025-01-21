@@ -284,4 +284,4 @@ The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-
 
 ## Source
 
-[modules/aggregation-layers/src/screen-grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/screen-grid-layer)
+[modules/aggregation-layers/src/screen-grid-layer](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/screen-grid-layer)

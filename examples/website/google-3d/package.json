@@ -12,7 +12,7 @@
     "@googlemaps/js-api-loader": "^1.16.0",
     "@turf/rhumb-bearing": "^6.5.0",
     "@turf/rhumb-distance": "^6.5.0",
-    "deck.gl": "^9.0.0"
+    "deck.gl": "^9.1.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

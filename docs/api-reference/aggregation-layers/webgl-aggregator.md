@@ -80,4 +80,4 @@ Mapped uniforms for shadertool modules, see [ModelProps](https://github.com/visg
 
 ## Source
 
-[modules/aggregation-layers/src/common/aggregator/gpu-aggregator/webgl-aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/gpu-aggregator/webgl-aggregator.ts)
+[modules/aggregation-layers/src/common/aggregator/gpu-aggregator/webgl-aggregator.ts](https://github.com/visgl/deck.gl/tree/9.1-release/modules/aggregation-layers/src/common/aggregator/gpu-aggregator/webgl-aggregator.ts)
