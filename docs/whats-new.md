@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.1
 
-Release date: TBD (targeting December 2024)
+Release date: Jan 21, 2025
 
 <table style={{border: 0}} align="center">
   <tbody>
