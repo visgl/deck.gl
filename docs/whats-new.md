@@ -32,7 +32,7 @@ Release date: Jan 21, 2025
 
 ### Globe View ♥ MapLibre
 
-deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.org/roadmap/globe-view/) for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre.md#integration-modes). The experimental [`GlobeView`](./api-reference/core/globe-view) has been updated to match MapLibre's camera at the same zoom level. [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md) works with maplibre-gl globe map without additional configuration.
+deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.org/maplibre-gl-js/docs/examples/globe-vector-tiles/) for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre.md#integration-modes). The experimental [`GlobeView`](./api-reference/core/globe-view.md) has been updated to match MapLibre's camera at the same zoom level. [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md) works with maplibre-gl globe map without additional configuration.
 
 *The Maplibre globe view integration was done in close collaboration with the MapLibre team.*
 
