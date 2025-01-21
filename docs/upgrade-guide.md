@@ -18,6 +18,12 @@
   + `tap` -> `click`
   + `doubletap` -> `dblclick`
 
+### Globe View
+
+Breaking changes:
+
+- The `zoom` value is now interpreted differently to match MapLibre's behavior. The appearance adapts based on `latitude`.
+
 ### Aggregation layers
 
 Breaking changes:

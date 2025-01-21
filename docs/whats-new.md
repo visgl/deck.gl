@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.1
 
-Release date: TBD (targeting December 2024)
+Release date: Jan 21, 2025
 
 <table style={{border: 0}} align="center">
   <tbody>
@@ -30,11 +30,11 @@ Release date: TBD (targeting December 2024)
 </table>
 
 
-### Maplibre Globe View
+### Globe View ♥ MapLibre
 
-- The deck.gl [`GlobeView`](./api-reference/core/globe-view) now integrates seamlessly with the MapLibre v5 [globe view](https://maplibre.org/roadmap/globe-view/). 
-- The Maplibre globe view integration was done in close collaboration with the MapLibre team, and works for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). 
-- The deck.gl `GlobeView` is no longer considered experimental, and can now be imported without a leading underscore.
+deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.org/roadmap/globe-view/) for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre#integration-modes). The experimental [`GlobeView`](./api-reference/core/globe-view) has been updated to match MapLibre's camera at the same zoom level. [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md) works with maplibre-gl globe map without additional configuration.
+
+*The Maplibre globe view integration was done in close collaboration with the MapLibre team.*
 
 ### React Widgets
 
@@ -43,7 +43,7 @@ deck.gl v9.0 added support for widgets, with v9.1 users can now create React com
 - Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
 - To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
 
-### Widgets Developer Guide
+##### Widgets Developer Guide
 
 deck.gl v9.1 provides the ability to for applications to write React component that integrate with deck.gl using the widget interface. Learn how to write such React components with our new [Custom Widgets Developer Guide](./developer-guide/custom-widgets).
 
