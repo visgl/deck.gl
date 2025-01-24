@@ -211,7 +211,7 @@ export default class H3HexagonLayer<
 
     const [centerX, centerY] = viewport.projectFlat([centerLng, centerLat]);
     vertices = vertices.map(p => {
-      const worldPosition = viewport.projectFlat([p[0], p[1]]);
+      const worldPosition = viewport.projectFlat(p);
       return [
         (worldPosition[0] - centerX) / unitsPerMeter[0],
         (worldPosition[1] - centerY) / unitsPerMeter[1]

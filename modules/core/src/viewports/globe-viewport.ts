@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, type NumberArray2, type NumberArray3} from '@math.gl/core';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
@@ -47,7 +47,7 @@ export type GlobeViewportOptions = {
   /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
   altitude?: number;
   /* Meter offsets of the viewport center from lng, lat */
-  position?: [number, number, number];
+  position?: NumberArray3;
   /** Zoom level */
   zoom?: number;
   /** Use orthographic projection */
@@ -138,10 +138,10 @@ export default class GlobeViewport extends Viewport {
   getBounds(options: {z?: number} = {}): [number, number, number, number] {
     const unprojectOption = {targetZ: options.z || 0};
 
-    const left = this.unproject([0, this.height / 2, 0], unprojectOption);
-    const top = this.unproject([this.width / 2, 0, 0], unprojectOption);
-    const right = this.unproject([this.width, this.height / 2, 0], unprojectOption);
-    const bottom = this.unproject([this.width / 2, this.height, 0], unprojectOption);
+    const left = this.unproject([0, this.height / 2], unprojectOption);
+    const top = this.unproject([this.width / 2, 0], unprojectOption);
+    const right = this.unproject([this.width, this.height / 2], unprojectOption);
+    const bottom = this.unproject([this.width / 2, this.height], unprojectOption);
 
     if (right[0] < this.longitude) right[0] += 360;
     if (left[0] > this.longitude) left[0] -= 360;
@@ -155,10 +155,10 @@ export default class GlobeViewport extends Viewport {
   }
 
   unproject(
-    xyz: [number, number, number],
+    xyz: NumberArray2 | NumberArray3,
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
-  ): [number, number, number] {
-    const [x, y, z] = xyz;
+  ): NumberArray2 | NumberArray3 {
+    const [x, y, z = 0] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
     const {pixelUnprojectionMatrix} = this;
@@ -188,12 +188,12 @@ export default class GlobeViewport extends Viewport {
     const [X, Y, Z] = this.unprojectPosition(coord);
 
     if (Number.isFinite(z)) {
-      return [X, Y, Z];
+      return Z ? [X, Y, Z] : [X, Y];
     }
-    return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y, 0];
+    return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  projectPosition(xyz: [number, number, number]): [number, number, number] {
+  projectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     const [lng, lat, Z = 0] = xyz;
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;
@@ -203,8 +203,8 @@ export default class GlobeViewport extends Viewport {
     return [Math.sin(lambda) * cosPhi * D, -Math.cos(lambda) * cosPhi * D, Math.sin(phi) * D];
   }
 
-  unprojectPosition(xyz: [number, number, number]): [number, number, number] {
-    const [x, y, z] = xyz;
+  unprojectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
+    const [x, y, z = 0] = xyz;
     const D = vec3.len(xyz);
     const phi = Math.asin(z / D);
     const lambda = Math.atan2(x, -y);
@@ -215,15 +215,15 @@ export default class GlobeViewport extends Viewport {
     return [lng, lat, Z];
   }
 
-  projectFlat(xy: [number, number]): [number, number] {
+  projectFlat(xy: NumberArray2): NumberArray2 {
     return xy;
   }
 
-  unprojectFlat(xy: [number, number]): [number, number] {
+  unprojectFlat(xy: NumberArray2): NumberArray2 {
     return xy;
   }
 
-  panByPosition(coords: number[], pixel: [number, number, number]): GlobeViewportOptions {
+  panByPosition(coords: number[], pixel: NumberArray2 | NumberArray3): GlobeViewportOptions {
     const fromPosition = this.unproject(pixel);
     return {
       longitude: coords[0] - fromPosition[0] + this.longitude,

@@ -4,8 +4,7 @@
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-import Viewport from './viewport';
-
+import {Matrix4, type NumberArray2, type NumberArray3, clamp, vec2} from '@math.gl/core';
 import {
   pixelsToWorld,
   getViewMatrix,
@@ -17,9 +16,7 @@ import {
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
-import {Padding} from './viewport';
-
-import {Matrix4, clamp, vec2} from '@math.gl/core';
+import Viewport, {Padding} from './viewport';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
@@ -45,7 +42,7 @@ export type WebMercatorViewportOptions = {
   /** Camera fovy in degrees. If provided, overrides `altitude` */
   fovy?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
-  position?: [number, number, number];
+  position?: NumberArray3;
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
@@ -236,7 +233,7 @@ export default class WebMercatorViewport extends Viewport {
     return this._subViewports;
   }
 
-  projectPosition(xyz: [number, number, number]): [number, number, number] {
+  projectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.projectPosition(xyz);
@@ -246,7 +243,7 @@ export default class WebMercatorViewport extends Viewport {
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: [number, number, number]): [number, number, number] {
+  unprojectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.unprojectPosition(xyz);
@@ -270,7 +267,7 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords: [number, number], pixel: number[]): WebMercatorViewportOptions {
+  panByPosition(coords: NumberArray2, pixel: number[]): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 

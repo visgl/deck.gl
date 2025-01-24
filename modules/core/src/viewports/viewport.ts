@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import log from '../utils/log';
-import {createMat4, getCameraPosition, getFrustumPlanes, FrustumPlane} from '../utils/math-utils';
-
-import {Matrix4, Vector3, equals, clamp, mat4} from '@math.gl/core';
-
+import {
+  Matrix4,
+  Vector3,
+  equals,
+  clamp,
+  mat4,
+  type NumberArray2,
+  type NumberArray3
+} from '@math.gl/core';
 import {
   getDistanceScales,
   getMeterZoom,
@@ -15,7 +19,8 @@ import {
   worldToPixels,
   pixelsToWorld
 } from '@math.gl/web-mercator';
-
+import log from '../utils/log';
+import {createMat4, getCameraPosition, getFrustumPlanes, FrustumPlane} from '../utils/math-utils';
 import {PROJECTION_MODE} from '../lib/constants';
 
 export type DistanceScales = {
@@ -46,7 +51,7 @@ export type ViewportOptions = {
   /** Latitude in degrees (geospatial only) */
   latitude?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
-  position?: [number, number, number];
+  position?: NumberArray3;
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
@@ -76,7 +81,7 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const IDENTITY = createMat4();
 
-const ZERO_VECTOR: [number, number, number] = [0, 0, 0];
+const ZERO_VECTOR: NumberArray3 = [0, 0, 0];
 
 const DEFAULT_DISTANCE_SCALES: DistanceScales = {
   unitsPerMeter: [1, 1, 1],
@@ -138,7 +143,7 @@ export default class Viewport {
   isGeospatial: boolean;
   zoom: number;
   focalDistance: number;
-  position: [number, number, number];
+  position: NumberArray3;
   modelMatrix: number[] | null;
 
   /** Derived parameters */
@@ -148,8 +153,8 @@ export default class Viewport {
 
   distanceScales: DistanceScales; /** scale factors between world space and common space */
   scale!: number; /** scale factor, equals 2^zoom */
-  center!: [number, number, number]; /** viewport center in common space */
-  cameraPosition!: [number, number, number]; /** Camera position in common space */
+  center!: NumberArray2 | NumberArray3; /** viewport center in common space */
+  cameraPosition!: NumberArray2 | NumberArray3; /** Camera position in common space */
   projectionMatrix!: number[];
   viewMatrix!: number[];
   viewMatrixUncentered!: number[];
@@ -242,13 +247,16 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz: [number, number, number], {topLeft = true}: {topLeft?: boolean} = {}): number[] {
+  project(
+    xyz: NumberArray2 | NumberArray3,
+    {topLeft = true}: {topLeft?: boolean} = {}
+  ): NumberArray2 | NumberArray3 {
     const worldPosition = this.projectPosition(xyz);
     const coord = worldToPixels(worldPosition, this.pixelProjectionMatrix);
 
     const [x, y] = coord;
     const y2 = topLeft ? y : this.height - y;
-    return [x, y2, coord[2]];
+    return [x, y2, coord[2] ?? 0];
   }
 
   /**
@@ -262,22 +270,22 @@ export default class Viewport {
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
   unproject(
-    xyz: [number, number, number],
+    xyz: NumberArray2 | NumberArray3,
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
-  ): [number, number, number] {
-    const [x, y, z] = xyz;
+  ): NumberArray2 | NumberArray3 {
+    const [x, y, z = 0] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
     const targetZWorld = targetZ && targetZ * this.distanceScales.unitsPerMeter[2];
-    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld) as [
-      number,
-      number,
-      number
-    ];
+    const coord = pixelsToWorld(
+      [x, y2, z],
+      this.pixelUnprojectionMatrix,
+      targetZWorld
+    ) as NumberArray3;
     const [X, Y, Z] = this.unprojectPosition(coord);
 
     if (Number.isFinite(z)) {
-      return [X, Y, Z];
+      return Z ? [X, Y, Z] : [X, Y];
     }
     return [X, Y, targetZ as number];
   }
@@ -285,13 +293,13 @@ export default class Viewport {
   // NON_LINEAR PROJECTION HOOKS
   // Used for web meractor projection
 
-  projectPosition(xyz: [number, number, number]): [number, number, number] {
+  projectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     const [X, Y] = this.projectFlat([xyz[0], xyz[1]]);
     const Z = (xyz[2] || 0) * this.distanceScales.unitsPerMeter[2];
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: [number, number, number]): [number, number, number] {
+  unprojectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     const [X, Y] = this.unprojectFlat([xyz[0], xyz[1]]);
     const Z = (xyz[2] || 0) * this.distanceScales.metersPerUnit[2];
     return [X, Y, Z];
@@ -306,14 +314,14 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  projectFlat(xy: [number, number]): [number, number] {
+  projectFlat(xy: NumberArray2): NumberArray2 {
     if (this.isGeospatial) {
       // Shader clamps latitude to +-89.9, see /shaderlib/project/project.glsl.js
       // lngLatToWorld([0, -89.9])[1] = -317.9934163758329
       // lngLatToWorld([0, 89.9])[1] = 829.9934163758271
       const result = lngLatToWorld(xy);
       result[1] = clamp(result[1], -318, 830);
-      return [result[0], result[1]];
+      return result;
     }
     return xy;
   }
@@ -326,9 +334,9 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  unprojectFlat(xy: [number, number]): [number, number] {
+  unprojectFlat(xy: NumberArray2): NumberArray2 {
     if (this.isGeospatial) {
-      return worldToLngLat(xy);
+      return worldToLngLat(xy as [number, number]);
     }
     return xy;
   }
@@ -340,10 +348,10 @@ export default class Viewport {
   getBounds(options: {z?: number} = {}): [number, number, number, number] {
     const unprojectOption = {targetZ: options.z || 0};
 
-    const topLeft = this.unproject([0, 0, 0], unprojectOption);
-    const topRight = this.unproject([this.width, 0, 0], unprojectOption);
-    const bottomLeft = this.unproject([0, this.height, 0], unprojectOption);
-    const bottomRight = this.unproject([this.width, this.height, 0], unprojectOption);
+    const topLeft = this.unproject([0, 0], unprojectOption);
+    const topRight = this.unproject([this.width, 0], unprojectOption);
+    const bottomLeft = this.unproject([0, this.height], unprojectOption);
+    const bottomRight = this.unproject([this.width, this.height], unprojectOption);
 
     return [
       Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
@@ -434,10 +442,10 @@ export default class Viewport {
     this.scale = scale;
 
     const {position, modelMatrix} = opts;
-    let meterOffset: [number, number, number] = ZERO_VECTOR;
+    let meterOffset: NumberArray3 = ZERO_VECTOR;
     if (position) {
       meterOffset = modelMatrix
-        ? (new Matrix4(modelMatrix).transformAsVector(position, []) as [number, number, number])
+        ? (new Matrix4(modelMatrix).transformAsVector(position, []) as NumberArray3)
         : position;
     }
 
@@ -448,7 +456,7 @@ export default class Viewport {
       this.center = new Vector3(meterOffset)
         // Convert to pixels in current zoom
         .scale(this.distanceScales.unitsPerMeter)
-        .toArray() as [number, number, number];
+        .toArray() as NumberArray3;
     } else {
       this.center = this.projectPosition(meterOffset);
     }

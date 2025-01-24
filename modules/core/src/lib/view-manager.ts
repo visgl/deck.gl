@@ -6,12 +6,13 @@ import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
+import type {Timeline} from '@luma.gl/engine';
+import type {NumberArray3} from '@math.gl/core';
+import type {EventManager} from 'mjolnir.js';
 import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
-import type {Timeline} from '@luma.gl/engine';
-import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
 import type {default as MapView, MapViewState} from '../views/map-view';
 
@@ -195,13 +196,13 @@ export default class ViewManager<ViewsT extends View[]> {
    * @param {Object} opts.topLeft=true - Whether origin is top left
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz: [number, number, number], opts?: {topLeft?: boolean}): number[] | null {
+  unproject(xyz: NumberArray3, opts?: {topLeft?: boolean}): number[] | null {
     const viewports = this.getViewports();
     const pixel = {x: xyz[0], y: xyz[1]};
     for (let i = viewports.length - 1; i >= 0; --i) {
       const viewport = viewports[i];
       if (viewport.containsPixel(pixel)) {
-        const p = xyz.slice() as [number, number, number];
+        const p = xyz.slice() as NumberArray3;
         p[0] -= viewport.x;
         p[1] -= viewport.y;
         return viewport.unproject(p, opts);

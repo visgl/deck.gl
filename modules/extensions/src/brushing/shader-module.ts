@@ -6,7 +6,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
-
+import type {NumberArray2} from '@math.gl/core';
 import type {BrushingExtensionProps} from './brushing-extension';
 
 export type BrushingModuleProps = {
@@ -131,7 +131,7 @@ export default {
       mousePos: mousePosition
         ? (viewport
             .unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y, 0])
-            .slice(0, 2) as [number, number])
+            .slice(0, 2) as NumberArray2)
         : [0, 0]
     };
   },

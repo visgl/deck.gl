@@ -3,14 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {Framebuffer} from '@luma.gl/core';
-
 import type {Layer, Viewport} from '@deck.gl/core';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 
 import {createRenderTarget} from './utils';
 import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../utils/projection-utils';
 
 type TileHeader = {
-  boundingBox: [min: number[], max: number[]];
+  boundingBox: [min: NumberArray2 | NumberArray3, max: NumberArray2 | NumberArray3];
 };
 
 /**
@@ -34,7 +34,7 @@ export class TerrainCover {
   private layers: string[] = [];
   private tile: TileHeader | null;
   /** Cached version of targetLayer.getBounds() */
-  private targetBounds: [number[], number[]] | null = null;
+  private targetBounds: [NumberArray2 | NumberArray3, NumberArray2 | NumberArray3] | null = null;
   /** targetBounds in cartesian space */
   private targetBoundsCommon: Bounds | null = null;
 
@@ -117,16 +117,8 @@ export class TerrainCover {
         shouldRedraw = true;
         this.targetBounds = this.tile.boundingBox;
 
-        const bottomLeftCommon = viewport.projectPosition([
-          this.targetBounds[0][0],
-          this.targetBounds[0][1],
-          this.targetBounds[0][2] || 0
-        ]);
-        const topRightCommon = viewport.projectPosition([
-          this.targetBounds[1][0],
-          this.targetBounds[1][1],
-          this.targetBounds[1][2] || 0
-        ]);
+        const bottomLeftCommon = viewport.projectPosition(this.targetBounds[0]);
+        const topRightCommon = viewport.projectPosition(this.targetBounds[1]);
         this.targetBoundsCommon = [
           bottomLeftCommon[0],
           bottomLeftCommon[1],

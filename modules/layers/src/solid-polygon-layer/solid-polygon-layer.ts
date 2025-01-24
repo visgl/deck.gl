@@ -26,6 +26,7 @@ import type {
   PickingInfo,
   DefaultProps
 } from '@deck.gl/core';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 import type {PolygonGeometry} from './polygon';
 
 type _SolidPolygonLayerProps<DataT> = {
@@ -148,7 +149,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     return false;
   }
 
-  getBounds(): [number[], number[]] | null {
+  getBounds(): [NumberArray2, NumberArray2] | null {
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 
@@ -160,15 +161,15 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
     }
 
-    let preproject: ((xyz: [number, number, number]) => number[]) | undefined;
+    let preproject: ((xyz: NumberArray3) => NumberArray2 | NumberArray3) | undefined;
 
     if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {
-        preproject = (xyz: [number, number, number]) => {
-          const [x, y] = viewport.projectFlat([xyz[0], xyz[1]]);
-          return [x, y, 0];
+        preproject = (xyz: NumberArray3) => {
+          const [x, y, z = 0] = viewport.projectFlat([xyz[0], xyz[1]]);
+          return [x, y, z];
         };
       }
     }

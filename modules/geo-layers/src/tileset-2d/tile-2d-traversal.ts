@@ -13,6 +13,7 @@ import {
 import {lngLatToWorld} from '@math.gl/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 
 const TILE_SIZE = 512;
 // number of world copies to check
@@ -70,7 +71,7 @@ class OSMNode {
   // eslint-disable-next-line complexity
   update(params: {
     viewport: Viewport;
-    project: ((xyz: [number, number, number]) => [number, number, number]) | null;
+    project: ((xyz: NumberArray2 | NumberArray3) => NumberArray2 | NumberArray3) | null;
     cullingVolume: CullingVolume;
     elevationBounds: ZRange;
     minZ: number;
@@ -144,7 +145,7 @@ class OSMNode {
   getBoundingVolume(
     zRange: ZRange,
     worldOffset: number,
-    project: ((xyz: [number, number, number]) => [number, number, number]) | null
+    project: ((xyz: NumberArray2 | NumberArray3) => NumberArray2 | NumberArray3) | null
   ) {
     if (project) {
       // Custom projection
@@ -155,11 +156,7 @@ class OSMNode {
       // Convert from tile-relative coordinates to common space
       const refPointPositions: number[][] = [];
       for (const p of refPoints) {
-        const lngLat: [number, number, number] = osmTile2lngLat(
-          this.x + p[0],
-          this.y + p[1],
-          this.z
-        );
+        const lngLat: NumberArray3 = osmTile2lngLat(this.x + p[0], this.y + p[1], this.z);
         lngLat[2] = zRange[0];
         refPointPositions.push(project(lngLat));
 
@@ -194,7 +191,7 @@ export function getOSMTileIndices(
   zRange: ZRange | null,
   bounds?: Bounds
 ): TileIndex[] {
-  const project: ((xyz: [number, number, number]) => [number, number, number]) | null =
+  const project: ((xyz: NumberArray2 | NumberArray3) => NumberArray2 | NumberArray3) | null =
     viewport instanceof _GlobeViewport && viewport.resolution
       ? // eslint-disable-next-line @typescript-eslint/unbound-method
         viewport.projectPosition

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {NumberArray2} from '@math.gl/core';
+
 /** Utility to estimate binIdRange as expected by AggregatorProps */
 export function getBinIdRange({
   dataBounds,
@@ -9,9 +11,9 @@ export function getBinIdRange({
   padding = 0
 }: {
   /** Bounds of the input data */
-  dataBounds: [min: number[], max: number[]];
+  dataBounds: [min: NumberArray2, max: NumberArray2];
   /** Given a data point, returns the bin id that it belongs to */
-  getBinId: (p: number[]) => number[];
+  getBinId: (p: NumberArray2) => NumberArray2;
   /** Add a border around the result to avoid clipping */
   padding?: number;
 }): [number, number][] {
@@ -20,7 +22,7 @@ export function getBinIdRange({
     dataBounds[1],
     [dataBounds[0][0], dataBounds[1][1]],
     [dataBounds[1][0], dataBounds[0][1]]
-  ].map(p => getBinId(p));
+  ].map(p => getBinId(p as NumberArray2));
 
   const minX = Math.min(...corners.map(p => p[0])) - padding;
   const minY = Math.min(...corners.map(p => p[1])) - padding;

@@ -3,8 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
-import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
+import {load} from '@loaders.gl/core';
+import {worldToPixels} from '@math.gl/web-mercator';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -22,14 +24,13 @@ import typedArrayManager from '../utils/typed-array-manager';
 import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
 
-import {worldToPixels} from '@math.gl/web-mercator';
-
-import {load} from '@loaders.gl/core';
-
+import type {Parameters as LumaParameters, TypedArray, RenderPass} from '@luma.gl/core';
+import type {Model} from '@luma.gl/engine';
+import type {PickingProps} from '@luma.gl/shadertools';
 import type {Loader} from '@loaders.gl/loader-utils';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -37,8 +38,6 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
-import {RenderPass} from '@luma.gl/core';
-import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -219,7 +218,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Public API for users
 
   /** Projects a point with current view state from the current layer's coordinate system to screen */
-  project(xyz: [number, number, number]): [number, number, number] {
+  project(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     assert(this.internalState);
     const viewport = this.internalState.viewport || this.context.viewport;
 
@@ -235,15 +234,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Unprojects a screen pixel to the current view's default coordinate system
       Note: this does not reverse `project`. */
-  unproject(xy: [number, number, number]): [number, number, number] {
+  unproject(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
     assert(this.internalState);
     const viewport = this.internalState.viewport || this.context.viewport;
-    return viewport.unproject(xy);
+    return viewport.unproject(xyz);
   }
 
   /** Projects a point with current view state from the current layer's coordinate system to the world space */
   projectPosition(
-    xyz: [number, number, number],
+    xyz: NumberArray2 | NumberArray3,
     params?: {
       /** The viewport to use */
       viewport?: Viewport;
@@ -442,7 +441,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // Default implementation
-  getBounds(): [number[], number[]] | null {
+  getBounds(): [NumberArray2, NumberArray2] | null {
     return this.getAttributeManager()?.getBounds(['positions', 'instancePositions']);
   }
 

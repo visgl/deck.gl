@@ -19,6 +19,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
@@ -311,13 +312,17 @@ export default class HexagonLayer<
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
+          getValue: (
+            {positions}: {positions: NumberArray2 | NumberArray3},
+            index: number,
+            opts: BinOptions
+          ) => {
             if (hexagonAggregator) {
               return hexagonAggregator(positions, radius);
             }
             const viewport = this.state.aggregatorViewport;
             // project to common space
-            const p = viewport.projectPosition([positions[0], positions[1], positions[2] || 0]);
+            const p = viewport.projectPosition(positions);
             const {radiusCommon, hexOriginCommon} = opts;
             return pointToHexbin(
               [p[0] - hexOriginCommon[0], p[1] - hexOriginCommon[1]],
@@ -451,7 +456,7 @@ export default class HexagonLayer<
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid: [number, number] = [
+      let centroid: NumberArray2 = [
         (bounds[0][0] + bounds[1][0]) / 2,
         (bounds[0][1] + bounds[1][1]) / 2
       ];
@@ -476,8 +481,8 @@ export default class HexagonLayer<
 
       binIdRange = getBinIdRange({
         dataBounds: bounds,
-        getBinId: (p: number[]) => {
-          const positionCommon = viewport.projectFlat([p[0], p[1]]);
+        getBinId: (p: NumberArray2) => {
+          const positionCommon = viewport.projectFlat(p);
           positionCommon[0] -= hexOriginCommon[0];
           positionCommon[1] -= hexOriginCommon[1];
           return pointToHexbin(positionCommon, radiusCommon);

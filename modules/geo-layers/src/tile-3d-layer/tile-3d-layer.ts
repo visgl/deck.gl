@@ -241,7 +241,6 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       return;
     }
 
-    //@ts-expect-error Type 'Vector3' is not assignable to type '[number, number, number]'
     tileset3d.selectTiles(Object.values(viewports)).then(frameNumber => {
       const tilesetChanged = this.state.frameNumber !== frameNumber;
       if (tilesetChanged) {

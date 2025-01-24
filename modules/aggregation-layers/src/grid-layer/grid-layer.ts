@@ -19,6 +19,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
@@ -313,7 +314,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             }
             const viewport = this.state.aggregatorViewport;
             // project to common space
-            const p = viewport.projectPosition([positions[0], positions[1], positions[2] || 0]);
+            const p = viewport.projectPosition(positions as NumberArray3);
             const {cellSizeCommon, cellOriginCommon} = opts;
             return [
               Math.floor((p[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
@@ -446,7 +447,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid: [number, number] = [
+      let centroid: NumberArray2 = [
         (bounds[0][0] + bounds[1][0]) / 2,
         (bounds[0][1] + bounds[1][1]) / 2
       ];
@@ -478,7 +479,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       binIdRange = getBinIdRange({
         dataBounds: bounds,
         getBinId: (p: number[]) => {
-          const positionCommon = viewport.projectFlat([p[0], p[1]]);
+          const positionCommon = viewport.projectFlat(p as NumberArray2);
           return [
             Math.floor((positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
             Math.floor((positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1])

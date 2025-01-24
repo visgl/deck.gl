@@ -15,6 +15,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
+import type {NumberArray3} from '@math.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
@@ -136,9 +137,9 @@ export default class ScreenGridLayer<
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
+          getValue: ({positions}: {positions: NumberArray3}, index: number, opts: BinOptions) => {
             const viewport = this.context.viewport;
-            const p = viewport.project([positions[0], positions[1], positions[2] || 0]);
+            const p = viewport.project(positions);
             const cellSizePixels: number = opts.cellSizePixels;
             if (p[0] < 0 || p[0] >= viewport.width || p[1] < 0 || p[1] >= viewport.height) {
               // Not on screen

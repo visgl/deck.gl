@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 import type Layer from '../layer';
 import type Viewport from '../../viewports/viewport';
 import type {PickedPixel} from './query-object';
@@ -53,12 +54,9 @@ export function getEmptyPickingInfo({
     // Find the viewport that contain the picked pixel
     pickedViewport = getViewportFromCoordinates(pickInfo?.pickedViewports || viewports, {x, y});
   }
-  let coordinate: [number, number, number] | undefined;
+  let coordinate: NumberArray2 | NumberArray3 | undefined;
   if (pickedViewport) {
-    const point: [number, number, number] = [x - pickedViewport.x, y - pickedViewport.y, 0];
-    if (z !== undefined) {
-      point[2] = z;
-    }
+    const point: NumberArray3 = [x - pickedViewport.x, y - pickedViewport.y, z ?? 0];
     coordinate = pickedViewport.unproject(point);
   }
 

@@ -10,14 +10,14 @@ import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
-import {vec3, vec4} from '@math.gl/core';
+import {type NumberArray2, type NumberArray3, vec3, vec4} from '@math.gl/core';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 
 import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import type {NumericArray} from '../../types/types';
 
-const DEFAULT_COORDINATE_ORIGIN: [number, number, number] = [0, 0, 0];
+const DEFAULT_COORDINATE_ORIGIN: NumberArray3 = [0, 0, 0];
 
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z
@@ -27,7 +27,7 @@ function lngLatZToWorldPosition(
   viewport: Viewport,
   offsetMode: boolean = false
 ): [number, number, number] {
-  const p = viewport.projectPosition(lngLatZ);
+  const p = viewport.projectPosition(lngLatZ) as NumberArray3;
 
   // TODO - avoid using instanceof
   if (offsetMode && viewport instanceof WebMercatorViewport) {
@@ -81,7 +81,7 @@ function normalizeParameters(opts: {
 
 /** Get the common space position from world coordinates in the given coordinate system */
 export function getWorldPosition(
-  position: [number, number, number],
+  position: NumberArray2 | NumberArray3,
   {
     viewport,
     modelMatrix,
@@ -124,7 +124,7 @@ export function getWorldPosition(
     default:
       return viewport.isGeospatial
         ? [x + coordinateOrigin[0], y + coordinateOrigin[1], z + coordinateOrigin[2]]
-        : viewport.projectPosition([x, y, z]);
+        : (viewport.projectPosition([x, y, z]) as NumberArray3);
   }
 }
 
@@ -134,7 +134,7 @@ export function getWorldPosition(
  * a reference coordinate system
  */
 export function projectPosition(
-  position: [number, number, number],
+  position: NumberArray2 | NumberArray3,
   params: {
     /** The current viewport */
     viewport: Viewport;
@@ -155,7 +155,7 @@ export function projectPosition(
      * Default `true` */
     autoOffset?: boolean;
   }
-): [number, number, number] {
+): NumberArray3 {
   const {
     viewport,
     coordinateSystem,

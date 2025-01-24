@@ -282,7 +282,7 @@ function getEventPixel(event, deck: Deck): {x: number; y: number} {
   }
   // event.pixel may not exist when clicking on a POI
   // https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
-  const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat(), 0]);
+  const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
   return {
     x: point[0],
     y: point[1]

@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import Viewport from '../viewports/viewport';
-
-import {Matrix4, clamp, vec2} from '@math.gl/core';
+import {Matrix4, type NumberArray3, clamp, vec2} from '@math.gl/core';
 import {pixelsToWorld} from '@math.gl/web-mercator';
+import Viewport from '../viewports/viewport';
 
 import type {Padding} from './viewport';
 
@@ -60,7 +59,7 @@ export type OrthographicViewportOptions = {
   /** Viewport height in pixels */
   height?: number;
   /** The world position at the center of the viewport. Default `[0, 0, 0]`. */
-  target?: [number, number, number];
+  target?: NumberArray3;
   /**  The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large.
    *   To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`. */
   zoom?: number | [number, number];

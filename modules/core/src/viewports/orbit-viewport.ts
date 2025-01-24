@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import Viewport from '../viewports/viewport';
-
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, type NumberArray3} from '@math.gl/core';
 import {pixelsToWorld, fovyToAltitude} from '@math.gl/web-mercator';
+import Viewport from '../viewports/viewport';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -136,7 +135,7 @@ export default class OrbitViewport extends Viewport {
     return [X, Y, Z];
   }
 
-  panByPosition(coords: [number, number, number], pixel: number[]): OrbitViewportOptions {
+  panByPosition(coords: NumberArray3, pixel: number[]): OrbitViewportOptions {
     const p0 = this.project(coords);
     const nextCenter = [
       this.width / 2 + p0[0] - pixel[0],

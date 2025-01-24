@@ -4,6 +4,7 @@
 
 import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
@@ -23,14 +24,8 @@ export function joinLayerBounds(
   for (const layer of layers) {
     const layerBounds = layer.getBounds();
     if (layerBounds) {
-      const bottomLeftCommon = layer.projectPosition([layerBounds[0][0], layerBounds[0][1], 0], {
-        viewport,
-        autoOffset: false
-      });
-      const topRightCommon = layer.projectPosition([layerBounds[1][0], layerBounds[1][1], 0], {
-        viewport,
-        autoOffset: false
-      });
+      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport, autoOffset: false});
+      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport, autoOffset: false});
 
       bounds[0] = Math.min(bounds[0], bottomLeftCommon[0]);
       bounds[1] = Math.min(bounds[1], bottomLeftCommon[1]);
@@ -73,7 +68,7 @@ export function makeViewport(opts: {
     (bounds[0] + bounds[2]) / 2,
     (bounds[1] + bounds[3]) / 2,
     0
-  ]);
+  ]) as NumberArray3;
 
   let {width, height, zoom} = opts;
   if (zoom === undefined) {
@@ -141,10 +136,10 @@ export function getViewportBounds(viewport: Viewport, zRange?: [number, number])
   }
 
   // Viewport bounds in cartesian coordinates
-  const bottomLeft = viewportBoundsWorld.slice(0, 2);
-  const topRight = viewportBoundsWorld.slice(2, 4);
-  const viewportBottomLeftCommon = viewport.projectPosition([bottomLeft[0], bottomLeft[1], 0]);
-  const viewportTopRightCommon = viewport.projectPosition([topRight[0], topRight[1], 0]);
+  const bottomLeft = viewportBoundsWorld.slice(0, 2) as NumberArray2;
+  const topRight = viewportBoundsWorld.slice(2, 4) as NumberArray2;
+  const viewportBottomLeftCommon = viewport.projectPosition(bottomLeft);
+  const viewportTopRightCommon = viewport.projectPosition(topRight);
   return [
     viewportBottomLeftCommon[0],
     viewportBottomLeftCommon[1],
