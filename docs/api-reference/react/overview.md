@@ -50,7 +50,3 @@ React props are passed to the widget:
 -new ZoomWidget({ id: 'zoom', placement: 'top-right' })
 +<ZoomWidget id='zoom' placement='top-right'/>
 ```
-
-### Authoring Custom Widgets with React
-
-Learn how author your own custom widgets in React with the `useWidget` hook by reading the [Custom Widget Developer Guide](../../developer-guide/custom-widgets).

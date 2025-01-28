@@ -51,8 +51,6 @@ const MyReactWidget = (props) => {
 </DeckGL>
 ```
 
-See a full example [here](../../developer-guide/custom-widgets/react-widgets.md).
-
 ## Signature
 
 ```tsx
