@@ -1,21 +1,28 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+'use strict';
+
 importScripts('./util.js');
-const FLUSH_LIMIT = 20000;
-let result = [];
-let count = 0;
-let triangleCount = 0;
+var FLUSH_LIMIT = 20000;
+var result = [];
+var count = 0;
+var triangleCount = 0;
 
 onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+  var lines = e.data.text.split('\n');
+
   lines.forEach(function (line) {
     if (!line) {
       return;
     }
+    var parts = line.split('\x01');
+    var height = decodeNumber(parts[0], 90, 32);
 
-    const parts = line.split('\x01');
-    const height = decodeNumber(parts[0], 90, 32); // footprints
-
+    // footprints
     parts.slice(1).forEach(function (str) {
-      const coords = decodePolyline(str);
+      var coords = decodePolyline(str);
       triangleCount += coords.length * 3 - 2;
       coords.push(coords[0]);
       result.push({
@@ -23,6 +30,7 @@ onmessage = function (e) {
         polygon: coords
       });
     });
+
     count++;
 
     if (result.length >= FLUSH_LIMIT) {
@@ -32,9 +40,7 @@ onmessage = function (e) {
 
   if (e.data.event === 'load') {
     flush();
-    postMessage({
-      action: 'end'
-    });
+    postMessage({ action: 'end' });
   }
 };
 
@@ -42,11 +48,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {
-      buildings: count,
-      triangles: triangleCount,
-      progressAlt: count / 3895 * 0.2
-    }
+    meta: { buildings: count, triangles: triangleCount, progressAlt: count / 3895 * 0.2 }
   });
   result = [];
 }

@@ -1,11 +1,18 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+'use strict';
+
 importScripts('./util.js');
-const FLUSH_LIMIT = 20000;
-let result = [];
-let index = 0;
-let count = 0;
+var FLUSH_LIMIT = 20000;
+var result = [];
+var index = 0;
+var count = 0;
 
 onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+  var lines = e.data.text.split('\n');
+
   lines.forEach(function (line) {
     if (!line) {
       return;
@@ -18,12 +25,14 @@ onmessage = function (e) {
     var coords1 = parts[3].split('\x01').map(function (str) {
       return decodePolyline(str, 1);
     });
+
     coords0.forEach(function (lineStr, i) {
       for (var j = 1; j < lineStr.length; j++) {
         var prevPt0 = coords0[i][j - 1],
             prevPt1 = coords1[i][j - 1],
             currPt0 = coords0[i][j],
             currPt1 = coords1[i][j];
+
         result.push({
           name: parts[0],
           country: parts[1],
@@ -41,9 +50,7 @@ onmessage = function (e) {
 
   if (e.data.event === 'load') {
     flush();
-    postMessage({
-      action: 'end'
-    });
+    postMessage({ action: 'end' });
   }
 };
 
@@ -51,9 +58,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {
-      count
-    }
+    meta: { count: count }
   });
   result = [];
 }

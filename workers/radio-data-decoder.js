@@ -1,25 +1,31 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+'use strict';
+
 importScripts('./util.js');
-let result = [];
+var result = [];
 
 onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+  var lines = e.data.text.split('\n');
+
   lines.forEach(function (line) {
     if (!line) {
       return;
     }
 
-    const parts = line.split('\t');
-
+    var parts = line.split('\t');
     if (parts.length < 5) {
       return;
     }
-
-    const type = parts[0][0] + 'M';
-    let frequency = decodeNumber(parts[0].slice(1, 3), 90, 32);
+    var type = parts[0][0] + 'M';
+    var frequency = decodeNumber(parts[0].slice(1, 3), 90, 32);
     if (type === 'FM') frequency /= 10;
+
     result.push({
-      type,
-      frequency,
+      type: type,
+      frequency: frequency,
       callSign: parts[0].slice(3),
       name: parts[4],
       state: parts[3].slice(0, 2),
@@ -31,9 +37,7 @@ onmessage = function (e) {
 
   if (e.data.event === 'load') {
     flush();
-    postMessage({
-      action: 'end'
-    });
+    postMessage({ action: 'end' });
   }
 };
 
@@ -41,9 +45,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {
-      count: result.length
-    }
+    meta: { count: result.length }
   });
   result = [];
 }
