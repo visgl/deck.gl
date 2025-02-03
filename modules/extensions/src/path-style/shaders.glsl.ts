@@ -85,15 +85,19 @@ in float instanceOffsets;
 `,
     'vs:#main-end': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
-  float offsetDir = sign(instanceOffsets);
+  float offsetDir = -sign(instanceOffsets);
   vPathPosition.x = (vPathPosition.x + offsetDir) * offsetWidth - offsetDir;
   vPathPosition.y *= offsetWidth;
   vPathLength *= offsetWidth;
 `,
-    'fs:#main-start': `
-  float isInside;
-  isInside = step(-1.0, vPathPosition.x) * step(vPathPosition.x, 1.0);
-  if (isInside == 0.0) {
+  'fs:#main-start': `
+  float dist = abs(vPathPosition.x);
+  // Smooth transition at the edges (from 0.9 to 1.1 for a slightly wider antialiasing band)
+  float opacity = 1.0 - smoothstep(0.9, 1.1, dist);
+`,
+    'fs:#main-end': `
+  fragColor.a *= opacity;
+  if (fragColor.a < 0.001) {
     discard;
   }
 `

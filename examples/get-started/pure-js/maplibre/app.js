@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ArcLayer } from '@deck.gl/layers';
+import { PathStyleExtension } from "@deck.gl/extensions";
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -17,8 +18,17 @@ const map = new maplibregl.Map({
   center: [0.45, 51.47],
   zoom: 4,
   bearing: 0,
-  pitch: 30
+  pitch: 30,
+  antialias: true
 });
+
+// basic feature collection with line from london to zurcich
+const line = {
+  type: 'FeatureCollection',
+  features: [
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[1.46, 52.46], [9.54, 48.37]] } }
+  ]
+};
 
 const deckOverlay = new DeckOverlay({
   interleaved: true,
@@ -50,6 +60,22 @@ const deckOverlay = new DeckOverlay({
       getSourceColor: [0, 128, 200],
       getTargetColor: [200, 0, 80],
       getWidth: 1
+    }),
+    new GeoJsonLayer({
+      id: 'line-og',
+      data: line,
+      getLineColor: [0, 128, 200],
+      getLineWidth: 7,
+      lineWidthMinPixels: 5
+    }),
+    new GeoJsonLayer({
+      id: 'line',
+      data: line,
+      getLineColor: [128, 0, 200],
+      getLineWidth: 7,
+      lineWidthMinPixels: 5,
+      getOffset: (f) => 3,
+      extensions: [new PathStyleExtension({ offset: true })],
     })
   ]
 });
