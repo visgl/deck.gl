@@ -7,7 +7,7 @@ import DeckGL from '@deck.gl/react';
 import {View} from '@deck.gl/core';
 import maplibregl from 'maplibre-gl';
 
-export default class DeckWithMapboxMaps extends Component {
+export default class DeckWithMapLibre extends Component {
   render() {
     const {views = []} = this.props;
 
@@ -16,12 +16,7 @@ export default class DeckWithMapboxMaps extends Component {
       if (view.props.map || view.props.mapStyle) {
         maps.push(
           <View id={view.props.id} key={view.props.id}>
-            <this.props.Map
-              reuseMap
-              mapLib={maplibregl}
-              mapStyle={view.props.mapStyle}
-              mapboxApiAccessToken={view.props.mapToken || this.props.mapboxApiAccessToken}
-            />
+            <this.props.Map reuseMaps mapLib={maplibregl} mapStyle={view.props.mapStyle} />
           </View>
         );
       }

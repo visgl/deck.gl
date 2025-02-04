@@ -4,7 +4,7 @@
 
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map, NavigationControl, Popup, useControl} from 'react-map-gl';
+import {Map, NavigationControl, Popup, useControl} from 'react-map-gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';

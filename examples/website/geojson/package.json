@@ -14,10 +14,10 @@
     "@types/react-dom": "^18.0.0",
     "d3-scale": "^4.0.0",
     "deck.gl": "^9.1.0",
-    "maplibre-gl": "^3.0.0",
+    "maplibre-gl": "^5.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-map-gl": "^7.1.0"
+    "react-map-gl": "^8.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",
