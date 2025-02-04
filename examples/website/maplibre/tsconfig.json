@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2020",
     "jsx": "react",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   }
 }

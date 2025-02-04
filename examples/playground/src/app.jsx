@@ -5,8 +5,8 @@
 import React, {Component, Fragment} from 'react';
 import {createRoot} from 'react-dom/client';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import {Map} from 'react-map-gl';
-import DeckWithMapboxMaps from './deck-with-mapbox-maps';
+import {Map} from 'react-map-gl/maplibre';
+import DeckWithMapLibre from './deck-with-maplibre';
 import DeckWithGoogleMaps from './deck-with-google-maps';
 
 import {FlyToInterpolator} from '@deck.gl/core';
@@ -169,7 +169,7 @@ export default class App extends Component {
       );
     } else {
       deckMap = (
-        <DeckWithMapboxMaps
+        <DeckWithMapLibre
           id="json-deck"
           {...jsonProps}
           initialViewState={initialViewState}
