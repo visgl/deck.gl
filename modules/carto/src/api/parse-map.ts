@@ -347,6 +347,9 @@ function createChannelProps(
         extensions: [collisionFilterExtension],
         collisionEnabled: true,
         collisionGroup,
+        // Make labels non-interactive, avoiding deck.gl issue:
+        // https://github.com/visgl/deck.gl/issues/9410
+        pickable: false,
 
         // getPointRadius already has radiusScale baked in, so only pass one or the other
         ...(result.getPointRadius
