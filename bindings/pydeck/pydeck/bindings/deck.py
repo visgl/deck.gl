@@ -8,7 +8,11 @@ from ..settings import settings as pydeck_settings
 from .view import View
 from .view_state import ViewState
 from .base_map_provider import BaseMapProvider
-from .map_styles import DARK, get_from_map_identifier
+from .map_styles import DARK, get_from_map_identifier, get_default_map_identifier
+
+
+# Special default value to for querying the default style for a map provider.
+_DEFAULT_MAP_STYLE_SENTINEL = '__MAP_STYLE__'
 
 
 def has_jupyter_extra():
@@ -29,7 +33,7 @@ class Deck(JSONMixin):
         self,
         layers=None,
         views=[View(type="MapView", controller=True)],
-        map_style=DARK,
+        map_style=_DEFAULT_MAP_STYLE_SENTINEL,
         api_keys=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
         width="100%",
@@ -61,8 +65,11 @@ class Deck(JSONMixin):
             Values can be ``carto``, ``mapbox`` or ``google_maps``
         map_style : str or dict, default 'dark'
             One of 'light', 'dark', 'road', 'satellite', 'dark_no_labels', and 'light_no_labels', a URI for a basemap
-            style, which varies by provider, or a dict that follows the Mapbox style `specification <https://docs.mapbox.com/mapbox-gl-js/style-spec/>`.
-            The default is Carto's Dark Matter map. For Mapbox examples, see  Mapbox's `gallery <https://www.mapbox.com/gallery/>`.
+            style, which varies by provider, or a dict that follows the Mapbox style `specification <https://docs.mapbox.com/mapbox-gl-js/style-spec/>`_.
+            If ``map_provider='google_maps'``, the default is the ``roadmap`` map type.
+            if ``map_provider='mapbox'``, the default is `Mapbox Dark <https://www.mapbox.com/maps/dark>`_ style.
+            Otherwise, the default is Carto's Dark Matter map.
+            For Mapbox examples, see  Mapbox's `gallery <https://www.mapbox.com/gallery/>`_.
             If not using a basemap, set ``map_provider=None``.
         initial_view_state : pydeck.ViewState, default ``pydeck.ViewState(latitude=0, longitude=0, zoom=1)``
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
@@ -119,6 +126,8 @@ class Deck(JSONMixin):
             assert map_provider == BaseMapProvider.MAPBOX.value, custom_map_style_error
             self.map_style = map_style
         else:
+            if map_provider and map_style == _DEFAULT_MAP_STYLE_SENTINEL:
+                map_style = get_default_map_identifier(map_provider)
             self.map_style = get_from_map_identifier(map_style, map_provider)
 
         self.parameters = parameters

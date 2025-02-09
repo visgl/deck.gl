@@ -1,4 +1,4 @@
-import warnings
+from .base_map_provider import BaseMapProvider
 
 
 DARK = "dark"
@@ -31,6 +31,12 @@ styles = {
     SATELLITE: {"mapbox": MAPBOX_SATELLITE, "google_maps": GOOGLE_SATELLITE},
 }
 
+_default_map_identifers = {
+    BaseMapProvider.CARTO: DARK,
+    BaseMapProvider.MAPBOX: DARK,
+    BaseMapProvider.GOOGLE_MAPS: GOOGLE_ROAD,
+}
+
 
 def get_from_map_identifier(map_identifier: str, provider: str) -> str:
     """Attempt to get a style URI by map provider, otherwise pass the map identifier
@@ -57,3 +63,12 @@ def get_from_map_identifier(map_identifier: str, provider: str) -> str:
         return styles[map_identifier][provider]
     except KeyError:
         return map_identifier
+
+
+def get_default_map_identifier(provider: str):
+    try:
+        provider_enum = BaseMapProvider(provider)
+    except KeyError:
+        return DARK
+
+    return _default_map_identifers[provider_enum]
