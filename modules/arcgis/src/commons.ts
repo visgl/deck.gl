@@ -109,7 +109,8 @@ void main(void) {
         pos: {size: 2, value: new Int8Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, 1, 1, -1])}
       }
     }),
-    vertexCount: 6
+    vertexCount: 6,
+    disableWarnings: true
   });
 
   const fbo = device.createFramebuffer({

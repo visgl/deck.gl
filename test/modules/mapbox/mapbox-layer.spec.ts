@@ -57,7 +57,7 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
       'Layer is added to deck'
     );
     // t.deepEqual(deck.userData.mapboxVersion, {major: 1, minor: 10}, 'Mapbox version is parsed');
-    t.ok(deck.props.views[0].id === 'mapbox', 'mapbox view exists');
+    t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
     t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
 
     t.ok(
@@ -135,7 +135,7 @@ test('MapboxLayer#external Deck', t => {
     map.addLayer(layer);
     t.is(layer.deck, deck, 'Used external Deck instance');
     // t.ok(deck.userData.mapboxVersion, 'Mapbox version is parsed');
-    t.ok(deck.props.views[0].id === 'mapbox', 'mapbox view exists');
+    t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
     t.ok(
       objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
       'Parameters are set correctly'
@@ -279,6 +279,9 @@ test('MapboxLayer#external Deck custom views', t => {
 export function objectEqual(actual, expected) {
   if (equals(actual, expected)) {
     return true;
+  }
+  if (typeof actual !== 'object' || typeof expected !== 'object') {
+    return false;
   }
 
   const keys0 = Object.keys(actual);

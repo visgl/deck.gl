@@ -30,6 +30,10 @@ export type MapViewState = {
   maxPitch?: number;
   /** Viewport center offsets from lng, lat, and elevation in meters */
   position?: NumberArray3;
+  /** The near plane position */
+  nearZ?: number;
+  /** The far plane position */
+  farZ?: number;
 } & CommonViewState;
 
 export type MapViewProps = {

@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@loaders.gl/i3s": "^4.2.0",
-    "maplibre-gl": "^3.0.0",
-    "react-map-gl": "^7.1.0",
+    "maplibre-gl": "^5.0.0",
+    "react-map-gl": "^8.0.0",
     "deck.gl": "^9.0.0"
   },
   "devDependencies": {

@@ -2,15 +2,15 @@
 
 This module integrates deck.gl into the Mapbox GL JS API-compatible ecosystem. 
 
-- It synchronizes a deck.gl `MapView` with the [mapbox-gl camera](https://docs.mapbox.com/mapbox-gl-js/guides/#camera).
-- It allows deck.gl to be used with mapbox-gl [controls](https://docs.mapbox.com/mapbox-gl-js/api/markers) and [plugins](https://docs.mapbox.com/mapbox-gl-js/plugins/) such as `NavigationControl`, `GeolocateControl` and `mapbox-gl-geocoder`.
-- It adds the option to interleave deck.gl layers with the base map layers, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
+- It synchronizes a deck.gl `MapView` with the mapbox-gl/maplibre-gl camera.
+- It allows deck.gl to be used with mapbox-gl/maplibre-gl [controls](https://docs.mapbox.com/mapbox-gl-js/api/markers) and [plugins](https://docs.mapbox.com/mapbox-gl-js/plugins/) such as `NavigationControl`, `GeolocateControl` and `mapbox-gl-geocoder`.
+- It adds the option to interleave deck.gl layers with the base map layers, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and buildings, etc.
 
 This module may be used in the React, Pure JS, and Scripting Environments. Visit the [mapbox base map developer guide](../../developer-guide/base-maps/using-with-mapbox.md) for examples of each option.
 
-When you use this module, Mapbox is the root HTML element and deck.gl is the child, with Mapbox handling all user inputs. Some of deck.gl's features are therefore unavailable due to limitations of mapbox-gl's API, see [limitations](#limitations). 
+When you use this module, Mapbox/Maplibre is the root HTML element and deck.gl is the child, with the map library handling all user inputs. Some of deck.gl's features are therefore unavailable due to limitations of the map library's API, see [limitations](#limitations). 
 
-It may be easier to understand the concepts of the module if you are already a mapbox-gl developer.
+It may be easier to understand the concepts of the module if you are already a mapbox-gl/maplibre-gl developer.
 
 <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
 
@@ -20,8 +20,10 @@ It may be easier to understand the concepts of the module if you are already a m
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js'></script>
+<!-- or -->
+<script src='https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.js'></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <script type="text/javascript">
   const {MapboxOverlay} = deck;
 </script>
@@ -37,20 +39,20 @@ npm install @deck.gl/mapbox
 import {MapboxOverlay} from '@deck.gl/mapbox';
 ```
 
-### Camera Syncronization between deck.gl and Mapbox
+### Camera Synchronization between deck.gl and Mapbox
 
-This module keeps a deck.gl `MapView` in sync with the mapbox-gl camera so that the base map and deck layers are always geospactially aligned. Some `Deck` props, such as `viewState`, are ignored or have different behavior. See `MapboxOverlay` constructor notes. Also, some camera features are unable to be fully synchronized due to mapbox-gl API limitations, see [limitations](#limitations).
+This module keeps a deck.gl `MapView` or `GlobeView` in sync with the mapbox-gl/maplibre-gl camera so that the base map and deck layers are always geospactially aligned. Some `Deck` props, such as `viewState`, are ignored or have different behavior. See `MapboxOverlay` constructor notes. Also, some camera features are unable to be fully synchronized due to API limitations, see [limitations](#limitations).
 
-### Using mapbox-gl controls and plugins with deck.gl
+### Using mapbox-gl/maplibre-gl controls and plugins with deck.gl
 
 The Mapbox ecosystem offers many well-designed controls, from the basic functionalities of `NavigationControl`, `Popup` and `GeolocateControl`, to vendor-service-bound UI implementations such as `mapbox-gl-geocoder` and `mapbox-gl-directions`. These libraries require that the Mapbox Map holds the source of truth of the camera state, instead of the normal [state management](../../developer-guide/interactivity.md) by `Deck`. When you use the `MapboxOverlay` classes from this module, deck.gl plays nice with all the mapbox-gl peripherals.
 
 
-### Mixing deck.gl layers and Mapbox layers
+### Mixing deck.gl layers and Map layers
 
-Some important information in the Mapbox map could be hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
+Some important information in the base map could be hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
 
-To inject a deck layer into the Mapbox stack add an `interleaved: true` props to the [MapboxOverlay](./mapbox-overlay.md) control and add a `beforeId` prop to any layer passed to the [MapboxOverlay](./mapbox-overlay.md) control.
+To inject a deck layer into the map layers stack add an `interleaved: true` props to the [MapboxOverlay](./mapbox-overlay.md) control and add a `beforeId` prop to any layer passed to the [MapboxOverlay](./mapbox-overlay.md) control.
 
 Mapbox provides an example of [finding the first label layer](https://www.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/). For more sophisticated injection point lookups, refer to Mapbox' documentation on the format of Mapbox style layers, see [Mapbox Style Spec](https://www.mapbox.com/mapbox-gl-js/style-spec/#layers).
 
@@ -80,5 +82,5 @@ If you're using deck.gl in a React or Scripting environment, you just want the b
 * When using deck.gl's multi-view system, only one of the views can match the base map and receive interaction. See [using MapboxOverlay with multi-views](./mapbox-overlay.md#multi-view-usage) for details.
 * When using deck.gl as Mapbox layers or controls, `Deck` only receives a subset of user inputs delegated by `Map`. Therefore, certain interactive callbacks like `onDrag`, `onInteractionStateChange` are not available.
 * Mapbox/MapLibre's terrain features are partially supported. When a terrain is used, the camera of deck.gl and the base map should synchronize, however the deck.gl data with z=0 are rendered at the sea level and not aligned with the terrain surface.
-* Only Mercator projection is supported. Mapbox adaptive projection is not supported as their API doesn't expose the projection used.
+* Mapbox's non-Mercator projections are not supported as their API doesn't expose the parameters used. Maplibre's globe projection is fully supported.
 * The `position` property in `viewState` has no equivalent in mapbox-gl.

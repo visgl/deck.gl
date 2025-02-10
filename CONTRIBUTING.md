@@ -58,9 +58,10 @@ vis.gl is part of the [OpenJS Foundation](https://openjsf.org/). See the organiz
 
 deck.gl development is governed by the vis.gl Technical Steering Committee (TSC). Current members:
 
-- [Ib Green](https://github.com/ibgreen)
 - [Xiaoji Chen](https://github.com/Pessimistress) - chairperson
-- [Alberto Asuero](https://github.com/alasarr)
+- [Ib Green](https://github.com/ibgreen)
+- [Felix Palmer](https://github.com/felixpalmer)
+- [Chris Gervang](https://github.com/chrisgervang)
 
 
 ### Maintainers
@@ -69,11 +70,8 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 - [Xintong Xia](https://github.com/xintongxia) - layers
 - [Georgios Karnas](https://github.com/georgios-uber) - glTF
 - [Kyle Barron](https://github.com/kylebarron) - tiles
-- [Chris Gervang](https://github.com/chrisgervang) - terrain
 - [Dario D'Amico](https://github.com/damix911) - ArcGIS
 - [Javier Aragón](https://github.com/padawannn) - MVT, CARTO
-- [Víctor Velarde](https://github.com/VictorVelarde) - MVT, CARTO
-- [Felix Palmer](https://github.com/felixpalmer) - MVT, GoogleMaps, CARTO
 - [Ilan Gold](https://github.com/ilan-gold) - tiles
 
 Maintainers of deck.gl have commit access to this GitHub repository, and take part in the decision making process.

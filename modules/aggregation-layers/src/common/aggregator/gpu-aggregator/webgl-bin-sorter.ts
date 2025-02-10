@@ -252,7 +252,8 @@ void main() {
     isInstanced: false,
     vs,
     fs,
-    topology: 'point-list'
+    topology: 'point-list',
+    disableWarnings: true
   });
   return model;
 }
