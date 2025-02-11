@@ -45,7 +45,7 @@
     "@luma.gl/webgl": "^9.1.2",
     "@luma.gl/constants": "^9.1.2",
     "d3-dsv": "^1.0.8",
-    "mapbox-gl": "^1.13.2"
+    "mapbox-gl": "^3.9.4"
   },
   "jupyterlab": {
     "extension": "src/plugin",
