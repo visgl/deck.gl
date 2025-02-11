@@ -127,7 +127,8 @@ function createStandaloneFromProvider({
   googleMapsKey,
   handleEvent,
   getTooltip,
-  container
+  container,
+  onError,
 }) {
   // Common deck.gl props for all basemaos
   const handlers = handleEvent
@@ -145,7 +146,8 @@ function createStandaloneFromProvider({
         onDrag: info => handleEvent('deck-drag-event', info),
         onDragEnd: info => handleEvent('deck-drag-end-event', info)
       }
-    : null;
+    : {};
+  handlers.onError = onError;
 
   const sharedProps = {
     ...handlers,
@@ -196,9 +198,24 @@ function createDeck({
   tooltip,
   handleEvent,
   customLibraries,
-  configuration
+  configuration,
+  showError,
 }) {
   let deckgl;
+  const onError = (e) => {
+    if (showError) {
+      const uiErrorText = window.document.createElement('pre');
+      uiErrorText.textContent = `Error: ${e.message}\nSource: ${e.source}\nLine: ${e.lineno}:${e.colno}\n${e.error ? e.error.stack : ''}`;
+      uiErrorText.className = 'error_text';
+
+      container.appendChild(uiErrorText);
+    } else {
+      // This will fail in node tests
+      // eslint-disable-next-line
+      console.error(err);
+    }
+  };
+
   try {
     if (configuration) {
       jsonConverter.mergeConfiguration(configuration);
@@ -223,7 +240,8 @@ function createDeck({
       googleMapsKey,
       handleEvent,
       getTooltip,
-      container
+      container,
+      onError,
     });
 
     const onComplete = () => {
@@ -241,9 +259,7 @@ function createDeck({
 
     addCustomLibraries(customLibraries, onComplete);
   } catch (err) {
-    // This will fail in node tests
-    // eslint-disable-next-line
-    console.error(err);
+    onError(err);
   }
   return deckgl;
 }
