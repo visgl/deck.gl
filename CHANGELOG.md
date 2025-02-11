@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.1] - Feb 11 2025
+
+- fix: Add missing dependencies (#9422)
+- fix(core): React StrictMode crash (#9421)
+- fix(extensions): CollisionFilterEffect: Explicitly pass isPicking to preRender (#9417)
+
 #### deck.gl [v9.1.0] - Jan 21 2025
 
 v9.1 brings integration with MapLibre globe projection, React widgets, restored and improved aggregation layers, and under-the-hood rewrites to get ready for WebGPU support. Visit [What's New](https://github.com/visgl/deck.gl/blob/9.1-release/docs/whats-new.md#deckgl-v91) to learn about the new features. Reference the [Upgrade Guide](https://github.com/visgl/deck.gl/blob/9.1-release/docs/upgrade-guide.md#upgrading-to-v91) to upgrade your application from v9.0.
