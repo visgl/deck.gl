@@ -25,7 +25,6 @@ module.exports = getESLintConfig({
       camelcase: 0,
       indent: 0,
       'import/no-unresolved': 0,
-      'import/no-extraneous-dependencies': 0, // ['warn'],
       'no-console': 1,
       'no-continue': 0,
       'callback-return': 0,

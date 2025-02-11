@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "9.1.0",
+    "@deck.gl/core": "9.1.0",
     "@deck.gl/geo-layers": "9.1.0",
     "@deck.gl/google-maps": "9.1.0",
     "@deck.gl/json": "9.1.0",
@@ -41,6 +42,8 @@
     "@loaders.gl/core": "^4.2.0",
     "@loaders.gl/csv": "^4.2.0",
     "@luma.gl/core": "^9.1.2",
+    "@luma.gl/webgl": "^9.1.2",
+    "@luma.gl/constants": "^9.1.2",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2"
   },

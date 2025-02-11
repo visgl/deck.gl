@@ -43,7 +43,8 @@
     "@arcgis/core": "^4.0.0",
     "@deck.gl/core": "^9.1.0",
     "@luma.gl/core": "^9.1.0",
-    "@luma.gl/engine": "^9.1.0"
+    "@luma.gl/engine": "^9.1.0",
+    "@luma.gl/webgl": "^9.1.0"
   },
   "devDependencies": {
     "@arcgis/core": "^4.21.0"

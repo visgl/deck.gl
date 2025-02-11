@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@carto/api-client": "^0.4.4",
+    "@loaders.gl/compression": "^4.2.0",
     "@loaders.gl/gis": "^4.2.0",
     "@loaders.gl/loader-utils": "^4.2.0",
     "@loaders.gl/mvt": "^4.2.0",
