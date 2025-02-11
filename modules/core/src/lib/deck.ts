@@ -376,6 +376,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
         type: 'best-available',
+        // luma by default throws if a device is already attached
+        // asynchronous device creation could happen after finalize() is called
+        // TODO - createDevice should support AbortController?
+        _reuseDevices: true,
         adapters: [webgl2Adapter],
         ...props.deviceProps,
         createCanvasContext: {
