@@ -3,7 +3,7 @@
   "description": "React Components for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.40",
+  "version": "9.0.41",
   "publishConfig": {
     "access": "public"
   },

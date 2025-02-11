@@ -3,7 +3,7 @@
   "description": "deck.gl core library",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.40",
+  "version": "9.0.41",
   "publishConfig": {
     "access": "public"
   },
