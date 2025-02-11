@@ -5,7 +5,7 @@
 /* global fetch */
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl//maplibre';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, CollisionFilterExtensionProps} from '@deck.gl/extensions';
