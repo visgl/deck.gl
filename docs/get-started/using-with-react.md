@@ -59,7 +59,7 @@ import DeckGL from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
 import {ZoomWidget} from '@deck.gl/react';
-import {Map} from 'react-map-gl';
+import {Map} from 'react-map-gl/mapbox';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -122.41669,
