@@ -5,4 +5,4 @@
 import {createLoaderWorker} from '@loaders.gl/loader-utils';
 import CartoPropertiesTileLoader from '../layers/schema/carto-properties-tile-loader';
 
-createLoaderWorker(CartoPropertiesTileLoader); 
+createLoaderWorker(CartoPropertiesTileLoader);
