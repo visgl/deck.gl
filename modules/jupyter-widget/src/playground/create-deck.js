@@ -128,7 +128,7 @@ function createStandaloneFromProvider({
   handleEvent,
   getTooltip,
   container,
-  onError,
+  onError
 }) {
   // Common deck.gl props for all basemaos
   const handlers = handleEvent
@@ -199,10 +199,10 @@ function createDeck({
   handleEvent,
   customLibraries,
   configuration,
-  showError,
+  showError
 }) {
   let deckgl;
-  const onError = (e) => {
+  const onError = e => {
     if (showError) {
       const uiErrorText = window.document.createElement('pre');
       uiErrorText.textContent = `Error: ${e.message}\nSource: ${e.source}\nLine: ${e.lineno}:${e.colno}\n${e.error ? e.error.stack : ''}`;
@@ -241,7 +241,7 @@ function createDeck({
       handleEvent,
       getTooltip,
       container,
-      onError,
+      onError
     });
 
     const onComplete = () => {
