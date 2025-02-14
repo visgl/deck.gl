@@ -209,11 +209,11 @@ function createDeck({
       uiErrorText.className = 'error_text';
 
       container.appendChild(uiErrorText);
-    } else {
-      // This will fail in node tests
-      // eslint-disable-next-line
-      console.error(err);
     }
+
+    // This will fail in node tests
+    // eslint-disable-next-line
+    console.error(e);
   };
 
   try {
