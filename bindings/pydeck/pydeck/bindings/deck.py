@@ -40,7 +40,7 @@ class Deck(JSONMixin):
         map_provider=BaseMapProvider.CARTO.value,
         parameters=None,
         widgets=None,
-        show_error=True,
+        show_error=False,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/docs/api-reference/core/deck>`_ class from deck.gl.
