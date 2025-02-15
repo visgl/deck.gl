@@ -17,7 +17,6 @@ import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
-import {webgpuAdapter} from '@luma.gl/webgpu';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -381,7 +380,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         // asynchronous device creation could happen after finalize() is called
         // TODO - createDevice should support AbortController?
         _reuseDevices: true,
-        adapters: [webgl2Adapter, webgpuAdapter],
+        adapters: [webgl2Adapter],
         ...props.deviceProps,
         createCanvasContext: {
           canvas: this._createCanvas(props),
@@ -881,6 +880,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Actually run picking */
   private _pickAndCallback() {
+    if (this.device?.type === 'webgpu') {
+      return;
+    }
+
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
@@ -1099,7 +1102,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.layerManager!.updateLayers();
 
     // Perform picking request if any
-    this._pickAndCallback();
+    if (this.device?.type !== 'webgpu') {
+      this._pickAndCallback();
+    }
 
     // Redraw if necessary
     this.redraw();
@@ -1172,6 +1177,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: evnet handler for pointerdown */
   _onPointerDown = (event: MjolnirPointerEvent) => {
+    if (this.device?.type === 'webgpu') {
+      return;
+    }
     const pos = event.offsetCenter;
     const pickedInfo = this._pick('pickObject', 'pickObject Time', {
       x: pos.x,

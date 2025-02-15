@@ -3,6 +3,34 @@
 // Copyright (c) vis.gl contributors
 
 export default /* wgsl */`\
+// Project module mock
+
+fn project_size_to_pixel(size: f32, units: i32) -> f32 {
+  return size;
+}
+
+fn project_position_to_clipspace(position: vec3<f32>, position64Low: vec3<f32>, offset: vec3<f32>, result: vec4<f32>) -> vec4<f32> {
+  return result;
+}
+
+fn project_pixel_size_to_clipspace(pixelSize: vec2<f32>) -> vec2<f32> {
+  return pixelSize;
+}
+
+fn project_pixel_size(size: f32) -> vec3<f32> {
+  return vec3<f32>(size, size, 0.0);
+}
+
+// Layer uniforms
+
+struct LayerUniforms {
+  opacity: f32,
+};
+
+@group(0) @binding(1) var<uniform> layer: LayerUniforms;
+
+// Main shaders
+
 struct ScatterplotUniforms {
   radiusScale: f32,
   radiusMinPixels: f32,
@@ -18,36 +46,59 @@ struct ScatterplotUniforms {
   lineWidthUnits: i32,
 };
 
-@group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
+struct ConstantAttributeUniforms {
+ instancePositions: vec3<f32>,
+ instancePositions64Low: vec3<f32>,
+ instanceRadius: f32,
+ instanceLineWidths: f32,
+ instanceFillColors: vec4<f32>,
+ instanceLineColors: vec4<f32>,
+ instancePickingColors: vec3<f32>,
 
-// Geometry module mock
-
-struct Geometry {
-  worldPosition: vec3<f32>,
-  uv: vec2<f32>,
-  pickingColor: vec3<f32>,
-  position: vec4<f32>,
+ instancePositionsConstant: i32,
+ instancePositions64LowConstant: i32,
+ instanceRadiusConstant: i32,
+ instanceLineWidthsConstant: i32,
+ instanceFillColorsConstant: i32,
+ instanceLineColorsConstant: i32,
+ instancePickingColorsConstant: i32
 };
 
-const SMOOTH_EDGE_RADIUS: f32 = 0.5;
+@group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
+// @group(0) @binding(1) var<uniform> constantAttributes: ConstantAttributeUniforms;
 
-// Project module mock
+struct ConstantAttributes {
+  instancePositions: vec3<f32>,
+  instancePositions64Low: vec3<f32>,
+  instanceRadius: f32,
+  instanceLineWidths: f32,
+  instanceFillColors: vec4<f32>,
+  instanceLineColors: vec4<f32>,
+  instancePickingColors: vec3<f32>
+};
 
-fn project_size_to_pixel(size: f32, units: i32) -> f32 {
-  return size;
-}
+const constants = ConstantAttributes(
+  vec3<f32>(0.0),
+  vec3<f32>(0.0),
+  0.0,
+  0.0,
+  vec4<f32>(0.0, 0.0, 0.0, 1.0),
+  vec4<f32>(0.0, 0.0, 0.0, 1.0),
+  vec3<f32>(0.0)
+);
 
-fn project_position_to_clipspace(position: vec3<f32>, position64Low: vec3<f32>, offset: vec3<f32>, result: vec4<f32>) -> vec4<f32> {
-  return result;
-}
+struct Attributes {
+  @location(0) positions: vec3<f32>,
+  @location(1) instancePositions: vec3<f32>,
+  @location(2) instancePositions64Low: vec3<f32>,
+  @location(3) instanceRadius: f32,
+  @location(4) instanceLineWidths: f32,
+  @location(5) instanceFillColors: vec4<f32>,
+  @location(6) instanceLineColors: vec4<f32>,
+  @location(7) instancePickingColors: vec3<f32>
+};
 
-fn project_pixel_size_to_clipspace(pixelSize: vec2<f32>) -> vec2<f32> {
-  return pixelSize;
-}
-
-// Main shaders
-
-struct VertexOutput {
+struct Varyings {
   @builtin(position) position: vec4<f32>,
   @location(0) vFillColor: vec4<f32>,
   @location(1) vLineColor: vec4<f32>,
@@ -57,119 +108,106 @@ struct VertexOutput {
 };
 
 @vertex
-fn vertexMain(
-  @location(0) positions: vec3<f32>,
-  @location(1) instancePositions: vec3<f32>,
-  @location(2) instancePositions64Low: vec3<f32>,
-  @location(3) instanceRadius: f32,
-  @location(4) instanceLineWidths: f32,
-  @location(5) instanceFillColors: vec4<f32>,
-  @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instancePickingColors: vec3<f32>
-) -> VertexOutput {
-  var output: VertexOutput;
-  var geometry: Geometry;
-
-  geometry.worldPosition = instancePositions;
+fn vertexMain(attributes: Attributes) -> Varyings {
+  var varyings: Varyings;
+  // var geometry: Geometry;
+  // geometry.worldPosition = instancePositions;
 
   // Multiply out radius and clamp to limits
-  output.outerRadiusPixels = clamp(
-    project_size_to_pixel(scatterplot.radiusScale * instanceRadius, scatterplot.radiusUnits),
+  varyings.outerRadiusPixels = clamp(
+    project_size_to_pixel(scatterplot.radiusScale * attributes.instanceRadius, scatterplot.radiusUnits),
     scatterplot.radiusMinPixels, scatterplot.radiusMaxPixels
   );
 
   // Multiply out line width and clamp to limits
   let lineWidthPixels = clamp(
-    project_size_to_pixel(scatterplot.lineWidthScale * instanceLineWidths, scatterplot.lineWidthUnits),
+    project_size_to_pixel(scatterplot.lineWidthScale * attributes.instanceLineWidths, scatterplot.lineWidthUnits),
     scatterplot.lineWidthMinPixels, scatterplot.lineWidthMaxPixels
   );
 
   // outer radius needs to offset by half stroke width
-  output.outerRadiusPixels += scatterplot.stroked * lineWidthPixels / 2.0;
+  varyings.outerRadiusPixels += scatterplot.stroked * lineWidthPixels / 2.0;
   // Expand geometry to accommodate edge smoothing
   let edgePadding = select(
-    (output.outerRadiusPixels + SMOOTH_EDGE_RADIUS) / output.outerRadiusPixels,
+    (varyings.outerRadiusPixels + SMOOTH_EDGE_RADIUS) / varyings.outerRadiusPixels,
     1.0,
     scatterplot.antialiasing != 0
   );
 
   // position on the containing square in [-1, 1] space
-  output.unitPosition = edgePadding * positions.xy;
-  geometry.uv = output.unitPosition;
-  geometry.pickingColor = instancePickingColors;
+  varyings.unitPosition = edgePadding * attributes.positions.xy;
+  geometry.uv = varyings.unitPosition;
+  geometry.pickingColor = attributes.instancePickingColors;
 
-  output.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / output.outerRadiusPixels;
+  varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
 
-  if (scatterplot.billboard) {
-    output.position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3<f32>(0.0), geometry.position);
-    // DECKGL_FILTER_GL_POSITION(output.position, geometry);
-    let offset = edgePadding * positions * output.outerRadiusPixels;
+  if (scatterplot.billboard != 0) {
+    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0), geometry.position);
+    // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
+    let offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     // DECKGL_FILTER_SIZE(offset, geometry);
-    output.position.xy += project_pixel_size_to_clipspace(offset.xy);
+    let clipPixels = project_pixel_size_to_clipspace(offset.xy);
+    varyings.position.x = clipPixels.x;
+    varyings.position.y = clipPixels.y;
   } else {
-    let offset = edgePadding * positions * project_pixel_size(output.outerRadiusPixels);
+    let offset = edgePadding * attributes.positions * project_pixel_size(varyings.outerRadiusPixels);
     // DECKGL_FILTER_SIZE(offset, geometry);
-    output.position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
-    // DECKGL_FILTER_GL_POSITION(output.position, geometry);
+    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset, geometry.position);
+    // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
   }
 
   // Apply opacity to instance color, or return instance picking color
-  output.vFillColor = vec4<f32>(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);
-  // DECKGL_FILTER_COLOR(output.vFillColor, geometry);
-  output.vLineColor = vec4<f32>(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
-  // DECKGL_FILTER_COLOR(output.vLineColor, geometry);
+  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
+  // DECKGL_FILTER_COLOR(varyings.vFillColor, geometry);
+  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * layer.opacity);
+  // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
 
-  return output;
+  return varyings;
 }
 
 @fragment
-fn fragmentMain(
-  @location(0) vFillColor: vec4<f32>,
-  @location(1) vLineColor: vec4<f32>,
-  @location(2) unitPosition: vec2<f32>,
-  @location(3) innerUnitRadius: f32,
-  @location(4) outerRadiusPixels: f32
-) -> @location(0) vec4<f32> {
-  var geometry: Geometry;
-  geometry.uv = unitPosition;
+fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
+  // var geometry: Geometry;
+  // geometry.uv = unitPosition;
 
-  let distToCenter = length(unitPosition) * outerRadiusPixels;
-  let inCircle = select(
-    smoothedge(distToCenter, outerRadiusPixels),
-    step(distToCenter, outerRadiusPixels),
-    scatterplot.antialiasing
-  );
+  // let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
+  // let inCircle = select(
+  //   smoothedge(distToCenter, varyings.outerRadiusPixels),
+  //   step(distToCenter, varyings.outerRadiusPixels),
+  //   scatterplot.antialiasing != 0
+  // );
 
-  if (inCircle == 0.0) {
-    discard;
-  }
+  // if (inCircle == 0.0) {
+  //   discard;
+  // }
 
-  var fragColor: vec4<f32>;
+  // var fragColor: vec4<f32>;
 
-  if (scatterplot.stroked > 0.5) {
-    let isLine = select(
-      smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter),
-      step(innerUnitRadius * outerRadiusPixels, distToCenter),
-      scatterplot.antialiasing
-    );
+  // if (scatterplot.stroked != 0) {
+  //   let isLine = select(
+  //     smoothedge(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+  //     step(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+  //     scatterplot.antialiasing != 0
+  //   );
 
-    if (scatterplot.filled) {
-      fragColor = mix(vFillColor, vLineColor, isLine);
-    } else {
-      if (isLine == 0.0) {
-        discard;
-      }
-      fragColor = vec4<f32>(vLineColor.rgb, vLineColor.a * isLine);
-    }
-  } else if (scatterplot.filled == false) {
-    discard;
-  } else {
-    fragColor = vFillColor;
-  }
+  //   if (scatterplot.filled != 0) {
+  //     fragColor = mix(varyings.vFillColor, varyings.vLineColor, isLine);
+  //   } else {
+  //     if (isLine == 0.0) {
+  //       discard;
+  //     }
+  //     fragColor = vec4<f32>(varyings.vLineColor.rgb, varyings.vLineColor.a * isLine);
+  //   }
+  // } else if (scatterplot.filled == 0) {
+  //   discard;
+  // } else {
+  //   fragColor = varyings.vFillColor;
+  // }
 
-  fragColor.a *= inCircle;
-  // DECKGL_FILTER_COLOR(fragColor, geometry);
+  // fragColor.a *= inCircle;
+  // // DECKGL_FILTER_COLOR(fragColor, geometry);
 
-  return fragColor;
+  // return fragColor;
+  return vec4<f32>(0, 0, 255, 1);
 }
 `;

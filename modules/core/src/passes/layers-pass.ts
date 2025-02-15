@@ -86,7 +86,7 @@ export default class LayersPass extends Pass {
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters,
-      clearColor: clearColor as [number, number, number, number],
+      clearColor: [1, 0, 1, 1],
       clearDepth,
       clearStencil
     });
@@ -95,6 +95,7 @@ export default class LayersPass extends Pass {
       return this._drawLayers(renderPass, options);
     } finally {
       renderPass.end();
+      this.device.submit();
     }
   }
 

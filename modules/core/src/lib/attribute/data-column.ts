@@ -610,7 +610,7 @@ export default class DataColumn<Options, State> {
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,
       id: this.id,
-      usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
+      usage: (isIndexed ? Buffer.INDEX : Buffer.VERTEX) | Buffer.COPY_DST,
       indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
       byteLength
     });

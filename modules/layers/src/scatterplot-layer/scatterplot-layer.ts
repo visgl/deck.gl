@@ -274,7 +274,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
-      isInstanced: true
+      isInstanced: true,
+      parameters: {
+        depthWriteEnabled: true,
+        depthCompare: 'less-equal',
+      }
     });
   }
 }

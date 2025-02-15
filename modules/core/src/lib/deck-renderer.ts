@@ -93,6 +93,8 @@ export default class DeckRenderer {
       this._postRender(renderOpts.effects, renderOpts);
     }
 
+    this.device?.submit();
+
     this.renderCount++;
 
     debug(TRACE_RENDER_LAYERS, this, renderStats, opts);
