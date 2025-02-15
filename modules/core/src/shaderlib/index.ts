@@ -14,20 +14,25 @@ import picking from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-const SHADER_HOOKS = [
-  'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',
-  'vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)',
-  'vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)',
-  'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
+const SHADER_HOOKS_GLSL = [
+  // 'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',
+  // 'vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)',
+  // 'vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)',
+  // 'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function getShaderAssembler() {
+const SHADER_HOOKS_WGSL = [
+  // Not supported
+];
+
+export function getShaderAssembler(language: 'glsl' | 'wgsl' = 'wgsl'): ShaderAssembler {
   const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
     shaderAssembler.addDefaultModule(shaderModule);
   }
-  for (const shaderHook of SHADER_HOOKS) {
+  const shaderHooks = language === 'glsl' ? SHADER_HOOKS_GLSL : SHADER_HOOKS_WGSL;
+  for (const shaderHook of SHADER_HOOKS_GLSL) {
     shaderAssembler.addShaderHook(shaderHook);
   }
 

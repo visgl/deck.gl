@@ -16,7 +16,8 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {WebGLDevice, webgl2Adapter} from '@luma.gl/webgl';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {webgpuAdapter} from '@luma.gl/webgpu';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -231,7 +232,7 @@ const defaultProps: DeckProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {type: 'webgl'} as DeviceProps,
+  deviceProps: {} as DeviceProps,
   gl: null,
   canvas: null,
   layers: [],
@@ -380,7 +381,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         // asynchronous device creation could happen after finalize() is called
         // TODO - createDevice should support AbortController?
         _reuseDevices: true,
-        adapters: [webgl2Adapter],
+        adapters: [webgl2Adapter, webgpuAdapter],
         ...props.deviceProps,
         createCanvasContext: {
           canvas: this._createCanvas(props),
@@ -939,7 +940,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    if (this.device instanceof WebGLDevice) {
+    if (this.device.type === 'webgl') {
       this.device.setParametersWebGL({
         blend: true,
         blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
@@ -950,8 +951,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onDeviceInitialized(this.device);
-    if (this.device instanceof WebGLDevice) {
+    if (this.device.type === 'webgl') {
       // Legacy callback - warn?
+      // @ts-expect-error gl is not visible on Device base class
       this.props.onWebGLInitialized(this.device.gl);
     }
 
