@@ -391,6 +391,15 @@ const TextLayerExample = {
       onUpdate: (newValue, newSettings, change) => {
         change('backgroundPadding', [newValue, newValue]);
       }
+    },
+    backgroundBorderRadius: {type: 'compound', elements: ['borderRadius']},
+    borderRadius: {
+      type: 'number',
+      min: 0,
+      max: 50,
+      onUpdate: (newValue, newSettings, change) => {
+        change('backgroundBorderRadius', newValue);
+      }
     }
   },
   props: {

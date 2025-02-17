@@ -87,6 +87,12 @@ type _TextLayerProps<DataT> = {
    * @default 0
    */
   getBorderWidth?: Accessor<DataT, number>;
+  /** Border radius of the background.
+   * If a number is supplied, it is the same border radius in pixel for all corner.
+   * If an array of 4 is supplied, it is interpreted as `[top_left_corner, top_right_corner, bottom_right_corner, bottom_left_corner]` border radius in pixel.
+   * @default 0
+   */
+  backgroundBorderRadius?: number | [number, number, number, number];
   /**
    * The padding of the background..
    * If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
@@ -194,6 +200,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
+  backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
   characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
@@ -478,6 +485,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
+      backgroundBorderRadius,
       backgroundPadding,
       background,
       billboard,
@@ -503,6 +511,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getFillColor: getBackgroundColor,
             getLineColor: getBorderColor,
             getLineWidth: getBorderWidth,
+            borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
 
             // props shared with characters layer
