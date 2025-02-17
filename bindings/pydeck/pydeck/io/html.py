@@ -64,6 +64,7 @@ def render_json_to_html(
     custom_libraries=None,
     configuration=None,
     offline=False,
+    show_error=False,
 ):
     js = j2_env.get_template("index.j2")
     css = j2_env.get_template("style.j2")
@@ -78,6 +79,7 @@ def render_json_to_html(
         css_text=css_text,
         custom_libraries=custom_libraries,
         configuration=configuration,
+        show_error=show_error,
     )
     return html_str
 
@@ -135,6 +137,7 @@ def deck_to_html(
     configuration=None,
     as_string=False,
     offline=False,
+    show_error=False,
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html_str = render_json_to_html(
@@ -146,6 +149,7 @@ def deck_to_html(
         custom_libraries=custom_libraries,
         configuration=configuration,
         offline=offline,
+        show_error=show_error,
     )
 
     if filename:
