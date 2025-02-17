@@ -167,47 +167,47 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
-  // var geometry: Geometry;
-  // geometry.uv = unitPosition;
+  var geometry: Geometry;
+  geometry.uv = unitPosition;
 
-  // let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
-  // let inCircle = select(
-  //   smoothedge(distToCenter, varyings.outerRadiusPixels),
-  //   step(distToCenter, varyings.outerRadiusPixels),
-  //   scatterplot.antialiasing != 0
-  // );
+  let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
+  let inCircle = select(
+    smoothedge(distToCenter, varyings.outerRadiusPixels),
+    step(distToCenter, varyings.outerRadiusPixels),
+    scatterplot.antialiasing != 0
+  );
 
-  // if (inCircle == 0.0) {
-  //   discard;
-  // }
+  if (inCircle == 0.0) {
+    discard;
+  }
 
-  // var fragColor: vec4<f32>;
+  var fragColor: vec4<f32>;
 
-  // if (scatterplot.stroked != 0) {
-  //   let isLine = select(
-  //     smoothedge(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
-  //     step(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
-  //     scatterplot.antialiasing != 0
-  //   );
+  if (scatterplot.stroked != 0) {
+    let isLine = select(
+      smoothedge(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+      step(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+      scatterplot.antialiasing != 0
+    );
 
-  //   if (scatterplot.filled != 0) {
-  //     fragColor = mix(varyings.vFillColor, varyings.vLineColor, isLine);
-  //   } else {
-  //     if (isLine == 0.0) {
-  //       discard;
-  //     }
-  //     fragColor = vec4<f32>(varyings.vLineColor.rgb, varyings.vLineColor.a * isLine);
-  //   }
-  // } else if (scatterplot.filled == 0) {
-  //   discard;
-  // } else {
-  //   fragColor = varyings.vFillColor;
-  // }
+    if (scatterplot.filled != 0) {
+      fragColor = mix(varyings.vFillColor, varyings.vLineColor, isLine);
+    } else {
+      if (isLine == 0.0) {
+        discard;
+      }
+      fragColor = vec4<f32>(varyings.vLineColor.rgb, varyings.vLineColor.a * isLine);
+    }
+  } else if (scatterplot.filled == 0) {
+    discard;
+  } else {
+    fragColor = varyings.vFillColor;
+  }
 
-  // fragColor.a *= inCircle;
-  // // DECKGL_FILTER_COLOR(fragColor, geometry);
+  fragColor.a *= inCircle;
+  // DECKGL_FILTER_COLOR(fragColor, geometry);
 
-  // return fragColor;
-  return vec4<f32>(0, 0, 255, 1);
+  return fragColor;
+  // return vec4<f32>(0, 0, 255, 1);
 }
 `;
