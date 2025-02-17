@@ -277,7 +277,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       isInstanced: true,
       parameters: {
         depthWriteEnabled: true,
-        depthCompare: 'less-equal',
+        depthCompare: 'less-equal'
       }
     });
   }

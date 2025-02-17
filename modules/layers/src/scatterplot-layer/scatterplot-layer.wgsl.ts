@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */`\
+export default /* wgsl */ `\
 // Project module mock
 
 fn project_size_to_pixel(size: f32, units: i32) -> f32 {

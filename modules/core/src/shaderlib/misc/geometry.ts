@@ -4,8 +4,6 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-
-
 const source = /* wgsl */ `\
 const SMOOTH_EDGE_RADIUS: f32 = 0.5;
 

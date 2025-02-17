@@ -70,8 +70,7 @@ export default function App({
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
-    >
-    </DeckGL>
+    />
   );
 }
 
