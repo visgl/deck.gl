@@ -52,7 +52,7 @@ jobs:
           cache: 'yarn'
 
       - name: Use Python ${{ matrix.python-version }}
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
 
