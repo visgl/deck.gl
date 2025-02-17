@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.2] - Feb 17 2025
+
+- pydeck: Add show_error flag to display error in cell output (#9430)
+- CARTO: Add worker for cartoPropertiesTile loader (#9429)
+
 #### deck.gl [v9.1.1] - Feb 11 2025
 
 - fix: Add missing dependencies (#9422)

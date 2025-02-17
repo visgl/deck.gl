@@ -3,7 +3,7 @@
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.1",
+  "version": "9.1.2",
   "publishConfig": {
     "access": "public"
   },
