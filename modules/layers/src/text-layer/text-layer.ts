@@ -87,7 +87,7 @@ type _TextLayerProps<DataT> = {
    * @default 0
    */
   getBorderWidth?: Accessor<DataT, number>;
-  /** Border radius of the background.
+  /** The border radius of the background.
    * If a number is supplied, it is the same border radius in pixel for all corner.
    * If an array of 4 is supplied, it is interpreted as `[top_left_corner, top_right_corner, bottom_right_corner, bottom_left_corner]` border radius in pixel.
    * @default 0
