@@ -23,7 +23,7 @@ PureJS examples in prototyping environments. These are great templates for featu
 * deck.gl [Codepen demos](https://codepen.io/vis-gl/)
 * deck.gl [Observable demos](https://beta.observablehq.com/@pessimistress)
 * [RandomFractals](https://github.com/RandomFractals) [Observable DeckGL collection](https://observablehq.com/collection/@randomfractals/deckgl)
-* [deck.gl Showcase](http://deck.gl/showcase)
+* [deck.gl Showcase](https://deck.gl/showcase)
 
 ## Community
 
