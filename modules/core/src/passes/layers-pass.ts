@@ -473,8 +473,10 @@ function getGLViewport(
     dimensions.x * pixelRatio,
     height - (dimensions.y + dimensions.height) * pixelRatio,
     dimensions.width * pixelRatio,
-    dimensions.height * pixelRatio
-  ];
+    dimensions.height * pixelRatio,
+    0,
+    1
+  ] as unknown as [number, number, number, number];
 }
 
 function mergeModuleParameters(
