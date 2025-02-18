@@ -70,6 +70,7 @@ export type {
   MapLibreBasemap as _MapLibreBasemap,
   GoogleBasemap as _GoogleBasemap
 } from './api/index';
+export {getDataFilterExtensionProps} from './get-data-filter-extension-props';
 
 // TODO(v10): Consider removing re-exports from '@carto/api-client' below.
 
