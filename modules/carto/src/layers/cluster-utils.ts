@@ -6,6 +6,7 @@ import {cellToParent} from 'quadbin';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Accessor, log} from '@deck.gl/core';
 import {BinaryFeatureCollection} from '@loaders.gl/schema';
+import {createBinaryPointFeature, createEmptyBinary} from '../utils';
 
 export type Aggregation = 'any' | 'average' | 'count' | 'min' | 'max' | 'sum';
 export type AggregationProperties<FeaturePropertiesT> = {
@@ -168,25 +169,7 @@ export function clustersToBinary<FeaturePropertiesT>(
   }
 
   return {
-    shape: 'binary-feature-collection',
-    points: {
-      type: 'Point',
-      positions: {value: positions, size: 2},
-      properties: data,
-      numericProps: {},
-      featureIds: {value: featureIds, size: 1},
-      globalFeatureIds: {value: featureIds, size: 1}
-    },
-    lines: {
-      type: 'LineString',
-      pathIndices: {value: EMPTY_UINT16ARRAY, size: 1},
-      ...EMPTY_BINARY_PROPS
-    },
-    polygons: {
-      type: 'Polygon',
-      polygonIndices: {value: EMPTY_UINT16ARRAY, size: 1},
-      primitivePolygonIndices: {value: EMPTY_UINT16ARRAY, size: 1},
-      ...EMPTY_BINARY_PROPS
-    }
+    ...createEmptyBinary(),
+    points: createBinaryPointFeature(positions, featureIds, featureIds, {}, data)
   };
 }

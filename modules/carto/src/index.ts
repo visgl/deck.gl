@@ -71,6 +71,8 @@ export type {
   GoogleBasemap as _GoogleBasemap
 } from './api/index';
 
+export {createPointsFromPolygons, createPointsFromLines} from './layers/label-utils';
+
 // TODO(v10): Consider removing re-exports from '@carto/api-client' below.
 
 import {
