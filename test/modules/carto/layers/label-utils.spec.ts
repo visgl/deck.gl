@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {createPointsFromLines, createPointsFromPolygons} from '@deck.gl/carto';
+import {createPointsFromLines, createPointsFromPolygons} from '@deck.gl/carto/layers/label-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 
 test('createPointsFromLines', t => {
