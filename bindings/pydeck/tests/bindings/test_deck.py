@@ -35,7 +35,7 @@ def test_deck_layer_args():
     ids=[BaseMapProvider.CARTO, BaseMapProvider.MAPBOX, BaseMapProvider.GOOGLE_MAPS],
 )
 def test_deck_default_map_style(map_provider_enum: BaseMapProvider, expected_map_style: str):
-    """Verify the a default map style is provided for all map providers."""
+    """Verify that a default map style is provided for all map providers."""
     r = Deck(**{"layers": [], "map_provider": map_provider_enum.value})
     assert r.map_provider == map_provider_enum.value
     assert r.map_style == expected_map_style
