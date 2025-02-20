@@ -45,10 +45,10 @@
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.0",
     "jsdom": "^20.0.0",
-    "@vis.gl/dev-tools": "1.0.0-alpha.21",
-    "@vis.gl/ts-plugins": "1.0.0-alpha.21",
+    "@vis.gl/dev-tools": "^1.0.0",
+    "@vis.gl/ts-plugins": "^1.0.0",
     "pre-commit": "^1.2.2",
-    "puppeteer": "^22.4.0",
+    "puppeteer": "^24.2.0",
     "s2-geometry": "^1.2.10",
     "tap-spec": "^5.0.0",
     "tape-catch": "^1.0.6"
