@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.3] - Feb 20 2025
+
+- CARTO: HeatmapTileLayer fix palette updating (#9453)
+- pydeck: Set default map style if not provided (#9419)
+
 #### deck.gl [v9.1.2] - Feb 17 2025
 
 - pydeck: Add show_error flag to display error in cell output (#9430)
