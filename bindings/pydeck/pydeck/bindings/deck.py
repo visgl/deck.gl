@@ -43,7 +43,8 @@ class Deck(JSONMixin):
         effects=None,
         map_provider=BaseMapProvider.CARTO.value,
         parameters=None,
-        widgets=None
+        widgets=None,
+        show_error=False,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/docs/api-reference/core/deck>`_ class from deck.gl.
@@ -83,6 +84,9 @@ class Deck(JSONMixin):
             Layers must have ``pickable=True`` set in order to display a tooltip.
             For more advanced usage, the user can pass a dict to configure more custom tooltip features.
             Further documentation is `here <tooltip.html>`_.
+        show_error : bool, default False
+            If ``True``, will display the error in the rendered output.
+            Otherwise, will only show error in browser console.
 
         .. _Deck:
             https://deck.gl/docs/api-reference/core/deck
@@ -105,6 +109,7 @@ class Deck(JSONMixin):
         self.effects = effects
         self.map_provider = str(map_provider).lower() if map_provider else None
         self._tooltip = tooltip
+        self._show_error = show_error
 
         if has_jupyter_extra():
             from ..widget import DeckGLWidget
@@ -237,6 +242,7 @@ class Deck(JSONMixin):
             configuration=pydeck_settings.configuration,
             as_string=as_string,
             offline=offline,
+            show_error=self._show_error,
             **kwargs,
         )
         return f
