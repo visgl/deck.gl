@@ -96,7 +96,6 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
       ]
     });
 
-    this.deck = deck;
     this.element = el as HTMLDivElement;
     return this.element;
   }
