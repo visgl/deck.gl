@@ -241,7 +241,6 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     tileset3d.selectTiles(Object.values(viewports)).then(frameNumber => {
       const tilesetChanged = this.state.frameNumber !== frameNumber;
       if (tilesetChanged) {

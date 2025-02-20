@@ -30,6 +30,7 @@ import type {
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {getMeshBoundingBox} from '@loaders.gl/schema';
+import {NumberArray2} from '@math.gl/core';
 
 function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
   const positionAttribute = attributes.positions || attributes.POSITION;
@@ -198,7 +199,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     model?: Model;
     emptyTexture: Texture;
     hasNormals?: boolean;
-    positionBounds?: [number[], number[]] | null;
+    positionBounds?: [NumberArray2, NumberArray2] | null;
   };
 
   getShaders() {
@@ -209,7 +210,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     });
   }
 
-  getBounds(): [number[], number[]] | null {
+  getBounds(): [NumberArray2, NumberArray2] | null {
     if (this.props._instanced) {
       return super.getBounds();
     }
@@ -234,7 +235,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
 
     this.state.positionBounds = result;
-    return result;
+    return result ?? null;
   }
 
   initializeState() {

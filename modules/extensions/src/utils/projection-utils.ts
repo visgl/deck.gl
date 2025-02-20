@@ -4,6 +4,7 @@
 
 import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
+import type {NumberArray2, NumberArray3} from '@math.gl/core';
 
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
@@ -67,7 +68,7 @@ export function makeViewport(opts: {
     (bounds[0] + bounds[2]) / 2,
     (bounds[1] + bounds[3]) / 2,
     0
-  ]);
+  ]) as NumberArray3;
 
   let {width, height, zoom} = opts;
   if (zoom === undefined) {
@@ -135,8 +136,10 @@ export function getViewportBounds(viewport: Viewport, zRange?: [number, number])
   }
 
   // Viewport bounds in cartesian coordinates
-  const viewportBottomLeftCommon = viewport.projectPosition(viewportBoundsWorld.slice(0, 2));
-  const viewportTopRightCommon = viewport.projectPosition(viewportBoundsWorld.slice(2, 4));
+  const bottomLeft = viewportBoundsWorld.slice(0, 2) as NumberArray2;
+  const topRight = viewportBoundsWorld.slice(2, 4) as NumberArray2;
+  const viewportBottomLeftCommon = viewport.projectPosition(bottomLeft);
+  const viewportTopRightCommon = viewport.projectPosition(topRight);
   return [
     viewportBottomLeftCommon[0],
     viewportBottomLeftCommon[1],

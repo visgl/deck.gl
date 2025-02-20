@@ -4,13 +4,14 @@
 
 import test from 'tape-promise/tape';
 
-import {testLayerAsync} from '@deck.gl/test-utils';
+import {LayerTestCase, testLayerAsync} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 test('Tile3DLayer', async t => {
-  const testCases = [
+  const testCases: LayerTestCase<Tile3DLayer>[] = [
     {
+      title: 'Tile3DLayer initial load',
       props: {
         data: './test/data/3d-tiles/tileset.json',
         getPointColor: [0, 0, 0]
@@ -23,6 +24,7 @@ test('Tile3DLayer', async t => {
       }
     },
     {
+      title: 'Tile3DLayer update opacity',
       updateProps: {
         opacity: 0.5
       },
