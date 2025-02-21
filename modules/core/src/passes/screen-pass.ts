@@ -66,7 +66,7 @@ export default class ScreenPass extends Pass {
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
       parameters: {viewport: [0, 0, ...texSize]},
-      clearColor: clearCanvas ? [0, 0, 0, 0] : false,
+      clearColor: clearCanvas ? [255, 0, 0, 255] : false,
       clearDepth: 1
     });
 
