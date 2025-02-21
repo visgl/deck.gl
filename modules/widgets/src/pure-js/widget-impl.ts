@@ -22,13 +22,31 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
+  static defaultProps: Required<WidgetImplProps> = {
+    id: 'screenshot',
+    placement: 'top-left',
+    style: {},
+    className: ''
+  };
+
   constructor(props: Required<PropsT>) {
     this.id = props.id || 'widget';
     this.props = props;
   }
 
-  abstract onAdd({deck}: {deck: Deck<any>}): HTMLDivElement;
-  abstract onRemove(): void;
+  abstract onCreateHTMLElement(): HTMLElement;
+
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
+    this.deck = deck;
+    const el = this.onCreateHTMLElement();
+    this.element = el as HTMLDivElement;
+    return this.element;
+  }
+
+  onRemove() {
+    this.deck = undefined;
+    this.element = undefined;
+  }
 
   setProps(props: Partial<PropsT>) {
     const oldProps = this.props;
@@ -54,16 +72,15 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
       style?: Partial<CSSStyleDeclaration>;
       classNames?: string[];
       events?: {[key: string]: EventListenerOrEventListenerObject};
-      children?: (HTMLElement | SVGSVGElement)[];
-    },
-    children?: (HTMLElement | SVGSVGElement)[]
+      children?: (HTMLElement | SVGSVGElement | undefined)[];
+    }
   ): HTMLElement {
     const {type = 'div', style = {}, classNames = [], events = {}} = props;
-    children ||= props.children || [];
+    const children = props.children || props.children || [];
     const el = document.createElement(type);
     classNames.filter(Boolean).forEach(className => el.classList.add(className));
     this._applyStyles(el, style);
-    children.forEach(child => el.appendChild(child));
+    children.filter(child => child !== undefined).forEach(child => el.appendChild(child));
     Object.entries(events).forEach(([event, handler]) => el.addEventListener(event, handler));
     return el;
   }
@@ -73,7 +90,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     classNames?: string[];
     style: Partial<CSSStyleDeclaration>;
     onClick: EventListenerOrEventListenerObject;
-    icon: SVGSVGElement;
+    icon?: SVGSVGElement;
   }): HTMLElement {
     const {widgetClassName = '', style = {}, classNames = []} = props;
 

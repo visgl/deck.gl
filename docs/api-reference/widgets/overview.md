@@ -37,13 +37,67 @@ new FullscreenWidget({});
 <link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
 ```
 
-```js
-new deck.FullscreenWidget({});
+## Using Widgets
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {
+  CompassWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  ScreenshotWidget,
+} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: [
+    ...
+  ],
+  widgets: [
+    new ZoomWidget(),
+    new CompassWidget(),
+    new FullscreenWidget(),
+    new ScreenshotWidget()
+  ]
+});
+```
+
+The built-in widgets support both dark and light color scheme changes and can be wired up to dynamically respond to color scheme changes like so:
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {
+  CompassWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  ScreenshotWidget,
+  DarkGlassTheme,
+  LightGlassTheme
+} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+/* global window */
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
+
+new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: [ ... ],
+  widgets: [
+    new ZoomWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme}),
+    new FullscreenWidget({style: widgetTheme}),
+    new ScreenshotWidget({style: widgetTheme})
+  ]
+});
 ```
 
 ## CSS Theming
 
-Customizing the appearance of widgets can be achieved using CSS variables. This section provides guidance on how to theme widgets at different levels of specificity.
+Customizing the appearance of widgets beyond light and dark mode can be achieved using CSS variables. This section provides guidance on how to theme widgets at different levels of specificity.
 
 ### Global Theming
 
