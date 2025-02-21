@@ -23,7 +23,7 @@ npm install @deck.gl/core @deck.gl/widgets
 import {FullscreenWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-new FullscreenWidget({});
+new FullscreenWidget();
 ```
 
 ### Include the Standalone Bundle
@@ -181,6 +181,7 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen Exit](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40) |
 | `--icon-zoom-in` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Add](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40) |
 | `--icon-zoom-out` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Remove](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40) |
+| `--icon-camera` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Photo Camera](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:photo_camera:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=picture&icon.size=24&icon.color=%23000000) |
 
 #### Replacing Icons
 

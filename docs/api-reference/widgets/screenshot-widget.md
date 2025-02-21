@@ -11,7 +11,7 @@ It is possible to use `props.onCapture` to integrate with more advanced screen c
 
 #### `id` (string, optional) {#id}
 
-Default: `'fullscreen'`
+Default: `'screenshot'`
 
 The `id` must be unique among all your widgets at a given time. 
 
