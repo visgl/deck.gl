@@ -118,7 +118,7 @@ export const deck = new Deck({
     new CompassWidget({id: 'globe-compass', style: widgetTheme, viewId: 'globe'}),
     new CompassWidget({style: widgetTheme, placement: 'bottom-right'}),
 
-    new FullscreenWidget({}), // TODO: should viewId be on all widgets for multi-view placement?
+    new FullscreenWidget(), // TODO: should viewId be on all widgets for multi-view placement?
     new FullscreenWidget({id: 'themed', style: widgetTheme}),
     new FullscreenWidget({id: 'purple', className: 'purple', placement: 'top-right'})
   ]

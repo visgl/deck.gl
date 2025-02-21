@@ -38,12 +38,15 @@ export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
   };
 
   className = 'deck-widget-screenshot';
+  placement: WidgetPlacement = 'top-left';
 
   constructor(props: ScreenshotWidgetProps = {}) {
     super({...ScreenshotWidget.defaultProps, ...props});
+    this.placement = props.placement ?? this.placement;
   }
 
   setProps(props: Partial<ScreenshotWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
     super.setProps(props);
   }
 
