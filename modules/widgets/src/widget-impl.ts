@@ -80,7 +80,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     const {widgetClassName, className, style} = props;
     const element = document.createElement('div');
     ['deck-widget', widgetClassName, className]
-      .filter(Boolean)
+      .filter((cls): cls is string => typeof cls === 'string' && cls.length > 0)
       .forEach(className => element.classList.add(className));
     _applyStyles(element, style);
     return element;
