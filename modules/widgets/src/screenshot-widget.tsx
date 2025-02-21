@@ -54,11 +54,11 @@ export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
     const element = this.element;
     if (!element) return;
     render(
-      h(IconButton, {
-        className: 'deck-widget-camera',
-        label: this.props.label,
-        onClick: this.handleClick.bind(this)
-      }),
+      <IconButton
+        className="deck-widget-camera"
+        label={this.props.label}
+        onClick={this.handleClick.bind(this)}
+      />,
       element
     );
   }
