@@ -48,56 +48,18 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     Object.assign(this.props, props);
   }
 
-  _createElement(
-    props: {
-      type?: string;
-      style?: Partial<CSSStyleDeclaration>;
-      classNames?: string[];
-      events?: {[key: string]: EventListenerOrEventListenerObject};
-      children?: (HTMLElement | SVGSVGElement)[];
-    },
-    children?: (HTMLElement | SVGSVGElement)[]
-  ): HTMLElement {
-    const {type = 'div', style = {}, classNames = [], events = {}} = props;
-    children ||= props.children || [];
-    const el = document.createElement(type);
-    classNames.filter(Boolean).forEach(className => el.classList.add(className));
-    this._applyStyles(el, style);
-    children.forEach(child => el.appendChild(child));
-    Object.entries(events).forEach(([event, handler]) => el.addEventListener(event, handler));
-    return el;
-  }
-
-  _createIconButton(props: {
+  _createRootElement(props: {
     widgetClassName: string;
-    classNames?: string[];
+    className: string;
     style: Partial<CSSStyleDeclaration>;
-    onClick: EventListenerOrEventListenerObject;
-    icon: SVGSVGElement;
-  }): HTMLElement {
-    const {widgetClassName = '', style = {}, classNames = []} = props;
-
-    const el = this._createElement({
-      style,
-      classNames: ['deck-widget', widgetClassName, ...classNames],
-      children: [
-        this._createElement({
-          type: 'div',
-          classNames: ['deck-widget-button'],
-          children: [
-            this._createElement({
-              type: 'button',
-              classNames: [widgetClassName, 'deck-widget-icon-button'],
-              events: {click: props.onClick},
-              children: [props.icon]
-            })
-          ]
-        })
-      ]
-    });
-
-    this.element = el as HTMLDivElement;
-    return this.element;
+  }) {
+    const {widgetClassName, className, style} = props;
+    const element = document.createElement('div');
+    ['deck-widget', widgetClassName, className]
+      .filter(Boolean)
+      .forEach(className => element.classList.add(className));
+    _applyStyles(element, style);
+    return element;
   }
 
   _applyStyles(el: HTMLElement, style: Partial<CSSStyleDeclaration>) {
