@@ -14,5 +14,7 @@ export type {ScreenshotWidgetProps} from './screenshot-widget';
 
 export type {WidgetImplProps} from './widget-impl';
 export {WidgetImpl as _WidgetImpl} from './widget-impl';
+import * as _components from './components';
+export {_components};
 
 export * from './themes';
