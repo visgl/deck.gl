@@ -12,6 +12,7 @@ import {
   LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
+import {LayerListWidget} from './layer-list-widget';
 
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
@@ -120,7 +121,9 @@ export const deck = new Deck({
 
     new FullscreenWidget(), // TODO: should viewId be on all widgets for multi-view placement?
     new FullscreenWidget({id: 'themed', style: widgetTheme}),
-    new FullscreenWidget({id: 'purple', className: 'purple', placement: 'top-right'})
+    new FullscreenWidget({id: 'purple', className: 'purple', placement: 'top-right'}),
+    new LayerListWidget({style: widgetTheme}),
+    new LayerListWidget({style: widgetTheme, viewId: 'globe'})
   ]
 });
 
