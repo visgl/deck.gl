@@ -9,12 +9,12 @@
     "build": "vite build"
   },
   "dependencies": {
-    "deck.gl": "^9.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "deck.gl": "^9.1.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^4.6.0",
-    "vite": "^4.0.0"
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
   }
 }

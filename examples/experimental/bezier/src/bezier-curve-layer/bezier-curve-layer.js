@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Layer, fp64LowPart, picking} from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
 
 import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';
@@ -20,12 +20,15 @@ const defaultProps = {
 };
 
 export default class BezierCurveLayer extends Layer {
+  static layerName = 'BezierCurveLayer';
+  static defaultProps = defaultProps;
+
   getShaders() {
     return {vs, fs, modules: [picking]};
   }
 
   initializeState() {
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -123,6 +126,3 @@ export default class BezierCurveLayer extends Layer {
     });
   }
 }
-
-BezierCurveLayer.layerName = 'BezierCurveLayer';
-BezierCurveLayer.defaultProps = defaultProps;

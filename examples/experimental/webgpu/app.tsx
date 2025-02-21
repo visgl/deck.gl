@@ -5,10 +5,16 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {ScatterplotLayer} from '@deck.gl/layers';
+// import {ScatterplotLayer} from '@deck.gl/layers';
+import {TriangleLayer} from './triangle-layer';
 import {webgpuAdapter} from '@luma.gl/webgpu';
+import {CanvasContext} from '@luma.gl/core';
 
 import type {Color, MapViewState} from '@deck.gl/core';
+
+CanvasContext.prototype.getDrawingBufferSize = function getDrawingBufferSize() {
+  return this.getPixelSize();
+}
 
 const MALE_COLOR: Color = [0, 128, 255];
 const FEMALE_COLOR: Color = [255, 0, 128];
@@ -44,6 +50,8 @@ export default function App({
   mapStyle?: string;
 }) {
   const layers = [
+    new TriangleLayer({}),
+    /*
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
@@ -60,6 +68,7 @@ export default function App({
       },
       pickable: true
     })
+      */
   ];
 
   return (
