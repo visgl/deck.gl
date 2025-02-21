@@ -1297,12 +1297,7 @@
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-4.1.0.tgz#ce28c06bcfe07d21311e00aeb25de82fecf7f393"
   integrity sha512-clYZdHcmRvMzVK5fjeDkQlHUzXQSNdZ7s4xOqC3nJPgz4C/TZkUecTo9YS4PruZqtDda/ag4erndP0MIn40dGA==
 
-"@math.gl/web-mercator@^4.0.0":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-4.0.1.tgz#138a9d32da0e810e919c1908fa1534adbdc2ef27"
-  integrity sha512-eJ0nDw8140kJorf8ASyKRC53rI+UG6vPxpsKJiGRD6lXsoKTeKYebeEAXiGDWTvi2AMe6+xngxTqqwm58fL3Fw==
-
-"@math.gl/web-mercator@^4.1.0":
+"@math.gl/web-mercator@^4.0.0", "@math.gl/web-mercator@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-4.1.0.tgz#b244112b2805ba68cdecc76f3d12578d05271a1d"
   integrity sha512-HZo3vO5GCMkXJThxRJ5/QYUYRr3XumfT8CzNNCwoJfinxy5NtKUd7dusNTXn7yJ40UoB8FMIwkVwNlqaiRZZAw==
@@ -7709,12 +7704,13 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.3.tgz#3aeeffc91967ef6e35c0e488ef46fb296ab76aad"
   integrity sha512-qxXIEh4pCGfHICj1mAJQ2/2XVZkjCDTcEgfoSQxc/fYivUZxTkk7L3bDBJSoNrEzXI17oUO5Dp07ktqE5KzczA==
 
-quadbin@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/quadbin/-/quadbin-0.2.0.tgz#ee962448bc009967a85c463790269af136d1cccb"
-  integrity sha512-bPgyRreIsFVwKxHRY+GFdaXatNmfQ1LzaQZj7aKEz07/gL893uWREhmRZpG6UuvlGHdTOPw/NGvqLsJica2goA==
+quadbin@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/quadbin/-/quadbin-0.4.0.tgz#25047ff18191bed50be4ca4b076000e08d10370b"
+  integrity sha512-KFfPgoL7ip6WNtexoTr6l7qM/dSKs9qMahgJSpD7XpifhrRkVUWW6f8EU3VG0K0/KYhaHNIXUsYzXTXdKD8tiA==
   dependencies:
     "@mapbox/tile-cover" "3.0.1"
+    "@math.gl/web-mercator" "^4.1.0"
 
 querystringify@^2.1.1:
   version "2.2.0"
