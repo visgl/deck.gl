@@ -322,7 +322,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
     if (colorTexture && colorTexture?.width === colorRange.length) {
       // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setSubImageData({data: colors});
+      (colorTexture as any).setTexture2DData({data: colors});
     } else {
       colorTexture?.destroy();
       // @ts-ignore TODO v9.1
