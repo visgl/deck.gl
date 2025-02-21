@@ -289,7 +289,7 @@ test('Deck#props omitted are unchanged', async t => {
     getPosition: d => d.position
   });
 
-  const widget = new FullscreenWidget({});
+  const widget = new FullscreenWidget();
 
   // Initialize with widgets and layers.
   const deck = new Deck({

@@ -8,6 +8,7 @@ import {
   CompassWidget,
   ZoomWidget,
   FullscreenWidget,
+  ScreenshotWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -77,6 +78,7 @@ new Deck({
   widgets: [
     new ZoomWidget({style: widgetTheme}),
     new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme})
+    new FullscreenWidget({style: widgetTheme}),
+    new ScreenshotWidget({style: widgetTheme})
   ]
 });
