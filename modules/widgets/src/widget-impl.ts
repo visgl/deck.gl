@@ -4,12 +4,10 @@
 
 /* global document */
 import {_deepEqual, _applyStyles, _removeStyles} from '@deck.gl/core';
-import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
+import type {Deck, Widget} from '@deck.gl/core';
 
 export type WidgetImplProps = {
   id?: string;
-  /** Widget positioning within the view. Default 'top-left'. */
-  placement?: WidgetPlacement;
   /** CSS inline style overrides. */
   style?: Partial<CSSStyleDeclaration>;
   /** Additional CSS class. */
@@ -24,7 +22,6 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
 
   static defaultProps: Required<WidgetImplProps> = {
     id: 'widget',
-    placement: 'top-left',
     style: {},
     className: ''
   };
@@ -87,9 +84,5 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
       .forEach(className => element.classList.add(className));
     _applyStyles(element, style);
     return element;
-  }
-
-  _applyStyles(el: HTMLElement, style: Partial<CSSStyleDeclaration>) {
-    _applyStyles(el, style);
   }
 }

@@ -5,10 +5,13 @@
 /* global document */
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
 import {h, render} from 'preact';
-import {IconButton} from '../components';
+import {IconButton} from './components';
+import type {WidgetPlacement} from '@deck.gl/core';
 
 /** Properties for the ScreenshotWidget */
 export type ScreenshotWidgetProps = WidgetImplProps & {
+  /** Widget positioning within the view. Default 'top-left'. */
+  placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
   /** Filename to save to */
@@ -27,6 +30,7 @@ export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
   static defaultProps: Required<ScreenshotWidgetProps> = {
     ...WidgetImpl.defaultProps,
     id: 'screenshot',
+    placement: 'top-left',
     label: 'Screenshot',
     filename: 'screenshot.png',
     imageFormat: 'image/png',
