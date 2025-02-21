@@ -22,13 +22,39 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
+  static defaultProps: Required<WidgetImplProps> = {
+    id: 'widget',
+    placement: 'top-left',
+    style: {},
+    className: ''
+  };
+
+  abstract className: Required<string>;
+
   constructor(props: Required<PropsT>) {
     this.id = props.id || 'widget';
     this.props = props;
   }
 
-  abstract onAdd({deck}: {deck: Deck<any>}): HTMLDivElement;
-  abstract onRemove(): void;
+  abstract onRenderHTML(): void;
+
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
+    this.deck = deck;
+    const {style, className} = this.props;
+    const el = this._createRootElement({
+      widgetClassName: this.className,
+      className,
+      style
+    });
+    this.element = el;
+    this.onRenderHTML();
+    return this.element;
+  }
+
+  onRemove() {
+    this.deck = undefined;
+    this.element = undefined;
+  }
 
   setProps(props: Partial<PropsT>) {
     const oldProps = this.props;
@@ -46,12 +72,13 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     }
 
     Object.assign(this.props, props);
+    this.onRenderHTML();
   }
 
   _createRootElement(props: {
     widgetClassName: string;
-    className: string;
-    style: Partial<CSSStyleDeclaration>;
+    className?: string;
+    style?: Partial<CSSStyleDeclaration>;
   }) {
     const {widgetClassName, className, style} = props;
     const element = document.createElement('div');

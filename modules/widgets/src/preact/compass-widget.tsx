@@ -51,7 +51,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: CompassWidgetProps) {
+  constructor(props: CompassWidgetProps = {}) {
     this.id = props.id ?? this.id;
     this.viewId = props.viewId ?? this.viewId;
     this.placement = props.placement ?? this.placement;

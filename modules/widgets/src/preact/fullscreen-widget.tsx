@@ -52,7 +52,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   fullscreen: boolean = false;
 
-  constructor(props: FullscreenWidgetProps) {
+  constructor(props: FullscreenWidgetProps = {}) {
     this.id = props.id ?? this.id;
     this.placement = props.placement ?? this.placement;
 

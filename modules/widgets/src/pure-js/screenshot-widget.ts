@@ -3,48 +3,47 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import type {Deck} from '@deck.gl/core';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
 import {h, render} from 'preact';
 import {IconButton} from '../components';
 
+/** Properties for the ScreenshotWidget */
 export type ScreenshotWidgetProps = WidgetImplProps & {
   /** Tooltip message */
   label?: string;
+  /** Filename to save to */
+  filename?: string;
+  /** Image format */
+  imageFormat?: 'image/png' | 'image/jpeg';
+  /** Callback, if defined user overrides the capture logic */
+  onCapture?: (widget: ScreenshotWidget) => void;
 };
 
+/**
+ * A button widget that captures a screenshot of the current canvas and downloads it as a (png) file.
+ * @note only captures canvas contents, not HTML DOM or CSS styles
+ */
 export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
   static defaultProps: Required<ScreenshotWidgetProps> = {
+    ...WidgetImpl.defaultProps,
     id: 'screenshot',
-    placement: 'top-left',
     label: 'Screenshot',
-    style: {},
-    className: ''
+    filename: 'screenshot.png',
+    imageFormat: 'image/png',
+    onCapture: undefined!
   };
 
-  constructor(props: ScreenshotWidgetProps) {
+  className = 'deck-widget-screenshot';
+
+  constructor(props: ScreenshotWidgetProps = {}) {
     super({...ScreenshotWidget.defaultProps, ...props});
   }
 
   setProps(props: Partial<ScreenshotWidgetProps>) {
     super.setProps(props);
-    this.update();
   }
 
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    const {style, className} = this.props;
-    const element = this._createRootElement({
-      widgetClassName: 'deck-widget-screenshot',
-      className,
-      style
-    });
-    this.element = element;
-    this.update();
-    this.deck = deck;
-    return element;
-  }
-
-  private update() {
+  onRenderHTML() {
     const element = this.element;
     if (!element) return;
     render(
@@ -57,19 +56,29 @@ export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
     );
   }
 
-  onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
+  handleClick() {
+    // Allow user to override the capture logic
+    if (this.props.onCapture) {
+      this.props.onCapture(this);
+      return;
+    }
+    const dataURL = this.captureScreenToDataURL(this.props.imageFormat);
+    if (dataURL) {
+      this.downloadDataURL(dataURL, this.props.filename);
+    }
   }
 
-  handleClick() {
+  /** @note only captures canvas contents, not HTML DOM or CSS styles */
+  captureScreenToDataURL(imageFormat: string): string | undefined {
     const canvas = this.deck?.getCanvas();
-    if (canvas) {
-      const dataURL = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = dataURL;
-      link.download = 'screenshot.png';
-      link.click();
-    }
+    return canvas?.toDataURL(imageFormat);
+  }
+
+  /** Download a data URL */
+  downloadDataURL(dataURL: string, filename: string): void {
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = filename;
+    link.click();
   }
 }
