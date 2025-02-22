@@ -204,8 +204,8 @@ Whether to render background for the text blocks.
 
 The border-radius of the background, a number or an array of 4 numbers.
 
-+ If a number is supplied, it is the same border radius in pixel for all corner.
-+ If an array of 4 is supplied, it is interpreted as `[top_left_corner, top_right_corner, bottom_right_corner, bottom_left_corner]` border radius in pixel.
++ If a number is supplied, it is the same border radius in pixel for all corners.
++ If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
 
 
 #### `backgroundPadding` (number[4], optional) {#backgroundpadding}
