@@ -245,7 +245,7 @@ export default [
         fontFamily: 'Arial',
         background: true,
         backgroundPadding: [10, 10],
-        backgroundBorderRadius: [10, 10, 10, 10],
+        backgroundBorderRadius: [100, 5, 15, 0],
         getBackgroundColor: [255, 255, 0, 200],
         getBorderWidth: 1,
         getText: x => `${x.ADDRESS}-${x.SPACES}`,

@@ -396,7 +396,7 @@ const TextLayerExample = {
     borderRadius: {
       type: 'number',
       min: 0,
-      max: 50,
+      max: 100,
       onUpdate: (newValue, newSettings, change) => {
         change('backgroundBorderRadius', newValue);
       }
