@@ -117,14 +117,15 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
 
   handleZoom(viewport: Viewport, nextZoom: number) {
     const viewId = this.viewId || viewport?.id || 'default-view';
-    const nextViewState = {
+    const nextViewState: Record<string, unknown> = {
       ...viewport,
       zoom: nextZoom,
-      transitionDuration: this.props.transitionDuration,
-      transitionInterpolator: new FlyToInterpolator()
     };
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+    if ('latitude' in nextViewState) {
+      nextViewState.transitionDuration = this.props.transitionDuration,
+        nextViewState.transitionInterpolator = new FlyToInterpolator()
+    }
+    this.setViewState(viewId, nextViewState);
   }
 
   handleZoomIn() {
@@ -137,6 +138,14 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     for (const viewport of Object.values(this.viewports)) {
       this.handleZoom(viewport, viewport.zoom - 1);
     }
+  }
+
+  /** 
+   * @todo - move to deck or widget manager 
+   */
+  private setViewState(viewId: string, viewState: Record<string, unknown>): void {
+    // @ts-ignore Using private method temporary until there's a public one
+    this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
   }
 
   private update() {
