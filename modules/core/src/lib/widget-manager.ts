@@ -23,6 +23,8 @@ export interface Widget<PropsT = any> {
   viewId?: string | null;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** Allows app to specify theme that applies for all widgets */
+  theme?: Partial<CSSStyleDeclaration>
 
   // Populated by core when mounted
   _element?: HTMLDivElement | null;
@@ -71,9 +73,15 @@ export type WidgetPlacement = keyof typeof PLACEMENTS;
 
 const ROOT_CONTAINER_ID = '__root';
 
+export type WidgetManagerProps = {
+  widgets?: Widget[];
+  widgetTheme?: Partial<CSSStyleDeclaration>
+}
+
 export class WidgetManager {
   deck: Deck<any>;
   parentElement?: HTMLElement | null;
+  theme: Partial<CSSStyleDeclaration> = {};
 
   /** Widgets added via the imperative API */
   private defaultWidgets: Widget[] = [];
@@ -97,9 +105,15 @@ export class WidgetManager {
   }
 
   /** Declarative API to configure widgets */
-  setProps(props: {widgets?: Widget[]}) {
+  setProps(props: WidgetManagerProps) {
     if (props.widgets && !deepEqual(props.widgets, this.widgets, 1)) {
       this._setWidgets(props.widgets);
+    }
+    if (props.widgetTheme && props.widgetTheme !== this.theme) {
+      this.theme = props.widgetTheme;
+      for (const widget of this.widgets) {
+        widget.setProps({style: this.theme})
+      }
     }
   }
 
