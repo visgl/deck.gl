@@ -3,10 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {WidgetImpl, WidgetImplProps} from '../widget-impl';
-import {h, render} from 'preact';
-import {IconButton} from '../components';
 import type {WidgetPlacement} from '@deck.gl/core';
+import {render} from 'preact';
+import {WidgetImpl, WidgetImplProps} from './widget-impl';
+import {IconButton} from './components';
 
 /** Properties for the ScreenshotWidget */
 export type ScreenshotWidgetProps = WidgetImplProps & {
