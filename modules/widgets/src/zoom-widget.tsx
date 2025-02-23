@@ -58,7 +58,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: ZoomWidgetProps) {
+  constructor(props: ZoomWidgetProps = {}) {
     this.id = props.id ?? this.id;
     this.viewId = props.viewId ?? this.viewId;
     this.placement = props.placement ?? this.placement;
