@@ -63,14 +63,14 @@ export class ResetViewWidget extends WidgetImpl<ResetViewWidgetProps> {
   }
 
   handleClick() {
-    const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState
+    const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
     this.setViewState(initialViewState);
   }
 
   setViewState(viewState: ViewState) {
     const viewId = this.props.viewId || viewState?.id || 'default-view';
     const nextViewState = {
-      ...viewState,
+      ...viewState
       // only works for geospatial?
       // transitionDuration: this.props.transitionDuration,
       // transitionInterpolator: new FlyToInterpolator()

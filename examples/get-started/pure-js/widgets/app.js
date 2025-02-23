@@ -80,7 +80,7 @@ new Deck({
     new ZoomWidget({style: widgetTheme}),
     new CompassWidget({style: widgetTheme}),
     new FullscreenWidget({style: widgetTheme}),
-    // new ScreenshotWidget({style: widgetTheme}),
+    new ScreenshotWidget({style: widgetTheme}),
     new ResetViewWidget({style: widgetTheme})
   ]
 });
