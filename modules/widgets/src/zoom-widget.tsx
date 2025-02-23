@@ -5,6 +5,7 @@
 /* global document */
 import {
   FlyToInterpolator,
+  LinearInterpolator,
   _deepEqual as deepEqual,
   _applyStyles as applyStyles,
   _removeStyles as removeStyles
@@ -36,7 +37,7 @@ export type ZoomWidgetProps = {
    */
   zoomOutLabel?: string;
   /**
-   * Zoom transition duration in ms.
+   * Zoom transition duration in ms. 0 disables the transition
    */
   transitionDuration?: number;
   /**
@@ -51,12 +52,24 @@ export type ZoomWidgetProps = {
 
 export class ZoomWidget implements Widget<ZoomWidgetProps> {
   id = 'zoom';
-  props: ZoomWidgetProps;
+  props: Required<ZoomWidgetProps>;
   placement: WidgetPlacement = 'top-left';
   viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
   deck?: Deck<any>;
   element?: HTMLDivElement;
+
+  static defaultProps: Required<ZoomWidgetProps> = {
+    id: 'zoom-widget',
+    style: {},
+    placement: 'top-left',
+    className: undefined!,
+    orientation: 'vertical',
+    transitionDuration: 200,
+    zoomInLabel: 'Zoom In',
+    zoomOutLabel: 'Zoom Out',
+    viewId: undefined!
+  };
 
   constructor(props: ZoomWidgetProps = {}) {
     this.id = props.id ?? this.id;
@@ -64,12 +77,8 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.placement = props.placement ?? this.placement;
 
     this.props = {
-      ...props,
-      orientation: props.orientation ?? 'vertical',
-      transitionDuration: props.transitionDuration ?? 200,
-      zoomInLabel: props.zoomInLabel ?? 'Zoom In',
-      zoomOutLabel: props.zoomOutLabel ?? 'Zoom Out',
-      style: props.style ?? {}
+      ...ZoomWidget.defaultProps,
+      ...props
     };
   }
 
@@ -119,11 +128,12 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     const viewId = this.viewId || viewport?.id || 'default-view';
     const nextViewState: Record<string, unknown> = {
       ...viewport,
-      zoom: nextZoom,
+      zoom: nextZoom
     };
-    if ('latitude' in nextViewState) {
-      nextViewState.transitionDuration = this.props.transitionDuration,
-        nextViewState.transitionInterpolator = new FlyToInterpolator()
+    if (this.props.transitionDuration > 0) {
+      nextViewState.transitionDuration = this.props.transitionDuration;
+      nextViewState.transitionInterpolator =
+        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
     }
     this.setViewState(viewId, nextViewState);
   }
@@ -140,8 +150,8 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     }
   }
 
-  /** 
-   * @todo - move to deck or widget manager 
+  /**
+   * @todo - move to deck or widget manager
    */
   private setViewState(viewId: string, viewState: Record<string, unknown>): void {
     // @ts-ignore Using private method temporary until there's a public one
