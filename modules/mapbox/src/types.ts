@@ -40,11 +40,11 @@ export type FreeCameraOptions = {
 };
 
 export interface IControl {
-  onAdd(map: Map): HTMLElement;
+  onAdd(map: unknown): HTMLElement;
 
-  onRemove(map: Map): void;
+  onRemove(map: unknown): void;
 
-  getDefaultPosition?: (() => string) | undefined;
+  getDefaultPosition?: (() => ControlPosition) | undefined;
 }
 
 export type ControlPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
