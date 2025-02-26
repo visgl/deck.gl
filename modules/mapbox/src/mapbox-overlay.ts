@@ -70,10 +70,12 @@ export default class MapboxOverlay implements IControl {
     }
   }
 
+  // The local Map type is for internal typecheck only. It does not necesarily satisefy mapbox/maplibre types at runtime.
+  // Do not restrict the argument type here to avoid type conflict.
   /** Called when the control is added to a map */
-  onAdd(map: Map): HTMLDivElement {
-    this._map = map;
-    return this._interleaved ? this._onAddInterleaved(map) : this._onAddOverlaid(map);
+  onAdd(map: unknown): HTMLDivElement {
+    this._map = map as Map;
+    return this._interleaved ? this._onAddInterleaved(map as Map) : this._onAddOverlaid(map as Map);
   }
 
   private _onAddOverlaid(map: Map): HTMLDivElement {
