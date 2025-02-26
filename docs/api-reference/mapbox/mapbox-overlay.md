@@ -50,7 +50,7 @@ map.once('load', () => {
 
 ```tsx
 import React from 'react';
-import {Map, useControl} from 'react-map-gl';
+import {Map, useControl} from 'react-map-gl/mapbox';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {DeckProps} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
