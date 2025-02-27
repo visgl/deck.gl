@@ -31,7 +31,7 @@ export type ThemeWidgetProps = {
   /** Styles for dark mode theme */
   darkModeTheme?: DeckWidgetTheme;
   /** Initial theme setting */
-  initialTheme?: 'auto' | 'light' | 'dark' | 'none'
+  initialTheme?: 'auto' | 'light' | 'dark' | 'none';
 };
 
 export class ThemeWidget implements Widget<ThemeWidgetProps> {
@@ -53,7 +53,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     lightModeTheme: LightGlassTheme,
     darkModeLabel: 'Dark Mode',
     darkModeTheme: DarkGlassTheme,
-    initialTheme: 'auto',
+    initialTheme: 'auto'
   };
 
   constructor(props: ThemeWidgetProps = {}) {
@@ -62,7 +62,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
 
     this.props = {
       ...ThemeWidget.defaultProps,
-      ...props,
+      ...props
     };
 
     this.darkMode = this.getInitialMode();
@@ -121,18 +121,24 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     Object.assign(this.props, props);
     this.update();
 
-    this.deck?.setProps({style: this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme});
+    this.deck?.setProps({
+      style: this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme
+    });
   }
 
   async handleClick() {
     this.darkMode = !this.darkMode;
-    console.log(`Switching to ${this.darkMode ? this.props.darkModeLabel : this.props.lightModeLabel}`);
-    this.deck?.setProps({style: this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme});
+    console.log(
+      `Switching to ${this.darkMode ? this.props.darkModeLabel : this.props.lightModeLabel}`
+    );
+    this.deck?.setProps({
+      style: this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme
+    });
     this.update();
   }
 
   getInitialMode(): boolean {
     // TODO - consider initial prop
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 }

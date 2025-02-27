@@ -24,5 +24,3 @@ export {_components};
 
 export type {WidgetImplProps} from './widget-impl';
 export {WidgetImpl as _WidgetImpl} from './widget-impl';
-
-export {ButtonWidget as _ButtonWidget} from './widgets/button-widget';

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/** 
- * A Deck Theme is a set of CSS variables that control CSS styling of the official widgets. 
+/**
+ * A Deck Theme is a set of CSS variables that control CSS styling of the official widgets.
  */
 export type DeckWidgetTheme = {
   '--button-background': string;
@@ -15,7 +15,7 @@ export type DeckWidgetTheme = {
   '--button-icon-hover': string;
   '--icon-compass-north-color': string;
   '--icon-compass-south-color': string;
-}
+};
 
 export const LightTheme = {
   '--button-background': '#fff',
