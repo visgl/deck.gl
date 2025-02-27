@@ -112,6 +112,8 @@ export class TriangleLayer extends Layer {
   draw({uniforms}) {
     const {strokeWidth} = this.props;
 
+    this.state.model.instanceCount = 1;
+    this.state.model.isInstanced = false;
     this.state.model.draw(this.context.renderPass);
   }
 
@@ -140,13 +142,20 @@ export class TriangleLayer extends Layer {
           }
         }),
         isInstanced: true,
+        vertexCount: 3,
+        instanceCount: 1,
         // shaderCache: this.context.shaderCache.
-        parameters: {
+        parameters: { 
           depthWriteEnabled: true,
           depthCompare: 'always'
         }
       }
     );
+    // work around model bug
+    model.setParameters({
+      depthWriteEnabled: true,
+      depthCompare: 'always'
+    })
     // model.setUniforms({numSegments: NUM_SEGMENTS});
     return model;
   }

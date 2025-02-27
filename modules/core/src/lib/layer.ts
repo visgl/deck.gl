@@ -1068,7 +1068,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
 
       for (const model of this.getModels()) {
-        model.setParameters(parameters);
+        model.setParameters({...model.parameters, ...parameters});
       }
 
       // Call subclass lifecycle method
