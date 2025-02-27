@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default `\
+export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME scatterplot-layer-fragment-shader
 

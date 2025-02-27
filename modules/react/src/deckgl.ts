@@ -82,7 +82,8 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
     // The Deck's animation loop is independent from React's render cycle, causing potential
     // synchronization issues. We provide this custom render function to make sure that React
     // and Deck update on the same schedule.
-    _customRender: redrawReason => {
+    // TODO(ib) - Hack to enable WebGPU
+    _customRender: props.deviceProps?.adapters?.[0]?.type === 'webgpu' ? undefined : redrawReason => {
       // Save the dirty flag for later
       thisRef.redrawReason = redrawReason;
 

@@ -19,6 +19,15 @@ TODO
 mapbox-gl.js
 mapbox-gl-dev.js
 
+
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 examples/**/yarn.lock
 showcases/**/yarn.lock
 test/**/yarn.lock
