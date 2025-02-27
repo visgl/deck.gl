@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.4] - Feb 26 2025
+
+- feat(mapbox): support Mapbox v3 Standard style slot (#9468)
+- fix(mapbox): relax MapboxOverlay type (#9467)
+- fix(widgets): ZoomWidget: Prevent crash when used with OrthographicView (#9459)
+
 #### deck.gl [v9.1.3] - Feb 20 2025
 
 - CARTO: HeatmapTileLayer fix palette updating (#9453)
