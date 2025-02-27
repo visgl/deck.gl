@@ -493,7 +493,8 @@ export default class DeckPicker {
       effects,
       pass,
       pickZ,
-      preRenderStats: {}
+      preRenderStats: {},
+      isPicking: true
     };
 
     for (const effect of effects) {

@@ -38,6 +38,22 @@ enable pydeck to run on JupyterLab and Jupyter Notebook locally:
 
 Verify that this new local copy of pydeck works by running ``make test``.
 
+Local development of @deck.gl/jupyter-widget
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To test local changes to ``@deck.gl/jupyter-widget``, open a separate terminal, rebuild
+and start a local web server as follows:
+
+.. code-block:: bash
+
+        cd deckl.gl/modules/jupyter-widget
+        yarn run build
+        # select any port you wish
+        PYDECK_DEV_PORT=8000
+        python -m http.server $PYDECK_DEV_PORT
+
+Note the ``PYDECK_DEV_PORT`` which will be referenced in the instructions below.
+
 Local development in Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -49,7 +65,7 @@ described above, then start a local Jupyter notebook:
         jupyter notebook
 
 .. CAUTION::
-   Additional steps (TODO) required to include local changes to deck.gl in a local Pydeck build.
+   Set ``export PYDECK_DEV_PORT=<port>`` before running the above command to include local changes to ``@deck.gl/jupyter-widget``.
 
 Local development in Google Colab
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,6 +79,9 @@ additional flags to trust WebSocket connections from the Colab frontend:
             --NotebookApp.allow_origin='https://colab.research.google.com' \
             --port=8888 \
             --NotebookApp.port_retries=0
+
+.. CAUTION::
+   Set ``export PYDECK_DEV_PORT=<port>`` before running the above command to include local changes to ``@deck.gl/jupyter-widget``.
 
 After the notebook starts, copy the full (localhost) URL printed to the console. In a Google
 Colab notebook, select *Connect to a local runtime* from the additional connection options

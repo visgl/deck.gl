@@ -38,7 +38,7 @@ Here's a typical example of how to switch from using pure-js widgets in the [`@d
 -import { ZoomWidget } from '@deck.gl/widgets';
 +import { ZoomWidget } from '@deck.gl/react';
 
--<DeckGL widgets={[new ZoomWidget({})]}>
+-<DeckGL widgets={[new ZoomWidget()]}>
 +<DeckGL>
 +  <ZoomWidget/>
 </DeckGL>
