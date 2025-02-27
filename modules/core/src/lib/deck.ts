@@ -168,8 +168,6 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   _typedArrayManagerProps?: TypedArrayManagerOptions;
   /** An array of Widget instances to be added to the parent element. */
   widgets?: Widget[];
-  /** A set of CSS styles that represent a theme for the widgets. @todo - it would be nice to expose light and dark themes */
-  widgetTheme?: Partial<CSSStyleDeclaration>;
 
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
@@ -249,7 +247,6 @@ const defaultProps: DeckProps = {
   _typedArrayManagerProps: {},
   _customRender: null,
   widgets: [],
-  widgetTheme: {},
 
   onDeviceInitialized: noop,
   onWebGLInitialized: noop,
