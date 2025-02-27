@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {CoordPair, H3IndexInput, cellToBoundary, cellToLatLng} from 'h3-js';
-import {lerp, NumberArray2} from '@math.gl/core';
+import {lerp} from '@math.gl/core';
 
 // normalize longitudes w.r.t center (refLng), when not provided first vertex
 export function normalizeLongitudes(vertices: CoordPair[], refLng?: number): void {
@@ -42,7 +42,7 @@ export function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-export function h3ToPolygon(hexId: H3IndexInput, coverage: number = 1): NumberArray2[] {
+export function h3ToPolygon(hexId: H3IndexInput, coverage: number = 1): number[][] {
   const vertices = cellToBoundary(hexId, true);
 
   if (coverage !== 1) {

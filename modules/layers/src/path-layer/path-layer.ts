@@ -24,7 +24,6 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
-import {NumberArray2} from '@math.gl/core';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -143,7 +142,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return false;
   }
 
-  getBounds(): [NumberArray2, NumberArray2] | null {
+  getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 

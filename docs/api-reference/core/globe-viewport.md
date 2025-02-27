@@ -64,7 +64,7 @@ Projects world coordinates to pixel coordinates on screen.
 
 Parameters:
 
-* `coordinates` ([number, number, number]) - `[longitude, latitude, altitude]`. `altitude` is in meters and default to `0` if not supplied.
+* `coordinates` (number[]) - `[longitude, latitude, altitude]`. `altitude` is in meters and default to `0` if not supplied.
 * `opts` (object)
   + `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
 

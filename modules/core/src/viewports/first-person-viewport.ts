@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  Matrix4,
-  type NumberArray3,
-  _SphericalCoordinates as SphericalCoordinates
-} from '@math.gl/core';
-import {getMeterZoom} from '@math.gl/web-mercator';
 import Viewport from '../viewports/viewport';
+import {getMeterZoom} from '@math.gl/web-mercator';
+import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from '@math.gl/core';
 
 export type FirstPersonViewportOptions = {
   /** Name of the viewport */
@@ -26,7 +22,7 @@ export type FirstPersonViewportOptions = {
   /** Latitude of the camera, in the geospatial case. */
   latitude?: number;
   /** Meter offsets of the camera from the lng-lat-elevation anchor point. Default `[0, 0, 0]`. */
-  position?: NumberArray3;
+  position?: [number, number, number];
   /** Bearing (heading) of the camera in degrees. Default `0` (north). */
   bearing?: number;
   /** Pitch (tilt) of the camera in degrees. Default `0` (horizontal). */

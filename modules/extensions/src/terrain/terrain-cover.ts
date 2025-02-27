@@ -3,14 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {Framebuffer} from '@luma.gl/core';
+
 import type {Layer, Viewport} from '@deck.gl/core';
-import type {NumberArray2, NumberArray3} from '@math.gl/core';
 
 import {createRenderTarget} from './utils';
 import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../utils/projection-utils';
 
 type TileHeader = {
-  boundingBox: [min: NumberArray2 | NumberArray3, max: NumberArray2 | NumberArray3];
+  boundingBox: [min: number[], max: number[]];
 };
 
 /**
@@ -34,7 +34,7 @@ export class TerrainCover {
   private layers: string[] = [];
   private tile: TileHeader | null;
   /** Cached version of targetLayer.getBounds() */
-  private targetBounds: [NumberArray2 | NumberArray3, NumberArray2 | NumberArray3] | null = null;
+  private targetBounds: [number[], number[]] | null = null;
   /** targetBounds in cartesian space */
   private targetBoundsCommon: Bounds | null = null;
 

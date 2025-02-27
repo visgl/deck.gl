@@ -4,7 +4,8 @@
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-import {Matrix4, type NumberArray2, type NumberArray3, clamp, vec2} from '@math.gl/core';
+import Viewport from './viewport';
+
 import {
   pixelsToWorld,
   getViewMatrix,
@@ -16,7 +17,9 @@ import {
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
-import Viewport, {Padding} from './viewport';
+import {Padding} from './viewport';
+
+import {Matrix4, clamp, vec2} from '@math.gl/core';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
@@ -42,7 +45,7 @@ export type WebMercatorViewportOptions = {
   /** Camera fovy in degrees. If provided, overrides `altitude` */
   fovy?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
-  position?: NumberArray3;
+  position?: number[];
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
@@ -233,22 +236,22 @@ export default class WebMercatorViewport extends Viewport {
     return this._subViewports;
   }
 
-  projectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
+  projectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.projectPosition(xyz);
     }
-    const [X, Y] = this.projectFlat([xyz[0], xyz[1]]);
+    const [X, Y] = this.projectFlat(xyz);
     const Z = (xyz[2] || 0) * unitsPerMeter(xyz[1]);
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: NumberArray2 | NumberArray3): NumberArray2 | NumberArray3 {
+  unprojectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.unprojectPosition(xyz);
     }
-    const [X, Y] = this.unprojectFlat([xyz[0], xyz[1]]);
+    const [X, Y] = this.unprojectFlat(xyz);
     const Z = (xyz[2] || 0) / unitsPerMeter(Y);
     return [X, Y, Z];
   }
@@ -267,7 +270,7 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords: NumberArray2, pixel: number[]): WebMercatorViewportOptions {
+  panByPosition(coords: number[], pixel: number[]): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 

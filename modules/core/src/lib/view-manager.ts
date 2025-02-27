@@ -6,13 +6,12 @@ import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
-import type {Timeline} from '@luma.gl/engine';
-import type {NumberArray3} from '@math.gl/core';
-import type {EventManager} from 'mjolnir.js';
 import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
+import type {Timeline} from '@luma.gl/engine';
+import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
 import type {default as MapView, MapViewState} from '../views/map-view';
 
@@ -21,14 +20,14 @@ type ViewStateOf<ViewT> = ViewT extends View<infer ViewStateT> ? ViewStateT : ne
 type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapView
   : ViewsT extends View[]
-  ? ViewsT[number]
-  : ViewsT;
+    ? ViewsT[number]
+    : ViewsT;
 export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStateOf<OneOfViews<ViewsT>>;
 export type ViewStateMap<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapViewState
   : ViewsT extends View
-  ? ViewStateOf<ViewsT>
-  : {[viewId: string]: AnyViewStateOf<ViewsT>};
+    ? ViewStateOf<ViewsT>
+    : {[viewId: string]: AnyViewStateOf<ViewsT>};
 
 /** This is a very lose type of all "acceptable" viewState
  * It's not good for type hinting but matches what may exist internally
@@ -196,13 +195,13 @@ export default class ViewManager<ViewsT extends View[]> {
    * @param {Object} opts.topLeft=true - Whether origin is top left
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz: NumberArray3, opts?: {topLeft?: boolean}): number[] | null {
+  unproject(xyz: number[], opts?: {topLeft?: boolean}): number[] | null {
     const viewports = this.getViewports();
     const pixel = {x: xyz[0], y: xyz[1]};
     for (let i = viewports.length - 1; i >= 0; --i) {
       const viewport = viewports[i];
       if (viewport.containsPixel(pixel)) {
-        const p = xyz.slice() as NumberArray3;
+        const p = xyz.slice();
         p[0] -= viewport.x;
         p[1] -= viewport.y;
         return viewport.unproject(p, opts);

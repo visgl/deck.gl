@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Viewport} from '@deck.gl/core';
-import {Matrix4, type NumberArray3} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
 
@@ -204,12 +204,12 @@ function getScale(z: number, tileSize: number): number {
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
-export function osmTile2lngLat(x: number, y: number, z: number): NumberArray3 {
+export function osmTile2lngLat(x: number, y: number, z: number): [number, number] {
   const scale = getScale(z, TILE_SIZE);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-  return [lng, lat, 0];
+  return [lng, lat];
 }
 
 function tile2XY(x: number, y: number, z: number, tileSize: number): [number, number] {

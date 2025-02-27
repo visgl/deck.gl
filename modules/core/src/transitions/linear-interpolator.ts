@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {lerp, type NumberArray3} from '@math.gl/core';
 import TransitionInterpolator from './transition-interpolator';
+import {lerp} from '@math.gl/core';
 
 import type Viewport from '../viewports/viewport';
 
@@ -11,7 +11,7 @@ const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
 
 type PropsWithAnchor = {
-  around?: NumberArray3;
+  around?: number[];
   aroundPosition?: number[];
   [key: string]: any;
 };
@@ -21,7 +21,7 @@ type PropsWithAnchor = {
  */
 export default class LinearInterpolator extends TransitionInterpolator {
   opts: {
-    around?: NumberArray3;
+    around?: number[];
     makeViewport?: (props: Record<string, any>) => Viewport;
   };
 
@@ -42,7 +42,7 @@ export default class LinearInterpolator extends TransitionInterpolator {
                 extract?: string[];
                 required?: string[];
               };
-          around?: NumberArray3;
+          around?: number[];
           makeViewport?: (props: Record<string, any>) => Viewport;
         } = {}
   ) {
@@ -77,7 +77,7 @@ export default class LinearInterpolator extends TransitionInterpolator {
     if (makeViewport && around) {
       const startViewport = makeViewport(startProps);
       const endViewport = makeViewport(endProps);
-      const aroundPosition = startViewport.unproject(around) as NumberArray3;
+      const aroundPosition = startViewport.unproject(around);
       result.start.around = around;
       Object.assign(result.end, {
         around: endViewport.project(aroundPosition),

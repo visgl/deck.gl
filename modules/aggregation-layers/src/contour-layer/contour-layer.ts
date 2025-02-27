@@ -15,7 +15,6 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Matrix4, type NumberArray2, type NumberArray3} from '@math.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
@@ -23,6 +22,7 @@ import {AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
+import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
@@ -140,7 +140,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: ({positions}: {positions: NumberArray3}, index: number, opts: BinOptions) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             const viewport = this.state.aggregatorViewport;
             // project to common space
             const p = viewport.projectPosition(positions);
@@ -241,10 +241,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid: NumberArray2 = [
-        (bounds[0][0] + bounds[1][0]) / 2,
-        (bounds[0][1] + bounds[1][1]) / 2
-      ];
+      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {cellSize, gridOrigin} = this.props;
       const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       cellSizeCommon[0] = unitsPerMeter[0] * cellSize;
@@ -274,8 +271,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       binIdRange = getBinIdRange({
         dataBounds: bounds,
-        getBinId: p => {
-          const positionCommon = viewport.projectFlat(p as NumberArray2);
+        getBinId: (p: number[]) => {
+          const positionCommon = viewport.projectFlat(p);
           return [
             Math.floor((positionCommon[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
             Math.floor((positionCommon[1] - cellOriginCommon[1]) / cellSizeCommon[1])

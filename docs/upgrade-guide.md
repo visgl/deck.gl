@@ -62,10 +62,6 @@ Layers need to be modified:
 
 For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
 
-### MapViewState / ViewportOptions
-
-- The `position` property changed from `number[]` to `[number, number, number]` (lng, lat, elevation).
-
 ## Upgrading to v9.0
 
 **Before you upgrade: known issues**

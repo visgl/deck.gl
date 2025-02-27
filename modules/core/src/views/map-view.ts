@@ -6,7 +6,6 @@ import View, {CommonViewState, CommonViewProps} from './view';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import MapController from '../controllers/map-controller';
 
-import type {NumberArray3} from '@math.gl/core';
 import type {NumericArray} from '../types/types';
 
 export type MapViewState = {
@@ -28,8 +27,8 @@ export type MapViewState = {
   minPitch?: number;
   /** Max pitch, default `60` */
   maxPitch?: number;
-  /** Viewport center offsets from lng, lat, and elevation in meters */
-  position?: NumberArray3;
+  /** Viewport center offsets from lng, lat in meters */
+  position?: number[];
   /** The near plane position */
   nearZ?: number;
   /** The far plane position */

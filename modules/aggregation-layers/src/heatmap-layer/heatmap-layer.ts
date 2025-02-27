@@ -28,7 +28,6 @@ import {
   DefaultProps,
   project32
 } from '@deck.gl/core';
-import type {NumberArray2} from '@math.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../common/utils/color-utils';
@@ -547,7 +546,7 @@ export default class HeatmapLayer<
     triPositionBuffer!.write(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p as NumberArray2), normalizedCommonBounds!)
+      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
     triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }

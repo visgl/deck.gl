@@ -19,7 +19,6 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import type {NumberArray2, NumberArray3} from '@math.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
@@ -312,11 +311,7 @@ export default class HexagonLayer<
         dimensions: 2,
         getBin: {
           sources: ['positions'],
-          getValue: (
-            {positions}: {positions: NumberArray2 | NumberArray3},
-            index: number,
-            opts: BinOptions
-          ) => {
+          getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             if (hexagonAggregator) {
               return hexagonAggregator(positions, radius);
             }
@@ -456,10 +451,7 @@ export default class HexagonLayer<
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid: NumberArray2 = [
-        (bounds[0][0] + bounds[1][0]) / 2,
-        (bounds[0][1] + bounds[1][1]) / 2
-      ];
+      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
       const {radius} = this.props;
       const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       radiusCommon = unitsPerMeter[0] * radius;
@@ -481,7 +473,7 @@ export default class HexagonLayer<
 
       binIdRange = getBinIdRange({
         dataBounds: bounds,
-        getBinId: (p: NumberArray2) => {
+        getBinId: (p: number[]) => {
           const positionCommon = viewport.projectFlat(p);
           positionCommon[0] -= hexOriginCommon[0];
           positionCommon[1] -= hexOriginCommon[1];
