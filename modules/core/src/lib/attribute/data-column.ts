@@ -610,8 +610,7 @@ export default class DataColumn<Options, State> {
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,
       id: this.id,
-      // TODO(ibgreen) - WebGPU requires COPY_DST and COPY_SRC to allow write / read
-      usage: (isIndexed ? Buffer.INDEX : Buffer.VERTEX) | Buffer.COPY_DST,
+      usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
       indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
       byteLength
     });
