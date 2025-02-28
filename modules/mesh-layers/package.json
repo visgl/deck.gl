@@ -39,13 +39,13 @@
   },
   "dependencies": {
     "@loaders.gl/gltf": "^4.2.0",
-    "@luma.gl/gltf": "^9.1.2",
-    "@luma.gl/shadertools": "^9.1.2"
+    "@luma.gl/gltf": "^9.1.3",
+    "@luma.gl/shadertools": "^9.1.3"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.1.0",
-    "@luma.gl/core": "^9.1.0",
-    "@luma.gl/engine": "^9.1.0"
+    "@luma.gl/core": "^9.1.3",
+    "@luma.gl/engine": "^9.1.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

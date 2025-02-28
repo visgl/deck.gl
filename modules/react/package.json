@@ -32,7 +32,6 @@
     "src"
   ],
   "sideEffects": false,
-  "scripts": {},
   "peerDependencies": {
     "@deck.gl/core": "^9.1.0",
     "@deck.gl/widgets": "^9.1.0",
