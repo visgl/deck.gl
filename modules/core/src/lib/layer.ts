@@ -1068,8 +1068,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
 
       for (const model of this.getModels()) {
-        // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
-        model.setParameters({...model.parameters, ...parameters});
+        model.setParameters(parameters);
       }
 
       // Call subclass lifecycle method

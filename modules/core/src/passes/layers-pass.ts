@@ -95,8 +95,6 @@ export default class LayersPass extends Pass {
       return this._drawLayers(renderPass, options);
     } finally {
       renderPass.end();
-      // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
-      this.device.submit();
     }
   }
 
@@ -474,11 +472,8 @@ function getGLViewport(
     dimensions.x * pixelRatio,
     height - (dimensions.y + dimensions.height) * pixelRatio,
     dimensions.width * pixelRatio,
-    dimensions.height * pixelRatio,
-    // TODO(ibgreen): WebGPU requires 6 coordinates. luma should probably autofill 0 and 1 if omitted.
-    0,
-    1
-  ] as unknown as [number, number, number, number];
+    dimensions.height * pixelRatio
+  ];
 }
 
 function mergeModuleParameters(

@@ -16,7 +16,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
+import {WebGLDevice, webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -231,7 +231,7 @@ const defaultProps: DeckProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {} as DeviceProps,
+  deviceProps: {type: 'webgl'} as DeviceProps,
   gl: null,
   canvas: null,
   layers: [],
@@ -880,10 +880,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Actually run picking */
   private _pickAndCallback() {
-    if (this.device?.type === 'webgpu') {
-      return;
-    }
-
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
@@ -943,7 +939,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    if (this.device.type === 'webgl') {
+    if (this.device instanceof WebGLDevice) {
       this.device.setParametersWebGL({
         blend: true,
         blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
@@ -954,9 +950,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onDeviceInitialized(this.device);
-    if (this.device.type === 'webgl') {
+    if (this.device instanceof WebGLDevice) {
       // Legacy callback - warn?
-      // @ts-expect-error gl is not visible on Device base class
       this.props.onWebGLInitialized(this.device.gl);
     }
 
@@ -1102,10 +1097,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.layerManager!.updateLayers();
 
     // Perform picking request if any
-    // TODO(ibgreen): Picking not yet supported on WebGPU
-    if (this.device?.type !== 'webgpu') {
-      this._pickAndCallback();
-    }
+    this._pickAndCallback();
 
     // Redraw if necessary
     this.redraw();
@@ -1178,10 +1170,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: evnet handler for pointerdown */
   _onPointerDown = (event: MjolnirPointerEvent) => {
-    // TODO(ibgreen) Picking not yet supported on WebGPU
-    if (this.device?.type === 'webgpu') {
-      return;
-    }
     const pos = event.offsetCenter;
     const pickedInfo = this._pick('pickObject', 'pickObject Time', {
       x: pos.x,
