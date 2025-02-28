@@ -29,6 +29,7 @@ type _TextBackgroundLayerProps<DataT> = {
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
 
+  borderRadius?: number | [number, number, number, number];
   padding?: [number, number] | [number, number, number, number];
 
   getPosition?: Accessor<DataT, Position>;
@@ -51,6 +52,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
+  borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
@@ -142,16 +144,21 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   draw({uniforms}) {
     const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth} =
       this.props;
-    let {padding} = this.props;
+    let {padding, borderRadius} = this.props;
 
     if (padding.length < 4) {
       padding = [padding[0], padding[1], padding[0], padding[1]];
+    }
+
+    if (!Array.isArray(borderRadius)) {
+      borderRadius = [borderRadius, borderRadius, borderRadius, borderRadius];
     }
 
     const model = this.state.model!;
     const textBackgroundProps: TextBackgroundProps = {
       billboard,
       stroked: Boolean(getLineWidth),
+      borderRadius,
       padding: padding as [number, number, number, number],
       sizeUnits: UNIT[sizeUnits],
       sizeScale,
