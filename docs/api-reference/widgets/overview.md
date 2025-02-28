@@ -175,6 +175,7 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--icon-compass-south-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#C2C2CC` |
 
 ### Icon
+
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40) |
@@ -202,3 +203,15 @@ Example:
     --button-icon-idle: blue;
 }
 ```
+
+#### Icon Recommendations
+
+If possible, make the new icon re-colorable, resizable, and replaceable with CSS.
+
+- Give the SVG a black fill for color masking
+- Convert your SVG to CSS with a convertor like [this](https://www.svgbackgrounds.com/tools/svg-to-css/).
+- Remove height and width attributes (widget sets to 100%)
+- Add css to the stylesheet like [this](https://github.com/visgl/deck.gl/blob/9752123d560ed9cf7cda62b6e83104b9a930e0df/modules/widgets/src/stylesheet.css#L132)
+- Use a unique CSS class name and variable for the icon.
+
+For consistency with the other icons in the core set, you can use [Google Symbols](https://fonts.google.com/icons).
