@@ -26,13 +26,13 @@ export function getBufferAttributeLayout(
   name: string,
   accessor: BufferAccessor
 ): BufferAttributeLayout {
+  // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
+  const type = accessor.type === 'uint8' ? 'unorm8' : accessor.type;
   return {
     attribute: name,
     // @ts-expect-error Not all combinations are valid vertex formats; it's up to DataColumn to ensure
     format:
-      (accessor.size as number) > 1
-        ? (`${accessor.type}x${accessor.size}` as VertexFormat)
-        : accessor.type,
+      (accessor.size as number) > 1 ? (`${type}x${accessor.size}` as VertexFormat) : accessor.type,
     byteOffset: accessor.offset || 0
     // Note stride is set on the top level
   };
