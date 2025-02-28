@@ -4,8 +4,7 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const defines = '#define SMOOTH_EDGE_RADIUS 0.5';
-const vs = `
+const vs = /* glsl */ `\
 ${defines}
 
 struct VertexGeometry {
@@ -25,7 +24,7 @@ struct VertexGeometry {
 );
 `;
 
-const fs = `
+const fs = /* glsl */ `\
 ${defines}
 
 struct FragmentGeometry {
@@ -37,4 +36,8 @@ float smoothedge(float edge, float x) {
 }
 `;
 
-export default {name: 'geometry', vs, fs} as const satisfies ShaderModule;
+export default {
+  name: 'geometry',
+  vs,
+  fs
+} as const satisfies ShaderModule;
