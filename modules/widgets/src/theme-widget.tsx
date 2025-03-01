@@ -137,9 +137,9 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     // this.deck?.setProps({
     //   style: themeStyle
     // });
-    const elements = document.querySelectorAll('.deck-theme')!;
+    const elements = document.querySelectorAll('.deck-theme');
     elements.forEach(root => {
-      const canvasStyle = root.style;
+      const canvasStyle = (root as HTMLElement).style;
       if (canvasStyle) {
         // Object.assign(canvasStyle, themeStyle);
         for (const [variable, value] of Object.entries(themeStyle!)) {
