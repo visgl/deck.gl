@@ -89,6 +89,7 @@ export default class LayerManager {
       // @ts-expect-error
       gl: device?.gl,
       deck,
+      // @ts-ignore
       shaderAssembler: getShaderAssembler(device.info.shadingLanguage),
       defaultShaderModules: [layerUniforms],
       renderPass: undefined!,
