@@ -10,14 +10,9 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  DarkGlassTheme,
-  LightGlassTheme
+  ThemeWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
-
-/* global window */
-const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -77,10 +72,11 @@ new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget({style: widgetTheme}),
-    new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme}),
-    new ScreenshotWidget({style: widgetTheme}),
-    new ResetViewWidget({style: widgetTheme})
+    new ZoomWidget(),
+    new CompassWidget(),
+    new FullscreenWidget(),
+    new ResetViewWidget(),
+    new ScreenshotWidget(),
+    new ThemeWidget()
   ]
 });
