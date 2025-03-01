@@ -65,7 +65,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       ...props
     };
 
-    this.darkMode = this.getInitialMode();
+    this.darkMode = false; // this.getInitialMode();
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -128,12 +128,25 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
 
   async handleClick() {
     this.darkMode = !this.darkMode;
+    const themeStyle = this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme;
     console.log(
-      `Switching to ${this.darkMode ? this.props.darkModeLabel : this.props.lightModeLabel}`
+      `Switching to ${this.darkMode ? this.props.darkModeLabel : this.props.lightModeLabel}`,
+      themeStyle
     );
-    this.deck?.setProps({
-      style: this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme
-    });
+    // Note: deck does not support updating the style property
+    // this.deck?.setProps({
+    //   style: themeStyle
+    // });
+    const root = document.documentElement; // this.deck?.getCanvas();
+    const canvasStyle = root.style;
+    if (canvasStyle) {
+      Object.assign(canvasStyle, themeStyle);
+      for (const [variable, value] of Object.entries(themeStyle!)) {
+        if (variable.startsWith('--')) {
+          canvasStyle.setProperty(variable, value);
+        }
+      }
+    }
     this.update();
   }
 

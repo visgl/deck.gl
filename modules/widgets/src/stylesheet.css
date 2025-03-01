@@ -1,3 +1,15 @@
+:root {
+  --widget-margin: 12px;
+  --button-stroke: rgba(255, 255, 255, 0.3);
+  --button-corner-radius: 8px;
+  --button-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.25);
+  --button-size: 28px;
+  --button-background: #616166;
+  --button-backdrop-filter: unset;
+  --button-inner-stroke: unset;
+  --button-icon-hover: rgb(24, 24, 26);
+}
+
 .deck-widget {
   margin: var(--widget-margin, 12px);
 }
@@ -81,7 +93,7 @@
 
 /* Icon button styles */
 .deck-widget button .deck-widget-icon {
-  background-color: var(--button-icon-idle, #616166);
+  background-color: var(--button-background, #616166);
   background-position: 50%;
   background-repeat: no-repeat;
   display: block;

@@ -740,6 +740,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     Object.assign(canvas.style, props.style);
 
+    canvas.classList.add('deck');
+
     return canvas;
   }
 
@@ -748,6 +750,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!this.canvas) {
       return;
     }
+
+    this.canvas.classList.add('deck');
 
     const {width, height} = props;
     // Set size ONLY if props are being provided, otherwise let canvas be layouted freely

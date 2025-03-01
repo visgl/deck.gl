@@ -9,13 +9,8 @@ import {
   ZoomWidget,
   FullscreenWidget,
   ScreenshotWidget,
-<<<<<<< HEAD
   ResetViewWidget,
-  DarkGlassTheme,
-  LightGlassTheme
-=======
   ThemeWidget
->>>>>>> feat(widgets): ThemeWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -80,6 +75,7 @@ new Deck({
     new ZoomWidget(),
     new CompassWidget(),
     new FullscreenWidget(),
+    new ResetViewWidget(),
     new ScreenshotWidget(),
     new ThemeWidget()
   ]
