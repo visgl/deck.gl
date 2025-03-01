@@ -201,6 +201,7 @@ export class WidgetManager {
       viewContainer.style.pointerEvents = 'none';
       viewContainer.style.position = 'absolute';
       viewContainer.style.overflow = 'hidden';
+      viewContainer.classList.add('deck-theme');
       this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }

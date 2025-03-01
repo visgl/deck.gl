@@ -137,16 +137,18 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     // this.deck?.setProps({
     //   style: themeStyle
     // });
-    const root = document.documentElement; // this.deck?.getCanvas();
-    const canvasStyle = root.style;
-    if (canvasStyle) {
-      Object.assign(canvasStyle, themeStyle);
-      for (const [variable, value] of Object.entries(themeStyle!)) {
-        if (variable.startsWith('--')) {
-          canvasStyle.setProperty(variable, value);
+    const elements = document.querySelectorAll('.deck-theme')!;
+    elements.forEach(root => {
+      const canvasStyle = root.style;
+      if (canvasStyle) {
+        // Object.assign(canvasStyle, themeStyle);
+        for (const [variable, value] of Object.entries(themeStyle!)) {
+          if (variable.startsWith('--')) {
+            canvasStyle.setProperty(variable, value);
+          }
         }
       }
-    }
+    });
     this.update();
   }
 
