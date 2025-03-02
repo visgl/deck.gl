@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {FlyToInterpolator} from '@deck.gl/core';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';

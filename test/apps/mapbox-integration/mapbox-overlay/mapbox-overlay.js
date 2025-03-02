@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global process */
 import mapboxgl from 'mapbox-gl';
 import {MapboxOverlay} from '@deck.gl/mapbox';

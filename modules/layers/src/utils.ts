@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Assume data array is sorted by <accessor>
 // Replaces the specified range with a new subarray
 // Mutates the data array

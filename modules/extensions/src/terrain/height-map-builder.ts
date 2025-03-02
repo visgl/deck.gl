@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Device, Framebuffer} from '@luma.gl/core';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';

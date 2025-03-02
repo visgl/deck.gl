@@ -1,4 +1,8 @@
-import {GPUGridLayer, GridLayer, CPUGridLayer} from '@deck.gl/aggregation-layers';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {GridLayer} from '@deck.gl/aggregation-layers';
 import * as dataSamples from 'deck.gl-test/data';
 
 const VIEW_STATE = {
@@ -48,14 +52,14 @@ export default [
     name: 'cpu-grid-layer:quantile',
     viewState: VIEW_STATE,
     layers: [
-      new CPUGridLayer(
-        Object.assign({}, PROPS, {
-          id: 'cpu-grid-layer:quantile',
-          getColorValue: points => getMean(points, 'SPACES'),
-          getElevationValue: points => getMax(points, 'SPACES'),
-          colorScaleType: 'quantile'
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        gpuAggregation: false,
+        id: 'cpu-grid-layer:quantile',
+        getColorValue: points => getMean(points, 'SPACES'),
+        getElevationValue: points => getMax(points, 'SPACES'),
+        colorScaleType: 'quantile'
+      })
     ],
     goldenImage: './test/render/golden-images/cpu-layer-quantile.png'
   },
@@ -63,128 +67,98 @@ export default [
     name: 'cpu-grid-layer:ordinal',
     viewState: VIEW_STATE,
     layers: [
-      new CPUGridLayer(
-        Object.assign({}, PROPS, {
-          id: 'cpu-grid-layer:ordinal',
-          getColorValue: points => getMean(points, 'SPACES'),
-          getElevationValue: points => getMax(points, 'SPACES'),
-          colorScaleType: 'ordinal'
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        gpuAggregation: false,
+        id: 'cpu-grid-layer:ordinal',
+        getColorValue: points => getMean(points, 'SPACES'),
+        getElevationValue: points => getMax(points, 'SPACES'),
+        colorScaleType: 'ordinal'
+      })
     ],
     goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
   },
   {
-    name: 'cpu-grid-layer:value-accessors',
+    name: 'grid-layer#cpu:value-accessors',
     viewState: VIEW_STATE,
     layers: [
-      new CPUGridLayer(
-        Object.assign({}, PROPS, {
-          id: 'cpu-grid-layer:value-accessors',
-          getColorValue: points => getMean(points, 'SPACES'),
-          getElevationValue: points => getMax(points, 'SPACES')
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        id: 'grid-layer#cpu-1',
+        gpuAggregation: false,
+        getColorValue: points => getMean(points, 'SPACES'),
+        getElevationValue: points => getMax(points, 'SPACES')
+      })
     ],
     goldenImage: GOLDEN_IMAGE
   },
   {
-    name: 'cpu-grid-layer:weight-accessors and operation',
+    name: 'grid-layer#cpu:weight-accessors and operation',
     viewState: VIEW_STATE,
     layers: [
-      new CPUGridLayer(
-        Object.assign({}, PROPS, {
-          id: 'cpu-grid-layer:weight-accessors and operation',
-          getColorWeight: x => x.SPACES,
-          colorAggregation: 'MEAN',
-          getElevationWeight: x => x.SPACES,
-          elevationAggregation: 'MAX'
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        id: 'grid-layer#cpu-2',
+        gpuAggregation: false,
+        getColorWeight: x => x.SPACES,
+        colorAggregation: 'MEAN',
+        getElevationWeight: x => x.SPACES,
+        elevationAggregation: 'MAX'
+      })
     ],
     goldenImage: GOLDEN_IMAGE
   },
   {
-    name: 'grid-layer:cpu',
+    name: 'grid-layer#gpu',
     viewState: VIEW_STATE,
     layers: [
-      new GridLayer(
-        Object.assign({}, PROPS, {
-          id: 'grid-layer:cpu',
-          getColorWeight: x => x.SPACES,
-          colorAggregation: 'MEAN',
-          getElevationWeight: x => x.SPACES,
-          elevationAggregation: 'MAX',
-          gpuAggregation: false
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        id: 'grid-layer#gpu',
+        gpuAggregation: true,
+        getColorWeight: x => x.SPACES,
+        colorAggregation: 'MEAN',
+        getElevationWeight: x => x.SPACES,
+        elevationAggregation: 'MAX',
+        gpuAggregation: true
+      })
     ],
     goldenImage: GOLDEN_IMAGE
   },
   {
-    name: 'grid-layer:gpu',
-    viewState: VIEW_STATE,
-    layers: [
-      new GridLayer(
-        Object.assign({}, PROPS, {
-          id: 'grid-layer:gpu',
-          getColorWeight: x => x.SPACES,
-          colorAggregation: 'MEAN',
-          getElevationWeight: x => x.SPACES,
-          elevationAggregation: 'MAX',
-          gpuAggregation: true
-        })
-      )
-    ],
-    goldenImage: GOLDEN_IMAGE
-  },
-  {
-    name: 'grid-layer:cpu-side',
+    name: 'grid-layer#cpu:side',
     viewState: VIEW_STATE_SIDE,
     layers: [
-      new GridLayer(
-        Object.assign({}, PROPS, {
-          id: 'grid-layer:cpu-side',
-          getColorWeight: x => x.SPACES,
-          colorAggregation: 'MEAN',
-          getElevationWeight: x => x.SPACES,
-          elevationAggregation: 'MAX',
-          gpuAggregation: false,
-          elevationScale: 5
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        id: 'grid-layer#cpu',
+        gpuAggregation: false,
+        getColorWeight: x => x.SPACES,
+        colorAggregation: 'MEAN',
+        getElevationWeight: x => x.SPACES,
+        elevationAggregation: 'MAX',
+        gpuAggregation: false,
+        elevationScale: 5
+      })
     ],
     goldenImage: GOLDEN_IMAGE_SIDE
   },
   {
-    name: 'grid-layer:gpu-side',
+    name: 'grid-layer#gpu:side',
     viewState: VIEW_STATE_SIDE,
     layers: [
-      new GridLayer(
-        Object.assign({}, PROPS, {
-          id: 'grid-layer:gpu-side',
-          getColorWeight: x => x.SPACES,
-          colorAggregation: 'MEAN',
-          getElevationWeight: x => x.SPACES,
-          elevationAggregation: 'MAX',
-          gpuAggregation: true,
-          elevationScale: 5
-        })
-      )
+      new GridLayer({
+        ...PROPS,
+        id: 'grid-layer#gpu',
+        gpuAggregation: true,
+        getColorWeight: x => x.SPACES,
+        colorAggregation: 'MEAN',
+        getElevationWeight: x => x.SPACES,
+        elevationAggregation: 'MAX',
+        gpuAggregation: true,
+        elevationScale: 5
+      })
     ],
     goldenImage: GOLDEN_IMAGE_SIDE
-  },
-  {
-    name: 'gpu-grid-lnglat',
-    viewState: VIEW_STATE,
-    layers: [
-      new GPUGridLayer(
-        Object.assign({}, PROPS, {
-          id: 'gpu-grid-lnglat',
-          gpuAggregation: true
-        })
-      )
-    ],
-    goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
   }
 ];

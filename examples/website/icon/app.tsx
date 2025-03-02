@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl//maplibre';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';

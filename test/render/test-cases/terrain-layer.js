@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';

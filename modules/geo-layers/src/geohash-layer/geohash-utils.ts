@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const BASE32_CODES = '0123456789bcdefghjkmnpqrstuvwxyz';
 const BASE32_CODES_DICT = {};
 for (let i = 0; i < BASE32_CODES.length; i++) {

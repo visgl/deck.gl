@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {equals, config} from '@math.gl/core';
@@ -13,7 +17,7 @@ const TEST_VIEWPORTS = [
   {
     width: 800,
     height: 600,
-    latitude: 90,
+    latitude: 80,
     longitude: 0,
     zoom: 1
   }

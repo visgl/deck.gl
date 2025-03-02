@@ -1,22 +1,7 @@
-// Copyright (c) 2015-2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 import project from '../project/project';
 import {Vector3, Matrix4} from '@math.gl/core';
@@ -25,29 +10,44 @@ import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
-import type {ProjectUniforms} from '../project/viewport-uniforms';
+import type {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 
-const vs = `
+const uniformBlock = /* glsl */ `
+uniform shadowUniforms {
+  bool drawShadowMap;
+  bool useShadowMap;
+  vec4 color;
+  highp int lightId;
+  float lightCount;
+  mat4 viewProjectionMatrix0;
+  mat4 viewProjectionMatrix1;
+  vec4 projectCenter0;
+  vec4 projectCenter1;
+} shadow;
+`;
+
+const vertex = /* glsl */ `
 const int max_lights = 2;
-uniform mat4 shadow_uViewProjectionMatrices[max_lights];
-uniform vec4 shadow_uProjectCenters[max_lights];
-uniform bool shadow_uDrawShadowMap;
-uniform bool shadow_uUseShadowMap;
-uniform int shadow_uLightId;
-uniform float shadow_uLightCount;
 
 out vec3 shadow_vPosition[max_lights];
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
-  if (shadow_uDrawShadowMap) {
-    return project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[shadow_uLightId], shadow_uProjectCenters[shadow_uLightId]);
+  mat4 viewProjectionMatrices[max_lights];
+  viewProjectionMatrices[0] = shadow.viewProjectionMatrix0;
+  viewProjectionMatrices[1] = shadow.viewProjectionMatrix1;
+  vec4 projectCenters[max_lights];
+  projectCenters[0] = shadow.projectCenter0;
+  projectCenters[1] = shadow.projectCenter1;
+
+  if (shadow.drawShadowMap) {
+    return project_common_position_to_clipspace(position_commonspace, viewProjectionMatrices[shadow.lightId], projectCenters[shadow.lightId]);
   }
-  if (shadow_uUseShadowMap) {
+  if (shadow.useShadowMap) {
     for (int i = 0; i < max_lights; i++) {
-      if(i < int(shadow_uLightCount)) {
-        vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[i], shadow_uProjectCenters[i]);
+      if(i < int(shadow.lightCount)) {
+        vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, viewProjectionMatrices[i], projectCenters[i]);
         shadow_vPosition[i] = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;
       }
     }
@@ -56,14 +56,15 @@ vec4 shadow_setVertexPosition(vec4 position_commonspace) {
 }
 `;
 
-const fs = `
+const vs = `
+${uniformBlock}
+${vertex}
+`;
+
+const fragment = /* glsl */ `
 const int max_lights = 2;
-uniform bool shadow_uDrawShadowMap;
-uniform bool shadow_uUseShadowMap;
 uniform sampler2D shadow_uShadowMap0;
 uniform sampler2D shadow_uShadowMap1;
-uniform vec4 shadow_uColor;
-uniform float shadow_uLightCount;
 
 in vec3 shadow_vPosition[max_lights];
 
@@ -79,22 +80,22 @@ float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
 }
 
 vec4 shadow_filterShadowColor(vec4 color) {
-  if (shadow_uDrawShadowMap) {
+  if (shadow.drawShadowMap) {
     vec4 rgbaDepth = fract(gl_FragCoord.z * bitPackShift);
     rgbaDepth -= rgbaDepth.gbaa * bitMask;
     return rgbaDepth;
   }
-  if (shadow_uUseShadowMap) {
+  if (shadow.useShadowMap) {
     float shadowAlpha = 0.0;
     shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0);
-    if(shadow_uLightCount > 1.0) {
+    if(shadow.lightCount > 1.0) {
       shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1);
     }
-    shadowAlpha *= shadow_uColor.a / shadow_uLightCount;
+    shadowAlpha *= shadow.color.a / shadow.lightCount;
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
 
     return vec4(
-      mix(color.rgb, shadow_uColor.rgb, shadowAlpha / blendedAlpha),
+      mix(color.rgb, shadow.color.rgb, shadowAlpha / blendedAlpha),
       blendedAlpha
     );
   }
@@ -102,21 +103,43 @@ vec4 shadow_filterShadowColor(vec4 color) {
 }
 `;
 
+const fs = `
+${uniformBlock}
+${fragment}
+`;
+
 const getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
 const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
 
-const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
+const DEFAULT_SHADOW_COLOR: NumberArray4 = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
-type ShadowModuleSettings = {
-  viewport: Viewport;
+export type ShadowModuleProps = {
+  project: ProjectProps;
   shadowEnabled?: boolean;
   drawToShadowMap?: boolean;
   shadowMaps?: Texture[];
-  dummyShadowMap?: Texture;
-  shadowColor?: number[];
+  dummyShadowMap: Texture;
+  shadowColor?: NumberArray4;
   shadowMatrices?: Matrix4[];
   shadowLightId?: number;
+};
+
+type ShadowModuleUniforms = {
+  drawShadowMap: boolean;
+  useShadowMap: boolean;
+  color?: NumberArray4;
+  lightId?: number;
+  lightCount?: number;
+  viewProjectionMatrix0?: NumberArray16;
+  viewProjectionMatrix1?: NumberArray16;
+  projectCenter0?: NumberArray4;
+  projectCenter1?: NumberArray4;
+};
+
+type ShadowModuleBindings = {
+  shadow_uShadowMap0: Texture;
+  shadow_uShadowMap1: Texture;
 };
 
 function screenToCommonSpace(xyz: number[], pixelUnprojectionMatrix: number[]): number[] {
@@ -183,46 +206,38 @@ function getViewProjectionMatrices({
 
 // eslint-disable-next-line complexity
 function createShadowUniforms(
-  opts: ShadowModuleSettings,
-  context: ProjectUniforms
-): Record<string, any> {
-  const {shadowEnabled = true} = opts;
-  if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
+  opts: Partial<ShadowModuleProps>
+): ShadowModuleBindings & ShadowModuleUniforms {
+  const {shadowEnabled = true, project: projectProps} = opts;
+  if (!shadowEnabled || !projectProps || !opts.shadowMatrices || !opts.shadowMatrices.length) {
     return {
-      shadow_uDrawShadowMap: false,
-      shadow_uUseShadowMap: false,
-      shadow_uShadowMap0: opts.dummyShadowMap,
-      shadow_uShadowMap1: opts.dummyShadowMap
+      drawShadowMap: false,
+      useShadowMap: false,
+      shadow_uShadowMap0: opts.dummyShadowMap!,
+      shadow_uShadowMap1: opts.dummyShadowMap!
     };
   }
-  const uniforms = {
-    shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
-    shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
-    shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
-    shadow_uLightId: opts.shadowLightId || 0,
-    shadow_uLightCount: opts.shadowMatrices.length
-  };
-
+  const projectUniforms = project.getUniforms(projectProps) as ProjectUniforms;
   const center = getMemoizedViewportCenterPosition({
-    viewport: opts.viewport,
-    center: context.center
+    viewport: projectProps.viewport,
+    center: projectUniforms.center
   });
 
   const projectCenters: NumericArray[] = [];
   const viewProjectionMatrices = getMemoizedViewProjectionMatrices({
     shadowMatrices: opts.shadowMatrices,
-    viewport: opts.viewport
+    viewport: projectProps.viewport
   }).slice();
 
   for (let i = 0; i < opts.shadowMatrices.length; i++) {
     const viewProjectionMatrix = viewProjectionMatrices[i];
     const viewProjectionMatrixCentered = viewProjectionMatrix
       .clone()
-      .translate(new Vector3(opts.viewport.center).negate());
+      .translate(new Vector3(projectProps.viewport.center).negate());
 
     if (
-      context.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
-      context.projectionMode === PROJECTION_MODE.WEB_MERCATOR
+      projectUniforms.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+      projectUniforms.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;
       projectCenters[i] = center;
@@ -234,9 +249,19 @@ function createShadowUniforms(
     }
   }
 
+  const uniforms: ShadowModuleUniforms & ShadowModuleBindings = {
+    drawShadowMap: Boolean(opts.drawToShadowMap),
+    useShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
+    color: opts.shadowColor || DEFAULT_SHADOW_COLOR,
+    lightId: opts.shadowLightId || 0,
+    lightCount: opts.shadowMatrices.length,
+    shadow_uShadowMap0: opts.dummyShadowMap!,
+    shadow_uShadowMap1: opts.dummyShadowMap!
+  };
+
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
-    uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
-    uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
+    uniforms[`viewProjectionMatrix${i}`] = viewProjectionMatrices[i];
+    uniforms[`projectCenter${i}`] = projectCenters[i];
   }
 
   for (let i = 0; i < 2; i++) {
@@ -259,14 +284,37 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
-  getUniforms: (opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {}, context = {}) => {
-    if (
-      'viewport' in opts &&
-      (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))
-    ) {
-      // @ts-expect-error if opts.viewport is defined, context should contain the project module's uniforms
-      return createShadowUniforms(opts, context);
-    }
-    return {};
+  getUniforms: createShadowUniforms,
+  uniformTypes: {
+    drawShadowMap: 'f32',
+    useShadowMap: 'f32',
+    color: 'vec4<f32>',
+    lightId: 'i32',
+    lightCount: 'f32',
+    viewProjectionMatrix0: 'mat4x4<f32>',
+    viewProjectionMatrix1: 'mat4x4<f32>',
+    projectCenter0: 'vec4<f32>',
+    projectCenter1: 'vec4<f32>'
   }
-} as ShaderModule<ShadowModuleSettings>;
+} as const satisfies ShaderModule<ShadowModuleProps, ShadowModuleUniforms, ShadowModuleBindings>;
+
+// TODO replace with type from math.gl
+type NumberArray4 = [number, number, number, number];
+type NumberArray16 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number
+];

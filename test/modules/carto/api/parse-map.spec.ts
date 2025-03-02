@@ -1,9 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-catch';
 import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {H3TileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
+import {H3TileLayer, QuadbinTileLayer, VectorTileLayer, HeatmapTileLayer} from '@deck.gl/carto';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {GridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const METADATA = {
   id: 1234,
@@ -1384,11 +1388,11 @@ test(`parseMap#visState Grid layer`, async t => {
 
   t.deepEquals(
     map.layers.map(l => l.toString()),
-    [`CPUGridLayer({id: 'ij06t3e'})`],
+    [`GridLayer({id: 'ij06t3e'})`],
     'layer names'
   );
 
-  const layer = map.layers[0] as CPUGridLayer;
+  const layer = map.layers[0] as GridLayer;
   t.equal(layer.props.id, 'ij06t3e', 'id');
   t.equal(layer.props.pickable, true, 'pickable');
   t.equal(layer.props.visible, true, 'visible');
@@ -1893,6 +1897,140 @@ test(`parseMap#visState tilesets spatial index`, async t => {
   t.equal(quadbinLayer.props.stroked, false, 'quadbinLayer - stroked');
   t.deepEqual(quadbinLayer.props.getFillColor, [246, 209, 138, 230], 'quadbinLayer - getFillColor');
   t.equal((quadbinLayer.props as any).cartoLabel, 'Layer 2', 'quadbinLayer - cartoLabel');
+  t.end();
+});
+
+test(`parseMap#visState HeatmapTileLayer`, async t => {
+  const keplerMapConfig = {
+    version: 'v1',
+    config: {
+      visState: {
+        layers: [
+          {
+            id: 'a6bbdbj',
+            type: 'heatmapTile',
+            config: {
+              color: [246, 209, 138],
+              label: 'Layer 2',
+              dataId: 'DATA_TILESET_QUADBIN_ID',
+              hidden: false,
+              columns: {},
+              isVisible: true,
+              textLabel: [
+                {
+                  size: 18,
+                  color: [255, 255, 255],
+                  outlineColor: [0, 0, 0],
+                  field: null,
+                  anchor: 'start',
+                  offset: [0, 0],
+                  alignment: 'center'
+                }
+              ],
+              visConfig: {
+                filled: true,
+                radius: 17.3,
+                opacity: 0.8,
+                stroked: false,
+                enable3d: false,
+                sizeRange: [0, 10],
+                thickness: 1,
+                wireframe: false,
+                colorRange: {
+                  name: 'Global Warming',
+                  type: 'sequential',
+                  colors: ['#ff0000', '#00ff00', '#0000ff', '#fc8d59', '#e34a33', '#b30000'],
+                  category: 'Uber'
+                },
+                heightRange: [0, 500],
+                radiusRange: [0, 50],
+                strokeColor: null,
+                strokeOpacity: 0.8,
+                elevationScale: 5,
+                colorAggregation: 'average',
+                strokeColorRange: {
+                  name: 'Global Warming',
+                  type: 'sequential',
+                  colors: ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'],
+                  category: 'Uber'
+                },
+                heightAggregation: 'average'
+              },
+              highlightColor: [252, 242, 26, 255]
+            },
+            visualChannels: {
+              sizeField: null,
+              sizeScale: 'linear',
+              colorField: null,
+              colorScale: 'quantile',
+              heightField: null,
+              heightScale: 'linear',
+              radiusField: null,
+              radiusScale: 'linear',
+              strokeColorField: null,
+              strokeColorScale: 'quantile',
+              weightField: {name: 'ride_count', type: 'integer'}
+            }
+          }
+        ],
+        filters: [],
+        splitMaps: [],
+        layerBlending: 'subtractive',
+        animationConfig: {speed: 1, currentTime: null},
+        interactionConfig: {
+          brush: {size: 0.5, enabled: false},
+          tooltip: {
+            enabled: true,
+            compareMode: false,
+            compareType: 'absolute',
+            fieldsToShow: {
+              '6184df9c-bb75-4fa3-abe5-e3b51bc1e63b': [],
+              '6da2452e-0390-4392-88ae-b8314cd68060': [],
+              'b3079c06-4ce1-4030-85a0-db79865a5e80': [
+                {name: 'type', format: null},
+                {name: 'name', format: null},
+                {name: 'location', format: null},
+                {name: 'capacity_mw', format: null},
+                {name: 'year_opened', format: null}
+              ]
+            }
+          },
+          geocoder: {enabled: false},
+          coordinate: {enabled: false}
+        }
+      }
+    }
+  };
+
+  const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
+
+  t.deepEquals(
+    map.layers.map(l => l.toString()),
+    [`HeatmapTileLayer({id: 'a6bbdbj'})`],
+    'layer names'
+  );
+
+  const heatmapTileLayer = map.layers[0] as HeatmapTileLayer;
+  t.equal(heatmapTileLayer.props.id, 'a6bbdbj', 'heatmapTileLayer - id');
+  t.equal(heatmapTileLayer.props.pickable, true, 'heatmapTileLayer - pickable');
+  t.equal(heatmapTileLayer.props.visible, true, 'heatmapTileLayer - visible');
+  t.equal(heatmapTileLayer.props.filled, true, 'heatmapTileLayer - filled');
+  t.equal(heatmapTileLayer.props.stroked, false, 'heatmapTileLayer - stroked');
+  t.equal(heatmapTileLayer.props.radiusPixels, 17.3, 'heatmapTileLayer - radiusPixels');
+  t.deepEqual(
+    heatmapTileLayer.props.colorRange,
+    [
+      [255, 0, 0, 255],
+      [0, 255, 0, 255],
+      [0, 0, 255, 255],
+      [252, 141, 89, 255],
+      [227, 74, 51, 255],
+      [179, 0, 0, 255]
+    ],
+    'heatmapTileLayer - colorRange'
+  );
+  t.equal(typeof heatmapTileLayer.props.getWeight, 'function', 'heatmapTileLayer - getWeight');
+  t.equal((heatmapTileLayer.props as any).cartoLabel, 'Layer 2', 'heatmapTileLayer - cartoLabel');
   t.end();
 });
 

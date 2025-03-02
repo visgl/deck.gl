@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {
   MapView,
@@ -44,7 +48,7 @@ test('GlobeController', async t => {
       zoom: 0
     },
     // GlobeView cannot be rotated
-    ['pan#function key', 'pinch', 'tripan']
+    ['pan#function key', 'pinch', 'multipan']
   );
 
   t.end();
@@ -71,7 +75,7 @@ test('OrthographicController', async t => {
       zoom: 1
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'tripan']
+    ['pan#function key', 'multipan']
   );
 
   t.end();
@@ -86,7 +90,7 @@ test('OrthographicController#2d zoom', async t => {
       zoom: [1, 2]
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'tripan']
+    ['pan#function key', 'multipan']
   );
 
   t.end();

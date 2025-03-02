@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
@@ -35,7 +39,7 @@ type DataPoint = [longitude: number, latitude: number, count: number];
 export default function App({
   data = DATA_URL,
   cellSize = 20,
-  gpuAggregation = false, // TODO(v9): Re-enable GPU aggregation.
+  gpuAggregation = true,
   aggregation = 'SUM',
   mapStyle = MAP_STYLE
 }: {

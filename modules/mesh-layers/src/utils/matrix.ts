@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {COORDINATE_SYSTEM, createIterable} from '@deck.gl/core';
 
 /* eslint-disable max-statements, complexity, camelcase */

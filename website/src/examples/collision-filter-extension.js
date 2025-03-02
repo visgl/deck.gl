@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/collision-filter/app';

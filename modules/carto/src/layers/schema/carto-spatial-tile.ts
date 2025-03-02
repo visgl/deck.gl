@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {readPackedTypedArray} from './fast-pbf';
 import {Indices, IndexScheme} from './spatialjson-utils';
 import {NumericProp, NumericPropKeyValueReader, PropertiesReader} from './carto-tile';

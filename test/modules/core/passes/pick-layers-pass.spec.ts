@@ -1,9 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device, getLayerUniforms} from '@deck.gl/test-utils';
 
 test('PickLayersPass#drawPickingBuffer', t => {
   const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
@@ -37,12 +41,11 @@ test('PickLayersPass#drawPickingBuffer', t => {
   });
 
   const subLayers = layer.getSubLayers();
-  const models = subLayers[0].getModels();
 
   t.ok(`PickLayersPass rendered`);
   t.equal(
-    models[0].pipeline.uniforms.lighting_uEnabled,
-    false,
+    getLayerUniforms(subLayers[0], 'lighting').enabled,
+    0,
     `PickLayersPass lighting disabled correctly`
   );
 

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-unused-vars */
 import test from 'tape-promise/tape';
 import React, {createElement, Fragment} from 'react';
@@ -27,6 +31,19 @@ const TEST_CASES = [
       layers: []
     },
     title: 'empty children'
+  },
+  {
+    input: {
+      children: null,
+      views: null,
+      layers: null
+    },
+    output: {
+      children: [],
+      views: null,
+      layers: null
+    },
+    title: 'empty layers'
   },
   {
     input: {

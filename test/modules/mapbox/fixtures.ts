@@ -1,11 +1,18 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GL} from '@luma.gl/constants';
 
 export const DEFAULT_PARAMETERS = {
-  depthMask: true,
-  depthTest: true,
+  depthWriteEnabled: true,
+  depthCompare: 'less-equal',
+  depthBias: 0,
   blend: true,
-  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-  polygonOffsetFill: true,
-  depthFunc: GL.LEQUAL,
-  blendEquation: GL.FUNC_ADD
+  blendColorSrcFactor: 'src-alpha',
+  blendColorDstFactor: 'one-minus-src-alpha',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha',
+  blendColorOperation: 'add',
+  blendAlphaOperation: 'add'
 };

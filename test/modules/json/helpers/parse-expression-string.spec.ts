@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-promise/tape';
 import parseExpressionString from '@deck.gl/json/helpers/parse-expression-string';

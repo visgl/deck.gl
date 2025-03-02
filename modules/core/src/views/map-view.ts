@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import View, {CommonViewState, CommonViewProps} from './view';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import MapController from '../controllers/map-controller';
@@ -25,6 +29,10 @@ export type MapViewState = {
   maxPitch?: number;
   /** Viewport center offsets from lng, lat in meters */
   position?: number[];
+  /** The near plane position */
+  nearZ?: number;
+  /** The far plane position */
+  farZ?: number;
 } & CommonViewState;
 
 export type MapViewProps = {
@@ -51,7 +59,7 @@ export default class MapView extends View<MapViewState, MapViewProps> {
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return WebMercatorViewport;
   }
 

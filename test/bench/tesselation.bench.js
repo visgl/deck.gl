@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as data from 'deck.gl-test/data';
 
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';

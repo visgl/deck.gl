@@ -1,27 +1,13 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 // Note: The numeric values here are matched by shader code in the
 // "project" and "project64" shader modules. Both places need to be
 // updated.
 import log from '../utils/log';
+import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
+import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
@@ -100,12 +86,27 @@ export const UNIT = {
   pixels: 2
 } as const;
 
-export const EVENTS = {
-  click: {handler: 'onClick'},
-  panstart: {handler: 'onDragStart'},
-  panmove: {handler: 'onDrag'},
-  panend: {handler: 'onDragEnd'}
+export const EVENT_HANDLERS: {[eventName: string]: string} = {
+  click: 'onClick',
+  panstart: 'onDragStart',
+  panmove: 'onDrag',
+  panend: 'onDragEnd'
 } as const;
+
+export const RECOGNIZERS = {
+  multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
+  pinch: [Pinch, {}, null, ['multipan']],
+  pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
+  dblclick: [Tap, {event: 'dblclick', taps: 2}],
+  click: [Tap, {event: 'click'}, null, ['dblclick']]
+} as const;
+export type RecognizerOptions = {
+  pinch?: Omit<PinchRecognizerOptions, 'event' | 'enable'>;
+  multipan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  pan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
+  dblclick?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  click?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+};
 
 /**
  * @deprecated Use string constants directly

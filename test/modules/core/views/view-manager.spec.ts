@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {OrbitController, OrbitView, MapController, MapView, Viewport} from 'deck.gl';

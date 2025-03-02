@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 
 export const mapboxBuildingLayer = {

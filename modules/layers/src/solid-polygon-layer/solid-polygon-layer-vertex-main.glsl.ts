@@ -1,29 +1,8 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export default `\
-
-uniform bool extruded;
-uniform bool isWireframe;
-uniform float elevationScale;
-uniform float opacity;
 
 in vec4 fillColors;
 in vec4 lineColors;
@@ -51,19 +30,19 @@ void calculatePosition(PolygonProps props) {
   vec3 pos = props.positions;
   vec3 pos64Low = props.positions64Low;
   vec3 normal = props.normal;
-  vec4 colors = isWireframe ? lineColors : fillColors;
+  vec4 colors = solidPolygon.isWireframe ? lineColors : fillColors;
 
   geometry.worldPosition = props.positions;
   geometry.pickingColor = pickingColors;
 
-  if (extruded) {
-    pos.z += props.elevations * elevationScale;
+  if (solidPolygon.extruded) {
+    pos.z += props.elevations * solidPolygon.elevationScale;
   }
   gl_Position = project_position_to_clipspace(pos, pos64Low, vec3(0.), geometry.position);
 
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  if (extruded) {
+  if (solidPolygon.extruded) {
   #ifdef IS_SIDE_VERTEX
     normal = project_offset_normal(normal);
   #else
@@ -71,9 +50,9 @@ void calculatePosition(PolygonProps props) {
   #endif
     geometry.normal = normal;
     vec3 lightColor = lighting_getLightColor(colors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
-    vColor = vec4(lightColor, colors.a * opacity);
+    vColor = vec4(lightColor, colors.a * layer.opacity);
   } else {
-    vColor = vec4(colors.rgb, colors.a * opacity);
+    vColor = vec4(colors.rgb, colors.a * layer.opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
 }

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
@@ -5,6 +9,8 @@ import {
   PopupWidget,
   ZoomWidget,
   FullscreenWidget,
+  ScreenshotWidget,
+  ResetViewWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -90,4 +96,11 @@ const deck = new Deck({
     })
   ],
   widgets: UI_WIDGETS
+  // widgets: [
+  //   new ZoomWidget({style: widgetTheme}),
+  //   new CompassWidget({style: widgetTheme}),
+  //   new FullscreenWidget({style: widgetTheme}),
+  //   new ScreenshotWidget({style: widgetTheme}),
+  //   new ResetViewWidget({style: widgetTheme})
+  // ]
 });

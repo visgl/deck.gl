@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {deserializeMatrix} from '@deck.gl/jupyter-widget/lib/utils/deserialize-matrix';
 import {jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';

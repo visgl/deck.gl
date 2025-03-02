@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Viewport from '../viewports/viewport';
 import {getMeterZoom} from '@math.gl/web-mercator';
 import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from '@math.gl/core';
@@ -17,7 +21,7 @@ export type FirstPersonViewportOptions = {
   longitude?: number;
   /** Latitude of the camera, in the geospatial case. */
   latitude?: number;
-  /** Meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`. */
+  /** Meter offsets of the camera from the lng-lat-elevation anchor point. Default `[0, 0, 0]`. */
   position?: [number, number, number];
   /** Bearing (heading) of the camera in degrees. Default `0` (north). */
   bearing?: number;

@@ -1,22 +1,7 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as React from 'react';
 import {createElement, useRef, useState, useMemo, useEffect, useImperativeHandle} from 'react';
 import {Deck} from '@deck.gl/core';
@@ -26,7 +11,7 @@ import extractJSXLayers, {DeckGLRenderCallback} from './utils/extract-jsx-layers
 import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
-import type {DeckGLContextValue} from './utils/position-children-under-views';
+import type {DeckGLContextValue} from './utils/deckgl-context';
 import type {DeckProps, View, Viewport} from '@deck.gl/core';
 
 export type ViewOrViews = View | View[] | null;
@@ -97,22 +82,26 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
     // The Deck's animation loop is independent from React's render cycle, causing potential
     // synchronization issues. We provide this custom render function to make sure that React
     // and Deck update on the same schedule.
-    _customRender: redrawReason => {
-      // Save the dirty flag for later
-      thisRef.redrawReason = redrawReason;
+    // TODO(ibgreen) - Hack to enable WebGPU as it needs to render quickly to avoid CanvasContext texture from going stale
+    _customRender:
+      props.deviceProps?.adapters?.[0]?.type === 'webgpu'
+        ? undefined
+        : redrawReason => {
+            // Save the dirty flag for later
+            thisRef.redrawReason = redrawReason;
 
-      // Viewport/view state is passed to child components as props.
-      // If they have changed, we need to trigger a React rerender to update children props.
-      const viewports = deck.getViewports();
-      if (thisRef.lastRenderedViewports !== viewports) {
-        // Viewports have changed, update children props first.
-        // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-        // so that the canvas does not get rendered before the child components update.
-        thisRef.forceUpdate();
-      } else {
-        redrawDeck(thisRef);
-      }
-    }
+            // Viewport/view state is passed to child components as props.
+            // If they have changed, we need to trigger a React rerender to update children props.
+            const viewports = deck.getViewports();
+            if (thisRef.lastRenderedViewports !== viewports) {
+              // Viewports have changed, update children props first.
+              // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
+              // so that the canvas does not get rendered before the child components update.
+              thisRef.forceUpdate();
+            } else {
+              redrawDeck(thisRef);
+            }
+          }
   });
   return deck;
 }
@@ -172,6 +161,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
     const forwardProps: DeckProps<ViewsT> = {
+      widgets: [],
       ...props,
       // Override user styling props. We will set the canvas style in render()
       style: null,

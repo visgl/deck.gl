@@ -249,7 +249,7 @@ The units of the radius, one of `'meters'`, `'common'`, and `'pixels'`. See [uni
 
 The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-#### `lineWidthScale` (boolean, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
+#### `lineWidthScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
 
 * Default: `1`
 

@@ -11,8 +11,8 @@ import {vectorTableSource} from '@deck.gl/carto';
 const data = vectorTableSource({
   accessToken: 'XXX',
   connectionName: 'carto_dw',
-  tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
-})
+  tableName: 'carto-demo-data.demo_tables.chicago_crime_sample'
+});
 ```
 
 ### Promise API
@@ -51,7 +51,7 @@ type SourceOptions = {
   apiBaseUrl?: string;
   clientId?: string;
   headers?: Record<string, string>;
-  mapsUrl?: string;
+  maxLengthURL?: number;
 };
 ```
 
@@ -64,7 +64,8 @@ type VectorTableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
   tableName: string;
-}
+  aggregationExp?: string;
+};
 ```
 
 #### vectorQuerySource
@@ -74,7 +75,8 @@ type VectorQuerySourceOptions = {
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
-}
+  aggregationExp?: string;
+};
 ```
 
 #### vectorTilesetSource
@@ -82,7 +84,7 @@ type VectorQuerySourceOptions = {
 ```ts
 type VectorTilesetSourceOptions = {
   tableName: string;
-}
+};
 ```
 
 #### h3TableSource
@@ -94,7 +96,7 @@ type H3TableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
   tableName: string;
-}
+};
 ```
 
 #### h3QuerySource
@@ -106,7 +108,7 @@ type H3QuerySourceOptions = {
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
-}
+};
 ```
 
 #### h3TilesetSource
@@ -114,7 +116,7 @@ type H3QuerySourceOptions = {
 ```ts
 type H3TilesetSourceOptions = {
   tableName: string;
-}
+};
 ```
 
 #### quadbinTableSource
@@ -126,7 +128,7 @@ type QuadbinTableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
   tableName: string;
-}
+};
 ```
 
 #### quadbinQuerySource
@@ -138,7 +140,7 @@ type QuadbinQuerySourceOptions = {
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
-}
+};
 ```
 
 #### quadbinTilesetSource
@@ -146,37 +148,37 @@ type QuadbinQuerySourceOptions = {
 ```ts
 type QuadbinTilesetSourceOptions = {
   tableName: string;
-}
+};
 ```
 
-#### rasterTilesetSource (Experimental)
+#### rasterSource
 
 ```ts
-type RasterTilesetSourceOptions = {
+type RasterSourceOptions = {
   tableName: string;
-}
+};
 ```
 
-#### boundaryTableSource (Experimental)
+Boundary sources are sources where both the tileset and the properties props need a specific schema to work. [Read more about Boundaries in the CARTO documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+
+#### boundaryTableSource
 
 ```ts
 type BoundaryTableSourceOptions = {
   tilesetTableName: string;
   columns?: string[];
-  matchingColumn?: string;
   propertiesTableName: string;
-}
+};
 ```
 
-#### boundaryQuerySource (Experimental)
+#### boundaryQuerySource
 
 ```ts
 type BoundaryQuerySourceOptions = {
   tilesetTableName: string;
-  matchingColumn?: string;
   propertiesSqlQuery: string;
   queryParameters?: QueryParameters;
-}
+};
 ```
 
 ### QueryParameters
@@ -184,6 +186,7 @@ type BoundaryQuerySourceOptions = {
 QueryParameters are used to parametrize SQL queries. The format depends on the source's provider, some examples:
 
 [PostgreSQL and Redshift](https://node-postgres.com/features/queries):
+
 ```ts
 vectorQuerySource({
   ...,
@@ -193,6 +196,7 @@ vectorQuerySource({
 ```
 
 [BigQuery positional](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+
 ```ts
 vectorQuerySource({
   ...,
@@ -201,8 +205,8 @@ vectorQuerySource({
 })
 ```
 
-
 [BigQuery named parameters](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+
 ```ts
 vectorQuerySource({
   ...,
@@ -212,6 +216,7 @@ vectorQuerySource({
 ```
 
 [Snowflake positional](https://docs.snowflake.com/en/user-guide/nodejs-driver-use.html#binding-statement-parameters) :
+
 ```ts
 vectorQuerySource({
   ...,
@@ -230,6 +235,7 @@ vectorQuerySource({
 ```
 
 [Databricks ODBC](https://github.com/markdirish/node-odbc#bindparameters-callback)
+
 ```ts
 vectorQuerySource({
   ...

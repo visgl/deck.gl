@@ -1,4 +1,8 @@
-import {GL} from '@luma.gl/constants';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {ColorParameters} from '@luma.gl/core';
 import {Layer, log} from '@deck.gl/core';
 import {
   AGGREGATION,
@@ -83,13 +87,18 @@ export function parseMap(json) {
   };
 }
 
-function createParametersProp(layerBlending, parameters: Record<string, any>) {
+function createParametersProp(layerBlending: string, parameters: ColorParameters) {
   if (layerBlending === 'additive') {
-    parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = GL.FUNC_ADD;
+    parameters.blendColorSrcFactor = parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendColorDstFactor = parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = parameters.blendAlphaOperation = 'add';
   } else if (layerBlending === 'subtractive') {
-    parameters.blendFunc = [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = [GL.FUNC_SUBTRACT, GL.FUNC_ADD];
+    parameters.blendColorSrcFactor = 'one';
+    parameters.blendColorDstFactor = 'one-minus-dst-color';
+    parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = 'subtract';
+    parameters.blendAlphaOperation = 'add';
   }
 
   return Object.keys(parameters).length ? {parameters} : {};
@@ -163,7 +172,8 @@ function createChannelProps(
     sizeField,
     sizeScale,
     strokeColorField,
-    strokeColorScale
+    strokeColorScale,
+    weightField
   } = visualChannels;
   let {heightField, heightScale} = visualChannels;
   if (type === 'hexagonId') {
@@ -237,7 +247,6 @@ function createChannelProps(
       data
     );
   }
-
   if (heightField && visConfig.enable3d) {
     result.getElevation = getSizeAccessor(
       heightField,
@@ -245,6 +254,16 @@ function createChannelProps(
       heightScale,
       visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
+      data
+    );
+  }
+
+  if (weightField) {
+    result.getWeight = getSizeAccessor(
+      weightField,
+      undefined,
+      visConfig.weightAggregation,
+      undefined,
       data
     );
   }

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Generated with
 // flow-remove-types ./node_modules/mapbox-gl/src/util/evented.js
 

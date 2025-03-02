@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
@@ -16,7 +20,6 @@ type LayerFilter = ((context: FilterContext) => boolean) | null;
 
 export default class DeckRenderer {
   device: Device;
-  gl: WebGL2RenderingContext;
   layerFilter: LayerFilter;
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
@@ -29,8 +32,6 @@ export default class DeckRenderer {
 
   constructor(device: Device) {
     this.device = device;
-    // @ts-expect-error
-    this.gl = device.gl;
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(device);

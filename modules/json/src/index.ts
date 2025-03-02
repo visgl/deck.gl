@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // @deck.gl/json: top-level exports
 
 // Generic JSON converter, usable by other wrapper modules

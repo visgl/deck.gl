@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import LayerManager from './layer-manager';
 import ViewManager from './view-manager';
@@ -32,7 +16,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {WebGLDevice} from '@luma.gl/webgl';
+import {WebGLDevice, webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -43,14 +27,14 @@ import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
-import {EVENTS} from './constants';
+import {EVENT_HANDLERS, RECOGNIZERS, RecognizerOptions} from './constants';
 
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
-import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
+import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
@@ -58,6 +42,7 @@ import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
+import {CreateDeviceProps} from '@luma.gl/core';
 
 /* global document */
 
@@ -122,21 +107,21 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * @default `document.body`
    */
   parent?: HTMLDivElement | null;
+
   /** The canvas to render into.
    * Can be either a HTMLCanvasElement or the element id.
    * Will be auto-created if not supplied.
    */
   canvas?: HTMLCanvasElement | string | null;
 
-  /** luma.gl GPU device. A device will be auto-created if not supplied. */
+  /** Use an existing luma.gl GPU device. @note If not supplied, a new device will be created using props.deviceProps */
   device?: Device | null;
-  /** A device will be auto-created if not supplied using these props. */
-  deviceProps?: DeviceProps;
 
-  /** WebGL context @deprecated Use props.device */
+  /** A new device will be created using these props, assuming that an existing device is not supplied using props.device) */
+  deviceProps?: CreateDeviceProps;
+
+  /** WebGL context @deprecated Use props.deviceProps.webgl. Also note that preserveDrawingBuffers is true by default */
   gl?: WebGL2RenderingContext | null;
-  /** Options used when creating a WebGL context. @deprecated Use props.deviceProps */
-  glOptions?: WebGLContextAttributes;
 
   /**
    * The array of Layer instances to be rendered.
@@ -167,11 +152,11 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Allow browser default touch actions.
    * @default `'none'`
    */
-  touchAction?: string;
-  /** Set Hammer.js recognizer options for gesture recognition. See documentation for details. */
-  eventRecognizerOptions?: {
-    [type: string]: RecognizerOptions;
-  };
+  touchAction?: EventManagerOptions['touchAction'];
+  /**
+   * Optional mjolnir.js recognizer options
+   */
+  eventRecognizerOptions?: RecognizerOptions;
 
   /** (Experimental) Render to a custom frame buffer other than to screen. */
   _framebuffer?: Framebuffer | null;
@@ -234,7 +219,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   drawPickingColors?: boolean;
 };
 
-const defaultProps = {
+const defaultProps: DeckProps = {
   id: '',
   width: '100%',
   height: '100%',
@@ -248,7 +233,6 @@ const defaultProps = {
   device: null,
   deviceProps: {type: 'webgl'} as DeviceProps,
   gl: null,
-  glOptions: {},
   canvas: null,
   layers: [],
   effects: [],
@@ -375,21 +359,35 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // See if we already have a device
     if (props.device) {
       this.device = props.device;
-    } else if (props.gl) {
-      if (props.gl instanceof WebGLRenderingContext) {
-        log.error('WebGL1 context not supported.')();
-      }
-      this.device = WebGLDevice.attach(props.gl);
     }
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
-    if (!deviceOrPromise) {
-      // TODO v9 should we install WebGL backend as default for now?
-      luma.registerDevices([WebGLDevice]);
 
+    // Attach a new luma.gl device to a WebGL2 context if supplied
+    if (!deviceOrPromise && props.gl) {
+      if (props.gl instanceof WebGLRenderingContext) {
+        log.error('WebGL1 context not supported.')();
+      }
+      deviceOrPromise = webgl2Adapter.attach(props.gl);
+    }
+
+    // Create a new device
+    if (!deviceOrPromise) {
+      // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
+        type: 'best-available',
+        // luma by default throws if a device is already attached
+        // asynchronous device creation could happen after finalize() is called
+        // TODO - createDevice should support AbortController?
+        _reuseDevices: true,
+        adapters: [webgl2Adapter],
         ...props.deviceProps,
-        canvas: this._createCanvas(props)
+        createCanvasContext: {
+          canvas: this._createCanvas(props),
+          useDevicePixels: this.props.useDevicePixels,
+          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
+          autoResize: false
+        }
       });
     }
 
@@ -466,7 +464,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const resolvedProps: Omit<Required<DeckProps>, 'glOptions'> & {
+    const resolvedProps: Required<DeckProps> & {
       width: number;
       height: number;
       views: View[];
@@ -672,11 +670,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.effectManager!.addDefaultEffect(effect);
   }
 
-  _addDefaultShaderModule(module: ShaderModule) {
+  _addDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager!.addDefaultShaderModule(module);
   }
 
-  _removeDefaultShaderModule(module: ShaderModule) {
+  _removeDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager?.removeDefaultShaderModule(module);
   }
 
@@ -794,8 +792,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // width,
       // height,
       gl,
-      // deviceProps,
-      // glOptions,
       // debug,
       onError,
       // onBeforeRender,
@@ -833,9 +829,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const normalizedViews: View[] = Array.isArray(views)
       ? views
       : // If null, default to a full screen map view port
-      views
-      ? [views]
-      : [new MapView({id: 'default-view'})];
+        views
+        ? [views]
+        : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
       normalizedViews[0].props.controller = this.props.controller;
@@ -943,13 +939,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    this.device.setParametersWebGL({
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthTest: true,
-      depthFunc: GL.LEQUAL
-    });
+    if (this.device instanceof WebGLDevice) {
+      this.device.setParametersWebGL({
+        blend: true,
+        blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+        polygonOffsetFill: true,
+        depthTest: true,
+        depthFunc: GL.LEQUAL
+      });
+    }
 
     this.props.onDeviceInitialized(this.device);
     if (this.device instanceof WebGLDevice) {
@@ -964,15 +962,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,
-      recognizerOptions: this.props.eventRecognizerOptions,
+      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+        // Resolve recognizer settings
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
+          RECOGNIZERS[eventName];
+        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
+        const options = {...defaultOptions, ...optionsOverride, event: eventName};
+        return {
+          recognizer: new RecognizerConstructor(options),
+          recognizeWith,
+          requestFailure
+        };
+      }),
       events: {
         pointerdown: this._onPointerDown,
         pointermove: this._onPointerMove,
         pointerleave: this._onPointerMove
       }
     });
-    for (const eventType in EVENTS) {
-      this.eventManager.on(eventType as keyof typeof EVENTS, this._onEvent);
+    for (const eventType in EVENT_HANDLERS) {
+      this.eventManager.on(eventType, this._onEvent);
     }
 
     this.viewManager = new ViewManager({
@@ -1126,10 +1135,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: event handler for click & drag */
   _onEvent = (event: MjolnirGestureEvent) => {
-    const eventOptions = EVENTS[event.type];
+    const eventHandlerProp = EVENT_HANDLERS[event.type];
     const pos = event.offsetCenter;
 
-    if (!eventOptions || !pos || !this.layerManager) {
+    if (!eventHandlerProp || !pos || !this.layerManager) {
       return;
     }
 
@@ -1146,9 +1155,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     ) as PickingInfo;
 
     const {layer} = info;
-    const layerHandler =
-      layer && (layer[eventOptions.handler] || layer.props[eventOptions.handler]);
-    const rootHandler = this.props[eventOptions.handler];
+    const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
+    const rootHandler = this.props[eventHandlerProp];
     let handled = false;
 
     if (layerHandler) {

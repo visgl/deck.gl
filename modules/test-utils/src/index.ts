@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+export {getLayerUniforms} from './utils/layer';
 export {toLowPrecision} from './utils/precision';
 export {gl, device} from './utils/setup-gl';
 

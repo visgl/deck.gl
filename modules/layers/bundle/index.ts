@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export * from '../../core/bundle/peer-dependency';
 
 // Import from package name instead of relative path

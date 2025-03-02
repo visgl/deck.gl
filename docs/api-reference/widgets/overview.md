@@ -23,27 +23,81 @@ npm install @deck.gl/core @deck.gl/widgets
 import {FullscreenWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-new FullscreenWidget({});
+new FullscreenWidget();
 ```
 
 ### Include the Standalone Bundle
 
 ```html
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
 ```
 
-```js
-new deck.FullscreenWidget({});
+## Using Widgets
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {
+  CompassWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  ScreenshotWidget,
+} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: [
+    ...
+  ],
+  widgets: [
+    new ZoomWidget(),
+    new CompassWidget(),
+    new FullscreenWidget(),
+    new ScreenshotWidget()
+  ]
+});
+```
+
+The built-in widgets support both dark and light color scheme changes and can be wired up to dynamically respond to color scheme changes like so:
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {
+  CompassWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  ScreenshotWidget,
+  DarkGlassTheme,
+  LightGlassTheme
+} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+/* global window */
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
+
+new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: [ ... ],
+  widgets: [
+    new ZoomWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme}),
+    new FullscreenWidget({style: widgetTheme}),
+    new ScreenshotWidget({style: widgetTheme})
+  ]
+});
 ```
 
 ## CSS Theming
 
-Customizing the appearance of widgets can be achieved using CSS variables. This section provides guidance on how to theme widgets at different levels of specificity.
+Customizing the appearance of widgets beyond light and dark mode can be achieved using CSS variables. This section provides guidance on how to theme widgets at different levels of specificity.
 
 ### Global Theming
 
@@ -73,6 +127,12 @@ Apply styles to a single instance of a widget using inline styles.
 
 ```js
 new FullscreenWidget({ style: {'--button-size': '48px'}})
+```
+
+To style hyphenated CSS properties (e.g. `background-color`, `border-color`, etc.), use the camelCase equivalent.
+
+```js
+new FullscreenWidget({ style: {'backgroundColor': '#fff'}})
 ```
 
 ### Custom Class Theming
@@ -115,12 +175,14 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--icon-compass-south-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#C2C2CC` |
 
 ### Icon
+
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40) |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen Exit](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40) |
 | `--icon-zoom-in` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Add](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40) |
 | `--icon-zoom-out` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Remove](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40) |
+| `--icon-camera` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Photo Camera](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:photo_camera:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=picture&icon.size=24&icon.color=%23000000) |
 
 #### Replacing Icons
 
@@ -141,3 +203,15 @@ Example:
     --button-icon-idle: blue;
 }
 ```
+
+#### Icon Recommendations
+
+If possible, make the new icon re-colorable, resizable, and replaceable with CSS.
+
+- Give the SVG a black fill for color masking
+- Convert your SVG to CSS with a convertor like [this](https://www.svgbackgrounds.com/tools/svg-to-css/).
+- Remove height and width attributes (widget sets to 100%)
+- Add css to the stylesheet like [this](https://github.com/visgl/deck.gl/blob/9752123d560ed9cf7cda62b6e83104b9a930e0df/modules/widgets/src/stylesheet.css#L132)
+- Use a unique CSS class name and variable for the icon.
+
+For consistency with the other icons in the core set, you can use [Google Symbols](https://fonts.google.com/icons).

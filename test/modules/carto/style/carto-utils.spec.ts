@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-catch';
 import {getAttrValue} from '@deck.gl/carto/style/utils';
 

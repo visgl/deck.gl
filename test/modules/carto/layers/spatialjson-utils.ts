@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {hexToBigInt} from 'quadbin';
 
 // Mimic encoding from backend for testing decoding

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {floatEquals, vecEquals} from '../../../utils/utils';
 import {getFrustumPlanes, toDoublePrecisionArray} from '@deck.gl/core/utils/math-utils';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useCallback, useState, useRef, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {MapboxOverlay} from '@deck.gl/mapbox';
@@ -7,7 +11,7 @@ import {scaleLog} from 'd3-scale';
 import {cellToLatLng} from 'h3-js';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
-import {Map, NavigationControl, useControl, Layer} from 'react-map-gl';
+import {Map, NavigationControl, useControl, Layer} from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const DATA_URL =

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Layer, Viewport} from '@deck.gl/core';
 import {getClosestObject} from '@deck.gl/core/lib/picking/query-object';
 

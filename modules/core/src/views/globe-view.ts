@@ -1,5 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import View, {CommonViewState, CommonViewProps} from './view';
 import GlobeViewport from '../viewports/globe-viewport';
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import GlobeController from '../controllers/globe-controller';
 
 export type GlobeViewState = {
@@ -13,6 +18,10 @@ export type GlobeViewState = {
   minZoom?: number;
   /** Max zoom, default `20` */
   maxZoom?: number;
+  /** The near plane position */
+  nearZ?: number;
+  /** The far plane position */
+  farZ?: number;
 } & CommonViewState;
 
 export type GlobeViewProps = {
@@ -33,8 +42,8 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
     super(props);
   }
 
-  get ViewportType() {
-    return GlobeViewport;
+  getViewportType(viewState: GlobeViewState) {
+    return viewState.zoom > 12 ? WebMercatorViewport : GlobeViewport;
   }
 
   get ControllerType() {

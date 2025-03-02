@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global window, document */
 /* eslint-disable max-statements, import/no-extraneous-dependencies */
 import {MapWrapper} from './map-wrapper';
@@ -48,6 +52,12 @@ type DeckGLProps = DeckProps & {
   container?: Element;
   /** base map library, mapboxgl or maplibregl */
   map?: any;
+  /** URL to base map style JSON, see Mapbox/Maplibre documentation */
+  mapStyle?: string;
+  /** Access token if using Mapbox */
+  mapboxApiAccessToken?: string;
+  /** Directly passed to Map class constructor */
+  mapOptions?: any;
 };
 
 /**

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import View, {CommonViewState, CommonViewProps} from './view';
 import FirstPersonViewport from '../viewports/first-person-viewport';
 import FirstPersonController from '../controllers/first-person-controller';
@@ -41,7 +45,7 @@ export default class FirstPersonView extends View<FirstPersonViewState, FirstPer
     super(props);
   }
 
-  get ViewportType() {
+  getViewportType() {
     return FirstPersonViewport;
   }
 

@@ -1,10 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `\
 #version 300 es
 #define SHADER_NAME text-background-layer-fragment-shader
 
 precision highp float;
-
-uniform bool stroked;
 
 in vec4 vFillColor;
 in vec4 vLineColor;
@@ -18,7 +20,7 @@ void main(void) {
   geometry.uv = uv;
 
   vec2 pixelPosition = uv * dimensions;
-  if (stroked) {
+  if (textBackground.stroked) {
     float distToEdge = min(
       min(pixelPosition.x, dimensions.x - pixelPosition.x),
       min(pixelPosition.y, dimensions.y - pixelPosition.y)

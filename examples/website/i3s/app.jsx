@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
@@ -25,7 +29,11 @@ export default function App({
     new Tile3DLayer({
       id: 'tile-3d-layer',
       data,
-      loader: I3SLoader
+      loader: I3SLoader,
+      loadOptions: {
+        // v9 TODO use compressed textures again
+        i3s: {useCompressedTextures: false}
+      }
     })
   ];
 

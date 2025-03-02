@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, _GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
 import {
@@ -8,6 +12,7 @@ import {
   LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
+import {LayerListWidget} from './layer-list-widget';
 
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
@@ -102,14 +107,23 @@ export const deck = new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget({style: widgetTheme, viewId: 'map'}),
-    new ZoomWidget({style: widgetTheme, orientation: 'horizontal', viewId: 'globe'}),
-    new CompassWidget({style: widgetTheme, viewId: 'map'}),
-    new CompassWidget({style: widgetTheme, viewId: 'globe'}),
+    new ZoomWidget({id: 'map-zoom', style: widgetTheme, viewId: 'map'}),
+    new ZoomWidget({
+      id: 'globe-zoom',
+      style: widgetTheme,
+      orientation: 'horizontal',
+      viewId: 'globe'
+    }),
+    new ZoomWidget({style: widgetTheme, placement: 'bottom-right'}),
+    new CompassWidget({id: 'map-compass', style: widgetTheme, viewId: 'map'}),
+    new CompassWidget({id: 'globe-compass', style: widgetTheme, viewId: 'globe'}),
+    new CompassWidget({style: widgetTheme, placement: 'bottom-right'}),
 
-    new FullscreenWidget({}), // TODO: should viewId be on all widgets for multi-view placement?
+    new FullscreenWidget(), // TODO: should viewId be on all widgets for multi-view placement?
     new FullscreenWidget({id: 'themed', style: widgetTheme}),
-    new FullscreenWidget({id: 'purple', className: 'purple', placement: 'top-right'})
+    new FullscreenWidget({id: 'purple', className: 'purple', placement: 'top-right'}),
+    new LayerListWidget({style: widgetTheme}),
+    new LayerListWidget({style: widgetTheme, viewId: 'globe'})
   ]
 });
 

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LayerManager, DeckRenderer} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
 

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {QuadkeyLayer} from '@deck.gl/geo-layers';
 import {quadkeys} from 'deck.gl-test/data';
 

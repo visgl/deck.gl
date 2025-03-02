@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable max-statements */
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {getTypedArrayFromDataType, getDataTypeFromTypedArray} from '@luma.gl/core';
 import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';

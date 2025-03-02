@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* global setTimeout clearTimeout */
 import {
@@ -41,15 +25,22 @@ import {
   log,
   Position,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
-import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
+import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
+import {defaultColorRange, colorRangeToFlatArray} from '../common/utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
 import maxFs from './max-fs.glsl';
+import {
+  MaxWeightProps,
+  maxWeightUniforms,
+  WeightProps,
+  weightUniforms
+} from './heatmap-layer-uniforms';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const TEXTURE_PROPS: TextureProps = {
@@ -200,6 +191,15 @@ export default class HeatmapLayer<
     visibleWorldBounds: number[];
     viewportCorners: number[][];
   };
+
+  getShaders(shaders: any) {
+    let modules = [project32];
+    if (shaders.modules) {
+      modules = [...modules, ...shaders.modules];
+    }
+
+    return super.getShaders({...shaders, modules});
+  }
 
   initializeState() {
     super.initializeAggregationLayer(DIMENSIONS);
@@ -391,7 +391,7 @@ export default class HeatmapLayer<
     }
   }
 
-  _createWeightsTransform(shaders: {vs: string; fs?: string}) {
+  _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     const attributeManager = this.getAttributeManager()!;
@@ -411,7 +411,8 @@ export default class HeatmapLayer<
         blendAlphaDstFactor: 'one'
       },
       topology: 'point-list',
-      ...shaders
+      ...shaders,
+      modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
     this.setState({weightsTransform});
@@ -428,12 +429,14 @@ export default class HeatmapLayer<
     });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders({vs: maxVs, fs: maxFs});
+    const maxWeightsTransformShaders = this.getShaders({
+      vs: maxVs,
+      fs: maxFs,
+      modules: [maxWeightUniforms]
+    });
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
-      bindings: {inTexture: weightsTexture},
-      uniforms: {textureSize},
-      targetTexture: maxWeightsTexture,
+      targetTexture: maxWeightsTexture!,
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
       topology: 'point-list',
@@ -446,6 +449,11 @@ export default class HeatmapLayer<
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one'
       }
+    });
+
+    const maxWeightProps: MaxWeightProps = {inTexture: weightsTexture!, textureSize};
+    maxWeightTransform.model.shaderInputs.setProps({
+      maxWeight: maxWeightProps
     });
 
     this.setState({
@@ -550,9 +558,10 @@ export default class HeatmapLayer<
 
     if (colorTexture && colorTexture?.width === colorRange.length) {
       // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setSubImageData({data: colors});
+      (colorTexture as any).setTexture2DData({data: colors});
     } else {
       colorTexture?.destroy();
+      // @ts-expect-error TODO(ib) - texture API change
       colorTexture = this.context.device.createTexture({
         ...TEXTURE_PROPS,
         data: colors,
@@ -565,7 +574,7 @@ export default class HeatmapLayer<
 
   _updateWeightmap() {
     const {radiusPixels, colorDomain, aggregation} = this.props;
-    const {worldBounds, textureSize, weightsScale} = this.state;
+    const {worldBounds, textureSize, weightsScale, weightsTexture} = this.state;
     const weightsTransform = this.state.weightsTransform!;
     this.state.isWeightMapDirty = false;
 
@@ -588,13 +597,22 @@ export default class HeatmapLayer<
     const attributeManager = this.getAttributeManager()!;
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
-    const positions = attributes.positions.buffer;
-    const uniforms = {radiusPixels, commonBounds, textureWidth: textureSize, weightsScale};
-    const weights = attributes.weights.buffer;
-    weightsTransform.model.setAttributes({positions, weights});
+    this._setModelAttributes(weightsTransform.model, attributes);
     weightsTransform.model.setVertexCount(this.getNumInstances());
-    weightsTransform.model.setUniforms(uniforms);
-    weightsTransform.model.updateModuleSettings(moduleSettings);
+
+    const weightProps: WeightProps = {
+      radiusPixels,
+      commonBounds,
+      textureWidth: textureSize,
+      weightsScale,
+      weightsTexture: weightsTexture!
+    };
+    const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleSettings;
+    const {modelMatrix} = this.props;
+    weightsTransform.model.shaderInputs.setProps({
+      project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin},
+      weight: weightProps
+    });
     weightsTransform.run({
       parameters: {viewport: [0, 0, textureSize, textureSize]},
       clearColor: [0, 0, 0, 0]
@@ -625,7 +643,10 @@ export default class HeatmapLayer<
   // input: worldBounds: [minLong, minLat, maxLong, maxLat]
   // input: opts.useLayerCoordinateSystem : layers coordiante system is used
   // optput: commonBounds: [minX, minY, maxX, maxY] scaled to fit the current texture
-  _worldToCommonBounds(worldBounds, opts: {useLayerCoordinateSystem?: boolean} = {}) {
+  _worldToCommonBounds(
+    worldBounds,
+    opts: {useLayerCoordinateSystem?: boolean} = {}
+  ): [number, number, number, number] {
     const {useLayerCoordinateSystem = false} = opts;
     const [minLong, minLat, maxLong, maxLat] = worldBounds;
     const {viewport} = this.context;

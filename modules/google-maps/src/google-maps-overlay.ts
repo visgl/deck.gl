@@ -1,5 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global google */
 import {GL, GLParameters} from '@luma.gl/constants';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {
   createDeckInstance,
   destroyDeckInstance,
@@ -32,7 +37,7 @@ export type GoogleMapsOverlayProps = Omit<
   | 'width'
   | 'height'
   | 'gl'
-  | 'glOptions'
+  | 'deviceProps'
   | 'parent'
   | 'canvas'
   | '_customRender'
@@ -257,14 +262,14 @@ export default class GoogleMapsOverlay {
 
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
-      const _framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
-
-      // @ts-expect-error
-      deck.setProps({_framebuffer});
+      if (device instanceof WebGLDevice) {
+        const _framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+        deck.setProps({_framebuffer});
+      }
 
       // With external gl context, animation loop doesn't resize webgl-canvas and thus fails to
       // calculate corrext pixel ratio. Force this manually.
-      device.getCanvasContext().resize();
+      device.getDefaultCanvasContext().resize();
 
       // Camera changed, will trigger a map repaint right after this
       // Clear any change flag triggered by setting viewState so that deck does not request
@@ -273,17 +278,19 @@ export default class GoogleMapsOverlay {
 
       // Workaround for bug in Google maps where viewport state is wrong
       // TODO remove once fixed
-      device.setParametersWebGL({
-        viewport: [0, 0, gl.canvas.width, gl.canvas.height],
-        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
-        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
-      });
-
-      device.withParametersWebGL(GL_STATE, () => {
-        deck._drawLayers('google-vector', {
-          clearCanvas: false
+      if (device instanceof WebGLDevice) {
+        device.setParametersWebGL({
+          viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+          scissor: [0, 0, gl.canvas.width, gl.canvas.height],
+          stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
-      });
+
+        device.withParametersWebGL(GL_STATE, () => {
+          deck._drawLayers('google-vector', {
+            clearCanvas: false
+          });
+        });
+      }
     }
   }
 

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {MaskExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';

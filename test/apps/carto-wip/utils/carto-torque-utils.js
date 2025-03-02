@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import assert from 'assert';
 
 // Parses a torque tile into a linear array of points which is easier for deck.gl to deal with

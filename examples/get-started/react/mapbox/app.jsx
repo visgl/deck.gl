@@ -1,6 +1,10 @@
-import React from 'react';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map, NavigationControl, useControl} from 'react-map-gl';
+import {Map, NavigationControl, Popup, useControl} from 'react-map-gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -28,12 +32,7 @@ function DeckGLOverlay(props) {
 }
 
 function Root() {
-  const onClick = info => {
-    if (info.object) {
-      // eslint-disable-next-line
-      alert(`${info.object.properties.name} (${info.object.properties.abbrev})`);
-    }
-  };
+  const [selected, setSelected] = useState(null);
 
   const layers = [
     new GeoJsonLayer({
@@ -48,7 +47,7 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick
+      onClick: info => setSelected(info.object)
       // beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
     }),
     new ArcLayer({
@@ -70,6 +69,17 @@ function Root() {
       mapStyle={MAP_STYLE}
       mapboxAccessToken={MAPBOX_TOKEN}
     >
+      {selected && (
+        <Popup
+          key={selected.properties.name}
+          anchor="bottom"
+          style={{zIndex: 10}} /* position above deck.gl canvas */
+          longitude={selected.geometry.coordinates[0]}
+          latitude={selected.geometry.coordinates[1]}
+        >
+          {selected.properties.name} ({selected.properties.abbrev})
+        </Popup>
+      )}
       <DeckGLOverlay layers={layers} /* interleaved*/ />
       <NavigationControl position="top-left" />
     </Map>

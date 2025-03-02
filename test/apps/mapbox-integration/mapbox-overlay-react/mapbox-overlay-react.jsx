@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -93,7 +97,7 @@ function App() {
         interleaved
         layers={layers}
         views={[mapboxView, widgetView]}
-        glOptions={{stencil: true}}
+        deviceProps={{type: 'webgl', webgl: {stencil: true}}}
         layerFilter={layerFilter}
       />
     </Map>

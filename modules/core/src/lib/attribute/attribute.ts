@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable complexity */
 import DataColumn, {
   DataColumnOptions,
@@ -231,8 +235,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           const endOffset = Number.isFinite(endRow)
             ? this.getVertexOffset(endRow)
             : noAlloc || !Number.isFinite(numInstances)
-            ? this.value.length
-            : numInstances * this.size;
+              ? this.value.length
+              : numInstances * this.size;
 
           super.updateSubBuffer({startOffset, endOffset});
         }

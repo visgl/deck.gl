@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Polyfill for loaders
 import '@loaders.gl/polyfills';
 
@@ -39,3 +43,4 @@ _global.cancelAnimationFrame = t => clearTimeout(t);
 // device.canvasContext.canvas = canvas;
 
 import './modules/imports-spec';
+import './modules/layers/core-layers.spec';

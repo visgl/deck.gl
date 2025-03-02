@@ -1,28 +1,13 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
+import {pathUniforms, PathProps} from './path-layer-uniforms';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -150,7 +135,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [project32, picking, pathUniforms]}); // 'project' module added by default.
   }
 
   get wrapLongitude(): boolean {
@@ -317,8 +302,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
 
     const model = this.state.model!;
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const pathProps: PathProps = {
       jointType: Number(jointRounded),
       capType: Number(capRounded),
       billboard,
@@ -327,7 +311,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       miterLimit,
       widthMinPixels,
       widthMaxPixels
-    });
+    };
+    model.shaderInputs.setProps({path: pathProps});
     model.draw(this.context.renderPass);
   }
 

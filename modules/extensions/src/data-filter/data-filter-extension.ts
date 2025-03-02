@@ -1,29 +1,20 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import type {Framebuffer} from '@luma.gl/core';
+import type {Buffer, Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
-import {Defines, shaderModule, shaderModule64} from './shader-module';
+import {
+  CategoryBitMask,
+  DataFilterModuleProps,
+  Defines,
+  dataFilter,
+  dataFilter64
+} from './shader-module';
 import * as aggregator from './aggregator';
+import {NumberArray4} from '@math.gl/core';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -94,7 +85,7 @@ export type DataFilterExtensionProps<DataT = any> = {
   }) => void;
 };
 
-type DataFilterExtensionOptions = {
+export type DataFilterExtensionOptions = {
   /**
    * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Set to `0` to disable category filtering.
    * @default 0
@@ -124,6 +115,12 @@ const defaultOptions: Required<DataFilterExtensionOptions> = {
   countItems: false
 };
 
+const CATEGORY_TYPE_FROM_SIZE = {
+  1: 'uint' as const,
+  2: 'uvec2' as const,
+  3: 'uvec3' as const,
+  4: 'uvec4' as const
+};
 const DATA_TYPE_FROM_SIZE = {
   1: 'float' as const,
   2: 'vec2' as const,
@@ -146,7 +143,7 @@ export default class DataFilterExtension extends LayerExtension<
     const {categorySize, filterSize, fp64} = extension.opts;
     const defines: Defines = {};
     if (categorySize) {
-      defines.DATACATEGORY_TYPE = DATA_TYPE_FROM_SIZE[categorySize];
+      defines.DATACATEGORY_TYPE = CATEGORY_TYPE_FROM_SIZE[categorySize];
       defines.DATACATEGORY_CHANNELS = categorySize;
     }
     if (filterSize) {
@@ -154,7 +151,10 @@ export default class DataFilterExtension extends LayerExtension<
       defines.DATAFILTER_DOUBLE = Boolean(fp64);
     }
 
-    return {modules: [fp64 ? shaderModule64 : shaderModule], defines};
+    const module = fp64 ? dataFilter64 : dataFilter;
+    module.uniformTypes = module.uniformTypesFromOptions(extension.opts);
+
+    return {modules: [module], defines};
   }
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
@@ -179,6 +179,7 @@ export default class DataFilterExtension extends LayerExtension<
             size: categorySize,
             stepMode: 'dynamic',
             accessor: 'getFilterCategory',
+            type: 'uint32',
             transform:
               categorySize === 1
                 ? d => extension._getCategoryKey.call(this, d, 0)
@@ -195,7 +196,7 @@ export default class DataFilterExtension extends LayerExtension<
       // The vertex shader checks if a vertex has the same "index" as the previous vertex
       // so that we only write one count cross multiple vertices of the same object
       attributeManager.add({
-        filterIndices: {
+        filterVertexIndices: {
           size: useFloatTarget ? 1 : 2,
           vertexOffset: 1,
           type: 'unorm8',
@@ -217,6 +218,7 @@ export default class DataFilterExtension extends LayerExtension<
       const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
         device,
+        attributeManager.getBufferLayouts({isInstanced: false}),
         extension.getShaders.call(this, extension),
         useFloatTarget
       );
@@ -250,7 +252,7 @@ export default class DataFilterExtension extends LayerExtension<
         attributeManager.attributes.filterCategoryValues.needsUpdate() ||
         !deepEqual(props.filterCategories, oldProps.filterCategories, 2);
       if (categoryBitMaskNeedsUpdate) {
-        this.setState({categoryBitMaskNeedsUpdate});
+        this.setState({categoryBitMask: null});
       }
 
       // Need to recreate category map if categorySize has changed
@@ -270,40 +272,66 @@ export default class DataFilterExtension extends LayerExtension<
     const filterFBO = this.state.filterFBO as Framebuffer;
     const filterModel = this.state.filterModel as Model;
     const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
-    const categoryBitMaskNeedsUpdate = this.state.categoryBitMaskNeedsUpdate as boolean;
 
-    const {onFilteredItemsChange} = this.props;
-
-    if (categoryBitMaskNeedsUpdate) {
+    if (!this.state.categoryBitMask) {
       extension._updateCategoryBitMask.call(this, params, extension);
     }
+
+    const {
+      onFilteredItemsChange,
+      extensions,
+      filterEnabled,
+      filterRange,
+      filterSoftRange,
+      filterTransformSize,
+      filterTransformColor,
+      filterCategories
+    } = this.props;
+    const dataFilterProps: DataFilterModuleProps = {
+      extensions,
+      filterEnabled,
+      filterRange,
+      filterSoftRange,
+      filterTransformSize,
+      filterTransformColor,
+      filterCategories
+    };
+    if (this.state.categoryBitMask) {
+      dataFilterProps.categoryBitMask = this.state.categoryBitMask as CategoryBitMask;
+    }
+    this.setShaderModuleProps({dataFilter: dataFilterProps});
+
+    /* eslint-disable-next-line camelcase */
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
+      const attributeManager = this.getAttributeManager()!;
       const {
-        attributes: {filterValues, filterCategoryValues, filterIndices}
-      } = this.getAttributeManager()!;
+        attributes: {filterValues, filterCategoryValues, filterVertexIndices}
+      } = attributeManager;
       filterModel.setVertexCount(this.getNumInstances());
 
-      this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
-
-      filterModel.updateModuleSettings(params.moduleParameters);
-      // @ts-expect-error filterValue and filterIndices should always have buffer value
-      filterModel.setAttributes({
+      // @ts-expect-error filterValue and filterVertexIndices should always have buffer value
+      const attributes: Record<string, Buffer> = {
         ...filterValues?.getValue(),
         ...filterCategoryValues?.getValue(),
-        ...filterIndices?.getValue()
+        ...filterVertexIndices?.getValue()
+      };
+      filterModel.setAttributes(attributes);
+      filterModel.shaderInputs.setProps({
+        dataFilter: dataFilterProps
       });
-      filterModel.setUniforms(params.uniforms);
-      filterModel.device.withParametersWebGL(
-        {
-          framebuffer: filterFBO,
-          // ts-ignore 'readonly' cannot be assigned to the mutable type '[GLBlendEquation, GLBlendEquation]'
-          ...(aggregator.parameters as any),
-          viewport: [0, 0, filterFBO.width, filterFBO.height]
-        },
-        () => {
-          filterModel.draw(this.context.renderPass);
-        }
-      );
+
+      const viewport = [0, 0, filterFBO.width, filterFBO.height] as NumberArray4;
+
+      const renderPass = filterModel.device.beginRenderPass({
+        id: 'data-filter-aggregation',
+        framebuffer: filterFBO,
+        parameters: {viewport},
+        clearColor: [0, 0, 0, 0]
+      });
+      filterModel.setParameters(aggregator.parameters);
+      filterModel.draw(renderPass);
+      renderPass.end();
+
       const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
       let count = 0;
       for (let i = 0; i < color.length; i++) {
@@ -335,8 +363,9 @@ export default class DataFilterExtension extends LayerExtension<
     extension: this
   ): void {
     const {categorySize} = extension.opts;
+    if (!categorySize) return;
     const {filterCategories} = this.props;
-    const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
+    const categoryBitMask: CategoryBitMask = new Uint32Array([0, 0, 0, 0]);
     const categoryFilters = (
       categorySize === 1 ? [filterCategories] : filterCategories
     ) as FilterCategory[][];
@@ -353,9 +382,7 @@ export default class DataFilterExtension extends LayerExtension<
         }
       }
     }
-    /* eslint-disable-next-line camelcase */
-    params.uniforms.filter_categoryBitMask = categoryBitMask;
-    this.state.categoryBitMaskNeedsUpdate = false;
+    this.state.categoryBitMask = categoryBitMask;
   }
 
   /**

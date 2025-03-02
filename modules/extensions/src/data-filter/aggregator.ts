@@ -1,6 +1,9 @@
-import {Device, DeviceFeature, Framebuffer} from '@luma.gl/core';
-import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Device, DeviceFeature, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
+import {Model, ModelProps} from '@luma.gl/engine';
 
 const AGGREGATE_VS = `\
 #version 300 es
@@ -84,7 +87,12 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
 }
 
 // Increments the counter based on dataFilter_value
-export function getModel(device: Device, shaderOptions: any, useFloatTarget: boolean): Model {
+export function getModel(
+  device: Device,
+  bufferLayout: ModelProps['bufferLayout'],
+  shaderOptions: any,
+  useFloatTarget: boolean
+): Model {
   shaderOptions.defines.NON_INSTANCED_MODEL = 1;
   if (useFloatTarget) {
     shaderOptions.defines.FLOAT_TARGET = 1;
@@ -94,16 +102,22 @@ export function getModel(device: Device, shaderOptions: any, useFloatTarget: boo
     id: 'data-filter-aggregation-model',
     vertexCount: 1,
     isInstanced: false,
-    drawMode: GL.POINTS,
+    topology: 'point-list',
+    disableWarnings: true,
     vs: AGGREGATE_VS,
     fs: AGGREGATE_FS,
+    bufferLayout,
     ...shaderOptions
   });
 }
 
-export const parameters = {
+export const parameters: RenderPipelineParameters = {
   blend: true,
-  blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-  blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
-  depthTest: false
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one',
+  blendColorOperation: 'add',
+  blendAlphaOperation: 'add',
+  depthCompare: 'never'
 } as const;
