@@ -15,7 +15,7 @@ const UNIT_GLSL_CONSTANTS = Object.keys(UNIT)
   .map(key => `const int UNIT_${key.toUpperCase()} = ${UNIT[key]};`)
   .join('');
 
-export default `\
+export default /* glsl */ `\
 ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
