@@ -315,7 +315,9 @@
           "api-reference/widgets/overview",
           "api-reference/widgets/zoom-widget",
           "api-reference/widgets/compass-widget",
-          "api-reference/widgets/fullscreen-widget"
+          "api-reference/widgets/fullscreen-widget",
+          "api-reference/widgets/reset-view-widget",
+          "api-reference/widgets/loading-widget"
         ]
       }
     ]
