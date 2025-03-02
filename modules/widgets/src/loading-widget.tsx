@@ -46,17 +46,19 @@ export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
     if (!element) return;
     render(
       // TODO(ibgreen) - this should not be a button, but styling is so nested that it is easier to reuse this component.
-      this.loading && <IconButton
-        className="deck-widget-spinner-icon"
-        label={this.props.label}
-        onClick={this.handleClick.bind(this)}
-      />,
+      this.loading && (
+        <IconButton
+          className="deck-widget-spinner-icon"
+          label={this.props.label}
+          onClick={this.handleClick.bind(this)}
+        />
+      ),
       element
     );
   }
 
   onRedraw({layers}: {layers: Layer[]}): void {
-    const loading = layers.some(layer => !layer.isLoaded);
+    const loading = !layers.some(layer => !layer.isLoaded);
     if (loading !== this.loading) {
       this.loading = loading;
       this.onRenderHTML();
@@ -64,6 +66,5 @@ export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
   }
 
   // TODO(ibgreen) - this should not be a button, see above.
-  handleClick() {
-  }
+  handleClick() {}
 }
