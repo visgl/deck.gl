@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck} from '@deck.gl/core';
+import {Deck, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
@@ -34,29 +34,9 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const UI_WIDGETS = [
-  new ZoomWidget({style: widgetTheme}),
-  new CompassWidget({style: widgetTheme}),
-  new FullscreenWidget({style: widgetTheme})
-];
-
-function updatePopup(object) {
-  const widgets = [...UI_WIDGETS];
-  if (object) {
-    const position = object.geometry.coordinates;
-    const text = `${object.properties.name} (${object.properties.abbrev})`;
-    const style = {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'};
-    widgets.push(new PopupWidget({position, text, style}));
-  }
-
-  deck.setProps({widgets});
-  return true;
-}
-
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
-  onClick: () => updatePopup(),
   layers: [
     new GeoJsonLayer({
       id: 'base-map',
@@ -80,8 +60,7 @@ const deck = new Deck({
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
-      autoHighlight: true,
-      onClick: info => updatePopup(info.object)
+      autoHighlight: true
     }),
     new ArcLayer({
       id: 'arcs',
@@ -95,12 +74,28 @@ const deck = new Deck({
       getWidth: 1
     })
   ],
-  widgets: UI_WIDGETS
-  // widgets: [
-  //   new ZoomWidget({style: widgetTheme}),
-  //   new CompassWidget({style: widgetTheme}),
-  //   new FullscreenWidget({style: widgetTheme}),
-  //   new ScreenshotWidget({style: widgetTheme}),
-  //   new ResetViewWidget({style: widgetTheme})
-  // ]
+  widgets: [
+    new ZoomWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme}),
+    new FullscreenWidget({style: widgetTheme}),
+    new ScreenshotWidget({style: widgetTheme}),
+    new ResetViewWidget({style: widgetTheme}),
+    new PopupWidget({
+      onClick(widget: PopupWidget, info: PickingInfo) {
+        if (info.object && info.layer?.id === 'airports') {
+          widget.setProps({
+            visible: true,
+            position: info.object.geometry.coordinates,
+            text: `${info.object.properties.name} (${info.object.properties.abbrev})`,
+            style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+          });
+        } else {
+          widget.setProps({
+            visible: false
+          });
+        }
+        return true;
+      }
+    })
+  ]
 });
