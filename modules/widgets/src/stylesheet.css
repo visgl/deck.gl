@@ -171,3 +171,7 @@
   );
 }
 
+.deck-widget .deck-widget-geolocate {
+  pointer-events: auto;
+  cursor: pointer;
+}
