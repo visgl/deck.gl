@@ -4,8 +4,8 @@
 
 import {fp32, ShaderModule} from '@luma.gl/shadertools';
 import geometry from '../misc/geometry';
-import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
+import projectShaderGLSL from './project.glsl';
 
 import type {ProjectProps, ProjectUniforms} from './viewport-uniforms';
 
@@ -21,7 +21,7 @@ function getUniforms(opts: ProjectProps | {} = INITIAL_MODULE_OPTIONS) {
 export default {
   name: 'project',
   dependencies: [fp32, geometry],
-  vs: projectShader,
+  vs: projectShaderGLSL,
   getUniforms,
   uniformTypes: {
     wrapLongitude: 'f32',
