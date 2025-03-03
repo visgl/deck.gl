@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck} from '@deck.gl/core';
+import {Deck, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
@@ -10,6 +10,7 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
+  ScaleWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -33,7 +34,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-new Deck({
+const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
@@ -59,10 +60,7 @@ new Deck({
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
-      autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      autoHighlight: true
     }),
     new ArcLayer({
       id: 'arcs',
@@ -81,6 +79,7 @@ new Deck({
     new CompassWidget({style: widgetTheme}),
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
-    new ResetViewWidget({style: widgetTheme})
+    new ResetViewWidget({style: widgetTheme}),
+    new ScaleWidget({style: widgetTheme}),
   ]
 });
