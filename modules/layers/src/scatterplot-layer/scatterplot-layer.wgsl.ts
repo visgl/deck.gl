@@ -6,19 +6,19 @@ export default /* wgsl */ `\
 // Project module mock
 
 fn project_size_to_pixel(size: f32, units: i32) -> f32 {
-  return size;
+  return 5.0; // size * 100.0;
 }
 
 fn project_position_to_clipspace(position: vec3<f32>, position64Low: vec3<f32>, offset: vec3<f32>, result: vec4<f32>) -> vec4<f32> {
-  return result;
+  return vec4(position / 200.0  + offset, 1.0) ;
 }
 
 fn project_pixel_size_to_clipspace(pixelSize: vec2<f32>) -> vec2<f32> {
-  return pixelSize;
+  return vec2f(1.0);
 }
 
 fn project_pixel_size(size: f32) -> vec3<f32> {
-  return vec3<f32>(size, size, 0.0);
+  return vec3<f32>(0.4, 0.4, 0.0); // vec3<f32>(size, size, 0.0);
 }
 
 // Layer uniforms
@@ -88,6 +88,8 @@ const constants = ConstantAttributes(
 );
 
 struct Attributes {
+  @builtin(instance_index) instanceIndex : u32,
+  @builtin(vertex_index) vertexIndex : u32,
   @location(0) positions: vec3<f32>,
   @location(1) instancePositions: vec3<f32>,
   @location(2) instancePositions64Low: vec3<f32>,
@@ -109,7 +111,14 @@ struct Varyings {
 
 @vertex
 fn vertexMain(attributes: Attributes) -> Varyings {
+  var positions = array<vec2<f32>, 3>(vec2(0.0, 0.5), vec2(-0.5, -0.5), vec2(0.5, -0.5));
+
   var varyings: Varyings;
+  if (attributes.instanceIndex == 0) {
+    varyings.position = vec4<f32>(positions[attributes.vertexIndex], 0.0, 1.0);
+    return varyings;
+  }
+
   // var geometry: Geometry;
   // geometry.worldPosition = instancePositions;
 
@@ -144,7 +153,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   if (scatterplot.billboard != 0) {
     varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0), geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
-    let offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
+    let offset = attributes.positions; // * edgePadding * varyings.outerRadiusPixels;
     // DECKGL_FILTER_SIZE(offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
     varyings.position.x = clipPixels.x;
@@ -178,7 +187,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   );
 
   if (inCircle == 0.0) {
-    discard;
+    // discard;
   }
 
   var fragColor: vec4<f32>;
@@ -194,12 +203,12 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
       fragColor = mix(varyings.vFillColor, varyings.vLineColor, isLine);
     } else {
       if (isLine == 0.0) {
-        discard;
+        // discard;
       }
       fragColor = vec4<f32>(varyings.vLineColor.rgb, varyings.vLineColor.a * isLine);
     }
   } else if (scatterplot.filled == 0) {
-    discard;
+    // discard;
   } else {
     fragColor = varyings.vFillColor;
   }
@@ -207,7 +216,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   fragColor.a *= inCircle;
   // DECKGL_FILTER_COLOR(fragColor, geometry);
 
-  return fragColor;
-  // return vec4<f32>(0, 0, 255, 1);
+  // return fragColor;
+  return vec4<f32>(0, 0, 1, 1);
 }
 `;

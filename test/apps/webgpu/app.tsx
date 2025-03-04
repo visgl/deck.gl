@@ -46,6 +46,7 @@ export default function App({
   mapStyle?: string;
 }) {
   const layers = [
+    // new TriangleLayer({}),
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
@@ -62,7 +63,6 @@ export default function App({
       },
       pickable: true
     }),
-    new TriangleLayer({})
   ];
 
   return (
