@@ -1,5 +1,9 @@
 # ScreenshotWidget
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+</p>
+
 This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
 
 :::caution 
