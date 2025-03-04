@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-// import {ScatterplotLayer} from '@deck.gl/layers';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {TriangleLayer} from './triangle-layer';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 import {CanvasContext} from '@luma.gl/core';
@@ -20,8 +20,6 @@ const MALE_COLOR: Color = [0, 128, 255];
 const FEMALE_COLOR: Color = [255, 0, 128];
 
 // Source data CSV
-const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -74,
@@ -34,10 +32,8 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 type DataPoint = [longitude: number, latitude: number, gender: number];
 
-const points = await fetch(DATA_URL).then(response => response.json());
-
 export default function App({
-  data = points,
+  data,
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
@@ -50,8 +46,7 @@ export default function App({
   mapStyle?: string;
 }) {
   const layers = [
-    new TriangleLayer({})
-    /*
+    // new TriangleLayer({}),
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
@@ -67,8 +62,7 @@ export default function App({
         getFillColor: [maleColor, femaleColor]
       },
       pickable: true
-    })
-      */
+    }),
   ];
 
   return (
@@ -83,6 +77,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
-  createRoot(container).render(<App />);
+export function renderToDOM(container: HTMLDivElement, data) {
+  createRoot(container).render(<App data={data} />);
 }
