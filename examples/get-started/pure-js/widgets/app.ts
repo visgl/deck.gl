@@ -80,6 +80,6 @@ const deck = new Deck({
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
     new ResetViewWidget({style: widgetTheme}),
-    new ScaleWidget({style: widgetTheme}),
+    new ScaleWidget({style: widgetTheme, placement: 'bottom-left'})
   ]
 });
