@@ -62,7 +62,10 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
           type="text"
           placeholder="-122.45, 37.8 or 37°48'N, 122°27'W"
           value={this.geolocateText}
-          onInput={e => this.setInput(e.target?.value || '')}
+          onInput={
+            // @ts-expect-error event type
+            e => this.setInput(e.target?.value || '')
+          }
           onKeyPress={this.handleKeyPress}
         />
         <button onClick={this.handleSubmit}>Go</button>
