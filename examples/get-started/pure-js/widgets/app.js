@@ -10,6 +10,7 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
+  LoadingWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -81,6 +82,7 @@ new Deck({
     new CompassWidget({style: widgetTheme}),
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
-    new ResetViewWidget({style: widgetTheme})
+    new ResetViewWidget({style: widgetTheme}),
+    new LoadingWidget({style: widgetTheme})
   ]
 });
