@@ -4,6 +4,7 @@
 
 /* global document */
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
+import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
 
@@ -17,8 +18,7 @@ export type GeolocateWidgetProps = WidgetImplProps & {
   placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
-  /** Callback, if defined user overrides the capture logic */
-  onCapture?: (widget: GeolocateWidget) => void;
+  transitionDuration?: number;
 };
 
 /**
@@ -33,7 +33,7 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
     viewId: undefined!,
     placement: 'top-left',
     label: 'Geolocate',
-    onCapture: undefined!
+    transitionDuration: 200
   };
 
   className = 'deck-widget-geolocate';
@@ -101,13 +101,16 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
   setViewState(viewState: ViewState) {
     const viewId = this.props.viewId || (viewState?.id as string) || 'default-view';
     const viewport = this.viewports[viewId] || {};
-    const nextViewState = {
+    const nextViewState: ViewState = {
       ...viewport,
       ...viewState
-      // only works for geospatial?
-      // transitionDuration: this.props.transitionDuration,
-      // transitionInterpolator: new FlyToInterpolator()
     };
+    if (this.props.transitionDuration > 0) {
+      nextViewState.transitionDuration = this.props.transitionDuration;
+      nextViewState.transitionInterpolator =
+        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+    }
+
     // @ts-ignore Using private method temporary until there's a public one
     this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
   }
