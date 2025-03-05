@@ -5,8 +5,8 @@
 import {fp32, ShaderModule} from '@luma.gl/shadertools';
 import geometry from '../misc/geometry';
 import {getUniformsFromViewport} from './viewport-uniforms';
-import projectShaderGLSL from './project.glsl';
-// import projectShaderWGSL from './project.wgsl';
+import {projectWGSL, projectWGSLMock} from './project.wgsl';
+import {projectGLSL} from './project.glsl';
 
 import type {ProjectProps, ProjectUniforms} from './viewport-uniforms';
 
@@ -19,11 +19,13 @@ function getUniforms(opts: ProjectProps | {} = INITIAL_MODULE_OPTIONS) {
   return {};
 }
 
+const mock = false;
+
 export default {
   name: 'project',
   dependencies: [fp32, geometry],
-  // source: projectShaderWGSL,
-  vs: projectShaderGLSL,
+  source: mock ? projectWGSLMock : projectWGSL,
+  vs: projectGLSL,
   getUniforms,
   uniformTypes: {
     wrapLongitude: 'f32',

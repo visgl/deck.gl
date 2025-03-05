@@ -3,31 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 export default /* wgsl */ `\
-// Project module mock
-
-fn project_size_to_pixel(size: f32, units: i32) -> f32 {
-  return size ;
-}
-
-fn project_position_to_clipspace(position: vec3<f32>, position64Low: vec3<f32>, offset: vec3<f32>, result: vec4<f32>) -> vec4<f32> {
-  return vec4f(vec3f(position.x + 74, position.y - 40.7, position.z) * 10.0  + offset, 1.0) ;
-}
-
-fn project_pixel_size_to_clipspace(pixelSize: vec2<f32>) -> vec2<f32> {
-  return vec2f(pixelSize / 100.0);
-}
-
-fn project_pixel_size(size: f32) -> vec3<f32> {
-  return vec3<f32>(size, size, 0.0) / 1000.0;
-}
-
 // Layer uniforms
 
 struct LayerUniforms {
   opacity: f32,
 };
 
-@group(0) @binding(1) var<uniform> layer: LayerUniforms;
+var<private> layer: LayerUniforms = LayerUniforms(1.0);
+// @group(0) @binding(1) var<uniform> layer: LayerUniforms;
 
 // Main shaders
 
@@ -64,8 +47,7 @@ struct ConstantAttributeUniforms {
  instancePickingColorsConstant: i32
 };
 
-@group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
-// @group(0) @binding(1) var<uniform> constantAttributes: ConstantAttributeUniforms;
+@group(0) @binding(2) var<uniform> scatterplot: ScatterplotUniforms;
 
 struct ConstantAttributes {
   instancePositions: vec3<f32>,
@@ -125,13 +107,13 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   // Multiply out radius and clamp to limits
   varyings.outerRadiusPixels = clamp(
-    project_size_to_pixel(scatterplot.radiusScale * attributes.instanceRadius, scatterplot.radiusUnits),
+    project_unit_size_to_pixel(scatterplot.radiusScale * attributes.instanceRadius, scatterplot.radiusUnits),
     scatterplot.radiusMinPixels, scatterplot.radiusMaxPixels
   );
 
   // Multiply out line width and clamp to limits
   let lineWidthPixels = clamp(
-    project_size_to_pixel(scatterplot.lineWidthScale * attributes.instanceLineWidths, scatterplot.lineWidthUnits),
+    project_unit_size_to_pixel(scatterplot.lineWidthScale * attributes.instanceLineWidths, scatterplot.lineWidthUnits),
     scatterplot.lineWidthMinPixels, scatterplot.lineWidthMaxPixels
   );
 
@@ -152,7 +134,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
 
   if (scatterplot.billboard != 0) {
-    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0), geometry.position);
+    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0)); // TODO , geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
     let offset = attributes.positions; // * edgePadding * varyings.outerRadiusPixels;
     // DECKGL_FILTER_SIZE(offset, geometry);
@@ -160,9 +142,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.position.x = clipPixels.x;
     varyings.position.y = clipPixels.y;
   } else {
-    let offset = edgePadding * attributes.positions * project_pixel_size(varyings.outerRadiusPixels);
+    let offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     // DECKGL_FILTER_SIZE(offset, geometry);
-    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset, geometry.position);
+    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset); // TODO , geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
   }
 

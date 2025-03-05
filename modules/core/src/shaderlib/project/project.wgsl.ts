@@ -15,7 +15,7 @@ const UNIT_WGSL_CONSTANTS = Object.keys(UNIT)
   .map(key => `const UNIT_${key.toUpperCase()}: i32 = ${UNIT[key]};`)
   .join('');
 
-export default /* wgsl */ `\
+export const projectWGSLHeader = /* wgsl */ `\
 ${COORDINATE_SYSTEM_WGSL_CONSTANTS}
 ${PROJECTION_MODE_WGSL_CONSTANTS}
 ${UNIT_WGSL_CONSTANTS}
@@ -31,7 +31,7 @@ const GLOBE_RADIUS: f32 = 256.0;
 // Uniform block (converted from GLSL uniform block)
 // -----------------------------------------------------------------------------
 struct ProjectUniforms {
-  wrapLongitude: bool,
+  wrapLongitude: i32,
   coordinateSystem: i32,
   commonUnitsPerMeter: vec3<f32>,
   projectionMode: i32,
@@ -47,7 +47,7 @@ struct ProjectUniforms {
   cameraPosition: vec3<f32>,
   coordinateOrigin: vec3<f32>,
   commonOrigin: vec3<f32>,
-  pseudoMeters: bool,
+  pseudoMeters: i32,
 };
 
 @group(0) @binding(0)
@@ -62,24 +62,51 @@ var<uniform> project: ProjectUniforms;
 struct Geometry {
   position: vec4<f32>,
   worldPosition: vec3<f32>,
+  uv: vec2f,
+  pickingColor: vec3<f32>
 };
 
-@group(0) @binding(1)
-var<uniform> geometry: Geometry;
+// @group(0) @binding(1)
+var<private> geometry: Geometry;
+`;
+
+// Project module mock to make test/apps/webbpu render
+export const projectWGSLMock = /* wgsl */ `\
+${projectWGSLHeader}
+
+fn project_size_to_pixel(size: f32, units: i32) -> f32 {
+  return size ;
+}
+
+fn project_position_to_clipspace(position: vec3<f32>, position64Low: vec3<f32>, offset: vec3<f32>, result: vec4<f32>) -> vec4<f32> {
+  return vec4f(vec3f(position.x + 74, position.y - 40.7, position.z) * 10.0  + offset, 1.0) ;
+}
+
+fn project_pixel_size_to_clipspace(pixelSize: vec2<f32>) -> vec2<f32> {
+  return vec2f(pixelSize / 100.0);
+}
+
+fn project_pixel_size(size: f32) -> vec3<f32> {
+  return vec3<f32>(size, size, 0.0) / 1000.0;
+}
+`;
+
+export const projectWGSL = /* wgsl */ `\
+${projectWGSLHeader}
 
 // -----------------------------------------------------------------------------
 // Functions
 // -----------------------------------------------------------------------------
 
 // Returns an adjustment factor for commonUnitsPerMeter
-fn project_size_at_latitude(lat: f32) -> f32 {
+fn _project_size_at_latitude(lat: f32) -> f32 {
   let y = clamp(lat, -89.9, 89.9);
   return 1.0 / cos(radians(y));
 }
 
 // Overloaded version: scales a value in meters at a given latitude.
-fn project_size_at_latitude_m(meters: f32, lat: f32) -> f32 {
-  return meters * project.commonUnitsPerMeter.z * project_size_at_latitude(lat);
+fn _project_size_at_latitude_m(meters: f32, lat: f32) -> f32 {
+  return meters * project.commonUnitsPerMeter.z * _project_size_at_latitude(lat);
 }
 
 // Computes a non-linear scale factor based on geometry.
@@ -87,9 +114,9 @@ fn project_size_at_latitude_m(meters: f32, lat: f32) -> f32 {
 fn project_size() -> f32 {
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
       project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
-      !project.pseudoMeters) {
+      project.pseudoMeters == 0) {
     if (geometry.position.w == 0.0) {
-      return project_size_at_latitude(geometry.worldPosition.y);
+      return _project_size_at_latitude(geometry.worldPosition.y);
     }
     let y: f32 = geometry.position.y / TILE_SIZE * 2.0 - 1.0;
     let y2 = y * y;
@@ -101,28 +128,30 @@ fn project_size() -> f32 {
 }
 
 // Overloads to scale offsets (meters to world units)
-fn project_size_m(meters: f32) -> f32 {
+fn project_size_float(meters: f32) -> f32 {
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
-fn project_size_v2(meters: vec2<f32>) -> vec2<f32> {
+fn project_size_vec2(meters: vec2<f32>) -> vec2<f32> {
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
-fn project_size_v3(meters: vec3<f32>) -> vec3<f32> {
+fn project_size_vec3(meters: vec3<f32>) -> vec3<f32> {
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
-fn project_size_v4(meters: vec4<f32>) -> vec4<f32> {
+fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
   return vec4<f32>(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
 // Returns a rotation matrix aligning the z‑axis with the given up vector.
 fn project_get_orientation_matrix(up: vec3<f32>) -> mat3x3<f32> {
   let uz = normalize(up);
-  let ux = (abs(uz.z) == 1.0)
-    ? vec3<f32>(1.0, 0.0, 0.0)
-    : normalize(vec3<f32>(uz.y, -uz.x, 0.0));
+  let ux = select(
+    vec3<f32>(1.0, 0.0, 0.0),
+    normalize(vec3<f32>(uz.y, -uz.x, 0.0)),
+    abs(uz.z) == 1.0
+  );
   let uy = cross(uz, ux);
   return mat3x3<f32>(ux, uy, uz);
 }
@@ -135,14 +164,9 @@ struct RotationResult {
 
 fn project_needs_rotation(commonPosition: vec3<f32>) -> RotationResult {
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-    return RotationResult {
-      needsRotation: true,
-      transform: project_get_orientation_matrix(commonPosition)
-    };
-  }
-  return RotationResult {
-    needsRotation: false,
-    transform: mat3x3<f32>()  // identity alternative if needed
+    return RotationResult(true, project_get_orientation_matrix(commonPosition));
+  } else {
+    return RotationResult(false, mat3x3<f32>());  // identity alternative if needed
   };
 }
 
@@ -167,8 +191,8 @@ fn project_offset_(offset: vec4<f32>) -> vec4<f32> {
 // Projects lng/lat coordinates to a unit tile [0,1]
 fn project_mercator_(lnglat: vec2<f32>) -> vec2<f32> {
   var x = lnglat.x;
-  if (project.wrapLongitude) {
-    x = mod(x + 180.0, 360.0) - 180.0;
+  if (project.wrapLongitude != 0) {
+    x = ((x + 180.0) % 360.0) - 180.0;
   }
   let y = clamp(lnglat.y, -89.9, 89.9);
   return vec2<f32>(
@@ -192,7 +216,7 @@ fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
 
 // Projects positions (with an optional 64-bit low part) from the input
 // coordinate system to the common space.
-fn project_position(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {
+fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {
   var position_world = project.modelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug:
@@ -200,12 +224,12 @@ fn project_position(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> 
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4<f32>(
         project_mercator_(position_world.xy),
-        project_size_at_latitude_m(position_world.z, position_world.y),
+        _project_size_at_latitude_m(position_world.z, position_world.y),
         position_world.w
       );
     }
     if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
-      position_world.xyz = position_world.xyz + project.coordinateOrigin;
+      position_world = vec4f(position_world.xyz + project.coordinateOrigin, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
@@ -221,7 +245,7 @@ fn project_position(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> 
       if (abs(position_world.y - project.coordinateOrigin.y) > 0.25) {
         return vec4<f32>(
           project_mercator_(position_world.xy) - project.commonOrigin.xy,
-          project_size(position_world.z),
+          project_size_float(position_world.z),
           position_world.w
         );
       }
@@ -231,7 +255,7 @@ fn project_position(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> 
       (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
        (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
         project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
-    position_world.xyz = position_world.xyz - project.coordinateOrigin;
+    position_world = vec4f(position_world.xyz - project.coordinateOrigin, position_world.w);
   }
 
   return project_offset_(position_world) +
@@ -239,33 +263,33 @@ fn project_position(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> 
 }
 
 // Overloaded versions for different input types.
-fn project_position_vec4(position: vec4<f32>) -> vec4<f32> {
-  return project_position(position, ZERO_64_LOW);
+fn project_position_vec4_f32(position: vec4<f32>) -> vec4<f32> {
+  return project_position_vec4_f64(position, ZERO_64_LOW);
 }
 
-fn project_position_vec3_offset(position: vec3<f32>, position64Low: vec3<f32>) -> vec3<f32> {
-  let projected_position = project_position(vec4<f32>(position, 1.0), position64Low);
+fn project_position_vec3_f64(position: vec3<f32>, position64Low: vec3<f32>) -> vec3<f32> {
+  let projected_position = project_position_vec4_f64(vec4<f32>(position, 1.0), position64Low);
   return projected_position.xyz;
 }
 
-fn project_position_vec3(position: vec3<f32>) -> vec3<f32> {
-  let projected_position = project_position(vec4<f32>(position, 1.0), ZERO_64_LOW);
+fn project_position_vec3_f32(position: vec3<f32>) -> vec3<f32> {
+  let projected_position = project_position_vec4_f64(vec4<f32>(position, 1.0), ZERO_64_LOW);
   return projected_position.xyz;
 }
 
-fn project_position_vec2(position: vec2<f32>) -> vec2<f32> {
-  let projected_position = project_position(vec4<f32>(position, 0.0, 1.0), ZERO_64_LOW);
+fn project_position_vec2_f32(position: vec2<f32>) -> vec2<f32> {
+  let projected_position = project_position_vec4_f64(vec4<f32>(position, 0.0, 1.0), ZERO_64_LOW);
   return projected_position.xy;
 }
 
 // Transforms a common space position to clip space.
-fn project_common_position_to_clipspace(position: vec4<f32>, viewProjectionMatrix: mat4x4<f32>, center: vec4<f32>) -> vec4<f32> {
+fn project_common_position_to_clipspace_with_projection(position: vec4<f32>, viewProjectionMatrix: mat4x4<f32>, center: vec4<f32>) -> vec4<f32> {
   return viewProjectionMatrix * position + center;
 }
 
 // Uses the project viewProjectionMatrix and center.
-fn project_common_position_to_clipspace_main(position: vec4<f32>) -> vec4<f32> {
-  return project_common_position_to_clipspace(position, project.viewProjectionMatrix, project.center);
+fn project_common_position_to_clipspace(position: vec4<f32>) -> vec4<f32> {
+  return project_common_position_to_clipspace_with_projection(position, project.viewProjectionMatrix, project.center);
 }
 
 // Returns a clip space offset corresponding to a given number of screen pixels.
@@ -274,13 +298,13 @@ fn project_pixel_size_to_clipspace(pixels: vec2<f32>) -> vec2<f32> {
   return offset * project.focalDistance;
 }
 
-fn project_size_to_pixel(meters: f32) -> f32 {
-  return project_size_m(meters) * project.scale;
+fn project_meter_size_to_pixel(meters: f32) -> f32 {
+  return project_size_float(meters) * project.scale;
 }
 
-fn project_size_to_pixel_unit(size: f32, unit: i32) -> f32 {
+fn project_unit_size_to_pixel(size: f32, unit: i32) -> f32 {
   if (unit == UNIT_METERS) {
-    return project_size_to_pixel(size);
+    return project_meter_size_to_pixel(size);
   } else if (unit == UNIT_COMMON) {
     return size * project.scale;
   }
@@ -288,11 +312,11 @@ fn project_size_to_pixel_unit(size: f32, unit: i32) -> f32 {
   return size;
 }
 
-fn project_pixel_size_f(pixels: f32) -> f32 {
+fn project_pixel_size_float(pixels: f32) -> f32 {
   return pixels / project.scale;
 }
 
-fn project_pixel_size_v2(pixels: vec2<f32>) -> vec2<f32> {
+fn project_pixel_size_vec2(pixels: vec2<f32>) -> vec2<f32> {
   return pixels / project.scale;
 }
 `;

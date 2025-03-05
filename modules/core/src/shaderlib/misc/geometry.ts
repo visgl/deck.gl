@@ -16,7 +16,7 @@ struct VertexGeometry {
   pickingColor: vec3<f32>,
 };
 
-var<private> geometry: VertexGeometry = VertexGeometry(
+var<private> geometry_: VertexGeometry = VertexGeometry(
   vec4<f32>(0.0, 0.0, 1.0, 0.0),
   vec3<f32>(0.0, 0.0, 0.0),
   vec3<f32>(0.0, 0.0, 0.0),

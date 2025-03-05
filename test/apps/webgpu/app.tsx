@@ -6,9 +6,10 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {TriangleLayer} from './triangle-layer';
+// import {TriangleLayer} from './triangle-layer';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 import {CanvasContext} from '@luma.gl/core';
+import {Map} from 'react-map-gl/maplibre';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 
@@ -54,7 +55,6 @@ export default function App({
       radiusMinPixels: 0.25,
       getPosition: d => [d[0], d[1], 0],
       getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
-      // getRadius: 1,
       getLineColor: d => [0, 0, 0, 0],
       getLineWidth: d => 1,
       getRadius: d => 1,
@@ -72,8 +72,11 @@ export default function App({
       }}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
-      controller={true}
-    />
+      controller={true} 
+    >
+      {/* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */}
+      <Map reuseMaps />
+    </DeckGL>
   );
 }
 
