@@ -70,27 +70,6 @@ struct Geometry {
 var<private> geometry: Geometry;
 `;
 
-// Project module mock to make test/apps/webbpu render
-export const projectWGSLMock = /* wgsl */ `\
-${projectWGSLHeader}
-
-fn project_size_to_pixel(size: f32, units: i32) -> f32 {
-  return size ;
-}
-
-fn project_position_to_clipspace(position: vec3<f32>, position64Low: vec3<f32>, offset: vec3<f32>, result: vec4<f32>) -> vec4<f32> {
-  return vec4f(vec3f(position.x + 74, position.y - 40.7, position.z) * 10.0  + offset, 1.0) ;
-}
-
-fn project_pixel_size_to_clipspace(pixelSize: vec2<f32>) -> vec2<f32> {
-  return vec2f(pixelSize / 100.0);
-}
-
-fn project_pixel_size(size: f32) -> vec3<f32> {
-  return vec3<f32>(size, size, 0.0) / 1000.0;
-}
-`;
-
 export const projectWGSL = /* wgsl */ `\
 ${projectWGSLHeader}
 
