@@ -24,10 +24,11 @@ export const dataTypeFromTypedArray = getDataTypeFromTypedArray;
 
 export function getBufferAttributeLayout(
   name: string,
-  accessor: BufferAccessor
+  accessor: BufferAccessor,
+  deviceType: 'webgpu' | 'wegbgl' | string
 ): BufferAttributeLayout {
   // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
-  const type = accessor.type === 'uint8' ? 'unorm8' : accessor.type;
+  const type = deviceType === 'webgpu' && accessor.type === 'uint8' ? 'unorm8' : accessor.type;
   return {
     attribute: name,
     // @ts-expect-error Not all combinations are valid vertex formats; it's up to DataColumn to ensure
