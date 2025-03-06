@@ -62,7 +62,7 @@ export default function App({
         getFillColor: [maleColor, femaleColor]
       },
       pickable: true
-    }),
+    })
   ];
 
   return (
@@ -72,7 +72,7 @@ export default function App({
       }}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
-      controller={true} 
+      controller={true}
     >
       {/* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */}
       <Map reuseMaps />

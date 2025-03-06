@@ -51,7 +51,6 @@ fn project_position_to_clipspace(
 }
 `;
 
-
 const vs = /* glsl */ `\
 vec4 project_position_to_clipspace(
   vec3 position, vec3 position64Low, vec3 offset, out vec4 commonPosition
