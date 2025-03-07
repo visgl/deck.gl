@@ -255,7 +255,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Use generic value
   // Returns true if successful
   setConstantValue(value?: NumericArray): boolean {
-    if (value === undefined || typeof value === 'function') {
+    // TODO(ibgreen): WebGPU does not support constant values
+    const isWebGPU = this.device.type === 'webgpu';
+    if (isWebGPU || value === undefined || typeof value === 'function') {
       return false;
     }
 
