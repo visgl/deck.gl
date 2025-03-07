@@ -59,11 +59,14 @@ var<uniform> project: ProjectUniforms;
 // you might supply this via vertex attributes or a uniform. Here we define a
 // uniform struct for demonstration.)
 // -----------------------------------------------------------------------------
+
+// Structure to carry additional geometry data used by deck.gl filters.
 struct Geometry {
-  position: vec4<f32>,
   worldPosition: vec3<f32>,
-  uv: vec2f,
-  pickingColor: vec3<f32>
+  worldPositionAlt: vec3<f32>,
+  position: vec4<f32>,
+  uv: vec2<f32>,
+  pickingColor: vec3<f32>,
 };
 
 // @group(0) @binding(1)

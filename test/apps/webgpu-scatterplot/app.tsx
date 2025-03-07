@@ -6,7 +6,6 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
-// import {TriangleLayer} from './triangle-layer';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 import {CanvasContext} from '@luma.gl/core';
 import {Map} from 'react-map-gl/maplibre';
@@ -66,16 +65,17 @@ export default function App({
   ];
 
   return (
-    <DeckGL
+      /* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */
+      <DeckGL
       deviceProps={{
+        createCanvasContext: {alphaMode: 'premultiplied'},
         adapters: [webgpuAdapter]
       }}
-      layers={layers}
+      layers={[]}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
     >
-      {/* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */}
-      <Map reuseMaps />
+      <Map reuseMaps mapStyle={mapStyle}/>
     </DeckGL>
   );
 }
