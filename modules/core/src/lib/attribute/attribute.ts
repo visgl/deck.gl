@@ -422,16 +422,21 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
   ): void {
     if (attribute.constant) {
-      return;
+      if (this.context.device.type !== 'webgpu') {
+        return;
+      } 
     }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    const accessorFunc: Accessor<any, any> =
+    let accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
-
+    // TODO(ibgreen) WebGPU needs buffers, generate an accessor function from a constant
+    if (typeof accessorFunc !== 'function') {
+      accessorFunc = () => accessorFunc;
+    }
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = attribute.getVertexOffset(startRow);
