@@ -7,14 +7,9 @@ import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
-import {CanvasContext} from '@luma.gl/core';
 import {Map} from 'react-map-gl/maplibre';
 
 import type {Color, MapViewState} from '@deck.gl/core';
-
-CanvasContext.prototype.getDrawingBufferSize = function getDrawingBufferSize() {
-  return this.getPixelSize();
-};
 
 const MALE_COLOR: Color = [0, 128, 255];
 const FEMALE_COLOR: Color = [255, 0, 128];
