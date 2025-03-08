@@ -16,8 +16,8 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import {Parameters} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
 import {shaderWGSL as source} from './line-layer.wgsl';
@@ -189,6 +189,15 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : {};
+
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -208,6 +217,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
+      parameters,
       isInstanced: true
     });
   }

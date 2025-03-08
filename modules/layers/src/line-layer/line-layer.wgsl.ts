@@ -3,6 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 export const shaderWGSL = /* wgsl */ `\
+// TODO(ibgreen): Hack for Layer uniforms (move to new "color" module?)
+struct LayerUniforms {
+  opacity: f32,
+};
+var<private> layer: LayerUniforms = LayerUniforms(1.0);
+// @group(0) @binding(1) var<uniform> layer: LayerUniforms;
 
 // ---------- Helper Structures & Functions ----------
 
@@ -110,9 +116,9 @@ fn vertexMain(
     }
   }
 
-  // Project source and target positions to clip space.
-  let sourceResult = project_position_to_clipspace(source_world, source_world_64low, vec3<f32>(0.0));
-  let targetResult = project_position_to_clipspace(target_world, target_world_64low, vec3<f32>(0.0));
+  // Project Pos and target positions to clip space.
+  let sourceResult = project_position_to_clipspace_and_commonspace(source_world, source_world_64low, vec3<f32>(0.0));
+  let targetResult = project_position_to_clipspace_and_commonspace(target_world, target_world_64low, vec3<f32>(0.0));
   let sourcePos: vec4<f32> = sourceResult.clipPosition;
   let targetPos: vec4<f32> = targetResult.clipPosition;
   let source_commonspace: vec4<f32> = sourceResult.commonPosition;
@@ -120,7 +126,7 @@ fn vertexMain(
 
   // Interpolate along the line segment.
   let segmentIndex: f32 = positions.x;
-  let p: vec4<f32> = source + segmentIndex * (targetPos - sourcePos);
+  let p: vec4<f32> = sourcePos + segmentIndex * (targetPos - sourcePos);
   geometry.position = source_commonspace + segmentIndex * (target_commonspace - source_commonspace);
   let uv: vec2<f32> = positions.xy;
   geometry.uv = uv;
@@ -128,7 +134,7 @@ fn vertexMain(
 
   // Determine width in pixels.
   let widthPixels: f32 = clamp(
-    project_size_to_pixel(instanceWidths * line.widthScale, line.widthUnits),
+    project_unit_size_to_pixel(instanceWidths * line.widthScale, line.widthUnits),
     line.widthMinPixels, line.widthMaxPixels
   );
 
@@ -137,8 +143,8 @@ fn vertexMain(
   let offset: vec3<f32> = vec3<f32>(extrusion, 0.0);
 
   // Apply deck.gl filter functions.
-  // let filteredOffset = deckgl_filter_size(offset, geometry);
-  // let filteredP = deckgl_filter_gl_position(p, geometry);
+  let filteredOffset = deckgl_filter_size(offset, geometry);
+  let filteredP = deckgl_filter_gl_position(p, geometry);
 
   let clipOffset: vec2<f32> = project_pixel_size_to_clipspace(filteredOffset.xy);
   let finalPosition: vec4<f32> = filteredP + vec4<f32>(clipOffset, 0.0, 0.0);

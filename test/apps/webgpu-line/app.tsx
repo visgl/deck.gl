@@ -68,9 +68,9 @@ export default function App({
     new ScatterplotLayer<Airport>({
       id: 'airports',
       data: airports,
-      radiusScale: 20,
+      radiusScale: 200,
       getPosition: d => d.coordinates,
-      getFillColor: d => [255, 140, 0],
+      getFillColor: d => [255, 140, 0, 255],
       getRadius: d => {
         if (d.type.search('major') >= 0) {
           return 100;
@@ -80,7 +80,9 @@ export default function App({
         }
         return 60;
       },
-      pickable: true
+      getLineColor: d => [0, 0, 0, 0],
+      getLineWidth: d => 1,
+      // pickable: true
     }),
     new LineLayer<FlightPath>({
       id: 'flight-paths',
@@ -100,7 +102,12 @@ export default function App({
 
   return (
     <DeckGL
-      deviceProps={{adapters: [webgpuAdapter]}}
+      deviceProps={{
+        adapters: [webgpuAdapter],
+        // onError: (error) => {
+        //   debugger
+        // }
+      }}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
@@ -120,6 +127,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
-  createRoot(container).render(<App />);
+export function renderToDOM(container: HTMLDivElement, airports, flightPaths) {
+  createRoot(container).render(<App airports={airports} flightPaths={flightPaths} />);
 }

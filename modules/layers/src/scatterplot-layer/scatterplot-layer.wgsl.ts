@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 export default /* wgsl */ `\
-// Layer uniforms
+// TODO(ibgreen): Hack for Layer uniforms (move to new "color" module?)
 
 struct LayerUniforms {
   opacity: f32,

@@ -65,17 +65,17 @@ export default function App({
   ];
 
   return (
-      /* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */
-      <DeckGL
+    /* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */
+    <DeckGL
       deviceProps={{
         createCanvasContext: {alphaMode: 'premultiplied'},
         adapters: [webgpuAdapter]
       }}
-      layers={[]}
+      layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
     >
-      <Map reuseMaps mapStyle={mapStyle}/>
+      <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }
