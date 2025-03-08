@@ -373,6 +373,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Create a new device
     if (!deviceOrPromise) {
+      const canvasContextProps = this.props.deviceProps?.createCanvasContext;
       // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
         type: 'best-available',
@@ -383,6 +384,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         adapters: [webgl2Adapter],
         ...props.deviceProps,
         createCanvasContext: {
+          ...(typeof canvasContextProps === 'object' ? canvasContextProps : {}),
           canvas: this._createCanvas(props),
           useDevicePixels: this.props.useDevicePixels,
           // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
