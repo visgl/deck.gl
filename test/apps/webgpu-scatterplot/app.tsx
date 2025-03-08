@@ -54,9 +54,9 @@ export default function App({
       radiusMinPixels: 0.25,
       getPosition: d => [d[0], d[1], 0],
       getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
-      getLineColor: d => [0, 0, 0, 0],
-      getLineWidth: d => 1,
-      getRadius: d => 1,
+      getLineColor: [0, 0, 0, 0],
+      getLineWidth: 1,
+      getRadius: 1,
       updateTriggers: {
         getFillColor: [maleColor, femaleColor]
       },
