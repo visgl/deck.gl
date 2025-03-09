@@ -422,6 +422,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
   ): void {
     if (attribute.constant) {
+      // @ts-ignore TODO(ibgreen) add to types?
       if (this.context.device.type !== 'webgpu') {
         return;
       } 
