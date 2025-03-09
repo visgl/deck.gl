@@ -81,7 +81,7 @@ export default function App({
         return 60;
       },
       getLineColor: d => [0, 0, 0, 0],
-      getLineWidth: d => 1,
+      getLineWidth: d => 1
       // pickable: true
     }),
     new LineLayer<FlightPath>({
@@ -103,7 +103,7 @@ export default function App({
   return (
     <DeckGL
       deviceProps={{
-        adapters: [webgpuAdapter],
+        adapters: [webgpuAdapter]
         // onError: (error) => {
         //   debugger
         // }

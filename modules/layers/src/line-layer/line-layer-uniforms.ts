@@ -4,7 +4,6 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-
 const uniformBlockWGSL = /* wgsl */ `\
 struct LineUniforms {
   widthScale: f32,
