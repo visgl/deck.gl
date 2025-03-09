@@ -257,8 +257,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     };
     const model = this.state.model!;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
-    // @ts-expect-error TODO - this line was needed during WebGPU port
-    model.instanceCount = this.props.data.length;
     model.draw(this.context.renderPass);
   }
 
@@ -274,7 +272,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         attributes: {
           positions: {size: 3, value: new Float32Array(positions)}
         }
-      })
+      }),
+      isInstanced: true
     });
   }
 }
