@@ -281,19 +281,31 @@ export default class DataColumn<Options, State> {
         options || {}
       );
       attributes.push(
-        getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
-        getBufferAttributeLayout(`${attributeName}64Low`, {
-          ...accessor,
-          ...doubleShaderAttributeDefs.low
-        })
+        getBufferAttributeLayout(
+          attributeName,
+          {...accessor, ...doubleShaderAttributeDefs.high},
+          this.device.type
+        ),
+        getBufferAttributeLayout(
+          `${attributeName}64Low`,
+          {
+            ...accessor,
+            ...doubleShaderAttributeDefs.low
+          },
+          this.device.type
+        )
       );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
       attributes.push(
-        getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
+        getBufferAttributeLayout(
+          attributeName,
+          {...accessor, ...shaderAttributeDef},
+          this.device.type
+        )
       );
     } else {
-      attributes.push(getBufferAttributeLayout(attributeName, accessor));
+      attributes.push(getBufferAttributeLayout(attributeName, accessor, this.device.type));
     }
     return result;
   }
