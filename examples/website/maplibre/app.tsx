@@ -114,6 +114,8 @@ export default function App({
         id="map"
         initialViewState={INITIAL_VIEW_STATE}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        dragRotate={false}
+        maxPitch={0}
       >
         <DeckGLOverlay layers={layers} interleaved />
       </Map>
