@@ -19,6 +19,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.5] - Mar 12 2025
+
+- DataFilterExtension: Make filterCategories prop optional (#9495)
+- CARTO: RasterLayer improve shader precision at high zooms (#9518)
+- fix(scatterplot-layer): use numeric uniform for "filled" to avoid GPU driver bug (#9514)
+- chore: WebGPU plumbing (#9480)
+- chore: WebGPU plumbing #1 (#9476)
+- feat(widgets): new ResetViewWidget (#9478)
+- feat(widgets): New ScreenshotWidget (#9477)
+
 #### deck.gl [v9.1.4] - Feb 26 2025
 
 - feat(mapbox): support Mapbox v3 Standard style slot (#9468)
