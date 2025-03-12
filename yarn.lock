@@ -963,15 +963,10 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@9.1.4", "@luma.gl/constants@^9.1.3":
+"@luma.gl/constants@9.1.4", "@luma.gl/constants@^9.0.0", "@luma.gl/constants@^9.1.3":
   version "9.1.4"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.1.4.tgz#f931d7949752d787a28e10224db685e9c6de1380"
   integrity sha512-bxqXRYFPFB2P4G3lMZ369y5rPuS0hCqGCU0Swzk9K8cCRBqQ4O4qa44Mj0ObxD/Fh8HeW8+EUwgvksZ9zHNrlA==
-
-"@luma.gl/constants@^9.0.0":
-  version "9.0.27"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.27.tgz#65d65fa1ea407fd5f74bfa92dfba43261be33763"
-  integrity sha512-NBkMim3u0xt4UDe4e69L6E/pq5XNxfX60GrggJDzfilVRfIbx5XwKhBXTyNjjtNEk4oc6uYLHWd/05jGRHcfLg==
 
 "@luma.gl/core@^9.1.3", "@luma.gl/core@^9.1.4":
   version "9.1.4"
@@ -2424,10 +2419,10 @@
     typescript-eslint "^7.7.0"
     vite "^4.5.0"
 
-"@vis.gl/ts-plugins@1.0.0-alpha.21":
-  version "1.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@vis.gl/ts-plugins/-/ts-plugins-1.0.0-alpha.21.tgz#91992a4cdf242ee0a92594e7cc2d51c82d837d8d"
-  integrity sha512-OgpfeiGj48mxSU3bJBoYFO81D4bfWw/lu4fgLVL8aNhTE5OSvHBsoxjPZfDTdSm0nz0iEnVul9MOVrg29+KVqA==
+"@vis.gl/ts-plugins@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@vis.gl/ts-plugins/-/ts-plugins-1.0.0.tgz#e22e223eebd251a7cb1b0e296f9e8ec0fec5b56f"
+  integrity sha512-O/3hwPbbmMbTJAyGVtMlYBxr0zRvOrsEt0fpP3Evc5ctB4eb7z29yew+wofi02KwH+KKR1bG7KvhLmEZvW1zGw==
   dependencies:
     "@luma.gl/constants" "^9.0.0"
     minimatch "^3.0.0"
