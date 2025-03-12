@@ -64,7 +64,7 @@
     "h3-js": "^4.1.0",
     "moment-timezone": "^0.5.33",
     "pbf": "^3.2.1",
-    "quadbin": "^0.2.0"
+    "quadbin": "^0.4.0"
   },
   "peerDependencies": {
     "@deck.gl/aggregation-layers": "^9.1.0",
