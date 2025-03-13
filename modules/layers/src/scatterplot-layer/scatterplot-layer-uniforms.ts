@@ -13,7 +13,7 @@ uniform scatterplotUniforms {
   float lineWidthMinPixels;
   float lineWidthMaxPixels;
   float stroked;
-  bool filled;
+  float filled;
   bool antialiasing;
   bool billboard;
   highp int radiusUnits;
