@@ -255,7 +255,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Use generic value
   // Returns true if successful
   setConstantValue(value?: NumericArray): boolean {
-    if (value === undefined || typeof value === 'function') {
+    // TODO(ibgreen): WebGPU does not support constant values
+    const isWebGPU = this.device.type === 'webgpu';
+    if (isWebGPU || value === undefined || typeof value === 'function') {
       return false;
     }
 
@@ -420,16 +422,22 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
   ): void {
     if (attribute.constant) {
-      return;
+      // @ts-ignore TODO(ibgreen) add to types?
+      if (this.context.device.type !== 'webgpu') {
+        return;
+      }
     }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    const accessorFunc: Accessor<any, any> =
+    let accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
-
+    // TODO(ibgreen) WebGPU needs buffers, generate an accessor function from a constant
+    if (typeof accessorFunc !== 'function') {
+      accessorFunc = () => accessorFunc;
+    }
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = attribute.getVertexOffset(startRow);
