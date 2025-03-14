@@ -20,7 +20,7 @@ const DATA_URL = {
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json', // eslint-disable-line
   FLIGHT_PATHS:
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
-};  
+};
 const airports = await fetch(DATA_URL.AIRPORTS).then(response => response.json());
 const flightPaths = await fetch(DATA_URL.FLIGHT_PATHS).then(response => response.json());
 
