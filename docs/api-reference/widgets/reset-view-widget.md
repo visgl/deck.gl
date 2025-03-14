@@ -1,6 +1,6 @@
 # ResetViewWidget
 
-This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view. 
+This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
 
 ## Props
 
@@ -8,7 +8,7 @@ This widget resets the view state of a deck.gl viewport to its initial state. Th
 
 Default: `'reset-view'`
 
-The `id` must be unique among all your widgets at a given time. 
+The `id` must be unique among all your widgets at a given time.
 
 Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
 
