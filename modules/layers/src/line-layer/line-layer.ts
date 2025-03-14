@@ -196,7 +196,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
             depthWriteEnabled: true,
             depthCompare: 'less-equal'
           } satisfies Parameters)
-        : {};
+        : undefined;
 
     /*
      *  (0, -1)-------------_(1, -1)

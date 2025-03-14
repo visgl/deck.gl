@@ -273,7 +273,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
             depthWriteEnabled: true,
             depthCompare: 'less-equal'
           } satisfies Parameters)
-        : {};
+        : undefined;
 
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
