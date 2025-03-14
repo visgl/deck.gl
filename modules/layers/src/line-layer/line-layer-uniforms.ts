@@ -4,7 +4,20 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const uniformBlockWGSL = /* wgsl */ `\
+struct LineUniforms {
+  widthScale: f32,
+  widthMinPixels: f32,
+  widthMaxPixels: f32,
+  useShortestPath: f32,
+  widthUnits: i32,
+};
+
+@group(0) @binding(1)
+var<uniform> line: LineUniforms;
+`;
+
+const uniformBlockGLSL = /* glsl */ `\
 uniform lineUniforms {
   float widthScale;
   float widthMinPixels;
@@ -24,8 +37,9 @@ export type LineProps = {
 
 export const lineUniforms = {
   name: 'line',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: uniformBlockWGSL,
+  vs: uniformBlockGLSL,
+  fs: uniformBlockGLSL,
   uniformTypes: {
     widthScale: 'f32',
     widthMinPixels: 'f32',
