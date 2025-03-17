@@ -77,10 +77,10 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.position.y += clipPixels.y;
 
   // Apply lighting
-  // let lightColor = lighting_getLightColor(attributes.instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal, vec3<f32>(1.0)); // TODO not sure what this colour should be
+  let lightColor = lighting_getLightColor2(attributes.instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
 
   // Apply opacity to instance color, or return instance picking color
-  varyings.vColor = attributes.instanceColors; //vec4(lightColor, attributes.instanceColors.a * layer.opacity);
+  varyings.vColor = vec4(lightColor, attributes.instanceColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(vColor, geometry);
 
   return varyings;
