@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
+  <style>
+    body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: hidden;}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+</body>
+<script type="module">
+  import {renderToDOM} from './app.tsx';
+// Source data CSV
+const DATA_URL = {
+  AIRPORTS:
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json', // eslint-disable-line
+  FLIGHT_PATHS:
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
+};
+const airports = await fetch(DATA_URL.AIRPORTS).then(response => response.json());
+const flightPaths = await fetch(DATA_URL.FLIGHT_PATHS).then(response => response.json());
+
+  renderToDOM(document.getElementById('app'), airports, flightPaths);
+</script>
+</html>
