@@ -127,18 +127,11 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const gouraudMat = gouraudMaterial;
-    // splicing out the lighting_getSpecularLightColor function as it errors
-    // wgsl_reflect despite being valid wgsl (will upstream a fix)
-    gouraudMat.source = gouraudMat.source?.replace(
-      /fn lighting_getSpecularLightColor.*{[\S\s]*?return[\S\s]*?}/,
-      ''
-    );
     return super.getShaders({
       vs,
       fs,
       source,
-      modules: [project32, /* gouraudMat, */ picking, pointCloudUniforms]
+      modules: [project32, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
 

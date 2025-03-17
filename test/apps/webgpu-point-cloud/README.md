@@ -16,7 +16,4 @@ npm start
 
 ### Data Source
 
-The sample data is from [kaarta.com](https://kaarta.com).
-
-[loaders.gl](https://loaders.gl) offers loaders for a variety of common point cloud formats that work seamlessly with this layer. To use your own data, check out
-the [documentation of PointCloudLayer](../../../docs/api-reference/layers/point-cloud-layer.md).
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/line), [Airports data source](http://www.naturalearthdata.com/)
