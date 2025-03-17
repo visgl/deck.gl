@@ -67,7 +67,7 @@ export default function App({
     new PointCloudLayer<Airport>({
       id: 'airports',
       data: airports,
-      radiusScale: 200,
+      pointSize: 4,
       getPosition: d => d.coordinates,
       getColor: d => {
         switch (d.type) {
