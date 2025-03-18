@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
   <style>
-    body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: auto;}
+    body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: hidden;}
   </style>
 </head>
 <body>
@@ -14,6 +14,9 @@
 </body>
 <script type="module">
   import {renderToDOM} from './app.tsx';
-  renderToDOM(document.getElementById('app'));
+  const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
+  const points = await fetch(DATA_URL).then(response => response.json());
+  renderToDOM(document.getElementById('app'), points);
 </script>
 </html>
