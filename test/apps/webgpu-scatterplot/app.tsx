@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {PointCloudLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 import {Map} from 'react-map-gl/maplibre';
 
@@ -27,14 +27,23 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 type DataPoint = [longitude: number, latitude: number, gender: number];
 
+type Airport = {
+  type: 'major' | 'mid' | 'small';
+  name: string;
+  abbrev: string; // airport code
+  coordinates: [longitude: number, latitude: number];
+};
+
 export default function App({
   data,
+  airports,
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
   mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 }: {
   data?: DataPoint[];
+  airports?: Airport[];
   radius?: number;
   maleColor?: Color;
   femaleColor?: Color;
@@ -56,6 +65,25 @@ export default function App({
         getFillColor: [maleColor, femaleColor]
       },
       pickable: true
+    }),
+    new PointCloudLayer<Airport>({
+      id: 'airports',
+      data: airports,
+      pointSize: 4,
+      getPosition: d => d.coordinates,
+      getColor: d => {
+        switch (d.type) {
+          case 'major':
+            return [255, 0, 0, 255];
+          case 'mid':
+            return [0, 255, 0, 255];
+          case 'small':
+            return [0, 0, 255, 255];
+          default:
+            return [255, 255, 255, 255];
+        }
+      }
+      // pickable: true
     })
   ];
 
@@ -75,6 +103,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement, data) {
-  createRoot(container).render(<App data={data} />);
+export function renderToDOM(container: HTMLDivElement, data, airports) {
+  createRoot(container).render(<App data={data} airports={airports} />);
 }

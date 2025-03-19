@@ -14,9 +14,12 @@
 </body>
 <script type="module">
   import {renderToDOM} from './app.tsx';
-  const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
-  const points = await fetch(DATA_URL).then(response => response.json());
-  renderToDOM(document.getElementById('app'), points);
+  const DATA_URL = {
+    MANHATTAN: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json', // eslint-disable-line
+    AIRPORTS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json' // eslint-disable-line
+  };
+  const manhattan = await fetch(DATA_URL.MANHATTAN).then(response => response.json());
+  const airports = await fetch(DATA_URL.AIRPORTS).then(response => response.json());
+  renderToDOM(document.getElementById('app'), manhattan, airports);
 </script>
 </html>

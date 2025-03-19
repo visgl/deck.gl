@@ -49,14 +49,7 @@ struct Varyings {
 @vertex
 fn vertexMain(attributes: Attributes) -> Varyings {
   var varyings: Varyings;
-
-  // Draw an inline geometry constant array clip space triangle to verify that rendering works.
-  // var positions = array<vec2<f32>, 3>(vec2(0.0, 0.5), vec2(-0.5, -0.5), vec2(0.5, -0.5));
-  // if (attributes.instanceIndex == 0) {
-  //   varyings.position = vec4<f32>(positions[attributes.vertexIndex], 0.0, 1.0);
-  //   return varyings;
-  // }
-
+  
   // var geometry: Geometry;
   // geometry.worldPosition = instancePositions;
   // geometry.normal = project_normal(instanceNormals);
@@ -102,6 +95,5 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // DECKGL_FILTER_COLOR(fragColor, geometry);
 
   return fragColor;
-  // return vec4<f32>(0, 0, 1, 1);
 }
 `;
