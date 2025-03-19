@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.6] - Mar 19 2025
+
+- CARTO: Default to PointLabelLayer in VectorTileLayer (#9524)
+- chore: Bump to luma.gl@9.1.5 (WebGPU fixes) (#9525)
+- feat: line layer and project module port to WGSL, test app for WebGPU line (#9509)
+- fix(chore): Disable constant attributes under WebGPU (#9506)
+- chore: WebGPU plumbing (#9502)
+
 #### deck.gl [v9.1.5] - Mar 12 2025
 
 - DataFilterExtension: Make filterCategories prop optional (#9495)
