@@ -40,7 +40,7 @@ function getGitTag() {
 
 function getReleaseNotes(version) {
   let changelog = readFileSync('CHANGELOG.md', 'utf-8');
-  const header = changelog.match(new RegExp(`^###.*\\b${version.replace('v', '')}\\b.*$`, 'm'));
+  const header = changelog.match(new RegExp(`^###.*\\b${version}\\b.*$`, 'm'));
   if (!header) {
     return null;
   }
