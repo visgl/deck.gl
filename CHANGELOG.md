@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.7] - Mar 21 2025
+
+- Append `.js` to WebGPU shaders for script builds (#9537)
+- fix(carto): Fix tree-shaking of CartoRasterTileLoader (#9535)
+
 #### deck.gl [v9.1.6] - Mar 19 2025
 
 - CARTO: Default to PointLabelLayer in VectorTileLayer (#9524)
