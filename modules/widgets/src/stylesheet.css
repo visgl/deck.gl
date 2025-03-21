@@ -171,3 +171,13 @@
   );
 }
 
+.deck-widget .deck-widget-scale {
+  background-color: var(--button-icon-idle, #616166);
+  background-position: 50%;
+  display: block;
+}
+
+.deck-widget .deck-widget-geolocate {
+  pointer-events: auto;
+  cursor: pointer;
+}
