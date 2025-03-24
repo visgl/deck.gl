@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.8] - Mar 24 2025
+
+- fix(mapbox): interleaving by reverting #9483 (#9542)
+
 #### deck.gl [v9.1.7] - Mar 21 2025
 
 - Append `.js` to WebGPU shaders for script builds (#9537)
