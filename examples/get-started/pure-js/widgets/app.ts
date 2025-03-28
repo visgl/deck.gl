@@ -6,19 +6,14 @@ import {Deck, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
-  InfoWidget,
   ZoomWidget,
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  DarkGlassTheme,
-  LightGlassTheme
+  _InfoWidget,
+  _ThemeWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
-
-/* global window */
-const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -75,13 +70,14 @@ const deck = new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget({style: widgetTheme}),
-    new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme}),
-    new ScreenshotWidget({style: widgetTheme}),
-    new ResetViewWidget({style: widgetTheme}),
-    new InfoWidget({
-      onClick(widget: InfoWidget, info: PickingInfo) {
+    new ZoomWidget(),
+    new CompassWidget(),
+    new FullscreenWidget(),
+    new ScreenshotWidget(),
+    new ResetViewWidget(),
+    new _ThemeWidget(),
+    new _InfoWidget({
+      onClick(widget: _InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {
           widget.setProps({
             visible: true,
