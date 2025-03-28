@@ -81,9 +81,9 @@ const deck = new Deck({
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
     new ResetViewWidget({style: widgetTheme}),
-    new _ScaleWidget({style: widgetTheme, placement: 'bottom-left'})
+    new _ScaleWidget({style: widgetTheme, placement: 'bottom-left'}),
     new _InfoWidget({
-      onClick(widget: InfoWidget, info: PickingInfo) {
+      onClick(widget: _InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {
           widget.setProps({
             visible: true,
