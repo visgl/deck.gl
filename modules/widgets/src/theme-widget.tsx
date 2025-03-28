@@ -22,27 +22,27 @@ export type ThemeWidgetProps = {
   style?: Partial<CSSStyleDeclaration>;
   /** Additional CSS class. */
   className?: string;
-  /** Tooltip message when out of fullscreen. */
+  /** Tooltip message when dark mode is selected. */
   lightModeLabel?: string;
   /** Styles for light mode theme */
   lightModeTheme?: DeckWidgetTheme;
-  /** Tooltip message when fullscreen. */
+  /** Tooltip message when light mode is selected. */
   darkModeLabel?: string;
   /** Styles for dark mode theme */
   darkModeTheme?: DeckWidgetTheme;
   /** Initial theme setting */
-  initialTheme?: 'auto' | 'light' | 'dark' | 'none';
+  initialTheme?: 'auto' | 'light' | 'dark';
 };
 
 export class ThemeWidget implements Widget<ThemeWidgetProps> {
   id = 'fullscreen';
-  props: ThemeWidgetProps;
+  props: Required<ThemeWidgetProps>;
   placement: WidgetPlacement = 'top-left';
 
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  themeMode: 'light' | 'dark' | 'none' = 'dark';
+  themeMode: 'light' | 'dark' = 'dark';
 
   static defaultProps: Required<ThemeWidgetProps> = {
     id: 'widget',
@@ -95,8 +95,8 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     const ui = (
       <IconButton
         onClick={this.handleClick.bind(this)}
-        label={this.darkMode ? darkModeLabel : lightModeLabel}
-        className={this.darkMode ? 'deck-widget-moon' : 'deck-widget-sun'}
+        label={this.themeMode === 'dark' ? darkModeLabel : lightModeLabel}
+        className={this.themeMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
       />
     );
     render(ui, element);
@@ -122,13 +122,14 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     this.update();
 
     this.deck?.setProps({
-      style: this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme
+      style: this.themeMode == 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme
     });
   }
 
   async handleClick() {
     this.themeMode = this.themeMode === 'dark' ? 'light' : 'dark';
-    const themeStyle = this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
+    const themeStyle =
+      this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
     console.log(
       `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
       themeStyle
@@ -152,9 +153,11 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     this.update();
   }
 
-  getInitialMode(): boolean {
-    const { initialTheme } = this.props;
-    if (initialTheme === 'auto') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  getInitialMode() {
+    const {initialTheme} = this.props;
+    if (initialTheme === 'auto') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
     return initialTheme;
   }
 }
