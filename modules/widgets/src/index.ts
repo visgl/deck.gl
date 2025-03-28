@@ -7,7 +7,7 @@ export {CompassWidget} from './compass-widget';
 export {ZoomWidget} from './zoom-widget';
 export {ScreenshotWidget} from './screenshot-widget';
 export {ResetViewWidget} from './reset-view-widget';
-export {LoadingWidget} from './loading-widget';
+export {LoadingWidget as _LoadingWidget} from './loading-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
