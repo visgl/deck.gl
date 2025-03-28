@@ -10,7 +10,8 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  GeolocateWidget,
+  _InfoWidget,
+  _GeolocateWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -80,6 +81,23 @@ const deck = new Deck({
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
     new ResetViewWidget({style: widgetTheme}),
-    new GeolocateWidget({})
+    new _GeolocateWidget({})
+    new _InfoWidget({
+      onClick(widget: InfoWidget, info: PickingInfo) {
+        if (info.object && info.layer?.id === 'airports') {
+          widget.setProps({
+            visible: true,
+            position: info.object.geometry.coordinates,
+            text: `${info.object.properties.name} (${info.object.properties.abbrev})`,
+            style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+          });
+        } else {
+          widget.setProps({
+            visible: false
+          });
+        }
+        return true;
+      }
+    })
   ]
 });
