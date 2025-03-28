@@ -14,7 +14,7 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 
 #### `id` (string, optional) {#id}
 
-Default: `'fullscreen'`
+Default: `'theme'`
 
 The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multipe widgets of a given thpe.
 
@@ -24,6 +24,11 @@ Default: `'top-left'`
 
 Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
 
+#### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
+
+Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
+
+Default: `'auto'`
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
 Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
