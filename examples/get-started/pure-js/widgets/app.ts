@@ -77,7 +77,7 @@ const deck = new Deck({
     new ResetViewWidget(),
     new _ThemeWidget(),
     new _InfoWidget({
-      onClick(widget: InfoWidget, info: PickingInfo) {
+      onClick(widget: _InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {
           widget.setProps({
             visible: true,
