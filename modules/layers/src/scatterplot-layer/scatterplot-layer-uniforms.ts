@@ -4,7 +4,7 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const glslUniformBlock = `\
 uniform scatterplotUniforms {
   float radiusScale;
   float radiusMinPixels;
@@ -13,7 +13,7 @@ uniform scatterplotUniforms {
   float lineWidthMinPixels;
   float lineWidthMaxPixels;
   float stroked;
-  bool filled;
+  float filled;
   bool antialiasing;
   bool billboard;
   highp int radiusUnits;
@@ -38,8 +38,9 @@ export type ScatterplotProps = {
 
 export const scatterplotUniforms = {
   name: 'scatterplot',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  vs: glslUniformBlock,
+  fs: glslUniformBlock,
+  source: '',
   uniformTypes: {
     radiusScale: 'f32',
     radiusMinPixels: 'f32',

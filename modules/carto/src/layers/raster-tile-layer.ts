@@ -17,6 +17,10 @@ import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import {TileLayer, TileLayerProps} from '@deck.gl/geo-layers';
 import {copy, PostProcessModifier} from './post-process-utils';
+import {registerLoaders} from '@loaders.gl/core';
+import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
+
+registerLoaders([CartoRasterTileLoader]);
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;

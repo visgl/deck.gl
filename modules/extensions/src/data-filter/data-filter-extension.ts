@@ -73,7 +73,7 @@ export type DataFilterExtensionProps<DataT = any> = {
    * The categories which define whether an object should be rendered.
    * @default []
    */
-  filterCategories: FilterCategory[] | FilterCategory[][];
+  filterCategories?: FilterCategory[] | FilterCategory[][];
   /**
    * Only called if the `countItems` option is enabled.
    */
