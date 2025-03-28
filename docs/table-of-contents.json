@@ -318,7 +318,8 @@
           "api-reference/widgets/compass-widget",
           "api-reference/widgets/fullscreen-widget",
           "api-reference/widgets/screenshot-widget",
-          "api-reference/widgets/theme-widget"
+          "api-reference/widgets/theme-widget",
+          "api-reference/widgets/info-widget"
         ]
       }
     ]

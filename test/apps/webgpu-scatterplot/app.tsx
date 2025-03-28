@@ -5,23 +5,16 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-// import {ScatterplotLayer} from '@deck.gl/layers';
-import {TriangleLayer} from './triangle-layer';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
-import {CanvasContext} from '@luma.gl/core';
+import {Map} from 'react-map-gl/maplibre';
 
 import type {Color, MapViewState} from '@deck.gl/core';
-
-CanvasContext.prototype.getDrawingBufferSize = function getDrawingBufferSize() {
-  return this.getPixelSize();
-};
 
 const MALE_COLOR: Color = [0, 128, 255];
 const FEMALE_COLOR: Color = [255, 0, 128];
 
 // Source data CSV
-const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -74,
@@ -34,10 +27,8 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 type DataPoint = [longitude: number, latitude: number, gender: number];
 
-const points = await fetch(DATA_URL).then(response => response.json());
-
 export default function App({
-  data = points,
+  data,
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
@@ -50,8 +41,7 @@ export default function App({
   mapStyle?: string;
 }) {
   const layers = [
-    new TriangleLayer({})
-    /*
+    // new TriangleLayer({}),
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
@@ -59,30 +49,32 @@ export default function App({
       radiusMinPixels: 0.25,
       getPosition: d => [d[0], d[1], 0],
       getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
-      // getRadius: 1,
-      getLineColor: d => [0, 0, 0, 0],
-      getLineWidth: d => 1,
-      getRadius: d => 1,
+      getLineColor: [0, 0, 0, 0],
+      getLineWidth: 1,
+      getRadius: 1,
       updateTriggers: {
         getFillColor: [maleColor, femaleColor]
       },
       pickable: true
     })
-      */
   ];
 
   return (
+    /* Map won't show through until we adopt premultiplied colors https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html */
     <DeckGL
       deviceProps={{
+        createCanvasContext: {alphaMode: 'premultiplied'},
         adapters: [webgpuAdapter]
       }}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
-    />
+    >
+      <Map reuseMaps mapStyle={mapStyle} />
+    </DeckGL>
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
-  createRoot(container).render(<App />);
+export function renderToDOM(container: HTMLDivElement, data) {
+  createRoot(container).render(<App data={data} />);
 }
