@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck} from '@deck.gl/core';
+import {Deck, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
+  InfoWidget,
   ZoomWidget,
   FullscreenWidget,
   ScreenshotWidget,
@@ -33,7 +34,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-new Deck({
+const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
@@ -59,10 +60,7 @@ new Deck({
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
-      autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      autoHighlight: true
     }),
     new ArcLayer({
       id: 'arcs',
@@ -81,6 +79,23 @@ new Deck({
     new CompassWidget({style: widgetTheme}),
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
-    new ResetViewWidget({style: widgetTheme})
+    new ResetViewWidget({style: widgetTheme}),
+    new InfoWidget({
+      onClick(widget: InfoWidget, info: PickingInfo) {
+        if (info.object && info.layer?.id === 'airports') {
+          widget.setProps({
+            visible: true,
+            position: info.object.geometry.coordinates,
+            text: `${info.object.properties.name} (${info.object.properties.abbrev})`,
+            style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+          });
+        } else {
+          widget.setProps({
+            visible: false
+          });
+        }
+        return true;
+      }
+    })
   ]
 });
