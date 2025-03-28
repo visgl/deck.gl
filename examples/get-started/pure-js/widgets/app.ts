@@ -75,7 +75,7 @@ const deck = new Deck({
     new FullscreenWidget(),
     new ScreenshotWidget(),
     new ResetViewWidget(),
-    new _ThemeWidget()
+    new _ThemeWidget(),
     new _InfoWidget({
       onClick(widget: InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {
