@@ -7,7 +7,7 @@ export {CompassWidget} from './compass-widget';
 export {ZoomWidget} from './zoom-widget';
 export {ScreenshotWidget} from './screenshot-widget';
 export {ResetViewWidget} from './reset-view-widget';
-export {GeolocateWidget} from './geolocate-widget';
+export {GeolocateWidget as _GeolocateWidget} from './geolocate-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
