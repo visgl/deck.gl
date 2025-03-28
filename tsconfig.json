@@ -55,12 +55,12 @@
       },
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
-        "extensions": [".js", ".glsl.js"],
+        "extensions": [".js", ".glsl.js", ".wgsl.js"],
         "after": true
       },
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
-        "extensions": [".js", ".glsl.js"],
+        "extensions": [".js", ".glsl.js", ".wgsl.js"],
         "afterDeclarations": true
       }
     ]
