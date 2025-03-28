@@ -35,7 +35,7 @@ export type ThemeWidgetProps = {
 };
 
 export class ThemeWidget implements Widget<ThemeWidgetProps> {
-  id = 'fullscreen';
+  id = 'theme';
   props: ThemeWidgetProps;
   placement: WidgetPlacement = 'top-left';
 
