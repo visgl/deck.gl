@@ -35,7 +35,7 @@ export type ThemeWidgetProps = {
 };
 
 export class ThemeWidget implements Widget<ThemeWidgetProps> {
-  id = 'fullscreen';
+  id = 'theme';
   props: Required<ThemeWidgetProps>;
   placement: WidgetPlacement = 'top-left';
 
@@ -142,8 +142,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     elements.forEach(root => {
       const canvasStyle = (root as HTMLElement).style;
       if (canvasStyle) {
-        // Object.assign(canvasStyle, themeStyle);
-        for (const [variable, value] of Object.entries(themeStyle!)) {
+        for (const [variable, value] of Object.entries(themeStyle)) {
           if (variable.startsWith('--')) {
             canvasStyle.setProperty(variable, value);
           }
