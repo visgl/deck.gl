@@ -25,6 +25,11 @@ Default: `'top-left'`
 
 Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
 
+#### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
+
+Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
+
+Default: `'auto'`
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
 Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.

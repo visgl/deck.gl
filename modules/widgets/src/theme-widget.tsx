@@ -42,7 +42,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  darkMode: boolean = false;
+  themeMode: 'light' | 'dark' | 'none' = 'dark';
 
   static defaultProps: Required<ThemeWidgetProps> = {
     id: 'widget',
@@ -65,7 +65,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       ...props
     };
 
-    this.darkMode = false; // this.getInitialMode();
+    this.themeMode = this.getInitialMode();
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -127,10 +127,10 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
   }
 
   async handleClick() {
-    this.darkMode = !this.darkMode;
-    const themeStyle = this.darkMode ? this.props.darkModeTheme : this.props.lightModeTheme;
+    this.themeMode = this.themeMode === 'dark' ? 'light' : 'dark';
+    const themeStyle = this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
     console.log(
-      `Switching to ${this.darkMode ? this.props.darkModeLabel : this.props.lightModeLabel}`,
+      `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
       themeStyle
     );
     // Note: deck does not support updating the style property
@@ -153,7 +153,8 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
   }
 
   getInitialMode(): boolean {
-    // TODO - consider initial prop
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const { initialTheme } = this.props;
+    if (initialTheme === 'auto') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return initialTheme;
   }
 }
