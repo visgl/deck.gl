@@ -6,7 +6,7 @@ import {Deck, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
-  PopupWidget,
+  InfoWidget,
   ZoomWidget,
   FullscreenWidget,
   ScreenshotWidget,
@@ -80,8 +80,8 @@ const deck = new Deck({
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme}),
     new ResetViewWidget({style: widgetTheme}),
-    new PopupWidget({
-      onClick(widget: PopupWidget, info: PickingInfo) {
+    new InfoWidget({
+      onClick(widget: InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {
           widget.setProps({
             visible: true,

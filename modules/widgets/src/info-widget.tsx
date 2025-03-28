@@ -2,7 +2,7 @@
 import type {Deck, PickingInfo, Viewport, Widget} from '@deck.gl/core';
 import {render} from 'preact';
 
-export type PopupWidgetProps = {
+export type InfoWidgetProps = {
   id: string;
   /**
    * View to attach to and interact with. Required when using multiple views.
@@ -29,18 +29,18 @@ export type PopupWidgetProps = {
    * Minimum offset (in pixels) to keep the popup away from the canvas edges.
    */
   minOffset?: number;
-  onClick?: (widget: PopupWidget, info: PickingInfo) => boolean;
+  onClick?: (widget: InfoWidget, info: PickingInfo) => boolean;
 };
 
-export class PopupWidget implements Widget<PopupWidgetProps> {
+export class InfoWidget implements Widget<InfoWidgetProps> {
   id = 'popup';
-  props: PopupWidgetProps;
+  props: InfoWidgetProps;
   viewId?: string | null = null;
   viewport?: Viewport;
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: PopupWidgetProps) {
+  constructor(props: InfoWidgetProps) {
     this.id = props.id || 'popup';
     this.viewId = props.viewId || null;
     props.style = props.style || {};
@@ -52,7 +52,7 @@ export class PopupWidget implements Widget<PopupWidgetProps> {
     this.props = props;
   }
 
-  setProps(props: Partial<PopupWidgetProps>) {
+  setProps(props: Partial<InfoWidgetProps>) {
     Object.assign(this.props, props);
     this.update();
   }
