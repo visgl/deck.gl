@@ -115,7 +115,7 @@ export class PopupWidget implements Widget<PopupWidgetProps> {
             padding: '10px',
             position: 'relative',
             // Include any additional styles
-            ...this.props.style
+            ...(this.props.style as React.CSSProperties)
           }}
         >
           {this.props.text}
