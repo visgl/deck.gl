@@ -10,16 +10,14 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  _InfoWidget,
   _LoadingWidget,
+  _ScaleWidget,
+  _ThemeWidget,
+  _InfoWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
-
-/* global window */
-const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -82,6 +80,8 @@ const deck = new Deck({
     new ScreenshotWidget(),
     new ResetViewWidget(),
     new _LoadingWidget(),
+    new _ScaleWidget({placement: 'bottom-left'}),
+    new _ThemeWidget(),
     new _InfoWidget({
       onClick(widget: _InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {

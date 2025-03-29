@@ -1,4 +1,4 @@
-# LoadingWidget
+# LoadingWidget (Experimental)
 
 This widget shows a spinning indicator while any deck.gl layers are loading data.
 

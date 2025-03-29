@@ -1,4 +1,4 @@
-# InfoWidget
+# InfoWidget (Experimental)
 
 The InfoWidget shows a popup when an item in a layer has been clicked.
 
