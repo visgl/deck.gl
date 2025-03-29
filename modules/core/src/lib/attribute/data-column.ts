@@ -281,19 +281,31 @@ export default class DataColumn<Options, State> {
         options || {}
       );
       attributes.push(
-        getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
-        getBufferAttributeLayout(`${attributeName}64Low`, {
-          ...accessor,
-          ...doubleShaderAttributeDefs.low
-        })
+        getBufferAttributeLayout(
+          attributeName,
+          {...accessor, ...doubleShaderAttributeDefs.high},
+          this.device.type
+        ),
+        getBufferAttributeLayout(
+          `${attributeName}64Low`,
+          {
+            ...accessor,
+            ...doubleShaderAttributeDefs.low
+          },
+          this.device.type
+        )
       );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
       attributes.push(
-        getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
+        getBufferAttributeLayout(
+          attributeName,
+          {...accessor, ...shaderAttributeDef},
+          this.device.type
+        )
       );
     } else {
-      attributes.push(getBufferAttributeLayout(attributeName, accessor));
+      attributes.push(getBufferAttributeLayout(attributeName, accessor, this.device.type));
     }
     return result;
   }
@@ -610,7 +622,8 @@ export default class DataColumn<Options, State> {
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,
       id: this.id,
-      usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
+      // TODO(ibgreen) - WebGPU requires COPY_DST and COPY_SRC to allow write / read
+      usage: (isIndexed ? Buffer.INDEX : Buffer.VERTEX) | Buffer.COPY_DST,
       indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
       byteLength
     });

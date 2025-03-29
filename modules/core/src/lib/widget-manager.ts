@@ -97,9 +97,11 @@ export class WidgetManager {
   }
 
   /** Declarative API to configure widgets */
-  setProps(props: {widgets?: Widget[]}) {
+  setProps(props: {widgets?: (Widget | null | undefined)[]}) {
     if (props.widgets && !deepEqual(props.widgets, this.widgets, 1)) {
-      this._setWidgets(props.widgets);
+      // Allow application to supply null widgets
+      const nextWidgets = props.widgets.filter(Boolean) as Widget[];
+      this._setWidgets(nextWidgets);
     }
   }
 
@@ -201,6 +203,7 @@ export class WidgetManager {
       viewContainer.style.pointerEvents = 'none';
       viewContainer.style.position = 'absolute';
       viewContainer.style.overflow = 'hidden';
+      viewContainer.classList.add('deck-theme');
       this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }

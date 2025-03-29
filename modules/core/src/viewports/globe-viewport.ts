@@ -46,7 +46,7 @@ export type GlobeViewportOptions = {
   latitude?: number;
   /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
   altitude?: number;
-  /* Meter offsets of the viewport center from lng, lat */
+  /* Meter offsets of the viewport center from lng, lat, elevation */
   position?: number[];
   /** Zoom level */
   zoom?: number;
