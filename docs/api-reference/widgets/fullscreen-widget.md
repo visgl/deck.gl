@@ -45,3 +45,14 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 Default: `undefined`
 
 Class name to attach to the widget element. The element has the default class name of `deck-widget deck-fullscreen-widget`.
+
+## Styles
+
+| Name                      | Type                     | Default                                                      |
+| ------------------------- | ------------------------ | ------------------------------------------------------------ |
+| `--icon-fullscreen-enter` | [SVG Data Url][data_url] | [Material Symbol Fullscreen][icon_fullscreen_enter_url]      |
+| `--icon-fullscreen-exit`  | [SVG Data Url][data_url] | [Material Symbol Fullscreen Exit][icon_fullscreen_exit_url] |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[icon_fullscreen_enter_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40
+[icon_fullscreen_exit_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40

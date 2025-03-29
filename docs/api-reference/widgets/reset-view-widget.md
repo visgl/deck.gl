@@ -1,6 +1,6 @@
 # ResetViewWidget
 
-This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view. 
+This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
 
 ## Props
 
@@ -8,7 +8,7 @@ This widget resets the view state of a deck.gl viewport to its initial state. Th
 
 Default: `'reset-view'`
 
-The `id` must be unique among all your widgets at a given time. 
+The `id` must be unique among all your widgets at a given time.
 
 Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
 
@@ -35,3 +35,12 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 Default: `undefined`
 
 Class name to attach to the widget element. The element has the default class name of `deck-widget deck-reset-view-widget`.
+
+## Styles
+
+| Name                | Type                     | Default                                       |
+| ------------------- | ------------------------ | --------------------------------------------- |
+| `--icon-reset-view` | [SVG Data Url][data_url] | [Material Symbol Fullscreen][icon_reset_view] |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[icon_reset_view_url]: https://fonts.google.com/icons
