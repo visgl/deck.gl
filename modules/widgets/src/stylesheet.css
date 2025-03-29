@@ -47,7 +47,7 @@
   flex-direction: column;
 }
 
-/* Common button styles */
+/* Common button background styles */
 .deck-widget-button-group button,
 .deck-widget-button button {
   width: calc(var(--button-size, 28px) - 2px);
@@ -91,9 +91,9 @@
   border-bottom-left-radius: 0;
 }
 
-/* Icon button styles */
+/* Icon button foreground styles */
 .deck-widget button .deck-widget-icon {
-  background-color: var(--button-background, #616166);
+  background-color: var(--button-icon-idle, #616166);
   background-position: 50%;
   background-repeat: no-repeat;
   display: block;
@@ -172,6 +172,7 @@
   );
 }
 
+/* Theme widget styles */
 .deck-widget.deck-widget-theme button.deck-widget-sun .deck-widget-icon {
   mask-image: var(
     --icon-sun,
@@ -189,7 +190,8 @@
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><circle x="12" cy="12" r="6" /></svg>')
   );
 }
- 
+
+/* Reset view styles */
 .deck-widget.deck-widget-reset-view button.deck-widget-reset-focus .deck-widget-icon {
   mask-image: var(
     --icon-camera,

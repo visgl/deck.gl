@@ -6,6 +6,9 @@
  * A Deck Theme is a set of CSS variables that control CSS styling of the official widgets.
  */
 export type DeckWidgetTheme = {
+  // layout
+  '--widget-margin'?: string;
+  // button and button group
   '--button-background': string;
   '--button-stroke': string;
   '--button-inner-stroke': string;
@@ -13,6 +16,9 @@ export type DeckWidgetTheme = {
   '--button-backdrop-filter': string;
   '--button-icon-idle': string;
   '--button-icon-hover': string;
+  '--button-size'?: string;
+  '--button-corner-radius'?: string;
+  // inter-icon color
   '--icon-compass-north-color': string;
   '--icon-compass-south-color': string;
 };
