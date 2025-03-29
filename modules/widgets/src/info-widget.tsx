@@ -69,9 +69,11 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
   onHover(info: PickingInfo): void {
     if (this.props.mode === 'hover' && this.props.getTooltip) {
       const tooltip = this.props.getTooltip(info, this);
+      // hover tooltips should show over static and click infos
       this.setProps({
         visible: tooltip !== null,
-        ...tooltip
+        ...tooltip,
+        style: {zIndex: 1, ...tooltip?.style}, 
       });
     }
   }
