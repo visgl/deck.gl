@@ -10,9 +10,10 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
+  _LoadingWidget,
   _ScaleWidget,
-  _InfoWidget,
   _ThemeWidget,
+  _InfoWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -78,6 +79,7 @@ const deck = new Deck({
     new FullscreenWidget(),
     new ScreenshotWidget(),
     new ResetViewWidget(),
+    new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-left'}),
     new _ThemeWidget(),
     new _InfoWidget({

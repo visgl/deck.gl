@@ -77,12 +77,11 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     className?: string;
     style?: Partial<CSSStyleDeclaration>;
   }) {
-    const {widgetClassName, className, style} = props;
     const element = document.createElement('div');
-    ['deck-widget', widgetClassName, className]
+    ['deck-widget', props.widgetClassName, props.className]
       .filter((cls): cls is string => typeof cls === 'string' && cls.length > 0)
       .forEach(className => element.classList.add(className));
-    _applyStyles(element, style);
+    _applyStyles(element, props.style);
     return element;
   }
 }

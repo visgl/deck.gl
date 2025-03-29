@@ -1,12 +1,12 @@
-# InfoWidget (Experimental)
+# LoadingWidget (Experimental)
 
-The InfoWidget shows a popup when an item in a layer has been clicked.
+This widget shows a spinning indicator while any deck.gl layers are loading data.
 
 ## Props
 
 #### `id` (string, optional) {#id}
 
-Default: `'popup'`
+Default: `'loading'`
 
 The `id` must be unique among all your widgets at a given time. 
 
@@ -22,7 +22,7 @@ Widget position within the view relative to the map container. Valid options are
 
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Popup'`
+Default: `'Loading data'`
 
 #### `style` (object, optional) {#style}
 
@@ -34,4 +34,4 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 
 Default: `undefined`
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-popup-widget`.
+Class name to attach to the widget element. The element has the default class name of `deck-widget deck-loading-widget`.
