@@ -16,6 +16,10 @@ export type InfoWidgetProps = {
    * Additional CSS class.
    */
   className?: string;
+
+  mode: 'click' | 'hover' | 'static';
+
+  getTooltip?: (info: PickingInfo, widget: InfoWidget) => any;
   /**
    * Position at which to place popup (clicked point: [longitude, latitude]).
    */
@@ -62,7 +66,27 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
     this.update();
   }
 
+  onHover(info: PickingInfo): void {
+    if (this.props.mode === 'hover' && this.props.getTooltip) {
+      const tooltip = this.props.getTooltip(info, this);
+      this.setProps({
+        visible: tooltip !== null,
+        ...tooltip
+      });
+    }
+  }
+
   onClick(info: PickingInfo): boolean {
+    if (this.props.mode === 'click' && this.props.getTooltip) {
+      const tooltip = this.props.getTooltip(info, this);
+      this.setProps({
+        visible: tooltip !== null,
+        ...tooltip
+      });
+      return tooltip != null;
+    }
+
+    // Original behavior
     return this.props.onClick?.(this, info) || false;
   }
 
