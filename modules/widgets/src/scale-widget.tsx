@@ -39,7 +39,7 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
   scaleText: string = '';
 
   constructor(props: ScaleWidgetProps = {}) {
-    super({ ...ScaleWidget.defaultProps, ...props });
+    super({...ScaleWidget.defaultProps, ...props});
     this.placement = props.placement ?? this.placement;
   }
 
@@ -61,7 +61,7 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
         className="deck-widget-scale"
         width={svgWidth}
         height={30}
-        style={{ overflow: 'visible', background: 'transparent' }}
+        style={{overflow: 'visible', background: 'transparent'}}
         onClick={this.handleClick.bind(this)}
       >
         {/* Pretty distance label positioned to the left of the horizontal line */}
@@ -70,7 +70,7 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
           y="10"
           textAnchor="end"
           alignmentBaseline="middle"
-          style={{ fontSize: '16px', fill: 'black', fontWeight: 'bold', fontFamily: "sans-serif" }}
+          style={{fontSize: '16px', fill: 'black', fontWeight: 'bold', fontFamily: 'sans-serif'}}
         >
           {this.scaleText}
         </text>
@@ -110,9 +110,9 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
     // Only handle geospatial viewports (which contain latitude)
     if (!('latitude' in viewport)) return;
 
-    const { latitude, zoom } = viewport as { latitude: number; zoom: number };
+    const {latitude, zoom} = viewport as {latitude: number; zoom: number};
     const metersPerPixel = getMetersPerPixel(latitude, zoom);
-    const { candidate, candidatePixels } = computeScaleCandidate(metersPerPixel);
+    const {candidate, candidatePixels} = computeScaleCandidate(metersPerPixel);
 
     this.scaleValue = candidate;
     this.scaleWidth = candidatePixels;
@@ -147,7 +147,10 @@ function getMetersPerPixel(latitude: number, zoom: number): number {
  * @param metersPerPixel - The number of meters per pixel at the current zoom/latitude.
  * @returns An object containing the candidate distance and its width in pixels.
  */
-function computeScaleCandidate(metersPerPixel: number): { candidate: number; candidatePixels: number } {
+function computeScaleCandidate(metersPerPixel: number): {
+  candidate: number;
+  candidatePixels: number;
+} {
   const minPixels = 100;
   const maxPixels = 200;
   const targetPixels = (minPixels + maxPixels) / 2;
@@ -178,5 +181,5 @@ function computeScaleCandidate(metersPerPixel: number): { candidate: number; can
       candidatePixels = candidate / metersPerPixel;
     }
   }
-  return { candidate, candidatePixels };
+  return {candidate, candidatePixels};
 }
