@@ -73,7 +73,7 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
       this.setProps({
         visible: tooltip !== null,
         ...tooltip,
-        style: {zIndex: 1, ...tooltip?.style}, 
+        style: {zIndex: 1, ...tooltip?.style}
       });
     }
   }

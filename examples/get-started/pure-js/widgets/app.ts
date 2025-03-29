@@ -82,7 +82,6 @@ const deck = new Deck({
     new ScreenshotWidget(),
     new ResetViewWidget(),
     new _LoadingWidget(),
-    new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-left'}),
     new _GeolocateWidget(),
     new _ThemeWidget(),
