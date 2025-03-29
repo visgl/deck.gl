@@ -313,9 +313,14 @@
         "label": "@deck.gl/widgets",
         "items": [
           "api-reference/widgets/overview",
+          "api-reference/widgets/styling",
           "api-reference/widgets/zoom-widget",
           "api-reference/widgets/compass-widget",
           "api-reference/widgets/fullscreen-widget",
+          "api-reference/widgets/reset-view-widget",
+          "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/loading-widget",
+          "api-reference/widgets/theme-widget",
           "api-reference/widgets/info-widget"
         ]
       }
