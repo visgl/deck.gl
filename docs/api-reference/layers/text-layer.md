@@ -86,7 +86,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -557,7 +557,7 @@ async function renderLayers() {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 
 function App() {

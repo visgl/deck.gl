@@ -175,7 +175,7 @@ The reverse-controlled option is supported by the pre-built scripting bundle, an
 ```tsx
 import React from 'react';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
 

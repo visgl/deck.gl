@@ -64,7 +64,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {AmbientLight, SunLight, LightingEffect} from '@deck.gl/core';
 
 // create an ambient light
@@ -209,7 +209,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/effects';
 import {PostProcessEffect} from '@deck.gl/core';
 

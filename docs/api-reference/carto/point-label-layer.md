@@ -5,7 +5,7 @@
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {PointLabelLayer} from '@deck.gl/carto';
 

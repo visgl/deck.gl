@@ -74,7 +74,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 function App() {

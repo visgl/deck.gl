@@ -5,7 +5,7 @@
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {H3TileLayer, h3QuerySource} from '@deck.gl/carto';
 
 function App({viewState}) {

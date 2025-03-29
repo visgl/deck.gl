@@ -15,7 +15,8 @@ import {
   _ThemeWidget,
   _InfoWidget,
   DarkGlassTheme,
-  LightGlassTheme
+  LightGlassTheme,
+  LightTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -81,7 +82,10 @@ const deck = new Deck({
     new ResetViewWidget(),
     new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-left'}),
-    new _ThemeWidget(),
+    new _ThemeWidget({
+      darkModeTheme: DarkGlassTheme, 
+      lightModeTheme: LightGlassTheme
+    }),
     new _InfoWidget({
       onClick(widget: _InfoWidget, info: PickingInfo) {
         if (info.object && info.layer?.id === 'airports') {

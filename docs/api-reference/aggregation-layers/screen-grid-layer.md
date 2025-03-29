@@ -97,7 +97,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScreenGridLayer, ScreenGridLayerPickingInfo} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
