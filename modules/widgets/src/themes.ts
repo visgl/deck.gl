@@ -25,8 +25,8 @@ export const LightTheme = {
   '--button-backdrop-filter': 'unset',
   '--button-icon-idle': 'rgba(97, 97, 102, 1)',
   '--button-icon-hover': 'rgba(24, 24, 26, 1)',
-  '--icon-compass-north-color': '#F05C44',
-  '--icon-compass-south-color': '#C2C2CC'
+  '--icon-compass-north-color': 'rgb(240, 92, 68)',
+  '--icon-compass-south-color': 'rgb(204, 204, 204)'
 } as const satisfies DeckWidgetTheme;
 
 export const DarkTheme = {
@@ -37,8 +37,8 @@ export const DarkTheme = {
   '--button-backdrop-filter': 'unset',
   '--button-icon-idle': 'rgba(158, 157, 168, 1)',
   '--button-icon-hover': 'rgba(215, 214, 229, 1)',
-  '--icon-compass-north-color': '#F05C44',
-  '--icon-compass-south-color': '#C2C2CC'
+  '--icon-compass-north-color': 'rgb(240, 92, 68)',
+  '--icon-compass-south-color': 'rgb(200, 199, 209)'
 } as const satisfies DeckWidgetTheme;
 
 export const LightGlassTheme = {
@@ -50,8 +50,8 @@ export const LightGlassTheme = {
   '--button-backdrop-filter': 'blur(4px)',
   '--button-icon-idle': 'rgba(97, 97, 102, 1)',
   '--button-icon-hover': 'rgba(24, 24, 26, 1)',
-  '--icon-compass-north-color': '#F05C44',
-  '--icon-compass-south-color': '#C2C2CC'
+  '--icon-compass-north-color': 'rgb(240, 92, 68)',
+  '--icon-compass-south-color': 'rgb(204, 204, 204)'
 } as const satisfies DeckWidgetTheme;
 
 export const DarkGlassTheme = {
@@ -63,6 +63,6 @@ export const DarkGlassTheme = {
   '--button-backdrop-filter': 'blur(4px)',
   '--button-icon-idle': 'rgba(158, 157, 168, 1)',
   '--button-icon-hover': 'rgba(215, 214, 229, 1)',
-  '--icon-compass-north-color': '#F05C44',
-  '--icon-compass-south-color': '#C2C2CC'
+  '--icon-compass-north-color': 'rgb(240, 92, 68)',
+  '--icon-compass-south-color': 'rgb(200, 199, 209)'
 } as const satisfies DeckWidgetTheme;
