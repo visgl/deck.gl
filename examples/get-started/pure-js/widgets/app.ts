@@ -10,9 +10,11 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  _LoadingWidget,
+  _GeolocateWidget,
   _ScaleWidget,
+  _LoadingWidget,
   _ThemeWidget,
+  _InfoWidget,
   _InfoWidget,
   DarkGlassTheme,
   LightGlassTheme
@@ -80,7 +82,9 @@ const deck = new Deck({
     new ScreenshotWidget(),
     new ResetViewWidget(),
     new _LoadingWidget(),
+    new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-left'}),
+    new _GeolocateWidget(),
     new _ThemeWidget(),
     new _InfoWidget({
       onClick(widget: _InfoWidget, info: PickingInfo) {
