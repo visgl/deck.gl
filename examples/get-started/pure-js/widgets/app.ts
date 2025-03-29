@@ -10,8 +10,11 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
+  _ScaleWidget,
   _InfoWidget,
-  _ThemeWidget
+  _ThemeWidget,
+  DarkGlassTheme,
+  LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -75,6 +78,7 @@ const deck = new Deck({
     new FullscreenWidget(),
     new ScreenshotWidget(),
     new ResetViewWidget(),
+    new _ScaleWidget({placement: 'bottom-left'}),
     new _ThemeWidget(),
     new _InfoWidget({
       onClick(widget: _InfoWidget, info: PickingInfo) {
