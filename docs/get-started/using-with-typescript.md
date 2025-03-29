@@ -6,7 +6,7 @@ Starting from v9.0, deck.gl publishes official TypeScript types for all modules.
 
 ```js
 // Values and types.
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 // Types only.
@@ -21,7 +21,7 @@ Help us improve the types by reporting issues or sending suggestions on GitHub!
 Starting from v8.8, deck.gl publishes "public preview" TypeScript types via an opt-in only entry point. To use the official types in your application, find the following statements:
 
 ```js
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 ```
 

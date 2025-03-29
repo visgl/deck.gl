@@ -5,7 +5,7 @@
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {HeatmapTileLayer, quadbinTableSource} from '@deck.gl/carto';
 
 function App({viewState}) {
