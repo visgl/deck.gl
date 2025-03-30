@@ -45,3 +45,12 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 Default: `undefined`
 
 Class name to attach to the widget element. The element has the default class name of `deck-widget deck-compass-widget`.
+
+## Styles
+
+| Name             | Type                     | Default                                        |
+| ---------------- | ------------------------ | ---------------------------------------------- |
+| `--icon-compass` | [SVG Data Url][data_url] | [Material Symbol Fullscreen][icon_compass_url] |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[icon_compass_url]: https://fonts.google.com/icons
