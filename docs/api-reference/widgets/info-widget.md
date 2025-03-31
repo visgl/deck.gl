@@ -6,11 +6,9 @@ The InfoWidget shows a popup when an item in a layer has been clicked.
 
 #### `id` (string, optional) {#id}
 
-Default: `'popup'`
+Default: `'info'`
 
-The `id` must be unique among all your widgets at a given time. 
-
-Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
+The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
 
 #### `placement` (string, optional) {#placement}
 
@@ -22,7 +20,7 @@ Widget position within the view relative to the map container. Valid options are
 
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Popup'`
+Default: `'Info'`
 
 #### `style` (object, optional) {#style}
 
@@ -34,4 +32,4 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 
 Default: `undefined`
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-popup-widget`.
+Class name to attach to the widget element. The element has the default class name of `deck-widget deck-info-widget`.
