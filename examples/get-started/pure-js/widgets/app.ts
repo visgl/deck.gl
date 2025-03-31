@@ -10,9 +10,11 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  _LoadingWidget,
+  _GeolocateWidget,
   _ScaleWidget,
+  _LoadingWidget,
   _ThemeWidget,
+  _InfoWidget,
   _InfoWidget,
   DarkGlassTheme,
   LightGlassTheme,
@@ -81,27 +83,41 @@ const deck = new Deck({
     new ScreenshotWidget(),
     new ResetViewWidget(),
     new _LoadingWidget(),
+    new _GeolocateWidget(),
     new _ScaleWidget({placement: 'bottom-left'}),
     new _ThemeWidget({
       darkModeTheme: DarkGlassTheme, 
       lightModeTheme: LightGlassTheme
     }),
-    new _InfoWidget({
-      onClick(widget: _InfoWidget, info: PickingInfo) {
-        if (info.object && info.layer?.id === 'airports') {
-          widget.setProps({
-            visible: true,
-            position: info.object.geometry.coordinates,
-            text: `${info.object.properties.name} (${info.object.properties.abbrev})`,
-            style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
-          });
-        } else {
-          widget.setProps({
-            visible: false
-          });
-        }
-        return true;
-      }
-    })
+    new _InfoWidget({mode: 'hover', getTooltip}),
+    new _InfoWidget({mode: 'click', getTooltip})
+    // new _InfoWidget({mode: 'static', getTooltip})
   ]
 });
+
+function getTooltip(info: PickingInfo, widget: _InfoWidget) {
+  if (!info.object || info.layer?.id !== 'airports') {
+    return null;
+  }
+
+  let text: string;
+  switch (widget.props.mode) {
+    case 'hover':
+      text = `${info.object.properties.name} (${info.object.properties.abbrev})`;
+      break;
+    case 'click':
+    case 'static':
+      text = `\
+${info.object.properties.name} (${info.object.properties.abbrev})
+${info.object.properties.type}
+${info.object.properties.featureclass} (${info.object.properties.location})
+`;
+      break;
+  }
+
+  return {
+    position: info.object.geometry.coordinates,
+    text,
+    style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+  };
+}
