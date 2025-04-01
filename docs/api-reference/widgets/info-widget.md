@@ -10,17 +10,31 @@ Default: `'info'`
 
 The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
 
-#### `placement` (string, optional) {#placement}
+#### position ([number, number]) {#position}
 
-Default: `'top-left'`
+Position at which to place popup (e.g. [longitude, latitude]).
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+#### text (string, optional) {#text}
 
-#### `label` (string, optional) {#label}
+Text to display within widget.
 
-Tooltip message displayed while hovering a mouse over the widget.
+#### visible (boolean, optional) {#visible}
 
-Default: `'Info'`
+Whether the widget is visible.
+
+Default: `false`
+
+#### minOffset (number, optional) {#minoffset}
+
+Minimum offset (in pixels) to keep the popup away from the canvas edges.
+
+#### onClick (Function, optional) {#onclick}
+
+`(widget: _InfoWidget, info: PickingInfo) => boolean`
+
+#### `viewId` (string, optional) {#viewid}
+
+View to attach to and interact with. Required when using multiple views.
 
 #### `style` (object, optional) {#style}
 
