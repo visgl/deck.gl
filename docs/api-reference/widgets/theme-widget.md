@@ -1,4 +1,4 @@
-# ThemeWidget
+# ThemeWidget (Experimental)
 
 <p class="badges">
   <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />

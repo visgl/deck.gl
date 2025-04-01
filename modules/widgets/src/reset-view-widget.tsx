@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
 import type {WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';

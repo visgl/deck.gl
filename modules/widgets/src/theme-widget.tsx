@@ -4,6 +4,7 @@
 
 /* global document */
 import {
+  log,
   _deepEqual as deepEqual,
   _applyStyles as applyStyles,
   _removeStyles as removeStyles
@@ -126,7 +127,8 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     this.themeMode = this.themeMode === 'dark' ? 'light' : 'dark';
     const themeStyle =
       this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
-    console.log(
+    log.log(
+      1,
       `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
       themeStyle
     );
