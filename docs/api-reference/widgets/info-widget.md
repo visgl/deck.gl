@@ -63,3 +63,7 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 Default: `undefined`
 
 Class name to attach to the widget element. The element has the default class name of `deck-widget deck-popup-widget`.
+
+## Source
+
+[modules/widgets/src/info-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/info-widget.tsx)

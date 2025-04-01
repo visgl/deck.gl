@@ -74,6 +74,8 @@ Class name to attach to the widget element. The element has the default class na
 
 ## Styles
 
+Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+
 | Name              | Type                     | Default                                     |
 | ----------------- | ------------------------ | ------------------------------------------- |
 | `--icon-zoom-in`  | [SVG Data Url][data_url] | [Material Symbol Add][icon_zoom_in_url]     |
@@ -82,3 +84,7 @@ Class name to attach to the widget element. The element has the default class na
 [data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
 [icon_zoom_in_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40
 [icon_zoom_out_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40
+
+## Source
+
+[modules/widgets/src/zoom-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/zoom-widget.tsx)

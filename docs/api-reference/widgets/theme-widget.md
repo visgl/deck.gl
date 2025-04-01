@@ -7,7 +7,7 @@ import {_ThemeWidget} from '@deck.gl/widgets';
 
 This widget changes the theme of deck.gl between light mode and dark mode. Click the widget to toggle the theme.
 
-:::caution
+:::info
 
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
   :::
@@ -77,3 +77,7 @@ Class name to attach to the widget element. The element has the default class na
 [data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
 [icon_sun_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40
 [icon_moon_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40
+
+## Source
+
+[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/theme-widget.tsx)

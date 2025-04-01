@@ -54,9 +54,15 @@ Class name to attach to the widget element. The element has the default class na
 
 ## Styles
 
+Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+
 | Name                | Type                     | Default                                       |
 | ------------------- | ------------------------ | --------------------------------------------- |
-| `--icon-reset-view` | [SVG Data Url][data_url] | [Material Symbol Fullscreen][icon_reset_view] |
+| `--icon-reset-view` | [SVG Data Url][data_url] | [Material Symbol Reset Focus][icon_reset_view] |
 
 [data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
-[icon_reset_view_url]: https://fonts.google.com/icons
+[icon_reset_view_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:reset_focus:FILL@1;wght@400;GRAD@0;opsz@40&icon.size=40&icon.color=%23000000&icon.style=Rounded
+
+## Source
+
+[modules/widgets/src/reset-view-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/reset-view-widget.tsx)
