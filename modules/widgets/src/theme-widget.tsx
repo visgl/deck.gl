@@ -135,7 +135,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
 
     const el = this.element;
     if (el) {
-      const container = el.closest('.deck-widget-container');
+      const container = el.closest<HTMLDivElement>('.deck-widget-container');
       if (container) {
         applyStyles(container, themeStyle);
       }
