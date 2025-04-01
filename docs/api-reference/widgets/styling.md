@@ -1,3 +1,5 @@
+import {WidgetThemes} from '@site/src/doc-demos/widgets';
+
 # Styling Widgets
 
 ## Themes
@@ -9,6 +11,9 @@ Themes are global for a deck instance, i.e they apply to all widgets in all view
 
 Default themes are provided for dark and light mode, however themes can be customized to offer applications some additional control of styling, see below.
 
+### Built-In Themes
+
+<WidgetThemes/>
 
 ## Setting the Theme
 

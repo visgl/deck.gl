@@ -1,6 +1,20 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {ZoomWidget} from '@deck.gl/widgets';
+
 # ZoomWidget
 
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
+
+<WidgetPreview cls={ZoomWidget} props={{orientation: 'horizontal'}}/>
+
+```ts
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [new ZoomWidget()]
+});
+```
 
 ## Props
 

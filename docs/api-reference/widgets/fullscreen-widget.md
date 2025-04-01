@@ -1,6 +1,20 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {FullscreenWidget} from '@deck.gl/widgets';
+
 # FullscreenWidget
 
 This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
+
+<WidgetPreview cls={FullscreenWidget}/>
+
+```ts
+import {FullscreenWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [new FullscreenWidget()]
+});
+```
 
 ## Props
 

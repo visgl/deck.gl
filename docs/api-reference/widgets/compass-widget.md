@@ -1,6 +1,20 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {CompassWidget} from '@deck.gl/widgets';
+
 # CompassWidget
 
 This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports Map and Globe view.
+
+<WidgetPreview cls={CompassWidget}/>
+
+```ts
+import {CompassWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [new CompassWidget()]
+});
+```
 
 ## Props
 

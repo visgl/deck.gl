@@ -1,8 +1,9 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_ThemeWidget} from '@deck.gl/widgets';
+
 # ThemeWidget (Experimental)
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
-</p>
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
 This widget changes the theme of deck.gl between light mode and dark mode. Click the widget to toggle the theme.
 
@@ -10,6 +11,17 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
   :::
+
+<WidgetPreview cls={_ThemeWidget}/>
+
+```ts
+import {_ThemeWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [new _ThemeWidget()]
+});
+```
 
 ## Props
 

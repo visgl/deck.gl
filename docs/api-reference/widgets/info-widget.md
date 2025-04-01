@@ -1,6 +1,34 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_InfoWidget} from '@deck.gl/widgets';
+
 # InfoWidget (Experimental)
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 The InfoWidget shows a popup when an item in a layer has been clicked.
+
+<WidgetPreview cls={_InfoWidget} props={{
+  visible: true,
+  position: [0, 0],
+  text: "Info",
+  style: {width: 50, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+}}/>
+
+```ts
+import {_InfoWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [
+    new _InfoWidget({
+      visible: true,
+      position: [0.45, 51.47],
+      text: "Info",
+      style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+    })
+  ]
+});
+```
 
 ## Props
 

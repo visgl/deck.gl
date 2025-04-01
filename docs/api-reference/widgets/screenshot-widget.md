@@ -1,15 +1,27 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {ScreenshotWidget} from '@deck.gl/widgets';
+
 # ScreenshotWidget
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
-</p>
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
 This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
 
-:::caution
+:::info
 Only the deck.gl canvas is captured, not other HTML DOM element underneath or on top of that canvas. This means that e.g. a non-interleaved basemap, or any widgets, will not be captured.
 It is possible to use `props.onCapture` to integrate with more advanced screen capture modules such as [html2canvas](https://html2canvas.hertzen.com/)
 :::
+
+<WidgetPreview cls={ScreenshotWidget}/>
+
+```ts
+import {ScreenshotWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [new ScreenshotWidget()]
+});
+```
 
 ## Props
 
