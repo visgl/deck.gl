@@ -4,10 +4,21 @@ Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and 
 
 This module contains the following widgets:
 
-- [FullscreenWidget](./fullscreen-widget.md)
+### Navigation Widgets
 - [ZoomWidget](./zoom-widget.md)
-- [CompassWidget](./compass-widget.md)
+- [ResetViewWidget](./reset-view-widget.md)
 
+### Geospatial Widgets
+- [CompassWidget](./compass-widget.md)
+<!-- - [ScaleWidget](./scale-widget.md) -->
+<!-- - [GeolocateWidget](./geolocate-widget.md) -->
+
+### Utility Widgets
+- [FullscreenWidget](./fullscreen-widget.md)
+- [ScreenshotWidget](./screenshot-widget.md)
+- [LoadingWidget](./loading-widget.md)
+- [ThemeWidget](./theme-widget.md)
+- [InfoWidget](./info-widget.md)
 
 ## Installation
 
@@ -97,4 +108,4 @@ new Deck({
 
 ## Themes and Styling
 
-deck.gl widget appearance can be customized using [themes and CSS](./styles).
+deck.gl widget appearance can be customized using [themes and CSS](./styling).
