@@ -2,8 +2,7 @@
 
 ## Themes
 
-The deck.gl widget system provides support for themes. The primary goal of widget themes is
-to allow applications to select and switch between)dark and light modes, so that widgets match the overall look of the application. 
+The deck.gl widget system provides support for themes. The primary goal of widget themes is to allow applications to select and switch between dark and light modes, so that widgets match the overall look of the application. 
 
 Themes are global for a deck instance, i.e they apply to all widgets in all views. Even though widgets can be placed in different views, it is not possible to specify different themes for different views.
 
@@ -15,10 +14,10 @@ Default themes are provided for dark and light mode, however themes can be custo
 For applications that already implement theme switching in the non-deck parts of their UI, it is expected that deck.gl themes will be updated programmatically when the ambient UI theme is switched.
 
 ```ts
-import {ThemeWidget} from '@deck.gl/widgets';
+import {DarkTheme, LightTheme} from '@deck.gl/widgets';
 
 new Deck({
-  theme: mode === 'dark' ? DarkTheme : LightTheme
+  style: mode === 'dark' ? DarkTheme : LightTheme
 })
 ```
 

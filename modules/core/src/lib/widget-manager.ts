@@ -89,6 +89,7 @@ export class WidgetManager {
 
   constructor({deck, parentElement}: {deck: Deck<any>; parentElement?: HTMLElement | null}) {
     this.deck = deck;
+    parentElement?.classList.add('deck-widget-container');
     this.parentElement = parentElement;
   }
 
@@ -203,7 +204,6 @@ export class WidgetManager {
       viewContainer.style.pointerEvents = 'none';
       viewContainer.style.position = 'absolute';
       viewContainer.style.overflow = 'hidden';
-      viewContainer.classList.add('deck-theme');
       this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }

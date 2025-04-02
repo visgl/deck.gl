@@ -8,9 +8,7 @@ This widget resets the view state of a deck.gl viewport to its initial state. Th
 
 Default: `'reset-view'`
 
-The `id` must be unique among all your widgets at a given time.
-
-Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
+The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
 
 #### `placement` (string, optional) {#placement}
 

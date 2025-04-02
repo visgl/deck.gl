@@ -46,7 +46,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
   themeMode: 'light' | 'dark' = 'dark';
 
   static defaultProps: Required<ThemeWidgetProps> = {
-    id: 'widget',
+    id: 'theme',
     placement: 'top-left',
     className: '',
     style: {},
@@ -121,10 +121,6 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
 
     Object.assign(this.props, props);
     this.update();
-
-    this.deck?.setProps({
-      style: this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme
-    });
   }
 
   async handleClick() {
@@ -135,23 +131,16 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       1,
       `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
       themeStyle
-    )();
+    );
 
-    // Note: deck does not support updating the style property
-    // this.deck?.setProps({
-    //   style: themeStyle
-    // });
-    const elements = document.querySelectorAll('.deck-theme');
-    elements.forEach(root => {
-      const canvasStyle = (root as HTMLElement).style;
-      if (canvasStyle) {
-        for (const [variable, value] of Object.entries(themeStyle)) {
-          if (variable.startsWith('--')) {
-            canvasStyle.setProperty(variable, value);
-          }
-        }
+    const el = this.element;
+    if (el) {
+      const container = el.closest<HTMLDivElement>('.deck-widget-container');
+      if (container) {
+        applyStyles(container, themeStyle);
       }
-    });
+    }
+
     this.update();
   }
 
