@@ -86,7 +86,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {PathLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 

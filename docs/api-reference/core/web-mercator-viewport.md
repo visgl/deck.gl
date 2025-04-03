@@ -189,7 +189,7 @@ function onAfterRender() {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {WebMercatorViewport, MapViewState} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 

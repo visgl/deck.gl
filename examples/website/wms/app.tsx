@@ -4,7 +4,7 @@
 
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 import type {MapViewState} from '@deck.gl/core';

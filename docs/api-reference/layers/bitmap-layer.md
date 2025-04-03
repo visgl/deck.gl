@@ -67,7 +67,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
 

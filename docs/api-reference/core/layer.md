@@ -432,7 +432,7 @@ function render({maleColor, femaleColor}: {
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {Color} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 

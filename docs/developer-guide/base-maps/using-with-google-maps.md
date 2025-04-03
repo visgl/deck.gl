@@ -134,7 +134,7 @@ The reverse-controlled option is currently only supported in React when used wit
 ```tsx
 import React from 'react';
 import {APIProvider, Map} from '@vis.gl/react-google-maps';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 function App() {

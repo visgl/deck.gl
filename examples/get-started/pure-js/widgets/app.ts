@@ -17,7 +17,8 @@ import {
   _InfoWidget,
   _InfoWidget,
   DarkGlassTheme,
-  LightGlassTheme
+  LightGlassTheme,
+  LightTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -82,9 +83,12 @@ const deck = new Deck({
     new ScreenshotWidget(),
     new ResetViewWidget(),
     new _LoadingWidget(),
-    new _ScaleWidget({placement: 'bottom-left'}),
     new _GeolocateWidget(),
-    new _ThemeWidget(),
+    new _ScaleWidget({placement: 'bottom-left'}),
+    new _ThemeWidget({
+      darkModeTheme: DarkGlassTheme, 
+      lightModeTheme: LightGlassTheme
+    }),
     new _InfoWidget({mode: 'hover', getTooltip}),
     new _InfoWidget({mode: 'click', getTooltip})
     // new _InfoWidget({mode: 'static', getTooltip})

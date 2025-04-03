@@ -9,7 +9,7 @@ To use deck.gl with React, simply import the `DeckGL` React component and render
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
 
@@ -55,7 +55,7 @@ It is possible to use JSX syntax to create deck.gl layers, views, and widgets as
 
 ```jsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
 import {ZoomWidget} from '@deck.gl/react';
@@ -111,7 +111,7 @@ For some projects, SSR may fail with an error message `Error: require() of ES Mo
 - Isolate the deck.gl imports and exclude them from SSR. Since deck.gl renders into a WebGL2/WebGPU context, it wouldn't benefit from SSR to begin with. Below is a minimal sample for `Next.js`:
 
 ```jsx title="/src/components/map.js"
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 
 export default function Map() {

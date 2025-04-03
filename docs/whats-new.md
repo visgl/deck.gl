@@ -1089,7 +1089,7 @@ For React users, it is now easy to use [react-map-gl](https://visgl.github.io/re
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 <DeckGL ... ContextProvider={MapContext.Provider}>

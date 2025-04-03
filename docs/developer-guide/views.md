@@ -112,7 +112,7 @@ const deck = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 
 function App() {
@@ -176,7 +176,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -261,7 +261,7 @@ document.getElementById('reset-btn').onclick = () => {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {OrthographicView, OrthographicViewState} from '@deck.gl/core';
 
 const INITIAL_VIEW_STATE: OrthographicViewState = {
@@ -354,7 +354,7 @@ const deckInstance = new Deck<[MapView, MapView]>({
 
 ```tsx
 import React, {useState} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapView, MapViewState} from '@deck.gl/core';
 
 function App() {
@@ -506,7 +506,7 @@ const deckInstance = new Deck<[MapView, MapView]>({
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapView, MapViewState} from '@deck.gl/core';
 
 function App() {
@@ -697,7 +697,7 @@ function updateCar(carPose: CarPos) {
 
 ```tsx
 import React, {useMemo, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {Deck, DeckProps, FirstPersonView, MapView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
@@ -830,7 +830,7 @@ const deck = new Deck<[MapView, MapView]>({
 
 ```tsx
 import React, {useMemo, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {DeckProps, MapView} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 

@@ -103,7 +103,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import type {Feature, Geometry} from 'geojson';
 import type {PickingInfo} from '@deck.gl/core';
