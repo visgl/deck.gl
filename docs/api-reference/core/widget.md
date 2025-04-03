@@ -21,6 +21,7 @@ class LoadingIndicator implements Widget {
   constructor(options: {
     size: number;
   }) {
+    this.id = 'loading-indicator'
     this.size = options.size;
   }
 
