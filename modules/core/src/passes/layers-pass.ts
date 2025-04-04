@@ -474,11 +474,8 @@ function getGLViewport(
     dimensions.x * pixelRatio,
     height - (dimensions.y + dimensions.height) * pixelRatio,
     dimensions.width * pixelRatio,
-    dimensions.height * pixelRatio,
-    // TODO(ibgreen): WebGPU requires 6 coordinates. luma should probably autofill 0 and 1 if omitted.
-    0,
-    1
-  ] as unknown as [number, number, number, number];
+    dimensions.height * pixelRatio
+  ];
 }
 
 function mergeModuleParameters(
