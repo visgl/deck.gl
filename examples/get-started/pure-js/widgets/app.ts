@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, PickingInfo} from '@deck.gl/core';
+import {Deck, MapView, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
@@ -16,6 +16,7 @@ import {
   _ThemeWidget,
   _InfoWidget,
   _InfoWidget,
+  _SplitterWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -36,8 +37,15 @@ const INITIAL_VIEW_STATE = {
 };
 
 const deck = new Deck({
-  initialViewState: INITIAL_VIEW_STATE,
+  initialViewState: {
+    'left-map': INITIAL_VIEW_STATE,
+    'right-map': INITIAL_VIEW_STATE
+  },
   controller: true,
+  views: [
+    new MapView({id: 'left-map', width: "50%"}),
+    new MapView({id: 'right-map', width: "50%", x: "50%"})
+  ],
   layers: [
     new GeoJsonLayer({
       id: 'base-map',
@@ -85,6 +93,7 @@ const deck = new Deck({
     new _ScaleWidget({placement: 'bottom-left'}),
     new _GeolocateWidget(),
     new _ThemeWidget(),
+    new _SplitterWidget({viewId1: 'view1', viewId2: 'view2', orientation: 'vertical'}),
     new _InfoWidget({mode: 'hover', getTooltip}),
     new _InfoWidget({mode: 'click', getTooltip})
     // new _InfoWidget({mode: 'static', getTooltip})
