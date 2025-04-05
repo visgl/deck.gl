@@ -17,6 +17,7 @@ export {ScreenshotWidget} from './screenshot-widget';
 export {LoadingWidget as _LoadingWidget} from './loading-widget';
 export {ThemeWidget as _ThemeWidget} from './theme-widget';
 export {InfoWidget as _InfoWidget} from './info-widget';
+export {SplitterWidget as _SplitterWidget} from './splitter-widget'
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
@@ -28,6 +29,7 @@ export type {LoadingWidgetProps} from './loading-widget';
 export type {ScaleWidgetProps} from './scale-widget';
 export type {ThemeWidgetProps} from './theme-widget';
 export type {InfoWidgetProps} from './info-widget';
+export type {SplitterWidgetProps} from './splitter-widget'
 
 export {IconButton, ButtonGroup, GroupedIconButton} from './components';
 
