@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import { h, render } from 'preact';
-import { useState, useRef } from 'preact/hooks';
-import { WidgetImpl, WidgetImplProps } from './widget-impl';
+import {h, render} from 'preact';
+import {useState, useRef} from 'preact/hooks';
+import {WidgetImpl, WidgetImplProps} from './widget-impl';
 
 /** Properties for the SplitterWidget */
 export type SplitterWidgetProps = WidgetImplProps & {
@@ -48,7 +48,7 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
 
   constructor(props: SplitterWidgetProps) {
     // No placement prop is used.
-    super({ ...SplitterWidget.defaultProps, ...props });
+    super({...SplitterWidget.defaultProps, ...props});
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
@@ -65,10 +65,12 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     element.style.width = '100%';
     element.style.height = '100%';
 
+    element.style.margin = '0px';
+
     render(
       <Splitter
-        orientation={this.props.orientation!}
-        initialSplit={this.props.initialSplit!}
+        orientation={this.props.orientation}
+        initialSplit={this.props.initialSplit}
         onChange={this.props.onChange}
         onDragStart={this.props.onDragStart}
         onDragEnd={this.props.onDragEnd}
@@ -102,7 +104,7 @@ function Splitter({
 
   const handleDragStart = (event: MouseEvent) => {
     dragging.current = true;
-    onDragStart && onDragStart();
+    onDragStart?.();
     document.addEventListener('mousemove', handleDragging);
     document.addEventListener('mouseup', handleDragEnd);
     event.preventDefault();
@@ -120,13 +122,13 @@ function Splitter({
     // Clamp newSplit between 5% and 95%
     newSplit = Math.min(Math.max(newSplit, 0.05), 0.95);
     setSplit(newSplit);
-    onChange && onChange(newSplit);
+    onChange?.(newSplit);
   };
 
   const handleDragEnd = (event: MouseEvent) => {
     if (!dragging.current) return;
     dragging.current = false;
-    onDragEnd && onDragEnd();
+    onDragEnd?.();
     document.removeEventListener('mousemove', handleDragging);
     document.removeEventListener('mouseup', handleDragEnd);
   };
@@ -143,7 +145,8 @@ function Splitter({
           cursor: 'col-resize',
           background: '#ccc',
           zIndex: 10,
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
         }
       : {
           position: 'absolute',
@@ -154,7 +157,8 @@ function Splitter({
           cursor: 'row-resize',
           background: '#ccc',
           zIndex: 10,
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
         };
 
   // Container style to fill the entire deck.gl canvas.
