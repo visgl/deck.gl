@@ -123,7 +123,7 @@ export class TimelineWidget implements Widget<TimelineWidgetProps> {
 
   private stop(): void {
     this.playing = false;
-    if (this.timerId != null) {
+    if (this.timerId !== null) {
       window.clearTimeout(this.timerId);
       this.timerId = null;
     }
