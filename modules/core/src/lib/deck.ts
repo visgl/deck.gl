@@ -525,13 +525,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const layerManagerNeedsRedraw = this.layerManager.needsRedraw(opts);
     const effectManagerNeedsRedraw = this.effectManager!.needsRedraw(opts);
     const deckRendererNeedsRedraw = this.deckRenderer!.needsRedraw(opts);
+    const widgetManagerNeedsRedraw = this.widgetManager!.needsRedraw(opts);
 
     redraw =
       redraw ||
       viewManagerNeedsRedraw ||
       layerManagerNeedsRedraw ||
       effectManagerNeedsRedraw ||
-      deckRendererNeedsRedraw;
+      deckRendererNeedsRedraw ||
+      widgetManagerNeedsRedraw;
     return redraw;
   }
 
@@ -570,7 +572,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Get a list of views that are currently rendered */
   getViews(): View[] {
     assert(this.viewManager);
-    return this.viewManager.views;
+    const views = this.viewManager.views;
   }
 
   /** Get a list of viewports that are currently rendered.
@@ -826,14 +828,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   // Get the view descriptor list
   private _getViews(): View[] {
     const {views} = this.props;
-    const normalizedViews: View[] = Array.isArray(views)
+    let normalizedViews: View[] = Array.isArray(views)
       ? views
       : // If null, default to a full screen map view port
         views
         ? [views]
         : [new MapView({id: 'default-view'})];
+
+    if (this.widgetManager) {
+      normalizedViews = this.widgetManager.filterViews(normalizedViews) || normalizedViews;
+    }
+
+    // Backward compatibility: support controller prop
     if (normalizedViews.length && this.props.controller) {
-      // Backward compatibility: support controller prop
       normalizedViews[0].props.controller = this.props.controller;
     }
     return normalizedViews;
@@ -1052,6 +1059,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.props.onBeforeRender({device, gl});
 
+    this._applyWidgetUpdates();
+
     const opts = {
       target: this.props._framebuffer,
       layers: this.layerManager!.getLayers(),
@@ -1074,6 +1083,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+  }
+
+  _applyWidgetUpdates() {
+    if (this.widgetManager!.viewsNeedUpdate) {
+      let oldViews = this._getViews();
+      const views = this.widgetManager!.filterViews(oldViews);
+      if (views) {
+        this.viewManager!.setProps({views})
+      }
+      this.widgetManager!.viewsNeedUpdate = false;
+    }
   }
 
   // Callbacks

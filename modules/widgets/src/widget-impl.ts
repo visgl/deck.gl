@@ -33,6 +33,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     this.props = props;
   }
 
+  abstract onWidgetInitialized(): void
   abstract onRenderHTML(): void;
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -45,6 +46,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     });
     this.element = el;
     this.onRenderHTML();
+    this.onWidgetInitialized?.();
     return this.element;
   }
 

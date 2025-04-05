@@ -4,6 +4,7 @@
 
 import type Deck from './deck';
 import type Viewport from '../viewports/viewport';
+import type View from '../views/view';
 import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
@@ -26,6 +27,7 @@ export interface Widget<PropsT = any> {
 
   // Populated by core when mounted
   _element?: HTMLDivElement | null;
+  _widgetManager?: WidgetManager;
 
   // Lifecycle hooks
   /** Called when the widget is added to a Deck instance.
@@ -56,6 +58,9 @@ export interface Widget<PropsT = any> {
   onDragStart?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
   /** Called when a dragend event occurs */
   onDragEnd?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
+
+  /** Widgets can modify or add/remove views */
+  filterViews?(views: View[]): View[];
 }
 
 const PLACEMENTS = {
@@ -74,6 +79,8 @@ const ROOT_CONTAINER_ID = '__root';
 export class WidgetManager {
   deck: Deck<any>;
   parentElement?: HTMLElement | null;
+
+  viewsNeedUpdate = false;
 
   /** Widgets added via the imperative API */
   private defaultWidgets: Widget[] = [];
@@ -127,6 +134,27 @@ export class WidgetManager {
     }
   }
 
+  // Deck integration
+
+  /** Widgets can modify or add/remove views */
+  filterViews(views: View[]): View[] | undefined {
+    return this.widgets.reduce((views, widget) => widget.filterViews?.(views) || views, views as View[]);
+  }
+
+  needsRedraw(opts: {clearRedrawFlags: boolean} = {clearRedrawFlags: false}): string | false {
+    const redraw = this._needsRedraw;
+    if (opts.clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+    return redraw;
+  }
+
+  setNeedsRedraw(reason: string) {
+    this._needsRedraw = reason;
+  }
+
+  private _needsRedraw: string | false = 'WidgetManager initialized';
+
   /** Resolve widgets from the declarative prop */
   private _setWidgets(nextWidgets: Widget[]) {
     const oldWidgetMap: Record<string, Widget | null> = {};
@@ -178,8 +206,9 @@ export class WidgetManager {
 
   private _add(widget: Widget) {
     const {viewId = null, placement = DEFAULT_PLACEMENT} = widget;
-    const element = widget.onAdd({deck: this.deck, viewId});
 
+    widget._widgetManager = this;
+    const element = widget.onAdd({deck: this.deck, viewId});
     if (element) {
       this._getContainer(viewId, placement).append(element);
     }
@@ -193,6 +222,7 @@ export class WidgetManager {
       widget._element.remove();
     }
     widget._element = undefined;
+    widget._widgetManager = undefined;
   }
 
   /* global document */
