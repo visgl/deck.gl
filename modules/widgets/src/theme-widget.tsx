@@ -143,6 +143,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
       themeStyle
     );
+    this._setTheme(themeStyle);
 
     this.update();
   }
