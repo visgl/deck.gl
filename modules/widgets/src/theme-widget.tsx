@@ -120,6 +120,16 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       }
     }
 
+    if (
+      this.themeMode === 'light' &&
+      lightModeTheme &&
+      !deepEqual(oldProps.lightModeTheme, lightModeTheme, 1)
+    ) {
+      this._setTheme(lightModeTheme);
+    } else if (darkModeTheme && !deepEqual(oldProps.darkModeTheme, darkModeTheme, 1)) {
+      this._setTheme(darkModeTheme);
+    }
+
     Object.assign(this.props, props);
     this.update();
   }
