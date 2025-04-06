@@ -29,13 +29,25 @@ const deck = new Deck({
 
 Default: `'theme'`
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multipe widgets of a given thpe.
+The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
 
 #### `placement` (string, optional) {#placement}
 
 Default: `'top-left'`
 
 Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+
+#### `lightModeTheme` (object, optional) {#lightmodetheme}
+
+Styles for light mode theme.
+
+Default: Light Glass Theme
+
+#### `darkModeTheme` (object, optional) {#darkmodetheme}
+
+Styles for dark mode theme.
+
+Default: Dark Glass Theme
 
 #### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
 

@@ -46,7 +46,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
   themeMode: 'light' | 'dark' = 'dark';
 
   static defaultProps: Required<ThemeWidgetProps> = {
-    id: 'widget',
+    id: 'theme',
     placement: 'top-left',
     className: '',
     style: {},
@@ -66,7 +66,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       ...props
     };
 
-    this.themeMode = this.getInitialMode();
+    this.themeMode = this._getInitialMode();
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -88,8 +88,8 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
 
   private update() {
     const {lightModeLabel, darkModeLabel} = this.props;
-    const element = this.element;
-    if (!element) {
+    const el = this.element;
+    if (!el) {
       return;
     }
 
@@ -100,11 +100,12 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
         className={this.themeMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
       />
     );
-    render(ui, element);
+    render(ui, el);
   }
 
   setProps(props: Partial<ThemeWidgetProps>) {
-    this.placement = props.placement ?? this.placement;
+    const {lightModeTheme, darkModeTheme, placement} = props;
+    this.placement = placement ?? this.placement;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -119,12 +120,18 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       }
     }
 
+    if (
+      this.themeMode === 'light' &&
+      lightModeTheme &&
+      !deepEqual(oldProps.lightModeTheme, lightModeTheme, 1)
+    ) {
+      this._setTheme(lightModeTheme);
+    } else if (darkModeTheme && !deepEqual(oldProps.darkModeTheme, darkModeTheme, 1)) {
+      this._setTheme(darkModeTheme);
+    }
+
     Object.assign(this.props, props);
     this.update();
-
-    this.deck?.setProps({
-      style: this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme
-    });
   }
 
   async handleClick() {
@@ -135,31 +142,27 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       1,
       `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
       themeStyle
-    )();
+    );
+    this._setTheme(themeStyle);
 
-    // Note: deck does not support updating the style property
-    // this.deck?.setProps({
-    //   style: themeStyle
-    // });
-    const elements = document.querySelectorAll('.deck-theme');
-    elements.forEach(root => {
-      const canvasStyle = (root as HTMLElement).style;
-      if (canvasStyle) {
-        for (const [variable, value] of Object.entries(themeStyle)) {
-          if (variable.startsWith('--')) {
-            canvasStyle.setProperty(variable, value);
-          }
-        }
-      }
-    });
     this.update();
   }
 
-  getInitialMode() {
+  _getInitialMode() {
     const {initialTheme} = this.props;
     if (initialTheme === 'auto') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     return initialTheme;
+  }
+
+  _setTheme(themeStyle: DeckWidgetTheme) {
+    const el = this.element;
+    if (el) {
+      const container = el.closest<HTMLDivElement>('.deck-widget-container');
+      if (container) {
+        applyStyles(container, themeStyle);
+      }
+    }
   }
 }
