@@ -65,7 +65,7 @@ export class ViewSelectorWidget extends WidgetImpl<ViewSelectorWidgetProps> {
     element.style.right = '10px';
     render(
       <ViewSelector
-        initialViewMode={this.props.initialViewMode!}
+        initialViewMode={this.props.initialViewMode}
         onViewModeChange={this.props.onViewModeChange}
       />,
       element
