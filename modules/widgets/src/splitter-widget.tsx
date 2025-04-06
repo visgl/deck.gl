@@ -174,7 +174,7 @@ function Splitter({
     <div ref={containerRef} style={containerStyle}>
       <div
         style={splitterStyle}
-        onMouseDown={handleDragStart as any} // Type cast to satisfy event typing.
+        onMouseDown={handleDragStart as h.JSX.MouseEventHandler} // Use the appropriate Preact event type.
       />
     </div>
   );
