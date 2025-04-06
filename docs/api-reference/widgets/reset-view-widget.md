@@ -48,7 +48,7 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 
 Default: `undefined`
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-reset-view-widget`.
+Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-reset-view`.
 
 ## Styles
 

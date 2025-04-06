@@ -28,6 +28,9 @@ export type InfoWidgetProps = {
    * Text of popup
    */
   text?: string;
+  /**
+   * Visibility of info widget
+   */
   visible?: boolean;
   /**
    * Minimum offset (in pixels) to keep the popup away from the canvas edges.
@@ -37,7 +40,7 @@ export type InfoWidgetProps = {
 };
 
 export class InfoWidget implements Widget<InfoWidgetProps> {
-  id = 'popup';
+  id = 'info';
   props: InfoWidgetProps;
   viewId?: string | null = null;
   viewport?: Viewport;
@@ -45,7 +48,7 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
   element?: HTMLDivElement;
 
   constructor(props: InfoWidgetProps) {
-    this.id = props.id || 'popup';
+    this.id = props.id || 'info';
     this.viewId = props.viewId || null;
     props.style = props.style || {};
     props.position = props.position || [0, 0];
@@ -95,7 +98,7 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
   onAdd({deck, viewId}: {deck: Deck<any>; viewId: string | null}): HTMLDivElement {
     const {className} = this.props;
     const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-popup');
+    element.classList.add('deck-widget', 'deck-widget-info');
     if (className) element.classList.add(className);
     // Ensure absolute positioning relative to the deck container
     const style = {margin: '0px', top: '0px', left: '0px', position: 'absolute'};

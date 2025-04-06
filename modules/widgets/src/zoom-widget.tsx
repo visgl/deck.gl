@@ -60,7 +60,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   element?: HTMLDivElement;
 
   static defaultProps: Required<ZoomWidgetProps> = {
-    id: 'zoom-widget',
+    id: 'zoom',
     style: {},
     placement: 'top-left',
     className: undefined!,
