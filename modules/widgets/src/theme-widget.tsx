@@ -66,7 +66,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       ...props
     };
 
-    this.themeMode = this.getInitialMode();
+    this.themeMode = this._getInitialMode();
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -88,8 +88,8 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
 
   private update() {
     const {lightModeLabel, darkModeLabel} = this.props;
-    const element = this.element;
-    if (!element) {
+    const el = this.element;
+    if (!el) {
       return;
     }
 
@@ -100,11 +100,12 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
         className={this.themeMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
       />
     );
-    render(ui, element);
+    render(ui, el);
   }
 
   setProps(props: Partial<ThemeWidgetProps>) {
-    this.placement = props.placement ?? this.placement;
+    const {lightModeTheme, darkModeTheme, placement} = props;
+    this.placement = placement ?? this.placement;
     const oldProps = this.props;
     const el = this.element;
     if (el) {
@@ -133,6 +134,18 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
       themeStyle
     );
 
+    this.update();
+  }
+
+  _getInitialMode() {
+    const {initialTheme} = this.props;
+    if (initialTheme === 'auto') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return initialTheme;
+  }
+
+  _setTheme(themeStyle: DeckWidgetTheme) {
     const el = this.element;
     if (el) {
       const container = el.closest<HTMLDivElement>('.deck-widget-container');
@@ -140,15 +153,5 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
         applyStyles(container, themeStyle);
       }
     }
-
-    this.update();
-  }
-
-  getInitialMode() {
-    const {initialTheme} = this.props;
-    if (initialTheme === 'auto') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return initialTheme;
   }
 }
