@@ -17,6 +17,7 @@ import {
   _InfoWidget,
   _InfoWidget,
   _SplitterWidget,
+  _ViewSelectorWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -105,6 +106,7 @@ const deck = new Deck({
     new _InfoWidget({mode: 'hover', getTooltip}),
     new _InfoWidget({mode: 'click', getTooltip}),
     // new _InfoWidget({mode: 'static', getTooltip})
+    new _ViewSelectorWidget(),
     new _SplitterWidget({
       viewId1: 'left-map',
       viewId2: 'right-map',
