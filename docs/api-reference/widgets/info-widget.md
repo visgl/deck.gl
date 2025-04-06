@@ -15,12 +15,12 @@ The InfoWidget shows a popup when an item in a layer has been clicked.
 }}/>
 
 ```ts
-import {_InfoWidget} from '@deck.gl/widgets';
+import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
 const deck = new Deck({
   widgets: [
-    new _InfoWidget({
+    new InfoWidget({
       visible: true,
       position: [0.45, 51.47],
       text: "Info",

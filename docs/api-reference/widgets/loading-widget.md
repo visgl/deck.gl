@@ -10,11 +10,11 @@ This widget shows a spinning indicator while any deck.gl layers are loading data
 <WidgetPreview cls={_LoadingWidget}/>
 
 ```ts
-import {_LoadingWidget} from '@deck.gl/widgets';
+import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
 const deck = new Deck({
-  widgets: [new _LoadingWidget()]
+  widgets: [new LoadingWidget()]
 });
 ```
 

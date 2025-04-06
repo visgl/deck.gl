@@ -15,11 +15,11 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 <WidgetPreview cls={_ThemeWidget}/>
 
 ```ts
-import {_ThemeWidget} from '@deck.gl/widgets';
+import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
 const deck = new Deck({
-  widgets: [new _ThemeWidget()]
+  widgets: [new ThemeWidget()]
 });
 ```
 
