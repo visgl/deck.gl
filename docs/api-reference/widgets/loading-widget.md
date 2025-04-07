@@ -1,6 +1,22 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_LoadingWidget} from '@deck.gl/widgets';
+
 # LoadingWidget (Experimental)
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 This widget shows a spinning indicator while any deck.gl layers are loading data.
+
+<WidgetPreview cls={_LoadingWidget}/>
+
+```ts
+import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+
+const deck = new Deck({
+  widgets: [new LoadingWidget()]
+});
+```
 
 ## Props
 
@@ -34,4 +50,8 @@ Additional CSS styles for the widget. camelCase CSS properties (e.g. `background
 
 Default: `undefined`
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-loading-widget`.
+Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-loading`.
+
+## Source
+
+[modules/widgets/src/loading-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/loading-widget.tsx)
