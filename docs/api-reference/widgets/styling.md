@@ -1,24 +1,28 @@
+import {WidgetThemes} from '@site/src/doc-demos/widgets';
+
 # Styling Widgets
 
 ## Themes
 
-The deck.gl widget system provides support for themes. The primary goal of widget themes is
-to allow applications to select and switch between)dark and light modes, so that widgets match the overall look of the application. 
+The deck.gl widget system provides support for themes. The primary goal of widget themes is to allow applications to select and switch between dark and light modes, so that widgets match the overall look of the application. 
 
 Themes are global for a deck instance, i.e they apply to all widgets in all views. Even though widgets can be placed in different views, it is not possible to specify different themes for different views.
 
 Default themes are provided for dark and light mode, however themes can be customized to offer applications some additional control of styling, see below.
 
+### Built-In Themes
+
+<WidgetThemes/>
 
 ## Setting the Theme
 
 For applications that already implement theme switching in the non-deck parts of their UI, it is expected that deck.gl themes will be updated programmatically when the ambient UI theme is switched.
 
 ```ts
-import {ThemeWidget} from '@deck.gl/widgets';
+import {DarkTheme, LightTheme} from '@deck.gl/widgets';
 
 new Deck({
-  theme: mode === 'dark' ? DarkTheme : LightTheme
+  style: mode === 'dark' ? DarkTheme : LightTheme
 })
 ```
 
@@ -104,7 +108,9 @@ new FullscreenWidget({ className: 'my-class'})
 
 ## Customizable CSS Variables
 
-We've provided a set of CSS variables to make styling UI Widgets more convenient. These variables allow for customization of widget sizes, colors, and other properties. Below is a comprehensive list of these variables, their expected types, and default values:
+We've provided a set of CSS variables to make styling UI Widgets more convenient. These variables allow for customization of widget sizes, colors, and other properties. Below is a list of these variables, their expected types, and default values.
+
+Additionally, refer to each widget's API reference for variables specific to that widget.
 
 ### Size
 
@@ -125,35 +131,20 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
 | `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)` |
 | `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
-| `--icon-compass-north-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#F05C44` |
-| `--icon-compass-south-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#C2C2CC` |
 
 ### Icon
 
-See each widget for styling information specific to that widget, including icons
-
-| Name | Type | Default |
-| ---- | ---- | ------- |
-| `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40) |
-| `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen Exit](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40) |
-| `--icon-zoom-in` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Add](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40) |
-| `--icon-zoom-out` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Remove](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40) |
-| `--icon-camera` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Photo Camera](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:photo_camera:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=picture&icon.size=24&icon.color=%23000000) |
+Refer to each widget's API reference for icon variable names.
 
 #### Replacing Icons
 
 Users can to customize icons to better align with their design preferences or branding. This section provides a step-by-step guide on how to replace and customize these icons.
 
-1. Prepare Your Icons:
-  - Ensure your icons are available as [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url). These will be used for a CSS [mask-image](https://developer.mozilla.org/en-US/docs/Web/CSS/mask-image).
-2. Icon Replacement:
-  - Use CSS variables, such as `--icon-fullscreen-enter`, to replace the default icons with your customized ones.
-3. Color Customization:
-  - The original color embedded in your SVG will be disregarded. However, it's crucial that the SVG isn't transparent.
-  - Customize the color of your icon using the appropriate CSS variable, such as `--button-icon-idle`.
+1. **Prepare Your Icons:** Ensure your icons are available as [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url). These will be used for a CSS [mask-image](https://developer.mozilla.org/en-US/docs/Web/CSS/mask-image).
+2. **Icon Replacement:** Use CSS variables, such as `--icon-fullscreen-enter`, to replace the default icons with your customized ones.
+3. **Color Customization:** The original color embedded in your SVG will be disregarded. However, it's crucial that the SVG isn't transparent. Customize the color of your icon using the appropriate CSS variable, such as `--button-icon-idle`.
 
-Example:
-```css
+```css title="widget-icon-overrides.css"
 .deck-widget {
     --icon-fullscreen-enter: url('path_to_your_svg_icon.svg');
     --button-icon-idle: blue;
