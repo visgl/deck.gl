@@ -35,7 +35,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     this.props = props;
   }
 
-  abstract onWidgetInitialized(): void;
+  onWidgetInitialized(): void {};
   abstract onRenderHTML(): void;
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {

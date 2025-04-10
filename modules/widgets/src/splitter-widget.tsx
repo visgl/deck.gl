@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Deck, View} from '@deck.gl/core';
+import type {View} from '@deck.gl/core';
 import {h, render} from 'preact';
 import {useState, useRef} from 'preact/hooks';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
@@ -39,9 +39,9 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     viewId2: '',
     orientation: 'vertical',
     initialSplitRatio: 0.5,
-    onSplitRatioChange: () => {},
-    onDragStart: () => {},
-    onDragEnd: () => {}
+    onSplitRatioChange: () => { },
+    onDragStart: () => { },
+    onDragEnd: () => { }
   };
 
   className = 'deck-widget-splitter';
@@ -108,6 +108,7 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
   }
 }
 
+/** @todo(ib) - We could add view cloning support to the View class or a deck/widget manager util */
 function cloneView(
   view: View,
   props: {
@@ -122,11 +123,28 @@ function cloneView(
   }
 ) {
   const ViewType = view.constructor;
+  // @ts-expect-error The constructor type is not known
   return new ViewType({...view.props, ...props});
 }
 
-function getViewPropsForSplitRatio(splitRatio: number, orientation?: 'horizontal' | 'vertical') {
+/**
+ * The first view will take the left/top part, and the second view will take the right/bottom part.
+ * @param splitRatio - A number between 0 and 1 representing the split ratio.
+ * @param orientation - The orientation of the splitter, either 'horizontal' or 'vertical'.
+ *                     Default is 'vertical'.
+ * @returns partial view props for the two views.
+ */
+function getViewPropsForSplitRatio(splitRatio: number, orientation: 'horizontal' | 'vertical' = 'vertical') {
   const percentage = splitRatio * 100;
+  switch (orientation) {
+    case 'horizontal':
+      return getHorizontalSplit(percentage);
+    case 'vertical':
+      return getVerticalSplit(percentage);
+  }
+}
+
+function getVerticalSplit(percentage: number) {
   const x1 = '0%';
   const width1 = `${percentage}%`;
   const x2 = width1;
@@ -134,6 +152,17 @@ function getViewPropsForSplitRatio(splitRatio: number, orientation?: 'horizontal
   return [
     {x: x1, width: width1},
     {x: x2, width: width2}
+  ];
+}
+
+function getHorizontalSplit(percentage: number) {
+  const y1 = '0%';
+  const height1 = `${percentage}%`;
+  const y2 = height1;
+  const height2 = `${100 - percentage}%`;
+  return [
+    {y: y1, height: height1},
+    {y: y2, height: height2}
   ];
 }
 
@@ -194,29 +223,29 @@ function Splitter({
   const splitterStyle: h.JSX.CSSProperties =
     orientation === 'vertical'
       ? {
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: `${split * 100}%`,
-          width: '4px',
-          cursor: 'col-resize',
-          background: '#ccc',
-          zIndex: 10,
-          pointerEvents: 'auto',
-          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-        }
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: `${split * 100}%`,
+        width: '4px',
+        cursor: 'col-resize',
+        background: '#ccc',
+        zIndex: 10,
+        pointerEvents: 'auto',
+        boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
+      }
       : {
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: `${split * 100}%`,
-          height: '4px',
-          cursor: 'row-resize',
-          background: '#ccc',
-          zIndex: 10,
-          pointerEvents: 'auto',
-          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-        };
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: `${split * 100}%`,
+        height: '4px',
+        cursor: 'row-resize',
+        background: '#ccc',
+        zIndex: 10,
+        pointerEvents: 'auto',
+        boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
+      };
 
   // Container style to fill the entire deck.gl canvas.
   const containerStyle: h.JSX.CSSProperties = {
