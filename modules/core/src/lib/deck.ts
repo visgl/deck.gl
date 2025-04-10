@@ -828,16 +828,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   // Get the view descriptor list
   private _getViews(): View[] {
     const {views} = this.props;
-    let normalizedViews: View[] = Array.isArray(views)
+    const normalizedViews: View[] = Array.isArray(views)
       ? views
       : // If null, default to a full screen map view port
         views
         ? [views]
         : [new MapView({id: 'default-view'})];
-
-    if (this.widgetManager) {
-      normalizedViews = this.widgetManager.filterViews(normalizedViews) || normalizedViews;
-    }
 
     // Backward compatibility: support controller prop
     if (normalizedViews.length && this.props.controller) {

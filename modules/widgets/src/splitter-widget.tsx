@@ -39,9 +39,9 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     viewId2: '',
     orientation: 'vertical',
     initialSplitRatio: 0.5,
-    onSplitRatioChange: () => { },
-    onDragStart: () => { },
-    onDragEnd: () => { }
+    onSplitRatioChange: () => {},
+    onDragStart: () => {},
+    onDragEnd: () => {}
   };
 
   className = 'deck-widget-splitter';
@@ -134,7 +134,10 @@ function cloneView(
  *                     Default is 'vertical'.
  * @returns partial view props for the two views.
  */
-function getViewPropsForSplitRatio(splitRatio: number, orientation: 'horizontal' | 'vertical' = 'vertical') {
+function getViewPropsForSplitRatio(
+  splitRatio: number,
+  orientation: 'horizontal' | 'vertical' = 'vertical'
+) {
   const percentage = splitRatio * 100;
   switch (orientation) {
     case 'horizontal':
@@ -224,29 +227,29 @@ function Splitter({
   const splitterStyle: h.JSX.CSSProperties =
     orientation === 'vertical'
       ? {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: `${split * 100}%`,
-        width: '4px',
-        cursor: 'col-resize',
-        background: '#ccc',
-        zIndex: 10,
-        pointerEvents: 'auto',
-        boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-      }
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: `${split * 100}%`,
+          width: '4px',
+          cursor: 'col-resize',
+          background: '#ccc',
+          zIndex: 10,
+          pointerEvents: 'auto',
+          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
+        }
       : {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: `${split * 100}%`,
-        height: '4px',
-        cursor: 'row-resize',
-        background: '#ccc',
-        zIndex: 10,
-        pointerEvents: 'auto',
-        boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-      };
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: `${split * 100}%`,
+          height: '4px',
+          cursor: 'row-resize',
+          background: '#ccc',
+          zIndex: 10,
+          pointerEvents: 'auto',
+          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
+        };
 
   // Container style to fill the entire deck.gl canvas.
   const containerStyle: h.JSX.CSSProperties = {
