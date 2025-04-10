@@ -64,7 +64,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
       container: undefined!,
       className: '',
       style: {},
-      ...props,
+      ...props
     };
   }
 

@@ -5,8 +5,8 @@
 export type IconButtonProps = {
   className: string;
   label: string;
-  onClick: (event?) => void;
-}
+  onClick: (event?) => unknown;
+};
 
 export const IconButton = (props: IconButtonProps) => {
   const {className, label, onClick} = props;
