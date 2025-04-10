@@ -31,14 +31,14 @@ export type {ThemeWidgetProps} from './theme-widget';
 export type {InfoWidgetProps} from './info-widget';
 export type {SplitterWidgetProps} from './splitter-widget';
 
-export {IconButton, ButtonGroup, GroupedIconButton} from './components';
+export {IconButton, ButtonGroup, GroupedIconButton} from './lib/components';
 
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';
 
 // Experimental exports
 
-import * as _components from './components';
+import * as _components from './lib/components';
 export {_components};
 
 export type {WidgetImplProps} from './widget-impl';
