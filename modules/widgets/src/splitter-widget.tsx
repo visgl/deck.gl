@@ -140,6 +140,7 @@ function getViewPropsForSplitRatio(splitRatio: number, orientation: 'horizontal'
     case 'horizontal':
       return getHorizontalSplit(percentage);
     case 'vertical':
+      default:
       return getVerticalSplit(percentage);
   }
 }
