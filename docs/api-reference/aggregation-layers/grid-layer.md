@@ -89,7 +89,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GridLayer, GridLayerPickingInfo} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {

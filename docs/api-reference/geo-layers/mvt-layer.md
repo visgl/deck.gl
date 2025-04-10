@@ -137,7 +137,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import type {MVTLayerPickingInfo} from '@deck.gl/geo-layers';
 import type {Feature, Geometry} from 'geojson';
