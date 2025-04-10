@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export const IconButton = props => {
+export type IconButtonProps = {
+  className: string;
+  label: string;
+  onClick: (event?) => unknown;
+};
+
+export const IconButton = (props: IconButtonProps) => {
   const {className, label, onClick} = props;
   return (
     <div className="deck-widget-button">

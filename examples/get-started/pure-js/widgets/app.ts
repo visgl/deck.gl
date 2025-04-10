@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, PickingInfo} from '@deck.gl/core';
+import {Deck, MapView, MapViewProps, PickingInfo} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
@@ -16,6 +16,7 @@ import {
   _ThemeWidget,
   _InfoWidget,
   _InfoWidget,
+  _SplitterWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
@@ -35,9 +36,25 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
+function getViewsForSplit(percentage: number) {
+  const x1 = '0%';
+  const width1 = `${percentage}%`;
+  const x2 = width1;
+  const width2 = `${100 - percentage}%`;
+
+  return [
+    new MapView({id: 'left-map', x: x1, width: width1, controller: true}),
+    new MapView({id: 'right-map', x: x2, width: width2, controller: true})
+  ];
+}
+
 const deck = new Deck({
-  initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
+  initialViewState: {
+    'left-map': INITIAL_VIEW_STATE,
+    'right-map': INITIAL_VIEW_STATE
+  },
+  // controller: true,
+  views: getViewsForSplit(50),
   layers: [
     new GeoJsonLayer({
       id: 'base-map',
@@ -86,8 +103,14 @@ const deck = new Deck({
     new _GeolocateWidget(),
     new _ThemeWidget(),
     new _InfoWidget({mode: 'hover', getTooltip}),
-    new _InfoWidget({mode: 'click', getTooltip})
+    new _InfoWidget({mode: 'click', getTooltip}),
     // new _InfoWidget({mode: 'static', getTooltip})
+    new _SplitterWidget({
+      viewId1: 'left-map',
+      viewId2: 'right-map',
+      orientation: 'vertical',
+      onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
+    })
   ]
 });
 
