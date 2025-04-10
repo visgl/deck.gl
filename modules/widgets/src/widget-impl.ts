@@ -5,6 +5,7 @@
 /* global document */
 import {_deepEqual, _applyStyles, _removeStyles} from '@deck.gl/core';
 import type {Deck, Widget} from '@deck.gl/core';
+import {WidgetManager} from 'modules/core/src/lib/widget-manager';
 
 export type WidgetImplProps = {
   id?: string;
@@ -19,6 +20,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
 
   deck?: Deck<any>;
   element?: HTMLDivElement;
+  _widgetManager?: WidgetManager;
 
   static defaultProps: Required<WidgetImplProps> = {
     id: 'widget',
@@ -33,7 +35,7 @@ export abstract class WidgetImpl<PropsT extends WidgetImplProps> implements Widg
     this.props = props;
   }
 
-  abstract onWidgetInitialized(): void
+  abstract onWidgetInitialized(): void;
   abstract onRenderHTML(): void;
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {

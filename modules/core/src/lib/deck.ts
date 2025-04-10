@@ -572,7 +572,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Get a list of views that are currently rendered */
   getViews(): View[] {
     assert(this.viewManager);
-    const views = this.viewManager.views;
+    return this.viewManager.views;
   }
 
   /** Get a list of viewports that are currently rendered.
@@ -1087,10 +1087,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   _applyWidgetUpdates() {
     if (this.widgetManager!.viewsNeedUpdate) {
-      let oldViews = this._getViews();
+      const oldViews = this._getViews();
       const views = this.widgetManager!.filterViews(oldViews);
       if (views) {
-        this.viewManager!.setProps({views})
+        this.viewManager!.setProps({views});
       }
       this.widgetManager!.viewsNeedUpdate = false;
     }

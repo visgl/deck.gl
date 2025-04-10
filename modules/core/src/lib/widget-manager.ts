@@ -138,7 +138,7 @@ export class WidgetManager {
 
   /** Widgets can modify or add/remove views */
   filterViews(views: View[]): View[] | undefined {
-    return this.widgets.reduce((views, widget) => widget.filterViews?.(views) || views, views as View[]);
+    return this.widgets.reduce((views, widget) => widget.filterViews?.(views) || views, views);
   }
 
   needsRedraw(opts: {clearRedrawFlags: boolean} = {clearRedrawFlags: false}): string | false {

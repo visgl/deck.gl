@@ -39,9 +39,9 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     viewId2: '',
     orientation: 'vertical',
     initialSplitRatio: 0.5,
-    onSplitRatioChange: () => { },
-    onDragStart: () => { },
-    onDragEnd: () => { }
+    onSplitRatioChange: () => {},
+    onDragStart: () => {},
+    onDragEnd: () => {}
   };
 
   className = 'deck-widget-splitter';
@@ -57,7 +57,7 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
 
   onWidgetInitialized() {
     this._widgetManager!.viewsNeedUpdate = true;
-    this._widgetManager!.setNeedsRedraw('SplitterWidget')
+    this._widgetManager!.setNeedsRedraw('SplitterWidget');
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
@@ -92,8 +92,8 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     this.props.onSplitRatioChange(splitRatio);
     this.splitRatio = splitRatio;
     this._widgetManager!.viewsNeedUpdate = true;
-    this._widgetManager!.setNeedsRedraw('SplitterWidget')
-  }
+    this._widgetManager!.setNeedsRedraw('SplitterWidget');
+  };
 
   filterViews(views: View[]): View[] {
     const view1Index = views.findIndex(view => view.id === this.props.viewId1);
@@ -108,16 +108,19 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
   }
 }
 
-function cloneView(view: View, props: {
-  /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
-  x?: number | string;
-  /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
-  y?: number | string;
-  /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
-  width?: number | string;
-  /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
-  height?: number | string;
-}) {
+function cloneView(
+  view: View,
+  props: {
+    /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
+    x?: number | string;
+    /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
+    y?: number | string;
+    /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
+    width?: number | string;
+    /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
+    height?: number | string;
+  }
+) {
   const ViewType = view.constructor;
   return new ViewType({...view.props, ...props});
 }
@@ -191,29 +194,29 @@ function Splitter({
   const splitterStyle: h.JSX.CSSProperties =
     orientation === 'vertical'
       ? {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: `${split * 100}%`,
-        width: '4px',
-        cursor: 'col-resize',
-        background: '#ccc',
-        zIndex: 10,
-        pointerEvents: 'auto',
-        boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-      }
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: `${split * 100}%`,
+          width: '4px',
+          cursor: 'col-resize',
+          background: '#ccc',
+          zIndex: 10,
+          pointerEvents: 'auto',
+          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
+        }
       : {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: `${split * 100}%`,
-        height: '4px',
-        cursor: 'row-resize',
-        background: '#ccc',
-        zIndex: 10,
-        pointerEvents: 'auto',
-        boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-      };
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: `${split * 100}%`,
+          height: '4px',
+          cursor: 'row-resize',
+          background: '#ccc',
+          zIndex: 10,
+          pointerEvents: 'auto',
+          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
+        };
 
   // Container style to fill the entire deck.gl canvas.
   const containerStyle: h.JSX.CSSProperties = {
