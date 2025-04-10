@@ -525,13 +525,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const layerManagerNeedsRedraw = this.layerManager.needsRedraw(opts);
     const effectManagerNeedsRedraw = this.effectManager!.needsRedraw(opts);
     const deckRendererNeedsRedraw = this.deckRenderer!.needsRedraw(opts);
+    const widgetManagerNeedsRedraw = this.widgetManager!.needsRedraw(opts);
 
     redraw =
       redraw ||
       viewManagerNeedsRedraw ||
       layerManagerNeedsRedraw ||
       effectManagerNeedsRedraw ||
-      deckRendererNeedsRedraw;
+      deckRendererNeedsRedraw ||
+      widgetManagerNeedsRedraw;
     return redraw;
   }
 
@@ -832,8 +834,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         views
         ? [views]
         : [new MapView({id: 'default-view'})];
+
+    // Backward compatibility: support controller prop
     if (normalizedViews.length && this.props.controller) {
-      // Backward compatibility: support controller prop
       normalizedViews[0].props.controller = this.props.controller;
     }
     return normalizedViews;
@@ -1052,6 +1055,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.props.onBeforeRender({device, gl});
 
+    this._applyWidgetUpdates();
+
     const opts = {
       target: this.props._framebuffer,
       layers: this.layerManager!.getLayers(),
@@ -1074,6 +1079,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+  }
+
+  _applyWidgetUpdates() {
+    if (this.widgetManager!.viewsNeedUpdate) {
+      const oldViews = this._getViews();
+      const views = this.widgetManager!.filterViews(oldViews);
+      if (views) {
+        this.viewManager!.setProps({views});
+      }
+      this.widgetManager!.viewsNeedUpdate = false;
+    }
   }
 
   // Callbacks

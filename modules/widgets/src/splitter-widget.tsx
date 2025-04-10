@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {View} from '@deck.gl/core';
 import {h, render} from 'preact';
 import {useState, useRef} from 'preact/hooks';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
@@ -16,9 +17,9 @@ export type SplitterWidgetProps = WidgetImplProps & {
   /** Orientation of the splitter: vertical (default) or horizontal */
   orientation?: 'vertical' | 'horizontal';
   /** The initial split percentage (0 to 1) for the first view, default 0.5 */
-  initialSplit?: number;
+  initialSplitRatio?: number;
   /** Callback invoked when the splitter is dragged with the new split value */
-  onChange?: (newSplit: number) => void;
+  onSplitRatioChange?: (splitRatio: number) => void;
   /** Callback invoked when dragging starts */
   onDragStart?: () => void;
   /** Callback invoked when dragging ends */
@@ -37,8 +38,8 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     viewId1: '',
     viewId2: '',
     orientation: 'vertical',
-    initialSplit: 0.5,
-    onChange: () => {},
+    initialSplitRatio: 0.5,
+    onSplitRatioChange: () => {},
     onDragStart: () => {},
     onDragEnd: () => {}
   };
@@ -46,9 +47,17 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
   className = 'deck-widget-splitter';
   placement = 'fill';
 
+  splitRatio: number;
+
   constructor(props: SplitterWidgetProps) {
     // No placement prop is used.
     super({...SplitterWidget.defaultProps, ...props});
+    this.splitRatio = this.props.initialSplitRatio;
+  }
+
+  onWidgetInitialized() {
+    this._widgetManager!.viewsNeedUpdate = true;
+    this._widgetManager!.setNeedsRedraw('SplitterWidget');
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
@@ -70,14 +79,95 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
     render(
       <Splitter
         orientation={this.props.orientation}
-        initialSplit={this.props.initialSplit}
-        onChange={this.props.onChange}
+        initialSplitRatio={this.props.initialSplitRatio}
+        onChange={this.onSplitRatioChange}
         onDragStart={this.props.onDragStart}
         onDragEnd={this.props.onDragEnd}
       />,
       element
     );
   }
+
+  onSplitRatioChange = (splitRatio: number) => {
+    this.props.onSplitRatioChange(splitRatio);
+    this.splitRatio = splitRatio;
+    this._widgetManager!.viewsNeedUpdate = true;
+    this._widgetManager!.setNeedsRedraw('SplitterWidget');
+  };
+
+  filterViews(views: View[]): View[] {
+    const view1Index = views.findIndex(view => view.id === this.props.viewId1);
+    const view2Index = views.findIndex(view => view.id === this.props.viewId2);
+    if (view1Index !== -1 && view2Index !== -1) {
+      views = [...views];
+      const [viewProps1, viewProps2] = getViewPropsForSplitRatio(this.splitRatio);
+      views[view1Index] = cloneView(views[view1Index], viewProps1);
+      views[view2Index] = cloneView(views[view2Index], viewProps2);
+    }
+    return views;
+  }
+}
+
+/** @todo(ib) - We could add view cloning support to the View class or a deck/widget manager util */
+function cloneView(
+  view: View,
+  props: {
+    /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
+    x?: number | string;
+    /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
+    y?: number | string;
+    /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
+    width?: number | string;
+    /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
+    height?: number | string;
+  }
+) {
+  const ViewType = view.constructor;
+  // @ts-expect-error The constructor type is not known
+  return new ViewType({...view.props, ...props});
+}
+
+/**
+ * The first view will take the left/top part, and the second view will take the right/bottom part.
+ * @param splitRatio - A number between 0 and 1 representing the split ratio.
+ * @param orientation - The orientation of the splitter, either 'horizontal' or 'vertical'.
+ *                     Default is 'vertical'.
+ * @returns partial view props for the two views.
+ */
+function getViewPropsForSplitRatio(
+  splitRatio: number,
+  orientation: 'horizontal' | 'vertical' = 'vertical'
+) {
+  const percentage = splitRatio * 100;
+  switch (orientation) {
+    case 'horizontal':
+      return getHorizontalSplit(percentage);
+    case 'vertical':
+    default:
+      return getVerticalSplit(percentage);
+  }
+}
+
+function getVerticalSplit(percentage: number) {
+  const x1 = '0%';
+  const width1 = `${percentage}%`;
+  const x2 = width1;
+  const width2 = `${100 - percentage}%`;
+  return [
+    {x: x1, width: width1},
+    {x: x2, width: width2}
+  ];
+}
+
+function getHorizontalSplit(percentage: number) {
+  const y1 = '0%';
+  const height1 = `${percentage}%`;
+  const y2 = height1;
+  const height2 = `${100 - percentage}%`;
+  return [
+    {y: y1, height: height1},
+    {y: y2, height: height2}
+  ];
 }
 
 /**
@@ -87,18 +177,18 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
  */
 function Splitter({
   orientation,
-  initialSplit,
+  initialSplitRatio,
   onChange,
   onDragStart,
   onDragEnd
 }: {
   orientation: 'vertical' | 'horizontal';
-  initialSplit: number;
+  initialSplitRatio: number;
   onChange?: (newSplit: number) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
 }) {
-  const [split, setSplit] = useState(initialSplit);
+  const [split, setSplit] = useState(initialSplitRatio);
   const dragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -113,16 +203,16 @@ function Splitter({
   const handleDragging = (event: MouseEvent) => {
     if (!dragging.current || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    let newSplit: number;
+    let newSplitRatio: number;
     if (orientation === 'vertical') {
-      newSplit = (event.clientX - rect.left) / rect.width;
+      newSplitRatio = (event.clientX - rect.left) / rect.width;
     } else {
-      newSplit = (event.clientY - rect.top) / rect.height;
+      newSplitRatio = (event.clientY - rect.top) / rect.height;
     }
-    // Clamp newSplit between 5% and 95%
-    newSplit = Math.min(Math.max(newSplit, 0.05), 0.95);
-    setSplit(newSplit);
-    onChange?.(newSplit);
+    // Clamp newSplitRatio between 5% and 95%
+    newSplitRatio = Math.min(Math.max(newSplitRatio, 0.05), 0.95);
+    setSplit(newSplitRatio);
+    onChange?.(newSplitRatio);
   };
 
   const handleDragEnd = (event: MouseEvent) => {
