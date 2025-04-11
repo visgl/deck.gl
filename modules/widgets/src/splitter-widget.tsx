@@ -5,10 +5,10 @@
 
 import {h, render} from 'preact';
 import {useState, useRef} from 'preact/hooks';
-import {WidgetImpl, WidgetImplProps} from './widget-impl';
+import {Widget, WidgetProps} from '@deck.gl/core';
 
 /** Properties for the SplitterWidget */
-export type SplitterWidgetProps = WidgetImplProps & {
+export type SplitterWidgetProps = WidgetProps & {
   /** The view id for the first (resizable) view */
   viewId1: string;
   /** The view id for the second view */
@@ -30,9 +30,9 @@ export type SplitterWidgetProps = WidgetImplProps & {
  * across the deck.gl canvas. It positions itself based on the split percentage
  * of the first view and provides callbacks when dragged.
  */
-export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
+export class SplitterWidget extends Widget<SplitterWidgetProps> {
   static defaultProps: Required<SplitterWidgetProps> = {
-    ...WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'splitter-widget',
     viewId1: '',
     viewId2: '',
@@ -48,24 +48,22 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
 
   constructor(props: SplitterWidgetProps) {
     // No placement prop is used.
-    super({...SplitterWidget.defaultProps, ...props});
+    super(props, SplitterWidget.defaultProps);
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
     super.setProps(props);
   }
 
-  onRenderHTML() {
-    const element = this.element;
-    if (!element) return;
+  onRenderHTML(rootElement: HTMLElement): void {
     // Ensure the widget container fills the deck.gl canvas.
-    element.style.position = 'absolute';
-    element.style.top = '0';
-    element.style.left = '0';
-    element.style.width = '100%';
-    element.style.height = '100%';
-
-    element.style.margin = '0px';
+    // TODO - Move styling to CSS
+    rootElement.style.position = 'absolute';
+    rootElement.style.top = '0';
+    rootElement.style.left = '0';
+    rootElement.style.width = '100%';
+    rootElement.style.height = '100%';
+    rootElement.style.margin = '0px';
 
     render(
       <Splitter
@@ -75,7 +73,7 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
         onDragStart={this.props.onDragStart}
         onDragEnd={this.props.onDragEnd}
       />,
-      element
+      rootElement
     );
   }
 }

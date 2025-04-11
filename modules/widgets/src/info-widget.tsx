@@ -1,21 +1,13 @@
 /* global document */
-import type {Deck, PickingInfo, Viewport, Widget} from '@deck.gl/core';
+import {Widget, WidgetProps} from '@deck.gl/core';
+import type {Deck, PickingInfo, Viewport} from '@deck.gl/core';
 import {render} from 'preact';
 
-export type InfoWidgetProps = {
-  id: string;
+export type InfoWidgetProps = WidgetProps & {
   /**
    * View to attach to and interact with. Required when using multiple views.
    */
   viewId?: string | null;
-  /**
-   * CSS inline style overrides.
-   */
-  style?: Partial<CSSStyleDeclaration>;
-  /**
-   * Additional CSS class.
-   */
-  className?: string;
 
   mode: 'click' | 'hover' | 'static';
 
@@ -39,34 +31,42 @@ export type InfoWidgetProps = {
   onClick?: (widget: InfoWidget, info: PickingInfo) => boolean;
 };
 
-export class InfoWidget implements Widget<InfoWidgetProps> {
-  id = 'info';
-  props: InfoWidgetProps;
+export class InfoWidget extends Widget<InfoWidgetProps> {
+  static defaultProps: Required<InfoWidgetProps> = {
+    ...Widget.defaultProps,
+    position: [0, 0],
+    text: '',
+    visible: false,
+    // Set default minOffset if not provided
+    minOffset: 0,
+    viewId: null,
+    mode: 'hover',
+    getTooltip: undefined!,
+    onClick: undefined!
+  };
+
+  placement = 'fill' as const;
+  className = 'deck-widget-info';
+
   viewId?: string | null = null;
   viewport?: Viewport;
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
 
   constructor(props: InfoWidgetProps) {
-    this.id = props.id || 'info';
-    this.viewId = props.viewId || null;
-    props.style = props.style || {};
+    super(props, InfoWidget.defaultProps);
     props.position = props.position || [0, 0];
     props.text = props.text || '';
     props.visible = props.visible || false;
     // Set default minOffset if not provided
     props.minOffset = props.minOffset ?? 0;
-    this.props = props;
   }
 
   setProps(props: Partial<InfoWidgetProps>) {
-    Object.assign(this.props, props);
-    this.update();
+    super.setProps(props);
   }
 
   onViewportChange(viewport) {
     this.viewport = viewport;
-    this.update();
+    this.updateHTML();
   }
 
   onHover(info: PickingInfo): void {
@@ -109,14 +109,13 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
     } else {
       this.viewport = deck.getViewports().find(viewport => viewport.id === viewId);
     }
-    this.element = element;
-    this.update();
+    this.rootElement = element;
+    this.updateHTML();
     return element;
   }
 
-  update() {
-    const element = this.element;
-    if (!element || !this.viewport) {
+  onRenderHTML(rootElement: HTMLElement): void {
+    if (!this.viewport) {
       return;
     }
     const [longitude, latitude] = this.props.position;
@@ -152,7 +151,7 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
         <div className="popup-arrow" style={{position: 'absolute', width: '0px', height: '0px'}} />
       </div>
     ) : null;
-    render(ui, element);
+    render(ui, rootElement);
 
     // After rendering, measure the content and adjust positioning so that:
     // - The popup (with its arrow) does not cover the clicked point.
@@ -160,9 +159,9 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
     // - The popup remains within the canvas bounds, with minOffset.
     // eslint-disable-next-line max-statements, complexity
     requestAnimationFrame(() => {
-      if (!this.props.visible || !element.firstChild || !this.viewport) return;
+      if (!this.props.visible || !rootElement.firstChild || !this.viewport) return;
 
-      const container = element.firstChild as HTMLElement;
+      const container = rootElement.firstChild as HTMLElement;
       const contentEl = container.querySelector('.popup-content') as HTMLElement;
       const arrowEl = container.querySelector('.popup-arrow') as HTMLElement;
       if (!contentEl || !arrowEl) return;
@@ -232,10 +231,5 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
         arrowEl.style.borderTop = '';
       }
     });
-  }
-
-  onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
   }
 }

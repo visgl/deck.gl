@@ -5,11 +5,11 @@
 /* global document */
 import type {WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {WidgetImpl, WidgetImplProps} from './widget-impl';
+import {Widget, WidgetProps} from '@deck.gl/core';
 import {IconButton} from './lib/components';
 
 /** Properties for the ScreenshotWidget */
-export type ScreenshotWidgetProps = WidgetImplProps & {
+export type ScreenshotWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
   /** Tooltip message */
@@ -26,9 +26,9 @@ export type ScreenshotWidgetProps = WidgetImplProps & {
  * A button widget that captures a screenshot of the current canvas and downloads it as a (png) file.
  * @note only captures canvas contents, not HTML DOM or CSS styles
  */
-export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
+export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
   static defaultProps: Required<ScreenshotWidgetProps> = {
-    ...WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'screenshot',
     placement: 'top-left',
     label: 'Screenshot',
@@ -41,7 +41,7 @@ export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
   placement: WidgetPlacement = 'top-left';
 
   constructor(props: ScreenshotWidgetProps = {}) {
-    super({...ScreenshotWidget.defaultProps, ...props});
+    super(props, ScreenshotWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
   }
 
@@ -50,16 +50,14 @@ export class ScreenshotWidget extends WidgetImpl<ScreenshotWidgetProps> {
     super.setProps(props);
   }
 
-  onRenderHTML() {
-    const element = this.element;
-    if (!element) return;
+  onRenderHTML(rootElement: HTMLElement): void {
     render(
       <IconButton
         className="deck-widget-camera"
         label={this.props.label}
         onClick={this.handleClick.bind(this)}
       />,
-      element
+      rootElement
     );
   }
 
