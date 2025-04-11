@@ -10,7 +10,7 @@ import {
 } from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {IconButton} from './components';
+import {IconButton} from './lib/components';
 
 export type FullscreenWidgetProps = {
   id?: string;

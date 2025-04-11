@@ -5,7 +5,7 @@
 import type {WidgetPlacement, Layer} from '@deck.gl/core';
 import {render} from 'preact';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
-import {IconButton} from './components';
+import {IconButton} from './lib/components';
 
 /** Properties for the LoadingWidget */
 export type LoadingWidgetProps = WidgetImplProps & {
