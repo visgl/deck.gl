@@ -5,7 +5,7 @@
 import type {WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {WidgetImpl, WidgetImplProps} from './widget-impl';
-import {IconButton} from './components';
+import {IconButton} from './lib/components';
 
 /** @todo - is the the best we can do? */
 type ViewState = Record<string, unknown>;
