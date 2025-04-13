@@ -45,7 +45,7 @@ export class SpectrogramLayer extends CompositeLayer<{
       this.props.settings !== params.oldProps.settings ||
       this.props.pickable !== params.oldProps.pickable
     ) {
-      this._computeSpectrogram();
+      void this._computeSpectrogram();
     }
   }
 

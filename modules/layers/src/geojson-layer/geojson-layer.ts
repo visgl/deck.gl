@@ -539,6 +539,8 @@ export default class GeoJsonLayer<
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           // @ts-expect-error TODO - type binary data
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,

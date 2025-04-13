@@ -69,7 +69,7 @@ export default function App({
       if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
-        layer.getFeatureInfoText(x, y).then(featureInfo => {
+        void layer.getFeatureInfoText(x, y).then(featureInfo => {
           setSelection({x, y, featureInfo});
         });
       }

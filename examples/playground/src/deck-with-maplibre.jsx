@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {View} from '@deck.gl/core';
 import maplibregl from 'maplibre-gl';
 

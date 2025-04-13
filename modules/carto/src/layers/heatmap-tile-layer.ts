@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable @typescript-eslint/no-shadow */
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 

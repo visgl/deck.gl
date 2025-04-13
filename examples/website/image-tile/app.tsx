@@ -6,7 +6,7 @@
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -71,7 +71,7 @@ export default function App({
         )
       });
     };
-    getMetaData();
+    void getMetaData();
   }, []);
 
   const tileLayer =

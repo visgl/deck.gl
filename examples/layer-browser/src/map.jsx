@@ -8,7 +8,7 @@ import React, {PureComponent} from 'react';
 import {Map} from 'react-map-gl/maplibre';
 import autobind from 'react-autobind';
 
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';
