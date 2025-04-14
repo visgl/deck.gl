@@ -82,8 +82,8 @@ export default function App({
           default:
             return [255, 255, 255, 255];
         }
-      }
-      // pickable: true
+      },
+      pickable: true
     })
   ];
 
