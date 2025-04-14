@@ -3,7 +3,7 @@
   "description": "Plug-and-play functionalities for deck.gl layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.8",
+  "version": "9.1.9",
   "publishConfig": {
     "access": "public"
   },

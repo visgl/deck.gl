@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.9] - Apr 14 2025
+
+- CARTO: Fallback to hidden tiles for maxDensity (#9578)
+- fix(carto): RasterTileLayer to support external options (#9561)
+
 #### deck.gl [v9.1.8] - Mar 24 2025
 
 - fix(mapbox): interleaving by reverting #9483 (#9542)
