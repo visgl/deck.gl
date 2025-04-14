@@ -74,6 +74,7 @@ export default class RasterTileLayer<
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom, raster_metadata: metadata} = tileJSON;
     const SubLayerClass = this.getSubLayerClass('tile', PostProcessTileLayer);
+    const loadOptions = this.getLoadOptions();
     return new SubLayerClass(this.props, {
       id: `raster-tile-layer-${this.props.id}`,
       data,
@@ -83,8 +84,8 @@ export default class RasterTileLayer<
       minZoom,
       maxZoom,
       loadOptions: {
-        cartoRasterTile: {metadata},
-        ...this.getLoadOptions()
+        ...loadOptions,
+        cartoRasterTile: {...loadOptions?.cartoRasterTile, metadata}
       }
     });
   }
