@@ -235,7 +235,13 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
     let tileZ = 0;
     let maxDensity = 0;
-    const tiles = [...this.state.tiles].filter(t => t.isVisible && t.content);
+    const loadedTiles = [...this.state.tiles].filter(t => t.content);
+    const visibleTiles = loadedTiles.filter(t => t.isVisible);
+
+    // As deck.gl initially marks tiles as hidden, use hidden tiles as fallback for calculation.
+    // This avoids an ugly flash/glitch at startup when layer is first rendered
+    const tiles = visibleTiles.length ? visibleTiles : loadedTiles;
+
     for (const tile of tiles) {
       const cell = tile.content[0];
       const unitDensity = unitDensityForCell(cell.id);
