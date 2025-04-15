@@ -11,13 +11,17 @@ import type {TilejsonResult} from '@carto/api-client';
 /**
  * Adds access token to Authorization header in loadOptions
  */
-export function injectAccessToken(loadOptions: any, accessToken: string): void {
+export function injectAccessToken(loadOptions: any, accessToken: string): any {
   if (!loadOptions?.fetch?.headers?.Authorization) {
-    loadOptions.fetch = {
-      ...loadOptions.fetch,
-      headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
+    return {
+      ...loadOptions,
+      fetch: {
+        ...loadOptions.fetch,
+        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
+      }
     };
   }
+  return loadOptions;
 }
 
 export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTile): VectorTile {
