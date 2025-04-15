@@ -10,7 +10,7 @@ import {
 } from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {IconButton} from './components';
+import {IconButton} from './lib/components';
 
 export type FullscreenWidgetProps = {
   id?: string;
@@ -44,7 +44,7 @@ export type FullscreenWidgetProps = {
 
 export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   id = 'fullscreen';
-  props: FullscreenWidgetProps;
+  props: Required<FullscreenWidgetProps>;
   placement: WidgetPlacement = 'top-left';
 
   deck?: Deck<any>;
@@ -57,10 +57,14 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     this.placement = props.placement ?? this.placement;
 
     this.props = {
-      ...props,
-      enterLabel: props.enterLabel ?? 'Enter Fullscreen',
-      exitLabel: props.exitLabel ?? 'Exit Fullscreen',
-      style: props.style ?? {}
+      id: 'fullscreen',
+      placement: 'top-left',
+      enterLabel: 'Enter Fullscreen',
+      exitLabel: 'Exit Fullscreen',
+      container: undefined!,
+      className: '',
+      style: {},
+      ...props
     };
   }
 
