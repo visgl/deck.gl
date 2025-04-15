@@ -49,11 +49,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   getLoadOptions(): any {
     const tileJSON = this.props.data as TilejsonResult;
     return mergeLoadOptions(super.getLoadOptions(), {
-      fetch: {
-        headers: {
-          Authorization: `Bearer ${tileJSON.accessToken}`
-        }
-      },
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
       cartoSpatialTile: {scheme: 'h3'}
     });
   }

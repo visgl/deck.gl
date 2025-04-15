@@ -79,4 +79,4 @@ test('utils#mergeLoadOptions', t => {
   // Test with no load options
   const result5 = mergeLoadOptions(null, loadOptions);
   t.deepEqual(result5, loadOptions);
-}); 
+});
