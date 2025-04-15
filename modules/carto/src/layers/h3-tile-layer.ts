@@ -7,7 +7,7 @@ import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import type {TilejsonResult} from '@carto/api-client';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
@@ -47,13 +47,15 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    return {
-      ...loadOptions,
-      ...injectAccessToken(loadOptions, tileJSON.accessToken),
-      cartoSpatialTile: {...loadOptions.cartoSpatialTile, scheme: 'h3'}
-    };
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {
+        headers: {
+          Authorization: `Bearer ${tileJSON.accessToken}`
+        }
+      },
+      cartoSpatialTile: {scheme: 'h3'}
+    });
   }
 
   renderLayers(): SpatialIndexTileLayer | null {

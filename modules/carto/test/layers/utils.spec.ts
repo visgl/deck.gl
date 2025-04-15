@@ -3,78 +3,80 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {injectAccessToken} from '../../src/layers/utils';
+import {mergeLoadOptions} from '../../src/layers/utils';
 
-test('utils#injectAccessToken', t => {
-  t.test('should add Authorization header when not present', t => {
-    const loadOptions = {
-      fetch: {
-        headers: {}
+test('utils#mergeLoadOptions', t => {
+  const accessToken = 'test-token';
+  const loadOptions = {
+    fetch: {
+      headers: {
+        'Content-Type': 'application/json'
       }
-    };
-    const accessToken = 'test-token';
-    const result = injectAccessToken(loadOptions, accessToken);
+    }
+  };
 
-    t.deepEqual(result, {
-      fetch: {
-        headers: {
-          Authorization: 'Bearer test-token'
-        }
+  const result = mergeLoadOptions(loadOptions, {
+    fetch: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
       }
-    }, 'should return new object with Authorization header');
-    t.deepEqual(loadOptions.fetch.headers, {}, 'should not mutate original object');
-    t.end();
+    }
   });
 
-  t.test('should not modify existing Authorization header', t => {
-    const loadOptions = {
-      fetch: {
-        headers: {
-          Authorization: 'Bearer existing-token'
-        }
+  t.deepEqual(result, {
+    fetch: {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
       }
-    };
-    const accessToken = 'test-token';
-    const result = injectAccessToken(loadOptions, accessToken);
-
-    t.deepEqual(result, loadOptions, 'should return original object');
-    t.equal(result.fetch.headers.Authorization, 'Bearer existing-token', 'should preserve existing token');
-    t.end();
+    }
   });
 
-  t.test('should handle missing fetch object', t => {
-    const loadOptions = {};
-    const accessToken = 'test-token';
-    const result = injectAccessToken(loadOptions, accessToken);
+  // Test with no existing headers
+  const loadOptions2 = {
+    fetch: {}
+  };
 
-    t.deepEqual(result, {
-      fetch: {
-        headers: {
-          Authorization: 'Bearer test-token'
-        }
+  const result2 = mergeLoadOptions(loadOptions2, {
+    fetch: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
       }
-    }, 'should create fetch object with Authorization header');
-    t.deepEqual(loadOptions, {}, 'should not mutate original object');
-    t.end();
+    }
   });
 
-  t.test('should handle missing headers object', t => {
-    const loadOptions = {
-      fetch: {}
-    };
-    const accessToken = 'test-token';
-    const result = injectAccessToken(loadOptions, accessToken);
-
-    t.deepEqual(result, {
-      fetch: {
-        headers: {
-          Authorization: 'Bearer test-token'
-        }
+  t.deepEqual(result2, {
+    fetch: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
       }
-    }, 'should create headers object with Authorization header');
-    t.deepEqual(loadOptions.fetch, {}, 'should not mutate original object');
-    t.end();
+    }
   });
 
-  t.end();
+  // Test with no existing fetch
+  const loadOptions3 = {};
+
+  const result3 = mergeLoadOptions(loadOptions3, {
+    fetch: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  });
+
+  t.deepEqual(result3, {
+    fetch: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  });
+
+  // Test with no additional options
+  const result4 = mergeLoadOptions(loadOptions, null);
+  t.deepEqual(result4, loadOptions);
+
+  // Test with no load options
+  const result5 = mergeLoadOptions(null, loadOptions);
+  t.deepEqual(result5, loadOptions);
 }); 

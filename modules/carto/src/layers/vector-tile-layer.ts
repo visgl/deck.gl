@@ -20,7 +20,7 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import type {TilejsonResult} from '@carto/api-client';
-import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
+import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import PointLabelLayer from './point-label-layer';
 
@@ -75,13 +75,15 @@ export default class VectorTileLayer<
   }
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    return {
-      ...loadOptions,
-      ...injectAccessToken(loadOptions, tileJSON.accessToken),
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {
+        headers: {
+          Authorization: `Bearer ${tileJSON.accessToken}`
+        }
+      },
       gis: {format: 'binary'} // Use binary for MVT loading
-    };
+    });
   }
 
   /* eslint-disable camelcase */

@@ -8,7 +8,7 @@ import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
 import type {TilejsonResult} from '@carto/api-client';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
@@ -43,13 +43,15 @@ export default class QuadbinTileLayer<
   static defaultProps = defaultProps;
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    return {
-      ...loadOptions,
-      ...injectAccessToken(loadOptions, tileJSON.accessToken),
-      cartoSpatialTile: {...loadOptions.cartoSpatialTile, scheme: 'quadbin'}
-    };
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {
+        headers: {
+          Authorization: `Bearer ${tileJSON.accessToken}`
+        }
+      },
+      cartoSpatialTile: {scheme: 'quadbin'}
+    });
   }
 
   renderLayers(): SpatialIndexTileLayer | null {
