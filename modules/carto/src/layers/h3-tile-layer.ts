@@ -49,9 +49,11 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'h3'};
-    return loadOptions;
+    return {
+      ...loadOptions,
+      ...injectAccessToken(loadOptions, tileJSON.accessToken),
+      cartoSpatialTile: {...loadOptions.cartoSpatialTile, scheme: 'h3'}
+    };
   }
 
   renderLayers(): SpatialIndexTileLayer | null {

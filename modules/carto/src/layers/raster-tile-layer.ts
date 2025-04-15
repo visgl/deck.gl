@@ -64,8 +64,10 @@ export default class RasterTileLayer<
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    return loadOptions;
+    return {
+      ...loadOptions,
+      ...injectAccessToken(loadOptions, tileJSON.accessToken)
+    };
   }
 
   renderLayers(): Layer | null | LayersList {

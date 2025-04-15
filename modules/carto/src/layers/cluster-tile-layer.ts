@@ -218,9 +218,11 @@ export default class ClusterTileLayer<
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
-    return loadOptions;
+    return {
+      ...loadOptions,
+      ...injectAccessToken(loadOptions, tileJSON.accessToken),
+      cartoSpatialTile: {...loadOptions.cartoSpatialTile, scheme: 'quadbin'}
+    };
   }
 
   renderLayers(): Layer | null | LayersList {

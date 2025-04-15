@@ -77,9 +77,11 @@ export default class VectorTileLayer<
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    loadOptions.gis = {format: 'binary'}; // Use binary for MVT loading
-    return loadOptions;
+    return {
+      ...loadOptions,
+      ...injectAccessToken(loadOptions, tileJSON.accessToken),
+      gis: {format: 'binary'} // Use binary for MVT loading
+    };
   }
 
   /* eslint-disable camelcase */
