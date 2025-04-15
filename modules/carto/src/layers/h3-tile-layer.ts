@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
 import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import type {TilejsonResult} from '@carto/api-client';
-import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {

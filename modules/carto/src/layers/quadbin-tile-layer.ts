@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
 import type {TilejsonResult} from '@carto/api-client';
-import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
