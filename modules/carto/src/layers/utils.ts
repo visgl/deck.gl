@@ -10,9 +10,9 @@ import type {TilejsonResult} from '@carto/api-client';
 
 /**
  * Merges load options with additional options, creating a new object without mutating the input.
- * Handles nested objects through recursive deep merge.
+ * Handles nested objects through recursive deep merge with protection against circular references.
  */
-export function mergeLoadOptions(loadOptions: any, additionalOptions: any): any {
+export function mergeLoadOptions(loadOptions: any, additionalOptions: any, depth = 0): any {
   if (!loadOptions) {
     return additionalOptions;
   }
@@ -20,12 +20,21 @@ export function mergeLoadOptions(loadOptions: any, additionalOptions: any): any 
     return loadOptions;
   }
 
+  // Safety check against deep recursion
+  if (depth > 10) {
+    return additionalOptions;
+  }
+
   const result = {...loadOptions};
 
   for (const key in additionalOptions) {
     const value = additionalOptions[key];
+    // Skip circular references
+    if (value === loadOptions || value === additionalOptions) {
+      continue;
+    }
     if (typeof value === 'object' && value !== null) {
-      result[key] = mergeLoadOptions(loadOptions[key], value);
+      result[key] = mergeLoadOptions(loadOptions[key], value, depth + 1);
     } else {
       result[key] = value;
     }
