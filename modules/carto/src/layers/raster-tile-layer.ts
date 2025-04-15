@@ -13,7 +13,7 @@ import {
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import type {TilejsonResult} from '@carto/api-client';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import {TileLayer, TileLayerProps} from '@deck.gl/geo-layers';
 import {copy, PostProcessModifier} from './post-process-utils';
@@ -62,10 +62,10 @@ export default class RasterTileLayer<
   static defaultProps = defaultProps;
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    return loadOptions;
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}}
+    });
   }
 
   renderLayers(): Layer | null | LayersList {
