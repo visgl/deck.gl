@@ -98,7 +98,7 @@ export default function App({
         const {width, height} = dimensions;
         const {data, ...otherProps} = props;
         return new BitmapLayer(otherProps, {
-          image: props.data,
+          image: data,
           bounds: [
             clamp(left, 0, width),
             clamp(top, 0, height),
