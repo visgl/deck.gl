@@ -69,7 +69,8 @@ export default function App({
       if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
-        void layer.getFeatureInfoText(x, y).then(featureInfo => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        layer.getFeatureInfoText(x, y).then(featureInfo => {
           setSelection({x, y, featureInfo});
         });
       }

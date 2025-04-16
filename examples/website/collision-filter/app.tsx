@@ -44,7 +44,8 @@ export default function App({
   const [roads, setRoads] = useState<FeatureCollection<Geometry, RoadProperties>>();
 
   useEffect(() => {
-    void fetch(DATA_URL)
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetch(DATA_URL)
       .then(resp => resp.json())
       .then(setRoads);
   }, []);

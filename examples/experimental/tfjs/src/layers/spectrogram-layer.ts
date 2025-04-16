@@ -45,7 +45,8 @@ export class SpectrogramLayer extends CompositeLayer<{
       this.props.settings !== params.oldProps.settings ||
       this.props.pickable !== params.oldProps.pickable
     ) {
-      void this._computeSpectrogram();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this._computeSpectrogram();
     }
   }
 

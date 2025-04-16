@@ -77,7 +77,8 @@ export default function App() {
     if (isPlaying) {
       video.pause();
     } else {
-      void video.play();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      video.play();
     }
     setPlaying(!isPlaying);
   };
