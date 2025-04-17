@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Widget, WidgetPlacement} from './widget-manager';
+import type {Widget} from './widget';
+import type {WidgetPlacement} from './widget-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type Deck from './deck';

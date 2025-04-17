@@ -91,7 +91,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GreatCircleLayer} from '@deck.gl/geo-layers';
 import type {PickingInfo} from '@deck.gl/core';
 

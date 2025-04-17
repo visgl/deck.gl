@@ -17,12 +17,8 @@ import {
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
-import PointLabelLayer from '../layers/point-label-layer';
-import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
 import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
-
-const collisionFilterExtension = new CollisionFilterExtension();
 
 export type ParseMapResult = {
   /** Map id. */
@@ -343,8 +339,9 @@ function createChannelProps(
     result._subLayerProps = {
       ...result._subLayerProps,
       'points-text': {
-        type: PointLabelLayer,
-        extensions: [collisionFilterExtension],
+        // The following props are injected by default by VectorTileLayer:
+        // type: PointLabelLayer,
+        // extensions: [new CollisionFilterExtension()],
         collisionEnabled: true,
         collisionGroup,
 

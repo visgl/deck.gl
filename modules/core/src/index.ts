@@ -129,7 +129,8 @@ export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from '.
 export type {PickingUniforms, ProjectProps, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
-export type {Widget, WidgetPlacement} from './lib/widget-manager';
+export type {Widget} from './lib/widget';
+export type {WidgetPlacement} from './lib/widget-manager';
 export type {LightingEffectProps} from './effects/lighting/lighting-effect';
 export type {AmbientLightOptions} from './effects/lighting/ambient-light';
 export type {DirectionalLightOptions} from './effects/lighting/directional-light';

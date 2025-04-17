@@ -203,7 +203,7 @@ update();
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
