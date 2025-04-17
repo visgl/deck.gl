@@ -196,6 +196,8 @@ function getPolygonArea(polygons: Required<BinaryPolygonFeature>, index: number)
   let triangleIndex = 0;
 
   // Find first triangle of this polygon
+  // Note: this assumes tirnagles and polygon indices are sorted.
+  // This is true for the current implementation of geojsonToBinary
   while (triangleIndex < triangles.length) {
     const i1 = triangles[triangleIndex];
     if (i1 >= startIndex) break;
