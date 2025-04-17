@@ -7,7 +7,7 @@ import {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';
 
