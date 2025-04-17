@@ -65,6 +65,7 @@ struct Geometry {
   worldPosition: vec3<f32>,
   worldPositionAlt: vec3<f32>,
   position: vec4<f32>,
+  normal: vec3<f32>,
   uv: vec2<f32>,
   pickingColor: vec3<f32>,
 };
