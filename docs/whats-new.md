@@ -2,9 +2,24 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.2
+
 ### Widgets
 
-- React: Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package, including: `ResetViewWidget`, `ScaleWidget`, `GeolocateWidget`, `ScreenshotWidget`, `LoadingWidget`, `ThemeWidget`, `InfoWidget`, and `SplitterWidget` (in addition to the `ZoomWidget`, `CompassWidget`, `FullscreenWidget` from v9.1)
+ A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
+
+- [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
+- [ScaleWidget](./api-reference/widgets/scale-widget.md)
+- [GeolocateWidget](./api-reference/widgets/geolocate-widget.md)
+- [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
+- [LoadingWidget](./api-reference/widgets/loading-widget.md)
+- [ThemeWidget](./api-reference/widgets/theme-widget.md)
+- [InfoWidget](./api-reference/widgets/info-widget.md)
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+
+The new widgets complement the existing `ZoomWidget`, `CompassWidget` and `FullscreenWidget` from v9.1.
+
+In addition, pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
 
 ## deck.gl v9.1
 

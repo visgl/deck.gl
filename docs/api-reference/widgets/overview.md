@@ -5,20 +5,25 @@ Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and 
 This module contains the following widgets:
 
 ### Navigation Widgets
+
 - [ZoomWidget](./zoom-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
 
 ### Geospatial Widgets
+
 - [CompassWidget](./compass-widget.md)
-<!-- - [ScaleWidget](./scale-widget.md) -->
-<!-- - [GeolocateWidget](./geolocate-widget.md) -->
+- [ScaleWidget](./scale-widget.md)
+- [GeolocateWidget](./geolocate-widget.md)
 
 ### Utility Widgets
+
 - [FullscreenWidget](./fullscreen-widget.md)
 - [ScreenshotWidget](./screenshot-widget.md)
 - [LoadingWidget](./loading-widget.md)
 - [ThemeWidget](./theme-widget.md)
 - [InfoWidget](./info-widget.md)
+- [SplitterWidget](./splitter-widget.md)
+- [TimelineWidget](./timeline-widget.md)
 
 ## Installation
 
