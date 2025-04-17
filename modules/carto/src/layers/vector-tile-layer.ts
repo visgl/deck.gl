@@ -3,11 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {registerLoaders} from '@loaders.gl/core';
+import {BinaryFeatureCollection, BinaryPointFeature} from '@loaders.gl/schema';
 import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
 registerLoaders([CartoPropertiesTileLoader, CartoVectorTileLoader]);
 
-import {DefaultProps} from '@deck.gl/core';
+import {DefaultProps, Layer, LayersList} from '@deck.gl/core';
 import {ClipExtension, CollisionFilterExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
@@ -15,17 +16,21 @@ import {
   TileLayer,
   _getURLFromTemplate,
   _Tile2DHeader,
-  _TileLoadProps as TileLoadProps
+  _TileLoadProps as TileLoadProps,
+  GeoBoundingBox
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import type {TilejsonResult} from '@carto/api-client';
 import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
+import {createPointsFromLines, createPointsFromPolygons} from './label-utils';
+import {createEmptyBinary} from '../utils';
 import PointLabelLayer from './point-label-layer';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
+  autoLabels: false,
   data: TilejsonPropType,
   dataComparator: TilejsonPropType.equal,
   tileSize: DEFAULT_TILE_SIZE
@@ -38,6 +43,12 @@ export type VectorTileLayerProps<FeaturePropertiesT = unknown> = _VectorTileLaye
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
   data: null | TilejsonResult | Promise<TilejsonResult>;
+
+  /**
+   * If true, create labels for lines and polygons.
+   * Specify uniqueIdProperty to only create a single label for each unique feature.
+   */
+  autoLabels: boolean | {uniqueIdProperty: string};
 };
 
 // @ts-ignore
@@ -121,38 +132,20 @@ export default class VectorTileLayer<
   /* eslint-enable camelcase */
 
   renderSubLayers(
-    props: TileLayer['props'] & {
+    props: VectorTileLayer['props'] & {
       id: string;
       data: any;
       _offset: number;
       tile: _Tile2DHeader;
     }
-  ): GeoJsonLayer | null {
+  ): GeoJsonLayer | GeoJsonLayer[] | null {
     if (props.data === null) {
       return null;
     }
 
-    if (this.state.mvt) {
-      return super.renderSubLayers(props) as GeoJsonLayer;
-    }
+    const tileBbox = props.tile.bbox as GeoBoundingBox;
 
-    const tileBbox = props.tile.bbox as any;
-    const {west, south, east, north} = tileBbox;
-
-    const extensions = [new ClipExtension(), ...(props.extensions || [])];
-    const clipProps = {
-      clipBounds: [west, south, east, north]
-    };
-
-    const applyClipExtensionToSublayerProps = (subLayerId: string) => {
-      return {
-        [subLayerId]: {
-          ...clipProps,
-          ...props?._subLayerProps?.[subLayerId],
-          extensions: [...extensions, ...(props?._subLayerProps?.[subLayerId]?.extensions || [])]
-        }
-      };
-    };
+    const subLayers: GeoJsonLayer[] = [];
 
     const defaultToPointLabelLayer = {
       'points-text': {
@@ -166,21 +159,86 @@ export default class VectorTileLayer<
       }
     };
 
-    const subLayerProps = {
-      ...props,
-      autoHighlight: false,
-      // Do not perform clipping on points (#9059)
-      _subLayerProps: {
-        ...props._subLayerProps,
-        ...defaultToPointLabelLayer,
-        ...applyClipExtensionToSublayerProps('polygons-fill'),
-        ...applyClipExtensionToSublayerProps('polygons-stroke'),
-        ...applyClipExtensionToSublayerProps('linestrings')
-      }
-    };
+    if (this.state.mvt) {
+      subLayers.push(super.renderSubLayers(props) as GeoJsonLayer);
+    } else {
+      const {west, south, east, north} = tileBbox;
 
-    const subLayer = new GeoJsonLayer(subLayerProps);
-    return subLayer;
+      const extensions = [new ClipExtension(), ...(props.extensions || [])];
+      const clipProps = {
+        clipBounds: [west, south, east, north]
+      };
+
+      const applyClipExtensionToSublayerProps = (subLayerId: string) => {
+        return {
+          [subLayerId]: {
+            ...clipProps,
+            ...props?._subLayerProps?.[subLayerId],
+            extensions: [...extensions, ...(props?._subLayerProps?.[subLayerId]?.extensions || [])]
+          }
+        };
+      };
+
+      const subLayerProps = {
+        ...props,
+        data: {...props.data, tileBbox},
+        autoHighlight: false,
+        // Do not perform clipping on points (#9059)
+        _subLayerProps: {
+          ...props._subLayerProps,
+          ...defaultToPointLabelLayer,
+          ...applyClipExtensionToSublayerProps('polygons-fill'),
+          ...applyClipExtensionToSublayerProps('polygons-stroke'),
+          ...applyClipExtensionToSublayerProps('linestrings')
+        }
+      };
+
+      subLayers.push(new GeoJsonLayer(subLayerProps));
+    }
+
+    // Add labels
+    if (subLayers[0] && props.autoLabels) {
+      const labelData = createEmptyBinary();
+      if (props.data.lines && props.data.lines.positions.value.length > 0) {
+        labelData.points = createPointsFromLines(
+          props.data.lines,
+          typeof props.autoLabels === 'object' ? props.autoLabels.uniqueIdProperty : undefined
+        ) as BinaryPointFeature;
+      }
+      if (props.data.polygons && props.data.polygons.positions.value.length > 0) {
+        labelData.points = createPointsFromPolygons(props.data.polygons, tileBbox, props);
+      }
+
+      subLayers.push(
+        subLayers[0].clone({
+          id: `${props.id}-labels`,
+          data: labelData,
+          pickable: false,
+          autoHighlight: false
+        })
+      );
+    }
+    return subLayers;
+  }
+
+  renderLayers(): Layer | null | LayersList {
+    const layers = super.renderLayers() as LayersList;
+    if (!this.props.autoLabels) {
+      return layers;
+    }
+
+    // Sort layers so that label layers are rendered after the main layer
+    const validLayers = layers.flat().filter(Boolean) as Layer[];
+    validLayers.sort((a: Layer, b: Layer) => {
+      const aHasLabel = a.id.includes('labels');
+      const bHasLabel = b.id.includes('labels');
+      if (aHasLabel && !bHasLabel) return 1;
+      if (!aHasLabel && bHasLabel) return -1;
+      return 0;
+    });
+    return validLayers.map(l =>
+      l.id.includes('labels') ? l.clone({highlightedObjectIndex: -1}) : l
+    );
   }
 
   protected override _isWGS84(): boolean {
