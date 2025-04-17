@@ -1253,6 +1253,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Private methods
 
   /** Called after updateState to perform common tasks */
+  // eslint-disable-next-line complexity
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
