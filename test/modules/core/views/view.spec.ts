@@ -19,6 +19,26 @@ test('View#imports', t => {
   t.end();
 });
 
+test('View#clone', t => {
+  const view = new MapView({
+    id: 'test-view',
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
+  const clone = view.clone({
+    id: 'cloned-view',
+    zoom: 5
+  });
+  t.ok(clone instanceof MapView, 'clone returns an instance of MapView');
+  t.ok(clone !== view, 'clone returns a new instance');
+  t.is(clone.id, 'cloned-view', 'clone id is overridden');
+  t.is(clone.props.zoom, 5, 'clone prop zoom is overridden');
+  t.is(clone.props.latitude, view.props.latitude, 'other props are preserved');
+  t.is(clone.props.longitude, view.props.longitude, 'other props are preserved');
+  t.end();
+});
+
 test('View#equals', t => {
   const mapView1 = new MapView({
     id: 'default-view',
