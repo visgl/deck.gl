@@ -43,3 +43,6 @@ export {_components};
 
 export type {WidgetImplProps} from './widget-impl';
 export {WidgetImpl as _WidgetImpl} from './widget-impl';
+// Timeline widget
+export {TimelineWidget} from './timeline-widget';
+export type {TimelineWidgetProps} from './timeline-widget';
