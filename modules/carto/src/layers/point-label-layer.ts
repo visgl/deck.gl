@@ -203,7 +203,9 @@ export default class PointLabelLayer<
 
     if (sizeScale < 2) {
       const propName = this.parent?.props?.textSizeScale ? 'textSizeScale' : 'sizeScale';
-      log.warn(`${propName} has small value (${sizeScale}). Note getTextSize is not supported on PointLabelLayer`)();
+      log.warn(
+        `${propName} has small value (${sizeScale}). Note getTextSize is not supported on PointLabelLayer`
+      )();
     }
 
     return new EnhancedTextLayer(

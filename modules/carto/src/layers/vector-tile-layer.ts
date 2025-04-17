@@ -158,7 +158,7 @@ export default class VectorTileLayer<
         ]
       }
     };
-    
+
     if (this.state.mvt) {
       subLayers.push(super.renderSubLayers(props) as GeoJsonLayer);
     } else {
