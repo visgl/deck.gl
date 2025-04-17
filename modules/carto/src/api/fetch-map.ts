@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable @typescript-eslint/no-shadow */
+
 import {
   DEFAULT_API_BASE_URL,
   APIErrorContext,

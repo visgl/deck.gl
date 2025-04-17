@@ -373,6 +373,7 @@ export default class HexagonLayer<
     });
   }
 
+  // eslint-disable-next-line complexity
   updateState(params: UpdateParameters<this>) {
     const aggregatorChanged = super.updateState(params);
 

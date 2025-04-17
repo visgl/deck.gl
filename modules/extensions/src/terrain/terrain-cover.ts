@@ -108,6 +108,7 @@ export class TerrainCover {
   }
 
   /** Compare viewport and terrain bounds with the last version. Only rerender if necesary. */
+  // eslint-disable-next-line max-statements
   private _updateViewport(viewport: Viewport): boolean {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
