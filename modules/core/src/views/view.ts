@@ -105,6 +105,12 @@ export default abstract class View<
     return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
   }
 
+  /** Clone this view with modified props */
+  clone(newProps: Partial<ViewProps>): this {
+    const ViewConstructor = this.constructor as new (props: ViewProps) => this;
+    return new ViewConstructor({...this.props, ...newProps});
+  }
+
   /** Make viewport from canvas dimensions and view state */
   makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);

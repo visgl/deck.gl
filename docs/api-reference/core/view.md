@@ -115,6 +115,24 @@ Returns:
 Note: For speed, deck.gl uses shallow equality. This means that a value of `false` does not guarantee that the views are not equivalent.
 
 
+#### `clone` {#clone}
+
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+```js
+view.clone(newProps)
+```
+
+Creates a new `View` instance by merging the existing view's props with the provided `newProps`.
+
+Parameters:
+
+* `newProps` (Object) - Partial view props to override on the cloned view.
+
+Returns:
+
+* `View` - A new view instance with merged props.
+
 #### `makeViewport` {#makeviewport}
 
 ```js

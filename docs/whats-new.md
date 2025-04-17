@@ -2,6 +2,14 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.2
+
+Target release date: Q2, 2025
+
+## Core
+
+- [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props.
+
 ## deck.gl v9.1
 
 Release date: Jan 21, 2025
