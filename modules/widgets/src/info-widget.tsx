@@ -88,7 +88,7 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
         visible: tooltip !== null,
         ...tooltip
       });
-      return tooltip != null;
+      return tooltip !== null;
     }
 
     // Original behavior
@@ -158,6 +158,7 @@ export class InfoWidget implements Widget<InfoWidgetProps> {
     // - The popup (with its arrow) does not cover the clicked point.
     // - The arrow's tip points to the clicked point.
     // - The popup remains within the canvas bounds, with minOffset.
+    // eslint-disable-next-line max-statements, complexity
     requestAnimationFrame(() => {
       if (!this.props.visible || !element.firstChild || !this.viewport) return;
 

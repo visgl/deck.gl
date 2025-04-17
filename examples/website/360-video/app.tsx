@@ -4,7 +4,7 @@
 
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {FirstPersonView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/engine';
@@ -77,6 +77,7 @@ export default function App() {
     if (isPlaying) {
       video.pause();
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       video.play();
     }
     setPlaying(!isPlaying);

@@ -6,7 +6,7 @@ import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from 'popmotion';
