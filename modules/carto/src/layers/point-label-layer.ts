@@ -17,6 +17,7 @@ import {
   TextLayerProps,
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
+import VectorTileLayer from './vector-tile-layer';
 
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
 
@@ -202,7 +203,7 @@ export default class PointLabelLayer<
     } = this.props;
 
     if (sizeScale < 2) {
-      const propName = this.parent?.props?.textSizeScale ? 'textSizeScale' : 'sizeScale';
+      const propName = (this.parent as VectorTileLayer)?.props?.textSizeScale ? 'textSizeScale' : 'sizeScale';
       log.warn(
         `${propName} has small value (${sizeScale}). Note getTextSize is not supported on PointLabelLayer`
       )();
