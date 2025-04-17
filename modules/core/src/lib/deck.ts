@@ -8,7 +8,8 @@ import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
-import {WidgetManager, Widget} from './widget-manager';
+import {Widget} from './widget';
+import {WidgetManager} from './widget-manager';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
@@ -16,7 +17,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {WebGLDevice, webgl2Adapter} from '@luma.gl/webgl';
+import {webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -231,7 +232,7 @@ const defaultProps: DeckProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {type: 'webgl'} as DeviceProps,
+  deviceProps: {} as DeviceProps,
   gl: null,
   canvas: null,
   layers: [],
@@ -880,6 +881,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Actually run picking */
   private _pickAndCallback() {
+    if (this.device?.type === 'webgpu') {
+      return;
+    }
+
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
@@ -939,7 +944,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    if (this.device instanceof WebGLDevice) {
+    if (this.device.type === 'webgl') {
       this.device.setParametersWebGL({
         blend: true,
         blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
@@ -950,8 +955,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onDeviceInitialized(this.device);
-    if (this.device instanceof WebGLDevice) {
+    if (this.device.type === 'webgl') {
       // Legacy callback - warn?
+      // @ts-expect-error gl is not visible on Device base class
       this.props.onWebGLInitialized(this.device.gl);
     }
 
@@ -1097,7 +1103,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.layerManager!.updateLayers();
 
     // Perform picking request if any
-    this._pickAndCallback();
+    // TODO(ibgreen): Picking not yet supported on WebGPU
+    if (this.device?.type !== 'webgpu') {
+      this._pickAndCallback();
+    }
 
     // Redraw if necessary
     this.redraw();
@@ -1170,6 +1179,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: evnet handler for pointerdown */
   _onPointerDown = (event: MjolnirPointerEvent) => {
+    // TODO(ibgreen) Picking not yet supported on WebGPU
+    if (this.device?.type === 'webgpu') {
+      return;
+    }
     const pos = event.offsetCenter;
     const pickedInfo = this._pick('pickObject', 'pickObject Time', {
       x: pos.x,

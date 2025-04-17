@@ -100,7 +100,7 @@ function render(settings: Settings) {
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 type DataType = {
@@ -232,7 +232,7 @@ function render(year: number) {
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 type CensusTract = {
@@ -402,7 +402,7 @@ function render() {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 type DataType = {
@@ -571,7 +571,7 @@ function render(layerVisibility: {
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 ```
 
@@ -713,7 +713,7 @@ function updateLayers(radius: number) {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {animate} from 'popmotion';
 

@@ -8,7 +8,7 @@ import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
 registerLoaders([CartoPropertiesTileLoader, CartoVectorTileLoader]);
 
 import {DefaultProps} from '@deck.gl/core';
-import {ClipExtension} from '@deck.gl/extensions';
+import {ClipExtension, CollisionFilterExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
   MVTLayerProps,
@@ -20,8 +20,9 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 import type {TilejsonResult} from '@carto/api-client';
-import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
+import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
+import PointLabelLayer from './point-label-layer';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
@@ -74,11 +75,11 @@ export default class VectorTileLayer<
   }
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    loadOptions.gis = {format: 'binary'}; // Use binary for MVT loading
-    return loadOptions;
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      gis: {format: 'binary'} // Use binary for MVT loading
+    });
   }
 
   /* eslint-disable camelcase */
@@ -153,12 +154,25 @@ export default class VectorTileLayer<
       };
     };
 
+    const defaultToPointLabelLayer = {
+      'points-text': {
+        type: PointLabelLayer,
+        ...props?._subLayerProps?.['points-text'],
+        extensions: [
+          new CollisionFilterExtension(),
+          ...(props.extensions || []),
+          ...(props?._subLayerProps?.['points-text']?.extensions || [])
+        ]
+      }
+    };
+
     const subLayerProps = {
       ...props,
       autoHighlight: false,
       // Do not perform clipping on points (#9059)
       _subLayerProps: {
         ...props._subLayerProps,
+        ...defaultToPointLabelLayer,
         ...applyClipExtensionToSublayerProps('polygons-fill'),
         ...applyClipExtensionToSublayerProps('polygons-stroke'),
         ...applyClipExtensionToSublayerProps('linestrings')

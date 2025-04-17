@@ -51,7 +51,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: CompassWidgetProps) {
+  constructor(props: CompassWidgetProps = {}) {
     this.id = props.id ?? this.id;
     this.viewId = props.viewId ?? this.viewId;
     this.placement = props.placement ?? this.placement;
@@ -138,11 +138,11 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
             <g transform={`rotate(${rz},13,13)`}>
               <path
                 d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
-                fill="var(--icon-compass-north-color, #F05C44)"
+                fill="var(--icon-compass-north-color, rgb(240, 92, 68))"
               />
               <path
                 d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
-                fill="var(--icon-compass-south-color, #C2C2CC)"
+                fill="var(--icon-compass-south-color, rgb(204, 204, 204))"
               />
             </g>
           </svg>

@@ -25,7 +25,7 @@ npm install @deck.gl/core @deck.gl/react
 ```
 
 ```jsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 
 <DeckGL initialViewState={{longitude: -122.45, latitude: 37.78, zoom: 12}}/>
 ```
@@ -38,7 +38,7 @@ Here's a typical example of how to switch from using pure-js widgets in the [`@d
 -import { ZoomWidget } from '@deck.gl/widgets';
 +import { ZoomWidget } from '@deck.gl/react';
 
--<DeckGL widgets={[new ZoomWidget({})]}>
+-<DeckGL widgets={[new ZoomWidget()]}>
 +<DeckGL>
 +  <ZoomWidget/>
 </DeckGL>

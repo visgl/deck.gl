@@ -9,15 +9,38 @@ import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {TilejsonResult} from '@carto/api-client';
 
 /**
- * Adds access token to Authorization header in loadOptions
+ * Merges load options with additional options, creating a new object without mutating the input.
+ * Handles nested objects through recursive deep merge with protection against circular references.
  */
-export function injectAccessToken(loadOptions: any, accessToken: string): void {
-  if (!loadOptions?.fetch?.headers?.Authorization) {
-    loadOptions.fetch = {
-      ...loadOptions.fetch,
-      headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
-    };
+export function mergeLoadOptions(loadOptions: any, additionalOptions: any, depth = 0): any {
+  if (!loadOptions) {
+    return additionalOptions;
   }
+  if (!additionalOptions) {
+    return loadOptions;
+  }
+
+  // Safety check against deep recursion
+  if (depth > 10) {
+    return additionalOptions;
+  }
+
+  const result = {...loadOptions};
+
+  for (const key in additionalOptions) {
+    const value = additionalOptions[key];
+    // Skip circular references
+    if (value === loadOptions || value === additionalOptions) {
+      continue;
+    }
+    if (typeof value === 'object' && value !== null) {
+      result[key] = mergeLoadOptions(loadOptions[key], value, depth + 1);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
 }
 
 export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTile): VectorTile {
