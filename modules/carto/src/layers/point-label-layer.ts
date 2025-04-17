@@ -203,7 +203,9 @@ export default class PointLabelLayer<
     } = this.props;
 
     if (sizeScale < 2) {
-      const propName = (this.parent as VectorTileLayer)?.props?.textSizeScale ? 'textSizeScale' : 'sizeScale';
+      const propName = (this.parent as VectorTileLayer)?.props?.textSizeScale
+        ? 'textSizeScale'
+        : 'sizeScale';
       log.warn(
         `${propName} has small value (${sizeScale}). Note getTextSize is not supported on PointLabelLayer`
       )();
