@@ -44,7 +44,7 @@ export class SplitterWidget extends WidgetImpl<SplitterWidgetProps> {
   };
 
   className = 'deck-widget-splitter';
-  placement = 'fill';
+  placement = 'fill' as const;
 
   constructor(props: SplitterWidgetProps) {
     // No placement prop is used.
