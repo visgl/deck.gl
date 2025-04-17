@@ -43,6 +43,7 @@ export function mergeLoadOptions(loadOptions: any, additionalOptions: any, depth
   return result;
 }
 
+// eslint-disable-next-line max-statements
 export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTile): VectorTile {
   const mapping = {};
   for (const {geoid, ...rest} of properties.properties) {

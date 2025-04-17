@@ -7,7 +7,7 @@ import {useState, useMemo, useCallback} from 'react';
 
 import {createRoot} from 'react-dom/client';
 
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {
   COORDINATE_SYSTEM,
   _GlobeView as GlobeView,

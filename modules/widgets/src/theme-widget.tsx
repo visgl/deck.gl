@@ -103,6 +103,7 @@ export class ThemeWidget implements Widget<ThemeWidgetProps> {
     render(ui, el);
   }
 
+  // eslint-disable-next-line complexity
   setProps(props: Partial<ThemeWidgetProps>) {
     const {lightModeTheme, darkModeTheme, placement} = props;
     this.placement = placement ?? this.placement;
