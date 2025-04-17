@@ -138,15 +138,6 @@ export function computeAggregationStats<FeaturePropertiesT>(
   return stats;
 }
 
-const EMPTY_UINT16ARRAY = new Uint16Array();
-const EMPTY_BINARY_PROPS = {
-  positions: {value: new Float32Array(), size: 2},
-  properties: [],
-  numericProps: {},
-  featureIds: {value: EMPTY_UINT16ARRAY, size: 1},
-  globalFeatureIds: {value: EMPTY_UINT16ARRAY, size: 1}
-};
-
 type BinaryFeatureCollectionWithStats<FeaturePropertiesT> = Omit<
   BinaryFeatureCollection,
   'points'
