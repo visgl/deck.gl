@@ -207,12 +207,14 @@
   align-items: center;
   pointer-events: 'auto';
 }
+
 .deck-widget.deck-widget-timeline .timeline-slider {
   margin: 0 8px;
   flex: 1;
   pointer-events: 'auto';
   cursor: pointer;
 }
+
 .deck-widget.deck-widget-timeline button.timeline-play-pause {
   background: var(--button-background, #fff);
   border: var(--button-inner-stroke, unset);

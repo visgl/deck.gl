@@ -6,7 +6,6 @@ import {Widget, WidgetProps} from './widget';
 import type {WidgetPlacement} from './widget-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
-import type Deck from './deck';
 
 /* global document */
 const defaultStyle: Partial<CSSStyleDeclaration> = {

@@ -44,8 +44,8 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
 
   onRenderHTML(rootElement: HTMLElement): void {
     const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
-    const viewport = this.viewports[viewId];
-    const [rz, rx] = this.getRotation(viewport);
+    const widgetViewport = this.viewports[viewId];
+    const [rz, rx] = this.getRotation(widgetViewport);
 
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100}}>

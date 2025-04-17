@@ -23,13 +23,13 @@ export class ScaleWidget extends Widget<ScaleWidgetProps> {
   static defaultProps: Required<ScaleWidgetProps> = {
     ...Widget.defaultProps,
     id: 'scale',
-    placement: 'top-left',
+    placement: 'bottom-left',
     label: 'Scale',
     onCapture: undefined!
   };
 
   className = 'deck-widget-scale';
-  placement: WidgetPlacement = 'top-left';
+  placement: WidgetPlacement = 'bottom-left';
 
   // The pixel width of the scale line (computed from a candidate distance)
   scaleWidth: number = 10;
