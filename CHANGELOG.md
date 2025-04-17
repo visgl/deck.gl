@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.10] - Apr 17 2025
+
+- CARTO: Automatically add labels to line & polygon layers (#9449)
+- chore: More lint fixes (#9582)
+- Feat: Add backgroundBorderRadius to TextLayer (#9447)
+- CARTO: Do not mutate passed in loadOptions objects (#9580)
+
 #### deck.gl [v9.1.9] - Apr 14 2025
 
 - CARTO: Fallback to hidden tiles for maxDensity (#9578)
