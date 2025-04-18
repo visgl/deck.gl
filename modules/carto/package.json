@@ -42,7 +42,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@carto/api-client": "^0.4.4",
+    "@carto/api-client": "^0.5.1",
     "@loaders.gl/compression": "^4.2.0",
     "@loaders.gl/gis": "^4.2.0",
     "@loaders.gl/loader-utils": "^4.2.0",
