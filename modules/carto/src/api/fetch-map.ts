@@ -6,7 +6,7 @@ import VectorTileLayer from '../layers/vector-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 
-import {fetchMap as _fetchMap, FetchMapOptions as _FetchMapOptions, FetchMapResult as _FetchMapResult, LayerType} from '@carto/api-client';
+import {fetchMap as _fetchMap, FetchMapOptions as _FetchMapOptions, FetchMapResult as _FetchMapResult, LayerDescriptor, LayerType} from '@carto/api-client';
 
 export type FetchMapResult = Omit<_FetchMapResult, 'layers'> & {
   layers: Layer[];
@@ -27,19 +27,34 @@ const layerClasses: Record<LayerType, _ConstructorOf<Layer>> = {
   tileset: VectorTileLayer
 } as const;
 
+export function LayerFactory(descriptor: LayerDescriptor): Layer {
+  const LayerClass = layerClasses[descriptor.type];
+  if (!LayerClass) {
+    throw new Error(`No layer class found for type: ${descriptor.type}`);
+  }
+  return new LayerClass(descriptor.props);
+}
+
+function createResult(result: _FetchMapResult): FetchMapResult {
+  return {
+    ...result,
+    layers: result.layers.map((descriptor) => LayerFactory(descriptor))
+  };
+}
+
 export async function fetchMap(options: FetchMapOptions): Promise<FetchMapResult> {
   // TODO handle onNewData
+  const {onNewData, ...rest} = options;
+  const _options: _FetchMapOptions = {
+    ...rest,
+    onNewData: (typeof onNewData === 'function' ? (result) => {
+      onNewData(createResult(result));
+    } : undefined)
+  };
 
   // For backwards compatibility, provide a shim for the old API
   // TODO: v9.2 remove `fetchMap` from @deck.gl/carto and only provide LayerFactory
-  const _result: _FetchMapResult = await _fetchMap(options);
-  const result: FetchMapResult = {
-    ..._result,
-    layers: _result.layers.map(({type, props}) => {
-      const LayerClass = layerClasses[type];
-      return new LayerClass(props);
-    }
-  };
-
+  const _result: _FetchMapResult = await _fetchMap(_options);
+  const result: FetchMapResult = createResult(_result);
   return result;
 }

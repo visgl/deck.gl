@@ -61,7 +61,7 @@ export {
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {fetchMap} from './api/index';
+export {fetchMap, LayerFactory} from './api/fetch-map';
 export {fetchBasemapProps} from './api/basemap';
 export type {
   FetchMapOptions,
