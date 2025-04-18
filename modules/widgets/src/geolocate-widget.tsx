@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {Widget, WidgetProps} from '@deck.gl/core';
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
-import {WidgetImpl, WidgetImplProps} from './widget-impl';
 
 /** @todo - is the the best we can do? */
 type ViewState = Record<string, unknown>;
 
 /** Properties for the GeolocateWidget */
-export type GeolocateWidgetProps = WidgetImplProps & {
+export type GeolocateWidgetProps = WidgetProps & {
   viewId?: string;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
@@ -25,9 +25,9 @@ export type GeolocateWidgetProps = WidgetImplProps & {
  * and a button that moves the view to that location.
  * @todo For now only supports coordinates, Could be extended with location service integrations.
  */
-export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
+export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
   static defaultProps: Required<GeolocateWidgetProps> = {
-    ...WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'geolocate',
     viewId: undefined!,
     placement: 'top-left',
@@ -43,18 +43,16 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
   errorText = '';
 
   constructor(props: GeolocateWidgetProps = {}) {
-    super({...GeolocateWidget.defaultProps, ...props});
+    super(props, GeolocateWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
   }
 
-  setProps(props: Partial<GeolocateWidgetProps>) {
+  setProps(props: Partial<GeolocateWidgetProps>): void {
     this.placement = props.placement ?? this.placement;
     super.setProps(props);
   }
 
-  onRenderHTML() {
-    const element = this.element;
-    if (!element) return;
+  onRenderHTML(rootElement: HTMLElement): void {
     render(
       <div className="deck-widget-geolocate">
         <input
@@ -70,7 +68,7 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
         <button onClick={this.handleSubmit}>Go</button>
         {this.errorText && <div className="error">{this.errorText}</div>}
       </div>,
-      element
+      rootElement
     );
   }
 

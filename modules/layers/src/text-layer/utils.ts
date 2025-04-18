@@ -312,8 +312,8 @@ export function transformParagraph(
 
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
+          // const rowOffsetLeft = x[j] - rowSize[0] / 2;
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          const rowOffsetLeft = x[j] - rowSize[0] / 2;
           const char = characters[j];
           const layoutOffsetY = iconMapping[char]?.layoutOffsetY || 0;
           y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;

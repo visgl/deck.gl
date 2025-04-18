@@ -214,7 +214,7 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  /* eslint-disable max-depth, max-statements */
+  /* eslint-disable max-depth, max-statements, complexity */
   private _drawLayersInViewport(
     renderPass: RenderPass,
     {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},

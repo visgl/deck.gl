@@ -3,12 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {
-  _deepEqual as deepEqual,
-  _applyStyles as applyStyles,
-  _removeStyles as removeStyles
-} from '@deck.gl/core';
-import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
+import {Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './lib/components';
 
@@ -42,58 +37,36 @@ export type FullscreenWidgetProps = {
   className?: string;
 };
 
-export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
-  id = 'fullscreen';
-  props: Required<FullscreenWidgetProps>;
+export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
+  static defaultProps: Required<FullscreenWidgetProps> = {
+    id: 'fullscreen',
+    placement: 'top-left',
+    enterLabel: 'Enter Fullscreen',
+    exitLabel: 'Exit Fullscreen',
+    container: undefined!,
+    className: '',
+    style: {}
+  };
+  className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
-
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
 
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps = {}) {
-    this.id = props.id ?? this.id;
+    super(props, FullscreenWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
-
-    this.props = {
-      id: 'fullscreen',
-      placement: 'top-left',
-      enterLabel: 'Enter Fullscreen',
-      exitLabel: 'Exit Fullscreen',
-      container: undefined!,
-      className: '',
-      style: {},
-      ...props
-    };
   }
 
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    const {style, className} = this.props;
-    const el = document.createElement('div');
-    el.classList.add('deck-widget', 'deck-widget-fullscreen');
-    if (className) el.classList.add(className);
-    applyStyles(el, style);
-    this.deck = deck;
-    this.element = el;
-    this.update();
+  onAdd(): void {
     document.addEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
-    return el;
   }
 
   onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
     document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
   }
 
-  private update() {
+  onRenderHTML(rootElement: HTMLElement): void {
     const {enterLabel, exitLabel} = this.props;
-    const element = this.element;
-    if (!element) {
-      return;
-    }
-
     const ui = (
       <IconButton
         onClick={this.handleClick.bind(this)}
@@ -101,27 +74,12 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />
     );
-    render(ui, element);
+    render(ui, rootElement);
   }
 
   setProps(props: Partial<FullscreenWidgetProps>) {
     this.placement = props.placement ?? this.placement;
-    const oldProps = this.props;
-    const el = this.element;
-    if (el) {
-      if (oldProps.className !== props.className) {
-        if (oldProps.className) el.classList.remove(oldProps.className);
-        if (props.className) el.classList.add(props.className);
-      }
-
-      if (!deepEqual(oldProps.style, props.style, 1)) {
-        removeStyles(el, oldProps.style);
-        applyStyles(el, props.style);
-      }
-    }
-
-    Object.assign(this.props, props);
-    this.update();
+    super.setProps(props);
   }
 
   getContainer() {
@@ -134,7 +92,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     if (prevFullscreen !== fullscreen) {
       this.fullscreen = !this.fullscreen;
     }
-    this.update();
+    this.updateHTML();
   }
 
   async handleClick() {
@@ -143,7 +101,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     } else {
       await this.requestFullscreen();
     }
-    this.update();
+    this.updateHTML();
   }
 
   async requestFullscreen() {

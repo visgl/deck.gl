@@ -9,12 +9,15 @@ A widget is a UI component that can interact with deck.gl's cameras and layers. 
 
 You may find many ready-to-use widgets in the `@deck.gl/widgets` module.
 
-A widget is expected to implement the `Widget` interface. Here is a custom widget that shows a spinner while layers are loading:
+The `Widget` class is not used directly by an app. It is a base class used to define new widgets.
+
+
+A widget should inherit the `Widget` class. Here is a custom widget that shows a spinner while layers are loading:
 
 ```ts
 import {Deck, Widget} from '@deck.gl/core';
 
-class LoadingIndicator implements Widget {
+class LoadingIndicator extends Widget {
   element?: HTMLDivElement;
   size: number;
 
@@ -24,18 +27,15 @@ class LoadingIndicator implements Widget {
     this.size = options.size;
   }
 
-  onAdd() {
-    const el = document.createElement('div');
+  onRenderHTML(el: HTMLElement) {
     el.className = 'spinner';
     el.style.width = `${this.size}px`;
     // TODO - create animation for .spinner in the CSS stylesheet
-    this.element = el;
-    return el;
   }
 
   onRedraw({layers}) {
     const isVisible = layers.some(layer => !layer.isLoaded);
-    this.element.style.display = isVisible ? 'block' : 'none';
+    this.rootElement.style.display = isVisible ? 'block' : 'none';
   }
 }
 
@@ -80,6 +80,25 @@ Widget positioning within the view. One of:
 
 ### Methods
 
+#### `setProps` {#setprops}
+
+Optional. Called to update widget options.
+
+#### `updateHTML` {#updatehtml}
+
+Updates the widget. Normally called automatically.
+
+
+### Lifecycle Methods
+
+The following methods are available when implementing a new widget.
+
+#### `constructor`
+
+Supply the props and default props to the base class.
+
+#### `onRenderHTML`
+
 #### `onAdd` {#onadd}
 
 Required. Called when the widget is added to a Deck instance.
@@ -95,10 +114,6 @@ Returns an optional UI element that should be appended to the Deck container.
 #### `onRemove` {#onremove}
 
 Optional. Called when the widget is removed.
-
-#### `setProps` {#setprops}
-
-Optional. Called to update widget options.
 
 #### `onViewportChange` {#onviewportchange}
 

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
-import type {Deck, Widget} from '@deck.gl/core';
+import {Widget, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
 export type TimelineWidgetProps = {
@@ -20,17 +19,21 @@ export type TimelineWidgetProps = {
    */
   className?: string;
   /**
-   * Slider domain [min, max].
+   * Widget placement.
    */
-  domain?: [number, number];
+  placement?: WidgetPlacement;
+  /**
+   * Slider timeRange [min, max].
+   */
+  timeRange?: [number, number];
   /**
    * Slider step.
    */
   step?: number;
   /**
-   * Current slider value.
+   * Initial slider value.
    */
-  value?: number;
+  initialTime?: number;
   /**
    * Callback when value changes.
    */
@@ -41,62 +44,68 @@ export type TimelineWidgetProps = {
   playInterval?: number;
 };
 
-export class TimelineWidget implements Widget<TimelineWidgetProps> {
+export class TimelineWidget extends Widget<TimelineWidgetProps> {
   id = 'timeline';
-  props: Required<TimelineWidgetProps>;
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
+  className = 'deck-widget-timeline';
+  placement: WidgetPlacement = 'bottom-left';
+
   private playing = false;
   private timerId: number | null = null;
+  currentTime: number;
 
   static defaultProps: Required<TimelineWidgetProps> = {
+    ...Widget.defaultProps,
     id: 'timeline',
-    style: {},
-    className: undefined!,
-    domain: [0, 100],
+    placement: 'bottom-left' as const,
+    timeRange: [0, 100],
     step: 1,
-    value: 0,
+    initialTime: undefined!,
     onTimeChange: () => {},
     playInterval: 1000
   };
 
   constructor(props: TimelineWidgetProps = {}) {
-    this.id = props.id ?? this.id;
-    this.props = {...TimelineWidget.defaultProps, ...props};
+    super(props, TimelineWidget.defaultProps);
+    this.currentTime = this.props.initialTime ?? this.props.timeRange[0];
   }
 
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    this.deck = deck;
-    const el = document.createElement('div');
-    el.classList.add('deck-widget', 'deck-widget-timeline');
-    if (this.props.className) {
-      el.classList.add(this.props.className);
-    }
-    Object.assign(el.style, this.props.style);
-    this.element = el;
-    this.renderUI();
-    return el;
+  setProps(props: Partial<TimelineWidgetProps>): void {
+    this.placement = props.placement || this.placement;
+    super.setProps(props);
+  }
+
+  onAdd(): void {
+    this.playing = false;
+    this.timerId = null;
   }
 
   onRemove(): void {
     this.stop();
-    this.deck = undefined;
-    this.element = undefined;
   }
 
-  setProps(props: Partial<TimelineWidgetProps>): void {
-    Object.assign(this.props, props);
-    if (this.element) {
-      // update className
-      this.element.className = ['deck-widget', 'deck-widget-timeline', this.props.className]
-        .filter(Boolean)
-        .join(' ');
-      // update style
-      if (props.style) {
-        Object.assign(this.element.style, this.props.style);
-      }
-    }
-    this.renderUI();
+  onRenderHTML(rootElement: HTMLElement): void {
+    render(
+      <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'auto'}}>
+        <button
+          type="button"
+          className="timeline-play-pause"
+          title={this.playing ? 'Pause' : 'Play'}
+          onClick={this.handlePlayPause}
+        >
+          {this.playing ? '⏸' : '▶'}
+        </button>
+        <input
+          type="range"
+          className="timeline-slider"
+          min={this.props.timeRange[0]}
+          max={this.props.timeRange[1]}
+          step={this.props.step}
+          value={this.currentTime}
+          onInput={this.handleSliderChange}
+        />
+      </div>,
+      rootElement
+    );
   }
 
   private handlePlayPause = (): void => {
@@ -110,66 +119,37 @@ export class TimelineWidget implements Widget<TimelineWidgetProps> {
   private handleSliderChange = (e: Event): void => {
     const input = e.target as HTMLInputElement;
     const val = Number(input.value);
-    this.props.value = val;
+    this.currentTime = val;
     this.props.onTimeChange(val);
-    this.renderUI();
+    this.updateHTML();
   };
 
   private start(): void {
     this.playing = true;
-    this.renderUI();
+    this.updateHTML();
     this.tick();
   }
 
   private stop(): void {
     this.playing = false;
-    if (this.timerId != null) {
+    if (this.timerId !== null) {
       window.clearTimeout(this.timerId);
       this.timerId = null;
     }
-    this.renderUI();
+    this.updateHTML();
   }
 
   private tick = (): void => {
-    const [min, max] = this.props.domain;
-    let next = this.props.value + this.props.step;
+    const [min, max] = this.props.timeRange;
+    let next = this.currentTime + this.props.step;
     if (next > max) {
       next = min;
     }
-    this.props.value = next;
+    this.currentTime = next;
     this.props.onTimeChange(next);
-    this.renderUI();
+    this.updateHTML();
     if (this.playing) {
       this.timerId = window.setTimeout(this.tick, this.props.playInterval);
     }
   };
-
-  private renderUI(): void {
-    const el = this.element;
-    if (!el) {
-      return;
-    }
-    const ui = (
-      <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'auto'}}>
-        <button
-          type="button"
-          onClick={this.handlePlayPause}
-          className="timeline-play-pause"
-          title={this.playing ? 'Pause' : 'Play'}
-        >
-          {this.playing ? '⏸' : '▶'}
-        </button>
-        <input
-          type="range"
-          min={this.props.domain[0]}
-          max={this.props.domain[1]}
-          step={this.props.step}
-          value={this.props.value}
-          onInput={this.handleSliderChange}
-          className="timeline-slider"
-        />
-      </div>
-    );
-    render(ui, el);
-  }
 }
