@@ -42,8 +42,11 @@ function createResult(result: _FetchMapResult): FetchMapResult {
   };
 }
 
+/**
+ * @deprecated import fetchMap from @carto/api-client instead and use LayerFactory
+ * to instantiate layers
+ */
 export async function fetchMap(options: FetchMapOptions): Promise<FetchMapResult> {
-  // TODO handle onNewData
   const {onNewData, ...rest} = options;
   const _options: _FetchMapOptions = {
     ...rest,
