@@ -144,6 +144,9 @@ export default class ResourceManager {
     onChange: (data: any) => void
   ) {
     const consumers = this._consumers;
+    if (consumerId === '__proto__' || consumerId === 'constructor' || consumerId === 'prototype') {
+      throw new Error('Invalid consumerId');
+    }
     const consumer = (consumers[consumerId] = consumers[consumerId] || {});
     let request = consumer[requestId];
 
