@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ComponentChildren} from 'preact';
+
 export type IconButtonProps = {
   className: string;
   label: string;
   onClick: (event?) => unknown;
+  /** Optional icon or element to render inside the button */
+  children?: ComponentChildren;
 };
 
 export const IconButton = (props: IconButtonProps) => {
-  const {className, label, onClick} = props;
+  const {className, label, onClick, children} = props;
   return (
     <div className="deck-widget-button">
       <button
@@ -18,7 +22,7 @@ export const IconButton = (props: IconButtonProps) => {
         onClick={onClick}
         title={label}
       >
-        <div className="deck-widget-icon" />
+        {children ? children : <div className="deck-widget-icon" />}
       </button>
     </div>
   );
