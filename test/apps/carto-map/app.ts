@@ -7,21 +7,27 @@ import {
   fetchMap,
   FetchMapOptions,
   _GoogleBasemap as GoogleBasemap,
-  _MapLibreBasemap as MapLibreBasemap
+  _MapLibreBasemap as MapLibreBasemap,
+  FetchMapResult
 } from '@deck.gl/carto';
-import {Deck} from '@deck.gl/core';
+import {getDataFilterExtensionProps, LayerType} from '@carto/api-client';
+import {_ConstructorOf, Deck, Layer} from '@deck.gl/core';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {Loader} from '@googlemaps/js-api-loader';
 
 import {_getStyleUrl} from '@deck.gl/carto';
-import {FetchMapResult} from 'modules/carto/src/api/fetch-map';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-
-// // Simplest instantiation
-// const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
-// fetchMap({cartoMapId}).then(map => new Deck(map));
+import {
+  ClusterTileLayer,
+  H3TileLayer,
+  HeatmapTileLayer,
+  VectorTileLayer,
+  QuadbinTileLayer,
+  RasterTileLayer
+} from '@deck.gl/carto';
 
 // Get proper API key to be able to render Google basemaps, otherwise we
 // render on maplibre/positron style
@@ -30,11 +36,37 @@ const GOOGLE_MAPS_API_KEY = '';
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
 
+// Layer factory to create deck.gl layers from layer descriptors
+const layerClasses: Record<LayerType, _ConstructorOf<Layer>> = {
+  clusterTile: ClusterTileLayer,
+  h3: H3TileLayer,
+  heatmapTile: HeatmapTileLayer,
+  mvt: VectorTileLayer,
+  quadbin: QuadbinTileLayer,
+  raster: RasterTileLayer,
+  tileset: VectorTileLayer
+} as const;
+
+function createLayers(layers: FetchMapResult['layers']) {
+  return layers.map(({type, props, filters}) => {
+    const LayerClass = layerClasses[type as LayerType];
+    if (!LayerClass) {
+      console.error(`No layer class found for type: ${type}`);
+      return null;
+    }
+    const filterProps = filters && {
+      ...getDataFilterExtensionProps(filters),
+      extensions: [new DataFilterExtension({filterSize: 4})]
+    };
+    return new LayerClass({...props, ...filterProps});
+  }).filter(Boolean);
+}
+
 async function createMapWithDeckController(result: FetchMapResult) {
   const deck = new Deck({canvas: 'deck-canvas'});
   // Get map info from CARTO and update deck
   const {initialViewState, layers} = result;
-  deck.setProps({initialViewState, layers});
+  deck.setProps({initialViewState, layers: createLayers(layers)});
 
   const basemap = result.basemap as MapLibreBasemap;
   const map = new mapboxgl.Map({
@@ -68,7 +100,7 @@ async function createMapWithMapboxOverlay(result: FetchMapResult) {
     })
   );
 
-  const overlay = new MapboxOverlay({layers: result.layers});
+  const overlay = new MapboxOverlay({layers: createLayers(result.layers)});
   map.addControl(overlay);
 
   return overlay;
@@ -86,7 +118,7 @@ async function createMapWithGoogleMapsOverlay(result: FetchMapResult) {
     disableDefaultUI: true
   });
 
-  const overlay = new GoogleMapsOverlay({layers: result.layers});
+  const overlay = new GoogleMapsOverlay({layers: createLayers(result.layers)});
   overlay.setMap(map);
 
   return overlay;
@@ -102,8 +134,8 @@ async function createMap(cartoMapId: string) {
   if (autoRefresh) {
     // Autorefresh the data every 5 seconds
     options.autoRefresh = 5;
-    options.onNewData = ({layers}) => {
-      deck?.setProps({layers});
+    options.onNewData = (result) => {
+      deck?.setProps({layers: createLayers(result.layers)});
     };
   }
 
