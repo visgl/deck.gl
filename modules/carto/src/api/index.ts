@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export {fetchMap} from './fetch-map';
-export type {FetchMapOptions, FetchMapResult} from './fetch-map';
+import {fetchMap} from '@carto/api-client';
+import type {FetchMapOptions, FetchMapResult} from '@carto/api-client';
+
+export {fetchMap, FetchMapOptions, FetchMapResult};
 export type {Basemap, MapLibreBasemap, GoogleBasemap} from './types';
