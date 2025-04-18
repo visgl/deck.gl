@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.11] - Apr 18 2025
+
+- CARTO: Make autoLabels prop optional (#9593)
+
 #### deck.gl [v9.1.10] - Apr 17 2025
 
 - CARTO: Automatically add labels to line & polygon layers (#9449)
