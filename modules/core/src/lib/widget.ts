@@ -113,7 +113,6 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
 
   /**
    * Called when the widget is added to a Deck instance.
-   * @returns an optional UI element that should be appended to the Deck container
    * */
   onAdd(params: {
     /** The Deck instance that the widget is attached to */
