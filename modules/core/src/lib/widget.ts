@@ -89,6 +89,7 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
   /**
    * Called to create the root DOM element for this widget
    * Configures the top-level styles and adds basic class names for theming
+   * @returns an optional UI element that should be appended to the Deck container
    */
   onCreateRootElement(): HTMLDivElement {
     const CLASS_NAMES = [
