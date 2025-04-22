@@ -19,7 +19,7 @@ test('View#imports', t => {
   t.end();
 });
 
-test.only('View#clone', t => {
+test('View#clone', t => {
   const view = new MapView({
     id: 'test-view',
     latitude: 0,
