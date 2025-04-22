@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.2
 
+Target release date: Q2, 2025
+
 ### Widgets
 
  A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
@@ -17,9 +19,11 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 - [InfoWidget](./api-reference/widgets/info-widget.md)
 - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
 
-The new widgets complement the existing `ZoomWidget`, `CompassWidget` and `FullscreenWidget` from v9.1.
+Also, pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
 
-In addition, pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
+### Core
+
+- [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`.
 
 ## deck.gl v9.1
 
