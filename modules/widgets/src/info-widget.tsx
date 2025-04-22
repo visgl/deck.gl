@@ -4,29 +4,19 @@ import type {Deck, PickingInfo, Viewport} from '@deck.gl/core';
 import {render} from 'preact';
 
 export type InfoWidgetProps = WidgetProps & {
-  /**
-   * View to attach to and interact with. Required when using multiple views.
-   */
+  /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
-
+  /** InfoWidget mode */
   mode: 'click' | 'hover' | 'static';
-
+  /** Get the popup contents from the selected element */
   getTooltip?: (info: PickingInfo, widget: InfoWidget) => any;
-  /**
-   * Position at which to place popup (clicked point: [longitude, latitude]).
-   */
+  /** Position at which to place popup (clicked point: [longitude, latitude]). */
   position: [number, number];
-  /**
-   * Text of popup
-   */
+  /** Text of popup */
   text?: string;
-  /**
-   * Visibility of info widget
-   */
+  /** Visibility of info widget */
   visible?: boolean;
-  /**
-   * Minimum offset (in pixels) to keep the popup away from the canvas edges.
-   */
+  /** Minimum offset (in pixels) to keep the popup away from the canvas edges. */
   minOffset?: number;
   onClick?: (widget: InfoWidget, info: PickingInfo) => boolean;
 };
@@ -45,9 +35,8 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
     onClick: undefined!
   };
 
-  placement = 'fill' as const;
   className = 'deck-widget-info';
-
+  placement = 'fill' as const;
   viewId?: string | null = null;
   viewport?: Viewport;
 
@@ -95,6 +84,7 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
     return this.props.onClick?.(this, info) || false;
   }
 
+  // TODO - Align with onCreateRootElement
   onAdd({deck, viewId}: {deck: Deck<any>; viewId: string | null}): HTMLDivElement {
     const {className} = this.props;
     const element = document.createElement('div');

@@ -8,43 +8,25 @@ import {render} from 'preact';
 import {ButtonGroup, GroupedIconButton} from './lib/components';
 
 export type ZoomWidgetProps = WidgetProps & {
-  /**
-   * Widget positioning within the view. Default 'top-left'.
-   */
+  /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
-  /**
-   * View to attach to and interact with. Required when using multiple views.
-   */
+  /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
-  /**
-   * Button orientation.
-   */
+  /** Button orientation. */
   orientation?: 'vertical' | 'horizontal';
-  /**
-   * Tooltip message on zoom in button.
-   */
+  /** Tooltip message on zoom in button. */
   zoomInLabel?: string;
-  /**
-   * Tooltip message on zoom out button.
-   */
+  /** Tooltip message on zoom out button. */
   zoomOutLabel?: string;
-  /**
-   * Zoom transition duration in ms. 0 disables the transition
-   */
+  /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
 };
 
 export class ZoomWidget extends Widget<ZoomWidgetProps> {
-  className = 'deck-widget-zoom';
-  placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
-  viewports: {[id: string]: Viewport} = {};
-
   static defaultProps: Required<ZoomWidgetProps> = {
+    ...Widget.defaultProps,
     id: 'zoom',
-    style: {},
     placement: 'top-left',
-    className: undefined!,
     orientation: 'vertical',
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
@@ -52,9 +34,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     viewId: undefined!
   };
 
+  className = 'deck-widget-zoom';
+  placement: WidgetPlacement = 'top-left';
+  viewId?: string | null = null;
+  viewports: {[id: string]: Viewport} = {};
+
   constructor(props: ZoomWidgetProps = {}) {
     super(props, ZoomWidget.defaultProps);
-
     this.viewId = props.viewId ?? this.viewId;
     this.placement = props.placement ?? this.placement;
   }
@@ -63,6 +49,24 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {
+    const ui = (
+      <ButtonGroup orientation={this.props.orientation}>
+        <GroupedIconButton
+          onClick={() => this.handleZoomIn()}
+          label={this.props.zoomInLabel}
+          className="deck-widget-zoom-in"
+        />
+        <GroupedIconButton
+          onClick={() => this.handleZoomOut()}
+          label={this.props.zoomOutLabel}
+          className="deck-widget-zoom-out"
+        />
+      </ButtonGroup>
+    );
+    render(ui, rootElement);
   }
 
   onViewportChange(viewport: Viewport) {
@@ -95,29 +99,9 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     }
   }
 
-  /**
-   * @todo - move to deck or widget manager
-   */
+  /** @todo - move to deck or widget manager */
   private setViewState(viewId: string, viewState: Record<string, unknown>): void {
     // @ts-ignore Using private method temporary until there's a public one
     this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
-  }
-
-  onRenderHTML(rootElement: HTMLElement): void {
-    const ui = (
-      <ButtonGroup orientation={this.props.orientation}>
-        <GroupedIconButton
-          onClick={() => this.handleZoomIn()}
-          label={this.props.zoomInLabel}
-          className="deck-widget-zoom-in"
-        />
-        <GroupedIconButton
-          onClick={() => this.handleZoomOut()}
-          label={this.props.zoomOutLabel}
-          className="deck-widget-zoom-out"
-        />
-      </ButtonGroup>
-    );
-    render(ui, rootElement);
   }
 }

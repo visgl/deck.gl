@@ -3,53 +3,39 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {Widget, WidgetPlacement} from '@deck.gl/core';
+import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './lib/components';
 
-export type FullscreenWidgetProps = {
+/* eslint-enable max-len */
+
+export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
-  /**
-   * Widget positioning within the view. Default 'top-left'.
-   */
+  /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
-  /**
-   * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
-   * By default, the map container element will be made full screen.
-   */
-  /* eslint-enable max-len */
-  container?: HTMLElement;
-  /**
-   * Tooltip message when out of fullscreen.
-   */
+  /** Tooltip message when out of fullscreen. */
   enterLabel?: string;
-  /**
-   * Tooltip message when fullscreen.
-   */
+  /** Tooltip message when fullscreen. */
   exitLabel?: string;
   /**
-   * CSS inline style overrides.
+   * A compatible DOM element which should be made full screen. By default, the map container element will be made full screen.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements
    */
-  style?: Partial<CSSStyleDeclaration>;
-  /**
-   * Additional CSS class.
-   */
-  className?: string;
+  container?: HTMLElement;
 };
 
 export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   static defaultProps: Required<FullscreenWidgetProps> = {
+    ...Widget.defaultProps,
     id: 'fullscreen',
     placement: 'top-left',
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
-    container: undefined!,
-    className: '',
-    style: {}
+    container: undefined!
   };
+
   className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
-
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps = {}) {
@@ -66,15 +52,14 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {enterLabel, exitLabel} = this.props;
-    const ui = (
+    render(
       <IconButton
         onClick={this.handleClick.bind(this)}
-        label={this.fullscreen ? exitLabel : enterLabel}
+        label={this.fullscreen ? this.props.exitLabel : this.props.enterLabel}
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
-      />
+      />,
+      rootElement
     );
-    render(ui, rootElement);
   }
 
   setProps(props: Partial<FullscreenWidgetProps>) {

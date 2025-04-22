@@ -111,9 +111,7 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
   /** Called to render HTML into the root element */
   abstract onRenderHTML(rootElement: HTMLElement): void;
 
-  /**
-   * Called when the widget is added to a Deck instance.
-   * */
+  /** Called after the widget is added to a Deck instance and the DOM rootElement has been created */
   onAdd(params: {
     /** The Deck instance that the widget is attached to */
     deck: Deck<any>;

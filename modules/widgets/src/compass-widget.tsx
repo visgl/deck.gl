@@ -74,6 +74,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
         </button>
       </div>
     );
+
     render(ui, rootElement);
   }
 
