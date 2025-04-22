@@ -10,7 +10,7 @@ import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import {Widget} from './widget';
 import {WidgetManager} from './widget-manager';
-import Tooltip from './tooltip';
+import {TooltipWidget} from './tooltip-widget';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -41,7 +41,7 @@ import type {ViewStateChangeParameters, InteractionState} from '../controllers/c
 import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
-import type {TooltipContent} from './tooltip';
+import type {TooltipContent} from './tooltip-widget';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
 import {CreateDeviceProps} from '@luma.gl/core';
 
@@ -295,7 +295,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected deckPicker: DeckPicker | null = null;
   protected eventManager: EventManager | null = null;
   protected widgetManager: WidgetManager | null = null;
-  protected tooltip: Tooltip | null = null;
+  protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
@@ -1026,7 +1026,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       deck: this,
       parentElement: this.canvas?.parentElement
     });
-    this.widgetManager.addDefault(new Tooltip());
+    this.widgetManager.addDefault(new TooltipWidget());
 
     this.setProps(this.props);
 

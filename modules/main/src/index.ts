@@ -74,7 +74,9 @@ export {
   Tesselator,
   fp64LowPart,
   createIterable,
-  getShaderAssembler
+  getShaderAssembler,
+  // Widgets
+  Widget
 } from '@deck.gl/core';
 
 //
@@ -162,8 +164,7 @@ export type {
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect,
-  Widget
+  Effect
 } from '@deck.gl/core';
 
 export type {
