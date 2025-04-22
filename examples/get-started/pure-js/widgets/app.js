@@ -9,7 +9,8 @@ import {
   ZoomWidget,
   FullscreenWidget,
   DarkGlassTheme,
-  LightGlassTheme
+  LightGlassTheme,
+  TimelineWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -77,6 +78,15 @@ new Deck({
   widgets: [
     new ZoomWidget({style: widgetTheme}),
     new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme})
+    new FullscreenWidget({style: widgetTheme}),
+    new TimelineWidget({
+      style: widgetTheme,
+      domain: [0, 24],
+      step: 1,
+      value: 0,
+      playInterval: 1000,
+      // eslint-disable-next-line no-console, no-undef
+      onTimeChange: time => console.log('Time:', time)
+    })
   ]
 });
