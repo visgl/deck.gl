@@ -4,12 +4,12 @@
 
 import {useContext, useMemo, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
-import {log, type Widget, _deepEqual as deepEqual} from '@deck.gl/core';
+import {log, Widget, type WidgetProps, _deepEqual as deepEqual} from '@deck.gl/core';
 
-export function useWidget<T extends Widget<PropsT>, PropsT extends {}>(
-  WidgetClass: {new (props_: PropsT): T},
-  props: PropsT
-): T {
+export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetProps>(
+  WidgetClass: {new (props_: WidgetPropsT): WidgetT},
+  props: WidgetPropsT
+): WidgetT {
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
   useEffect(() => {

@@ -6,7 +6,6 @@ import {bigIntToHex} from 'quadbin';
 import {BinaryPointFeature} from '@loaders.gl/schema';
 
 export type IndexScheme = 'h3' | 'quadbin';
-type TypedArray = Float32Array | Float64Array;
 
 export type Indices = {value: BigUint64Array};
 export type NumericProps = BinaryPointFeature['numericProps'];
