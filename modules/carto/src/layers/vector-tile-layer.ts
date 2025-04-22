@@ -47,7 +47,7 @@ type _VectorTileLayerProps = {
    * If true, create labels for lines and polygons.
    * Specify uniqueIdProperty to only create a single label for each unique feature.
    */
-  autoLabels: boolean | {uniqueIdProperty: string};
+  autoLabels?: boolean | {uniqueIdProperty: string};
 };
 
 // @ts-ignore
