@@ -38,7 +38,10 @@
       jsonInput,
       tooltip,
       customLibraries,
-      configuration
+      configuration,
+      {% if show_error %}
+      showError: true,
+      {% endif %}
     });
 
   </script>

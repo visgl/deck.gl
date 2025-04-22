@@ -4,7 +4,7 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {OrbitView, OrbitViewState} from '@deck.gl/core';
 import PlotLayer, {Axes, PlotLayerPickingInfo} from './plot-layer';
 import {scaleLinear} from 'd3-scale';

@@ -1,9 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {useContext, useMemo, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
 import {log, type Widget, _deepEqual as deepEqual} from '@deck.gl/core';
 
-export function useWidget<T extends Widget, PropsT extends {}>(
-  WidgetClass: {new (props: PropsT): T},
+export function useWidget<T extends Widget<PropsT>, PropsT extends {}>(
+  WidgetClass: {new (props_: PropsT): T},
   props: PropsT
 ): T {
   const context = useContext(DeckGlContext);

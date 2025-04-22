@@ -154,6 +154,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
         sampler: pbr_baseColorSampler || emptyTexture,
         hasTexture: Boolean(pbr_baseColorSampler)
       };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const {camera, ...pbrMaterialProps} = {
         ...parsedPBRMaterial.bindings,
         ...parsedPBRMaterial.uniforms

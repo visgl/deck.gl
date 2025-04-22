@@ -9,6 +9,7 @@ import './api/parse-map.spec';
 import './utils.spec';
 import './layers/h3-tile-layer.spec';
 import './layers/h3-tileset-2d.spec';
+import './layers/label-utils.spec';
 import './layers/raster.spec';
 import './layers/raster-tile-layer.spec';
 import './layers/spatialjson.spec';

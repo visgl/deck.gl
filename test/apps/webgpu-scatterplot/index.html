@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
+  <style>
+    body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: hidden;}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+</body>
+<script type="module">
+  import {renderToDOM} from './app.tsx';
+  const DATA_URL = {
+    MANHATTAN: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json', // eslint-disable-line
+    AIRPORTS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json' // eslint-disable-line
+  };
+  const manhattan = await fetch(DATA_URL.MANHATTAN).then(response => response.json());
+  const airports = await fetch(DATA_URL.AIRPORTS).then(response => response.json());
+  renderToDOM(document.getElementById('app'), manhattan, airports);
+</script>
+</html>

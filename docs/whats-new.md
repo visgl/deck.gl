@@ -2,6 +2,10 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+### Widgets
+
+- React: Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package, including: `ResetViewWidget`, `ScaleWidget`, `GeolocateWidget`, `ScreenshotWidget`, `LoadingWidget`, `ThemeWidget`, `InfoWidget`, and `SplitterWidget` (in addition to the `ZoomWidget`, `CompassWidget`, `FullscreenWidget` from v9.1)
+
 ## deck.gl v9.1
 
 Release date: Jan 21, 2025
@@ -1089,7 +1093,7 @@ For React users, it is now easy to use [react-map-gl](https://visgl.github.io/re
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 <DeckGL ... ContextProvider={MapContext.Provider}>

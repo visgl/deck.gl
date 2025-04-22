@@ -40,13 +40,14 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "@loaders.gl/polyfills": "^4.2.0",
-    "@luma.gl/webgpu": "^9.1.2",
-    "@luma.gl/effects": "^9.1.2",
+    "@luma.gl/core": "^9.1.9",
+    "@luma.gl/effects": "^9.1.9",
+    "@luma.gl/webgpu": "^9.1.9",
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.0",
-    "jsdom": "^20.0.0",
     "@vis.gl/dev-tools": "1.0.0-alpha.21",
     "@vis.gl/ts-plugins": "1.0.0-alpha.21",
+    "jsdom": "^20.0.0",
     "pre-commit": "^1.2.2",
     "puppeteer": "^22.4.0",
     "s2-geometry": "^1.2.10",
@@ -60,9 +61,9 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {},
   "volta": {
     "node": "18.19.0",
     "yarn": "1.22.19"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }

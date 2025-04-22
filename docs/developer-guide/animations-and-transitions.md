@@ -125,7 +125,7 @@ function flyToCity(name: string) {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState, FlyToInterpolator} from '@deck.gl/core';
 
 const CITIES: {[name: string]: MapViewState} = {
@@ -232,7 +232,7 @@ function rotateCamera(): void {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {LinearInterpolator, MapViewState} from '@deck.gl/core';
 
 function App() {
@@ -367,7 +367,7 @@ function getLayers(data: DataType[] | null) {
 
 ```tsx
 import React, {useEffect, useState} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 type DataType = {
@@ -586,7 +586,7 @@ function updateLayers(currentTime: number) {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from "popmotion";

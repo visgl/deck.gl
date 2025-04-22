@@ -18,12 +18,14 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
+import {Parameters} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {gouraudMaterial} from '@luma.gl/shadertools';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
+import source from './point-cloud-layer.wgsl';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 const DEFAULT_NORMAL: [number, number, number] = [0, 0, 1];
@@ -128,6 +130,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
+      source,
       modules: [project32, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
@@ -178,10 +181,23 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       radiusPixels: pointSize
     };
     model.shaderInputs.setProps({pointCloud: pointCloudProps});
+    if (this.context.device.type === 'webgpu') {
+      // @ts-expect-error TODO - this line was needed during WebGPU port
+      model.instanceCount = this.props.data.length;
+    }
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     // a triangle that minimally cover the unit circle
     const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
@@ -199,6 +215,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
           positions: new Float32Array(positions)
         }
       }),
+      parameters,
       isInstanced: true
     });
   }
