@@ -44,6 +44,8 @@ export class WidgetManager {
   private containers: {[id: string]: HTMLDivElement} = {};
   /** Viewport provided to widget on redraw */
   private lastViewports: {[id: string]: Viewport} = {};
+  /** Redraw tracking */
+  private _needsRedraw: string | false = 'WidgetManager initialized';
 
   constructor({deck, parentElement}: WidgetManagerProps) {
     this.deck = deck;
@@ -83,6 +85,18 @@ export class WidgetManager {
       // Update widget list
       this._setWidgets(this.widgets);
     }
+  }
+
+  needsRedraw(opts: {clearRedrawFlags: boolean} = {clearRedrawFlags: false}): string | false {
+    const redraw = this._needsRedraw;
+    if (opts.clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+    return redraw;
+  }
+
+  setNeedsRedraw(reason: string) {
+    this._needsRedraw = reason;
   }
 
   onRedraw({viewports, layers}: {viewports: Viewport[]; layers: Layer[]}) {
