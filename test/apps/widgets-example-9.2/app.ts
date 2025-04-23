@@ -17,7 +17,8 @@ import {
   _InfoWidget,
   _InfoWidget,
   _SplitterWidget,
-  _TimelineWidget
+  _TimelineWidget,
+  _ViewSelectorWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -113,6 +114,7 @@ const deck = new Deck({
       // eslint-disable-next-line no-console, no-undef
       onTimeChange: time => console.log('Time:', time)
     }),
+    new _ViewSelectorWidget(),
     new _SplitterWidget({
       viewId1: 'left-map',
       viewId2: 'right-map',
