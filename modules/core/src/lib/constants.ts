@@ -12,39 +12,48 @@ import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions}
 /**
  * The coordinate system that positions/dimensions are defined in.
  */
+export type CoordinateSystem =
+  | 'default'
+  | 'lnglat'
+  | 'meter-offsets'
+  | 'lnglat-offsets'
+  | 'cartesian';
+
+
+/**
+ * The coordinate system that positions/dimensions are defined in.
+ * @deprecated Use string constants
+ */
 export const COORDINATE_SYSTEM = {
   /**
    * `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
    */
-  DEFAULT: -1,
+  DEFAULT: 'default',
   /**
    * Positions are interpreted as [longitude, latitude, elevation]
    * longitude/latitude are in degrees, elevation is in meters.
    * Dimensions are in meters.
    */
-  LNGLAT: 1,
+  LNGLAT: 'lnglat',
 
   /**
    * Positions are interpreted as [x, y, z] in meter offsets from the coordinate origin.
    * Dimensions are in meters.
    */
-  METER_OFFSETS: 2,
+  METER_OFFSETS: 'meter-offsets',
 
   /**
    * Positions are interpreted as [deltaLng, deltaLat, elevation] from the coordinate origin.
    * deltaLng/deltaLat are in degrees, elevation is in meters.
    * Dimensions are in meters.
    */
-  LNGLAT_OFFSETS: 3,
+  LNGLAT_OFFSETS: 'lnglat-offsets',
 
   /**
    * Positions and dimensions are in the common units of the viewport.
    */
-  CARTESIAN: 0
+  CARTESIAN: 'cartesian'
 } as const;
-
-// Enums cannot be directly exported as they are not transpiled correctly into ES5, see https://github.com/visgl/deck.gl/issues/7130
-export type CoordinateSystem = -1 | 0 | 1 | 2 | 3;
 
 // Deprecated
 /* eslint-disable accessor-pairs */

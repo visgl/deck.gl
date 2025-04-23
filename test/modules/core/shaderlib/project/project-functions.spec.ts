@@ -5,15 +5,16 @@
 import test from 'tape-promise/tape';
 
 import {
-  COORDINATE_SYSTEM,
   WebMercatorViewport,
   OrthographicViewport,
   project,
-  ProjectProps
+  ProjectProps,
+  CoordinateSystem
 } from '@deck.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
+import { getShaderCoordinateSystem } from '@deck.gl/core/src/shaderlib/project/viewport-uniforms';
 import {equals, config, NumberArray3} from '@math.gl/core';
 import {runOnGPU, TestProps, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 
@@ -32,7 +33,7 @@ const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
 export type TestCase = {
   title: string;
   position: NumberArray3;
-  projectProps: ProjectProps & {fromCoordinateSystem?: number};
+  projectProps: ProjectProps & {fromCoordinateSystem?: CoordinateSystem};
   result: NumberArray3;
 };
 const TEST_CASES: TestCase[] = [
@@ -41,7 +42,7 @@ const TEST_CASES: TestCase[] = [
     position: [-70, 41, 1000],
     projectProps: {
       viewport: TEST_VIEWPORT_2,
-      coordinateSystem: COORDINATE_SYSTEM.DEFAULT
+      coordinateSystem: 'default'
     },
     result: [156.44444444444446, 320.0378755678335, 0.01694745572307248]
   },
@@ -50,7 +51,7 @@ const TEST_CASES: TestCase[] = [
     position: [-122.46, 37.8, 1000],
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.DEFAULT
+      coordinateSystem: 'default'
     },
     result: [-0.014226562499999318, 0.03599588695612965, 0.016187212628251565]
   },
@@ -64,7 +65,7 @@ const TEST_CASES: TestCase[] = [
         target: [3.1416, 2.7183, 0],
         zoom: 4
       }),
-      coordinateSystem: COORDINATE_SYSTEM.DEFAULT
+      coordinateSystem: 'default'
     },
     result: [-13.1416, 7.2817, 10]
   },
@@ -73,7 +74,7 @@ const TEST_CASES: TestCase[] = [
     position: [256, 256, 0],
     projectProps: {
       viewport: TEST_VIEWPORT_2,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       coordinateOrigin: [0, 0, 0]
     },
     result: [256, 256, 0]
@@ -83,7 +84,7 @@ const TEST_CASES: TestCase[] = [
     position: [0, 0, 0],
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       coordinateOrigin: [256, 256, 0]
     },
     result: [174.15110778808594, -58.11044311523443, 0]
@@ -93,7 +94,7 @@ const TEST_CASES: TestCase[] = [
     position: [-0.05, 0.06, 50],
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+      coordinateSystem: 'lnglat-offsets',
       coordinateOrigin: [-122.5, 38.8, 0]
     },
     result: [-0.07111111111110802, 0.10954078583623073, 0.0008212863345433337]
@@ -103,7 +104,7 @@ const TEST_CASES: TestCase[] = [
     position: [-100, 300, 50],
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: 'meter-offsets',
       coordinateOrigin: [-122.5, 38.8, 0]
     },
     result: [-0.0016412509100689476, 0.00492356632304336, 0.0008206254565218747]
@@ -113,9 +114,9 @@ const TEST_CASES: TestCase[] = [
     position: [-122.46, 37.8, 1000],
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: 'meter-offsets',
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
-      fromCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      fromCoordinateSystem: 'lnglat'
     },
     result: [-0.014222222222187497, 0.03599369037291922, 0.016187212628251565]
   },
@@ -124,9 +125,9 @@ const TEST_CASES: TestCase[] = [
     position: [-122.46, 37.8, 1000],
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+      coordinateSystem: 'lnglat-offsets',
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
-      fromCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      fromCoordinateSystem: 'lnglat'
     },
     result: [-0.014222222222187497, 0.03599369037291922, 0.016187212628251565]
   }
@@ -145,7 +146,7 @@ test('project#projectPosition', t => {
   t.end();
 });
 
-test('project#projectPosition vs project_position', async t => {
+test.only('project#projectPosition vs project_position', async t => {
   config.EPSILON = 1e-5;
 
   const vs = `\
@@ -168,6 +169,8 @@ void main()
       uPos: position,
       uPos64Low: position.map(fp64LowPart) as NumberArray3
     };
+
+    debugger
     const shaderResult = await runOnGPU({
       vs,
       varying: 'outValue',
