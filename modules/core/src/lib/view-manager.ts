@@ -39,12 +39,15 @@ export type ViewStateObject<ViewsT extends ViewOrViews> =
 
 /** ViewManager props directly supplied by the user */
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
+  /** Views supplied by user */
   views: ViewsT;
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
   width?: number;
   height?: number;
+  /** Views injected (by WidgetManager) */
+  _injectedViews?: ViewsT;
 };
 
 export default class ViewManager<ViewsT extends View[]> {
@@ -54,6 +57,11 @@ export default class ViewManager<ViewsT extends View[]> {
   viewState: ViewStateObject<ViewsT>;
   controllers: {[viewId: string]: Controller<any> | null};
   timeline: Timeline;
+
+  /** Tracks the user supplied views */
+  private _views: View[] = [];
+  /** Tracks injected views (widgets) */
+  private _injectedViews: View[] = [];
 
   private _viewports: Viewport[];
   private _viewportMap: {[viewId: string]: Viewport};
@@ -215,6 +223,9 @@ export default class ViewManager<ViewsT extends View[]> {
     if (props.views) {
       this._setViews(props.views);
     }
+    if (props._injectedViews) {
+      this._setInjectedViews(props._injectedViews);
+    }
 
     if (props.viewState) {
       this._setViewState(props.viewState);
@@ -268,12 +279,23 @@ export default class ViewManager<ViewsT extends View[]> {
   private _setViews(views: View[]): void {
     views = flatten(views, Boolean);
 
-    const viewsChanged = this._diffViews(views, this.views);
+    const viewsChanged = this._diffViews(views, this._views);
     if (viewsChanged) {
       this.setNeedsUpdate('views changed');
     }
 
-    this.views = views;
+    this._views = views;
+    this.views = [...this._views, ...this._injectedViews];
+  }
+
+  private _setInjectedViews(views: View[]): void {
+    const viewsChanged = this._diffViews(views, this._injectedViews);
+    if (viewsChanged) {
+      this.setNeedsUpdate('injected views changed');
+    }
+
+    this._injectedViews = views;
+    this.views = [...this._views, ...this._injectedViews];
   }
 
   private _setViewState(viewState: ViewStateObject<ViewsT>): void {
