@@ -10,6 +10,12 @@ import type Layer from './layer';
 import type {WidgetManager, WidgetPlacement} from './widget-manager';
 import {deepEqual} from '../utils/deep-equal';
 import {applyStyles, removeStyles} from '../utils/apply-styles';
+import {default as LinearInterpolator} from '../transitions/linear-interpolator';
+import {default as FlyToInterpolator} from '../transitions/fly-to-interpolator';
+
+/** @todo - is the the best we can do? deck.gl does not seem to export a union type */
+type ViewState = Record<string, unknown>;
+
 
 export type WidgetProps = {
   id?: string;
@@ -84,8 +90,6 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
 
   // WIDGET LIFECYCLE
 
-  // @note empty method calls have an overhead in V8 but it is very low, ~1ns
-
   /**
    * Called to create the root DOM element for this widget
    * Configures the top-level styles and adds basic class names for theming
@@ -122,7 +126,7 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
   /** Called when the widget is removed */
   onRemove(): void {}
 
-  // deck integration - Event hooks
+  // DECK INTEGRATION - EVENT HOOKS
 
   /** Called when the containing view is changed */
   onViewportChange(viewport: Viewport): void {}
@@ -138,4 +142,38 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
   onDragStart(info: PickingInfo, event: MjolnirGestureEvent): void {}
   /** Called when a dragend event occurs */
   onDragEnd(info: PickingInfo, event: MjolnirGestureEvent): void {}
+
+  // DECK INTEGRATION - OPERATIONS
+
+  /** 
+   * Lets the widget update viewState for a view, optionally with transitions
+   * @note this code abuses protected methods and should be refactored, 
+   * but does work for now until we have a cleaner solutions.
+   */
+  setViewState({
+    viewState,
+    viewId = (viewState?.id as string) || 'default-view',
+    transitionDuration = 0,
+  }: {
+    viewState: ViewState,
+    viewId?: string, 
+    transitionDuration?: number
+  }) {
+    // @ts-expect-error viewManager is protected
+    const viewport = this.deck?.viewManager?.getViewport(viewId) || {};
+    
+    // HACK - mising viewport and view state
+    const nextViewState: ViewState = {
+      ...viewport,
+      ...viewState
+    };
+    if (transitionDuration > 0) {
+      nextViewState.transitionDuration = transitionDuration;
+      nextViewState.transitionInterpolator =
+        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+    }
+
+    // @ts-expect-error Using private method temporary until there's a public one
+    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+  }
 }
