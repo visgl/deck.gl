@@ -19,7 +19,9 @@ export type ResetViewWidgetProps = WidgetProps & {
   /** The initial view state to reset the view to. Defaults to deck.props.initialViewState */
   initialViewState?: ViewState;
   /** View to interact with. Required when using multiple views. */
-  viewId?: string | null;
+  viewId?: string;
+  /** Set to 0 to disable transitions */
+  transitionDurationMs?: number;
 };
 
 /**
@@ -32,7 +34,8 @@ export class ResetViewWidget extends Widget<ResetViewWidgetProps> {
     placement: 'top-left',
     label: 'Reset View',
     initialViewState: undefined!,
-    viewId: undefined!
+    viewId: undefined!,
+    transitionDurationMs: 200,
   };
 
   className = 'deck-widget-reset-view';
@@ -61,18 +64,10 @@ export class ResetViewWidget extends Widget<ResetViewWidgetProps> {
 
   handleClick() {
     const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
-    this.setViewState(initialViewState);
-  }
-
-  setViewState(viewState: ViewState) {
-    const viewId = this.props.viewId || viewState?.id || 'default-view';
-    const nextViewState = {
-      ...viewState
-      // only works for geospatial?
-      // transitionDuration: this.props.transitionDuration,
-      // transitionInterpolator: new FlyToInterpolator()
-    };
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+    this.setViewState({
+      viewState: initialViewState, 
+      viewId: this.props.viewId, 
+      transitionDurationMs: this.props.transitionDurationMs
+    });
   }
 }

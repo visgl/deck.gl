@@ -4,11 +4,7 @@
 
 import {Widget, WidgetProps} from '@deck.gl/core';
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
-import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
-
-/** @todo - is the the best we can do? */
-type ViewState = Record<string, unknown>;
 
 /** Properties for the GeolocateWidget */
 export type GeolocateWidgetProps = WidgetProps & {
@@ -17,7 +13,8 @@ export type GeolocateWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
-  transitionDuration?: number;
+  /** Animated transition duration. Set to 0 to disable transitions */
+  transitionDurationMs?: number;
 };
 
 /**
@@ -32,7 +29,7 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
     viewId: undefined!,
     placement: 'top-left',
     label: 'Geolocate',
-    transitionDuration: 200
+    transitionDurationMs: 200
   };
 
   className = 'deck-widget-geolocate';
@@ -95,31 +92,6 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
   handleCoordinates = coordinates => {
     this.setViewState(coordinates);
   };
-
-  // TODO - MOVE TO WIDGETIMPL?
-
-  setViewState(viewState: ViewState) {
-    const viewId = this.props.viewId || (viewState?.id as string) || 'default-view';
-    const viewport = this.viewports[viewId] || {};
-    const nextViewState: ViewState = {
-      ...viewport,
-      ...viewState
-    };
-    if (this.props.transitionDuration > 0) {
-      nextViewState.transitionDuration = this.props.transitionDuration;
-      nextViewState.transitionInterpolator =
-        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
-    }
-
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
-  }
-
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-  }
-
-  viewports: Record<string, Viewport> = {};
 }
 
 /**
