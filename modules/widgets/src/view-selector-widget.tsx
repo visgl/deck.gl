@@ -6,6 +6,7 @@
 import {render, JSX} from 'preact';
 import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {Menu} from './lib/components';
+import {h} from 'preact';
 
 /** The available view modes */
 export type ViewMode = 'single' | 'split-horizontal' | 'split-vertical';
