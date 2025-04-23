@@ -83,9 +83,9 @@ const MENU_ITEM_STYLE: JSX.CSSProperties = {
 
 export type MenuProps<KeyType = string> = {
   className: string;
-  icon?: JSX.Element;
+  icon?: () => JSX.Element;
   label?: string;
-  menuItems: {value: KeyType; icon: JSX.Element; label: string}[];
+  menuItems: {value: KeyType; icon: () => JSX.Element; label: string}[];
   initialItem: KeyType;
   onSelect: (item: KeyType) => void;
 };
@@ -121,12 +121,12 @@ export function Menu<KeyType extends string>(props: MenuProps<KeyType>) {
 
   const selectedMenuItem = props.menuItems.find(item => item.value === selectedItem);
   const label = props.label || selectedMenuItem?.label || '';
-  const icon = props.icon || selectedMenuItem?.icon || '';
+  const Icon = (props.icon || selectedMenuItem?.icon)!;
 
   return (
     <div style={{position: 'relative', display: 'inline-block'}} ref={containerRef}>
       <IconButton className={props.className} label={label} onClick={handleButtonClick}>
-        {icon}
+        <Icon />
       </IconButton>
       {menuOpen && (
         <div style={MENU_STYLE}>

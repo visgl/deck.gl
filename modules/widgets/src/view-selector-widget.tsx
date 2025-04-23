@@ -81,19 +81,19 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
 const ICON_STYLE = {width: '24px', height: '24px'};
 
 // Define inline SVG icons for each view mode.
-const ICONS: Record<ViewMode, JSX.Element> = {
-  single: (
+const ICONS: Record<ViewMode, () => JSX.Element> = {
+  single: () => (
     <svg width="24" height="24" style={ICON_STYLE}>
       <rect x="4" y="4" width="16" height="16" stroke="black" fill="none" strokeWidth="2" />
     </svg>
   ),
-  'split-horizontal': (
+  'split-horizontal': () => (
     <svg width="24" height="24" style={ICON_STYLE}>
       <rect x="4" y="4" width="16" height="7" stroke="black" fill="none" strokeWidth="2" />
       <rect x="4" y="13" width="16" height="7" stroke="black" fill="none" strokeWidth="2" />
     </svg>
   ),
-  'split-vertical': (
+  'split-vertical': () => (
     <svg width="24" height="24" style={ICON_STYLE}>
       <rect x="4" y="4" width="7" height="16" stroke="black" fill="none" strokeWidth="2" />
       <rect x="13" y="4" width="7" height="16" stroke="black" fill="none" strokeWidth="2" />
@@ -102,7 +102,7 @@ const ICONS: Record<ViewMode, JSX.Element> = {
 };
 
 // Define menu items for the popup menu.
-const MENU_ITEMS: Array<{value: ViewMode; icon: JSX.Element; label: string}> = [
+const MENU_ITEMS: Array<{value: ViewMode; icon: () => JSX.Element; label: string}> = [
   {value: 'single', icon: ICONS.single, label: 'Single View'},
   {value: 'split-horizontal', icon: ICONS['split-horizontal'], label: 'Split Horizontal'},
   {value: 'split-vertical', icon: ICONS['split-vertical'], label: 'Split Vertical'}
