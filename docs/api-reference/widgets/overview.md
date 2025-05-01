@@ -11,7 +11,7 @@ This module contains the following widgets:
 ### Geospatial Widgets
 - [CompassWidget](./compass-widget.md)
 <!-- - [ScaleWidget](./scale-widget.md) -->
-<!-- - [GeolocateWidget](./geolocate-widget.md) -->
+- [GeocoderWidget](./geocoder-widget.md)
 
 ### Utility Widgets
 - [FullscreenWidget](./fullscreen-widget.md)

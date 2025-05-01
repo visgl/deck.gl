@@ -6,6 +6,7 @@ import {Widget, WidgetProps} from '@deck.gl/core';
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
+import {DropdownMenu} from './lib/dropdown-menu';
 
 /** @todo - is the the best we can do? */
 type ViewState = Record<string, unknown>;
@@ -14,8 +15,10 @@ const GOOGLE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 const MAPBOX_URL = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 const OPENCAGE_API_URL = 'https://api.opencagedata.com/geocode/v1/json';
 
-/** Properties for the GeolocateWidget */
-export type GeolocateWidgetProps = WidgetProps & {
+const CURRENT_LOCATION = 'current';
+
+/** Properties for the GeocoderWidget */
+export type GeocoderWidgetProps = WidgetProps & {
   viewId?: string;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
@@ -38,8 +41,8 @@ export type GeolocateWidgetProps = WidgetProps & {
  * and a button that moves the view to that location.
  * @todo For now only supports coordinates, Could be extended with location service integrations.
  */
-export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
-  static defaultProps: Required<GeolocateWidgetProps> = {
+export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
+  static defaultProps: Required<GeocoderWidgetProps> = {
     ...Widget.defaultProps,
     id: 'geolocate',
     viewId: undefined!,
@@ -51,19 +54,20 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
     onGeocode: undefined!
   };
 
-  className = 'deck-widget-geolocate';
+  className = 'deck-widget-geocoder';
   placement: WidgetPlacement = 'top-left';
 
-  geolocateText = '';
-  geolocateWidth = 10;
+  addressText = '';
   errorText = '';
+  addressHistory: string[] = [];
 
-  constructor(props: GeolocateWidgetProps = {}) {
-    super(props, GeolocateWidget.defaultProps);
+  constructor(props: GeocoderWidgetProps = {}) {
+    super(props, GeocoderWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
+    this.addressHistory = this.loadPreviousAddresses();
   }
 
-  setProps(props: Partial<GeolocateWidgetProps>): void {
+  setProps(props: Partial<GeocoderWidgetProps>): void {
     this.placement = props.placement ?? this.placement;
     super.setProps(props);
     if (!this.props.apiKey && ['google', 'mapbox', 'opencage'].includes(this.props.geocoder)) {
@@ -72,17 +76,41 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
+    const menuItems = [CURRENT_LOCATION, ...this.addressHistory];
     render(
-      <div className="deck-widget-geolocate">
+      <div
+        className="deck-widget-geocoder"
+        style={{
+          pointerEvents: 'auto',
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap' // Allows wrapping on smaller screens
+        }}
+      >
         <input
           type="text"
           placeholder="-122.45, 37.8 or 37°48'N, 122°27'W"
-          value={this.geolocateText}
+          value={this.addressText}
           // @ts-expect-error event type
           onInput={e => this.setInput(e.target?.value || '')}
           onKeyPress={this.handleKeyPress}
+          style={{
+            flex: '1 1 auto',
+            minWidth: '200px',
+            margin: 0,
+            padding: '8px',
+            boxSizing: 'border-box'
+          }}
         />
-        <button onClick={this.handleSubmit}>Go</button>
+        <DropdownMenu
+          menuItems={menuItems}
+          onSelect={this.handleSelect}
+          style={{
+            margin: 2,
+            padding: '4px 2px',
+            boxSizing: 'border-box'
+          }}
+        />
         {this.errorText && <div className="error">{this.errorText}</div>}
       </div>,
       rootElement
@@ -90,7 +118,7 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
   }
 
   setInput = (text: string) => {
-    this.geolocateText = text;
+    this.addressText = text;
   };
 
   handleKeyPress = e => {
@@ -99,18 +127,25 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
     }
   };
 
+  handleSelect = (address: string) => {
+    this.setInput(address);
+    this.handleSubmit();
+  };
+
   /** Sync wrapper for async geocode() */
   handleSubmit = () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.geocode();
   };
 
+  /** PErform geocoding */
   geocode: () => Promise<void> = async () => {
     this.errorText = '';
     try {
-      const coordinates = await this.callGeocoderService(this.geolocateText);
+      const coordinates = await this.callGeocoderService(this.addressText);
       if (coordinates) {
         this.setViewState(coordinates);
+        this.storeAddress(this.addressText);
       } else {
         this.errorText = 'Invalid address';
       }
@@ -119,10 +154,46 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
     }
   };
 
+  loadPreviousAddresses(): string[] {
+    try {
+      const stored = window.localStorage.getItem('deck-geocoder-widget-history');
+      const list = stored && JSON.parse(stored);
+      const addresses = Array.isArray(list)
+        ? list.filter((v): v is string => typeof v === 'string')
+        : [];
+      return addresses;
+    } catch {
+      // ignore
+    }
+    return [];
+  }
+
+  storeAddress(address: string) {
+    const cleaned = address.trim();
+    if (!cleaned || cleaned === CURRENT_LOCATION) {
+      return;
+    }
+    const deduped = [cleaned, ...this.addressHistory.filter(a => a !== cleaned)];
+    this.addressHistory = deduped.slice(0, 5);
+    this.updateHTML();
+    try {
+      window.localStorage.setItem(
+        'deck-geocoder-widget-history',
+        JSON.stringify(this.addressHistory)
+      );
+    } catch {
+      // ignore
+    }
+  }
+
   callGeocoderService = async (
     address: string
   ): Promise<{longitude: number; latitude: number} | null> => {
     const {geocoder, apiKey, onGeocode} = this.props;
+
+    if (address === CURRENT_LOCATION) {
+      return this.getCurrentLocation();
+    }
 
     switch (geocoder) {
       case 'google':
@@ -187,8 +258,27 @@ export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
     return null;
   }
 
+  /** Parse a coordinate string */
   async geocodeCoordinates(address: string): Promise<{longitude: number; latitude: number} | null> {
     return parseCoordinates(address) || null;
+  }
+
+  /** Attempt to call browsers geolocation API */
+  async getCurrentLocation(): Promise<{longitude: number; latitude: number} | null> {
+    if (!navigator.geolocation) {
+      throw new Error('Geolocation not supported');
+    }
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        /** @see https://developer.mozilla.org/docs/Web/API/GeolocationPosition */
+        (position: GeolocationPosition) => {
+          const {longitude, latitude} = position.coords;
+          resolve({longitude, latitude});
+        },
+        /** @see https://developer.mozilla.org/docs/Web/API/GeolocationPositionError */
+        (error: GeolocationPositionError) => reject(new Error(error.message))
+      );
+    });
   }
 
   /** Fetch JSON, catching HTTP errors */
