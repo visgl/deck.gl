@@ -10,6 +10,7 @@ This module contains the following widgets:
 
 ### Geospatial Widgets
 - [CompassWidget](./compass-widget.md)
+- [GimbalWidget](./gimbal-widget.md)
 <!-- - [ScaleWidget](./scale-widget.md) -->
 <!-- - [GeolocateWidget](./geolocate-widget.md) -->
 
