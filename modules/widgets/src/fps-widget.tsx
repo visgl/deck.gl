@@ -42,7 +42,7 @@ export class FpsWidget extends Widget<FpsWidgetProps> {
     const fps = this._getFps();
     rootElement.innerText = `FPS:\n${fps}`;
     rootElement.style.backgroundColor = 'white';
-    rootElement.style.fontFamily = 'sans-serif';
+    rootElement.style.fontFamily = 'monospace';
     rootElement.style.fontSize = '8px';
     rootElement.style.fontWeight = '700'; // Make font bolder on click
   }
