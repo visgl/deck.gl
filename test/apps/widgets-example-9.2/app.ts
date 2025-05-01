@@ -100,7 +100,7 @@ const deck = new Deck({
     new ResetViewWidget(),
     new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-right'}),
-    new _GeolocateWidget(),
+    new _GeolocateWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
     new _InfoWidget({mode: 'hover', getTooltip}),
     new _InfoWidget({mode: 'click', getTooltip}),
