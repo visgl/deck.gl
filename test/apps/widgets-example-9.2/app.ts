@@ -20,7 +20,7 @@ import {
   _SplitterWidget,
   _TimelineWidget,
   _ViewSelectorWidget,
-  _ContextMenuWidget,
+  _ContextMenuWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -37,20 +37,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
   pitch: 30
 };
-
-function getContextMenuItems(info: PickingInfo): ContextWidgetMenuItem[] | null {
-  const name = info.layer?.id === 'airports' && info.object?.properties.name;
-  return [
-    {
-      key: 'log',
-      label: `Log ${name}`,
-    },
-    {
-      key: 'open-in-new-tab',
-      label: 'Open in new tab',
-    }
-  ];
-}
 
 function getViewsForSplit(percentage: number) {
   const x1 = '0%';
@@ -119,10 +105,22 @@ const deck = new Deck({
     new _ScaleWidget({placement: 'bottom-right'}),
     new _GeolocateWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
-    new _ContextMenuWidget({getItems: getContextMenuItems}),
+    new _ContextMenuWidget({
+      getMenuItems: (info: PickingInfo) => {
+        const name = info.layer?.id === 'airports' && info.object?.properties.name;
+        console.log('Context menu:', name);
+        return (
+          name && [
+            {key: 'airport', label: `${name}`},
+            {key: 'open', label: 'Open in new tab'},
+            {key: 'favorite', label: 'Set as favorite'},
+            {key: 'filter', label: 'Exclude from filter'}
+          ]
+        );
+      }
+    }),
     // new _InfoWidget({mode: 'hover', getTooltip}),
     // new _InfoWidget({mode: 'click', getTooltip}),
-    // new _InfoWidget({mode: 'static', getTooltip})
     new _TimelineWidget({
       placement: 'bottom-left',
       domain: [0, 24],

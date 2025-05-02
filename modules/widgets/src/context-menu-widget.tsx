@@ -1,8 +1,8 @@
 /* global document */
-import { picking, Widget, WidgetProps } from '@deck.gl/core';
-import type { Deck, PickingInfo } from '@deck.gl/core';
-import { render, JSX } from 'preact';
-import { SimpleMenu } from './lib/simple-menu';
+import {picking, Widget, WidgetProps} from '@deck.gl/core';
+import type {Deck, PickingInfo} from '@deck.gl/core';
+import {render, JSX} from 'preact';
+import {SimpleMenu} from './lib/simple-menu';
 
 export type ContextWidgetMenuItem = {
   label: string;
@@ -15,7 +15,7 @@ export type ContextMenuWidgetProps = WidgetProps & {
   /** Controls visibility of the context menu */
   visible?: boolean;
   /** Screen position at which to place the menu */
-  position: { x: number; y: number };
+  position: {x: number; y: number};
   /** Optional styling applied to the dropdown menu */
   style?: JSX.CSSProperties;
   /** Items to render */
@@ -30,7 +30,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     ...Widget.defaultProps,
     viewId: null,
     visible: false,
-    position: { x: 0, y: 0 },
+    position: {x: 0, y: 0},
     style: undefined!,
     getMenuItems: undefined!,
     menuItems: [],
@@ -48,7 +48,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     this.setProps(props);
   }
 
-  onAdd({ deck }: { deck: Deck<any> }): HTMLDivElement {
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-context-menu');
     const style = {
@@ -56,7 +56,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
       top: '0px',
       left: '0px',
       position: 'absolute',
-      pointerEvents: 'none'
+      pointerEvents: 'auto'
     };
     Object.entries(style).forEach(([key, value]) => element.style.setProperty(key, value));
 
@@ -66,15 +66,15 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const { visible, position, menuItems, style } = this.props;
+    const {visible, position, menuItems, style} = this.props;
 
     const ui =
       visible && menuItems.length ? (
-        <SimpleMenu 
-          menuItems={menuItems} 
+        <SimpleMenu
+          menuItems={menuItems}
           onItemSelected={key => this.props.onMenuItemSelected(key, this.pickInfo)}
-          position={position} 
-          style={{ pointerEvents: 'auto',  }} 
+          position={position}
+          style={{pointerEvents: 'auto'}}
         />
       ) : null;
     render(ui, rootElement);
@@ -82,15 +82,16 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
 
   handleContextMenu(srcEvent: MouseEvent): boolean {
     if (srcEvent && (srcEvent.button === 2 || srcEvent.which === 3)) {
-      this.pickInfo = this.deck?.pickObject({
-        x: srcEvent.clientX,
-        y: srcEvent.clientY,
-      }) || null;
+      this.pickInfo =
+        this.deck?.pickObject({
+          x: srcEvent.clientX,
+          y: srcEvent.clientY
+        }) || null;
       const menuItems = (this.pickInfo && this.props.getMenuItems?.(this.pickInfo, this)) || [];
       const visible = menuItems.length > 0;
       this.setProps({
         visible,
-        position: { x: srcEvent.clientX, y: srcEvent.clientY },
+        position: {x: srcEvent.clientX, y: srcEvent.clientY},
         menuItems
       });
       this.updateHTML();
@@ -102,6 +103,6 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   }
 
   hide(): void {
-    this.setProps({ visible: false });
+    this.setProps({visible: false});
   }
 }
