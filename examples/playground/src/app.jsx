@@ -13,9 +13,7 @@ import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
 
-import AceEditor from 'react-ace';
-import 'brace/mode/json';
-import 'brace/theme/github';
+import Editor from '@monaco-editor/react';
 
 import JSON_TEMPLATES from '../json-examples';
 
@@ -130,7 +128,8 @@ export default class App extends Component {
     this._setTemplate(value);
   }
 
-  _onEditorChange(text, event) {
+  _onEditorChange(value) {
+    const text = value;
     let json = null;
     // Parse JSON, while capturing and ignoring exceptions
     try {
@@ -180,25 +179,21 @@ export default class App extends Component {
 
     return (
       <Fragment>
-        {/* Left Pane: Ace Editor and Template Selector */}
+        {/* Left Pane: Monaco Editor and Template Selector */}
         <div id="left-pane">
           {this._renderJsonSelector()}
 
           <div id="editor">
             <AutoSizer>
               {({width, height}) => (
-                <AceEditor
+                <Editor
                   width={`${width}px`}
                   height={`${height}px`}
-                  mode="json"
-                  theme="github"
-                  onChange={this._onEditorChange}
-                  name="AceEditorDiv"
-                  editorProps={{$blockScrolling: true}}
-                  ref={instance => {
-                    this.ace = instance;
-                  }}
+                  defaultLanguage="json"
+                  theme="light"
                   value={this.state.text}
+                  onChange={this._onEditorChange}
+                  options={{scrollBeyondLastLine: false}}
                 />
               )}
             </AutoSizer>
