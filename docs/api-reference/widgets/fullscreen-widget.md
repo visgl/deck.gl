@@ -16,19 +16,17 @@ const deck = new Deck({
 });
 ```
 
-## Props
+## Types
 
-#### `id` (string, optional) {#id}
+### `FullscreenWidgetProps`
 
-Default: `'fullscreen'`
+The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'top-left'`
-
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+- `id` (default `'fullscreen'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
 #### `container` (HTMLElement, optional) {#container}
 
