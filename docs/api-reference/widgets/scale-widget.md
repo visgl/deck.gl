@@ -18,38 +18,23 @@ const deck = new Deck({
 });
 ```
 
-## Props
+# Types
 
-#### `id` (string, optional) {#id}
+### `ResetViewWidgetProps`
 
-Default: `'scale'`
+The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-Unique identifier for the widget.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'bottom-left'`
-
-Widget position within the view. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+- `id` (default `'scale'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
 #### `label` (string, optional) {#label}
 
 Default: `'Scale'`
 
 Tooltip label for the widget.
-
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. Supports camelCase and kebab-case CSS variables.
-
-#### `className` (string, optional) {#classname}
-
-Default: None
-
-Custom class name for the widget element.
 
 ## Source
 

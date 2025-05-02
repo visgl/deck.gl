@@ -111,6 +111,41 @@ new Deck({
 });
 ```
 
+## Writing new Widgets
+
+A widget should inherit the `Widget` class. 
+Here is a custom widget that shows a spinner while layers are loading:
+
+```ts
+import {Deck, Widget} from '@deck.gl/core';
+
+class LoadingIndicator extends Widget {
+  element?: HTMLDivElement;
+  size: number;
+
+  constructor(options: {
+    size: number;
+  }) {
+    this.size = options.size;
+  }
+
+  onRenderHTML(el: HTMLElement) {
+    el.className = 'spinner';
+    el.style.width = `${this.size}px`;
+    // TODO - create animation for .spinner in the CSS stylesheet
+  }
+
+  onRedraw({layers}) {
+    const isVisible = layers.some(layer => !layer.isLoaded);
+    this.rootElement.style.display = isVisible ? 'block' : 'none';
+  }
+}
+
+new Deck({
+  widgets: [new LoadingIndicator({size: 48})]
+});
+```
+
 ## Themes and Styling
 
 deck.gl widget appearance can be customized using [themes and CSS](./styling).

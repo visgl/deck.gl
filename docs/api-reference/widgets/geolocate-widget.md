@@ -18,25 +18,17 @@ const deck = new Deck({
 });
 ```
 
-## Props
+## Types
 
-#### `id` (string, optional) {#id}
+### `GeolocateWidgetProps` 
 
-Default: `'geolocate'`
+The `GeolocateWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-Unique identifier for the widget.
-
-#### `viewId` (string, optional) {#viewid}
-
-Default: `null`
-
-Attach the widget to a specific view by view id.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'top-left'`
-
-Widget position within the view. Valid options: `top-left`, `top-right`, `bottom-left`, `bottom-right`, `fill`.
+- `id` (default `'geolocate'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
 #### `label` (string, optional) {#label}
 

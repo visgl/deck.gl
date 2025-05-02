@@ -39,25 +39,15 @@ const deck = new Deck({
 });
 ```
 
-## Props
+### `SplitterWidgetProps`
 
-#### `id` (string, optional) {#id}
+The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-Default: `'splitter-widget'`
-
-Unique identifier for the widget. Recommended when using multiple widgets of the same type.
-
-#### `viewId` (string, optional) {#viewid}
-
-Default: `null`
-
-If set, the widget is attached to the specified view; otherwise it is attached to the root widget container.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'fill'`
-
-Widget placement covers the entire canvas to allow the splitter to span across both views. This prop is fixed to `fill`.
+- `id` (default `'splitter'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
 #### `viewId1` (string, required) {#viewid1}
 
@@ -96,18 +86,6 @@ Callback invoked when the user begins dragging the splitter.
 `() => void`
 
 Callback invoked when the user releases the splitter.
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget container. Supports camelCase properties and kebab-case CSS variables.
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Custom class name for the widget element. The default classes are `deck-widget` and `deck-widget-splitter`.
 
 ## Source
 

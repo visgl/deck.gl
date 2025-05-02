@@ -24,6 +24,16 @@ const deck = new Deck({
 });
 ```
 
+### `TimelineProps`
+
+The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+
+- `id` (default `'timeline'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
+
 ## Props
 
 #### `id` (string, optional) {#id}
@@ -67,18 +77,6 @@ Callback invoked when the time value changes (drag or play).
 Default: `1000`
 
 Interval in milliseconds between automatic time increments when playing.
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Inline CSS styles for the widget container.
-
-#### `className` (string, optional) {#classname}
-
-Default: None
-
-Custom class name for the widget element.
 
 ## Source
 
