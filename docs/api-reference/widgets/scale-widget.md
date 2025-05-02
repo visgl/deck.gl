@@ -38,11 +38,6 @@ Default: `'Scale'`
 
 Tooltip label for the widget.
 
-#### `onCapture` (Function, optional) {#oncapture}
-
-`(widget: ScaleWidget) => void`
-
-Callback when the widget is clicked.
 
 #### `style` (object, optional) {#style}
 
