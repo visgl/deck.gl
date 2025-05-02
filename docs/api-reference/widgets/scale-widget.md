@@ -5,7 +5,7 @@ import {_ScaleWidget} from '@deck.gl/widgets';
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
-This widget displays a dynamic scale bar (like Google Maps) that updates as the map zoom and latitude change. It renders  a horizontal line with two tick marks at the ends, and a formatted distance label.
+This widget displays a dynamic cartographic scale bar that updates as the map view changes. It shows a horizontal line with end tick marks and a distance label, reflecting the current map scale based on zoom level and latitude.
 
 <WidgetPreview cls={_ScaleWidget}/>
 
