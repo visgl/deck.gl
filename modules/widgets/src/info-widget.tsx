@@ -1,7 +1,7 @@
 /* global document */
 import {Widget, WidgetProps} from '@deck.gl/core';
 import type {Deck, PickingInfo, Viewport} from '@deck.gl/core';
-import {render} from 'preact';
+import {render, JSX} from 'preact';
 
 export type InfoWidgetProps = WidgetProps & {
   /** View to attach to and interact with. Required when using multiple views. */
@@ -133,7 +133,7 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
             padding: '10px',
             position: 'relative',
             // Include any additional styles
-            ...(this.props.style as React.CSSProperties)
+            ...(this.props.style as JSX.CSSProperties)
           }}
         >
           {this.props.text}
