@@ -5,7 +5,7 @@
 
 import {render, JSX} from 'preact';
 import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
-import {Menu} from './lib/components';
+import {IconMenu} from './lib/components/icon-menu';
 
 /** The available view modes */
 export type ViewMode = 'single' | 'split-horizontal' | 'split-vertical';
@@ -60,11 +60,11 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
 
   onRenderHTML(rootElement: HTMLElement) {
     render(
-      <Menu<ViewMode>
+      <IconMenu<ViewMode>
         className="deck-widget-view-selector"
         menuItems={MENU_ITEMS}
         initialItem={this.props.initialViewMode}
-        onSelect={this.handleSelectMode}
+        onItemSelected={this.handleSelectMode}
       />,
       rootElement
     );
