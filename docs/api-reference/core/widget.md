@@ -1,72 +1,35 @@
 # Widget
 
-A widget is a UI component that can interact with deck.gl's cameras and layers. Some examples are:
+A widget is a UI component that can interact with deck.gl's layers and views.
+You can write your own widgets, or use any of the many ready-to-use widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module.
 
-- A tooltip that follows the pointer and provide information for the hovered object
-- A marker pinned to a geo-location containing HTML content
-- Buttons to manipulate the camera, such as +/- zoom buttons, a compass rose for the MapView, a gimble widget for the OrbitView, etc.
-- A legend that offers visual comparison of sizes, colors etc. corresponding to the rendered layers and viewport. For example a distance ruler, a color scale for the HeatmapLayer, etc.
+## Usage
 
-You may find many ready-to-use widgets in the `@deck.gl/widgets` module.
+The `Widget` class is a base class used to define new widgets and should not be instantiated directly by an application. See the [Widget Documentation](../widgets/overview.md) for information about how to write your own widgets.
 
-The `Widget` class is not used directly by an app. It is a base class used to define new widgets.
+## Types 
 
+#### `WidgetProps` (object) {#props}
 
-A widget should inherit the `Widget` class. Here is a custom widget that shows a spinner while layers are loading:
-
-```ts
-import {Deck, Widget} from '@deck.gl/core';
-
-class LoadingIndicator extends Widget {
-  element?: HTMLDivElement;
-  size: number;
-
-  constructor(options: {
-    size: number;
-  }) {
-    this.size = options.size;
-  }
-
-  onRenderHTML(el: HTMLElement) {
-    el.className = 'spinner';
-    el.style.width = `${this.size}px`;
-    // TODO - create animation for .spinner in the CSS stylesheet
-  }
-
-  onRedraw({layers}) {
-    const isVisible = layers.some(layer => !layer.isLoaded);
-    this.rootElement.style.display = isVisible ? 'block' : 'none';
-  }
-}
-
-new Deck({
-  widgets: [new LoadingIndicator({size: 48})]
-});
-```
-
-## Widget Interface
-
-When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
-
-### Members
-
-A `Widget` implements the following members.
+Options for the widget, as passed into the constructor and can be updated with `setProps`.
 
 #### `id` {#id}
 
-Unique identifier of the widget.
-
-#### `props` (object) {#props}
-
-Any options for the widget, as passed into the constructor and can be updated with `setProps`.
+The `id` string must be unique among all your widgets at a given time. While a default `id` is provided, it is recommended to set `id` explicitly if you have multiple widgets of the same type.
 
 #### `viewId` (string | null) {#viewid}
 
+The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
+
 * Default: `null`
+
+When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
 
 The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
 
 #### `placement` (string, optional) {#placement}
+
+Widget position within the view relative to the map container.
 
 * Default: `'top-left'`
 
@@ -78,26 +41,39 @@ Widget positioning within the view. One of:
 - `'bottom-right'`
 - `'fill'`
 
-### Methods
+#### `style`
 
-#### `setProps` {#setprops}
+CSS inline style overrides.
 
-Optional. Called to update widget options.
+```ts
+  style?: Partial<CSSStyleDeclaration>;
+```
 
-#### `updateHTML` {#updatehtml}
+#### `className`
 
-Updates the widget. Normally called automatically.
+Additional CSS classnames for interaction with custom stylesheets.
+  
+```ts
+  className?: string;
+```
 
-
-### Lifecycle Methods
-
-The following methods are available when implementing a new widget.
+### Methods for Widget Writers
 
 #### `constructor`
 
 Supply the props and default props to the base class.
 
+#### `setProps` {#setprops}
+
+Called to update widget options.
+
+#### `updateHTML` {#updatehtml}
+
+Updates the widget. Called by the specific widget when state has changed. Calls `onRenderHTML()`
+
 #### `onRenderHTML`
+
+This function is implemented by the specific widget subclass to update the HTML for the widget
 
 #### `onAdd` {#onadd}
 
