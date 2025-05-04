@@ -1,8 +1,13 @@
 /* global document */
-import {picking, Widget, WidgetProps} from '@deck.gl/core';
+import {Widget, WidgetProps} from '@deck.gl/core';
 import type {Deck, PickingInfo} from '@deck.gl/core';
-import {render, JSX} from 'preact';
-import {SimpleMenu} from './lib/simple-menu';
+import {render} from 'preact';
+import {SimpleMenu} from './lib/components/simple-menu';
+
+/** The standard, modern way is to use event.button === 2, where button is the standardized property (0 = left, 1 = middle, 2 = right). */
+const MOUSE_BUTTON_RIGHT = 2;
+/** A name for the legacy MouseEvent.which value that corresponds to the right-mouse button. In older browsers, the check is: if (event.which === 3) */
+const MOUSE_WHICH_RIGHT  = 3;
 
 export type ContextWidgetMenuItem = {
   label: string;
@@ -16,8 +21,6 @@ export type ContextMenuWidgetProps = WidgetProps & {
   visible?: boolean;
   /** Screen position at which to place the menu */
   position: {x: number; y: number};
-  /** Optional styling applied to the dropdown menu */
-  style?: JSX.CSSProperties;
   /** Items to render */
   menuItems: ContextWidgetMenuItem[];
   /** Provide menu items for the menu given the picked object */
@@ -32,7 +35,6 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     viewId: null,
     visible: false,
     position: {x: 0, y: 0},
-    style: undefined!,
     getMenuItems: undefined!,
     menuItems: [],
     onMenuItemSelected: (key, pickInfo) => console.log('Context menu item selected:', key, pickInfo)
@@ -67,7 +69,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {visible, position, menuItems, style} = this.props;
+    const {visible, position, menuItems} = this.props;
 
     const ui =
       visible && menuItems.length ? (
@@ -82,7 +84,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   }
 
   handleContextMenu(srcEvent: MouseEvent): boolean {
-    if (srcEvent && (srcEvent.button === 2 || srcEvent.which === 3)) {
+    if (srcEvent && (srcEvent.button === MOUSE_BUTTON_RIGHT || srcEvent.which === MOUSE_WHICH_RIGHT)) {
       this.pickInfo =
         this.deck?.pickObject({
           x: srcEvent.clientX,

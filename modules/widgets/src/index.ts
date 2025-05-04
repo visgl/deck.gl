@@ -39,12 +39,12 @@ export type {SplitterWidgetProps} from './splitter-widget';
 export type {TimelineWidgetProps} from './timeline-widget';
 export type {ViewSelectorWidgetProps} from './view-selector-widget';
 
-export {IconButton, ButtonGroup, GroupedIconButton} from './lib/components';
-
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';
 
 // Experimental exports
-
-import * as _components from './lib/components';
-export {_components};
+export {ButtonGroup as _ButtonGroup, type ButtonGroupProps} from './lib/components/button-group';
+export {IconButton as _IconButton, type IconButtonProps} from './lib/components/icon-button';
+export {GroupedIconButton as _GroupedIconButton, type GroupedIconButtonProps} from './lib/components/grouped-icon-button';
+export {SimpleMenu as _SimpleMenu, type SimpleMenuProps} from './lib/components/simple-menu';
+export {IconMenu as _IconMenu, type IconMenuProps} from './lib/components/icon-menu';

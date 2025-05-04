@@ -28,35 +28,3 @@ export const IconButton = (props: IconButtonProps) => {
     </div>
   );
 };
-
-export type ButtonGroupProps = {
-  children;
-  orientation;
-};
-
-/** Renders a group of buttons with Widget CSS */
-export const ButtonGroup = (props: ButtonGroupProps) => {
-  const {children, orientation} = props;
-  return <div className={`deck-widget-button-group ${orientation}`}>{children}</div>;
-};
-
-export type GroupedIconButtonProps = {
-  className;
-  label;
-  onClick;
-};
-
-/** Renders an icon button as part of a ButtonGroup */
-export const GroupedIconButton = props => {
-  const {className, label, onClick} = props;
-  return (
-    <button
-      className={`deck-widget-icon-button ${className}`}
-      type="button"
-      onClick={onClick}
-      title={label}
-    >
-      <div className="deck-widget-icon" />
-    </button>
-  );
-};

@@ -1,6 +1,6 @@
 import type {JSX} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
-import {IconButton} from './components';
+import {IconButton} from './icon-button';
 
 const MENU_STYLE: JSX.CSSProperties = {
   position: 'absolute',

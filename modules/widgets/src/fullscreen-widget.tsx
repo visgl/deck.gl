@@ -5,7 +5,7 @@
 /* global document */
 import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {IconButton} from './lib/components';
+import {IconButton} from './lib/components/icon-button';
 
 /* eslint-enable max-len */
 
