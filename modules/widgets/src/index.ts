@@ -45,6 +45,9 @@ export type {DeckWidgetTheme} from './themes';
 // Experimental exports
 export {ButtonGroup as _ButtonGroup, type ButtonGroupProps} from './lib/components/button-group';
 export {IconButton as _IconButton, type IconButtonProps} from './lib/components/icon-button';
-export {GroupedIconButton as _GroupedIconButton, type GroupedIconButtonProps} from './lib/components/grouped-icon-button';
+export {
+  GroupedIconButton as _GroupedIconButton,
+  type GroupedIconButtonProps
+} from './lib/components/grouped-icon-button';
 export {SimpleMenu as _SimpleMenu, type SimpleMenuProps} from './lib/components/simple-menu';
 export {IconMenu as _IconMenu, type IconMenuProps} from './lib/components/icon-menu';

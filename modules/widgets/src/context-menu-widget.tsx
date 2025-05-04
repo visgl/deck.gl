@@ -7,7 +7,7 @@ import {SimpleMenu} from './lib/components/simple-menu';
 /** The standard, modern way is to use event.button === 2, where button is the standardized property (0 = left, 1 = middle, 2 = right). */
 const MOUSE_BUTTON_RIGHT = 2;
 /** A name for the legacy MouseEvent.which value that corresponds to the right-mouse button. In older browsers, the check is: if (event.which === 3) */
-const MOUSE_WHICH_RIGHT  = 3;
+const MOUSE_WHICH_RIGHT = 3;
 
 export type ContextWidgetMenuItem = {
   label: string;
@@ -37,6 +37,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     position: {x: 0, y: 0},
     getMenuItems: undefined!,
     menuItems: [],
+    // eslint-disable-next-line no-console
     onMenuItemSelected: (key, pickInfo) => console.log('Context menu item selected:', key, pickInfo)
   };
 
@@ -84,7 +85,10 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   }
 
   handleContextMenu(srcEvent: MouseEvent): boolean {
-    if (srcEvent && (srcEvent.button === MOUSE_BUTTON_RIGHT || srcEvent.which === MOUSE_WHICH_RIGHT)) {
+    if (
+      srcEvent &&
+      (srcEvent.button === MOUSE_BUTTON_RIGHT || srcEvent.which === MOUSE_WHICH_RIGHT)
+    ) {
       this.pickInfo =
         this.deck?.pickObject({
           x: srcEvent.clientX,

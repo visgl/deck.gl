@@ -37,8 +37,8 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
     placement: 'top-left',
     label: 'Split View',
     initialViewMode: 'single',
-    // eslint-disable-next-line no-console
     onViewModeChange: (viewMode: string) => {
+      // eslint-disable-next-line no-console
       console.log(viewMode);
     }
   };
