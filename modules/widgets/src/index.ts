@@ -22,6 +22,7 @@ export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
 export {SplitterWidget as _SplitterWidget} from './splitter-widget';
 export {TimelineWidget as _TimelineWidget} from './timeline-widget';
 export {ViewSelectorWidget as _ViewSelectorWidget} from './view-selector-widget';
+export {ButtonGroupWidget as _ButtonGroupWidget, type ButtonGroupWidgetProps} from './button-group-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
