@@ -9,15 +9,17 @@ import {ButtonGroup} from './lib/components/button-group';
 import {GroupedIconButton} from './lib/components/grouped-icon-button';
 
 /** Defined one button in the menu */
-export type Button = {
-  id: string;
-  label: string;
-  icon?: () => JSX.Element;
-} | {
-  id: string;
-  label: string;
-  className: string;
-}
+export type Button =
+  | {
+      id: string;
+      label: string;
+      icon?: () => JSX.Element;
+    }
+  | {
+      id: string;
+      label: string;
+      className: string;
+    };
 
 export type ButtonGroupWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -32,8 +34,8 @@ export type ButtonGroupWidgetProps = WidgetProps & {
   onButtonClick?: (id: string, widget: ButtonGroupWidget) => void;
 };
 
-/** 
- * A widget that lets the user add custom icon buttons to deck 
+/**
+ * A widget that lets the user add custom icon buttons to deck
  * The buttons participate in widget positioning and theming,
  * however the functionality is defined by the props.onButtonClick callback
  */

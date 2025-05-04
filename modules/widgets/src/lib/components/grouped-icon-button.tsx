@@ -22,9 +22,7 @@ export const GroupedIconButton = props => {
       onClick={onClick}
       title={label}
     >
-      <div className="deck-widget-icon">
-        {icon && icon()}
-      </div>
+      <div className="deck-widget-icon">{icon && icon()}</div>
     </button>
   );
 };
