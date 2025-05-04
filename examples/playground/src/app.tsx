@@ -45,21 +45,18 @@ function addUpdateTriggersForAccessors(json) {
 }
 
 export default class App extends Component {
+  jsonConverter: JSONConverter;
+
+  state = {
+    // editor
+    text: '',
+    // deck.gl JSON Props
+    jsonProps: {} as Record<string, unknown>,
+    initialViewState: null as Record<string, any> | null
+  };
+
   constructor(props) {
     super(props);
-
-    this.state = {
-      // react-ace
-      text: '',
-      // deck.gl JSON Props
-      jsonProps: {},
-      initialViewState: null
-    };
-
-    // TODO/ib - could use arrow functions
-    // keeping like this for now to allow this code to be copied back to deck.gl
-    this._onTemplateChange = this._onTemplateChange.bind(this);
-    this._onEditorChange = this._onEditorChange.bind(this);
 
     // Configure and create the JSON converter instance
     const configuration = new JSONConfiguration(JSON_CONVERTER_CONFIGURATION);
@@ -143,7 +140,7 @@ export default class App extends Component {
 
   _renderJsonSelector() {
     return (
-      <select name="JSON templates" onChange={this._onTemplateChange}>
+      <select name="JSON templates" onChange={event => this._onTemplateChange(event)}>
         {Object.entries(JSON_TEMPLATES).map(([key]) => (
           <option key={key} value={key}>
             {key}
@@ -192,7 +189,7 @@ export default class App extends Component {
                   defaultLanguage="json"
                   theme="light"
                   value={this.state.text}
-                  onChange={this._onEditorChange}
+                  onChange={value => this._onEditorChange(value)}
                   options={{scrollBeyondLastLine: false}}
                 />
               )}
