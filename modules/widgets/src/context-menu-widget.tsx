@@ -22,6 +22,7 @@ export type ContextMenuWidgetProps = WidgetProps & {
   menuItems: ContextWidgetMenuItem[];
   /** Provide menu items for the menu given the picked object */
   getMenuItems: (info: PickingInfo, widget: ContextMenuWidget) => ContextWidgetMenuItem[] | null;
+  /** Callback with the selected item */
   onMenuItemSelected?: (key: string, pickInfo: PickingInfo | null) => void;
 };
 
@@ -34,7 +35,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     style: undefined!,
     getMenuItems: undefined!,
     menuItems: [],
-    onMenuItemSelected: (key, pickInfo) => console.log('Context meny item selected:', key, pickInfo)
+    onMenuItemSelected: (key, pickInfo) => console.log('Context menu item selected:', key, pickInfo)
   };
 
   className = 'deck-widget-context-menu';
