@@ -2,27 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
-import {
-  log,
-  _deepEqual as deepEqual,
-  _applyStyles as applyStyles,
-  _removeStyles as removeStyles
-} from '@deck.gl/core';
-import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
+import {log, _deepEqual as deepEqual, _applyStyles as applyStyles} from '@deck.gl/core';
+import {Widget, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
+// import {useCallback} from 'preact/hooks';
 import {IconButton} from './lib/components';
 import type {DeckWidgetTheme} from './themes';
 import {LightGlassTheme, DarkGlassTheme} from './themes';
 
-export type ThemeWidgetProps = {
-  id?: string;
+export type ThemeWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
-  /** CSS inline style overrides. */
-  style?: Partial<CSSStyleDeclaration>;
-  /** Additional CSS class. */
-  className?: string;
   /** Tooltip message when dark mode is selected. */
   lightModeLabel?: string;
   /** Styles for light mode theme */
@@ -31,139 +21,100 @@ export type ThemeWidgetProps = {
   darkModeLabel?: string;
   /** Styles for dark mode theme */
   darkModeTheme?: DeckWidgetTheme;
-  /** Initial theme setting */
-  initialTheme?: 'auto' | 'light' | 'dark';
+  /** Initial theme mode. 'auto' reads the browser default setting */
+  initialThemeMode?: 'auto' | 'light' | 'dark';
 };
 
-export class ThemeWidget implements Widget<ThemeWidgetProps> {
-  id = 'theme';
-  props: Required<ThemeWidgetProps>;
-  placement: WidgetPlacement = 'top-left';
-
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
-
-  themeMode: 'light' | 'dark' = 'dark';
-
+export class ThemeWidget extends Widget<ThemeWidgetProps> {
   static defaultProps: Required<ThemeWidgetProps> = {
+    ...Widget.defaultProps,
     id: 'theme',
     placement: 'top-left',
-    className: '',
-    style: {},
     lightModeLabel: 'Light Mode',
     lightModeTheme: LightGlassTheme,
     darkModeLabel: 'Dark Mode',
     darkModeTheme: DarkGlassTheme,
-    initialTheme: 'auto'
+    initialThemeMode: 'auto'
   };
 
+  className = 'deck-widget-theme';
+  placement: WidgetPlacement = 'top-left';
+  themeMode: 'light' | 'dark' = 'dark';
+
   constructor(props: ThemeWidgetProps = {}) {
-    this.id = props.id ?? this.id;
+    super(props, ThemeWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
-
-    this.props = {
-      ...ThemeWidget.defaultProps,
-      ...props
-    };
-
-    this.themeMode = this._getInitialMode();
-  }
-
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    const {style, className} = this.props;
-    const el = document.createElement('div');
-    el.classList.add('deck-widget', 'deck-widget-theme');
-    if (className) el.classList.add(className);
-    applyStyles(el, style);
-    this.deck = deck;
-    this.element = el;
-    this.update();
-    return el;
-  }
-
-  onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
-  }
-
-  private update() {
-    const {lightModeLabel, darkModeLabel} = this.props;
-    const el = this.element;
-    if (!el) {
-      return;
-    }
-
-    const ui = (
-      <IconButton
-        onClick={this.handleClick.bind(this)}
-        label={this.themeMode === 'dark' ? darkModeLabel : lightModeLabel}
-        className={this.themeMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
-      />
-    );
-    render(ui, el);
+    this.themeMode = this._getInitialThemeMode();
   }
 
   // eslint-disable-next-line complexity
   setProps(props: Partial<ThemeWidgetProps>) {
-    const {lightModeTheme, darkModeTheme, placement} = props;
-    this.placement = placement ?? this.placement;
-    const oldProps = this.props;
-    const el = this.element;
-    if (el) {
-      if (oldProps.className !== props.className) {
-        if (oldProps.className) el.classList.remove(oldProps.className);
-        if (props.className) el.classList.add(props.className);
-      }
+    const {lightModeTheme, darkModeTheme} = this.props;
+    this.placement = props.placement ?? this.placement;
+    super.setProps(props);
 
-      if (!deepEqual(oldProps.style, props.style, 1)) {
-        removeStyles(el, oldProps.style);
-        applyStyles(el, props.style);
-      }
+    // Update if current theme definition changed
+    switch (this.themeMode) {
+      case 'light':
+        if (props.lightModeTheme && !deepEqual(props.lightModeTheme, lightModeTheme, 1)) {
+          this._setThemeMode('light');
+        }
+        break;
+      case 'dark':
+        if (props.darkModeTheme && !deepEqual(props.darkModeTheme, darkModeTheme, 1)) {
+          this._setThemeMode('dark');
+        }
+        break;
     }
-
-    if (
-      this.themeMode === 'light' &&
-      lightModeTheme &&
-      !deepEqual(oldProps.lightModeTheme, lightModeTheme, 1)
-    ) {
-      this._setTheme(lightModeTheme);
-    } else if (darkModeTheme && !deepEqual(oldProps.darkModeTheme, darkModeTheme, 1)) {
-      this._setTheme(darkModeTheme);
-    }
-
-    Object.assign(this.props, props);
-    this.update();
   }
 
-  async handleClick() {
-    this.themeMode = this.themeMode === 'dark' ? 'light' : 'dark';
-    const themeStyle =
-      this.themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
-    log.log(
-      1,
-      `Switching to ${this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel}`,
-      themeStyle
+  onRenderHTML(rootElement: HTMLElement): void {
+    const {lightModeLabel, darkModeLabel} = this.props;
+    // const onClick = useCallback(this._handleClick.bind(this), [this._handleClick]);
+
+    render(
+      <IconButton
+        onClick={this._handleClick.bind(this)}
+        label={this.themeMode === 'dark' ? darkModeLabel : lightModeLabel}
+        className={this.themeMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
+      />,
+      rootElement
     );
-    this._setTheme(themeStyle);
-
-    this.update();
   }
 
-  _getInitialMode() {
-    const {initialTheme} = this.props;
-    if (initialTheme === 'auto') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return initialTheme;
+  onAdd() {
+    // Note: theme styling is applied in here onAdd() once DOM element is created
+    this._setThemeMode(this.themeMode);
   }
 
-  _setTheme(themeStyle: DeckWidgetTheme) {
-    const el = this.element;
-    if (el) {
-      const container = el.closest<HTMLDivElement>('.deck-widget-container');
-      if (container) {
-        applyStyles(container, themeStyle);
-      }
+  _handleClick() {
+    const newThemeMode = this.themeMode === 'dark' ? 'light' : 'dark';
+    this._setThemeMode(newThemeMode);
+  }
+
+  _setThemeMode(themeMode: 'light' | 'dark') {
+    this.themeMode = themeMode;
+    const container = this.rootElement?.closest<HTMLDivElement>('.deck-widget-container');
+    if (container) {
+      const themeStyle =
+        themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
+      applyStyles(container, themeStyle);
+
+      const label =
+        this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel;
+      log.log(1, `Switched theme to ${label}`, themeStyle);
+
+      this.updateHTML();
     }
+  }
+
+  /** Read browser preference */
+  _getInitialThemeMode(): 'light' | 'dark' {
+    const {initialThemeMode} = this.props;
+    return initialThemeMode === 'auto'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : initialThemeMode;
   }
 }

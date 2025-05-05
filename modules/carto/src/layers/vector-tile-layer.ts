@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {registerLoaders} from '@loaders.gl/core';
-import {BinaryFeatureCollection, BinaryPointFeature} from '@loaders.gl/schema';
+import {BinaryPointFeature} from '@loaders.gl/schema';
 import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
 registerLoaders([CartoPropertiesTileLoader, CartoVectorTileLoader]);
@@ -13,7 +13,6 @@ import {ClipExtension, CollisionFilterExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
   MVTLayerProps,
-  TileLayer,
   _getURLFromTemplate,
   _Tile2DHeader,
   _TileLoadProps as TileLoadProps,
@@ -48,7 +47,7 @@ type _VectorTileLayerProps = {
    * If true, create labels for lines and polygons.
    * Specify uniqueIdProperty to only create a single label for each unique feature.
    */
-  autoLabels: boolean | {uniqueIdProperty: string};
+  autoLabels?: boolean | {uniqueIdProperty: string};
 };
 
 // @ts-ignore

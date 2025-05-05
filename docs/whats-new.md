@@ -2,9 +2,17 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.2
+
+Target release date: Q2, 2025
+
 ### Widgets
 
 - React: Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package, including: `ResetViewWidget`, `ScaleWidget`, `GeolocateWidget`, `ScreenshotWidget`, `LoadingWidget`, `ThemeWidget`, `InfoWidget`, and `SplitterWidget` (in addition to the `ZoomWidget`, `CompassWidget`, `FullscreenWidget` from v9.1)
+
+## Core
+
+- [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`.
 
 ## deck.gl v9.1
 
