@@ -17,6 +17,17 @@ function sleep(milliseconds: number): Promise<void> {
   });
 }
 
+class TestScatterplotLayer extends ScatterplotLayer {
+  draw(params) {
+    super.draw(params);
+    this.props.onAfterRedraw({
+      viewport: this.context.viewport,
+      layer: this
+    });
+  }
+}
+TestScatterplotLayer.layerName = 'TestScatterplotLayer';
+
 test('MapboxOverlay#overlaid', t => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
@@ -147,13 +158,22 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
 });
 
 test('MapboxOverlay#interleaved', t => {
+  let drawLog = [];
+  const onRedrawLayer = ({viewport, layer}) => {
+    drawLog.push(layer.id);
+  };
+
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
   });
   const overlay = new MapboxOverlay({
     interleaved: true,
-    layers: [new ScatterplotLayer({id: 'poi'})],
+    layers: [
+      new TestScatterplotLayer({id: 'poi', onAfterRedraw: onRedrawLayer}),
+      new TestScatterplotLayer({id: 'poi2', onAfterRedraw: onRedrawLayer})
+    ],
+    layerFilter: ({layer}) => layer.id === 'poi',
     parameters: {
       depthWriteEnabled: false,
       cullMode: 'back'
@@ -199,14 +219,19 @@ test('MapboxOverlay#interleaved', t => {
 
     await sleep(100);
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
+    t.ok(map.getLayer('poi2'), 'MapboxLayer is added');
+    t.deepEqual(drawLog, ['poi'], 'layers correctly filtered');
+    drawLog = [];
 
     overlay.setProps({
-      layers: [new ScatterplotLayer({id: 'cities'})]
+      layers: [new TestScatterplotLayer({id: 'cities', onAfterRedraw: onRedrawLayer})],
+      layerFilter: undefined
     });
 
     await sleep(100);
     t.notOk(map.getLayer('poi'), 'MapboxLayer is removed');
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
+    t.deepEqual(drawLog, ['cities'], 'layers correctly filtered');
 
     map.removeControl(overlay);
     t.notOk(overlay._deck, 'Deck instance is finalized');

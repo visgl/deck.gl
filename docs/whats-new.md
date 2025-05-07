@@ -8,9 +8,20 @@ Target release date: Q2, 2025
 
 ### Widgets
 
-- React: Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package, including: `ResetViewWidget`, `ScaleWidget`, `GeocoderWidget`, `ScreenshotWidget`, `LoadingWidget`, `ThemeWidget`, `InfoWidget`, and `SplitterWidget` (in addition to the `ZoomWidget`, `CompassWidget`, `FullscreenWidget` from v9.1)
+ A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
 
-## Core
+- [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
+- [ScaleWidget](./api-reference/widgets/scale-widget.md)
+- [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
+- [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
+- [LoadingWidget](./api-reference/widgets/loading-widget.md)
+- [ThemeWidget](./api-reference/widgets/theme-widget.md)
+- [InfoWidget](./api-reference/widgets/info-widget.md)
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+
+Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
+
+### Core
 
 - [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`.
 

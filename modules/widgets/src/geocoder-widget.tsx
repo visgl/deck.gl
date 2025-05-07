@@ -6,7 +6,7 @@ import {Widget, WidgetProps} from '@deck.gl/core';
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
-import {DropdownMenu} from './lib/dropdown-menu';
+import {DropdownMenu} from './lib/components/dropdown-menu';
 import {type Geocoder} from './lib/geocode/geocoder';
 import {GeocoderHistory} from './lib/geocode/geocoder-history';
 import {
@@ -30,9 +30,9 @@ export type GeocoderWidgetProps = WidgetProps & {
   /** Tooltip message */
   label?: string;
   transitionDuration?: number;
-  /** Geocoding service selector */
+  /** Geocoding service selector, for declarative usage */
   geocoder?: 'google' | 'mapbox' | 'opencage' | 'coordinates' | 'custom';
-  /** Geocoding service selector */
+  /** Custom geocoding service (Used when geocoder = 'custom') */
   customGeocoder?: Geocoder;
   /** API key used for geocoding services */
   apiKey?: string;

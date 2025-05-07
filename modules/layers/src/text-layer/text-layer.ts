@@ -252,7 +252,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     // Breaking change in v8.9
     if (this.props.maxWidth > 0) {
-      log.warn('v8.9 breaking change: TextLayer maxWidth is now relative to text size')();
+      log.once(1, 'v8.9 breaking change: TextLayer maxWidth is now relative to text size')();
     }
   }
 
