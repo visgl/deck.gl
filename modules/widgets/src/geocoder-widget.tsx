@@ -36,6 +36,8 @@ export type GeocoderWidgetProps = WidgetProps & {
   customGeocoder?: Geocoder;
   /** API key used for geocoding services */
   apiKey?: string;
+  /** Whether to use geolocation @note Experimental*/
+  _geolocation?: boolean;
 };
 
 /**
@@ -53,7 +55,8 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
     transitionDuration: 200,
     geocoder: 'coordinates',
     customGeocoder: CoordinatesGeocoder,
-    apiKey: ''
+    apiKey: '',
+    _geolocation: false
   };
 
   className = 'deck-widget-geocoder';
@@ -76,7 +79,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const menuItems = [CURRENT_LOCATION, ...this.geocodeHistory.addressHistory];
+    const menuItems = this.props._geolocation? [CURRENT_LOCATION, ...this.geocodeHistory.addressHistory] : [...this.geocodeHistory.addressHistory];
     render(
       <div
         className="deck-widget-geocoder"
@@ -142,7 +145,8 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
 
   /** Perform geocoding */
   geocode: (address: string) => Promise<void> = async address => {
-    const geocoder = address === CURRENT_LOCATION ? CurrentLocationGeocoder : this.getGeocoder();
+    const useGeolocation = this.props._geolocation && address === CURRENT_LOCATION;
+    const geocoder = useGeolocation ? CurrentLocationGeocoder : this.getGeocoder();
     const coordinates = await this.geocodeHistory.geocode(
       geocoder,
       this.addressText,
