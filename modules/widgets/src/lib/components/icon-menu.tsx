@@ -1,66 +1,6 @@
-// deck.gl
-// SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-
-import type {ComponentChildren, JSX} from 'preact';
+import type {JSX} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
-
-export type IconButtonProps = {
-  className: string;
-  label: string;
-  onClick: (event?) => unknown;
-  /** Optional icon or element to render inside the button */
-  children?: ComponentChildren;
-};
-
-/** Renders a button component with widget CSS */
-export const IconButton = (props: IconButtonProps) => {
-  const {className, label, onClick, children} = props;
-  return (
-    <div className="deck-widget-button">
-      <button
-        className={`deck-widget-icon-button ${className}`}
-        type="button"
-        onClick={onClick}
-        title={label}
-      >
-        {children ? children : <div className="deck-widget-icon" />}
-      </button>
-    </div>
-  );
-};
-
-export type ButtonGroupProps = {
-  children;
-  orientation;
-};
-
-/** Renders a group of buttons with Widget CSS */
-export const ButtonGroup = (props: ButtonGroupProps) => {
-  const {children, orientation} = props;
-  return <div className={`deck-widget-button-group ${orientation}`}>{children}</div>;
-};
-
-export type GroupedIconButtonProps = {
-  className;
-  label;
-  onClick;
-};
-
-/** Renders an icon button as part of a ButtonGroup */
-export const GroupedIconButton = props => {
-  const {className, label, onClick} = props;
-  return (
-    <button
-      className={`deck-widget-icon-button ${className}`}
-      type="button"
-      onClick={onClick}
-      title={label}
-    >
-      <div className="deck-widget-icon" />
-    </button>
-  );
-};
+import {IconButton} from './icon-button';
 
 const MENU_STYLE: JSX.CSSProperties = {
   position: 'absolute',
@@ -81,17 +21,17 @@ const MENU_ITEM_STYLE: JSX.CSSProperties = {
   pointerEvents: 'auto'
 };
 
-export type MenuProps<KeyType = string> = {
+export type IconMenuProps<KeyType = string> = {
   className: string;
   icon?: () => JSX.Element;
   label?: string;
   menuItems: {value: KeyType; icon: () => JSX.Element; label: string}[];
   initialItem: KeyType;
-  onSelect: (item: KeyType) => void;
+  onItemSelected: (item: KeyType) => void;
 };
 
-/** A component that renders the popup menu for view mode selection. */
-export function Menu<KeyType extends string>(props: MenuProps<KeyType>) {
+/** A component that renders an icon popup menu */
+export function IconMenu<KeyType extends string>(props: IconMenuProps<KeyType>) {
   const [menuOpen, setMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -114,7 +54,7 @@ export function Menu<KeyType extends string>(props: MenuProps<KeyType>) {
   const handleSelectItem = (item: KeyType) => {
     setSelectedItem(item);
     setMenuOpen(false);
-    props.onSelect(item);
+    props.onItemSelected(item);
   };
 
   const handleButtonClick = () => setMenuOpen(!menuOpen);

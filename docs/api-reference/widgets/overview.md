@@ -5,21 +5,26 @@ Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and 
 This module contains the following widgets:
 
 ### Navigation Widgets
+
 - [ZoomWidget](./zoom-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
+<!-- - [GimbalWidget](./gimbal-widget.md) -->
 
 ### Geospatial Widgets
+
 - [CompassWidget](./compass-widget.md)
-- [GimbalWidget](./gimbal-widget.md)
 <!-- - [ScaleWidget](./scale-widget.md) -->
 <!-- - [GeolocateWidget](./geolocate-widget.md) -->
 
 ### Utility Widgets
+
 - [FullscreenWidget](./fullscreen-widget.md)
 - [ScreenshotWidget](./screenshot-widget.md)
 - [LoadingWidget](./loading-widget.md)
 - [ThemeWidget](./theme-widget.md)
 - [InfoWidget](./info-widget.md)
+- [SplitterWidget](./splitter-widget.md)
+- [TimelineWidget](./timeline-widget.md)
 
 ## Installation
 
@@ -104,6 +109,41 @@ new Deck({
     new FullscreenWidget({style: widgetTheme}),
     new ScreenshotWidget({style: widgetTheme})
   ]
+});
+```
+
+## Writing new Widgets
+
+A widget should inherit the `Widget` class. 
+Here is a custom widget that shows a spinner while layers are loading:
+
+```ts
+import {Deck, Widget} from '@deck.gl/core';
+
+class LoadingIndicator extends Widget {
+  element?: HTMLDivElement;
+  size: number;
+
+  constructor(options: {
+    size: number;
+  }) {
+    this.size = options.size;
+  }
+
+  onRenderHTML(el: HTMLElement) {
+    el.className = 'spinner';
+    el.style.width = `${this.size}px`;
+    // TODO - create animation for .spinner in the CSS stylesheet
+  }
+
+  onRedraw({layers}) {
+    const isVisible = layers.some(layer => !layer.isLoaded);
+    this.rootElement.style.display = isVisible ? 'block' : 'none';
+  }
+}
+
+new Deck({
+  widgets: [new LoadingIndicator({size: 48})]
 });
 ```
 

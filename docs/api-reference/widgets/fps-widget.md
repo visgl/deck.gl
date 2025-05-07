@@ -15,14 +15,14 @@ new Deck({
 });
 ```
 
-## Properties
+## Types
 
-The `FpsWidget` accepts the generic [`WidgetProps`](./overview.md#widgetprops) and
-supports one additional option:
+### `FpsWidgetProps`
 
-### `placement` (String)
+The `FpsWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-- Default: `'top-left'`
-- Position of the widget within the view. One of `top-left`, `top-right`, `bottom-left`,
-  `bottom-right`.
-
+- `id` (default `'fps'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.

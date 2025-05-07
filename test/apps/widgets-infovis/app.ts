@@ -41,5 +41,5 @@ new Deck({
       billboard: true
     })
   ],
-  widgets: [new ZoomWidget(), new GimbalWidget(), new FullscreenWidget({})]
+  widgets: [new ZoomWidget(), new GimbalWidget(), new FullscreenWidget()]
 });

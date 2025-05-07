@@ -136,7 +136,6 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     const [rz, rx] = this.getRotation(viewState);
     const rotationOrbit = normalizeAndClampAngle(rz);
     const rotationX = normalizeAndClampAngle(rx);
-    console.log('GimbalWidget', {rotationOrbit, rotationX}, {rz, rx});
     return {rotationOrbit, rotationX};
   }
 
