@@ -44,3 +44,13 @@ export type {DeckWidgetTheme} from './themes';
 
 import * as _components from './lib/components';
 export {_components};
+
+// Experimental geocoders. May be removed, use at your own risk!
+export {type Geocoder} from './lib/geocode/geocoder';
+export {
+  GoogleGeocoder as _GoogleGeocoder,
+  MapboxGeocoder as _MapboxGeocoder,
+  OpenCageGeocoder as _OpenCageGeocoder,
+  CoordinatesGeocoder as _CoordinatesGeocoder,
+  CurrentLocationGeocoder as _CurrentLocationGeocoder
+} from './lib/geocode/geocoders';

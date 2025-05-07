@@ -79,7 +79,9 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const menuItems = this.props._geolocation? [CURRENT_LOCATION, ...this.geocodeHistory.addressHistory] : [...this.geocodeHistory.addressHistory];
+    const menuItems = this.props._geolocation
+      ? [CURRENT_LOCATION, ...this.geocodeHistory.addressHistory]
+      : [...this.geocodeHistory.addressHistory];
     render(
       <div
         className="deck-widget-geocoder"
