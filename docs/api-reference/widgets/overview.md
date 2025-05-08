@@ -8,6 +8,7 @@ This module contains the following widgets:
 
 - [ZoomWidget](./zoom-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
+<!-- - [GimbalWidget](./gimbal-widget.md) -->
 
 ### Geospatial Widgets
 

@@ -64,17 +64,21 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
 
   geocodeHistory = new GeocoderHistory({});
   addressText: string = '';
+  geocoder: Geocoder = CoordinatesGeocoder;
 
   constructor(props: GeocoderWidgetProps = {}) {
     super(props, GeocoderWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
+    this.setProps(props);
+    this.geocoder = getGeocoder(props);
   }
 
   setProps(props: Partial<GeocoderWidgetProps>): void {
-    this.placement = props.placement ?? this.placement;
     super.setProps(props);
-    if (!this.props.apiKey && ['google', 'mapbox', 'opencage'].includes(this.props.geocoder)) {
-      throw new Error('API key is required');
+    this.placement = props.placement ?? this.placement;
+    this.geocoder = getGeocoder(this.props);
+    if (this.geocoder.requiresApiKey && !this.props.apiKey) {
+      throw new Error(`API key is required for the ${this.geocoder.name} geocoder`);
     }
   }
 
@@ -94,7 +98,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       >
         <input
           type="text"
-          placeholder="-122.45, 37.8 or 37°48'N, 122°27'W"
+          placeholder={this.geocoder.placeholderLocation ?? 'Enter address or location'}
           value={this.geocodeHistory.addressText}
           // @ts-expect-error event type
           onInput={e => this.setInput(e.target?.value || '')}
@@ -148,7 +152,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   /** Perform geocoding */
   geocode: (address: string) => Promise<void> = async address => {
     const useGeolocation = this.props._geolocation && address === CURRENT_LOCATION;
-    const geocoder = useGeolocation ? CurrentLocationGeocoder : this.getGeocoder();
+    const geocoder = useGeolocation ? CurrentLocationGeocoder : this.geocoder;
     const coordinates = await this.geocodeHistory.geocode(
       geocoder,
       this.addressText,
@@ -158,23 +162,6 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       this.setViewState(coordinates);
     }
   };
-
-  getGeocoder() {
-    switch (this.props.geocoder) {
-      case 'google':
-        return GoogleGeocoder;
-      case 'mapbox':
-        return MapboxGeocoder;
-      case 'opencage':
-        return OpenCageGeocoder;
-      case 'coordinates':
-        return CoordinatesGeocoder;
-      case 'custom':
-        return this.props.customGeocoder;
-      default:
-        throw new Error(`Unknown geocoder: ${this.props.geocoder}`);
-    }
-  }
 
   // TODO - MOVE TO WIDGETIMPL?
   setViewState(viewState: ViewState) {
@@ -199,4 +186,24 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   }
 
   viewports: Record<string, Viewport> = {};
+}
+
+function getGeocoder(props: {geocoder?: string; customGeocoder?: Geocoder}): Geocoder {
+  switch (props.geocoder) {
+    case 'google':
+      return GoogleGeocoder;
+    case 'mapbox':
+      return MapboxGeocoder;
+    case 'opencage':
+      return OpenCageGeocoder;
+    case 'coordinates':
+      return CoordinatesGeocoder;
+    case 'custom':
+      if (!props.customGeocoder) {
+        throw new Error('Custom geocoder is not defined');
+      }
+      return props.customGeocoder;
+    default:
+      throw new Error(`Unknown geocoder: ${props.geocoder}`);
+  }
 }

@@ -15,6 +15,7 @@ const OPENCAGE_API_URL = 'https://api.opencagedata.com/geocode/v1/json';
  */
 export const GoogleGeocoder = {
   name: 'google',
+  requiresApiKey: true,
   async geocode(
     address: string,
     apiKey: string
@@ -39,6 +40,7 @@ export const GoogleGeocoder = {
  */
 export const MapboxGeocoder = {
   name: 'google',
+  requiresApiKey: true,
   async geocode(
     address: string,
     apiKey: string
@@ -63,6 +65,7 @@ export const MapboxGeocoder = {
  */
 export const OpenCageGeocoder = {
   name: 'opencage',
+  requiresApiKey: true,
   async geocode(
     address: string,
     key: string
@@ -78,24 +81,13 @@ export const OpenCageGeocoder = {
 } as const satisfies Geocoder;
 
 /**
- * Parse a coordinate string.
- * Supports comma- or semicolon-separated values.
- * Heuristically determines which value is longitude and which is latitude.
- */
-export const CoordinatesGeocoder = {
-  name: 'coordinates',
-  async geocode(address: string): Promise<{longitude: number; latitude: number} | null> {
-    return parseCoordinates(address) || null;
-  }
-} as const satisfies Geocoder;
-
-/**
  * A geocoder adapter that wraps the browser's geolocation API. Always returns the user's current location.
  * @note Not technically a geocoder, but a geolocation service that provides a source of locations.
  * @note The user must allow location access for this to work.
  */
 export const CurrentLocationGeocoder = {
   name: 'current',
+  requiresApiKey: false,
   /** Attempt to call browsers geolocation API */
   async geocode(): Promise<{longitude: number; latitude: number} | null> {
     if (!navigator.geolocation) {
@@ -133,6 +125,20 @@ async function fetchJson(url: string): Promise<any> {
   }
   return data;
 }
+
+/**
+ * Parse a coordinate string.
+ * Supports comma- or semicolon-separated values.
+ * Heuristically determines which value is longitude and which is latitude.
+ */
+export const CoordinatesGeocoder = {
+  name: 'coordinates',
+  requiresApiKey: false,
+  placeholderLocation: `-122.45, 37.8 or 37°48'N, 122°27'W`,
+  async geocode(address: string): Promise<{longitude: number; latitude: number} | null> {
+    return parseCoordinates(address) || null;
+  }
+} as const satisfies Geocoder;
 
 /**
  * Parse an input string for coordinates.

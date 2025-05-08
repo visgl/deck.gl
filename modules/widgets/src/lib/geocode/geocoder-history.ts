@@ -7,21 +7,22 @@ import {type Geocoder} from './geocoder';
 const CURRENT_LOCATION = 'current';
 const LOCAL_STORAGE_KEY = 'deck-geocoder-history';
 
-export type GeocoderHistoryProps = {};
+export type GeocoderHistoryProps = {
+  maxEntries?: number;
+};
 
 /**
- * A widget that display a text box that lets user type in a location
- * and a button that moves the view to that location.
- * @todo For now only supports coordinates, Could be extended with location service integrations.
+ * An internal, experimental helper class for storing a list of locations in local storage.
+ * @todo Remove the UI related state.
  */
 export class GeocoderHistory {
-  props: GeocoderHistoryProps;
+  props: Required<GeocoderHistoryProps>;
   addressText = '';
   errorText = '';
   addressHistory: string[] = [];
 
   constructor(props: GeocoderHistoryProps) {
-    this.props = props;
+    this.props = {maxEntries: 5, ...props};
     this.addressHistory = this.loadPreviousAddresses();
   }
 
@@ -62,7 +63,7 @@ export class GeocoderHistory {
       return;
     }
     const deduped = [cleaned, ...this.addressHistory.filter(a => a !== cleaned)];
-    this.addressHistory = deduped.slice(0, 5);
+    this.addressHistory = deduped.slice(0, this.props.maxEntries);
     try {
       window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.addressHistory));
     } catch {
