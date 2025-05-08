@@ -53,7 +53,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -201,7 +201,7 @@ function flyToCity(name: string) {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState, FlyToInterpolator} from '@deck.gl/core';
 
 const CITIES: {[name: string]: MapViewState} = {
@@ -317,7 +317,7 @@ new Deck({
 
 ```tsx
 import React, {useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 
 function App({bounds}: {
@@ -397,7 +397,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React, {useState} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 
 function App() {
@@ -517,7 +517,7 @@ const layer = new ScatterplotLayer<DataType>({
 </Tabs>
 
 
-* Specify callbacks for all pickable layers by setting [event handler props](../api-reference/react/deckgl.md#event-callbacks) of the `Deck`/`DeckGL` component:
+* Specify callbacks for all pickable layers by setting [event handler props](../api-reference/core/deck.md#event-callbacks) of the `Deck`/`DeckGL` component:
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
@@ -555,7 +555,7 @@ new Deck({
 
 ```tsx
 import React, {useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {Deck, PickingInfo} from '@deck.gl/core';
 import {MjolnirEvent} from 'mjolnir.js';
 
@@ -699,7 +699,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React, {useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {PickingInfo} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -907,7 +907,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React, {useState} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {PickingInfo} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -1005,7 +1005,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React, {useRef, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {PickingInfo} from '@deck.gl/core';
 
 function App() {

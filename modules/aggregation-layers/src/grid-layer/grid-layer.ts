@@ -33,7 +33,7 @@ import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 function noop() {}
 
 const defaultProps: DefaultProps<GridLayerProps> = {
-  gpuAggregation: false,
+  gpuAggregation: true,
 
   // color
   colorDomain: null,
@@ -239,7 +239,7 @@ type _GridLayerProps<DataT> = {
 
   /**
    * When set to true, aggregation is performed on GPU, provided other conditions are met.
-   * @default false
+   * @default true
    */
   gpuAggregation?: boolean;
 };
@@ -368,6 +368,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  // eslint-disable-next-line complexity
   updateState(params: UpdateParameters<this>) {
     const aggregatorChanged = super.updateState(params);
 

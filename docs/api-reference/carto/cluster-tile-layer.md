@@ -1,11 +1,11 @@
-# ClusterTileLayer (Experimental)
+# ClusterTileLayer
 
-`ClusterTileLayer` is a layer for visualizing point data aggregated using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using clusters. 
+`ClusterTileLayer` is a layer for visualizing point data aggregated using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) with dynamic clustering. It provides efficient visualization of large point datasets with automatic clustering based on zoom level and customizable aggregation strategies.
 
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ClusterTileLayer, quadbinTableSource} from '@deck.gl/carto';
 
 function App({viewState}) {
@@ -105,11 +105,20 @@ The weight of each cell used for clustering.
 
 When using the `GeoJsonLayer` accessors to style the clusters, aggregated values will be passed to the styling accessor functions.
 
+### Aggregation types
+
 The type aggregation is infered based on the property name, for example `population_average` will be aggregated using a (mean) average operation across all the quadbin cells that are present in the cluster, while `age_min` will give the minimum value present in the cluster.
 
-### Valid aggregation types
+The following suffixes are supported:
 
-Supported aggregation types are: `any`, `average`, `count`, `min`, `max`, `sum`.
+| Suffix | Operation | Example |
+|--------|-----------|---------|
+| `_average` | Mean | `temperature_average` |
+| `_count` | Count | `point_count` |
+| `_min` | Minimum | `age_min` |
+| `_max` | Maximum | `age_max` |
+| `_sum` | Sum | `population_sum` |
+| `_any` | Any value | `category_any` |
 
 ### Global aggregation
 

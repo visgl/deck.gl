@@ -2,13 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  CompositeLayerProps,
+  DefaultProps,
+  FilterContext,
+  Layer,
+  LayersList
+} from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import type {TilejsonResult} from '@carto/api-client';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import {TileLayer, TileLayerProps} from '@deck.gl/geo-layers';
+import {copy, PostProcessModifier} from './post-process-utils';
+import {registerLoaders} from '@loaders.gl/core';
+import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
+
+registerLoaders([CartoRasterTileLoader]);
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;
@@ -18,6 +30,7 @@ export const renderSubLayers = props => {
 
 const defaultProps: DefaultProps<RasterTileLayerProps> = {
   data: TilejsonPropType,
+  refinementStrategy: 'no-overlap',
   tileSize: DEFAULT_TILE_SIZE
 };
 
@@ -31,6 +44,16 @@ type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> &
     data: null | TilejsonResult | Promise<TilejsonResult>;
   };
 
+class PostProcessTileLayer extends PostProcessModifier(TileLayer, copy) {
+  filterSubLayer(context: FilterContext) {
+    // Handle DrawCallbackLayer
+    const {tile} = (context.layer as Layer<{tile: any}>).props;
+    if (!tile) return true;
+
+    return super.filterSubLayer(context);
+  }
+}
+
 export default class RasterTileLayer<
   DataT = any,
   ExtraProps extends {} = {}
@@ -39,18 +62,19 @@ export default class RasterTileLayer<
   static defaultProps = defaultProps;
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    return loadOptions;
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}}
+    });
   }
 
   renderLayers(): Layer | null | LayersList {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
-    const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
-    const SubLayerClass = this.getSubLayerClass('tile', TileLayer);
+    const {tiles: data, minzoom: minZoom, maxzoom: maxZoom, raster_metadata: metadata} = tileJSON;
+    const SubLayerClass = this.getSubLayerClass('tile', PostProcessTileLayer);
+    const loadOptions = this.getLoadOptions();
     return new SubLayerClass(this.props, {
       id: `raster-tile-layer-${this.props.id}`,
       data,
@@ -59,7 +83,10 @@ export default class RasterTileLayer<
       renderSubLayers,
       minZoom,
       maxZoom,
-      loadOptions: this.getLoadOptions()
+      loadOptions: {
+        ...loadOptions,
+        cartoRasterTile: {...loadOptions?.cartoRasterTile, metadata}
+      }
     });
   }
 }

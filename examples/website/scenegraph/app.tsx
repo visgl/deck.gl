@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global fetch, setTimeout, clearTimeout */
-import React, {useEffect, useState} from 'react';
+/* global fetch, setInterval, clearInterval */
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
@@ -71,8 +71,8 @@ const DATA_INDEX = {
   CATEGORY: 17
 } as const;
 
-async function fetchData(): Promise<Aircraft[]> {
-  const resp = await fetch(DATA_URL);
+async function fetchData(signal: AbortSignal): Promise<Aircraft[]> {
+  const resp = await fetch(DATA_URL, {signal});
   const {time, states} = (await resp.json()) as {time: number; states: Aircraft[]};
   // make lastContact timestamp relative to response time
   for (const a of states) {
@@ -93,6 +93,22 @@ function getTooltip({object}: PickingInfo<Aircraft>) {
   );
 }
 
+export function useInterval(callback: () => unknown, delay: number) {
+  const savedCallback = useRef(callback);
+
+  // Update callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Loop.
+  useEffect(() => {
+    savedCallback.current(); // Initial call.
+    const id = setInterval(() => savedCallback.current(), delay);
+    return () => clearInterval(id);
+  }, [delay]);
+}
+
 export default function App({
   sizeScale = 25,
   onDataLoad,
@@ -102,46 +118,36 @@ export default function App({
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
 }) {
-  const [data, setData] = useState<Aircraft[]>();
-  const [timer, setTimer] = useState<{id: number | null}>({id: null});
+  const [abortController] = useState<AbortController>(new AbortController());
+  const dataRef = useRef<Aircraft[]>([]); // Callback requires stable reference to data.
+  const [, setVersion] = useState(0); // Re-render on data change.
 
-  useEffect(() => {
-    timer.id++;
-    fetchData()
-      .then(newData => {
-        if (timer.id === null) {
-          // Component has unmounted
-          return;
-        }
-        // In order to keep the animation smooth we need to always return the same
-        // object at a given index. This function will discard new objects
-        // and only update existing ones.
-        if (data) {
-          const dataById: Record<string, Aircraft> = {};
-          newData.forEach(entry => (dataById[entry[DATA_INDEX.UNIQUE_ID]] = entry));
-          newData = data.map(entry => dataById[entry[DATA_INDEX.UNIQUE_ID]] || entry);
-        }
+  const sync = useCallback(async () => {
+    let newData = await fetchData(abortController.signal);
 
-        setData(newData);
+    // In order to keep the animation smooth we need to always return the same
+    // object at a given index. This function will discard new objects
+    // and only update existing ones.
+    if (dataRef.current.length > 0) {
+      const dataById: Record<string, Aircraft> = {};
+      newData.forEach(entry => (dataById[entry[DATA_INDEX.UNIQUE_ID]] = entry));
+      newData = dataRef.current.map(entry => dataById[entry[DATA_INDEX.UNIQUE_ID]] || entry);
+    }
 
-        if (onDataLoad) {
-          onDataLoad(newData.length);
-        }
-      })
-      .finally(() => {
-        const timeoutId = setTimeout(() => setTimer({id: timeoutId}), REFRESH_TIME_SECONDS * 1000);
-        timer.id = timeoutId;
-      });
+    dataRef.current = newData;
+    setVersion(v => v + 1);
 
-    return () => {
-      clearTimeout(timer.id);
-      timer.id = null;
-    };
-  }, [timer, data]);
+    if (onDataLoad) {
+      onDataLoad(newData.length);
+    }
+  }, []);
+
+  useInterval(sync, REFRESH_TIME_SECONDS * 1000);
+  useEffect(() => () => abortController.abort(), []);
 
   const layer = new ScenegraphLayer<Aircraft>({
     id: 'scenegraph-layer',
-    data,
+    data: dataRef.current,
     pickable: true,
     sizeScale,
     scenegraph: MODEL_URL,

@@ -9,7 +9,7 @@ To use deck.gl with React, simply import the `DeckGL` React component and render
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
 
@@ -49,15 +49,16 @@ The vis.gl community maintains two React libraries that seamlessly work with dec
 - `react-map-gl` - a React wrapper for [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/guides) and [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/). Several integration options are discussed in [using with Mapbox](../developer-guide/base-maps/using-with-mapbox.md).
 - `@vis.gl/react-google-maps` - a React wrapper for [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript). See [using with Google Maps](../developer-guide/base-maps/using-with-google-maps.md).
 
-## Using JSX Layers and Views
+## Using JSX Layers, Views, and Widgets
 
-It is possible to use JSX syntax to create deck.gl layers and views as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop. There are no performance advantages to this syntax but it can allow for a more consistent, React-like coding style.
+It is possible to use JSX syntax to create deck.gl layers, views, and widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers`, `views`, or `widgets` prop, respectively. There are no performance advantages to this syntax but it can allow for a more consistent, React-like coding style.
 
 ```jsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
+import {ZoomWidget} from '@deck.gl/react';
 import {Map} from 'react-map-gl';
 
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -83,6 +84,8 @@ function App() {
       </MapView>
 
       <FirstPersonView width="50%" x="50%" fovy={50} />
+
+      <ZoomWidget/>
     </DeckGL>
   );
 }
@@ -108,7 +111,7 @@ For some projects, SSR may fail with an error message `Error: require() of ES Mo
 - Isolate the deck.gl imports and exclude them from SSR. Since deck.gl renders into a WebGL2/WebGPU context, it wouldn't benefit from SSR to begin with. Below is a minimal sample for `Next.js`:
 
 ```jsx title="/src/components/map.js"
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 
 export default function Map() {

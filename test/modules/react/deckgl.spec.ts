@@ -8,7 +8,8 @@ import {createElement, createRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {act} from 'react-dom/test-utils';
 
-import DeckGL from 'deck.gl';
+import {DeckGL, Layer, Widget} from 'deck.gl';
+import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
 import {gl} from '@deck.gl/test-utils';
 
@@ -83,4 +84,82 @@ test('DeckGL#render', t => {
       [createElement('div', {key: 0, className: 'child'}, 'Child')]
     )
   );
+});
+
+class TestLayer extends Layer {
+  initializeState() {}
+}
+
+TestLayer.layerName = 'TestLayer';
+
+const LAYERS = [new TestLayer({id: 'primitive'})];
+
+class TestWidget extends Widget<WidgetProps> {
+  placement: WidgetPlacement = 'top-left';
+  className = 'deck-test-widget';
+
+  constructor(props: WidgetProps = {}) {
+    super(props, Widget.defaultProps);
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {}
+}
+
+const WIDGETS = [new TestWidget({id: 'A'})];
+
+test('DeckGL#props omitted are reset', t => {
+  const ref = createRef();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  // Initialize widgets and layers on first render.
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100,
+        gl: getMockContext(),
+        layers: LAYERS,
+        widgets: WIDGETS,
+        onLoad: () => {
+          const {deck} = ref.current;
+          t.ok(deck, 'DeckGL is initialized');
+          const {widgets, layers} = deck.props;
+          t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets is set');
+          t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers is set');
+
+          act(() => {
+            // Render deck a second time without setting widget or layer props.
+            root.render(
+              createElement(DeckGL, {
+                ref,
+                onAfterRender: () => {
+                  const {deck} = ref.current;
+                  const {widgets, layers} = deck.props;
+                  t.is(
+                    widgets && Array.isArray(widgets) && widgets.length,
+                    0,
+                    'Widgets is reset to an empty array'
+                  );
+                  t.is(
+                    layers && Array.isArray(layers) && layers.length,
+                    0,
+                    'Layers is reset to an empty array'
+                  );
+
+                  root.render(null);
+                  container.remove();
+                  t.end();
+                }
+              })
+            );
+          });
+        }
+      })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
 });

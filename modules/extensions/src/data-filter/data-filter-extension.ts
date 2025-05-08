@@ -73,7 +73,7 @@ export type DataFilterExtensionProps<DataT = any> = {
    * The categories which define whether an object should be rendered.
    * @default []
    */
-  filterCategories: FilterCategory[] | FilterCategory[][];
+  filterCategories?: FilterCategory[] | FilterCategory[][];
   /**
    * Only called if the `countItems` option is enabled.
    */
@@ -115,6 +115,12 @@ const defaultOptions: Required<DataFilterExtensionOptions> = {
   countItems: false
 };
 
+const CATEGORY_TYPE_FROM_SIZE = {
+  1: 'uint' as const,
+  2: 'uvec2' as const,
+  3: 'uvec3' as const,
+  4: 'uvec4' as const
+};
 const DATA_TYPE_FROM_SIZE = {
   1: 'float' as const,
   2: 'vec2' as const,
@@ -137,7 +143,7 @@ export default class DataFilterExtension extends LayerExtension<
     const {categorySize, filterSize, fp64} = extension.opts;
     const defines: Defines = {};
     if (categorySize) {
-      defines.DATACATEGORY_TYPE = DATA_TYPE_FROM_SIZE[categorySize];
+      defines.DATACATEGORY_TYPE = CATEGORY_TYPE_FROM_SIZE[categorySize];
       defines.DATACATEGORY_CHANNELS = categorySize;
     }
     if (filterSize) {
@@ -173,6 +179,7 @@ export default class DataFilterExtension extends LayerExtension<
             size: categorySize,
             stepMode: 'dynamic',
             accessor: 'getFilterCategory',
+            type: 'uint32',
             transform:
               categorySize === 1
                 ? d => extension._getCategoryKey.call(this, d, 0)
@@ -219,6 +226,7 @@ export default class DataFilterExtension extends LayerExtension<
     }
   }
 
+  // eslint-disable-next-line complexity
   updateState(
     this: Layer<DataFilterExtensionProps>,
     {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>,
@@ -261,6 +269,7 @@ export default class DataFilterExtension extends LayerExtension<
     }
   }
 
+  // eslint-disable-next-line max-statements
   draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
     const filterFBO = this.state.filterFBO as Framebuffer;
     const filterModel = this.state.filterModel as Model;

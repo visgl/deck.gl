@@ -114,7 +114,7 @@ Returns:
 
 #### `addMetersToLngLat` {#addmeterstolnglat}
 
-Add a meter delta to a base lnglat coordinate using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](#-getdistancescales-).
+Add a meter delta to a base lnglat coordinate using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](#getdistancescales).
 
 Parameters:
 
@@ -189,7 +189,7 @@ function onAfterRender() {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {WebMercatorViewport, MapViewState} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 

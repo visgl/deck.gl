@@ -67,7 +67,7 @@ Some coordinate systems need to be used with the [coordinateOrigin](../api-refer
 
 Remarks:
 
-* Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-system) section for details.
+* Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-systems) section for details.
 * The `CARTESIAN` mode describes positions that are identical in the world space and the common space. It is the default coordinate system when rendering into non-geospatial views. When combined with geospatial views, the positions are treated as common space coordinates for that particular projection mode. The latter can be seen used by the [MVTLayer](../api-reference/geo-layers/mvt-layer.md), where the data decoded from the tiles are already pre-projected onto the Web Mercator plane.
 
 

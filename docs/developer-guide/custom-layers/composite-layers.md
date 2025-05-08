@@ -15,7 +15,7 @@ Examples could be:
 * A `TopoJSONLayer` that is like the `GeoJsonLayer`, but accepts [TopoJSON](https://github.com/topojson/topojson) provided to the `data` prop.
 * Adding aggregation to an existing layer. By default, deck.gl layers render one graphical element for each element in the `data` prop. But in some cases, e.g. heatmaps, the data needs to be aggregated (or "binned") into cells before rendering. An adaptor in the form of a composite layer is one way to add this functionality.
 
-The deck.gl layers [TextLayer](../../api-reference/layers/text-layer.md), [HexagonLayer](../../api-reference/aggregation-layers/hexagon-layer.md), [CPUGridLayer](../../api-reference/aggregation-layers/cpu-grid-layer.md) and few others are written as composite "adapter" layers.
+The deck.gl layers [TextLayer](../../api-reference/layers/text-layer.md), [HexagonLayer](../../api-reference/aggregation-layers/hexagon-layer.md), [GridLayer](../../api-reference/aggregation-layers/grid-layer.md) and few others are written as composite "adapter" layers.
 
 
 ### Collection Layers

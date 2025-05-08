@@ -320,6 +320,7 @@ export default class DeckPicker {
   }
 
   /** Pick all objects within the given bounding box */
+  // eslint-disable-next-line max-statements
   _pickVisibleObjects({
     layers,
     views,
@@ -493,7 +494,8 @@ export default class DeckPicker {
       effects,
       pass,
       pickZ,
-      preRenderStats: {}
+      preRenderStats: {},
+      isPicking: true
     };
 
     for (const effect of effects) {

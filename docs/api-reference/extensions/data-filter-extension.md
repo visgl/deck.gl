@@ -13,6 +13,11 @@ The `DataFilterExtension` adds GPU-based data filtering functionalities to layer
   </iframe>
 </div>
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -34,6 +39,42 @@ const layer = new GeoJsonLayer({
   extensions: [new DataFilterExtension({filterSize: 1})]
 });
 ```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {GeoJsonLayer} from '@deck.gl/layers';
+import {DataFilterExtension, DataFilterExtensionProps} from '@deck.gl/extensions';
+import type {Feature, Geometry} from 'geojson';
+
+type PropertiesType = {
+  timeOfDay: number;
+};
+
+const layer = new GeoJsonLayer<
+  PropertiesType,
+  DataFilterExtensionProps<Feature<Geometry, PropertiesType>>
+>({
+  id: 'geojson-layer',
+  data: GEOJSON,
+
+  // props from GeoJsonLayer
+  getFillColor: [160, 160, 180],
+  getLineColor: [0, 0, 0],
+  getLineWidth: 10,
+
+  // props added by DataFilterExtension
+  getFilterValue: (f: Feature<Geometry, PropertiesType>) => f.properties.timeOfDay, // in seconds
+  filterRange: [43200, 46800], // 12:00 - 13:00
+
+  // Define extensions
+  extensions: [new DataFilterExtension({filterSize: 1})]
+});
+```
+
+  </TabItem>
+</Tabs>
 
 ## Installation
 

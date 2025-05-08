@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, RenderPassParameters} from '@luma.gl/core';
+import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -38,11 +38,11 @@ export type LayersPassRenderOptions = {
   preRenderStats?: Record<string, any>;
 };
 
-type DrawLayerParameters = {
+export type DrawLayerParameters = {
   shouldDrawLayer: boolean;
-  layerRenderIndex?: number;
-  shaderModuleProps?: any;
-  layerParameters?: any;
+  layerRenderIndex: number;
+  shaderModuleProps: any;
+  layerParameters: Parameters;
 };
 
 export type FilterContext = {
@@ -95,6 +95,8 @@ export default class LayersPass extends Pass {
       return this._drawLayers(renderPass, options);
     } finally {
       renderPass.end();
+      // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
+      this.device.submit();
     }
   }
 
@@ -182,11 +184,11 @@ export default class LayersPass extends Pass {
         layerFilterCache
       );
 
-      const layerParam: DrawLayerParameters = {
-        shouldDrawLayer
-      };
+      const layerParam = {shouldDrawLayer} as DrawLayerParameters;
 
       if (shouldDrawLayer && !evaluateShouldDrawOnly) {
+        layerParam.shouldDrawLayer = true;
+
         // This is the "logical" index for ordering this layer in the stack
         // used to calculate polygon offsets
         // It can be the same as another layer
@@ -203,6 +205,7 @@ export default class LayersPass extends Pass {
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
+
       drawLayerParams[layerIndex] = layerParam;
     }
     return drawLayerParams;
@@ -211,11 +214,11 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  /* eslint-disable max-depth, max-statements */
+  /* eslint-disable max-depth, max-statements, complexity */
   private _drawLayersInViewport(
     renderPass: RenderPass,
     {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},
-    drawLayerParams
+    drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
       shaderModuleProps: globalModuleParameters,
@@ -223,16 +226,18 @@ export default class LayersPass extends Pass {
       viewport
     });
 
-    // TODO v9 - remove WebGL specific logic
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      this.device.withParametersWebGL(
-        {
-          scissorTest: true,
-          scissor: glViewport
+      const clearRenderPass = this.device.beginRenderPass({
+        framebuffer: target,
+        parameters: {
+          viewport: glViewport,
+          scissorRect: glViewport
         },
-        () => this.device.clearWebGL(clearOpts)
-      );
+        clearColor: clearOpts.color ? [0, 0, 0, 0] : false,
+        clearDepth: clearOpts.depth ? 1 : false
+      });
+      clearRenderPass.end();
     }
 
     // render layers in normal colors
@@ -248,8 +253,8 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
       const layer = layers[layerIndex] as Layer;
-      const {shouldDrawLayer, layerRenderIndex, shaderModuleProps, layerParameters} =
-        drawLayerParams[layerIndex];
+      const drawLayerParameters = drawLayerParams[layerIndex];
+      const {shouldDrawLayer} = drawLayerParameters;
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -258,7 +263,8 @@ export default class LayersPass extends Pass {
       if (layer.isComposite) {
         renderStatus.compositeCount++;
       }
-      if (layer.isDrawable && shouldDrawLayer) {
+      if (layer.isDrawable && drawLayerParameters.shouldDrawLayer) {
+        const {layerRenderIndex, shaderModuleProps, layerParameters} = drawLayerParameters;
         // Draw the layer
         renderStatus.visibleCount++;
 
@@ -304,7 +310,7 @@ export default class LayersPass extends Pass {
     return null;
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return layer.props.parameters;
   }
 

@@ -11,7 +11,7 @@ import extractJSXLayers, {DeckGLRenderCallback} from './utils/extract-jsx-layers
 import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
-import type {DeckGLContextValue} from './utils/position-children-under-views';
+import type {DeckGLContextValue} from './utils/deckgl-context';
 import type {DeckProps, View, Viewport} from '@deck.gl/core';
 
 export type ViewOrViews = View | View[] | null;
@@ -82,22 +82,26 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
     // The Deck's animation loop is independent from React's render cycle, causing potential
     // synchronization issues. We provide this custom render function to make sure that React
     // and Deck update on the same schedule.
-    _customRender: redrawReason => {
-      // Save the dirty flag for later
-      thisRef.redrawReason = redrawReason;
+    // TODO(ibgreen) - Hack to enable WebGPU as it needs to render quickly to avoid CanvasContext texture from going stale
+    _customRender:
+      props.deviceProps?.adapters?.[0]?.type === 'webgpu'
+        ? undefined
+        : redrawReason => {
+            // Save the dirty flag for later
+            thisRef.redrawReason = redrawReason;
 
-      // Viewport/view state is passed to child components as props.
-      // If they have changed, we need to trigger a React rerender to update children props.
-      const viewports = deck.getViewports();
-      if (thisRef.lastRenderedViewports !== viewports) {
-        // Viewports have changed, update children props first.
-        // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-        // so that the canvas does not get rendered before the child components update.
-        thisRef.forceUpdate();
-      } else {
-        redrawDeck(thisRef);
-      }
-    }
+            // Viewport/view state is passed to child components as props.
+            // If they have changed, we need to trigger a React rerender to update children props.
+            const viewports = deck.getViewports();
+            if (thisRef.lastRenderedViewports !== viewports) {
+              // Viewports have changed, update children props first.
+              // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
+              // so that the canvas does not get rendered before the child components update.
+              thisRef.forceUpdate();
+            } else {
+              redrawDeck(thisRef);
+            }
+          }
   });
   return deck;
 }
@@ -157,6 +161,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
     const forwardProps: DeckProps<ViewsT> = {
+      widgets: [],
       ...props,
       // Override user styling props. We will set the canvas style in render()
       style: null,

@@ -3,7 +3,7 @@
   "description": "UI widgets for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-alpha.0",
+  "version": "9.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -45,7 +45,7 @@
     "preact": "^10.17.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "9.0.0-alpha.0"
+    "@deck.gl/core": "^9.1.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

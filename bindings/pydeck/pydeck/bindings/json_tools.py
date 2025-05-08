@@ -14,6 +14,7 @@ IGNORE_KEYS = [
     "_binary_data",
     "_tooltip",
     "_kwargs",
+    "_show_error",
 ]
 
 
@@ -74,7 +75,7 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     attrs = vars(o)
     attrs = {k: v for k, v in attrs.items() if v is not None}
     for ignore_attr in IGNORE_KEYS:
-        if attrs.get(ignore_attr):
+        if ignore_attr in attrs:
             del attrs[ignore_attr]
     if remap_function:
         remap_function(attrs)

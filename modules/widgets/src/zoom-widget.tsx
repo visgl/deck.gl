@@ -2,77 +2,59 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
-import {FlyToInterpolator} from '@deck.gl/core';
-import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
+import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
+import {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {ButtonGroup, GroupedIconButton} from './components';
+import {ButtonGroup} from './lib/components/button-group';
+import {GroupedIconButton} from './lib/components/grouped-icon-button';
 
-interface ZoomWidgetProps {
-  id?: string;
+export type ZoomWidgetProps = WidgetProps & {
+  /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
-  /**
-   * View to attach to and interact with. Required when using multiple views.
-   */
+  /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
-  /**
-   * Button orientation.
-   */
+  /** Button orientation. */
   orientation?: 'vertical' | 'horizontal';
-  /**
-   * Tooltip message on zoom in button.
-   */
+  /** Tooltip message on zoom in button. */
   zoomInLabel?: string;
-  /**
-   * Tooltip message on zoom out button.
-   */
+  /** Tooltip message on zoom out button. */
   zoomOutLabel?: string;
-  /**
-   * Zoom transition duration in ms.
-   */
+  /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
-  /**
-   * CSS inline style overrides.
-   */
-  style?: Partial<CSSStyleDeclaration>;
-  /**
-   * Additional CSS class.
-   */
-  className?: string;
-}
+};
 
-export class ZoomWidget implements Widget<ZoomWidgetProps> {
-  id = 'zoom';
-  props: ZoomWidgetProps;
+export class ZoomWidget extends Widget<ZoomWidgetProps> {
+  static defaultProps: Required<ZoomWidgetProps> = {
+    ...Widget.defaultProps,
+    id: 'zoom',
+    placement: 'top-left',
+    orientation: 'vertical',
+    transitionDuration: 200,
+    zoomInLabel: 'Zoom In',
+    zoomOutLabel: 'Zoom Out',
+    viewId: undefined!
+  };
+
+  className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
-  orientation: 'vertical' | 'horizontal' = 'vertical';
   viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
 
-  constructor(props: ZoomWidgetProps) {
-    this.id = props.id || 'zoom';
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    this.orientation = props.orientation || 'vertical';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.zoomInLabel = props.zoomInLabel || 'Zoom In';
-    props.zoomOutLabel = props.zoomOutLabel || 'Zoom Out';
-    props.style = props.style || {};
-    this.props = props;
+  constructor(props: ZoomWidgetProps = {}) {
+    super(props, ZoomWidget.defaultProps);
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
   }
 
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    const {style, className} = this.props;
-    const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-zoom');
-    if (className) element.classList.add(className);
-    if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
-    }
+  setProps(props: Partial<ZoomWidgetProps>) {
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    super.setProps(props);
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {
     const ui = (
-      <ButtonGroup orientation={this.orientation}>
+      <ButtonGroup orientation={this.props.orientation}>
         <GroupedIconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
@@ -85,21 +67,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
         />
       </ButtonGroup>
     );
-    render(ui, element);
-
-    this.deck = deck;
-    this.element = element;
-
-    return element;
-  }
-
-  onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
-  }
-
-  setProps(props: Partial<ZoomWidgetProps>) {
-    Object.assign(this.props, props);
+    render(ui, rootElement);
   }
 
   onViewportChange(viewport: Viewport) {
@@ -108,14 +76,16 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
 
   handleZoom(viewport: Viewport, nextZoom: number) {
     const viewId = this.viewId || viewport?.id || 'default-view';
-    const nextViewState = {
+    const nextViewState: Record<string, unknown> = {
       ...viewport,
-      zoom: nextZoom,
-      transitionDuration: this.props.transitionDuration,
-      transitionInterpolator: new FlyToInterpolator()
+      zoom: nextZoom
     };
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+    if (this.props.transitionDuration > 0) {
+      nextViewState.transitionDuration = this.props.transitionDuration;
+      nextViewState.transitionInterpolator =
+        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+    }
+    this.setViewState(viewId, nextViewState);
   }
 
   handleZoomIn() {
@@ -128,5 +98,11 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     for (const viewport of Object.values(this.viewports)) {
       this.handleZoom(viewport, viewport.zoom - 1);
     }
+  }
+
+  /** @todo - move to deck or widget manager */
+  private setViewState(viewId: string, viewState: Record<string, unknown>): void {
+    // @ts-ignore Using private method temporary until there's a public one
+    this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
   }
 }

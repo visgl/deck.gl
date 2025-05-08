@@ -7,7 +7,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
 
@@ -89,7 +89,7 @@ export default function App({
   const layers = [
     new HexagonLayer<DataPoint>({
       id: 'heatmap',
-      // gpuAggregation: true,
+      gpuAggregation: true,
       colorRange,
       coverage,
       data,

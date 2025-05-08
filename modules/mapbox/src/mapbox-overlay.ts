@@ -3,9 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, assert} from '@deck.gl/core';
-import {getViewState, getDeckInstance, removeDeckInstance, getInterleavedProps} from './deck-utils';
+import {
+  getViewState,
+  getDefaultView,
+  getDeckInstance,
+  removeDeckInstance,
+  getDefaultParameters
+} from './deck-utils';
 
-import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
+import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {DeckProps} from '@deck.gl/core';
 import {log} from '@deck.gl/core';
@@ -26,7 +32,6 @@ export type MapboxOverlayProps = Omit<
 > & {
   interleaved?: boolean;
 };
-type ControlPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
 /**
  * Implements Mapbox [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) interface
@@ -34,7 +39,7 @@ type ControlPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
  */
 export default class MapboxOverlay implements IControl {
   private _props: MapboxOverlayProps;
-  private _deck?: Deck;
+  private _deck?: Deck<any>;
   private _map?: Map;
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
@@ -54,15 +59,23 @@ export default class MapboxOverlay implements IControl {
 
     Object.assign(this._props, props);
 
-    if (this._deck) {
-      this._deck.setProps(this._interleaved ? getInterleavedProps(this._props) : this._props);
+    if (this._deck && this._map) {
+      this._deck.setProps({
+        ...this._props,
+        parameters: {
+          ...getDefaultParameters(this._map, this._interleaved),
+          ...this._props.parameters
+        }
+      });
     }
   }
 
+  // The local Map type is for internal typecheck only. It does not necesarily satisefy mapbox/maplibre types at runtime.
+  // Do not restrict the argument type here to avoid type conflict.
   /** Called when the control is added to a map */
-  onAdd(map: Map): HTMLDivElement {
-    this._map = map;
-    return this._interleaved ? this._onAddInterleaved(map) : this._onAddOverlaid(map);
+  onAdd(map: unknown): HTMLDivElement {
+    this._map = map as Map;
+    return this._interleaved ? this._onAddInterleaved(map as Map) : this._onAddOverlaid(map as Map);
   }
 
   private _onAddOverlaid(map: Map): HTMLDivElement {
@@ -77,9 +90,11 @@ export default class MapboxOverlay implements IControl {
     });
     this._container = container;
 
-    this._deck = new Deck({
+    this._deck = new Deck<any>({
       ...this._props,
       parent: container,
+      parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
+      views: this._props.views || getDefaultView(map),
       viewState: getViewState(map)
     });
 
@@ -213,9 +228,12 @@ export default class MapboxOverlay implements IControl {
 
   private _updateViewState = () => {
     const deck = this._deck;
-    if (deck) {
-      // @ts-ignore (2345) map is always defined if deck is
-      deck.setProps({viewState: getViewState(this._map)});
+    const map = this._map;
+    if (deck && map) {
+      deck.setProps({
+        views: this._props.views || getDefaultView(map),
+        viewState: getViewState(map)
+      });
       // Redraw immediately if view state has changed
       if (deck.isInitialized) {
         deck.redraw();
@@ -256,7 +274,7 @@ export default class MapboxOverlay implements IControl {
 
     switch (mockEvent.type) {
       case 'mousedown':
-        deck._onPointerDown(mockEvent as MjolnirPointerEvent);
+        deck._onPointerDown(mockEvent as unknown as MjolnirPointerEvent);
         this._lastMouseDownPoint = {
           ...event.point,
           clientX: event.originalEvent.clientX,
@@ -266,38 +284,38 @@ export default class MapboxOverlay implements IControl {
 
       case 'dragstart':
         mockEvent.type = 'panstart';
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'drag':
         mockEvent.type = 'panmove';
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'dragend':
         mockEvent.type = 'panend';
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'click':
         mockEvent.tapCount = 1;
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'dblclick':
         mockEvent.type = 'click';
         mockEvent.tapCount = 2;
-        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        deck._onEvent(mockEvent as unknown as MjolnirGestureEvent);
         break;
 
       case 'mousemove':
         mockEvent.type = 'pointermove';
-        deck._onPointerMove(mockEvent as MjolnirPointerEvent);
+        deck._onPointerMove(mockEvent as unknown as MjolnirPointerEvent);
         break;
 
       case 'mouseout':
         mockEvent.type = 'pointerleave';
-        deck._onPointerMove(mockEvent as MjolnirPointerEvent);
+        deck._onPointerMove(mockEvent as unknown as MjolnirPointerEvent);
         break;
 
       default:

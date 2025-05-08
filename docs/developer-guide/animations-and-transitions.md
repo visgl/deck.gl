@@ -21,7 +21,7 @@ Transitions are performed when setting `Deck`'s `viewState` or `initialViewState
 
 * `transitionDuration` (number | string, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
 When using `FlyToInterpolator`, it can also be set to `'auto'` where actual duration is calculated based on the distance between the start and end states, and the `speed` option.
-* `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: <http://easings.net/>)   
+* `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. ([list of sample easing functions](http://easings.net))   
 * `transitionInterruption` (number, optional, default: `TRANSITION_EVENTS.BREAK`) - This field controls how to process a new view state change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
 
     | `TRANSITION_EVENTS` | Result |
@@ -125,7 +125,7 @@ function flyToCity(name: string) {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState, FlyToInterpolator} from '@deck.gl/core';
 
 const CITIES: {[name: string]: MapViewState} = {
@@ -232,7 +232,7 @@ function rotateCamera(): void {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {LinearInterpolator, MapViewState} from '@deck.gl/core';
 
 function App() {
@@ -367,7 +367,7 @@ function getLayers(data: DataType[] | null) {
 
 ```tsx
 import React, {useEffect, useState} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 type DataType = {
@@ -586,7 +586,7 @@ function updateLayers(currentTime: number) {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from "popmotion";

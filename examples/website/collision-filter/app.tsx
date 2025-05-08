@@ -5,8 +5,8 @@
 /* global fetch */
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl//maplibre';
-import DeckGL from '@deck.gl/react';
+import {Map} from 'react-map-gl/maplibre';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, CollisionFilterExtensionProps} from '@deck.gl/extensions';
 import {calculateLabels, Label} from './calculate-labels';
@@ -44,6 +44,7 @@ export default function App({
   const [roads, setRoads] = useState<FeatureCollection<Geometry, RoadProperties>>();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetch(DATA_URL)
       .then(resp => resp.json())
       .then(setRoads);

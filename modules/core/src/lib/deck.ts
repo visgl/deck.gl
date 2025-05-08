@@ -8,15 +8,16 @@ import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
-import {WidgetManager, Widget} from './widget-manager';
-import Tooltip from './tooltip';
+import {Widget} from './widget';
+import {WidgetManager} from './widget-manager';
+import {TooltipWidget} from './tooltip-widget';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {WebGLDevice, webgl2Adapter} from '@luma.gl/webgl';
+import {webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -40,8 +41,9 @@ import type {ViewStateChangeParameters, InteractionState} from '../controllers/c
 import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
-import type {TooltipContent} from './tooltip';
+import type {TooltipContent} from './tooltip-widget';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
+import {CreateDeviceProps} from '@luma.gl/core';
 
 /* global document */
 
@@ -106,21 +108,21 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * @default `document.body`
    */
   parent?: HTMLDivElement | null;
+
   /** The canvas to render into.
    * Can be either a HTMLCanvasElement or the element id.
    * Will be auto-created if not supplied.
    */
   canvas?: HTMLCanvasElement | string | null;
 
-  /** luma.gl GPU device. A device will be auto-created if not supplied. */
+  /** Use an existing luma.gl GPU device. @note If not supplied, a new device will be created using props.deviceProps */
   device?: Device | null;
-  /** A device will be auto-created if not supplied using these props. */
-  deviceProps?: DeviceProps;
 
-  /** WebGL context @deprecated Use props.device */
+  /** A new device will be created using these props, assuming that an existing device is not supplied using props.device) */
+  deviceProps?: CreateDeviceProps;
+
+  /** WebGL context @deprecated Use props.deviceProps.webgl. Also note that preserveDrawingBuffers is true by default */
   gl?: WebGL2RenderingContext | null;
-  /** Options used when creating a WebGL context. @deprecated Use props.deviceProps */
-  glOptions?: WebGLContextAttributes;
 
   /**
    * The array of Layer instances to be rendered.
@@ -230,9 +232,8 @@ const defaultProps: DeckProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {type: 'webgl'} as DeviceProps,
+  deviceProps: {} as DeviceProps,
   gl: null,
-  glOptions: {},
   canvas: null,
   layers: [],
   effects: [],
@@ -294,7 +295,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected deckPicker: DeckPicker | null = null;
   protected eventManager: EventManager | null = null;
   protected widgetManager: WidgetManager | null = null;
-  protected tooltip: Tooltip | null = null;
+  protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
@@ -376,9 +377,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
         type: 'best-available',
+        // luma by default throws if a device is already attached
+        // asynchronous device creation could happen after finalize() is called
+        // TODO - createDevice should support AbortController?
+        _reuseDevices: true,
         adapters: [webgl2Adapter],
         ...props.deviceProps,
-        createCanvasContext: {canvas: this._createCanvas(props)}
+        createCanvasContext: {
+          canvas: this._createCanvas(props),
+          useDevicePixels: this.props.useDevicePixels,
+          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
+          autoResize: false
+        }
       });
     }
 
@@ -455,7 +465,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const resolvedProps: Omit<Required<DeckProps>, 'glOptions'> & {
+    const resolvedProps: Required<DeckProps> & {
       width: number;
       height: number;
       views: View[];
@@ -783,8 +793,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // width,
       // height,
       gl,
-      // deviceProps,
-      // glOptions,
       // debug,
       onError,
       // onBeforeRender,
@@ -822,9 +830,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const normalizedViews: View[] = Array.isArray(views)
       ? views
       : // If null, default to a full screen map view port
-      views
-      ? [views]
-      : [new MapView({id: 'default-view'})];
+        views
+        ? [views]
+        : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
       normalizedViews[0].props.controller = this.props.controller;
@@ -873,6 +881,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Actually run picking */
   private _pickAndCallback() {
+    if (this.device?.type === 'webgpu') {
+      return;
+    }
+
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
@@ -932,7 +944,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    if (this.device instanceof WebGLDevice) {
+    if (this.device.type === 'webgl') {
       this.device.setParametersWebGL({
         blend: true,
         blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
@@ -943,8 +955,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onDeviceInitialized(this.device);
-    if (this.device instanceof WebGLDevice) {
+    if (this.device.type === 'webgl') {
       // Legacy callback - warn?
+      // @ts-expect-error gl is not visible on Device base class
       this.props.onWebGLInitialized(this.device.gl);
     }
 
@@ -1013,7 +1026,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       deck: this,
       parentElement: this.canvas?.parentElement
     });
-    this.widgetManager.addDefault(new Tooltip());
+    this.widgetManager.addDefault(new TooltipWidget());
 
     this.setProps(this.props);
 
@@ -1090,7 +1103,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.layerManager!.updateLayers();
 
     // Perform picking request if any
-    this._pickAndCallback();
+    // TODO(ibgreen): Picking not yet supported on WebGPU
+    if (this.device?.type !== 'webgpu') {
+      this._pickAndCallback();
+    }
 
     // Redraw if necessary
     this.redraw();
@@ -1163,6 +1179,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: evnet handler for pointerdown */
   _onPointerDown = (event: MjolnirPointerEvent) => {
+    // TODO(ibgreen) Picking not yet supported on WebGPU
+    if (this.device?.type === 'webgpu') {
+      return;
+    }
     const pos = event.offsetCenter;
     const pickedInfo = this._pick('pickObject', 'pickObject Time', {
       x: pos.x,

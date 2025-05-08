@@ -17,12 +17,12 @@
     "d3-scale": "^3.1.0",
     "extrude-polyline": "^1.0.6",
     "h3-js": "^4.1.0",
-    "maplibre-gl": "^3.0.0",
+    "maplibre-gl": "^5.0.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^18.2.0",
-    "react-map-gl": "^7.1.0",
+    "react-map-gl": "^8.0.0",
     "react-stats-zavatta": "^0.0.6"
   },
   "devDependencies": {

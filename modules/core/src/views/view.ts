@@ -54,7 +54,7 @@ export default abstract class View<
   ViewProps extends CommonViewProps<ViewState> = CommonViewProps<ViewState>
 > {
   id: string;
-  abstract get ViewportType(): ConstructorOf<Viewport>;
+  abstract getViewportType(viewState: ViewState): ConstructorOf<Viewport>;
   protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
   private _x: Position;
@@ -102,7 +102,13 @@ export default abstract class View<
     }
 
     // To correctly compare padding use depth=2
-    return this.ViewportType === view.ViewportType && deepEqual(this.props, view.props, 2);
+    return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
+  }
+
+  /** Clone this view with modified props */
+  clone(newProps: Partial<ViewProps>): this {
+    const ViewConstructor = this.constructor as new (props: ViewProps) => this;
+    return new ViewConstructor({...this.props, ...newProps});
   }
 
   /** Make viewport from canvas dimensions and view state */
@@ -114,7 +120,8 @@ export default abstract class View<
     if (!viewportDimensions.height || !viewportDimensions.width) {
       return null;
     }
-    return new this.ViewportType({...viewState, ...this.props, ...viewportDimensions});
+    const ViewportType = this.getViewportType(viewState);
+    return new ViewportType({...viewState, ...this.props, ...viewportDimensions});
   }
 
   getViewStateId(): string {

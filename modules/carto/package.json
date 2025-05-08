@@ -3,7 +3,7 @@
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-alpha.0",
+  "version": "9.1.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -37,19 +37,20 @@
   "sideEffects": false,
   "scripts": {
     "build-bundle": "npm run build-workers && ocular-bundle ./bundle.ts",
-    "build-workers": "npm run build-worker --cartoloader=RasterTile && npm run build-worker --cartoloader=SpatialTile && npm run build-worker --cartoloader=VectorTile",
+    "build-workers": "npm run build-worker --cartoloader=RasterTile && npm run build-worker --cartoloader=SpatialTile && npm run build-worker --cartoloader=VectorTile && npm run build-worker --cartoloader=PropertiesTile",
     "build-worker": "esbuild src/workers/carto$npm_config_cartoloader.ts --bundle --outfile=dist/carto$npm_config_cartoloader-worker.js --define:__VERSION__=\\\"$npm_package_version\\\"",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@carto/api-client": "^0.4.0-alpha.4",
+    "@carto/api-client": "^0.4.4",
+    "@loaders.gl/compression": "^4.2.0",
     "@loaders.gl/gis": "^4.2.0",
     "@loaders.gl/loader-utils": "^4.2.0",
     "@loaders.gl/mvt": "^4.2.0",
     "@loaders.gl/schema": "^4.2.0",
     "@loaders.gl/tiles": "^4.2.0",
-    "@luma.gl/core": "^9.2.0-alpha.1",
-    "@luma.gl/shadertools": "^9.2.0-alpha.1",
+    "@luma.gl/core": "^9.2.0-alpha.3",
+    "@luma.gl/shadertools": "^9.2.0-alpha.3",
     "@math.gl/web-mercator": "^4.1.0",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^1.4.2",
@@ -63,16 +64,16 @@
     "h3-js": "^4.1.0",
     "moment-timezone": "^0.5.33",
     "pbf": "^3.2.1",
-    "quadbin": "^0.2.0"
+    "quadbin": "^0.4.0"
   },
   "peerDependencies": {
-    "@deck.gl/aggregation-layers": "9.0.0-alpha.0",
-    "@deck.gl/core": "9.0.0-alpha.0",
-    "@deck.gl/extensions": "9.0.0-alpha.0",
-    "@deck.gl/geo-layers": "9.0.0-alpha.0",
-    "@deck.gl/layers": "9.0.0-alpha.0",
+    "@deck.gl/aggregation-layers": "^9.1.0",
+    "@deck.gl/core": "^9.1.0",
+    "@deck.gl/extensions": "^9.1.0",
+    "@deck.gl/geo-layers": "^9.1.0",
+    "@deck.gl/layers": "^9.1.0",
     "@loaders.gl/core": "^4.2.0",
-    "@luma.gl/core": "^9.2.0-alpha.1"
+    "@luma.gl/core": "^9.2.0-alpha.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

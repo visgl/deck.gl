@@ -27,10 +27,10 @@ Deck renders into the WebGL2 context of the base map. This allows for occlusion 
 | ----- | ----- | ----- | ----- | ----- | ----- |
 | [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) | ✓ | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/arcgis) | [link](../developer-guide/base-maps/using-with-arcgis.md) |
 | [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/deckgl-overlay-view) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) | [link](../developer-guide/base-maps/using-with-google-maps.md) |
-| [harp.gl](https://www.harp.gl/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/harp.gl) |  | |
+| [harp.gl](https://github.com/heremaps/harp.gl) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/harp.gl) |  | |
 | [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/leaflet) |  | |
 | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-overlay) | [link](../developer-guide/base-maps/using-with-mapbox.md) |
-| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/maplibre-overlay) | [link](../developer-guide/base-maps/using-with-maplibre.md) |
+| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/API/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/maplibre-overlay) | [link](../developer-guide/base-maps/using-with-maplibre.md) |
 | [OpenLayers](https://openlayers.org/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/openlayers) |  | |
 | [Apple Maps](https://developer.apple.com/documentation/mapkitjs) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/apple-maps) |  | |
 

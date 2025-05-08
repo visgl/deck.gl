@@ -3,19 +3,23 @@
 // Copyright (c) vis.gl contributors
 
 import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
-import type {Map, CustomLayerInterface} from 'mapbox-gl';
+import type {Map, CustomLayerInterface} from './types';
 import type {Deck, Layer} from '@deck.gl/core';
 
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
   id: string;
   renderingMode?: '2d' | '3d';
   deck?: Deck;
+  /* Mapbox v3 Standard style */
+  slot?: 'bottom' | 'middle' | 'top';
 };
 
 export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInterface {
   id: string;
   type: 'custom';
   renderingMode: '2d' | '3d';
+  /* Mapbox v3 Standard style */
+  slot?: 'bottom' | 'middle' | 'top';
   map: Map | null;
   deck: Deck | null;
   props: MapboxLayerProps<LayerT>;
@@ -29,6 +33,7 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
     this.id = props.id;
     this.type = 'custom';
     this.renderingMode = props.renderingMode || '3d';
+    this.slot = props.slot;
     this.map = null;
     this.deck = null;
     this.props = props;
@@ -57,7 +62,7 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
     }
   }
 
-  render() {
-    drawLayer(this.deck!, this.map, this);
+  render(gl, renderParameters) {
+    drawLayer(this.deck!, this.map!, this, renderParameters);
   }
 }

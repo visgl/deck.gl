@@ -7,12 +7,7 @@
 // updated.
 import log from '../utils/log';
 import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
-import type {
-  PanRecognizerOptions,
-  RotateRecognizerOptions,
-  PinchRecognizerOptions,
-  TapRecognizerOptions
-} from 'mjolnir.js';
+import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
@@ -91,12 +86,12 @@ export const UNIT = {
   pixels: 2
 } as const;
 
-export const EVENT_HANDLERS: {[eventName: string]: string} = {
+export const EVENT_HANDLERS = {
   click: 'onClick',
   panstart: 'onDragStart',
   panmove: 'onDrag',
   panend: 'onDragEnd'
-} as const;
+} as const satisfies {[eventName: string]: string};
 
 export const RECOGNIZERS = {
   multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
@@ -105,6 +100,7 @@ export const RECOGNIZERS = {
   dblclick: [Tap, {event: 'dblclick', taps: 2}],
   click: [Tap, {event: 'click'}, null, ['dblclick']]
 } as const;
+
 export type RecognizerOptions = {
   pinch?: Omit<PinchRecognizerOptions, 'event' | 'enable'>;
   multipan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;

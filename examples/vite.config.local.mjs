@@ -1,5 +1,5 @@
 import {defineConfig} from 'vite';
-import {getOcularConfig} from 'ocular-dev-tools';
+import {getOcularConfig} from '@vis.gl/dev-tools';
 import {join} from 'path';
 
 const rootDir = join(__dirname, '..');
@@ -30,7 +30,7 @@ export default defineConfig(async () => {
       port: 8080
     },
     optimizeDeps: {
-      esbuildOptions: {target: 'es2020'}
+      esbuildOptions: {target: 'es2022'}
     }
   };
 });

@@ -3,7 +3,7 @@
 
 // Enables ES2015 import/export in Node.js
 require('reify');
-const {getOcularConfig} = require('ocular-dev-tools');
+const {getOcularConfig} = require('@vis.gl/dev-tools');
 const moduleAlias = require('module-alias');
 const config = getOcularConfig({
   aliasMode: 'src',

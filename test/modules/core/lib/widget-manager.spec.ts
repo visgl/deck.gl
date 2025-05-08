@@ -6,26 +6,42 @@
 import test from 'tape-promise/tape';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {Widget, WebMercatorViewport, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
-class TestWidget {
-  constructor(props) {
-    this.id = props.id;
-    this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    this.props = props;
+type TestWidgetProps = WidgetProps & {
+  placement?: WidgetPlacement;
+  viewId?: string;
+  version?: number;
+};
+class TestWidget extends Widget<TestWidgetProps> {
+  static defaultProps: Required<TestWidgetProps> = {
+    ...Widget.defaultProps,
+    id: 'test-widget',
+    placement: 'top-left',
+    version: 1,
+    viewId: 'default-view'
+  };
+
+  placement: WidgetPlacement = 'top-left';
+  className = 'deck-test-widget';
+  isVisible = false;
+
+  constructor(props: TestWidgetProps = {}) {
+    super(props, TestWidget.defaultProps);
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? 'top-left';
   }
 
+  onRenderHTML(rootElement: HTMLElement): void {}
+
   setProps(props) {
-    Object.assign(this.props, props);
+    this.viewId = props.viewId ?? this.viewId;
+    this.placement = props.placement ?? this.placement;
+    super.setProps(props);
   }
 
   onAdd() {
     this.isVisible = true;
-
-    const el = document.createElement('div');
-    el.id = this.id;
-    return el;
   }
 
   onRemove() {
@@ -50,7 +66,7 @@ test('WidgetManager#setProps', t => {
   t.is(widgetManager.getWidgets().length, 1, 'widget is added');
   t.ok(widgetA.isVisible, 'widget.onAdd is called');
   t.ok(
-    widgetManager.containers['__root'].contains(widgetA._element),
+    widgetManager.containers['__root'].contains(widgetA.rootElement),
     'widget UI is added to the container'
   );
   t.is(container.childElementCount, 1, 'widget container is added');
@@ -63,18 +79,18 @@ test('WidgetManager#setProps', t => {
   t.is(widgetManager.getWidgets().length, 2, 'widget is added');
   t.ok(widgetB.isVisible, 'widget.onAdd is called');
   t.ok(
-    widgetManager.containers['map'].contains(widgetB._element),
+    widgetManager.containers['map'].contains(widgetB.rootElement),
     'widget UI is added to the container'
   );
   t.is(container.childElementCount, 2, 'widget container is added');
 
-  const elementA = widgetA._element;
+  const elementA = widgetA.rootElement;
   // Only B
   widgetManager.setProps({
     widgets: [widgetB]
   });
   t.is(widgetManager.getWidgets().length, 1, 'widget is removed');
-  t.notOk(widgetA._element, 'widget context is cleared');
+  t.notOk(widgetA.rootElement, 'widget context is cleared');
   t.notOk(widgetA.isVisible, 'widget.onRemove is called');
   t.notOk(
     widgetManager.containers['__root'].contains(elementA),
@@ -96,10 +112,24 @@ test('WidgetManager#setProps', t => {
   t.notOk(widgetB.isVisible, 'widget.onRemove is called');
   t.ok(widgetB2.isVisible, 'widget.onAdd is called');
 
+  widgetManager.setProps({widgets: []});
+  t.is(widgetManager.getWidgets().length, 0, 'all widgets are removed');
+  t.notOk(widgetB2.isVisible, 'widget.onRemove is called');
+
+  t.end();
+});
+
+test('WidgetManager#finalize', t => {
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widgetA = new TestWidget({id: 'A'});
+  widgetManager.setProps({widgets: [widgetA]});
+
   widgetManager.finalize();
   t.is(widgetManager.getWidgets().length, 0, 'all widgets are removed');
   t.is(container.childElementCount, 0, 'all widget containers are removed');
-  t.notOk(widgetB2.isVisible, 'widget.onRemove is called');
+  t.notOk(widgetA.isVisible, 'widget.onRemove is called');
 
   t.end();
 });
@@ -162,7 +192,7 @@ test('WidgetManager#onRedraw#without viewId', t => {
     layers: []
   });
 
-  t.is(onViewportChangeCalledCount, 1, 'widget.onViewportChange not called');
+  t.is(onViewportChangeCalledCount, 2, 'widget.onViewportChange called');
   t.is(onRedrawCalledCount, 2, 'widget.onRedraw called');
 
   widgetManager.onRedraw({
@@ -188,7 +218,7 @@ test('WidgetManager#onRedraw#without viewId', t => {
     ],
     layers: []
   });
-  t.is(onViewportChangeCalledCount, 3, 'widget.onViewportChange called');
+  t.is(onViewportChangeCalledCount, 4, 'widget.onViewportChange called');
   t.is(onRedrawCalledCount, 3, 'widget.onRedraw called');
 
   widgetManager.finalize();

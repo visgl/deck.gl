@@ -181,7 +181,7 @@ The reverse-controlled option is supported by the pre-built scripting bundle, an
 ```tsx
 import React from 'react';
 import {Map} from 'react-map-gl';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -229,7 +229,7 @@ function App() {
 
 All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration.
 
-When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) is used with react-map-gl's `useControl` hook. 
+When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#example) is used with react-map-gl's `useControl` hook. 
 
 When you choose the reverse-controlled option, the `DeckGL` React component acts as the root component, and the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) is a child. In this case, `Map` will automatically interpret the deck.gl view state (i.e. latitude, longitude, zoom etc), so that deck.gl layers will render as a synchronized geospatial overlay over the underlying map.
 

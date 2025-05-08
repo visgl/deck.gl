@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable @typescript-eslint/no-shadow */
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
@@ -235,7 +237,13 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
     let tileZ = 0;
     let maxDensity = 0;
-    const tiles = [...this.state.tiles].filter(t => t.isVisible && t.content);
+    const loadedTiles = [...this.state.tiles].filter(t => t.content);
+    const visibleTiles = loadedTiles.filter(t => t.isVisible);
+
+    // As deck.gl initially marks tiles as hidden, use hidden tiles as fallback for calculation.
+    // This avoids an ugly flash/glitch at startup when layer is first rendered
+    const tiles = visibleTiles.length ? visibleTiles : loadedTiles;
+
     for (const tile of tiles) {
       const cell = tile.content[0];
       const unitDensity = unitDensityForCell(cell.id);
@@ -322,7 +330,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
     if (colorTexture && colorTexture?.width === colorRange.length) {
       // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setSubImageData({data: colors});
+      (colorTexture as any).setTexture2DData({data: colors});
     } else {
       colorTexture?.destroy();
       // @ts-ignore TODO v9.1

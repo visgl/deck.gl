@@ -8,6 +8,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   Layer,
+  LayerData,
   PickingInfo,
   Unit,
   Material,
@@ -538,11 +539,13 @@ export default class GeoJsonLayer<
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           // @ts-expect-error TODO - type binary data
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
             // @ts-expect-error TODO - type binary data
-            data: {...pointsLayerProps.data, attributes: rest}
+            data: {...(pointsLayerProps.data as LayerData), attributes: rest}
           };
         }
 

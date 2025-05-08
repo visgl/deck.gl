@@ -9,6 +9,8 @@ except ImportError:
     from mock import MagicMock
 
 from pydeck import Deck
+from pydeck import map_styles
+from pydeck.bindings.base_map_provider import BaseMapProvider
 from IPython.display import HTML
 
 from . import pydeck_examples
@@ -21,6 +23,22 @@ def test_deck_layer_args():
     for [args, expected_output] in CASES:
         r = Deck(**args)
         assert r.layers == expected_output
+
+
+@pytest.mark.parametrize(
+    "map_provider_enum, expected_map_style",
+    (
+        (BaseMapProvider.CARTO, map_styles.CARTO_DARK),
+        (BaseMapProvider.MAPBOX, map_styles.MAPBOX_DARK),
+        (BaseMapProvider.GOOGLE_MAPS, map_styles.GOOGLE_ROAD),
+    ),
+    ids=[BaseMapProvider.CARTO, BaseMapProvider.MAPBOX, BaseMapProvider.GOOGLE_MAPS],
+)
+def test_deck_default_map_style(map_provider_enum: BaseMapProvider, expected_map_style: str):
+    """Verify that a default map style is provided for all map providers."""
+    r = Deck(**{"layers": [], "map_provider": map_provider_enum.value})
+    assert r.map_provider == map_provider_enum.value
+    assert r.map_style == expected_map_style
 
 
 def test_json_output():

@@ -5,6 +5,7 @@
 import test from 'tape-promise/tape';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils';
 import {sleep} from './async-iterator-test-utils';
 
@@ -279,4 +280,48 @@ test('Deck#resourceManager', async t => {
 
   deck.finalize();
   t.end();
+});
+
+test('Deck#props omitted are unchanged', async t => {
+  const layer = new ScatterplotLayer({
+    id: 'scatterplot-global-data',
+    data: 'deck://pins',
+    getPosition: d => d.position
+  });
+
+  const widget = new FullscreenWidget();
+
+  // Initialize with widgets and layers.
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    },
+
+    layers: [layer],
+    widgets: [widget],
+
+    onLoad: () => {
+      const {widgets, layers} = deck.props;
+      t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets is set');
+      t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers is set');
+
+      // Render deck a second time without changing widget or layer props.
+      deck.setProps({
+        onAfterRender: () => {
+          const {widgets, layers} = deck.props;
+          t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets remain set');
+          t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers remain set');
+
+          deck.finalize();
+          t.end();
+        }
+      });
+    }
+  });
 });
