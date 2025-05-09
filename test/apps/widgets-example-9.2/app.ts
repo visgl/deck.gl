@@ -138,7 +138,7 @@ const deck = new Deck({
       orientation: 'vertical',
       onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
     }),
-    new _StatsWidget({})
+    new _StatsWidget({type: 'luma'})
   ]
 });
 
