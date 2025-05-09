@@ -6,7 +6,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
@@ -120,7 +120,7 @@ export default function App({
 }) {
   const [abortController] = useState<AbortController>(new AbortController());
   const dataRef = useRef<Aircraft[]>([]); // Callback requires stable reference to data.
-  const [_, setVersion] = useState(0); // Re-render on data change.
+  const [, setVersion] = useState(0); // Re-render on data change.
 
   const sync = useCallback(async () => {
     let newData = await fetchData(abortController.signal);

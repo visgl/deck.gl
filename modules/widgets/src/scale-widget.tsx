@@ -4,9 +4,9 @@
 
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
 import {render} from 'preact';
-import {WidgetImpl, WidgetImplProps} from './widget-impl';
+import {Widget, WidgetProps} from '@deck.gl/core';
 
-export type ScaleWidgetProps = WidgetImplProps & {
+export type ScaleWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
   label?: string;
   onCapture?: (widget: ScaleWidget) => void;
@@ -19,17 +19,17 @@ export type ScaleWidgetProps = WidgetImplProps & {
  * positioned to the left of the line. The horizontal line’s length is computed from a “nice”
  * candidate distance (e.g. 200, 500, 1000 m, etc.) so that its pixel width is between 100 and 200.
  */
-export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
+export class ScaleWidget extends Widget<ScaleWidgetProps> {
   static defaultProps: Required<ScaleWidgetProps> = {
-    ...WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'scale',
-    placement: 'top-left',
+    placement: 'bottom-left',
     label: 'Scale',
     onCapture: undefined!
   };
 
   className = 'deck-widget-scale';
-  placement: WidgetPlacement = 'top-left';
+  placement: WidgetPlacement = 'bottom-left';
 
   // The pixel width of the scale line (computed from a candidate distance)
   scaleWidth: number = 10;
@@ -39,7 +39,7 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
   scaleText: string = '';
 
   constructor(props: ScaleWidgetProps = {}) {
-    super({...ScaleWidget.defaultProps, ...props});
+    super(props, ScaleWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
   }
 
@@ -48,9 +48,7 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
     super.setProps(props);
   }
 
-  onRenderHTML(): void {
-    const element = this.element;
-    if (!element) return;
+  onRenderHTML(rootElement: HTMLElement): void {
     // Reserve space for the text label (to the left of the horizontal line)
     const lineOffsetX = 50;
     // Overall SVG width includes the left offset plus the computed scale line width.
@@ -102,11 +100,11 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
           strokeWidth="6"
         />
       </svg>,
-      element
+      rootElement
     );
   }
 
-  onViewportChange?(viewport: Viewport): void {
+  onViewportChange(viewport: Viewport): void {
     // Only handle geospatial viewports (which contain latitude)
     if (!('latitude' in viewport)) return;
 
@@ -122,7 +120,7 @@ export class ScaleWidget extends WidgetImpl<ScaleWidgetProps> {
     } else {
       this.scaleText = `${candidate} m`;
     }
-    this.onRenderHTML();
+    this.updateHTML();
   }
 
   handleClick(): void {}

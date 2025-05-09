@@ -4,7 +4,17 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const wgslUniformBlock = /* wgsl */ `\
+struct PointCloudUniforms {
+  radiusPixels: f32,
+  sizeUnits: i32,
+};
+
+@group(0) @binding(3)
+var<uniform> pointCloud: PointCloudUniforms;
+`;
+
+const glslUniformBlock = `\
 uniform pointCloudUniforms {
   float radiusPixels;
   highp int sizeUnits;
@@ -18,8 +28,9 @@ export type PointCloudProps = {
 
 export const pointCloudUniforms = {
   name: 'pointCloud',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: wgslUniformBlock,
+  vs: glslUniformBlock,
+  fs: glslUniformBlock,
   uniformTypes: {
     radiusPixels: 'f32',
     sizeUnits: 'i32'

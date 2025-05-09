@@ -4,7 +4,7 @@
 
 import React, {useState, useEffect, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer, IconLayer, TextLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -86,7 +86,7 @@ export default function App({
   const [routes, setRoutes] = useState<FeatureCollection<LineString, RouteProperties>>();
 
   useEffect(() => {
-    /* global fetch */
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetch(DATA_URL)
       .then(resp => resp.json())
       .then(setRoutes);

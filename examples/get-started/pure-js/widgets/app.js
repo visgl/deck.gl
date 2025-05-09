@@ -2,24 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, PickingInfo} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
   ZoomWidget,
   FullscreenWidget,
-  ScreenshotWidget,
-  ResetViewWidget,
-  _GeolocateWidget,
-  _ScaleWidget,
-  _LoadingWidget,
-  _ThemeWidget,
-  _InfoWidget,
-  _InfoWidget,
   DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
+
+/* global window */
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -35,7 +31,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const deck = new Deck({
+new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
@@ -61,7 +57,10 @@ const deck = new Deck({
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
-      autoHighlight: true
+      autoHighlight: true,
+      onClick: info =>
+        // eslint-disable-next-line
+        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
     }),
     new ArcLayer({
       id: 'arcs',
@@ -76,32 +75,8 @@ const deck = new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget(),
-    new CompassWidget(),
-    new FullscreenWidget(),
-    new ScreenshotWidget(),
-    new ResetViewWidget(),
-    new _LoadingWidget(),
-    new _LoadingWidget(),
-    new _ScaleWidget({placement: 'bottom-left'}),
-    new _GeolocateWidget(),
-    new _ThemeWidget(),
-    new _InfoWidget({
-      onClick(widget: _InfoWidget, info: PickingInfo) {
-        if (info.object && info.layer?.id === 'airports') {
-          widget.setProps({
-            visible: true,
-            position: info.object.geometry.coordinates,
-            text: `${info.object.properties.name} (${info.object.properties.abbrev})`,
-            style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
-          });
-        } else {
-          widget.setProps({
-            visible: false
-          });
-        }
-        return true;
-      }
-    })
+    new ZoomWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme}),
+    new FullscreenWidget({style: widgetTheme})
   ]
 });

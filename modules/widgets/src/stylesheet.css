@@ -1,15 +1,3 @@
-.deck-theme {
-  --widget-margin: 12px;
-  --button-stroke: rgba(255, 255, 255, 0.3);
-  --button-corner-radius: 8px;
-  --button-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.25);
-  --button-size: 28px;
-  --button-background: #616166;
-  --button-backdrop-filter: unset;
-  --button-inner-stroke: unset;
-  --button-icon-hover: rgb(24, 24, 26);
-}
-
 .deck-widget {
   margin: var(--widget-margin, 12px);
 }
@@ -47,7 +35,7 @@
   flex-direction: column;
 }
 
-/* Common button styles */
+/* Common button background styles */
 .deck-widget-button-group button,
 .deck-widget-button button {
   width: calc(var(--button-size, 28px) - 2px);
@@ -91,9 +79,9 @@
   border-bottom-left-radius: 0;
 }
 
-/* Icon button styles */
+/* Icon button foreground styles */
 .deck-widget button .deck-widget-icon {
-  background-color: var(--button-background, #616166);
+  background-color: var(--button-icon-idle, #616166);
   background-position: 50%;
   background-repeat: no-repeat;
   display: block;
@@ -182,6 +170,7 @@
   );
 }
 
+/* Theme widget styles */
 .deck-widget.deck-widget-theme button.deck-widget-sun .deck-widget-icon {
   mask-image: var(
     --icon-sun,
@@ -199,7 +188,8 @@
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><circle x="12" cy="12" r="6" /></svg>')
   );
 }
- 
+
+/* Reset view styles */
 .deck-widget.deck-widget-reset-view button.deck-widget-reset-focus .deck-widget-icon {
   mask-image: var(
     --icon-camera,
@@ -209,6 +199,34 @@
     --icon-camera,
       url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
   );
+}
+ 
+/* Timeline widget styles */
+.deck-widget.deck-widget-timeline {
+  display: flex;
+  align-items: center;
+  pointer-events: 'auto';
+}
+
+.deck-widget.deck-widget-timeline .timeline-slider {
+  margin: 0 8px;
+  flex: 1;
+  pointer-events: 'auto';
+  cursor: pointer;
+}
+
+.deck-widget.deck-widget-timeline button.timeline-play-pause {
+  background: var(--button-background, #fff);
+  border: var(--button-inner-stroke, unset);
+  border-radius: var(--button-corner-radius, 4px);
+  width: var(--button-size, 28px);
+  height: var(--button-size, 28px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  pointer-events: 'auto';
 }
 
 .deck-widget-spinner-icon {
@@ -231,4 +249,30 @@
 .deck-widget .deck-widget-geolocate {
   pointer-events: auto;
   cursor: pointer;
+}
+
+/**
+ * Reusable styles for widgets
+ */
+.deck-widget-common {
+  font-family:
+    'SF Mono',
+    /* macOS */
+    'Menlo',
+    /* macOS */
+    'Consolas',
+    /* Windows */
+    'DejaVu Sans Mono',
+    /* Linux */
+    'Liberation Mono',
+    /* Linux */
+    monospace;
+  background-color: var(--button-background, #fff);
+  color: #333;
+}
+
+.deck-widget-stats-container {
+  font-size: 0.7rem;
+  /* Approximately 14px */
+  line-height: 1.6;
 }

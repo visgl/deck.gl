@@ -1,37 +1,69 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_InfoWidget} from '@deck.gl/widgets';
+
 # InfoWidget (Experimental)
+
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
 The InfoWidget shows a popup when an item in a layer has been clicked.
 
-## Props
+<WidgetPreview cls={_InfoWidget} props={{
+  visible: true,
+  position: [0, 0],
+  text: "Info",
+  style: {width: 50, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+}}/>
 
-#### `id` (string, optional) {#id}
+```ts
+import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
 
-Default: `'popup'`
+const deck = new Deck({
+  widgets: [
+    new InfoWidget({
+      visible: true,
+      position: [0.45, 51.47],
+      text: "Info",
+      style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+    })
+  ]
+});
+```
 
-The `id` must be unique among all your widgets at a given time. 
+## Types
 
-Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
+### `InfoWidgetProps`
 
-#### `placement` (string, optional) {#placement}
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-Default: `'top-left'`
+- `id` (default `'info'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+#### position ([number, number]) {#position}
 
-#### `label` (string, optional) {#label}
+Position at which to place popup (e.g. [longitude, latitude]).
 
-Tooltip message displayed while hovering a mouse over the widget.
+#### text (string, optional) {#text}
 
-Default: `'Popup'`
+Text to display within widget.
 
-#### `style` (object, optional) {#style}
+#### visible (boolean, optional) {#visible}
 
-Default: `{}`
+Whether the widget is visible.
 
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
+Default: `false`
 
-#### `className` (string, optional) {#classname}
+#### minOffset (number, optional) {#minoffset}
 
-Default: `undefined`
+Minimum offset (in pixels) to keep the popup away from the canvas edges.
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-popup-widget`.
+#### onClick (Function, optional) {#onclick}
+
+`(widget: _InfoWidget, info: PickingInfo) => boolean`
+
+## Source
+
+[modules/widgets/src/info-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/info-widget.tsx)

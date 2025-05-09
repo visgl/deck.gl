@@ -25,7 +25,7 @@ npm install @deck.gl/core @deck.gl/react
 ```
 
 ```jsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 
 <DeckGL initialViewState={{longitude: -122.45, latitude: 37.78, zoom: 12}}/>
 ```

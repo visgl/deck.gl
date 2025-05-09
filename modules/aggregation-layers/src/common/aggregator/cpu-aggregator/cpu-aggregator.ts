@@ -75,6 +75,7 @@ export class CPUAggregator implements Aggregator {
   }
 
   /** Update aggregation props */
+  // eslint-disable-next-line complexity
   setProps(props: Partial<CPUAggregationProps>) {
     const oldProps = this.props;
 

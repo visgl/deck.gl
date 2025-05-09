@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Widget, WidgetPlacement} from './widget-manager';
+import {Widget, WidgetProps} from './widget';
+import type {WidgetPlacement} from './widget-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
-import type Deck from './deck';
 
 /* global document */
 const defaultStyle: Partial<CSSStyleDeclaration> = {
@@ -30,32 +30,34 @@ export type TooltipContent =
       style?: Partial<CSSStyleDeclaration>;
     };
 
-export default class Tooltip implements Widget {
+export type TooltipWidgetProps = WidgetProps;
+
+export class TooltipWidget extends Widget<TooltipWidgetProps> {
+  static defaultProps: Required<TooltipWidgetProps> = {
+    ...Widget.defaultProps
+  };
+
   id = 'default-tooltip';
   placement: WidgetPlacement = 'fill';
-  props = {};
+  className = 'deck-tooltip';
+
   isVisible: boolean = false;
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
   lastViewport?: Viewport;
 
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
+  constructor(props: TooltipWidgetProps = {}) {
+    super(props, TooltipWidget.defaultProps);
+    this.setProps(props);
+  }
+
+  // TODO(ib) - does this really need to be overridden?
+  onCreateRootElement() {
     const el = document.createElement('div');
-    el.className = 'deck-tooltip';
+    el.className = this.className;
     Object.assign(el.style, defaultStyle);
-
-    this.deck = deck;
-    this.element = el;
-
     return el;
   }
 
-  onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
-  }
-
-  setProps() {}
+  onRenderHTML(rootElement: HTMLElement): void {}
 
   onViewportChange(viewport: Viewport) {
     if (this.isVisible && viewport.id === this.lastViewport?.id && viewport !== this.lastViewport) {
@@ -76,7 +78,7 @@ export default class Tooltip implements Widget {
   }
 
   setTooltip(displayInfo: TooltipContent, x?: number, y?: number): void {
-    const el = this.element;
+    const el = this.rootElement;
     if (!el) {
       return;
     }

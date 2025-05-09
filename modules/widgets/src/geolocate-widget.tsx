@@ -2,23 +2,35 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
+import {Widget, WidgetProps} from '@deck.gl/core';
 import type {WidgetPlacement, Viewport} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
-import {WidgetImpl, WidgetImplProps} from './widget-impl';
 
 /** @todo - is the the best we can do? */
 type ViewState = Record<string, unknown>;
 
+const GOOGLE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+const MAPBOX_URL = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
+const OPENCAGE_API_URL = 'https://api.opencagedata.com/geocode/v1/json';
+
 /** Properties for the GeolocateWidget */
-export type GeolocateWidgetProps = WidgetImplProps & {
+export type GeolocateWidgetProps = WidgetProps & {
   viewId?: string;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
   transitionDuration?: number;
+  /** Geocoding service */
+  geocoder?: 'google' | 'mapbox' | 'opencage' | 'custom' | 'coordinates';
+  /** API key used for geocoding services */
+  apiKey?: string;
+  /** Callback when using a custom geocoder */
+  onGeocode?: (
+    address: string,
+    apiKey: string
+  ) => Promise<{longitude: number; latitude: number} | null>;
 };
 
 /**
@@ -26,14 +38,17 @@ export type GeolocateWidgetProps = WidgetImplProps & {
  * and a button that moves the view to that location.
  * @todo For now only supports coordinates, Could be extended with location service integrations.
  */
-export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
+export class GeolocateWidget extends Widget<GeolocateWidgetProps> {
   static defaultProps: Required<GeolocateWidgetProps> = {
-    ...WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'geolocate',
     viewId: undefined!,
     placement: 'top-left',
     label: 'Geolocate',
-    transitionDuration: 200
+    transitionDuration: 200,
+    geocoder: 'coordinates',
+    apiKey: '',
+    onGeocode: undefined!
   };
 
   className = 'deck-widget-geolocate';
@@ -44,49 +59,38 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
   errorText = '';
 
   constructor(props: GeolocateWidgetProps = {}) {
-    super({...GeolocateWidget.defaultProps, ...props});
+    super(props, GeolocateWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
   }
 
-  setProps(props: Partial<GeolocateWidgetProps>) {
+  setProps(props: Partial<GeolocateWidgetProps>): void {
     this.placement = props.placement ?? this.placement;
     super.setProps(props);
+    if (!this.props.apiKey && ['google', 'mapbox', 'opencage'].includes(this.props.geocoder)) {
+      throw new Error('API key is required');
+    }
   }
 
-  onRenderHTML() {
-    const element = this.element;
-    if (!element) return;
+  onRenderHTML(rootElement: HTMLElement): void {
     render(
       <div className="deck-widget-geolocate">
         <input
           type="text"
           placeholder="-122.45, 37.8 or 37°48'N, 122°27'W"
           value={this.geolocateText}
-          onInput={
-            // @ts-expect-error event type
-            e => this.setInput(e.target?.value || '')
-          }
+          // @ts-expect-error event type
+          onInput={e => this.setInput(e.target?.value || '')}
           onKeyPress={this.handleKeyPress}
         />
         <button onClick={this.handleSubmit}>Go</button>
         {this.errorText && <div className="error">{this.errorText}</div>}
       </div>,
-      element
+      rootElement
     );
   }
 
   setInput = (text: string) => {
     this.geolocateText = text;
-  };
-
-  handleSubmit = () => {
-    const coords = parseCoordinates(this.geolocateText);
-    if (coords) {
-      this.errorText = '';
-      this.handleCoordinates(coords);
-    } else {
-      this.errorText = 'Invalid coordinate format.';
-    }
   };
 
   handleKeyPress = e => {
@@ -95,9 +99,116 @@ export class GeolocateWidget extends WidgetImpl<GeolocateWidgetProps> {
     }
   };
 
-  handleCoordinates = coordinates => {
-    this.setViewState(coordinates);
+  /** Sync wrapper for async geocode() */
+  handleSubmit = () => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.geocode();
   };
+
+  geocode: () => Promise<void> = async () => {
+    this.errorText = '';
+    try {
+      const coordinates = await this.callGeocoderService(this.geolocateText);
+      if (coordinates) {
+        this.setViewState(coordinates);
+      } else {
+        this.errorText = 'Invalid address';
+      }
+    } catch (error) {
+      this.errorText = `Error: ${(error as Error).message}`;
+    }
+  };
+
+  callGeocoderService = async (
+    address: string
+  ): Promise<{longitude: number; latitude: number} | null> => {
+    const {geocoder, apiKey, onGeocode} = this.props;
+
+    switch (geocoder) {
+      case 'google':
+        return this.geocodeGoogle(address, apiKey);
+      case 'mapbox':
+        return this.geocodeMapbox(address, apiKey);
+      case 'opencage':
+        return this.geocodeOpenCage(address, apiKey);
+      case 'custom':
+        return await onGeocode(address, apiKey);
+      case 'coordinates':
+        return await this.geocodeCoordinates(address);
+      default:
+        throw new Error(`Unsupported geocoder: ${geocoder}`);
+    }
+  };
+
+  async geocodeGoogle(
+    address: string,
+    apiKey: string
+  ): Promise<{longitude: number; latitude: number} | null> {
+    const encodedAddress = encodeURIComponent(address);
+    const json = await this._fetchJson(`${GOOGLE_URL}?address=${encodedAddress}&key=${apiKey}`);
+
+    switch (json.status) {
+      case 'OK':
+        const loc = json.results.length > 0 && json.results[0].geometry.location;
+        return loc ? {longitude: loc.lng, latitude: loc.lat} : null;
+      default:
+        throw new Error(`Google Geocoder failed: ${json.status}`);
+    }
+  }
+
+  async geocodeMapbox(
+    address: string,
+    apiKey: string
+  ): Promise<{longitude: number; latitude: number} | null> {
+    const encodedAddress = encodeURIComponent(address);
+    const json = await this._fetchJson(
+      `${MAPBOX_URL}/${encodedAddress}.json?access_token=${apiKey}`
+    );
+
+    if (Array.isArray(json.features) && json.features.length > 0) {
+      const center = json.features[0].center;
+      if (Array.isArray(center) && center.length >= 2) {
+        return {longitude: center[0], latitude: center[1]};
+      }
+    }
+    return null;
+  }
+
+  async geocodeOpenCage(
+    address: string,
+    key: string
+  ): Promise<{longitude: number; latitude: number} | null> {
+    const encodedAddress = encodeURIComponent(address);
+    const data = await this._fetchJson(`${OPENCAGE_API_URL}?q=${encodedAddress}&key=${key}`);
+    if (Array.isArray(data.results) && data.results.length > 0) {
+      const geometry = data.results[0].geometry;
+      return {longitude: geometry.lng, latitude: geometry.lat};
+    }
+    return null;
+  }
+
+  async geocodeCoordinates(address: string): Promise<{longitude: number; latitude: number} | null> {
+    return parseCoordinates(address) || null;
+  }
+
+  /** Fetch JSON, catching HTTP errors */
+  async _fetchJson(url: string): Promise<any> {
+    let response: Response;
+    try {
+      response = await fetch(url);
+    } catch (error) {
+      // Annoyingly, fetch reports some errors (e.g. CORS) using excpetions, not response.ok
+      throw new Error(`Failed to fetch ${url}: ${error}`);
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+    }
+    const data = await response.json();
+    if (!data) {
+      throw new Error(`No data returned from ${url}`);
+    }
+    return data;
+  }
 
   // TODO - MOVE TO WIDGETIMPL?
 
