@@ -1,7 +1,7 @@
-import { Widget, WidgetPlacement, WidgetProps } from '@deck.gl/core';
-import { luma } from '@luma.gl/core';
-import { render } from 'preact';
-import type { Stats, Stat } from '@probe.gl/stats';
+import {Widget, WidgetPlacement, WidgetProps} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import {render} from 'preact';
+import type {Stats, Stat} from '@probe.gl/stats';
 
 const RIGHT_ARROW = '\u25b6';
 const DOWN_ARROW = '\u2b07';
@@ -63,9 +63,9 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
   constructor(props: StatsWidgetProps = {}) {
     super(props, StatsWidget.defaultProps);
-    this._formatters = { ...DEFAULT_FORMATTERS };
+    this._formatters = {...DEFAULT_FORMATTERS};
     this.setProps(props);
-    this._resetOnUpdate = { ...this.props.resetOnUpdate };
+    this._resetOnUpdate = {...this.props.resetOnUpdate};
     this._stats = this.props.stats;
   }
 
@@ -80,7 +80,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
       }
     }
     if (props.resetOnUpdate) {
-      this._resetOnUpdate = { ...props.resetOnUpdate };
+      this._resetOnUpdate = {...props.resetOnUpdate};
     }
   }
 
@@ -103,7 +103,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
         }
         lines.forEach((line, i) => {
           items.push(
-            <div key={`${stat.name}-${i}`} style={{ whiteSpace: 'pre' }}>
+            <div key={`${stat.name}-${i}`} style={{whiteSpace: 'pre'}}>
               {line}
             </div>
           );
@@ -112,10 +112,10 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     }
 
     render(
-      <div className="deck-widget-stats-container" style={{ cursor: 'default' }}>
+      <div className="deck-widget-stats-container" style={{cursor: 'default'}}>
         <div
           className="deck-widget-stats-header"
-          style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+          style={{cursor: 'pointer', pointerEvents: 'auto'}}
           onClick={this._toggleCollapsed}
         >
           {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
