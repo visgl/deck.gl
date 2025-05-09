@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "vite --open",
-    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "start-local": "vite --config ../vite.config.local.mjs",
     "build": "vite build"
   },
   "dependencies": {
