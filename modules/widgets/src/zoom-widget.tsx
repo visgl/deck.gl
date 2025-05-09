@@ -5,7 +5,8 @@
 import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {ButtonGroup, GroupedIconButton} from './lib/components';
+import {ButtonGroup} from './lib/components/button-group';
+import {GroupedIconButton} from './lib/components/grouped-icon-button';
 
 export type ZoomWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */

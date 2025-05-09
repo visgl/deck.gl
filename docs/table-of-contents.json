@@ -319,6 +319,7 @@
           "api-reference/widgets/fullscreen-widget",
           "api-reference/widgets/reset-view-widget",
           "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/fps-widget",
           "api-reference/widgets/loading-widget",
           "api-reference/widgets/theme-widget",
           "api-reference/widgets/info-widget"

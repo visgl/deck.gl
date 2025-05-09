@@ -6,7 +6,7 @@ import {log, _deepEqual as deepEqual, _applyStyles as applyStyles} from '@deck.g
 import {Widget, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 // import {useCallback} from 'preact/hooks';
-import {IconButton} from './lib/components';
+import {IconButton} from './lib/components/icon-button';
 import type {DeckWidgetTheme} from './themes';
 import {LightGlassTheme, DarkGlassTheme} from './themes';
 

@@ -14,11 +14,14 @@ import {
   _ScaleWidget,
   _LoadingWidget,
   _ThemeWidget,
+  _FpsWidget,
   _InfoWidget,
-  _InfoWidget,
+  _ContextMenuWidget,
   _SplitterWidget,
   _TimelineWidget,
-  _ViewSelectorWidget
+  _ViewSelectorWidget,
+  _ContextMenuWidget,
+  _StatsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -98,13 +101,27 @@ const deck = new Deck({
     new FullscreenWidget(),
     new ScreenshotWidget(),
     new ResetViewWidget(),
+    new _FpsWidget(),
     new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-right'}),
-    new _GeolocateWidget(),
+    new _GeolocateWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
-    new _InfoWidget({mode: 'hover', getTooltip}),
-    new _InfoWidget({mode: 'click', getTooltip}),
-    // new _InfoWidget({mode: 'static', getTooltip})
+    new _ContextMenuWidget({
+      getMenuItems: (info: PickingInfo) => {
+        const name = info.layer?.id === 'airports' && info.object?.properties.name;
+        console.log('Context menu:', name);
+        return (
+          name && [
+            {key: 'airport', label: `${name}`},
+            {key: 'open', label: 'Open in new tab'},
+            {key: 'favorite', label: 'Set as favorite'},
+            {key: 'filter', label: 'Exclude from filter'}
+          ]
+        );
+      }
+    }),
+    // new _InfoWidget({mode: 'hover', getTooltip}),
+    // new _InfoWidget({mode: 'click', getTooltip}),
     new _TimelineWidget({
       placement: 'bottom-left',
       domain: [0, 24],
@@ -120,7 +137,8 @@ const deck = new Deck({
       viewId2: 'right-map',
       orientation: 'vertical',
       onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
-    })
+    }),
+    new _StatsWidget({type: 'luma'})
   ]
 });
 
