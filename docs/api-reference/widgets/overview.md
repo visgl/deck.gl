@@ -14,7 +14,7 @@ This module contains the following widgets:
 
 - [CompassWidget](./compass-widget.md)
 <!-- - [ScaleWidget](./scale-widget.md) -->
-<!-- - [GeolocateWidget](./geolocate-widget.md) -->
+<!-- - [GeocoderWidget](./geocoder-widget.md) -->
 
 ### Utility Widgets
 
