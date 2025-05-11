@@ -17,17 +17,20 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {S2Layer} from '@deck.gl/geo-layers';
+import {A5Layer} from '@deck.gl/geo-layers';
 
-const layer = new S2Layer({
-  id: 'S2Layer',
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.s2cells.json',
+const layer = new A5Layer({
+  id: 'A5Layer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
   
   extruded: true,
-  getS2Token: d => d.token,
-  getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
-  getElevation: d => d.value,
-  elevationScale: 1000,
+  getPentagon: f => f.pentagon,
+  getFillColor: f => {
+    const value = f.count / 211;
+    return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+  },
+  getElevation: f => f.count,
+  elevationScale: 10,
   pickable: true
 });
 
@@ -38,7 +41,7 @@ new Deck({
     zoom: 11
   },
   controller: true,
-  getTooltip: ({object}) => object && `${object.token} value: ${object.value}`,
+  getTooltip: ({object}) => object && `${object.pentagon} count: ${object.count}`,
   layers: [layer]
 });
 ```
@@ -48,22 +51,25 @@ new Deck({
 
 ```ts
 import {Deck, PickingInfo} from '@deck.gl/core';
-import {S2Layer} from '@deck.gl/geo-layers';
+import {A5Layer} from '@deck.gl/geo-layers';
 
 type DataType = {
-  token: string;
-  value: number;
+  pentagon: string;
+  count: number;
 };
 
-const layer = new S2Layer<DataType>({
-  id: 'S2Layer',
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.s2cells.json',
+const layer = new A5Layer<DataType>({
+  id: 'A5Layer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
   
   extruded: true,
-  getS2Token: (d: DataType) => d.token,
-  getFillColor: (d: DataType) => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
-  getElevation: (d: DataType) => d.value,
-  elevationScale: 1000,
+  getPentagon: (f: DataType) => f.pentagon,
+  getFillColor: (f: DataType) => {
+    const value = f.count / 211;
+    return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+  },
+  getElevation: (f: DataType) => f.count,
+  elevationScale: 10,
   pickable: true
 });
 
@@ -74,7 +80,7 @@ new Deck({
     zoom: 11
   },
   controller: true,
-  getTooltip: ({object}: PickingInfo<DataType>) => object && `${object.token} value: ${object.value}`,
+  getTooltip: ({object}: PickingInfo<DataType>) => object && `${object.pentagon} count: ${object.count}`,
   layers: [layer]
 });
 ```
@@ -85,24 +91,27 @@ new Deck({
 ```tsx
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
-import {S2Layer} from '@deck.gl/geo-layers';
+import {A5Layer} from '@deck.gl/geo-layers';
 import type {PickingInfo} from '@deck.gl/core';
 
 type DataType = {
-  token: string;
-  value: number;
+  pentagon: string;
+  count: number;
 };
 
 function App() {
-  const layer = new S2Layer<DataType>({
-    id: 'S2Layer',
-    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.s2cells.json',
+  const layer = new A5Layer<DataType>({
+    id: 'A5Layer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
     
     extruded: true,
-    getS2Token: (d: DataType) => d.token,
-    getFillColor: (d: DataType) => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
-    getElevation: (d: DataType) => d.value,
-    elevationScale: 1000,
+    getPentagon: (f: DataType) => f.pentagon,
+    getFillColor: (f: DataType) => {
+      const value = f.count / 211;
+      return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+    },
+    getElevation: (f: DataType) => f.count,
+    elevationScale: 10,
     pickable: true
   });
 
@@ -113,7 +122,7 @@ function App() {
       zoom: 11
     }}
     controller
-    getTooltip={({object}: PickingInfo<DataType>) => object && `${object.token} value: ${object.value}`}
+    getTooltip={({object}: PickingInfo<DataType>) => object && `${object.pentagon} count: ${object.count}`}
     layers={[layer]}
   />;
 }
@@ -134,10 +143,10 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
 ```ts
-import {S2Layer} from '@deck.gl/geo-layers';
-import type {S2LayerProps} from '@deck.gl/geo-layers';
+import {A5Layer} from '@deck.gl/geo-layers';
+import type {A5LayerProps} from '@deck.gl/geo-layers';
 
-new S2Layer<DataT>(...props: S2LayerProps<DataT>[]);
+new A5Layer<DataT>(...props: A5LayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -151,7 +160,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.S2Layer({});
+new deck.A5Layer({});
 ```
 
 
@@ -161,27 +170,27 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getS2Token` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gets2token}
+#### `getPentagon` ([Accessor&lt;bigint | string&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpentagon}
 
-Called for each data object to retrieve the identifier of the S2 cell. May return one of the following:
+Called for each data object to retrieve the identifier of the A5 pentagon cell.  May return one of the following:
 
-- A string that is the cell's hex token
-- A string that is the Hilbert quad key (containing `/`)
-- A [Long](https://www.npmjs.com/package/long) object that is the cell's id
+- A 64-bit [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) identifier for the A5 cell.
+- A base-16 string encoding of the 64-bit integer
 
-Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details.
+For more information on representing the A5 cell, see [A5 Cell Representation](https://a5geo.org/docs/api-reference/indexing#cell-representation)
 
-* default: `object => object.token`
+
+* default: `object => object.pentagon`
 
 
 ## Sub Layers
 
-The `S2Layer` renders the following sublayers:
+The `A5Layer` renders the following sublayers:
 
-* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all S2 cells.
+* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all A5 cells.
 
 
 ## Source
 
-[modules/geo-layers/src/s2-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/s2-layer)
+[modules/geo-layers/src/a5-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/a5-layer)
 
