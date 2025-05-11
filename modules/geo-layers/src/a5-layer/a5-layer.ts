@@ -5,7 +5,7 @@
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {cellToBoundary, hexToBigInt} from 'a5-js';
-import { flattenPolygon } from '../h3-layers/h3-utils';
+import {flattenPolygon} from '../h3-layers/h3-utils';
 
 const defaultProps: DefaultProps<A5LayerProps> = {
   getPentagon: {type: 'accessor', value: (d: any) => d.pentagon}
@@ -42,7 +42,9 @@ export default class A5Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
       positionFormat: 'XY',
       getPolygon: (x: DataT, objectInfo) => {
         const pentagon = getPentagon(x, objectInfo);
-        const boundary = cellToBoundary(typeof pentagon === 'string' ? hexToBigInt(pentagon) : pentagon);
+        const boundary = cellToBoundary(
+          typeof pentagon === 'string' ? hexToBigInt(pentagon) : pentagon
+        );
         boundary.push(boundary[0]);
         return flattenPolygon(boundary);
       }
