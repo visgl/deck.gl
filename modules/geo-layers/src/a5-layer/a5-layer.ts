@@ -43,6 +43,7 @@ export default class A5Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
       getPolygon: (x: DataT, objectInfo) => {
         const pentagon = getPentagon(x, objectInfo);
         const boundary = cellToBoundary(typeof pentagon === 'string' ? hexToBigInt(pentagon) : pentagon);
+        boundary.push(boundary[0]);
         return flattenPolygon(boundary);
       }
     };
