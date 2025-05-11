@@ -6,6 +6,7 @@
 import {BitmapLayer} from '@deck.gl/layers';
 
 import {
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   TileLayer,
