@@ -4,10 +4,11 @@
 
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
-import {cellToBoundary} from 'a5-js';
+import {cellToBoundary, hexToBigInt} from 'a5-js';
+import { flattenPolygon } from '../h3-layers/h3-utils';
 
 const defaultProps: DefaultProps<A5LayerProps> = {
-  getPentagon: {type: 'accessor', value: (d: any) => d.token}
+  getPentagon: {type: 'accessor', value: (d: any) => d.pentagon}
 };
 
 /** All properties supported by A5Layer. */
@@ -37,8 +38,13 @@ export default class A5Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
     return {
       data,
       _normalize: false,
+      _windingOrder: 'CCW',
       positionFormat: 'XY',
-      getPolygon: (x: DataT, objectInfo) => cellToBoundary(getPentagon(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => {
+        const pentagon = getPentagon(x, objectInfo);
+        const boundary = cellToBoundary(typeof pentagon === 'string' ? hexToBigInt(pentagon) : pentagon);
+        return flattenPolygon(boundary);
+      }
     };
   }
 }
