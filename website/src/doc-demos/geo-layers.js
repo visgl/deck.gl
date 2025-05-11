@@ -84,6 +84,27 @@ export const S2LayerDemo = makeLayerDemo({
   }`
 });
 
+export const A5LayerDemo = makeLayerDemo({
+  Layer: A5Layer,
+  getTooltip: '({object}) => object && `${object.pentagon} count: ${object.count}`',
+  props: `{
+    // TODO update to use DATA_URI once deck.gl-data is updated
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/9f7668f54fa905cda7597b9bc756f7824e6ab2ef/website/sf.bike.parking.a5.json',
+    // data: '${DATA_URI}/sf.bike.parking.a5.json',
+    pickable: true,
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 10,
+    getPentagon: f => f.pentagon,
+    getFillColor: f => {
+      const value = f.count / 211;
+      return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+    },
+    getElevation: f => f.count
+  }`
+});
+
 export const H3HexagonLayerDemo = makeLayerDemo({
   Layer: H3HexagonLayer,
   dependencies: ['https://unpkg.com/h3-js@4.1.0'],
