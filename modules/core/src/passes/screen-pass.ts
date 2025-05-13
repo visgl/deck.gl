@@ -67,7 +67,8 @@ export default class ScreenPass extends Pass {
       framebuffer: outputBuffer,
       parameters: {viewport: [0, 0, ...texSize]},
       clearColor: clearCanvas ? [0, 0, 0, 0] : false,
-      clearDepth: 1
+      clearDepth: 1,
+      clearStencil: false
     });
 
     this.model.draw(renderPass);
