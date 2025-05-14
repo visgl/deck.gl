@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.12] - May 14 2025
+
+- fix: do not touch stencil in _renderPass() (#9630)
+- chore: Reduce lint errors (#9550)
+- chore(layers): Change warning to debug message (#9621)
+
 #### deck.gl [v9.1.11] - Apr 18 2025
 
 - CARTO: Make autoLabels prop optional (#9593)
