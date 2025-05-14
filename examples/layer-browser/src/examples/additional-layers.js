@@ -6,10 +6,12 @@ import {
   GreatCircleLayer,
   QuadkeyLayer,
   S2Layer,
+  DGGSLayer,
   H3ClusterLayer,
   H3HexagonLayer,
   TripsLayer,
-  GeohashLayer
+  GeohashLayer,
+  A5Decoder
   // KMLLayer
 } from '@deck.gl/geo-layers';
 
@@ -73,6 +75,24 @@ const S2LayerExample = {
   }
 };
 
+const DGGSLayerExample = {
+  layer: DGGSLayer,
+  props: {
+    data: dataSamples.pentagons,
+    opacity: 0.6,
+    A5Decoder,
+    getPentagon: f => f.pentagon,
+    A5Decoder,
+    getFillColor: f => {
+      const value = f.count / 211;
+      return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+    },
+    getElevation: f => f.count,
+    elevationScale: 10,
+    pickable: true
+  }
+};
+
 const H3ClusterLayerExample = {
   layer: H3ClusterLayer,
   props: {
@@ -131,6 +151,7 @@ export default {
   'Geo Layers': {
     S2Layer: S2LayerExample,
     QuadkeyLayer: QuadkeyLayerExample,
+    DGGSLayer: DGGSLayerExample,
     H3ClusterLayer: H3ClusterLayerExample,
     H3HexagonLayer: H3HexagonLayerExample,
     GreatCircleLayer: GreatCircleLayerExample,

@@ -40,6 +40,7 @@ The [Aggregation Layers](https://www.npmjs.com/package/@deck.gl/aggregation-laye
 
 The [Geo Layers](https://www.npmjs.com/package/@deck.gl/geo-layers) collects layers that specifically target geospatial visualization use cases, including support for map tiles, popular geospatial indexing systems, GIS formats, etc.
 
+  - [DGGSLayer](../geo-layers/dggs-layer.md)
   - [GeohashLayer](../geo-layers/geohash-layer.md)
   - [GreatCircleLayer](../geo-layers/great-circle-layer.md)
   - [H3ClusterLayer](../geo-layers/h3-cluster-layer.md)
