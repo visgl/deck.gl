@@ -4,7 +4,7 @@
 
 import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
-import {DGGSLayer} from '@deck.gl/geo-layers';
+import {DGGSLayer, A5Decoder} from '@deck.gl/geo-layers';
 
 const data = [
   // Bigint IDs, resolution 10
@@ -23,7 +23,8 @@ test('DGGSLayer', t => {
     Layer: DGGSLayer,
     sampleProps: {
       data,
-      getPentagon: d => d
+      getCellId: d => d,
+      dggsDecoder: A5Decoder,
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),

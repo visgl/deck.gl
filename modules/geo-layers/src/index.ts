@@ -46,4 +46,4 @@ export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
 
 // Additional classes
 export {type DGGSDecoder} from './dggs-layer/dggs-decoder';
-export {type A5Decoder} from './dggs-layer/a5-decoder';
+export {A5Decoder} from './dggs-layer/a5-decoder';

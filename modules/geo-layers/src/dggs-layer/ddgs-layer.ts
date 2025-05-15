@@ -13,7 +13,7 @@ export type DGGSLayerProps<DataT = unknown> = _DGGSLayerProps<DataT> & GeoCellLa
 /** Properties added by DGGSLayer. */
 type _DGGSLayerProps<DataT> = {
   /** Called for each data object to retrieve the DGGS cell identifier. By default, it reads `cellId` property of data object. */
-  getDGGSCellId?: AccessorFunction<DataT, string | bigint>;
+  getCellId?: AccessorFunction<DataT, string | bigint>;
   /** The DGGS decoder to use. */
   dggsDecoder: DGGSDecoder;
 };
@@ -25,11 +25,11 @@ export class DGGSLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellL
 > {
   static layerName = 'DGGSLayer';
   static defaultProps: DefaultProps<DGGSLayerProps> = {
-    getDGGSCellId: {type: 'accessor', value: (d: any) => d.cellId}
+    getCellId: {type: 'accessor', value: (d: any) => d.cellId}
   };
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
-    const {data, getDGGSCellId} = this.props;
+    const {data, getCellId} = this.props;
 
     return {
       data,
@@ -38,7 +38,7 @@ export class DGGSLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellL
       positionFormat: 'XY',
       getPolygon: (x: DataT, objectInfo) => {
         const {dggsDecoder} = this.props;
-        const cellIdOrIndex = getDGGSCellId(x, objectInfo);
+        const cellIdOrIndex = getCellId(x, objectInfo);
         const cellId =
           typeof cellIdOrIndex === 'bigint'
             ? dggsDecoder.getTokenFromCellIndex?.(cellIdOrIndex)
