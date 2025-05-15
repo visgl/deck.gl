@@ -6,7 +6,8 @@
 import {type DGGSDecoder} from './dggs-decoder';
 import {
   type CoordPair,
-  type H3IndexInput,
+  type H3IndexInput, // Either string or SplitLong
+  type SplitLong,
   cellToBoundary,
   cellToLatLng,
   h3IndexToSplitLong,
@@ -23,28 +24,37 @@ export const H3Decoder = {
   // See `main/bundle.ts`, installs a check for the H3 library.
   initialize: () => {},
   getCellIndexFromToken: (token: string) => {
-    const [high, low] = h3IndexToSplitLong(token);
-    return joinBitInt(high, low);
+    const splitLong = h3IndexToSplitLong(token);
+    return splitLongToBigInt(splitLong);
   },
   getCellLngLat: (cellIndex: bigint) => {
-    const [lat, lng] = cellToLatLng(splitBigInt(cellIndex));
-    return [lng, lat];
+    const latLng = cellToLatLng(bigIntToSplitLong(cellIndex));
+    return inPlaceReverseLatLng(latLng);
   },
-  getCellBoundaryPolygon: (cellIndex: bigint) => cellToBoundary(splitBigInt(cellIndex)),
+  getCellBoundaryPolygon: (cellIndex: bigint) => cellToBoundary(bigIntToSplitLong(cellIndex)),
   getMultiCellBoundaryAsMultiPolygon: (cellIndexes: bigint[]) =>
-    cellsToMultiPolygon(cellIndexes.map(splitBigInt), true)
+    cellsToMultiPolygon(cellIndexes.map(bigIntToSplitLong), true)
 } as const satisfies DGGSDecoder;
+
+/** Reverse the latitude and longitude in place to avoid minting new arrays. */
+function inPlaceReverseLatLng(latLng: [number, number]): [number, number] {
+  const temp = latLng[0];
+  latLng[0] = latLng[1];
+  latLng[1] = temp;
+  return latLng;
+}
 
 /**
  * Splits a bigint into a 2-element array of 32-bit numbers.
  * @param value - The bigint to split.
  * @returns A 2-element array containing the high and low 32-bit numbers.
- * @todo - Maybe H3 provides this function?
  */
-export function splitBigInt(value: bigint): [number, number] {
-  const low = Number(value & BigInt(0xffffffff)); // Extract the lower 32 bits
-  const high = Number((value >> BigInt(32)) & BigInt(0xffffffff)); // Extract the upper 32 bits
-  return [high, low];
+function bigIntToSplitLong(value: bigint): SplitLong {
+  // Mask lower 32 bits
+  const low = Number(value & 0xffffffffn); // BigInt & BigInt ⇒ BigInt :contentReference[oaicite:2]{index=2}
+  // Shift right to get upper 32 bits
+  const high = Number((value >> 32n) & 0xffffffffn); // BigInt >> BigInt ⇒ BigInt :contentReference[oaicite:3]{index=3}
+  return [low, high];
 }
 
 /**
@@ -52,10 +62,10 @@ export function splitBigInt(value: bigint): [number, number] {
  * @param high - The high 32-bit number.
  * @param low - The low 32-bit number.
  * @returns The combined bigint.
- * @todo - Maybe H3 provides this function?
  */
-export function joinBitInt(high: number, low: number): bigint {
-  return (BigInt(high) << BigInt(32)) | BigInt(low);
+function splitLongToBigInt([low, high]: SplitLong): bigint {
+  // Shift high half back and OR with low half
+  return (BigInt(high) << 32n) | BigInt(low); // BigInt << BigInt ⇒ BigInt; BigInt | BigInt ⇒ BigInt :contentReference[oaicite:4]{index=4}
 }
 
 // TODO
