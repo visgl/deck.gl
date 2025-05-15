@@ -4,7 +4,7 @@
 
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
-import {DGGSDecoder} from './dggs-decoder';
+import {DGGSDecoder} from './dggs-decoders/dggs-decoder';
 import {flattenPolygon} from '../h3-layers/h3-utils';
 
 /** All properties supported by DGGSLayer. */

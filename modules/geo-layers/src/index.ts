@@ -48,6 +48,6 @@ export {Tileset2D as _Tileset2D} from './tileset-2d/index';
 export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
 
 // Additional classes
-export {type DGGSDecoder} from './dggs-layer/dggs-decoder';
-export {A5Decoder} from './dggs-layer/a5-decoder';
-export {H3Decoder} from './dggs-layer/h3-decoder';
+export {type DGGSDecoder} from './dggs-layer/dggs-decoders/dggs-decoder';
+export {A5Decoder} from './dggs-layer/dggs-decoders/a5-decoder';
+export {H3Decoder} from './dggs-layer/dggs-decoders/h3-decoder';

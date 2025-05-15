@@ -9,9 +9,9 @@ import {
   createIterable,
   log
 } from '@deck.gl/core';
-import {type DGGSDecoder} from './dggs-decoder';
+import {type DGGSDecoder} from './dggs-decoders/dggs-decoder';
 import GeoCellLayer, {type GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
-import {normalizeLongitudes} from './h3-decoder';
+import {normalizeLongitudes} from './dggs-decoders/h3-decoder';
 
 /** All properties supported by DGGSClusterLayer. */
 export type DGGSClusterLayerProps<DataT = unknown> = _DGGSClusterLayerProps<DataT> &
