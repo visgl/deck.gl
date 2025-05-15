@@ -7,6 +7,7 @@ import {
   QuadkeyLayer,
   S2Layer,
   DGGSLayer,
+  A5Layer,
   H3ClusterLayer,
   H3HexagonLayer,
   TripsLayer,
@@ -81,8 +82,23 @@ const DGGSLayerExample = {
     data: dataSamples.pentagons,
     opacity: 0.6,
     A5Decoder,
+    getCellId: f => f.pentagon,
+    getFillColor: f => {
+      const value = f.count / 211;
+      return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+    },
+    getElevation: f => f.count,
+    elevationScale: 10,
+    pickable: true
+  }
+};
+
+const A5LayerExample = {
+  layer: A5Layer,
+  props: {
+    data: dataSamples.pentagons,
+    opacity: 0.6,
     getPentagon: f => f.pentagon,
-    A5Decoder,
     getFillColor: f => {
       const value = f.count / 211;
       return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
@@ -152,6 +168,7 @@ export default {
     S2Layer: S2LayerExample,
     QuadkeyLayer: QuadkeyLayerExample,
     DGGSLayer: DGGSLayerExample,
+    A5Layer: A5LayerExample,
     H3ClusterLayer: H3ClusterLayerExample,
     H3HexagonLayer: H3HexagonLayerExample,
     GreatCircleLayer: GreatCircleLayerExample,

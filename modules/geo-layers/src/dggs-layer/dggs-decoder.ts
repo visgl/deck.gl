@@ -15,9 +15,9 @@ export type DGGSDecoder = {
   /** Convert a binary cell index to a token */
   getTokenFromCellIndex?: (index: bigint) => string;
   /** Convert a string token to a binary cell index */
-  getCellIndexFromToken?: (token: string) => bigint;
+  getCellIndexFromToken: (token: string) => bigint;
   /** @returns the center of the cell */
-  getCellLngLat: (geohash: string) => number[];
+  getCellLngLat: (cellIndex: bigint) => number[];
   /** @returns the boundary of the cell, as an array of coordinate arrays */
-  getCellBoundaryPolygon: (geohash: string) => [number, number][];
+  getCellBoundaryPolygon: (cellIndex: bigint) => [number, number][];
 };

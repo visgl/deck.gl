@@ -111,6 +111,8 @@ export {
 
 export {
   DGGSLayer,
+  A5Decoder,
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   QuadkeyLayer,

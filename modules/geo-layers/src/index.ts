@@ -5,6 +5,7 @@
 /* eslint-disable max-len */
 
 export {DGGSLayer, type DGGSLayerProps} from './dggs-layer/ddgs-layer';
+export {default as A5Layer} from './a5-layer/a5-layer';
 export {WMSLayer as _WMSLayer} from './wms-layer/wms-layer';
 export {default as GreatCircleLayer} from './great-circle-layer/great-circle-layer';
 export {default as S2Layer} from './s2-layer/s2-layer';
@@ -21,6 +22,7 @@ export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 export {default as _GeoCellLayer} from './geo-cell-layer/GeoCellLayer';
 
 // Types
+export type {A5LayerProps} from './a5-layer/a5-layer';
 export type {WMSLayerProps} from './wms-layer/wms-layer';
 export type {H3ClusterLayerProps} from './h3-layers/h3-cluster-layer';
 export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';

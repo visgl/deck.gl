@@ -13,6 +13,6 @@ import {cellToBoundary, cellToLonLat, hexToBigInt} from 'a5-js';
 export const A5Decoder = {
   name: 'a5',
   getCellIndexFromToken: (token: string) => hexToBigInt(token),
-  getCellLngLat: (geohash: string) => cellToLonLat(hexToBigInt(geohash)),
-  getCellBoundaryPolygon: (geohash: string) => cellToBoundary(hexToBigInt(geohash))
+  getCellLngLat: (cellIndex: bigint) => cellToLonLat(cellIndex),
+  getCellBoundaryPolygon: (cellIndex: bigint) => cellToBoundary(cellIndex)
 } as const satisfies DGGSDecoder;

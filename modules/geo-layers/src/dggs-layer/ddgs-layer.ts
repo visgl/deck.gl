@@ -25,7 +25,8 @@ export class DGGSLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellL
 > {
   static layerName = 'DGGSLayer';
   static defaultProps: DefaultProps<DGGSLayerProps> = {
-    getCellId: {type: 'accessor', value: (d: any) => d.cellId}
+    getCellId: {type: 'accessor', value: (d: any) => d.cellId},
+    dggsDecoder: {type: 'object', compare: true, value: undefined!}
   };
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
@@ -38,12 +39,9 @@ export class DGGSLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellL
       positionFormat: 'XY',
       getPolygon: (x: DataT, objectInfo) => {
         const {dggsDecoder} = this.props;
-        const cellIdOrIndex = getCellId(x, objectInfo);
-        const cellId =
-          typeof cellIdOrIndex === 'bigint'
-            ? dggsDecoder.getTokenFromCellIndex?.(cellIdOrIndex)
-            : cellIdOrIndex;
-        const boundary = dggsDecoder.getCellBoundaryPolygon(cellId!);
+        const cell = getCellId(x, objectInfo);
+        const cellId = typeof cell === 'string' ? dggsDecoder.getCellIndexFromToken(cell) : cell;
+        const boundary = dggsDecoder.getCellBoundaryPolygon(cellId);
         boundary.push(boundary[0]);
         return flattenPolygon(boundary);
       }

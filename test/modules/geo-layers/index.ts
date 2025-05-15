@@ -6,6 +6,7 @@ import test from 'tape-promise/tape';
 
 import {
   DGGSLayer,
+  A5Layer,
   GreatCircleLayer,
   H3HexagonLayer,
   H3ClusterLayer,
@@ -20,6 +21,7 @@ import {
 
 test('Top-level imports', t => {
   t.ok(DGGSLayer, 'DGGSLayer symbol imported');
+  t.ok(A5Layer, 'A5Layer symbol imported');
   t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
   t.ok(QuadkeyLayer, 'QuadkeyLayer symbol imported');
   t.ok(S2Layer, 'S2Layer symbol imported');
@@ -34,6 +36,7 @@ test('Top-level imports', t => {
 });
 
 import './dggs-layer.spec';
+import './a5-layer.spec';
 import './tile-layer';
 import './wms-layer.spec';
 import './quadkey-layer.spec';
