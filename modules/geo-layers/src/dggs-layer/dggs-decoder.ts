@@ -12,6 +12,8 @@ export type DGGSDecoder = {
   /** The name of the DGGS */
   name: string;
 
+  /** Initialization function. Should be idempotent, i.e. it may be called multiple times */
+  initialize?: () => void;
   /** Convert a binary cell index to a token */
   getTokenFromCellIndex?: (index: bigint) => string;
   /** Convert a string token to a binary cell index */
@@ -20,4 +22,6 @@ export type DGGSDecoder = {
   getCellLngLat: (cellIndex: bigint) => number[];
   /** @returns the boundary of the cell, as an array of coordinate arrays */
   getCellBoundaryPolygon: (cellIndex: bigint) => [number, number][];
+  /** @returns the bounds of the cell */
+  getMultiCellBoundaryAsMultiPolygon?: (cellIndexes: bigint[]) => [number, number][][][];
 };

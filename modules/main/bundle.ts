@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer, H3Decoder} from '@deck.gl/geo-layers';
 
 export * from '../core/bundle';
 export * from '@deck.gl/layers';
@@ -22,7 +22,7 @@ import * as h3 from 'h3-js';
 
 /* eslint-disable import/namespace */
 // Check for H3 library. In the standalone bundle, h3-js is not included (see `scripts/bundle.config.js`)
-H3HexagonLayer._checkH3Lib = () => {
+function _checkH3Lib(): void {
   const installHelp =
     'include the <script src="https://unpkg.com/h3-js@^4.0.0"></script> tag before the deck.gl script tag. https://deck.gl/docs/api-reference/geo-layers/h3-hexagon-layer';
   if (!h3) {
@@ -31,4 +31,7 @@ H3HexagonLayer._checkH3Lib = () => {
   } else if (h3.polyfill && !h3.polygonToCells) {
     throw new Error(`Incompatible h3-js version. ${installHelp}`);
   }
-};
+}
+
+H3HexagonLayer._checkH3Lib = _checkH3Lib;
+H3Decoder.initialize = _checkH3Lib;

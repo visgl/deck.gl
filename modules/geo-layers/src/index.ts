@@ -5,6 +5,7 @@
 /* eslint-disable max-len */
 
 export {DGGSLayer, type DGGSLayerProps} from './dggs-layer/ddgs-layer';
+export {DGGSClusterLayer, type DGGSClusterLayerProps} from './dggs-layer/dggs-cluster-layer';
 export {default as A5Layer} from './a5-layer/a5-layer';
 export {WMSLayer as _WMSLayer} from './wms-layer/wms-layer';
 export {default as GreatCircleLayer} from './great-circle-layer/great-circle-layer';
@@ -49,3 +50,4 @@ export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
 // Additional classes
 export {type DGGSDecoder} from './dggs-layer/dggs-decoder';
 export {A5Decoder} from './dggs-layer/a5-decoder';
+export {H3Decoder} from './dggs-layer/h3-decoder';

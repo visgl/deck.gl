@@ -111,7 +111,9 @@ export {
 
 export {
   DGGSLayer,
+  DGGSClusterLayer,
   A5Decoder,
+  H3Decoder,
   A5Layer,
   GreatCircleLayer,
   S2Layer,
