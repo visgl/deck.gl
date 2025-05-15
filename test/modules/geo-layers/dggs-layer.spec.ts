@@ -24,7 +24,7 @@ test('DGGSLayer', t => {
     sampleProps: {
       data,
       getCellId: d => d,
-      dggsDecoder: A5Decoder,
+      dggsDecoder: A5Decoder
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
