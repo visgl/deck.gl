@@ -19,6 +19,14 @@ export {default as MVTLayer} from './mvt-layer/mvt-layer';
 export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 
 export {default as _GeoCellLayer} from './geo-cell-layer/GeoCellLayer';
+export {
+  GlobalGridLayer as _GlobalGridLayer,
+  type GlobalGridLayerProps
+} from './global-grid-layer/global-grid-layer';
+export {
+  GlobalGridClusterLayer as _GlobalGridClusterLayer,
+  type GlobalGridClusterLayerProps
+} from './global-grid-layer/global-grid-cluster-layer';
 
 // Types
 export type {A5LayerProps} from './a5-layer/a5-layer';
@@ -44,3 +52,8 @@ export type {TileLoadProps as _TileLoadProps} from './tileset-2d/index';
 export {getURLFromTemplate as _getURLFromTemplate} from './tileset-2d/index';
 export {Tileset2D as _Tileset2D} from './tileset-2d/index';
 export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
+
+// Additional classes
+export {type GlobalGridDecoder} from './global-grid-layer/global-grid-decoders/global-grid-decoder';
+export {A5Decoder as _A5Decoder} from './global-grid-layer/global-grid-decoders/a5-decoder';
+export {H3Decoder as _H3Decoder} from './global-grid-layer/global-grid-decoders/h3-decoder';

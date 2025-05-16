@@ -5,6 +5,7 @@
 import test from 'tape-promise/tape';
 
 import {
+  _GlobalGridLayer,
   A5Layer,
   GreatCircleLayer,
   H3HexagonLayer,
@@ -19,6 +20,7 @@ import {
 } from '@deck.gl/geo-layers';
 
 test('Top-level imports', t => {
+  t.ok(_GlobalGridLayer, 'GlobalGridLayer symbol imported');
   t.ok(A5Layer, 'A5Layer symbol imported');
   t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
   t.ok(QuadkeyLayer, 'QuadkeyLayer symbol imported');
@@ -33,6 +35,7 @@ test('Top-level imports', t => {
   t.end();
 });
 
+import './global-grid-layer.spec';
 import './a5-layer.spec';
 import './tile-layer';
 import './wms-layer.spec';
