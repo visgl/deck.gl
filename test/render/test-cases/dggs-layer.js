@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {DGGSLayer} from '@deck.gl/geo-layers';
+import {GlobalGridLayer} from '@deck.gl/geo-layers';
 import {pentagons} from 'deck.gl-test/data';
 
 export default [
   {
-    name: 'dggs-layer',
+    name: 'global-grid-layer',
     viewState: {
       latitude: 37.75,
       longitude: -122.45,
@@ -16,7 +16,7 @@ export default [
       bearing: 0
     },
     layers: [
-      new DGGSLayer({
+      new GlobalGridLayer({
         data: pentagons,
         opacity: 0.8,
         filled: true,
@@ -29,10 +29,10 @@ export default [
         pickable: true
       })
     ],
-    goldenImage: './test/render/golden-images/dggs-layer.png'
+    goldenImage: './test/render/golden-images/global-grid-layer.png'
   },
   {
-    name: 'dggs-layer-flat',
+    name: 'global-grid-layer-flat',
     viewState: {
       latitude: 37.78,
       longitude: -122.45,
@@ -41,7 +41,7 @@ export default [
       bearing: 0
     },
     layers: [
-      new DGGSLayer({
+      new GlobalGridLayer({
         data: pentagons,
         opacity: 0.8,
         filled: true,
@@ -56,6 +56,6 @@ export default [
         pickable: true
       })
     ],
-    goldenImage: './test/render/golden-images/dggs-layer.png'
+    goldenImage: './test/render/golden-images/global-grid-layer.png'
   }
 ];

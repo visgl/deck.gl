@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {H3HexagonLayer, H3Decoder} from '@deck.gl/geo-layers';
+import {H3HexagonLayer, _H3Decoder} from '@deck.gl/geo-layers';
 
 export * from '../core/bundle';
 export * from '@deck.gl/layers';
@@ -34,4 +34,5 @@ function _checkH3Lib(): void {
 }
 
 H3HexagonLayer._checkH3Lib = _checkH3Lib;
-H3Decoder.initialize = _checkH3Lib;
+// @ts-expect-error const object
+_H3Decoder.initialize = _checkH3Lib;

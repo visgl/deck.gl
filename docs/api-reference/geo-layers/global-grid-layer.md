@@ -1,12 +1,12 @@
-# DGGSLayer
+# GlobalGridLayer
 
-import {DGGSLayerDemo} from '@site/src/doc-demos/geo-layers';
+import {GlobalGridLayerDemo} from '@site/src/doc-demos/geo-layers';
 
-<DGGSLayerDemo />
+<GlobalGridLayerDemo />
 
-The `DGGSLayer` renders filled and/or stroked polygons based on the specified DGGS geospatial indexing system.
+The `GlobalGridLayer` renders filled and/or stroked polygons based on the specified DGGS geospatial indexing system.
 
-`DGGSLayer` is a [CompositeLayer](../core/composite-layer.md).
+`GlobalGridLayer` is a [CompositeLayer](../core/composite-layer.md).
 
 
 import Tabs from '@theme/Tabs';
@@ -17,10 +17,10 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {DGGSLayer, A5Decoder} from '@deck.gl/geo-layers';
+import {GlobalGridLayer, A5Decoder} from '@deck.gl/geo-layers';
 
 const layer = new SGGSLayer({
-  id: 'DGGSLayer',
+  id: 'GlobalGridLayer',
   data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
   dggsDecoder: A5Decoder,
   
@@ -52,15 +52,15 @@ new Deck({
 
 ```ts
 import {Deck, PickingInfo} from '@deck.gl/core';
-import {DGGSLayer} from '@deck.gl/geo-layers';
+import {GlobalGridLayer} from '@deck.gl/geo-layers';
 
 type DataType = {
   pentagon: string;
   count: number;
 };
 
-const layer = new DGGSLayer<DataType>({
-  id: 'DGGSLayer',
+const layer = new GlobalGridLayer<DataType>({
+  id: 'GlobalGridLayer',
   data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
   dggsDecoder: A5Decoder,
 
@@ -93,7 +93,7 @@ new Deck({
 ```tsx
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
-import {DGGSLayer} from '@deck.gl/geo-layers';
+import {GlobalGridLayer} from '@deck.gl/geo-layers';
 import type {PickingInfo} from '@deck.gl/core';
 
 type DataType = {
@@ -102,8 +102,8 @@ type DataType = {
 };
 
 function App() {
-  const layer = new DGGSLayer<DataType>({
-    id: 'DGGSLayer',
+  const layer = new GlobalGridLayer<DataType>({
+    id: 'GlobalGridLayer',
     data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
     dggsDecoder: A5Decoder,
     
@@ -146,10 +146,10 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
 ```ts
-import {DGGSLayer} from '@deck.gl/geo-layers';
-import type {DGGSLayerProps} from '@deck.gl/geo-layers';
+import {GlobalGridLayer} from '@deck.gl/geo-layers';
+import type {GlobalGridLayerProps} from '@deck.gl/geo-layers';
 
-new DGGSLayer<DataT>(...props: DGGSLayerProps<DataT>[]);
+new GlobalGridLayer<DataT>(...props: GlobalGridLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -163,7 +163,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.DGGSLayer({});
+new deck.GlobalGridLayer({});
 ```
 
 
@@ -186,12 +186,12 @@ Called for each data object to retrieve the identifier of the DGGS cell id.  May
 
 ## Sub Layers
 
-The `DGGSLayer` renders the following sublayers:
+The `GlobalGridLayer` renders the following sublayers:
 
 * `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering the DGGS cells.
 
 
 ## Source
 
-[modules/geo-layers/src/dggs-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/dggs-layer)
+[modules/geo-layers/src/global-grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/global-grid-layer)
 

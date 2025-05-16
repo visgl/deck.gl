@@ -4,27 +4,28 @@
 
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
-import {DGGSDecoder} from './dggs-decoders/dggs-decoder';
+import {GlobalGridDecoder} from './global-grid-decoders/global-grid-decoder';
 import {flattenPolygon} from '../h3-layers/h3-utils';
 
-/** All properties supported by DGGSLayer. */
-export type DGGSLayerProps<DataT = unknown> = _DGGSLayerProps<DataT> & GeoCellLayerProps<DataT>;
+/** All properties supported by GlobalGridLayer. */
+export type GlobalGridLayerProps<DataT = unknown> = _GlobalGridLayerProps<DataT> &
+  GeoCellLayerProps<DataT>;
 
-/** Properties added by DGGSLayer. */
-type _DGGSLayerProps<DataT> = {
+/** Properties added by GlobalGridLayer. */
+type _GlobalGridLayerProps<DataT> = {
   /** Called for each data object to retrieve the DGGS cell identifier. By default, it reads `cellId` property of data object. */
   getCellId?: AccessorFunction<DataT, string | bigint>;
   /** The DGGS decoder to use. */
-  dggsDecoder: DGGSDecoder;
+  dggsDecoder: GlobalGridDecoder;
 };
 
 /** Render filled and/or stroked polygons based on the specified DGGS geospatial indexing system. */
-export class DGGSLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
+export class GlobalGridLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
-  Required<_DGGSLayerProps<DataT>> & ExtraProps
+  Required<_GlobalGridLayerProps<DataT>> & ExtraProps
 > {
-  static layerName = 'DGGSLayer';
-  static defaultProps: DefaultProps<DGGSLayerProps> = {
+  static layerName = 'GlobalGridLayer';
+  static defaultProps: DefaultProps<GlobalGridLayerProps> = {
     getCellId: {type: 'accessor', value: (d: any) => d.cellId},
     dggsDecoder: {type: 'object', compare: true, value: undefined!}
   };
@@ -40,8 +41,8 @@ export class DGGSLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellL
       getPolygon: (x: DataT, objectInfo) => {
         const {dggsDecoder} = this.props;
         const cell = getCellId(x, objectInfo);
-        const cellId = typeof cell === 'string' ? dggsDecoder.getCellIndexFromToken(cell) : cell;
-        const boundary = dggsDecoder.getCellBoundaryPolygon(cellId);
+        const cellId = typeof cell === 'string' ? dggsDecoder.tokenToBigInt(cell) : cell;
+        const boundary = dggsDecoder.cellToBoundary(cellId);
         boundary.push(boundary[0]);
         return flattenPolygon(boundary);
       }

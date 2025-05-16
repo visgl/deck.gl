@@ -6,7 +6,7 @@ import {
   GreatCircleLayer,
   QuadkeyLayer,
   S2Layer,
-  DGGSLayer,
+  GlobalGridLayer,
   A5Layer,
   H3ClusterLayer,
   H3HexagonLayer,
@@ -76,8 +76,8 @@ const S2LayerExample = {
   }
 };
 
-const DGGSLayerExample = {
-  layer: DGGSLayer,
+const GlobalGridLayerExample = {
+  layer: GlobalGridLayer,
   props: {
     data: dataSamples.pentagons,
     opacity: 0.6,
@@ -167,7 +167,7 @@ export default {
   'Geo Layers': {
     S2Layer: S2LayerExample,
     QuadkeyLayer: QuadkeyLayerExample,
-    DGGSLayer: DGGSLayerExample,
+    GlobalGridLayer: GlobalGridLayerExample,
     A5Layer: A5LayerExample,
     H3ClusterLayer: H3ClusterLayerExample,
     H3HexagonLayer: H3HexagonLayerExample,

@@ -9,31 +9,31 @@ import {
   createIterable,
   log
 } from '@deck.gl/core';
-import {type DGGSDecoder} from './dggs-decoders/dggs-decoder';
+import {type GlobalGridDecoder} from './global-grid-decoders/global-grid-decoder';
 import GeoCellLayer, {type GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
-import {normalizeLongitudes} from './dggs-decoders/h3-decoder';
+import {normalizeLongitudes} from './global-grid-utils/global-grid-utils';
 
-/** All properties supported by DGGSClusterLayer. */
-export type DGGSClusterLayerProps<DataT = unknown> = _DGGSClusterLayerProps<DataT> &
+/** All properties supported by GlobalGridClusterLayer. */
+export type GlobalGridClusterLayerProps<DataT = unknown> = _GlobalGridClusterLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
-/** Properties added by DGGSClusterLayer. */
-type _DGGSClusterLayerProps<DataT> = {
+/** Properties added by GlobalGridClusterLayer. */
+type _GlobalGridClusterLayerProps<DataT> = {
   /** Called for each data object to retrieve the hexagon identifiers. By default, it reads `cellIds` property of data object. */
   getCellIds?: AccessorFunction<DataT, (string | bigint)[]>;
   /** The DGGS decoder to use. */
-  dggsDecoder: DGGSDecoder;
+  dggsDecoder: GlobalGridDecoder;
 };
 
-export class DGGSClusterLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
+export class GlobalGridClusterLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
-  Required<_DGGSClusterLayerProps<DataT>> & ExtraProps
+  Required<_GlobalGridClusterLayerProps<DataT>> & ExtraProps
 > {
-  static layerName = 'DGGSClusterLayer';
+  static layerName = 'GlobalGridClusterLayer';
   static defaultProps = {
     getCellIds: {type: 'accessor', value: (d: any) => d.cellIds},
     dggsDecoder: {type: 'object', compare: true, value: undefined!}
-  } as const satisfies DefaultProps<DGGSClusterLayerProps>;
+  } as const satisfies DefaultProps<GlobalGridClusterLayerProps>;
 
   state!: {
     polygons: {polygon: number[][][]}[];
@@ -56,14 +56,16 @@ export class DGGSClusterLayer<DataT = any, ExtraProps extends {} = {}> extends G
         objectInfo.index++;
         const cellIds = getCellIds(object, objectInfo);
         const cellIndexes = cellIds.map(cellId =>
-          typeof cellId === 'string' ? dggsDecoder.getCellIndexFromToken(cellId) : cellId
+          typeof cellId === 'string' ? dggsDecoder.tokenToBigInt(cellId) : cellId
         );
 
-        if (!dggsDecoder.getMultiCellBoundaryAsMultiPolygon) {
-          log.warn('getMultiCellBoundaryAsMultiPolygon not supported by provided DGGSDecoder')();
+        if (!dggsDecoder.cellsToBoundaryMultiPolygon) {
+          log.warn(
+            'getMultiCellBoundaryAsMultiPolygon not supported by provided GlobalGridDecoder'
+          )();
           continue;
         }
-        const multiPolygon = dggsDecoder.getMultiCellBoundaryAsMultiPolygon?.(cellIndexes);
+        const multiPolygon = dggsDecoder.cellsToBoundaryMultiPolygon?.(cellIndexes);
 
         for (const polygon of multiPolygon) {
           // Normalize polygons to prevent wrapping over the anti-meridian

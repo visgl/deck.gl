@@ -6,7 +6,7 @@
 import {BitmapLayer} from '@deck.gl/layers';
 
 import {
-  DGGSLayer,
+  GlobalGridLayer,
   A5Layer,
   GreatCircleLayer,
   S2Layer,
@@ -86,8 +86,8 @@ export const S2LayerDemo = makeLayerDemo({
   }`
 });
 
-export const DGGSLayerDemo = makeLayerDemo({
-  Layer: DGGSLayer,
+export const GlobalGridLayerDemo = makeLayerDemo({
+  Layer: GlobalGridLayer,
   getTooltip: '({object}) => object && `${object.pentagon} count: ${object.count}`',
   props: `{
     // TODO update to use DATA_URI once deck.gl-data is updated

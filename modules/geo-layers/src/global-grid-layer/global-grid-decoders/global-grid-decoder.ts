@@ -8,20 +8,20 @@
  * DGGS modules export objects that satisfy this "interface",
  * allowing different DGGS systems can be used interchangeably.
  */
-export type DGGSDecoder = {
+export type GlobalGridDecoder = {
   /** The name of the DGGS */
   name: string;
 
   /** Initialization function. Should be idempotent, i.e. it may be called multiple times */
   initialize?: () => void;
   /** Convert a binary cell index to a token */
-  getTokenFromCellIndex?: (index: bigint) => string;
+  cellToToken?: (index: bigint) => string;
   /** Convert a string token to a binary cell index */
-  getCellIndexFromToken: (token: string) => bigint;
+  tokenToBigInt: (token: string) => bigint;
   /** @returns the center of the cell */
-  getCellLngLat: (cellIndex: bigint) => number[];
+  cellToLngLat: (cellIndex: bigint) => number[];
   /** @returns the boundary of the cell, as an array of coordinate arrays */
-  getCellBoundaryPolygon: (cellIndex: bigint) => [number, number][];
+  cellToBoundary: (cellIndex: bigint) => [number, number][];
   /** @returns the bounds of the cell */
-  getMultiCellBoundaryAsMultiPolygon?: (cellIndexes: bigint[]) => [number, number][][][];
+  cellsToBoundaryMultiPolygon?: (cellIndexes: bigint[]) => [number, number][][][];
 };
