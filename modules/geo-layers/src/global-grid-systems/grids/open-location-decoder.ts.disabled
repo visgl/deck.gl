@@ -1,0 +1,56 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {type GlobalGrid} from './global-grid';
+import * as olc from 'open-location-code';
+
+/** 
+ * Decoder for Google Plus / Open Location codes 
+ * Location codes created by the OLC system are referred to as Plus Codes.
+ * @see https://en.wikipedia.org/wiki/Open_Location_Code
+ * @see https://www.geoapify.com/google-plus-code-as-a-location-code
+ */
+export const OpenLocationDecoder: GlobalGrid = {
+  name: 'openlocation',
+
+  // Converts a Plus Code string to a bigint representation.
+  tokenToBigInt: (token: string): bigint => {
+    const decoded = olc.decode(token);
+    // Convert latitude and longitude to a unique bigint.
+    // This is a placeholder; implement a suitable encoding for your use case.
+    const lat = Math.round(decoded.latitudeCenter * 1e6);
+    const lng = Math.round(decoded.longitudeCenter * 1e6);
+    return BigInt(`${lat}${lng}`);
+  },
+
+  // Converts a bigint back to a Plus Code string.
+  cellToToken: (index: bigint): string => {
+    // Extract latitude and longitude from the bigint.
+    // This is a placeholder; implement the inverse of your encoding.
+    const indexStr = index.toString();
+    const lat = parseInt(indexStr.slice(0, indexStr.length / 2)) / 1e6;
+    const lng = parseInt(indexStr.slice(indexStr.length / 2)) / 1e6;
+    return olc.encode(lat, lng);
+  },
+
+  // Returns the center of the cell as [longitude, latitude].
+  cellToLngLat: (cellIndex: bigint): [number, number] => {
+    const token = plusCodeDecoder.cellToToken!(cellIndex);
+    const decoded = olc.decode(token);
+    return [decoded.longitudeCenter, decoded.latitudeCenter];
+  },
+
+  // Returns the boundary of the cell as an array of [longitude, latitude] pairs.
+  cellToBoundary: (cellIndex: bigint): [number, number][] => {
+    const token = plusCodeDecoder.cellToToken!(cellIndex);
+    const decoded = olc.decode(token);
+    return [
+      [decoded.longitudeLo, decoded.latitudeLo],
+      [decoded.longitudeHi, decoded.latitudeLo],
+      [decoded.longitudeHi, decoded.latitudeHi],
+      [decoded.longitudeLo, decoded.latitudeHi],
+      [decoded.longitudeLo, decoded.latitudeLo], // Closing the polygon
+    ];
+  }
+} as const satisfies GlobalGrid;

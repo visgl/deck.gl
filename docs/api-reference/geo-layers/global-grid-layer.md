@@ -22,7 +22,7 @@ import {GlobalGridLayer, A5Decoder} from '@deck.gl/geo-layers';
 const layer = new SGGSLayer({
   id: 'GlobalGridLayer',
   data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
-  dggsDecoder: A5Decoder,
+  globalGrid: A5Decoder,
   
   extruded: true,
   getPentagon: f => f.pentagon,
@@ -62,7 +62,7 @@ type DataType = {
 const layer = new GlobalGridLayer<DataType>({
   id: 'GlobalGridLayer',
   data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
-  dggsDecoder: A5Decoder,
+  globalGrid: A5Decoder,
 
   extruded: true,
   getPentagon: (f: DataType) => f.pentagon,
@@ -105,7 +105,7 @@ function App() {
   const layer = new GlobalGridLayer<DataType>({
     id: 'GlobalGridLayer',
     data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
-    dggsDecoder: A5Decoder,
+    globalGrid: A5Decoder,
     
     extruded: true,
     getPentagon: (f: DataType) => f.pentagon,

@@ -54,6 +54,6 @@ export {Tileset2D as _Tileset2D} from './tileset-2d/index';
 export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
 
 // Additional classes
-export {type GlobalGridDecoder} from './global-grid-layer/global-grid-decoders/global-grid-decoder';
-export {A5Decoder as _A5Decoder} from './global-grid-layer/global-grid-decoders/a5-decoder';
-export {H3Decoder as _H3Decoder} from './global-grid-layer/global-grid-decoders/h3-decoder';
+export {type GlobalGrid} from './global-grid-systems/grids/global-grid';
+export {A5Decoder as _A5Decoder} from './global-grid-systems/grids/a5-decoder';
+export {H3Decoder as _H3Decoder} from './global-grid-systems/grids/h3-decoder';

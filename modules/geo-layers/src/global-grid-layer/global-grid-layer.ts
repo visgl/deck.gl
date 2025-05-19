@@ -4,8 +4,8 @@
 
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
-import {GlobalGridDecoder} from './global-grid-decoders/global-grid-decoder';
-import {flattenPolygon} from '../h3-layers/h3-utils';
+import {GlobalGrid} from '../global-grid-systems/grids/global-grid';
+import {flattenPolygon} from '../global-grid-systems/utils/geometry-utils';
 
 /** All properties supported by GlobalGridLayer. */
 export type GlobalGridLayerProps<DataT = unknown> = _GlobalGridLayerProps<DataT> &
@@ -13,10 +13,10 @@ export type GlobalGridLayerProps<DataT = unknown> = _GlobalGridLayerProps<DataT>
 
 /** Properties added by GlobalGridLayer. */
 type _GlobalGridLayerProps<DataT> = {
+  /** The DGGS decoder to use. */
+  globalGrid: GlobalGrid;
   /** Called for each data object to retrieve the DGGS cell identifier. By default, it reads `cellId` property of data object. */
   getCellId?: AccessorFunction<DataT, string | bigint>;
-  /** The DGGS decoder to use. */
-  dggsDecoder: GlobalGridDecoder;
 };
 
 /** Render filled and/or stroked polygons based on the specified DGGS geospatial indexing system. */
@@ -27,8 +27,12 @@ export class GlobalGridLayer<DataT = any, ExtraProps extends {} = {}> extends Ge
   static layerName = 'GlobalGridLayer';
   static defaultProps: DefaultProps<GlobalGridLayerProps> = {
     getCellId: {type: 'accessor', value: (d: any) => d.cellId},
-    dggsDecoder: {type: 'object', compare: true, value: undefined!}
+    globalGrid: {type: 'object', compare: true, value: undefined!}
   };
+
+  initializeState(): void {
+    this.props.globalGrid?.initialize?.();
+  }
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
     const {data, getCellId} = this.props;
@@ -39,10 +43,9 @@ export class GlobalGridLayer<DataT = any, ExtraProps extends {} = {}> extends Ge
       _windingOrder: 'CCW',
       positionFormat: 'XY',
       getPolygon: (x: DataT, objectInfo) => {
-        const {dggsDecoder} = this.props;
+        const {globalGrid} = this.props;
         const cell = getCellId(x, objectInfo);
-        const cellId = typeof cell === 'string' ? dggsDecoder.tokenToBigInt(cell) : cell;
-        const boundary = dggsDecoder.cellToBoundary(cellId);
+        const boundary = globalGrid.cellToBoundary(cell);
         boundary.push(boundary[0]);
         return flattenPolygon(boundary);
       }

@@ -8,7 +8,7 @@
 import {
   type CoordPair,
   type SplitLong,
-  // type H3IndexInput,
+  latLngToCell,
   cellToBoundary as _cellToBoundary,
   cellToLatLng as _cellToLatLng,
   cellsToMultiPolygon as _cellsToMultiPolygon,
@@ -16,7 +16,7 @@ import {
   splitLongToH3Index as _splitLongToH3Index
 } from 'h3-js';
 
-export {type CoordPair, type SplitLong};
+export {type CoordPair, type SplitLong, latLngToCell};
 
 export type H3IndexInput = bigint | string | SplitLong;
 

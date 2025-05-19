@@ -16,3 +16,13 @@ export function normalizeLongitudes(vertices: CoordPair[], refLng?: number): voi
     }
   }
 }
+
+export function flattenPolygon(vertices: number[][]): Float64Array {
+  const positions = new Float64Array(vertices.length * 2);
+  let i = 0;
+  for (const pt of vertices) {
+    positions[i++] = pt[0];
+    positions[i++] = pt[1];
+  }
+  return positions;
+}

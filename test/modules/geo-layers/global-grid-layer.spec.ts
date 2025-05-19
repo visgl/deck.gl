@@ -24,7 +24,7 @@ test('_GlobalGridLayer', t => {
     sampleProps: {
       data,
       getCellId: d => d,
-      dggsDecoder: _A5Decoder
+      globalGrid: _A5Decoder
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),

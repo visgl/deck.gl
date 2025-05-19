@@ -9,7 +9,7 @@ import {
   cellToBoundary,
   cellToLatLng
 } from '../h3-js-bigint/h3-js-bigint';
-import {normalizeLongitudes} from './global-grid-utils';
+import {normalizeLongitudes} from './geometry-utils';
 
 // UTILITIES - TODO can these be generalized using the decoder?
 
