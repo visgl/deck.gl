@@ -9,7 +9,8 @@ const state = {
   onMessage: _ => _
 };
 
-export default class Transport {
+/** Helper class for Python / Jupyter integration */
+export class Transport {
   static setCallbacks({onInitialize, onFinalize, onMessage}) {
     if (onInitialize) {
       state.onInitialize = onInitialize;
@@ -34,10 +35,10 @@ export default class Transport {
 
   /**
    * Return a root DOM element for this transport connection
-   * @return {HTMLElement} default implementation returns document.body
+   * @returns default implementation returns document.body
    * Jupyter Notebook transports will return an element associated with the notebook cell
    */
-  getRootDOMElement() {
+  getRootDOMElement(): HTMLElement | null {
     return typeof document !== 'undefined' ? document.body : null;
   }
 

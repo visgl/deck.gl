@@ -2,35 +2,35 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
-// Lightly processes `json` props, transform string values, and extract `views` and `layers`
-// See: https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
-//
-// NOTES:
-// * This is intended to provide minimal necessary processing required to support
-//   existing deck.gl props via JSON. This is not an implementation of alternate JSON schemas.
-// * Optionally, error checking could be applied, but ideally should leverage
-//   non-JSON specific mechanisms like prop types.
-
-import assert from './utils/assert';
-import JSONConfiguration from './json-configuration';
-import {instantiateClass} from './helpers/instantiate-class';
-import {executeFunction} from './helpers/execute-function';
-
-import {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER, FUNCTION_KEY} from './syntactic-sugar';
-import parseJSON from './helpers/parse-json';
+import { JSONConfiguration } from './json-configuration';
+import { FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER, FUNCTION_KEY } from './syntactic-sugar';
+import { instantiateClass } from './helpers/instantiate-class';
+import { executeFunction } from './helpers/execute-function';
+import {assert} from './utils/assert';
+import {parseJSON} from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
 
-export type JSONConverterProps = {
-  configuration: JSONConfiguration | Record<string, any>;
-  onJSONChange;
+export type JSONConverterProps = JSONConfiguration & {
+  onJSONChange: () => void;
 };
 
-export default class JSONConverter {
+/** 
+ * Converts JSON to "props" by "hydrating" classes, resolving enums and functions etc.
+ * 
+ * Lightly processes `json` props, transform string values, and extract `views` and `layers`
+ * @see https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
+ *
+ * NOTES:
+ * - This is intended to provide minimal necessary processing required to support
+ *   existing deck.gl props via JSON. This is not an implementation of alternate JSON schemas.
+ * - Optionally, error checking could be applied, but ideally should leverage
+ *   non-JSON specific mechanisms like prop types.
+ */
+export class JSONConverter {
   log = console; // eslint-disable-line
   configuration!: JSONConfiguration;
-  onJSONChange = () => {};
+  onJSONChange = () => { };
   json = null;
   convertedJson = null;
 
@@ -39,7 +39,7 @@ export default class JSONConverter {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  finalize() {}
+  finalize() { }
 
   setProps(props: JSONConverterProps) {
     // HANDLE CONFIGURATION PROPS
@@ -48,7 +48,7 @@ export default class JSONConverter {
       this.configuration =
         props.configuration instanceof JSONConfiguration
           ? props.configuration
-          : new JSONConfiguration(props.configuration);
+          : new JSONConfiguration(props.config);
     }
 
     if ('onJSONChange' in props) {
@@ -92,7 +92,7 @@ function convertJSON(json, configuration) {
   return convertJSONRecursively(json, '', configuration);
 }
 
-// Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
+/** Converts JSON to props ("hydrating" classes, resolving enums and functions etc). */
 function convertJSONRecursively(json, key, configuration) {
   if (Array.isArray(json)) {
     return json.map((element, i) => convertJSONRecursively(element, String(i), configuration));
@@ -120,20 +120,20 @@ function convertJSONRecursively(json, key, configuration) {
   return json;
 }
 
-// Returns true if an object has a `type` field
+/** Returns true if an object has a `type` field */
 function isClassInstance(json, configuration) {
-  const {typeKey} = configuration;
+  const { typeKey } = configuration;
   const isClass = isObject(json) && Boolean(json[typeKey]);
   return isClass;
 }
 
 function convertClassInstance(json, configuration) {
   // Extract the class type field
-  const {typeKey} = configuration;
+  const { typeKey } = configuration;
   const type = json[typeKey];
 
   // Prepare a props object and ensure all values have been converted
-  let props = {...json};
+  let props = { ...json };
   delete props[typeKey];
 
   props = convertPlainObject(props, configuration);
@@ -141,14 +141,14 @@ function convertClassInstance(json, configuration) {
   return instantiateClass(type, props, configuration);
 }
 
-// Plain JS object, embed functions.
+/** Plain JS object, embed functions. */
 function convertFunctionObject(json, configuration) {
   // Extract the target function field
-  const {functionKey} = configuration;
+  const { functionKey } = configuration;
   const targetFunction = json[functionKey];
 
   // Prepare a props object and ensure all values have been converted
-  let props = {...json};
+  let props = { ...json };
   delete props[functionKey];
 
   props = convertPlainObject(props, configuration);
@@ -156,7 +156,7 @@ function convertFunctionObject(json, configuration) {
   return executeFunction(targetFunction, props, configuration);
 }
 
-// Plain JS object, convert each key and return.
+/** Plain JS object, convert each key and return. */
 function convertPlainObject(json, configuration) {
   assert(isObject(json));
 
@@ -168,9 +168,9 @@ function convertPlainObject(json, configuration) {
   return result;
 }
 
-// Convert one string value in an object
-// TODO - We could also support string syntax for hydrating other types, like regexps...
-// But no current use case
+/** Convert one string value in an object
+ * @todo We could also support string syntax for hydrating other types, like regexps... But no current use case
+ */
 function convertString(string, key, configuration) {
   // Here the JSON value is supposed to be treated as a function
   if (string.startsWith(FUNCTION_IDENTIFIER) && configuration.convertFunction) {

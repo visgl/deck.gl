@@ -5,16 +5,17 @@
 import {get} from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
-import {parse, eval as evaluate} from '../utils/expression-eval';
+import {parse, eval as evaluate} from '../expression-eval/expression-eval';
 
 const cachedExpressionMap = {
   '-': object => object
 };
 
-// Calculates an accessor function from a JSON string
-// '-' : x => x
-// 'a.b.c': x => x.a.b.c
-export default function parseExpressionString(propValue, configuration) {
+/** Generates an accessor function from a JSON string
+ * '-' : x => x
+ * 'a.b.c': x => x.a.b.c
+ */
+export function parseExpressionString(propValue, configuration) {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
@@ -47,7 +48,7 @@ export default function parseExpressionString(propValue, configuration) {
   return func;
 }
 
-// Helper function to search all nodes in AST returned by expressionEval
+/** Helper function to search all nodes in AST returned by expressionEval */
 // eslint-disable-next-line complexity
 function traverse(node, visitor) {
   if (Array.isArray(node)) {
