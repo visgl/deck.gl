@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-
-import { TYPE_KEY, FUNCTION_KEY } from './syntactic-sugar';
+import {TYPE_KEY, FUNCTION_KEY} from './syntactic-sugar';
 // TODO - default parsing code should not be part of the configuration.
-import { parseExpressionString } from './helpers/parse-expression-string';
+import {parseExpressionString} from './helpers/parse-expression-string';
 
 const isObject = value => value && typeof value === 'object';
 
@@ -31,7 +30,7 @@ export class JSONConfiguration {
     enumerations: {},
     constants: {},
     functions: {},
-    React: undefined!,
+    React: undefined!
   };
 
   config: Required<JSONConfigurationProps> = {...JSONConfiguration.defaultProps};

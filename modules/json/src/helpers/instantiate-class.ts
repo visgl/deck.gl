@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import { JSONConfiguration } from '../json-configuration';
-import{ convertFunctions } from './convert-functions';
+import {JSONConfiguration} from '../json-configuration';
+import {convertFunctions} from './convert-functions';
 
 /**
  * Attempt to instantiate a class, either as a class or as a React component

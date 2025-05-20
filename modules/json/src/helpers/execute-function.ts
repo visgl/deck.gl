@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {type  JSONConfiguration } from "../json-configuration";
+import {type JSONConfiguration} from '../json-configuration';
 
-/** 
+/**
  * Attempt to execute a function
  */
 export function executeFunction(targetFunction, props, configuration: JSONConfiguration) {

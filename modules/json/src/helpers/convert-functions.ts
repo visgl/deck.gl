@@ -5,7 +5,7 @@
 import {parseExpressionString} from './parse-expression-string';
 
 import {FUNCTION_IDENTIFIER} from '../syntactic-sugar';
-import {type JSONConfiguration } from '../json-configuration';
+import {type JSONConfiguration} from '../json-configuration';
 
 function hasFunctionIdentifier(value) {
   return typeof value === 'string' && value.startsWith(FUNCTION_IDENTIFIER);
@@ -18,7 +18,7 @@ function trimFunctionIdentifier(value) {
 /**
  * Tries to determine if any props are "function valued"
  * and if so convert their string values to functions
- */ 
+ */
 export function convertFunctions(props, configuration: JSONConfiguration) {
   // Use deck.gl prop types if available.
   const replacedProps = {};
