@@ -5,7 +5,7 @@
 import test from 'tape-promise/tape';
 import {makeSpy} from '@probe.gl/test-utils';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core/lib/constants';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapController} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import configuration, {log, calculateRadius} from './json-configuration-for-deck';

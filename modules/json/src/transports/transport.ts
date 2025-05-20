@@ -2,8 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+export type TransportCallbacks = {
+  onInitialize: (message: any) => void;
+  onFinalize: (message: any) => void;
+  onMessage: (message: any) => void;
+};
+
 /* global document */
-const state = {
+const state: TransportCallbacks = {
   onInitialize: _ => _,
   onFinalize: _ => _,
   onMessage: _ => _
@@ -11,7 +17,7 @@ const state = {
 
 /** Helper class for Python / Jupyter integration */
 export class Transport {
-  static setCallbacks({onInitialize, onFinalize, onMessage}) {
+  static setCallbacks({onInitialize, onFinalize, onMessage}: Partial<TransportCallbacks>) {
     if (onInitialize) {
       state.onInitialize = onInitialize;
     }

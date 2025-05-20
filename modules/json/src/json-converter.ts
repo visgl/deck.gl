@@ -9,7 +9,9 @@ import {executeFunction} from './helpers/execute-function';
 import {assert} from './utils/assert';
 import {parseJSON} from './helpers/parse-json';
 
-const isObject = value => value && typeof value === 'object';
+function isObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object';
+}
 
 export type JSONConverterProps = JSONConfiguration & {
   onJSONChange: () => void;
@@ -30,9 +32,9 @@ export type JSONConverterProps = JSONConfiguration & {
 export class JSONConverter {
   log = console; // eslint-disable-line
   configuration!: JSONConfiguration;
-  onJSONChange = () => {};
-  json = null;
-  convertedJson = null;
+  onJSONChange: () => void = () => {};
+  json: unknown = null;
+  convertedJson: unknown = null;
 
   constructor(props) {
     this.setProps(props);
@@ -56,11 +58,11 @@ export class JSONConverter {
     }
   }
 
-  mergeConfiguration(config) {
+  mergeConfiguration(config: JSONConfiguration) {
     this.configuration.merge(config);
   }
 
-  convert(json) {
+  convert(json: unknown): unknown {
     // Use shallow equality to ensure we only convert same json once
     if (!json || json === this.json) {
       return this.convertedJson;
@@ -86,14 +88,14 @@ export class JSONConverter {
   }
 }
 
-function convertJSON(json, configuration) {
+function convertJSON(json: unknown, configuration: JSONConfiguration) {
   // Fixup configuration
   configuration = new JSONConfiguration(configuration);
   return convertJSONRecursively(json, '', configuration);
 }
 
 /** Converts JSON to props ("hydrating" classes, resolving enums and functions etc). */
-function convertJSONRecursively(json, key, configuration) {
+function convertJSONRecursively(json: unknown, key, configuration) {
   if (Array.isArray(json)) {
     return json.map((element, i) => convertJSONRecursively(element, String(i), configuration));
   }
@@ -121,13 +123,13 @@ function convertJSONRecursively(json, key, configuration) {
 }
 
 /** Returns true if an object has a `type` field */
-function isClassInstance(json, configuration) {
+function isClassInstance(json: unknown, configuration: JSONConfiguration) {
   const {typeKey} = configuration;
   const isClass = isObject(json) && Boolean(json[typeKey]);
   return isClass;
 }
 
-function convertClassInstance(json, configuration) {
+function convertClassInstance(json: unknown, configuration: JSONConfiguration) {
   // Extract the class type field
   const {typeKey} = configuration;
   const type = json[typeKey];
@@ -142,7 +144,7 @@ function convertClassInstance(json, configuration) {
 }
 
 /** Plain JS object, embed functions. */
-function convertFunctionObject(json, configuration) {
+function convertFunctionObject(json, configuration:JSONConfiguration) {
   // Extract the target function field
   const {functionKey} = configuration;
   const targetFunction = json[functionKey];
@@ -157,8 +159,10 @@ function convertFunctionObject(json, configuration) {
 }
 
 /** Plain JS object, convert each key and return. */
-function convertPlainObject(json, configuration) {
-  assert(isObject(json));
+function convertPlainObject(json: unknown, configuration: JSONConfiguration) {
+  if (!isObject(json)) {
+    throw new Error('convertPlainObject: expected an object');
+  }
 
   const result = {};
   for (const key in json) {
@@ -171,7 +175,7 @@ function convertPlainObject(json, configuration) {
 /** Convert one string value in an object
  * @todo We could also support string syntax for hydrating other types, like regexps... But no current use case
  */
-function convertString(string, key, configuration) {
+function convertString(string, key, configuration: JSONConfiguration) {
   // Here the JSON value is supposed to be treated as a function
   if (string.startsWith(FUNCTION_IDENTIFIER) && configuration.convertFunction) {
     string = string.replace(FUNCTION_IDENTIFIER, '');
