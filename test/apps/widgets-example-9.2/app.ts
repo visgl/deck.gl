@@ -20,7 +20,8 @@ import {
   _SplitterWidget,
   _TimelineWidget,
   _ViewSelectorWidget,
-  _ContextMenuWidget
+  _ContextMenuWidget,
+  _StatsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -136,7 +137,8 @@ const deck = new Deck({
       viewId2: 'right-map',
       orientation: 'vertical',
       onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
-    })
+    }),
+    new _StatsWidget({type: 'luma'})
   ]
 });
 
