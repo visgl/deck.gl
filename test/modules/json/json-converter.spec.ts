@@ -8,7 +8,7 @@ import {makeSpy} from '@probe.gl/test-utils';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapController} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
-import configuration, {log, calculateRadius} from './json-configuration-for-deck';
+import {JSON_CONFIGURATION, log, calculateRadius} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 import COMPLEX_JSON from './data/complex-data.json';
 
@@ -20,13 +20,13 @@ test('JSONConverter#import', t => {
 });
 
 test('JSONConverter#create', t => {
-  const jsonConverter = new JSONConverter({configuration});
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
   t.ok(jsonConverter, 'JSONConverter created');
   t.end();
 });
 
 test('JSONConverter#convert', t => {
-  const jsonConverter = new JSONConverter({configuration});
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
   t.ok(jsonConverter, 'JSONConverter created');
 
   let deckProps = jsonConverter.convert(JSON_DATA);
@@ -52,7 +52,7 @@ test('JSONConverter#convert', t => {
 });
 
 test('JSONConverter#merge', t => {
-  const jsonConverter = new JSONConverter({configuration});
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
   jsonConverter.mergeConfiguration({
     classes: {OrbitView}
   });
@@ -69,7 +69,7 @@ test('JSONConverter#merge', t => {
 });
 
 test('JSONConverter#badConvert', t => {
-  const jsonConverter = new JSONConverter({configuration});
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
   t.ok(jsonConverter, 'JSONConverter created');
   const badData = JSON.parse(JSON.stringify(JSON_DATA));
   badData.layers[0]['@@type'] = 'InvalidLayer';
@@ -81,7 +81,7 @@ test('JSONConverter#badConvert', t => {
 });
 
 test('JSONConverter#handleTypeAsKey', t => {
-  const jsonConverter = new JSONConverter({configuration});
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
   t.ok(jsonConverter, 'JSONConverter created');
   const complexData = JSON.parse(JSON.stringify(COMPLEX_JSON));
   const deckProps = jsonConverter.convert(complexData);

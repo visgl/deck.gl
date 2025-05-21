@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {JSONConfiguration} from './json-configuration';
+import {JSONConfiguration, JSONConfigurationProps} from './json-configuration';
 import {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER, FUNCTION_KEY} from './syntactic-sugar';
 import {instantiateClass} from './helpers/instantiate-class';
 import {executeFunction} from './helpers/execute-function';
-import {assert} from './utils/assert';
 import {parseJSON} from './helpers/parse-json';
 
 function isObject(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object';
+  return Boolean(value) && typeof value === 'object';
 }
 
-export type JSONConverterProps = JSONConfiguration & {
+export type JSONConverterProps = {
+  configuration: JSONConfiguration | JSONConfigurationProps;
   onJSONChange: () => void;
 };
 
@@ -43,14 +43,14 @@ export class JSONConverter {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   finalize() {}
 
-  setProps(props: JSONConverterProps) {
+  setProps(props: JSONConverterProps | JSONConfiguration) {
     // HANDLE CONFIGURATION PROPS
     if ('configuration' in props) {
       // Accept object or `JSONConfiguration`
       this.configuration =
         props.configuration instanceof JSONConfiguration
           ? props.configuration
-          : new JSONConfiguration(props.config);
+          : new JSONConfiguration(props.configuration);
     }
 
     if ('onJSONChange' in props) {
@@ -72,6 +72,9 @@ export class JSONConverter {
 
     // Accept JSON strings by parsing them
     const parsedJSON = parseJSON(json);
+    if (!isObject(parsedJSON)) {
+      throw new Error('JSONConverter: expected an object');
+    }
 
     // Convert the JSON
     let convertedJson = convertJSON(parsedJSON, this.configuration);
@@ -88,9 +91,9 @@ export class JSONConverter {
   }
 }
 
-function convertJSON(json: unknown, configuration: JSONConfiguration) {
+function convertJSON(json: Record<string, unknown>, configuration: JSONConfiguration) {
   // Fixup configuration
-  configuration = new JSONConfiguration(configuration);
+  configuration = new JSONConfiguration(configuration.config);
   return convertJSONRecursively(json, '', configuration);
 }
 
@@ -100,12 +103,12 @@ function convertJSONRecursively(json: unknown, key, configuration) {
     return json.map((element, i) => convertJSONRecursively(element, String(i), configuration));
   }
 
-  // If object.type is in configuration, instantiate
-  if (isClassInstance(json, configuration)) {
-    return convertClassInstance(json, configuration);
-  }
-
   if (isObject(json)) {
+    // If object.type is in configuration, instantiate
+    if (isClassInstance(json, configuration)) {
+      return convertClassInstance(json, configuration);
+    }
+
     // If object.function is in configuration, convert object to function
     if (FUNCTION_KEY in json) {
       return convertFunctionObject(json, configuration);
@@ -123,15 +126,15 @@ function convertJSONRecursively(json: unknown, key, configuration) {
 }
 
 /** Returns true if an object has a `type` field */
-function isClassInstance(json: unknown, configuration: JSONConfiguration) {
-  const {typeKey} = configuration;
+function isClassInstance(json: Record<string, unknown>, configuration: JSONConfiguration) {
+  const {typeKey} = configuration.config;
   const isClass = isObject(json) && Boolean(json[typeKey]);
   return isClass;
 }
 
-function convertClassInstance(json: unknown, configuration: JSONConfiguration) {
+function convertClassInstance(json: Record<string, unknown>, configuration: JSONConfiguration) {
   // Extract the class type field
-  const {typeKey} = configuration;
+  const {typeKey} = configuration.config;
   const type = json[typeKey];
 
   // Prepare a props object and ensure all values have been converted
@@ -144,9 +147,9 @@ function convertClassInstance(json: unknown, configuration: JSONConfiguration) {
 }
 
 /** Plain JS object, embed functions. */
-function convertFunctionObject(json, configuration:JSONConfiguration) {
+function convertFunctionObject(json, configuration: JSONConfiguration) {
   // Extract the target function field
-  const {functionKey} = configuration;
+  const {functionKey} = configuration.config;
   const targetFunction = json[functionKey];
 
   // Prepare a props object and ensure all values have been converted
@@ -165,8 +168,7 @@ function convertPlainObject(json: unknown, configuration: JSONConfiguration) {
   }
 
   const result = {};
-  for (const key in json) {
-    const value = json[key];
+  for (const [key, value] of Object.entries(json)) {
     result[key] = convertJSONRecursively(value, key, configuration);
   }
   return result;
@@ -175,7 +177,7 @@ function convertPlainObject(json: unknown, configuration: JSONConfiguration) {
 /** Convert one string value in an object
  * @todo We could also support string syntax for hydrating other types, like regexps... But no current use case
  */
-function convertString(string, key, configuration: JSONConfiguration) {
+function convertString(string: string, key: string, configuration: JSONConfiguration) {
   // Here the JSON value is supposed to be treated as a function
   if (string.startsWith(FUNCTION_IDENTIFIER) && configuration.convertFunction) {
     string = string.replace(FUNCTION_IDENTIFIER, '');
@@ -183,12 +185,12 @@ function convertString(string, key, configuration: JSONConfiguration) {
   }
   if (string.startsWith(CONSTANT_IDENTIFIER)) {
     string = string.replace(CONSTANT_IDENTIFIER, '');
-    if (configuration.constants[string]) {
-      return configuration.constants[string];
+    if (configuration.config.constants[string]) {
+      return configuration.config.constants[string];
     }
     // enum
     const [enumVarName, enumValName] = string.split('.');
-    return configuration.enumerations[enumVarName][enumValName];
+    return configuration.config.enumerations[enumVarName][enumValName];
   }
   return string;
 }

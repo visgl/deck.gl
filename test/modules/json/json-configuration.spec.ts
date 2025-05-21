@@ -5,7 +5,7 @@
 import test from 'tape-promise/tape';
 
 import {JSONConfiguration} from '@deck.gl/json';
-import configuration from './json-configuration-for-deck';
+import {JSON_CONFIGURATION} from './json-configuration-for-deck';
 
 test('JSONConfiguration#import', t => {
   t.ok(JSONConfiguration, 'JSONConfiguration imported');
@@ -13,7 +13,7 @@ test('JSONConfiguration#import', t => {
 });
 
 test('JSONConfiguration#create', t => {
-  const jsonConverter = new JSONConfiguration({configuration});
+  const jsonConverter = new JSONConfiguration({configuration: JSON_CONFIGURATION});
   t.ok(jsonConverter, 'JSONConfiguration created');
   t.end();
 });

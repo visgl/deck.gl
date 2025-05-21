@@ -5,8 +5,8 @@
 // @deck.gl/json: top-level exports
 
 // Generic JSON converter, usable by other wrapper modules
-export {JSONConverter} from './json-converter';
-export {JSONConfiguration} from './json-configuration';
+export {JSONConverter, type JSONConverterProps} from './json-converter';
+export {JSONConfiguration, type JSONConfigurationProps} from './json-configuration';
 
 // Transports
 export {Transport} from './transports/transport';
