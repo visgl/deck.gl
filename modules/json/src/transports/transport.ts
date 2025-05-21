@@ -2,15 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+export type TransportCallbacks = {
+  onInitialize: (message: any) => void;
+  onFinalize: (message: any) => void;
+  onMessage: (message: any) => void;
+};
+
 /* global document */
-const state = {
+const state: TransportCallbacks = {
   onInitialize: _ => _,
   onFinalize: _ => _,
   onMessage: _ => _
 };
 
-export default class Transport {
-  static setCallbacks({onInitialize, onFinalize, onMessage}) {
+/** Helper class for Python / Jupyter integration */
+export class Transport {
+  static setCallbacks({onInitialize, onFinalize, onMessage}: Partial<TransportCallbacks>) {
     if (onInitialize) {
       state.onInitialize = onInitialize;
     }
@@ -34,10 +41,10 @@ export default class Transport {
 
   /**
    * Return a root DOM element for this transport connection
-   * @return {HTMLElement} default implementation returns document.body
+   * @returns default implementation returns document.body
    * Jupyter Notebook transports will return an element associated with the notebook cell
    */
-  getRootDOMElement() {
+  getRootDOMElement(): HTMLElement | null {
     return typeof document !== 'undefined' ? document.body : null;
   }
 
