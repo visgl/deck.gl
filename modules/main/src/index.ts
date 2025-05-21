@@ -122,7 +122,11 @@ export {
   Tile3DLayer,
   TerrainLayer,
   MVTLayer,
-  GeohashLayer
+  GeohashLayer,
+  _GlobalGridLayer,
+  _GlobalGridClusterLayer,
+  _A5Decoder,
+  _H3Decoder
 } from '@deck.gl/geo-layers';
 
 export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
