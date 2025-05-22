@@ -5,7 +5,8 @@
 /* global window */
 
 import React, {PureComponent} from 'react';
-import {Map} from 'react-map-gl/maplibre';
+import {Map, useControl} from 'react-map-gl/maplibre';
+import {MapboxOverlay} from '@deck.gl/mapbox';
 import autobind from 'react-autobind';
 
 import {DeckGL} from '@deck.gl/react';
@@ -42,9 +43,15 @@ const INITIAL_VIEW_STATES = {
   }
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
+
+function DeckGLOverlay(props) {
+  const overlay = useControl(() => new MapboxOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
 
 export default class DeckMap extends PureComponent {
   constructor(props) {
@@ -55,7 +62,6 @@ export default class DeckMap extends PureComponent {
       hoveredItem: null,
       clickedItem: null,
       queriedItems: null,
-
       enableDepthPickOnClick: false,
       metrics: null
     };
@@ -132,45 +138,32 @@ export default class DeckMap extends PureComponent {
       layers,
       views,
       effects,
-      settings: {pickingRadius, drawPickingColors, useDevicePixels}
+      settings: {pickingRadius, drawPickingColors, useDevicePixels, interleaved}
     } = this.props;
 
     return (
-      <div style={{backgroundColor: '#eeeeee'}}>
+      <div style={{backgroundColor: '#eeeeee', height: '100vh', width: '100vw'}}>
         <div style={{position: 'absolute', top: '10px', left: '100px', zIndex: 999}}>
           <RenderMetrics metrics={this.state.metrics} />
         </div>
-        <DeckGL
-          ref={this.deckRef}
-          id="default-deckgl-overlay"
-          layers={layers}
-          layerFilter={this._layerFilter}
-          views={views}
-          initialViewState={INITIAL_VIEW_STATES}
-          effects={effects}
-          pickingRadius={pickingRadius}
-          onHover={this._onHover}
-          onClick={this._onClick}
-          useDevicePixels={useDevicePixels}
-          debug={true}
-          drawPickingColors={drawPickingColors}
-          _onMetrics={this._onMetrics}
-        >
-          <View id="basemap">
-            <Map key="map" mapStyle={MAP_STYLE} />
-            <ViewportLabel key="label">Map View</ViewportLabel>
-          </View>
-
-          <View id="first-person">
-            <ViewportLabel>First Person View</ViewportLabel>
-          </View>
-
-          <View id="infovis">
-            <ViewportLabel>Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
-          </View>
-
+        <Map key={`map-${interleaved}`} mapStyle={MAP_STYLE} initialViewState={INITIAL_VIEW_STATES.basemap}>
+          <DeckGLOverlay
+            layers={layers.map(l => l.clone({beforeId: 'watername_ocean'}))}
+            initialViewState={INITIAL_VIEW_STATES}
+            layerFilter={this._layerFilter}
+            {...(!interleaved && {views})}
+            effects={effects}
+            pickingRadius={pickingRadius}
+            onHover={this._onHover}
+            onClick={this._onClick}
+            useDevicePixels={useDevicePixels}
+            debug={true}
+            drawPickingColors={drawPickingColors}
+            _onMetrics={this._onMetrics}
+            interleaved={interleaved}
+          />
           <LayerInfo hovered={hoveredItem} clicked={clickedItem} queried={queriedItems} />
-        </DeckGL>
+        </Map>
       </div>
     );
   }

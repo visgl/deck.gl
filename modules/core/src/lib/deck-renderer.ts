@@ -85,7 +85,8 @@ export default class DeckRenderer {
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
     if (this.lastPostProcessEffect) {
       renderOpts.clearColor = [0, 0, 0, 0];
-      renderOpts.clearCanvas = true;
+      // Interleaved basemap rendering requires clearCanvas to be false
+      renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
     }
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
