@@ -146,7 +146,11 @@ export default class DeckMap extends PureComponent {
         <div style={{position: 'absolute', top: '10px', left: '100px', zIndex: 999}}>
           <RenderMetrics metrics={this.state.metrics} />
         </div>
-        <Map key={`map-${interleaved}`} mapStyle={MAP_STYLE} initialViewState={INITIAL_VIEW_STATES.basemap}>
+        <Map
+          key={`map-${interleaved}`}
+          mapStyle={MAP_STYLE}
+          initialViewState={INITIAL_VIEW_STATES.basemap}
+        >
           <DeckGLOverlay
             layers={layers.map(l => l.clone({beforeId: 'watername_ocean'}))}
             initialViewState={INITIAL_VIEW_STATES}
