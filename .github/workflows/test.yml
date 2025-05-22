@@ -34,6 +34,10 @@ jobs:
           yarn lint
           yarn test ci
 
+      - name: Test website build
+        run: |
+          yarn test-website
+
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
