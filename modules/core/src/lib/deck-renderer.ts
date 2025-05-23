@@ -83,14 +83,21 @@ export default class DeckRenderer {
     }
 
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+
     if (this.lastPostProcessEffect) {
       renderOpts.clearColor = [0, 0, 0, 0];
-      // Interleaved basemap rendering requires clearCanvas to be false
-      renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
+      renderOpts.clearCanvas = true;
+      // renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
     }
+    console.log('layersPass.render.clearCanvas', renderOpts.clearCanvas);
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
     if (renderOpts.effects) {
+      if (this.lastPostProcessEffect) {
+        // Interleaved basemap rendering requires clearCanvas to be false
+        renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
+      }
+
       this._postRender(renderOpts.effects, renderOpts);
     }
 
@@ -161,6 +168,8 @@ export default class DeckRenderer {
     };
     for (const effect of effects) {
       if (effect.postRender) {
+        console.log('effect.postRender.clearCanvas', params.clearCanvas);
+
         // If not the last post processing effect, unset the target so that
         // it only renders between the swap buffers
         params.target = effect.id === this.lastPostProcessEffect ? opts.target : undefined;

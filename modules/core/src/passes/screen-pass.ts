@@ -36,7 +36,8 @@ export default class ScreenPass extends Pass {
       depthCompare: 'always' as const,
       depthBias: 0,
       blend: true,
-      blendColorSrcFactor: 'one',
+      blendColorSrcFactor: 'src-alpha', // <-- needed for zoom blur
+      // blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one-minus-src-alpha',
       blendAlphaSrcFactor: 'one',
       blendAlphaDstFactor: 'one-minus-src-alpha',
