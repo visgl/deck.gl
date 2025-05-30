@@ -14,6 +14,8 @@ class PointCloudDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/point-cloud`;
 
+  static hasDeviceTabs = true;
+
   static renderInfo(meta) {
     return (
       <div>
@@ -35,7 +37,7 @@ class PointCloudDemo extends Component {
 
   render() {
     return <div style={{width: '100%', height: '100%', background: '#ecdbce'}}>
-      <App onLoad={this._onLoad} />
+      <App onLoad={this._onLoad} device={this.props.device} />
     </div>;
   }
 }

@@ -478,6 +478,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       viewState: this._getViewState()
     });
 
+    if (props.device && props.device.id !== this.device?.id) {
+      this.animationLoop?.stop();
+
+      console.log(`recreating animation loop for new device! id=${props.device.id}`);
+
+      this.animationLoop = this._createAnimationLoop(props.device, props);
+      this.animationLoop.start();
+    }
+
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
