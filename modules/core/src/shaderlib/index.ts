@@ -32,6 +32,10 @@ export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
     shaderAssembler.addDefaultModule(shaderModule);
   }
 
+  // if we're recreating the device we may have changed language
+  // and must not inject hooks for the wrong language
+  shaderAssembler.resetShaderHooks();
+
   // Add shader hooks based on language
   // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?
   const shaderHooks = language === 'glsl' ? SHADER_HOOKS_GLSL : SHADER_HOOKS_WGSL;
