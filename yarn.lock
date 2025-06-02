@@ -44,14 +44,16 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@carto/api-client@file:../carto-api-client":
-  version "0.5.1"
+"@carto/api-client@^0.5.6":
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.5.6.tgz#9e0714cd977770039f1693c9c55708be7d59e97b"
+  integrity sha512-sq6tzIK5P59Qk7zPNpjP0OkqIvZ1UqGKffLEOJtjQLWIPjRxm+EXUqdeOccj9uV0IGfyA5Dp/6a+H0vPDU/QeQ==
   dependencies:
     "@loaders.gl/schema" "^4.3.3"
     "@types/geojson" "^7946.0.16"
     d3-format "^3.1.0"
     d3-scale "^4.0.2"
-    h3-js "4.1.0"
+    h3-js "^4.1.0"
     quadbin "^0.4.1-alpha.0"
 
 "@cspotcode/source-map-support@^0.8.0":
@@ -4946,7 +4948,7 @@ grid-index@^1.1.0:
   resolved "https://registry.yarnpkg.com/grid-index/-/grid-index-1.1.0.tgz#97f8221edec1026c8377b86446a7c71e79522ea7"
   integrity sha512-HZRwumpOGUrHyxO5bqKZL0B0GlUpwtCAzZ42sgxUPniu33R1LSFH5yrIcBCHjkctCAh3mtWKcKd9J4vDDdeVHA==
 
-h3-js@4.1.0, h3-js@^4.1.0:
+h3-js@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-4.1.0.tgz#f8c4a8ad36612489a954f1a0bb3f4b7657d364e5"
   integrity sha512-LQhmMl1dRQQjMXPzJc7MpZ/CqPOWWuAvVEoVJM9n/s7vHypj+c3Pd5rLQCkAsOgAoAYKbNCsYFE++LF7MvSfCQ==
