@@ -6,7 +6,13 @@ import VectorTileLayer from '../layers/vector-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 
-import {fetchMap as _fetchMap, FetchMapOptions as _FetchMapOptions, FetchMapResult as _FetchMapResult, LayerDescriptor, LayerType} from '@carto/api-client';
+import {
+  fetchMap as _fetchMap,
+  FetchMapOptions as _FetchMapOptions,
+  FetchMapResult as _FetchMapResult,
+  LayerDescriptor,
+  LayerType
+} from '@carto/api-client';
 
 export type FetchMapResult = Omit<_FetchMapResult, 'layers'> & {
   layers: Layer[];
@@ -38,7 +44,7 @@ export function LayerFactory(descriptor: LayerDescriptor): Layer {
 function createResult(result: _FetchMapResult): FetchMapResult {
   return {
     ...result,
-    layers: result.layers.map((descriptor) => LayerFactory(descriptor))
+    layers: result.layers.map(descriptor => LayerFactory(descriptor))
   };
 }
 
@@ -51,9 +57,12 @@ export async function fetchMap(options: FetchMapOptions): Promise<FetchMapResult
   const {onNewData, ...rest} = options;
   const _options: _FetchMapOptions = {
     ...rest,
-    onNewData: (typeof onNewData === 'function' ? (result) => {
-      onNewData(createResult(result));
-    } : undefined)
+    onNewData:
+      typeof onNewData === 'function'
+        ? result => {
+            onNewData(createResult(result));
+          }
+        : undefined
   };
 
   // For backwards compatibility, provide a shim for the old API
