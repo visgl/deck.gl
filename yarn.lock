@@ -2420,6 +2420,13 @@ JSONStream@^1.3.5:
     jsonparse "^1.2.0"
     through ">=2.2.7 <3"
 
+a5-js@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.1.3.tgz#a98e62f2f4270b9f492d870946f9aa454f390b31"
+  integrity sha512-s8jfeM5zKgh1FtArOV3TpAyf8wEQcRdtmt66OyoeMA+B+Iz0Ir+LMa3C35756BWAy9Zijrfb/6Sgl7g6lSJ9Zw==
+  dependencies:
+    gl-matrix "^3.4.3"
+
 abab@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.6.tgz#41b80f2c871d19686216b82309231cfd3cb3d291"
@@ -4820,7 +4827,7 @@ gitconfiglocal@^1.0.0:
   dependencies:
     ini "^1.3.2"
 
-gl-matrix@^3.0.0, gl-matrix@^3.2.1:
+gl-matrix@^3.0.0, gl-matrix@^3.2.1, gl-matrix@^3.4.3:
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.4.3.tgz#fc1191e8320009fd4d20e9339595c6041ddc22c9"
   integrity sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==

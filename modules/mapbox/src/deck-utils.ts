@@ -174,8 +174,9 @@ export function drawLayer(
 
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
-    layerFilter: ({layer: deckLayer}) =>
-      layer.id === deckLayer.id || deckLayer.props.operation.includes('terrain'),
+    layerFilter: params =>
+      (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+      (layer.id === params.layer.id || params.layer.props.operation.includes('terrain')),
     clearStack,
     clearCanvas: false
   });

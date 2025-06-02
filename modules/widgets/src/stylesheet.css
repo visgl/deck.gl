@@ -250,3 +250,29 @@
   pointer-events: auto;
   cursor: pointer;
 }
+
+/**
+ * Reusable styles for widgets
+ */
+.deck-widget-common {
+  font-family:
+    'SF Mono',
+    /* macOS */
+    'Menlo',
+    /* macOS */
+    'Consolas',
+    /* Windows */
+    'DejaVu Sans Mono',
+    /* Linux */
+    'Liberation Mono',
+    /* Linux */
+    monospace;
+  background-color: var(--button-background, #fff);
+  color: #333;
+}
+
+.deck-widget-stats-container {
+  font-size: 0.7rem;
+  /* Approximately 14px */
+  line-height: 1.6;
+}

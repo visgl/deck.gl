@@ -6,7 +6,7 @@
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
-import {Map} from 'react-map-gl';
+import {Map} from 'react-map-gl/mapbox';
 
 import MapboxLayer from '../../../../modules/mapbox/src/mapbox-layer';
 
