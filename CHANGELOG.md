@@ -17,6 +17,51 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.2
+
+### deck.gl v9.2 Prereleases
+
+#### deck.gl [v9.2.0-alpha.1] - May 27 2025
+
+- feat(widgets): GeocoderWidget and experimental Geocoders (#9610)
+- Feature: Add A5Layer (#9626)
+- feat(widgets) Add StatsWidget (#9623)
+- feat(widgets): New GimbalWidget (#9614)
+- feat(widgets): New ContextMenuWidget (#9616)
+- feat(widgets): FpsWidget (#9607)
+- feat(widget): Add geocoder support to GeolocateWidget (#9608)
+- [feat] ViewSelectorWidget (#9591)
+- chore(widgets): Join Widget and WidgetImpl, clean up widgets (#9576)
+- feat(core): Add View.clone() method (#9588)
+- feat(widgets): minimal TimelineWidget (#9587)
+- feat(react): Add missing react widget wrappers (#9589)
+- chore: More lint fixes (#9582)
+- chore: Bump luma to 9.1.9 (#9583)
+- feat: Port point-cloud-layer to WebGPU (#9531)
+- chore(widgets): Light code reorg (#9573)
+- chore: Reduce lint errors (#9550)
+- [feat]: SplitterWidget (#9565)
+- docs(widgets) demos and a pass on sources, styling, and TOC (#9559)
+- feat(widgets) theme widget applies styles to widget container (#9558)
+- chore: Bump to luma.gl@9.1.7 (#9556)
+- [feat] Add hover support to InfoWidget (#9552)
+- feat(widgets): Simple GeolocateWidget (#9488)
+- feat(widgets): New LoadingWidget (#9485)
+- feat(widgets): New ScaleWidget (#9491)
+- feat(widgets): ThemeWidget (#9471)
+- POC: PopupWidget (#8958)
+- Revert #9483 using 6 coordinates in glViewport (#9542)
+- Append `.js` to WebGPU shaders for script builds (#9537)
+- chore: Bump to luma.gl@9.1.5 (WebGPU fixes) (#9525)
+- feat: line layer and project module port to WGSL, test app for WebGPU line (#9509)
+- fix(chore): Disable constant attributes under WebGPU (#9506)
+- chore: WebGPU plumbing (#9502)
+- chore: WebGPU plumbing (#9480)
+- chore: WebGPU plumbing #1 (#9476)
+- feat(widgets): New ResetViewWidget (#9456)
+- feat(widgets) New ScreenshotWidget (#9454)
+
+
 ## deck.gl v9.1
 
 ### deck.gl v9.1 Prereleases
