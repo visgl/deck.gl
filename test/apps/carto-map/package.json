@@ -4,7 +4,6 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@carto/api-client": "file:./../../../../carto-api-client",
     "@deck.gl/carto": "^8.6.0",
     "@deck.gl/core": "^8.6.0",
     "@deck.gl/geo-layers": "^8.6.0",
