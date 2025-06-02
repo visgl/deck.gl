@@ -43,8 +43,9 @@ function createResult(result: _FetchMapResult): FetchMapResult {
 }
 
 /**
- * @deprecated import fetchMap from @carto/api-client instead and use LayerFactory
- * to instantiate layers
+ * fetchMap is a wrapper around the @carto/api-client fetchMap function.
+ * It is used to fetch a map from the Carto API and return a set of configured deck.gl layers.
+ * For greater control, use the @carto/api-client fetchMap function directly and use LayerFactory to create layers manually.
  */
 export async function fetchMap(options: FetchMapOptions): Promise<FetchMapResult> {
   const {onNewData, ...rest} = options;
@@ -56,7 +57,6 @@ export async function fetchMap(options: FetchMapOptions): Promise<FetchMapResult
   };
 
   // For backwards compatibility, provide a shim for the old API
-  // TODO: v9.2 remove `fetchMap` from @deck.gl/carto and only provide LayerFactory
   const _result: _FetchMapResult = await _fetchMap(_options);
   const result: FetchMapResult = createResult(_result);
   return result;
