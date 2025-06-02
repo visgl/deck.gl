@@ -226,16 +226,41 @@ export default class LayersPass extends Pass {
       viewport
     });
 
-    if (view && view.props.clear) {
-      const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
+    if (view) {
+      const {clearColor, clearDepth, clear} = view.props;
+
+      // By default, do not clear
+      let colorToUse: [number, number, number, number] | false = false;
+      let depthToUse: number | false = false;
+
+      // If clear is explicitly set to true, clear color and depth buffers
+      if (clear) {
+        colorToUse = [0, 0, 0, 0];
+        depthToUse = 1;
+      }
+
+      // If clearColor or clearDepth are explicitly set, use them
+      // Except, if clear is explicitly set to false, do not clear
+      if (clearColor && clear !== false) {
+        colorToUse = [
+          clearColor[0] / 255,
+          clearColor[1] / 255,
+          clearColor[2] / 255,
+          (clearColor[3] || 255) / 255
+        ];
+      }
+      if (clearDepth && clear !== false) {
+        depthToUse = 1;
+      }
+
       const clearRenderPass = this.device.beginRenderPass({
         framebuffer: target,
         parameters: {
           viewport: glViewport,
           scissorRect: glViewport
         },
-        clearColor: clearOpts.color ? [0, 0, 0, 0] : false,
-        clearDepth: clearOpts.depth ? 1 : false
+        clearColor: colorToUse,
+        clearDepth: depthToUse
       });
       clearRenderPass.end();
     }

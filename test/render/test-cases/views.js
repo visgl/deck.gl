@@ -133,5 +133,53 @@ export default [
       ],
       goldenImage: `./test/render/golden-images/globe-mvt.png`
     };
-  })
+  }),
+  {
+    name: 'multi-view',
+    views: [
+      new MapView({id: 'background', clearColor: [0, 0, 255]}),
+      new MapView({
+        id: 'red',
+        x: 0,
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clearColor: [255, 0, 0, 255]
+      }),
+      new MapView({
+        id: 'green',
+        x: '50%',
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clearColor: [0, 255, 0]
+      }),
+      new MapView({
+        id: 'doesnt-clear',
+        x: 0,
+        y: '50%',
+        width: '50%',
+        height: '50%',
+        clear: false,
+        clearColor: [0, 255, 0, 255]
+      }),
+      new MapView({id: 'transparent', x: '50%', y: '50%', width: '50%', height: '50%', clear: true})
+    ],
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: getRes0Cells(),
+        getPosition: d => cellToLatLng(d).reverse(),
+        radiusMinPixels: 4,
+        getFillColor: [0, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/multi-view.png'
+  }
 ];
