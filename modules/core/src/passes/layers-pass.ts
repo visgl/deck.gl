@@ -228,9 +228,9 @@ export default class LayersPass extends Pass {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
       pass: string;
-      target: Framebuffer;
+      target?: Framebuffer | null;
       viewport: Viewport;
-      view: View;
+      view?: View;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
@@ -491,7 +491,7 @@ function getGLViewport(
     viewport
   }: {
     shaderModuleProps: any;
-    target?: Framebuffer;
+    target?: Framebuffer | null;
     viewport: Viewport;
   }
 ): [number, number, number, number] {
