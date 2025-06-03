@@ -49,8 +49,8 @@ function createResult(result: _FetchMapResult): FetchMapResult {
 }
 
 /**
- * fetchMap is a wrapper around the @carto/api-client fetchMap function.
- * It is used to fetch a map from the Carto API and return a set of configured deck.gl layers.
+ * fetchMap is a wrapper around the @carto/api-client fetchMap function, with additions for convenience and backward-compatibility.
+ * Where @carto/api-client fetchMap returns layer props, @deck.gl/carto fetchMap returns Layer instances ready for use.
  * For greater control, use the @carto/api-client fetchMap function directly and use LayerFactory to create layers manually.
  */
 export async function fetchMap(options: FetchMapOptions): Promise<FetchMapResult> {
