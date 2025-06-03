@@ -12,14 +12,14 @@ Target release date: Q2, 2025
 
 - [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
 - [ScaleWidget](./api-reference/widgets/scale-widget.md)
-- [GeolocateWidget](./api-reference/widgets/geolocate-widget.md)
+- [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
 - [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
 - [LoadingWidget](./api-reference/widgets/loading-widget.md)
 - [ThemeWidget](./api-reference/widgets/theme-widget.md)
 - [InfoWidget](./api-reference/widgets/info-widget.md)
 - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
 
-Also, pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
+Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
 
 ### Core
 

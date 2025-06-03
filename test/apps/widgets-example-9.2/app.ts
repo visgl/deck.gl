@@ -10,7 +10,7 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  _GeolocateWidget,
+  _GeocoderWidget,
   _ScaleWidget,
   _LoadingWidget,
   _ThemeWidget,
@@ -104,7 +104,7 @@ const deck = new Deck({
     new _FpsWidget(),
     new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-right'}),
-    new _GeolocateWidget({viewId: 'left-map'}),
+    new _GeocoderWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
     new _ContextMenuWidget({
       getMenuItems: (info: PickingInfo) => {
