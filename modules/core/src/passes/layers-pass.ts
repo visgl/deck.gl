@@ -217,7 +217,21 @@ export default class LayersPass extends Pass {
   /* eslint-disable max-depth, max-statements, complexity */
   private _drawLayersInViewport(
     renderPass: RenderPass,
-    {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},
+    {
+      layers,
+      shaderModuleProps: globalModuleParameters,
+      pass,
+      target,
+      viewport,
+      view
+    }: {
+      layers: Layer[];
+      shaderModuleProps: Record<string, any>;
+      pass: string;
+      target: Framebuffer;
+      viewport: Viewport;
+      view: View;
+    },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
@@ -227,42 +241,40 @@ export default class LayersPass extends Pass {
     });
 
     if (view) {
-      const {clearColor, clearDepth, clear} = view.props;
+      const {clear, clearColor, clearDepth} = view.props;
+      // Only clear if a clear option is explicitly set and not disabled
+      if (clear !== false && (clear || clearColor || clearDepth !== undefined)) {
+        let colorToUse: [number, number, number, number] | false = false;
+        let depthToUse: number | false = false;
 
-      // By default, do not clear
-      let colorToUse: [number, number, number, number] | false = false;
-      let depthToUse: number | false = false;
+        if (clear) {
+          colorToUse = [0, 0, 0, 0];
+          depthToUse = 1;
+        }
 
-      // If clear is explicitly set to true, clear color and depth buffers
-      if (clear) {
-        colorToUse = [0, 0, 0, 0];
-        depthToUse = 1;
+        if (clearColor) {
+          colorToUse = [
+            clearColor[0] / 255,
+            clearColor[1] / 255,
+            clearColor[2] / 255,
+            (clearColor[3] || 255) / 255
+          ];
+        }
+        if (clearDepth !== undefined) {
+          depthToUse = clearDepth ? 1 : false;
+        }
+
+        const clearRenderPass = this.device.beginRenderPass({
+          framebuffer: target,
+          parameters: {
+            viewport: glViewport,
+            scissorRect: glViewport
+          },
+          clearColor: colorToUse,
+          clearDepth: depthToUse
+        });
+        clearRenderPass.end();
       }
-
-      // If clearColor or clearDepth are explicitly set, use them
-      // Except, if clear is explicitly set to false, do not clear
-      if (clearColor && clear !== false) {
-        colorToUse = [
-          clearColor[0] / 255,
-          clearColor[1] / 255,
-          clearColor[2] / 255,
-          (clearColor[3] || 255) / 255
-        ];
-      }
-      if (clearDepth && clear !== false) {
-        depthToUse = 1;
-      }
-
-      const clearRenderPass = this.device.beginRenderPass({
-        framebuffer: target,
-        parameters: {
-          viewport: glViewport,
-          scissorRect: glViewport
-        },
-        clearColor: colorToUse,
-        clearDepth: depthToUse
-      });
-      clearRenderPass.end();
     }
 
     // render layers in normal colors
@@ -277,7 +289,7 @@ export default class LayersPass extends Pass {
 
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-      const layer = layers[layerIndex] as Layer;
+      const layer = layers[layerIndex];
       const drawLayerParameters = drawLayerParams[layerIndex];
       const {shouldDrawLayer} = drawLayerParameters;
 
