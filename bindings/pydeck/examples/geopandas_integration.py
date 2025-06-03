@@ -35,4 +35,3 @@ layers = [
 ]
 
 pdk.Deck(layers, map_provider=None).to_html("geopandas_integration.html", css_background_color="cornflowerblue")
-
