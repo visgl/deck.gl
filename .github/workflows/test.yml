@@ -11,8 +11,12 @@ permissions:
   contents: read
 
 jobs:
-  setup:
+  test-node:
     runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: volta-cli/action@5c175f92dea6f48441c436471e6479dbc192e194 # v4.2.1
@@ -25,30 +29,6 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      # Upload the built artifacts so other jobs can use them
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist
-            node_modules
-
-  test-node:
-    needs: setup
-    runs-on: ubuntu-22.04
-    permissions:
-      checks: write
-      contents: read
-
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
       - name: Run tests
         run: |
           yarn lint
@@ -60,7 +40,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   
   test-website:
-    needs: setup
     runs-on: ubuntu-22.04
     permissions:
       checks: write
@@ -68,11 +47,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - uses: volta-cli/action@5c175f92dea6f48441c436471e6479dbc192e194 # v4.2.1
         with:
-          name: build-artifacts
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn bootstrap
+
+      - name: Build packages
+        run: yarn build
 
       - name: Test website build
         run: |
