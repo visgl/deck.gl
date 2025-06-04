@@ -6,65 +6,58 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {PostProcessEffect} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {zoomBlur, vignette} from '@luma.gl/effects';
-import {points} from '../../../examples/layer-browser/src/data-samples';
 
-import type {MapViewState} from '@deck.gl/core';
+import type {Color, MapViewState} from '@deck.gl/core';
+
+const MALE_COLOR: Color = [0, 128, 255];
+const FEMALE_COLOR: Color = [255, 0, 128];
 
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
 const INITIAL_VIEW_STATE: MapViewState = {
-  latitude: 37.751537058389985,
-  longitude: -122.42694203247012,
-  zoom: 11.5,
+  longitude: -74,
+  latitude: 40.7,
+  zoom: 11,
+  maxZoom: 16,
   pitch: 0,
   bearing: 0
 };
 
-type DataPoint = {
-  COORDINATES: [number, number];
-  SPACES: number;
-};
+type DataPoint = [longitude: number, latitude: number, gender: number];
 
 export default function App({
-  data = points,
+  data = DATA_URL,
   radius = 30,
+  maleColor = MALE_COLOR,
+  femaleColor = FEMALE_COLOR,
   mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 }: {
-  data?: typeof points;
+  data?: string | DataPoint[];
   radius?: number;
+  maleColor?: Color;
+  femaleColor?: Color;
   mapStyle?: string;
 }) {
-  const effects = [
-    new PostProcessEffect(zoomBlur, {strength: 0.6}),
-    new PostProcessEffect(vignette, {})
-  ];
-
   const layers = [
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
       radiusScale: radius,
-      radiusMinPixels: 1,
-      radiusMaxPixels: 30,
-      getPosition: d => d.COORDINATES,
-      getFillColor: [255, 128, 0],
-      getRadius: d => d.SPACES,
-      pickable: true
+      radiusMinPixels: 0.25,
+      getPosition: d => [d[0], d[1], 0],
+      getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
+      getRadius: 1,
+      updateTriggers: {
+        getFillColor: [maleColor, femaleColor]
+      }
     })
   ];
 
   return (
-    <DeckGL 
-      layers={layers} 
-      initialViewState={INITIAL_VIEW_STATE} 
-      controller={true}
-      effects={effects}
-    >
+    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );

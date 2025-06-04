@@ -36,13 +36,12 @@ export default class ScreenPass extends Pass {
       depthCompare: 'always' as const,
       depthBias: 0,
       blend: true,
-      // blendColorSrcFactor: 'src-alpha', // <-- needed for zoom blur
-      blendAlphaDstFactor: 'one-minus-src-alpha',
-      blendAlphaOperation: 'add',
-      blendAlphaSrcFactor: 'one',
+      blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one-minus-src-alpha',
+      blendAlphaSrcFactor: 'one',
+      blendAlphaDstFactor: 'one-minus-src-alpha',
       blendColorOperation: 'add',
-      blendColorSrcFactor: 'one', // <-- needed for layer opacity
+      blendAlphaOperation: 'add'
     };
     this.model = new ClipSpace(device, {id, fs, modules: [module, screenUniforms], parameters});
   }
@@ -75,7 +74,6 @@ export default class ScreenPass extends Pass {
       screen: screenProps,
       ...options.moduleProps
     });
-    console.log('ScreenPass.model', this.model.parameters);
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
       parameters: {viewport: [0, 0, ...texSize]},
