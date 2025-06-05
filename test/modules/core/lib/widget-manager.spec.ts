@@ -362,11 +362,11 @@ test('WidgetManager#onHover, onEvent#without viewId', t => {
   widgetManager.onEvent(pickedInfo, {type: 'click'});
   // Trigger onDragStart event
   widgetManager.onEvent(pickedInfo, {type: 'panstart'});
-  // Event not defined
+  // Trigger onClick event
   widgetManager.onEvent(pickedInfo, {type: 'dblclick'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is called');
-  t.is(onClickCalledCount, 1, 'widget.onClick is called');
+  t.is(onClickCalledCount, 2, 'widget.onClick is called');
 
   widgetManager.finalize();
   t.end();
@@ -395,11 +395,11 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
   widgetManager.onEvent(pickedInfo, {type: 'click'});
   // Trigger onDragStart event
   widgetManager.onEvent(pickedInfo, {type: 'panstart'});
-  // Event not defined
+  // Trigger onClick event
   widgetManager.onEvent(pickedInfo, {type: 'dblclick'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is called');
-  t.is(onClickCalledCount, 1, 'widget.onClick is called');
+  t.is(onClickCalledCount, 2, 'widget.onClick is called');
 
   pickedInfo = {
     viewport: new WebMercatorViewport({id: 'minimap'}),
@@ -412,7 +412,7 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
   widgetManager.onEvent(pickedInfo, {type: 'click'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is not called');
-  t.is(onClickCalledCount, 1, 'widget.onClick is not called');
+  t.is(onClickCalledCount, 2, 'widget.onClick is not called');
 
   widgetManager.finalize();
   t.end();
