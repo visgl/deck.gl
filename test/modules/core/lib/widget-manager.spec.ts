@@ -356,13 +356,14 @@ test('WidgetManager#onHover, onEvent#without viewId', t => {
   widget.onHover = () => onHoverCalledCount++;
   widget.onClick = () => onClickCalledCount++;
 
-  // Trigger onHover event
+  // Given the pickedInfo, test that widgetManager does forward events to test widget
+  // Trigger hover event leading to onHover callback
   widgetManager.onHover(pickedInfo, {});
-  // Trigger onClick event
+  // Trigger click event leading to onClick callback
   widgetManager.onEvent(pickedInfo, {type: 'click'});
-  // Trigger onDragStart event
+  // Trigger panstart event leading to onDragStart callback
   widgetManager.onEvent(pickedInfo, {type: 'panstart'});
-  // Trigger onClick event
+  // Trigger dblclick event leading to onClick callback
   widgetManager.onEvent(pickedInfo, {type: 'dblclick'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is called');
@@ -389,13 +390,14 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
   widget.onHover = () => onHoverCalledCount++;
   widget.onClick = () => onClickCalledCount++;
 
-  // Trigger onHover event
+  // Given the pickedInfo, test that widgetManager does forward events to test widget
+  // Trigger hover event leading to onHover callback
   widgetManager.onHover(pickedInfo, {});
-  // Trigger onClick event
+  // Trigger click event leading to onClick callback
   widgetManager.onEvent(pickedInfo, {type: 'click'});
-  // Trigger onDragStart event
+  // Trigger panstart event leading to onDragStart callback
   widgetManager.onEvent(pickedInfo, {type: 'panstart'});
-  // Trigger onClick event
+  // Trigger dblclick event leading to onClick callback
   widgetManager.onEvent(pickedInfo, {type: 'dblclick'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is called');
@@ -406,9 +408,10 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
     index: 0
   };
 
-  // Trigger onHover event
+  // Given the updated pickedInfo, test that widgetManager does *not* forward events to test widget
+  // Trigger hover event not leading to onHover callback
   widgetManager.onHover(pickedInfo, {});
-  // Trigger onClick event
+  // Trigger click event not leading to onClick callback
   widgetManager.onEvent(pickedInfo, {type: 'click'});
 
   t.is(onHoverCalledCount, 1, 'widget.onHover is not called');
