@@ -48,7 +48,8 @@ void main(void) {
   );
 
   // scale icon height to match instanceSize
-  float instanceScale = iconSize.y == 0.0 ? 0.0 : sizePixels / iconSize.y;
+  float iconConstraint = mix(iconSize.y, iconSize.x, sizeBasis);
+  float instanceScale = iconConstraint == 0.0 ? 0.0 : sizePixels / iconConstraint;
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;

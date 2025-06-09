@@ -32,7 +32,6 @@ type _IconLayerProps<DataT> = {
   iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
-
   /** Icon size multiplier.
    * @default 1
    */
@@ -43,6 +42,9 @@ type _IconLayerProps<DataT> = {
    * @default 'pixels'
    */
   sizeUnits?: Unit;
+
+  sizeBasis: 'height' | 'width';
+
   /**
    * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
    */
@@ -105,6 +107,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeScale: {type: 'number', value: 1, min: 0},
   billboard: true,
   sizeUnits: 'pixels',
+  sizeBasis: 'height',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
@@ -257,7 +260,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}): void {
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
+    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} =
+      this.props;
     const {iconManager} = this.state;
 
     const iconsTexture = iconManager.getTexture();
@@ -268,6 +272,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
+        sizeBasis: sizeBasis === 'height' ? 1.0 : 0.0,
         sizeMinPixels,
         sizeMaxPixels,
         billboard,
