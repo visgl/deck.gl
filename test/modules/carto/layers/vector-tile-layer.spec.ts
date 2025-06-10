@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
+import {vectorTableSource} from '@carto/api-client';
+import {VectorTileLayer} from '@deck.gl/carto';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {testPickingLayer} from '../../layers/test-picking-layer';
 import {WebMercatorViewport} from '@deck.gl/core';

@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.2 Prereleases
 
+#### deck.gl [v9.2.0-alpha.2] - Jun 4 2025
+
+- CARTO: refactor to remove fetchmap code  (#9619)
+
 #### deck.gl [v9.2.0-alpha.1] - May 27 2025
 
 - feat(widgets): GeocoderWidget and experimental Geocoders (#9610)
