@@ -22,4 +22,4 @@ export const LANDCOVER_LEGEND = [
   {color: [44, 44, 138], label: 'Water', selected: true},
   {color: [230, 230, 230], label: 'Snow and Ice', selected: true},
   {color: [178, 140, 140], label: 'Barren', selected: true}
-] as {color: Color, label: string, selected: boolean}[]; 
+] as {color: Color; label: string; selected: boolean}[];
