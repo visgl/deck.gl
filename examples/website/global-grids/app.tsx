@@ -27,7 +27,7 @@ type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 
 // TODO update to proper path once merged in deck.gl-data
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/98399817d78116927c7c404f7a59c23d9afeda20/website/';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/39fc27a2c1e20085dd9c8cd230fe097204472247/website/';
 
 export default function App({
   gridSystem,
