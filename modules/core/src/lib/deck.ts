@@ -376,7 +376,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!deviceOrPromise) {
       // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
-        type: 'best-available',
+        type: 'webgl',
         // luma by default throws if a device is already attached
         // asynchronous device creation could happen after finalize() is called
         // TODO - createDevice should support AbortController?
