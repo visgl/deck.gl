@@ -93,7 +93,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Controls the resolution of drawing buffer used for rendering.
    * @default `true` (use browser devicePixelRatio)
    */
-  useDevicePixels?: boolean | number;
+  useDevicePixels?: boolean;
   /** Extra pixels around the pointer to include while picking.
    * @default `0`
    */
@@ -386,8 +386,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         createCanvasContext: {
           canvas: this._createCanvas(props),
           useDevicePixels: this.props.useDevicePixels,
-          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
-          autoResize: false
+          autoResize: true
         }
       });
     }
@@ -794,21 +793,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // height,
       gl,
       // debug,
-      onError,
+      onError
       // onBeforeRender,
       // onAfterRender,
-      useDevicePixels
     } = props;
 
     return new AnimationLoop({
       device: deviceOrPromise,
-      useDevicePixels,
       // TODO v9
       autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
-
       onRender: this._onRenderFrame.bind(this),
       // @ts-expect-error typing mismatch: AnimationLoop does not accept onError:null
       onError
