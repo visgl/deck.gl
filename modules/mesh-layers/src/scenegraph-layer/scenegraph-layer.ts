@@ -353,6 +353,9 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const {viewport, renderPass} = this.context;
     const {sizeScale, sizeMinPixels, sizeMaxPixels, coordinateSystem} = this.props;
+    const pbrProjectionProps = {
+      camera: viewport.cameraPosition as [number, number, number]
+    };
 
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
@@ -360,10 +363,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         const {model} = node;
         model.setInstanceCount(numInstances);
 
-        const pbrProjectionProps = {
-          // Needed for PBR (TODO: find better way to get it)
-          camera: model.uniforms.cameraPosition as [number, number, number]
-        };
         const scenegraphProps: ScenegraphProps = {
           sizeScale,
           sizeMinPixels,
