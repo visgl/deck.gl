@@ -31,8 +31,12 @@ export type CommonViewProps<ViewState> = {
     top?: number | string;
     bottom?: number | string;
   } | null;
-  /** When using multiple views, set this flag to wipe the pixels drawn by other overlaping views */
+  /** When using multiple views, set this flag to wipe the pixels drawn by other overlapping views. Default `undefined` */
   clear?: boolean;
+  /** Color to clear the viewport with, in RGBA format [r, g, b, a]. Values are 0-255. Default `undefined` */
+  clearColor?: number[];
+  /** Whether to clear the depth buffer. Default `undefined` */
+  clearDepth?: boolean;
   /** State of the view */
   viewState?:
     | string
