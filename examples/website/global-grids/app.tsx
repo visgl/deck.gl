@@ -25,9 +25,7 @@ const INITIAL_VIEW_STATE: GlobeViewState = {longitude: 0, latitude: 0, zoom: 2};
 type GridCell = {id: string; value: number};
 type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 
-// TODO update to proper path once merged in deck.gl-data
-const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/39fc27a2c1e20085dd9c8cd230fe097204472247/website/';
+const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/';
 
 export default function App({
   gridSystem,
