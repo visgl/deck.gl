@@ -308,7 +308,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             log.warn(`animation ${key} not found`)();
           }
         } else {
-          const findResult = animations.find(({name}) => name === key);
+          const findResult = animations.find(({animation}) => animation.name === key);
           if (findResult) {
             Object.assign(findResult, value);
           } else {
