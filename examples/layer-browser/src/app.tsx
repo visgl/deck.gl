@@ -88,6 +88,7 @@ export default class App extends PureComponent {
         useDevicePixels: true,
         pickingRadius: 0,
         drawPickingColors: false,
+        interleaved: true,
 
         // Model matrix manipulation
         separation: 0,
