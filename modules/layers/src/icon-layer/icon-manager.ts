@@ -477,8 +477,7 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.generateMipmap();
+          this._texture?.generateMipmapsWebGL();
 
           this.onUpdate();
         })
