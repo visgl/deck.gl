@@ -734,6 +734,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.id = props.id || 'deckgl-overlay';
+
+      // TODO this is a hack, investigate why these are not set for the picking
+      // tests
+      if (props.width && typeof props.width === 'number') {
+        canvas.width = props.width;
+      }
+      if (props.height && typeof props.height === 'number') {
+        canvas.height = props.height;
+      }
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
