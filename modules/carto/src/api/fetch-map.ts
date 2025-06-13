@@ -30,6 +30,7 @@ import {ParseMapResult, parseMap} from './parse-map';
 import {assert} from '../utils';
 import type {Basemap} from './types';
 import {fetchBasemapProps} from './basemap';
+import {DEFAULT_AGGREGATION_EXP} from '../constants';
 
 type Dataset = {
   id: string;
@@ -45,9 +46,6 @@ type Dataset = {
   aggregationResLevel: number;
   queryParameters: QueryParameters;
 };
-
-const DEFAULT_AGGREGATION_EXP_ALIAS = '__aggregationValue';
-const DEFAULT_AGGREGATION_EXP = `1 AS ${DEFAULT_AGGREGATION_EXP_ALIAS}`;
 
 /* global clearInterval, setInterval, URL */
 /* eslint-disable complexity, max-statements, max-params */
