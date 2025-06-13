@@ -30,6 +30,7 @@ import {ParseMapResult, parseMap} from './parse-map';
 import {assert} from '../utils';
 import type {Basemap} from './types';
 import {fetchBasemapProps} from './basemap';
+import {DEFAULT_AGGREGATION_EXP} from '../constants';
 
 type Dataset = {
   id: string;
@@ -88,14 +89,24 @@ async function _fetchMapDataset(dataset: Dataset, context: _FetchMapContext) {
         });
       }
     } else if (spatialDataType === 'h3') {
-      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      const options = {
+        ...globalOptions,
+        aggregationExp: aggregationExp || DEFAULT_AGGREGATION_EXP,
+        aggregationResLevel,
+        spatialDataColumn
+      };
       if (type === 'table') {
         dataset.data = await h3TableSource({...options, tableName: source});
       } else if (type === 'query') {
         dataset.data = await h3QuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else if (spatialDataType === 'quadbin') {
-      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      const options = {
+        ...globalOptions,
+        aggregationExp: aggregationExp || DEFAULT_AGGREGATION_EXP,
+        aggregationResLevel,
+        spatialDataColumn
+      };
       if (type === 'table') {
         dataset.data = await quadbinTableSource({...options, tableName: source});
       } else if (type === 'query') {
