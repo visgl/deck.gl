@@ -46,6 +46,9 @@ type Dataset = {
   queryParameters: QueryParameters;
 };
 
+const DEFAULT_AGGREGATION_EXP_ALIAS = '__aggregationValue';
+const DEFAULT_AGGREGATION_EXP = `1 AS ${DEFAULT_AGGREGATION_EXP_ALIAS}`;
+
 /* global clearInterval, setInterval, URL */
 /* eslint-disable complexity, max-statements, max-params */
 async function _fetchMapDataset(dataset: Dataset, context: _FetchMapContext) {
@@ -88,14 +91,24 @@ async function _fetchMapDataset(dataset: Dataset, context: _FetchMapContext) {
         });
       }
     } else if (spatialDataType === 'h3') {
-      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      const options = {
+        ...globalOptions,
+        aggregationExp: aggregationExp || DEFAULT_AGGREGATION_EXP,
+        aggregationResLevel,
+        spatialDataColumn
+      };
       if (type === 'table') {
         dataset.data = await h3TableSource({...options, tableName: source});
       } else if (type === 'query') {
         dataset.data = await h3QuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else if (spatialDataType === 'quadbin') {
-      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      const options = {
+        ...globalOptions,
+        aggregationExp: aggregationExp || DEFAULT_AGGREGATION_EXP,
+        aggregationResLevel,
+        spatialDataColumn
+      };
       if (type === 'table') {
         dataset.data = await quadbinTableSource({...options, tableName: source});
       } else if (type === 'query') {
