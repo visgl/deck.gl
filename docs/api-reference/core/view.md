@@ -83,35 +83,35 @@ The `viewState` property is intended to support a number of use cases:
 
 #### `clear` (boolean, optional) {#clear}
 
-Clears the contents (pixels) of the viewport. If `true` clears color and depth buffers.
+Clears the contents (pixels) of the viewport. If `true` clears color, depth, and stencil buffers. Options for each buffer can be customized with the `clearColor`, `clearDepth`, and `clearStencil` option.
 
-Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only specify the `clear` property if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
+Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only clear the viewport if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
 
-**Interaction between clearing properties:**
-* `clear: false` - Disables all clearing operations for this view, regardless of `clearColor` or `clearDepth` settings.
-* `clear: true` - Clears both color and depth buffers.
-* `clearColor` - When defined, specifies the color used for clearing, but only has an effect if `clear` is not `false` (i.e., `true` or `undefined`).
-* `clearDepth` - When defined, controls depth buffer clearing, but only has an effect if `clear` is not `false` (i.e., `true` or `undefined`).
+Default `false`.
 
-Default `undefined`.
+#### `clearColor` (number[] | false, optional) {#clearcolor}
 
-#### `clearColor` (number[], optional) {#clearcolor}
+Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clearColor` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
 
-Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clear` is set to `false`, this property will be ignored.
+Default `[0, 0, 0, 0]`.
 
-Default `undefined`.
+#### `clearDepth` (number | false, optional) {#cleardepth}
 
-#### `clearDepth` (boolean, optional) {#cleardepth}
+Specifies the depth buffer value to clear the viewport with, as number between `0.0` and `1.0`. If `clearDepth` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
 
-Specifies whether the depth buffer should be cleared. If `clearDepth` is `true`, the depth buffer will be cleared. If `clear` is set to `false`, this property will be ignored.
+Default `1.0`.
 
-Default `undefined`.
+#### `clearStencil` (number | false, optional) {#clearstencil}
+
+Specifies the stencil buffer value to clear the viewport with, as number between `0` and `255`. If `clearStencil` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+
+Default `255`.
 
 **Examples:**
 
-*   Clearing to a solid color: `new View({clearColor: [80, 120, 200, 255]})`
-*   Clearing color but not depth: `new View({clearColor: [50, 50, 50, 255], clearDepth: false})`
-*   No clearing at all: `new View({clear: false})`
+*   Clearing to a solid color: `new View({clear: true, clearColor: [80, 120, 200, 255]})`
+*   Clearing color and stencil but not depth: `new View({clear: true, clearColor: [50, 50, 50, 255], clearDepth: false})`
+*   No clearing at all: `new View({})` or `new View({clear false})`
 
 
 ## Methods
