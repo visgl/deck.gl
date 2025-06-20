@@ -89,9 +89,7 @@ export const A5LayerDemo = makeLayerDemo({
   Layer: A5Layer,
   getTooltip: '({object}) => object && `${object.pentagon} count: ${object.count}`',
   props: `{
-    // TODO update to use DATA_URI once deck.gl-data is updated
-    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/9f7668f54fa905cda7597b9bc756f7824e6ab2ef/website/sf.bike.parking.a5.json',
-    // data: '${DATA_URI}/sf.bike.parking.a5.json',
+    data: '${DATA_URI}/sf.bike.parking.a5.json',
     pickable: true,
     wireframe: false,
     filled: true,
