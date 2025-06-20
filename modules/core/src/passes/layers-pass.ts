@@ -241,27 +241,30 @@ export default class LayersPass extends Pass {
     });
 
     if (view) {
-      const {clear, clearColor, clearDepth} = view.props;
-      // Only clear if a clear option is explicitly set and not disabled
-      if (clear !== false && (clear || clearColor || clearDepth !== undefined)) {
-        let colorToUse: [number, number, number, number] | false = false;
-        let depthToUse: number | false = false;
+      const {clear, clearColor, clearDepth, clearStencil} = view.props;
+      if (clear) {
+        // If clear option is set, clear all buffers by default.
+        let colorToUse: [number, number, number, number] | false = [0, 0, 0, 0];
+        let depthToUse: number | false = 1.0;
+        let stencilToUse: number | false = 255;
 
-        if (clear) {
-          colorToUse = [0, 0, 0, 0];
-          depthToUse = 1;
-        }
-
-        if (clearColor) {
+        if (Array.isArray(clearColor)) {
           colorToUse = [
             clearColor[0] / 255,
             clearColor[1] / 255,
             clearColor[2] / 255,
             (clearColor[3] || 255) / 255
           ];
+        } else if (clearColor === false) {
+          colorToUse = false;
         }
+
         if (clearDepth !== undefined) {
-          depthToUse = clearDepth ? 1 : false;
+          depthToUse = clearDepth;
+        }
+
+        if (clearStencil !== undefined) {
+          stencilToUse = clearStencil;
         }
 
         const clearRenderPass = this.device.beginRenderPass({
@@ -271,7 +274,8 @@ export default class LayersPass extends Pass {
             scissorRect: glViewport
           },
           clearColor: colorToUse,
-          clearDepth: depthToUse
+          clearDepth: depthToUse,
+          clearStencil: stencilToUse
         });
         clearRenderPass.end();
       }
