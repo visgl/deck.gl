@@ -83,7 +83,7 @@ The `viewState` property is intended to support a number of use cases:
 
 #### `clear` (boolean, optional) {#clear}
 
-Clears the contents (pixels) of the viewport. If `true` clears color, depth, and stencil buffers. Options for each buffer can be customized with the `clearColor`, `clearDepth`, and `clearStencil` option.
+Clears the contents (pixels) of the viewport. If `true` clears color, depth, and stencil buffers. Behavior is controlled with the `clearColor`, `clearDepth`, and `clearStencil` properties.
 
 Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only clear the viewport if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
 
