@@ -137,7 +137,7 @@ export default [
   {
     name: 'multi-view',
     views: [
-      new MapView({id: 'background', clearColor: [0, 0, 255, 128]}),
+      new MapView({id: 'background', clear: true, clearColor: [0, 0, 255, 128]}),
       new MapView({
         id: 'transparent',
         x: 0,
@@ -152,16 +152,17 @@ export default [
         y: 0,
         width: '50%',
         height: '50%',
+        clear: true,
         clearColor: [0, 255, 0]
       }),
       new MapView({
-        id: 'clearing-disabled',
+        id: 'clearing-color-disabled',
         x: 0,
         y: '50%',
         width: '50%',
         height: '50%',
-        clear: false,
-        clearColor: [255, 0, 0, 255]
+        clear: true,
+        clearColor: false
       }),
       new MapView({id: 'default', x: '50%', y: '50%', width: '50%', height: '50%'})
     ],
