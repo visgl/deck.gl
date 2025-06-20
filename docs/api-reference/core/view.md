@@ -91,21 +91,21 @@ Default `false`.
 
 #### `clearColor` (number[] | false, optional) {#clearcolor}
 
-Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clearColor` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a?]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clearColor` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
 
-Default `[0, 0, 0, 0]`.
+Default `[0, 0, 0, 0]` (transparent).
 
 #### `clearDepth` (number | false, optional) {#cleardepth}
 
 Specifies the depth buffer value to clear the viewport with, as number between `0.0` and `1.0`. If `clearDepth` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
 
-Default `1.0`.
+Default `1.0` (far plane).
 
 #### `clearStencil` (number | false, optional) {#clearstencil}
 
 Specifies the stencil buffer value to clear the viewport with, as number between `0` and `255`. If `clearStencil` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
 
-Default `255`.
+Default `0` (clear).
 
 **Examples:**
 

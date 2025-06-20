@@ -4,6 +4,7 @@
 
 import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -80,13 +81,13 @@ export default class LayersPass extends Pass {
       parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
-      parameters.scissorRect = options.scissorRect as [number, number, number, number];
+      parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters,
-      clearColor: clearColor as [number, number, number, number],
+      clearColor: clearColor as NumberArray4,
       clearDepth,
       clearStencil
     });
@@ -244,17 +245,14 @@ export default class LayersPass extends Pass {
       const {clear, clearColor, clearDepth, clearStencil} = view.props;
       if (clear) {
         // If clear option is set, clear all buffers by default.
-        let colorToUse: [number, number, number, number] | false = [0, 0, 0, 0];
+        let colorToUse: NumberArray4 | false = [0, 0, 0, 0];
         let depthToUse: number | false = 1.0;
-        let stencilToUse: number | false = 255;
+        let stencilToUse: number | false = 0;
 
         if (Array.isArray(clearColor)) {
-          colorToUse = [
-            clearColor[0] / 255,
-            clearColor[1] / 255,
-            clearColor[2] / 255,
-            (clearColor[3] || 255) / 255
-          ];
+          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
+            c => c / 255
+          ) as NumberArray4;
         } else if (clearColor === false) {
           colorToUse = false;
         }
