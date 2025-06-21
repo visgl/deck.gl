@@ -7,11 +7,11 @@ import {pentagons} from 'deck.gl-test/data';
 
 export default [
   {
-    name: 'a5-layer',
+    name: 'a5-layer-flat',
     viewState: {
       latitude: 37.75,
       longitude: -122.45,
-      zoom: 11.5,
+      zoom: 11,
       pitch: 0,
       bearing: 0
     },
@@ -29,10 +29,10 @@ export default [
         pickable: true
       })
     ],
-    goldenImage: './test/render/golden-images/a5-layer.png'
+    goldenImage: './test/render/golden-images/a5-layer-flat.png'
   },
   {
-    name: 'a5-layer-flat',
+    name: 'a5-layer',
     viewState: {
       latitude: 37.78,
       longitude: -122.45,
@@ -52,7 +52,7 @@ export default [
           return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
         },
         getElevation: f => f.count,
-        elevationScale: 50,
+        elevationScale: 30,
         pickable: true
       })
     ],
