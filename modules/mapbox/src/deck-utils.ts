@@ -300,7 +300,11 @@ type MaplibreRenderParameters = {
 
 function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport {
   const viewState = getViewState(map);
-  const view = getDefaultView(map);
+  const {
+    props: {views}
+  } = deck;
+  const view =
+    (views && flatten(views).filter((v: {id: string}) => v.id === 'mapbox')) || getDefaultView(map);
 
   if (renderParameters) {
     // Called from MapboxLayer.render
