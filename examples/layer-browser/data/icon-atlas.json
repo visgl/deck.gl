@@ -2,7 +2,7 @@
   "marker": {
     "x": 0,
     "y": 0,
-    "width": 128,
+    "width": 64,
     "height": 128,
     "anchorY": 128,
     "mask": true
@@ -11,7 +11,7 @@
     "x": 128,
     "y": 0,
     "width": 128,
-    "height": 128,
+    "height": 64,
     "anchorY": 128,
     "mask": false
   }

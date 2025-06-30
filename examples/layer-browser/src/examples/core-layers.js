@@ -16,11 +16,11 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
-import {PathStyleExtension, FillStyleExtension} from '@deck.gl/extensions';
+import { PathStyleExtension, FillStyleExtension } from '@deck.gl/extensions';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
-import {parseColor, setOpacity} from '../utils/color';
+import { parseColor, setOpacity } from '../utils/color';
 import flattenVertices from '../utils/flatten-vertices';
 
 const MARKER_SIZE_MAP = {
@@ -58,10 +58,44 @@ const ArcLayerExample = {
 const IconLayerExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
+  // propTypes: {
+  //   sizeBasis: {
+  //     type: 'category',
+  //     value: ['height', 'width']
+  //   }
+  // },
   props: {
+    id: 'icon-layer',
+    //sizeBasis: 'height',
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
     sizeScale: 24,
+    getSizeBasis: d => 0.0,
+    getPosition: d => d.COORDINATES,
+    getColor: d => [64, 64, 72],
+    getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+    getSize: d => (d.RACKS > 2 ? 2 : 1),
+    opacity: 0.8,
+    pickable: true
+  }
+};
+
+const IconLayerExample2 = {
+  layer: IconLayer,
+  getData: () => dataSamples.points,
+  // propTypes: {
+  //   sizeBasis: {
+  //     type: 'category',
+  //     value: ['height', 'width']
+  //   }
+  // },
+  props: {
+    id: 'icon-layer-2',
+    //sizeBasis: 'width',
+    iconAtlas: 'data/icon-atlas.png',
+    iconMapping: dataSamples.iconAtlas,
+    sizeScale: 24,
+    getSizeBasis: d => 1.0,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
     getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
@@ -110,7 +144,7 @@ const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
   getData: () => dataSamples.geojson,
   propTypes: {
-    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    getDashArray: { type: 'compound', elements: ['dashSizeLine'] },
     dashSizeLine: {
       type: 'number',
       max: 20,
@@ -140,7 +174,7 @@ const GeoJsonLayerExample = {
     pickable: true,
     dashJustified: true,
     dashGapPickable: true,
-    extensions: [new PathStyleExtension({dash: true})]
+    extensions: [new PathStyleExtension({ dash: true })]
   }
 };
 
@@ -162,7 +196,7 @@ const PolygonLayerExample = {
   layer: PolygonLayer,
   getData: () => dataSamples.polygons,
   propTypes: {
-    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    getDashArray: { type: 'compound', elements: ['dashSizeLine'] },
     dashSizeLine: {
       type: 'number',
       max: 20,
@@ -182,7 +216,7 @@ const PolygonLayerExample = {
     pickable: true,
     dashJustified: true,
     elevationScale: 0.6,
-    extensions: [new PathStyleExtension({dash: true})]
+    extensions: [new PathStyleExtension({ dash: true })]
   }
 };
 
@@ -191,7 +225,7 @@ const PolygonLayerBinaryExample = {
   getData: () =>
     dataSamples.polygons.map(polygon => {
       // Convert each polygon from an array of points to an array of numbers
-      return flattenVertices(polygon, {dimensions: 2});
+      return flattenVertices(polygon, { dimensions: 2 });
     }),
   props: {
     ...PolygonLayerExample.props,
@@ -204,7 +238,7 @@ const PolygonLayerBinaryExample = {
       ['hatch-1x', 'hatch-2x', 'hatch-cross', 'dots'][Math.floor(Math.random() * 4)],
     getFillPatternOffset: [0, 0],
     getFillPatternScale: 5,
-    extensions: [new FillStyleExtension({pattern: true})]
+    extensions: [new FillStyleExtension({ pattern: true })]
   }
 };
 
@@ -212,7 +246,7 @@ const PathLayerExample = {
   layer: PathLayer,
   getData: () => dataSamples.zigzag,
   propTypes: {
-    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    getDashArray: { type: 'compound', elements: ['dashSizeLine'] },
     dashSizeLine: {
       type: 'number',
       max: 20,
@@ -237,7 +271,7 @@ const PathLayerExample = {
     widthMinPixels: 1,
     pickable: true,
     dashJustified: true,
-    extensions: [new PathStyleExtension({dash: true, offset: true, highPrecisionDash: true})]
+    extensions: [new PathStyleExtension({ dash: true, offset: true, highPrecisionDash: true })]
   }
 };
 
@@ -339,34 +373,34 @@ const TextLayerExample = {
       type: 'number',
       max: 100,
       onUpdate: (newValue, newSettings, change) => {
-        change('fontSettings', {...newSettings.fontSettings, fontSize: newValue});
+        change('fontSettings', { ...newSettings.fontSettings, fontSize: newValue });
       }
     },
     buffer: {
       type: 'number',
       max: 100,
       onUpdate: (newValue, newSettings, change) => {
-        change('fontSettings', {...newSettings.fontSettings, buffer: newValue});
+        change('fontSettings', { ...newSettings.fontSettings, buffer: newValue });
       }
     },
     sdf: {
       type: 'boolean',
       onUpdate: (newValue, newSettings, change) => {
-        change('fontSettings', {...newSettings.fontSettings, sdf: newValue});
+        change('fontSettings', { ...newSettings.fontSettings, sdf: newValue });
       }
     },
     radius: {
       type: 'number',
       max: 20,
       onUpdate: (newValue, newSettings, change) => {
-        change('fontSettings', {...newSettings.fontSettings, radius: newValue});
+        change('fontSettings', { ...newSettings.fontSettings, radius: newValue });
       }
     },
     cutoff: {
       type: 'number',
       max: 1,
       onUpdate: (newValue, newSettings, change) => {
-        change('fontSettings', {...newSettings.fontSettings, cutoff: newValue});
+        change('fontSettings', { ...newSettings.fontSettings, cutoff: newValue });
       }
     },
     wordBreak: {
@@ -384,7 +418,7 @@ const TextLayerExample = {
       type: 'number',
       max: 100
     },
-    backgroundPadding: {type: 'compound', elements: ['padding']},
+    backgroundPadding: { type: 'compound', elements: ['padding'] },
     padding: {
       type: 'number',
       max: 100,
@@ -392,7 +426,7 @@ const TextLayerExample = {
         change('backgroundPadding', [newValue, newValue]);
       }
     },
-    backgroundBorderRadius: {type: 'compound', elements: ['borderRadius']},
+    backgroundBorderRadius: { type: 'compound', elements: ['borderRadius'] },
     borderRadius: {
       type: 'number',
       min: 0,
@@ -454,6 +488,7 @@ export default {
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     IconLayer: IconLayerExample,
+    'IconLayer 2': IconLayerExample2,
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
