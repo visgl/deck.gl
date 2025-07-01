@@ -130,7 +130,6 @@ const defaultProps: DefaultProps<IconLayerProps> = {
 export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_IconLayerProps<DataT>>
 > {
-
   static defaultProps = defaultProps;
   static layerName = 'IconLayer';
 
@@ -279,6 +278,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         billboard,
         alphaCutoff
       };
+
       model.shaderInputs.setProps({icon: iconProps});
       model.draw(this.context.renderPass);
     }
