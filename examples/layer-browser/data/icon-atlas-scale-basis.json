@@ -1,0 +1,18 @@
+{
+  "tall-narrow": {
+    "x": 0,
+    "y": 0,
+    "width": 20,
+    "height": 60,
+    "anchorY": 60,
+    "mask": true
+  },
+  "wide-short": {
+    "x": 20,
+    "y": 0,
+    "width": 60,
+    "height": 20,
+    "anchorY": 20,
+    "mask": true
+  }
+}

@@ -65,7 +65,6 @@ void main(void) {
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
-
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     DECKGL_FILTER_SIZE(offset_common, geometry);
@@ -79,12 +78,7 @@ void main(void) {
     (positions.xy + 1.0) / 2.0
   ) / icon.iconsTextureDim;
 
-  //vColor = instanceColors;
-if (icon.sizeBasis == 0.0) {
-  vColor = vec4(0.0, 1.0, 0.0, 1.0);
-} else {
-  vColor = vec4(1.0, 1.0, 0.0, 1.0);
-}
+  vColor = instanceColors;
 
   DECKGL_FILTER_COLOR(vColor, geometry);
 

@@ -55,18 +55,10 @@ const ArcLayerExample = {
   }
 };
 
-const IconLayerHeightExample = {
+const IconLayerExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
-  propTypes: {
-    sizeBasis: {
-      type: 'category',
-      value: ['height', 'width']
-    }
-  },
   props: {
-    id: 'icon-layer-height',
-    sizeBasis: 'height',
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
     sizeScale: 24,
@@ -79,7 +71,31 @@ const IconLayerHeightExample = {
   }
 };
 
-const IconLayerWidthExample = {
+const IconLayerTallNarrowExample = {
+  layer: IconLayer,
+  getData: () => dataSamples.points,
+  propTypes: {
+    sizeBasis: {
+      type: 'category',
+      value: ['height', 'width']
+    }
+  },
+  props: {
+    id: 'icon-layer-height',
+    sizeBasis: 'height',
+    iconAtlas: 'data/icon-atlas-scale-basis.png',
+    iconMapping: dataSamples.iconAtlasScaleBasis,
+    sizeScale: 24,
+    getPosition: d => d.COORDINATES,
+    getColor: d => [64, 64, 72],
+    getIcon: d => 'tall-narrow',
+    getSize: d => (d.RACKS > 2 ? 2 : 1),
+    opacity: 0.8,
+    pickable: true
+  }
+};
+
+const IconLayerWideShortExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
   propTypes: {
@@ -91,12 +107,12 @@ const IconLayerWidthExample = {
   props: {
     id: 'icon-layer-width',
     sizeBasis: 'width',
-    iconAtlas: 'data/icon-atlas.png',
-    iconMapping: dataSamples.iconAtlas,
+    iconAtlas: 'data/icon-atlas-scale-basis.png',
+    iconMapping: dataSamples.iconAtlasScaleBasis,
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
-    getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+    getIcon: d => 'wide-short',
     getSize: d => (d.RACKS > 2 ? 2 : 1),
     opacity: 0.8,
     pickable: true
@@ -485,8 +501,9 @@ export default {
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
-    'IconLayer height': IconLayerHeightExample,
-    'IconLayer width': IconLayerWidthExample,
+    IconLayer: IconLayerExample,
+    'IconLayer tall narrow icon': IconLayerTallNarrowExample,
+    'IconLayer wide short icon': IconLayerWideShortExample,
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
