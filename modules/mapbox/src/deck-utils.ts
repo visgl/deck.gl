@@ -304,7 +304,8 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
     props: {views}
   } = deck;
   const view =
-    (views && flatten(views).filter((v: {id: string}) => v.id === 'mapbox')) || getDefaultView(map);
+    (views && flatten(views).filter((v: {id: string}) => v.id === 'mapbox')[0]) ||
+    getDefaultView(map);
 
   if (renderParameters) {
     // Called from MapboxLayer.render
