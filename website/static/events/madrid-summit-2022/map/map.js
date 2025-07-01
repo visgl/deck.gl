@@ -10,7 +10,7 @@ deck.carto.setDefaultCredentials({
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
   apiVersion: deck.carto.API_VERSIONS.V3,
   accessToken:
-    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJhMjQyNDM4MSJ9.5bAXb8y7PyIOB__X7i-iQUWCZgLkedtGoqRI25HuQxc'
+    'YOUR_JWT_TOKEN_HERE'
 });
 
 const POLYGON_COLORS = [
