@@ -18,7 +18,16 @@ here = os.path.dirname(os.path.abspath(__file__))
 
 version_ns = {}
 with open(os.path.join(here, "pydeck", "_version.py")) as f:
-    exec(f.read(), {}, version_ns)
+import re
+
+def get_version():
+    with open("pydeck/_version.py", "r") as f:
+        content = f.read()
+    match = re.search(r"__version__s*=s*["']([^"']*)["']", content)
+    if match:
+    raise RuntimeError("Unable to find version string.")
+
+version = get_version()
 
 
 def read(*parts):
