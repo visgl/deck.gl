@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-console.log("ICON LAYER SHADER LOADED v0.0.2");
-
 export default `\
 #version 300 es
 #define SHADER_NAME icon-layer-vertex-shader
@@ -79,7 +77,6 @@ void main(void) {
   ) / icon.iconsTextureDim;
 
   vColor = instanceColors;
-
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   vColorMode = instanceColorModes;

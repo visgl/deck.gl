@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import { Layer, project32, picking, log, UNIT } from '@deck.gl/core';
-import { SamplerProps, Texture } from '@luma.gl/core';
-import { Model, Geometry } from '@luma.gl/engine';
+import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
+import {SamplerProps, Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
 
-import { iconUniforms, IconProps } from './icon-layer-uniforms';
+import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
 import IconManager from './icon-manager';
@@ -24,7 +24,7 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 
-import type { UnpackedIcon, IconMapping, LoadIconErrorContext } from './icon-manager';
+import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -32,6 +32,7 @@ type _IconLayerProps<DataT> = {
   iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
+
   /** Icon size multiplier.
    * @default 1
    */
@@ -43,7 +44,7 @@ type _IconLayerProps<DataT> = {
    */
   sizeUnits?: Unit;
   /**
-   * TODO
+   * The dimension to scale the image
    */
   sizeBasis: 'height' | 'width';
   /**
@@ -103,31 +104,32 @@ export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProp
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 const defaultProps: DefaultProps<IconLayerProps> = {
-  iconAtlas: { type: 'image', value: null, async: true },
-  iconMapping: { type: 'object', value: {}, async: true },
-  sizeScale: { type: 'number', value: 1, min: 0 },
+  iconAtlas: {type: 'image', value: null, async: true},
+  iconMapping: {type: 'object', value: {}, async: true},
+  sizeScale: {type: 'number', value: 1, min: 0},
   billboard: true,
   sizeUnits: 'pixels',
   sizeBasis: 'height',
-  sizeMinPixels: { type: 'number', min: 0, value: 0 }, //  min point radius in pixels
-  sizeMaxPixels: { type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER }, // max point radius in pixels
-  alphaCutoff: { type: 'number', value: 0.05, min: 0, max: 1 },
+  sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
+  sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
+  alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: { type: 'accessor', value: (x: any) => x.position },
-  getIcon: { type: 'accessor', value: (x: any) => x.icon },
-  getColor: { type: 'accessor', value: DEFAULT_COLOR },
-  getSize: { type: 'accessor', value: 1 },
-  getAngle: { type: 'accessor', value: 0 },
-  getPixelOffset: { type: 'accessor', value: [0, 0] },
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getIcon: {type: 'accessor', value: (x: any) => x.icon},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getSize: {type: 'accessor', value: 1},
+  getAngle: {type: 'accessor', value: 0},
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
 
-  onIconError: { type: 'function', value: null, optional: true },
+  onIconError: {type: 'function', value: null, optional: true},
 
-  textureParameters: { type: 'object', ignore: true, value: null }
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** Render raster icons at given coordinates. */
-export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
-  Layer<ExtraPropsT & Required<_IconLayerProps<DataT>>> {
+export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
+  ExtraPropsT & Required<_IconLayerProps<DataT>>
+> {
 
   static defaultProps = defaultProps;
   static layerName = 'IconLayer';
@@ -138,7 +140,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({ vs, fs, modules: [project32, picking, iconUniforms] });
+    return super.getShaders({vs, fs, modules: [project32, picking, iconUniforms]});
   }
 
   initializeState() {
@@ -208,11 +210,11 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   /* eslint-disable max-statements, complexity */
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const { props, oldProps, changeFlags } = params;
+    const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
-    const { iconAtlas, iconMapping, data, getIcon, textureParameters } = props;
-    const { iconManager } = this.state;
+    const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
+    const {iconManager} = this.state;
 
     if (typeof iconAtlas === 'string') {
       return;
@@ -260,10 +262,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     this.state.iconManager.finalize();
   }
 
-  draw({ uniforms }): void {
-    const { sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff } =
-      this.props;
-    const { iconManager } = this.state;
+  draw({uniforms}): void {
+    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
+    const {iconManager} = this.state;
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
       const model = this.state.model!;
@@ -278,7 +279,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         billboard,
         alphaCutoff
       };
-      model.shaderInputs.setProps({ icon: iconProps });
+      model.shaderInputs.setProps({icon: iconProps});
       model.draw(this.context.renderPass);
     }
   }
@@ -336,7 +337,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected getInstanceIconFrame(icon: string): number[] {
-    const { x, y, width, height } = this.state.iconManager.getIconMapping(icon);
+    const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
     return [x, y, width, height];
   }
 }

@@ -18,7 +18,6 @@ import routes from '../data/sfmta.routes.json' assert {type: 'json'};
 import trips from '../data/trips.json' assert {type: 'json'};
 import SFTrips from '../data/sf.trips.json' assert {type: 'json'};
 import iconAtlas from '../data/icon-atlas.json' assert {type: 'json'};
-import iconAtlasScaleBasis from '../data/icon-atlas-scale-basis.json' assert {type: 'json'};
 import quadkeys from '../data/sf.quadkeys.json' assert {type: 'json'};
 import s2cells from '../data/sf.s2cells.json' assert {type: 'json'};
 import pentagons from '../data/sf.bike.parking.a5.json' assert {type: 'json'};
@@ -34,7 +33,6 @@ export {
   trips,
   SFTrips,
   iconAtlas,
-  iconAtlasScaleBasis,
   quadkeys,
   s2cells,
   pentagons,
