@@ -55,22 +55,21 @@ const ArcLayerExample = {
   }
 };
 
-const IconLayerExample = {
+const IconLayerHeightExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
-  // propTypes: {
-  //   sizeBasis: {
-  //     type: 'category',
-  //     value: ['height', 'width']
-  //   }
-  // },
+  propTypes: {
+    sizeBasis: {
+      type: 'category',
+      value: ['height', 'width']
+    }
+  },
   props: {
-    id: 'icon-layer',
-    //sizeBasis: 'height',
+    id: 'icon-layer-height',
+    sizeBasis: 'height',
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
     sizeScale: 24,
-    getSizeBasis: d => 0.0,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
     getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
@@ -80,22 +79,21 @@ const IconLayerExample = {
   }
 };
 
-const IconLayerExample2 = {
+const IconLayerWidthExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
-  // propTypes: {
-  //   sizeBasis: {
-  //     type: 'category',
-  //     value: ['height', 'width']
-  //   }
-  // },
+  propTypes: {
+    sizeBasis: {
+      type: 'category',
+      value: ['width', 'height']
+    }
+  },
   props: {
-    id: 'icon-layer-2',
-    //sizeBasis: 'width',
+    id: 'icon-layer-width',
+    sizeBasis: 'width',
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
     sizeScale: 24,
-    getSizeBasis: d => 1.0,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
     getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
@@ -487,8 +485,8 @@ export default {
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
-    IconLayer: IconLayerExample,
-    'IconLayer 2': IconLayerExample2,
+    'IconLayer height': IconLayerHeightExample,
+    'IconLayer width': IconLayerWidthExample,
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,

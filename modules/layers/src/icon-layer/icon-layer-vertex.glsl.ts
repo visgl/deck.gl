@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-console.log("ICON LAYER SHADER LOADED v0.0.1");
+console.log("ICON LAYER SHADER LOADED v0.0.2");
 
 export default `\
 #version 300 es
 #define SHADER_NAME icon-layer-vertex-shader
 
 in vec2 positions;
-
-in float instanceSizeBasis;
 
 in vec3 instancePositions;
 in vec3 instancePositions64Low;
@@ -51,9 +49,8 @@ void main(void) {
     icon.sizeMinPixels, icon.sizeMaxPixels
   );
 
-  // scale icon height or weigth to match instanceSize
-  float sizeBasis = instanceSizeBasis;
-  float iconConstraint = mix(iconSize.y, iconSize.x, sizeBasis);
+  // Use width (iconSize.x) if icon.sizeBasis is 1.0, else use height (iconSize.y)
+  float iconConstraint = mix(iconSize.y, iconSize.x, icon.sizeBasis);
   float instanceScale = iconConstraint == 0.0 ? 0.0 : sizePixels / iconConstraint;
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
@@ -83,7 +80,7 @@ void main(void) {
   ) / icon.iconsTextureDim;
 
   //vColor = instanceColors;
-if (sizeBasis == 0.0) {
+if (icon.sizeBasis == 0.0) {
   vColor = vec4(0.0, 1.0, 0.0, 1.0);
 } else {
   vColor = vec4(1.0, 1.0, 0.0, 1.0);
