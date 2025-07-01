@@ -1,50 +1,40 @@
-// deck.gl
-// SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-
-const {LOCAL_BUNDLE} = require('./constants');
-const utils = require('./utils');
+const csrf = require('csurf');
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 
-let pagesByName = {};
+// Parse cookies and body for CSRF middleware
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-app.use('/images', express.static('./images'));
+// Setup CSRF protection
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
 
-app.get('/', (req, resp) => {
-  /* Refresh page index */
-  const pages = utils.getAllMetadata();
-  pagesByName = {};
-  pages.forEach(meta => {
-    pagesByName[meta.name] = meta;
-  });
+// Serve static files
+app.use(express.static(path.join(__dirname, '../dist')));
 
-  resp.send(utils.getIndexPage(pages, {noCache: true}));
+// CSRF token endpoint
+app.get('/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
 });
 
-app.get('/404', (req, resp) => {
-  resp.send('Page not found');
-});
-
-app.get('/deckgl.min.js', (req, resp) => {
-  const src = fs.readFileSync(LOCAL_BUNDLE, 'utf-8');
-  resp.append('Content-Type', 'text/javascript');
-  resp.send(src);
-});
-
-app.get('/*', (req, resp) => {
-  const name = path.basename(req.path, '.html');
-  const page = pagesByName[name] && utils.getPage(pagesByName[name], {noCache: true});
-
-  if (page) {
-    resp.send(page);
+// CSRF error handler
+app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    res.status(403).json({ error: 'Invalid CSRF token' });
   } else {
-    resp.redirect('/404');
+    next(err);
   }
 });
 
-app.listen(3000);
+// Catch all handler
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
