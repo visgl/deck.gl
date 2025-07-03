@@ -14,7 +14,9 @@ const DEFAULT_CANVAS_CONTEXT_PROPS: CanvasContextProps = {
 };
 
 /** Test device */
-const webglDevice = globalThis.navigator !== undefined && new WebGLDevice({createCanvasContext: DEFAULT_CANVAS_CONTEXT_PROPS});
+const webglDevice =
+  globalThis.navigator !== undefined &&
+  new WebGLDevice({createCanvasContext: DEFAULT_CANVAS_CONTEXT_PROPS});
 export const device = webglDevice || new NullDevice({});
 export const gl = webglDevice ? webglDevice.gl : 1;
 
