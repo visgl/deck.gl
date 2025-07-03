@@ -28,7 +28,7 @@ export default class ShadowPass extends LayersPass {
         magFilter: 'linear',
         addressModeU: 'clamp-to-edge',
         addressModeV: 'clamp-to-edge'
-      },
+      }
       // TODO - texture API change in luma.gl v9.2
       // mipmaps: true
     });
