@@ -36,10 +36,10 @@ test('H3Tileset2D', async t => {
   t.equal(tileset.getTileId({i: '82754ffffffffff'}), '82754ffffffffff', 'tile id');
   const {bbox} = tileset.getTileMetadata({i: '82754ffffffffff'});
   const expectedBbox = {
-    west: -0.8199508788179312,
-    south: -1.855492618547643,
-    east: 1.9211969045935835,
-    north: 0.9361637645983679
+    west: -1.0122479382442804,
+    south: -2.0477834895958438,
+    east: 2.113493964019933,
+    north: 1.1284546356465657
   };
   t.ok(
     Object.keys(bbox).every(name => equals(bbox[name], expectedBbox[name])),
