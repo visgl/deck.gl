@@ -15,7 +15,7 @@ const PICKING_BLENDING: RenderPipelineParameters = {
   blendColorSrcFactor: 'one',
   blendColorDstFactor: 'zero',
   blendAlphaOperation: 'add',
-  blendAlphaSrcFactor: 'constant-alpha',
+  blendAlphaSrcFactor: 'constant',
   blendAlphaDstFactor: 'zero'
 };
 

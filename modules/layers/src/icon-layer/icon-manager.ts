@@ -4,6 +4,7 @@
 
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
+import {AsyncTexture} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -116,21 +117,26 @@ function getIconId(icon: UnpackedIcon): string {
 }
 
 // resize texture without losing original data
-function resizeTexture(
+async function resizeTexture(
   texture: Texture,
   width: number,
   height: number,
   sampler: SamplerProps
-): Texture {
+): Promise<Texture> {
   const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = device.createTexture({
+  const asyncTexture = new AsyncTexture(device, {
     format: 'rgba8unorm',
+    dimension: '2d',
+    data: null,
     width,
     height,
     sampler,
     mipmaps: true
   });
+  // TODO: Remove this once we have a new luma.gl that has this fix
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const newTexture = asyncTexture.texture;
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
     sourceTexture: texture,
@@ -386,7 +392,7 @@ export default class IconManager {
     return this._pendingCount === 0;
   }
 
-  packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): void {
+  async packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): Promise<void> {
     if (!this._autoPacking || typeof document === 'undefined') {
       return;
     }
@@ -413,17 +419,22 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        this._texture = this.device.createTexture({
+        const asyncTexture = new AsyncTexture(this.device, {
           format: 'rgba8unorm',
+          dimension: '2d',
+          data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
           mipmaps: true
         });
+        // TODO: Remove this once we have a new luma.gl that has this fix
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        this._texture = asyncTexture.texture;
       }
 
       if (this._texture.height !== this._canvasHeight) {
-        this._texture = resizeTexture(
+        this._texture = await resizeTexture(
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
@@ -477,8 +488,7 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.generateMipmap();
+          this._texture?.generateMipmapsWebGL();
 
           this.onUpdate();
         })

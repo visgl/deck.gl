@@ -133,10 +133,13 @@ export default class DeckRenderer {
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
     const size = this.device.canvasContext!.getDrawingBufferSize();
+    const [width, height] = size;
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {
         const texture = this.device.createTexture({
-          sampler: {minFilter: 'linear', magFilter: 'linear'}
+          sampler: {minFilter: 'linear', magFilter: 'linear'},
+          width,
+          height
         });
         renderBuffers.push(
           this.device.createFramebuffer({

@@ -77,7 +77,7 @@ export default class App extends PureComponent {
 
     this.state = props.state || {
       activeExamples: {
-        ScatterplotLayer: true
+        'IconLayer (auto packing)': true
       },
       settings: {
         shadow: false,

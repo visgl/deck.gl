@@ -267,10 +267,6 @@ export default class GoogleMapsOverlay {
         deck.setProps({_framebuffer});
       }
 
-      // With external gl context, animation loop doesn't resize webgl-canvas and thus fails to
-      // calculate corrext pixel ratio. Force this manually.
-      device.getDefaultCanvasContext().resize();
-
       // Camera changed, will trigger a map repaint right after this
       // Clear any change flag triggered by setting viewState so that deck does not request
       // a second repaint
