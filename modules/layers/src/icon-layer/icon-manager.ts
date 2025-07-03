@@ -134,7 +134,8 @@ async function resizeTexture(
     sampler,
     mipmaps: true
   });
-  await asyncTexture.ready;
+  // TODO: Remove this once we have a new luma.gl that has this fix
+  await new Promise(resolve => setTimeout(resolve, 1000));
   const newTexture = asyncTexture.texture;
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
@@ -427,7 +428,8 @@ export default class IconManager {
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
           mipmaps: true
         });
-        await asyncTexture.ready;
+        // TODO: Remove this once we have a new luma.gl that has this fix
+        await new Promise(resolve => setTimeout(resolve, 1000));
         this._texture = asyncTexture.texture;
       }
 
