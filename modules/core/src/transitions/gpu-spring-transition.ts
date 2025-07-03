@@ -211,7 +211,6 @@ function getTexture(device: Device): Texture {
   return device.createTexture({
     data: new Uint8Array(4),
     format: 'rgba8unorm',
-    mipmaps: false,
     width: 1,
     height: 1
   });
