@@ -194,6 +194,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     ],
     varyings: ['vNext'],
     modules: [springUniforms],
+    // @ts-expect-error TODO fix luma type
     defines: {ATTRIBUTE_TYPE: attributeType},
     parameters: {
       depthCompare: 'always',
