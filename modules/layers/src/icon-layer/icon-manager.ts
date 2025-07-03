@@ -4,6 +4,7 @@
 
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
+import {AsyncTexture} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -116,16 +117,18 @@ function getIconId(icon: UnpackedIcon): string {
 }
 
 // resize texture without losing original data
-function resizeTexture(
+async function resizeTexture(
   texture: Texture,
   width: number,
   height: number,
   sampler: SamplerProps
-): Texture {
+): Promise<Texture> {
   const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = device.createTexture({
+  const newTexture = await AsyncTexture.createTexture(device, {
     format: 'rgba8unorm',
+    dimension: '2d',
+    data: null,
     width,
     height,
     sampler,
@@ -386,7 +389,7 @@ export default class IconManager {
     return this._pendingCount === 0;
   }
 
-  packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): void {
+  async packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): Promise<void> {
     if (!this._autoPacking || typeof document === 'undefined') {
       return;
     }
@@ -413,13 +416,16 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        this._texture = this.device.createTexture({
+        const asyncTexture = await AsyncTexture.createTexture(this.device, {
           format: 'rgba8unorm',
+          dimension: '2d',
+          data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
           mipmaps: true
         });
+        this._texture = asyncTexture.texture;
       }
 
       if (this._texture.height !== this._canvasHeight) {
