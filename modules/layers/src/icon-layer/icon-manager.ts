@@ -125,7 +125,7 @@ async function resizeTexture(
 ): Promise<Texture> {
   const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = await AsyncTexture.createTexture(device, {
+  const asyncTexture = new AsyncTexture(device, {
     format: 'rgba8unorm',
     dimension: '2d',
     data: null,
@@ -134,6 +134,8 @@ async function resizeTexture(
     sampler,
     mipmaps: true
   });
+  await asyncTexture.ready;
+  const newTexture = asyncTexture.texture;
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
     sourceTexture: texture,
@@ -416,7 +418,7 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        const asyncTexture = await AsyncTexture.createTexture(this.device, {
+        const asyncTexture = new AsyncTexture(this.device, {
           format: 'rgba8unorm',
           dimension: '2d',
           data: null,
@@ -425,11 +427,12 @@ export default class IconManager {
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
           mipmaps: true
         });
+        await asyncTexture.ready;
         this._texture = asyncTexture.texture;
       }
 
       if (this._texture.height !== this._canvasHeight) {
-        this._texture = resizeTexture(
+        this._texture = await resizeTexture(
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
