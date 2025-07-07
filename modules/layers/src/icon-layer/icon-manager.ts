@@ -117,26 +117,22 @@ function getIconId(icon: UnpackedIcon): string {
 }
 
 // resize texture without losing original data
-async function resizeTexture(
+function resizeTexture(
   texture: Texture,
   width: number,
   height: number,
   sampler: SamplerProps
-): Promise<Texture> {
+): Texture {
   const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const asyncTexture = new AsyncTexture(device, {
+  const newTexture = device.createTexture({
     format: 'rgba8unorm',
-    dimension: '2d',
-    data: null,
     width,
     height,
     sampler,
-    mipmaps: true
+    mipLevels: device.getMipLevelCount(width, height)
   });
-  // TODO: Remove this once we have a new luma.gl that has this fix
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const newTexture = asyncTexture.texture;
+
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
     sourceTexture: texture,
@@ -145,6 +141,7 @@ async function resizeTexture(
     height: oldHeight
   });
   commandEncoder.finish();
+  newTexture.generateMipmapsWebGL();
 
   texture.destroy();
   return newTexture;
@@ -392,7 +389,7 @@ export default class IconManager {
     return this._pendingCount === 0;
   }
 
-  async packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): Promise<void> {
+  packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): void {
     if (!this._autoPacking || typeof document === 'undefined') {
       return;
     }
@@ -419,22 +416,18 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        const asyncTexture = new AsyncTexture(this.device, {
+        this._texture = this.device.createTexture({
           format: 'rgba8unorm',
-          dimension: '2d',
           data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
-          mipmaps: true
+          mipLevels: this.device.getMipLevelCount(this._canvasWidth, this._canvasHeight)
         });
-        // TODO: Remove this once we have a new luma.gl that has this fix
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        this._texture = asyncTexture.texture;
       }
 
       if (this._texture.height !== this._canvasHeight) {
-        this._texture = await resizeTexture(
+        this._texture = resizeTexture(
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
@@ -447,6 +440,7 @@ export default class IconManager {
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
+      this._texture?.generateMipmapsWebGL();
     }
   }
 
