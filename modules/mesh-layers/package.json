@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@loaders.gl/gltf": "^4.2.0",
+    "@loaders.gl/schema": "^4.2.0",
     "@luma.gl/gltf": "^9.1.9",
     "@luma.gl/shadertools": "^9.1.9"
   },
