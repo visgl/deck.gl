@@ -15,6 +15,22 @@ import {polygons} from 'deck.gl-test/data';
 
 const cube = new CubeGeometry();
 
+// Hack in GLSL shader for vignette
+// TODO: remove once https://github.com/visgl/luma.gl/pull/2403 released
+vignette.source = vignette.fs;
+vignette.fs = /* glsl */ `\
+uniform vignetteUniforms {
+  float radius;
+  float amount;
+} vignette;
+
+vec4 vignette_filterColor_ext(vec4 color, vec2 texSize, vec2 texCoord) {
+  float dist = distance(texCoord, vec2(0.5, 0.5));
+  float ratio = smoothstep(0.8, vignette.radius * 0.799, dist * (vignette.amount + vignette.radius));
+  return color.rgba * ratio + (1.0 - ratio)*vec4(0.0, 0.0, 0.0, 1.0);
+}
+`;
+
 const MASK_POLYGON = [
   [-122.48, 37.75],
   [-122.43, 37.73],
