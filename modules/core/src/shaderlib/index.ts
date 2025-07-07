@@ -5,6 +5,10 @@
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
 import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
+// TODO remove once https://github.com/visgl/luma.gl/pull/2404 merged
+phongMaterial.fs = phongMaterial.fs.replace('MAX_LIGHTS 1', 'MAX_LIGHTS 3');
+gouraudMaterial.vs = gouraudMaterial.vs.replace('MAX_LIGHTS 1', 'MAX_LIGHTS 3');
+
 import {layerUniforms} from './misc/layer-uniforms';
 import geometry from './misc/geometry';
 import project from './project/project';
