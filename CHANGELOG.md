@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.13] - Jul 8 2025
+
+- fix(google): Do not force canvas resize (#9695)
+- fix(CARTO): H3 tile bounding box includes edge children (#9693)
+- fix: onClick callback does not handle dblclick (#9629)
+- fix(carto): Assign default aggregationExp in fetchMap() (#9668)
+- fix: filter layers in mapbox overlay, interleaved mode (#9603)
+
 #### deck.gl [v9.1.12] - May 14 2025
 
 - fix: do not touch stencil in _renderPass() (#9630)
