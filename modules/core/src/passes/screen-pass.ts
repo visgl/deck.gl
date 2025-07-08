@@ -31,7 +31,18 @@ export default class ScreenPass extends Pass {
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
     const {module, fs, id} = props;
-    const parameters = {depthWriteEnabled: false, depthCompare: 'always' as const};
+    const parameters: any = {
+      depthWriteEnabled: false,
+      depthCompare: 'always' as const,
+      depthBias: 0,
+      blend: true,
+      blendColorSrcFactor: 'one',
+      blendColorDstFactor: 'one-minus-src-alpha',
+      blendAlphaSrcFactor: 'one',
+      blendAlphaDstFactor: 'one-minus-src-alpha',
+      blendColorOperation: 'add',
+      blendAlphaOperation: 'add'
+    };
     this.model = new ClipSpace(device, {id, fs, modules: [module, screenUniforms], parameters});
   }
 
