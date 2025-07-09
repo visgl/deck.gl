@@ -28,6 +28,7 @@
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
     "test-fast": "ocular-lint && ocular-test node",
+    "test-website": "cd website && yarn && yarn test-build && cd ..",
     "metrics": "ocular-metrics",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",

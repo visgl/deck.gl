@@ -110,6 +110,7 @@ export {
 } from '@deck.gl/aggregation-layers';
 
 export {
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   QuadkeyLayer,

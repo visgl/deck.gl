@@ -10,7 +10,7 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  _GeolocateWidget,
+  _GeocoderWidget,
   _ScaleWidget,
   _LoadingWidget,
   _ThemeWidget,
@@ -20,7 +20,8 @@ import {
   _SplitterWidget,
   _TimelineWidget,
   _ViewSelectorWidget,
-  _ContextMenuWidget
+  _ContextMenuWidget,
+  _StatsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -103,7 +104,7 @@ const deck = new Deck({
     new _FpsWidget(),
     new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-right'}),
-    new _GeolocateWidget({viewId: 'left-map'}),
+    new _GeocoderWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
     new _ContextMenuWidget({
       getMenuItems: (info: PickingInfo) => {
@@ -136,7 +137,8 @@ const deck = new Deck({
       viewId2: 'right-map',
       orientation: 'vertical',
       onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
-    })
+    }),
+    new _StatsWidget({type: 'luma'})
   ]
 });
 
