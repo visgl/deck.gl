@@ -480,6 +480,20 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
+    if (props.useDevicePixels !== undefined && this.device?.canvasContext?.canvas instanceof HTMLCanvasElement) {
+      // TODO: It would be much cleaner if CanvasContext had a setProps method
+      this.device.canvasContext.props.useDevicePixels = props.useDevicePixels;
+      const canvas = this.device.canvasContext.canvas;
+      const entry = {
+        target: canvas,
+        contentBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}],
+        devicePixelContentBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}],
+        borderBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}]
+      };
+      // Access the protected _handleResize method through the canvas context
+      (this.device.canvasContext as any)._handleResize([entry]);
+    }
+
     // If initialized, update sub manager props
     if (this.layerManager) {
       this.viewManager!.setProps(resolvedProps);
