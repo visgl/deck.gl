@@ -49,8 +49,9 @@ export default {
       onAfterEvents: ({deck, layers}) => {
         t.is(hoverEvents.length, 1, 'onHover is called');
         t.is(hoverEvents[0].info.index, 0, 'object is picked');
+        const uniforms = layers[0].state.model.shaderInputs.getUniformValues();
         t.deepEqual(
-          layers[0].state.model.getUniforms().picking_uSelectedColor,
+          uniforms.picking.highlightedObjectColor,
           [1, 0, 0],
           'autoHighlight parameter is set'
         );
