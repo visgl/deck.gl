@@ -22,7 +22,9 @@ export function createRenderTarget(
           format: 'rgba32float',
           type: GL.FLOAT
         }),
-        mipmaps: false,
+        dimension: '2d',
+        width: 1,
+        height: 1,
         sampler:
           opts.interpolate === false
             ? {
