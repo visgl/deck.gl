@@ -44,7 +44,7 @@ export default {
   getTestCases: t => [
     {
       name: 'hover',
-      events: [{type: 'mousemove', x: 400, y: 200}, {wait: 500}],
+      events: [{type: 'mousemove', x: 400, y: 200}, {wait: 50}],
       onBeforeEvents,
       onAfterEvents: ({deck, layers}) => {
         t.is(hoverEvents.length, 1, 'onHover is called');
@@ -59,7 +59,7 @@ export default {
     },
     {
       name: 'hover',
-      events: [{type: 'click', x: 400, y: 200}, {wait: 1000}],
+      events: [{type: 'click', x: 400, y: 200}, {wait: 350}],
       onBeforeEvents,
       onAfterEvents: ({deck}) => {
         t.is(clickEvents.length, 1, 'onClick is called');

@@ -29,6 +29,6 @@ enableDOMLogging({
   })
 });
 
-import './modules';
-import './render';
+//import './modules';
+//import './render';
 import './interaction';
