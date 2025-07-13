@@ -387,7 +387,7 @@ export default class DataColumn<Options, State> {
           accessor.type = 'float32';
         } else {
           const type = dataTypeFromTypedArray(opts.value);
-          accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;
+          accessor.type = accessor.normalized ? type.replace('int', 'norm') : type;
         }
       }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;

@@ -56,7 +56,7 @@ export default {
           'autoHighlight parameter is set'
         );
       }
-    },
+    }
     // TODO(felixpalmer/ibgreen): Temporarily disabled during luma 9.2 upgrade
     // {
     //   name: 'hover',
