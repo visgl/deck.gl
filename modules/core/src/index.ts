@@ -49,8 +49,8 @@ export {
   picking,
   project,
   project32,
-  gouraudLighting,
-  phongLighting,
+  gouraudMaterial,
+  phongMaterial,
   shadow
 } from './shaderlib/index';
 
