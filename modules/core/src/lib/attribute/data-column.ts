@@ -387,7 +387,9 @@ export default class DataColumn<Options, State> {
           accessor.type = 'float32';
         } else {
           const type = dataTypeFromTypedArray(opts.value);
-          accessor.type = accessor.normalized ? type.replace('int', 'norm') : type;
+          // (lint wants to remove the cast)
+          // eslint-disable-next-line
+          accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;
         }
       }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
