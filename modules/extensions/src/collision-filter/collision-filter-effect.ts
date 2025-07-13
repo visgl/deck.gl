@@ -244,8 +244,7 @@ export default class CollisionFilterEffect implements Effect {
   }
 
   createFBO(device: Device, collisionGroup: string) {
-    // @ts-expect-error
-    const {width, height} = device.gl.canvas;
+    const {width, height} = device.getDefaultCanvasContext().canvas;
     const collisionMap = device.createTexture({
       format: 'rgba8unorm',
       width,
@@ -258,12 +257,10 @@ export default class CollisionFilterEffect implements Effect {
       }
     });
 
-    // @ts-ignore
     const depthStencilAttachment = device.createTexture({
       format: 'depth16unorm',
       width,
-      height,
-      mipmaps: false
+      height
     });
     this.collisionFBOs[collisionGroup] = device.createFramebuffer({
       id: `collision-${collisionGroup}`,
