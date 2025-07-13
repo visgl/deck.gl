@@ -111,7 +111,7 @@ Default `0` (clear).
 
 *   Clearing to a solid color: `new View({clear: true, clearColor: [80, 120, 200, 255]})`
 *   Clearing color and stencil but not depth: `new View({clear: true, clearColor: [50, 50, 50, 255], clearDepth: false})`
-*   No clearing at all: `new View({})` or `new View({clear false})`
+*   No clearing at all: `new View({})` or `new View({clear: false})`
 
 
 ## Methods
