@@ -55,6 +55,9 @@
     "tap-spec": "^5.0.0",
     "tape-catch": "^1.0.6"
   },
+  "resolutions": {
+    "wgsl_reflect": "^1.2.0"
+  },
   "pre-commit": [
     "test-fast",
     "bindings-precommit-tests"
