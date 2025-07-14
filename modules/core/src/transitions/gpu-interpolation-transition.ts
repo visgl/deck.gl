@@ -200,7 +200,9 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       // @ts-expect-error fp64 module only sets ONE uniform via defaultUniforms
       modules: [fp64arithmetic, interpolationUniforms],
       defines: {
+        // @ts-expect-error TODO fix luma type
         ATTRIBUTE_TYPE: attributeType,
+        // @ts-expect-error TODO fix luma type
         ATTRIBUTE_SIZE: attributeSize
       },
       // Default uniforms are not set without this
@@ -218,6 +220,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     ],
     modules: [interpolationUniforms],
     defines: {
+      // @ts-expect-error TODO fix luma type
       ATTRIBUTE_TYPE: attributeType
     },
     varyings: ['vCurrent'],
