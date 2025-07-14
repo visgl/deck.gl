@@ -304,7 +304,7 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
   const viewState = getViewState(map);
   const {views} = deck.props;
   const view =
-    (views && flatten(views).filter((v: {id: string}) => v.id === 'mapbox')[0]) ||
+    (views && flatten(views).find((v: {id: string}) => v.id === MAPBOX_VIEW_ID)) ||
     getDefaultView(map);
 
   if (renderParameters) {
