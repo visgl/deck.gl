@@ -3,12 +3,12 @@
 A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
-import {picking, project32, gouraudLighting} from '@deck.gl/core';
+import {picking, project32, gouraudMaterial} from '@deck.gl/core';
 
 const model = new Model(gl, {
   vs: '// vertex shader GLSL source'
   fs: '// fragment shader GLSL source',
-  modules: [picking, project32, gouraudLighting] // list of optional module names
+  modules: [picking, project32, gouraudMaterial] // list of optional module names
 });
 ```
 
@@ -34,8 +34,8 @@ The `project` module also has two extensions, [project32](../../api-reference/co
 
 A simple lighting package is provided in deck.gl, supporting a single directional light in addition to ambient light. Turning on lighting requires normals to be provided for each vertex. There are two flavors:
 
-- [gouraudLighting] - for lighting calculated in the vertex shader
-- [phongLighting] - for lighting calculated in the fragment shader
+- [gouraudMaterial] - for lighting calculated in the vertex shader
+- [phongMaterial] - for lighting calculated in the fragment shader
 
 
 #### fp64
