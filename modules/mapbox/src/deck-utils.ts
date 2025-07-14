@@ -10,6 +10,8 @@ import type {Map} from './types';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
+const MAPBOX_VIEW_ID = 'mapbox';
+
 type UserData = {
   isExternal: boolean;
   currentViewport?: Viewport | null;
@@ -200,9 +202,9 @@ function getProjection(map: Map): 'mercator' | 'globe' {
 
 export function getDefaultView(map: Map): GlobeView | MapView {
   if (getProjection(map) === 'globe') {
-    return new GlobeView({id: 'mapbox'});
+    return new GlobeView({id: MAPBOX_VIEW_ID});
   }
-  return new MapView({id: 'mapbox'});
+  return new MapView({id: MAPBOX_VIEW_ID});
 }
 
 export function getViewState(map: Map): MapViewState & {
@@ -340,7 +342,7 @@ function afterRender(deck: Deck, map: Map): void {
       layer => layer && !mapboxLayerIds.includes(layer.id)
     );
     let viewports = deck.getViewports();
-    const mapboxViewportIdx = viewports.findIndex(vp => vp.id === 'mapbox');
+    const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
     const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
 
     if (hasNonMapboxLayers || hasNonMapboxViews) {
@@ -353,7 +355,7 @@ function afterRender(deck: Deck, map: Map): void {
         viewports,
         layerFilter: params =>
           (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-          (params.viewport.id !== 'mapbox' || !mapboxLayerIds.includes(params.layer.id)),
+          (params.viewport.id !== MAPBOX_VIEW_ID || !mapboxLayerIds.includes(params.layer.id)),
         clearCanvas: false
       });
     }
