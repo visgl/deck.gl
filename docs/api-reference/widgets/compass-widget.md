@@ -47,8 +47,8 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 | Name             | Type                     | Default                                        |
 | ---------------- | ------------------------ | ---------------------------------------------- |
 | `--icon-compass` | [SVG Data Url][data_url] | Custom Icon |
-| `--icon-compass-north-color` | [Color](color_url) | `rgb(240, 92, 68)` |
-| `--icon-compass-south-color` | [Color](color_url) | `rgb(204, 204, 204)` |
+| `--icon-compass-north-color` | [Color][color_url] | `rgb(240, 92, 68)` |
+| `--icon-compass-south-color` | [Color][color_url] | `rgb(204, 204, 204)` |
 
 [data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
 [color_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value

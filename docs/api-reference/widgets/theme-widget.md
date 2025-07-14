@@ -1,3 +1,4 @@
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import {WidgetPreview} from '@site/src/doc-demos/widgets';
 import {_ThemeWidget} from '@deck.gl/widgets';
 
@@ -12,7 +13,7 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
   :::
 
-<WidgetPreview cls={_ThemeWidget}/>
+<BrowserOnly>{() => <WidgetPreview cls={_ThemeWidget}/>}</BrowserOnly>
 
 ```ts
 import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
