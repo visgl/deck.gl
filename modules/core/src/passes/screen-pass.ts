@@ -5,7 +5,7 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import type {Device, Framebuffer} from '@luma.gl/core';
+import type {Device, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import Pass from './pass';
@@ -31,7 +31,7 @@ export default class ScreenPass extends Pass {
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
     const {module, fs, id} = props;
-    const parameters: any = {
+    const parameters: RenderPipelineParameters = {
       depthWriteEnabled: false,
       depthCompare: 'always' as const,
       depthBias: 0,
