@@ -4,7 +4,7 @@
 
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
-import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
+import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
 import {layerUniforms} from './misc/layer-uniforms';
 import geometry from './misc/geometry';
 import project from './project/project';
@@ -42,7 +42,7 @@ export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   return shaderAssembler;
 }
 
-export {layerUniforms, picking, project, project32, gouraudLighting, phongLighting, shadow};
+export {layerUniforms, picking, project, project32, gouraudMaterial, phongMaterial, shadow};
 
 // Useful for custom shader modules
 export type {ProjectProps, ProjectUniforms} from './project/viewport-uniforms';
