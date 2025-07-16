@@ -214,8 +214,13 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     }
 
     // Force initial render if Deck is initialized
+    // Defer initial render to next frame to avoid race conditions with map initialization
     if (thisRef.deck?.isInitialized) {
-      thisRef.deck.redraw('Initial render');
+      requestAnimationFrame(() => {
+        if (thisRef.deck?.isInitialized) {
+          thisRef.deck.redraw('Initial render');
+        }
+      });
     }
   });
 

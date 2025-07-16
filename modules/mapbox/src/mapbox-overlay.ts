@@ -90,16 +90,30 @@ export default class MapboxOverlay implements IControl {
     });
     this._container = container;
 
-    this._deck = new Deck<any>({
-      ...this._props,
-      parent: container,
-      parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
-      views: this._props.views || getDefaultView(map),
-      viewState: getViewState(map)
-    });
+    // Defer deck creation until map is loaded to avoid race condition with projection initialization
+    const createDeck = () => {
+      if (this._deck) return; // Already created
+      
+      this._deck = new Deck<any>({
+        ...this._props,
+        parent: container,
+        parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
+        views: this._props.views || getDefaultView(map),
+        viewState: getViewState(map)
+      });
+    };
+
+    // Create deck immediately if map style is already loaded, otherwise wait for load event
+    if (map.isStyleLoaded()) {
+      createDeck();
+    } else {
+      map.once('load', createDeck);
+    }
 
     map.on('resize', this._updateContainerSize);
     map.on('render', this._updateViewState);
+    // Listen for projection changes to update the view
+    map.on('style.load', this._updateViewState);
     map.on('mousedown', this._handleMouseEvent);
     map.on('dragstart', this._handleMouseEvent);
     map.on('drag', this._handleMouseEvent);
@@ -121,17 +135,30 @@ export default class MapboxOverlay implements IControl {
         'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
       )();
     }
-    this._deck = getDeckInstance({
-      map,
-      gl,
-      deck: new Deck({
-        ...this._props,
-        gl
-      })
-    });
+
+    // Defer deck creation until map is loaded to avoid race condition with projection initialization
+    const createDeck = () => {
+      if (this._deck) return; // Already created
+      
+      this._deck = getDeckInstance({
+        map,
+        gl,
+        deck: new Deck({
+          ...this._props,
+          gl
+        })
+      });
+      resolveLayers(map, this._deck, [], this._props.layers);
+    };
+
+    // Create deck immediately if map style is already loaded, otherwise wait for load event
+    if (map.isStyleLoaded()) {
+      createDeck();
+    } else {
+      map.once('load', createDeck);
+    }
 
     map.on('styledata', this._handleStyleChange);
-    resolveLayers(map, this._deck, [], this._props.layers);
 
     return document.createElement('div');
   }
@@ -213,7 +240,9 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _handleStyleChange = () => {
-    resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    if (this._deck && this._map) {
+      resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    }
   };
 
   private _updateContainerSize = () => {
