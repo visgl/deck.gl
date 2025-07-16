@@ -136,7 +136,7 @@ export default class MapboxOverlay implements IControl {
       resolveLayers(map, this._deck, [], this._props.layers);
     };
 
-    if (map.isStyleLoaded()) {
+    if (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
       createDeck();
     } else {
       map.once('load', createDeck);
