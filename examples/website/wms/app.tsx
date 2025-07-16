@@ -4,7 +4,7 @@
 
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 import type {MapViewState} from '@deck.gl/core';
@@ -69,6 +69,7 @@ export default function App({
       if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         layer.getFeatureInfoText(x, y).then(featureInfo => {
           setSelection({x, y, featureInfo});
         });

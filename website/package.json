@@ -8,6 +8,7 @@
     "start": "docusaurus start",
     "build": "./scripts/build.sh prod",
     "build-staging": "./scripts/build.sh staging",
+    "test-build": "./scripts/test-build.sh",
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
@@ -23,9 +24,9 @@
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
+    "@monaco-editor/react": "^4.4.6",
     "@turf/turf": "^6.5.0",
     "@vis.gl/react-maplibre": "^1.0.0-alpha.5",
-    "brace": "^0.11.1",
     "d3-color": "^3.1.0",
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
@@ -33,9 +34,9 @@
     "expr-eval": "^2.0.2",
     "mapbox-gl": "^3.0.0",
     "maplibre-gl": "^5.0.0",
+    "monaco-editor": "^0.39.0",
     "popmotion": "^11.0.0",
     "react": "^18.0.0",
-    "react-ace": "^6.1.4",
     "react-dom": "^18.0.0",
     "react-map-gl": "^8.0.0",
     "react-virtualized-auto-sizer": "^1.0.2",
@@ -60,5 +61,6 @@
   "volta": {
     "node": "18.19.0",
     "yarn": "1.22.19"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }

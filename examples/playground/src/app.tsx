@@ -13,9 +13,7 @@ import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
 
-import AceEditor from 'react-ace';
-import 'brace/mode/json';
-import 'brace/theme/github';
+import Editor from '@monaco-editor/react';
 
 import JSON_TEMPLATES from '../json-examples';
 
@@ -47,21 +45,18 @@ function addUpdateTriggersForAccessors(json) {
 }
 
 export default class App extends Component {
+  jsonConverter: JSONConverter;
+
+  state = {
+    // editor
+    text: '',
+    // deck.gl JSON Props
+    jsonProps: {} as Record<string, unknown>,
+    initialViewState: null as Record<string, any> | null
+  };
+
   constructor(props) {
     super(props);
-
-    this.state = {
-      // react-ace
-      text: '',
-      // deck.gl JSON Props
-      jsonProps: {},
-      initialViewState: null
-    };
-
-    // TODO/ib - could use arrow functions
-    // keeping like this for now to allow this code to be copied back to deck.gl
-    this._onTemplateChange = this._onTemplateChange.bind(this);
-    this._onEditorChange = this._onEditorChange.bind(this);
 
     // Configure and create the JSON converter instance
     const configuration = new JSONConfiguration(JSON_CONVERTER_CONFIGURATION);
@@ -130,7 +125,8 @@ export default class App extends Component {
     this._setTemplate(value);
   }
 
-  _onEditorChange(text, event) {
+  _onEditorChange(value) {
+    const text = value;
     let json = null;
     // Parse JSON, while capturing and ignoring exceptions
     try {
@@ -144,7 +140,7 @@ export default class App extends Component {
 
   _renderJsonSelector() {
     return (
-      <select name="JSON templates" onChange={this._onTemplateChange}>
+      <select name="JSON templates" onChange={event => this._onTemplateChange(event)}>
         {Object.entries(JSON_TEMPLATES).map(([key]) => (
           <option key={key} value={key}>
             {key}
@@ -180,25 +176,21 @@ export default class App extends Component {
 
     return (
       <Fragment>
-        {/* Left Pane: Ace Editor and Template Selector */}
+        {/* Left Pane: Monaco Editor and Template Selector */}
         <div id="left-pane">
           {this._renderJsonSelector()}
 
           <div id="editor">
             <AutoSizer>
               {({width, height}) => (
-                <AceEditor
+                <Editor
                   width={`${width}px`}
                   height={`${height}px`}
-                  mode="json"
-                  theme="github"
-                  onChange={this._onEditorChange}
-                  name="AceEditorDiv"
-                  editorProps={{$blockScrolling: true}}
-                  ref={instance => {
-                    this.ace = instance;
-                  }}
+                  defaultLanguage="json"
+                  theme="light"
                   value={this.state.text}
+                  onChange={value => this._onEditorChange(value)}
+                  options={{scrollBeyondLastLine: false}}
                 />
               )}
             </AutoSizer>

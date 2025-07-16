@@ -6,7 +6,7 @@
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -71,6 +71,7 @@ export default function App({
         )
       });
     };
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     getMetaData();
   }, []);
 
@@ -97,7 +98,7 @@ export default function App({
         const {width, height} = dimensions;
         const {data, ...otherProps} = props;
         return new BitmapLayer(otherProps, {
-          image: props.data,
+          image: data,
           bounds: [
             clamp(left, 0, width),
             clamp(top, 0, height),

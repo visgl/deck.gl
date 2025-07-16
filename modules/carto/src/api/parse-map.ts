@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable no-shadow */
+
 import {ColorParameters} from '@luma.gl/core';
 import {Layer, log} from '@deck.gl/core';
 import {
@@ -90,7 +92,7 @@ function createParametersProp(layerBlending: string, parameters: ColorParameters
     parameters.blendColorOperation = parameters.blendAlphaOperation = 'add';
   } else if (layerBlending === 'subtractive') {
     parameters.blendColorSrcFactor = 'one';
-    parameters.blendColorDstFactor = 'one-minus-dst-color';
+    parameters.blendColorDstFactor = 'one-minus-dst';
     parameters.blendAlphaSrcFactor = 'src-alpha';
     parameters.blendAlphaDstFactor = 'dst-alpha';
     parameters.blendColorOperation = 'subtract';

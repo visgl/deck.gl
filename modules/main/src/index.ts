@@ -47,8 +47,8 @@ export {
   picking,
   project,
   project32,
-  gouraudLighting,
-  phongLighting,
+  gouraudMaterial,
+  phongMaterial,
   shadow,
   // Internal classes
   LayerManager,
@@ -74,7 +74,9 @@ export {
   Tesselator,
   fp64LowPart,
   createIterable,
-  getShaderAssembler
+  getShaderAssembler,
+  // Widgets
+  Widget
 } from '@deck.gl/core';
 
 //
@@ -108,6 +110,7 @@ export {
 } from '@deck.gl/aggregation-layers';
 
 export {
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   QuadkeyLayer,
@@ -162,8 +165,7 @@ export type {
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect,
-  Widget
+  Effect
 } from '@deck.gl/core';
 
 export type {

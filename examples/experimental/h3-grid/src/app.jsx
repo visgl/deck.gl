@@ -4,7 +4,7 @@
 
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 
 import {Map} from 'react-map-gl/maplibre';

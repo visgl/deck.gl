@@ -92,6 +92,7 @@
           "api-reference/layers/README",
           "api-reference/core/layer",
           "api-reference/core/composite-layer",
+          "api-reference/geo-layers/a5-layer",
           "api-reference/layers/arc-layer",
           "api-reference/layers/bitmap-layer",
           "api-reference/layers/column-layer",
@@ -313,9 +314,20 @@
         "label": "@deck.gl/widgets",
         "items": [
           "api-reference/widgets/overview",
-          "api-reference/widgets/zoom-widget",
+          "api-reference/widgets/styling",
           "api-reference/widgets/compass-widget",
-          "api-reference/widgets/fullscreen-widget"
+          "api-reference/widgets/fps-widget",
+          "api-reference/widgets/fullscreen-widget",
+          "api-reference/widgets/gimbal-widget",
+          "api-reference/widgets/info-widget",
+          "api-reference/widgets/loading-widget",
+          "api-reference/widgets/reset-view-widget",
+          "api-reference/widgets/scale-widget",
+          "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/theme-widget",
+          "api-reference/widgets/timeline-widget",
+          "api-reference/widgets/zoom-widget"
         ]
       }
     ]

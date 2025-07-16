@@ -31,8 +31,14 @@ export type CommonViewProps<ViewState> = {
     top?: number | string;
     bottom?: number | string;
   } | null;
-  /** When using multiple views, set this flag to wipe the pixels drawn by other overlaping views */
+  /** When using multiple views, set this flag to wipe the pixels drawn by other overlapping views. Default `false` */
   clear?: boolean;
+  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent). */
+  clearColor?: number[] | false;
+  /** Depth buffer value to clear the viewport with, between 0.0 - 1.0. Default `1.0` (far plane). */
+  clearDepth?: number | false;
+  /** Stencil buffer Value to clear the viewport with, between 0 - 255. Default `0` (clear). */
+  clearStencil?: number | false;
   /** State of the view */
   viewState?:
     | string
@@ -103,6 +109,12 @@ export default abstract class View<
 
     // To correctly compare padding use depth=2
     return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
+  }
+
+  /** Clone this view with modified props */
+  clone(newProps: Partial<ViewProps>): this {
+    const ViewConstructor = this.constructor as new (props: ViewProps) => this;
+    return new ViewConstructor({...this.props, ...newProps});
   }
 
   /** Make viewport from canvas dimensions and view state */

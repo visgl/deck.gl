@@ -226,6 +226,7 @@ export default class DataFilterExtension extends LayerExtension<
     }
   }
 
+  // eslint-disable-next-line complexity
   updateState(
     this: Layer<DataFilterExtensionProps>,
     {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>,
@@ -268,6 +269,7 @@ export default class DataFilterExtension extends LayerExtension<
     }
   }
 
+  // eslint-disable-next-line max-statements
   draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
     const filterFBO = this.state.filterFBO as Framebuffer;
     const filterModel = this.state.filterModel as Model;
