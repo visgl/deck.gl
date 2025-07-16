@@ -90,25 +90,13 @@ export default class MapboxOverlay implements IControl {
     });
     this._container = container;
 
-    // Defer deck creation until map is loaded to avoid race condition with projection initialization
-    const createDeck = () => {
-      if (this._deck) return; // Already created
-      
-      this._deck = new Deck<any>({
-        ...this._props,
-        parent: container,
-        parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
-        views: this._props.views || getDefaultView(map),
-        viewState: getViewState(map)
-      });
-    };
-
-    // Create deck immediately if map style is already loaded, otherwise wait for load event
-    if (map.isStyleLoaded()) {
-      createDeck();
-    } else {
-      map.once('load', createDeck);
-    }
+    this._deck = new Deck<any>({
+      ...this._props,
+      parent: container,
+      parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
+      views: this._props.views || getDefaultView(map),
+      viewState: getViewState(map)
+    });
 
     map.on('resize', this._updateContainerSize);
     map.on('render', this._updateViewState);
