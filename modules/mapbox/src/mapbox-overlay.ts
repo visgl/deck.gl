@@ -100,8 +100,6 @@ export default class MapboxOverlay implements IControl {
 
     map.on('resize', this._updateContainerSize);
     map.on('render', this._updateViewState);
-    // Listen for projection changes to update the view
-    map.on('style.load', this._updateViewState);
     map.on('mousedown', this._handleMouseEvent);
     map.on('dragstart', this._handleMouseEvent);
     map.on('drag', this._handleMouseEvent);
@@ -228,9 +226,7 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _handleStyleChange = () => {
-    if (this._deck && this._map) {
-      resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
-    }
+    resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
   };
 
   private _updateContainerSize = () => {
