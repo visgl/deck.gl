@@ -2423,10 +2423,10 @@ JSONStream@^1.3.5:
     jsonparse "^1.2.0"
     through ">=2.2.7 <3"
 
-a5-js@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.2.0.tgz#91124d6b1646c78c0e5b2d05efebc474e44bef1d"
-  integrity sha512-Gze9pambXy3PkMSMxf5qej5M1EiznJkphI0pyaVwG0w0JwVq8DfTz0wGgjgLqaSDvXJbf5aKLKgWvhBj/CaZOA==
+a5-js@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.4.0.tgz#97449db5ceb88606ea8468d406345ebdf29120da"
+  integrity sha512-U3sPg6V6l9ULHlPqvry09XVCcYR6KeyufYYZCv4jGi4ED3rPe8yEMj0kuGfn3D9fS66yjNX2EWUMtKrj4gWb+w==
   dependencies:
     gl-matrix "^3.4.3"
 
