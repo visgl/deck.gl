@@ -124,8 +124,7 @@ export default class MapboxOverlay implements IControl {
 
     // Defer deck creation until map is loaded to avoid race condition with projection initialization
     const createDeck = () => {
-      if (this._deck) return; // Already created
-      
+      if (this._deck) return;
       this._deck = getDeckInstance({
         map,
         gl,
@@ -137,7 +136,6 @@ export default class MapboxOverlay implements IControl {
       resolveLayers(map, this._deck, [], this._props.layers);
     };
 
-    // Create deck immediately if map style is already loaded, otherwise wait for load event
     if (map.isStyleLoaded()) {
       createDeck();
     } else {
