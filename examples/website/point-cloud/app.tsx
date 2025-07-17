@@ -66,8 +66,8 @@ export default function App({
   const onDataLoad = useCallback((data: any) => {
     const header = (data as LASMesh).header!;
     const pos = (data as LASMesh).attributes.POSITION;
-    // TODO: (kaapp) can we work around this? webgpu won't allow us to just downgrade
-    // to Float32 and not supply the low value.
+    // TODO: (kaapp) webgpu won't allow us to just downgrade
+    // to Float32 and not supply the low value as webgl so kindly did.
     const f64Pos = new Float64Array(pos.value.length);
     for (let i = 0; i < pos.value.length; i++) {
       f64Pos[i] = pos.value[i];

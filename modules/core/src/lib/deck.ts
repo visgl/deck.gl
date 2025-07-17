@@ -480,8 +480,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (props.device && props.device.id !== this.device?.id) {
       this.animationLoop?.stop();
       if (this.canvas !== props.device.canvasContext?.canvas) {
-        // hide old canvas if new one being used and de-register events
-        // don't remove it from the DOM as it is external to us.
+        // remove old canvas if new one being used and de-register events
         // TODO (ck): We might not own this canvas depending it's source, so removing it from the
         // DOM here might be a bit unexpected but it should be ok for most users.
         this.canvas?.remove();
