@@ -981,7 +981,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!this.canvas) {
       this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
 
-      // if canvas is not in DOM, add it
+      // external canvas may not be in DOM
       if (!this.canvas.isConnected && this.props.parent) {
         this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
       }
