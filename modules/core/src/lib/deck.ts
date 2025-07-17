@@ -480,6 +480,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     if (props.device && props.device.id !== this.device?.id) {
       this.animationLoop?.stop();
+      if (this.canvas !== props.device.canvasContext?.canvas) {
+        this.canvas?.remove(); // remove old canvas if new one being used
+        // ensure we will re-attach ourselves after createDevice callbacks
+        this.canvas = null;
+      }
 
       console.log(`recreating animation loop for new device! id=${props.device.id}`);
 
