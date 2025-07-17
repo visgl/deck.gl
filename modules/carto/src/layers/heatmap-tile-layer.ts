@@ -37,7 +37,9 @@ const defaultColorRange: Color[] = [
 
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
-  mipmaps: false,
+  dimension: '2d',
+  width: 1,
+  height: 1,
   sampler: {
     minFilter: 'linear',
     magFilter: 'linear',
@@ -333,7 +335,6 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
       (colorTexture as any).setTexture2DData({data: colors});
     } else {
       colorTexture?.destroy();
-      // @ts-ignore TODO v9.1
       colorTexture = this.context.device.createTexture({
         ...TEXTURE_PROPS,
         data: colors,
