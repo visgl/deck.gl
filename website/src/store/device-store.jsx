@@ -17,7 +17,11 @@ export async function createDevice(type) {
       adapters: [webgl2Adapter, webgpuAdapter],
       type,
       createCanvasContext: {
-        container: 'deckgl-wrapper'
+        container: 'deckgl-wrapper',
+        useDevicePixels: true,
+        autoResize: true,
+        width: undefined,
+        height: undefined,
       },
     });
   return await cachedDevice[type];
