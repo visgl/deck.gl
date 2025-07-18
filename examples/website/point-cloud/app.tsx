@@ -40,15 +40,9 @@ export default function App({
 }) {
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
 
   useEffect(() => {
-    // we have to re-load the data on device change
-    setIsLoaded(false);
-  }, [device?.id]);
-
-  useEffect(() => {
-    if (!isLoaded || hasInteracted) {
+    if (!isLoaded) {
       return;
     }
     const rotateCamera = () => {
@@ -121,11 +115,6 @@ export default function App({
       device={device}
       views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
       initialViewState={viewState}
-      onViewStateChange={changeParams => {
-        if (!changeParams.interactionState.inTransition) {
-          setHasInteracted(true);
-        }
-      }}
       controller={true}
       layers={layers}
     />
