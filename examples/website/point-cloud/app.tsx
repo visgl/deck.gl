@@ -11,7 +11,7 @@ import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASWorkerLoader} from '@loaders.gl/las';
 import type {OrbitViewState} from '@deck.gl/core';
-import {Device, log} from '@luma.gl/core';
+import {Device} from '@luma.gl/core';
 
 // TODO - export from loaders?
 type LASMesh = (typeof LASWorkerLoader)['dataType'];

@@ -391,6 +391,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         // asynchronous device creation could happen after finalize() is called
         // TODO - createDevice should support AbortController?
         _reuseDevices: true,
+        // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
+        type: 'webgl',
         ...deviceProps,
         // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
         createCanvasContext: {
