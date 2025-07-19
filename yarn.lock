@@ -786,15 +786,15 @@
     "@loaders.gl/worker-utils" "4.2.2"
     draco3d "1.5.7"
 
-"@loaders.gl/gis@4.2.2", "@loaders.gl/gis@^4.2.0":
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/gis/-/gis-4.2.2.tgz#8b233d7c5c8c7d882a4d7f076b3a39d07cf89340"
-  integrity sha512-s9kD6yLMKn8+jAhDFDVWBeeKcDkJHFrscTnVWveGBfnC7IYT4gD6lQeHRIfXrJKs0LWmKPrAS8grTq7Ull8V6Q==
+"@loaders.gl/gis@4.3.4", "@loaders.gl/gis@^4.2.0":
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/gis/-/gis-4.3.4.tgz#07fa1101cf294c6783755fddbda50336dc6c26ea"
+  integrity sha512-8xub38lSWW7+ZXWuUcggk7agRHJUy6RdipLNKZ90eE0ZzLNGDstGD1qiBwkvqH0AkG+uz4B7Kkiptyl7w2Oa6g==
   dependencies:
-    "@loaders.gl/loader-utils" "4.2.2"
-    "@loaders.gl/schema" "4.2.2"
+    "@loaders.gl/loader-utils" "4.3.4"
+    "@loaders.gl/schema" "4.3.4"
     "@mapbox/vector-tile" "^1.3.1"
-    "@math.gl/polygon" "^4.0.0"
+    "@math.gl/polygon" "^4.1.0"
     pbf "^3.2.1"
 
 "@loaders.gl/gltf@4.2.2", "@loaders.gl/gltf@^4.2.0":
@@ -809,14 +809,21 @@
     "@loaders.gl/textures" "4.2.2"
     "@math.gl/core" "^4.0.0"
 
-"@loaders.gl/images@4.2.2", "@loaders.gl/images@^4.2.0":
+"@loaders.gl/images@4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-4.2.2.tgz#a6f37ad3778ab74aeb90f7ead45ef21751aea88c"
   integrity sha512-R53rkexvVT0i4YXt++r8gLq3reB6kWTLvdJL81J3R4YJbM5+kNSe40jJOA94LFYlsTN+oirF4lkLTe5YXGZPYQ==
   dependencies:
     "@loaders.gl/loader-utils" "4.2.2"
 
-"@loaders.gl/loader-utils@4.2.2", "@loaders.gl/loader-utils@^4.2.0":
+"@loaders.gl/images@4.3.4", "@loaders.gl/images@^4.2.0":
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-4.3.4.tgz#386ab26083893af3ffe5b9dd4ae8912fcfb920c0"
+  integrity sha512-qgc33BaNsqN9cWa/xvcGvQ50wGDONgQQdzHCKDDKhV2w/uptZoR5iofJfuG8UUV2vUMMd82Uk9zbopRx2rS4Ag==
+  dependencies:
+    "@loaders.gl/loader-utils" "4.3.4"
+
+"@loaders.gl/loader-utils@4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-4.2.2.tgz#7c4e930c2343bf20d3750ccc770c7368b5cb447a"
   integrity sha512-5udJQhFx1KNIcRBYkFMi8QZitAsK+m3PkZ9GejM8VpOSsJUHD2Yal3wBHOPTRsOjQ0zXG/nqM7BHOojjeetNTg==
@@ -835,6 +842,16 @@
     "@probe.gl/log" "^4.0.2"
     "@probe.gl/stats" "^4.0.2"
 
+"@loaders.gl/loader-utils@4.3.4", "@loaders.gl/loader-utils@^4.2.0":
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-4.3.4.tgz#c45385f29e3a806e709453a59a2e8c3f6f92fca4"
+  integrity sha512-tjMZvlKQSaMl2qmYTAxg+ySR6zd6hQn5n3XaU8+Ehp90TD3WzxvDKOMNDqOa72fFmIV+KgPhcmIJTpq4lAdC4Q==
+  dependencies:
+    "@loaders.gl/schema" "4.3.4"
+    "@loaders.gl/worker-utils" "4.3.4"
+    "@probe.gl/log" "^4.0.2"
+    "@probe.gl/stats" "^4.0.2"
+
 "@loaders.gl/math@4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@loaders.gl/math/-/math-4.2.2.tgz#8f93c3c21c16514fabb66cf08f0cf32f23d192af"
@@ -845,15 +862,16 @@
     "@math.gl/core" "^4.0.0"
 
 "@loaders.gl/mvt@^4.2.0":
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-4.2.2.tgz#5cf45ee7b72c65325ed97c44605c105661c1f36a"
-  integrity sha512-KglhYp1rwIs6h6AtrmKjrEYWxcX6xhlG3c3pTIFJwfA5nMBa+cmzD19vBRo1po9hzWKq4oqqhi7JL0ovH6GAqw==
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-4.3.4.tgz#e7ddd27f8a70f75179b9941f3636ec9edd32bde0"
+  integrity sha512-9DrJX8RQf14htNtxsPIYvTso5dUce9WaJCWCIY/79KYE80Be6dhcEYMknxBS4w3+PAuImaAe66S5xo9B7Erm5A==
   dependencies:
-    "@loaders.gl/gis" "4.2.2"
-    "@loaders.gl/images" "4.2.2"
-    "@loaders.gl/loader-utils" "4.2.2"
-    "@loaders.gl/schema" "4.2.2"
-    "@math.gl/polygon" "^4.0.0"
+    "@loaders.gl/gis" "4.3.4"
+    "@loaders.gl/images" "4.3.4"
+    "@loaders.gl/loader-utils" "4.3.4"
+    "@loaders.gl/schema" "4.3.4"
+    "@math.gl/polygon" "^4.1.0"
+    "@probe.gl/stats" "^4.0.0"
     pbf "^3.2.1"
 
 "@loaders.gl/polyfills@^4.2.0":
@@ -871,17 +889,24 @@
     through "^2.3.8"
     web-streams-polyfill "^3.2.1"
 
-"@loaders.gl/schema@4.2.2", "@loaders.gl/schema@^4.2.0":
+"@loaders.gl/schema@4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.2.2.tgz#c5399343ce6103aebb21ba51bda956478247c133"
   integrity sha512-vrQ6vlGWWptJXDP1DrL5x/j70xmyt2l36QZcGyDYptrohTGvQLc3yrOEHuD5v96fXX5WR619pT3zSYhuf1FnIg==
   dependencies:
     "@types/geojson" "^7946.0.7"
 
-"@loaders.gl/schema@4.3.3", "@loaders.gl/schema@^4.3.3":
+"@loaders.gl/schema@4.3.3":
   version "4.3.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.3.3.tgz#4466022119e0a7d106a22f8efda1c87789083945"
   integrity sha512-zacc9/8je+VbuC6N/QRfiTjRd+BuxsYlddLX1u5/X/cg9s36WZZBlU1oNKUgTYe8eO6+qLyYx77yi+9JbbEehw==
+  dependencies:
+    "@types/geojson" "^7946.0.7"
+
+"@loaders.gl/schema@4.3.4", "@loaders.gl/schema@^4.2.0", "@loaders.gl/schema@^4.3.3":
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.3.4.tgz#03a09dd8cccc30b6e979471daa8343c1efd7d254"
+  integrity sha512-1YTYoatgzr/6JTxqBLwDiD3AVGwQZheYiQwAimWdRBVB0JAzych7s1yBuE0CVEzj4JDPKOzVAz8KnU1TiBvJGw==
   dependencies:
     "@types/geojson" "^7946.0.7"
 
@@ -942,6 +967,11 @@
   version "4.3.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-4.3.3.tgz#ab81dd30c7082f35fd69c984a65b46671a43acc7"
   integrity sha512-eg45Ux6xqsAfqPUqJkhmbFZh9qfmYuPfA+34VcLtfeXIwAngeP6o4SrTmm9LWLGUKiSh47anCEV1p7borDgvGQ==
+
+"@loaders.gl/worker-utils@4.3.4":
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-4.3.4.tgz#f1e3115d8aff4f229aedd2cfc89fa07f9aae7d07"
+  integrity sha512-EbsszrASgT85GH3B7jkx7YXfQyIYo/rlobwMx6V3ewETapPUwdSAInv+89flnk5n2eu2Lpdeh+2zS6PvqbL2RA==
 
 "@loaders.gl/xml@4.2.2":
   version "4.2.2"
@@ -1257,13 +1287,6 @@
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-4.0.1.tgz#d41205c03b8a3f2bc95f4c2636c1844c7c2cf10e"
   integrity sha512-FfTUMk8uRlBa4W3dMSFwPjRgdEBnOeVjBr3mcGqb3lHA/PPMvKuE+o7OJfA61Wj6ItuZqCEZHbLbA3WRAENoqQ==
-  dependencies:
-    "@math.gl/core" "4.0.1"
-
-"@math.gl/polygon@^4.0.0":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-4.0.1.tgz#5b67a0378abd6b66a011f2439a0727aebd2ed2c3"
-  integrity sha512-pwtEbwW3N5qy09K/1FwRYW7M2u9XMPBfIe8BNpkbJh8uH3DPXQdT4uCNFiwrQPPQUQTDdlQyLu/0mRHm2R/fbg==
   dependencies:
     "@math.gl/core" "4.0.1"
 
@@ -1724,7 +1747,7 @@
   dependencies:
     "@probe.gl/env" "4.1.0"
 
-"@probe.gl/stats@^4.0.2", "@probe.gl/stats@^4.0.8", "@probe.gl/stats@^4.1.0":
+"@probe.gl/stats@^4.0.0", "@probe.gl/stats@^4.0.2", "@probe.gl/stats@^4.0.8", "@probe.gl/stats@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@probe.gl/stats/-/stats-4.1.0.tgz#181b774b31f7f3c91f9750e41ccd72f6c8c4ad93"
   integrity sha512-EI413MkWKBDVNIfLdqbeNSJTs7ToBz/KVGkwi3D+dQrSIkRI2IYbWGAU3xX+D6+CI4ls8ehxMhNpUVMaZggDvQ==
@@ -8389,7 +8412,16 @@ streamx@^2.15.0, streamx@^2.18.0:
   optionalDependencies:
     bare-events "^2.2.0"
 
-"string-width-cjs@npm:string-width@^4.2.0", "string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+"string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -8495,7 +8527,7 @@ string_decoder@~1.1.1:
   dependencies:
     safe-buffer "~5.1.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -8508,6 +8540,13 @@ strip-ansi@^3.0.0:
   integrity sha512-VhumSSbBqDTP8p2ZLKj40UjBCV4+v8bUSEpUb4KjRgWk9pbqGF4REFj6KEagidb2f/M6AzC0EmFyDNGaw9OCzg==
   dependencies:
     ansi-regex "^2.0.0"
+
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
 
 strip-ansi@^7.0.1:
   version "7.1.0"
@@ -9356,7 +9395,7 @@ wordwrap@^1.0.0:
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
   integrity sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -9369,6 +9408,15 @@ wrap-ansi@^6.0.1:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
