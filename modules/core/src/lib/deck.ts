@@ -477,6 +477,25 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       viewState: this._getViewState()
     });
 
+    if (props.device && props.device.id !== this.device?.id) {
+      this.animationLoop?.stop();
+      if (this.canvas !== props.device.canvasContext?.canvas) {
+        // remove old canvas if new one being used and de-register events
+        // TODO (ck): We might not own this canvas depending it's source, so removing it from the
+        // DOM here might be a bit unexpected but it should be ok for most users.
+        this.canvas?.remove();
+        this.eventManager?.destroy();
+
+        // ensure we will re-attach ourselves after createDevice callbacks
+        this.canvas = null;
+      }
+
+      log.log(`recreating animation loop for new device! id=${props.device.id}`);
+
+      this.animationLoop = this._createAnimationLoop(props.device, props);
+      this.animationLoop.start();
+    }
+
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
@@ -961,6 +980,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+
+      // external canvas may not be in DOM
+      if (!this.canvas.isConnected && this.props.parent) {
+        this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
+      }
       // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device

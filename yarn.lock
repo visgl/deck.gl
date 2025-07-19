@@ -9223,12 +9223,7 @@ webidl-conversions@^7.0.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-7.0.0.tgz#256b4e1882be7debbf01d05f0aa2039778ea080a"
   integrity sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==
 
-wgsl_reflect@^1.0.1:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.0.9.tgz#38719f27a3894f039af840e55179de2be988fc4f"
-  integrity sha512-NgO7ApUnFuB3FTsBVYjWizMIM5qOawlkSsi7j5BsYlMAW/e+j5IgB2M9kdKzR5lgUECFDSZZK3zdJ4yDmjfx4Q==
-
-wgsl_reflect@^1.2.0:
+wgsl_reflect@^1.0.1, wgsl_reflect@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.2.0.tgz#37be44b292f93cbd64f6f994ab9a38214577ba32"
   integrity sha512-bDYcmWfbg4WsrBmPv6lsyjqXx02r8dkNAzR77OCNqIcR8snO4aNSBTjir9zqgR7rLnw6PaisiZxtCitSCIUlnQ==
