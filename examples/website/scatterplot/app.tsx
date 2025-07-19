@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React from 'react';
+import React, {useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 import type {Color, MapViewState} from '@deck.gl/core';
+import type {Device, DeviceProps} from '@luma.gl/core';
 
-const MALE_COLOR: Color = [0, 128, 255];
-const FEMALE_COLOR: Color = [255, 0, 128];
+const MALE_COLOR: Color = [0, 128, 255, 255];
+const FEMALE_COLOR: Color = [255, 0, 128, 255];
 
 // Source data CSV
 const DATA_URL =
@@ -29,12 +30,16 @@ const INITIAL_VIEW_STATE: MapViewState = {
 type DataPoint = [longitude: number, latitude: number, gender: number];
 
 export default function App({
+  device,
+  deviceProps,
   data = DATA_URL,
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
   mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 }: {
+  device?: Device;
+  deviceProps?: DeviceProps;
   data?: string | DataPoint[];
   radius?: number;
   maleColor?: Color;
@@ -52,17 +57,24 @@ export default function App({
       getRadius: 1,
       updateTriggers: {
         getFillColor: [maleColor, femaleColor]
-      }
+      },
+      pickable: true
     })
   ];
 
   return (
-    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+    <DeckGL
+      device={device}
+      deviceProps={deviceProps}
+      layers={layers}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+    >
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
-  createRoot(container).render(<App />);
+export function renderToDOM(container: HTMLDivElement, device?: Device, deviceProps?: DeviceProps) {
+  createRoot(container).render(<App deviceProps={deviceProps} />);
 }
