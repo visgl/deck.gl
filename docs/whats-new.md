@@ -4,7 +4,11 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.2
 
-Target release date: Q2, 2025
+Target release date: July, 2025
+
+### WebGPU Early Preview
+
+A few deck.gl layers can now be run on WebGPU in the website, by selecting the `WebGPU` tab. See documentation about how to [test WebGPU support](./developer-guide/webgpu.md).
 
 ### Widgets
 
