@@ -37,7 +37,7 @@ class PointCloudDemo extends Component {
 
   render() {
     return <div style={{width: '100%', height: '100%', background: '#ecdbce'}}>
-      <App key={this.props.device?.type} onLoad={this._onLoad} device={this.props.device} />
+      <App key={this.props.device?.type} device={this.props.device} onLoad={this._onLoad} />
     </div>;
   }
 }
