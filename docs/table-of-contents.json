@@ -41,7 +41,8 @@
           "developer-guide/tips-and-tricks",
           "developer-guide/building-apps",
           "developer-guide/debugging",
-          "developer-guide/testing"
+          "developer-guide/testing",
+          "developer-guide/webgpu"
         ]
       },
       {
