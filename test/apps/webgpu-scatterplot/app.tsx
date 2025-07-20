@@ -92,7 +92,7 @@ export default function App({
     <DeckGL
       deviceProps={{
         createCanvasContext: {alphaMode: 'premultiplied'},
-        adapters: [webgpuAdapter]
+        adapters: []
       }}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
