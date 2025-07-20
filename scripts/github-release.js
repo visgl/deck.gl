@@ -1,5 +1,5 @@
-const {execSync} = require('child_process');
-const {readFileSync} = require('fs');
+import {execSync} from 'child_process';
+import {readFileSync} from 'fs';
 
 // Get the latest tag
 const tag = getGitTag();
@@ -28,7 +28,7 @@ console.log(JSON.stringify(requestBody));
 
 function getGitTag() {
   try {
-    return execSync('git describe --exact-match HEAD', {
+    return execSync('git describe --tags --exact-match HEAD', {
       stdio: [null, 'pipe', null],
       encoding: 'utf-8'
     }).trim();

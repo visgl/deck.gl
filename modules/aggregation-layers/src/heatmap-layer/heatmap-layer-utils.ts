@@ -1,5 +1,6 @@
-import {Device} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)
@@ -41,7 +42,11 @@ export function packVertices(points: number[][], dimensions: number = 2): Float3
 }
 
 // Expands boundingBox:[xMin, yMin, xMax, yMax] to match aspect ratio of given width and height
-export function scaleToAspectRatio(boundingBox: number[], width: number, height: number): number[] {
+export function scaleToAspectRatio(
+  boundingBox: [number, number, number, number],
+  width: number,
+  height: number
+): [number, number, number, number] {
   const [xMin, yMin, xMax, yMax] = boundingBox;
 
   const currentWidth = xMax - xMin;
@@ -76,24 +81,4 @@ export function scaleToAspectRatio(boundingBox: number[], width: number, height:
 export function getTextureCoordinates(point: number[], bounds: number[]) {
   const [xMin, yMin, xMax, yMax] = bounds;
   return [(point[0] - xMin) / (xMax - xMin), (point[1] - yMin) / (yMax - yMin)];
-}
-
-// Returns format and type for creating texture objects
-export function getTextureParams({
-  device,
-  floatTargetSupport
-}: {
-  device: Device;
-  floatTargetSupport?: boolean;
-}) {
-  return floatTargetSupport
-    ? {
-        // format:  should be RGBA32F on WebGL2 (float textures), RGBA in WebGL1 for float or non float textures
-        format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
-        type: GL.FLOAT
-      }
-    : {
-        format: GL.RGBA,
-        type: GL.UNSIGNED_BYTE
-      };
 }

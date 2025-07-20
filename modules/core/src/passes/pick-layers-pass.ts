@@ -1,16 +1,22 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import type {GLParameters} from '@luma.gl/webgl';
-import type {Framebuffer} from '@luma.gl/core';
-import {withGLParameters} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/constants';
+import type {Framebuffer, Parameters, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
+import type {Effect} from '../lib/effect';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
-const PICKING_PARAMETERS: GLParameters = {
-  blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
-  blendEquation: GL.FUNC_ADD
+const PICKING_BLENDING: RenderPipelineParameters = {
+  blendColorOperation: 'add',
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'zero',
+  blendAlphaOperation: 'add',
+  blendAlphaSrcFactor: 'constant',
+  blendAlphaDstFactor: 'zero'
 };
 
 type PickLayersPassRenderOptions = LayersPassRenderOptions & {
@@ -64,51 +70,36 @@ export default class PickLayersPass extends LayersPass {
     effects,
     pass = 'picking',
     pickZ,
-    moduleParameters
+    shaderModuleProps
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
+    const scissorRect = [x, y, width, height];
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
     // Note that the callback here is called synchronously.
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    const renderStatus = withGLParameters(
-      this.device,
-      {
-        scissorTest: true,
-        scissor: [x, y, width, height],
-        clearColor: [0, 0, 0, 0],
-        // When used as Mapbox custom layer, the context state may be dirty
-        // TODO - Remove when mapbox fixes this issue
-        // https://github.com/mapbox/mapbox-gl-js/issues/7801
-        depthMask: true,
-        depthTest: true,
-        depthRange: [0, 1],
-        colorMask: [true, true, true, true],
-        // Blending
-        ...PICKING_PARAMETERS,
-        blend: !pickZ
-      },
-      () =>
-        super.render({
-          target: pickingFBO,
-          layers,
-          layerFilter,
-          views,
-          viewports,
-          onViewportActive,
-          cullRect,
-          effects: effects?.filter(e => e.useInPicking),
-          pass,
-          isPicking: true,
-          moduleParameters
-        })
-    );
+    const renderStatus = super.render({
+      target: pickingFBO,
+      layers,
+      layerFilter,
+      views,
+      viewports,
+      onViewportActive,
+      cullRect,
+      effects: effects?.filter(e => e.useInPicking),
+      pass,
+      isPicking: true,
+      shaderModuleProps,
+      clearColor: [0, 0, 0, 0],
+      colorMask: 0xf,
+      scissorRect
+    });
 
     // Clear the temp field
     this._colorEncoderState = null;
@@ -125,31 +116,34 @@ export default class PickLayersPass extends LayersPass {
     );
   }
 
-  protected getModuleParameters() {
+  protected getShaderModuleProps(
+    layer: Layer,
+    effects: Effect[] | undefined,
+    otherShaderModuleProps: Record<string, any>
+  ): any {
     return {
       picking: {
         isActive: 1,
         isAttribute: this.pickZ
       },
-      // turn off lighting by adding empty light source object
-      // lights shader module relies on the `lightSources` to turn on/off lighting
-      lightSources: {}
+      lighting: {enabled: false}
     };
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    const pickParameters = {...layer.props.parameters};
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
+    // TODO use Parameters type
+    const pickParameters: any = {
+      ...layer.props.parameters
+    };
     const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState) {
+    if (!this._colorEncoderState || operation.includes('terrain')) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
-      Object.assign(pickParameters, PICKING_PARAMETERS);
+      Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
+      // TODO: blendColor no longer part of luma.gl API
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
-    }
-    if (operation.includes('terrain')) {
-      pickParameters.blend = false;
     }
 
     return pickParameters;

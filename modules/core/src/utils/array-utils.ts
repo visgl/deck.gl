@@ -1,33 +1,25 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import type {NumericArray, TypedArray} from '../types/types';
 
 /*
  * Helper function for padArray
  */
 function padArrayChunk(options: {
-  source;
-  target;
-  start?: number;
-  end?: number;
+  /** original data */
+  source: TypedArray;
+  /** output data */
+  target: TypedArray;
+  /** length per datum */
   size: number;
-  getData;
+  /** callback to get new data when source is short */
+  getData: (index: number, context: NumericArray) => NumericArray;
+  /** start index */
+  start?: number;
+  /** end index */
+  end?: number;
 }): void {
   const {source, target, start = 0, size, getData} = options;
   const end = options.end || target.length;
@@ -62,15 +54,29 @@ function padArrayChunk(options: {
    The arrays can have internal structures (like the attributes of PathLayer and
    SolidPolygonLayer), defined by the optional sourceStartIndices and targetStartIndices parameters.
    If the target array is larger, the getData callback is used to fill in the blanks.
- * @params {TypedArray} source - original data
- * @params {TypedArray} target - output data
- * @params {Number} size - length per datum
- * @params {Function} getData - callback to get new data when source is short
- * @params {Array<Number>} [sourceStartIndices] - subdivision of the original data in [object0StartIndex, object1StartIndex, ...]
- * @params {Array<Number>} [targetStartIndices] - subdivision of the output data in [object0StartIndex, object1StartIndex, ...]
  */
-export function padArray({source, target, size, getData, sourceStartIndices, targetStartIndices}) {
-  if (!Array.isArray(targetStartIndices)) {
+export function padArray({
+  source,
+  target,
+  size,
+  getData,
+  sourceStartIndices,
+  targetStartIndices
+}: {
+  /** original data */
+  source: TypedArray;
+  /** output data */
+  target: TypedArray;
+  /** length per datum */
+  size: number;
+  /** callback to get new data when source is short */
+  getData: (index: number, context: NumericArray) => NumericArray;
+  /** subdivision of the original data in [object0StartIndex, object1StartIndex, ...] */
+  sourceStartIndices?: NumericArray | null;
+  /** subdivision of the output data in [object0StartIndex, object1StartIndex, ...] */
+  targetStartIndices?: NumericArray | null;
+}): TypedArray {
+  if (!sourceStartIndices || !targetStartIndices) {
     // Flat arrays
     padArrayChunk({
       source,
@@ -107,6 +113,7 @@ export function padArray({source, target, size, getData, sourceStartIndices, tar
 
   if (targetIndex < target.length) {
     padArrayChunk({
+      // @ts-ignore
       source: [],
       target,
       start: targetIndex,

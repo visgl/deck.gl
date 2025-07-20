@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {lerp} from '@math.gl/core';
 
 const DEFAULT_INDICES = new Uint32Array([0, 2, 1, 0, 3, 2]);

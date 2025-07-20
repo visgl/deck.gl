@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';

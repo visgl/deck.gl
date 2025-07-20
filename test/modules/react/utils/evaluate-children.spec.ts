@@ -1,7 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import evaluateChildren from '@deck.gl/react/utils/evaluate-children';
 import React, {createElement} from 'react';
-import {StaticMap} from 'react-map-gl';
 
 const TEST_CHILD_PROPS = {zIndex: 1};
 
@@ -34,8 +37,8 @@ const TEST_CASES = [
     }
   },
   {
-    title: 'react-map-gl Map',
-    input: createElement(StaticMap),
+    title: 'mock react-map-gl Map',
+    input: createElement('div', {mapStyle: 'https://map/style.json'}),
     count: 1,
     expected: {
       zIndex: 1

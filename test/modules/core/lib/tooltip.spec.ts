@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import test from 'tape-promise/tape';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
-import Tooltip from '@deck.gl/core/lib/tooltip';
+import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';
 
 const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 
@@ -10,7 +14,7 @@ const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 function setupTest() {
   const container = document.createElement('div');
   const widgetManager = new WidgetManager({parentElement: container});
-  const tooltip = new Tooltip();
+  const tooltip = new TooltipWidget();
   widgetManager.addDefault(tooltip);
   return {tooltip, widgetManager, container};
 }
@@ -32,12 +36,12 @@ function getTooltipFuncDefault(pickedValue) {
   };
 }
 
-test('Tooltip#setTooltip', t => {
+test('TooltipWidget#setTooltip', t => {
   const {widgetManager, tooltip} = setupTest();
 
   tooltip.setTooltip(getTooltipFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
 
-  const el = tooltip.element;
+  const el = tooltip.rootElement;
   t.equals(el.style.backgroundColor, 'lemonchiffon');
   t.equals(el.style.transform, 'translate(10px, 20px)');
   t.equals(el.innerHTML, '<strong>Number of points:</strong> 10');
@@ -48,12 +52,12 @@ test('Tooltip#setTooltip', t => {
   t.end();
 });
 
-test('Tooltip#setTooltipWithString', t => {
+test('TooltipWidget#setTooltipWithString', t => {
   const {widgetManager, tooltip} = setupTest();
 
   const pickedInfoFunc = info => `Number of points: ${info.object.elevationValue}`;
   tooltip.setTooltip(pickedInfoFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
-  const el = tooltip.element;
+  const el = tooltip.rootElement;
   t.equals(el.innerText, 'Number of points: 10');
   t.equals(el.className, 'deck-tooltip');
   t.equals(el.style.transform, `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`);
@@ -62,12 +66,12 @@ test('Tooltip#setTooltipWithString', t => {
   t.end();
 });
 
-test('Tooltip#setTooltipDefaults', t => {
+test('TooltipWidget#setTooltipDefaults', t => {
   const {widgetManager, tooltip} = setupTest();
 
   const tooltipResult = getTooltipFuncDefault(pickedInfo);
   tooltip.setTooltip(tooltipResult, pickedInfo.x, pickedInfo.y);
-  const el = tooltip.element;
+  const el = tooltip.rootElement;
   t.equals(el.innerText, 'Number of points: 10');
   t.equals(el.className, 'deck-tooltip');
 
@@ -75,26 +79,26 @@ test('Tooltip#setTooltipDefaults', t => {
   t.end();
 });
 
-test('Tooltip#setTooltipNullCase', t => {
+test('TooltipWidget#setTooltipNullCase', t => {
   const {widgetManager, tooltip} = setupTest();
 
   tooltip.setTooltip(null, pickedInfo.x, pickedInfo.y);
-  const el = tooltip.element;
+  const el = tooltip.rootElement;
   t.equals(el.style.display, 'none');
 
   widgetManager.finalize();
   t.end();
 });
 
-test('Tooltip#remove', t => {
+test('TooltipWidget#remove', t => {
   const {widgetManager, tooltip, container} = setupTest();
 
-  t.equals(container.querySelectorAll('.deck-tooltip').length, 1, 'Tooltip element present');
+  t.equals(container.querySelectorAll('.deck-tooltip').length, 1, 'TooltipWidget element present');
   widgetManager.finalize();
   t.equals(
     container.querySelectorAll('.deck-tooltip').length,
     0,
-    'Tooltip element successfully removed'
+    'TooltipWidget element successfully removed'
   );
 
   t.end();

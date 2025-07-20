@@ -32,26 +32,27 @@ The [Aggregation Layers](https://www.npmjs.com/package/@deck.gl/aggregation-laye
 
   - [ContourLayer](../aggregation-layers/contour-layer.md)
   - [GridLayer](../aggregation-layers/grid-layer.md)
-  - [GPUGridLayer](../aggregation-layers/gpu-grid-layer.md)
-  - [CPUGridLayer](../aggregation-layers/cpu-grid-layer.md)
+  - [HeatmapLayer](../aggregation-layers/heatmap-layer.md)
   - [HexagonLayer](../aggregation-layers/hexagon-layer.md)
   - [ScreenGridLayer](../aggregation-layers/screen-grid-layer.md)
-  - [HeatmapLayer](../aggregation-layers/heatmap-layer.md) *Experimental*
 
 ## Geo Layers
 
 The [Geo Layers](https://www.npmjs.com/package/@deck.gl/geo-layers) collects layers that specifically target geospatial visualization use cases, including support for map tiles, popular geospatial indexing systems, GIS formats, etc.
 
+  - [A5Layer](../geo-layers/a5-layer.md)
+  - [GeohashLayer](../geo-layers/geohash-layer.md)
   - [GreatCircleLayer](../geo-layers/great-circle-layer.md)
   - [H3ClusterLayer](../geo-layers/h3-cluster-layer.md)
   - [H3HexagonLayer](../geo-layers/h3-hexagon-layer.md)
-  - [GeohashLayer](../geo-layers/geohash-layer.md)
+  - [MVTLayer](../geo-layers/mvt-layer.md)
   - [QuadkeyLayer](../geo-layers/quadkey-layer.md)
   - [S2Layer](../geo-layers/s2-layer.md)
-  - [TileLayer](../geo-layers/tile-layer.md)
-  - [TripsLayer](../geo-layers/trips-layer.md)
   - [TerrainLayer](../geo-layers/terrain-layer.md)
-  - [MVTLayer](../geo-layers/mvt-layer.md)
+  - [TileLayer](../geo-layers/tile-layer.md)
+  - [Tile3DLayer](../geo-layers/tile-3d-layer.md)
+  - [TripsLayer](../geo-layers/trips-layer.md)
+  - [WMSLayer](../geo-layers/wms-layer.md)
 
 ## Mesh Layers
 

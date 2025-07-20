@@ -1,10 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {PostProcessEffect, LightingEffect, AmbientLight, DirectionalLight} from '@deck.gl/core';
-import {zoomBlur, vignette} from '@luma.gl/shadertools';
+import {zoomBlur, vignette} from '@luma.gl/effects';
 import {hexagons, points} from 'deck.gl-test/data';
 
 import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
-// TODO v9
-// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MaskExtension} from '@deck.gl/extensions';
 
 import {CubeGeometry} from '@luma.gl/engine';
@@ -22,8 +25,6 @@ const MASK_POLYGON = [
 ];
 
 export default [
-  // TODO v9
-  /*
   {
     name: 'shadow-effect',
     effects: [
@@ -75,7 +76,6 @@ export default [
     ],
     goldenImage: './test/render/golden-images/shadow-effect.png'
   },
-  */
   ...[true, false].map(maskInverted => ({
     name: `mask-effect${maskInverted ? '-inverted' : ''}`,
     viewState: {

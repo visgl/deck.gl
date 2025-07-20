@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {polygonToCells, getRes0Cells, getIcosahedronFaces, latLngToCell} from 'h3-js';
 
 // Number of hexagons at resolution 10 in tile x:497 y:505 z:10

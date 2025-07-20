@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
+import {TextBackgroundProps, textBackgroundUniforms} from './text-background-layer-uniforms';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
 
@@ -25,6 +29,7 @@ type _TextBackgroundLayerProps<DataT> = {
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
 
+  borderRadius?: number | [number, number, number, number];
   padding?: [number, number] | [number, number, number, number];
 
   getPosition?: Accessor<DataT, Position>;
@@ -47,6 +52,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
+  borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
@@ -70,14 +76,14 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, textBackgroundUniforms]});
   }
 
   initializeState() {
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -105,16 +111,14 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceFillColors: {
         size: 4,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: 4,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -140,36 +144,41 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   draw({uniforms}) {
     const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth} =
       this.props;
-    let {padding} = this.props;
+    let {padding, borderRadius} = this.props;
 
     if (padding.length < 4) {
       padding = [padding[0], padding[1], padding[0], padding[1]];
     }
 
+    if (!Array.isArray(borderRadius)) {
+      borderRadius = [borderRadius, borderRadius, borderRadius, borderRadius];
+    }
+
     const model = this.state.model!;
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const textBackgroundProps: TextBackgroundProps = {
       billboard,
       stroked: Boolean(getLineWidth),
-      padding,
+      borderRadius,
+      padding: padding as [number, number, number, number],
       sizeUnits: UNIT[sizeUnits],
       sizeScale,
       sizeMinPixels,
       sizeMaxPixels
-    });
+    };
+    model.shaderInputs.setProps({textBackground: textBackgroundProps});
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
     // a square that minimally cover the unit circle
-    const positions = [0, 0, 1, 0, 1, 1, 0, 1];
+    const positions = [0, 0, 1, 0, 0, 1, 1, 1];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+        topology: 'triangle-strip',
         vertexCount: 4,
         attributes: {
           positions: {size: 2, value: new Float32Array(positions)}

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `\
 #version 300 es
 #define SHADER_NAME text-background-layer-vertex-shader
@@ -14,14 +18,6 @@ in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in vec3 instancePickingColors;
-
-uniform bool billboard;
-uniform float opacity;
-uniform float sizeScale;
-uniform float sizeMinPixels;
-uniform float sizeMaxPixels;
-uniform vec4 padding;
-uniform int sizeUnits;
 
 out vec4 vFillColor;
 out vec4 vLineColor;
@@ -48,18 +44,18 @@ void main(void) {
 
   // project meters to pixels and clamp to limits
   float sizePixels = clamp(
-    project_size_to_pixel(instanceSizes * sizeScale, sizeUnits),
-    sizeMinPixels, sizeMaxPixels
+    project_size_to_pixel(instanceSizes * textBackground.sizeScale, textBackground.sizeUnits),
+    textBackground.sizeMinPixels, textBackground.sizeMaxPixels
   );
 
-  dimensions = instanceRects.zw * sizePixels + padding.xy + padding.zw;
+  dimensions = instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
 
-  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + mix(-padding.xy, padding.zw, positions);
+  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
   pixelOffset += instancePixelOffsets;
   pixelOffset.y *= -1.0;
 
-  if (billboard)  {
+  if (textBackground.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
@@ -73,9 +69,9 @@ void main(void) {
   }
 
   // Apply opacity to instance color, or return instance picking color
-  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity);
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vFillColor, geometry);
-  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity);
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
 }
 `;

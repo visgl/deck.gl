@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Loader} from '@loaders.gl/loader-utils';
 
 function isJSON(text: string): boolean {
@@ -8,6 +12,8 @@ function isJSON(text: string): boolean {
 
 // A light weight version instead of @loaders.gl/json (stream processing etc.)
 export default {
+  dataType: null as any,
+  batchType: null as never,
   id: 'JSON',
   name: 'JSON',
   module: '',

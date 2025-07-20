@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable */
 /* prettier-ignore */
 /* minified bundle of a custom @deck.gl/jupyter-widget layer, for use in a library like pydeck */

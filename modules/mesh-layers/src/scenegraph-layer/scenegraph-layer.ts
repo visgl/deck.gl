@@ -1,34 +1,18 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
-import {pbr} from '@luma.gl/shadertools';
-import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
+import {pbrMaterial} from '@luma.gl/shadertools';
+import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
-import {GL} from '@luma.gl/constants';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
+import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
@@ -93,7 +77,7 @@ type _ScenegraphLayerProps<DataT> = {
    */
   _imageBasedLightingEnvironment?:
     | PBREnvironment
-    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
+    | ((context: {gl: WebGL2RenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -184,17 +168,24 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   state!: {
     scenegraph: GroupNode;
     animator: GLTFAnimator;
-    attributesAvailable?: boolean;
+    models: Model[];
   };
 
   getShaders() {
-    const modules = [project32, picking];
+    const defines: {LIGHTING_PBR?: 1} = {};
+    let pbr;
 
     if (this.props._lighting === 'pbr') {
-      modules.push(pbr);
+      pbr = pbrMaterial;
+      defines.LIGHTING_PBR = 1;
+    } else {
+      // Dummy shader module needed to handle
+      // pbrMaterial.pbr_baseColorSampler binding
+      pbr = {name: 'pbrMaterial'};
     }
 
-    return super.getShaders({vs, fs, modules});
+    const modules = [project32, picking, scenegraphUniforms, pbr];
+    return super.getShaders({defines, vs, fs, modules});
   }
 
   initializeState() {
@@ -203,16 +194,15 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         accessor: 'getPosition',
         transition: true
       },
       instanceColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
-        normalized: true,
         defaultValue: DEFAULT_COLOR,
         transition: true
       },
@@ -227,13 +217,17 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (props.scenegraph !== oldProps.scenegraph) {
       this._updateScenegraph();
     } else if (props._animations !== oldProps._animations) {
-      this._applyAnimationsProp(this.state.scenegraph, this.state.animator, props._animations);
+      this._applyAnimationsProp(this.state.animator, props._animations);
     }
   }
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this._deleteScenegraph();
+    this.state.scenegraph?.destroy();
+  }
+
+  get isLoaded(): boolean {
+    return Boolean(this.state?.scenegraph && super.isLoaded);
   }
 
   private _updateScenegraph(): void {
@@ -253,9 +247,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
-      waitForGLTFAssets(gltfObjects).then(() => {
-        this.setNeedsRedraw();
-      }); // eslint-disable-line @typescript-eslint/no-floating-promises
+      waitForGLTFAssets(gltfObjects)
+        .then(() => {
+          this.setNeedsRedraw();
+        })
+        .catch(ex => {
+          this.raiseError(ex, 'loading glTF');
+        });
     }
 
     const options = {layer: this, device: this.context.device};
@@ -263,33 +261,26 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const animator = props.getAnimator(scenegraphData, options);
 
     if (scenegraph instanceof GroupNode) {
-      this._deleteScenegraph();
-      this._applyAllAttributes(scenegraph);
-      this._applyAnimationsProp(scenegraph, animator, props._animations);
-      this.setState({scenegraph, animator});
+      this.state.scenegraph?.destroy();
+
+      this._applyAnimationsProp(animator, props._animations);
+
+      const models: Model[] = [];
+      scenegraph.traverse(node => {
+        if (node instanceof ModelNode) {
+          models.push(node.model);
+        }
+      });
+
+      this.setState({scenegraph, animator, models});
+      this.getAttributeManager()!.invalidateAll();
     } else if (scenegraph !== null) {
       log.warn('invalid scenegraph:', scenegraph)();
     }
   }
 
-  private _applyAllAttributes(scenegraph: GroupNode): void {
-    if (this.state.attributesAvailable) {
-      // attributeManager is always defined for primitive layers
-      const allAttributes = this.getAttributeManager()!.getAttributes();
-      scenegraph.traverse(node => {
-        if (node instanceof ModelNode) {
-          this._setModelAttributes(node.model, allAttributes, false);
-        }
-      });
-    }
-  }
-
-  private _applyAnimationsProp(
-    scenegraph: GroupNode,
-    animator: GLTFAnimator,
-    animationsProp: any
-  ): void {
-    if (!scenegraph || !animator || !animationsProp) {
+  private _applyAnimationsProp(animator: GLTFAnimator, animationsProp: any): void {
+    if (!animator || !animationsProp) {
       return;
     }
 
@@ -317,7 +308,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             log.warn(`animation ${key} not found`)();
           }
         } else {
-          const findResult = animations.find(({name}) => name === key);
+          const findResult = animations.find(({animation}) => animation.name === key);
           if (findResult) {
             Object.assign(findResult, value);
           } else {
@@ -325,13 +316,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           }
         }
       });
-  }
-
-  private _deleteScenegraph(): void {
-    const {scenegraph} = this.state;
-    if (scenegraph instanceof ScenegraphNode) {
-      scenegraph.delete();
-    }
   }
 
   private _getModelOptions(): GLTFInstantiatorOptions {
@@ -359,26 +343,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     };
   }
 
-  updateAttributes(changedAttributes) {
-    this.setState({attributesAvailable: true});
-    if (!this.state.scenegraph) return;
-
-    // If some buffer layout changed
-    let bufferLayoutChanged = false;
-    for (const id in changedAttributes) {
-      if (changedAttributes[id].layoutChanged()) {
-        bufferLayoutChanged = true;
-      }
-    }
-
-    this.state.scenegraph.traverse(node => {
-      if (node instanceof ModelNode) {
-        this._setModelAttributes(node.model, changedAttributes, bufferLayoutChanged);
-      }
-    });
-  }
-
-  draw({moduleParameters = null, parameters = {}, context}) {
+  draw({context}) {
     if (!this.state.scenegraph) return;
 
     if (this.props._animations && this.state.animator) {
@@ -387,27 +352,29 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
 
     const {viewport, renderPass} = this.context;
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, coordinateSystem} = this.props;
+    const pbrProjectionProps = {
+      camera: viewport.cameraPosition as [number, number, number]
+    };
+
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
       if (node instanceof ModelNode) {
         const {model} = node;
         model.setInstanceCount(numInstances);
-        if (moduleParameters) {
-          model.updateModuleSettings(moduleParameters);
-        }
-        model.setUniforms({
+
+        const scenegraphProps: ScenegraphProps = {
           sizeScale,
-          opacity,
           sizeMinPixels,
           sizeMaxPixels,
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
-          sceneModelMatrix: worldMatrix,
-          // Needed for PBR (TODO: find better way to get it)
-          // eslint-disable-next-line camelcase
-          u_Camera: model.uniforms.project_uCameraPosition
-        });
+          sceneModelMatrix: worldMatrix
+        };
 
+        model.shaderInputs.setProps({
+          pbrProjection: pbrProjectionProps,
+          scenegraph: scenegraphProps
+        });
         model.draw(renderPass);
       }
     });

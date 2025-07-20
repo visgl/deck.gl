@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {MapView, LayerManager} from '@deck.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -32,14 +36,15 @@ test('MaskEffect#constructor', t => {
   t.end();
 });
 
-test('MaskEffect#cleanup', t => {
+test('MaskEffect#setup, cleanup', t => {
   const maskEffect = new MaskEffect();
 
   const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
   layerManager.updateLayers();
 
-  maskEffect.preRender(device, {
+  maskEffect.setup({device});
+  maskEffect.preRender({
     pass: 'screen',
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
@@ -58,12 +63,14 @@ test('MaskEffect#cleanup', t => {
   t.notOk(maskEffect.maskPass, 'Mask pass is deleted');
   t.notOk(maskEffect.maskMap, 'Mask map is deleted');
 
+  layerManager.finalize();
   t.end();
 });
 
 /* eslint-disable max-statements */
 test('MaskEffect#update', t => {
   const maskEffect = new MaskEffect();
+  maskEffect.setup({device});
 
   const TEST_MASK_LAYER2 = TEST_MASK_LAYER.clone({id: 'test-mask-layer-2'});
   const TEST_MASK_LAYER2_ALT = TEST_MASK_LAYER.clone({
@@ -78,8 +85,7 @@ test('MaskEffect#update', t => {
     t.comment(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
-
-    maskEffect.preRender(device, {
+    maskEffect.preRender({
       pass: 'screen',
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
@@ -89,7 +95,7 @@ test('MaskEffect#update', t => {
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
 
-  let parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
   let mask = parameters.maskChannels['test-mask-layer'];
   t.is(mask?.index, 0, 'Mask is rendered in channel 0');
@@ -98,7 +104,7 @@ test('MaskEffect#update', t => {
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER, TEST_MASK_LAYER2], 'Add second mask');
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   t.is(mask?.index, 0, 'Mask is rendered in channel 0');
   t.is(mask?.bounds, bounds, 'Using cached mask bounds');
@@ -109,7 +115,7 @@ test('MaskEffect#update', t => {
 
   preRenderWithLayers([TEST_LAYER, TEST_MASK_LAYER2], 'Remove first mask');
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   t.notOk(mask, 'Mask is removed');
   mask = parameters.maskChannels['test-mask-layer-2'];
@@ -121,7 +127,7 @@ test('MaskEffect#update', t => {
     'Update second mask, add third'
   );
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer-2'];
   t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
   t.not(mask?.bounds, bounds, 'Second mask is updated');
@@ -129,11 +135,13 @@ test('MaskEffect#update', t => {
   t.is(mask?.index, 0, 'New mask is rendered in channel 0');
 
   maskEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });
 
 test('MaskEffect#coordinates', t => {
   const maskEffect = new MaskEffect();
+  maskEffect.setup({device});
 
   const TEST_MASK_LAYER_CARTESIAN = TEST_MASK_LAYER.clone({
     coordinateOrigin: [1, 2, 3],
@@ -147,7 +155,7 @@ test('MaskEffect#coordinates', t => {
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
-    maskEffect.preRender(device, {
+    maskEffect.preRender({
       pass: 'screen',
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
@@ -157,18 +165,19 @@ test('MaskEffect#coordinates', t => {
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
 
-  let parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   let mask = parameters.maskChannels['test-mask-layer'];
   t.same(mask?.coordinateOrigin, [0, 0, 0], 'Mask has correct coordinate origin');
   t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.DEFAULT, 'Mask has correct coordinate system');
 
   preRenderWithLayers([TEST_MASK_LAYER_CARTESIAN, TEST_LAYER], 'Update to cartesion coordinates');
 
-  parameters = maskEffect.getModuleParameters(TEST_LAYER);
+  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   t.same(mask?.coordinateOrigin, [1, 2, 3], 'Mask has correct coordinate origin');
   t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.CARTESIAN, 'Mask has correct coordinate system');
 
   maskEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });

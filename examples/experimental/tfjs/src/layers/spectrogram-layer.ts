@@ -1,7 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as tf from '@tensorflow/tfjs';
 
-import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core/typed';
-import GL from '@luma.gl/constants';
+import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core';
+import {GL} from '@luma.gl/constants';
 
 import {Tensor2DLayer} from './tensor-2d-layer';
 import {CustomTFContext} from '../tf-utils/tf-context';
@@ -41,6 +45,7 @@ export class SpectrogramLayer extends CompositeLayer<{
       this.props.settings !== params.oldProps.settings ||
       this.props.pickable !== params.oldProps.pickable
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._computeSpectrogram();
     }
   }

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global console, document, window */
 import React, {Component} from 'react';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';

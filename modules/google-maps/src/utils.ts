@@ -1,5 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global google, document */
-import {Deck} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 
@@ -44,6 +48,7 @@ export function createDeckInstance(
     useDevicePixels: props.interleaved ? true : props.useDevicePixels,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
+    views: new MapView({repeat: true}),
     initialViewState: {
       longitude: 0,
       latitude: 0,

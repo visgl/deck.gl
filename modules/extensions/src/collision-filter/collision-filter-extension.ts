@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
 import collision from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
@@ -42,13 +46,8 @@ export default class CollisionFilterExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<CollisionFilterExtensionProps>, {uniforms, context, moduleParameters}: any) {
-    const {collisionEnabled} = this.props;
-    const {collisionFBO, drawToCollisionMap} = moduleParameters;
-    const enabled = collisionEnabled && Boolean(collisionFBO);
-    uniforms.collision_enabled = enabled;
-
-    if (drawToCollisionMap) {
+  draw(this: Layer<CollisionFilterExtensionProps>, {shaderModuleProps}: any) {
+    if (shaderModuleProps.collision?.drawToCollisionMap) {
       // Override any props with those defined in collisionTestProps
       // @ts-ignore
       this.props = this.clone(this.props.collisionTestProps).props;
@@ -68,11 +67,8 @@ export default class CollisionFilterExtension extends LayerExtension {
     attributeManager!.add({
       collisionPriorities: {
         size: 1,
-        accessor: 'getCollisionPriority',
-        shaderAttributes: {
-          collisionPriorities: {divisor: 0},
-          instanceCollisionPriorities: {divisor: 1}
-        }
+        stepMode: 'dynamic',
+        accessor: 'getCollisionPriority'
       }
     });
   }

@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Layer,
@@ -32,10 +16,11 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
+import {Parameters} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
 
+import {lineUniforms, LineProps} from './line-layer-uniforms';
+import {shaderWGSL as source} from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
@@ -129,7 +114,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, source, modules: [project32, picking, lineUniforms]});
   }
 
   // This layer has its own wrapLongitude logic
@@ -144,22 +129,21 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getTargetPosition'
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
@@ -187,27 +171,33 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
     const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
       useShortestPath: wrapLongitude ? 1 : 0
-    });
+    };
+    model.shaderInputs.setProps({line: lineProps});
     model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      model.setUniforms({
-        useShortestPath: -1
-      });
+      model.shaderInputs.setProps({line: {...lineProps, useShortestPath: -1}});
       model.draw(this.context.renderPass);
     }
   }
 
   protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -227,6 +217,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
+      parameters,
       isInstanced: true
     });
   }

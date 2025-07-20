@@ -1,11 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Layer,
   Viewport,
   LayersPassRenderOptions,
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
-import {withGLParameters} from '@luma.gl/webgl';
 import type {TerrainCover} from './terrain-cover';
+import {Parameters} from '@luma.gl/core';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
   pickZ: boolean;
@@ -54,34 +58,37 @@ export class TerrainPickingPass extends PickLayersPass {
     }
     target.resize(viewport);
 
-    withGLParameters(
-      this.device,
-      {
-        depthTest: false
-      },
-      () =>
-        this.render({
-          ...opts,
-          pickingFBO: target,
-          pass: `terrain-cover-picking-${terrainCover.id}`,
-          layers,
-          effects: [],
-          viewports: [viewport],
-          // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
-          // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
-          cullRect: undefined,
-          deviceRect: viewport,
-          pickZ: false
-        })
-    );
+    this.render({
+      ...opts,
+      pickingFBO: target,
+      pass: `terrain-cover-picking-${terrainCover.id}`,
+      layers,
+      effects: [],
+      viewports: [viewport],
+      // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
+      // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
+      cullRect: undefined,
+      deviceRect: viewport,
+      pickZ: false
+    });
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
+    let parameters: any;
     if (this.drawParameters[layer.id]) {
-      return this.drawParameters[layer.id];
+      parameters = this.drawParameters[layer.id];
+    } else {
+      parameters = super.getLayerParameters(layer, layerIndex, viewport);
+      parameters.blend = true;
     }
-    const parameters = super.getLayerParameters(layer, layerIndex, viewport);
-    parameters.blend = true;
-    return parameters;
+    return {...parameters, depthCompare: 'always'};
+  }
+
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    return {
+      terrain: {
+        project: otherShaderModuleProps.project
+      }
+    };
   }
 }

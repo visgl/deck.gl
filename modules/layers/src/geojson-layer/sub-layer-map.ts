@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer, Layer} from '@deck.gl/core';
 
 import IconLayer from '../icon-layer/icon-layer';

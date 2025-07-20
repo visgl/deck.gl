@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Accessor,
@@ -24,6 +8,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   Layer,
+  LayerData,
   PickingInfo,
   Unit,
   Material,
@@ -33,7 +18,7 @@ import {
 } from '@deck.gl/core';
 
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import type {Feature, GeoJSON} from 'geojson';
+import type {Feature, Geometry, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';
 import {BinaryFeatureTypes, binaryToFeatureForAccesor} from './geojson-binary';
@@ -53,11 +38,17 @@ import {
 } from './geojson-layer-props';
 
 /** All properties supported by GeoJsonLayer */
-export type GeoJsonLayerProps = _GeoJsonLayerProps & CompositeLayerProps;
+export type GeoJsonLayerProps<FeaturePropertiesT = unknown> =
+  _GeoJsonLayerProps<FeaturePropertiesT> & CompositeLayerProps;
 
 /** Properties added by GeoJsonLayer */
-export type _GeoJsonLayerProps = {
-  data: string | GeoJSON | BinaryFeatureCollection | Promise<GeoJSON | BinaryFeatureCollection>;
+export type _GeoJsonLayerProps<FeaturePropertiesT> = {
+  data:
+    | string
+    | GeoJSON
+    | Feature[]
+    | BinaryFeatureCollection
+    | Promise<GeoJSON | Feature[] | BinaryFeatureCollection>;
   /**
    * How to render Point and MultiPoint features in the data.
    *
@@ -69,15 +60,15 @@ export type _GeoJsonLayerProps = {
    * @default 'circle'
    */
   pointType?: string;
-} & _GeoJsonLayerFillProps &
-  _GeoJsonLayerStrokeProps &
-  _GeoJsonLayer3DProps &
-  _GeoJsonLayerPointCircleProps &
-  _GeojsonLayerIconPointProps &
-  _GeojsonLayerTextPointProps;
+} & _GeoJsonLayerFillProps<FeaturePropertiesT> &
+  _GeoJsonLayerStrokeProps<FeaturePropertiesT> &
+  _GeoJsonLayer3DProps<FeaturePropertiesT> &
+  _GeoJsonLayerPointCircleProps<FeaturePropertiesT> &
+  _GeojsonLayerIconPointProps<FeaturePropertiesT> &
+  _GeojsonLayerTextPointProps<FeaturePropertiesT>;
 
 /** GeoJsonLayer fill options. */
-type _GeoJsonLayerFillProps = {
+type _GeoJsonLayerFillProps<FeaturePropertiesT> = {
   /**
    * Whether to draw a filled polygon (solid fill).
    *
@@ -92,11 +83,11 @@ type _GeoJsonLayerFillProps = {
    *
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<Feature, Color>;
+  getFillColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
 };
 
 /** GeoJsonLayer stroke options. */
-type _GeoJsonLayerStrokeProps = {
+type _GeoJsonLayerStrokeProps<FeaturePropertiesT> = {
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *
@@ -111,14 +102,14 @@ type _GeoJsonLayerStrokeProps = {
    *
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<Feature, Color>;
+  getLineColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
 
   /**
    * Line width value or accessor.
    *
-   * @default [0, 0, 0, 255]
+   * @default 1
    */
-  getLineWidth?: Accessor<Feature, number>;
+  getLineWidth?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
 
   /**
    * The units of the line width, one of `meters`, `common`, and `pixels`.
@@ -184,7 +175,7 @@ type _GeoJsonLayerStrokeProps = {
 };
 
 /** GeoJsonLayer 3D options. */
-type _GeoJsonLayer3DProps = {
+type _GeoJsonLayer3DProps<FeaturePropertiesT> = {
   /**
    * Extrude Polygon and MultiPolygon features along the z-axis if set to true
    *
@@ -215,7 +206,7 @@ type _GeoJsonLayer3DProps = {
    *
    * @default 1000
    */
-  getElevation?: Accessor<Feature, number>;
+  getElevation?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
 
   /**
    * Elevation multiplier.
@@ -237,8 +228,8 @@ type _GeoJsonLayer3DProps = {
 };
 
 /** GeoJsonLayer Properties forwarded to `ScatterPlotLayer` if `pointType` is `'circle'` */
-export type _GeoJsonLayerPointCircleProps = {
-  getPointRadius?: Accessor<Feature, number>;
+export type _GeoJsonLayerPointCircleProps<FeaturePropertiesT> = {
+  getPointRadius?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
   pointRadiusUnits?: Unit;
   pointRadiusScale?: number;
   pointRadiusMinPixels?: number;
@@ -247,18 +238,18 @@ export type _GeoJsonLayerPointCircleProps = {
   pointBillboard?: boolean;
 
   /** @deprecated use getPointRadius */
-  getRadius?: Accessor<Feature, number>;
+  getRadius?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
 };
 
 /** GeoJsonLayer properties forwarded to `IconLayer` if `pointType` is `'icon'` */
-type _GeojsonLayerIconPointProps = {
+type _GeojsonLayerIconPointProps<FeaturePropertiesT> = {
   iconAtlas?: any;
   iconMapping?: any;
-  getIcon?: Accessor<Feature, any>;
-  getIconSize?: Accessor<Feature, number>;
-  getIconColor?: Accessor<Feature, Color>;
-  getIconAngle?: Accessor<Feature, number>;
-  getIconPixelOffset?: Accessor<Feature, number[]>;
+  getIcon?: Accessor<Feature<Geometry, FeaturePropertiesT>, any>;
+  getIconSize?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getIconColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getIconAngle?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getIconPixelOffset?: Accessor<Feature<Geometry, FeaturePropertiesT>, number[]>;
   iconSizeUnits?: Unit;
   iconSizeScale?: number;
   iconSizeMinPixels?: number;
@@ -268,17 +259,17 @@ type _GeojsonLayerIconPointProps = {
 };
 
 /** GeoJsonLayer properties forwarded to `TextLayer` if `pointType` is `'text'` */
-type _GeojsonLayerTextPointProps = {
-  getText?: Accessor<Feature, any>;
-  getTextColor?: Accessor<Feature, Color>;
-  getTextAngle?: Accessor<Feature, number>;
-  getTextSize?: Accessor<Feature, number>;
-  getTextAnchor?: Accessor<Feature, string>;
-  getTextAlignmentBaseline?: Accessor<Feature, string>;
-  getTextPixelOffset?: Accessor<Feature, number[]>;
-  getTextBackgroundColor?: Accessor<Feature, Color>;
-  getTextBorderColor?: Accessor<Feature, Color>;
-  getTextBorderWidth?: Accessor<Feature, number>;
+type _GeojsonLayerTextPointProps<FeaturePropertiesT> = {
+  getText?: Accessor<Feature<Geometry, FeaturePropertiesT>, any>;
+  getTextColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getTextAngle?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getTextSize?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getTextAnchor?: Accessor<Feature<Geometry, FeaturePropertiesT>, string>;
+  getTextAlignmentBaseline?: Accessor<Feature<Geometry, FeaturePropertiesT>, string>;
+  getTextPixelOffset?: Accessor<Feature<Geometry, FeaturePropertiesT>, number[]>;
+  getTextBackgroundColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getTextBorderColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getTextBorderWidth?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
   textSizeUnits?: Unit;
   textSizeScale?: number;
   textSizeMinPixels?: number;
@@ -330,9 +321,10 @@ type GeoJsonPickingInfo = PickingInfo & {
 };
 
 /** Render GeoJSON formatted data as polygons, lines and points (circles, icons and/or texts). */
-export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeLayer<
-  Required<GeoJsonLayerProps> & ExtraProps
-> {
+export default class GeoJsonLayer<
+  FeaturePropertiesT = any,
+  ExtraProps extends {} = {}
+> extends CompositeLayer<Required<_GeoJsonLayerProps<FeaturePropertiesT>> & ExtraProps> {
   static layerName = 'GeoJsonLayer';
   static defaultProps = defaultProps;
 
@@ -547,11 +539,13 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           // @ts-expect-error TODO - type binary data
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
             // @ts-expect-error TODO - type binary data
-            data: {...pointsLayerProps.data, attributes: rest}
+            data: {...(pointsLayerProps.data as LayerData), attributes: rest}
           };
         }
 

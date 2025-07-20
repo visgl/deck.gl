@@ -1,11 +1,28 @@
-import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {withGLParameters} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/constants';
-import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import type {
+  Device,
+  Framebuffer,
+  Parameters,
+  RenderPipelineParameters,
+  Texture
+} from '@luma.gl/core';
+import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
   /** The channel to render into, 0:red, 1:green, 2:blue, 3:alpha */
-  channel: number;
+  channel: 0 | 1 | 2 | 3;
+};
+
+const MASK_BLENDING: RenderPipelineParameters = {
+  blendColorOperation: 'subtract',
+  blendColorSrcFactor: 'zero',
+  blendColorDstFactor: 'one',
+  blendAlphaOperation: 'subtract',
+  blendAlphaSrcFactor: 'zero',
+  blendAlphaDstFactor: 'one'
 };
 
 export default class MaskPass extends LayersPass {
@@ -38,21 +55,22 @@ export default class MaskPass extends LayersPass {
   }
 
   render(options: MaskPassRenderOptions) {
-    const colorMask = [false, false, false, false];
-    colorMask[options.channel] = true;
+    const colorMask = 2 ** options.channel;
     const clearColor = [255, 255, 255, 255];
+    super.render({...options, clearColor, colorMask, target: this.fbo, pass: 'mask'});
+  }
 
-    return withGLParameters(
-      this.device,
-      {
-        blend: true,
-        blendFunc: [GL.ZERO, GL.ONE],
-        blendEquation: GL.FUNC_SUBTRACT,
-        colorMask,
-        depthTest: false
-      },
-      () => super.render({...options, clearColor, target: this.fbo, pass: 'mask'})
-    );
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): Parameters {
+    return {
+      ...layer.props.parameters,
+      blend: true,
+      depthCompare: 'always',
+      ...MASK_BLENDING
+    };
   }
 
   shouldDrawLayer(layer) {

@@ -1,15 +1,20 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable camelcase */
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project} from '@deck.gl/core';
+import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
-export type TerrainModuleSettings = {
-  picking: {isActive?: boolean};
+export type TerrainModuleProps = {
+  project: ProjectProps;
+  isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture;
@@ -17,6 +22,15 @@ export type TerrainModuleSettings = {
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
   terrainSkipRender?: boolean;
+};
+
+type TerrainModuleUniforms = {
+  mode: number;
+  bounds: [number, number, number, number];
+};
+
+type TerrainModuleBindings = {
+  terrain_map: Texture;
 };
 
 /** A model can have one of the following modes */
@@ -38,36 +52,44 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
   .join('\n');
 
-// @ts-expect-error
+const uniformBlock =
+  // eslint-disable-next-line prefer-template
+  TERRAIN_MODE_CONSTANTS +
+  /* glsl */ `
+uniform terrainUniforms {
+  float mode;
+  vec4 bounds;
+} terrain;
+
+uniform sampler2D terrain_map;
+`;
+
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
+  // eslint-disable-next-line prefer-template
+  vs: uniformBlock + /* glsl */ 'out vec3 commonPos;',
+  // eslint-disable-next-line prefer-template
+  fs: uniformBlock + /* glsl */ 'in vec3 commonPos;',
   inject: {
-    'vs:#decl': `
-uniform float terrain_mode;
-uniform sampler2D terrain_map;
-uniform vec4 terrain_bounds;
-out vec3 commonPos;
-${TERRAIN_MODE_CONSTANTS}
-    `,
-    'vs:#main-start': `
-if (terrain_mode == TERRAIN_MODE_SKIP) {
+    'vs:#main-start': /* glsl */ `
+if (terrain.mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
   return;
 }
 `,
-    'vs:DECKGL_FILTER_GL_POSITION': `
+    'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
 commonPos = geometry.position.xyz;
-if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
-  commonPos.z += project_uCommonOrigin.z;
+  commonPos.z += project.commonOrigin.z;
 }
-if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
-  vec2 texCoords = (anchorCommon.xy - terrain_bounds.xy) / terrain_bounds.zw;
+  vec2 texCoords = (anchorCommon.xy - terrain.bounds.xy) / terrain.bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     geometry.position.z += terrainZ;
@@ -75,24 +97,17 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   }
 }
     `,
-    'fs:#decl': `
-uniform float terrain_mode;
-uniform sampler2D terrain_map;
-uniform vec4 terrain_bounds;
-in vec3 commonPos;
-${TERRAIN_MODE_CONSTANTS}
-    `,
-    'fs:#main-start': `
-if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+    'fs:#main-start': /* glsl */ `
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
-    'fs:DECKGL_FILTER_COLOR': `
-if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
-  vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
+    'fs:DECKGL_FILTER_COLOR': /* glsl */ `
+if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
+  vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
     color = pixel;
   } else {
     // pixel is premultiplied
@@ -103,7 +118,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
     `
   },
   // eslint-disable-next-line complexity
-  getUniforms: (opts: Partial<TerrainModuleSettings> = {}, uniforms) => {
+  getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
     if ('dummyHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
@@ -114,11 +129,12 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      const {project_uCommonOrigin} = uniforms;
+      const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
+      const {commonOrigin} = projectUniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler = dummyHeightMap as Texture;
+      let sampler: Texture | undefined = dummyHeightMap as Texture;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
@@ -130,12 +146,11 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         bounds = heightMapBounds!;
       } else if (terrainCover) {
         // This is a terrain layer
-        const isPicking = opts.picking?.isActive;
-        // @ts-expect-error
-        sampler = isPicking
+        const fbo = opts.isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
-        if (isPicking) {
+        sampler = fbo?.colorAttachments[0].texture;
+        if (opts.isPicking) {
           // Never render the layer itself in picking pass
           mode = TERRAIN_MODE.SKIP;
         }
@@ -149,19 +164,23 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 
       /* eslint-disable camelcase */
       return {
-        terrain_mode: mode,
+        mode,
         terrain_map: sampler,
         // Convert bounds to the common space, as [minX, minY, width, height]
-        terrain_bounds: bounds
+        bounds: bounds
           ? [
-              bounds[0] - project_uCommonOrigin[0],
-              bounds[1] - project_uCommonOrigin[1],
+              bounds[0] - commonOrigin[0],
+              bounds[1] - commonOrigin[1],
               bounds[2] - bounds[0],
               bounds[3] - bounds[1]
             ]
           : [0, 0, 0, 0]
       };
     }
-    return null;
+    return {};
+  },
+  uniformTypes: {
+    mode: 'f32',
+    bounds: 'vec4<f32>'
   }
-} as ShaderModule<TerrainModuleSettings>;
+} as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;

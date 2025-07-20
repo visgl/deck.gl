@@ -1,26 +1,9 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import {GL} from '@luma.gl/constants';
 import test from 'tape-promise/tape';
 import {device} from '@deck.gl/test-utils';
 
@@ -71,10 +54,11 @@ test('AttributeManager.add', t => {
     {positions: ['positions'], getPosition: ['positions']},
     'AttributeManager.add - build update triggers mapping'
   );
+  attributeManager.addInstanced({instancePositions: {size: 2, accessor: 'getPosition', update}});
   t.equals(
-    attributeManager.getAttributes()['positions'].settings.divisor,
-    0,
-    'AttributeManager.add creates attribute with default divisor of 0'
+    attributeManager.getAttributes()['instancePositions'].settings.stepMode,
+    'instance',
+    'AttributeManager.addInstanced creates attribute with stepMode:instance'
   );
   t.end();
 });
@@ -213,7 +197,7 @@ test('AttributeManager.update - external virtual buffers', t => {
 
   attributeManager.add({
     positions: {size: 2, update: dummyUpdate},
-    colors: {size: 3, type: GL.UNSIGNED_BYTE, update: dummyUpdate}
+    colors: {size: 3, type: 'uint8', update: dummyUpdate}
   });
 
   // First update, should autoalloc and update the value array
@@ -268,7 +252,7 @@ test('AttributeManager.update - external logical buffers', t => {
 
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
-    colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]},
+    colors: {size: 4, type: 'uint8', accessor: 'getColor', defaultValue: [0, 0, 0, 255]},
     types: {size: 1, accessor: 'getType', transform: x => x - 65}
   });
 
@@ -313,7 +297,7 @@ test('AttributeManager.update - external logical buffers - variable width', t =>
 
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
-    colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]}
+    colors: {size: 4, type: 'uint8', accessor: 'getColor', defaultValue: [0, 0, 0, 255]}
   });
 
   // First update, should autoalloc and update the value array
@@ -367,6 +351,93 @@ test('AttributeManager.invalidate', t => {
   t.ok(
     attributeManager.getAttributes()['colors'].needsUpdate,
     'invalidated attribute by accessor name'
+  );
+
+  t.end();
+});
+
+test('AttributeManager.getBufferLayouts', t => {
+  const attributeManager = new AttributeManager(device);
+  attributeManager.add({
+    // indexed attribute
+    indices: {size: 1, isIndexed: true, update},
+    // non-instanced attribute
+    colors: {size: 4, type: 'unorm8', stepMode: 'vertex', accessor: 'getColor'},
+    // instanced attribute
+    instanceColors: {size: 4, type: 'unorm8', stepMode: 'instance', accessor: 'getColor'},
+    // dynamically assigned stepMode
+    positions: {size: 3, type: 'float64', fp64: true, stepMode: 'dynamic', accessor: 'getPosition'}
+  });
+
+  t.deepEqual(
+    attributeManager.getBufferLayouts(),
+    [
+      {
+        name: 'indices',
+        byteStride: 4,
+        attributes: [
+          {
+            attribute: 'indices',
+            format: 'uint32',
+            byteOffset: 0
+          }
+        ],
+        stepMode: 'vertex'
+      },
+      {
+        name: 'colors',
+        byteStride: 4,
+        attributes: [
+          {
+            attribute: 'colors',
+            format: 'unorm8x4',
+            byteOffset: 0
+          }
+        ],
+        stepMode: 'vertex'
+      },
+      {
+        name: 'instanceColors',
+        byteStride: 4,
+        attributes: [
+          {
+            attribute: 'instanceColors',
+            format: 'unorm8x4',
+            byteOffset: 0
+          }
+        ],
+        stepMode: 'instance'
+      },
+      {
+        name: 'positions',
+        byteStride: 24,
+        attributes: [
+          {
+            attribute: 'positions',
+            format: 'float32x3',
+            byteOffset: 0
+          },
+          {
+            attribute: 'positions64Low',
+            format: 'float32x3',
+            byteOffset: 12
+          }
+        ],
+        stepMode: 'instance'
+      }
+    ],
+    'getBufferLayouts()'
+  );
+
+  t.is(
+    attributeManager.getBufferLayouts({isInstanced: false})[3].stepMode,
+    'vertex',
+    'dynamic attribute.stepMode in nonInstancedModel'
+  );
+  t.is(
+    attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
+    'instance',
+    'dynamic attribute.stepMode in instancedModel'
   );
 
   t.end();

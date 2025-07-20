@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {_flatten as flatten} from '@deck.gl/core';
 import MapboxLayer from './mapbox-layer';
 
 import type {Deck, LayersList, Layer} from '@deck.gl/core';
-import type {Map} from 'mapbox-gl';
+import type {Map} from './types';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 
@@ -42,11 +46,18 @@ export function resolveLayers(
   for (const layer of layers) {
     const mapboxLayer = map.getLayer(layer.id) as MapboxLayer<Layer>;
     if (mapboxLayer) {
+      // Mapbox's map.getLayer() had a breaking change in v3.6.0, see https://github.com/visgl/deck.gl/issues/9086
       // @ts-expect-error not typed
-      mapboxLayer.implementation.setProps(layer.props);
+      const layerInstance = mapboxLayer.implementation || mapboxLayer;
+      layerInstance.setProps(layer.props);
     } else {
       map.addLayer(
-        new MapboxLayer({id: layer.id, deck}),
+        new MapboxLayer({
+          id: layer.id,
+          deck,
+          // @ts-expect-error slot is not defined in LayerProps
+          slot: layer.props.slot
+        }),
         // @ts-expect-error beforeId is not defined in LayerProps
         layer.props.beforeId
       );

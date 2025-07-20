@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import {Home} from '../components';
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -71,7 +75,7 @@ export default function IndexPage() {
           <FeatureImage src={`${baseUrl}images/maps.jpg`} />
           <TextContainer>
             <h2>
-              deck.gl is a WebGL-powered framework for visual exploratory data analysis of large
+              deck.gl is a GPU-powered framework for visual exploratory data analysis of large
               datasets.
             </h2>
             <hr className="short" />
@@ -103,7 +107,7 @@ export default function IndexPage() {
             </h3>
             <p>
               deck.gl APIs are designed to reflect the reactive programming paradigm. Whether using
-              Vanilla JS or the React interface, it can handle efficient WebGL rendering under heavy
+              Vanilla JS or the React interface, it can handle efficient WebGL2/WebGPU rendering under heavy
               data load.
             </p>
 
@@ -113,7 +117,7 @@ export default function IndexPage() {
             </h3>
             <p>
               While deck.gl works standalone without a base map, it plays nicely with your favorite
-              base map providers such as Google Maps, Mapbox, ArcGIS and more. Where the base map
+              base map libraries such as Google Maps, Mapbox, ArcGIS, MapLibre, and more. Where the base map
               library permits, deck.gl may interleave with 3D map layers to create seamless
               visualizations.
             </p>

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {loadArcGISModules} from '@deck.gl/arcgis';
 import {TripsLayer} from '@deck.gl/geo-layers';
 

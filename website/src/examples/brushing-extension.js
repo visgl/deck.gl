@@ -1,14 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
-import App, {inFlowColors, outFlowColors} from 'website-examples/brushing/app';
+import App, {inFlowColor, outFlowColor} from 'website-examples/brushing/app';
 
 import {makeExample} from '../components';
 
-const colorRamp = inFlowColors
-  .slice()
-  .reverse()
-  .concat(outFlowColors)
+const colorRamp = [inFlowColor, outFlowColor]
   .map(color => `rgb(${color.join(',')})`);
 
 class BrushingDemo extends Component {

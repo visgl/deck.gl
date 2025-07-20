@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {CompositeLayer, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 

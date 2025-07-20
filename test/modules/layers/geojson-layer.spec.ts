@@ -1,25 +1,9 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
@@ -218,11 +202,11 @@ test('GeoJsonLayer#tests', t => {
         subLayers.every(_subLayer => _subLayer.props.data.attributes.getFilterValue),
         'every subLayer should receive getFilterValue binary attribute'
       );
-      const {uniforms} = subLayer.state.models[0];
-      t.is(uniforms.filter_min, 1, 'has correct uniforms');
-      t.is(uniforms.filter_max, 1, 'has correct uniforms');
-      t.is(uniforms.filter_useSoftMargin, false, 'has correct uniforms');
-      t.is(uniforms.filter_enabled, true, 'has correct uniforms');
+      const uniforms = getLayerUniforms(subLayer, 'dataFilter');
+      t.is(uniforms.min, 1, 'has correct uniforms');
+      t.is(uniforms.max, 1, 'has correct uniforms');
+      t.is(uniforms.useSoftMargin, false, 'has correct uniforms');
+      t.is(uniforms.enabled, true, 'has correct uniforms');
     },
     updateProps: {
       data: binaryDataWithGetFilterValue,
@@ -256,15 +240,15 @@ test('GeoJsonLayer#picking', async t => {
           t.is(info.object.geometry.type, 'Point', 'info.object populated');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points-circle' ? 1 : 0,
+              uniforms.picking.isHighlightActive,
+              subLayer.id === 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
             );
-            if (uniforms.picking_uSelectedColorValid) {
+            if (uniforms.picking.isHighlightActive) {
               t.deepEqual(
-                uniforms.picking_uSelectedColor,
+                uniforms.picking.highlightedObjectColor,
                 [1, 0, 0],
                 'highlighted index is set correctly'
               );
@@ -283,15 +267,15 @@ test('GeoJsonLayer#picking', async t => {
           t.is(info.object.geometry.type, 'Point', 'info.object populated');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points-circle' ? 1 : 0,
+              uniforms.picking.isHighlightActive,
+              subLayer.id === 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
             );
-            if (uniforms.picking_uSelectedColorValid) {
+            if (uniforms.picking.isHighlightActive) {
               t.deepEqual(
-                uniforms.picking_uSelectedColor,
+                uniforms.picking.highlightedObjectColor,
                 [2, 0, 0],
                 'highlighted index is set correctly'
               );
@@ -310,15 +294,15 @@ test('GeoJsonLayer#picking', async t => {
           t.is(info.object.geometry.type, 'Polygon', 'info.object populated');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points-circle' ? 0 : 1,
+              uniforms.picking.isHighlightActive,
+              subLayer.id !== 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
             );
-            if (uniforms.picking_uSelectedColorValid) {
+            if (uniforms.picking.isHighlightActive) {
               t.deepEqual(
-                uniforms.picking_uSelectedColor,
+                uniforms.picking.highlightedObjectColor,
                 [6, 0, 0],
                 'highlighted index is set correctly'
               );
@@ -336,10 +320,10 @@ test('GeoJsonLayer#picking', async t => {
           t.notOk(info.object, 'info.object is null');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              0,
+              uniforms.picking.isHighlightActive,
+              false,
               `auto highlight is set for ${subLayer.id}`
             );
           }

@@ -1,24 +1,180 @@
 # Upgrade Guide
 
+## Upgrading to v9.1
+
+### User input handling
+
+- The main gesture recognition library, [mjolnir.js](https://visgl.github.io/mjolnir.js), is upgraded to v3.0. Hammer.js is no longer an (indirect) dependency, due to its lack of maintenance and various issues with SSR and test environments.
+- The default gesture to manipulate viewport `pitch` by touch has been changed from three-finger to two-finger dragging vertically. You can revert this behavior by setting the [eventRecognizerOptions](./api-reference/core/deck.md#eventrecognizeroptions) prop of `Deck`:
+
+  ```ts
+  eventRecognizerOptions: {
+    multipan: {pointers: 3}
+  }
+  ```
+
+- If your app already uses Deck's `eventRecognizerOptions` prop or implement a custom [Controller](./api-reference/core/controller.md), some events have been renamed:
+  + `tripan` -> `multipan`
+  + `tap` -> `click`
+  + `doubletap` -> `dblclick`
+
+### Globe View
+
+Breaking changes:
+
+- The `zoom` value is now interpreted differently to match MapLibre's behavior. The appearance adapts based on `latitude`.
+
+### Aggregation layers
+
+Breaking changes:
+
+- `GPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: true`.
+- `CPUGridLayer` is removed. Use `GridLayer` with `gpuAggregation: false`.
+- If you are supplying a custom [hexagonAggregator](./api-reference/aggregation-layers/hexagon-layer.md#hexagonaggregator) to `HexagonLayer`, its function signiature has changed.
+- `HexagonLayer`'s sub layer is renamed `<id>-cells` and is no longer a vanilla `ColumnLayer`. If you were overriding the sub layer class with your own, please open a Discussion on GitHub for support.
+
+
+### LightingEffect
+
+- `PointLight.attenuation` was previously ignored. To retain old behavior, use the default (`[1, 0, 0]`).
+
+### Uniform buffers
+
+GLSL shaders that take inputs via WebGL1-style uniforms need to be migrated to use uniform buffers instead. For example:
+
+```glsl
+// Global uniform
+uniform float opacity;
+
+// UBO
+uniform layerUniforms {
+  uniform float opacity;
+} layer;
+```
+
+The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module) class is used to encapsulate and inject the uniforms, as well as providing using useful type checks. It maps (typed) props to bindings and uniforms defined in the UBO block, which [ShaderInputs](https://luma.gl/docs/api-reference/engine/shader-inputs) uses to update bindings and uniform buffers on the GPU.
+
+See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
+
+Layers need to be modified:
+- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
+
+For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
+
 ## Upgrading to v9.0
 
-### Custom Layers
+**Before you upgrade: known issues**
 
-Create models with device instead of gl.
+The following issues are known and can be expected to resolve in a 9.0 patch:
 
-```typescript
-// luma.gl vp
-new Model(this.context.device, {opts});
-// luma.gl v8
-new Model(this.context.gl, {opts});
+- GPU aggregation is not working for the following layers: `ScreenGridLayer`, `GPUGridLayer`, `GridLayer`
+
+### Typescript
+
+Typescript is now enabled on all modules. The `'@deck.gl/xxx/typed'` packages are removed. 
+
+### luma.gl v9 Updates
+
+The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. Fortunately, deck.gl encapsulates most of the luma.gl API so the changes to deck.gl applications should be limited, in particular if the application does not directly interact with GPU resources.
+
+Quick summary:
+
+- `DeckProps.gl (WebGLRenderingContext)` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
+- `DeckProps.glOptions (WebGLContextAttributes)` should be replaced with `DeckProps.deviceProps.webgl`: `deviceProps: {type: 'webgl', webgl: ...glOptions}`: [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)
+- `DeckProps.glOptions.preserveDrawingBuffers` is now set by default, and does not need to be overridden.
+- `DeckProps.onWebGLInitialized` callback is now `DeckProps.onDeviceInitialized`.
+- `LayerProps.parameters` and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
+- When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
+- GPU resources should no longer be created by directly instantiating classes. For example, instead of `new Buffer(gl)` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
+
+#### Custom Layers
+
+Model creation needs to adapt to the [luma.gl v9 API](https://luma.gl/docs/upgrade-guide):
+
+```ts
+class MyLayer {
+  getModel() {
+    return new Model(
+      // Replaces this.context.gl
+      this.context.device,
+      {
+        // GLSL 1.00 shaders no longer supported, must be updated to GLSL 3.00
+        vs,
+        fs,
+        // New in v9 Model API
+        bufferLayout: this.getAttributeManager().getBufferLayouts(),
+        // Replaces GL constant `drawMode`
+        topology: 'triangle-strip'
+      }
+    );
+  }
+}
 ```
 
 
-- drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select different topology when creating geometries.
+While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl curtom layers:
 
-### Deck
+- deck.gl now uses uniform buffers instead of global uniforms. It is not yet required to use uniform buffers but it will be necessary if you would like to run deck.gl on WebGPU in future releases.
+- When defining an attribute, `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of GL constant, and `divisor` is replaced by `stepMode`. See [AttributeManager.add](./api-reference/core/attribute-manager.md#add)
+- WebGL draw modes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
+- The luma picking module now [uses uniform buffers](https://github.com/visgl/luma.gl/blob/master/modules/shadertools/src/modules/engine/picking/picking.ts#L34-L50). To access picking state in shaders use `picking.isActive` rather than `picking_isActive`
 
-- `Deck.pickObjects` minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
+### @deck.gl/mapbox
+
+`MapboxLayer` has been removed. Use `MapboxOverlay` instead.
+
+```ts
+// deck.gl v9
+import {MapboxOverlay} from '@deck.gl/mapbox'
+map.addControl(new MapboxOverlay({
+  interleaved: true,
+  layers: [new ArcLayer({...})]
+}))
+// deck.gl v8
+import {MapboxLayer} from '@deck.gl/mapbox'
+map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
+```
+
+### @deck.gl/carto
+
+- `CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
+- `setDefaultCredentials` has been removed. Authentication is now passed to the [Data Source](./api-reference/carto/data-sources).
+- `fetchLayerData` has been replaced by `query`. Find [a working example here](./api-reference/carto/overview)
+
+```ts
+// deck.gl v9
+import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+const data = vectorQuerySource({
+  accessToken: 'XXX',
+  connectionName: 'carto_dw',
+  sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
+});
+const layer = new VectorTileLayer({data, ...styleProps});
+
+// deck.gl v8
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
+setDefaultCredentials({accessToken: 'XXX'});
+const layer = new CartoLayer({
+  type: MAP_TYPES.QUERY,
+  connection: 'carto_dw',
+  data: 'SELECT * FROM cartobq.testtables.points_10k',
+  ...styleProps
+});
+```
+
+### loaders.gl
+
+loaders.gl dependencies are updated to v4. Although most version differences are handled internal to deck.gl, some changes may be required for applications that work directly with loaders:
+
+- If an application imports `@loaders.gl/*` sub packages to load specific data formats, they should be upgraded from v3.x to v4.x.
+- If the layer prop `dataTransform` is used to pre-process data, the loaded data object might have changed. For example, `CSVLoader` now yields [a new table format](https://loaders.gl/docs/specifications/category-table). 
+- For a complete list of breaking changes and improvements, see [loaders.gl 4.0 upgrade guide](https://loaders.gl/docs/upgrade-guide#upgrading-to-v40).
+
+### Others
+
+- `Deck.pickObjects()`  -  minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
+- Custom effects: the `Effect` interface has changed. `preRender` and `postRender` no longer receives device/context as an argument, implement the `setup()` lifecycle method instead.
 
 ## Upgrading from deck.gl v8.8 to v8.9
 
@@ -29,6 +185,7 @@ new Model(this.context.gl, {opts});
 - `GoogleMapsOverlays` now also triggers `onClick` for rightclick events. To filter out these events check for `event.srcEvent.domEvent.button === 2` in `onClick`.
 - Some dependencies are upgraded to their next major version, including `@mapbox/tiny-sdf` and `d3-*`. This upgrade is necessary because certain security vulnerabilities in these packages are only fixed in the latest versions. Unfortunately, they became [ES modules](https://nodejs.org/api/packages.html) and no longer support `require()` from the commonjs entry point. This will break Server Side Rendering in frameworks such as Next.js. To mitigate this, you must exclude deck.gl from SSR either by framework config or by using dynamic import. See [here](./get-started/using-with-react.md#using-deckgl-with-ssr) for details.
 
+---
 
 ## Upgrading from deck.gl v8.7 to v8.8
 
@@ -93,7 +250,7 @@ Note that this flag may be removed in a future release.
 
 ### Layer filtering
 
-- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](./api-reference/geo-layers/h3-hexagon-layer.md#highprecision-boolean-optional) for details.
+- `H3HexagonLayer`'s `highPrecision` prop default value is changed to `'auto'`. Setting `highPrecision` to `false` now forces instanced rendering. See updated [layer documentation](./api-reference/geo-layers/h3-hexagon-layer.md#highprecision) for details.
 - `layerFilter` is now only called with top-level layers. For example, if you have a `GeoJsonLayer` with `id: 'regions'`, in previous versions the callback would look like:
 
   ```js
@@ -118,7 +275,7 @@ Note that this flag may be removed in a future release.
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_subLayerProps) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 - If a composite layer has `visible: false`, all of the layers generated by it will also be hidden regardless of their own `visible` prop. In previous versions, a descendant layer may be visible as long as it has `visible: true`, which often led to confusing behavior if a composite layer does not propagate its props correctly.
 
@@ -358,17 +515,17 @@ new Model({
 Should now become
 
 ```js
-import {picking, project32, gouraudLighting} from '@deck.gl/core';
+import {picking, project32, gouraudMaterial} from '@deck.gl/core';
 /// NEW
 new Model({
   // ...
-  modules: [picking, project32, gouraudLighting]
+  modules: [picking, project32, gouraudMaterial]
 });
 ```
 
 ##### Auto view state update
 
-A bug was fixed where initial view state tracking could sometimes overwrite user-provided `viewState` prop. Apps that rely on auto view state update by specifying `initialViewState` should make sure that `viewState` is never assigned. If manual view state update is desired, use `viewState` and `onViewStateChange` instead. See [developer guide](./developer-guide/views.md#using-a-view-class-with-view-state) for examples.
+A bug was fixed where initial view state tracking could sometimes overwrite user-provided `viewState` prop. Apps that rely on auto view state update by specifying `initialViewState` should make sure that `viewState` is never assigned. If manual view state update is desired, use `viewState` and `onViewStateChange` instead. See [developer guide](./developer-guide/views.md#using-a-view-with-view-state) for examples.
 
 We have fixed a bug when using `initialViewState` with multiple views. In the past, the state change in one view is unintendedly propagated to all views. As a result of this fix, multiple views (e.g. mini map) are no longer synchronized by default. To synchronize them, define the views with an explicit `viewState.id`:
 
@@ -397,17 +554,17 @@ See [View class](./api-reference/core/view.md) documentation for details.
 - `ScreenGridLayer`: support is now limited to browsers that implement either WebGL2 or the `OES_texture_float` extension. [coverage stats](https://webglstats.com/webgl/extension/OES_texture_float)
 - Some shader attributes are renamed for consistency:
 
-| Layer | Old | New |
-| ----- | --- | --- |
-| `LineLayer` | `instanceSourceTargetPositions64xyLow.xy` | `instanceSourcePositions64xyLow` |
-| | `instanceSourceTargetPositions64xyLow.zw` | `instanceTargetPositions64xyLow` |
-| `PathLayer` | `instanceLeftStartPositions64xyLow.xy` | `instanceLeftPositions64xyLow`  |
-| | `instanceLeftStartPositions64xyLow.zw` | `instanceStartPositions64xyLow` |
-| | `instanceEndRightPositions64xyLow.xy`  | `instanceEndPositions64xyLow`   |
-| | `instanceEndRightPositions64xyLow.zw`  | `instanceRightPositions64xyLow` |
-| `ArcLayer` | `instancePositions64Low` | `instancePositions64xyLow`  |
-| `ScenegraphLayer` | `instancePositions64xy` | `instancePositions64xyLow`  |
-| `SimpleMeshLayer` | `instancePositions64xy` | `instancePositions64xyLow`  |
+| Layer             | Old                                       | New                              |
+| ----------------- | ----------------------------------------- | -------------------------------- |
+| `LineLayer`       | `instanceSourceTargetPositions64xyLow.xy` | `instanceSourcePositions64xyLow` |
+|                   | `instanceSourceTargetPositions64xyLow.zw` | `instanceTargetPositions64xyLow` |
+| `PathLayer`       | `instanceLeftStartPositions64xyLow.xy`    | `instanceLeftPositions64xyLow`   |
+|                   | `instanceLeftStartPositions64xyLow.zw`    | `instanceStartPositions64xyLow`  |
+|                   | `instanceEndRightPositions64xyLow.xy`     | `instanceEndPositions64xyLow`    |
+|                   | `instanceEndRightPositions64xyLow.zw`     | `instanceRightPositions64xyLow`  |
+| `ArcLayer`        | `instancePositions64Low`                  | `instancePositions64xyLow`       |
+| `ScenegraphLayer` | `instancePositions64xy`                   | `instancePositions64xyLow`       |
+| `SimpleMeshLayer` | `instancePositions64xy`                   | `instancePositions64xyLow`       |
 
 
 #### @deck.gl/json
@@ -426,11 +583,11 @@ See [View class](./api-reference/core/view.md) documentation for details.
 
 Following `Layer` class methods have been removed :
 
-| Removed            | Alternate       | Comment |
-| ---              | --- | --- |
-| `use64bitProjection`  | use `Fp64Extension` | details in `fp64 prop` section below  |
-| `is64bitEnabled`      | use `Fp64Extension` | details in `fp64 prop` section below  |
-| `updateAttributes` | `_updateAttributes` | method is renamed |
+| Removed              | Alternate           | Comment                              |
+| -------------------- | ------------------- | ------------------------------------ |
+| `use64bitProjection` | use `Fp64Extension` | details in `fp64 prop` section below |
+| `is64bitEnabled`     | use `Fp64Extension` | details in `fp64 prop` section below |
+| `updateAttributes`   | `_updateAttributes` | method is renamed                    |
 
 
 ##### fp64 prop
@@ -539,7 +696,7 @@ IE support is deprecated and will be removed in the next major release.
 
 Breaking Changes:
 
-- `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be a valid [picking info](./developer-guide/interactivity.md#the-picking-info-object) object, and the second argument is the pointer event. This change makes these two events behave consistently with other event callbacks.
+- `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be a valid [picking info](./developer-guide/interactivity.md#the-pickinginfo-object) object, and the second argument is the pointer event. This change makes these two events behave consistently with other event callbacks.
 
 #### Layers
 
@@ -560,7 +717,7 @@ Breaking Changes:
 #### Lighting
 
 The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/visgl/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](./api-reference/core/lighting-effect.md) with the [effects prop of Deck](./api-reference/core/deck.md#effects).
-Check [Using Lighting](./developer-guide/using-lighting.md) in developer guide for more details.
+Check [Using Lighting](./developer-guide/using-effects.md) in developer guide for more details.
 
 #### Views
 
@@ -586,7 +743,7 @@ Deprecations:
 
 #### React
 
-If you are using DeckGL with react-map-gl, ` @deck.gl/react@^7.0.0` no longer works with react-map-gl v3.x.
+If you are using DeckGL with react-map-gl, ` @deck.gl/react@^9.0.0` no longer works with react-map-gl v3.x.
 
 
 ## Upgrading from deck.gl v6.3 to v6.4
@@ -721,10 +878,10 @@ new MapView().makeViewport({width, height, viewState: {longitude, latitude, zoom
 
 ### Layer properties
 
-| Layer            | Removed Prop       | New Prop             | Comment |
-| ---              | --- | --- | --- |
-| `ArcLayer`       | `strokeWidth`       | `getStrokeWidth` | Can be set to constant value |
-| `LineLayer`      | `strokeWidth`       | `getStrokeWidth` | Can be set to constant value |
+| Layer       | Removed Prop  | New Prop         | Comment                      |
+| ----------- | ------------- | ---------------- | ---------------------------- |
+| `ArcLayer`  | `strokeWidth` | `getStrokeWidth` | Can be set to constant value |
+| `LineLayer` | `strokeWidth` | `getStrokeWidth` | Can be set to constant value |
 
 
 ### Pure JS applications
@@ -776,10 +933,10 @@ deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a norma
 
 Coordinate system related props have been renamed for clarity. The old props are no longer supported and will generate errors when used.
 
-| Layer            | Removed Prop       | New Prop             | Comment |
-| ---              | ---                | ---                  | ---     |
-| Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
-| Layer            | `projectionOrigin` | `coordinateOrigin`   | [lng, lat] |
+| Layer | Removed Prop       | New Prop           | Comment                               |
+| ----- | ------------------ | ------------------ | ------------------------------------- |
+| Layer | `projectionMode`   | `coordinateSystem` | Any constant from `COORDINATE_SYSTEM` |
+| Layer | `projectionOrigin` | `coordinateOrigin` | [lng, lat]                            |
 
 Note; There is also an important semantical change in that using `coordinateSystem` instead of `projectionMode` causes the superimposed `METER_OFFSET` system's y-axis to point north instead of south. This was always the intention so in some sense this was regarded as a bug fix.
 
@@ -787,18 +944,18 @@ Note; There is also an important semantical change in that using `coordinateSyst
 
 Following methods and props have been renamed for clarity. The semantics are unchanged. The old props are still available but will generate a deprecation warning.
 
-| Old Method            | New Method        | Comment |
-| ---                   | ---               | ---     |
-| `queryObject`         | `pickObject`      | These names were previously aligned with react-map-gl, but ended up confusing users. Since rest of the deck.gl documentation talks extensively about "picking" it made sense to stay with that terminology. |
-| `queryVisibleObjects` | `pickObjects`     | The word "visible" was intended to remind the user that this function only selects the objects that are actually visible in at least one pixel, but again it confused more than it helped. |
+| Old Method            | New Method    | Comment                                                                                                                                                                                                     |
+| --------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `queryObject`         | `pickObject`  | These names were previously aligned with react-map-gl, but ended up confusing users. Since rest of the deck.gl documentation talks extensively about "picking" it made sense to stay with that terminology. |
+| `queryVisibleObjects` | `pickObjects` | The word "visible" was intended to remind the user that this function only selects the objects that are actually visible in at least one pixel, but again it confused more than it helped.                  |
 
 ### Removed picking Uniforms
 
-| Removed uniform       | Comment |
-| ---                   | ---     |
-| renderPickingBuffer   |[picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
-| pickingEnabled        |[picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
-| selectedPickingColor  |[picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+| Removed uniform      | Comment                                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| renderPickingBuffer  | [picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking) |
+| pickingEnabled       | [picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking) |
+| selectedPickingColor | [picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking) |
 
 
 The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/visgl/luma.gl/tree/5.0-release/src/shadertools/modules/picking).
@@ -808,15 +965,15 @@ The shader uniforms are used for implementing picking in custom shaders, these u
 
 Following WebGL parameters are set during DeckGL component initialization.
 
-| WebGL State   |  Value |
-|----           |----    |
-| depthTest     | true         |
-| depthFunc     | gl.LEQUAL |
+| WebGL State       | Value                                                                  |
+| ----------------- | ---------------------------------------------------------------------- |
+| depthTest         | true                                                                   |
+| depthFunc         | gl.LEQUAL                                                              |
 | blendFuncSeparate | [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA] |
 
 All our layers enable depth test so we are going set this state during initialization. We are also changing blend function for more appropriate rendering when multiple elements are blended.
 
-For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](./api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
+For any custom needs, these parameters can be overwritten by updating them in `onWebGLInitialized` callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
 
 
 ### assembleShaders
@@ -896,11 +1053,11 @@ const model = new Model({
 
 ### Removed Layers
 
-| Layer              | Status       | Replacement         |
-| ---                | ---          | ---                 |
-| `ChoroplethLayer`  | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `ChoroplethLayer64` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `ExtrudedChoroplethLayer` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| Layer                     | Status  | Replacement                                    |
+| ------------------------- | ------- | ---------------------------------------------- |
+| `ChoroplethLayer`         | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer` |
+| `ChoroplethLayer64`       | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer` |
+| `ExtrudedChoroplethLayer` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer` |
 
 * ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
 
@@ -925,12 +1082,12 @@ While it would have been preferable to avoid this change, a significant moderniz
 
 ### Deprecated/Removed Layers
 
-| Layer              | Status       | Replacement         |
-| ---                | ---          | ---                 |
-| `ChoroplethLayer`  | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `ChoroplethLayer64` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `ExtrudedChoroplethLayer` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `EnhancedChoroplethLayer`  | Moved to examples  | `PathLayer`    |
+| Layer                     | Status            | Replacement                                    |
+| ------------------------- | ----------------- | ---------------------------------------------- |
+| `ChoroplethLayer`         | Deprecated        | `GeoJsonLayer`, `PolygonLayer` and `PathLayer` |
+| `ChoroplethLayer64`       | Deprecated        | `GeoJsonLayer`, `PolygonLayer` and `PathLayer` |
+| `ExtrudedChoroplethLayer` | Deprecated        | `GeoJsonLayer`, `PolygonLayer` and `PathLayer` |
+| `EnhancedChoroplethLayer` | Moved to examples | `PathLayer`                                    |
 
 * ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
 
@@ -948,13 +1105,13 @@ Developers can either copy this layer from the example folder into their applica
 
 ### Removed, Changed and Deprecated Layer Properties
 
-| Layer            | Old Prop       | New Prop         | Comment |
-| ---              | ---            | ---              | ---     |
+| Layer            | Old Prop       | New Prop         | Comment                          |
+| ---------------- | -------------- | ---------------- | -------------------------------- |
 | Layer            | `dataIterator` | N/A              | Prop was not functional in v3    |
 | ScatterplotLayer | `radius`       | `radiusScale`    | Default has changed from 30 to 1 |
-| ScatterplotLayer | `drawOutline`  | `outline`        | |
-| ScreenGridLayer  | `unitWidth`    | `cellSizePixels` | |
-| ScreenGridLayer  | `unitHeight`   | `cellSizePixels` | | |
+| ScatterplotLayer | `drawOutline`  | `outline`        |                                  |
+| ScreenGridLayer  | `unitWidth`    | `cellSizePixels` |                                  |
+| ScreenGridLayer  | `unitHeight`   | `cellSizePixels` |                                  |  |
 
 
 #### Note about `strokeWidth` props

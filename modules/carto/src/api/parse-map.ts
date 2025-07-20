@@ -1,5 +1,11 @@
-import {GL} from '@luma.gl/constants';
-import {log} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* eslint-disable no-shadow */
+
+import {ColorParameters} from '@luma.gl/core';
+import {Layer, log} from '@deck.gl/core';
 import {
   AGGREGATION,
   getLayer,
@@ -13,17 +19,33 @@ import {
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
-import PointLabelLayer from '../layers/point-label-layer';
-import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
-import {MapDataset, MapLayerConfig, VisualChannels} from './types';
+import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
 
-const collisionFilterExtension = new CollisionFilterExtension();
+export type ParseMapResult = {
+  /** Map id. */
+  id: string;
+
+  /** Title of map. */
+  title: string;
+
+  /** Description of map. */
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  initialViewState: any;
+
+  /** @deprecated Use `basemap`. */
+  mapStyle: any;
+  token: string;
+
+  layers: Layer[];
+};
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;
   assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
-  const {mapState, mapStyle} = keplerMapConfig.config;
+  const {mapState, mapStyle} = keplerMapConfig.config as KeplerMapConfig;
   const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
 
   return {
@@ -33,6 +55,7 @@ export function parseMap(json) {
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
     initialViewState: mapState,
+    /** @deprecated Use `basemap`. */
     mapStyle,
     token,
     layers: layers.reverse().map(({id, type, config, visualChannels}) => {
@@ -62,13 +85,18 @@ export function parseMap(json) {
   };
 }
 
-function createParametersProp(layerBlending, parameters: Record<string, any>) {
+function createParametersProp(layerBlending: string, parameters: ColorParameters) {
   if (layerBlending === 'additive') {
-    parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = GL.FUNC_ADD;
+    parameters.blendColorSrcFactor = parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendColorDstFactor = parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = parameters.blendAlphaOperation = 'add';
   } else if (layerBlending === 'subtractive') {
-    parameters.blendFunc = [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = [GL.FUNC_SUBTRACT, GL.FUNC_ADD];
+    parameters.blendColorSrcFactor = 'one';
+    parameters.blendColorDstFactor = 'one-minus-dst';
+    parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = 'subtract';
+    parameters.blendAlphaOperation = 'add';
   }
 
   return Object.keys(parameters).length ? {parameters} : {};
@@ -142,7 +170,8 @@ function createChannelProps(
     sizeField,
     sizeScale,
     strokeColorField,
-    strokeColorScale
+    strokeColorScale,
+    weightField
   } = visualChannels;
   let {heightField, heightScale} = visualChannels;
   if (type === 'hexagonId') {
@@ -216,7 +245,6 @@ function createChannelProps(
       data
     );
   }
-
   if (heightField && visConfig.enable3d) {
     result.getElevation = getSizeAccessor(
       heightField,
@@ -224,6 +252,16 @@ function createChannelProps(
       heightScale,
       visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
+      data
+    );
+  }
+
+  if (weightField) {
+    result.getWeight = getSizeAccessor(
+      weightField,
+      undefined,
+      visConfig.weightAggregation,
+      undefined,
       data
     );
   }
@@ -303,8 +341,9 @@ function createChannelProps(
     result._subLayerProps = {
       ...result._subLayerProps,
       'points-text': {
-        type: PointLabelLayer,
-        extensions: [collisionFilterExtension],
+        // The following props are injected by default by VectorTileLayer:
+        // type: PointLabelLayer,
+        // extensions: [new CollisionFilterExtension()],
         collisionEnabled: true,
         collisionGroup,
 

@@ -1,17 +1,16 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 /* eslint-disable no-console */
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {
-  vectorTableSource,
-  H3TileLayer,
-  RasterTileLayer,
-  QuadbinTileLayer,
-  query,
-  VectorTileLayer
-} from '@deck.gl/carto';
+import {H3TileLayer, RasterTileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
+
+import {query} from '@carto/api-client';
 import datasets from './datasets';
 import {Layer} from '@deck.gl/core';
 
@@ -58,7 +57,7 @@ function Root() {
             .join('');
         }}
       >
-        <StaticMap mapStyle={MAP_STYLE} />
+        <Map mapStyle={MAP_STYLE} />
       </DeckGL>
       <ObjectSelect
         title="dataset"
@@ -71,28 +70,19 @@ function Root() {
 }
 
 function useBoundaryLayer(datasource) {
-  const {
-    getFillColor,
-    source,
-    tilesetTableName,
-    columns,
-    matchingColumn,
-    propertiesSqlQuery,
-    propertiesTableName
-  } = datasource;
+  const {getFillColor, source, tilesetTableName, columns, propertiesSqlQuery, propertiesTableName} =
+    datasource;
   const tilejson = source({
     ...globalOptions,
     tilesetTableName,
     columns,
-    matchingColumn,
     propertiesTableName,
     propertiesSqlQuery
   });
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor
@@ -159,8 +149,7 @@ function useVectorLayer(datasource) {
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor

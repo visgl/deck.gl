@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 const PROP_BLACK_LIST = ['dataComparator', 'fetch'];
 const BASE_LAYER_PROP_WHITE_LIST = [
   'autoHighlight',
@@ -242,7 +246,7 @@ new DeckGL({
   `;
 
   gotoSource({
-    dependencies: dependencies.concat(['https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js']),
+    dependencies: dependencies.concat(['https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js']),
     title: `deck.gl ${Layer.layerName}`,
     source
   });

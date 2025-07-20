@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
@@ -71,7 +75,7 @@ class TripsDemo extends Component {
         {...otherProps}
         trips={data && data[0]}
         buildings={data && data[1]}
-        animationSpeed={0.5}
+        animationSpeed={1}
         trailLength={params.trail.value}
       />
     );

@@ -1,26 +1,44 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const source = /* wgsl */ `\
+const SMOOTH_EDGE_RADIUS: f32 = 0.5;
+
+struct VertexGeometry {
+  position: vec4<f32>,
+  worldPosition: vec3<f32>,
+  worldPositionAlt: vec3<f32>,
+  normal: vec3<f32>,
+  uv: vec2<f32>,
+  pickingColor: vec3<f32>,
+};
+
+var<private> geometry_: VertexGeometry = VertexGeometry(
+  vec4<f32>(0.0, 0.0, 1.0, 0.0),
+  vec3<f32>(0.0, 0.0, 0.0),
+  vec3<f32>(0.0, 0.0, 0.0),
+  vec3<f32>(0.0, 0.0, 0.0),
+  vec2<f32>(0.0, 0.0),
+  vec3<f32>(0.0, 0.0, 0.0)
+);
+
+struct FragmentGeometry {
+  uv: vec2<f32>,
+};
+
+var<private> fragmentGeometry: FragmentGeometry;
+
+fn smoothedge(edge: f32, x: f32) -> f32 {
+  return smoothstep(edge - SMOOTH_EDGE_RADIUS, edge + SMOOTH_EDGE_RADIUS, x);
+}
+`;
+
 const defines = '#define SMOOTH_EDGE_RADIUS 0.5';
-const vs = `
+
+const vs = /* glsl */ `\
 ${defines}
 
 struct VertexGeometry {
@@ -40,7 +58,7 @@ struct VertexGeometry {
 );
 `;
 
-const fs = `
+const fs = /* glsl */ `\
 ${defines}
 
 struct FragmentGeometry {
@@ -52,4 +70,9 @@ float smoothedge(float edge, float x) {
 }
 `;
 
-export default {name: 'geometry', vs, fs} as ShaderModule;
+export default {
+  name: 'geometry',
+  source,
+  vs,
+  fs
+} as const satisfies ShaderModule;

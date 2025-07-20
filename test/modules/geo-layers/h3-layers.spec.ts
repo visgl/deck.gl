@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
 import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
@@ -153,8 +137,7 @@ test('H3Utils#normalizeLongitudes', t => {
   t.end();
 });
 
-// TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
-test.skip('H3HexagonLayer', t => {
+test('H3HexagonLayer', t => {
   const testCases = generateLayerTests({
     Layer: H3HexagonLayer,
     sampleProps: SAMPLE_PROPS,
@@ -176,8 +159,7 @@ test.skip('H3HexagonLayer', t => {
   t.end();
 });
 
-// TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
-test.skip('H3HexagonLayer#_shouldUseHighPrecision', t => {
+test('H3HexagonLayer#_shouldUseHighPrecision', t => {
   testLayer({
     Layer: H3HexagonLayer,
     onError: t.notOk,
@@ -230,8 +212,7 @@ test.skip('H3HexagonLayer#_shouldUseHighPrecision', t => {
   t.end();
 });
 
-// TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
-test.skip('H3HexagonLayer#viewportUpdate', t => {
+test('H3HexagonLayer#viewportUpdate', t => {
   let vertices = null;
 
   testLayer({

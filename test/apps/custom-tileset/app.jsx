@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 /* eslint-disable no-console */
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import {BASEMAP} from '@deck.gl/carto';
 import DeckGL from '@deck.gl/react';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -75,7 +79,7 @@ function Root() {
         controller={true}
         layers={[h3TileLayer, quadkeyTileLayer]}
       >
-        <StaticMap mapStyle={BASEMAP.VOYAGER} />
+        <Map mapStyle={BASEMAP.VOYAGER} />
       </DeckGL>
     </>
   );

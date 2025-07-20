@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export * from '../core/bundle/peer-dependency';
 
-export * from './src/load-modules';
+// @ts-ignore import from transpiled code to leverage TS transforms
+export * from './dist/load-modules';

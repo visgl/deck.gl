@@ -1,6 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import React, {createElement} from 'react';
 import positionChildrenUnderViews from '@deck.gl/react/utils/position-children-under-views';
+import {DeckGlContext} from '@deck.gl/react/utils/deckgl-context';
 import {MapView, OrthographicView, View} from '@deck.gl/core';
 
 const TEST_VIEW_STATES = {
@@ -60,27 +65,40 @@ test('positionChildrenUnderViews#before initialization', t => {
 test('positionChildrenUnderViews', t => {
   const children = positionChildrenUnderViews({
     children: TEST_CHILDREN,
-    deck: {viewManager: dummyViewManager}
+    deck: {viewManager: dummyViewManager, canvas: document.createElement('canvas')}
   });
   t.is(children.length, 2, 'Returns wrapped children');
 
-  t.is(children[0].key, 'view-map', 'Has map view');
-  t.is(children[1].key, 'view-ortho', 'Has orthographic view');
-  t.is(children[0].props.style.left, 0, 'Wrapper component has x position');
-  t.is(children[1].props.style.left, 400, 'Wrapper component has x position');
+  t.is(children[0].key, 'view-map-context', 'Child has deck context');
+  t.is(children[0].type, DeckGlContext.Provider, 'view is wrapped in DeckGlContext.Provider');
+  t.is(children[1].key, 'view-ortho-context', 'Child has deck context');
+  t.is(children[1].type, DeckGlContext.Provider, 'view is wrapped in DeckGlContext.Provider');
 
-  let wrappedChild = children[0].props.children;
+  // check first view
+  let wrappedView = children[0].props.children;
+  t.is(wrappedView.key, 'view-map', 'Has map view');
+  t.is(wrappedView.props.style.left, 0, 'Wrapper component has x position');
+
+  // check first view's children
+  let wrappedChild = wrappedView.props.children;
+  t.is(wrappedChild.length, 2, 'Returns wrapped children');
   t.is(wrappedChild[0].props.id, 'function-under-view', 'function child preserves id');
   t.is(wrappedChild[0].props.width, 400, 'function child has width');
   t.is(wrappedChild[0].props.viewState, TEST_VIEW_STATES.map, 'function child has viewState');
   t.is(wrappedChild[1].props.id, 'element-without-view', 'element child preserves id');
 
-  wrappedChild = children[1].props.children;
+  // check second view
+  wrappedView = children[1].props.children;
+  t.is(wrappedView.key, 'view-ortho', 'Has ortho view');
+  t.is(wrappedView.props.style.left, 400, 'Wrapper component has x position');
+
+  // check second view's child
+  wrappedChild = wrappedView.props.children;
   t.is(wrappedChild.props.id, 'element-under-view', 'element child preserves id');
   t.end();
 });
 
-test('positionChildrenUnderViews#ContextProvider', t => {
+test('positionChildrenUnderViews#override ContextProvider', t => {
   const context = React.createContext();
 
   const children = positionChildrenUnderViews({
@@ -94,9 +112,11 @@ test('positionChildrenUnderViews#ContextProvider', t => {
 
   t.is(children.length, 2, 'Returns wrapped children');
 
+  t.is(children[0].key, 'view-map-context', 'Child has deck context');
   t.is(children[0].type, context.Provider, 'child is wrapped in ContextProvider');
   t.is(children[0].props.value.viewport, TEST_VIEWPORTS.map, 'Context has viewport');
 
+  t.is(children[1].key, 'view-ortho-context', 'Child has deck context');
   t.is(children[1].type, context.Provider, 'child is wrapped in ContextProvider');
   t.is(children[1].props.value.viewport, TEST_VIEWPORTS.ortho, 'Context has viewport');
   t.end();

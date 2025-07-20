@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export default `\
 #version 300 es
@@ -36,15 +20,6 @@ in vec3 instanceRightPositions64Low;
 in float instanceStrokeWidths;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
-
-uniform float widthScale;
-uniform float widthMinPixels;
-uniform float widthMaxPixels;
-uniform float jointType;
-uniform float capType;
-uniform float miterLimit;
-uniform bool billboard;
-uniform int widthUnits;
 
 uniform float opacity;
 
@@ -76,7 +51,7 @@ vec3 getLineJoinOffset(
   vec3 deltaB3 = (nextPoint - currPoint);
 
   mat3 rotationMatrix;
-  bool needsRotation = !billboard && project_needs_rotation(currPoint, rotationMatrix);
+  bool needsRotation = !path.billboard && project_needs_rotation(currPoint, rotationMatrix);
   if (needsRotation) {
     deltaA3 = deltaA3 * rotationMatrix;
     deltaB3 = deltaB3 * rotationMatrix;
@@ -136,10 +111,10 @@ vec3 getLineJoinOffset(
 
   // extend out a triangle to envelope the round cap
   if (isCap) {
-    offsetVec = mix(perp * sideOfPath, dir * capType * 4.0 * flipIfTrue(isStartCap), isJoint);
-    vJointType = capType;
+    offsetVec = mix(perp * sideOfPath, dir * path.capType * 4.0 * flipIfTrue(isStartCap), isJoint);
+    vJointType = path.capType;
   } else {
-    vJointType = jointType;
+    vJointType = path.jointType;
   }
 
   // Generate variables for fragment shader
@@ -175,7 +150,7 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 void main() {
   geometry.pickingColor = instancePickingColors;
 
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
+  vColor = vec4(instanceColors.rgb, instanceColors.a * layer.opacity);
 
   float isEnd = positions.x;
 
@@ -190,11 +165,11 @@ void main() {
 
   geometry.worldPosition = currPosition;
   vec2 widthPixels = vec2(clamp(
-    project_size_to_pixel(instanceStrokeWidths * widthScale, widthUnits),
-    widthMinPixels, widthMaxPixels) / 2.0);
+    project_size_to_pixel(instanceStrokeWidths * path.widthScale, path.widthUnits),
+    path.widthMinPixels, path.widthMaxPixels) / 2.0);
   vec3 width;
 
-  if (billboard) {
+  if (path.billboard) {
     // Extrude in clipspace
     vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
     vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET, geometry.position);

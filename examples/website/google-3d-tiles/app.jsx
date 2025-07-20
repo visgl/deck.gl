@@ -1,7 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useState} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -31,6 +35,17 @@ const INITIAL_VIEW_STATE = {
 
 const BUILDING_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d-tiles/buildings.geojson';
+
+function getTooltip({object}) {
+  return (
+    object && {
+      html: `\
+    <div><b>Distance to nearest tree</b></div>
+    <div>${object.properties.distance_to_nearest_tree}</div>
+    `
+    }
+  );
+}
 
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
@@ -64,7 +79,8 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
       getFillColor: ({properties}) => colorScale(properties.distance_to_nearest_tree),
       opacity,
       getFilterValue: f => f.properties.distance_to_nearest_tree,
-      filterRange: [distance, 500]
+      filterRange: [distance, 500],
+      pickable: true
     })
   ];
 
@@ -75,6 +91,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
         initialViewState={INITIAL_VIEW_STATE}
         controller={{touchRotate: true, inertia: 250}}
         layers={layers}
+        getTooltip={getTooltip}
       />
       <div
         style={{position: 'absolute', left: '8px', bottom: '4px', color: 'white', fontSize: '10px'}}

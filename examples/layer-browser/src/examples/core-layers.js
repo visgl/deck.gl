@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   ScatterplotLayer,
   ArcLayer,
@@ -386,6 +390,15 @@ const TextLayerExample = {
       max: 100,
       onUpdate: (newValue, newSettings, change) => {
         change('backgroundPadding', [newValue, newValue]);
+      }
+    },
+    backgroundBorderRadius: {type: 'compound', elements: ['borderRadius']},
+    borderRadius: {
+      type: 'number',
+      min: 0,
+      max: 100,
+      onUpdate: (newValue, newSettings, change) => {
+        change('backgroundBorderRadius', newValue);
       }
     }
   },

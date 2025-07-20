@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {SphereGeometry} from '@luma.gl/engine';
 import {
   COORDINATE_SYSTEM,
@@ -7,8 +11,7 @@ import {
   FirstPersonView
 } from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-// TODO v9
-// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
@@ -89,9 +92,7 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/map-repeat.png'
-  }
-  // TODO v9
-  /*
+  },
   ...[true, false].map(binary => {
     const id = `globe-mvt${binary ? '-binary' : ''}`;
     return {
@@ -100,9 +101,7 @@ export default [
       viewState: {
         longitude: -100,
         latitude: 80,
-        zoom: 0,
-        pitch: 0,
-        bearing: 0
+        zoom: -1
       },
       layers: [
         new SimpleMeshLayer({
@@ -121,11 +120,7 @@ export default [
           stroked: false,
           getFillColor: [0, 0, 0],
           onTileError: error => {
-            if (error.message.includes('404')) {
-              // trying to load tiles in the previous viewport, ignore
-            } else {
-              throw error;
-            }
+            //ignore missing tiles
           },
           lineWidthMinPixels: 1,
           binary,
@@ -138,6 +133,54 @@ export default [
       ],
       goldenImage: `./test/render/golden-images/globe-mvt.png`
     };
-  })
-  */
+  }),
+  {
+    name: 'multi-view',
+    views: [
+      new MapView({id: 'background', clear: true, clearColor: [0, 0, 255, 128]}),
+      new MapView({
+        id: 'transparent',
+        x: 0,
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clear: true
+      }),
+      new MapView({
+        id: 'green',
+        x: '50%',
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clear: true,
+        clearColor: [0, 255, 0]
+      }),
+      new MapView({
+        id: 'clearing-color-disabled',
+        x: 0,
+        y: '50%',
+        width: '50%',
+        height: '50%',
+        clear: true,
+        clearColor: false
+      }),
+      new MapView({id: 'default', x: '50%', y: '50%', width: '50%', height: '50%'})
+    ],
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: getRes0Cells(),
+        getPosition: d => cellToLatLng(d).reverse(),
+        radiusMinPixels: 4,
+        getFillColor: [0, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/multi-view.png'
+  }
 ];

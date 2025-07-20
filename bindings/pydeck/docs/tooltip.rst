@@ -111,7 +111,7 @@ A full demo is below:
     r.to_html()
 
 .. _pickingInfo.object:
-    https://github.com/visgl/deck.gl/blob/master/docs/developer-guide/interactivity.md#the-picking-info-object
+    https://github.com/visgl/deck.gl/blob/master/docs/developer-guide/interactivity.md#the-pickinginfo-object
 .. _innerHTML:
     https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML
 .. _innerText:

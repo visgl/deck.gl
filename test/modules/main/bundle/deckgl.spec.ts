@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import test from 'tape-catch';
 import * as deckgl from 'deck.gl/../bundle';
@@ -27,6 +11,11 @@ test('standalone#imports', t => {
   t.ok(deckgl.WebMercatorViewport, 'WebMercatorViewport class is exported');
   t.ok(deckgl.Layer, 'Layer class is exported');
   t.ok(deckgl.ScatterplotLayer, 'ScatterplotLayer class is exported');
+
+  t.ok(globalThis.deck, 'deck namespace is exported');
+  t.ok(globalThis.luma, 'luma namespace is exported');
+  t.ok(globalThis.luma.enforceWebGL2, 'enforceWebGL2 is exported');
+  t.ok(globalThis.loaders, 'loaders namespace is exported');
 
   t.end();
 });

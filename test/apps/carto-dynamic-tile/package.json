@@ -5,8 +5,10 @@
   },
   "dependencies": {
     "deck.gl": "^8.0.0",
+    "maplibre-gl": "^4.3.2",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.1.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

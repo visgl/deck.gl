@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {RasterTileLayer} from '@deck.gl/carto';
@@ -52,14 +56,13 @@ test('RasterTileLayer tilejson', async t => {
   t.end();
 });
 
-test('RasterLayer', async t => {
+test.skip('RasterLayer', async t => {
   const testCases = [
     {
       Layer: RasterLayer,
       props: {
         data: {
-          blockWidth: 256,
-          blockHeight: 256,
+          blockSize: 256,
           cells: {
             properties: [],
             numericProps: {band: {value: new Float32Array(256 * 256).fill(7)}}

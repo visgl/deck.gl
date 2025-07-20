@@ -32,24 +32,24 @@ new deck.DeckGL({
 
 All [Deck](./deck.md) class properties, with these additional props that can be passed to the constructor:
 
-##### `container` (DOMElement | String, optional) {#container}
+#### `container` (DOMElement | String, optional) {#container}
 
 Default: `document.body`
 
 The container in which deck.gl should append its canvas. Can be either a HTMLDivElement or the element id. The deck.gl canvas is resized to fill the container.
 
-##### `map` (Object, optional) {#map}
+#### `map` (object, optional) {#map}
 
 Default: `window.mapboxgl || window.maplibregl`
 
 The scripting API offers out-of-the-box integration with [Mapbox GL JS](https://mapbox.com) or [MapLibre GL JS](https://maplibre.org). To add a base map to your visualization, you need to include the base map library and stylesheet:
 
 ```html
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet' />
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
 <!-- or -->
-<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.css" rel="stylesheet" />
 ```
 
 The above script adds `mapboxgl` or `maplibregl` to the global scope, which will be picked up by default. 
@@ -59,9 +59,9 @@ To disable the base map, simply exclude the mapbox script or set `map` to false.
 In some environments such as Observable, libraries cannot be imported into the global scope, in which case you need to manually pass the mapboxgl object to `map`:
 
 ```js
-mapboxgl = require('mapbox-gl@^1.13.0/dist/mapbox-gl.js');
+mapboxgl = require('mapbox-gl@^3.0.0/dist/mapbox-gl.js');
 // or
-maplibregl = require('maplibre-gl@^2.4.0/dist/maplibre-gl.js');
+maplibregl = require('maplibre-gl@^3.0.0/dist/maplibre-gl.js');
 ```
 
 And
@@ -73,20 +73,24 @@ new deck.DeckGL({
 });
 ```
 
-##### `mapStyle` (Object | String) {#mapstyle}
+#### `mapStyle` (object | string, optional) {#mapstyle}
 
 The style JSON or URL for the Mapbox map.
 
-##### `mapboxApiAccessToken` (String) {#mapboxapiaccesstoken}
+#### `mapboxApiAccessToken` (string, optional) {#mapboxapiaccesstoken}
 
 The API access token to use Mapbox tiles. See [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/api) documentation for how to use Mapbox.
+
+#### `mapOptions` (object, optional) {#mapoptions}
+
+Additional options to pass to the [mapboxgl.Map](https://docs.mapbox.com/mapbox-gl-js/api/map/) or [maplibregl.Map](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/) constructor.
 
 
 ## Methods
 
 All [Deck](./deck.md) class methods, with these additional methods:
 
-##### `getMapboxMap` {#getmapboxmap}
+#### `getMapboxMap` {#getmapboxmap}
 
 Returns the mapbox-gl or maplibre-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instance if a base map is present.
 

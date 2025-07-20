@@ -1,41 +1,42 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-/* global window, console */
+/* global window, console, setTimeout */
 /* eslint-disable no-console */
-import {Deck, MapView} from '@deck.gl/core';
+import {Deck, DeckProps, MapView} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
-const GL_VENDOR = 0x1f00;
-
-const DEFAULT_DECK_PROPS = {
+const DEFAULT_DECK_PROPS: DeckProps<any> = {
   ...Deck.defaultProps,
   id: 'deckgl-render-test',
   width: 800,
   height: 450,
   style: {position: 'absolute', left: '0px', top: '0px'},
-  views: [new MapView()],
+  views: [new MapView({})],
   useDevicePixels: false,
   debug: true
 };
 
-const DEFAULT_TEST_OPTIONS = {
+export type TestCase = {
+  name: string;
+  /** milliseconds to wait before aborting */
+  timeout?: number;
+};
+
+type TestOptions<TestCaseT extends TestCase, ResultT> = {
+  /** Called when a test case starts */
+  onTestStart: (testCase: TestCaseT) => void;
+  /** Called when a test case passes */
+  onTestPass: (testCase: TestCaseT, result: ResultT) => void;
+  /** Called when a test case fails */
+  onTestFail: (testCase: TestCaseT, result: ResultT | {error: string}) => void;
+
+  /** milliseconds to wait for each test case before aborting */
+  timeout: number;
+};
+
+const DEFAULT_TEST_OPTIONS: TestOptions<TestCase, unknown> = {
   // test lifecycle callback
   onTestStart: testCase => console.log(`# ${testCase.name}`),
   onTestPass: testCase => console.log(`ok ${testCase.name} passed`),
@@ -45,35 +46,39 @@ const DEFAULT_TEST_OPTIONS = {
   timeout: 2000
 };
 
-const DEFAULT_TEST_CASE = {
-  name: 'Unnamed test'
-};
+export abstract class TestRunner<TestCaseT extends TestCase, ResultT, ExtraOptions = {}> {
+  deck: Deck<any> | null = null;
+  props: DeckProps<any>;
+  isHeadless: boolean;
+  isRunning: boolean = false;
+  testOptions: TestOptions<TestCaseT, ResultT> & ExtraOptions;
+  gpuVendor?: string;
 
-export default class TestRunner {
+  private _testCases: TestCaseT[] = [];
+  private _currentTestCase: TestCaseT | null = null;
+  private _testCaseData: unknown = null;
+
   /**
    * props
    *   Deck props
    */
-  constructor(props = {}) {
+  constructor(props: DeckProps = {}, options: ExtraOptions) {
     this.props = {...DEFAULT_DECK_PROPS, ...props};
 
-    this.isRunning = false;
-    this._testCases = [];
-    this._testCaseData = null;
-
+    // @ts-ignore browserTestDriver_isHeadless is injected by @probe.gl/test-utils if running in headless browser
     this.isHeadless = Boolean(window.browserTestDriver_isHeadless);
 
-    this.testOptions = {...DEFAULT_TEST_OPTIONS};
+    this.testOptions = {...DEFAULT_TEST_OPTIONS, ...options};
   }
 
-  get defaultTestCase() {
-    return DEFAULT_TEST_CASE;
+  get defaultTestCase(): TestCaseT {
+    throw new Error('Not implemented');
   }
 
   /**
    * Add testCase(s)
    */
-  add(testCases) {
+  add(testCases: TestCaseT[]): this {
     if (!Array.isArray(testCases)) {
       testCases = [testCases];
     }
@@ -86,13 +91,13 @@ export default class TestRunner {
   /**
    * Returns a promise that resolves when all the test cases are done
    */
-  run(options = {}) {
+  run(options: Partial<TestOptions<TestCaseT, ResultT> & ExtraOptions> = {}): Promise<void> {
     Object.assign(this.testOptions, options);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.deck = new Deck({
         ...this.props,
-        onWebGLInitialized: this._onWebGLInitialized.bind(this),
+        onDeviceInitialized: this._onDeviceInitialized.bind(this),
         onLoad: resolve
       });
 
@@ -107,18 +112,18 @@ export default class TestRunner {
         });
         return promise;
       })
-      .catch(error => {
-        this._fail({error: error.message});
+      .catch((error: unknown) => {
+        this.fail({error: (error as Error).message});
       })
       .finally(() => {
-        this.deck.finalize();
+        this.deck!.finalize();
         this.deck = null;
       });
   }
 
   /* Lifecycle methods for subclassing */
 
-  initTestCase(testCase) {
+  initTestCase(testCase: TestCaseT) {
     for (const key in this.defaultTestCase) {
       if (!(key in testCase)) {
         testCase[key] = this.defaultTestCase[key];
@@ -127,51 +132,48 @@ export default class TestRunner {
     this.testOptions.onTestStart(testCase);
   }
 
-  assert(testCase) {
-    this.onTestPass(testCase);
-    this._next();
-  }
+  /** Execute the test case. Fails if takes longer than options.timeout */
+  abstract runTestCase(testCase: TestCaseT): Promise<void>;
+  /** Check the result of the test case. Calls pass() or fail() */
+  abstract assert(testCase: TestCaseT): Promise<void>;
 
   /* Utilities */
 
-  _pass(result) {
-    this.testOptions.onTestPass(this._currentTestCase, result);
+  protected pass(result: ResultT) {
+    this.testOptions.onTestPass(this._currentTestCase!, result);
   }
 
-  _fail(result) {
-    this.testOptions.onTestFail(this._currentTestCase, result);
+  protected fail(result: ResultT | {error: string}) {
+    this.testOptions.onTestFail(this._currentTestCase!, result);
   }
 
   /* Private Methods */
 
-  _onWebGLInitialized(gl) {
-    const vendorMasked = gl.getParameter(GL_VENDOR);
-    const ext = gl.getExtension('WEBGL_debug_renderer_info');
-    const vendorUnmasked = ext && gl.getParameter(ext.UNMASKED_VENDOR_WEBGL || GL_VENDOR);
-    this.gpuVendor = vendorUnmasked || vendorMasked;
+  private _onDeviceInitialized(device: Device) {
+    this.gpuVendor = device.info.vendor;
   }
 
-  _runTest(testCase) {
-    return new Promise((resolve, reject) => {
-      this._currentTestCase = testCase;
-      this._next = resolve;
+  private async _runTest(testCase: TestCaseT) {
+    this._currentTestCase = testCase;
 
-      // normalize test case
-      this.initTestCase(testCase);
+    // normalize test case
+    this.initTestCase(testCase);
 
-      let isDone = false;
-      let timeoutId = null;
-      const done = () => {
-        if (!isDone) {
-          isDone = true;
-          window.clearTimeout(timeoutId);
-          this.assert(testCase);
-        }
-      };
-
-      timeoutId = window.setTimeout(done, testCase.timeout || this.testOptions.timeout);
-
-      this.runTestCase(testCase, done);
+    const timeout = testCase.timeout || this.testOptions.timeout;
+    const task = this.runTestCase(testCase);
+    const timeoutTask = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject('Timeout');
+      }, timeout);
     });
+
+    try {
+      await Promise.race([task, timeoutTask]);
+      await this.assert(testCase);
+    } catch (err: unknown) {
+      if (err === 'Timeout') {
+        this.fail({error: 'Timeout'});
+      }
+    }
   }
 }

@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {Map} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import styled from 'styled-components';
 import {useColorMode} from '@docusaurus/theme-common';
 import {MAPBOX_STYLES} from '../constants/defaults';
@@ -129,9 +133,7 @@ export function makeLayerDemo(config) {
             {mapStyle && (
               <Map
                 reuseMaps
-                mapLib={import('maplibre-gl')}
                 mapStyle={mapStyleSheet}
-                preventStyleDiffing={true}
               />
             )}
           </DeckGL>

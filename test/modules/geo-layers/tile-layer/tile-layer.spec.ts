@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -71,6 +55,7 @@ test('TileLayer', async t => {
 
   const testCases = [
     {
+      title: 'default',
       props: {
         data: DUMMY_DATA
       },
@@ -87,6 +72,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'show z=2',
       props: {
         getTileData,
         renderSubLayers
@@ -109,6 +95,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'show z=3',
       viewport: testViewport2,
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
@@ -124,6 +111,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'hide z=3',
       viewport: testViewport1,
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
@@ -139,6 +127,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'cached sublayers',
       updateProps: {
         renderSubLayers: renderNestedSubLayers
       },
@@ -147,6 +136,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'cached sublayers (invalidate)',
       updateProps: {
         minWidthPixels: 1
       },
@@ -155,6 +145,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'cached sublayers (refetch)',
       updateProps: {
         updateTriggers: {
           getTileData: 1
@@ -186,10 +177,11 @@ test('TileLayer#MapView:repeat', async t => {
     repeat: true
   });
 
-  t.is(testViewport.subViewports.length, 3, 'Viewport has more than one sub viewports');
+  t.is(testViewport.subViewports!.length, 3, 'Viewport has more than one sub viewports');
 
   const testCases = [
     {
+      title: 'repeat',
       props: {
         data: DUMMY_DATA,
         renderSubLayers
@@ -224,6 +216,7 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
 
   const testCases = [
     {
+      title: 'case-1',
       props: {
         getTileData: () => sleep(10)
       },
@@ -232,6 +225,7 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
       }
     },
     {
+      title: 'case-2',
       updateProps: {
         updateTriggers: {
           getTileData: 1
@@ -265,6 +259,7 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
 
   const testCases = [
     {
+      title: 'case-1',
       props: {
         getTileData: () => sleep(10)
       },
@@ -273,6 +268,7 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
       }
     },
     {
+      title: 'case-2',
       props: {
         id: 'new-layer'
       },
@@ -287,6 +283,30 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
   ];
 
   testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('TileLayer#debounceTime', async t => {
+  const testViewport = new WebMercatorViewport({width: 1200, height: 400, zoom: 8});
+  const testCases = [
+    {
+      title: 'debounceTime = 0',
+      props: {debounceTime: 0, getTileData: () => sleep(10)},
+      onAfterUpdate: ({layer}) => {
+        t.is(layer.state.tileset.opts.debounceTime, 0, 'assigns tileset#debounceTime = 0');
+      }
+    },
+    {
+      title: 'debounceTime = 25',
+      props: {debounceTime: 25, getTileData: () => sleep(10)},
+      onAfterUpdate: ({layer}) => {
+        t.is(layer.state.tileset.opts.debounceTime, 25, 'assigns tileset#debounceTime = 25');
+      }
+    }
+  ];
+
+  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.fail});
 
   t.end();
 });

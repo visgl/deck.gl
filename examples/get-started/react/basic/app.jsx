@@ -1,6 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
+import {DeckGL, GeoJsonLayer, ArcLayer} from 'deck.gl';
+import {CompassWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -58,6 +64,7 @@ function Root() {
         getTargetColor={[200, 0, 80]}
         getWidth={1}
       />
+      <CompassWidget />
     </DeckGL>
   );
 }

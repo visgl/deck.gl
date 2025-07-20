@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 
 import {getRes0Cells, gridDisk} from 'h3-js';

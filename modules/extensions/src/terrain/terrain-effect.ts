@@ -1,13 +1,17 @@
-import {Device, Texture} from '@luma.gl/core';
-import {log, getShaderAssembler} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import {terrainModule, TerrainModuleSettings} from './shader-module';
+import {Texture} from '@luma.gl/core';
+import {log} from '@deck.gl/core';
+
+import {terrainModule, TerrainModuleProps} from './shader-module';
 import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
 import {HeightMapBuilder} from './height-map-builder';
 
-import type {Effect, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
+import type {Effect, EffectContext, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 
 /** Class to manage terrain effect */
 export class TerrainEffect implements Effect {
@@ -28,7 +32,7 @@ export class TerrainEffect implements Effect {
   /** One texture for each primitive terrain layer, into which the draped layers render */
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
-  initialize(device: Device) {
+  setup({device, deck}: EffectContext) {
     this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
@@ -43,21 +47,10 @@ export class TerrainEffect implements Effect {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
-    getShaderAssembler().addDefaultModule(terrainModule);
+    deck._addDefaultShaderModule(terrainModule);
   }
 
-  preRender(device: Device, opts: PreRenderOptions): void {
-    if (!this.dummyHeightMap) {
-      // First time this effect is in use, initialize resources and register the shader module
-      this.initialize(device);
-      for (const layer of opts.layers) {
-        // Force the terrain layer (and its descendents) to rebuild their models with the new shader
-        if (layer.props.operation.includes('terrain')) {
-          layer.setChangeFlags({extensionsChanged: true});
-        }
-      }
-    }
-
+  preRender(opts: PreRenderOptions): void {
     // @ts-expect-error pickZ only defined in picking pass
     if (opts.pickZ) {
       // Do not update if picking attributes
@@ -65,7 +58,8 @@ export class TerrainEffect implements Effect {
       return;
     }
 
-    const {viewports, isPicking = false} = opts;
+    const {viewports} = opts;
+    const isPicking = opts.pass.startsWith('picking');
     this.isPicking = isPicking;
     this.isDrapingEnabled = true;
 
@@ -92,21 +86,27 @@ export class TerrainEffect implements Effect {
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
-  getModuleParameters(layer: Layer): TerrainModuleSettings {
+  getShaderModuleProps(
+    layer: Layer,
+    otherShaderModuleProps: Record<string, any>
+  ): {terrain: TerrainModuleProps} {
     const {terrainDrawMode} = layer.state;
 
     return {
-      // @ts-expect-error
-      heightMap: this.heightMap?.getRenderFramebuffer(),
-      heightMapBounds: this.heightMap?.bounds,
-      dummyHeightMap: this.dummyHeightMap!,
-      terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
-      useTerrainHeightMap: terrainDrawMode === 'offset',
-      terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
+      terrain: {
+        project: otherShaderModuleProps.project,
+        isPicking: this.isPicking,
+        heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
+        heightMapBounds: this.heightMap?.bounds,
+        dummyHeightMap: this.dummyHeightMap!,
+        terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
+        useTerrainHeightMap: terrainDrawMode === 'offset',
+        terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
+      }
     };
   }
 
-  cleanup(): void {
+  cleanup({deck}: EffectContext): void {
     if (this.dummyHeightMap) {
       this.dummyHeightMap.delete();
       this.dummyHeightMap = undefined;
@@ -121,6 +121,8 @@ export class TerrainEffect implements Effect {
       terrainCover.delete();
     }
     this.terrainCovers.clear();
+
+    deck._removeDefaultShaderModule(terrainModule);
   }
 
   private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {
@@ -137,11 +139,15 @@ export class TerrainEffect implements Effect {
     this.terrainPass.renderHeightMap(this.heightMap, {
       ...opts,
       layers: terrainLayers,
-      moduleParameters: {
-        heightMapBounds: this.heightMap.bounds,
-        dummyHeightMap: this.dummyHeightMap,
-        devicePixelRatio: 1,
-        drawToTerrainHeightMap: true
+      shaderModuleProps: {
+        terrain: {
+          heightMapBounds: this.heightMap.bounds,
+          dummyHeightMap: this.dummyHeightMap,
+          drawToTerrainHeightMap: true
+        },
+        project: {
+          devicePixelRatio: 1
+        }
       }
     });
   }
@@ -195,13 +201,22 @@ export class TerrainEffect implements Effect {
         renderPass.renderTerrainCover(terrainCover, {
           ...opts,
           layers: drapeLayers,
-          moduleParameters: {
-            dummyHeightMap: this.dummyHeightMap,
-            terrainSkipRender: false,
-            devicePixelRatio: 1
+          shaderModuleProps: {
+            terrain: {
+              dummyHeightMap: this.dummyHeightMap,
+              terrainSkipRender: false
+            },
+            project: {
+              devicePixelRatio: 1
+            }
           }
         });
-        terrainCover.isDirty = false;
+
+        if (!this.isPicking) {
+          // IsDirty refers to the normal fbo, not the picking fbo.
+          // Only mark it as not dirty if the normal fbo was updated.
+          terrainCover.isDirty = false;
+        }
       }
     } catch (err) {
       terrainLayer.raiseError(err as Error, `Error rendering terrain cover ${terrainCover.id}`);

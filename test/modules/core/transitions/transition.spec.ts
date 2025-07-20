@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import Transition from '@deck.gl/core/transitions/transition';
 import {Timeline} from '@luma.gl/engine';

@@ -1,4 +1,8 @@
-import {normalizeTransitionSettings} from './attribute/attribute-transition-utils';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {normalizeTransitionSettings} from './attribute/transition-settings';
 import CPUInterpolationTransition from '../transitions/cpu-interpolation-transition';
 import CPUSpringTransition from '../transitions/cpu-spring-transition';
 import log from '../utils/log';

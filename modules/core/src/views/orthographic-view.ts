@@ -1,4 +1,8 @@
-import View, {CommonViewState} from './view';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import View, {CommonViewState, CommonViewProps} from './view';
 import OrthographicViewport from '../viewports/orthographic-viewport';
 import OrthographicController from '../controllers/orthographic-controller';
 
@@ -14,19 +18,23 @@ export type OrthographicViewState = {
   maxZoom?: number;
 } & CommonViewState;
 
-type OrthographicViewProps = {
+export type OrthographicViewProps = {
   /** Distance of near clipping plane. Default `0.1`. */
   near?: number;
   /** Distance of far clipping plane. Default `1000`. */
   far?: number;
   /** Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`. */
   flipY?: boolean;
-};
+} & CommonViewProps<OrthographicViewState>;
 
 export default class OrthographicView extends View<OrthographicViewState, OrthographicViewProps> {
   static displayName = 'OrthographicView';
 
-  get ViewportType() {
+  constructor(props: OrthographicViewProps = {}) {
+    super(props);
+  }
+
+  getViewportType() {
     return OrthographicViewport;
   }
 

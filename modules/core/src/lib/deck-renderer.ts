@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {Device} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
-import debug from '../debug';
+import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 
@@ -16,7 +20,6 @@ type LayerFilter = ((context: FilterContext) => boolean) | null;
 
 export default class DeckRenderer {
   device: Device;
-  gl: WebGLRenderingContext;
   layerFilter: LayerFilter;
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
@@ -29,8 +32,6 @@ export default class DeckRenderer {
 
   constructor(device: Device) {
     this.device = device;
-    // @ts-expect-error
-    this.gl = device.gl;
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(device);
@@ -82,9 +83,19 @@ export default class DeckRenderer {
     }
 
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+
+    if (this.lastPostProcessEffect) {
+      renderOpts.clearColor = [0, 0, 0, 0];
+      renderOpts.clearCanvas = true;
+    }
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
     if (renderOpts.effects) {
+      if (this.lastPostProcessEffect) {
+        // Interleaved basemap rendering requires clearCanvas to be false
+        renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
+      }
+
       this._postRender(renderOpts.effects, renderOpts);
     }
 
@@ -114,7 +125,7 @@ export default class DeckRenderer {
     opts.preRenderStats = opts.preRenderStats || {};
 
     for (const effect of effects) {
-      opts.preRenderStats[effect.id] = effect.preRender(this.device, opts);
+      opts.preRenderStats[effect.id] = effect.preRender(opts);
       if (effect.postRender) {
         this.lastPostProcessEffect = effect.id;
       }
@@ -127,14 +138,25 @@ export default class DeckRenderer {
 
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
+    const size = this.device.canvasContext!.getDrawingBufferSize();
+    const [width, height] = size;
     if (renderBuffers.length === 0) {
-      renderBuffers.push(
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
-      );
+      [0, 1].map(i => {
+        const texture = this.device.createTexture({
+          sampler: {minFilter: 'linear', magFilter: 'linear'},
+          width,
+          height
+        });
+        renderBuffers.push(
+          this.device.createFramebuffer({
+            id: `deck-renderbuffer-${i}`,
+            colorAttachments: [texture]
+          })
+        );
+      });
     }
     for (const buffer of renderBuffers) {
-      buffer.resize();
+      buffer.resize(size);
     }
   }
 
@@ -147,13 +169,12 @@ export default class DeckRenderer {
     };
     for (const effect of effects) {
       if (effect.postRender) {
-        if (effect.id === this.lastPostProcessEffect) {
-          params.target = opts.target;
-          effect.postRender(this.device, params);
-          break;
-        }
-        const buffer = effect.postRender(this.device, params);
-        params.inputBuffer = buffer;
+        // If not the last post processing effect, unset the target so that
+        // it only renders between the swap buffers
+        params.target = effect.id === this.lastPostProcessEffect ? opts.target : undefined;
+        const buffer = effect.postRender(params);
+        // Buffer cannot be null if target is unset
+        params.inputBuffer = buffer!;
         params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];
       }
     }

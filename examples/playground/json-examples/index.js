@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import heatmap from './3d-heatmap.json';
 import heatmapMinimap from './3d-heatmap-minimap.json';
 import geojson from './geojson.json';
@@ -14,7 +18,6 @@ import usMap from './us-map.json';
 import dotText from './dot-text.json';
 
 export default {
-  'website/Scatterplot (ScatterplotLayer)': scatterplot,
   // WEBSITE EXAMPLES AS JSON PAYLOADS
   'website/3D Heatmap (HexagonLayer)': heatmap,
   'website/3D Heatmap (wth Minimap)': heatmapMinimap,

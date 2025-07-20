@@ -9,12 +9,14 @@
     "build": "vite build"
   },
   "dependencies": {
-    "deck.gl": "8.9.0-beta.3",
+    "@turf/turf": "6.5.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "deck.gl": "^9.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "maplibre-gl": "^2.4.0",
-    "react-map-gl": "^7.0.0",
-    "@turf/turf": "6.5.0"
+    "maplibre-gl": "^5.0.0",
+    "react-map-gl": "^8.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

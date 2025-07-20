@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Viewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
 
 import {
@@ -183,7 +187,7 @@ class OSMNode {
 export function getOSMTileIndices(
   viewport: Viewport,
   maxZ: number,
-  zRange?: ZRange | null,
+  zRange: ZRange | null,
   bounds?: Bounds
 ): TileIndex[] {
   const project: ((xyz: number[]) => number[]) | null =

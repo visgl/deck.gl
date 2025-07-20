@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Accessor,
   Color,
@@ -5,13 +9,15 @@ import {
   CompositeLayerProps,
   DefaultProps,
   Layer,
-  LayersList
+  LayersList,
+  log
 } from '@deck.gl/core';
 import {
   TextLayer,
   TextLayerProps,
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
+import VectorTileLayer from './vector-tile-layer';
 
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
 
@@ -24,10 +30,10 @@ class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
 
     // Modify shader so that the padding is offset by the pixel offset to ensure the padding
     // always captures the anchor point. As padding is uniform we cannot pass it a per-label value
-    vs = vs.replaceAll('padding.', '_padding.');
+    vs = vs.replaceAll('textBackground.padding.', '_padding.');
     vs = vs.replace(
       'void main(void) {',
-      'void main(void) {\n  vec4 _padding = padding + instancePixelOffsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0);'
+      'void main(void) {\n  vec4 _padding = textBackground.padding + instancePixelOffsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0);'
     );
 
     return {...shaders, vs};
@@ -93,6 +99,12 @@ type _PointLabelLayerProps<DataT> = TextLayerProps<DataT> & {
   secondarySizeScale?: number;
 };
 
+/**
+ * PointLabelLayer is a layer that renders point labels.
+ * It is a composite layer that renders a primary and secondary label.
+ * It behaves like a TextLayer except that getTextSize is **not supported**
+ * and the text size for the primary label must be set with **sizeScale**.
+ */
 export default class PointLabelLayer<
   DataT = any,
   ExtraProps extends {} = {}
@@ -189,6 +201,15 @@ export default class PointLabelLayer<
 
       updateTriggers
     } = this.props;
+
+    if (sizeScale < 2) {
+      const propName = (this.parent as VectorTileLayer)?.props?.textSizeScale
+        ? 'textSizeScale'
+        : 'sizeScale';
+      log.warn(
+        `${propName} has small value (${sizeScale}). Note getTextSize is not supported on PointLabelLayer`
+      )();
+    }
 
     return new EnhancedTextLayer(
       this.getSubLayerProps({

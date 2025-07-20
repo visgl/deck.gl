@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // core layers
 import coreLayersTests from './core-layers';
 import arcLayersTests from './arc-layer';
@@ -15,6 +19,7 @@ import screenGridLayerTests from './screen-grid-layer';
 import heatmapLayerTests from './heatmap-layer';
 import hexagonLayerTests from './hexagon-layer';
 // geo-layers
+import a5LayerTests from './a5-layer';
 import h3LayersTests from './h3-layers';
 import quadkeyLayerTests from './quadkey-layer';
 import s2LayerTests from './s2-layer';
@@ -24,40 +29,43 @@ import geohashLayerTests from './geohash-layer';
 import terrainLayerTests from './terrain-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
-// import scenegraphLayerTests from './scenegraph-layer';
+import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
 import collisionFilterExtensionTests from './collision-filter-extension';
 import transitionTests from './transitions';
+import dataFilterExtensionTests from './data-filter-extension';
 
 export default [].concat(
-  // coreLayersTests, // TODO(v9): Re-check after PR#8334
+  coreLayersTests,
   arcLayersTests,
-  // columnLayerTests, // TODO(v9): Re-check after PR#8334
+  columnLayerTests,
   geojsonLayerTests,
-  // pathLayerTests, // TODO(v9): Re-check after PR#8334
+  pathLayerTests,
   pointCloudLayerTests,
-  // polygonLayerTests,
+  polygonLayerTests,
   iconLayerTests,
   textLayerTests,
-  // contourLayerTests,
-  // gridLayerTests,
+  contourLayerTests,
+  gridLayerTests,
   hexagonLayerTests,
-  // screenGridLayerTests,
-  // heatmapLayerTests,
-  // h3LayersTests, // TODO(v9): Re-check after PR#8334
+  screenGridLayerTests,
+  heatmapLayerTests,
+  a5LayerTests,
+  h3LayersTests,
   quadkeyLayerTests,
   s2LayerTests,
   tripsLayerTests,
-  // mvtLayerTests, // TODO(v9): Re-check after PR#8334
+  mvtLayerTests,
   geohashLayerTests,
   simpleMeshLayerTests,
-  // scenegraphLayerTests,
+  scenegraphLayerTests,
   viewsTests,
-  // effectsTests,
-  // TODO - Broken in headless mode with Chrome 113
-  // transitionTests,
+  effectsTests,
+  transitionTests,
+  collisionFilterExtensionTests,
+  dataFilterExtensionTests,
+  /* It is important to run this last for now - TerrainEffect once added cannot be removed */
   terrainLayerTests
-  // collisionFilterExtensionTests
 );

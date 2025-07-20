@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type LayerExtension from '../lib/layer-extension';
@@ -7,9 +11,10 @@ import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
 import type {Texture, TextureProps} from '@luma.gl/core';
-import type {Buffer} from '@luma.gl/core';
+import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {LightingModuleSettings} from '../shaderlib';
+import type {LightingModuleSettings} from '../shaderlib/index';
+import type {Matrix4Like} from '@math.gl/core';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -83,12 +88,14 @@ export type TextureSource =
  * * A `Promise` whose resolved value will be used as the value of the `data` prop.
  * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
  * * `string` - a URL to load data from
+ * * `null` - empty data
  */
 export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
   | AsyncIterable<DataType[]>
-  | Promise<LayerData<DataType>>;
+  | Promise<LayerData<DataType>>
+  | null;
 
 /**
  * Base Layer prop types
@@ -167,7 +174,7 @@ export type LayerProps = {
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
-  modelMatrix?: NumericArray | null;
+  modelMatrix?: Matrix4Like | null;
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */
@@ -183,7 +190,7 @@ export type LayerProps = {
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
-  parameters?: any;
+  parameters?: Parameters;
   /**
    * Create smooth transitions when prop values update.
    */

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-template-curly-in-string */
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
@@ -11,6 +15,7 @@ import {
   PathLayer,
   PointCloudLayer,
   PolygonLayer,
+  SolidPolygonLayer,
   ScatterplotLayer,
   TextLayer
 } from '@deck.gl/layers';
@@ -34,9 +39,11 @@ export const ArcLayerDemo = makeLayerDemo({
 
 export const BitmapLayerDemo = makeLayerDemo({
   Layer: BitmapLayer,
+  getTooltip: '({bitmap}) => bitmap && `${bitmap.pixel}`',
   props: `{
     bounds: [-122.519, 37.7045, -122.355, 37.829],
-    image: '${DATA_URI}/sf-districts.png'
+    image: '${DATA_URI}/sf-districts.png',
+    pickable: true
   }`
 });
 
@@ -49,12 +56,12 @@ export const ColumnLayerDemo = makeLayerDemo({
     radius: 250,
     extruded: true,
     pickable: true,
-    elevationScale: 100,
+    elevationScale: 5000,
     getPosition: d => d.centroid,
     getFillColor: d => [48, 128, d.value * 255, 255],
     getLineColor: [0, 0, 0],
     getLineWidth: 20,
-    getElevation: d => d.value * 50
+    getElevation: d => d.value
   }`
 });
 
@@ -106,20 +113,10 @@ export const IconLayerDemo = makeLayerDemo({
     data: '${DATA_URI}/bart-stations.json',
     pickable: true,
     iconAtlas: '${DATA_URI}/icon-atlas.png',
-    iconMapping: {
-      marker: {
-        x: 0,
-        y: 0,
-        width: 128,
-        height: 128,
-        anchorY: 128,
-        mask: true
-      }
-    },
-    sizeScale: 8,
+    iconMapping: '${DATA_URI}/icon-atlas.json',
     getPosition: d => d.coordinates,
     getIcon: d => 'marker',
-    getSize: d => 5,
+    getSize: 40,
     getColor: d => [Math.sqrt(d.exits), 140, 0]
   }`
 });
@@ -146,7 +143,6 @@ export const PathLayerDemo = makeLayerDemo({
       depthMask: false
     },
     pickable: true,
-    widthScale: 20,
     widthMinPixels: 2,
     getPath: d => d.path,
     getColor: d => {
@@ -154,7 +150,7 @@ export const PathLayerDemo = makeLayerDemo({
       // convert to RGB
       return hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16));
     },
-    getWidth: d => 5
+    getWidth: 100
   }`
 });
 
@@ -164,7 +160,7 @@ export const PointCloudLayerDemo = makeLayerDemo({
   imports: {COORDINATE_SYSTEM},
   props: `{
     data: '${DATA_URI}/pointcloud.json',
-    pickable: false,
+    pickable: true,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: [-122.4, 37.74],
     pointSize: 2,
@@ -180,16 +176,29 @@ export const PolygonLayerDemo = makeLayerDemo({
   props: `{
     data: '${DATA_URI}/sf-zipcodes.json',
     pickable: true,
-    stroked: true,
-    filled: true,
-    extruded: true,
-    wireframe: true,
+
     lineWidthMinPixels: 1,
     getPolygon: d => d.contour,
     getElevation: d => d.population / d.area / 10,
     getFillColor: d => [d.population / d.area / 60, 140, 0],
-    getLineColor: [80, 80, 80],
-    getLineWidth: d => 1
+    getLineColor: [255, 255, 255],
+    getLineWidth: 20
+  }`
+});
+
+export const SolidPolygonLayerDemo = makeLayerDemo({
+  Layer: SolidPolygonLayer,
+  getTooltip: '({object}) => object && `${object.zipcode}\nPopulation: ${object.population}`',
+  props: `{
+    data: '${DATA_URI}/sf-zipcodes.json',
+    pickable: true,
+    filled: true,
+    extruded: true,
+    wireframe: true,
+    getPolygon: d => d.contour,
+    getElevation: d => d.population / d.area / 10,
+    getFillColor: d => [d.population / d.area / 60, 140, 0],
+    getLineColor: [80, 80, 80]
   }`
 });
 
@@ -218,7 +227,6 @@ export const TextLayerDemo = makeLayerDemo({
   props: `{
     data: '${DATA_URI}/bart-stations.json',
     pickable: true,
-    sizeScale: 1,
     getPosition: d => d.coordinates,
     getText: d => d.name,
     getColor: [255, 128, 0],

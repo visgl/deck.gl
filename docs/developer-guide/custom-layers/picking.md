@@ -15,7 +15,7 @@ After the picking buffer is rendered, deck.gl looks at the color of the pixel un
 
 ### Event Propagation
 
-Once an object is picked, deck.gl creates a [picking info](../interactivity.md#the-picking-info-object) object that describes what is under the pointer.
+Once an object is picked, deck.gl creates a [picking info](../interactivity.md#the-pickinginfo-object) object that describes what is under the pointer.
 
 The [`layer.getPickingInfo()`](../../api-reference/core/layer.md#getpickinginfo) method is called first on the layer that directly rendered the picked object, to modify or add additional fields to the info.
 
@@ -37,7 +37,7 @@ If any of the callback functions return `true`, the event is marked handled and 
 Whenever the pointer moves over the canvas, deck.gl performs a new picking pass, yielding a picking info object describing the result. This object is used for multiple purposes:
 
 - The `onHover` callbacks are called with it
-- To update the picked layer if [autoHighlight](../../api-reference/core/layer.md#autohighlight-boolean-optional) is enabled
+- To update the picked layer if [autoHighlight](../../api-reference/core/layer.md#autohighlight) is enabled
 - Saved for later use
 
 When other gestures (click, drag, etc.) are detected, deck.gl does not repeat picking. Instead, their callbacks are called with the last picked info from `hover`.

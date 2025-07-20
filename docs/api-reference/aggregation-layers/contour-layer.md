@@ -4,40 +4,135 @@ import {ContourLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 <ContourLayerDemo />
 
-The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
+The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
-const CONTOURS = [
-  {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
-  {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
-  {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
-];
+const layer = new ContourLayer({
+  id: 'ContourLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {COORDINATES: [-122.42177834, 37.78346622]},
-   *   ...
-   * ]
-   */
-  const layer = new ContourLayer({
-    id: 'contourLayer',
-    // Three contours are rendered.
-    contours: CONTOURS,
+  cellSize: 200,
+  contours: [
+    {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+    {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+    {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+    {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
+  ],
+  getPosition: d => d.COORDINATES,
+  getWeight: d => d.SPACES,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `threshold: ${object.contour.threshold}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {ContourLayer} from '@deck.gl/aggregation-layers';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+const layer = new ContourLayer<BikeRack>({
+  id: 'ContourLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  cellSize: 200,
+  contours: [
+    {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+    {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+    {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+    {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
+  ],
+  getPosition: (d: BikeRack) => d.COORDINATES,
+  getWeight: (d: BikeRack) => d.SPACES,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<BikeRack>) => object && `threshold: ${object.contour.threshold}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL} from '@deck.gl/react';
+import {ContourLayer} from '@deck.gl/aggregation-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layer = new ContourLayer<BikeRack>({
+    id: 'ContourLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
     cellSize: 200,
-    getPosition: d => d.COORDINATES,
+    contours: [
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+      {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+      {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
+    ],
+    getPosition: (d: BikeRack) => d.COORDINATES,
+    getWeight: (d: BikeRack) => d.SPACES,
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<BikeRack>) => object && `threshold: ${object.contour.threshold}`}
     layers={[layer]}
-    getTooltip={({object}) => object && object.name} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -50,19 +145,21 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
-```js
+```ts
 import {ContourLayer} from '@deck.gl/aggregation-layers';
-new ContourLayer({});
+import type {ContourLayerProps, ContourLayerPickingInfo} from '@deck.gl/aggregation-layers';
+
+new ContourLayer<DataT>(...props: ContourLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/aggregation-layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -74,54 +171,60 @@ new deck.ContourLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) properties.
 
-### Render Options
+### Aggregation Options
 
-##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
+#### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each cell in meters
 
-##### `gpuAggregation` (bool, optional) {#gpuaggregation}
+#### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
 * Default: true
 
-When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
+When set to `true` and the browser supports it, aggregation is performed on GPU.
 
-NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
-
-##### `aggregation` (String, optional) {#aggregation}
-
-* Default: 'SUM'
-
-Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. When no value or an invalid value is set, 'SUM' is used as aggregation.
-
-* SUM : Grid cell contains sum of all weights that fall into it.
-* MEAN : Grid cell contains mean of all weights that fall into it.
-* MIN : Grid cell contains minimum of all weights that fall into it.
-* MAX : Grid cell contains maximum of all weights that fall into it.
+In the right context, enabling GPU aggregation can significantly speed up your application. However, depending on the nature of input data and required application features, there are pros and cons in leveraging this functionality. See [CPU vs GPU aggregation](./overview.md#cpu-vs-gpu-aggregation) for an in-depth discussion.
 
 
-##### `contours` (Array, optional) {#contours}
+#### `aggregation` (string, optional) {#aggregation}
+
+* Default: `'SUM'`
+
+Defines the operation used to aggregate all data object weights to calculate a cell's value. Valid values are:
+
+- `'SUM'`: The sum of weights across all points that fall into a cell.
+- `'MEAN'`: The mean weight across all points that fall into a cell.
+- `'MIN'`: The minimum weight across all points that fall into a cell.
+- `'MAX'`: The maximum weight across all points that fall into a cell.
+- `'COUNT'`: The number of points that fall into a cell.
+
+`getWeight` and `aggregation` together determine the elevation value of each cell. 
+
+
+### Render Options
+
+#### `contours` (object[], optional) {#contours}
 
 * Default: `[{threshold: 1}]`
 
 Array of objects with following keys
 
-* `threshold` (Number or Array) :
+* `threshold` (number | number[2]) :
 
-  - Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
-  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
+  - Isolines: `threshold` value must be a single number, Isolines are generated based on this threshold value.
+  - Isobands: `threshold` value must be an array of two numbers. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
 
-* `color` (Array, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
+* `color` (Color, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
 
-* `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
+* `strokeWidth` (number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
 
-* `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
+* `zIndex` (number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
 NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. This prop should be set to an array object, that changes only when contours need to be changed.
 
-##### `zOffset` (Number, optional) {#zoffset}
+#### `zOffset` (number, optional) {#zoffset}
 
 * Default: `0.005`
 
@@ -129,13 +232,13 @@ A very small z offset that is added for each vertex of a contour (Isoline or Iso
 
 ### Data Accessors
 
-##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
+#### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 
@@ -145,11 +248,18 @@ The weight of each object.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
+## Picking
+
+The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-object) field returned by hover/click events of this layer represents a path (isoline) or a polygon (isoband). The object contains the following fields:
+
+- `contour` (object) - one of the contour configurations passed to the `contours` prop.
+
+
 ## Sub Layers
 
 The `ContourLayer` renders the following sublayers:
 
-* `lines` - For Isolines, rendered by [LineLayer](../layers/line-layer.md)
+* `lines` - For Isolines, rendered by [PathLayer](../layers/path-layer.md)
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 

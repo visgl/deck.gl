@@ -46,11 +46,11 @@ new PathStyleExtension({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -63,16 +63,16 @@ new deck.PathStyleExtension({});
 new PathStyleExtension({dash});
 ```
 
-* `dash` (Boolean) - add capability to render dashed lines. Default `false`.
-* `highPrecisionDash` (Boolean) - improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead, see "Remarks" below. Default `false`.
-* `offset` (Boolean) - add capability to offset lines. Default `false`.
+* `dash` (boolean) - add capability to render dashed lines. Default `false`.
+* `highPrecisionDash` (boolean) - improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead, see "Remarks" below. Default `false`.
+* `offset` (boolean) - add capability to offset lines. Default `false`.
 
 ## Layer Properties
 
 When added to a layer via the `extensions` prop, the `PathStyleExtension` adds the following properties to the layer:
 
 
-##### `getDashArray` ([Function](../../developer-guide/using-layers.md#accessors)|Array) {#getdasharray}
+#### `getDashArray` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getdasharray}
 
 Must be specified if the `dash` option is enabled.
 
@@ -83,14 +83,14 @@ The dash array to draw each path with: `[dashSize, gapSize]` relative to the wid
 * If this accessor is not specified, all paths are drawn as solid lines.
 
 
-##### `dashJustified` (Boolean, optional) {#dashjustified}
+#### `dashJustified` (boolean, optional) {#dashjustified}
 
 * Default: `false`
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends. Overrides the effect of `highPrecisionDash`.
 
 
-##### `getOffset` ([Function](../../developer-guide/using-layers.md#accessors)|Number) {#getoffset}
+#### `getOffset` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getoffset}
 
 Must be specified if the `offset` option is enabled.
 
@@ -100,7 +100,7 @@ The offset to draw each path with, relative to the width of the path. Negative o
 * If a function is provided, it is called on each path to retrieve its offset.
 
 
-##### `dashGapPickable` (Boolean, optional) {#dashgappickable}
+#### `dashGapPickable` (boolean, optional) {#dashgappickable}
 
 * Default `false`
 
@@ -110,7 +110,7 @@ Only effective if `getDashArray` is specified. If `true`, gaps between solid str
 
 ### Limitations
 
-WebGL has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
+WebGL2 has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
 
 ### Tips on Rendering Dash Lines
 

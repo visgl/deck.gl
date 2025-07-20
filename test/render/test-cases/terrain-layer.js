@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -33,66 +37,65 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/terrain-layer.png'
+  },
+  {
+    name: 'terrain-extension-drape',
+    viewState: {
+      longitude: -122.45,
+      latitude: 37.75,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new TerrainLayer({
+        elevationData: ELEVATION_DATA,
+        texture: TEXTURE,
+        elevationDecoder: DECODER,
+        operation: 'draw+terrain'
+      }),
+      new GeoJsonLayer({
+        data: choropleths,
+        getLineWidth: 50,
+        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
+        extensions: [new TerrainExtension()]
+      })
+    ],
+    goldenImage: './test/render/golden-images/terrain-extension-drape.png'
+  },
+  {
+    name: 'terrain-extension-offset',
+    viewState: {
+      longitude: -122.45,
+      latitude: 37.75,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new TerrainLayer({
+        elevationData: ELEVATION_DATA,
+        texture: TEXTURE,
+        elevationDecoder: DECODER,
+        operation: 'terrain'
+      }),
+      new GeoJsonLayer({
+        data: choropleths,
+        getLineWidth: 50,
+        getFillColor: (_, {index}) => [(index % 3) * 60 + 60, (index % 2) * 64 + 128, 200],
+        extensions: [new TerrainExtension()]
+      }),
+      new IconLayer({
+        data: points,
+        iconAtlas: './test/data/icon-atlas.png',
+        iconMapping,
+        sizeScale: 12,
+        getPosition: d => d.COORDINATES,
+        getIcon: d => 'marker-warning',
+        getSize: d => (d.PLACEMENT === 'SW' ? 0 : 2),
+        extensions: [new TerrainExtension()]
+      })
+    ],
+    goldenImage: './test/render/golden-images/terrain-extension-offset.png'
   }
-  // TODO - v9 TerrainExtension
-  // {
-  //   name: 'terrain-extension-drape',
-  //   viewState: {
-  //     longitude: -122.45,
-  //     latitude: 37.75,
-  //     zoom: 11.5,
-  //     pitch: 60,
-  //     bearing: 0
-  //   },
-  //   layers: [
-  //     new TerrainLayer({
-  //       elevationData: ELEVATION_DATA,
-  //       texture: TEXTURE,
-  //       elevationDecoder: DECODER,
-  //       operation: 'draw+terrain'
-  //     }),
-  //     new GeoJsonLayer({
-  //       data: choropleths,
-  //       getLineWidth: 50,
-  //       getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
-  //       extensions: [new TerrainExtension()]
-  //     })
-  //   ],
-  //   goldenImage: './test/render/golden-images/terrain-extension-drape.png'
-  // },
-  // {
-  //   name: 'terrain-extension-offset',
-  //   viewState: {
-  //     longitude: -122.45,
-  //     latitude: 37.75,
-  //     zoom: 11.5,
-  //     pitch: 60,
-  //     bearing: 0
-  //   },
-  //   layers: [
-  //     new TerrainLayer({
-  //       elevationData: ELEVATION_DATA,
-  //       texture: TEXTURE,
-  //       elevationDecoder: DECODER,
-  //       operation: 'terrain'
-  //     }),
-  //     new GeoJsonLayer({
-  //       data: choropleths,
-  //       getLineWidth: 50,
-  //       getFillColor: (_, {index}) => [(index % 3) * 60 + 60, (index % 2) * 64 + 128, 200],
-  //       extensions: [new TerrainExtension()]
-  //     }),
-  //     new IconLayer({
-  //       data: points,
-  //       iconAtlas: './test/data/icon-atlas.png',
-  //       iconMapping,
-  //       sizeScale: 12,
-  //       getPosition: d => d.COORDINATES,
-  //       getIcon: d => 'marker-warning',
-  //       getSize: d => (d.PLACEMENT === 'SW' ? 0 : 2),
-  //       extensions: [new TerrainExtension()]
-  //     })
-  //   ],
-  //   goldenImage: './test/render/golden-images/terrain-extension-offset.png'
-  // }
 ];

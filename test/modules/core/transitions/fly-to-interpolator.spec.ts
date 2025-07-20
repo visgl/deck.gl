@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import FlyToInterpolator from '@deck.gl/core/transitions/fly-to-interpolator';
 import {toLowPrecision} from '@deck.gl/test-utils';

@@ -1,7 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
-// import {copyToTexture} from '@luma.gl/webgl';
-// import {ImageLoader} from '@loaders.gl/images';
+import {AsyncTexture} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -86,7 +89,7 @@ function resizeImage(
   maxWidth: number,
   maxHeight: number
 ): {
-  data: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
+  image: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
   width: number;
   height: number;
 } {
@@ -96,7 +99,7 @@ function resizeImage(
 
   if (resizeRatio === 1) {
     // No resizing required
-    return {data: imageData, width, height};
+    return {image: imageData, width, height};
   }
 
   ctx.canvas.height = height;
@@ -106,7 +109,7 @@ function resizeImage(
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
   ctx.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
-  return {data: ctx.canvas, width, height};
+  return {image: ctx.canvas, width, height};
 }
 
 function getIconId(icon: UnpackedIcon): string {
@@ -120,18 +123,27 @@ function resizeTexture(
   height: number,
   sampler: SamplerProps
 ): Texture {
-  const oldWidth = texture.width;
-  const oldHeight = texture.height;
+  const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = texture.device.createTexture({format: 'rgba8unorm', width, height, sampler});
-  // @ts-expect-error TODO v9 import
-  copyToTexture(texture, newTexture, {
-    targetY: 0,
+  const newTexture = device.createTexture({
+    format: 'rgba8unorm',
+    width,
+    height,
+    sampler,
+    mipLevels: device.getMipLevelCount(width, height)
+  });
+
+  const commandEncoder = device.createCommandEncoder();
+  commandEncoder.copyTextureToTexture({
+    sourceTexture: texture,
+    destinationTexture: newTexture,
     width: oldWidth,
     height: oldHeight
   });
+  commandEncoder.finish();
+  newTexture.generateMipmapsWebGL();
 
-  texture.delete();
+  texture.destroy();
   return newTexture;
 }
 
@@ -290,7 +302,7 @@ export default class IconManager {
   private _texture: Texture | null = null;
   private _externalTexture: Texture | null = null;
   private _mapping: IconMapping = {};
-  private _textureParameters: SamplerProps | null = null;
+  private _samplerParameters: SamplerProps | null = null;
 
   /** count of pending requests to fetch icons */
   private _pendingCount: number = 0;
@@ -348,7 +360,7 @@ export default class IconManager {
     autoPacking?: boolean;
     iconAtlas?: Texture | null;
     iconMapping?: IconMapping | null;
-    textureParameters?: Record<number, number> | null;
+    textureParameters?: SamplerProps | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;
@@ -369,7 +381,7 @@ export default class IconManager {
     }
 
     if (textureParameters) {
-      this._textureParameters = textureParameters;
+      this._samplerParameters = textureParameters;
     }
   }
 
@@ -406,9 +418,11 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = this.device.createTexture({
           format: 'rgba8unorm',
+          data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
-          sampler: this._textureParameters || DEFAULT_SAMPLER_PARAMETERS
+          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
+          mipLevels: this.device.getMipLevelCount(this._canvasWidth, this._canvasHeight)
         });
       }
 
@@ -417,7 +431,7 @@ export default class IconManager {
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
-          this._textureParameters || DEFAULT_SAMPLER_PARAMETERS
+          this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS
         );
       }
 
@@ -426,6 +440,7 @@ export default class IconManager {
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
+      this._texture?.generateMipmapsWebGL();
     }
   }
 
@@ -449,16 +464,15 @@ export default class IconManager {
           const iconDef = this._mapping[id];
           const {x, y, width: maxWidth, height: maxHeight} = iconDef;
 
-          const {data, width, height} = resizeImage(
+          const {image, width, height} = resizeImage(
             ctx,
             imageData as ImageBitmap,
             maxWidth,
             maxHeight
           );
 
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.setSubImageData({
-            data,
+          this._texture?.copyExternalImage({
+            image,
             x: x + (maxWidth - width) / 2,
             y: y + (maxHeight - height) / 2,
             width,
@@ -468,8 +482,7 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.generateMipmap();
+          this._texture?.generateMipmapsWebGL();
 
           this.onUpdate();
         })

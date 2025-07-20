@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Timeline} from '@luma.gl/engine';
 
 function makeEvents(events, opts = {}) {
@@ -110,23 +114,23 @@ const TEST_CASES = [
   },
 
   {
-    title: 'tripan',
+    title: 'multipan',
     props: {},
-    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
     viewStateChanges: 3,
     interactionStates: 2 // isDragging, isRotating
   },
   {
-    title: 'tripan#out of bounds',
+    title: 'multipan#out of bounds',
     props: {x: 200},
-    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
     viewStateChanges: 0,
     interactionStates: 0
   },
   {
-    title: 'tripan#disabled',
+    title: 'multipan#disabled',
     props: {touchRotate: false},
-    events: () => makeEvents(['tripanstart', 'tripanmove', 'tripanend']),
+    events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
     viewStateChanges: 2,
     interactionStates: 1 // isDragging
   },
@@ -154,23 +158,23 @@ const TEST_CASES = [
   },
 
   {
-    title: 'doubletap',
+    title: 'dblclick',
     props: {},
-    events: () => makeEvents(['doubletap']),
+    events: () => makeEvents(['dblclick']),
     viewStateChanges: 1,
     interactionStates: 2
   },
   {
-    title: 'doubletap#out of bounds',
+    title: 'dblclick#out of bounds',
     props: {x: 200},
-    events: () => makeEvents(['doubletap']),
+    events: () => makeEvents(['dblclick']),
     viewStateChanges: 0,
     interactionStates: 0
   },
   {
-    title: 'doubletap#disabled',
+    title: 'dblclick#disabled',
     props: {doubleClickZoom: false},
-    events: () => makeEvents(['doubletap']),
+    events: () => makeEvents(['dblclick']),
     viewStateChanges: 0,
     interactionStates: 0
   },

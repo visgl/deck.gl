@@ -1,29 +1,13 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import PathTesselator from './path-tesselator';
 
+import {pathUniforms, PathProps} from './path-layer-uniforms';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -151,7 +135,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [project32, picking, pathUniforms]}); // 'project' module added by default.
   }
 
   get wrapLongitude(): boolean {
@@ -171,7 +155,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 3,
         // Start filling buffer from 1 vertex in
         vertexOffset: 1,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
@@ -195,7 +179,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       },
       instanceTypes: {
         size: 1,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateSegmentTypes,
         noAlloc
@@ -208,15 +192,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         accessor: 'getColor',
         transition: ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR
       },
       instancePickingColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
       }
@@ -279,24 +262,24 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = (data as any[]).find(d => d.__source.index === index);
+      info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }
 
   /** Override base Layer method */
   disablePickingIndex(objectIndex: number) {
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < (data as any[]).length; i++) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }
@@ -319,8 +302,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
 
     const model = this.state.model!;
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const pathProps: PathProps = {
       jointType: Number(jointRounded),
       capType: Number(capRounded),
       billboard,
@@ -329,7 +311,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       miterLimit,
       widthMinPixels,
       widthMaxPixels
-    });
+    };
+    model.shaderInputs.setProps({path: pathProps});
     model.draw(this.context.renderPass);
   }
 

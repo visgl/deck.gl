@@ -5,7 +5,7 @@
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {H3TileLayer, h3QuerySource} from '@deck.gl/carto';
 
 function App({viewState}) {
@@ -58,9 +58,9 @@ new deck.carto.H3TileLayer({});
 
 ## Properties
 
-Inherits all properties from [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
+Inherits all properties from [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions and additions noted below.
 
-##### `data` (TilejsonResult) {#data}
+#### `data` (TilejsonResult) {#data}
 
 Required. A valid `TilejsonResult` object.
 

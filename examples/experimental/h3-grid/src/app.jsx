@@ -1,10 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 
 import H3GridLayer from './h3-grid-layer';
 import {getMinZoom} from './h3-utils';
@@ -75,7 +78,7 @@ export default function App() {
         onViewStateChange={onViewStateChange}
         getTooltip={info => info.object}
       >
-        <Map mapLib={maplibregl} mapStyle={MAP_STYLE} />
+        <Map mapStyle={MAP_STYLE} />
       </DeckGL>
       <div style={CONTROL_PANEL_STYLE}>
         <div>Resolution: {resolution}</div>

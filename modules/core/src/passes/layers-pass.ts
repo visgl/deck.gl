@@ -1,11 +1,18 @@
-import type {Device} from '@luma.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
 import type {Effect} from '../lib/effect';
+import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
+import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
@@ -24,17 +31,19 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  colorMask?: number;
+  scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
-  moduleParameters?: any;
+  shaderModuleProps?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
 };
 
-type DrawLayerParameters = {
+export type DrawLayerParameters = {
   shouldDrawLayer: boolean;
-  layerRenderIndex?: number;
-  moduleParameters?: any;
-  layerParameters?: any;
+  layerRenderIndex: number;
+  shaderModuleProps: any;
+  layerParameters: Parameters;
 };
 
 export type FilterContext = {
@@ -60,20 +69,35 @@ export default class LayersPass extends Pass {
     // @ts-expect-error TODO - assuming WebGL context
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
 
+    // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
+    const clearCanvas = options.clearCanvas ?? true;
+    const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
+    const clearDepth = clearCanvas ? 1 : false;
+    const clearStencil = clearCanvas ? 0 : false;
+    const colorMask = options.colorMask ?? 0xf;
+
+    const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
+    if (options.colorMask) {
+      parameters.colorMask = colorMask;
+    }
+    if (options.scissorRect) {
+      parameters.scissorRect = options.scissorRect as NumberArray4;
+    }
+
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
-      parameters: {
-        viewport: [0, 0, width, height]
-      },
-      // clear depth and color buffers, restoring transparency
-      clearColor: options.clearColor ?? (options.clearCanvas ? [0, 0, 0, 0] : false),
-      clearDepth: options.clearCanvas ? 1 : undefined
+      parameters,
+      clearColor: clearColor as NumberArray4,
+      clearDepth,
+      clearStencil
     });
 
     try {
       return this._drawLayers(renderPass, options);
     } finally {
       renderPass.end();
+      // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
+      this.device.submit();
     }
   }
 
@@ -81,7 +105,7 @@ export default class LayersPass extends Pass {
   private _drawLayers(renderPass: RenderPass, options: LayersPassRenderOptions) {
     const {
       target,
-      moduleParameters,
+      shaderModuleProps,
       viewports,
       views,
       onViewportActive,
@@ -110,7 +134,7 @@ export default class LayersPass extends Pass {
           renderPass,
           {
             target,
-            moduleParameters,
+            shaderModuleProps,
             viewport: subViewport,
             view,
             pass: options.pass,
@@ -136,7 +160,7 @@ export default class LayersPass extends Pass {
       layerFilter,
       cullRect,
       effects,
-      moduleParameters
+      shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
     evaluateShouldDrawOnly: boolean = false
@@ -161,24 +185,28 @@ export default class LayersPass extends Pass {
         layerFilterCache
       );
 
-      const layerParam: DrawLayerParameters = {
-        shouldDrawLayer
-      };
+      const layerParam = {shouldDrawLayer} as DrawLayerParameters;
 
       if (shouldDrawLayer && !evaluateShouldDrawOnly) {
+        layerParam.shouldDrawLayer = true;
+
         // This is the "logical" index for ordering this layer in the stack
         // used to calculate polygon offsets
         // It can be the same as another layer
         layerParam.layerRenderIndex = indexResolver(layer, shouldDrawLayer);
 
-        layerParam.moduleParameters = this._getModuleParameters(
+        layerParam.shaderModuleProps = this._getShaderModuleProps(
           layer,
           effects,
           pass,
-          moduleParameters
+          shaderModuleProps
         );
-        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex, viewport);
+        layerParam.layerParameters = {
+          ...layer.context.deck?.props.parameters,
+          ...this.getLayerParameters(layer, layerIndex, viewport)
+        };
       }
+
       drawLayerParams[layerIndex] = layerParam;
     }
     return drawLayerParams;
@@ -187,32 +215,68 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  /* eslint-disable max-depth, max-statements */
+  /* eslint-disable max-depth, max-statements, complexity */
   private _drawLayersInViewport(
     renderPass: RenderPass,
-    {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view},
-    drawLayerParams
+    {
+      layers,
+      shaderModuleProps: globalModuleParameters,
+      pass,
+      target,
+      viewport,
+      view
+    }: {
+      layers: Layer[];
+      shaderModuleProps: Record<string, any>;
+      pass: string;
+      target?: Framebuffer | null;
+      viewport: Viewport;
+      view?: View;
+    },
+    drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
-      moduleParameters: globalModuleParameters,
+      shaderModuleProps: globalModuleParameters,
       target,
       viewport
     });
 
-    // TODO v9 - since clearing is done in renderPass construction in luma.gl v9
-    // we have a choice
-    if (view && view.props.clear) {
-      console.warn(`${view.id}: Per view clearing not yet implemented in deck.gl v9`);
+    if (view) {
+      const {clear, clearColor, clearDepth, clearStencil} = view.props;
+      if (clear) {
+        // If clear option is set, clear all buffers by default.
+        let colorToUse: NumberArray4 | false = [0, 0, 0, 0];
+        let depthToUse: number | false = 1.0;
+        let stencilToUse: number | false = 0;
 
-      // const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      // withGLParameters(
-      //   device,
-      //   {
-      //     scissorTest: true,
-      //     scissor: glViewport
-      //   },
-      //   () => clear(device, clearOpts)
-      // );
+        if (Array.isArray(clearColor)) {
+          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
+            c => c / 255
+          ) as NumberArray4;
+        } else if (clearColor === false) {
+          colorToUse = false;
+        }
+
+        if (clearDepth !== undefined) {
+          depthToUse = clearDepth;
+        }
+
+        if (clearStencil !== undefined) {
+          stencilToUse = clearStencil;
+        }
+
+        const clearRenderPass = this.device.beginRenderPass({
+          framebuffer: target,
+          parameters: {
+            viewport: glViewport,
+            scissorRect: glViewport
+          },
+          clearColor: colorToUse,
+          clearDepth: depthToUse,
+          clearStencil: stencilToUse
+        });
+        clearRenderPass.end();
+      }
     }
 
     // render layers in normal colors
@@ -227,9 +291,9 @@ export default class LayersPass extends Pass {
 
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-      const layer = layers[layerIndex] as Layer;
-      const {shouldDrawLayer, layerRenderIndex, moduleParameters, layerParameters} =
-        drawLayerParams[layerIndex];
+      const layer = layers[layerIndex];
+      const drawLayerParameters = drawLayerParams[layerIndex];
+      const {shouldDrawLayer} = drawLayerParameters;
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -237,14 +301,18 @@ export default class LayersPass extends Pass {
       }
       if (layer.isComposite) {
         renderStatus.compositeCount++;
-      } else if (shouldDrawLayer) {
+      }
+      if (layer.isDrawable && drawLayerParameters.shouldDrawLayer) {
+        const {layerRenderIndex, shaderModuleProps, layerParameters} = drawLayerParameters;
         // Draw the layer
         renderStatus.visibleCount++;
 
         this._lastRenderIndex = Math.max(this._lastRenderIndex, layerRenderIndex);
 
         // overwrite layer.context.viewport with the sub viewport
-        moduleParameters.viewport = viewport;
+        if (shaderModuleProps.project) {
+          shaderModuleProps.project.viewport = viewport;
+        }
 
         // TODO v9 - we are sending renderPass both as a parameter and through the context.
         // Long-term, it is likely better not to have user defined layer methods have to access
@@ -254,7 +322,7 @@ export default class LayersPass extends Pass {
         try {
           layer._drawLayer({
             renderPass,
-            moduleParameters,
+            shaderModuleProps,
             uniforms: {layerIndex: layerRenderIndex},
             parameters: layerParameters
           });
@@ -273,11 +341,15 @@ export default class LayersPass extends Pass {
     return true;
   }
 
-  protected getModuleParameters(layer: Layer, effects?: Effect[]): any {
+  protected getShaderModuleProps(
+    layer: Layer,
+    effects: Effect[] | undefined,
+    otherShaderModuleProps: Record<string, any>
+  ): any {
     return null;
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return layer.props.parameters;
   }
 
@@ -322,7 +394,7 @@ export default class LayersPass extends Pass {
     return true;
   }
 
-  private _getModuleParameters(
+  private _getShaderModuleProps(
     layer: Layer,
     effects: Effect[] | undefined,
     pass: string,
@@ -330,27 +402,37 @@ export default class LayersPass extends Pass {
   ): any {
     // @ts-expect-error TODO - assuming WebGL context
     const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    const layerProps = layer.internalState?.propsInTransition || layer.props;
 
-    const moduleParameters = Object.assign(
-      Object.create(layer.internalState?.propsInTransition || layer.props),
-      {
-        autoWrapLongitude: layer.wrapLongitude,
+    const shaderModuleProps = {
+      layer: layerProps,
+      picking: {
+        isActive: false
+      } satisfies PickingProps,
+      project: {
         viewport: layer.context.viewport,
-        mousePosition: layer.context.mousePosition,
-        picking: {
-          isActive: 0
-        },
-        devicePixelRatio
-      }
-    );
+        devicePixelRatio,
+        modelMatrix: layerProps.modelMatrix,
+        coordinateSystem: layerProps.coordinateSystem,
+        coordinateOrigin: layerProps.coordinateOrigin,
+        autoWrapLongitude: layer.wrapLongitude
+      } satisfies ProjectProps
+    };
 
     if (effects) {
       for (const effect of effects) {
-        Object.assign(moduleParameters, effect.getModuleParameters?.(layer));
+        mergeModuleParameters(
+          shaderModuleProps,
+          effect.getShaderModuleProps?.(layer, shaderModuleProps)
+        );
       }
     }
 
-    return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), overrides);
+    return mergeModuleParameters(
+      shaderModuleProps,
+      this.getShaderModuleProps(layer, effects, shaderModuleProps),
+      overrides
+    );
   }
 }
 
@@ -406,17 +488,17 @@ export function layerIndexResolver(
 function getGLViewport(
   device: Device,
   {
-    moduleParameters,
+    shaderModuleProps,
     target,
     viewport
   }: {
-    moduleParameters: any;
-    target?: Framebuffer;
+    shaderModuleProps: any;
+    target?: Framebuffer | null;
     viewport: Viewport;
   }
 ): [number, number, number, number] {
   const pixelRatio =
-    (moduleParameters && moduleParameters.devicePixelRatio) ||
+    shaderModuleProps?.project?.devicePixelRatio ??
     // @ts-expect-error TODO - assuming WebGL context
     device.canvasContext.cssToDeviceRatio();
 
@@ -433,4 +515,22 @@ function getGLViewport(
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];
+}
+
+function mergeModuleParameters(
+  target: Record<string, any>,
+  ...sources: Record<string, any>[]
+): Record<string, any> {
+  for (const source of sources) {
+    if (source) {
+      for (const key in source) {
+        if (target[key]) {
+          Object.assign(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      }
+    }
+  }
+  return target;
 }

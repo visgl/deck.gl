@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {cutPolylineByGrid, cutPolylineByMercatorBounds} from '@math.gl/polygon';
 
 import type {NumericArray} from '@math.gl/core';

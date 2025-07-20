@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {rgb} from 'd3-color';
 
 export const normalizeParam = p => {

@@ -1,7 +1,11 @@
-import {AccessorFunction} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {AccessorFunction, Color} from '@deck.gl/core';
 import {scaleLinear} from 'd3-scale';
 import {Feature} from 'geojson';
-import getPalette, {Color, DEFAULT_PALETTE, NULL_COLOR} from './palette';
+import getPalette, {DEFAULT_PALETTE, NULL_COLOR} from './palette';
 import {assert} from '../utils';
 import {AttributeSelector, getAttrValue} from './utils';
 
@@ -41,8 +45,8 @@ export default function colorContinuous<DataT = Feature>({
   const palette = typeof colors === 'string' ? getPalette(colors, domain.length) : colors;
   const color = scaleLinear<Color>().domain(domain).range(palette);
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return typeof value === 'number' && Number.isFinite(value) ? color(value) : nullColor;
   };
 }

@@ -26,7 +26,7 @@ body:
       - label: Python/Jupyter notebook
       - label: MapboxOverlay
       - label: GoogleMapsOverlay
-      - label: CartoLayer
+      - label: CARTO
       - label: ArcGIS
 - type: textarea
   attributes:

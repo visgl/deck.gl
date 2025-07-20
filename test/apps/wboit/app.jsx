@@ -1,7 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {PureComponent, Fragment} from 'react';
 import DeckGL from '@deck.gl/react';
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
-import {StaticMap} from 'react-map-gl';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import WBOITLayer from './wboit-layer/wboit-layer';
 
@@ -163,9 +166,7 @@ export default class App extends PureComponent {
           controller={true}
           effects={[lightingEffect]}
           layers={layers}
-        >
-          <StaticMap />
-        </DeckGL>
+        ></DeckGL>
         <div style={{position: 'fixed'}}>
           {mkButton('Opacity 25%', 'opacity', 0.25)}
           {mkButton('Opacity 50%', 'opacity', 0.5)}

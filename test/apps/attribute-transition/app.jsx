@@ -1,149 +1,117 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document console */
 /* eslint-disable no-console */
-import React, {Component} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL, {COORDINATE_SYSTEM, OrthographicView, ScatterplotLayer, PolygonLayer} from 'deck.gl';
+import DeckGL, {OrthographicView, ScatterplotLayer, PolygonLayer} from 'deck.gl';
 
 import DataGenerator from './data-generator';
 
-class Root extends Component {
-  constructor(props) {
-    super(props);
+const initialViewState = {
+  target: [0, 0, 0],
+  zoom: 0
+};
 
-    this._dataGenerator = new DataGenerator();
+const interpolationSettings = {
+  duration: 600
+  // onStart: () => console.log('onStart'),
+  // onEnd: () => console.log('onEnd'),
+  // onInterrupt: () => console.log('onInterrupt')
+};
 
-    this.state = {
-      transitionType: 'spring',
-      points: this._dataGenerator.points,
-      polygons: this._dataGenerator.polygons,
-      viewState: {
-        target: [0, 0, 0],
-        zoom: 0
-      }
-    };
+const springSettings = {
+  type: 'spring',
+  stiffness: 0.01,
+  damping: 0.15
+  // onStart: () => console.log('onStart'),
+  // onEnd: () => console.log('onEnd'),
+  // onInterrupt: () => console.log('onInterrupt')
+};
 
-    this._randomize = this._randomize.bind(this);
-    this._onChangeTransitionType = this._onChangeTransitionType.bind(this);
+const scatterplotTransitionsByType = {
+  interpolation: {
+    getPosition: {...interpolationSettings, enter: () => [0, 0]},
+    getRadius: {...interpolationSettings, enter: () => [0]},
+    getFillColor: {...interpolationSettings, enter: ([r, g, b]) => [r, g, b, 0]}
+  },
+  spring: {
+    getPosition: {...springSettings, enter: () => [0, 0]},
+    getRadius: {...springSettings, enter: () => [0]},
+    getFillColor: {...springSettings, enter: ([r, g, b]) => [r, g, b, 0]}
   }
+};
 
-  _randomize() {
-    this._dataGenerator.randomize();
-    this.setState({
-      points: this._dataGenerator.points,
-      polygons: this._dataGenerator.polygons
-    });
+const polygonTransitionsByType = {
+  interpolation: {
+    getPolygon: 600,
+    getLineColor: {...interpolationSettings, enter: ([r, g, b]) => [r, g, b, 0]},
+    getFillColor: {...interpolationSettings, enter: ([r, g, b]) => [r, g, b, 0]},
+    getLineWidth: 600
+  },
+  spring: {
+    getPolygon: springSettings,
+    getLineColor: {...springSettings, enter: ([r, g, b]) => [r, g, b, 0]},
+    getFillColor: {...springSettings, enter: ([r, g, b]) => [r, g, b, 0]},
+    getLineWidth: springSettings
   }
+};
 
-  _onChangeTransitionType({currentTarget}) {
-    this.setState({
-      transitionType: currentTarget.value
-    });
-  }
+function Root() {
+  const dataGenerator = useMemo(() => new DataGenerator());
+  const [points, setPoints] = useState(dataGenerator.points);
+  const [polygons, setPolygons] = useState(dataGenerator.polygons);
+  const [transitionType, setTransitionType] = useState('interpolation');
 
-  render() {
-    const {points, polygons, viewState} = this.state;
+  const randomize = useCallback(() => {
+    dataGenerator.randomize();
+    setPoints(dataGenerator.points);
+    setPolygons(dataGenerator.polygons);
+  }, [dataGenerator]);
 
-    const interpolationSettings = {
-      duration: 600,
-      onStart: () => {
-        console.log('onStart');
-      },
-      onEnd: () => {
-        console.log('onEnd');
-      },
-      onInterrupt: () => {
-        console.log('onInterrupt');
-      }
-    };
+  const onChangeTransitionType = useCallback(({currentTarget}) => {
+    setTransitionType(currentTarget.value);
+  });
 
-    const springSettings = {
-      type: 'spring',
-      stiffness: 0.01,
-      damping: 0.15,
-      onStart: () => {
-        console.log('onStart');
-      },
-      onEnd: () => {
-        console.log('onEnd');
-      },
-      onInterrupt: () => {
-        console.log('onInterrupt');
-      }
-    };
+  const layers = [
+    new ScatterplotLayer({
+      data: points,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      getRadius: d => d.radius,
+      transitions: scatterplotTransitionsByType[transitionType]
+    }),
+    new PolygonLayer({
+      data: polygons,
+      stroked: true,
+      filled: true,
+      getPolygon: d => d.polygon,
+      getLineColor: d => d.color,
+      getFillColor: d => [d.color[0], d.color[1], d.color[2], 128],
+      getLineWidth: d => d.width,
+      transitions: polygonTransitionsByType[transitionType]
+    })
+  ];
 
-    const scatterplotTransitionsByType = {
-      interpolation: {
-        getPosition: Object.assign({}, interpolationSettings, {enter: () => [0, 0]}),
-        getRadius: Object.assign({}, interpolationSettings, {enter: () => [0]}),
-        getFillColor: Object.assign({}, interpolationSettings, {enter: ([r, g, b]) => [r, g, b, 0]})
-      },
-      spring: {
-        getPosition: Object.assign({}, springSettings, {enter: () => [0, 0]}),
-        getRadius: Object.assign({}, springSettings, {enter: () => [0]}),
-        getFillColor: Object.assign({}, springSettings, {enter: ([r, g, b]) => [r, g, b, 0]})
-      }
-    };
-
-    const polygonTransitionsByType = {
-      interpolation: {
-        getPolygon: 600,
-        getLineColor: Object.assign({}, interpolationSettings, {
-          enter: ([r, g, b]) => [r, g, b, 0]
-        }),
-        getFillColor: Object.assign({}, interpolationSettings, {
-          enter: ([r, g, b]) => [r, g, b, 0]
-        }),
-        getLineWidth: 600
-      },
-      spring: {
-        getPolygon: springSettings,
-        getLineColor: Object.assign({}, springSettings, {enter: ([r, g, b]) => [r, g, b, 0]}),
-        getFillColor: Object.assign({}, springSettings, {enter: ([r, g, b]) => [r, g, b, 0]}),
-        getLineWidth: springSettings
-      }
-    };
-
-    const layers = [
-      new ScatterplotLayer({
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        data: points,
-        getPosition: d => d.position,
-        getFillColor: d => d.color,
-        getRadius: d => d.radius,
-        transitions: scatterplotTransitionsByType[this.state.transitionType]
-      }),
-      new PolygonLayer({
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        data: polygons,
-        stroked: true,
-        filled: true,
-        getPolygon: d => d.polygon,
-        getLineColor: d => d.color,
-        getFillColor: d => [d.color[0], d.color[1], d.color[2], 128],
-        getLineWidth: d => d.width,
-        transitions: polygonTransitionsByType[this.state.transitionType]
-      })
-    ];
-
-    return (
-      <div>
-        <DeckGL
-          views={new OrthographicView()}
-          controller={true}
-          viewState={viewState}
-          onViewStateChange={evt => this.setState({viewState: evt.viewState})}
-          layers={layers}
-        />
-        <div id="control-panel">
-          <button onClick={this._randomize}>Randomize</button>
-          <select value={this.state.transitionType} onChange={this._onChangeTransitionType}>
-            <option value="interpolation">Interpolation Transition</option>
-            <option value="spring">Spring Transition</option>
-          </select>
-        </div>
+  return (
+    <div>
+      <DeckGL
+        views={new OrthographicView()}
+        controller={true}
+        initialViewState={initialViewState}
+        layers={layers}
+      />
+      <div id="control-panel">
+        <button onClick={randomize}>Randomize</button>
+        <select value={transitionType} onChange={onChangeTransitionType}>
+          <option value="interpolation">Interpolation Transition</option>
+          <option value="spring">Spring Transition</option>
+        </select>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 const container = document.body.appendChild(document.createElement('div'));

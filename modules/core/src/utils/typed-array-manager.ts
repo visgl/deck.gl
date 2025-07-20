@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {TypedArray, TypedArrayConstructor} from '../types/types';
 
 export type TypedArrayManagerOptions = {

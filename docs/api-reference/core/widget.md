@@ -1,74 +1,35 @@
-# Widget Class
+# Widget
 
-A widget is a UI component that can interact with deck.gl's cameras and layers. Some examples are:
+A widget is a UI component that can interact with deck.gl's layers and views.
+You can write your own widgets, or use any of the many ready-to-use widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module.
 
-- A tooltip that follows the pointer and provide information for the hovered object
-- A marker pinned to a geo-location containing HTML content
-- Buttons to manipulate the camera, such as +/- zoom buttons, a compass rose for the MapView, a gimble widget for the OrbitView, etc.
-- A legend that offers visual comparison of sizes, colors etc. corresponding to the rendered layers and viewport. For example a distance ruler, a color scale for the HeatmapLayer, etc.
+## Usage
 
-You may find many ready-to-use widgets in the `@deck.gl/widgets` module.
+The `Widget` class is a base class used to define new widgets and should not be instantiated directly by an application. See the [Widget Documentation](../widgets/overview.md) for information about how to write your own widgets.
 
-A widget is expected to implement the `Widget` interface. Here is a custom widget that shows a spinner while layers are loading:
+## Types 
 
-```ts
-import {Widget} from '@deck.gl/core';
+#### `WidgetProps` (object) {#props}
 
-class LoadingIndicator implements Widget {
-  element?: HTMLDivElement;
-  size: number;
+Options for the widget, as passed into the constructor and can be updated with `setProps`.
 
-  constructor(options: {
-    size: number;
-  }) {
-    this.size = options.size;
-  }
+#### `id` {#id}
 
-  onAdd() {
-    const el = document.createElement('div');
-    el.className = 'spinner';
-    el.style.width = `${this.size}px`;
-    // TODO - create animation for .spinner in the CSS stylesheet
-    this.element = el;
-    return el;
-  }
+The `id` string must be unique among all your widgets at a given time. While a default `id` is provided, it is recommended to set `id` explicitly if you have multiple widgets of the same type.
 
-  onRemove() {
-    this.element = undefined;
-  }
+#### `viewId` (string | null) {#viewid}
 
-  onRedraw({layers}) {
-    const isVisible = layers.some(layer => !layer.isLoaded);
-    this.element.style.display = isVisible ? 'block' : 'none';
-  }
-}
-
-deckgl.addWidget(new LoadingIndicator({size: 48}));
-```
-
-## Widget Interface
-
-When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occured inside the specific view that matches this id.
-
-### Members
-
-A `Widget` implements the following members.
-
-##### `id` {#id}
-
-Unique identifier of the widget.
-
-##### `props` (Object) {#props}
-
-Any options for the widget, as passed into the constructor and can be updated with `setProps`.
-
-##### `viewId` (String | null) {#viewid}
+The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
 
 * Default: `null`
 
+When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
+
 The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
 
-##### `placement` (String, optional) {#placement}
+#### `placement` (string, optional) {#placement}
+
+Widget position within the view relative to the map container.
 
 * Default: `'top-left'`
 
@@ -80,36 +41,64 @@ Widget positioning within the view. One of:
 - `'bottom-right'`
 - `'fill'`
 
-### Methods
+#### `style`
 
-##### `onAdd` {#onadd}
+CSS inline style overrides.
+
+```ts
+  style?: Partial<CSSStyleDeclaration>;
+```
+
+#### `className`
+
+Additional CSS classnames for interaction with custom stylesheets.
+  
+```ts
+  className?: string;
+```
+
+### Methods for Widget Writers
+
+#### `constructor`
+
+Supply the props and default props to the base class.
+
+#### `setProps` {#setprops}
+
+Called to update widget options.
+
+#### `updateHTML` {#updatehtml}
+
+Updates the widget. Called by the specific widget when state has changed. Calls `onRenderHTML()`
+
+#### `onRenderHTML`
+
+This function is implemented by the specific widget subclass to update the HTML for the widget
+
+#### `onAdd` {#onadd}
 
 Required. Called when the widget is added to a Deck instance.
 
 Receives the following arguments:
 
-- `context` (Object)
+- `context` (object)
   + `deck` (Deck) - the Deck instance that this widget is being attached to.
-  + `viewId` (String | null) - the view id that this widget is being attached to.
+  + `viewId` (string | null) - the view id that this widget is being attached to.
 
 Returns an optional UI element that should be appended to the Deck container.
 
-##### `onRemove` {#onremove}
+#### `onRemove` {#onremove}
 
-Required. Called when the widget is removed.
+Optional. Called when the widget is removed.
 
-##### `setProps` {#setprops}
-
-Optional. Called to update widget options.
-
-##### `onViewportChange` {#onviewportchange}
+#### `onViewportChange` {#onviewportchange}
 
 Op†ional. Called when the containing view is changed. If `viewId: null`, will be called if any viewport changes.
 
 Receives the following arguments:
 - `viewport` (Viewport) - the viewport that has changed
 
-##### `onRedraw` {#onredraw}
+#### `onRedraw` {#onredraw}
 
 Optional. Called when the containing view is redrawn. If `viewId: null`, will be called if anything redraws.
 
@@ -118,49 +107,49 @@ Receives the following arguments:
   + `viewports` (Viewport[]) - the viewports that are being redrawn
   + `layers` (Layer[]) - the layers that are being redrawn
 
-##### `onHover` {#onhover}
+#### `onHover` {#onhover}
 
 Optional. Called when a hover event occurs in the containing view. If `viewId: null`, will be called if hover occurs in any view.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being hovered.
 * `event` - the original gesture event
 
 
-##### `onClick` {#onclick}
+#### `onClick` {#onclick}
 
 Optional. Called when a click event occurs in the containing view. If `viewId: null`, will be called if click occurs in any view.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being clicked.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being clicked.
 * `event` - the original gesture event
 
 
-##### `onDragStart` {#ondragstart}
+#### `onDragStart` {#ondragstart}
 
 Optional. Called when a dragstart event occurs in the containing view. If `viewId: null`, will be called if drag occurs in any view.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
-##### `onDrag` {#ondrag}
+#### `onDrag` {#ondrag}
 
 Optional. Called when a drag event occurs in the containing view. If `viewId: null`, will be called if drag occurs in any view.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
-##### `onDragEnd` {#ondragend}
+#### `onDragEnd` {#ondragend}
 
 Optional. Called when a dragend event occurs in the containing view. If `viewId: null`, will be called if drag occurs in any view.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event

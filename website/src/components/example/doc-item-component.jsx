@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import styled from 'styled-components';
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -10,7 +14,7 @@ const DemoContainer = styled.div`
   top: 0;
   bottom: 0;
 
-  > h1 {
+  > header > h1 {
     display: none;
   }
 `;

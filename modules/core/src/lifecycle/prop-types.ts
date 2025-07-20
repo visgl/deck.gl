@@ -1,9 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {createTexture, destroyTexture} from '../utils/texture';
 import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
 import type {Color, TextureSource} from '../types/layer-props';
 import type Layer from '../lib/layer';
+import type {SamplerProps} from '@luma.gl/core';
 
 type BasePropType<ValueT> = {
   value: ValueT;
@@ -83,7 +88,7 @@ type DataPropType<T = any> = BasePropType<T> & {
 };
 type ImagePropType = BasePropType<TextureSource | null> & {
   type: 'image';
-  parameters?: Record<number, number>;
+  parameters?: SamplerProps;
 };
 type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
@@ -192,8 +197,22 @@ const TYPE_DEFINITIONS = {
   },
   data: {
     transform: (value, propType: DataPropType, component) => {
+      if (!value) {
+        return value;
+      }
       const {dataTransform} = component.props;
-      return dataTransform && value ? dataTransform(value) : value;
+      if (dataTransform) {
+        return dataTransform(value);
+      }
+      // Detect loaders.gl v4 table format
+      if (
+        typeof value.shape === 'string' &&
+        value.shape.endsWith('-table') &&
+        Array.isArray(value.data)
+      ) {
+        return value.data;
+      }
+      return value;
     }
   },
   image: {

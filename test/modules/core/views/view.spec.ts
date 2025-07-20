@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {
   View,
@@ -12,6 +16,29 @@ import {equals} from '@math.gl/core';
 
 test('View#imports', t => {
   t.ok(View, 'View import ok');
+  t.end();
+});
+
+test('View#clone', t => {
+  const view = new MapView({
+    id: 'test-view',
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
+  const identicalClone = view.clone({});
+  t.ok(identicalClone instanceof MapView, 'identical clone is an instance of MapView');
+  t.ok(identicalClone !== view, 'identical clone is a new instance');
+  t.ok(identicalClone.equals(view), 'identical clone.equals() is true');
+
+  const clone = view.clone({
+    id: 'cloned-view',
+    zoom: 5
+  });
+  t.is(clone.id, 'cloned-view', 'modified clone id is overridden');
+  t.is(clone.props.zoom, 5, 'modified clone prop zoom is overridden');
+  t.is(clone.props.latitude, view.props.latitude, 'other props are preserved');
+  t.is(clone.props.longitude, view.props.longitude, 'other props are preserved');
   t.end();
 });
 

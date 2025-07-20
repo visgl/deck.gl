@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Framebuffer} from '@luma.gl/core';
 
 import type {Layer, Viewport} from '@deck.gl/core';
@@ -104,6 +108,7 @@ export class TerrainCover {
   }
 
   /** Compare viewport and terrain bounds with the last version. Only rerender if necesary. */
+  // eslint-disable-next-line max-statements
   private _updateViewport(viewport: Viewport): boolean {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
@@ -174,7 +179,8 @@ export class TerrainCover {
     }
     if (!this.pickingFbo) {
       this.pickingFbo = createRenderTarget(this.targetLayer.context.device, {
-        id: `${this.id}-picking`
+        id: `${this.id}-picking`,
+        interpolate: false
       });
     }
     return this.pickingFbo;

@@ -1,5 +1,5 @@
 import {defineConfig} from 'vite';
-import {getOcularConfig} from 'ocular-dev-tools';
+import {getOcularConfig} from '@vis.gl/dev-tools';
 import {join} from 'path';
 
 const rootDir = join(__dirname, '..');
@@ -13,8 +13,10 @@ export default defineConfig(async () => {
       alias: {
         ...aliases,
         // Use root dependencies
+        'mjolnir.js': join(rootDir, './node_modules/mjolnir.js'),
         '@luma.gl': join(rootDir, './node_modules/@luma.gl'),
         '@math.gl': join(rootDir, './node_modules/@math.gl'),
+        '@arcgis/core': join(rootDir, './node_modules/@arcgis/core'),
         '@loaders.gl/core': join(rootDir, './node_modules/@loaders.gl/core')
       }
     },
@@ -28,7 +30,7 @@ export default defineConfig(async () => {
       port: 8080
     },
     optimizeDeps: {
-      esbuildOptions: {target: 'es2020'}
+      esbuildOptions: {target: 'es2022'}
     }
   };
 });

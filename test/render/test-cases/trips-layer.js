@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {trips} from 'deck.gl-test/data';
 

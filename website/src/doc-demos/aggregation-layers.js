@@ -1,10 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable no-template-curly-in-string */
 import {
   ContourLayer,
-  CPUGridLayer,
   HexagonLayer,
   ScreenGridLayer,
-  GPUGridLayer,
   GridLayer,
   HeatmapLayer
 } from '@deck.gl/aggregation-layers';
@@ -20,6 +22,7 @@ export const ContourLayerDemo = makeLayerDemo({
     pickable: true,
     cellSize: 200,
     getPosition: d => d.COORDINATES,
+    getWeight: d => d.SPACES,
     contours: [
       {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
       {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
@@ -30,43 +33,36 @@ export const ContourLayerDemo = makeLayerDemo({
 });
 
 const GRID_LAYER_INFO = {
-  getTooltip: "({object}) => object && `${object.position.join(', ')}\nCount: ${object.count}`",
+  getTooltip: '({object}) => object && `Count: ${object.elevationValue}`',
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,
     extruded: true,
     cellSize: 200,
     elevationScale: 4,
-    getPosition: d => d.COORDINATES
+    getPosition: d => d.COORDINATES,
+    getColorWeight: d => d.SPACES,
+    getElevationWeight: d => d.SPACES
   }`
 };
-
-export const GPUGridLayerDemo = makeLayerDemo({
-  Layer: GPUGridLayer,
-  ...GRID_LAYER_INFO
-});
 
 export const GridLayerDemo = makeLayerDemo({
   Layer: GridLayer,
   ...GRID_LAYER_INFO
 });
 
-export const CPUGridLayerDemo = makeLayerDemo({
-  Layer: CPUGridLayer,
-  ...GRID_LAYER_INFO
-});
-
 export const HexagonLayerDemo = makeLayerDemo({
   Layer: HexagonLayer,
-  getTooltip:
-    "({object}) => object && `${object.position.join(', ')}\nCount: ${object.points.length}`",
+  getTooltip: '({object}) => object && `Count: ${object.elevationValue}`',
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,
     extruded: true,
     radius: 200,
     elevationScale: 4,
-    getPosition: d => d.COORDINATES
+    getPosition: d => d.COORDINATES,
+    getColorWeight: d => d.SPACES,
+    getElevationWeight: d => d.SPACES
   }`
 });
 
@@ -94,6 +90,7 @@ export const HeatmapLayerDemo = makeLayerDemo({
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     getPosition: d => d.COORDINATES,
+    getWeight: d => d.SPACES,
     radiusPixels: 25
   }`
 });

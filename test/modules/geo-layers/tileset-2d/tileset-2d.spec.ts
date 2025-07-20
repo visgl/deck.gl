@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 
 const testViewState = {
@@ -67,7 +71,7 @@ test('Tileset2D#updateOnModelMatrix', t => {
       target: [100, 100],
       zoom: 4
     }
-  });
+  }) as Viewport;
   tileset.update(testOrthoraphicViewport, {modelMatrix: null});
   t.is(tileset._cache.size, 4, 'null model matrix updates');
 
@@ -81,14 +85,17 @@ test('Tileset2D#updateOnModelMatrix', t => {
 });
 
 test('Tileset2D#finalize', async t => {
+  const tileDataPending = sleep(50);
   const tileset = new Tileset2D({
-    getTileData: () => sleep(50),
+    getTileData: () => tileDataPending,
     onTileLoad: () => {}
   });
-  tileset.update(testViewport);
-  const tile1 = tileset.selectedTiles[0];
 
-  await sleep(60);
+  tileset.update(testViewport);
+  const tile1 = tileset.selectedTiles![0];
+
+  await tileDataPending;
+  await sleep(10);
 
   tileset.update(
     new WebMercatorViewport(
@@ -98,7 +105,7 @@ test('Tileset2D#finalize', async t => {
       })
     )
   );
-  const tile2 = tileset.selectedTiles[0];
+  const tile2 = tileset.selectedTiles![0];
 
   tileset.finalize();
   t.notOk(tileset._cache.size, 'cache is purged');
@@ -156,6 +163,9 @@ test('Tileset2D#maxCacheByteSize', async t => {
   t.equal(tileset._cache.size, 1, 'expected cache size');
   t.ok(tileset._cache.get('1171-1566-12'), 'expected tile is in cache');
 
+  // Wait for the tile to load
+  await sleep(100);
+
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
     new WebMercatorViewport(
@@ -168,10 +178,36 @@ test('Tileset2D#maxCacheByteSize', async t => {
 
   t.equal(tileset._cache.size, 2, 'new tile added to cache');
 
+  // Wait for the new tile to load
   await sleep(100);
 
   t.equal(tileset._cache.size, 1, 'cache is resized after tile data is loaded');
   t.ok(tileset._cache.get('910-459-12'), 'expected tile is in cache');
+
+  t.end();
+});
+
+test('Tileset2D#debounceTime', async t => {
+  const tileset = new Tileset2D({
+    getTileData: () => sleep(2),
+    maxRequests: 1000,
+    debounceTime: 25,
+    onTileLoad: () => {}
+  });
+
+  tileset.update(new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 20})));
+
+  await sleep(10);
+
+  for (const tile of tileset.tiles) {
+    t.false(tile.isLoaded, `tile ${tile.id} pending`);
+  }
+
+  await sleep(50);
+
+  for (const tile of tileset.tiles) {
+    t.true(tile.isLoaded, `tile ${tile.id} loaded`);
+  }
 
   t.end();
 });
@@ -306,7 +342,8 @@ test('Tileset2D#traversal', async t => {
   const tileset = new Tileset2D({
     getTileData: () => sleep(10),
     onTileLoad: () => {},
-    onTileError: () => {}
+    onTileError: () => {},
+    maxRequests: 0
   });
 
   /*

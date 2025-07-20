@@ -37,7 +37,7 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 ### Custom layers connected to CARTO datasource
 
 ```jsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
 
 function App() {
@@ -68,6 +68,7 @@ You can view a collection of working examples on the [CARTO documentation websit
 The CARTO module contains a number of custom layers which can be used to visualize the data, which work in conjunction with the [data source](#carto-data-sources) functions:
 
 - [H3TileLayer](./h3-tile-layer.md)
+- [HeatmapTileLayer](./heatmap-tile-layer.md)
 - [QuadbinTileLayer](./quadbin-tile-layer.md)
 - [RasterTileLayer](./raster-tile-layer.md)
 - [VectorTileLayer](./vector-tile-layer.md)
@@ -91,7 +92,7 @@ It is also straightforward to request data directly using the CARTO [SQL API](ht
 
 
 ```jsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {query} from '@deck.gl/carto';
 

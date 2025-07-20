@@ -1,3 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* global console */
+/* eslint-disable no-console */
 import * as tf from '@tensorflow/tfjs';
 import {
   CompositeLayer,
@@ -10,9 +16,9 @@ import {
   UpdateParameters,
   AttributeManager,
   _deepEqual
-} from '@deck.gl/core/typed';
-import {GridCellLayer} from '@deck.gl/layers/typed';
-import {Buffer} from '@luma.gl/webgl';
+} from '@deck.gl/core';
+import {GridCellLayer} from '@deck.gl/layers';
+import {Buffer} from '@luma.gl/core';
 import {Matrix4} from '@math.gl/core';
 
 import {CustomTFContext} from '../tf-utils/tf-context';
@@ -55,7 +61,7 @@ export class HistogramLayer<DataT = any> extends CompositeLayer<
 
   initializeState() {
     const context = this.context;
-    const attributeManager = new AttributeManager(context.gl, {
+    const attributeManager = new AttributeManager(context.device, {
       id: this.props.id,
       stats: context.stats,
       timeline: context.timeline
@@ -162,7 +168,7 @@ export class HistogramLayer<DataT = any> extends CompositeLayer<
         .floorDiv(binSize);
 
       const min = binIds.min();
-      const binsToCount = binIds.sub(min) as tf.Tensor1D;
+      const binsToCount = binIds.sub(min);
 
       const minBin = min.arraySync() as number;
       const maxBin = binIds.max().arraySync() as number;

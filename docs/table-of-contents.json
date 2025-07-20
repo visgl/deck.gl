@@ -16,9 +16,9 @@
     "items": [
       "get-started/getting-started",
       "get-started/using-standalone",
-      "get-started/using-with-map",
       "get-started/using-with-react",
       "get-started/using-with-typescript",
+      "get-started/using-with-map",
       "get-started/learning-resources"
     ]
   },
@@ -34,15 +34,24 @@
           "developer-guide/interactivity",
           "developer-guide/coordinate-systems",
           "developer-guide/views",
-          "developer-guide/view-state-transitions",
+          "developer-guide/animations-and-transitions",
           "developer-guide/loading-data",
-          "developer-guide/using-lighting",
+          "developer-guide/using-effects",
           "developer-guide/performance",
-          "developer-guide/fp64",
           "developer-guide/tips-and-tricks",
           "developer-guide/building-apps",
           "developer-guide/debugging",
           "developer-guide/testing"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Supported Base Maps",
+        "items": [
+          "developer-guide/base-maps/using-with-arcgis",
+          "developer-guide/base-maps/using-with-google-maps",
+          "developer-guide/base-maps/using-with-mapbox",
+          "developer-guide/base-maps/using-with-maplibre"
         ]
       },
       {
@@ -61,15 +70,6 @@
           "developer-guide/custom-layers/attribute-management",
           "developer-guide/custom-layers/writing-shaders"
         ]
-      },
-      {
-        "type": "category",
-        "label": "Using with Supported Base Maps",
-        "items": [
-          "developer-guide/base-maps/using-with-arcgis",
-          "developer-guide/base-maps/using-with-google-maps",
-          "developer-guide/base-maps/using-with-mapbox"
-        ]
       }
     ]
   },
@@ -82,7 +82,8 @@
         "label": "Core Classes",
         "items": [
           "api-reference/core/deck",
-          "api-reference/core/attribute-manager"
+          "api-reference/core/attribute-manager",
+          "api-reference/core/widget"
         ]
       },
       {
@@ -92,13 +93,13 @@
           "api-reference/layers/README",
           "api-reference/core/layer",
           "api-reference/core/composite-layer",
+          "api-reference/geo-layers/a5-layer",
           "api-reference/layers/arc-layer",
           "api-reference/layers/bitmap-layer",
           "api-reference/layers/column-layer",
-          "api-reference/aggregation-layers/cpu-grid-layer",
           "api-reference/aggregation-layers/contour-layer",
+          "api-reference/geo-layers/geohash-layer",
           "api-reference/layers/geojson-layer",
-          "api-reference/aggregation-layers/gpu-grid-layer",
           "api-reference/geo-layers/great-circle-layer",
           "api-reference/layers/grid-cell-layer",
           "api-reference/aggregation-layers/grid-layer",
@@ -107,13 +108,11 @@
           "api-reference/aggregation-layers/heatmap-layer",
           "api-reference/aggregation-layers/hexagon-layer",
           "api-reference/layers/icon-layer",
-          "api-reference/geo-layers/wms-layer",
           "api-reference/layers/line-layer",
           "api-reference/geo-layers/mvt-layer",
           "api-reference/layers/path-layer",
           "api-reference/layers/point-cloud-layer",
           "api-reference/layers/polygon-layer",
-          "api-reference/geo-layers/geohash-layer",
           "api-reference/geo-layers/quadkey-layer",
           "api-reference/geo-layers/s2-layer",
           "api-reference/layers/scatterplot-layer",
@@ -125,7 +124,19 @@
           "api-reference/layers/text-layer",
           "api-reference/geo-layers/tile-layer",
           "api-reference/geo-layers/tile-3d-layer",
-          "api-reference/geo-layers/trips-layer"
+          "api-reference/geo-layers/trips-layer",
+          "api-reference/geo-layers/wms-layer"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Aggregation Layers",
+        "items": [
+          "api-reference/aggregation-layers/overview",
+          "api-reference/aggregation-layers/aggregation-layer",
+          "api-reference/aggregation-layers/aggregator",
+          "api-reference/aggregation-layers/cpu-aggregator",
+          "api-reference/aggregation-layers/webgl-aggregator"
         ]
       },
       {
@@ -229,7 +240,9 @@
           "api-reference/carto/basemap",
           "api-reference/carto/fetch-map",
           "api-reference/carto/data-sources",
+          "api-reference/carto/cluster-tile-layer",
           "api-reference/carto/h3-tile-layer",
+          "api-reference/carto/heatmap-tile-layer",
           "api-reference/carto/quadbin-tile-layer",
           "api-reference/carto/raster-tile-layer",
           "api-reference/carto/vector-tile-layer",
@@ -275,7 +288,6 @@
         "label": "@deck.gl/mapbox",
         "items": [
           "api-reference/mapbox/overview",
-          "api-reference/mapbox/mapbox-layer",
           "api-reference/mapbox/mapbox-overlay"
         ]
       },
@@ -283,7 +295,9 @@
         "type": "category",
         "label": "@deck.gl/react",
         "items": [
-          "api-reference/react/deckgl"
+          "api-reference/react/overview",    
+          "api-reference/react/deckgl",
+          "api-reference/react/use-widget"
         ]
       },
       {
@@ -294,6 +308,27 @@
           "api-reference/test-utils/generate-layer-tests",
           "api-reference/test-utils/test-layer",
           "api-reference/test-utils/snapshot-test-runner"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/widgets",
+        "items": [
+          "api-reference/widgets/overview",
+          "api-reference/widgets/styling",
+          "api-reference/widgets/compass-widget",
+          "api-reference/widgets/fps-widget",
+          "api-reference/widgets/fullscreen-widget",
+          "api-reference/widgets/gimbal-widget",
+          "api-reference/widgets/info-widget",
+          "api-reference/widgets/loading-widget",
+          "api-reference/widgets/reset-view-widget",
+          "api-reference/widgets/scale-widget",
+          "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/theme-widget",
+          "api-reference/widgets/timeline-widget",
+          "api-reference/widgets/zoom-widget"
         ]
       }
     ]

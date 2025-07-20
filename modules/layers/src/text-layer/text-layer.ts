@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
@@ -103,6 +87,12 @@ type _TextLayerProps<DataT> = {
    * @default 0
    */
   getBorderWidth?: Accessor<DataT, number>;
+  /** The border radius of the background.
+   * If a number is supplied, it is the same border radius in pixel for all corners.
+   * If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
+   * @default 0
+   */
+  backgroundBorderRadius?: number | [number, number, number, number];
   /**
    * The padding of the background..
    * If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
@@ -210,6 +200,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
+  backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
   characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
@@ -261,7 +252,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     // Breaking change in v8.9
     if (this.props.maxWidth > 0) {
-      log.warn('v8.9 breaking change: TextLayer maxWidth is now relative to text size')();
+      log.once(1, 'v8.9 breaking change: TextLayer maxWidth is now relative to text size')();
     }
   }
 
@@ -295,7 +286,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     // because `TextLayer` assign the same pickingInfoIndex for one text label,
     // here info.index refers the index of text label in props.data
-    info.object = info.index >= 0 ? this.props.data[info.index] : null;
+    info.object = info.index >= 0 ? (this.props.data as any[])[info.index] : null;
     return info;
   }
 
@@ -494,6 +485,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
+      backgroundBorderRadius,
       backgroundPadding,
       background,
       billboard,
@@ -519,6 +511,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getFillColor: getBackgroundColor,
             getLineColor: getBorderColor,
             getLineWidth: getBorderWidth,
+            borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
 
             // props shared with characters layer

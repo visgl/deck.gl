@@ -9,8 +9,11 @@
     "build": "vite build"
   },
   "dependencies": {
-    "d3-scale": "^2.0.0",
-    "deck.gl": "^9.0.0-alpha.3",
+    "@types/d3-scale": "^4.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "d3-scale": "^4.0.0",
+    "deck.gl": "^9.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },

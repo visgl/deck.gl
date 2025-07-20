@@ -46,10 +46,10 @@ new CollisionFilterExtension();
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.9.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.9.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^8.9.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -66,11 +66,11 @@ new CollisionFilterExtension();
 
 When added to a layer via the `extensions` prop, the `CollisionFilterExtension` adds the following properties to the layer:
 
-##### `collisionEnabled` (Boolean, optional) {#collisionenabled}
+#### `collisionEnabled` (boolean, optional) {#collisionenabled}
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
-##### `collisionGroup` (string, optional) {#collisiongroup}
+#### `collisionGroup` (string, optional) {#collisiongroup}
 
 Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collisionGroup` will be considered together when calculating collisions.
 
@@ -96,7 +96,7 @@ const layers = [
 ];
   ```
 
-##### `collisionTestProps` (Object, optional) {#collisiontestprops}
+#### `collisionTestProps` (object, optional) {#collisiontestprops}
 
 Props to override when computing collisions. A common use case is to increase the size of the features when computing collisions to provide greater spacing between visible features. For the `ScatterplotLayer` this would be done by:
 
@@ -104,7 +104,7 @@ Props to override when computing collisions. A common use case is to increase th
 collisionTestProps: {radiusScale: 2}
 ```
 
-##### `getCollisionPriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollisionpriority}
+#### `getCollisionPriority` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getcollisionpriority}
 
 The collision priority of each object. Features with higher values are shown preferentially.
 The priority is a number in the range -1000 -> 1000, values outside will be clamped. 
@@ -112,6 +112,17 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 * If a number is provided, it is used for all objects in the layer.
 * If a function is provided, it is called on each object to retrieve its priority.
 
+## Using with transparent layers
+
+The `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
+
+A common issue is with the `IconLayer`, which [discards transparent pixels](https://deck.gl/docs/api-reference/layers/icon-layer#alphacutoff). To avoid this, use `alphaCutoff: -1`. A similar issue occurs when the anchor point of the `IconLayer` is too close to the edge of the image, to be safe include a few pixels of padding, e.g.
+
+```js
+iconMapping: {
+  marker: {x: 0, y: 0, width: 128, height: 128, anchorY: 124}
+}
+```
 
 ## Limitations
 

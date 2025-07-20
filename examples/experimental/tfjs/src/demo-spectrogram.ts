@@ -1,4 +1,9 @@
-import {Deck, OrthographicView} from '@deck.gl/core/typed';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* global document */
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {SpectrogramLayer, SpectrogramSettings} from './layers/spectrogram-layer';
 
 const SETTINGS: SpectrogramSettings = {
@@ -62,7 +67,7 @@ function update() {
   const spectrogramLayer = new SpectrogramLayer({
     id: 'frequency-domain-data',
     data: byteBuffer,
-    sampleRate: sampleRate,
+    sampleRate,
     bounds: [-256, -256, 256, 256],
     pickable: !isPlaying,
     settings: SETTINGS,

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // deck.gl, MIT license
 // Attributions:
 // Copyright 2022 Foursquare Labs, Inc.
@@ -86,7 +90,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     // Track the explicit loading done by this layer
-    return Boolean(this.state) && this.state.loadCounter === 0 && super.isLoaded;
+    return this.state?.loadCounter === 0 && super.isLoaded;
   }
 
   /** Lets deck.gl know that we want viewport change events */

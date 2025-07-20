@@ -41,6 +41,9 @@ If you set a ``MAPBOX_API_KEY`` or ``GOOGLE_MAPS_API_KEY`` environment variables
 Enabling pydeck for Jupyter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. WARNING::
+   Jupyter-specific features are not currently supported in pydeck v0.9+.
+
 Jupyter allows for more complex server/client interactions. You or your system administrator
 must enable pydeck for use in Jupyter. Binary data transportation, data selection, and updating data over time
 interactively only work if pydeck is enabled for use in a Jupyter environments.

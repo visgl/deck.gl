@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
 
 const DEFAULT_TEXTURE_PARAMETERS: SamplerProps = {
@@ -29,7 +33,6 @@ export function createTexture(
   sampler: SamplerProps
 ): Texture | null {
   if (image instanceof Texture) {
-    // @ts-expect-error This type error seems like it shouldn't happen...
     return image;
   } else if (image.constructor && image.constructor.name !== 'Object') {
     // Browser object
@@ -44,14 +47,18 @@ export function createTexture(
     };
   }
 
+  const {width, height} = image.data;
   const texture = device.createTexture({
     ...image,
     sampler: {
       ...DEFAULT_TEXTURE_PARAMETERS,
       ...samplerParameters,
       ...sampler
-    }
+    },
+    mipLevels: device.getMipLevelCount(width, height)
   });
+  texture.generateMipmapsWebGL();
+
   // Track this texture
   internalTextures[texture.id] = owner;
   return texture;

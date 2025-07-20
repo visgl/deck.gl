@@ -1,9 +1,27 @@
 # Using deck.gl with TypeScript
 
+## deck.gl v9+
+
+Starting from v9.0, deck.gl publishes official TypeScript types for all modules. If TypeScript is enabled in your project, imports from deck.gl packages will include types. Examples:
+
+```js
+// Values and types.
+import {DeckGL} from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
+
+// Types only.
+import type {DeckGLRef} from '@deck.gl/react';
+import type {GeoJsonLayerProps} from '@deck.gl/layers';
+```
+
+Help us improve the types by reporting issues or sending suggestions on GitHub!
+
+## deck.gl v8
+
 Starting from v8.8, deck.gl publishes "public preview" TypeScript types via an opt-in only entry point. To use the official types in your application, find the following statements:
 
 ```js
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 ```
 
@@ -26,7 +44,7 @@ Note that the typed exports are a work in progress. They are not exposed by defa
 The typed exports will remain at the `typed` entry points throughout the rest of the 8.x releases. They will be exposed directly at the package roots starting in v9.0.
 
 
-## Alternative Solution for Legacy Versions
+## Legacy Versions
 
 If you are using a version before v8.8, a third-party typings library is available.
 

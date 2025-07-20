@@ -1,11 +1,11 @@
-import {getLoggers} from '../src/debug/loggers';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-/* global deck */
-declare global {
-  const deck: any;
-}
+// @ts-nocheck
+import {getLoggers} from '@deck.gl/core/debug/loggers';
 
-const loggers = getLoggers(deck.log);
-deck._registerLoggers(loggers);
+const loggers = getLoggers(globalThis.deck.log);
+globalThis.deck._registerLoggers(loggers);
 
 export {loggers};

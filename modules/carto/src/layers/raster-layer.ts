@@ -1,17 +1,22 @@
-import {GL} from '@luma.gl/constants';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   Accessor,
   CompositeLayer,
   CompositeLayerProps,
   Layer,
   LayersList,
-  DefaultProps
+  DefaultProps,
+  PickingInfo
 } from '@deck.gl/core';
 import {ColumnLayer, ColumnLayerProps} from '@deck.gl/layers';
 import {quadbinToOffset} from './quadbin-utils';
 import {Raster} from './schema/carto-raster-tile-loader';
 import vs from './raster-layer-vertex.glsl';
-import {assert, createBinaryProxy} from '../utils';
+import {createBinaryProxy} from '../utils';
+import {RTTModifier} from './post-process-utils';
 
 const defaultProps: DefaultProps<RasterLayerProps> = {
   ...ColumnLayer.defaultProps,
@@ -26,12 +31,15 @@ const defaultProps: DefaultProps<RasterLayerProps> = {
 };
 
 // Modified ColumnLayer with custom vertex shader
-class RasterColumnLayer extends ColumnLayer {
+// Use RTT to avoid inter-tile seams
+class RasterColumnLayer extends RTTModifier(ColumnLayer) {
   static layerName = 'RasterColumnLayer';
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, vs};
+    const data = this.props.data as unknown as {data: Raster; length: number};
+    const BLOCK_WIDTH = data.data.blockSize ?? Math.sqrt(data.length);
+    return {...shaders, defines: {...shaders.defines, BLOCK_WIDTH}, vs};
   }
 
   initializeState() {
@@ -46,16 +54,14 @@ class RasterColumnLayer extends ColumnLayer {
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: [255, 255, 255, 255]
@@ -77,12 +83,26 @@ type _RasterLayerProps = {
   tileIndex: bigint;
 };
 
+type RasterColumnLayerData = {
+  data: Raster;
+  length: number;
+};
+
+function wrappedDataComparator(oldData: RasterColumnLayerData, newData: RasterColumnLayerData) {
+  return oldData.data === newData.data && oldData.length === newData.length;
+}
+
 // Adapter layer around RasterColumnLayer that converts data & accessors into correct format
 export default class RasterLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
   Required<RasterLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'RasterLayer';
   static defaultProps = defaultProps;
+
+  state!: {
+    highlightedObjectIndex: number;
+    highlightColor: number[];
+  };
 
   renderLayers(): Layer | null | LayersList {
     // Rendering props underlying layer
@@ -94,20 +114,17 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       getLineWidth,
       tileIndex,
       updateTriggers
-    } = this.props;
+    } = this.props as typeof this.props & {data: Raster};
     if (!data || !tileIndex) return null;
 
-    const {blockWidth, blockHeight} = data as unknown as Raster;
-    assert(
-      blockWidth === blockHeight,
-      `blockWidth (${blockWidth}) must equal blockHeight (${blockHeight})`
-    );
-
+    const blockSize = data.blockSize ?? 0;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
-    const offset = [xOffset, yOffset, scale / blockWidth];
+    const offset = [xOffset, yOffset];
+    const lineWidthScale = scale / blockSize;
 
     // Filled Column Layer
     const CellLayer = this.getSubLayerClass('column', RasterColumnLayer);
+    const {highlightedObjectIndex, highlightColor} = this.state;
     return new CellLayer(
       this.props,
       this.getSubLayerProps({
@@ -122,9 +139,13 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       {
         data: {
           data, // Pass through data for getSubLayerAccessor()
-          length: blockWidth * blockHeight
+          length: blockSize * blockSize
         },
-        offset
+        dataComparator: wrappedDataComparator,
+        offset,
+        lineWidthScale, // Re-use widthScale prop to pass cell scale,
+        highlightedObjectIndex,
+        highlightColor
       }
     );
   }
@@ -142,5 +163,39 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       // @ts-ignore (TS2349) accessor is always function
       return accessor({properties: proxy}, info);
     };
+  }
+
+  getPickingInfo(params: any) {
+    const info = super.getPickingInfo(params);
+
+    if (info.index !== -1) {
+      info.object = this.getSubLayerAccessor((x: any) => x)(undefined, {
+        data: this.props,
+        index: info.index
+      });
+    }
+
+    return info;
+  }
+
+  _updateAutoHighlight(info: PickingInfo) {
+    const {highlightedObjectIndex} = this.state;
+    let newHighlightedObjectIndex: number = -1;
+
+    if (info.index !== -1) {
+      newHighlightedObjectIndex = info.index;
+    }
+
+    if (highlightedObjectIndex !== newHighlightedObjectIndex) {
+      let {highlightColor} = this.props;
+      if (typeof highlightColor === 'function') {
+        highlightColor = highlightColor(info);
+      }
+
+      this.setState({
+        highlightColor,
+        highlightedObjectIndex: newHighlightedObjectIndex
+      });
+    }
   }
 }

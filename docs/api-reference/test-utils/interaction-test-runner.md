@@ -58,11 +58,11 @@ new InteractionTestRunner(deckProps)
 
 Create a InteractionTestRunner instance. The `deckProps` argument is passed to the [Deck](../core/deck.md) constructor.
 
-### add(testCase: Array|Object)
+### add(testCase: Array|object)
 
 Add one or a list of test cases. Each test case may contain the following fields:
  
-* `name` (String) - name of the test case.
+* `name` (string) - name of the test case.
 * `events` (Array) - a sequence of inputs to dispatch. See [Event](#event) section below.
 * `onBeforeEvents` (Function, optional) - called before the events are dispatched. Receives the following arguments:
   - `deck` - the Deck instance.
@@ -77,7 +77,7 @@ Run all test cases.
 
 Options:
 
-* `timeout` (Number) - time to wait for each test case to resolve (by calling the `done` callback) before aborting, in milliseconds. Default `2000`.
+* `timeout` (number) - time to wait for each test case to resolve (by calling the `done` callback) before aborting, in milliseconds. Default `2000`.
 
 Returns: a `Promise` that resolves when all test cases are done.
 
@@ -98,11 +98,11 @@ An event is a javascript descriptor of emulated user input. The following event 
 Press a key on the keyboard.
 
 - `type: 'keypress'`
-- `key` (String) - see https://github.com/GoogleChrome/puppeteer/blob/master/lib/USKeyboardLayout.js
-- `delay` (Number) - the time between keydown and keyup. Default `0`.
-- `shiftKey` (Boolean) - whether to press the key with the shift key down. Default `false`.
-- `ctrlKey` (Boolean) - whether to press the key with the control key down. Default `false`.
-- `metaKey` (Boolean) - whether to press the key with the meta key down. Default `false`.
+- `key` (string) - see https://github.com/GoogleChrome/puppeteer/blob/master/lib/USKeyboardLayout.js
+- `delay` (number) - the time between keydown and keyup. Default `0`.
+- `shiftKey` (boolean) - whether to press the key with the shift key down. Default `false`.
+- `ctrlKey` (boolean) - whether to press the key with the control key down. Default `false`.
+- `metaKey` (boolean) - whether to press the key with the meta key down. Default `false`.
 
 
 ### click
@@ -110,13 +110,13 @@ Press a key on the keyboard.
 Click the mouse at a given screen coordinate.
 
 - `type: 'click'`
-- `x` (Number) - the screen x of the click.
-- `y` (Number) - the screen y of the click.
-- `button` (String) - `'left'`, `'right'` or `'middle'`.
-- `delay` (Number) - the time between mousedown and mouse up. Default `0`.
-- `shiftKey` (Boolean) - whether to click with the shift key pressed. Default `false`.
-- `ctrlKey` (Boolean) - whether to click with the control key pressed. Default `false`.
-- `metaKey` (Boolean) - whether to click with the meta key pressed. Default `false`.
+- `x` (number) - the screen x of the click.
+- `y` (number) - the screen y of the click.
+- `button` (string) - `'left'`, `'right'` or `'middle'`.
+- `delay` (number) - the time between mousedown and mouse up. Default `0`.
+- `shiftKey` (boolean) - whether to click with the shift key pressed. Default `false`.
+- `ctrlKey` (boolean) - whether to click with the control key pressed. Default `false`.
+- `metaKey` (boolean) - whether to click with the meta key pressed. Default `false`.
 
 
 ### mousemove
@@ -124,9 +124,9 @@ Click the mouse at a given screen coordinate.
 Move the mouse to a given screen coordinate.
 
 - `type: 'mousemove'`
-- `x` (Number) - the screen x to move the pointer to.
-- `y` (Number) - the screen y to move the pointer to.
-- `steps` (Number) - how many intermediate mousemove events to generate, default `1`.
+- `x` (number) - the screen x to move the pointer to.
+- `y` (number) - the screen y to move the pointer to.
+- `steps` (number) - how many intermediate mousemove events to generate, default `1`.
 
 
 ### drag
@@ -134,20 +134,20 @@ Move the mouse to a given screen coordinate.
 Drag the mouse from a given screen coordinate to another.
 
 - `type: 'drag'`
-- `startX` (Number) - the screen x to drag from.
-- `startY` (Number) - the screen y to drag from.
-- `endX` (Number) - the screen x to drag to.
-- `endY` (Number) - the screen y to drag to.
-- `button` (String) - `'left'`, `'right'` or `'middle'`.
-- `steps` (Number) - how many intermediate mousemove events to generate, default `1`.
-- `shiftKey` (Boolean) - whether to click with the shift key pressed. Default `false`.
-- `ctrlKey` (Boolean) - whether to click with the control key pressed. Default `false`.
-- `metaKey` (Boolean) - whether to click with the meta key pressed. Default `false`.
+- `startX` (number) - the screen x to drag from.
+- `startY` (number) - the screen y to drag from.
+- `endX` (number) - the screen x to drag to.
+- `endY` (number) - the screen y to drag to.
+- `button` (string) - `'left'`, `'right'` or `'middle'`.
+- `steps` (number) - how many intermediate mousemove events to generate, default `1`.
+- `shiftKey` (boolean) - whether to click with the shift key pressed. Default `false`.
+- `ctrlKey` (boolean) - whether to click with the control key pressed. Default `false`.
+- `metaKey` (boolean) - whether to click with the meta key pressed. Default `false`.
 
 
 ### wait
 
 Idle for a given period of time before the next event.
 
-- `wait` (Number) - the timeout in milliseconds.
+- `wait` (number) - the timeout in milliseconds.
 

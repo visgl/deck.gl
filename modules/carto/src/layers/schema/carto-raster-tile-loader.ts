@@ -1,4 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {RasterMetadata} from '@carto/api-client';
 
 import {TileReader} from './carto-raster-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -10,12 +15,14 @@ const id = 'cartoRasterTile';
 
 type CartoRasterTileLoaderOptions = LoaderOptions & {
   cartoRasterTile?: {
+    metadata: RasterMetadata | null;
     workerUrl: string;
   };
 };
 
 const DEFAULT_OPTIONS: CartoRasterTileLoaderOptions = {
   cartoRasterTile: {
+    metadata: null,
     workerUrl: getWorkerUrl(id, VERSION)
   }
 };
@@ -36,8 +43,8 @@ const CartoRasterTileLoader: LoaderWithParser = {
 };
 
 export type Raster = {
-  blockWidth: number;
-  blockHeight: number;
+  /** Raster tiles are square, with 'blockSize' width and height in pixels. */
+  blockSize: number;
   cells: {
     numericProps: NumericProps;
     properties: Properties[];
@@ -48,15 +55,19 @@ function parseCartoRasterTile(
   arrayBuffer: ArrayBuffer,
   options?: CartoRasterTileLoaderOptions
 ): Raster | null {
-  if (!arrayBuffer) return null;
-  const tile = parsePbf(arrayBuffer, TileReader);
-  const {bands, blockHeight, blockWidth} = tile;
+  const metadata = options?.cartoRasterTile?.metadata;
+  if (!arrayBuffer || !metadata) return null;
+  // @ts-expect-error Upstream type needs to be updated
+  TileReader.compression = metadata.compression;
+  const out = parsePbf(arrayBuffer, TileReader);
+  const {bands, blockSize} = out;
+
   const numericProps = {};
   for (let i = 0; i < bands.length; i++) {
     const {name, data} = bands[i];
     numericProps[name] = data;
   }
-  return {blockWidth, blockHeight, cells: {numericProps, properties: []}};
+  return {blockSize, cells: {numericProps, properties: []}};
 }
 
 export default CartoRasterTileLoader;

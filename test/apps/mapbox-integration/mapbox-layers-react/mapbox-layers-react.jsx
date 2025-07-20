@@ -1,10 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document, process */
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
-import {Map} from 'react-map-gl';
+import {Map} from 'react-map-gl/mapbox';
 
-import {MapboxLayer} from '@deck.gl/mapbox';
+import MapboxLayer from '../../../../modules/mapbox/src/mapbox-layer';
 
 import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer, deckTextLayer} from '../layers';
 import {MapView, OrthographicView} from '@deck.gl/core';
@@ -83,7 +87,7 @@ function App() {
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       onWebGLInitialized={setGLContext}
-      glOptions={{stencil: true}}
+      deviceProps={{type: 'webgl', webgl: {stencil: true}}}
       layerFilter={layerFilter}
     >
       {glContext && (

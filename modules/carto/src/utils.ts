@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {BinaryFeatureCollection, BinaryPointFeature} from '@loaders.gl/schema';
 import {log} from '@deck.gl/core';
 import type {Properties, NumericProps} from './layers/schema/spatialjson-utils';
 
@@ -22,6 +27,14 @@ export function createBinaryProxy(
 
     has(target, property) {
       return property in numericProps || property in target;
+    },
+
+    ownKeys(target) {
+      return [...Object.keys(numericProps), ...Reflect.ownKeys(target)];
+    },
+
+    getOwnPropertyDescriptor(target, prop) {
+      return {enumerable: true, configurable: true};
     }
   });
 }
@@ -51,7 +64,89 @@ export function scaleIdentity() {
     return unknown;
   };
 
-  scale.copy = () => scaleIdentity().unknown(unknown);
+  scale.copy = () => {
+    const scaleCopy = scaleIdentity();
+    scaleCopy.unknown(unknown);
+    return scaleCopy;
+  };
 
   return scale;
+}
+
+export const isObject: (x: unknown) => boolean = x => x !== null && typeof x === 'object';
+
+export const isPureObject: (x: any) => boolean = x =>
+  isObject(x) && x.constructor === {}.constructor;
+
+// Helpers for binary data
+const EMPTY_UINT16ARRAY = new Uint16Array();
+const EMPTY_BINARY_PROPS: Omit<BinaryPointFeature, 'type'> = {
+  positions: {value: new Float32Array(), size: 2},
+  properties: [],
+  numericProps: {},
+  featureIds: {value: EMPTY_UINT16ARRAY, size: 1},
+  globalFeatureIds: {value: EMPTY_UINT16ARRAY, size: 1}
+};
+
+export function createEmptyBinary(): Required<BinaryFeatureCollection> {
+  return {
+    shape: 'binary-feature-collection',
+    points: {
+      type: 'Point',
+      ...EMPTY_BINARY_PROPS
+    },
+    lines: {
+      type: 'LineString',
+      pathIndices: {value: EMPTY_UINT16ARRAY, size: 1},
+      ...EMPTY_BINARY_PROPS
+    },
+    polygons: {
+      type: 'Polygon',
+      polygonIndices: {value: EMPTY_UINT16ARRAY, size: 1},
+      primitivePolygonIndices: {value: EMPTY_UINT16ARRAY, size: 1},
+      ...EMPTY_BINARY_PROPS
+    }
+  };
+}
+
+export function createBinaryPointFeature(
+  positions: number[] | Float32Array | Float64Array,
+  featureIds: number[] | Uint16Array | Uint32Array,
+  globalFeatureIds: number[] | Uint16Array | Uint32Array,
+  numericProps: NumericProps,
+  properties: Properties,
+  size: 2 | 3 = 2
+): BinaryPointFeature {
+  return {
+    type: 'Point',
+    positions: {value: new Float32Array(positions), size},
+    featureIds: {value: new Uint16Array(featureIds), size: 1},
+    globalFeatureIds: {value: new Uint32Array(globalFeatureIds), size: 1},
+    numericProps,
+    properties
+  };
+}
+
+export function initializeNumericProps(
+  numPoints: number,
+  sourceProps?: NumericProps
+): NumericProps {
+  const numericProps: NumericProps = {};
+  if (sourceProps) {
+    Object.keys(sourceProps).forEach(prop => {
+      numericProps[prop] = {value: new Float32Array(numPoints), size: 1};
+    });
+  }
+  return numericProps;
+}
+
+export function copyNumericProps(
+  sourceProps: NumericProps,
+  targetProps: NumericProps,
+  sourceIndex: number,
+  targetIndex: number
+): void {
+  Object.keys(sourceProps).forEach(prop => {
+    targetProps[prop].value[targetIndex] = sourceProps[prop].value[sourceIndex];
+  });
 }

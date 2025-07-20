@@ -1,7 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -33,8 +37,8 @@ test('FillStyleExtension#PolygonLayer', t => {
         const fillLayer = subLayers.find(l => l.id.includes('fill'));
 
         t.ok(fillLayer.state.emptyTexture, 'should be enabled in composite layer');
-        let uniforms = fillLayer.getModels()[0].getUniforms();
-        t.ok(uniforms.fill_patternMask, 'has fill_patternMask uniform');
+        let uniforms = getLayerUniforms(fillLayer);
+        t.ok(uniforms.patternMask, 'has patternMask uniform');
         t.deepEqual(
           fillLayer.getAttributeManager().getAttributes().fillPatternScales.value,
           [2],
@@ -46,9 +50,9 @@ test('FillStyleExtension#PolygonLayer', t => {
           'fillPatternFrames attribute is populated'
         );
 
-        uniforms = strokeLayer.getModels()[0].getUniforms();
+        uniforms = getLayerUniforms(strokeLayer);
         t.notOk(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer');
-        t.notOk('fill_patternMask' in uniforms, 'should not be enabled in PathLayer');
+        t.notOk('patternMask' in uniforms, 'should not be enabled in PathLayer');
       }
     },
     {

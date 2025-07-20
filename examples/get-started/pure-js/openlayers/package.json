@@ -9,8 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.8.0",
-    "@deck.gl/layers": "^8.8.0",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
     "ol": "^7.1.0"
   },
   "devDependencies": {

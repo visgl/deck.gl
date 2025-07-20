@@ -1,8 +1,9 @@
-const {getESLintConfig} = require('ocular-dev-tools/configuration');
+const {getESLintConfig} = require('@vis.gl/dev-tools/configuration');
 
 module.exports = getESLintConfig({
   react: '18.0.0',
   overrides: {
+    parser: '',
     parserOptions: {
       project: ['./tsconfig.json'],
       ecmaVersion: 2020
@@ -24,9 +25,8 @@ module.exports = getESLintConfig({
       camelcase: 0,
       indent: 0,
       'import/no-unresolved': 0,
-      'import/no-extraneous-dependencies': 0, // ['warn'],
       'no-console': 1,
-      'no-continue': ['warn'],
+      'no-continue': 0,
       'callback-return': 0,
       'max-depth': ['warn', 4],
       complexity: ['warn'],
@@ -41,7 +41,7 @@ module.exports = getESLintConfig({
 
     overrides: [
       {
-        files: ['**/*.ts', '**/*.tsx', '**/*.d.ts'],
+        files: ['**/*.js', '**/*.ts', '**/*.tsx', '**/*.d.ts'],
         rules: {
           indent: 0,
           // For parquet module
@@ -59,21 +59,26 @@ module.exports = getESLintConfig({
           ],
           // We still have some issues with import resolution
           'import/named': 0,
+          'import/no-duplicates': 0,
           // Warn instead of error
-          // 'max-params': ['warn'],
+          'max-params': ['warn'],
           // 'no-undef': ['warn'],
           // camelcase: ['warn'],
           // '@typescript-eslint/no-floating-promises': ['warn'],
           // '@typescript-eslint/await-thenable': ['warn'],
           // '@typescript-eslint/no-misused-promises': ['warn'],
-          '@typescript-eslint/no-empty-function': ['warn', {allow: ['arrowFunctions']}],
+          '@typescript-eslint/no-shadow': ['warn'],
+          '@typescript-eslint/no-empty-function': 0,
           // We use function hoisting
           '@typescript-eslint/no-use-before-define': 0,
           // We always want explicit typing, e.g `field: string = ''`
           '@typescript-eslint/no-inferrable-types': 0,
           '@typescript-eslint/restrict-template-expressions': 0,
           '@typescript-eslint/explicit-module-boundary-types': 0,
+          '@typescript-eslint/no-redundant-type-constituents': 0,
           '@typescript-eslint/require-await': 0,
+          '@typescript-eslint/no-explicit-any': 0,
+          '@typescript-eslint/no-unsafe-argument': 0,
           '@typescript-eslint/no-unsafe-return': 0,
           '@typescript-eslint/no-unsafe-call': 0,
           '@typescript-eslint/no-empty-interface': 0,

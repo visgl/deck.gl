@@ -1,25 +1,8 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import {readPixelsToArray} from '@luma.gl/webgl';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
@@ -101,11 +84,10 @@ export default class DeckPicker {
 
   finalize() {
     if (this.pickingFBO) {
-      this.pickingFBO.delete();
+      this.pickingFBO.destroy();
     }
     if (this.depthFBO) {
-      this.depthFBO.colorAttachments[0].delete();
-      this.depthFBO.delete();
+      this.depthFBO.destroy();
     }
   }
 
@@ -146,26 +128,24 @@ export default class DeckPicker {
   _resizeBuffer() {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
-      this.pickingFBO = this.device.createFramebuffer({colorAttachments: ['rgba8unorm']});
+      this.pickingFBO = this.device.createFramebuffer({
+        colorAttachments: ['rgba8unorm'],
+        depthStencilAttachment: 'depth16unorm'
+      });
 
       if (this.device.isTextureFormatRenderable('rgba32float')) {
         const depthFBO = this.device.createFramebuffer({
-          colorAttachments: [
-            this.device.createTexture({
-              format: this.device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm'
-              // type: GL.FLOAT
-            })
-          ]
+          colorAttachments: ['rgba32float'],
+          depthStencilAttachment: 'depth16unorm'
         });
         this.depthFBO = depthFBO;
       }
     }
 
     // Resize it to current canvas size (this is a noop if size hasn't changed)
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-    this.pickingFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
-    this.depthFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
+    const {canvas} = this.device.getDefaultCanvasContext();
+    this.pickingFBO?.resize({width: canvas.width, height: canvas.height});
+    this.depthFBO?.resize({width: canvas.width, height: canvas.height});
   }
 
   /** Preliminary filtering of the layers list. Skid picking pass if no layer is pickable. */
@@ -202,7 +182,7 @@ export default class DeckPicker {
 
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return {
         result: [],
         emptyInfo: getEmptyPickingInfo({viewports, x, y, pixelRatio})
@@ -340,6 +320,7 @@ export default class DeckPicker {
   }
 
   /** Pick all objects within the given bounding box */
+  // eslint-disable-next-line max-statements
   _pickVisibleObjects({
     layers,
     views,
@@ -355,7 +336,7 @@ export default class DeckPicker {
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return [];
     }
 
@@ -513,12 +494,13 @@ export default class DeckPicker {
       effects,
       pass,
       pickZ,
-      preRenderStats: {}
+      preRenderStats: {},
+      isPicking: true
     };
 
     for (const effect of effects) {
       if (effect.useInPicking) {
-        opts.preRenderStats[effect.id] = effect.preRender(this.device, opts);
+        opts.preRenderStats[effect.id] = effect.preRender(opts);
       }
     }
 
@@ -528,7 +510,7 @@ export default class DeckPicker {
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
     const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    readPixelsToArray(pickingFBO as Framebuffer, {
+    this.device.readPixelsToArrayWebGL(pickingFBO as Framebuffer, {
       sourceX: x,
       sourceY: y,
       sourceWidth: width,

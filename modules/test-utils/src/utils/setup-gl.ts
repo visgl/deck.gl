@@ -1,19 +1,12 @@
-import {createTestContext, webgl1Device, webgl2Device} from '@luma.gl/test-utils';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-/** Test device */
-export const device = webgl2Device || webgl1Device;
+import {CanvasContextProps} from '@luma.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
+import {webglDevice, NullDevice} from '@luma.gl/test-utils';
 
-/** Test context */
-export const gl = createTestContext({
-  width: 1,
-  height: 1,
-  debug: true
-  // throwOnFailure: false,
-  // throwOnError: false
-});
-
-//   // TODO - Seems to be an issue in luma.gl
-//   (createContext && createContext(100, 100, {}));
-// // console.log('Context', globalThis.glContext);
+export const device = webglDevice || new NullDevice({});
+export const gl = webglDevice?.gl || 1;
 
 globalThis.glContext = globalThis.glContext || gl;

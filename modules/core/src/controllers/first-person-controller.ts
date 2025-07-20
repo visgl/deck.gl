@@ -1,11 +1,17 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Controller from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
+import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
 import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
 
 const MOVEMENT_SPEED = 20;
+const PAN_SPEED = 500;
 
 type FirstPersonStateProps = {
   width: number;
@@ -28,6 +34,8 @@ type FirstPersonStateInternal = {
   startBearing?: number;
   startPitch?: number;
   startZoomPosition?: number[];
+  startPanPos?: [number, number];
+  startPanPosition?: number[];
 };
 
 class FirstPersonState extends ViewState<
@@ -35,7 +43,14 @@ class FirstPersonState extends ViewState<
   FirstPersonStateProps,
   FirstPersonStateInternal
 > {
-  constructor(options: FirstPersonStateProps & FirstPersonStateInternal) {
+  makeViewport: (props: Record<string, any>) => Viewport;
+
+  constructor(
+    options: FirstPersonStateProps &
+      FirstPersonStateInternal & {
+        makeViewport: (props: Record<string, any>) => Viewport;
+      }
+  ) {
     const {
       /* Viewport arguments */
       width, // Width of viewport
@@ -58,7 +73,9 @@ class FirstPersonState extends ViewState<
       startRotatePos,
       startBearing,
       startPitch,
-      startZoomPosition
+      startZoomPosition,
+      startPanPos,
+      startPanPosition
     } = options;
 
     super(
@@ -77,9 +94,13 @@ class FirstPersonState extends ViewState<
         startRotatePos,
         startBearing,
         startPitch,
-        startZoomPosition
+        startZoomPosition,
+        startPanPos,
+        startPanPosition
       }
     );
+
+    this.makeViewport = options.makeViewport;
   }
 
   /* Public API */
@@ -88,16 +109,37 @@ class FirstPersonState extends ViewState<
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  panStart(): FirstPersonState {
-    return this;
+  panStart({pos}): FirstPersonState {
+    const {position} = this.getViewportProps();
+    return this._getUpdatedState({
+      startPanPos: pos,
+      startPanPosition: position
+    });
   }
 
   /**
    * Pan
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  pan(): FirstPersonState {
-    return this;
+  pan({pos}): FirstPersonState {
+    if (!pos) {
+      return this;
+    }
+    const {startPanPos = [0, 0], startPanPosition = [0, 0]} = this.getState();
+    const {width, height, bearing, pitch} = this.getViewportProps();
+    const deltaScaleX = (PAN_SPEED * (pos[0] - startPanPos[0])) / width;
+    const deltaScaleY = (PAN_SPEED * (pos[1] - startPanPos[1])) / height;
+
+    const up = new SphericalCoordinates({bearing, pitch});
+    const forward = new SphericalCoordinates({bearing, pitch: -90});
+    const yDirection = up.toVector3().normalize();
+    const xDirection = forward.toVector3().cross(yDirection).normalize();
+
+    return this._getUpdatedState({
+      position: new Vector3(startPanPosition)
+        .add(xDirection.scale(deltaScaleX))
+        .add(yDirection.scale(deltaScaleY))
+    });
   }
 
   /**
@@ -105,7 +147,10 @@ class FirstPersonState extends ViewState<
    * Must call if `panStart()` was called
    */
   panEnd(): FirstPersonState {
-    return this;
+    return this._getUpdatedState({
+      startPanPos: null,
+      startPanPosition: null
+    });
   }
 
   /**
@@ -188,14 +233,20 @@ class FirstPersonState extends ViewState<
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({scale}: {scale: number}): FirstPersonState {
-    let {startZoomPosition} = this.getState();
-    if (!startZoomPosition) {
-      startZoomPosition = this.getViewportProps().position;
-    }
+  zoom({pos, scale}: {pos: [number, number]; scale: number}): FirstPersonState {
+    const viewportProps = this.getViewportProps();
+    const startZoomPosition = this.getState().startZoomPosition || viewportProps.position;
+    const viewport = this.makeViewport(viewportProps);
+    const {projectionMatrix, width} = viewport;
+    const fovxRadians = 2.0 * Math.atan(1.0 / projectionMatrix[0]);
+    const angle = fovxRadians * (pos[0] / width - 0.5);
 
-    const direction = this.getDirection();
-    return this._move(direction, Math.log2(scale) * MOVEMENT_SPEED, startZoomPosition);
+    const direction = this.getDirection(true);
+    return this._move(
+      direction.rotateZ({radians: -angle}),
+      Math.log2(scale) * MOVEMENT_SPEED,
+      startZoomPosition
+    );
   }
 
   /**
@@ -254,12 +305,12 @@ class FirstPersonState extends ViewState<
     });
   }
 
-  zoomIn(speed: number = 2): FirstPersonState {
-    return this.zoom({scale: speed});
+  zoomIn(speed: number = MOVEMENT_SPEED): FirstPersonState {
+    return this._move(new Vector3(0, 0, 1), speed);
   }
 
-  zoomOut(speed: number = 2): FirstPersonState {
-    return this.zoom({scale: 1 / speed});
+  zoomOut(speed: number = MOVEMENT_SPEED): FirstPersonState {
+    return this._move(new Vector3(0, 0, -1), speed);
   }
 
   // shortest path between two view states
@@ -304,7 +355,12 @@ class FirstPersonState extends ViewState<
 
   _getUpdatedState(newProps: Record<string, any>): FirstPersonState {
     // Update _viewportProps
-    return new FirstPersonState({...this.getViewportProps(), ...this.getState(), ...newProps});
+    return new FirstPersonState({
+      makeViewport: this.makeViewport,
+      ...this.getViewportProps(),
+      ...this.getState(),
+      ...newProps
+    });
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state

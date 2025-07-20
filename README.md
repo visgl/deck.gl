@@ -15,12 +15,12 @@
 
 <h1 align="center">deck.gl | <a href="https://deck.gl">Website</a></h1>
 
-<h5 align="center"> WebGL2-powered, highly performant large-scale data visualization</h5>
+<h5 align="center"> GPU-powered, highly performant large-scale data visualization</h5>
 
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://visgl.github.io/deck.gl)
 
 
-deck.gl is designed to simplify high-performance, WebGL-based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
+deck.gl is designed to simplify high-performance, WebGL2/WebGPU based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
 
 deck.gl maps **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: e.g. map, first-person, orthographic.
 
@@ -66,8 +66,8 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](https://pydeck.gl/installation.html)
-- [Examples](https://pydeck.gl/)
+- [Get started](https://deckgl.readthedocs.io/en/latest/installation.html)
+- [Examples](https://deckgl.readthedocs.io/en/latest/layer.html)
 
 ### Third-Party Goodies
 
@@ -80,13 +80,13 @@ pip install pydeck
 
 ## Learning Resources
 
-* [API documentation](https://deck.gl/#/documentation) for the latest release
-* [Website demos](https://deck.gl/#/examples) with links to source
+* [API documentation](https://deck.gl/docs) for the latest release
+* [Website demos](https://deck.gl/examples) with links to source
 * [Interactive playground](https://deck.gl/playground)
 * [deck.gl Codepen demos](https://codepen.io/vis-gl/)
 * [deck.gl Observable demos](https://beta.observablehq.com/@pessimistress)
 * [vis.gl Medium blog](https://medium.com/vis-gl)
-* [deck.gl Slack workspace](https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg)
+* [deck.gl Slack workspace](https://slack-invite.openjsf.org/)
 
 ## Contributing
 

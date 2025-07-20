@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `\
 #version 300 es
 
@@ -13,19 +17,12 @@ in vec3 instanceModelMatrixCol1;
 in vec3 instanceModelMatrixCol2;
 in vec3 instanceTranslation;
 
-// Scale the model
-uniform float sizeScale;
-uniform float sizeMinPixels;
-uniform float sizeMaxPixels;
-uniform mat4 sceneModelMatrix;
-uniform bool composeModelMatrix;
-
 // Primitive attributes
 in vec3 positions;
 #ifdef HAS_UV
   in vec2 texCoords;
 #endif
-#ifdef MODULE_PBR
+#ifdef LIGHTING_PBR
   #ifdef HAS_NORMALS
     in vec3 normals;
   #endif
@@ -34,8 +31,8 @@ in vec3 positions;
 // Varying
 out vec4 vColor;
 
-// MODULE_PBR contains all the varying definitions needed
-#ifndef MODULE_PBR
+// pbrMaterial contains all the varying definitions needed
+#ifndef LIGHTING_PBR
   #ifdef HAS_UV
     out vec2 vTEXCOORD_0;
   #endif
@@ -43,7 +40,7 @@ out vec4 vColor;
 
 // Main
 void main(void) {
-  #if defined(HAS_UV) && !defined(MODULE_PBR)
+  #if defined(HAS_UV) && !defined(LIGHTING_PBR)
     vTEXCOORD_0 = texCoords;
     geometry.uv = texCoords;
   #endif
@@ -54,17 +51,17 @@ void main(void) {
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
 
   vec3 normal = vec3(0.0, 0.0, 1.0);
-  #ifdef MODULE_PBR
+  #ifdef LIGHTING_PBR
     #ifdef HAS_NORMALS
-      normal = instanceModelMatrix * (sceneModelMatrix * vec4(normals, 0.0)).xyz;
+      normal = instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(normals, 0.0)).xyz;
     #endif
   #endif
 
-  float originalSize = project_size_to_pixel(sizeScale);
-  float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
+  float originalSize = project_size_to_pixel(scenegraph.sizeScale);
+  float clampedSize = clamp(originalSize, scenegraph.sizeMinPixels, scenegraph.sizeMaxPixels);
 
-  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * vec4(positions, 1.0)).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
-  if(composeModelMatrix) {
+  vec3 pos = (instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(positions, 1.0)).xyz) * scenegraph.sizeScale * (clampedSize / originalSize) + instanceTranslation;
+  if(scenegraph.composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
     // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
@@ -81,7 +78,7 @@ void main(void) {
   }
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  #ifdef MODULE_PBR
+  #ifdef LIGHTING_PBR
     // set PBR data
     pbr_vPosition = geometry.position.xyz;
     #ifdef HAS_NORMALS

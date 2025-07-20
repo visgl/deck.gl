@@ -1,16 +1,21 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import {useMemo} from 'react';
-
 import {createRoot} from 'react-dom/client';
 import {OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {Matrix4} from '@math.gl/core';
-import type {MeshAttributes} from '@loaders.gl/schema';
-
 import {scaleLinear} from 'd3-scale';
+import {minIndex, maxIndex} from 'd3-array';
 import {sortData} from './sort-data';
+
+import type {MeshAttributes} from '@loaders.gl/schema';
+import type {Color, Position, OrthographicViewState, PickingInfo} from '@deck.gl/core';
 
 // Data source
 const DATA_URL =
@@ -27,6 +32,22 @@ const borderMesh: MeshAttributes = {
     size: 3
   }
 };
+
+export type Station = {
+  id: string;
+  country: string;
+  name: string;
+  longitude: number;
+  latitude: number;
+  altitude: number;
+  meanTemp: [year: number, temperature: number][];
+};
+
+export type StationGroup = {
+  name: string;
+  stations: Station[];
+};
+
 const xScale = scaleLinear()
   .domain([1880, 2020]) // year
   .range([0, CHART_WIDTH]);
@@ -35,7 +56,7 @@ const yScale = scaleLinear()
   .domain([-60, 35]) // temperature
   .range([CHART_HEIGHT, 0]);
 const yTicks = [-60, -30, 0, 30];
-export const colorScale = scaleLinear<[number, number, number]>()
+export const colorScale = scaleLinear<Color>()
   .domain([-60, -10, 30]) // temperature
   .range([
     [80, 160, 225],
@@ -43,62 +64,71 @@ export const colorScale = scaleLinear<[number, number, number]>()
     [255, 80, 80]
   ]);
 
-function getOffset(chartIndex: number) {
-  const y = Math.floor(chartIndex / ROW_SIZE);
-  const x = chartIndex % ROW_SIZE;
+function getPlotOffset(plotIndex: number): [number, number, number] {
+  const y = Math.floor(plotIndex / ROW_SIZE);
+  const x = plotIndex % ROW_SIZE;
   return [x * (CHART_WIDTH + SPACING), y * (CHART_HEIGHT + SPACING), 0];
 }
 
-function getTooltip({object}) {
-  return (
-    object &&
-    `\
-  ${object.name}
-  ${object.country}
-  Latitude: ${Math.abs(object.latitude)}°${object.latitude >= 0 ? 'N' : 'S'},
-  Altitude: ${object.altitude === null ? 'N/A' : object.altitude},
-  Lowest: ${object.min[1]}°C in ${object.min[0]}
-  Highest: ${object.max[1]}°C in ${object.max[0]}
-  `
-  );
+function getTooltip({object}: PickingInfo<Station>) {
+  if (!object) return null;
+
+  const {meanTemp, name, country, latitude, altitude} = object;
+  const minYear = meanTemp[minIndex(meanTemp, d => d[1])];
+  const maxYear = meanTemp[maxIndex(meanTemp, d => d[1])];
+
+  return `\
+  ${name}
+  ${country}
+  Latitude: ${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}
+  Altitude: ${altitude === null ? 'N/A' : altitude}
+  Lowest: ${minYear[1]}°C in ${minYear[0]}
+  Highest: ${maxYear[1]}°C in ${maxYear[0]}
+  `;
 }
 
-export default function App({data = null, groupBy = 'Country'}) {
-  const dataSlices = useMemo(() => sortData(data, groupBy), [data, groupBy]);
+export default function App({
+  data,
+  groupBy = 'Country'
+}: {
+  data?: Station[];
+  groupBy?: 'Country' | 'Latitude';
+}) {
+  const plots: StationGroup[] = useMemo(() => sortData(data, groupBy), [data, groupBy]);
 
-  const initialViewState = useMemo(() => {
-    const centerX = (Math.min(dataSlices.length, ROW_SIZE) / 2) * (CHART_WIDTH + SPACING);
-    const centerY = (Math.ceil(dataSlices.length / ROW_SIZE) / 2) * (CHART_HEIGHT + SPACING);
+  const initialViewState: OrthographicViewState = useMemo(() => {
+    const centerX = (Math.min(plots.length, ROW_SIZE) / 2) * (CHART_WIDTH + SPACING);
+    const centerY = (Math.ceil(plots.length / ROW_SIZE) / 2) * (CHART_HEIGHT + SPACING);
     return {
       target: [centerX, centerY, 0],
       zoom: -2,
       minZoom: -2
     };
-  }, [dataSlices.length]);
+  }, [plots.length]);
 
   const yLabels = useMemo(
     () =>
-      dataSlices.flatMap((_, i) => {
-        return yTicks.map(y => ({index: i, y}));
+      plots.flatMap((_, i) => {
+        return yTicks.map(y => ({plotIndex: i, y}));
       }),
-    [dataSlices.length]
+    [plots.length]
   );
   const xLabels = useMemo(
     () =>
-      dataSlices.flatMap((_, i) => {
-        return xTicks.map(x => ({index: i, x}));
+      plots.flatMap((_, i) => {
+        return xTicks.map(x => ({plotIndex: i, x}));
       }),
-    [dataSlices.length]
+    [plots.length]
   );
 
   const layers = [
-    dataSlices.map(
-      (slice, i) =>
-        new PathLayer({
+    plots.map(
+      (slice: StationGroup, i: number) =>
+        new PathLayer<Station>({
           id: slice.name,
           data: slice.stations,
-          modelMatrix: new Matrix4().translate(getOffset(i)),
-          getPath: d => d.meanTemp.map(p => [xScale(p[0]), yScale(p[1])]),
+          modelMatrix: new Matrix4().translate(getPlotOffset(i)),
+          getPath: d => d.meanTemp.map(p => [xScale(p[0]), yScale(p[1])] as Position),
           getColor: d => d.meanTemp.map(p => colorScale(p[1])),
           getWidth: 1,
           widthMinPixels: 1,
@@ -109,20 +139,20 @@ export default function App({data = null, groupBy = 'Country'}) {
           highlightColor: [255, 200, 0, 255]
         })
     ),
-    new SimpleMeshLayer({
+    new SimpleMeshLayer<StationGroup>({
       id: 'border',
-      data: dataSlices,
+      data: plots,
       mesh: borderMesh,
-      getPosition: (d, {index}) => getOffset(index),
+      getPosition: (d, {index}) => getPlotOffset(index),
       getScale: [CHART_WIDTH, CHART_HEIGHT, 1],
       getColor: [255, 255, 255],
       wireframe: true
     }),
-    new TextLayer({
+    new TextLayer<{plotIndex: number; y: number}>({
       id: 'y-labels',
       data: yLabels,
       getPosition: d => {
-        const offset = getOffset(d.index);
+        const offset = getPlotOffset(d.plotIndex);
         return [-4 + offset[0], yScale(d.y) + offset[1]];
       },
       getText: d => String(d.y),
@@ -132,11 +162,11 @@ export default function App({data = null, groupBy = 'Country'}) {
       sizeMaxPixels: 28,
       getTextAnchor: 'end'
     }),
-    new TextLayer({
+    new TextLayer<{plotIndex: number; x: number}>({
       id: 'x-labels',
       data: xLabels,
       getPosition: d => {
-        const offset = getOffset(d.index);
+        const offset = getPlotOffset(d.plotIndex);
         return [xScale(d.x) + offset[0], CHART_HEIGHT + offset[1] + 4];
       },
       getText: d => String(d.x),
@@ -146,10 +176,10 @@ export default function App({data = null, groupBy = 'Country'}) {
       sizeMaxPixels: 28,
       getAlignmentBaseline: 'top'
     }),
-    new TextLayer({
+    new TextLayer<StationGroup>({
       id: 'title',
-      data: dataSlices,
-      getPosition: (d, {index}) => getOffset(index),
+      data: plots,
+      getPosition: (d, {index}) => getPlotOffset(index),
       getText: d => d.name,
       getSize: 16,
       sizeUnits: 'meters',
@@ -173,14 +203,12 @@ export default function App({data = null, groupBy = 'Country'}) {
   );
 }
 
-export function renderToDOM(container) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
   /* global fetch */
-  fetch(DATA_URL)
-    .then(resp => resp.json())
-    .then(data => {
-      root.render(<App data={data} />);
-    });
+  const resp = await fetch(DATA_URL);
+  const data = await resp.json();
+  root.render(<App data={data} />);
 }

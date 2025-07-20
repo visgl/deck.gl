@@ -12,7 +12,6 @@ good technique to add it.
 ```js
 // Example to add per-segment color to PathLayer
 import {PathLayer} from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
 
 // Allow accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
@@ -22,7 +21,7 @@ export default class MultiColorPathLayer extends PathLayer {
     this.getAttributeManager().addInstanced({
       instanceColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: "unorm8",
         normalized: true,
         update: this.calculateColors
       }
@@ -225,7 +224,7 @@ void main(void) {
   /* replaced uniform 'radiusPixels' with 'instanceRadiusPixels' */
   gl_Position.xy += project_pixel_size_to_clipspace(positions.xy * instanceRadiusPixels);
 
-  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
 
   vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
 

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global setTimeout */
 import {Device} from '@luma.gl/core';
 import Resource from './resource';
@@ -7,7 +11,7 @@ export type ResourceManagerContext = {
   device: Device;
   resourceManager: ResourceManager;
   /** @deprecated */
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
 };
 
 type Consumer = Record<string, ResourceSubscriber & {resourceId: string}>;

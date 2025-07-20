@@ -2,43 +2,19 @@
 // Disabling lint temporarily to facilitate copying code in and out of this repo
 /* eslint-disable */
 
-// Copyright (c) 2015 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import {
-  Layer,
-  project32,
-  phongLighting,
-  picking,
-  DefaultProps,
-  log,
-  LayerContext,
-  Material
-} from '@deck.gl/core';
-import {Texture} from '@luma.gl/core';
+import {Layer, project32, picking, DefaultProps, log, LayerContext, Material} from '@deck.gl/core';
+import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
-import {GL} from '@luma.gl/constants';
+import {phongMaterial} from '@luma.gl/shadertools';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
+import {simpleMeshUniforms, SimpleMeshProps} from './simple-mesh-layer-uniforms';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
 
@@ -119,7 +95,7 @@ type _SimpleMeshLayerProps<DataT> = {
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | TextureSource | Promise<TextureSource>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
-  textureParameters?: Record<number, number> | null;
+  textureParameters?: SamplerProps | null;
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -207,7 +183,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   // 4x4 matrix
   getTransformMatrix: {type: 'accessor', value: []},
 
-  textureParameters: {type: 'object', ignore: true}
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** Render a number of instances of an arbitrary 3D geometry. */
@@ -226,20 +202,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const transpileToGLSL100 = this.context.device.info.type !== 'webgl2';
-
-    const defines: any = {};
-
-    if (this.context.device.features.has('glsl-derivatives')) {
-      defines.DERIVATIVES_AVAILABLE = 1;
-    }
-
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking],
-      transpileToGLSL100,
-      defines
+      modules: [project32, phongMaterial, picking, simpleMeshUniforms]
     });
   }
 
@@ -277,16 +243,15 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     attributeManager!.addInstanced({
       instancePositions: {
         transition: true,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         size: 3,
         accessor: 'getPosition'
       },
       instanceColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         transition: true,
         size: this.props.colorFormat.length,
-        normalized: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -347,13 +312,17 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {viewport, renderPass} = this.context;
     const {sizeScale, coordinateSystem, _instanced} = this.props;
 
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
       composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
       flatShading: !this.state.hasNormals
-    });
+    };
+    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     model.draw(renderPass);
+  }
+
+  get isLoaded(): boolean {
+    return Boolean(this.state?.model && super.isLoaded);
   }
 
   protected getModel(mesh: Mesh): Model {
@@ -367,13 +336,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;
-    model.setBindings({
-      sampler: (texture as Texture) || emptyTexture
-    });
-    model.setUniforms({
+    const simpleMeshProps: SimpleMeshProps = {
+      sampler: (texture as Texture) || emptyTexture,
       hasTexture: Boolean(texture)
-    });
-
+    };
+    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     return model;
   }
 
@@ -383,12 +350,11 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
     if (model) {
-      model.setBindings({
-        sampler: texture || emptyTexture
-      });
-      model.setUniforms({
+      const simpleMeshProps: SimpleMeshProps = {
+        sampler: texture || emptyTexture,
         hasTexture: Boolean(texture)
-      });
+      };
+      model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
     }
   }
 }

@@ -5,7 +5,7 @@ The `project64` shader module is an extension of the [project](./project.md) sha
 
 ## getUniforms
 
-The uniforms needed by `project64` are extracted from the `project` module uniforms `project_uViewProjectionMatrix` and `project_uScale`.
+The uniforms needed by `project64` are extracted from the `project` module uniforms `project.viewProjectionMatrix` and `project.scale`.
 
 
 ## GLSL Uniforms

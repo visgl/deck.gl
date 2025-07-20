@@ -1,17 +1,23 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {registerLoaders} from '@loaders.gl/core';
-import {DefaultProps} from '@deck.gl/core';
-import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
+import {DefaultProps, LayerProps} from '@deck.gl/core';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
-registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
+registerLoaders([CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
 import {TileLayer, _Tile2DHeader as Tile2DHeader, TileLayerProps} from '@deck.gl/geo-layers';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {};
+const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {
+  tileSize: DEFAULT_TILE_SIZE
+};
 
 /** All properties supported by SpatialIndexTileLayer. */
 export type SpatialIndexTileLayerProps<DataT = unknown> = _SpatialIndexTileLayerProps &
@@ -28,14 +34,14 @@ export default class SpatialIndexTileLayer<
   static defaultProps = defaultProps;
 
   state!: TileLayer<DataT>['state'] & {
-    hoveredFeatureId: number | null;
+    hoveredFeatureId: BigInt | number | null;
     highlightColor: number[];
   };
 
   protected _updateAutoHighlight(info: PickingInfo): void {
     const {hoveredFeatureId} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
+    let newHoveredFeatureId: BigInt | number | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = hoveredFeature.id;
@@ -54,7 +60,7 @@ export default class SpatialIndexTileLayer<
     }
   }
 
-  getSubLayerPropsByTile(tile: Tile2DHeader) {
+  getSubLayerPropsByTile(tile: Tile2DHeader): Partial<LayerProps> | null {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
       highlightColor: this.state.highlightColor
@@ -79,6 +85,7 @@ export default class SpatialIndexTileLayer<
   }
 
   _featureInTile(tile: Tile2DHeader, featureId: BigInt | number) {
+    // TODO: Tile2DHeader index should be generic for H3TileIndex or QuadbinTileIndex
     const tileset = this.state.tileset!;
     const tileZoom = tileset.getTileZoom(tile.index);
     // @ts-ignore

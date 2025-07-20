@@ -1,5 +1,8 @@
-import type {Device, Shader} from '@luma.gl/core';
-import {ShaderAssembler} from '@luma.gl/shadertools';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import type {Device} from '@luma.gl/core';
 import {Texture} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
@@ -8,48 +11,68 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
 
+import type {LightingProps} from '@luma.gl/shadertools';
+import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
-import type {Effect, PreRenderOptions} from '../../lib/effect';
+import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
 
-const DEFAULT_AMBIENT_LIGHT_PROPS = {color: [255, 255, 255], intensity: 1.0};
+const DEFAULT_AMBIENT_LIGHT_PROPS = {
+  color: [255, 255, 255] as [number, number, number],
+  intensity: 1.0
+};
 const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
   {
-    color: [255, 255, 255],
+    color: [255, 255, 255] as [number, number, number],
     intensity: 1.0,
-    direction: [-1, 3, -1]
+    direction: [-1, 3, -1] as [number, number, number]
   },
   {
-    color: [255, 255, 255],
+    color: [255, 255, 255] as [number, number, number],
     intensity: 0.9,
-    direction: [1, -8, -2.5]
+    direction: [1, -8, -2.5] as [number, number, number]
   }
 ];
-const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
+const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255] as [number, number, number, number];
 
-type LightingEffectProps = Record<string, PointLight | DirectionalLight | AmbientLight>;
+export type LightingEffectProps = Record<string, PointLight | DirectionalLight | AmbientLight>;
 
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect implements Effect {
   id = 'lighting-effect';
   props!: LightingEffectProps;
-  shadowColor: number[] = DEFAULT_SHADOW_COLOR;
+  shadowColor: [number, number, number, number] = DEFAULT_SHADOW_COLOR;
+  context?: EffectContext;
 
   private shadow: boolean = false;
-  private ambientLight?: AmbientLight | null = null;
+  private ambientLight?: AmbientLight;
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
-  private shadowMaps: Texture[] = [];
   private dummyShadowMap: Texture | null = null;
-  private shaderAssembler?: ShaderAssembler;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: LightingEffectProps = {}) {
     this.setProps(props);
   }
 
+  setup(context: EffectContext) {
+    this.context = context;
+    const {device, deck} = context;
+
+    if (this.shadow && !this.dummyShadowMap) {
+      this._createShadowPasses(device);
+
+      deck._addDefaultShaderModule(shadow);
+
+      this.dummyShadowMap = device.createTexture({
+        width: 1,
+        height: 1
+      });
+    }
+  }
+
   setProps(props: LightingEffectProps) {
-    this.ambientLight = null;
+    this.ambientLight = undefined;
     this.directionalLights = [];
     this.pointLights = [];
 
@@ -62,11 +85,11 @@ export default class LightingEffect implements Effect {
           break;
 
         case 'directional':
-          this.directionalLights.push(lightSource as DirectionalLight);
+          this.directionalLights.push(lightSource);
           break;
 
         case 'point':
-          this.pointLights.push(lightSource as PointLight);
+          this.pointLights.push(lightSource);
           break;
         default:
       }
@@ -74,34 +97,18 @@ export default class LightingEffect implements Effect {
     this._applyDefaultLights();
 
     this.shadow = this.directionalLights.some(light => light.shadow);
+    if (this.context) {
+      // Create resources if necessary
+      this.setup(this.context);
+    }
     this.props = props;
   }
 
-  preRender(
-    device: Device,
-    {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
-  ) {
+  preRender({layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions) {
     if (!this.shadow) return;
 
     // create light matrix every frame to make sure always updated from light source
     this.shadowMatrices = this._calculateMatrices();
-
-    if (this.shadowPasses.length === 0) {
-      this._createShadowPasses(device);
-    }
-    if (!this.shaderAssembler) {
-      this.shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
-      if (shadow) {
-        this.shaderAssembler.addDefaultModule(shadow);
-      }
-    }
-
-    if (!this.dummyShadowMap) {
-      this.dummyShadowMap = device.createTexture({
-        width: 1,
-        height: 1
-      });
-    }
 
     for (let i = 0; i < this.shadowPasses.length; i++) {
       const shadowPass = this.shadowPasses[i];
@@ -111,63 +118,59 @@ export default class LightingEffect implements Effect {
         viewports,
         onViewportActive,
         views,
-        moduleParameters: {
-          shadowLightId: i,
-          dummyShadowMap: this.dummyShadowMap,
-          shadowMatrices: this.shadowMatrices
+        shaderModuleProps: {
+          shadow: {
+            shadowLightId: i,
+            dummyShadowMap: this.dummyShadowMap,
+            shadowMatrices: this.shadowMatrices
+          }
         }
       });
     }
   }
 
-  getModuleParameters(layer: Layer) {
-    const parameters: {
-      lightSources?: {
-        ambientLight?: AmbientLight | null;
-        directionalLights: DirectionalLight[];
-        pointLights: PointLight[];
-      };
-      shadowMaps?: Texture[];
-      dummyShadowMap?: Texture | null;
-      shadowColor?: number[];
-      shadowMatrices?: Matrix4[];
-    } = this.shadow
-      ? {
-          shadowMaps: this.shadowMaps,
-          dummyShadowMap: this.dummyShadowMap,
+  getShaderModuleProps(layer: Layer, otherShaderModuleProps: Record<string, any>) {
+    const shadowProps = this.shadow
+      ? ({
+          project: otherShaderModuleProps.project,
+          shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
+          dummyShadowMap: this.dummyShadowMap!,
           shadowColor: this.shadowColor,
           shadowMatrices: this.shadowMatrices
-        }
+        } satisfies ShadowModuleProps)
       : {};
 
     // when not rendering to screen, turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
-    parameters.lightSources = {
+    const lightingProps: LightingProps = {
+      enabled: true,
       ambientLight: this.ambientLight,
       directionalLights: this.directionalLights.map(directionalLight =>
         directionalLight.getProjectedLight({layer})
       ),
       pointLights: this.pointLights.map(pointLight => pointLight.getProjectedLight({layer}))
     };
+    // @ts-expect-error material is not a Layer prop
+    const materialProps = layer.props.material;
 
-    return parameters;
+    return {
+      shadow: shadowProps,
+      lighting: lightingProps,
+      phongMaterial: materialProps,
+      gouraudMaterial: materialProps
+    };
   }
 
-  cleanup(): void {
+  cleanup(context: EffectContext): void {
     for (const shadowPass of this.shadowPasses) {
       shadowPass.delete();
     }
     this.shadowPasses.length = 0;
-    this.shadowMaps.length = 0;
 
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
       this.dummyShadowMap = null;
-    }
-
-    if (this.shadow && this.shaderAssembler) {
-      this.shaderAssembler.removeDefaultModule(shadow);
-      this.shaderAssembler = null!;
+      context.deck._removeDefaultShaderModule(shadow);
     }
   }
 
@@ -187,7 +190,6 @@ export default class LightingEffect implements Effect {
     for (let i = 0; i < this.directionalLights.length; i++) {
       const shadowPass = new ShadowPass(device);
       this.shadowPasses[i] = shadowPass;
-      this.shadowMaps[i] = shadowPass.shadowMap;
     }
   }
 

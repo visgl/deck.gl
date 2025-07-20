@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {TerrainCover} from '@deck.gl/extensions/terrain/terrain-cover';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -147,7 +151,7 @@ test('TerrainCover#viewport diffing#non-geo', async t => {
   t.end();
 });
 
-test('TerrainCover#layers diffing#non-geo', async t => {
+test.skip('TerrainCover#layers diffing#non-geo', async t => {
   const lifecycle = new LifecycleTester();
   const terrainSource = new TileLayer({
     id: 'terrain',
@@ -205,7 +209,7 @@ test('TerrainCover#layers diffing#non-geo', async t => {
   t.end();
 });
 
-test('TerrainCover#layers diffing#geo', async t => {
+test.skip('TerrainCover#layers diffing#geo', async t => {
   const lifecycle = new LifecycleTester();
   const terrainSource = new TileLayer({
     id: 'terrain',

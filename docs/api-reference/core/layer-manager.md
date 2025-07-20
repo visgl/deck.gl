@@ -17,12 +17,12 @@ new LayerManager(gl, {eventManager: ...}})`
 
 Parameters:
 
-* `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
+* `gl` ([WebGL2RenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext))
 
 
 ## Methods
 
-##### `needsRedraw` {#needsredraw}
+#### `needsRedraw` {#needsredraw}
 
 Checks if layers need to be redrawn.
 
@@ -32,13 +32,13 @@ layerManager.needsRedraw({clearRedrawFlags = false});
 
 Parameters:
 
-* `clearRedrawFlags` (Bool) - Reset the needs redraw status
+* `clearRedrawFlags` (boolean) - Reset the needs redraw status
 
 Returns:
 
 * `true` if redraw is needed.
 
-##### `getLayers` {#getlayers}
+#### `getLayers` {#getlayers}
 
 Returns an list of layers, optionally be filtered by a list of layer ids.
 
@@ -48,7 +48,7 @@ const layers = layerManager.getLayers({layerIds = []});
 
 Parameters:
 
-* `layerIds` (String[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
+* `layerIds` (string[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
 
 Returns:
 
@@ -61,7 +61,7 @@ Notes:
 * layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
 
 
-##### `setLayers` {#setlayers}
+#### `setLayers` {#setlayers}
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
 
@@ -72,7 +72,7 @@ layerManager.updateLayers({newLayers});
 * `newLayers` (Layer[]) - Array of layers
 
 
-##### `updateLayers` {#updatelayers}
+#### `updateLayers` {#updatelayers}
 
 Updates the current list of layers.
 

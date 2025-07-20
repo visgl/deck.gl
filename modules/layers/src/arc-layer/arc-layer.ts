@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Layer,
@@ -34,10 +18,9 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
+import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
@@ -165,7 +148,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: [project32, picking, arcUniforms]}); // 'project' module added by default.
   }
 
   // This layer has its own wrapLongitude logic
@@ -180,30 +163,28 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getTargetPosition'
       },
       instanceSourceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getSourceColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getTargetColor',
         defaultValue: DEFAULT_COLOR
@@ -230,11 +211,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     /* eslint-enable max-len */
   }
 
-  updateState(opts: UpdateParameters<this>): void {
-    super.updateState(opts);
-    const {props, oldProps, changeFlags} = opts;
-    // Re-generate model if geometry changed
-    if (opts.changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
+  updateState(params: UpdateParameters<this>): void {
+    super.updateState(params);
+
+    if (params.changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -242,51 +222,38 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   draw({uniforms}) {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
-      this.props;
-    const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const {
+      widthUnits,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
       greatCircle,
+      wrapLongitude,
+      numSegments
+    } = this.props;
+    const arcProps: ArcProps = {
+      numSegments,
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
+      greatCircle,
       useShortestPath: wrapLongitude
-    });
+    };
+
+    const model = this.state.model!;
+    model.shaderInputs.setProps({arc: arcProps});
+    model.setVertexCount(numSegments * 2);
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
-    const {numSegments} = this.props;
-    let positions: number[] = [];
-    /*
-     *  (0, -1)-------------_(1, -1)
-     *       |          _,-"  |
-     *       o      _,-"      o
-     *       |  _,-"          |
-     *   (0, 1)"-------------(1, 1)
-     */
-    for (let i = 0; i < numSegments; i++) {
-      positions = positions.concat([i, 1, 0, i, -1, 0]);
-    }
-
-    const model = new Model(this.context.device, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-strip',
-        attributes: {
-          positions: {size: 3, value: new Float32Array(positions)}
-        }
-      }),
+      topology: 'triangle-strip',
       isInstanced: true
     });
-
-    model.setUniforms({numSegments});
-
-    return model;
   }
 }

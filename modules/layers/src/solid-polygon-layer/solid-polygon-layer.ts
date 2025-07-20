@@ -1,30 +1,15 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
+import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
+import {solidPolygonUniforms, SolidPolygonProps} from './solid-polygon-layer-uniforms';
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
@@ -155,7 +140,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       defines: {
         RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
       },
-      modules: [project32, gouraudLighting, picking]
+      modules: [project32, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 
@@ -168,7 +153,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   initializeState() {
-    const {device, viewport} = this.context;
+    const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
     if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
@@ -192,7 +177,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !device || device.features.has('index-uint32-webgl1') ? Uint32Array : Uint16Array
+        IndexType: Uint32Array
       })
     });
 
@@ -212,7 +197,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       vertexPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
+        stepMode: 'dynamic',
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
@@ -220,70 +206,47 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
-          instancePositions: {
-            vertexOffset: 0,
-            divisor: 1
-          },
-          instanceNextPositions: {
-            vertexOffset: 1,
-            divisor: 1
+          nextVertexPositions: {
+            vertexOffset: 1
           }
         }
       },
       instanceVertexValid: {
         size: 1,
-        type: GL.UNSIGNED_SHORT,
-        divisor: 1,
+        type: 'uint16',
+        stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
         noAlloc
       },
       elevations: {
         size: 1,
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getElevation',
-        shaderAttributes: {
-          instanceElevations: {
-            divisor: 1
-          }
-        }
+        accessor: 'getElevation'
       },
       fillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          instanceFillColors: {
-            divisor: 1
-          }
-        }
+        defaultValue: DEFAULT_COLOR
       },
       lineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          instanceLineColors: {
-            divisor: 1
-          }
-        }
+        defaultValue: DEFAULT_COLOR
       },
       pickingColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
+        stepMode: 'dynamic',
         accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value),
-        shaderAttributes: {
-          instancePickingColors: {
-            divisor: 1
-          }
-        }
+          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
       }
     });
     /* eslint-enable max-len */
@@ -292,23 +255,23 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = (data as any[]).find(d => d.__source.index === index);
+      info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }
 
   disablePickingIndex(objectIndex: number) {
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < (data as any[]).length; i++) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }
@@ -322,28 +285,28 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {extruded, filled, wireframe, elevationScale} = this.props;
     const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
-    const renderUniforms = {
-      ...uniforms,
+    const renderUniforms: SolidPolygonProps = {
       extruded: Boolean(extruded),
-      elevationScale
+      elevationScale,
+      isWireframe: false
     };
 
     // Note - the order is important
     if (wireframeModel && wireframe) {
       wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      wireframeModel.setUniforms(renderUniforms);
+      wireframeModel.shaderInputs.setProps({solidPolygon: {...renderUniforms, isWireframe: true}});
       wireframeModel.draw(this.context.renderPass);
     }
 
     if (sideModel && filled) {
       sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      sideModel.setUniforms(renderUniforms);
+      sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       sideModel.draw(this.context.renderPass);
     }
 
     if (topModel && filled) {
       topModel.setVertexCount(polygonTesselator.vertexCount);
-      topModel.setUniforms(renderUniforms);
+      topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       topModel.draw(this.context.renderPass);
     }
   }
@@ -415,19 +378,15 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     let sideModel;
     let wireframeModel;
 
-    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
-
     if (filled) {
       const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
 
       topModel = new Model(this.context.device, {
         ...shaders,
         id: `${id}-top`,
         topology: 'triangle-list',
-        uniforms: {
-          isWireframe: false
-        },
         bufferLayout,
         isIndexed: true,
         userData: {
@@ -436,13 +395,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       });
     }
     if (extruded) {
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
         bufferLayout,
-        uniforms: {
-          isWireframe: false
-        },
         geometry: new Geometry({
           topology: 'triangle-strip',
           attributes: {
@@ -453,7 +411,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
             }
           }
         }),
-        isInstanced: 1,
+        isInstanced: true,
         userData: {
           excludeAttributes: {indices: true}
         }
@@ -463,9 +421,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...this.getShaders('side'),
         id: `${id}-wireframe`,
         bufferLayout,
-        uniforms: {
-          isWireframe: true
-        },
         geometry: new Geometry({
           topology: 'line-strip',
           attributes: {
@@ -476,7 +431,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
             }
           }
         }),
-        isInstanced: 1,
+        isInstanced: true,
         userData: {
           excludeAttributes: {indices: true}
         }

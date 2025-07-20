@@ -1,6 +1,6 @@
 # MapboxLayer
 
-`MapboxLayer` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [CustomLayerInterface](https://docs.mapbox.com/mapbox-gl-js/api/properties/#customlayerinterface) API. By adding a `MapboxLayer` instance to an mapbox map, one can render any deck.gl layer inside the mapbox canvas / WebGL context. This is in contrast to the traditional deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas over the base map.
+`MapboxLayer` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [CustomLayerInterface](https://docs.mapbox.com/mapbox-gl-js/api/properties/#customlayerinterface) API. By adding a `MapboxLayer` instance to an mapbox map, one can render any deck.gl layer inside the mapbox canvas / WebGL2 context. This is in contrast to the traditional deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas over the base map.
 
 See the Mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API for how to add a layer to an existing layer stack.
 
@@ -45,8 +45,8 @@ new MapboxLayer(props);
 
 Parameters:
 
-- `props` (Object)
-  + `props.id` (String) - an unique id is required for each layer.
+- `props` (object)
+  + `props.id` (string) - an unique id is required for each layer.
   + `props.type` (`Layer`, optional) - a class that extends deck.gl's base `Layer` class. Required if `deck` is not provided.
   + `props.deck` (`Deck`, optional) - a `Deck` instance that controls the rendering of this layer. If provided, the layer will be looked up from its layer stack by `id` at render time, and all other props are ignored. It's recommended that you use the [MapboxOverlay](./mapbox-overlay.md) class where a `Deck` instance is automatically managed.
   + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](../layers/README.md) for documentation and examples on how to create layers.

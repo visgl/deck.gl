@@ -1,6 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils';
 import {sleep} from './async-iterator-test-utils';
 
@@ -16,8 +21,6 @@ test('Deck#constructor', t => {
     device,
     width: 1,
     height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -56,12 +59,30 @@ test('Deck#constructor', t => {
   t.pass('Deck constructor did not throw');
 });
 
+test('Deck#abort', async t => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    onError: err => {
+      t.notOk(err, 'Deck encounters error');
+    }
+  });
+
+  deck.finalize();
+
+  await sleep(50);
+
+  t.pass('Deck initialization aborted');
+  t.end();
+});
+
 test('Deck#no views', t => {
   const deck = new Deck({
     device,
     width: 1,
     height: 1,
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {longitude: 0, latitude: 0, zoom: 0},
     views: [],
@@ -77,8 +98,7 @@ test('Deck#no views', t => {
   t.pass('Deck constructor did not throw');
 });
 
-// TODO v9
-test.skip('Deck#rendering, picking, logging', t => {
+test('Deck#rendering, picking, logging', t => {
   // Test logging functionalities
   log.priority = 4;
 
@@ -86,8 +106,6 @@ test.skip('Deck#rendering, picking, logging', t => {
     device,
     width: 1,
     height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -129,10 +147,6 @@ test('Deck#auto view state', t => {
     width: 1,
     height: 1,
 
-    // This is required because the jsdom canvas does not have client width/height
-    // TODO v9 does not seem supported
-    // autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
-
     views: [
       new MapView({id: 'default'}),
       new MapView({id: 'map'}),
@@ -156,13 +170,15 @@ test('Deck#auto view state', t => {
     },
 
     onLoad: () => {
-      deck.viewManager._onViewStateChange('default', {
+      deck._onViewStateChange({
+        viewId: 'default',
         viewState: {longitude: 0, latitude: 0, zoom: 11}
       });
       t.is(onViewStateChangeCalled, 1, 'onViewStateChange is called');
       t.is(deck.getViewports()[0].longitude, 0, 'default view state should not change');
 
-      deck.viewManager._onViewStateChange('map', {
+      deck._onViewStateChange({
+        viewId: 'map',
         viewState: {longitude: 1, latitude: 1, zoom: 11}
       });
       t.is(onViewStateChangeCalled, 2, 'onViewStateChange is called');
@@ -172,7 +188,8 @@ test('Deck#auto view state', t => {
       t.is(deck.getViewports()[2].longitude, 1, 'minimap longitude is updated');
       t.is(deck.getViewports()[2].zoom, 12, 'minimap zoom should not change');
 
-      deck.viewManager._onViewStateChange('minimap', {
+      deck._onViewStateChange({
+        viewId: 'minimap',
         viewState: {longitude: 2, latitude: 2, zoom: 12}
       });
       t.is(onViewStateChangeCalled, 3, 'onViewStateChange is called');
@@ -180,7 +197,8 @@ test('Deck#auto view state', t => {
       t.is(deck.getViewports()[2].longitude, 1, 'minimap state should not change');
 
       deck.setProps({viewState: {longitude: 3, latitude: 3, zoom: 12}});
-      deck.viewManager._onViewStateChange('map', {
+      deck._onViewStateChange({
+        viewId: 'map',
         viewState: {longitude: 1, latitude: 1, zoom: 11}
       });
       t.is(deck.getViewports()[0].longitude, 3, 'external viewState should override internal');
@@ -214,8 +232,6 @@ test('Deck#resourceManager', async t => {
     device,
     width: 1,
     height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -228,7 +244,7 @@ test('Deck#resourceManager', async t => {
     onError: () => null
   });
 
-  function update(props) {
+  function update(props = {}) {
     return new Promise(resolve => {
       deck.setProps({
         ...props,
@@ -238,6 +254,7 @@ test('Deck#resourceManager', async t => {
   }
 
   await update();
+  // @ts-expect-error Accessing private member
   const {resourceManager} = deck.layerManager;
   t.is(layer1.getNumInstances(), 0, 'layer subscribes to global data resource');
   t.ok(resourceManager.contains('cities.json'), 'data url is cached');
@@ -263,4 +280,48 @@ test('Deck#resourceManager', async t => {
 
   deck.finalize();
   t.end();
+});
+
+test('Deck#props omitted are unchanged', async t => {
+  const layer = new ScatterplotLayer({
+    id: 'scatterplot-global-data',
+    data: 'deck://pins',
+    getPosition: d => d.position
+  });
+
+  const widget = new FullscreenWidget();
+
+  // Initialize with widgets and layers.
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    },
+
+    layers: [layer],
+    widgets: [widget],
+
+    onLoad: () => {
+      const {widgets, layers} = deck.props;
+      t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets is set');
+      t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers is set');
+
+      // Render deck a second time without changing widget or layer props.
+      deck.setProps({
+        onAfterRender: () => {
+          const {widgets, layers} = deck.props;
+          t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets remain set');
+          t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers remain set');
+
+          deck.finalize();
+          t.end();
+        }
+      });
+    }
+  });
 });

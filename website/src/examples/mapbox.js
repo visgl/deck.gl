@@ -1,13 +1,17 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component, createRef} from 'react';
 import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
-import {renderToDOM} from 'website-examples/safegraph/app';
+import App from 'website-examples/mapbox/app';
 
 import {makeExample} from '../components';
 
 class MapboxDemo extends Component {
   static title = 'Who Is Visiting San Francisco?';
 
-  static code = `${GITHUB_TREE}/examples/website/safegraph`;
+  static code = `${GITHUB_TREE}/examples/website/mapbox`;
 
   static data = {
     url: `${DATA_URI}/safegraph.txt`,
@@ -31,31 +35,9 @@ class MapboxDemo extends Component {
 
   _containerRef = createRef();
 
-  componentDidMount() {
-    /* global document */
-    // Attach mapbox stylesheet
-    const style = document.createElement('link');
-    style.setAttribute('rel', 'stylesheet');
-    style.setAttribute('href', 'https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css');
-    document.head.appendChild(style);
-
-    this._view = renderToDOM(this._containerRef.current, this.props.data);
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.data && !prevProps.data) {
-      this._view.update(this.props.data);
-    }
-  }
-
-  componentWillUnmount() {
-    if (this._view) {
-      this._view.remove();
-    }
-  }
-
   render() {
-    return <div ref={this._containerRef} style={{width: '100%', height: '100%'}} />;
+    const {data, ...otherProps} = this.props;
+    return <App {...otherProps} data={data}/>;
   }
 }
 

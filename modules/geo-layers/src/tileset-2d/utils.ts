@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
@@ -138,7 +142,7 @@ export function getCullBounds({
   /** Current viewport */
   viewport: Viewport;
   /** Current z range */
-  z?: ZRange | number | null;
+  z: ZRange | number | null;
   /** Culling rectangle in screen space */
   cullRect: {x: number; y: number; width: number; height: number};
 }): [number, number, number, number][] {
@@ -273,7 +277,7 @@ export function getTileIndices({
   viewport: Viewport;
   maxZoom?: number;
   minZoom?: number;
-  zRange?: ZRange | null;
+  zRange: ZRange | null;
   extent?: Bounds;
   tileSize?: number;
   modelMatrix?: Matrix4;

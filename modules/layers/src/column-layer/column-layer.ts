@@ -1,28 +1,10 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Layer,
   project32,
-  gouraudLighting,
-  phongLighting,
   picking,
   UNIT,
   LayerProps,
@@ -36,10 +18,11 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
+import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import ColumnGeometry from './column-geometry';
 
+import {columnUniforms, ColumnProps} from './column-layer-uniforms';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
@@ -102,7 +85,7 @@ type _ColumnLayerProps<DataT> = {
    * Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one.
    * @default null
    */
-  vertices: Position[] | null;
+  vertices?: Position[] | null;
 
   /**
    * Disk offset from the position, relative to the radius.
@@ -244,20 +227,17 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   };
 
   getShaders() {
-    const {device} = this.context;
-    const transpileToGLSL100 = device.info.type !== 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
-    if (useDerivatives) {
+    const {flatShading} = this.props;
+    if (flatShading) {
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
       vs,
       fs,
       defines,
-      transpileToGLSL100,
-      modules: [project32, useDerivatives ? phongLighting : gouraudLighting, picking]
+      modules: [project32, flatShading ? phongMaterial : gouraudMaterial, picking, columnUniforms]
     });
   }
 
@@ -271,7 +251,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -283,16 +263,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR
@@ -421,8 +399,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const wireframeModel = this.state.wireframeModel!;
     const {fillVertexCount, edgeDistance} = this.state;
 
-    const renderUniforms = {
-      ...uniforms,
+    const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
       angle: (angle / 180) * Math.PI,
       offset,
@@ -440,17 +417,24 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      wireframeModel.setUniforms(renderUniforms);
-      wireframeModel.setUniforms({isStroke: true});
+      wireframeModel.shaderInputs.setProps({
+        column: {
+          ...columnProps,
+          isStroke: true
+        }
+      });
       wireframeModel.draw(this.context.renderPass);
     }
-
-    fillModel.setUniforms(renderUniforms);
 
     if (filled) {
       // model.setProps({isIndexed: false});
       fillModel.setVertexCount(fillVertexCount);
-      fillModel.setUniforms({isStroke: false});
+      fillModel.shaderInputs.setProps({
+        column: {
+          ...columnProps,
+          isStroke: false
+        }
+      });
       fillModel.draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
@@ -459,7 +443,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       // The width of the stroke is achieved by flattening the side of the cylinder.
       // Skip the last 1/3 of the vertices which is the top.
       fillModel.setVertexCount((fillVertexCount * 2) / 3);
-      fillModel.setUniforms({isStroke: true});
+      fillModel.shaderInputs.setProps({
+        column: {
+          ...columnProps,
+          isStroke: true
+        }
+      });
       fillModel.draw(this.context.renderPass);
     }
   }

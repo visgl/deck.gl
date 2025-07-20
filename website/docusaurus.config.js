@@ -1,15 +1,21 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+import {themes as prismThemes} from 'prism-react-renderer';
+const lightCodeTheme = prismThemes.nightOwlLight;
+const darkCodeTheme = prismThemes.nightOwl;
+
 const webpack = require('webpack');
 const {resolve} = require('path');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'deck.gl',
-  tagline: 'WebGL2-powered, highly performant large-scale data visualization',
+  tagline: 'GPU-powered, highly performant large-scale data visualization',
   url: 'https://deck.gl',
   baseUrl: process.env.STAGING ? '/deck.gl/' : '/',
   onBrokenLinks: 'throw',
@@ -33,7 +39,8 @@ const config = {
         theme: {
           customCss: [
             resolve('./src/styles.css'),
-            resolve('./node_modules/maplibre-gl/dist/maplibre-gl.css')
+            resolve('./node_modules/maplibre-gl/dist/maplibre-gl.css'),
+            resolve('../modules/widgets/dist/stylesheet.css')
           ]
         }
       })
@@ -48,18 +55,18 @@ const config = {
         resolve: {
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
-            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/src'),
-            '@deck.gl/arcgis': resolve('../modules/arcgis/src'),
-            '@deck.gl/carto': resolve('../modules/carto/src'),
-            '@deck.gl/core': resolve('../modules/core/src'),
-            '@deck.gl/extensions': resolve('../modules/extensions/src'),
-            '@deck.gl/geo-layers': resolve('../modules/geo-layers/src'),
-            '@deck.gl/google-maps': resolve('../modules/google-maps/src'),
-            '@deck.gl/json': resolve('../modules/json/src'),
-            '@deck.gl/layers': resolve('../modules/layers/src'),
-            '@deck.gl/mapbox': resolve('../modules/mapbox/src'),
-            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/src'),
-            '@deck.gl/react': resolve('../modules/react/src'),
+            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers'),
+            '@deck.gl/arcgis': resolve('../modules/arcgis'),
+            '@deck.gl/carto': resolve('../modules/carto'),
+            '@deck.gl/core': resolve('../modules/core'),
+            '@deck.gl/extensions': resolve('../modules/extensions'),
+            '@deck.gl/geo-layers': resolve('../modules/geo-layers'),
+            '@deck.gl/google-maps': resolve('../modules/google-maps'),
+            '@deck.gl/json': resolve('../modules/json'),
+            '@deck.gl/layers': resolve('../modules/layers'),
+            '@deck.gl/mapbox': resolve('../modules/mapbox'),
+            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers'),
+            '@deck.gl/react': resolve('../modules/react'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
@@ -176,6 +183,10 @@ const config = {
             title: 'Other vis.gl Libraries',
             items: [
               {
+                label: 'deck.gl-community',
+                href: 'https://visgl.github.io/deck.gl-community/'
+              },
+              {
                 label: 'luma.gl',
                 href: 'https://luma.gl'
               },
@@ -222,7 +233,7 @@ const config = {
         // Optional: see doc section below
         contextualSearch: true,
         // Optional: path for search page that enabled by default (`false` to disable it)
-        searchPagePath: 'search'
+        searchPagePath: false
       },
       prism: {
         theme: lightCodeTheme,

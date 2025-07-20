@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -6,6 +10,23 @@ import {MapboxOverlay} from '@deck.gl/mapbox';
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
 import {DEFAULT_PARAMETERS} from './fixtures';
+
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+class TestScatterplotLayer extends ScatterplotLayer {
+  draw(params) {
+    super.draw(params);
+    this.props.onAfterRedraw({
+      viewport: this.context.viewport,
+      layer: this
+    });
+  }
+}
+TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
 test('MapboxOverlay#overlaid', t => {
   const map = new MockMapboxMap({
@@ -48,7 +69,7 @@ test('MapboxOverlay#overlaid', t => {
   map.setCenter({lng: 0.45, lat: 51.47});
   map.setZoom(4);
   map.triggerRepaint();
-  map.on('render', () => {
+  map.once('render', () => {
     t.ok(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
@@ -111,7 +132,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   map.setCenter({lng: 0.45, lat: 51.47});
   map.setZoom(4);
   map.triggerRepaint();
-  map.on('render', () => {
+  map.once('render', () => {
     t.ok(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
@@ -137,16 +158,25 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
 });
 
 test('MapboxOverlay#interleaved', t => {
+  let drawLog = [];
+  const onRedrawLayer = ({viewport, layer}) => {
+    drawLog.push(layer.id);
+  };
+
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
   });
   const overlay = new MapboxOverlay({
     interleaved: true,
-    layers: [new ScatterplotLayer({id: 'poi'})],
+    layers: [
+      new TestScatterplotLayer({id: 'poi', onAfterRedraw: onRedrawLayer}),
+      new TestScatterplotLayer({id: 'poi2', onAfterRedraw: onRedrawLayer})
+    ],
+    layerFilter: ({layer}) => layer.id === 'poi',
     parameters: {
-      depthMask: false,
-      cull: true
+      depthWriteEnabled: false,
+      cullMode: 'back'
     },
     useDevicePixels: 1
   });
@@ -155,7 +185,7 @@ test('MapboxOverlay#interleaved', t => {
 
   t.ok(overlay._deck, 'Deck instance is created');
 
-  map.on('render', () => {
+  map.once('render', async () => {
     const VIEW_STATE = {
       longitude: -122.45,
       latitude: 37.78,
@@ -171,15 +201,15 @@ test('MapboxOverlay#interleaved', t => {
     t.ok(
       objectEqual(overlay._deck.props.parameters, {
         ...DEFAULT_PARAMETERS,
-        depthMask: false,
-        cull: true
+        depthWriteEnabled: false,
+        cullMode: 'back'
       }),
       'Parameters are set correctly'
     );
     t.ok(
       objectEqual(overlay._props.parameters, {
-        depthMask: false, // User defined parameters should override defaults.
-        cull: true // Expected to merge in.
+        depthWriteEnabled: false,
+        cullMode: 'back'
       }),
       'Overlay parameters are intact'
     );
@@ -187,13 +217,21 @@ test('MapboxOverlay#interleaved', t => {
     t.is(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
     t.is(overlay._props.useDevicePixels, 1, 'useDevicePixels are intact');
 
+    await sleep(100);
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
+    t.ok(map.getLayer('poi2'), 'MapboxLayer is added');
+    t.deepEqual(drawLog, ['poi'], 'layers correctly filtered');
+    drawLog = [];
 
     overlay.setProps({
-      layers: [new ScatterplotLayer({id: 'cities'})]
+      layers: [new TestScatterplotLayer({id: 'cities', onAfterRedraw: onRedrawLayer})],
+      layerFilter: undefined
     });
+
+    await sleep(100);
     t.notOk(map.getLayer('poi'), 'MapboxLayer is removed');
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
+    t.deepEqual(drawLog, ['cities'], 'layers correctly filtered');
 
     map.removeControl(overlay);
     t.notOk(overlay._deck, 'Deck instance is finalized');
@@ -210,8 +248,8 @@ test('MapboxOverlay#interleaved#remove and add', t => {
     interleaved: true,
     layers: [new ScatterplotLayer({id: 'poi'})],
     parameters: {
-      depthMask: false,
-      cull: true
+      depthWriteEnabled: false,
+      cullMode: 'back'
     },
     useDevicePixels: 1
   });
@@ -245,7 +283,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
 
   t.ok(overlay._deck, 'Deck instance is created');
 
-  map.on('render', () => {
+  map.once('render', async () => {
     t.is(overlay._deck.props.layers.length, 0, 'Layers are empty');
     t.false('layers' in overlay._props, 'Overlay layers arent set');
 
@@ -261,18 +299,22 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})],
       parameters: {
-        depthMask: false
+        depthWriteEnabled: false
       }
     });
+    await sleep(100);
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
     t.ok(
-      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
+      objectEqual(overlay._deck.props.parameters, {
+        ...DEFAULT_PARAMETERS,
+        depthWriteEnabled: false
+      }),
       'Parameters are updated correctly'
     );
     t.ok(
       objectEqual(overlay._props.parameters, {
-        depthMask: false
+        depthWriteEnabled: false
       }),
       'Overlay parameters are updated correctly'
     );
@@ -298,7 +340,7 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
   t.ok(overlay._deck, 'Deck instance is created');
   t.false('move' in map._listeners, 'No move listeners initially');
 
-  map.on('render', () => {
+  map.once('render', () => {
     t.true(map._listeners['move'].length === 1, 'One move listener attached by overlay');
 
     overlay.finalize();

@@ -1,14 +1,23 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
+// Set your Mapbox token here or via environment variable
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  style: 'mapbox://styles/mapbox/light-v9',
+  accessToken: MAPBOX_TOKEN,
   center: [0.45, 51.47],
   zoom: 4,
   bearing: 0,
@@ -16,6 +25,7 @@ const map = new mapboxgl.Map({
 });
 
 const deckOverlay = new DeckOverlay({
+  // interleaved: true,
   layers: [
     new GeoJsonLayer({
       id: 'airports',
@@ -32,6 +42,7 @@ const deckOverlay = new DeckOverlay({
       onClick: info =>
         // eslint-disable-next-line
         info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      // beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',

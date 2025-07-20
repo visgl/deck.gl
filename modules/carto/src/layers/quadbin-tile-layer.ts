@@ -1,10 +1,15 @@
-import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
-import type {TilejsonResult} from '../sources/types';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import type {TilejsonResult} from '@carto/api-client';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -16,7 +21,8 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by QuadbinTileLayer. */
@@ -37,29 +43,27 @@ export default class QuadbinTileLayer<
   static defaultProps = defaultProps;
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
-    return loadOptions;
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      cartoSpatialTile: {scheme: 'quadbin'}
+    });
   }
 
-  renderLayers(): Layer | null | LayersList {
+  renderLayers(): SpatialIndexTileLayer | null {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
     const {tiles: data, maxresolution: maxZoom} = tileJSON;
-    return [
-      // @ts-ignore
-      new SpatialIndexTileLayer(this.props, {
-        id: `quadbin-tile-layer-${this.props.id}`,
-        data,
-        // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: QuadbinTileset2D as any,
-        renderSubLayers,
-        maxZoom,
-        loadOptions: this.getLoadOptions()
-      })
-    ];
+    const SubLayerClass = this.getSubLayerClass('spatial-index-tile', SpatialIndexTileLayer);
+    return new SubLayerClass(this.props, {
+      id: `quadbin-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: QuadbinTileset2D as any,
+      renderSubLayers,
+      maxZoom,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }

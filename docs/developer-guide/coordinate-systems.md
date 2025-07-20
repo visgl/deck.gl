@@ -14,11 +14,10 @@ new PointCloudLayer({
   coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
   coordinateOrigin: [-122.4004935, 37.7900486, 0],  // anchor point in longitude/latitude/altitude
   data: [
-    {position: [33.22, 109.87, 1.455]}, // meter offsets from the coordinate origin
-    ...
+    {position: [33.22, 109.87, 1.455]}, // offsets from the coordinate origin in meters
   ],
-  radiusPixels: 2,
-  sizeUnits: 'pixels'
+  getPosition: d => d.position,
+  pointSize: 2
 })
 ```
 
@@ -68,7 +67,7 @@ Some coordinate systems need to be used with the [coordinateOrigin](../api-refer
 
 Remarks:
 
-* Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-system) section for details.
+* Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-systems) section for details.
 * The `CARTESIAN` mode describes positions that are identical in the world space and the common space. It is the default coordinate system when rendering into non-geospatial views. When combined with geospatial views, the positions are treated as common space coordinates for that particular projection mode. The latter can be seen used by the [MVTLayer](../api-reference/geo-layers/mvt-layer.md), where the data decoded from the tiles are already pre-projected onto the Web Mercator plane.
 
 
@@ -144,5 +143,5 @@ The conversion between common sizes and pixel sizes: 1 common unit equals `2 ** 
 If you are familiar with the traditional 3D graphics/game engine terminologies, here is how they map to deck.gl's coordinate spaces:
 
 - deck.gl's world space maps to the standard "model space", i.e. the data that comes in before any transforms have been applied.
-- deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
+- deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL2/WebGPU, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
 - Zoom levels are applied by scaling the view matrix with `Math.pow(2, zoom)`.

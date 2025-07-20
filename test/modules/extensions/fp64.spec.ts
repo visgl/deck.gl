@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {Fp64Extension} from '@deck.gl/extensions';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 
 test('Fp64Extension', t => {
   const testCases = [
@@ -22,8 +26,9 @@ test('Fp64Extension', t => {
         extensions: [new Fp64Extension()]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
-        t.ok(uniforms.project_uViewProjectionMatrixFP64, 'has fp64 uniforms');
+        const uniforms = getLayerUniforms(layer);
+        t.ok(uniforms.viewProjectionMatrix, 'has fp64 uniforms');
+        t.ok(uniforms.viewProjectionMatrix64Low, 'has fp64 uniforms');
       }
     }
   ];

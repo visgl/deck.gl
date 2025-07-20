@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE, UNIT} from '../../lib/constants';
 
@@ -31,28 +15,31 @@ const UNIT_GLSL_CONSTANTS = Object.keys(UNIT)
   .map(key => `const int UNIT_${key.toUpperCase()} = ${UNIT[key]};`)
   .join('');
 
-export default `\
+export const projectGLSL = /* glsl */ `\
 ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
-uniform int project_uCoordinateSystem;
-uniform int project_uProjectionMode;
-uniform float project_uScale;
-uniform bool project_uWrapLongitude;
-uniform vec3 project_uCommonUnitsPerMeter;
-uniform vec3 project_uCommonUnitsPerWorldUnit;
-uniform vec3 project_uCommonUnitsPerWorldUnit2;
-uniform vec4 project_uCenter;
-uniform mat4 project_uModelMatrix;
-uniform mat4 project_uViewProjectionMatrix;
-uniform vec2 project_uViewportSize;
-uniform float project_uDevicePixelRatio;
-uniform float project_uFocalDistance;
-uniform vec3 project_uCameraPosition;
-uniform vec3 project_uCoordinateOrigin;
-uniform vec3 project_uCommonOrigin;
-uniform bool project_uPseudoMeters;
+uniform projectUniforms {
+  bool wrapLongitude;
+  int coordinateSystem;
+  vec3 commonUnitsPerMeter;
+  int projectionMode;
+  float scale;
+  vec3 commonUnitsPerWorldUnit;
+  vec3 commonUnitsPerWorldUnit2;
+  vec4 center;
+  mat4 modelMatrix;
+  mat4 viewProjectionMatrix;
+  vec2 viewportSize;
+  float devicePixelRatio;
+  float focalDistance;
+  vec3 cameraPosition;
+  vec3 coordinateOrigin;
+  vec3 commonOrigin;
+  bool pseudoMeters;
+} project;
+
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -68,9 +55,9 @@ float project_size_at_latitude(float lat) {
 }
 
 float project_size() {
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR &&
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
-    project_uPseudoMeters == false) {
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
+    project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+    project.pseudoMeters == false) {
 
     // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
     // Adjust by 1 / cos(latitude)
@@ -95,7 +82,7 @@ float project_size() {
 }
 
 float project_size_at_latitude(float meters, float lat) {
-  return meters * project_uCommonUnitsPerMeter.z * project_size_at_latitude(lat);
+  return meters * project.commonUnitsPerMeter.z * project_size_at_latitude(lat);
 }
 
 //
@@ -103,19 +90,20 @@ float project_size_at_latitude(float meters, float lat) {
 // Note the scalar version of project_size is for scaling the z component only
 //
 float project_size(float meters) {
-  return meters * project_uCommonUnitsPerMeter.z * project_size();
+  // For scatter relevant
+  return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
-  return meters * project_uCommonUnitsPerMeter.xy * project_size();
+  return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
-  return meters * project_uCommonUnitsPerMeter * project_size();
+  return meters * project.commonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {
-  return vec4(meters.xyz * project_uCommonUnitsPerMeter, meters.w);
+  return vec4(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
 // Get rotation matrix that aligns the z axis with the given up vector
@@ -129,7 +117,7 @@ mat3 project_get_orientation_matrix(vec3 up) {
 }
 
 bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     transform = project_get_orientation_matrix(commonPosition);
     return true;
   }
@@ -142,8 +130,8 @@ bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
 //
 vec3 project_normal(vec3 vector) {
   // Apply model matrix
-  vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
-  vec3 n = normalize(normal_modelspace.xyz * project_uCommonUnitsPerMeter);
+  vec4 normal_modelspace = project.modelMatrix * vec4(vector, 0.0);
+  vec3 n = normalize(normal_modelspace.xyz * project.commonUnitsPerMeter);
   mat3 rotation;
   if (project_needs_rotation(geometry.position.xyz, rotation)) {
     n = rotation * n;
@@ -153,7 +141,7 @@ vec3 project_normal(vec3 vector) {
 
 vec4 project_offset_(vec4 offset) {
   float dy = offset.y;
-  vec3 commonUnitsPerWorldUnit = project_uCommonUnitsPerWorldUnit + project_uCommonUnitsPerWorldUnit2 * dy;
+  vec3 commonUnitsPerWorldUnit = project.commonUnitsPerWorldUnit + project.commonUnitsPerWorldUnit2 * dy;
   return vec4(offset.xyz * commonUnitsPerWorldUnit, offset.w);
 }
 
@@ -162,7 +150,7 @@ vec4 project_offset_(vec4 offset) {
 //
 vec2 project_mercator_(vec2 lnglat) {
   float x = lnglat.x;
-  if (project_uWrapLongitude) {
+  if (project.wrapLongitude) {
     x = mod(x + 180., 360.0) - 180.;
   }
   float y = clamp(lnglat.y, -89.9, 89.9);
@@ -186,55 +174,55 @@ vec3 project_globe_(vec3 lnglatz) {
 }
 
 //
-// Projects positions (defined by project_uCoordinateSystem) to common space (defined by project_uProjectionMode)
+// Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
-  vec4 position_world = project_uModelMatrix * position;
+  vec4 position_world = project.modelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_mercator_(position_world.xy),
         project_size_at_latitude(position_world.z, position_world.y),
         position_world.w
       );
     }
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
-      position_world.xyz += project_uCoordinateOrigin;
+    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+      position_world.xyz += project.coordinateOrigin;
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_globe_(position_world.xyz),
         position_world.w
       );
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
-      if (abs(position_world.y - project_uCoordinateOrigin.y) > 0.25) {
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+      if (abs(position_world.y - project.coordinateOrigin.y) > 0.25) {
         // Too far from the projection center for offset mode to be accurate
         // Only use high parts
         return vec4(
-          project_mercator_(position_world.xy) - project_uCommonOrigin.xy,
+          project_mercator_(position_world.xy) - project.commonOrigin.xy,
           project_size(position_world.z),
           position_world.w
         );
       }
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_IDENTITY ||
-    (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
-    (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-     project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
+  if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+    (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
+    (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
+     project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
-    position_world.xyz -= project_uCoordinateOrigin;
+    position_world.xyz -= project.coordinateOrigin;
   }
 
   // Translation is already added to the high parts
-  return project_offset_(position_world + project_uModelMatrix * vec4(position64Low, 0.0));
+  return project_offset_(position_world) + project_offset_(project.modelMatrix * vec4(position64Low, 0.0));
 }
 
 vec4 project_position(vec4 position) {
@@ -262,31 +250,31 @@ vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatr
 
 //
 // Projects from common space coordinates to clip space.
-// Uses project_uViewProjectionMatrix
+// Uses project.viewProjectionMatrix
 //
 vec4 project_common_position_to_clipspace(vec4 position) {
-  return project_common_position_to_clipspace(position, project_uViewProjectionMatrix, project_uCenter);
+  return project_common_position_to_clipspace(position, project.viewProjectionMatrix, project.center);
 }
 
 // Returns a clip space offset that corresponds to a given number of screen pixels
 vec2 project_pixel_size_to_clipspace(vec2 pixels) {
-  vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio * 2.0;
-  return offset * project_uFocalDistance;
+  vec2 offset = pixels / project.viewportSize * project.devicePixelRatio * 2.0;
+  return offset * project.focalDistance;
 }
 
 float project_size_to_pixel(float meters) {
-  return project_size(meters) * project_uScale;
+  return project_size(meters) * project.scale;
 }
 float project_size_to_pixel(float size, int unit) {
   if (unit == UNIT_METERS) return project_size_to_pixel(size);
-  if (unit == UNIT_COMMON) return size * project_uScale;
+  if (unit == UNIT_COMMON) return size * project.scale;
   // UNIT_PIXELS
   return size;
 }
 float project_pixel_size(float pixels) {
-  return pixels / project_uScale;
+  return pixels / project.scale;
 }
 vec2 project_pixel_size(vec2 pixels) {
-  return pixels / project_uScale;
+  return pixels / project.scale;
 }
 `;

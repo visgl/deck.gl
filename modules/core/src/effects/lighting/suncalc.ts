@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // sun position calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 // and inspired by https://github.com/mourner/suncalc/blob/master/suncalc.js
 const DEGREES_TO_RADIANS = Math.PI / 180;

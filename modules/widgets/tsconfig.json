@@ -1,14 +1,13 @@
 {
-  "extends": "../../tsconfig.module.json",
+  "extends": "../../tsconfig.json",
   "include": ["src/**/*"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "typed",
-    "jsx": "preserve",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
   },
   "references": [
     {"path": "../core"}

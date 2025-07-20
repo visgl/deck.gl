@@ -1,9 +1,14 @@
-import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
 import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
-import type {TilejsonResult} from '../sources/types';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import type {TilejsonResult} from '@carto/api-client';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -18,7 +23,8 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<H3TileLayerProps> = {
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by H3TileLayer. */
@@ -41,14 +47,14 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   getLoadOptions(): any {
-    const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as TilejsonResult;
-    injectAccessToken(loadOptions, tileJSON.accessToken);
-    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'h3'};
-    return loadOptions;
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      cartoSpatialTile: {scheme: 'h3'}
+    });
   }
 
-  renderLayers(): Layer | null | LayersList {
+  renderLayers(): SpatialIndexTileLayer | null {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
@@ -59,31 +65,29 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     if (this.props.minZoom) {
       minresolution = Math.max(
         minresolution,
-        getHexagonResolution({zoom: this.props.minZoom, latitude: 0})
+        getHexagonResolution({zoom: this.props.minZoom, latitude: 0}, this.props.tileSize)
       );
     }
     if (this.props.maxZoom) {
       maxresolution = Math.min(
         maxresolution,
-        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0})
+        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0}, this.props.tileSize)
       );
     }
 
+    const SubLayerClass = this.getSubLayerClass('spatial-index-tile', SpatialIndexTileLayer);
     // The naming is unfortunate, but minZoom & maxZoom in the context
     // of a Tileset2D refer to the resolution levels, not the Mercator zooms
-    return [
-      // @ts-ignore
-      new SpatialIndexTileLayer(this.props, {
-        id: `h3-tile-layer-${this.props.id}`,
-        data,
-        // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: H3Tileset2D as any,
-        renderSubLayers,
-        // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
-        minZoom: minresolution,
-        maxZoom: maxresolution,
-        loadOptions: this.getLoadOptions()
-      })
-    ];
+    return new SubLayerClass(this.props, {
+      id: `h3-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: H3Tileset2D as any,
+      renderSubLayers,
+      // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
+      minZoom: minresolution,
+      maxZoom: maxresolution,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {
   getTileIndices,
@@ -271,7 +275,7 @@ const TEST_CASES = [
       viewState: {
         longitude: -6,
         latitude: 58,
-        zoom: 1.5
+        zoom: 2
       }
     }),
     tileSize: 512,

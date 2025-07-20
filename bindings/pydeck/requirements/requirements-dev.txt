@@ -5,16 +5,15 @@ pytest>=4.0.2
 pytest-cov>=2.6.1
 pytest-asyncio>=0.10.0;python_version>="3.5"
 pathlib>=1.0.1;python_version<="2.7"
-typing>=3.7.4;python_version<="3.5"
 typing_extensions>=3.7.4;python_version<="3.5"
 flake8
 requests
 sphinx
 recommonmark
-jupyterlab
+jupyterlab<4.0.0
 ipython>=5.8.0;python_version<"3.4"
 semver # necessary for PEP440-compliant semantic versions
 sphinx-markdown-builder
 wheel
-sphinx_rtd_theme
+sphinx_rtd_theme==2.0.0
 black;python_version>="3.6"

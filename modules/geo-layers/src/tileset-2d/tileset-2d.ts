@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Viewport} from '@deck.gl/core';
 
 import {RequestScheduler} from '@loaders.gl/loader-utils';
@@ -73,6 +77,8 @@ export type Tileset2DProps<DataT = any> = {
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
   maxRequests?: number;
+  /** Queue tile requests until no new tiles have been requested for at least `debounceTime` milliseconds. @default 0 */
+  debounceTime?: number;
   /** Changes the zoom level at which the tiles are fetched. Needs to be an integer. @default 0 */
   zoomOffset?: number;
 
@@ -101,6 +107,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   refinementStrategy: 'best-available',
   zRange: null,
   maxRequests: 6,
+  debounceTime: 0,
   zoomOffset: 0,
 
   // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
@@ -115,7 +122,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
  * and only creates new tiles if they are present.
  */
 export class Tileset2D {
-  private opts: Required<Tileset2DProps>;
+  protected opts: Required<Tileset2DProps>;
   private _requestScheduler: RequestScheduler;
   private _cache: Map<string, Tile2DHeader>;
   private _dirty: boolean;
@@ -123,7 +130,7 @@ export class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
-  private _zRange?: ZRange | null;
+  private _zRange: ZRange | null;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -140,18 +147,20 @@ export class Tileset2D {
    */
   constructor(opts: Tileset2DProps) {
     this.opts = {...DEFAULT_TILESET2D_PROPS, ...opts};
+    this.setOptions(this.opts);
 
     this.onTileLoad = tile => {
       this.opts.onTileLoad?.(tile);
-      if (this.opts.maxCacheByteSize) {
+      if (this.opts.maxCacheByteSize !== null) {
         this._cacheByteSize += tile.byteLength;
         this._resizeCache();
       }
     };
 
     this._requestScheduler = new RequestScheduler({
-      maxRequests: opts.maxRequests,
-      throttleRequests: Boolean(opts.maxRequests && opts.maxRequests > 0)
+      throttleRequests: this.opts.maxRequests > 0 || this.opts.debounceTime > 0,
+      maxRequests: this.opts.maxRequests,
+      debounceTime: this.opts.debounceTime
     });
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
@@ -162,13 +171,12 @@ export class Tileset2D {
 
     // Cache the last processed viewport
     this._viewport = null;
+    this._zRange = null;
     this._selectedTiles = null;
     this._frameNumber = 0;
 
     this._modelMatrix = new Matrix4();
     this._modelMatrixInverse = new Matrix4();
-
-    this.setOptions(opts);
   }
 
   /* Public API */
@@ -226,7 +234,10 @@ export class Tileset2D {
    */
   update(
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange | null; modelMatrix?: NumericArray | null} = {}
+    {zRange, modelMatrix}: {zRange: ZRange | null; modelMatrix: NumericArray | null} = {
+      zRange: null,
+      modelMatrix: null
+    }
   ): number {
     const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
@@ -326,7 +337,7 @@ export class Tileset2D {
     viewport: Viewport;
     maxZoom?: number;
     minZoom?: number;
-    zRange?: ZRange | null;
+    zRange: ZRange | null;
     tileSize?: number;
     modelMatrix?: Matrix4;
     modelMatrixInverse?: Matrix4;
@@ -462,10 +473,10 @@ export class Tileset2D {
     const {_cache, opts} = this;
 
     const maxCacheSize =
-      opts.maxCacheSize ||
+      opts.maxCacheSize ??
       // @ts-expect-error called only when selectedTiles is initialized
-      (opts.maxCacheByteSize ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
-    const maxCacheByteSize = opts.maxCacheByteSize || Infinity;
+      (opts.maxCacheByteSize !== null ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
+    const maxCacheByteSize = opts.maxCacheByteSize ?? Infinity;
 
     const overflown = _cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
@@ -473,7 +484,7 @@ export class Tileset2D {
       for (const [id, tile] of _cache) {
         if (!tile.isVisible && !tile.isSelected) {
           // delete tile
-          this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
+          this._cacheByteSize -= opts.maxCacheByteSize !== null ? tile.byteLength : 0;
           _cache.delete(id);
           this.opts.onTileUnload?.(tile);
         }

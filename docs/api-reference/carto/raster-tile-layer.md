@@ -1,15 +1,15 @@
-# RasterTileLayer (Experimental)
+# RasterTileLayer
 
 `RasterTileLayer` is a layer for visualizing tiled raster data.
 
-## Usage 
+## Usage
 
 ```tsx
-import DeckGL from '@deck.gl/react';
-import {RasterTileLayer, rasterTilesetSource} from '@deck.gl/carto';
+import {DeckGL} from '@deck.gl/react';
+import {RasterTileLayer, rasterSource} from '@deck.gl/carto';
 
 function App({viewState}) {
-  const data = rasterTilesetSource({
+  const data = rasterSource({
     accessToken: 'XXX',
     connectionName: 'carto_dw',
     tableName: 'cartobq.public_account.temperature_raster'
@@ -64,11 +64,11 @@ new deck.carto.RasterTileLayer({});
 Inherits all properties from [`ColumnLayer`](../layers/column-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
 
 
-##### `data` (TilejsonResult) {#data}
+#### `data` (TilejsonResult) {#data}
 
 Required. A valid `TilejsonResult` object.
 
-Use the [rasterTilesetSource](./data-sources.md#rastertilesetsource) to fetch this from the CARTO API.
+Use the [rasterSource](./data-sources.md#rastersource) to fetch this from the CARTO API.
 
 ## Source
 

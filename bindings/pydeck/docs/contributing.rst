@@ -36,7 +36,59 @@ enable pydeck to run on JupyterLab and Jupyter Notebook locally:
         make init
         make prepare-jupyter
 
-At this point, verify that this new local copy of pydeck works by running ``make test``. 
+Verify that this new local copy of pydeck works by running ``make test``.
+
+Local development of @deck.gl/jupyter-widget
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To test local changes to ``@deck.gl/jupyter-widget``, open a separate terminal, rebuild
+and start a local web server as follows:
+
+.. code-block:: bash
+
+        cd deckl.gl/modules/jupyter-widget
+        yarn run build
+        # select any port you wish
+        PYDECK_DEV_PORT=8000
+        python -m http.server $PYDECK_DEV_PORT
+
+Note the ``PYDECK_DEV_PORT`` which will be referenced in the instructions below.
+
+Local development in Jupyter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To test local changes to Pydeck in a Jupyter notebook, set up a virtual environment as
+described above, then start a local Jupyter notebook:
+
+.. code-block:: bash
+
+        jupyter notebook
+
+.. CAUTION::
+   Set ``export PYDECK_DEV_PORT=<port>`` before running the above command to include local changes to ``@deck.gl/jupyter-widget``.
+
+Local development in Google Colab
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To test local changes to Pydeck in a Google Colab notebook, first start a Jupyter runtime with
+additional flags to trust WebSocket connections from the Colab frontend:
+
+.. code-block:: bash
+
+        jupyter notebook \
+            --NotebookApp.allow_origin='https://colab.research.google.com' \
+            --port=8888 \
+            --NotebookApp.port_retries=0
+
+.. CAUTION::
+   Set ``export PYDECK_DEV_PORT=<port>`` before running the above command to include local changes to ``@deck.gl/jupyter-widget``.
+
+After the notebook starts, copy the full (localhost) URL printed to the console. In a Google
+Colab notebook, select *Connect to a local runtime* from the additional connection options
+dropdown, and provide the local URL when prompted. After a reload, the Colab notebook will have
+access to the local Jupyter runtime and its local Pydeck build.
+
+For more information, refer to Google Colab's `documentation for local runtimes <https://research.google.com/colaboratory/local-runtimes.html>`__.
 
 Submitting a PR
 ^^^^^^^^^^^^^^^

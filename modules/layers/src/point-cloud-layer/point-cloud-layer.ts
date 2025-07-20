@@ -1,27 +1,10 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Layer,
   project32,
-  gouraudLighting,
   picking,
   UNIT,
   LayerProps,
@@ -35,11 +18,14 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
+import {Parameters} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
+import {gouraudMaterial} from '@luma.gl/shadertools';
 
+import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
+import source from './point-cloud-layer.wgsl';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 const DEFAULT_NORMAL: [number, number, number] = [0, 0, 1];
@@ -74,7 +60,8 @@ function normalizeData(data) {
     attributes.instanceNormals = attributes.NORMAL;
   }
   if (attributes.COLOR_0) {
-    attributes.instanceColors = attributes.COLOR_0;
+    const {size, value} = attributes.COLOR_0;
+    attributes.instanceColors = {size, type: 'unorm8', value};
   }
 }
 
@@ -140,14 +127,19 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
+    return super.getShaders({
+      vs,
+      fs,
+      source,
+      modules: [project32, gouraudMaterial, picking, pointCloudUniforms]
+    });
   }
 
   initializeState() {
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -160,8 +152,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
@@ -185,16 +176,28 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
     const model = this.state.model!;
-
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const pointCloudProps: PointCloudProps = {
       sizeUnits: UNIT[sizeUnits],
       radiusPixels: pointSize
-    });
+    };
+    model.shaderInputs.setProps({pointCloud: pointCloudProps});
+    if (this.context.device.type === 'webgpu') {
+      // @ts-expect-error TODO - this line was needed during WebGPU port
+      model.instanceCount = this.props.data.length;
+    }
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     // a triangle that minimally cover the unit circle
     const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
@@ -212,6 +215,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
           positions: new Float32Array(positions)
         }
       }),
+      parameters,
       isInstanced: true
     });
   }

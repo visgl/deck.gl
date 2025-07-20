@@ -2,12 +2,9 @@
   margin: var(--widget-margin, 12px);
 }
 
-.deck-widget-button-border {
-  width: var(--button-size, 28px);
-  height: var(--button-size, 28px);
-  box-sizing: border-box;
-  flex-shrink: 0;
-
+/* Common button container styles */
+.deck-widget-button,
+.deck-widget-button-group {
   background: var(--button-stroke, rgba(255, 255, 255, 0.3));
   border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
@@ -17,12 +14,34 @@
   justify-content: center;
 }
 
-.deck-widget-button-border button {
+/* Single button */
+.deck-widget-button {
+  width: var(--button-size, 28px);
+  height: var(--button-size, 28px);
+}
+
+/* Button group */
+.deck-widget-button-group {
+  width: calc(var(--button-size, 28px) - 2);
+  height: calc((var(--button-size, 28px) * 2) - 1);
+  
+  flex-direction: row;
+  padding: 1px;
+  gap: 1px;
+}
+
+.deck-widget-button-group.vertical {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+/* Common button background styles */
+.deck-widget-button-group button,
+.deck-widget-button button {
   width: calc(var(--button-size, 28px) - 2px);
   height: calc(var(--button-size, 28px) - 2px);
-  box-sizing: border-box;
-  flex-shrink: 0;
 
+  box-sizing: border-box;
   background: var(--button-background, #fff);
   backdrop-filter: var(--button-backdrop-filter, unset);
   border: var(--button-inner-stroke, unset);
@@ -34,8 +53,35 @@
   padding: 0;
 }
 
+/* Border radius adjustments for grouped buttons */
+.deck-widget-button-group.vertical > *:not(:last-child),
+.deck-widget-button-group.vertical > *:not(:last-child) > button {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.deck-widget-button-group.vertical > *:not(:first-child),
+.deck-widget-button-group.vertical > *:not(:first-child) > button {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+
+.deck-widget-button-group.horizontal > *:not(:last-child),
+.deck-widget-button-group.horizontal > *:not(:last-child) > button {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.deck-widget-button-group.horizontal > *:not(:first-child),
+.deck-widget-button-group.horizontal > *:not(:first-child) > button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Icon button foreground styles */
 .deck-widget button .deck-widget-icon {
-  background-color: var(--button-icon-idle, rgba(97, 97, 102, 1));
+  background-color: var(--button-icon-idle, #616166);
   background-position: 50%;
   background-repeat: no-repeat;
   display: block;
@@ -44,9 +90,10 @@
 }
 
 .deck-widget button .deck-widget-icon:hover {
-  background-color: var(--button-icon-hover, rgba(24, 24, 26, 1));
+  background-color: var(--button-icon-hover, rgb(24, 24, 26));
 }
 
+/* Fullscreen styles */
 .deck-widget.deck-widget-fullscreen button.deck-widget-fullscreen-enter .deck-widget-icon {
   mask-image: var(
     --icon-fullscreen-enter,
@@ -69,6 +116,16 @@
   );
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.deck-widget.deck-widget-loading button.deck-widget-spinner-icon .deck-widget-icon {
+  animation: spin 1s linear infinite;
+}
+
 .deck-pseudo-fullscreen {
   height: 100% !important;
   left: 0 !important;
@@ -76,4 +133,146 @@
   top: 0 !important;
   width: 100% !important;
   z-index: 99999;
+}
+
+/* Zoom styles */
+.deck-widget.deck-widget-zoom button.deck-widget-zoom-in .deck-widget-icon {
+  mask-image: var(
+    --icon-zoom-in,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"><path d="M12.1029 13.8971H7.89332C7.64334 13.8971 7.43196 13.8105 7.25918 13.6373C7.08639 13.4641 7 13.2521 7 13.0014C7 12.7508 7.08639 12.5396 7.25918 12.368C7.43196 12.1963 7.64334 12.1105 7.89332 12.1105H12.1029V7.90097C12.1029 7.65161 12.1895 7.43912 12.3627 7.26348C12.5359 7.08783 12.7479 7 12.9986 7C13.2492 7 13.4604 7.08783 13.632 7.26348C13.8037 7.43912 13.8895 7.65161 13.8895 7.90097V12.1105H18.099C18.3484 12.1105 18.5609 12.1971 18.7365 12.3703C18.9122 12.5436 19 12.7555 19 13.0062C19 13.2569 18.9122 13.468 18.7365 13.6397C18.5609 13.8113 18.3484 13.8971 18.099 13.8971H13.8895V18.1067C13.8895 18.3567 13.8029 18.568 13.6297 18.7408C13.4564 18.9136 13.2445 19 12.9938 19C12.7431 19 12.532 18.9136 12.3603 18.7408C12.1887 18.568 12.1029 18.3567 12.1029 18.1067V13.8971Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-zoom-in,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"><path d="M12.1029 13.8971H7.89332C7.64334 13.8971 7.43196 13.8105 7.25918 13.6373C7.08639 13.4641 7 13.2521 7 13.0014C7 12.7508 7.08639 12.5396 7.25918 12.368C7.43196 12.1963 7.64334 12.1105 7.89332 12.1105H12.1029V7.90097C12.1029 7.65161 12.1895 7.43912 12.3627 7.26348C12.5359 7.08783 12.7479 7 12.9986 7C13.2492 7 13.4604 7.08783 13.632 7.26348C13.8037 7.43912 13.8895 7.65161 13.8895 7.90097V12.1105H18.099C18.3484 12.1105 18.5609 12.1971 18.7365 12.3703C18.9122 12.5436 19 12.7555 19 13.0062C19 13.2569 18.9122 13.468 18.7365 13.6397C18.5609 13.8113 18.3484 13.8971 18.099 13.8971H13.8895V18.1067C13.8895 18.3567 13.8029 18.568 13.6297 18.7408C13.4564 18.9136 13.2445 19 12.9938 19C12.7431 19 12.532 18.9136 12.3603 18.7408C12.1887 18.568 12.1029 18.3567 12.1029 18.1067V13.8971Z"/></svg>')
+  );
+}
+
+.deck-widget.deck-widget-zoom button.deck-widget-zoom-out .deck-widget-icon {
+  mask-image: var(
+    --icon-zoom-out,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"> wBox="0 0 26 26" fill="none"><path d="M7.89332 13.8866C7.64334 13.8866 7.43196 13.8 7.25918 13.6268C7.08639 13.4535 7 13.2416 7 12.9909C7 12.7403 7.08639 12.5291 7.25918 12.3575C7.43196 12.1858 7.64334 12.1 7.89332 12.1H18.099C18.349 12.1 18.5617 12.1866 18.737 12.3598C18.9123 12.5331 19 12.745 19 12.9957C19 13.2463 18.9123 13.4575 18.737 13.6291C18.5617 13.8008 18.349 13.8866 18.099 13.8866H7.89332Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-zoom-out,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"> wBox="0 0 26 26" fill="none"><path d="M7.89332 13.8866C7.64334 13.8866 7.43196 13.8 7.25918 13.6268C7.08639 13.4535 7 13.2416 7 12.9909C7 12.7403 7.08639 12.5291 7.25918 12.3575C7.43196 12.1858 7.64334 12.1 7.89332 12.1H18.099C18.349 12.1 18.5617 12.1866 18.737 12.3598C18.9123 12.5331 19 12.745 19 12.9957C19 13.2463 18.9123 13.4575 18.737 13.6291C18.5617 13.8008 18.349 13.8866 18.099 13.8866H7.89332Z"/></svg>')
+  );
+}
+
+/* Screenshot styles */
+.deck-widget.deck-widget-screenshot button.deck-widget-camera .deck-widget-icon {
+  mask-image: var(
+    --icon-camera,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-camera,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg>')
+  );
+}
+
+/* Theme widget styles */
+.deck-widget.deck-widget-theme button.deck-widget-sun .deck-widget-icon {
+  mask-image: var(
+    --icon-sun,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="black" stroke="black"><g ><circle cx="12" cy="12" r="6" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></g></svg>')
+  );
+}
+
+.deck-widget.deck-widget-theme button.deck-widget-moon .deck-widget-icon {
+  mask-image: var(
+    --icon-moon,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" ><circle cx="12" cy="12" r="6" fill="black" mask="url(%23moon-mask)" /><mask id="moon-mask" viewBox="0 0 24 24" ><rect x="0" y="0" width="24" height="24" fill="white" /><circle cx="24" cy="10" r="12" fill="black"/></mask></svg>')
+  );
+  -webbit-mask-image: var(
+    --icon-moon,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><circle x="12" cy="12" r="6" /></svg>')
+  );
+}
+
+/* Reset view styles */
+.deck-widget.deck-widget-reset-view button.deck-widget-reset-focus .deck-widget-icon {
+  mask-image: var(
+    --icon-camera,
+      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-camera,
+      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
+  );
+}
+ 
+/* Timeline widget styles */
+.deck-widget.deck-widget-timeline {
+  display: flex;
+  align-items: center;
+  pointer-events: 'auto';
+}
+
+.deck-widget.deck-widget-timeline .timeline-slider {
+  margin: 0 8px;
+  flex: 1;
+  pointer-events: 'auto';
+  cursor: pointer;
+}
+
+.deck-widget.deck-widget-timeline button.timeline-play-pause {
+  background: var(--button-background, #fff);
+  border: var(--button-inner-stroke, unset);
+  border-radius: var(--button-corner-radius, 4px);
+  width: var(--button-size, 28px);
+  height: var(--button-size, 28px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  pointer-events: 'auto';
+}
+
+.deck-widget-spinner-icon {
+  mask-image: var(
+    --loading-icon, 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>')
+  );
+  -webkit-mask-image: var(
+    --loading-icon,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>')
+  );
+}
+
+.deck-widget .deck-widget-scale {
+  background-color: var(--button-icon-idle, #616166);
+  background-position: 50%;
+  display: block;
+}
+
+.deck-widget .deck-widget-geolocate {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/**
+ * Reusable styles for widgets
+ */
+.deck-widget-common {
+  font-family:
+    'SF Mono',
+    /* macOS */
+    'Menlo',
+    /* macOS */
+    'Consolas',
+    /* Windows */
+    'DejaVu Sans Mono',
+    /* Linux */
+    'Liberation Mono',
+    /* Linux */
+    monospace;
+  background-color: var(--button-background, #fff);
+  color: #333;
+}
+
+.deck-widget-stats-container {
+  font-size: 0.7rem;
+  /* Approximately 14px */
+  line-height: 1.6;
 }

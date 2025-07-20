@@ -2,7 +2,6 @@ dist/
 dist-es6/
 test/
 website/build/
-modules/*/typed
 node_modules/
 workers/
 dist.js
@@ -10,5 +9,6 @@ dist.js
 mapbox-gl.js
 .cache
 .docusaurus
-examples/
+examples/layer-browser/
 test/apps/
+bindings/

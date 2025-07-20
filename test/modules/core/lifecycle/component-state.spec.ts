@@ -1,8 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // loaders.gl, MIT license
 
 import test from 'tape-promise/tape';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
+import {load} from '@loaders.gl/core';
+import {CSVLoader} from '@loaders.gl/csv';
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -15,7 +21,7 @@ type TestComponentProps = {
 const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataTransform: data => data,
+  dataTransform: null,
   image: {type: 'image', value: null, async: true}
 };
 
@@ -192,8 +198,7 @@ test('ComponentState#asynchronous async props', async t => {
   t.end();
 });
 
-// TODO - disabled for v9
-test('ComponentState#async props with transform', t => {
+test('ComponentState#async props with transform', async t => {
   const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];
@@ -205,10 +210,11 @@ test('ComponentState#async props with transform', t => {
     0, 0, 255, 255
   ]), width: 2, height: 2};
 
+  // @ts-expect-error
   const state = new ComponentState();
 
   // Simulate Layer class
-  const makeComponent = (props: Record<string, unknown>, onAsyncPropUpdated = () => {}) => {
+  const makeComponent = (props: Record<string, unknown>) => {
     const comp = new TestComponent(props);
     // @ts-expect-error
     comp.internalState = state;
@@ -217,7 +223,6 @@ test('ComponentState#async props with transform', t => {
 
     state.component = comp;
     state.setAsyncProps(comp.props);
-    state.onAsyncPropUpdated = onAsyncPropUpdated;
 
     return comp;
   };
@@ -251,32 +256,34 @@ test('ComponentState#async props with transform', t => {
   t.is(component.props.image, image, 'Unchanged image value is not transformed again');
 
   // Async value for async prop
-  component = makeComponent(
-    {
-      data: Promise.resolve(testData),
-      dataTransform: d => d.slice(0, 2),
-      image: Promise.resolve(testImage)
-    },
-    // @ts-expect-error
-    (propName, value) => {
-      if (propName === 'image') {
-        t.ok(image.destroyed, 'Last texture is deleted');
-        image = component.props.image;
-        t.ok(image, 'Async value for image should be transformed');
-      }
-      if (propName === 'data') {
-        data = component.props.data;
-        t.deepEqual(data, [0, 1], 'Async value for data should be transformed');
-      }
+  const testDataAsync = Promise.resolve(testData);
+  const testImageAsync = Promise.resolve(testImage);
+  component = makeComponent({
+    data: testDataAsync,
+    dataTransform: d => d.slice(0, 2),
+    image: testImageAsync
+  });
 
-      // @ts-expect-error
-      if (!state.isAsyncPropLoading()) {
-        // @ts-expect-error
-        state.finalize();
-        t.ok(image.destroyed, 'Texture is deleted on finalization');
+  await testDataAsync;
+  data = component.props.data;
+  t.deepEqual(data, [0, 1], 'Async value for data should be transformed');
 
-        t.end();
-      }
-    }
-  );
+  await testImageAsync;
+  t.ok(image.destroyed, 'Last texture is deleted');
+  image = component.props.image;
+  t.ok(image, 'Async value for image should be transformed');
+
+  const loadDataAsync = load('./test/data/bart-stations.csv', [CSVLoader]);
+  component = makeComponent({
+    data: loadDataAsync,
+    image: testImageAsync
+  });
+
+  await loadDataAsync;
+  t.is(component.props.image, image, 'Unchanged image value is not transformed again');
+  data = component.props.data;
+  t.ok(Array.isArray(data), 'loaders.gl table object is properly transformed');
+
+  state.finalize();
+  t.ok(image.destroyed, 'Texture is deleted on finalization');
 });

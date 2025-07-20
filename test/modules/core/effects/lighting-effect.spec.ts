@@ -1,5 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
-import {LightingEffect, getShaderAssembler} from '@deck.gl/core';
+import {LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
@@ -13,6 +17,16 @@ const testViewport = new MapView().makeViewport({
   viewState: {longitude: -122, latitude: 37, zoom: 13}
 });
 
+function makeMockContext(device, layerManager) {
+  return {
+    device,
+    deck: {
+      _addDefaultShaderModule: layerManager.addDefaultShaderModule.bind(layerManager),
+      _removeDefaultShaderModule: layerManager.removeDefaultShaderModule.bind(layerManager)
+    }
+  };
+}
+
 test('LightingEffect#constructor', t => {
   const lightingEffect = new LightingEffect();
   t.ok(lightingEffect, 'Lighting effect created');
@@ -21,7 +35,7 @@ test('LightingEffect#constructor', t => {
   t.end();
 });
 
-test('LightingEffect#getModuleParameters', t => {
+test('LightingEffect#getShaderModuleProps', t => {
   const cameraLight = new CameraLight();
   const pointLight = new PointLight();
   const lightingEffect = new LightingEffect({cameraLight, pointLight});
@@ -39,25 +53,28 @@ test('LightingEffect#getModuleParameters', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.preRender(device, {
+  const effectContext = makeMockContext(device, layerManager);
+  lightingEffect.setup(effectContext);
+  lightingEffect.preRender({
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
     pixelRatio: 1
   });
 
-  const {lightSources} = lightingEffect.getModuleParameters(layer);
-  t.is(lightSources.pointLights.length, 2, 'Lights are exported');
+  const {lighting} = lightingEffect.getShaderModuleProps(layer);
+  t.is(lighting.pointLights.length, 2, 'Lights are exported');
   t.ok(
-    equals(lightSources.pointLights[0].position, [0, 0, 0.018310546875]),
+    equals(lighting.pointLights[0].position, [0, 0, 0.018310546875]),
     'Camera light projection is ok'
   );
-  t.deepEqual(lightSources.pointLights[1].color, [255, 0, 0], 'point light color is ok');
+  t.deepEqual(lighting.pointLights[1].color, [255, 0, 0], 'point light color is ok');
 
-  t.equal(lightSources.ambientLight, null, 'Lighting effect getGLParameters is ok');
-  t.deepEqual(lightSources.directionalLights, [], 'Lighting effect getGLParameters is ok');
+  t.equal(lighting.ambientLight, undefined, 'Lighting effect getGLParameters is ok');
+  t.deepEqual(lighting.directionalLights, [], 'Lighting effect getGLParameters is ok');
 
-  lightingEffect.cleanup();
+  lightingEffect.cleanup(effectContext);
+  layerManager.finalize();
   t.end();
 });
 
@@ -89,7 +106,10 @@ test('LightingEffect#preRender, cleanup', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.preRender(device, {
+  const effectContext = makeMockContext(device, layerManager);
+  lightingEffect.setup(effectContext);
+
+  lightingEffect.preRender({
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
@@ -99,38 +119,9 @@ test('LightingEffect#preRender, cleanup', t => {
   t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect creates shadow passes');
   t.ok(lightingEffect.dummyShadowMap, 'LightingEffect creates dummy shadow map');
 
-  lightingEffect.cleanup();
+  lightingEffect.cleanup(effectContext);
+  layerManager.finalize();
   t.equal(lightingEffect.shadowPasses.length, 0, 'LightingEffect creates shadow passes');
   t.notOk(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map');
-  t.end();
-});
-
-test('LightingEffect#shadow module', t => {
-  const dirLight = new DirectionalLight({
-    color: [255, 255, 255],
-    intensity: 1.0,
-    direction: [10, -20, -30],
-    _shadow: true
-  });
-
-  const lightingEffect = new LightingEffect({dirLight});
-  const pipelineFactory = getShaderAssembler();
-  lightingEffect.preRender(device, {
-    layers: [],
-    viewports: [testViewport],
-    onViewportActive: () => {},
-    views: [],
-    pixelRatio: 1
-  });
-  // ts-expect-error private
-  let defaultModules = pipelineFactory._defaultModules;
-  let hasShadow = defaultModules.some(m => m.name === 'shadow');
-  t.equal(hasShadow, true, 'LightingEffect adds shadow module to default correctly');
-
-  lightingEffect.cleanup();
-  // ts-expect-error private
-  defaultModules = pipelineFactory._defaultModules;
-  hasShadow = defaultModules.some(m => m.name === 'shadow');
-  t.equal(hasShadow, false, 'LightingEffect removes shadow module to default correctly');
   t.end();
 });

@@ -1,83 +1,60 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
 
-import {COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
-import {project} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, WebMercatorViewport, OrbitViewport, project} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 
 const TEST_VIEWPORTS = {
-  map: new MapView().makeViewport({
+  map: new WebMercatorViewport({
     width: 800,
     height: 600,
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11,
-      bearing: -30,
-      pitch: 40
-    }
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11,
+    bearing: -30,
+    pitch: 40
   }),
-  mapHighZoom: new MapView().makeViewport({
+  mapHighZoom: new WebMercatorViewport({
     width: 800,
     height: 600,
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 13,
-      bearing: -30,
-      pitch: 40
-    }
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 13,
+    bearing: -30,
+    pitch: 40
   }),
-  infoVis: new OrbitView().makeViewport({
+  infoVis: new OrbitViewport({
     width: 800,
     height: 600,
-    viewState: {
-      rotationX: -30,
-      rotationOrbit: 40,
-      target: [10.285714285714, -3.14159265359],
-      zoom: 8
-    }
+    rotationX: -30,
+    rotationOrbit: 40,
+    target: [10.285714285714, -3.14159265359, 0],
+    zoom: 8
   })
 };
 
 const UNIFORMS = {
   // Projection mode values
-  project_uCoordinateSystem: Number,
-  project_uCenter: Array,
+  coordinateSystem: Number,
+  center: Array,
 
   // Screen size
-  project_uViewportSize: Array,
-  project_uDevicePixelRatio: Number,
+  viewportSize: Array,
+  devicePixelRatio: Number,
 
   // Distance at which screen pixels are projected
-  project_uFocalDistance: Number,
-  project_uCommonUnitsPerWorldUnit: Array,
-  project_uScale: Number, // This is the mercator scale (2 ** zoom)
+  focalDistance: Number,
+  commonUnitsPerWorldUnit: Array,
+  scale: Number, // This is the mercator scale (2 ** zoom)
 
-  project_uModelMatrix: Array,
-  project_uViewProjectionMatrix: Array,
+  modelMatrix: Array,
+  viewProjectionMatrix: Array,
 
   // This is for lighting calculations
-  project_uCameraPosition: Array
+  cameraPosition: Array
 };
 
 // 64 bit support
@@ -106,33 +83,32 @@ function getUniformsError(uniforms, formats) {
 test('project#getUniforms', t => {
   let uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.map});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
+  t.deepEqual(uniforms.center, [0, 0, 0, 0], 'Returned zero projection center');
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.map,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
+  t.deepEqual(uniforms.center, [0, 0, 0, 0], 'Returned zero projection center');
 
   uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
   t.ok(
-    Math.abs(uniforms.project_uCenter[0]) < EPSILON &&
-      Math.abs(uniforms.project_uCenter[1]) < EPSILON,
+    Math.abs(uniforms.center[0]) < EPSILON && Math.abs(uniforms.center[1]) < EPSILON,
     'project center at center of clipspace'
   );
   t.deepEqual(
-    uniforms.project_uCoordinateOrigin,
+    uniforms.coordinateOrigin,
     [-122.42694091796875, 37.75153732299805, 0],
     'Returned shader coordinate origin'
   );
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
 
@@ -143,7 +119,7 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
 
@@ -153,18 +129,16 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
   // CARTESIAN + WEB_MERCATOR_AUTO_OFFSET is rounded in the common space
   t.ok(
-    Math.abs(uniforms.project_uCenter[0]) < EPSILON * 10 &&
-      Math.abs(uniforms.project_uCenter[1]) < EPSILON * 10,
+    Math.abs(uniforms.center[0]) < EPSILON * 10 && Math.abs(uniforms.center[1]) < EPSILON * 10,
     'project center at center of clipspace'
   );
   t.ok(
-    uniforms.project_uCommonUnitsPerWorldUnit[0] === 1 &&
-      uniforms.project_uCommonUnitsPerWorldUnit[1] === 1,
+    uniforms.commonUnitsPerWorldUnit[0] === 1 && uniforms.commonUnitsPerWorldUnit[1] === 1,
     'Returned correct distanceScales'
   );
 
@@ -174,12 +148,12 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(
-    uniforms.project_uCoordinateOrigin,
+    uniforms.coordinateOrigin,
     [10.285714149475098, -3.1415927410125732, 0],
     'Returned shader coordinate origin'
   );
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
 

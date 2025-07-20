@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
@@ -9,7 +13,7 @@ const defaultProps: DefaultProps<GeohashLayerProps> = {
 /**
  * Properties of `GeohashLayer`.
  */
-type GeohashLayerProps<DataT = unknown> = {
+export type GeohashLayerProps<DataT = unknown> = {
   /**
    * Called for each data object to retrieve the geohash string identifier.
    *

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
@@ -16,7 +20,7 @@ class ScreenGridDemo extends Component {
   };
 
   static parameters = {
-    gpuAggregation: {displayName: 'GPU Acceleration', type: 'checkbox', value: false},
+    gpuAggregation: {displayName: 'GPU Acceleration', type: 'checkbox', value: true},
     cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
   };
 

@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {LayerExtension} from '@deck.gl/core';
 
-import {patternShaders} from './shaders.glsl';
+import {FillStyleModuleProps, patternShaders} from './shader-module';
 
 import type {
   Layer,
   LayerContext,
+  DefaultProps,
   Accessor,
   AccessorFunction,
   TextureSource,
@@ -12,15 +17,13 @@ import type {
 } from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
-const defaultProps = {
+const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternEnabled: true,
   fillPatternAtlas: {
     type: 'image',
     value: null,
     async: true,
-    parameters: {
-      minFilter: 'linear'
-    }
+    parameters: {lodMaxClamp: 0}
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,
@@ -70,7 +73,7 @@ export type FillStyleExtensionProps<DataT = any> = {
   getFillPatternOffset?: Accessor<DataT, [number, number]>;
 };
 
-type FillStyleExtensionOptions = {
+export type FillStyleExtensionOptions = {
   /** If `true`, adds the ability to tile the filled area with a pattern.
    * @default false
    */
@@ -111,41 +114,20 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       attributeManager!.add({
         fillPatternFrames: {
           size: 4,
+          stepMode: 'dynamic',
           accessor: 'getFillPattern',
-          transform: extension.getPatternFrame.bind(this),
-          shaderAttributes: {
-            fillPatternFrames: {
-              divisor: 0
-            },
-            instanceFillPatternFrames: {
-              divisor: 1
-            }
-          }
+          transform: extension.getPatternFrame.bind(this)
         },
         fillPatternScales: {
           size: 1,
+          stepMode: 'dynamic',
           accessor: 'getFillPatternScale',
-          defaultValue: 1,
-          shaderAttributes: {
-            fillPatternScales: {
-              divisor: 0
-            },
-            instanceFillPatternScales: {
-              divisor: 1
-            }
-          }
+          defaultValue: 1
         },
         fillPatternOffsets: {
           size: 2,
-          accessor: 'getFillPatternOffset',
-          shaderAttributes: {
-            fillPatternOffsets: {
-              divisor: 0
-            },
-            instanceFillPatternOffsets: {
-              divisor: 1
-            }
-          }
+          stepMode: 'dynamic',
+          accessor: 'getFillPatternOffset'
         }
       });
     }
@@ -177,10 +159,14 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       return;
     }
 
-    const {fillPatternAtlas} = this.props;
-    this.setModuleParameters({
-      fillPatternTexture: fillPatternAtlas || this.state.emptyTexture
-    });
+    const {fillPatternAtlas, fillPatternEnabled, fillPatternMask} = this.props;
+    const fillProps: FillStyleModuleProps = {
+      project: params.shaderModuleProps.project,
+      fillPatternEnabled,
+      fillPatternMask,
+      fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture
+    };
+    this.setShaderModuleProps({fill: fillProps});
   }
 
   finalizeState(this: Layer<FillStyleExtensionProps>) {
