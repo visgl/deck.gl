@@ -60,6 +60,7 @@
         "label": "Writing Custom Layers",
         "items": [
           "developer-guide/custom-layers/README",
+          "developer-guide/custom-layers/layer-attributes",
           "developer-guide/custom-layers/layer-lifecycle",
           "developer-guide/custom-layers/picking",
           "developer-guide/custom-layers/composite-layers",
