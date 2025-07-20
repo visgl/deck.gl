@@ -2,23 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, OrbitView} from '@deck.gl/core';
+import {Deck, OrbitView, OrbitViewState} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {
-  CompassWidget,
-  ZoomWidget,
-  FullscreenWidget,
-  DarkGlassTheme,
-  LightGlassTheme
-} from '@deck.gl/widgets';
+import {GimbalWidget, ZoomWidget, FullscreenWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-/* global window */
-const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
-
 function generateData(count) {
-  const result = [];
+  const result: {position: number[]; color: number[]}[] = [];
   for (let i = 0; i < count; i++) {
     result.push({
       position: [Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50],
@@ -33,7 +23,7 @@ const INITIAL_VIEW_STATE = {
   rotationX: 45,
   rotationOrbit: 0,
   zoom: 0
-};
+} as const satisfies OrbitViewState;
 
 new Deck({
   views: new OrbitView(),
@@ -47,12 +37,9 @@ new Deck({
       getFillColor: d => d.color,
       getRadius: 3,
       pickable: true,
-      autoHighlight: true
+      autoHighlight: true,
+      billboard: true
     })
   ],
-  widgets: [
-    new ZoomWidget({style: widgetTheme}),
-    new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme})
-  ]
+  widgets: [new ZoomWidget(), new GimbalWidget(), new FullscreenWidget()]
 });

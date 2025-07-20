@@ -28,6 +28,7 @@
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
     "test-fast": "ocular-lint && ocular-test node",
+    "test-website": "cd website && yarn && yarn test-build && cd ..",
     "metrics": "ocular-metrics",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
@@ -40,9 +41,9 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "@loaders.gl/polyfills": "^4.2.0",
-    "@luma.gl/core": "^9.1.9",
-    "@luma.gl/effects": "^9.1.9",
-    "@luma.gl/webgpu": "^9.1.9",
+    "@luma.gl/core": "^9.2.0-alpha.5",
+    "@luma.gl/webgpu": "^9.2.0-alpha.5",
+    "@luma.gl/effects": "^9.2.0-alpha.5",
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.0",
     "@vis.gl/dev-tools": "1.0.0-alpha.21",
@@ -53,6 +54,9 @@
     "s2-geometry": "^1.2.10",
     "tap-spec": "^5.0.0",
     "tape-catch": "^1.0.6"
+  },
+  "resolutions": {
+    "wgsl_reflect": "^1.2.0"
   },
   "pre-commit": [
     "test-fast",

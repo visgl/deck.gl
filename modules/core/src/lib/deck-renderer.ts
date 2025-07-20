@@ -83,6 +83,7 @@ export default class DeckRenderer {
     }
 
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+
     if (this.lastPostProcessEffect) {
       renderOpts.clearColor = [0, 0, 0, 0];
       renderOpts.clearCanvas = true;
@@ -90,6 +91,11 @@ export default class DeckRenderer {
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
     if (renderOpts.effects) {
+      if (this.lastPostProcessEffect) {
+        // Interleaved basemap rendering requires clearCanvas to be false
+        renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
+      }
+
       this._postRender(renderOpts.effects, renderOpts);
     }
 
@@ -133,10 +139,13 @@ export default class DeckRenderer {
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
     const size = this.device.canvasContext!.getDrawingBufferSize();
+    const [width, height] = size;
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {
         const texture = this.device.createTexture({
-          sampler: {minFilter: 'linear', magFilter: 'linear'}
+          sampler: {minFilter: 'linear', magFilter: 'linear'},
+          width,
+          height
         });
         renderBuffers.push(
           this.device.createFramebuffer({

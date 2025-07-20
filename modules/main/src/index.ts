@@ -47,8 +47,8 @@ export {
   picking,
   project,
   project32,
-  gouraudLighting,
-  phongLighting,
+  gouraudMaterial,
+  phongMaterial,
   shadow,
   // Internal classes
   LayerManager,
@@ -110,6 +110,7 @@ export {
 } from '@deck.gl/aggregation-layers';
 
 export {
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   QuadkeyLayer,

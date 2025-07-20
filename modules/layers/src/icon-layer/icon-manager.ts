@@ -4,6 +4,7 @@
 
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
+import {AsyncTexture} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -129,8 +130,9 @@ function resizeTexture(
     width,
     height,
     sampler,
-    mipmaps: true
+    mipLevels: device.getMipLevelCount(width, height)
   });
+
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
     sourceTexture: texture,
@@ -139,6 +141,7 @@ function resizeTexture(
     height: oldHeight
   });
   commandEncoder.finish();
+  newTexture.generateMipmapsWebGL();
 
   texture.destroy();
   return newTexture;
@@ -415,10 +418,11 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = this.device.createTexture({
           format: 'rgba8unorm',
+          data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
-          mipmaps: true
+          mipLevels: this.device.getMipLevelCount(this._canvasWidth, this._canvasHeight)
         });
       }
 
@@ -436,6 +440,7 @@ export default class IconManager {
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
+      this._texture?.generateMipmapsWebGL();
     }
   }
 
@@ -477,8 +482,7 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.generateMipmap();
+          this._texture?.generateMipmapsWebGL();
 
           this.onUpdate();
         })

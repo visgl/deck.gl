@@ -145,18 +145,7 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
         offset,
         lineWidthScale, // Re-use widthScale prop to pass cell scale,
         highlightedObjectIndex,
-        highlightColor,
-
-        // RTT requires blending otherwise opacity < 1 blends with black
-        // render target
-        parameters: {
-          blendColorSrcFactor: 'one',
-          blendAlphaSrcFactor: 'one',
-          blendColorDstFactor: 'zero',
-          blendAlphaDstFactor: 'zero',
-          blendColorOperation: 'add',
-          blendAlphaOperation: 'add'
-        }
+        highlightColor
       }
     );
   }

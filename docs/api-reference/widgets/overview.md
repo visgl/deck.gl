@@ -8,12 +8,13 @@ This module contains the following widgets:
 
 - [ZoomWidget](./zoom-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
+<!-- - [GimbalWidget](./gimbal-widget.md) -->
 
 ### Geospatial Widgets
 
 - [CompassWidget](./compass-widget.md)
-- [ScaleWidget](./scale-widget.md)
-- [GeolocateWidget](./geolocate-widget.md)
+<!-- - [ScaleWidget](./scale-widget.md) -->
+<!-- - [GeocoderWidget](./geocoder-widget.md) -->
 
 ### Utility Widgets
 
