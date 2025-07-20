@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {TYPE_KEY, FUNCTION_KEY} from './syntactic-sugar';
+import { TYPE_KEY, FUNCTION_KEY } from './syntactic-sugar';
 // TODO - default parsing code should not be part of the configuration.
-import {parseExpressionString} from './helpers/parse-expression-string';
+import { parseExpressionString } from './helpers/parse-expression-string';
 
 const isObject = value => value && typeof value === 'object';
 
@@ -16,7 +16,7 @@ export type JSONConfigurationProps = {
   enumerations?: Record<string, any>;
   constants: Record<string, unknown>;
   functions: Record<string, Function>;
-  React?: {createElement: (Component, props, children) => any};
+  React?: { createElement: (Component, props, children) => any };
   reactComponents?: Record<string, Function>;
 };
 
@@ -33,7 +33,7 @@ export class JSONConfiguration {
     React: undefined!
   };
 
-  config: Required<JSONConfigurationProps> = {...JSONConfiguration.defaultProps};
+  config: Required<JSONConfigurationProps> = { ...JSONConfiguration.defaultProps };
 
   // TODO - this needs to be simpler, function conversion should be built in
   convertFunction = parseExpressionString;
@@ -46,15 +46,12 @@ export class JSONConfiguration {
 
   merge(configuration: JSONConfigurationProps) {
     for (const key in configuration) {
-      switch (key) {
-        default:
-          // Store configuration as root fields (this.classes, ...)
-          if (key in this.config) {
-            const value = configuration[key];
-            this.config[key] = isObject(this.config[key])
-              ? Object.assign(this.config[key], value)
-              : value;
-          }
+      // Store configuration as root fields (this.classes, ...)
+      if (key in this.config) {
+        const value = configuration[key];
+        this.config[key] = isObject(this.config[key])
+          ? Object.assign(this.config[key], value)
+          : value;
       }
     }
   }

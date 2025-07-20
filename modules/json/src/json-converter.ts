@@ -58,9 +58,9 @@ export class JSONConverter {
     }
   }
 
-  // mergeConfiguration(config: JSONConfiguration) {
-  //   this.configuration.merge(config);
-  // }
+  mergeConfiguration(config: JSONConfiguration) {
+    this.configuration.merge(config.config);
+  }
 
   convert(json: unknown): unknown {
     // Use shallow equality to ensure we only convert same json once
