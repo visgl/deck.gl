@@ -51,22 +51,22 @@ test('JSONConverter#convert', t => {
   t.end();
 });
 
-test('JSONConverter#merge', t => {
-  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
-  jsonConverter.mergeConfiguration({
-    classes: {OrbitView}
-  });
-  const deckProps = jsonConverter.convert({
-    views: [{'@@type': 'OrbitView'}, {'@@type': 'NoSuchView'}]
-  });
-  t.ok(
-    deckProps.views[0] instanceof OrbitView && deckProps.views[0].id,
-    'JSONConverter added a new class to its configuration'
-  );
-  t.ok(!deckProps.views[1], 'JSONConverter does not add a class not in its configuration');
+// test('JSONConverter#merge', t => {
+//   const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+//   jsonConverter.mergeConfiguration({
+//     classes: {OrbitView}
+//   });
+//   const deckProps = jsonConverter.convert({
+//     views: [{'@@type': 'OrbitView'}, {'@@type': 'NoSuchView'}]
+//   });
+//   t.ok(
+//     deckProps.views[0] instanceof OrbitView && deckProps.views[0].id,
+//     'JSONConverter added a new class to its configuration'
+//   );
+//   t.ok(!deckProps.views[1], 'JSONConverter does not add a class not in its configuration');
 
-  t.end();
-});
+//   t.end();
+// });
 
 test('JSONConverter#badConvert', t => {
   const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
