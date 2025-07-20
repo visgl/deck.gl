@@ -194,6 +194,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     ],
     varyings: ['vNext'],
     modules: [springUniforms],
+    // @ts-expect-error TODO fix luma type
     defines: {ATTRIBUTE_TYPE: attributeType},
     parameters: {
       depthCompare: 'always',
@@ -211,7 +212,6 @@ function getTexture(device: Device): Texture {
   return device.createTexture({
     data: new Uint8Array(4),
     format: 'rgba8unorm',
-    mipmaps: false,
     width: 1,
     height: 1
   });

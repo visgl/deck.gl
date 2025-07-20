@@ -93,7 +93,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Controls the resolution of drawing buffer used for rendering.
    * @default `true` (use browser devicePixelRatio)
    */
-  useDevicePixels?: boolean | number;
+  useDevicePixels?: boolean;
   /** Extra pixels around the pointer to include while picking.
    * @default `0`
    */
@@ -374,20 +374,32 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Create a new device
     if (!deviceOrPromise) {
+      const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
+      const canvasContextProps =
+        typeof canvasContextUserProps === 'object' ? canvasContextUserProps : undefined;
+
+      // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
+      // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
+      const deviceProps = {adapters: [], ...props.deviceProps};
+      if (!deviceProps.adapters.includes(webgl2Adapter)) {
+        deviceProps.adapters.push(webgl2Adapter);
+      }
+
       // Create the "best" device supported from the registered adapters
       deviceOrPromise = luma.createDevice({
-        type: 'best-available',
         // luma by default throws if a device is already attached
         // asynchronous device creation could happen after finalize() is called
         // TODO - createDevice should support AbortController?
         _reuseDevices: true,
-        adapters: [webgl2Adapter],
-        ...props.deviceProps,
+        // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
+        type: 'webgl',
+        ...deviceProps,
+        // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
         createCanvasContext: {
+          ...canvasContextProps,
           canvas: this._createCanvas(props),
           useDevicePixels: this.props.useDevicePixels,
-          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
-          autoResize: false
+          autoResize: true
         }
       });
     }
@@ -478,8 +490,46 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       viewState: this._getViewState()
     });
 
+    if (props.device && props.device.id !== this.device?.id) {
+      this.animationLoop?.stop();
+      if (this.canvas !== props.device.canvasContext?.canvas) {
+        // remove old canvas if new one being used and de-register events
+        // TODO (ck): We might not own this canvas depending it's source, so removing it from the
+        // DOM here might be a bit unexpected but it should be ok for most users.
+        this.canvas?.remove();
+        this.eventManager?.destroy();
+
+        // ensure we will re-attach ourselves after createDevice callbacks
+        this.canvas = null;
+      }
+
+      log.log(`recreating animation loop for new device! id=${props.device.id}`);
+
+      this.animationLoop = this._createAnimationLoop(props.device, props);
+      this.animationLoop.start();
+    }
+
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
+
+    if (
+      props.useDevicePixels !== undefined &&
+      this.device?.canvasContext?.canvas instanceof HTMLCanvasElement
+    ) {
+      // TODO: It would be much cleaner if CanvasContext had a setProps method
+      this.device.canvasContext.props.useDevicePixels = props.useDevicePixels;
+      const canvas = this.device.canvasContext.canvas;
+      const entry = {
+        target: canvas,
+        contentBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}],
+        devicePixelContentBoxSize: [
+          {inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}
+        ],
+        borderBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}]
+      };
+      // Access the protected _handleResize method through the canvas context
+      (this.device.canvasContext as any)._handleResize([entry]);
+    }
 
     // If initialized, update sub manager props
     if (this.layerManager) {
@@ -735,6 +785,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.id = props.id || 'deckgl-overlay';
+
+      // TODO this is a hack, investigate why these are not set for the picking
+      // tests
+      if (props.width && typeof props.width === 'number') {
+        canvas.width = props.width;
+      }
+      if (props.height && typeof props.height === 'number') {
+        canvas.height = props.height;
+      }
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
@@ -794,21 +853,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // height,
       gl,
       // debug,
-      onError,
+      onError
       // onBeforeRender,
       // onAfterRender,
-      useDevicePixels
     } = props;
 
     return new AnimationLoop({
       device: deviceOrPromise,
-      useDevicePixels,
       // TODO v9
       autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
-
       onRender: this._onRenderFrame.bind(this),
       // @ts-expect-error typing mismatch: AnimationLoop does not accept onError:null
       onError
@@ -937,6 +993,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+
+      // external canvas may not be in DOM
+      if (!this.canvas.isConnected && this.props.parent) {
+        this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
+      }
       // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
