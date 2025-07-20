@@ -4,7 +4,7 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import BezierGraphLayer from './bezier-graph-layer';
 

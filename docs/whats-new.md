@@ -2,6 +2,29 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.2
+
+Target release date: Q2, 2025
+
+### Widgets
+
+ A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
+
+- [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
+- [ScaleWidget](./api-reference/widgets/scale-widget.md)
+- [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
+- [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
+- [LoadingWidget](./api-reference/widgets/loading-widget.md)
+- [ThemeWidget](./api-reference/widgets/theme-widget.md)
+- [InfoWidget](./api-reference/widgets/info-widget.md)
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+
+Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
+
+### Core
+
+- [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`.
+
 ## deck.gl v9.1
 
 Release date: Jan 21, 2025
@@ -1089,7 +1112,7 @@ For React users, it is now easy to use [react-map-gl](https://visgl.github.io/re
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 <DeckGL ... ContextProvider={MapContext.Provider}>

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable no-shadow */
+
 import {ColorParameters} from '@luma.gl/core';
 import {Layer, log} from '@deck.gl/core';
 import {
@@ -17,12 +19,8 @@ import {
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
-import PointLabelLayer from '../layers/point-label-layer';
-import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
 import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
-
-const collisionFilterExtension = new CollisionFilterExtension();
 
 export type ParseMapResult = {
   /** Map id. */
@@ -94,7 +92,7 @@ function createParametersProp(layerBlending: string, parameters: ColorParameters
     parameters.blendColorOperation = parameters.blendAlphaOperation = 'add';
   } else if (layerBlending === 'subtractive') {
     parameters.blendColorSrcFactor = 'one';
-    parameters.blendColorDstFactor = 'one-minus-dst-color';
+    parameters.blendColorDstFactor = 'one-minus-dst';
     parameters.blendAlphaSrcFactor = 'src-alpha';
     parameters.blendAlphaDstFactor = 'dst-alpha';
     parameters.blendColorOperation = 'subtract';
@@ -343,8 +341,9 @@ function createChannelProps(
     result._subLayerProps = {
       ...result._subLayerProps,
       'points-text': {
-        type: PointLabelLayer,
-        extensions: [collisionFilterExtension],
+        // The following props are injected by default by VectorTileLayer:
+        // type: PointLabelLayer,
+        // extensions: [new CollisionFilterExtension()],
         collisionEnabled: true,
         collisionGroup,
 

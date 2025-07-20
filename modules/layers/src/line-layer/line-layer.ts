@@ -16,10 +16,11 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import {Parameters} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
+import {shaderWGSL as source} from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
@@ -113,7 +114,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, lineUniforms]});
+    return super.getShaders({vs, fs, source, modules: [project32, picking, lineUniforms]});
   }
 
   // This layer has its own wrapLongitude logic
@@ -188,6 +189,15 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -207,6 +217,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
+      parameters,
       isInstanced: true
     });
   }

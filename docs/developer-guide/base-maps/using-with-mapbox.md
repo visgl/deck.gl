@@ -86,7 +86,7 @@ map.once('load', () => {
 
 ```tsx
 import React from 'react';
-import {Map, useControl} from 'react-map-gl';
+import {Map, useControl} from 'react-map-gl/mapbox';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {DeckProps} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -180,8 +180,8 @@ The reverse-controlled option is supported by the pre-built scripting bundle, an
 
 ```tsx
 import React from 'react';
-import {Map} from 'react-map-gl';
-import DeckGL from '@deck.gl/react';
+import {Map} from 'react-map-gl/mapbox';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import 'mapbox-gl/dist/mapbox-gl.css';
 

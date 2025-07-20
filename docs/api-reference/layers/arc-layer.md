@@ -88,7 +88,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ArcLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 

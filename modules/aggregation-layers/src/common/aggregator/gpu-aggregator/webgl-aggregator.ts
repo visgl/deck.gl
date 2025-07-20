@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ModelProps} from '@luma.gl/engine';
 import {WebGLBinSorter} from './webgl-bin-sorter';
 import {WebGLAggregationTransform} from './webgl-aggregation-transform';
 import {_deepEqual as deepEqual, log, BinaryAttribute} from '@deck.gl/core';
@@ -169,6 +168,7 @@ export class WebGLAggregator implements Aggregator {
   }
 
   /** Update aggregation props. Normalize prop values and set change flags. */
+  // eslint-disable-next-line complexity, max-statements
   setProps(props: Partial<WebGLAggregationProps>) {
     const oldProps = this.props;
 

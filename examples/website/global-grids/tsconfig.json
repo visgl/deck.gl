@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "module": "ES2022",
-    "target": "es2022",
+    "target": "es2020",
     "jsx": "react",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   }
 }

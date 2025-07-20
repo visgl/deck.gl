@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {readPackedTypedArray} from './fast-pbf';
+import {TypedArray} from '@loaders.gl/loader-utils';
 
 // KeyValueObject ========================================
 interface KeyValueObject {
@@ -88,7 +89,8 @@ class FieldsReader {
 // NumericProp ========================================
 
 export interface NumericProp {
-  value: number[];
+  value: TypedArray;
+  size: number;
 }
 
 class NumericPropReader {
