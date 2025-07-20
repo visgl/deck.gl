@@ -7,7 +7,11 @@ import {type JSONConfiguration} from '../json-configuration';
 /**
  * Attempt to execute a function
  */
-export function executeFunction(targetFunction, props, configuration: JSONConfiguration) {
+export function executeFunction(
+  targetFunction: string,
+  props: Record<string, unknown>,
+  configuration: JSONConfiguration
+) {
   // Find the function
   const matchedFunction = configuration.config.functions[targetFunction];
 

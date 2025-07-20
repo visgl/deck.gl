@@ -5,10 +5,16 @@
 import {JSONConfiguration} from '../json-configuration';
 import {convertFunctions} from './convert-functions';
 
+type Constructor<T = unknown> = new (props: Record<string, unknown>) => T;
+
 /**
  * Attempt to instantiate a class, either as a class or as a React component
  */
-export function instantiateClass(type, props, configuration: JSONConfiguration) {
+export function instantiateClass(
+  type: string,
+  props: Record<string, unknown>,
+  configuration: JSONConfiguration
+): unknown {
   // Find the class
   const Class = configuration.config.classes[type];
   const Component = configuration.config.reactComponents[type];
@@ -30,7 +36,11 @@ export function instantiateClass(type, props, configuration: JSONConfiguration) 
   return instantiateReactComponent(Component, props, configuration);
 }
 
-function instantiateJavaScriptClass(Class, props, configuration: JSONConfiguration) {
+function instantiateJavaScriptClass<T = unknown>(
+  Class: Constructor<T>,
+  props: Record<string, unknown>,
+  configuration: JSONConfiguration
+): unknown {
   if (configuration.preProcessClassProps) {
     props = configuration.preProcessClassProps(Class, props);
   }

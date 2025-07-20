@@ -58,9 +58,9 @@ export class JSONConverter {
     }
   }
 
-  mergeConfiguration(config: JSONConfiguration) {
-    this.configuration.merge(config);
-  }
+  // mergeConfiguration(config: JSONConfiguration) {
+  //   this.configuration.merge(config);
+  // }
 
   convert(json: unknown): unknown {
     // Use shallow equality to ensure we only convert same json once
@@ -143,7 +143,7 @@ function convertClassInstance(json: Record<string, unknown>, configuration: JSON
 
   props = convertPlainObject(props, configuration);
 
-  return instantiateClass(type, props, configuration);
+  return instantiateClass(type as string, props, configuration);
 }
 
 /** Plain JS object, embed functions. */

@@ -7,15 +7,22 @@ import {get} from '../utils/get';
 // expression-eval: Small jsep based expression parser that supports array and object indexing
 import {parse, eval as evaluate} from '../expression-eval/expression-eval';
 
-const cachedExpressionMap = {
+type AccessorFunction = (row: Record<string, unknown>) => unknown;
+
+const cachedExpressionMap: Record<string, AccessorFunction> = {
+  // Identity function
   '-': object => object
 };
 
-/** Generates an accessor function from a JSON string
+/**
+ * Generates an accessor function from a JSON string
  * '-' : x => x
  * 'a.b.c': x => x.a.b.c
  */
-export function parseExpressionString(propValue, configuration) {
+export function parseExpressionString(
+  propValue: string,
+  configuration?
+): (row: Record<string, unknown>) => unknown {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
