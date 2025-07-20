@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 import type {MapViewState} from '@deck.gl/core';

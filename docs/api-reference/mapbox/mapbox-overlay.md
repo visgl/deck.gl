@@ -36,7 +36,7 @@ map.once('load', () => {
         getPosition: d => d.position,
         getFillColor: [255, 0, 0, 100],
         getRadius: 1000,
-        beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
+        beforeId: 'waterway-label' // In interleaved mode render the layer under map labels. Replace with `slot: 'bottom'` if using Mapbox v3 Standard Style.
       })
     ]
   });
@@ -50,7 +50,7 @@ map.once('load', () => {
 
 ```tsx
 import React from 'react';
-import {Map, useControl} from 'react-map-gl';
+import {Map, useControl} from 'react-map-gl/mapbox';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {DeckProps} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -72,7 +72,7 @@ function App() {
       getPosition: d => d.position,
       getFillColor: [255, 0, 0, 100],
       getRadius: 1000,
-      beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
+      beforeId: 'waterway-label' // In interleaved mode render the layer under map labels. Replace with `slot: 'bottom'` if using Mapbox v3 Standard Style.
     })
   ];
 
@@ -118,7 +118,7 @@ The constructor additionally accepts the following option:
 
 - `interleaved` (boolean) - If `false`, a dedicated deck.gl canvas is added on top of the base map. If `true`, deck.gl layers are inserted into mapbox-gl's layer stack, and share the same `WebGL2RenderingContext` as the base map. Default is `false`. Note that interleaving with basemaps such as mapbox-gl-js v1 that only support WebGL 1 is not supported, see [compatibility](./overview#interleaved-renderer-compatibility).
 
-When using `interleaved: true`, you may optionally add a `beforeId` prop to a layer to specify its position in the Mapbox layer stack. If multiple deck.gl layers have the same `beforeId`, they are rendered in the order that is passed into the `layers` array.
+When using `interleaved: true`, you may control the ordering of layers in the Mapbox/MapLibre stack by optionally add a `beforeId` prop to a layer. If multiple deck.gl layers have the same `beforeId`, they are rendered in the order that is passed into the `layers` array. If used with Mapbox v3 Standard Style, supply a [slot](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to layers instead.
 
 ## Methods
 

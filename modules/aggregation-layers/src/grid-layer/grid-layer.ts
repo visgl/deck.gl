@@ -368,6 +368,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  // eslint-disable-next-line complexity
   updateState(params: UpdateParameters<this>) {
     const aggregatorChanged = super.updateState(params);
 

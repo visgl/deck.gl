@@ -4,7 +4,7 @@
 
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
-import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
+import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
 import {layerUniforms} from './misc/layer-uniforms';
 import geometry from './misc/geometry';
 import project from './project/project';
@@ -14,27 +14,40 @@ import picking from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-const SHADER_HOOKS = [
+const SHADER_HOOKS_GLSL = [
   'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',
   'vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)',
   'vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)',
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function getShaderAssembler() {
+const SHADER_HOOKS_WGSL = [
+  // Not yet supported
+];
+
+export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
     shaderAssembler.addDefaultModule(shaderModule);
   }
-  for (const shaderHook of SHADER_HOOKS) {
+
+  // if we're recreating the device we may have changed language
+  // and must not inject hooks for the wrong language
+  // shaderAssembler.resetShaderHooks();
+  (shaderAssembler as any)._hookFunctions.length = 0;
+
+  // Add shader hooks based on language
+  // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?
+  const shaderHooks = language === 'glsl' ? SHADER_HOOKS_GLSL : SHADER_HOOKS_WGSL;
+  for (const shaderHook of shaderHooks) {
     shaderAssembler.addShaderHook(shaderHook);
   }
 
   return shaderAssembler;
 }
 
-export {layerUniforms, picking, project, project32, gouraudLighting, phongLighting, shadow};
+export {layerUniforms, picking, project, project32, gouraudMaterial, phongMaterial, shadow};
 
 // Useful for custom shader modules
 export type {ProjectProps, ProjectUniforms} from './project/viewport-uniforms';

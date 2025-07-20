@@ -52,7 +52,12 @@ export function resolveLayers(
       layerInstance.setProps(layer.props);
     } else {
       map.addLayer(
-        new MapboxLayer({id: layer.id, deck}),
+        new MapboxLayer({
+          id: layer.id,
+          deck,
+          // @ts-expect-error slot is not defined in LayerProps
+          slot: layer.props.slot
+        }),
         // @ts-expect-error beforeId is not defined in LayerProps
         layer.props.beforeId
       );

@@ -2,126 +2,51 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
-import {
-  FlyToInterpolator,
-  WebMercatorViewport,
-  _GlobeViewport,
-  _deepEqual as deepEqual,
-  _applyStyles as applyStyles,
-  _removeStyles as removeStyles
-} from '@deck.gl/core';
-import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
+import {Widget, FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 
-export type CompassWidgetProps = {
-  id?: string;
-  /**
-   * Widget positioning within the view. Default 'top-left'.
-   */
+export type CompassWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
-  /**
-   * View to attach to and interact with. Required when using multiple views.
-   */
+  /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
-  /**
-   * Tooltip message.
-   */
+  /** Tooltip message. */
   label?: string;
-  /**
-   * Bearing and pitch reset transition duration in ms.
-   */
+  /** Bearing and pitch reset transition duration in ms. */
   transitionDuration?: number;
-  /**
-   * CSS inline style overrides.
-   */
-  style?: Partial<CSSStyleDeclaration>;
-  /**
-   * Additional CSS class.
-   */
-  className?: string;
 };
 
-export class CompassWidget implements Widget<CompassWidgetProps> {
-  id = 'compass';
-  props: CompassWidgetProps;
+export class CompassWidget extends Widget<CompassWidgetProps> {
+  static defaultProps: Required<CompassWidgetProps> = {
+    ...Widget.defaultProps,
+    id: 'compass',
+    placement: 'top-left',
+    viewId: null,
+    label: 'Reset Compass',
+    transitionDuration: 200
+  };
+
+  className = 'deck-widget-compass';
   placement: WidgetPlacement = 'top-left';
   viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
-  deck?: Deck<any>;
-  element?: HTMLDivElement;
 
-  constructor(props: CompassWidgetProps) {
-    this.id = props.id ?? this.id;
-    this.viewId = props.viewId ?? this.viewId;
-    this.placement = props.placement ?? this.placement;
-
-    this.props = {
-      ...props,
-      transitionDuration: props.transitionDuration ?? 200,
-      label: props.label ?? 'Reset Compass',
-      style: props.style ?? {}
-    };
+  constructor(props: CompassWidgetProps = {}) {
+    super(props, CompassWidget.defaultProps);
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<CompassWidgetProps>) {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
-    const oldProps = this.props;
-    const el = this.element;
-    if (el) {
-      if (oldProps.className !== props.className) {
-        if (oldProps.className) el.classList.remove(oldProps.className);
-        if (props.className) el.classList.add(props.className);
-      }
-
-      if (!deepEqual(oldProps.style, props.style, 1)) {
-        removeStyles(el, oldProps.style);
-        applyStyles(el, props.style);
-      }
-    }
-
-    Object.assign(this.props, props);
-    this.update();
+    super.setProps(props);
   }
 
-  onViewportChange(viewport: Viewport) {
-    // no need to update if viewport is the same
-    if (!viewport.equals(this.viewports[viewport.id])) {
-      this.viewports[viewport.id] = viewport;
-      this.update();
-    }
-  }
-
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    const {style, className} = this.props;
-    const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-compass');
-    if (className) element.classList.add(className);
-    applyStyles(element, style);
-    this.deck = deck;
-    this.element = element;
-    this.update();
-    return element;
-  }
-
-  getRotation(viewport?: Viewport) {
-    if (viewport instanceof WebMercatorViewport) {
-      return [-viewport.bearing, viewport.pitch];
-    } else if (viewport instanceof _GlobeViewport) {
-      return [0, Math.max(-80, Math.min(80, viewport.latitude))];
-    }
-    return [0, 0];
-  }
-
-  private update() {
+  onRenderHTML(rootElement: HTMLElement): void {
     const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
-    const viewport = this.viewports[viewId];
-    const [rz, rx] = this.getRotation(viewport);
-    const element = this.element;
-    if (!element) {
-      return;
-    }
+    const widgetViewport = this.viewports[viewId];
+    const [rz, rx] = this.getRotation(widgetViewport);
+
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100}}>
         <button
@@ -138,23 +63,36 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
             <g transform={`rotate(${rz},13,13)`}>
               <path
                 d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
-                fill="var(--icon-compass-north-color, #F05C44)"
+                fill="var(--icon-compass-north-color, rgb(240, 92, 68))"
               />
               <path
                 d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
-                fill="var(--icon-compass-south-color, #C2C2CC)"
+                fill="var(--icon-compass-south-color, rgb(204, 204, 204))"
               />
             </g>
           </svg>
         </button>
       </div>
     );
-    render(ui, element);
+
+    render(ui, rootElement);
   }
 
-  onRemove() {
-    this.deck = undefined;
-    this.element = undefined;
+  onViewportChange(viewport: Viewport) {
+    // no need to update if viewport is the same
+    if (!viewport.equals(this.viewports[viewport.id])) {
+      this.viewports[viewport.id] = viewport;
+      this.updateHTML();
+    }
+  }
+
+  getRotation(viewport?: Viewport) {
+    if (viewport instanceof WebMercatorViewport) {
+      return [-viewport.bearing, viewport.pitch];
+    } else if (viewport instanceof _GlobeViewport) {
+      return [0, Math.max(-80, Math.min(80, viewport.latitude))];
+    }
+    return [0, 0];
   }
 
   handleCompassReset(viewport: Viewport) {

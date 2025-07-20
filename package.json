@@ -28,6 +28,7 @@
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
     "test-fast": "ocular-lint && ocular-test node",
+    "test-website": "cd website && yarn && yarn test-build && cd ..",
     "metrics": "ocular-metrics",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
@@ -40,18 +41,22 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
     "@loaders.gl/polyfills": "^4.2.0",
-    "@luma.gl/webgpu": "^9.1.2",
-    "@luma.gl/effects": "^9.1.2",
+    "@luma.gl/core": "^9.2.0-alpha.5",
+    "@luma.gl/webgpu": "^9.2.0-alpha.5",
+    "@luma.gl/effects": "^9.2.0-alpha.5",
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.0",
-    "jsdom": "^20.0.0",
     "@vis.gl/dev-tools": "1.0.0-alpha.21",
     "@vis.gl/ts-plugins": "1.0.0-alpha.21",
+    "jsdom": "^20.0.0",
     "pre-commit": "^1.2.2",
     "puppeteer": "^22.4.0",
     "s2-geometry": "^1.2.10",
     "tap-spec": "^5.0.0",
     "tape-catch": "^1.0.6"
+  },
+  "resolutions": {
+    "wgsl_reflect": "^1.2.0"
   },
   "pre-commit": [
     "test-fast",
@@ -60,9 +65,9 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {},
   "volta": {
     "node": "18.19.0",
     "yarn": "1.22.19"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }

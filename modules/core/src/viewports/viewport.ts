@@ -45,7 +45,7 @@ export type ViewportOptions = {
   longitude?: number;
   /** Latitude in degrees (geospatial only) */
   latitude?: number;
-  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat */
+  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
   /** Zoom level */
   zoom?: number;

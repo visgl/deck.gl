@@ -17,7 +17,8 @@ import {
 
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
-  mipmaps: false,
+  width: 1,
+  height: 1,
   sampler: {
     minFilter: 'linear',
     magFilter: 'linear',

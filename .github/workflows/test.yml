@@ -38,6 +38,28 @@ jobs:
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+  
+  test-website:
+    runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: volta-cli/action@5c175f92dea6f48441c436471e6479dbc192e194 # v4.2.1
+        with:
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn bootstrap
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Test website build
+        run: |
+          yarn test-website
 
   test-python:
     runs-on: ubuntu-latest

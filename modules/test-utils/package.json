@@ -3,7 +3,7 @@
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-beta.3",
+  "version": "9.2.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -32,14 +32,14 @@
     "src"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.1.2"
+    "@luma.gl/test-utils": "^9.2.0-alpha.5",
+    "@luma.gl/webgl": "^9.2.0-alpha.5"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.1.0",
-    "@luma.gl/core": "^9.1.0",
-    "@luma.gl/engine": "^9.1.0",
-    "@probe.gl/test-utils": "^4.1.0-alpha.2"
+    "@luma.gl/core": "^9.2.0-alpha.5",
+    "@luma.gl/engine": "^9.2.0-alpha.5",
+    "@probe.gl/test-utils": "^4.1.0"
   },
-  "scripts": {},
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
