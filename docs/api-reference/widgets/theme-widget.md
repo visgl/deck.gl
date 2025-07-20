@@ -1,3 +1,4 @@
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import {WidgetPreview} from '@site/src/doc-demos/widgets';
 import {_ThemeWidget} from '@deck.gl/widgets';
 
@@ -12,7 +13,7 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
   :::
 
-<WidgetPreview cls={_ThemeWidget}/>
+<BrowserOnly>{() => <WidgetPreview cls={_ThemeWidget}/>}</BrowserOnly>
 
 ```ts
 import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
@@ -23,19 +24,15 @@ const deck = new Deck({
 });
 ```
 
-## Props
+### `ThemeWidgetProps`
 
-#### `id` (string, optional) {#id}
+The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-Default: `'theme'`
-
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'top-left'`
-
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+- `id` (default `'theme'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
 #### `lightModeTheme` (object, optional) {#lightmodetheme}
 
@@ -66,18 +63,6 @@ Default: `'Light Theme'`
 Tooltip message displayed while hovering a mouse over the widget when fullscreen.
 
 Default: `'Dark Theme'`
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-theme`.
 
 ## Styles
 

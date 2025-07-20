@@ -88,6 +88,7 @@ export const UNIT = {
 
 export const EVENT_HANDLERS = {
   click: 'onClick',
+  dblclick: 'onClick',
   panstart: 'onDragStart',
   panmove: 'onDrag',
   panend: 'onDragEnd'

@@ -515,11 +515,11 @@ new Model({
 Should now become
 
 ```js
-import {picking, project32, gouraudLighting} from '@deck.gl/core';
+import {picking, project32, gouraudMaterial} from '@deck.gl/core';
 /// NEW
 new Model({
   // ...
-  modules: [picking, project32, gouraudLighting]
+  modules: [picking, project32, gouraudMaterial]
 });
 ```
 

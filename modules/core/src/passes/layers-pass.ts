@@ -4,6 +4,7 @@
 
 import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -80,13 +81,13 @@ export default class LayersPass extends Pass {
       parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
-      parameters.scissorRect = options.scissorRect as [number, number, number, number];
+      parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters,
-      clearColor: clearColor as [number, number, number, number],
+      clearColor: clearColor as NumberArray4,
       clearDepth,
       clearStencil
     });
@@ -214,10 +215,24 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  /* eslint-disable max-depth, max-statements */
+  /* eslint-disable max-depth, max-statements, complexity */
   private _drawLayersInViewport(
     renderPass: RenderPass,
-    {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},
+    {
+      layers,
+      shaderModuleProps: globalModuleParameters,
+      pass,
+      target,
+      viewport,
+      view
+    }: {
+      layers: Layer[];
+      shaderModuleProps: Record<string, any>;
+      pass: string;
+      target?: Framebuffer | null;
+      viewport: Viewport;
+      view?: View;
+    },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
@@ -226,18 +241,42 @@ export default class LayersPass extends Pass {
       viewport
     });
 
-    if (view && view.props.clear) {
-      const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      const clearRenderPass = this.device.beginRenderPass({
-        framebuffer: target,
-        parameters: {
-          viewport: glViewport,
-          scissorRect: glViewport
-        },
-        clearColor: clearOpts.color ? [0, 0, 0, 0] : false,
-        clearDepth: clearOpts.depth ? 1 : false
-      });
-      clearRenderPass.end();
+    if (view) {
+      const {clear, clearColor, clearDepth, clearStencil} = view.props;
+      if (clear) {
+        // If clear option is set, clear all buffers by default.
+        let colorToUse: NumberArray4 | false = [0, 0, 0, 0];
+        let depthToUse: number | false = 1.0;
+        let stencilToUse: number | false = 0;
+
+        if (Array.isArray(clearColor)) {
+          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
+            c => c / 255
+          ) as NumberArray4;
+        } else if (clearColor === false) {
+          colorToUse = false;
+        }
+
+        if (clearDepth !== undefined) {
+          depthToUse = clearDepth;
+        }
+
+        if (clearStencil !== undefined) {
+          stencilToUse = clearStencil;
+        }
+
+        const clearRenderPass = this.device.beginRenderPass({
+          framebuffer: target,
+          parameters: {
+            viewport: glViewport,
+            scissorRect: glViewport
+          },
+          clearColor: colorToUse,
+          clearDepth: depthToUse,
+          clearStencil: stencilToUse
+        });
+        clearRenderPass.end();
+      }
     }
 
     // render layers in normal colors
@@ -252,7 +291,7 @@ export default class LayersPass extends Pass {
 
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-      const layer = layers[layerIndex] as Layer;
+      const layer = layers[layerIndex];
       const drawLayerParameters = drawLayerParams[layerIndex];
       const {shouldDrawLayer} = drawLayerParameters;
 
@@ -454,7 +493,7 @@ function getGLViewport(
     viewport
   }: {
     shaderModuleProps: any;
-    target?: Framebuffer;
+    target?: Framebuffer | null;
     viewport: Viewport;
   }
 ): [number, number, number, number] {

@@ -10,15 +10,18 @@ import {
   FullscreenWidget,
   ScreenshotWidget,
   ResetViewWidget,
-  _GeolocateWidget,
+  _GeocoderWidget,
   _ScaleWidget,
   _LoadingWidget,
   _ThemeWidget,
+  _FpsWidget,
   _InfoWidget,
-  _InfoWidget,
+  _ContextMenuWidget,
   _SplitterWidget,
-  DarkGlassTheme,
-  LightGlassTheme
+  _TimelineWidget,
+  _ViewSelectorWidget,
+  _ContextMenuWidget,
+  _StatsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -98,19 +101,44 @@ const deck = new Deck({
     new FullscreenWidget(),
     new ScreenshotWidget(),
     new ResetViewWidget(),
+    new _FpsWidget(),
     new _LoadingWidget(),
-    new _ScaleWidget({placement: 'bottom-left'}),
-    new _GeolocateWidget(),
+    new _ScaleWidget({placement: 'bottom-right'}),
+    new _GeocoderWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
-    new _InfoWidget({mode: 'hover', getTooltip}),
-    new _InfoWidget({mode: 'click', getTooltip}),
-    // new _InfoWidget({mode: 'static', getTooltip})
+    new _ContextMenuWidget({
+      getMenuItems: (info: PickingInfo) => {
+        const name = info.layer?.id === 'airports' && info.object?.properties.name;
+        console.log('Context menu:', name);
+        return (
+          name && [
+            {key: 'airport', label: `${name}`},
+            {key: 'open', label: 'Open in new tab'},
+            {key: 'favorite', label: 'Set as favorite'},
+            {key: 'filter', label: 'Exclude from filter'}
+          ]
+        );
+      }
+    }),
+    // new _InfoWidget({mode: 'hover', getTooltip}),
+    // new _InfoWidget({mode: 'click', getTooltip}),
+    new _TimelineWidget({
+      placement: 'bottom-left',
+      domain: [0, 24],
+      step: 1,
+      value: 0,
+      playInterval: 1000,
+      // eslint-disable-next-line no-console, no-undef
+      onTimeChange: time => console.log('Time:', time)
+    }),
+    new _ViewSelectorWidget(),
     new _SplitterWidget({
       viewId1: 'left-map',
       viewId2: 'right-map',
       orientation: 'vertical',
       onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
-    })
+    }),
+    new _StatsWidget({type: 'luma'})
   ]
 });
 

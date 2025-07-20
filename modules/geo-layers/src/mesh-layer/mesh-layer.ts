@@ -105,8 +105,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       pickFeatureIds: Boolean(featureIds)
     };
     const pbrProjectionProps = {
-      // Needed for PBR (TODO: find better way to get it)
-      camera: model.uniforms.cameraPosition as [number, number, number]
+      camera: this.context.viewport.cameraPosition as [number, number, number]
     };
     model.shaderInputs.setProps({
       pbrProjection: pbrProjectionProps,
@@ -154,6 +153,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
         sampler: pbr_baseColorSampler || emptyTexture,
         hasTexture: Boolean(pbr_baseColorSampler)
       };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const {camera, ...pbrMaterialProps} = {
         ...parsedPBRMaterial.bindings,
         ...parsedPBRMaterial.uniforms

@@ -103,7 +103,7 @@ export default function App({
   return (
     <DeckGL
       deviceProps={{
-        adapters: [webgpuAdapter]
+        adapters: []
         // onError: (error) => {
         //   debugger
         // }

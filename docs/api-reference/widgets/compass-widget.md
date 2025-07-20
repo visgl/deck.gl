@@ -16,25 +16,17 @@ const deck = new Deck({
 });
 ```
 
-## Props
+## Types
 
-#### `id` (string, optional) {#id}
+### `CompassWidgetProps`
 
-Default: `'compass'`
+The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
-
-#### `viewId` (string, optional) {#viewid}
-
-Default: `null`
-
-The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'top-left'`
-
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+- `id` (default `'compass'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
 
 #### `label` (string, optional) {#label}
 
@@ -48,18 +40,6 @@ Default: `200`
 
 Bearing and pitch reset transition duration in milliseconds.
 
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-compass-widget`.
-
 ## Styles
 
 Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
@@ -67,8 +47,8 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 | Name             | Type                     | Default                                        |
 | ---------------- | ------------------------ | ---------------------------------------------- |
 | `--icon-compass` | [SVG Data Url][data_url] | Custom Icon |
-| `--icon-compass-north-color` | [Color](color_url) | `rgb(240, 92, 68)` |
-| `--icon-compass-south-color` | [Color](color_url) | `rgb(204, 204, 204)` |
+| `--icon-compass-north-color` | [Color][color_url] | `rgb(240, 92, 68)` |
+| `--icon-compass-south-color` | [Color][color_url] | `rgb(204, 204, 204)` |
 
 [data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
 [color_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value

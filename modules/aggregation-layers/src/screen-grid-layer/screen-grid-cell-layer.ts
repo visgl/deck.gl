@@ -4,7 +4,7 @@
 
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {Layer, picking, UpdateParameters, DefaultProps, Color} from '@deck.gl/core';
+import {Layer, picking, UpdateParameters, Color} from '@deck.gl/core';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable no-shadow */
+
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {
   TileLayer,

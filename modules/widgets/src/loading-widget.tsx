@@ -4,11 +4,11 @@
 
 import type {WidgetPlacement, Layer} from '@deck.gl/core';
 import {render} from 'preact';
-import {WidgetImpl, WidgetImplProps} from './widget-impl';
-import {IconButton} from './lib/components';
+import {Widget, WidgetProps} from '@deck.gl/core';
+import {IconButton} from './lib/components/icon-button';
 
 /** Properties for the LoadingWidget */
-export type LoadingWidgetProps = WidgetImplProps & {
+export type LoadingWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
   /** Tooltip message when loading */
@@ -18,9 +18,9 @@ export type LoadingWidgetProps = WidgetImplProps & {
 /**
  * A non-interactive widget that shows a loading spinner if any layers are loading data
  */
-export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
+export class LoadingWidget extends Widget<LoadingWidgetProps> {
   static defaultProps: Required<LoadingWidgetProps> = {
-    ...WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'loading',
     placement: 'top-left',
     label: 'Loading layer data'
@@ -31,7 +31,7 @@ export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
   loading = true;
 
   constructor(props: LoadingWidgetProps = {}) {
-    super({...LoadingWidget.defaultProps, ...props});
+    super(props, LoadingWidget.defaultProps);
     this.placement = props.placement ?? this.placement;
   }
 
@@ -40,9 +40,7 @@ export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
     super.setProps(props);
   }
 
-  onRenderHTML() {
-    const element = this.element;
-    if (!element) return;
+  onRenderHTML(rootElement: HTMLElement): void {
     render(
       // TODO(ibgreen) - this should not be a button, but styling is so nested that it is easier to reuse this component.
       this.loading && (
@@ -52,7 +50,7 @@ export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
           onClick={this.handleClick.bind(this)}
         />
       ),
-      element
+      rootElement
     );
   }
 
@@ -60,7 +58,7 @@ export class LoadingWidget extends WidgetImpl<LoadingWidgetProps> {
     const loading = !layers.some(layer => !layer.isLoaded);
     if (loading !== this.loading) {
       this.loading = loading;
-      this.onRenderHTML();
+      this.updateHTML();
     }
   }
 

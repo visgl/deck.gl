@@ -18,6 +18,18 @@ const deck = new Deck({
 });
 ```
 
+## Types
+
+### `LoadingnWidgetProps`
+
+The `LoadingnWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+
+- `id` (default `'loading'`) -  Unique id for this widget
+- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
+- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
+- `style` (default `{}`) - Additional inline styles on the top HTML element.
+- `className` (default `''`) - Additional classnames on the top HTML element.
+
 ## Props
 
 #### `id` (string, optional) {#id}
@@ -39,18 +51,6 @@ Widget position within the view relative to the map container. Valid options are
 Tooltip message displayed while hovering a mouse over the widget.
 
 Default: `'Loading data'`
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-loading`.
 
 ## Source
 
