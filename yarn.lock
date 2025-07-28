@@ -952,20 +952,15 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@9.1.5":
-  version "9.1.5"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.1.5.tgz#475c212d457cd27a10b18fc95f7fd51e346dd1d5"
-  integrity sha512-vxUaL2OAnSxX6h5xgW2fQdlPZjBBXRxQyHfSMYZ2j2iNIKXTuaCGXfbPLuWExLJOPlSLtp34VPualCeAVwr+Ug==
+"@luma.gl/constants@9.1.9", "@luma.gl/constants@~9.1.9":
+  version "9.1.9"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.1.9.tgz#97d6b70fa8b485ecc24d1bb4f1ff09f5fd4168b5"
+  integrity sha512-yc9fml04OeTTcwK+7gmDMxoLQ67j4ZiAFXjmYvPomYyBVzS0NZxTDuwcCBmnxjLOiroOZW8FRRrVc/yOiFug2w==
 
 "@luma.gl/constants@^9.0.0":
   version "9.0.27"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.27.tgz#65d65fa1ea407fd5f74bfa92dfba43261be33763"
   integrity sha512-NBkMim3u0xt4UDe4e69L6E/pq5XNxfX60GrggJDzfilVRfIbx5XwKhBXTyNjjtNEk4oc6uYLHWd/05jGRHcfLg==
-
-"@luma.gl/constants@~9.1.9":
-  version "9.1.9"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.1.9.tgz#97d6b70fa8b485ecc24d1bb4f1ff09f5fd4168b5"
-  integrity sha512-yc9fml04OeTTcwK+7gmDMxoLQ67j4ZiAFXjmYvPomYyBVzS0NZxTDuwcCBmnxjLOiroOZW8FRRrVc/yOiFug2w==
 
 "@luma.gl/core@~9.1.9":
   version "9.1.9"
@@ -9276,6 +9271,11 @@ wgsl_reflect@^1.0.1:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.0.9.tgz#38719f27a3894f039af840e55179de2be988fc4f"
   integrity sha512-NgO7ApUnFuB3FTsBVYjWizMIM5qOawlkSsi7j5BsYlMAW/e+j5IgB2M9kdKzR5lgUECFDSZZK3zdJ4yDmjfx4Q==
+
+wgsl_reflect@^1.2.0:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/wgsl_reflect/-/wgsl_reflect-1.2.3.tgz#41985a661efdd00047e771ad7aa06ab131926a55"
+  integrity sha512-BQWBIsOn411M+ffBxmA6QRLvAOVbuz3Uk4NusxnqC1H7aeQcVLhdA3k2k/EFFFtqVjhz3z7JOOZF1a9hj2tv4Q==
 
 whatwg-encoding@^2.0.0:
   version "2.0.0"
