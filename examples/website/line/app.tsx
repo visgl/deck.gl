@@ -9,6 +9,7 @@ import {DeckGL} from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL = {
@@ -56,12 +57,14 @@ export default function App({
   airports = DATA_URL.AIRPORTS,
   flightPaths = DATA_URL.FLIGHT_PATHS,
   lineWidth = 3,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device
 }: {
   airports?: string | Airport[];
   flightPaths?: string | FlightPath[];
   lineWidth?: number;
   mapStyle?: string;
+  device?: Device;
 }) {
   const layers = [
     new ScatterplotLayer<Airport>({
@@ -92,13 +95,20 @@ export default function App({
         const r = z / 10000;
         return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
       },
-      getWidth: lineWidth,
+      // TODO(ck): WebGPU does not support constant attributes, so force the line layer to
+      // generate a buffer with each value individually, otherwise it will not be updated properly.
+      getWidth: () => lineWidth,
+      updateTriggers: {
+        // then use update triggers so that the function will be re-evaluated when lineWidth changes
+        getWidth: [lineWidth]
+      },
       pickable: true
     })
   ];
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
