@@ -18,6 +18,7 @@ in vec4 instanceIconFrames;
 in float instanceColorModes;
 in vec2 instanceOffsets;
 in vec2 instancePixelOffset;
+in float instanceBillboards;
 
 out float vColorMode;
 out vec4 vColor;
@@ -56,7 +57,7 @@ void main(void) {
   pixelOffset += instancePixelOffset;
   pixelOffset.y *= -1.0;
 
-  if (icon.billboard)  {
+  if (instanceBillboards > 0.0)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
