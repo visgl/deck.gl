@@ -95,13 +95,7 @@ export default function App({
         const r = z / 10000;
         return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
       },
-      // TODO(ck): WebGPU does not support constant attributes, so force the line layer to
-      // generate a buffer with each value individually, otherwise it will not be updated properly.
-      getWidth: () => lineWidth,
-      updateTriggers: {
-        // then use update triggers so that the function will be re-evaluated when lineWidth changes
-        getWidth: [lineWidth]
-      },
+      getWidth: lineWidth,
       pickable: true
     })
   ];
