@@ -51,10 +51,6 @@ type _IconLayerProps<DataT> = {
    * The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
    */
   sizeMaxPixels?: number;
-  /** If `true`, the icon always faces camera. Otherwise the icon faces up (z)
-   * @default true
-   */
-  billboard?: boolean;
   /**
    * Discard pixels whose opacity is below this threshold.
    * A discarded pixel would create a "hole" in the icon that is not considered part of the object.
@@ -86,6 +82,10 @@ type _IconLayerProps<DataT> = {
    * @default [0, 0]
    */
   getPixelOffset?: Accessor<DataT, [number, number]>;
+  /** Icon billboard accessor. If `true`, the icon always faces camera. Otherwise the icon faces up (z)
+   * @default true
+   */
+  getBillboard?: Accessor<DataT, boolean>;
   /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
@@ -103,7 +103,6 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   iconAtlas: {type: 'image', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
-  billboard: true,
   sizeUnits: 'pixels',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
@@ -115,6 +114,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getBillboard: {type: 'accessor', value: true},
 
   onIconError: {type: 'function', value: null, optional: true},
 
@@ -196,6 +196,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
+      },
+      instanceBillboards: {
+        size: 1,
+        type: 'uint8',
+        accessor: 'getBillboard',
+        defaultValue: 1,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        transform: this.getInstanceBillboard
       }
     });
     /* eslint-enable max-len */
@@ -257,7 +265,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}): void {
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, alphaCutoff} = this.props;
     const {iconManager} = this.state;
 
     const iconsTexture = iconManager.getTexture();
@@ -270,7 +278,6 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         sizeScale,
         sizeMinPixels,
         sizeMaxPixels,
-        billboard,
         alphaCutoff
       };
 
@@ -334,5 +341,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   protected getInstanceIconFrame(icon: string): number[] {
     const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
     return [x, y, width, height];
+  }
+
+  protected getInstanceBillboard(billboard: boolean): number {
+    return billboard ? 1 : 0;
   }
 }
