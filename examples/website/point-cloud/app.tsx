@@ -67,16 +67,6 @@ export default function App({
       f64Pos[i] = pos.value[i];
     }
     (data as LASMesh).attributes.POSITION.value = f64Pos;
-    // TODO: (kaapp) lack of transparency support for webgpu requires us to recolour the points
-    // for now. We can remove this once we can create transparent webgpu canvas
-    const color = (data as LASMesh).attributes.COLOR_0;
-    for (let i = 0; i < color.value.length / 4; i++) {
-      const index = i * 4;
-      color.value[index] = 0xff; // r
-      color.value[index + 1] = 0x00; // g
-      color.value[index + 2] = 0x00; // b
-      color.value[index + 3] = 0xff; // a
-    }
     if (header.boundingBox) {
       const [mins, maxs] = header.boundingBox;
       // File contains bounding box info
