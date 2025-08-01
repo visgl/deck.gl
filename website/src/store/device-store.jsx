@@ -18,6 +18,7 @@ export async function createDevice(type) {
       type,
       createCanvasContext: {
         container: 'deckgl-wrapper',
+        alphaMode: 'premultiplied',
         useDevicePixels: true,
         autoResize: true,
         width: undefined,
