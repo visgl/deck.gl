@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
@@ -175,7 +175,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       vs,
       fs,
       source,
-      modules: [project32, picking, scatterplotUniforms]
+      modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 
