@@ -634,7 +634,82 @@ Parameters:
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
+#### `pickObjectAsync` {#pickobjectasync}
+
+Get the closest pickable and visible object at the given screen coordinate.
+
+```ts
+await deck.pickObjectAsync({x, y, radius, layerIds, unproject3D})
+```
+
+Parameters:
+
+* `x` (number) - x position in pixels
+* `y` (number) - y position in pixels
+* `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
+* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
+
+Returns:
+
+* a single [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) object, or `null` if nothing is found.
+
+
+#### `pickMultipleObjectsAsync` {#pickmultipleobjectsasync}
+
+Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
+
+```ts
+await deck.pickMultipleObjectsAsync({x, y, radius, layerIds, depth, unproject3D})
+```
+
+Parameters:
+
+* `x` (number) - x position in pixels
+* `y` (number) - y position in pixels
+* `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
+* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `depth` - Specifies the max number of objects to return. Default `10`.
+* `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
+
+Returns:
+
+* An array of [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects. The array will be empty if no object was picked.
+
+Notes:
+
+* Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
+
+
+#### `pickObjectsAsync` {#pickobjectsasync}
+
+Get all pickable and visible objects within a bounding box.
+
+```ts
+await deck.pickObjectsAsync({x, y, width, height, layerIds, maxObjects})
+```
+
+Parameters:
+
+* `x` (number) - left of the bounding box in pixels
+* `y` (number) - top of the bouding box in pixels
+* `width` (number, optional) - width of the bouding box in pixels. Default `1`.
+* `height` (number, optional) - height of the bouding box in pixels. Default `1`.
+* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `maxObjects` (number, optional) - if specified, limits the number of objects that can be returned.
+
+Returns:
+
+* an array of unique [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects
+
+Notes:
+
+* The query methods are designed to quickly find objects by utilizing the picking buffer.
+* The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
+
 #### `pickObject` {#pickobject}
+
+<img src="https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square" />
 
 Get the closest pickable and visible object at the given screen coordinate.
 
@@ -656,6 +731,8 @@ Returns:
 
 
 #### `pickMultipleObjects` {#pickmultipleobjects}
+
+<img src="https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square" />
 
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
@@ -682,6 +759,8 @@ Notes:
 
 
 #### `pickObjects` {#pickobjects}
+
+<img src="https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square" />
 
 Get all pickable and visible objects within a bounding box.
 

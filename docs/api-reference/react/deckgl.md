@@ -192,6 +192,9 @@ All [Deck](../core/deck.md#methods) methods are available on the `DeckGL` compon
 
 The public methods you can call explicitly list below:
 
+* `pickObjectAsync`
+* `pickMultipleObjectsAsync`
+* `pickObjectsAsync`
 * `pickObject`
 * `pickMultipleObjects`
 * `pickObjects`
