@@ -91,7 +91,10 @@ export default class DeckPicker {
     }
   }
 
-  /** Pick the closest info at given coordinate @returns Promise that resolves with picking info */
+  /**
+   * Pick the closest info at given coordinate
+   * @returns Promise that resolves with picking info
+   */
   pickObjectAsync(opts: PickByPointOptions & PickOperationContext): Promise<{
     result: PickingInfo[];
     emptyInfo: PickingInfo;
@@ -99,17 +102,28 @@ export default class DeckPicker {
     return this._pickClosestObjectAsync(opts);
   }
 
-  /** Get all unique infos within a bounding box */
+  /**
+   * Picks a list of unique infos within a bounding box
+   * @returns Promise that resolves to all unique infos within a bounding box
+   */
   pickObjectsAsync(opts: PickByRectOptions & PickOperationContext): Promise<PickingInfo[]> {
     return this._pickVisibleObjectsAsync(opts);
   }
 
-  /** Pick the closest info at given coordinate @deprecated WebGL only */
+  /**
+   * Pick the closest info at given coordinate
+   * @returns picking info
+   * @deprecated WebGL only - use pickObjectAsync instead
+   */
   pickObject(opts: PickByPointOptions & PickOperationContext) {
     return this._pickClosestObject(opts);
   }
 
-  /** Get all unique infos within a bounding box */
+  /**
+   * Get all unique infos within a bounding box
+   * @returns all unique infos within a bounding box
+   * @deprecated WebGL only - use pickObjectAsync instead
+   */
   pickObjects(opts: PickByRectOptions & PickOperationContext) {
     return this._pickVisibleObjects(opts);
   }
@@ -499,7 +513,6 @@ export default class DeckPicker {
 
   /**
    * Pick all objects within the given bounding box
-   * @deprecated WebGL only
    */
   // eslint-disable-next-line max-statements
   async _pickVisibleObjectsAsync({
@@ -744,6 +757,7 @@ export default class DeckPicker {
     decodePickingColor: null;
   }>;
 
+  // Note: Implementation of the overloaded signatures above, TSDoc is on the signatures
   async _drawAndSampleAsync(
     {
       layers,
@@ -848,6 +862,7 @@ export default class DeckPicker {
     decodePickingColor: null;
   };
 
+  // Note: Implementation of the overloaded signatures above, TSDoc is on the signatures
   _drawAndSample(
     {
       layers,
