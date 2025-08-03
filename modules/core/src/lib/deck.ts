@@ -611,6 +611,66 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /** Query the object rendered on top at a given point */
+  async pickObjectAsync(opts: {
+    /** x position in pixels */
+    x: number;
+    /** y position in pixels */
+    y: number;
+    /** Radius of tolerance in pixels. Default `0`. */
+    radius?: number;
+    /** A list of layer ids to query from. If not specified, then all pickable and visible layers are queried. */
+    layerIds?: string[];
+    /** If `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`. */
+    unproject3D?: boolean;
+  }): Promise<PickingInfo | null> {
+    const infos = (await this._pickAsync('pickObjectAsync', 'pickObject Time', opts)).result;
+    return infos.length ? infos[0] : null;
+  }
+
+  /* Query all rendered objects at a given point */
+  async pickMultipleObjectsAsync(opts: {
+    /** x position in pixels */
+    x: number;
+    /** y position in pixels */
+    y: number;
+    /** Radius of tolerance in pixels. Default `0`. */
+    radius?: number;
+    /** Specifies the max number of objects to return. Default `10`. */
+    depth?: number;
+    /** A list of layer ids to query from. If not specified, then all pickable and visible layers are queried. */
+    layerIds?: string[];
+    /** If `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`. */
+    unproject3D?: boolean;
+  }): Promise<PickingInfo[]> {
+    opts.depth = opts.depth || 10;
+    return (await this._pickAsync('pickObjectAsync', 'pickMultipleObjects Time', opts)).result;
+  }
+
+  /**
+   * Query all objects rendered on top within a bounding box
+   * @note Caveat: this method performs multiple async GPU queries, so state could potentially change between calls.
+   */
+  async pickObjectsAsync(opts: {
+    /** Left of the bounding box in pixels */
+    x: number;
+    /** Top of the bounding box in pixels */
+    y: number;
+    /** Width of the bounding box in pixels. Default `1` */
+    width?: number;
+    /** Height of the bounding box in pixels. Default `1` */
+    height?: number;
+    /** A list of layer ids to query from. If not specified, then all pickable and visible layers are queried. */
+    layerIds?: string[];
+    /** If specified, limits the number of objects that can be returned. */
+    maxObjects?: number | null;
+  }): Promise<PickingInfo[]> {
+    return await this._pickAsync('pickObjectsAsync', 'pickObjects Time', opts);
+  }
+
+  /**
+   * Query the object rendered on top at a given point
+   * @deprecated WebGL only. Use `pickObjectsAsync` instead
+   */
   pickObject(opts: {
     /** x position in pixels */
     x: number;
@@ -627,7 +687,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return infos.length ? infos[0] : null;
   }
 
-  /* Query all rendered objects at a given point */
+  /**
+   * Query all rendered objects at a given point
+   * @deprecated WebGL only. Use `pickObjectsAsync` instead
+   */
   pickMultipleObjects(opts: {
     /** x position in pixels */
     x: number;
@@ -646,7 +709,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this._pick('pickObject', 'pickMultipleObjects Time', opts).result;
   }
 
-  /* Query all objects rendered on top within a bounding box */
+  /**
+   * Query all objects rendered on top within a bounding box
+   * @deprecated WebGL only. Use `pickObjectsAsync` instead
+   */
   pickObjects(opts: {
     /** Left of the bounding box in pixels */
     x: number;
@@ -703,6 +769,47 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   // Private Methods
+
+  private _pickAsync(
+    method: 'pickObjectAsync',
+    statKey: string,
+    opts: PickByPointOptions & {layerIds?: string[]}
+  ): Promise<{
+    result: PickingInfo[];
+    emptyInfo: PickingInfo;
+  }>;
+  private _pickAsync(
+    method: 'pickObjectsAsync',
+    statKey: string,
+    opts: PickByRectOptions & {layerIds?: string[]}
+  ): Promise<PickingInfo[]>;
+
+  private _pickAsync(
+    method: 'pickObjectAsync' | 'pickObjectsAsync',
+    statKey: string,
+    opts: (PickByPointOptions | PickByRectOptions) & {layerIds?: string[]}
+  ) {
+    assert(this.deckPicker);
+
+    const {stats} = this;
+
+    stats.get('Pick Count').incrementCount();
+    stats.get(statKey).timeStart();
+
+    const infos = this.deckPicker[method]({
+      // layerManager, viewManager and effectManager are always defined if deckPicker is
+      layers: this.layerManager!.getLayers(opts),
+      views: this.viewManager!.getViews(),
+      viewports: this.getViewports(opts),
+      onViewportActive: this.layerManager!.activateViewport,
+      effects: this.effectManager!.getEffects(),
+      ...opts
+    });
+
+    stats.get(statKey).timeEnd();
+
+    return infos;
+  }
 
   private _pick(
     method: 'pickObject',
