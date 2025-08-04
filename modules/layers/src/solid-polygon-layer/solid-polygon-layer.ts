@@ -13,6 +13,7 @@ import {solidPolygonUniforms, SolidPolygonProps} from './solid-polygon-layer-uni
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
+import {shaderWGSL as source} from './solid-polygon-layer.wgsl';
 
 import type {
   LayerProps,
@@ -134,13 +135,18 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   };
 
   getShaders(type) {
+    const modules =
+      this.context.device.type === 'webgpu'
+        ? [project32, picking, solidPolygonUniforms]
+        : [project32, gouraudMaterial, picking, solidPolygonUniforms];
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
       fs,
       defines: {
         RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
       },
-      modules: [project32, gouraudMaterial, picking, solidPolygonUniforms]
+      modules,
+      ...(type === 'top' ? {source} : {})
     });
   }
 
@@ -282,7 +288,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   draw({uniforms}) {
-    const {extruded, filled, wireframe, elevationScale} = this.props;
+    const {filled, wireframe, elevationScale} = this.props;
+    const extruded = this.props.extruded && this.context.device.type !== 'webgpu';
     const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
     const renderUniforms: SolidPolygonProps = {
@@ -292,13 +299,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     };
 
     // Note - the order is important
-    if (wireframeModel && wireframe) {
+    if (wireframeModel && wireframe && extruded) {
       wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       wireframeModel.shaderInputs.setProps({solidPolygon: {...renderUniforms, isWireframe: true}});
       wireframeModel.draw(this.context.renderPass);
     }
 
-    if (sideModel && filled) {
+    if (sideModel && filled && extruded) {
       sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       sideModel.draw(this.context.renderPass);
@@ -372,7 +379,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   protected _getModels() {
-    const {id, filled, extruded} = this.props;
+    const {id, filled} = this.props;
+    const extruded = this.props.extruded && this.context.device.type !== 'webgpu';
 
     let topModel;
     let sideModel;
