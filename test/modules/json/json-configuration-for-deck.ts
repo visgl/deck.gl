@@ -13,7 +13,7 @@ export function calculateRadius({base, exponent}) {
   return Math.pow(base, exponent);
 }
 
-export default {
+export const JSON_CONFIGURATION = {
   log,
   // a map of all layers that should be exposes as JSONLayers
   classes: Object.assign({MapView, FirstPersonView}, deckglLayers),

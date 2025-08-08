@@ -4,7 +4,7 @@
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-promise/tape';
-import convertFunctions from '@deck.gl/json/helpers/convert-functions';
+import {_convertFunctions as convertFunctions} from '@deck.gl/json';
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
