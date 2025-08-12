@@ -270,14 +270,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    let hasChanged = false;
-
-    if(this.settings.transform){
-      hasChanged = this.setData({constant: true, value: this.settings.transform.call(context, value)});
-    } 
-    else{
-      hasChanged = this.setData({constant: true, value});
-    }
+    const objectValue = this.settings.transform ? this.settings.transform.call(context, value) : value;
+    const hasChanged = this.setData({constant:true, value: objectValue});
 
     if (hasChanged) {
       this.setNeedsRedraw();
