@@ -208,7 +208,7 @@ export default class AttributeManager {
       } else if (
         typeof accessorName === 'string' &&
         !buffers[accessorName] &&
-        attribute.setConstantValue(props[accessorName])
+        attribute.setConstantValue(props[accessorName], context)
       ) {
         // Step 3: try set constant value from props
         // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
@@ -380,7 +380,7 @@ export default class AttributeManager {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
       // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
-      attribute.setConstantValue(attribute.value);
+      attribute.setConstantValue(attribute.value, context);
       return;
     }
 
