@@ -1040,9 +1040,9 @@
     "@probe.gl/env" "^4.0.8"
 
 "@luma.gl/webgpu@^9.2.0-alpha.5":
-  version "9.2.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.2.0-alpha.5.tgz#8eb88c5d9138ab36268be4ec82fad3ed48db9cc6"
-  integrity sha512-IeMJZUUKDaEdYN1CALronnO1jJMdMmsmZl4Q0i1nx5ONgG6+SfSOdoixEbaWTmInxsL9AlDOy1lVCQ7q4cjYvA==
+  version "9.2.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.2.0-beta.2.tgz#9a301963b307e029cd41a2930fb841efe9e67738"
+  integrity sha512-MZ5T2JEgikSCyE6W/uVfc57LWilMC9J5R2Tj5LsYRnvfmvohqANd5I6Kd4a3z23yDHiWmyxfDx7eYGwSX4fCjA==
   dependencies:
     "@probe.gl/env" "^4.0.8"
     "@webgpu/types" "^0.1.34"
