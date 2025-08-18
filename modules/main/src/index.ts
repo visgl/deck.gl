@@ -44,11 +44,12 @@ export {
   Attribute,
   AttributeManager,
   // Shader modules
+  color,
   picking,
   project,
   project32,
-  gouraudLighting,
-  phongLighting,
+  gouraudMaterial,
+  phongMaterial,
   shadow,
   // Internal classes
   LayerManager,

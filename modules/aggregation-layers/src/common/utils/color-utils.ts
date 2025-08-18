@@ -72,7 +72,6 @@ export function createColorRangeTexture(
 
   return device.createTexture({
     format: 'rgba8unorm',
-    mipmaps: false,
     sampler: {
       minFilter: COLOR_RANGE_FILTER[type],
       magFilter: COLOR_RANGE_FILTER[type],
