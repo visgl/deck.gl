@@ -11,8 +11,8 @@ import {
   getHexagonEdgeLengthAvg,
   H3Index
 } from 'h3-js';
+
 import {
-  AccessorFunction,
   CompositeLayer,
   createIterable,
   Layer,
@@ -21,8 +21,16 @@ import {
   WebMercatorViewport,
   DefaultProps
 } from '@deck.gl/core';
+
 import {ColumnLayer, PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
-import {flattenPolygon, getHexagonCentroid, h3ToPolygon} from './h3-utils';
+
+import {
+  type HexagonAccessor,
+  flattenPolygon,
+  getHexagonCentroid,
+  getIndexAndBaseElevation,
+  h3ToPolygon
+} from './h3-utils';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
 // This constant defines the distance between two hexagons that leads to "significant
@@ -75,7 +83,7 @@ type _H3HexagonLayerProps<DataT> = {
    *
    * By default, it reads `hexagon` property of data object.
    */
-  getHexagon?: AccessorFunction<DataT, string>;
+  getHexagon?: HexagonAccessor<DataT>;
   /**
    * Whether to extrude polygons.
    * @default true
@@ -140,7 +148,7 @@ export default class H3HexagonLayer<
     const {iterable, objectInfo} = createIterable(this.props.data);
     for (const object of iterable) {
       objectInfo.index++;
-      const hexId = this.props.getHexagon(object, objectInfo);
+      const [hexId] = getIndexAndBaseElevation(this.props.getHexagon, object, objectInfo);
       // Take the resolution of the first hex
       const hexResolution = getResolution(hexId);
       if (resolution < 0) {
@@ -296,10 +304,9 @@ export default class H3HexagonLayer<
         data,
         _normalize: false,
         _windingOrder: 'CCW',
-        positionFormat: 'XY',
         getPolygon: (object, objectInfo) => {
-          const hexagonId = getHexagon(object, objectInfo);
-          return flattenPolygon(h3ToPolygon(hexagonId, coverage));
+          const hexagon = getHexagon(object, objectInfo);
+          return flattenPolygon(h3ToPolygon(hexagon, coverage));
         }
       }
     );
@@ -324,7 +331,7 @@ export default class H3HexagonLayer<
         diskResolution: 6, // generate an extruded hexagon as the base geometry
         radius: 1,
         vertices: this.state.vertices,
-        getPosition: getHexagonCentroid.bind(null, getHexagon)
+        getPosition: getHexagonCentroid.bind(null, getHexagon as any)
       }
     );
   }
