@@ -254,7 +254,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   // Use generic value
   // Returns true if successful
-  setConstantValue(value?: any, context?: any): boolean {
+  setConstantValue(context: any, value?: any): boolean {
     // TODO(ibgreen): WebGPU does not support constant values,
     // they will be emulated as buffers instead for now.
     const isWebGPU = this.device.type === 'webgpu';
@@ -270,8 +270,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    const objectValue = this.settings.transform ? this.settings.transform.call(context, value) : value;
-    const hasChanged = this.setData({constant:true, value: objectValue});
+    const transformedValue = this.settings.transform
+      ? this.settings.transform.call(context, value)
+      : value;
+    const hasChanged = this.setData({constant: true, value: transformedValue});
 
     if (hasChanged) {
       this.setNeedsRedraw();
