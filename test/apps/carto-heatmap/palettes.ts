@@ -13,14 +13,14 @@ export const colorPalettes: Record<string, Color[]> = {
     [240, 59, 32],
     [189, 0, 38]
   ],
-  'Viridis': [
+  Viridis: [
     [68, 1, 84],
     [59, 82, 139],
     [33, 145, 140],
     [94, 201, 98],
     [253, 231, 37]
   ],
-  'Plasma': [
+  Plasma: [
     [13, 8, 135],
     [75, 3, 161],
     [125, 3, 168],
@@ -30,7 +30,7 @@ export const colorPalettes: Record<string, Color[]> = {
     [245, 190, 39],
     [253, 231, 37]
   ],
-  'Blues': [
+  Blues: [
     [247, 251, 255],
     [222, 235, 247],
     [198, 219, 239],
@@ -41,7 +41,7 @@ export const colorPalettes: Record<string, Color[]> = {
     [8, 81, 156],
     [8, 48, 107]
   ],
-  'Reds': [
+  Reds: [
     [255, 245, 240],
     [254, 224, 210],
     [252, 187, 161],
@@ -52,7 +52,7 @@ export const colorPalettes: Record<string, Color[]> = {
     [165, 15, 21],
     [103, 0, 13]
   ],
-  'RdYlBu': [
+  RdYlBu: [
     [165, 0, 38],
     [215, 48, 39],
     [244, 109, 67],
@@ -65,7 +65,7 @@ export const colorPalettes: Record<string, Color[]> = {
     [69, 117, 180],
     [49, 54, 149]
   ],
-  'Turbo': [
+  Turbo: [
     [48, 18, 59],
     [61, 82, 161],
     [33, 145, 140],

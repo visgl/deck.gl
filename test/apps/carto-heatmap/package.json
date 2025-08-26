@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "vite --open",
-    "start-local": "vite --config ../vite.config.local.mjs"
+    "start-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build"
   },
   "dependencies": {
     "@carto/api-client": "^0.5.6",

@@ -38,7 +38,7 @@ function App() {
   const [colorDomain, setColorDomain] = useState<[number, number]>([0, 1]);
 
   const dataset = datasets[selectedDataset];
-  
+
   // Create tile JSON source
   // @ts-ignore
   const tilejson = dataset.source({
@@ -57,12 +57,18 @@ function App() {
     colorRange: colorPalettes[selectedPalette]
   });
 
-  const handleDatasetChange = useCallback((event) => setSelectedDataset(event.target.value), []);
-  const handleRadiusChange = useCallback((event) => setRadiusPixels(Number(event.target.value)), []);
-  const handleIntensityChange = useCallback((event) => setIntensity(Number(event.target.value)), []);
-  const handleMinDomainChange = useCallback((event) => setColorDomain([Number(event.target.value), colorDomain[1]]), [colorDomain]);
-  const handleMaxDomainChange = useCallback((event) => setColorDomain([colorDomain[0], Number(event.target.value)]), [colorDomain]);
-  const handlePaletteChange = useCallback((event) => setSelectedPalette(event.target.value), []);
+  const handleDatasetChange = useCallback(event => setSelectedDataset(event.target.value), []);
+  const handleRadiusChange = useCallback(event => setRadiusPixels(Number(event.target.value)), []);
+  const handleIntensityChange = useCallback(event => setIntensity(Number(event.target.value)), []);
+  const handleMinDomainChange = useCallback(
+    event => setColorDomain([Number(event.target.value), colorDomain[1]]),
+    [colorDomain]
+  );
+  const handleMaxDomainChange = useCallback(
+    event => setColorDomain([colorDomain[0], Number(event.target.value)]),
+    [colorDomain]
+  );
+  const handlePaletteChange = useCallback(event => setSelectedPalette(event.target.value), []);
 
   return (
     <>
@@ -80,10 +86,10 @@ function App() {
       >
         <Map mapStyle={MAP_STYLE} />
       </DeckGL>
-      
+
       <div id="control-panel">
         <h3>CARTO Heatmap Test</h3>
-        
+
         <label>Dataset:</label>
         <select value={selectedDataset} onChange={handleDatasetChange}>
           {Object.keys(datasets).map(name => (
@@ -92,11 +98,9 @@ function App() {
             </option>
           ))}
         </select>
-        
-        <div className="description">
-          {dataset.description}
-        </div>
-        
+
+        <div className="description">{dataset.description}</div>
+
         <label>Color Palette:</label>
         <select value={selectedPalette} onChange={handlePaletteChange}>
           {Object.keys(colorPalettes).map(name => (
@@ -105,7 +109,7 @@ function App() {
             </option>
           ))}
         </select>
-        
+
         <div className="color-preview">
           {colorPalettes[selectedPalette].map((color, index) => (
             <div
@@ -122,21 +126,15 @@ function App() {
             />
           ))}
         </div>
-        
+
         <label>Radius (pixels):</label>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={radiusPixels}
-          onChange={handleRadiusChange}
-        />
+        <input type="range" min="0" max="100" value={radiusPixels} onChange={handleRadiusChange} />
         <div className="range-label">
           <span>0</span>
           <span>{radiusPixels}</span>
           <span>100</span>
         </div>
-        
+
         <label>Intensity:</label>
         <input
           type="range"
@@ -151,7 +149,7 @@ function App() {
           <span>{intensity}</span>
           <span>5.0</span>
         </div>
-        
+
         <label>Color Domain Min:</label>
         <input
           type="number"
@@ -161,7 +159,7 @@ function App() {
           value={colorDomain[0]}
           onChange={handleMinDomainChange}
         />
-        
+
         <label>Color Domain Max:</label>
         <input
           type="number"
