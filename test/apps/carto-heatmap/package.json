@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@carto/api-client": "^0.5.6",
+    "deck.gl": "^9.2.0-alpha",
+    "maplibre-gl": "^4.3.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.1.0"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
+}
