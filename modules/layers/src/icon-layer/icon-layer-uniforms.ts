@@ -11,7 +11,6 @@ uniform iconUniforms {
   vec2 iconsTextureDim;
   float sizeMinPixels;
   float sizeMaxPixels;
-  bool billboard;
   highp int sizeUnits;
   float alphaCutoff;
 } icon;
@@ -26,7 +25,6 @@ type IconUniformProps = {
   iconsTextureDim: [number, number];
   sizeMinPixels: number;
   sizeMaxPixels: number;
-  billboard: boolean;
   sizeUnits: number;
   alphaCutoff: number;
 };
@@ -42,7 +40,6 @@ export const iconUniforms = {
     iconsTextureDim: 'vec2<f32>',
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',
-    billboard: 'f32',
     sizeUnits: 'i32',
     alphaCutoff: 'f32'
   }
