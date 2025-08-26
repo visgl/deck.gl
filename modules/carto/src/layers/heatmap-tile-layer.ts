@@ -6,12 +6,14 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
+import {getResolution as getH3Resolution} from 'h3-js';
 
 import {
   Accessor,
   Color,
   CompositeLayer,
   CompositeLayerProps,
+  _deepEqual as deepEqual,
   DefaultProps,
   Layer,
   UpdateParameters
@@ -21,10 +23,12 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 import {HeatmapProps, heatmap} from './heatmap';
 import {RTTModifier, PostProcessModifier} from './post-process-utils';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
+import H3TileLayer, {H3TileLayerProps} from './h3-tile-layer';
 import {TilejsonPropType} from './utils';
 import {TilejsonResult} from '@carto/api-client';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Texture, TextureProps} from '@luma.gl/core';
+import {getHexagonResolution} from './h3-tileset-2d';
 
 const defaultColorRange: Color[] = [
   [255, 255, 178],
@@ -48,11 +52,21 @@ const TEXTURE_PROPS: TextureProps = {
   }
 };
 /**
- * Computes the unit density (inverse of cell area)
+ * Computes the unit density (inverse of cell area) for Quadbin cells
  */
-function unitDensityForCell(cell: bigint) {
+function unitDensityForQuadbinCell(cell: bigint) {
   const cellResolution = Number(getResolution(cell));
   return Math.pow(4.0, cellResolution);
+}
+
+/**
+ * Computes the unit density (inverse of cell area) for H3 cells
+ * H3 hexagons at each resolution level have approximately 1/7th the area of the previous level,
+ * with resolution 0 containing 122 cells.
+ */
+function unitDensityForH3Cell(cellId: string) {
+  const cellResolution = Number(getH3Resolution(cellId));
+  return 122 * Math.pow(7.0, cellResolution);
 }
 
 /**
@@ -121,8 +135,19 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   draw(this, opts: any) {
     const cell = this.props!.data[0];
     const maxDensity = this.props.elevationScale;
+    let unitDensity: number;
+
+    // Check if this is an H3 cell (string) or Quadbin cell (has bigint id)
+    if (typeof cell.id === 'string') {
+      // H3 cell
+      unitDensity = unitDensityForH3Cell(cell.id);
+    } else {
+      // Quadbin cell
+      unitDensity = unitDensityForQuadbinCell(cell.id);
+    }
+
     const densityProps: DensityProps = {
-      factor: unitDensityForCell(cell.id) / maxDensity
+      factor: unitDensity / maxDensity
     };
     for (const model of this.state.models) {
       model.shaderInputs.setProps({density: densityProps});
@@ -134,6 +159,9 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
 
 // Modify QuadbinTileLayer to apply heatmap post process effect
 const PostProcessQuadbinTileLayer = PostProcessModifier(QuadbinTileLayer, heatmap);
+
+// Modify H3TileLayer to apply heatmap post process effect
+const PostProcessH3TileLayer = PostProcessModifier(H3TileLayer, heatmap);
 
 const defaultProps: DefaultProps<HeatmapTileLayerProps> = {
   data: TilejsonPropType,
@@ -152,7 +180,7 @@ export type HeatmapTileLayerProps<DataT = unknown> = _HeatmapTileLayerProps<Data
   };
 
 /** Properties added by HeatmapTileLayer. */
-type _HeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &
+type _HeatmapTileLayerProps<DataT> = (QuadbinTileLayerProps<DataT> | H3TileLayerProps<DataT>) &
   HeatmapProps & {
     /**
      * Specified as an array of colors [color1, color2, ...].
@@ -181,12 +209,14 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
   state!: {
     colorTexture?: Texture;
     isLoaded: boolean;
+    scheme: string | null;
     tiles: Set<Tile2DHeader>;
     viewportChanged?: boolean;
   };
   initializeState() {
     this.state = {
       isLoaded: false,
+      scheme: null,
       tiles: new Set(),
       viewportChanged: false
     };
@@ -201,8 +231,14 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
   updateState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     super.updateState(opts);
-    if (props.colorRange !== oldProps.colorRange) {
+    if (!deepEqual(props.colorRange, oldProps.colorRange, 2)) {
       this._updateColorTexture(opts);
+    }
+
+    const scheme = props.data && 'scheme' in props.data ? props.data.scheme : null;
+    if (this.state.scheme !== scheme) {
+      this.setState({scheme});
+      this.state.tiles.clear();
     }
   }
 
@@ -222,15 +258,18 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
       ...tileLayerProps
     } = this.props;
 
+    const isH3 = this.state.scheme === 'h3';
+
+    const cellLayerName = isH3 ? 'hexagon-cell-hifi' : 'cell';
     // Inject modified polygon layer as sublayer into TileLayer
     const subLayerProps = {
       ..._subLayerProps,
-      cell: {
-        ..._subLayerProps?.cell,
+      [cellLayerName]: {
+        ..._subLayerProps?.[cellLayerName],
         _subLayerProps: {
-          ..._subLayerProps?.cell?._subLayerProps,
+          ..._subLayerProps?.[cellLayerName]?._subLayerProps,
           fill: {
-            ..._subLayerProps?.cell?._subLayerProps?.fill,
+            ..._subLayerProps?.[cellLayerName]?._subLayerProps?.fill,
             type: RTTSolidPolygonLayer
           }
         }
@@ -248,21 +287,35 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
     for (const tile of tiles) {
       const cell = tile.content[0];
-      const unitDensity = unitDensityForCell(cell.id);
+      const unitDensity = isH3 ? unitDensityForH3Cell(cell.id) : unitDensityForQuadbinCell(cell.id);
       maxDensity = Math.max(tile.userData!.maxWeight * unitDensity, maxDensity);
       tileZ = Math.max(tile.zoom, tileZ);
     }
 
-    // Between zoom levels the max density will change, but it isn't possible to know by what factor. Uniform data distributions lead to a factor of 4, while very localized data gives 1. As a heurstic estimate with a value inbetween (2) to make the transitions less obvious.
-    const overzoom = this.context.viewport.zoom - tileZ;
-    const estimatedMaxDensity = maxDensity * Math.pow(2, overzoom);
+    // Between zoom levels the max density will change, but it isn't possible to know by what factor.
+    // For quadbin, uniform data distributions lead to a factor of 4, while very localized data gives 1. As a heuristic estimate with a value inbetween (2) to make the transitions less obvious.
+    // For H3 the same logic applies but the aperture is 7, rather than 4, so a slightly higher factor is used.
+    let estimatedMaxDensity: number;
+    if (isH3) {
+      // For H3, we need to account for the viewport zoom to H3 resolution mapping (see getHexagonResolution())
+      const overzoom = (2 / 3) * this.context.viewport.zoom - tileZ - 2.25;
+      estimatedMaxDensity = maxDensity * Math.pow(2.2, overzoom);
+    } else {
+      const overzoom = this.context.viewport.zoom - tileZ;
+      estimatedMaxDensity = maxDensity * Math.pow(2, overzoom);
+    }
 
     maxDensity = estimatedMaxDensity;
     if (typeof onMaxDensityChange === 'function') {
       onMaxDensityChange(maxDensity);
     }
-    return new PostProcessQuadbinTileLayer(
-      tileLayerProps as Omit<QuadbinTileLayerProps, 'data'>,
+    const PostProcessTileLayer = isH3 ? PostProcessH3TileLayer : PostProcessQuadbinTileLayer;
+    const layerProps = isH3
+      ? (tileLayerProps as Omit<H3TileLayerProps, 'data'>)
+      : (tileLayerProps as Omit<QuadbinTileLayerProps, 'data'>);
+
+    return new PostProcessTileLayer(
+      layerProps,
       this.getSubLayerProps({
         id: 'heatmap',
         data,
@@ -330,18 +383,14 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange);
 
-    if (colorTexture && colorTexture?.width === colorRange.length) {
-      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setTexture2DData({data: colors});
-    } else {
-      colorTexture?.destroy();
-      colorTexture = this.context.device.createTexture({
-        ...TEXTURE_PROPS,
-        data: colors,
-        width: colorRange.length,
-        height: 1
-      });
-    }
+    colorTexture?.destroy();
+    colorTexture = this.context.device.createTexture({
+      ...TEXTURE_PROPS,
+      data: colors,
+      width: colorRange.length,
+      height: 1
+    });
+
     this.setState({colorTexture});
   }
 }
