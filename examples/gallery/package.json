@@ -7,7 +7,9 @@
     "start": "node build-tools/serve",
     "start-local": "node build-tools/serve --version=local"
   },
-  "dependencies": {},
+  "dependencies": {
+    "csurf": "^1.11.0"
+  },
   "devDependencies": {
     "express": "^4.16.3",
     "mustache": "^2.3.0"
