@@ -8,7 +8,7 @@ import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {HeatmapTileLayer, ClusterTileLayer, colorBins} from '@deck.gl/carto';
+import {HeatmapTileLayer, ClusterTileLayer, colorBins, colorContinuous} from '@deck.gl/carto';
 
 import {colorPalettes} from './palettes';
 import {datasets} from './datasets';
@@ -48,7 +48,7 @@ const paletteToCartoColors: Record<string, string> = {
 function App() {
   const [selectedDataset, setSelectedDataset] = useState('H3 Table (Population)');
   const [selectedPalette, setSelectedPalette] = useState('YlOrRd (Default)');
-  const [visualizationType, setVisualizationType] = useState<'heatmap' | 'cluster'>('heatmap');
+  const [visualizationType, setVisualizationType] = useState<'heatmap' | 'cluster'>('cluster');
   const [radiusPixels, setRadiusPixels] = useState(30);
   const [intensity, setIntensity] = useState(2);
   const [colorDomain, setColorDomain] = useState<[number, number]>([0, 1]);
@@ -81,29 +81,27 @@ function App() {
         clusterLevel,
         stroked: false,
         pointRadiusUnits: 'pixels',
-        getFillColor: colorBins({
-          attr: d => {
-            // Use the same weight property as the dataset
-            if (dataset.aggregationExp?.includes('population')) {
-              return d.properties.population_sum;
-            }
-            return d.properties.retail || d.properties.avg_retail || 1;
+        getFillColor: colorContinuous({
+          attr: (d: any, info: any) => {
+            // Normalize value to range 0-1 to match domain
+            const value = d.properties.population_sum;
+            const { min, max } = info.data.attributes.stats?.population_sum || { min: 1, max: 1000 };
+            return normalize(value, min, max);
           },
-          domain: dataset.aggregationExp?.includes('population') 
-            ? [1, 50, 100, 500, 1000, 5000]
-            : [1, 2, 5, 10, 20, 50],
-          colors: paletteToCartoColors[selectedPalette] || 'OrYel'
+          domain: [0, 1],
+          colors: paletteToCartoColors[selectedPalette]
         }),
         getPointRadius: (d: any, info: any) => {
-          const weightProperty = dataset.aggregationExp?.includes('population') ? 'population_sum' : 
-                                dataset.tableName.includes('h3') ? 'retail' : 'avg_retail';
-          const value = d.properties[weightProperty] || 1;
-          const stats = info.data.attributes.stats?.[weightProperty] || {min: 1, max: 1000};
+          const value = d.properties.population_sum;
+          const stats = info.data.attributes.stats?.population_sum;
           const radiusMin = 10;
           const radiusMax = 80;
           const radiusDelta = radiusMax - radiusMin;
           const normalized = normalize(value, stats.min, stats.max);
           return radiusMin + radiusDelta * Math.sqrt(normalized);
+        },
+        updateTriggers: {
+          getFillColor: [selectedPalette]
         }
       });
 
@@ -156,8 +154,6 @@ function App() {
             </option>
           ))}
         </select>
-
-        <div className="description">{dataset.description}</div>
 
         <label>Color Palette:</label>
         <select value={selectedPalette} onChange={handlePaletteChange}>
