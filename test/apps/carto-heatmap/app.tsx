@@ -10,7 +10,7 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {HeatmapTileLayer, ClusterTileLayer, colorBins, colorContinuous} from '@deck.gl/carto';
 
-import {colorPalettes} from './palettes';
+import {getColorRange} from './palette-utils';
 import {datasets} from './datasets';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
@@ -34,20 +34,11 @@ function normalize(value, min, max) {
   return (value - min) / Math.max(1, max - min);
 }
 
-// Map display palette names to valid CARTOColors names
-const paletteToCartoColors: Record<string, string> = {
-  'YlOrRd (Default)': 'OrYel',
-  'Viridis': 'SunsetDark', 
-  'Plasma': 'Purp',
-  'Blues': 'Peach',
-  'Reds': 'BrwnYl',
-  'RdYlBu': 'Earth',
-  'Turbo': 'Temps'
-};
+const cartoColorPalettes = ['OrYel', 'SunsetDark', 'Purp', 'Peach', 'BrwnYl', 'Earth', 'Temps'];
 
 function App() {
   const [selectedDataset, setSelectedDataset] = useState('H3 Table (Population)');
-  const [selectedPalette, setSelectedPalette] = useState('YlOrRd (Default)');
+  const [selectedPalette, setSelectedPalette] = useState('OrYel');
   const [visualizationType, setVisualizationType] = useState<'heatmap' | 'cluster'>('cluster');
   const [radiusPixels, setRadiusPixels] = useState(30);
   const [intensity, setIntensity] = useState(2);
@@ -72,7 +63,7 @@ function App() {
         radiusPixels,
         intensity,
         colorDomain,
-        colorRange: colorPalettes[selectedPalette]
+        colorRange: getColorRange(selectedPalette)
       })
     : new ClusterTileLayer({
         id: 'cluster',
@@ -89,7 +80,7 @@ function App() {
             return normalize(value, min, max);
           },
           domain: [0, 1],
-          colors: paletteToCartoColors[selectedPalette]
+          colors: selectedPalette
         }),
         getPointRadius: (d: any, info: any) => {
           const value = d.properties.population_sum;
@@ -157,7 +148,7 @@ function App() {
 
         <label>Color Palette:</label>
         <select value={selectedPalette} onChange={handlePaletteChange}>
-          {Object.keys(colorPalettes).map(name => (
+          {cartoColorPalettes.map(name => (
             <option key={name} value={name}>
               {name}
             </option>
@@ -165,7 +156,7 @@ function App() {
         </select>
 
         <div className="color-preview">
-          {colorPalettes[selectedPalette].map((color, index) => (
+          {getColorRange(selectedPalette).map((color, index) => (
             <div
               key={index}
               className="color-swatch"
