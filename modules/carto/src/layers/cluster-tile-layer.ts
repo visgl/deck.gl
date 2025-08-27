@@ -24,7 +24,8 @@ import {
   GetPickingInfoParams,
   Layer,
   LayersList,
-  PickingInfo
+  PickingInfo,
+  WebMercatorViewport
 } from '@deck.gl/core';
 
 import {
@@ -40,8 +41,9 @@ import {
 } from './cluster-utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import H3Tileset2D from './h3-tileset-2d';
+import H3Tileset2D, { getHexagonResolution } from './h3-tileset-2d';
 import {getQuadbinPolygon} from './quadbin-utils';
+import {getResolution} from 'h3-js';
 import {getH3Position} from './h3-utils';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 import {TilejsonPropType, mergeLoadOptions} from './utils';
@@ -155,13 +157,11 @@ class ClusterGeoJsonLayer<
     const visibleTiles = this.state.tileset?.tiles.filter((tile: Tile2DHeader) => {
       return tile.isLoaded && tile.content && this.state.tileset!.isTileVisible(tile);
     }) as Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>[];
-    if (!visibleTiles?.length) {
+    if (!visibleTiles?.length || !this.state.tileset) {
       return null;
     }
     visibleTiles.sort((a, b) => b.zoom - a.zoom);
-
-    let {zoom} = this.context.viewport;
-    const {clusterLevel, getPosition, getWeight} = this.props;
+    const {getPosition, getWeight} = this.props;
     const {aggregationCache, scheme} = this.state;
     
     const isH3 = scheme === 'h3';
@@ -170,15 +170,10 @@ class ClusterGeoJsonLayer<
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
     let needsUpdate = false;
 
-    if (isH3) {
-      // For H3, we need to account for the viewport zoom to H3 resolution mapping (see getHexagonResolution())
-      zoom = (2 / 3) * zoom - 1;
-    }
+    const aggregationLevels = this._getAggregationLevels(visibleTiles);
 
     for (const tile of visibleTiles) {
       // Calculate aggregation based on viewport zoom
-      const overZoom = Math.round(zoom - tile.zoom);
-      const aggregationLevels = Math.round(clusterLevel) - overZoom;
       let tileAggregationCache = aggregationCache.get(tile.content);
       if (!tileAggregationCache) {
         tileAggregationCache = new Map();
@@ -245,6 +240,28 @@ class ClusterGeoJsonLayer<
 
   filterSubLayer() {
     return true;
+  }
+
+  private _getAggregationLevels(visibleTiles: Tile2DHeader[]) : number {
+    const isH3 = this.state.scheme === 'h3';
+    const firstTile = visibleTiles[0];
+
+    // Resolution of data present in tiles
+    let tileResolution;
+
+    // Resolution of tiles that should be (eventually) visible in the viewport
+    let viewportResolution;
+    if (isH3) {
+      tileResolution = getResolution(firstTile.id);
+      viewportResolution = getHexagonResolution(this.context.viewport as WebMercatorViewport, (this.state.tileset as any).opts.tileSize);
+    } else {
+      tileResolution = firstTile.zoom;
+      viewportResolution = this.context.viewport.zoom;
+    }
+
+    const resolutionDiff = Math.round(viewportResolution - tileResolution);
+    const aggregationLevels = Math.round(this.props.clusterLevel) - resolutionDiff;
+    return aggregationLevels;
   }
 }
 
