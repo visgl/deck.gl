@@ -94,11 +94,11 @@ function App() {
             : [1, 2, 5, 10, 20, 50],
           colors: paletteToCartoColors[selectedPalette] || 'OrYel'
         }),
-        getPointRadius: d => {
+        getPointRadius: (d: any, info: any) => {
           const weightProperty = dataset.aggregationExp?.includes('population') ? 'population_sum' : 
                                 dataset.tableName.includes('h3') ? 'retail' : 'avg_retail';
           const value = d.properties[weightProperty] || 1;
-          const stats = d.properties.stats?.[weightProperty] || {min: 1, max: 1000};
+          const stats = info.data.attributes.stats?.[weightProperty] || {min: 1, max: 1000};
           const radiusMin = 10;
           const radiusMax = 80;
           const radiusDelta = radiusMax - radiusMin;
