@@ -123,11 +123,24 @@ class ClusterGeoJsonLayer<
     hoveredFeatureId: bigint | string | number | null;
     highlightColor: number[];
     aggregationCache: WeakMap<any, Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>>;
+    scheme: string | null;
   };
 
   initializeState() {
     super.initializeState();
     this.state.aggregationCache = new WeakMap();
+    this.state.scheme = null;
+  }
+
+  updateState(opts) {
+    const {props, oldProps} = opts;
+    super.updateState(opts);
+
+    const scheme = props.data && 'scheme' in props.data ? props.data.scheme : null;
+    if (this.state.scheme !== scheme) {
+      this.setState({scheme});
+      this.state.aggregationCache = new WeakMap(); // Clear cache when scheme changes
+    }
   }
 
   // eslint-disable-next-line max-statements
@@ -142,11 +155,9 @@ class ClusterGeoJsonLayer<
 
     const {zoom} = this.context.viewport;
     const {clusterLevel, getPosition, getWeight} = this.props;
-    const {aggregationCache} = this.state;
+    const {aggregationCache, scheme} = this.state;
     
-    // Determine if we're using H3 or Quadbin scheme
-    const firstCell = visibleTiles[0].content![0];
-    const isH3 = typeof firstCell.id === 'string';
+    const isH3 = scheme === 'h3';
 
     const properties = extractAggregationProperties(visibleTiles[0]);
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
