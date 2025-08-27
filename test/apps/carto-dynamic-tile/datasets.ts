@@ -151,11 +151,19 @@ export default {
     aggregationExp: 'sum(population) as population_sum',
     clusterLevel: 5,
     getFillColor: colorBins({
-      attr: d => d.properties.count,
-      domain: [1, 5, 10, 50, 100, 500],
+      attr: d => d.properties.population_sum,
+      domain: [1, 50, 100, 500, 1000, 5000],
       colors: 'OrYel'
     }),
-    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 10, 100)
+    getPointRadius: d => {
+      const value = d.properties.population_sum;
+      const stats = d.properties.stats?.population_sum || {min: 1, max: 1e6};
+      const radiusMin = 10;
+      const radiusMax = 100;
+      const radiusDelta = radiusMax - radiusMin;
+      const normalized = (value - stats.min) / Math.max(1, stats.max - stats.min);
+      return radiusMin + radiusDelta * Math.sqrt(normalized);
+    }
   },
   'cluster-h3-tileset': {
     source: h3TilesetSource,
@@ -163,11 +171,20 @@ export default {
       'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_h3res8_v1_yearly_v2_tileset',
     clusterLevel: 4,
     getFillColor: colorBins({
-      attr: d => d.properties.count,
-      domain: [1, 5, 10, 50, 100],
+      attr: d => d.properties.retail,
+      domain: [1, 2, 5, 10, 20, 50],
       colors: 'Peach'
     }),
-    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 8, 80)
+    getPointRadius: d => {
+      const value = d.properties.retail;
+      const stats = d.properties.stats?.retail;
+      if (!stats) return 40; // fallback
+      const radiusMin = 8;
+      const radiusMax = 80;
+      const radiusDelta = radiusMax - radiusMin;
+      const normalized = (value - stats.min) / Math.max(1, stats.max - stats.min);
+      return radiusMin + radiusDelta * Math.sqrt(normalized);
+    }
   },
   'cluster-quadbin-table': {
     source: quadbinTableSource,
@@ -175,11 +192,19 @@ export default {
     aggregationExp: 'sum(population) as population_sum',
     clusterLevel: 6,
     getFillColor: colorBins({
-      attr: d => d.properties.count,
-      domain: [1, 5, 10, 50, 100, 500],
+      attr: d => d.properties.population_sum,
+      domain: [1, 50, 100, 500, 1000, 5000],
       colors: 'BrwnYl'
     }),
-    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 12, 120)
+    getPointRadius: d => {
+      const value = d.properties.population_sum;
+      const stats = d.properties.stats?.population_sum || {min: 1, max: 1e6};
+      const radiusMin = 12;
+      const radiusMax = 120;
+      const radiusDelta = radiusMax - radiusMin;
+      const normalized = (value - stats.min) / Math.max(1, stats.max - stats.min);
+      return radiusMin + radiusDelta * Math.sqrt(normalized);
+    }
   },
   'cluster-quadbin-tileset': {
     source: quadbinTilesetSource,
@@ -187,10 +212,19 @@ export default {
       'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset',
     clusterLevel: 5,
     getFillColor: colorBins({
-      attr: d => d.properties.count,
-      domain: [1, 5, 10, 50, 100],
+      attr: d => d.properties.avg_retail,
+      domain: [1, 2, 5, 10, 20, 50],
       colors: 'Purp'
     }),
-    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 10, 100)
+    getPointRadius: d => {
+      const value = d.properties.avg_retail;
+      const stats = d.properties.stats?.avg_retail;
+      if (!stats) return 50; // fallback
+      const radiusMin = 10;
+      const radiusMax = 100;
+      const radiusDelta = radiusMax - radiusMin;
+      const normalized = (value - stats.min) / Math.max(1, stats.max - stats.min);
+      return radiusMin + radiusDelta * Math.sqrt(normalized);
+    }
   }
 };
