@@ -49,6 +49,12 @@ import type {TilejsonResult} from '@carto/api-client';
 
 registerLoaders([CartoSpatialTileLoader]);
 
+function getScheme(tilesetClass: typeof H3Tileset2D | typeof QuadbinTileset2D): 'h3' | 'quadbin' {
+  if (tilesetClass === H3Tileset2D) return 'h3';
+  if (tilesetClass === QuadbinTileset2D) return 'quadbin';
+  throw new Error('Invalid tileset class');
+}
+
 const defaultProps: DefaultProps<ClusterTileLayerProps> = {
   data: TilejsonPropType,
   clusterLevel: {type: 'number', value: 5, min: 1},
@@ -129,18 +135,19 @@ class ClusterGeoJsonLayer<
   initializeState() {
     super.initializeState();
     this.state.aggregationCache = new WeakMap();
-    this.state.scheme = null;
+    this.state.scheme = getScheme(this.props.TilesetClass as any);
   }
 
   updateState(opts) {
-    const {props, oldProps} = opts;
-    super.updateState(opts);
-
-    const scheme = props.data && 'scheme' in props.data ? props.data.scheme : null;
+    const {props} = opts;
+    const scheme = getScheme(props.TilesetClass as any);
     if (this.state.scheme !== scheme) {
-      this.setState({scheme});
-      this.state.aggregationCache = new WeakMap(); // Clear cache when scheme changes
+      // Clear caches when scheme changes
+      this.setState({scheme, tileset: null});
+      this.state.aggregationCache = new WeakMap();
     }
+
+    super.updateState(opts);
   }
 
   // eslint-disable-next-line max-statements
