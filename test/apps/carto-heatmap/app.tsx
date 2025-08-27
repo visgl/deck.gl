@@ -213,11 +213,11 @@ function App() {
         ) : (
           <>
             <label>Cluster Level:</label>
-            <input type="range" min="1" max="10" value={clusterLevel} onChange={handleClusterLevelChange} />
+            <input type="range" min="3" max="8" value={clusterLevel} onChange={handleClusterLevelChange} />
             <div className="range-label">
-              <span>1</span>
+              <span>3</span>
               <span>{clusterLevel}</span>
-              <span>10</span>
+              <span>8</span>
             </div>
           </>
         )}

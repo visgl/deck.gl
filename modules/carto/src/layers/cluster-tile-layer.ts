@@ -160,7 +160,7 @@ class ClusterGeoJsonLayer<
     }
     visibleTiles.sort((a, b) => b.zoom - a.zoom);
 
-    const {zoom} = this.context.viewport;
+    let {zoom} = this.context.viewport;
     const {clusterLevel, getPosition, getWeight} = this.props;
     const {aggregationCache, scheme} = this.state;
     
@@ -169,6 +169,12 @@ class ClusterGeoJsonLayer<
     const properties = extractAggregationProperties(visibleTiles[0]);
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
     let needsUpdate = false;
+
+    if (isH3) {
+      // For H3, we need to account for the viewport zoom to H3 resolution mapping (see getHexagonResolution())
+      zoom = (2 / 3) * zoom - 1;
+    }
+
     for (const tile of visibleTiles) {
       // Calculate aggregation based on viewport zoom
       const overZoom = Math.round(zoom - tile.zoom);
