@@ -34,11 +34,15 @@ import {
   computeAggregationStats,
   extractAggregationProperties,
   ParsedQuadbinCell,
-  ParsedQuadbinTile
+  ParsedQuadbinTile,
+  ParsedH3Cell,
+  ParsedH3Tile
 } from './cluster-utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import QuadbinTileset2D from './quadbin-tileset-2d';
+import H3Tileset2D from './h3-tileset-2d';
 import {getQuadbinPolygon} from './quadbin-utils';
+import {getH3Position} from './h3-utils';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 import {TilejsonPropType, mergeLoadOptions} from './utils';
 import type {TilejsonResult} from '@carto/api-client';
@@ -50,7 +54,13 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
   clusterLevel: {type: 'number', value: 5, min: 1},
   getPosition: {
     type: 'accessor',
-    value: ({id}) => getQuadbinPolygon(id, 0.5).slice(2, 4) as [number, number]
+    value: ({id}) => {
+      // Determine scheme based on ID type: H3 uses string IDs, Quadbin uses bigint IDs
+      if (typeof id === 'string') {
+        return getH3Position(id);
+      }
+      return getQuadbinPolygon(id as bigint, 0.5).slice(2, 4) as [number, number];
+    }
   },
   getWeight: {type: 'accessor', value: 1},
   refinementStrategy: 'no-overlap',
@@ -58,14 +68,14 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
 };
 
 export type ClusterTileLayerPickingInfo<FeaturePropertiesT = {}> = TileLayerPickingInfo<
-  ParsedQuadbinTile<FeaturePropertiesT>,
+  ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>,
   PickingInfo<Feature<Geometry, FeaturePropertiesT>>
 >;
 
 /** All properties supported by ClusterTileLayer. */
 export type ClusterTileLayerProps<FeaturePropertiesT = unknown> =
   _ClusterTileLayerProps<FeaturePropertiesT> &
-    Omit<TileLayerProps<ParsedQuadbinTile<FeaturePropertiesT>>, 'data'>;
+    Omit<TileLayerProps<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>, 'data'>;
 
 /** Properties added by ClusterTileLayer. */
 type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
@@ -84,33 +94,33 @@ type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
 
   /**
    * The (average) position of points in a cell used for clustering.
-   * If not supplied the center of the quadbin cell is used.
+   * If not supplied the center of the quadbin cell or H3 cell is used.
    *
    * @default cell center
    */
-  getPosition?: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>;
+  getPosition?: Accessor<ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>, [number, number]>;
 
   /**
    * The weight of each cell used for clustering.
    *
    * @default 1
    */
-  getWeight?: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, number>;
+  getWeight?: Accessor<ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>, number>;
 };
 
 class ClusterGeoJsonLayer<
   FeaturePropertiesT extends {} = {},
   ExtraProps extends {} = {}
 > extends TileLayer<
-  ParsedQuadbinTile<FeaturePropertiesT>,
+  ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>,
   ExtraProps & Required<_ClusterTileLayerProps<FeaturePropertiesT>>
 > {
   static layerName = 'ClusterGeoJsonLayer';
   static defaultProps = defaultProps;
   state!: TileLayer<FeaturePropertiesT>['state'] & {
     data: BinaryFeatureCollection;
-    clusterIds: bigint[];
-    hoveredFeatureId: bigint | number | null;
+    clusterIds: (bigint | string)[];
+    hoveredFeatureId: bigint | string | number | null;
     highlightColor: number[];
     aggregationCache: WeakMap<any, Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>>;
   };
@@ -124,7 +134,7 @@ class ClusterGeoJsonLayer<
   renderLayers(): Layer | null | LayersList {
     const visibleTiles = this.state.tileset?.tiles.filter((tile: Tile2DHeader) => {
       return tile.isLoaded && tile.content && this.state.tileset!.isTileVisible(tile);
-    }) as Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>[];
+    }) as Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>[];
     if (!visibleTiles?.length) {
       return null;
     }
@@ -133,6 +143,10 @@ class ClusterGeoJsonLayer<
     const {zoom} = this.context.viewport;
     const {clusterLevel, getPosition, getWeight} = this.props;
     const {aggregationCache} = this.state;
+    
+    // Determine if we're using H3 or Quadbin scheme
+    const firstCell = visibleTiles[0].content![0];
+    const isH3 = typeof firstCell.id === 'string';
 
     const properties = extractAggregationProperties(visibleTiles[0]);
     const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
@@ -152,7 +166,8 @@ class ClusterGeoJsonLayer<
         aggregationLevels,
         properties,
         getPosition,
-        getWeight
+        getWeight,
+        isH3 ? 'h3' : 'quadbin'
       );
       needsUpdate ||= didAggregate;
       data.push(...tileAggregationCache.get(aggregationLevels)!);
@@ -186,7 +201,7 @@ class ClusterGeoJsonLayer<
   }
 
   getPickingInfo(params: GetPickingInfoParams): ClusterTileLayerPickingInfo<FeaturePropertiesT> {
-    const info = params.info as TileLayerPickingInfo<ParsedQuadbinTile<FeaturePropertiesT>>;
+    const info = params.info as TileLayerPickingInfo<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>;
 
     if (info.index !== -1) {
       const {data} = params.sourceLayer!.props;
@@ -219,9 +234,10 @@ export default class ClusterTileLayer<
 
   getLoadOptions(): any {
     const tileJSON = this.props.data as TilejsonResult;
+    const scheme = tileJSON && 'scheme' in tileJSON ? tileJSON.scheme : 'quadbin';
     return mergeLoadOptions(super.getLoadOptions(), {
       fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
-      cartoSpatialTile: {scheme: 'quadbin'}
+      cartoSpatialTile: {scheme}
     });
   }
 
@@ -230,13 +246,16 @@ export default class ClusterTileLayer<
     if (!tileJSON) return null;
 
     const {tiles: data, maxresolution: maxZoom} = tileJSON;
+    const isH3 = tileJSON && 'scheme' in tileJSON && tileJSON.scheme === 'h3';
+    const TilesetClass = isH3 ? H3Tileset2D : QuadbinTileset2D;
+    
     return [
       // @ts-ignore
       new ClusterGeoJsonLayer(this.props, {
         id: `cluster-geojson-layer-${this.props.id}`,
         data,
         // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: QuadbinTileset2D as any,
+        TilesetClass: TilesetClass as any,
         maxZoom,
         loadOptions: this.getLoadOptions()
       })

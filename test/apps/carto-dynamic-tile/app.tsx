@@ -8,7 +8,7 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {H3TileLayer, RasterTileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
+import {H3TileLayer, RasterTileLayer, QuadbinTileLayer, VectorTileLayer, ClusterTileLayer} from '@deck.gl/carto';
 
 import {query} from '@carto/api-client';
 import datasets from './datasets';
@@ -31,6 +31,8 @@ function Root() {
 
   if (dataset.includes('boundary')) {
     layers = [useBoundaryLayer(datasource)];
+  } else if (dataset.includes('cluster')) {
+    layers = [useClusterLayer(datasource)];
   } else if (dataset.includes('h3')) {
     layers = [useH3Layer(datasource)];
   } else if (dataset.includes('raster')) {
@@ -140,6 +142,30 @@ function useQuadbinLayer(datasource) {
     pickable: true,
     stroked: false,
     getFillColor
+  });
+}
+
+function useClusterLayer(datasource) {
+  const {getFillColor, getPointRadius, source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName, clusterLevel} =
+    datasource;
+  const tilejson = source({
+    ...globalOptions,
+    aggregationExp,
+    columns,
+    spatialDataColumn,
+    sqlQuery,
+    tableName
+  });
+
+  return new ClusterTileLayer({
+    id: 'carto-cluster',
+    data: tilejson,
+    pickable: true,
+    stroked: false,
+    clusterLevel: clusterLevel || 5,
+    getWeight: d => d.properties.population_sum || d.properties.retail || 1,
+    getFillColor,
+    getPointRadius: getPointRadius || 50
   });
 }
 

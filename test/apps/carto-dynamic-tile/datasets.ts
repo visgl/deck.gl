@@ -14,9 +14,10 @@ import {
   quadbinQuerySource,
   vectorTableSource,
   vectorTilesetSource,
-  vectorQuerySource,
-  colorBins
-} from '@deck.gl/carto';
+  vectorQuerySource
+} from '@carto/api-client';
+
+import {colorBins} from '@deck.gl/carto';
 
 export default {
   'boundary-query': {
@@ -143,5 +144,53 @@ export default {
       domain: [15000, 25000, 35000, 45000, 60000],
       colors: 'OrYel'
     })
+  },
+  'cluster-h3-table': {
+    source: h3TableSource,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2',
+    aggregationExp: 'sum(population) as population_sum',
+    clusterLevel: 5,
+    getFillColor: colorBins({
+      attr: d => d.properties.count,
+      domain: [1, 5, 10, 50, 100, 500],
+      colors: 'OrYel'
+    }),
+    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 10, 100)
+  },
+  'cluster-h3-tileset': {
+    source: h3TilesetSource,
+    tableName:
+      'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_h3res8_v1_yearly_v2_tileset',
+    clusterLevel: 4,
+    getFillColor: colorBins({
+      attr: d => d.properties.count,
+      domain: [1, 5, 10, 50, 100],
+      colors: 'Peach'
+    }),
+    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 8, 80)
+  },
+  'cluster-quadbin-table': {
+    source: quadbinTableSource,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
+    aggregationExp: 'sum(population) as population_sum',
+    clusterLevel: 6,
+    getFillColor: colorBins({
+      attr: d => d.properties.count,
+      domain: [1, 5, 10, 50, 100, 500],
+      colors: 'BrwnYl'
+    }),
+    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 12, 120)
+  },
+  'cluster-quadbin-tileset': {
+    source: quadbinTilesetSource,
+    tableName:
+      'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset',
+    clusterLevel: 5,
+    getFillColor: colorBins({
+      attr: d => d.properties.count,
+      domain: [1, 5, 10, 50, 100],
+      colors: 'Purp'
+    }),
+    getPointRadius: d => Math.min(Math.sqrt(d.properties.count) * 10, 100)
   }
 };
