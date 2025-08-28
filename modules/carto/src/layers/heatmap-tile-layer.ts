@@ -28,7 +28,6 @@ import {TilejsonPropType} from './utils';
 import {TilejsonResult} from '@carto/api-client';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Texture, TextureProps} from '@luma.gl/core';
-import {getHexagonResolution} from './h3-tileset-2d';
 
 const defaultColorRange: Color[] = [
   [255, 255, 178],
@@ -134,23 +133,14 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
 
   draw(this, opts: any) {
     const cell = this.props!.data[0];
-    const maxDensity = this.props.elevationScale;
-    let unitDensity: number;
-
-    // Check if this is an H3 cell (string) or Quadbin cell (has bigint id)
-    if (typeof cell.id === 'string') {
-      // H3 cell
-      unitDensity = unitDensityForH3Cell(cell.id);
-    } else {
-      // Quadbin cell
-      unitDensity = unitDensityForQuadbinCell(cell.id);
-    }
-
-    const densityProps: DensityProps = {
-      factor: unitDensity / maxDensity
-    };
-    for (const model of this.state.models) {
-      model.shaderInputs.setProps({density: densityProps});
+    if (cell) {
+      const maxDensity = this.props.elevationScale;
+      const { scheme } = this.parent.parent.parent.parent.parent.state;
+      const unitDensity = scheme === 'h3' ? unitDensityForH3Cell(cell.id) : unitDensityForQuadbinCell(cell.id);
+      const densityProps: DensityProps = { factor: unitDensity / maxDensity };
+      for (const model of this.state.models) {
+        model.shaderInputs.setProps({ density: densityProps });
+      }
     }
 
     super.draw(opts);
@@ -293,19 +283,21 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     }
 
     // Between zoom levels the max density will change, but it isn't possible to know by what factor.
-    // For quadbin, uniform data distributions lead to a factor of 4, while very localized data gives 1. As a heuristic estimate with a value inbetween (2) to make the transitions less obvious.
-    // For H3 the same logic applies but the aperture is 7, rather than 4, so a slightly higher factor is used.
-    let estimatedMaxDensity: number;
+    // As a heuristic, an estimatedGrowthFactor makes the transitions less obvious.
+    // For quadbin, uniform data distributions lead to an estimatedGrowthFactor of 4, while very localized data gives 1.
+    // For H3 the same logic applies but the aperture is 7, rather than 4, so a slightly higher estimatedGrowthFactor is used.
+    let overzoom: number;
+    let estimatedGrowthFactor: number;
     if (isH3) {
       // For H3, we need to account for the viewport zoom to H3 resolution mapping (see getHexagonResolution())
-      const overzoom = (2 / 3) * this.context.viewport.zoom - tileZ - 2.25;
-      estimatedMaxDensity = maxDensity * Math.pow(2.2, overzoom);
+      overzoom = (2 / 3) * this.context.viewport.zoom - tileZ - 2.25;
+      estimatedGrowthFactor = 2.2;
     } else {
-      const overzoom = this.context.viewport.zoom - tileZ;
-      estimatedMaxDensity = maxDensity * Math.pow(2, overzoom);
+      overzoom = this.context.viewport.zoom - tileZ;
+      estimatedGrowthFactor = 2;
     }
 
-    maxDensity = estimatedMaxDensity;
+    maxDensity = maxDensity * Math.pow(estimatedGrowthFactor, overzoom);
     if (typeof onMaxDensityChange === 'function') {
       onMaxDensityChange(maxDensity);
     }
