@@ -135,11 +135,12 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
     const cell = this.props!.data[0];
     if (cell) {
       const maxDensity = this.props.elevationScale;
-      const { scheme } = this.parent.parent.parent.parent.parent.state;
-      const unitDensity = scheme === 'h3' ? unitDensityForH3Cell(cell.id) : unitDensityForQuadbinCell(cell.id);
-      const densityProps: DensityProps = { factor: unitDensity / maxDensity };
+      const {scheme} = this.parent.parent.parent.parent.parent.state;
+      const unitDensity =
+        scheme === 'h3' ? unitDensityForH3Cell(cell.id) : unitDensityForQuadbinCell(cell.id);
+      const densityProps: DensityProps = {factor: unitDensity / maxDensity};
       for (const model of this.state.models) {
-        model.shaderInputs.setProps({ density: densityProps });
+        model.shaderInputs.setProps({density: densityProps});
       }
     }
 
