@@ -135,7 +135,6 @@ function App() {
           <option value="heatmap">Heatmap</option>
           <option value="cluster">Clusters</option>
         </select>
-
         <label>Dataset:</label>
         <select value={selectedDataset} onChange={handleDatasetChange}>
           {Object.keys(datasets).map(name => (
