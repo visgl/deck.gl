@@ -13,8 +13,7 @@ import {
   HeatmapTileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
-  VectorTileLayer,
-  ClusterTileLayer
+  VectorTileLayer
 } from '@deck.gl/carto';
 
 import {query} from '@carto/api-client';
@@ -27,23 +26,17 @@ const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 
-const accessToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRVNGNZTHAwaThjYnVMNkd0LTE0diJ9.eyJodHRwOi8vYXBwLmNhcnRvLmNvbS9lbWFpbCI6ImZwYWxtZXJAY2FydG9kYi5jb20iLCJodHRwOi8vYXBwLmNhcnRvLmNvbS9hY2NvdW50X2lkIjoiYWNfN3hoZnd5bWwiLCJpc3MiOiJodHRwczovL2F1dGguY2FydG8uY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3OTY5NjU1OTI5NjExMjIxNDg2IiwiYXVkIjpbImNhcnRvLWNsb3VkLW5hdGl2ZS1hcGkiLCJodHRwczovL2NhcnRvLXByb2R1Y3Rpb24udXMuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTc1NjIwODk4MSwiZXhwIjoxNzU2Mjk1MzgxLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXIgcmVhZDpjb25uZWN0aW9ucyB3cml0ZTpjb25uZWN0aW9ucyByZWFkOm1hcHMgd3JpdGU6bWFwcyByZWFkOmFjY291bnQiLCJhenAiOiJqQ1duSEs2RTJLMmFPeTlqTHkzTzdaTXBocUdPOUJQTCIsInBlcm1pc3Npb25zIjpbImV4ZWN1dGU6d29ya2Zsb3dzIiwicmVhZDphY2NvdW50IiwicmVhZDphY2NvdW50X3VzZXJzIiwicmVhZDphcHBzIiwicmVhZDpjb25uZWN0aW9ucyIsInJlYWQ6Y3VycmVudF91c2VyIiwicmVhZDppbXBvcnRzIiwicmVhZDpsaXN0ZWRfYXBwcyIsInJlYWQ6bWFwcyIsInJlYWQ6dGlsZXNldHMiLCJyZWFkOnRva2VucyIsInJlYWQ6d29ya2Zsb3dzIiwidXBkYXRlOmN1cnJlbnRfdXNlciIsIndyaXRlOmFwcHMiLCJ3cml0ZTpjYXJ0by1kdy1ncmFudHMiLCJ3cml0ZTpjb25uZWN0aW9ucyIsIndyaXRlOmltcG9ydHMiLCJ3cml0ZTptYXBzIiwid3JpdGU6dG9rZW5zIiwid3JpdGU6d29ya2Zsb3dzIl19.KDiIG4IKm4TnRG-LezjZtDEAs1gLLq0h4osKtuTqsL2LcSTz9PICaDSh6kXmo3evvkgfFJ8KexaMTA2jA52hMAt0i9LogS4vNQKuikJ2W5uGs3BWiONjOrWrwKczjz6srA2_MonKQ9GtcmNquihTdYiVLvcIKOkPQ7CGkWr0Zq0yuzj07ndTGHq7tmMa2ltdiX5JVGkw_tE49MoYpVrc2kzvCRCQ08_LSykHnq8ROoXUYI2QV8PBII0VJcYKSJfcHTJ2uZfaWojB2Yk98P8VPAiiZs8n2cdEsgSmD_4xhvVxZjO6KVBs0jXM2_8lg80maKLvGTE5qrvXpqusPFrXTQ';
+const accessToken = 'XXX';
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
-function normalize(value, min, max) {
-  return (value - min) / Math.max(1, max - min);
-}
-
 function Root() {
-  const [dataset, setDataset] = useState(Object.keys(datasets)[15]);
+  const [dataset, setDataset] = useState(Object.keys(datasets)[0]);
   const datasource = datasets[dataset];
   let layers: Layer[] = [];
 
   if (dataset.includes('boundary')) {
     layers = [useBoundaryLayer(datasource)];
-  } else if (dataset.includes('cluster')) {
-    layers = [useClusterLayer(datasource)];
   } else if (dataset.includes('heatmap')) {
     layers = [useHeatmapLayer(datasource)];
   } else if (dataset.includes('h3')) {
@@ -184,31 +177,6 @@ function useQuadbinLayer(datasource) {
     pickable: true,
     stroked: false,
     getFillColor
-  });
-}
-
-function useClusterLayer(datasource) {
-  const {getFillColor, getPointRadius, getWeight, source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName, clusterLevel} =
-    datasource;
-  const tilejson = source({
-    ...globalOptions,
-    aggregationExp,
-    columns,
-    spatialDataColumn,
-    sqlQuery,
-    tableName
-  });
-
-  return new ClusterTileLayer({
-    id: 'carto-cluster',
-    data: tilejson,
-    pickable: true,
-    stroked: false,
-    clusterLevel: clusterLevel || 5,
-    getWeight: getWeight || (d => d.properties.population_sum || d.properties.retail || 1),
-    getFillColor,
-    pointRadiusUnits: 'pixels',
-    getPointRadius: getPointRadius || 50
   });
 }
 
