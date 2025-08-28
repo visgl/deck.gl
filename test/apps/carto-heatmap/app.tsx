@@ -27,7 +27,7 @@ const INITIAL_VIEW_STATE = {
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 const accessToken =
-  'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiI3ZDljNmQ2OSJ9.4BRC6J5PNxZXNLeULerfRFaBi87-st2wY0zUvxJ36oY'; // Replace with your CARTO access token
+  'XXX'; // Replace with your CARTO access token
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName};
 
