@@ -74,7 +74,6 @@ function App() {
         pointRadiusUnits: 'pixels',
         getFillColor: colorContinuous({
           attr: (d: any, info: any) => {
-            // Normalize value to range 0-1 to match domain
             const value = d.properties.population_sum;
             const { min, max } = info.data.attributes.stats?.population_sum || { min: 1, max: 1000 };
             return normalize(value, min, max);
@@ -145,6 +144,8 @@ function App() {
             </option>
           ))}
         </select>
+
+        <div className="description">{dataset.description}</div>
 
         <label>Color Palette:</label>
         <select value={selectedPalette} onChange={handlePaletteChange}>

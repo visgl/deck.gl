@@ -8,7 +8,14 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {H3TileLayer, RasterTileLayer, QuadbinTileLayer, VectorTileLayer, ClusterTileLayer} from '@deck.gl/carto';
+import {
+  H3TileLayer,
+  HeatmapTileLayer,
+  RasterTileLayer,
+  QuadbinTileLayer,
+  VectorTileLayer,
+  ClusterTileLayer
+} from '@deck.gl/carto';
 
 import {query} from '@carto/api-client';
 import datasets from './datasets';
@@ -37,6 +44,8 @@ function Root() {
     layers = [useBoundaryLayer(datasource)];
   } else if (dataset.includes('cluster')) {
     layers = [useClusterLayer(datasource)];
+  } else if (dataset.includes('heatmap')) {
+    layers = [useHeatmapLayer(datasource)];
   } else if (dataset.includes('h3')) {
     layers = [useH3Layer(datasource)];
   } else if (dataset.includes('raster')) {
@@ -92,6 +101,35 @@ function useBoundaryLayer(datasource) {
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor
+  });
+}
+
+function useHeatmapLayer(datasource) {
+  const {getWeight, source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} =
+    datasource;
+  const tilejson = source({
+    ...globalOptions,
+    aggregationExp,
+    columns,
+    spatialDataColumn,
+    sqlQuery,
+    tableName
+  });
+
+  return new HeatmapTileLayer({
+    id: 'carto-heatmap',
+    data: tilejson,
+    getWeight,
+    radiusPixels: 30,
+    intensity: 2,
+    colorRange: [
+      [255, 255, 178],
+      [254, 217, 118],
+      [254, 178, 76],
+      [253, 141, 60],
+      [240, 59, 32],
+      [189, 0, 38]
+    ]
   });
 }
 

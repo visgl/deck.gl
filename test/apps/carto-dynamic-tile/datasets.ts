@@ -20,6 +20,30 @@ import {
 import {colorBins} from '@deck.gl/carto';
 
 export default {
+  'heatmap-h3-table': {
+    source: h3TableSource,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2',
+    aggregationExp: 'sum(population) as population_sum',
+    getWeight: d => d.properties.population_sum || 1
+  },
+  'heatmap-h3-tileset': {
+    source: h3TilesetSource,
+    tableName:
+      'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_h3res8_v1_yearly_v2_tileset',
+    getWeight: d => d.properties.retail || 1
+  },
+  'heatmap-quadbin-table': {
+    source: quadbinTableSource,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
+    aggregationExp: 'sum(population) as population_sum',
+    getWeight: d => d.properties.population_sum || 1
+  },
+  'heatmap-quadbin-tileset': {
+    source: quadbinTilesetSource,
+    tableName:
+      'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset',
+    getWeight: d => d.properties.avg_retail || 1
+  },
   'boundary-query': {
     source: boundaryQuerySource,
     tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
