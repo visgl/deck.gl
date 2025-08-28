@@ -6,7 +6,7 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
-import {getResolution as getH3Resolution} from 'h3-js';
+import {getResolution as getH3Resolution, getNumCells} from 'h3-js';
 
 import {
   Accessor,
@@ -52,7 +52,8 @@ const TEXTURE_PROPS: TextureProps = {
   }
 };
 /**
- * Computes the unit density (inverse of cell area) for Quadbin cells
+ * Computes the unit density for Quadbin cells.
+ * The unit density is the number of cells needed to cover the Earth's surface at a given resolution. It is inversely proportional to the cell area.
  */
 function unitDensityForQuadbinCell(cell: bigint) {
   const cellResolution = Number(getResolution(cell));
@@ -60,13 +61,12 @@ function unitDensityForQuadbinCell(cell: bigint) {
 }
 
 /**
- * Computes the unit density (inverse of cell area) for H3 cells
- * H3 hexagons at each resolution level have approximately 1/7th the area of the previous level,
- * with resolution 0 containing 122 cells.
+ * Computes the unit density for H3 cells.
+ * The unit density is the number of cells needed to cover the Earth's surface at a given resolution. It is inversely proportional to the cell area.
  */
 function unitDensityForH3Cell(cellId: string) {
   const cellResolution = Number(getH3Resolution(cellId));
-  return 122 * Math.pow(7.0, cellResolution);
+  return getNumCells(cellResolution);
 }
 
 /**
