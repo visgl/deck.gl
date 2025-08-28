@@ -41,7 +41,7 @@ import {
 } from './cluster-utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import H3Tileset2D, { getHexagonResolution } from './h3-tileset-2d';
+import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import {getQuadbinPolygon} from './quadbin-utils';
 import {getResolution, cellToLatLng} from 'h3-js';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
@@ -67,7 +67,8 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
         const [lat, lng] = cellToLatLng(id);
         return [lng, lat];
       }
-      return getQuadbinPolygon(id as bigint, 0.5).slice(2, 4) as [number, number];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      return getQuadbinPolygon(id as bigint, 0.5).slice(2, 4);
     }
   },
   getWeight: {type: 'accessor', value: 1},
@@ -83,7 +84,10 @@ export type ClusterTileLayerPickingInfo<FeaturePropertiesT = {}> = TileLayerPick
 /** All properties supported by ClusterTileLayer. */
 export type ClusterTileLayerProps<FeaturePropertiesT = unknown> =
   _ClusterTileLayerProps<FeaturePropertiesT> &
-    Omit<TileLayerProps<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>, 'data'>;
+    Omit<
+      TileLayerProps<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>,
+      'data'
+    >;
 
 /** Properties added by ClusterTileLayer. */
 type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
@@ -106,14 +110,20 @@ type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
    *
    * @default cell center
    */
-  getPosition?: Accessor<ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>, [number, number]>;
+  getPosition?: Accessor<
+    ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>,
+    [number, number]
+  >;
 
   /**
    * The weight of each cell used for clustering.
    *
    * @default 1
    */
-  getWeight?: Accessor<ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>, number>;
+  getWeight?: Accessor<
+    ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>,
+    number
+  >;
 };
 
 class ClusterGeoJsonLayer<
@@ -142,7 +152,7 @@ class ClusterGeoJsonLayer<
 
   updateState(opts) {
     const {props} = opts;
-    const scheme = getScheme(props.TilesetClass as any);
+    const scheme = getScheme(props.TilesetClass);
     if (this.state.scheme !== scheme) {
       // Clear caches when scheme changes
       this.setState({scheme, tileset: null});
@@ -163,7 +173,7 @@ class ClusterGeoJsonLayer<
     visibleTiles.sort((a, b) => b.zoom - a.zoom);
     const {getPosition, getWeight} = this.props;
     const {aggregationCache, scheme} = this.state;
-    
+
     const isH3 = scheme === 'h3';
 
     const properties = extractAggregationProperties(visibleTiles[0]);
@@ -220,7 +230,9 @@ class ClusterGeoJsonLayer<
   }
 
   getPickingInfo(params: GetPickingInfoParams): ClusterTileLayerPickingInfo<FeaturePropertiesT> {
-    const info = params.info as TileLayerPickingInfo<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>;
+    const info = params.info as TileLayerPickingInfo<
+      ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>
+    >;
 
     if (info.index !== -1) {
       const {data} = params.sourceLayer!.props;
@@ -242,7 +254,7 @@ class ClusterGeoJsonLayer<
     return true;
   }
 
-  private _getAggregationLevels(visibleTiles: Tile2DHeader[]) : number {
+  private _getAggregationLevels(visibleTiles: Tile2DHeader[]): number {
     const isH3 = this.state.scheme === 'h3';
     const firstTile = visibleTiles[0];
 
@@ -253,7 +265,10 @@ class ClusterGeoJsonLayer<
     let viewportResolution;
     if (isH3) {
       tileResolution = getResolution(firstTile.id);
-      viewportResolution = getHexagonResolution(this.context.viewport as WebMercatorViewport, (this.state.tileset as any).opts.tileSize);
+      viewportResolution = getHexagonResolution(
+        this.context.viewport as WebMercatorViewport,
+        (this.state.tileset as any).opts.tileSize
+      );
     } else {
       tileResolution = firstTile.zoom;
       viewportResolution = this.context.viewport.zoom;
@@ -289,7 +304,7 @@ export default class ClusterTileLayer<
     const {tiles: data, maxresolution: maxZoom} = tileJSON;
     const isH3 = tileJSON && 'scheme' in tileJSON && tileJSON.scheme === 'h3';
     const TilesetClass = isH3 ? H3Tileset2D : QuadbinTileset2D;
-    
+
     return [
       // @ts-ignore
       new ClusterGeoJsonLayer(this.props, {

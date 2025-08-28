@@ -34,8 +34,14 @@ export function aggregateTile<FeaturePropertiesT>(
   tileAggregationCache: Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>,
   aggregationLevels: number,
   properties: AggregationProperties<FeaturePropertiesT> = [],
-  getPosition: Accessor<ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>, [number, number]>,
-  getWeight: Accessor<ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>, number>,
+  getPosition: Accessor<
+    ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>,
+    [number, number]
+  >,
+  getWeight: Accessor<
+    ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>,
+    number
+  >,
   scheme: 'quadbin' | 'h3' = 'quadbin'
 ): boolean {
   if (!tile.content) return false;

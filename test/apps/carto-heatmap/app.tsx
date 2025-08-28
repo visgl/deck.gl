@@ -26,7 +26,8 @@ const INITIAL_VIEW_STATE = {
 // Configure your CARTO credentials
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
-const accessToken = 'XXX'; // Replace with your CARTO access token
+const accessToken =
+  'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiI3ZDljNmQ2OSJ9.4BRC6J5PNxZXNLeULerfRFaBi87-st2wY0zUvxJ36oY'; // Replace with your CARTO access token
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName};
 
@@ -55,45 +56,46 @@ function App() {
     ...(dataset.aggregationExp && {aggregationExp: dataset.aggregationExp})
   });
 
-  const layer = visualizationType === 'heatmap' 
-    ? new HeatmapTileLayer({
-        id: 'heatmap',
-        data: tilejson,
-        getWeight: dataset.getWeight,
-        radiusPixels,
-        intensity,
-        colorDomain,
-        colorRange: getColorRange(selectedPalette)
-      })
-    : new ClusterTileLayer({
-        id: 'cluster',
-        data: tilejson,
-        getWeight: dataset.getWeight,
-        clusterLevel,
-        stroked: false,
-        pointRadiusUnits: 'pixels',
-        getFillColor: colorContinuous({
-          attr: (d: any, info: any) => {
+  const layer =
+    visualizationType === 'heatmap'
+      ? new HeatmapTileLayer({
+          id: 'heatmap',
+          data: tilejson,
+          getWeight: dataset.getWeight,
+          radiusPixels,
+          intensity,
+          colorDomain,
+          colorRange: getColorRange(selectedPalette)
+        })
+      : new ClusterTileLayer({
+          id: 'cluster',
+          data: tilejson,
+          getWeight: dataset.getWeight,
+          clusterLevel,
+          stroked: false,
+          pointRadiusUnits: 'pixels',
+          getFillColor: colorContinuous({
+            attr: (d: any, info: any) => {
+              const value = d.properties.population_sum;
+              const {min, max} = info.data.attributes.stats?.population_sum || {min: 1, max: 1000};
+              return normalize(value, min, max);
+            },
+            domain: [0, 1],
+            colors: selectedPalette
+          }),
+          getPointRadius: (d: any, info: any) => {
             const value = d.properties.population_sum;
-            const { min, max } = info.data.attributes.stats?.population_sum || { min: 1, max: 1000 };
-            return normalize(value, min, max);
+            const stats = info.data.attributes.stats?.population_sum;
+            const radiusMin = 10;
+            const radiusMax = 80;
+            const radiusDelta = radiusMax - radiusMin;
+            const normalized = normalize(value, stats.min, stats.max);
+            return radiusMin + radiusDelta * Math.sqrt(normalized);
           },
-          domain: [0, 1],
-          colors: selectedPalette
-        }),
-        getPointRadius: (d: any, info: any) => {
-          const value = d.properties.population_sum;
-          const stats = info.data.attributes.stats?.population_sum;
-          const radiusMin = 10;
-          const radiusMax = 80;
-          const radiusDelta = radiusMax - radiusMin;
-          const normalized = normalize(value, stats.min, stats.max);
-          return radiusMin + radiusDelta * Math.sqrt(normalized);
-        },
-        updateTriggers: {
-          getFillColor: [selectedPalette]
-        }
-      });
+          updateTriggers: {
+            getFillColor: [selectedPalette]
+          }
+        });
 
   const handleDatasetChange = useCallback(event => setSelectedDataset(event.target.value), []);
   const handleRadiusChange = useCallback(event => setRadiusPixels(Number(event.target.value)), []);
@@ -107,8 +109,14 @@ function App() {
     [colorDomain]
   );
   const handlePaletteChange = useCallback(event => setSelectedPalette(event.target.value), []);
-  const handleVisualizationTypeChange = useCallback(event => setVisualizationType(event.target.value), []);
-  const handleClusterLevelChange = useCallback(event => setClusterLevel(Number(event.target.value)), []);
+  const handleVisualizationTypeChange = useCallback(
+    event => setVisualizationType(event.target.value),
+    []
+  );
+  const handleClusterLevelChange = useCallback(
+    event => setClusterLevel(Number(event.target.value)),
+    []
+  );
 
   return (
     <>
@@ -175,7 +183,13 @@ function App() {
         {visualizationType === 'heatmap' ? (
           <>
             <label>Radius (pixels):</label>
-            <input type="range" min="0" max="100" value={radiusPixels} onChange={handleRadiusChange} />
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={radiusPixels}
+              onChange={handleRadiusChange}
+            />
             <div className="range-label">
               <span>0</span>
               <span>{radiusPixels}</span>
@@ -200,7 +214,13 @@ function App() {
         ) : (
           <>
             <label>Cluster Level:</label>
-            <input type="range" min="3" max="8" value={clusterLevel} onChange={handleClusterLevelChange} />
+            <input
+              type="range"
+              min="3"
+              max="8"
+              value={clusterLevel}
+              onChange={handleClusterLevelChange}
+            />
             <div className="range-label">
               <span>3</span>
               <span>{clusterLevel}</span>
