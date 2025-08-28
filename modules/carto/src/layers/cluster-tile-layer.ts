@@ -68,7 +68,7 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
         return [lng, lat];
       }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      return getQuadbinPolygon(id as bigint, 0.5).slice(2, 4);
+      return getQuadbinPolygon(id as bigint, 0.5).slice(2, 4) as [number, number];
     }
   },
   getWeight: {type: 'accessor', value: 1},
