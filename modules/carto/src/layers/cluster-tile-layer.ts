@@ -43,8 +43,7 @@ import {DEFAULT_TILE_SIZE} from '../constants';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import H3Tileset2D, { getHexagonResolution } from './h3-tileset-2d';
 import {getQuadbinPolygon} from './quadbin-utils';
-import {getResolution} from 'h3-js';
-import {getH3Position} from './h3-utils';
+import {getResolution, cellToLatLng} from 'h3-js';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 import {TilejsonPropType, mergeLoadOptions} from './utils';
 import type {TilejsonResult} from '@carto/api-client';
@@ -65,7 +64,8 @@ const defaultProps: DefaultProps<ClusterTileLayerProps> = {
     value: ({id}) => {
       // Determine scheme based on ID type: H3 uses string IDs, Quadbin uses bigint IDs
       if (typeof id === 'string') {
-        return getH3Position(id);
+        const [lat, lng] = cellToLatLng(id);
+        return [lng, lat];
       }
       return getQuadbinPolygon(id as bigint, 0.5).slice(2, 4) as [number, number];
     }
