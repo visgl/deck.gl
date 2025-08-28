@@ -260,3 +260,42 @@ test('TransitionManager#auto#duration', t => {
   );
   t.end();
 });
+
+test('TransitionManager clamps transition time', t => {
+  const timeline = new Timeline();
+  let viewState = null;
+
+  const initialProps = {
+    width: 100,
+    height: 100,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 0,
+    pitch: 0,
+    bearing: 0
+  };
+
+  const finalProps = {
+    ...initialProps,
+    zoom: 4,
+    transitionInterpolator: new LinearInterpolator(),
+    transitionDuration: 100
+  };
+
+  const transitionManager = new TransitionManager({
+    timeline,
+    getControllerState: props => new MapState(props),
+    onViewStateChange: ({viewState: vs}) => {
+      viewState = vs;
+    }
+  });
+
+  transitionManager.processViewStateChange(initialProps);
+  transitionManager.processViewStateChange(finalProps);
+
+  timeline.setTime(200);
+  transitionManager.updateTransition();
+
+  t.is(viewState.zoom, 4, 'transition ends at expected zoom');
+  t.end();
+});

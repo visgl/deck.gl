@@ -8,6 +8,7 @@ import type {IViewState} from './view-state';
 
 import type {Timeline} from '@luma.gl/engine';
 import type {InteractionState} from './controller';
+import {clamp} from '@math.gl/core';
 
 const noop = () => {};
 
@@ -226,7 +227,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
       time,
       settings: {interpolator, startProps, endProps, duration, easing}
     } = transition;
-    const t = easing(time / duration);
+    const t = easing(clamp(time / duration, 0, 1));
     const viewport = interpolator.interpolateProps(startProps, endProps, t);
 
     // This gurantees all props (e.g. bearing, longitude) are normalized
