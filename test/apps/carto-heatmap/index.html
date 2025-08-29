@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CARTO Heatmap Test App</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-weight: 200;
+        color: #fff;
+        overflow: hidden;
+      }
+
+      #control-panel {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        max-width: 300px;
+      }
+
+      #control-panel h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      #control-panel label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      #control-panel select,
+      #control-panel input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: #fff;
+        font-size: 12px;
+      }
+
+      #control-panel input[type="range"] {
+        margin-bottom: 8px;
+      }
+
+      .range-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        margin-bottom: 12px;
+        color: #ccc;
+      }
+
+      .description {
+        font-size: 11px;
+        color: #aaa;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+
+      .color-preview {
+        margin-bottom: 12px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .color-swatch {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin-right: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script type="module" src="./app.tsx"></script>
+  </body>
+</html>
