@@ -37,7 +37,7 @@ export type ProcessedGeometry = BinaryLineFeature & {
   attributes: {
     getColor?: {value: Uint8Array; size: number; normalized: boolean};
     getTimestamps: {value: Float32Array; size: number};
-  }
+  };
 };
 
 function isPointInTileBounds(bounds: TileBounds, point?: TrajectoryPoint): boolean {
