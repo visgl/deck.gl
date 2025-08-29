@@ -180,7 +180,6 @@ export default class VectorTileLayer<
 
       const subLayerProps = {
         ...props,
-        data: {...props.data, tileBbox},
         autoHighlight: false,
         // Do not perform clipping on points (#9059)
         _subLayerProps: {

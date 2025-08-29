@@ -44,10 +44,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@carto/api-client@^0.5.6":
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.5.6.tgz#9e0714cd977770039f1693c9c55708be7d59e97b"
-  integrity sha512-sq6tzIK5P59Qk7zPNpjP0OkqIvZ1UqGKffLEOJtjQLWIPjRxm+EXUqdeOccj9uV0IGfyA5Dp/6a+H0vPDU/QeQ==
+"@carto/api-client@^0.5.15":
+  version "0.5.15"
+  resolved "https://registry.yarnpkg.com/@carto/api-client/-/api-client-0.5.15.tgz#cb49ec2e9b5f3d4620167a3918801bdc4c0e8f3c"
+  integrity sha512-x6WWlHx+hpq0Xmnege61nzBB3hGmI9MGm12pG5BGzGkMXa+ZU5GszEB4Urf24o5TdpLCPsupMR+VHsFmVlxmjw==
   dependencies:
     "@loaders.gl/schema" "^4.3.3"
     "@types/geojson" "^7946.0.16"
