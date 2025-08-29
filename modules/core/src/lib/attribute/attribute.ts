@@ -270,7 +270,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    const transformedValue = this.settings.transform
+    const transformedValue = this.settings.transform && context
       ? this.settings.transform.call(context, value)
       : value;
     const hasChanged = this.setData({constant: true, value: transformedValue});
