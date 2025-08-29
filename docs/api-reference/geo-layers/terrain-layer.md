@@ -6,7 +6,7 @@ import {TerrainLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 The `TerrainLayer` reconstructs mesh surfaces from height map images, e.g. [Mapzen Terrain Tiles](https://github.com/tilezen/joerd/blob/master/docs/formats.md), which encodes elevation into R,G,B values.
 
-When `elevationData` is supplied with a URL template, i.e. a string containing `'{x}'` and `'{y}'`, it loads terrain tiles on demand using a `TileLayer` and renders a mesh for each tile. If `elevationData` is an absolute URL, a single mesh is used, and the `bounds` prop is required to position it into the world space.
+When `elevationData` is supplied with a URL template, i.e. a string containing `'{x}'` and `'{y}'` (or `'{-y}'` for TMS tiles), it loads terrain tiles on demand using a `TileLayer` and renders a mesh for each tile. If `elevationData` is an absolute URL, a single mesh is used, and the `bounds` prop is required to position it into the world space.
 
 
 import Tabs from '@theme/Tabs';
