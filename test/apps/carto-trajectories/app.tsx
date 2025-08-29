@@ -54,36 +54,23 @@ export default function App() {
   >(null);
 
   // Handle trajectory click to jump to start time
-  function handleTrajectoryClick(info) {
-    console.log('handleTrajectoryClick', info);
+  function handleTrajectoryClick(info: any) {
     if (!info.object || !dataSource?.widgetSource) return;
 
-    const trajectoryIdColumn = dataSource.widgetSource.props.trajectoryIdColumn;
-    const timestampColumn = dataSource.widgetSource.props.timestampColumn;
-
-    // Get the trajectory ID directly from the object properties
+    const {trajectoryIdColumn, timestampColumn} = dataSource.widgetSource.props;
     const trajectoryId = info.object.properties[trajectoryIdColumn];
+
     if (!trajectoryId) return;
 
-    console.log('Clicked trajectory with ID:', trajectoryId);
-
-    // Use getRange to efficiently get min/max timestamps for this trajectory
+    // Fetch the time range for this specific trajectory and jump to its start
     dataSource.widgetSource
       .getRange({
         column: timestampColumn,
         filters: {[trajectoryIdColumn]: {in: {values: [trajectoryId]}}}
       })
       .then(timeRange => {
-        if (timeRange && timeRange.min) {
+        if (timeRange?.min) {
           const startTime = normalizeTimestamp(timeRange.min);
-
-          console.log('Trajectory timespan:', {
-            trajectoryId,
-            startTime: timeRange.min,
-            endTime: timeRange.max
-          });
-          console.log('Jumping to trajectory start time:', startTime);
-
           setCurrentTime(startTime);
         }
       })
@@ -193,23 +180,23 @@ export default function App() {
             colors: palette
           }),
 
-          // Color each vertex by speed
-          autocomputeSpeed: true, // Will add 'speed' attribute to geometry
+          // Color each vertex by speed (requires autocomputeSpeed: true)
+          autocomputeSpeed: true,
           getFillColor: colorContinuous({
             attr: 'speed',
-            domain: [0, 5, 10, 15, 20, 25],
+            domain: [0, 5, 10, 15, 20, 25], // speed in m/s
             colors: palette
           }),
-          updateTriggers: {getLineColor: [palette], getFillColor: [palette]},
+          updateTriggers: {
+            getLineColor: [palette],
+            getFillColor: [palette]
+          },
 
-          //
+          // Animation and interaction props
           currentTime,
           trailLength,
           getWidth: lineWidth,
           onClick: handleTrajectoryClick,
-          onHover: info => {
-            info.object && console.log('onHover', info.object.properties);
-          },
           pickable: true,
           autoHighlight: true,
           highlightColor: [255, 122, 44, 255]

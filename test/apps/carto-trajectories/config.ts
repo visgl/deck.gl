@@ -1,15 +1,17 @@
 import {trajectoryQuerySource, trajectoryTableSource} from '@carto/api-client';
 
-const apiBaseUrl = 'https://gcp-us-east1-19.dev.api.carto.com';
-const accessToken = 'XXX';
+// CARTO API configuration
+const API_CONFIG = {
+  apiBaseUrl: 'https://gcp-us-east1-19.dev.api.carto.com',
+  accessToken: 'XXX', // Replace with your CARTO access token
+  connectionName: 'carto_dw'
+};
 
 export const DATASETS = {
   'NYC Taxi Trips (Query)': {
     name: 'NYC Taxi Trips (Query)',
     dataSource: trajectoryQuerySource({
-      connectionName: 'carto_dw',
-      accessToken,
-      apiBaseUrl,
+      ...API_CONFIG,
       sqlQuery:
         'SELECT geometry as geom, timestamp as ts, ride_id as trajectoryId FROM `cartodb-on-gcp-frontend-team.felix.taxi-trips`',
       trajectoryIdColumn: 'trajectoryId',
@@ -30,9 +32,7 @@ export const DATASETS = {
   'NYC Taxi Trips (Table)': {
     name: 'NYC Taxi Trips (Table)',
     dataSource: trajectoryTableSource({
-      connectionName: 'carto_dw',
-      accessToken,
-      apiBaseUrl,
+      ...API_CONFIG,
       tableName: 'cartodb-on-gcp-frontend-team.felix.taxi-trips',
       spatialDataColumn: 'geometry',
       trajectoryIdColumn: 'ride_id',
@@ -53,9 +53,7 @@ export const DATASETS = {
   'Atlanta Vehicle Trajectories': {
     name: 'Atlanta Vehicle Trajectories',
     dataSource: trajectoryQuerySource({
-      connectionName: 'carto_dw',
-      accessToken,
-      apiBaseUrl,
+      ...API_CONFIG,
       sqlQuery:
         'SELECT * FROM `carto-demo-data.demo_tables.citytrek_14k_vehicle_trajectories` WHERE timestamp >= "2017-11-01" AND timestamp < "2017-11-05"',
       trajectoryIdColumn: 'trip_id',
@@ -76,9 +74,7 @@ export const DATASETS = {
   'Memphis Vehicle Trajectories (Query)': {
     name: 'Memphis Vehicle Trajectories (Query)',
     dataSource: trajectoryQuerySource({
-      connectionName: 'carto_dw',
-      accessToken,
-      apiBaseUrl,
+      ...API_CONFIG,
       sqlQuery:
         'SELECT * FROM `carto-demo-data.demo_tables.citytrek_14k_vehicle_trajectories` LIMIT 100000',
       trajectoryIdColumn: 'trip_id',
@@ -98,9 +94,12 @@ export const DATASETS = {
   }
 };
 
-export const DATASET_NAMES = Object.keys(DATASETS);
-
-export const LAYER = {Path: 'Path 2D', Trips: 'Trips 2D', Points: 'Point 2D'};
+// Available layer rendering modes
+export const LAYER = {
+  Path: 'Path 2D',
+  Trips: 'Trips 2D',
+  Points: 'Point 2D'
+};
 
 export const PALETTES = {
   ArmyRose: 'ArmyRose',
@@ -121,3 +120,4 @@ export const MAP_STYLES = {
   satellite: 'satellite-streets-v12',
   navigationNight: 'navigation-night-v1'
 };
+export const DATASET_NAMES = Object.keys(DATASETS);

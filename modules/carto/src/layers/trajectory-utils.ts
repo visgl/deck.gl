@@ -211,7 +211,7 @@ export function rebuildGeometry(
   for (let i = 0; i < pathIndices.length - 1; i++) {
     const startIndex = pathIndices[i];
     const endIndex = pathIndices[i + 1];
-    const point = validPoints[startIndex]; // is this correct??? validPoints[i]????
+    const point = validPoints[startIndex];
     const srcIndex = point.index;
     const numVertices = endIndex - startIndex;
 
