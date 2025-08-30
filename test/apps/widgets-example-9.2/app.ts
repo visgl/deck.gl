@@ -120,8 +120,8 @@ const deck = new Deck({
         );
       }
     }),
-    // new _InfoWidget({mode: 'hover', getTooltip}),
-    // new _InfoWidget({mode: 'click', getTooltip}),
+    new _InfoWidget({mode: 'hover', getTooltip}),
+    new _InfoWidget({mode: 'click', getTooltip}),
     new _TimelineWidget({
       placement: 'bottom-left',
       domain: [0, 24],
