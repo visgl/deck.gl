@@ -68,9 +68,9 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
 
   constructor(props: GeocoderWidgetProps = {}) {
     super(props, GeocoderWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
-    this.setProps(props);
-    this.geocoder = getGeocoder(props);
+    this.placement = this.props.placement ?? this.placement;
+    this.setProps(this.props);
+    this.geocoder = getGeocoder(this.props);
   }
 
   setProps(props: Partial<GeocoderWidgetProps>): void {

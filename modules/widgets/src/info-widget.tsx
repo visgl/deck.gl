@@ -53,6 +53,13 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
     super.setProps(props);
   }
 
+  onCreateRootElement(): HTMLDivElement {
+    const element = super.onCreateRootElement();
+    const style = {margin: '0px', top: '0px', left: '0px', position: 'absolute'};
+    Object.entries(style).forEach(([key, value]) => element.style.setProperty(key, value));
+    return element;
+  }
+
   onViewportChange(viewport) {
     this.viewport = viewport;
     this.updateHTML();
@@ -84,24 +91,13 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
     return this.props.onClick?.(this, info) || false;
   }
 
-  // TODO - Align with onCreateRootElement
-  onAdd({deck, viewId}: {deck: Deck<any>; viewId: string | null}): HTMLDivElement {
-    const {className} = this.props;
-    const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-info');
-    if (className) element.classList.add(className);
-    // Ensure absolute positioning relative to the deck container
-    const style = {margin: '0px', top: '0px', left: '0px', position: 'absolute'};
-    Object.entries(style).forEach(([key, value]) => element.style.setProperty(key, value));
+  onAdd({deck, viewId}: {deck: Deck<any>; viewId: string | null}) {
     this.deck = deck;
     if (!viewId) {
       this.viewport = deck.getViewports()[0];
     } else {
       this.viewport = deck.getViewports().find(viewport => viewport.id === viewId);
     }
-    this.rootElement = element;
-    this.updateHTML();
-    return element;
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
