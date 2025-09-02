@@ -18,6 +18,7 @@ import './layers/quadbin-layer.spec';
 import './layers/quadbin-tile-layer.spec';
 import './layers/quadbin-tileset-2d.spec';
 import './layers/vector-tile-layer.spec';
+import './layers/trajectory-utils.spec';
 import './layers/schema/carto-properties-tile-loader.spec';
 import './layers/schema/carto-raster-tile-loader.spec';
 import './layers/schema/carto-raster-tile.spec';
