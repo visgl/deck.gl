@@ -103,10 +103,10 @@ test('Attribute#allocate', t => {
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
-  attribute.setConstantValue([1, 1]);
+  attribute.setConstantValue(this, [1, 1]);
   t.deepEquals(attribute.value, [1, 1], 'value overwritten by external constant');
 
-  attribute.setConstantValue(undefined);
+  attribute.setConstantValue(this, undefined);
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
@@ -136,14 +136,14 @@ test('Attribute#setConstantValue', t => {
   t.ok(attribute.getValue().positions instanceof Buffer, 'attribute is using packed buffer');
   attribute.needsRedraw({clearChangedFlags: true});
 
-  attribute.setConstantValue([0, 0, 0]);
+  attribute.setConstantValue(this, [0, 0, 0]);
   t.deepEqual(attribute.getValue().positions, [0, 0, 0], 'attribute set to constant value');
   t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
 
-  attribute.setConstantValue([0, 0, 0]);
+  attribute.setConstantValue(this, [0, 0, 0]);
   t.notOk(attribute.needsRedraw({clearChangedFlags: true}), 'attribute should not need redraw');
 
-  attribute.setConstantValue([0, 0, 1]);
+  attribute.setConstantValue(this, [0, 0, 1]);
   t.deepEqual(attribute.getValue().positions, [0, 0, 1], 'attribute set to constant value');
   t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
 
@@ -156,7 +156,7 @@ test('Attribute#setConstantValue', t => {
     accessor: 'getColor'
   });
 
-  attribute.setConstantValue([255, 255, 0]);
+  attribute.setConstantValue(this, [255, 255, 0]);
   t.deepEqual(attribute.getValue().colors, [1, 1, 0], 'constant value is normalized');
 
   t.end();
@@ -277,7 +277,8 @@ test('Attribute#updateBuffer', t => {
       {id: 'E', value: 0, color: undefined}
     ],
     getColor: d => d.color,
-    getValue: d => d.value
+    getValue: d => d.value,
+    getValueConstant: [20]
   };
 
   const TEST_PARAMS = [
@@ -340,6 +341,18 @@ test('Attribute#updateBuffer', t => {
       }),
       standard: [20, 40, 14, 0],
       'variable size': [20, 20, 40, 14, 14, 14, 14, 0, 0, 0]
+    },
+    {
+      title: 'constant accessor with transform',
+      attribute: new Attribute(device, {
+        id: 'values',
+        type: 'float32',
+        size: 1,
+        accessor: 'getValueConstant',
+        transform: x => x * 2
+      }),
+      standard: [40, 40, 40, 40],
+      'variable size': [40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
     },
     {
       title: 'custom accessor',
@@ -1114,7 +1127,7 @@ test('Attribute#updateBuffer', t => {
   t.is(bounds, attribute.getBounds(), 'bounds is cached');
 
   attribute.setNeedsUpdate();
-  attribute.setConstantValue([-1, 0, 1]);
+  attribute.setConstantValue(this, [-1, 0, 1]);
 
   bounds = attribute.getBounds();
   t.deepEqual(
