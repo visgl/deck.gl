@@ -25,6 +25,9 @@ import {
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
+import {SelectionWidget} from '@deck.gl/widgets';
+import {SelectionLayer} from '@deck.gl-community/editable-layers';
+
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
@@ -138,7 +141,32 @@ const deck = new Deck({
       orientation: 'vertical',
       onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
     }),
-    new _StatsWidget({type: 'luma'})
+    new _StatsWidget({type: 'luma'}),
+    new SelectionWidget({
+      viewId: 'left-map',
+      SelectionLayer,
+      layerIds: ['airports'],
+      onSelect: (info: PickingInfo) => {
+        console.log('Selected:', info);
+        // if (info.layer?.id === 'airports' && info.object) {
+        //   return {
+        //     id: info.object.properties.abbrev,
+        //     name: info.object.properties.name,
+        //     type: info.object.properties.type,
+        //     featureclass: info.object.properties.featureclass,
+        //     location: info.object.properties.location
+        //   };
+        // }
+        // return null;
+      }
+      // onSelectionChange: (info: PickingInfo) => {
+      //   if (info.layer?.id === 'airports' && info.object) {
+      //     console.log('Selected:', info.object.properties.name);
+      //   } else {
+      //     console.log('Selection cleared');
+      //   }
+      // }
+    })
   ]
 });
 
