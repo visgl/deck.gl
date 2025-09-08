@@ -170,7 +170,7 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 #### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
-* Default: `false`
+* Default: `true`
 
 When set to `true`, aggregation is performed on the GPU. 
 
