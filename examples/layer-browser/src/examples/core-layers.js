@@ -63,11 +63,11 @@ const IconLayerExample = {
       type: 'category',
       value: ['height', 'width']
     }
-  },  
+  },
   props: {
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
-    sizeBasis: 'height',    
+    sizeBasis: 'height',
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],

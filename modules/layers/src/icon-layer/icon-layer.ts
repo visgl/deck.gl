@@ -262,7 +262,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}): void {
-    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
+    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} =
+      this.props;
     const {iconManager} = this.state;
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
@@ -272,7 +273,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
-        sizeBasis: (sizeBasis === 'height' ? 1.0 : 0.0),
+        sizeBasis: sizeBasis === 'height' ? 1.0 : 0.0,
         sizeMinPixels,
         sizeMaxPixels,
         billboard,

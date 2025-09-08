@@ -51,13 +51,13 @@ export default [
         data: points,
         iconAtlas: './test/data/rectangle.png',
         iconMapping: {
-          "rectangle": {
-            "x": 0,
-            "y": 0,
-            "width": 197,
-            "height": 133,
-            "anchorY": 66,
-            "mask": true
+          rectangle: {
+            x: 0,
+            y: 0,
+            width: 197,
+            height: 133,
+            anchorY: 66,
+            mask: true
           }
         },
         sizeScale: 12,
