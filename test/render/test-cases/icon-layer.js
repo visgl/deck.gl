@@ -36,6 +36,42 @@ export default [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-lnglat-rectangle',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat-rectangle',
+        data: points,
+        iconAtlas: './test/data/rectangle.png',
+        iconMapping: {
+          "rectangle": {
+            "x": 0,
+            "y": 0,
+            "width": 197,
+            "height": 133,
+            "anchorY": 66,
+            "mask": true
+          }
+        },
+        sizeScale: 12,
+        sizeBasis: 'width',
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => 'rectangle',
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8
+      })
+    ],
+    goldenImage: './test/render/golden-images/icon-lnglat-rectangle.png'
+  },
+  {
     name: 'icon-lnglat-external-buffer',
     viewState: {
       latitude: 37.751537058389985,
