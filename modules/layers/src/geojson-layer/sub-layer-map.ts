@@ -68,6 +68,7 @@ export const POINT_LAYER = {
       textFontWeight: 'fontWeight',
       textLineHeight: 'lineHeight',
       textMaxWidth: 'maxWidth',
+      getTextMaxWidth: 'getMaxWidth',
       textOutlineColor: 'outlineColor',
       textOutlineWidth: 'outlineWidth',
       textWordBreak: 'wordBreak',

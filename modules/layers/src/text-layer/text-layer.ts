@@ -144,6 +144,11 @@ type _TextLayerProps<DataT> = {
    */
   maxWidth?: number;
   /**
+   * Per-object width limit accessor. Returns the same unit as `maxWidth`.
+   * @default -1
+   */
+  getMaxWidth?: Accessor<DataT, number>;
+  /**
    * Label text accessor
    */
   getText?: AccessorFunction<DataT, string>;
@@ -214,6 +219,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   // auto wrapping options
   wordBreak: 'break-word',
   maxWidth: {type: 'number', value: -1},
+  getMaxWidth: {type: 'accessor', value: -1},
 
   getText: {type: 'accessor', value: (x: any) => x.text},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
@@ -274,7 +280,10 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       fontChanged ||
       props.lineHeight !== oldProps.lineHeight ||
       props.wordBreak !== oldProps.wordBreak ||
-      props.maxWidth !== oldProps.maxWidth;
+      props.maxWidth !== oldProps.maxWidth ||
+      props.getMaxWidth !== oldProps.getMaxWidth ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getMaxWidth));
 
     if (styleChanged) {
       this.setState({
@@ -387,14 +396,25 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {fontAtlasManager} = this.state;
     const iconMapping = fontAtlasManager.mapping!;
     const getText = this.state.getText!;
-    const {wordBreak, lineHeight, maxWidth} = this.props;
+    const {wordBreak, lineHeight, maxWidth, getMaxWidth} = this.props;
+
+    let objectMaxWidth = maxWidth;
+    const maxWidthAccessor = getMaxWidth;
+    if (typeof maxWidthAccessor === 'function') {
+      const value = maxWidthAccessor(object, objectInfo);
+      if (Number.isFinite(value) && value >= 0) {
+        objectMaxWidth = value;
+      }
+    } else if (Number.isFinite(maxWidthAccessor) && maxWidthAccessor >= 0) {
+      objectMaxWidth = maxWidthAccessor;
+    }
 
     const paragraph = getText(object, objectInfo) || '';
     return transformParagraph(
       paragraph,
       lineHeight,
       wordBreak,
-      maxWidth * fontAtlasManager.props.fontSize,
+      objectMaxWidth * fontAtlasManager.props.fontSize,
       iconMapping
     );
   }
@@ -549,6 +569,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
                 getText: updateTriggers.getText,
                 getTextAnchor: updateTriggers.getTextAnchor,
                 getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+                getMaxWidth: updateTriggers.getMaxWidth,
                 styleVersion
               }
             }
@@ -609,6 +630,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getIconOffsets: {
               getTextAnchor: updateTriggers.getTextAnchor,
               getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+              getMaxWidth: updateTriggers.getMaxWidth,
               styleVersion
             }
           }
