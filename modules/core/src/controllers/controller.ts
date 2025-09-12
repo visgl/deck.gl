@@ -367,11 +367,16 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.state = newControllerState.getState();
     this._setInteractionState(interactionState);
 
+    let oldViewState;
     if (changed) {
-      const oldViewState = this.controllerState && this.controllerState.getViewportProps();
-      if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState, viewId: this.props.id});
-      }
+      oldViewState = this.controllerState && this.controllerState.getViewportProps();
+      // Optimistically update props so that subsequent events use the latest view state
+      // even if the new props have not yet been fed back through setProps.
+      this.props = {...this.props, ...viewState};
+    }
+
+    if (changed && this.onViewStateChange) {
+      this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState, viewId: this.props.id});
     }
   }
 
