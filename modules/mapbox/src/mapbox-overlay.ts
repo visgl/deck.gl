@@ -121,17 +121,28 @@ export default class MapboxOverlay implements IControl {
         'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
       )();
     }
-    this._deck = getDeckInstance({
-      map,
-      gl,
-      deck: new Deck({
-        ...this._props,
-        gl
-      })
-    });
+
+    // Defer deck creation until map is loaded to avoid race condition with projection initialization
+    const createDeck = () => {
+      if (this._deck) return;
+      this._deck = getDeckInstance({
+        map,
+        gl,
+        deck: new Deck({
+          ...this._props,
+          gl
+        })
+      });
+      resolveLayers(map, this._deck, [], this._props.layers);
+    };
+
+    if (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
+      createDeck();
+    } else {
+      map.once('load', createDeck);
+    }
 
     map.on('styledata', this._handleStyleChange);
-    resolveLayers(map, this._deck, [], this._props.layers);
 
     return document.createElement('div');
   }
