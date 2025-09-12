@@ -10,9 +10,12 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@deck.gl-community/editable-layers": "^9.0.3",
+    "@deck.gl-community/layers": "^9.0.3",
     "@deck.gl/core": "^9.1.0",
     "@deck.gl/layers": "^9.1.0",
-    "@deck.gl/widgets": "^9.1.0"
+    "@deck.gl/widgets": "^9.1.0",
+    "preact": "^10.17.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

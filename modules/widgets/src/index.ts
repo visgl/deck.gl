@@ -15,6 +15,7 @@ export {GeocoderWidget as _GeocoderWidget} from './geocoder-widget';
 // Utility widgets
 export {FullscreenWidget} from './fullscreen-widget';
 export {ScreenshotWidget} from './screenshot-widget';
+export {SelectionWidget} from './selection-widget';
 export {LoadingWidget as _LoadingWidget} from './loading-widget';
 export {FpsWidget as _FpsWidget} from './fps-widget';
 export {ThemeWidget as _ThemeWidget} from './theme-widget';
@@ -29,6 +30,7 @@ export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
 export type {ZoomWidgetProps} from './zoom-widget';
 export type {ScreenshotWidgetProps} from './screenshot-widget';
+export type {SelectionWidgetProps} from './selection-widget';
 export type {ResetViewWidgetProps} from './reset-view-widget';
 export type {GeocoderWidgetProps} from './geocoder-widget';
 export type {LoadingWidgetProps} from './loading-widget';
