@@ -11,3 +11,9 @@ If you have discovered a security vulnerability in this project, please report i
 Please disclose it at [security advisory](https://github.com/visgl/deck.gl/security/advisories/new).
 
 This project is maintained by a team of volunteers on a reasonable-effort basis. As such, please give us at least 90 days to work on a fix before public exposure.
+
+## Escalation
+
+If you do not receive an acknowledgement of your report within 6 business days, or if you cannot find a private security contact for the project, you may escalate to the OpenJS Foundation CNA at `security@lists.openjsf.org`.
+
+If the project acknowledges your report but does not provide any further response or engagement within 14 days, escalation is also appropriate.
