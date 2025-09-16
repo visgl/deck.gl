@@ -24,6 +24,8 @@ class LineDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/line`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     width: {
       displayName: 'Width',
@@ -62,6 +64,8 @@ class LineDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type} 
+        device={this.props.device}
         flightPaths={data && data[0]}
         airports={data && data[1]}
         lineWidth={params.width.value}

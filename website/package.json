@@ -41,7 +41,8 @@
     "react-map-gl": "^8.0.0",
     "react-virtualized-auto-sizer": "^1.0.2",
     "styled-components": "^5.3.3",
-    "supercluster": "^8.0.1"
+    "supercluster": "^8.0.1",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@docusaurus/core": "^3.6.3",
