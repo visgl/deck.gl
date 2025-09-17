@@ -9,6 +9,7 @@ import {default as HeatmapTileLayer} from './layers/heatmap-tile-layer';
 import {default as PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
 import {default as RasterTileLayer} from './layers/raster-tile-layer';
+import {default as TrajectoryTileLayer} from './layers/trajectory-tile-layer';
 import {default as VectorTileLayer} from './layers/vector-tile-layer';
 
 // Exports for playground/bindings
@@ -19,6 +20,7 @@ const CARTO_LAYERS = {
   PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
+  TrajectoryTileLayer,
   VectorTileLayer
 };
 export {
@@ -29,6 +31,7 @@ export {
   PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
+  TrajectoryTileLayer,
   VectorTileLayer
 };
 
@@ -47,6 +50,7 @@ export type {QuadbinTileLayerProps} from './layers/quadbin-tile-layer';
 export type {RasterLayerProps} from './layers/raster-layer';
 export type {RasterTileLayerProps} from './layers/raster-tile-layer';
 export type {SpatialIndexTileLayerProps} from './layers/spatial-index-tile-layer';
+export type {TrajectoryTileLayerProps} from './layers/trajectory-tile-layer';
 export type {VectorTileLayerProps} from './layers/vector-tile-layer';
 
 // Helpers
@@ -63,6 +67,7 @@ export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
 export {fetchMap, LayerFactory} from './api/fetch-map';
 export {fetchBasemapProps} from './api/basemap';
+export {normalizeTimestamp} from './layers/trajectory-utils';
 export type {
   FetchMapOptions,
   FetchMapResult,
