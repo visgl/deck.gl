@@ -21,6 +21,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.2 Prereleases
 
+#### deck.gl [v9.2.0-beta.1] - Sep 19 2025
+
 #### deck.gl [v9.2.0-alpha.3] - Sep 15 2025
 
 - fix(core): orthographic scroll zoom transitions (#9769)
