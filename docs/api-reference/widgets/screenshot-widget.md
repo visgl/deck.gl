@@ -23,7 +23,7 @@ const deck = new Deck({
 });
 ```
 
-### `ScreenshotWidgetProps`
+### `ScreenshotWidgetProps` {#screenshotwidgetprops}
 
 The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
@@ -39,7 +39,7 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 Default: `'Screenshot'`
 
-#### `imageFormat` (string, optional) {#imageFormat}
+#### `imageFormat` (string, optional) {#imageformat}
 
 Format of the downloaded image. Browser dependent, may support `image/jpeg`, `image/webp`, `image/avif`
 

@@ -29,15 +29,15 @@ Default: `'coordinates'`
 
 Which geocoding service to use. Supported values are `'coordinates'`, `'google'`, `'mapbox'`, `'opencage'`, or `'custom'`.
 
-#### `apiKey` (string, optional) {#apiKey}
+#### `apiKey` (string, optional) {#apikey}
 
 Required if `geocoder` is set to a third party provider. For quick testing, applications can use the  `coordinates` geocode does not require an api key.
 
-#### `customGeocoder` (optional) {#customGeocoder}
+#### `customGeocoder` (optional) {#customgeocoder}
 
 Only used when `geocoder` is `'custom'`. A function that receives the entered text and an API key, and resolves to a `{longitude, latitude}` object when successful.
 
-#### `_geolocation` (optional) {#geolocation}
+#### `_geolocation` (optional) {#_geolocation}
 
 In addition to addresses / coordinates, one position of obvious interest is the user's own current position. This experimental option adds a `current` menu item that calls the browser's geolocation API and navigates to the user's current position. Note that this requires the user to enable geolocation in the browser.
 

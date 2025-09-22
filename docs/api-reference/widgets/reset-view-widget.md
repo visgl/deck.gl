@@ -20,7 +20,7 @@ const deck = new Deck({
 
 ## Types
 
-### `ResetViewWidgetProps`
+### `ResetViewWidgetProps` {#resetviewwidgetprops}
 
 The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

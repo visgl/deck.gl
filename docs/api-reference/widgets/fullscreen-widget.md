@@ -18,7 +18,7 @@ const deck = new Deck({
 
 ## Types
 
-### `FullscreenWidgetProps`
+### `FullscreenWidgetProps` {#fullscreenwidgetprops}
 
 The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

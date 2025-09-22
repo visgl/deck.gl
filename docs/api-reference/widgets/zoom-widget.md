@@ -16,7 +16,7 @@ const deck = new Deck({
 });
 ```
 
-### `ZoomProps`
+### `ZoomProps` {#zoomprops}
 
 The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

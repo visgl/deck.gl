@@ -9,7 +9,7 @@ The `Widget` class is a base class used to define new widgets and should not be 
 
 ## Types 
 
-#### `WidgetProps` (object) {#props}
+#### `WidgetProps` (object) {#widgetprops}
 
 Options for the widget, as passed into the constructor and can be updated with `setProps`.
 
@@ -41,7 +41,7 @@ Widget positioning within the view. One of:
 - `'bottom-right'`
 - `'fill'`
 
-#### `style`
+#### `style` {#style}
 
 CSS inline style overrides.
 
@@ -49,7 +49,7 @@ CSS inline style overrides.
   style?: Partial<CSSStyleDeclaration>;
 ```
 
-#### `className`
+#### `className` {#classname}
 
 Additional CSS classnames for interaction with custom stylesheets.
   
@@ -59,7 +59,7 @@ Additional CSS classnames for interaction with custom stylesheets.
 
 ### Methods for Widget Writers
 
-#### `constructor`
+#### `constructor` {#constructor}
 
 Supply the props and default props to the base class.
 
@@ -71,7 +71,7 @@ Called to update widget options.
 
 Updates the widget. Called by the specific widget when state has changed. Calls `onRenderHTML()`
 
-#### `onRenderHTML`
+#### `onRenderHTML` {#onrenderhtml}
 
 This function is implemented by the specific widget subclass to update the HTML for the widget
 

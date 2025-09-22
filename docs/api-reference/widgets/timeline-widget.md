@@ -24,7 +24,7 @@ const deck = new Deck({
 });
 ```
 
-### `TimelineProps`
+### `TimelineProps` {#timelineprops}
 
 The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

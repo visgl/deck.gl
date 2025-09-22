@@ -18,7 +18,7 @@ const deck = new Deck({
 
 ## Types
 
-### `CompassWidgetProps`
+### `CompassWidgetProps` {#compasswidgetprops}
 
 The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

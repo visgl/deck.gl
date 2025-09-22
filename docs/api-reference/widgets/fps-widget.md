@@ -17,7 +17,7 @@ new Deck({
 
 ## Types
 
-### `FpsWidgetProps`
+### `FpsWidgetProps` {#fpswidgetprops}
 
 The `FpsWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

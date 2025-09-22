@@ -20,9 +20,9 @@ const deck = new Deck({
 
 ## Types
 
-### `LoadingnWidgetProps`
+### `LoadingWidgetProps` {#loadingwidgetprops}
 
-The `LoadingnWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `LoadingWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
 - `id` (default `'loading'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container

@@ -39,7 +39,7 @@ const deck = new Deck({
 });
 ```
 
-### `SplitterWidgetProps`
+### `SplitterWidgetProps` {#splitterwidgetprops}
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

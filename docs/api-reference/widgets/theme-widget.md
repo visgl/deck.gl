@@ -24,7 +24,7 @@ const deck = new Deck({
 });
 ```
 
-### `ThemeWidgetProps`
+### `ThemeWidgetProps` {#themewidgetprops}
 
 The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 

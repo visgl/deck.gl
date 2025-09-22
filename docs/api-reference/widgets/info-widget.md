@@ -32,7 +32,7 @@ const deck = new Deck({
 
 ## Types
 
-### `InfoWidgetProps`
+### `InfoWidgetProps` {#infowidgetprops}
 
 The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
 
