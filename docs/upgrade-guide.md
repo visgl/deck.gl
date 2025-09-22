@@ -82,7 +82,7 @@ import {Deck} from '@deck.gl/core'
 import {Deck} from '@deck.gl/core/typed'
 ```
 
-### luma.gl v9 Updates
+### @deck.gl/core and luma.gl v9 Updates
 
 The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. Fortunately, deck.gl encapsulates most of the luma.gl API so the changes to deck.gl applications should be limited, in particular if the application does not directly interact with GPU resources.
 
