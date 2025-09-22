@@ -9,21 +9,21 @@ Target release date: September, 2025
 ### Widgets
 
 - A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
-  - [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
-  - [ScaleWidget](./api-reference/widgets/scale-widget.md)
-  - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
-  - [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
-  - [LoadingWidget](./api-reference/widgets/loading-widget.md)
-  - [ThemeWidget](./api-reference/widgets/theme-widget.md)
-  - [InfoWidget](./api-reference/widgets/info-widget.md)
-  - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
-  - [StatsWidget](./api-reference/widgets/stats-widget.md)
-  - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
   - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md)
   - [FpsWidget](./api-reference/widgets/fps-widget.md)
-  - [ViewSelectorWidget](./api-reference/widgets/view-selector-widget.md)
-  - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
+  - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
   - [GeolocateWidget](./api-reference/widgets/geolocate-widget.md)
+  - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
+  - [InfoWidget](./api-reference/widgets/info-widget.md)
+  - [LoadingWidget](./api-reference/widgets/loading-widget.md)
+  - [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
+  - [ScaleWidget](./api-reference/widgets/scale-widget.md)
+  - [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
+  - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+  - [StatsWidget](./api-reference/widgets/stats-widget.md)
+  - [ThemeWidget](./api-reference/widgets/theme-widget.md)
+  - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
+  - [ViewSelectorWidget](./api-reference/widgets/view-selector-widget.md)
 - Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
 - Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly.
 - Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling).
