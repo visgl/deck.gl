@@ -38,8 +38,14 @@ export class FpsWidget extends Widget<FpsWidgetProps> {
     super.setProps(props);
   }
 
+  onAdd({}: {deck: Deck<any>; viewId: string | null}): void {
+    this._lastFps = this._getFps();
+    this.updateHTML();
+  }
+
   onRenderHTML(rootElement: HTMLElement): void {
     const fps = this._getFps();
+    // TODO - avoid changing the root element, instead create a child for better styling.
     rootElement.innerText = `FPS:\n${fps}`;
     rootElement.style.backgroundColor = 'white';
     rootElement.style.fontFamily = 'monospace';
@@ -53,11 +59,6 @@ export class FpsWidget extends Widget<FpsWidgetProps> {
       this._lastFps = fps;
       this.updateHTML();
     }
-  }
-
-  onAdd({}: {deck: Deck<any>; viewId: string | null}): void {
-    this._lastFps = this._getFps();
-    this.updateHTML();
   }
 
   _getFps(): number {

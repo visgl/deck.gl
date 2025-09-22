@@ -8,9 +8,9 @@ import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
-import {HeatmapTileLayer} from '@deck.gl/carto';
+import {HeatmapTileLayer, ClusterTileLayer, colorBins, colorContinuous} from '@deck.gl/carto';
 
-import {colorPalettes} from './palettes';
+import {getColorRange} from './palette-utils';
 import {datasets} from './datasets';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
@@ -30,12 +30,20 @@ const accessToken = 'XXX'; // Replace with your CARTO access token
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName};
 
+function normalize(value, min, max) {
+  return (value - min) / Math.max(1, max - min);
+}
+
+const cartoColorPalettes = ['OrYel', 'SunsetDark', 'Purp', 'Peach', 'BrwnYl', 'Earth', 'Temps'];
+
 function App() {
   const [selectedDataset, setSelectedDataset] = useState('H3 Table (Population)');
-  const [selectedPalette, setSelectedPalette] = useState('YlOrRd (Default)');
+  const [selectedPalette, setSelectedPalette] = useState('OrYel');
+  const [visualizationType, setVisualizationType] = useState<'heatmap' | 'cluster'>('cluster');
   const [radiusPixels, setRadiusPixels] = useState(30);
   const [intensity, setIntensity] = useState(2);
   const [colorDomain, setColorDomain] = useState<[number, number]>([0, 1]);
+  const [clusterLevel, setClusterLevel] = useState(5);
 
   const dataset = datasets[selectedDataset];
 
@@ -47,15 +55,46 @@ function App() {
     ...(dataset.aggregationExp && {aggregationExp: dataset.aggregationExp})
   });
 
-  const layer = new HeatmapTileLayer({
-    id: 'heatmap',
-    data: tilejson,
-    getWeight: dataset.getWeight,
-    radiusPixels,
-    intensity,
-    colorDomain,
-    colorRange: colorPalettes[selectedPalette]
-  });
+  const layer =
+    visualizationType === 'heatmap'
+      ? new HeatmapTileLayer({
+          id: 'heatmap',
+          data: tilejson,
+          getWeight: dataset.getWeight,
+          radiusPixels,
+          intensity,
+          colorDomain,
+          colorRange: getColorRange(selectedPalette)
+        })
+      : new ClusterTileLayer({
+          id: 'cluster',
+          data: tilejson,
+          getWeight: dataset.getWeight,
+          clusterLevel,
+          stroked: false,
+          pointRadiusUnits: 'pixels',
+          getFillColor: colorContinuous({
+            attr: (d: any, info: any) => {
+              const value = d.properties.population_sum;
+              const {min, max} = info.data.attributes.stats?.population_sum || {min: 1, max: 1000};
+              return normalize(value, min, max);
+            },
+            domain: [0, 1],
+            colors: selectedPalette
+          }),
+          getPointRadius: (d: any, info: any) => {
+            const value = d.properties.population_sum;
+            const stats = info.data.attributes.stats?.population_sum;
+            const radiusMin = 10;
+            const radiusMax = 80;
+            const radiusDelta = radiusMax - radiusMin;
+            const normalized = normalize(value, stats.min, stats.max);
+            return radiusMin + radiusDelta * Math.sqrt(normalized);
+          },
+          updateTriggers: {
+            getFillColor: [selectedPalette]
+          }
+        });
 
   const handleDatasetChange = useCallback(event => setSelectedDataset(event.target.value), []);
   const handleRadiusChange = useCallback(event => setRadiusPixels(Number(event.target.value)), []);
@@ -69,6 +108,14 @@ function App() {
     [colorDomain]
   );
   const handlePaletteChange = useCallback(event => setSelectedPalette(event.target.value), []);
+  const handleVisualizationTypeChange = useCallback(
+    event => setVisualizationType(event.target.value),
+    []
+  );
+  const handleClusterLevelChange = useCallback(
+    event => setClusterLevel(Number(event.target.value)),
+    []
+  );
 
   return (
     <>
@@ -88,8 +135,13 @@ function App() {
       </DeckGL>
 
       <div id="control-panel">
-        <h3>CARTO Heatmap Test</h3>
+        <h3>CARTO Visualization Test</h3>
 
+        <label>Visualization Type:</label>
+        <select value={visualizationType} onChange={handleVisualizationTypeChange}>
+          <option value="heatmap">Heatmap</option>
+          <option value="cluster">Clusters</option>
+        </select>
         <label>Dataset:</label>
         <select value={selectedDataset} onChange={handleDatasetChange}>
           {Object.keys(datasets).map(name => (
@@ -103,7 +155,7 @@ function App() {
 
         <label>Color Palette:</label>
         <select value={selectedPalette} onChange={handlePaletteChange}>
-          {Object.keys(colorPalettes).map(name => (
+          {cartoColorPalettes.map(name => (
             <option key={name} value={name}>
               {name}
             </option>
@@ -111,7 +163,7 @@ function App() {
         </select>
 
         <div className="color-preview">
-          {colorPalettes[selectedPalette].map((color, index) => (
+          {getColorRange(selectedPalette).map((color, index) => (
             <div
               key={index}
               className="color-swatch"
@@ -127,28 +179,54 @@ function App() {
           ))}
         </div>
 
-        <label>Radius (pixels):</label>
-        <input type="range" min="0" max="100" value={radiusPixels} onChange={handleRadiusChange} />
-        <div className="range-label">
-          <span>0</span>
-          <span>{radiusPixels}</span>
-          <span>100</span>
-        </div>
+        {visualizationType === 'heatmap' ? (
+          <>
+            <label>Radius (pixels):</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={radiusPixels}
+              onChange={handleRadiusChange}
+            />
+            <div className="range-label">
+              <span>0</span>
+              <span>{radiusPixels}</span>
+              <span>100</span>
+            </div>
 
-        <label>Intensity:</label>
-        <input
-          type="range"
-          min="0.1"
-          max="5"
-          step="0.1"
-          value={intensity}
-          onChange={handleIntensityChange}
-        />
-        <div className="range-label">
-          <span>0.1</span>
-          <span>{intensity}</span>
-          <span>5.0</span>
-        </div>
+            <label>Intensity:</label>
+            <input
+              type="range"
+              min="0.1"
+              max="5"
+              step="0.1"
+              value={intensity}
+              onChange={handleIntensityChange}
+            />
+            <div className="range-label">
+              <span>0.1</span>
+              <span>{intensity}</span>
+              <span>5.0</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <label>Cluster Level:</label>
+            <input
+              type="range"
+              min="3"
+              max="8"
+              value={clusterLevel}
+              onChange={handleClusterLevelChange}
+            />
+            <div className="range-label">
+              <span>3</span>
+              <span>{clusterLevel}</span>
+              <span>8</span>
+            </div>
+          </>
+        )}
 
         <label>Color Domain Min:</label>
         <input
