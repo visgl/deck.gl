@@ -236,6 +236,15 @@ export default class HeatmapLayer<
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
+
+      // Recreate weights transform if data changed to handle binary data format
+      if (changeFlags.dataChanged) {
+        const weightsTransformShaders = this.getShaders({
+          vs: weightsVs,
+          fs: weightsFs
+        });
+        this._createWeightsTransform(weightsTransformShaders);
+      }
     } else if (changeFlags.viewportZoomChanged) {
       // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
