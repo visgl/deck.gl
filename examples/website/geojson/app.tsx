@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
-import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
-import {GeoJsonLayer, PolygonLayer} from '@deck.gl/layers';
-import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';
-import {scaleThreshold} from 'd3-scale';
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Map } from 'react-map-gl/maplibre';
+import { DeckGL } from '@deck.gl/react';
+import { GeoJsonLayer, PolygonLayer } from '@deck.gl/layers';
+import { LightingEffect, AmbientLight, _SunLight as SunLight } from '@deck.gl/core';
+import { scaleThreshold } from 'd3-scale';
 
-import type {Color, Position, PickingInfo, MapViewState} from '@deck.gl/core';
-import type {Feature, Geometry} from 'geojson';
+import type { Device, DeviceProps } from '@luma.gl/core';
+import type { Color, Position, PickingInfo, MapViewState } from '@deck.gl/core';
+import type { Feature, Geometry } from 'geojson';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -74,7 +75,7 @@ type BlockProperties = {
   growth: number;
 };
 
-function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
+function getTooltip({ object }: PickingInfo<Feature<Geometry, BlockProperties>>) {
   return (
     object && {
       html: `\
@@ -89,14 +90,18 @@ function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
 }
 
 export default function App({
+  device,
+  deviceProps,
   data = DATA_URL,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
+  deviceProps?: DeviceProps;
   data?: string | Feature<Geometry, BlockProperties>[];
   mapStyle?: string;
 }) {
   const [effects] = useState(() => {
-    const lightingEffect = new LightingEffect({ambientLight, dirLight});
+    const lightingEffect = new LightingEffect({ ambientLight, dirLight });
     lightingEffect.shadowColor = [0, 0, 0, 0.5];
     return [lightingEffect];
   });
@@ -127,6 +132,8 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
+      deviceProps={deviceProps}
       layers={layers}
       effects={effects}
       initialViewState={INITIAL_VIEW_STATE}
@@ -138,6 +145,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
-  createRoot(container).render(<App />);
+export function renderToDOM(container: HTMLDivElement, device?: Device, deviceProps?: DeviceProps) {
+  createRoot(container).render(<App deviceProps={deviceProps} />);
 }
