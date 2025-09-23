@@ -39,9 +39,10 @@ A few deck.gl layers can now be run on WebGPU in the website, by selecting the `
 - Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views
 - Mapbox v3 Standard style slot support - Integration with Mapbox's latest Standard style slot system for better map styling
 
-### New Layers
+### Layers
 
-- [A5Layer](./api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](../examples/global-grids) example.
+- New [A5Layer](./api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](../examples/global-grids) example
+- TextLayer - new [`backgroundBorderRadius`](./api-reference/layers/text-layer#backgroundborderradius) prop
 
 ### CARTO
 
