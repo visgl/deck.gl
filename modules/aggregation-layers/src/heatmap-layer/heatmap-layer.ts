@@ -565,18 +565,13 @@ export default class HeatmapLayer<
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
-    if (colorTexture && colorTexture?.width === colorRange.length) {
-      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setTexture2DData({data: colors});
-    } else {
-      colorTexture?.destroy();
-      colorTexture = this.context.device.createTexture({
-        ...TEXTURE_PROPS,
-        data: colors,
-        width: colorRange.length,
-        height: 1
-      });
-    }
+    colorTexture?.destroy();
+    colorTexture = this.context.device.createTexture({
+      ...TEXTURE_PROPS,
+      data: colors,
+      width: colorRange.length,
+      height: 1
+    });
     this.setState({colorTexture});
   }
 
