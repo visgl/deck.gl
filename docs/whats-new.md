@@ -9,10 +9,8 @@ Target release date: September, 2025
 ### Widgets
 
 - A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
-  - ContextMenuWidget
   - [FpsWidget](./api-reference/widgets/fps-widget.md)
   - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
-  - GeolocateWidget
   - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
   - [InfoWidget](./api-reference/widgets/info-widget.md)
   - [LoadingWidget](./api-reference/widgets/loading-widget.md)
@@ -20,10 +18,8 @@ Target release date: September, 2025
   - [ScaleWidget](./api-reference/widgets/scale-widget.md)
   - [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
   - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
-  - StatsWidget
   - [ThemeWidget](./api-reference/widgets/theme-widget.md)
   - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
-  - ViewSelectorWidget
 - Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
 - Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly.
 - Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling).
