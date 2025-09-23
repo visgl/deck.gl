@@ -1,8 +1,8 @@
 # HeatmapTileLayer
 
-`HeatmapTileLayer` is a layer for visualizing point data aggregated using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using a heatmap. 
+`HeatmapTileLayer` is a layer for visualizing point data aggregated using spatial indexes like [Quadbin](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) or [H3](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3) using a heatmap. The layer automatically detects the spatial index type and renders cells accordingly. 
 
-## Usage 
+## Usage
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';
@@ -72,9 +72,15 @@ Required. A valid `TilejsonResult` object.
 
 Use one of the following [Data Sources](./data-sources.md) to fetch this from the CARTO API:
 
+**Quadbin sources:**
 - [quadbinTableSource](./data-sources#quadbintablesource)
 - [quadbinQuerySource](./data-sources#quadbinquerysource)
 - [quadbinTilesetSource](./data-sources#quadbintilesetsource)
+
+**H3 sources:**
+- [h3TableSource](./data-sources#h3tablesource)
+- [h3QuerySource](./data-sources#h3querysource)
+- [h3TilesetSource](./data-sources#h3tilesetsource)
 
 ### Render Options
 
@@ -117,7 +123,7 @@ Value that is multiplied with the total weight at a pixel to obtain the final we
 
 * Default: `1`
 
-Method called to retrieve weight of each quadbin cell. By default each cell will use a weight of `1`.
+Method called to retrieve weight of each spatial index cell (quadbin or H3). By default each cell will use a weight of `1`.
 
 ### Callbacks
 
