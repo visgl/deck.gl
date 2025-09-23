@@ -47,14 +47,12 @@ export default function App({
     const positions = new Float32Array(pointCount * 2);
     const weights = new Float32Array(pointCount);
 
-    // Generate simple test data
-    positions[0] = -122.3321;  // Seattle lng
-    positions[1] = 47.6062;    // Seattle lat
-    positions[2] = -122.3320;  // Nearby point lng
-    positions[3] = 47.6061;    // Nearby point lat
-
-    weights[0] = 100;
-    weights[1] = 50;
+    // Generate random test data around Seattle
+    for (let i = 0; i < pointCount; i++) {
+      positions[i * 2] = -122.33 + (Math.random() - 0.5) * 0.1;     // lng ± 0.05
+      positions[i * 2 + 1] = 47.6 + (Math.random() - 0.5) * 0.1;   // lat ± 0.05
+      weights[i] = Math.random() * 100 + 10; // Random weight 10-110
+    }
 
     return {
       length: pointCount,
