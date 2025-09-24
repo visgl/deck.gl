@@ -39,7 +39,7 @@ const deck = new Deck({
 
 The `ContextMenuWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `id` (string, default: `'context'`) - **Required.** Unique id for this widget.
+- `id` (string, default: `'context'`) - **Required.** Unique id for this widget
 - `getMenuItems` (function) - **Required.** Function that returns menu items based on the picked object. Receives `PickingInfo` and returns an array of `ContextWidgetMenuItem` objects or `null`.
 - `onMenuItemSelected` (function, optional) - Callback invoked when a menu item is selected. Receives the selected item key and `PickingInfo`.
 - `visible` (boolean, default `false`) - Controls visibility of the context menu.

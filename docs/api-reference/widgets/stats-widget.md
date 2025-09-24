@@ -1,16 +1,17 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
+
 # StatsWidget (Experimental)
 
 Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget.
 
-```ts
-import {StatsWidget} from '@deck.gl/widgets';
-```
-
 ## Usage
+
+<WidgetPreview cls={StatsWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';
-import {StatsWidget} from '@deck.gl/widgets';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 
 const deck = new Deck({
   widgets: [
@@ -28,6 +29,7 @@ const deck = new Deck({
 
 The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
+- `id` (string, default: `'stats'`) - **Required.** Unique id for this widget
 - `type` (string, default `'deck'`) - Type of stats to display: `'deck'`, `'luma'`, `'device'`, or `'custom'`
 - `stats` (Stats, optional) - Custom stats object when using `type: 'custom'`
 - `title` (string, default `'Stats'`) - Title shown in the widget header
