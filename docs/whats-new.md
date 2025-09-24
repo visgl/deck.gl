@@ -52,7 +52,7 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 ### CARTO
 
 - [ClusterTileLayer](./api-reference/carto/cluster-tile-layer) and [HeatmapTileLayer](./api-reference/carto/heatmap-tile-layer) support H3 data
-- New TrajectoryTileLayer
+- [VectorTileLayer](./api-reference/carto/vector-tile-layer) supports labels for line & polygon data, via new `autoLabels` prop
 
 ## deck.gl v9.1
 
