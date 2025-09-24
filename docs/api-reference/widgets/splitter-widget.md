@@ -41,7 +41,7 @@ const deck = new Deck({
 
 ### `SplitterWidgetProps` {#splitterwidgetprops}
 
-The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
 
 - `id` (default `'splitter'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container

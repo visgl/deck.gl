@@ -34,7 +34,7 @@ const deck = new Deck({
 
 ### `InfoWidgetProps` {#infowidgetprops}
 
-The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
 
 - `id` (default `'info'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container

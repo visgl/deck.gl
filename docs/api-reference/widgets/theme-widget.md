@@ -26,7 +26,7 @@ const deck = new Deck({
 
 ### `ThemeWidgetProps` {#themewidgetprops}
 
-The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
 
 - `id` (default `'theme'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container

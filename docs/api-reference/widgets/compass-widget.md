@@ -20,7 +20,7 @@ const deck = new Deck({
 
 ### `CompassWidgetProps` {#compasswidgetprops}
 
-The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
 
 - `id` (default `'compass'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container

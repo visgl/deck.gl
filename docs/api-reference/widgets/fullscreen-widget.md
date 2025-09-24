@@ -20,7 +20,7 @@ const deck = new Deck({
 
 ### `FullscreenWidgetProps` {#fullscreenwidgetprops}
 
-The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
 
 - `id` (default `'fullscreen'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container

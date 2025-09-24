@@ -29,7 +29,7 @@ const deck = new Deck({
 
 ### `ViewSelectorWidgetProps` {#viewselectorwidgetprops}
 
-The `ViewSelectorWidget` accepts the generic [`WidgetProps`](../core/widget.md#props) and:
+The `ViewSelectorWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 - `initialViewMode` (ViewMode, default `'single'`) - Initial view mode selection
 - `onViewModeChange` (function, optional) - Callback invoked when view mode changes. Receives the new `ViewMode`.
