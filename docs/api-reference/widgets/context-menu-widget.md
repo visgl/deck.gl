@@ -5,7 +5,7 @@ import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
 
 Displays a context menu on right-click events with customizable menu items based on picked objects.
 
-<WidgetPreview cls={GeocoderWidget}/>
+<WidgetPreview cls={ContextMenuWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';
