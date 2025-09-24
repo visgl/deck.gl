@@ -34,7 +34,7 @@ A few deck.gl layers can now be run on WebGPU in the website, by selecting the `
 ### Core
 
 - [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
-- Async DeckPicker methods - New asynchronous methods for improved picking performance and non-blocking operations
+- Async DeckPicker methods - New asynchronous methods for non-blocking operations and (depending on platform and usage) improved picking performance.
 - Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views
 - Mapbox v3 Standard style slot support - Integration with Mapbox's latest Standard style slot system for better map styling
 
