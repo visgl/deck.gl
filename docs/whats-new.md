@@ -29,7 +29,13 @@ Target release date: September, 2025
 
 ### WebGPU Early Preview
 
-A few deck.gl layers can now be run on WebGPU in the website, by selecting the `WebGPU` tab. See documentation about how to [test WebGPU support](./developer-guide/webgpu.md).
+A few deck.gl layers can now be run on WebGPU in the website, by selecting the `WebGPU` tab:
+
+- [LineLayer](../examples/line-layer)
+- [PointCloudLayer](../examples/point-cloud-layer)
+- [ScatterplotLayer](../examples/scatterplot-layer)
+
+See documentation about how to [test WebGPU support](./developer-guide/webgpu.md).
 
 ### Core
 
