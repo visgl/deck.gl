@@ -1,16 +1,17 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_ViewSelectorWidget as ViewSelectorWidget} from '@deck.gl/widgets';
+
 # ViewSelectorWidget (Experimental)
 
 Provides a dropdown menu for selecting different view modes including single view and split view configurations.
 
-```ts
-import {ViewSelectorWidget} from '@deck.gl/widgets';
-```
-
 ## Usage
+
+<WidgetPreview cls={ViewSelectorWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';
-import {ViewSelectorWidget} from '@deck.gl/widgets';
+import {_ViewSelectorWidget as ViewSelectorWidget} from '@deck.gl/widgets';
 
 const deck = new Deck({
   widgets: [
@@ -31,7 +32,8 @@ const deck = new Deck({
 
 The `ViewSelectorWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `initialViewMode` (ViewMode, default `'single'`) - Initial view mode selection
+- `id` (string, default: `'view-selector'`) - **Required.** Unique id for this widget
+- `initialViewMode` ([ViewMode](#viewmode), default `'single'`) - Initial view mode selection
 - `onViewModeChange` (function, optional) - Callback invoked when view mode changes. Receives the new `ViewMode`.
 - `label` (string, default `'Split View'`) - Tooltip label for the widget
 
