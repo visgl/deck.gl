@@ -13,7 +13,7 @@ The `Widget` class is a base class used to define new widgets and should not be 
 
 Options for the widget, as passed into the constructor and can be updated with `setProps`.
 
-#### `id` {#id}
+#### `id` (string) {#id}
 
 The `id` string must be unique among all your widgets at a given time. While a default `id` is provided, it is recommended to set `id` explicitly if you have multiple widgets of the same type.
 
@@ -41,21 +41,21 @@ Widget positioning within the view. One of:
 - `'bottom-right'`
 - `'fill'`
 
-#### `style` {#style}
+#### `style` (object, optional) {#style}
 
-CSS inline style overrides.
+Additional inline CSS styles on the top HTML element.
 
 ```ts
   style?: Partial<CSSStyleDeclaration>;
 ```
 
-#### `className` {#classname}
+* Default: `{}`
 
-Additional CSS classnames for interaction with custom stylesheets.
+#### `className` (string, optional) {#classname}
+
+Additional CSS classnames on the top HTML element.
   
-```ts
-  className?: string;
-```
+* Default: `''`
 
 ### Methods for Widget Writers
 
