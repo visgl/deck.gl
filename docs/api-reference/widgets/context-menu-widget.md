@@ -15,17 +15,19 @@ import {ContextMenuWidget} from '@deck.gl/widgets';
 const deck = new Deck({
   widgets: [
     new ContextMenuWidget({
-      getMenuItems: (info) => {
+      getMenuItems: (info, widget) => {
         if (info.object) {
+        const name = info.object.properties.name;
           return [
-            {label: 'Show Info', key: 'info'},
-            {label: 'Delete', key: 'delete'}
+            {key: 'name', label: name},
+            {key: 'delete', label: 'Delete'}
           ];
         }
         return [{label: 'Add Point', key: 'add'}];
       },
       onMenuItemSelected: (key, pickInfo) => {
-        console.log('Selected:', key, pickInfo?.object);
+        if (key === 'add') addPoint(pickInfo);  
+        if (key === 'delete') deletePoint(pickInfo);  
       }
     })
   ]

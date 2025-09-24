@@ -16,11 +16,7 @@ const deck = new Deck({
   widgets: [
     new StatsWidget({
       type: 'deck',
-      framesPerUpdate: 5,
-      formatters: {
-        'GPU Memory': 'memory',
-        'Render Time': 'averageTime'
-      }
+      framesPerUpdate: 5
     })
   ]
 });

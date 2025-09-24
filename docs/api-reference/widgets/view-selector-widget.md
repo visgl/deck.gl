@@ -47,9 +47,11 @@ Available view modes:
 
 - Click the button to open a dropdown menu with view mode options
 - Each option shows an icon representing the layout
-- Selection updates the current view mode and triggers the callback
+- Selection updates the current view mode internally
 - The widget button displays an icon matching the currently selected mode
+
+**Note:** The `onViewModeChange` callback is currently not invoked in the implementation, so this widget primarily serves as a visual selector without automatic view switching functionality.
 
 ## Integration
 
-This widget provides the UI for view mode selection but does not directly modify the deck.gl view configuration. Applications should implement the view switching logic in the `onViewModeChange` callback to create and configure multiple views as needed.
+This widget provides the UI for view mode selection but does not currently trigger callbacks or modify deck.gl view configuration automatically. Applications need to implement custom logic to detect view mode changes and update view configurations accordingly.
