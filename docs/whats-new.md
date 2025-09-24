@@ -24,8 +24,8 @@ Target release date: September, 2025
   - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
   - [ViewSelectorWidget](./api-reference/widgets/view-selector-widget.md)
 - Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
-- Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly.
-- Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling).
+- Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
+- Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)
 
 ### WebGPU Early Preview
 
@@ -39,10 +39,9 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 
 ### Core
 
-- [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
-- Async DeckPicker methods - New asynchronous methods for non-blocking operations and (depending on platform and usage) improved picking performance.
-- Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views
-- Mapbox v3 Standard style slot support - Integration with Mapbox's latest Standard style slot system for better map styling
+- [`View.clone()`](./api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
+- Async DeckPicker methods - New asynchronous methods for non-blocking operations and (depending on platform and usage) improved picking performance
+- Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearColor), [`clearDepth`](./api-reference/core/view.md#clearDepth), [`clearStencil`](./api-reference/core/view.md#clearStencil) props
 
 ### Layers
 
@@ -53,6 +52,10 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 
 - [ClusterTileLayer](./api-reference/carto/cluster-tile-layer) and [HeatmapTileLayer](./api-reference/carto/heatmap-tile-layer) support H3 data
 - [VectorTileLayer](./api-reference/carto/vector-tile-layer) supports labels for line & polygon data, via new `autoLabels` prop
+
+### Mapbox
+
+- [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md#constructor) - When using `interleaved: true` and a Mapbox v3 Standard style, you may now control the ordering of layers by adding the [`slot`](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to a layer.
 
 ## deck.gl v9.1
 
