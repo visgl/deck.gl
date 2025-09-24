@@ -12,7 +12,6 @@ Target release date: September, 2025
   - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md)
   - [FpsWidget](./api-reference/widgets/fps-widget.md)
   - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
-  - [GeolocateWidget](./api-reference/widgets/geolocate-widget.md)
   - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
   - [InfoWidget](./api-reference/widgets/info-widget.md)
   - [LoadingWidget](./api-reference/widgets/loading-widget.md)
