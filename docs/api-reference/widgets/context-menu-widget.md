@@ -1,16 +1,15 @@
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
+
 # ContextMenuWidget (Experimental)
 
 Displays a context menu on right-click events with customizable menu items based on picked objects.
 
-```ts
-import {ContextMenuWidget} from '@deck.gl/widgets';
-```
-
-## Usage
+<WidgetPreview cls={GeocoderWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';
-import {ContextMenuWidget} from '@deck.gl/widgets';
+import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
 
 const deck = new Deck({
   widgets: [
@@ -40,6 +39,7 @@ const deck = new Deck({
 
 The `ContextMenuWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
+- `id` (string, default: `'context'`) - **Required.** Unique id for this widget.
 - `getMenuItems` (function) - **Required.** Function that returns menu items based on the picked object. Receives `PickingInfo` and returns an array of `ContextWidgetMenuItem` objects or `null`.
 - `onMenuItemSelected` (function, optional) - Callback invoked when a menu item is selected. Receives the selected item key and `PickingInfo`.
 - `visible` (boolean, default `false`) - Controls visibility of the context menu.
