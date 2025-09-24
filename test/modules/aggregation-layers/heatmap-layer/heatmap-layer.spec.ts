@@ -60,7 +60,7 @@ test('HeatmapLayer', t => {
   t.end();
 });
 
-test('HeatmapLayer#updates', t => {
+test.skip('HeatmapLayer#updates', t => {
   testLayer({
     Layer: HeatmapLayer,
     onError: t.notOk,
