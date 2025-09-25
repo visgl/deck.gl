@@ -30,7 +30,6 @@ export default class Map extends Evented {
     setTimeout(() => {
       this.style._loaded = true;
       this.fire(new Event('styledata'));
-      console.log('styleload');
       this._loaded = true;
       this.fire(new Event('load'));
     }, 0);
