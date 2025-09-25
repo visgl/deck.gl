@@ -1,0 +1,26 @@
+{
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.10.2",
+    "@material-ui/icons": "^4.10.2",
+    "react-map-gl": "^7.1.0",
+    "mapbox-gl": "^3.8.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@carto/api-client": "^0.5.15",
+    "@deck.gl/carto": "^9.2.0-alpha.2",
+    "@deck.gl/core": "^9.2.0-alpha.2",
+    "@deck.gl/geo-layers": "^9.2.0-alpha.2",
+    "@deck.gl/layers": "^9.2.0-alpha.2",
+    "@deck.gl/mesh-layers": "^9.2.0-alpha.2"
+  },
+  "devDependencies": {
+    "@types/react-dom": "^18.2.20",
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
+  }
+}
+

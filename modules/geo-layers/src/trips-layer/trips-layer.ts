@@ -64,16 +64,23 @@ vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPa
       'fs:#decl': `\
 in float vTime;
 `,
-      // Drop the segments outside of the time window
+      // Drop the segments outside of the time window, unless highlighted
       'fs:#main-start': `\
-if(vTime > trips.currentTime || (trips.fadeTrail && (vTime < trips.currentTime - trips.trailLength))) {
+bool isHighlighted = bool(picking_vRGBcolor_Avalid.a);
+if(!isHighlighted && (vTime > trips.currentTime || (trips.fadeTrail && (vTime < trips.currentTime - trips.trailLength)))) {
   discard;
 }
 `,
-      // Fade the color (currentTime - 100%, end of trail - 0%)
+      // Fade the color (currentTime - 100%, end of trail - 0%), unless highlighted
       'fs:DECKGL_FILTER_COLOR': `\
-if(trips.fadeTrail) {
+bool isHighlighted = bool(picking_vRGBcolor_Avalid.a);
+if(!isHighlighted && trips.fadeTrail) {
   color.a *= 1.0 - (trips.currentTime - vTime) / trips.trailLength;
+}
+
+bool isTrailVisible = trips.currentTime - trips.trailLength < vTime && vTime < trips.currentTime;
+if (bool(picking.isActive) && !isTrailVisible) {
+  discard;
 }
 `
     };
