@@ -8,7 +8,8 @@ import {
   getDefaultView,
   getDeckInstance,
   removeDeckInstance,
-  getDefaultParameters
+  getDefaultParameters,
+  getProjection
 } from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
@@ -214,6 +215,13 @@ export default class MapboxOverlay implements IControl {
 
   private _handleStyleChange = () => {
     resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    if (!this._map) return;
+
+    // getProjection() returns undefined before style is loaded
+    const projection = getProjection(this._map);
+    if (projection && !this._props.views) {
+      this._deck?.setProps({views: getDefaultView(this._map)});
+    }
   };
 
   private _updateContainerSize = () => {

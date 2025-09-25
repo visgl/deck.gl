@@ -3,8 +3,8 @@
 <p align="center">
   These docs are for
   &nbsp;
-  <a href="https://github.com/visgl/deck.gl/blob/9.0-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v9.0-brightgreen.svg?style=flat-square" />
+  <a href="https://github.com/visgl/deck.gl/blob/9.1-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v9.1-brightgreen.svg?style=flat-square" />
   </a>
   <br />
   Looking for an old version?
