@@ -32,29 +32,31 @@ The `GeocoderWidgetProps` accepts the generic [`WidgetProps`](../core/widget.md#
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Geocoder'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Geocoder'`
+#### `transitionDuration` (number, optional) {#transitionduration}
+
+* Default: `200`
+
+View state transition duration in milliseconds.
 
 #### `geocoder` (string, optional) {#geocoder}
 
-Default: `'coordinates'`
+* Default: `'coordinates'`
 
 Which geocoding service to use. Supported values are `'coordinates'`, `'google'`, `'mapbox'`, `'opencage'`, or `'custom'`.
 
 #### `apiKey` (string, optional) {#apikey}
+
+* Default: `''`
 
 Required if `geocoder` is set to a third party provider. For quick testing, applications can use the  `coordinates` geocode does not require an api key.
 
 #### `customGeocoder` (optional) {#customgeocoder}
 
 Only used when `geocoder` is `'custom'`. A function that receives the entered text and an API key, and resolves to a `{longitude, latitude}` object when successful.
-
-#### `transitionDuration` (number, optional) {#transitionduration}
-
-Default: `200`
-
-View state transition duration in milliseconds.
 
 #### `_geolocation` (optional) {#_geolocation}
 

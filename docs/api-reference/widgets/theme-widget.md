@@ -32,33 +32,33 @@ The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
 
 #### `lightModeTheme` (object, optional) {#lightmodetheme}
 
-Styles for light mode theme.
+* Default: Light Glass Theme
 
-Default: Light Glass Theme
+Styles for light mode theme.
 
 #### `darkModeTheme` (object, optional) {#darkmodetheme}
 
-Styles for dark mode theme.
+* Default: Dark Glass Theme
 
-Default: Dark Glass Theme
+Styles for dark mode theme.
 
 #### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
 
 Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
+* Default: `'auto'`
 
-Default: `'auto'`
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+* Default: `'Light Theme'`
 
-Default: `'Light Theme'`
+Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
 
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when fullscreen.
+* Default: `'Dark Theme'`
 
-Default: `'Dark Theme'`
+Tooltip message displayed while hovering a mouse over the widget when fullscreen.
 
 ## Styles
 

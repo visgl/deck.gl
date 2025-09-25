@@ -28,7 +28,7 @@ The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widg
 
 #### `label` (string, optional) {#label}
 
-Default: `'Scale'`
+* Default: `'Scale'`
 
 Tooltip label for the widget.
 

@@ -40,19 +40,26 @@ The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 #### position ([number, number]) {#position}
 
+* Default: `[0, 0]`
+
 Position at which to place popup (e.g. [longitude, latitude]).
 
 #### text (string, optional) {#text}
+
+* Default: `''`
 
 Text to display within widget.
 
 #### visible (boolean, optional) {#visible}
 
+* Default: `false`
+
 Whether the widget is visible.
 
-Default: `false`
 
 #### minOffset (number, optional) {#minoffset}
+
+* Default: `0`
 
 Minimum offset (in pixels) to keep the popup away from the canvas edges.
 

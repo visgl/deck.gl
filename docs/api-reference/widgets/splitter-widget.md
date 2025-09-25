@@ -47,39 +47,55 @@ The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widge
 
 #### `viewId1` (string, required) {#viewid1}
 
+* Default: `''`
+
 The `id` of the first (resizable) view.
 
 #### `viewId2` (string, required) {#viewid2}
+
+* Default: `''`
 
 The `id` of the second view to compare against.
 
 #### `orientation` ('vertical' | 'horizontal', optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Orientation of the splitter line. Use `vertical` for side-by-side comparison or `horizontal` for top-bottom.
 
 #### `initialSplit` (number, optional) {#initialsplit}
 
-Default: `0.5`
+* Default: `0.5`
 
 Initial split ratio (between 0 and 1) for the first view.
 
 #### `onChange` (Function, optional) {#onchange}
 
-`(newSplit: number) => void`
+```ts
+(newSplit: number) => void
+```
+
+* Default: `() => {}`
 
 Callback invoked during dragging with the updated split ratio.
 
 #### `onDragStart` (Function, optional) {#ondragstart}
 
-`() => void`
+```ts
+() => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the user begins dragging the splitter.
 
 #### `onDragEnd` (Function, optional) {#ondragend}
 
-`() => void`
+```ts
+() => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the user releases the splitter.
 

@@ -31,21 +31,24 @@ The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#wid
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Screenshot'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Screenshot'`
 
 #### `imageFormat` (string, optional) {#imageformat}
 
-Format of the downloaded image. Browser dependent, may support `image/jpeg`, `image/webp`, `image/avif`
+* Default: `'image/png'`
 
-Default: `'image/png'`
+Format of the downloaded image. Browser dependent, may support `image/jpeg`, `image/webp`, `image/avif`
 
 #### `onCapture` (function, optional) {#oncapture}
 
 ```ts
-onCapture(widget: ScreenshotWidget): void
+(widget: ScreenshotWidget) => void
 ```
+
+* Default: `undefined`
 
 Allows the application to define its own capture logic, perhaps to integrate a more advanced screen capture module such as [html2canvas](https://html2canvas.hertzen.com/).
 
