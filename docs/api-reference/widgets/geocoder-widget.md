@@ -64,3 +64,6 @@ In addition to addresses / coordinates, one position of obvious interest is the 
 
 If `props._geolocation` **Current position** from the drop-down uses `navigator.geolocation` to center the map. The option is hidden if the browser does not provide the Geolocation API or the user denies access.
 
+## Source
+
+[modules/widgets/src/geocoder-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/geocoder-widget.tsx)
