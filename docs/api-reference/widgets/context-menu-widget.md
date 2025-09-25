@@ -14,17 +14,19 @@ import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
 const deck = new Deck({
   widgets: [
     new ContextMenuWidget({
-      getMenuItems: (info) => {
+      getMenuItems: (info, widget) => {
         if (info.object) {
+          const name = info.object.properties.name;
           return [
-            {label: 'Show Info', key: 'info'},
-            {label: 'Delete', key: 'delete'}
+            {key: 'name', label: name},
+            {key: 'delete', label: 'Delete'}
           ];
         }
         return [{label: 'Add Point', key: 'add'}];
       },
       onMenuItemSelected: (key, pickInfo) => {
-        console.log('Selected:', key, pickInfo?.object);
+        if (key === 'add') addPoint(pickInfo);
+        if (key === 'delete') deletePoint(pickInfo);
       }
     })
   ]
@@ -35,7 +37,7 @@ const deck = new Deck({
 
 ### `ContextMenuWidgetProps` {#contextmenuwidgetprops}
 
-The `ContextMenuWidget` accepts the generic [`WidgetProps`](../core/widget.md#props) and:
+The `ContextMenuWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 - `getMenuItems` (function) - **Required.** Function that returns menu items based on the picked object. Receives `PickingInfo` and returns an array of `ContextWidgetMenuItem` objects or `null`.
 - `onMenuItemSelected` (function, optional) - Callback invoked when a menu item is selected. Receives the selected item key and `PickingInfo`.
