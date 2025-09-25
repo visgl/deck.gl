@@ -6,7 +6,8 @@
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';
-import {ClusterTileLayer, quadbinTableSource} from '@deck.gl/carto';
+import {ClusterTileLayer} from '@deck.gl/carto';
+import {quadbinTableSource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = quadbinTableSource({

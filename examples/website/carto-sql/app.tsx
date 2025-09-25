@@ -7,7 +7,8 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
-import {colorBins, H3TileLayer, h3QuerySource} from '@deck.gl/carto';
+import {colorBins, H3TileLayer} from '@deck.gl/carto';
+import {h3QuerySource} from '@carto/api-client';
 import {TooltipContent} from '@deck.gl/core/dist/lib/tooltip';
 
 const INITIAL_VIEW_STATE = {

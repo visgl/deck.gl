@@ -6,7 +6,8 @@
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';
-import {HeatmapTileLayer, quadbinTableSource} from '@deck.gl/carto';
+import {HeatmapTileLayer} from '@deck.gl/carto';
+import {quadbinTableSource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = quadbinTableSource({

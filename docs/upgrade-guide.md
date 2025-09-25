@@ -144,7 +144,8 @@ map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
 
 ```ts
 // deck.gl v9
-import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+import {VectorTileLayer} from '@deck.gl/carto';
+import {vectorQuerySource} from '@carto/api-client';
 const data = vectorQuerySource({
   accessToken: 'XXX',
   connectionName: 'carto_dw',
