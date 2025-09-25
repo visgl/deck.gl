@@ -30,31 +30,35 @@ The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#widge
 
 #### `timeRange` ([number, number], optional) {#timerange}
 
-Default: `[0, 100]`
+* Default: `[0, 100]`
 
 Minimum and maximum values for the time slider.
 
 #### `step` (number, optional) {#step}
 
-Default: `1`
+* Default: `1`
 
 Increment step for the slider and play animation.
 
 #### `initialTime` (number, optional) {#initialtime}
 
-Default: `timeRange[0]`
+* Default: `timeRange[0]`
 
 Starting value of the slider.
 
 #### `onTimeChange` (Function, optional) {#ontimechange}
 
-`(value: number) => void`
+```ts
+(value: number) => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the time value changes (drag or play).
 
 #### `playInterval` (number, optional) {#playinterval}
 
-Default: `1000`
+* Default: `1000`
 
 Interval in milliseconds between automatic time increments when playing.
 

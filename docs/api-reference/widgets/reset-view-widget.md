@@ -28,9 +28,10 @@ The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widg
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Reset View'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Reset View'`
 
 ## Styles
 

@@ -28,22 +28,21 @@ The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#wid
 
 #### `container` (HTMLElement, optional) {#container}
 
-Default: `undefined`
+* Default: `undefined`
 
 A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen. By default, the map container element will be made full screen.
 
 #### `enterLabel` (string, optional) {#enterlabel}
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+* Default: `'Enter Fullscreen'`
 
-Default: `'Enter Fullscreen'`
+Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
 
 #### `exitLabel` (string, optional) {#exitlabel}
 
+* Default: `'Exit Fullscreen'`
+
 Tooltip message displayed while hovering a mouse over the widget when fullscreen.
-
-Default: `'Exit Fullscreen'`
-
 
 ## Styles
 

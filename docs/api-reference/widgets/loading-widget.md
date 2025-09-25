@@ -28,9 +28,9 @@ The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 #### `label` (string, optional) {#label}
 
-Tooltip message displayed while hovering a mouse over the widget.
+* Default: `'Loading data'`
 
-Default: `'Loading data'`
+Tooltip message displayed while hovering a mouse over the widget.
 
 ## Source
 

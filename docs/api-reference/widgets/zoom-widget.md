@@ -26,25 +26,25 @@ The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprop
 
 #### `orientation` (string, optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom in button.
+* Default: `'Zoom In'`
 
-Default: `'Zoom In'`
+Tooltip message displayed while hovering a mouse over the zoom in button.
 
 #### `zoomOutLabel` (string, optional) {#zoomoutlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom out button.
+* Default: `'Zoom Out'`
 
-Default: `'Zoom Out'`
+Tooltip message displayed while hovering a mouse over the zoom out button.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Zoom transition duration in milliseconds.
 

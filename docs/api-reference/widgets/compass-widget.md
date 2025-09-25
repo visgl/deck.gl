@@ -28,13 +28,13 @@ The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#widget
 
 #### `label` (string, optional) {#label}
 
-Tooltip message displayed while hovering a mouse over the widget.
+* Default: `'Compass'`
 
-Default: `'Compass'`
+Tooltip message displayed while hovering a mouse over the widget.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Bearing and pitch reset transition duration in milliseconds.
 
