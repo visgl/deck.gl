@@ -39,10 +39,7 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
     viewId: null,
     label: 'Split View',
     initialViewMode: 'single',
-    onViewModeChange: (viewMode: string) => {
-      // eslint-disable-next-line no-console
-      console.log(viewMode);
-    }
+    onViewModeChange: () => {}
   };
 
   className = 'deck-widget-view-selector';
@@ -76,6 +73,7 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   handleSelectMode = (viewMode: ViewMode) => {
     this.viewMode = viewMode;
     this.updateHTML();
+    this.props.onViewModeChange(viewMode);
   };
 }
 
