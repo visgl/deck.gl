@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import type {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
 import {GroupedIconButton} from './lib/components/grouped-icon-button';

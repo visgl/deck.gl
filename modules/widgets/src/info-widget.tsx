@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {Deck, PickingInfo, Viewport} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {Deck, PickingInfo, Viewport, WidgetProps} from '@deck.gl/core';
 import {render, JSX} from 'preact';
 
 export type InfoWidgetProps = WidgetProps & {

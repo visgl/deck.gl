@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {Deck, PickingInfo} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {Deck, PickingInfo, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 import {SimpleMenu} from './lib/components/simple-menu';
 

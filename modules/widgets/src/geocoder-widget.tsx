@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {WidgetPlacement, Viewport} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {WidgetPlacement, Viewport, WidgetProps} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
 import {DropdownMenu} from './lib/components/dropdown-menu';

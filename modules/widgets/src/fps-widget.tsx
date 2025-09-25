@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {WidgetPlacement, Deck} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {WidgetPlacement, Deck, WidgetProps} from '@deck.gl/core';
 
 /** Properties for the FpsWidget. */
 export type FpsWidgetProps = WidgetProps & {

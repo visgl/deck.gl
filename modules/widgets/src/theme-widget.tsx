@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {log, _deepEqual as deepEqual, _applyStyles as applyStyles} from '@deck.gl/core';
-import {Widget, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 // import {useCallback} from 'preact/hooks';
 import {IconButton} from './lib/components/icon-button';

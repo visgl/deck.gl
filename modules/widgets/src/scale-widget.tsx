@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {WidgetPlacement, Viewport} from '@deck.gl/core';
+import type {WidgetPlacement, Viewport, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
-import {Widget, WidgetProps} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
 
 export type ScaleWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'bottom-left'. */

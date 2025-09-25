@@ -4,7 +4,7 @@
 
 import {h, render} from 'preact';
 import {useState, useRef} from 'preact/hooks';
-import {Widget, WidgetProps} from '@deck.gl/core';
+import {Widget, type WidgetProps} from '@deck.gl/core';
 
 /** Properties for the SplitterWidget */
 export type SplitterWidgetProps = WidgetProps & {

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {WidgetPlacement} from '@deck.gl/core';
+import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
-import {Widget, WidgetProps} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
 
 /** @todo - is the the best we can do? */
