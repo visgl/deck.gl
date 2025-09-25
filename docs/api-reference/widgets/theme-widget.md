@@ -42,11 +42,11 @@ Styles for light mode theme.
 
 Styles for dark mode theme.
 
-#### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
+#### `initialTheme` (`'auto' | 'light' | 'dark'`) {#initialtheme}
 
-Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
 * Default: `'auto'`
 
+Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
