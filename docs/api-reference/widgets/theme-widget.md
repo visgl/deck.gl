@@ -11,7 +11,9 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 :::info
 
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
-  :::
+:::
+
+## Usage
 
 <BrowserOnly>{() => <WidgetPreview cls={_ThemeWidget}/>}</BrowserOnly>
 
@@ -19,7 +21,7 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
-const deck = new Deck({
+new Deck({
   widgets: [new ThemeWidget()]
 });
 ```

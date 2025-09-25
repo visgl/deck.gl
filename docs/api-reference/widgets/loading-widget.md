@@ -7,13 +7,15 @@ import {_LoadingWidget} from '@deck.gl/widgets';
 
 This widget shows a spinning indicator while any deck.gl layers are loading data.
 
+## Usage
+
 <WidgetPreview cls={_LoadingWidget}/>
 
 ```ts
-import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
 
-const deck = new Deck({
+new Deck({
   widgets: [new LoadingWidget()]
 });
 ```

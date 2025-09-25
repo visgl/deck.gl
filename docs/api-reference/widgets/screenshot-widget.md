@@ -12,13 +12,15 @@ Only the deck.gl canvas is captured, not other HTML DOM element underneath or on
 It is possible to use `props.onCapture` to integrate with more advanced screen capture modules such as [html2canvas](https://html2canvas.hertzen.com/)
 :::
 
+## Usage
+
 <WidgetPreview cls={ScreenshotWidget}/>
 
 ```ts
 import {ScreenshotWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
-const deck = new Deck({
+new Deck({
   widgets: [new ScreenshotWidget()]
 });
 ```

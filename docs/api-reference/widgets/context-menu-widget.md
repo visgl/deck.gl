@@ -3,7 +3,11 @@ import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
 
 # ContextMenuWidget (Experimental)
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 Displays a context menu on right-click events with customizable menu items based on picked objects.
+
+## Usage
 
 <WidgetPreview cls={GeocoderWidget}/>
 
@@ -11,7 +15,7 @@ Displays a context menu on right-click events with customizable menu items based
 import {Deck} from '@deck.gl/core';
 import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
 
-const deck = new Deck({
+new Deck({
   widgets: [
     new ContextMenuWidget({
       getMenuItems: (info, widget) => {
