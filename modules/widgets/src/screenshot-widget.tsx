@@ -12,6 +12,8 @@ import {IconButton} from './lib/components/icon-button';
 export type ScreenshotWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip message */
   label?: string;
   /** Filename to save to */
@@ -31,6 +33,7 @@ export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
     ...Widget.defaultProps,
     id: 'screenshot',
     placement: 'top-left',
+    viewId: null,
     label: 'Screenshot',
     filename: 'screenshot.png',
     imageFormat: 'image/png',
@@ -42,11 +45,12 @@ export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
 
   constructor(props: ScreenshotWidgetProps = {}) {
     super(props, ScreenshotWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ScreenshotWidgetProps>) {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 

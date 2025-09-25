@@ -7,9 +7,12 @@ import {render} from 'preact';
 import {Widget, WidgetProps} from '@deck.gl/core';
 
 export type ScaleWidgetProps = WidgetProps & {
+  /** Widget positioning within the view. Default 'bottom-left'. */
   placement?: WidgetPlacement;
+  /** Label for the scale widget */
   label?: string;
-  onCapture?: (widget: ScaleWidget) => void;
+  /** View to attach to and interact with. Required when using multiple views */
+  viewId?: string | null;
 };
 
 /**
@@ -25,7 +28,7 @@ export class ScaleWidget extends Widget<ScaleWidgetProps> {
     id: 'scale',
     placement: 'bottom-left',
     label: 'Scale',
-    onCapture: undefined!
+    viewId: null
   };
 
   className = 'deck-widget-scale';
@@ -40,11 +43,12 @@ export class ScaleWidget extends Widget<ScaleWidgetProps> {
 
   constructor(props: ScaleWidgetProps = {}) {
     super(props, ScaleWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ScaleWidgetProps>): void {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 

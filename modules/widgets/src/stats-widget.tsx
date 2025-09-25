@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Widget, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render} from 'preact';
