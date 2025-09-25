@@ -548,6 +548,95 @@ test('Tileset2D#isTileVisible', async t => {
   t.end();
 });
 
+test('Tileset2D#isTileVisibleWithModelMatrix', async t => {
+  const cullRect = {x: 0, y: 0, width: 256, height: 256};
+  const identityMatrix = new Matrix4();
+  const translationMatrix = new Matrix4().translate([512, 0, 0]);
+  const rotationMatrix = new Matrix4().rotateZ(Math.PI / 2);
+
+  const testCases = [
+    {
+      title: 'identity',
+      viewport: new OrthographicView().makeViewport({
+        width: 1024,
+        height: 512,
+        viewState: {
+          target: [512, 256, 0],
+          zoom: 0
+        }
+      }),
+      modelMatrix: identityMatrix,
+      checks: [
+        {id: '0-0-0', modelMatrix: identityMatrix, result: true},
+        {id: '1-0-0', modelMatrix: identityMatrix, result: true}
+      ]
+    },
+    {
+      title: 'translation',
+      viewport: new OrthographicView().makeViewport({
+        width: 1024,
+        height: 512,
+        viewState: {
+          target: [512, 256, 0],
+          zoom: 0
+        }
+      }),
+      modelMatrix: translationMatrix,
+      checks: [
+        {id: '0-0-0', modelMatrix: translationMatrix, result: true},
+        {id: '0-0-0', cullRect, modelMatrix: translationMatrix, result: false},
+        {id: '1-0-0', modelMatrix: translationMatrix, result: false}
+      ]
+    },
+    {
+      title: 'rotation',
+      viewport: new OrthographicView().makeViewport({
+        width: 1024,
+        height: 512,
+        viewState: {
+          target: [-512, 256, 0],
+          zoom: 0
+        }
+      }),
+      modelMatrix: rotationMatrix,
+      checks: [
+        {id: '0-0-0', modelMatrix: rotationMatrix, result: true},
+        {id: '0-0-0', cullRect, modelMatrix: rotationMatrix, result: false},
+        {id: '0-1-0', modelMatrix: rotationMatrix, result: true},
+        {id: '0-1-0', cullRect, modelMatrix: rotationMatrix, result: true}
+      ]
+    }
+  ];
+
+  let viewport, options;
+  const updateTileset = () => tileset.update(viewport, options);
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: updateTileset,
+    onTileError: updateTileset
+  });
+
+  for (const testCase of testCases) {
+    t.comment(testCase.title);
+    viewport = testCase.viewport;
+    options = {modelMatrix: testCase.modelMatrix};
+
+    updateTileset();
+    await sleep(10);
+
+    for (const {id, cullRect, modelMatrix, result} of testCase.checks) {
+      const tile = tileset._cache.get(id);
+      t.is(
+        tileset.isTileVisible(tile, cullRect, modelMatrix),
+        result,
+        `isTileVisible with modelMatrix ${cullRect ? 'with cullRect ' : ''}returns correct value for ${id}`
+      );
+    }
+  }
+
+  t.end();
+});
+
 function validateVisibility(strategy, selectedTiles, tiles) {
   /* eslint-disable default-case */
   switch (strategy) {

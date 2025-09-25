@@ -1,3 +1,4 @@
+import uuid
 from .json_tools import JSONMixin
 
 TYPE_IDENTIFIER = "@@type"
@@ -30,7 +31,7 @@ class Widget(JSONMixin):
 
     def __init__(self, type, id=None, placement=None, view_id=None, **kwargs):
         self.type = type
-        self.id = id
+        self.id = id or str(uuid.uuid4())
         self.placement = placement
         self.view_id = view_id
         self.__dict__.update(kwargs)

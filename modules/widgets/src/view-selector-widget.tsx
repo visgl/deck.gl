@@ -33,7 +33,7 @@ export type ViewSelectorWidgetProps = WidgetProps & {
 export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   static defaultProps: Required<ViewSelectorWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'view-selector-widget',
+    id: 'view-selector',
     placement: 'top-left',
     label: 'Split View',
     initialViewMode: 'single',

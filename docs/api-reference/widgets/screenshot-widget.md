@@ -23,9 +23,9 @@ const deck = new Deck({
 });
 ```
 
-### `ScreenshotWidgetProps`
+### `ScreenshotWidgetProps` {#screenshotwidgetprops}
 
-The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
 
 - `id` (default `'screenshot'`) -  Unique id for this widget
 - `placement` (default `'top-left'`) - Widget position within the view relative to the map container
@@ -39,7 +39,7 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 Default: `'Screenshot'`
 
-#### `imageFormat` (string, optional) {#imageFormat}
+#### `imageFormat` (string, optional) {#imageformat}
 
 Format of the downloaded image. Browser dependent, may support `image/jpeg`, `image/webp`, `image/avif`
 

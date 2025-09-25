@@ -32,6 +32,7 @@ export type ContextMenuWidgetProps = WidgetProps & {
 export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   static defaultProps: Required<ContextMenuWidgetProps> = {
     ...Widget.defaultProps,
+    id: 'context',
     viewId: null,
     visible: false,
     position: {x: 0, y: 0},
