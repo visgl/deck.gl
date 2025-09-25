@@ -18,7 +18,6 @@ const deck = new Deck({
 
 ## Props
 
-- `id`: `'gimbal'`
 - `label`: `'Gimbal'`
 - `transitionDuration`: `200`
 

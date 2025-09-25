@@ -19,10 +19,5 @@ new Deck({
 
 ### `FpsWidgetProps` {#fpswidgetprops}
 
-The `FpsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
+The `FpsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops).
 
-- `id` (default `'fps'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.

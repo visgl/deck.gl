@@ -20,13 +20,7 @@ const deck = new Deck({
 
 ### `FullscreenWidgetProps` {#fullscreenwidgetprops}
 
-The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
-
-- `id` (default `'fullscreen'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `container` (HTMLElement, optional) {#container}
 
@@ -46,17 +40,6 @@ Tooltip message displayed while hovering a mouse over the widget when fullscreen
 
 Default: `'Exit Fullscreen'`
 
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-fullscreen-widget`.
 
 ## Styles
 

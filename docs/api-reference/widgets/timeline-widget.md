@@ -26,27 +26,7 @@ const deck = new Deck({
 
 ### `TimelineProps` {#timelineprops}
 
-The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
-
-- `id` (default `'timeline'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
-
-## Props
-
-#### `id` (string, optional) {#id}
-
-Default: `'timeline'`
-
-Unique identifier for the widget.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'bottom-left'`
-
-Widget position within the view. Valid options: `top-left`, `top-right`, `bottom-left`, `bottom-right`, `fill`.
+The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `timeRange` ([number, number], optional) {#timerange}
 

@@ -32,7 +32,6 @@ const deck = new Deck({
 
 The `ViewSelectorWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `id` (string, default: `'view-selector'`) - **Required.** Unique id for this widget
 - `initialViewMode` ([ViewMode](#viewmode), default `'single'`) - Initial view mode selection
 - `onViewModeChange` (function, optional) - Callback invoked when view mode changes. Receives the new `ViewMode`.
 - `label` (string, default `'Split View'`) - Tooltip label for the widget
