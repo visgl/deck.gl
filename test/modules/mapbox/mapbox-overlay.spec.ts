@@ -6,6 +6,7 @@ import test from 'tape-promise/tape';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
@@ -354,3 +355,40 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
     t.end();
   });
 });
+
+const PROJECTION_TEST_CASES = [
+  {projection: 'globe', ExpectedView: GlobeView},
+  {projection: 'mercator', ExpectedView: MapView},
+  {ExpectedView: MapView}
+];
+
+for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
+  test(`MapboxOverlay#${projection} projection view selection`, t => {
+    const map = new MockMapboxMap({
+      center: {lng: -122.45, lat: 37.78},
+      zoom: 14,
+      projection
+    });
+
+    const overlay = new MapboxOverlay({
+      interleaved: true,
+      layers: [new ScatterplotLayer({id: 'test-layer'})]
+    });
+
+    map.addControl(overlay);
+
+    t.ok(overlay._deck, 'Deck instance is created');
+
+    map.on('render', () => {
+      const mapboxView = overlay._deck.props.views;
+      t.ok(
+        mapboxView instanceof ExpectedView,
+        `should use correct view when map has ${projection} projection`
+      );
+
+      map.removeControl(overlay);
+      t.notOk(overlay._deck, 'Deck instance is finalized');
+      t.end();
+    });
+  });
+}
