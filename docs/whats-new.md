@@ -40,7 +40,7 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 ### Core
 
 - [`View.clone()`](./api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
-- Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearColor), [`clearDepth`](./api-reference/core/view.md#clearDepth), [`clearStencil`](./api-reference/core/view.md#clearStencil) props
+- Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearcolor), [`clearDepth`](./api-reference/core/view.md#cleardepth), [`clearStencil`](./api-reference/core/view.md#clearstencil) props
 
 ### Layers
 
