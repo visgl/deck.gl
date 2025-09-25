@@ -8,23 +8,36 @@ This module contains the following widgets:
 
 - [ZoomWidget](./zoom-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
-<!-- - [GimbalWidget](./gimbal-widget.md) -->
+- [GimbalWidget](./gimbal-widget.md)
 
 ### Geospatial Widgets
 
 - [CompassWidget](./compass-widget.md)
-<!-- - [ScaleWidget](./scale-widget.md) -->
-<!-- - [GeocoderWidget](./geocoder-widget.md) -->
+- [ScaleWidget](./scale-widget.md)
+- [GeocoderWidget](./geocoder-widget.md)
+
+### View Widgets
+
+- [FullscreenWidget](./fullscreen-widget.md)
+- [SplitterWidget](./splitter-widget.md)
+- [ViewSelectorWidget](./view-selector-widget.md)
+
+### Information Widgets
+
+- [InfoWidget](./info-widget.md)
+- [ContextMenuWidget](./context-menu-widget.md)
+
+### Control Widgets
+
+- [TimelineWidget](./timeline-widget.md)
 
 ### Utility Widgets
 
-- [FullscreenWidget](./fullscreen-widget.md)
 - [ScreenshotWidget](./screenshot-widget.md)
-- [LoadingWidget](./loading-widget.md)
 - [ThemeWidget](./theme-widget.md)
-- [InfoWidget](./info-widget.md)
-- [SplitterWidget](./splitter-widget.md)
-- [TimelineWidget](./timeline-widget.md)
+- [LoadingWidget](./loading-widget.md)
+- [FpsWidget](./fps-widget.md)
+- [StatsWidget](./stats-widget.md)
 
 ## Installation
 
