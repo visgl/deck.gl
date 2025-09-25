@@ -56,6 +56,14 @@ Text to display within widget.
 
 Whether the widget is visible.
 
+#### mode (string, optional) {#mode}
+
+* Default: `'hover'`
+
+Determines the interaction mode of the widget:
+* `'click'`: The widget is triggered by a user click.
+* `'hover'`: The widget is triggered when the user hovers over an element.
+* `'static'`: The widget remains visible at a fixed position.
 
 #### minOffset (number, optional) {#minoffset}
 
@@ -63,9 +71,25 @@ Whether the widget is visible.
 
 Minimum offset (in pixels) to keep the popup away from the canvas edges.
 
+#### getTooltip (Function, optional) {#gettooltip}
+
+```ts
+(info: PickingInfo, widget: InfoWidget) => InfoWidgetProps | null
+```
+
+* Default: `undefined`
+
+Function to generate the popup contents from the selected element.
+
 #### onClick (Function, optional) {#onclick}
 
-`(widget: _InfoWidget, info: PickingInfo) => boolean`
+```ts
+(widget: InfoWidget, info: PickingInfo) => boolean
+```
+
+* Default: `undefined`
+
+Callback triggered when the widget is clicked.
 
 ## Source
 

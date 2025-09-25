@@ -20,10 +20,29 @@ new Deck({
 });
 ```
 
-## Props
+## Types
 
-- `label`: `'Gimbal'`
-- `transitionDuration`: `200`
+### `GimbalWidgetProps` {#gimbalwidgetprops}
+
+The `GimbalWidgetProps` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
+
+#### `label` (string, optional) {#label}
+
+* Default: `'Gimbal'`
+
+Tooltip message displayed while hovering a mouse over the widget.
+
+#### `strokeWidth` (number, optional) {#strokewidth}
+
+* Default: `1.5`
+
+Width of gimbal lines.
+
+#### `transitionDuration` (number, optional) {#transitionduration}
+
+* Default: `200`
+
+View state transition duration in milliseconds.
 
 ## Styles
 

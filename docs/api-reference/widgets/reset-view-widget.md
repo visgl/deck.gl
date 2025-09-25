@@ -32,6 +32,11 @@ The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widg
 
 Tooltip message displayed while hovering a mouse over the widget.
 
+#### `initialViewState` (ViewState, optional) {#initialviewstate}
+
+* Default: `deck.props.initialViewState`
+
+The initial view state to reset the view to.
 
 ## Styles
 
