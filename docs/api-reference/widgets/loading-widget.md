@@ -22,29 +22,7 @@ const deck = new Deck({
 
 ### `LoadingWidgetProps` {#loadingwidgetprops}
 
-The `LoadingWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
-
-- `id` (default `'loading'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
-
-## Props
-
-#### `id` (string, optional) {#id}
-
-Default: `'loading'`
-
-The `id` must be unique among all your widgets at a given time. 
-
-Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'top-left'`
-
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
