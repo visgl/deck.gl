@@ -220,7 +220,7 @@ export default class MapboxOverlay implements IControl {
     // getProjection() returns undefined before style is loaded
     const projection = getProjection(this._map);
     if (projection && !this._props.views) {
-      this._deck?.setProps({views: getDefaultView(this._map!)});
+      this._deck?.setProps({views: getDefaultView(this._map)});
     }
   };
 
