@@ -3,15 +3,19 @@ import {GimbalWidget} from '@deck.gl/widgets';
 
 # GimbalWidget
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 Visualizes the orientation of an `OrbitView` using nested circles. Clicking resets `rotationOrbit` and `rotationX` to `0`.
+
+## Usage
 
 <WidgetPreview cls={GimbalWidget}/>
 
 ```ts
-import {GimbalWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {GimbalWidget} from '@deck.gl/widgets';
 
-const deck = new Deck({
+new Deck({
   widgets: [new GimbalWidget()]
 });
 ```

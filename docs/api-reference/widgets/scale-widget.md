@@ -7,6 +7,8 @@ import {_ScaleWidget} from '@deck.gl/widgets';
 
 This widget displays a dynamic cartographic scale bar that updates as the map view changes. It shows a horizontal line with end tick marks and a distance label, reflecting the current map scale based on zoom level and latitude.
 
+## Usage
+
 <WidgetPreview cls={_ScaleWidget}/>
 
 ```ts

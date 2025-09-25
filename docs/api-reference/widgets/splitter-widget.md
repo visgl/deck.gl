@@ -7,6 +7,8 @@ import {_SplitterWidget} from '@deck.gl/widgets';
 
 This widget renders a draggable splitter line across the deck.gl canvas to divide two views. It supports both vertical and horizontal orientations, allowing users to compare two views (e.g., two map or globe views) by dragging the splitter handle.
 
+## Usage
+
 <WidgetPreview cls={_SplitterWidget} props={{
   orientation: 'vertical',
   initialSplit: 0.5

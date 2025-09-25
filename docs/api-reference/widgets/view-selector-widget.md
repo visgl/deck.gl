@@ -3,6 +3,8 @@ import {_ViewSelectorWidget as ViewSelectorWidget} from '@deck.gl/widgets';
 
 # ViewSelectorWidget (Experimental)
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 Provides a dropdown menu for selecting different view modes including single view and split view configurations.
 
 ## Usage

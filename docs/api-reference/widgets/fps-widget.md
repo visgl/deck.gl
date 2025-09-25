@@ -1,15 +1,20 @@
-# FpsWidget
+import {WidgetPreview} from '@site/src/doc-demos/widgets';
+import {_FpsWidget as FpsWidget} from '@deck.gl/widgets';
 
-Displays the measured frames per second (FPS) as reported by the attached
-`Deck` instance.
+# FpsWidget (Experimental)
 
-```ts
-import {FpsWidget} from '@deck.gl/widgets';
-```
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+Displays the measured frames per second (FPS) as reported by the attached `Deck` instance.
 
 ## Usage
 
+<WidgetPreview cls={FpsWidget}/>
+
 ```ts
+import {Deck} from '@deck.gl/core';
+import {_FpsWidget as FpsWidget} from '@deck.gl/widgets';
+
 new Deck({
   widgets: [new FpsWidget({placement: 'top-right'})]
 });

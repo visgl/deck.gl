@@ -3,6 +3,8 @@ import {_GeocoderWidget} from '@deck.gl/widgets';
 
 # GeocoderWidget (Experimental)
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 The GeocoderWidget helps the user find positions on the map.
 
 This widget provides an input box for entering an address or a pair of coordinates.
@@ -14,8 +16,8 @@ Addresses that return a valid location are stored in browser local storage (up t
 <WidgetPreview cls={_GeocoderWidget}/>
 
 ```ts
-import {_GeocoderWidget as GeocoderWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {_GeocoderWidget as GeocoderWidget} from '@deck.gl/widgets';
 
 new Deck({
   widgets: [new GeocoderWidget()]

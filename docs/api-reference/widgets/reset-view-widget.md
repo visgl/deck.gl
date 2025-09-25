@@ -7,11 +7,13 @@ import {ResetViewWidget} from '@deck.gl/widgets';
 
 This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
 
+## Usage
+
 <WidgetPreview cls={ResetViewWidget}/>
 
 ```ts
-import {ResetViewWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {ResetViewWidget} from '@deck.gl/widgets';
 
 const deck = new Deck({
   widgets: [new ResetViewWidget()]
