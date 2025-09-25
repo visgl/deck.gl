@@ -1,7 +1,7 @@
 import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {GeocoderWidget} from '@deck.gl/widgets';
+import {_GeocoderWidget} from '@deck.gl/widgets';
 
-# GeocoderWidget
+# GeocoderWidget (Experimental)
 
 The GeocoderWidget helps the user find positions on the map.
 
@@ -11,10 +11,10 @@ The user types an address or coordinates into the text field and press **Go** to
 
 Addresses that return a valid location are stored in browser local storage (up to five entries). They will appear in the drop-down for quick re-use during later visits.
 
-<WidgetPreview cls={GeocoderWidget}/>
+<WidgetPreview cls={_GeocoderWidget}/>
 
 ```ts
-import {GeocoderWidget} from '@deck.gl/widgets';
+import {_GeocoderWidget as GeocoderWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
 new Deck({
