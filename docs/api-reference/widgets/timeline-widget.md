@@ -7,13 +7,15 @@ import {_TimelineWidget} from '@deck.gl/widgets';
 
 This widget provides a time slider with play/pause controls. Configure a time range, step interval, and play speed to animate data over time.
 
+## Usage
+
 <WidgetPreview cls={_TimelineWidget}/>
 
 ```ts
-import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 
-const deck = new Deck({
+new Deck({
   widgets: [
     new TimelineWidget({
       timeRange: [0, 24],
