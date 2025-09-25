@@ -48,10 +48,10 @@ export type GeocoderWidgetProps = WidgetProps & {
 export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   static defaultProps: Required<GeocoderWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'geolocate',
+    id: 'geocoder',
     viewId: undefined!,
     placement: 'top-left',
-    label: 'Geolocate',
+    label: 'Geocoder',
     transitionDuration: 200,
     geocoder: 'coordinates',
     customGeocoder: CoordinatesGeocoder,
