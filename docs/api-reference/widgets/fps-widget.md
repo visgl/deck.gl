@@ -26,3 +26,6 @@ new Deck({
 
 The `FpsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops).
 
+## Source
+
+[modules/widgets/src/fps-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/fps-widget.tsx)

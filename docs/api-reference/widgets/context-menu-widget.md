@@ -62,3 +62,7 @@ Menu item definition:
 - Menu items are dynamically generated based on what was clicked
 - Click elsewhere to hide the menu
 - Menu automatically positions itself at the cursor location
+
+## Source
+
+[modules/widgets/src/context-menu-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/context-menu-widget.tsx)

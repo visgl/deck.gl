@@ -32,3 +32,6 @@ new Deck({
 | `--icon-gimbal-outer-color` | `rgb(68, 92, 204)` |
 | `--icon-gimbal-inner-color` | `rgb(240, 92, 68)` |
 
+## Source
+
+[modules/widgets/src/gimbal-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/gimbal-widget.tsx)

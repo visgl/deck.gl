@@ -56,3 +56,7 @@ The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
   - `'luma'`: luma.gl WebGL statistics
   - `'device'`: GPU device statistics
   - `'custom'`: User-provided stats object
+
+## Source
+
+[modules/widgets/src/stats-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/stats-widget.tsx)
