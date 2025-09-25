@@ -13,6 +13,8 @@ import {LightGlassTheme, DarkGlassTheme} from './themes';
 export type ThemeWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip message when dark mode is selected. */
   lightModeLabel?: string;
   /** Styles for light mode theme */
@@ -30,6 +32,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
     ...Widget.defaultProps,
     id: 'theme',
     placement: 'top-left',
+    viewId: null,
     lightModeLabel: 'Light Mode',
     lightModeTheme: LightGlassTheme,
     darkModeLabel: 'Dark Mode',
@@ -43,14 +46,15 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
 
   constructor(props: ThemeWidgetProps = {}) {
     super(props, ThemeWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
     this.themeMode = this._getInitialThemeMode();
+    this.setProps(this.props);
   }
 
   // eslint-disable-next-line complexity
   setProps(props: Partial<ThemeWidgetProps>) {
     const {lightModeTheme, darkModeTheme} = this.props;
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
 
     // Update if current theme definition changed

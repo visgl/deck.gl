@@ -12,7 +12,7 @@ export type GimbalWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message. */
   label?: string;
-  /** Width of gimbal lines */
+  /** Width of gimbal lines. */
   strokeWidth?: number;
   /** Transition duration in ms when resetting rotation. */
   transitionDuration?: number;
@@ -23,7 +23,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     ...Widget.defaultProps,
     id: 'gimbal',
     placement: 'top-left',
-    viewId: undefined!,
+    viewId: null,
     label: 'Gimbal',
     strokeWidth: 1.5,
     transitionDuration: 200
@@ -31,7 +31,6 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
 
   className = 'deck-widget-gimbal';
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
 
   constructor(props: GimbalWidgetProps = {}) {
     super(props, GimbalWidget.defaultProps);

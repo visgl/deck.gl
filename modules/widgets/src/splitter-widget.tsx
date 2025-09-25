@@ -1,4 +1,3 @@
-// SplitterWidget.tsx
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
@@ -47,7 +46,6 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
   placement = 'fill' as const;
 
   constructor(props: SplitterWidgetProps) {
-    // No placement prop is used.
     super(props, SplitterWidget.defaultProps);
   }
 
