@@ -35,7 +35,7 @@ The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#wid
 
 Tooltip message displayed while hovering a mouse over the widget.
 
-#### `filename` (string, optional) {filename}
+#### `filename` (string, optional) {#filename}
 
 * Default: `'screenshot.png'`
 
