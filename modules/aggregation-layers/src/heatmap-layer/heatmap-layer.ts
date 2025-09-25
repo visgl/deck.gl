@@ -236,6 +236,13 @@ export default class HeatmapLayer<
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
+
+      if (changeFlags.dataChanged) {
+        // Recreate weights transform if data changed, as buffer layout may have changed,
+        // happens when binary attibutes passed.
+        const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
+        this._createWeightsTransform(weightsTransformShaders);
+      }
     } else if (changeFlags.viewportZoomChanged) {
       // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
@@ -558,18 +565,13 @@ export default class HeatmapLayer<
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
-    if (colorTexture && colorTexture?.width === colorRange.length) {
-      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setTexture2DData({data: colors});
-    } else {
-      colorTexture?.destroy();
-      colorTexture = this.context.device.createTexture({
-        ...TEXTURE_PROPS,
-        data: colors,
-        width: colorRange.length,
-        height: 1
-      });
-    }
+    colorTexture?.destroy();
+    colorTexture = this.context.device.createTexture({
+      ...TEXTURE_PROPS,
+      data: colors,
+      width: colorRange.length,
+      height: 1
+    });
     this.setState({colorTexture});
   }
 
