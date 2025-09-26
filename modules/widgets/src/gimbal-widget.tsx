@@ -118,8 +118,8 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     this.updateHTML();
   }
 
-  resetOrbitView() {
-    const viewId = this.getViewId();
+  resetOrbitView(viewport?: Viewport) {
+    const viewId = this.getViewId(viewport);
     const viewState = this.getViewState(viewId);
     if ('rotationOrbit' in viewState || 'rotationX' in viewState) {
       const nextViewState = {
