@@ -93,8 +93,6 @@ export {
 } from '@carto/api-client';
 
 export type {
-  GeojsonResult,
-  JsonResult,
   TilejsonResult,
   SourceOptions,
   QuerySourceOptions,
