@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
+import {log, Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './lib/components/icon-button';
 
@@ -13,6 +13,8 @@ export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip message when out of fullscreen. */
   enterLabel?: string;
   /** Tooltip message when fullscreen. */
@@ -29,6 +31,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     ...Widget.defaultProps,
     id: 'fullscreen',
     placement: 'top-left',
+    viewId: null,
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
     container: undefined!
@@ -40,7 +43,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   constructor(props: FullscreenWidgetProps = {}) {
     super(props, FullscreenWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    this.setProps(this.props);
   }
 
   onAdd(): void {
@@ -54,7 +57,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     render(
       <IconButton
-        onClick={this.handleClick.bind(this)}
+        onClick={() => {
+          this.handleClick().catch(err => log.error(err)());
+        }}
         label={this.fullscreen ? this.props.exitLabel : this.props.enterLabel}
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />,
@@ -64,6 +69,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   setProps(props: Partial<FullscreenWidgetProps>) {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 

@@ -2,45 +2,24 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, type WidgetPlacement} from '@deck.gl/core';
+import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
+import {IconButton} from './lib/components/icon-button';
 
-export type TimelineWidgetProps = {
-  /**
-   * Widget id
-   */
-  id?: string;
-  /**
-   * CSS inline style overrides.
-   */
-  style?: Partial<CSSStyleDeclaration>;
-  /**
-   * Additional CSS class.
-   */
-  className?: string;
-  /**
-   * Widget placement.
-   */
+export type TimelineWidgetProps = WidgetProps & {
+  /** Widget positioning within the view. Default 'bottom-left'. */
   placement?: WidgetPlacement;
-  /**
-   * Slider timeRange [min, max].
-   */
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
+  /** Slider timeRange [min, max]. */
   timeRange?: [number, number];
-  /**
-   * Slider step.
-   */
+  /** Slider step. */
   step?: number;
-  /**
-   * Initial slider value.
-   */
+  /** Initial slider value. */
   initialTime?: number;
-  /**
-   * Callback when value changes.
-   */
+  /** Callback when value changes. */
   onTimeChange?: (value: number) => void;
-  /**
-   * Play interval in milliseconds.
-   */
+  /** Play interval in milliseconds. */
   playInterval?: number;
 };
 
@@ -56,7 +35,8 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   static defaultProps: Required<TimelineWidgetProps> = {
     ...Widget.defaultProps,
     id: 'timeline',
-    placement: 'bottom-left' as const,
+    placement: 'bottom-left',
+    viewId: null,
     timeRange: [0, 100],
     step: 1,
     initialTime: undefined!,
@@ -67,10 +47,12 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   constructor(props: TimelineWidgetProps = {}) {
     super(props, TimelineWidget.defaultProps);
     this.currentTime = this.props.initialTime ?? this.props.timeRange[0];
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<TimelineWidgetProps>): void {
-    this.placement = props.placement || this.placement;
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 
@@ -86,14 +68,9 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     render(
       <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'auto'}}>
-        <button
-          type="button"
-          className="timeline-play-pause"
-          title={this.playing ? 'Pause' : 'Play'}
-          onClick={this.handlePlayPause}
-        >
-          {this.playing ? '⏸' : '▶'}
-        </button>
+        <IconButton label={this.playing ? 'Pause' : 'Play'} onClick={this.handlePlayPause}>
+          <div className="text">{this.playing ? '⏸' : '▶'}</div>
+        </IconButton>
         <input
           type="range"
           className="timeline-slider"

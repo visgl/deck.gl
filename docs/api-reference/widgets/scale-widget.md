@@ -7,6 +7,8 @@ import {_ScaleWidget} from '@deck.gl/widgets';
 
 This widget displays a dynamic cartographic scale bar that updates as the map view changes. It shows a horizontal line with end tick marks and a distance label, reflecting the current map scale based on zoom level and latitude.
 
+## Usage
+
 <WidgetPreview cls={_ScaleWidget}/>
 
 ```ts
@@ -22,17 +24,11 @@ const deck = new Deck({
 
 ### `ResetViewWidgetProps` {#resetviewwidgetprops}
 
-The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
-
-- `id` (default `'scale'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
-Default: `'Scale'`
+* Default: `'Scale'`
 
 Tooltip label for the widget.
 

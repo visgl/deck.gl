@@ -72,21 +72,125 @@ The following issues are known and can be expected to resolve in a 9.0 patch:
 
 ### Typescript
 
-Typescript is now enabled on all modules. The `'@deck.gl/xxx/typed'` packages are removed. 
+Typescript is now enabled on all modules. The `'@deck.gl/xxx/typed'` packages are removed.
 
-### luma.gl v9 Updates
+```ts
+// deck.gl v9
+import {Deck} from '@deck.gl/core'
+
+// deck.gl v8
+import {Deck} from '@deck.gl/core/typed'
+```
+
+### @deck.gl/core and luma.gl v9 Updates
 
 The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. Fortunately, deck.gl encapsulates most of the luma.gl API so the changes to deck.gl applications should be limited, in particular if the application does not directly interact with GPU resources.
 
-Quick summary:
+For more information read the [luma v9 porting guide](https://luma.gl/docs/legacy/porting-guide)
 
-- `DeckProps.gl (WebGLRenderingContext)` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
-- `DeckProps.glOptions (WebGLContextAttributes)` should be replaced with `DeckProps.deviceProps.webgl`: `deviceProps: {type: 'webgl', webgl: ...glOptions}`: [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)
+#### External GL Context
+
+`DeckProps.gl (WebGLRenderingContext)` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device):
+
+```ts
+// deck.gl v9
+import {Deck} from '@deck.gl/core'
+import {luma} from '@luma.gl/core'
+import {webgl2Adapter}'@luma.gl/webgl'
+
+new Deck({ 
+  device: await luma.createDevice({adapters: [webgl2Adapter]})
+});
+
+// deck.gl v8
+import {Deck} from '@deck.gl/core/typed'
+
+const canvas = document.getElementById('myCanvas');
+
+new Deck({ 
+  gl: canvas.getContext('webgl2')
+});
+```
+
+#### GL Options and Device Initialization
+
+- `DeckProps.glOptions (WebGLContextAttributes)` should be replaced with `DeckProps.deviceProps.webgl`: [WebGLContextAttributes](https://luma.gl/docs/api-reference/core/device#webglcontextattributes)
 - `DeckProps.glOptions.preserveDrawingBuffers` is now set by default, and does not need to be overridden.
+- `DeckProps.glOptions.powerPreference` is now set to `'high-performance'` by default, and does not need to be overridden.
 - `DeckProps.onWebGLInitialized` callback is now `DeckProps.onDeviceInitialized`.
-- `LayerProps.parameters` and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
-- When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
-- GPU resources should no longer be created by directly instantiating classes. For example, instead of `new Buffer(gl)` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
+
+```ts
+// deck.gl v9
+import {Deck} from '@deck.gl/core'
+
+new Deck({
+  deviceProps: {
+    type: 'webgl', 
+    // powerPreference: 'high-performance' is now set by default
+    webgl: {
+      stencil: true
+      // preserveDrawingBuffers: true is now set by default
+    }
+  },
+  onDeviceInitialized: (device) => {
+    const gl = device.handle // WebGL2RenderingContext when using a webgl device
+  }
+});
+
+// deck.gl v8
+import {Deck} from '@deck.gl/core/typed'
+
+new Deck({
+  glOptions: {
+    stencil: true,
+    preserveDrawingBuffers: true,
+    powerPreference: 'high-performance'
+  },
+  onWebGLInitialized: (gl) => {}
+});
+```
+
+#### GPU Parameters
+
+`DeckProps.parameters`, `LayerProps.parameters`, and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/):
+
+```ts
+// deck.gl v9 using string constants (preferred)
+import {Deck} from '@deck.gl/core'
+new Deck({
+  parameters: {
+    blendColorOperation: 'add',
+    blendColorSrcFactor: 'src-alpha',
+    blendColorDstFactor: 'one',
+    blendAlphaOperation: 'add',
+    blendAlphaSrcFactor: 'one-minus-dst-alpha',
+    blendAlphaDstFactor: 'one'
+  }
+})
+
+// deck.gl v9 using GL constants
+// The constant module remains but is now considered an internal luma.gl module, and is no longer intended to be imported by applications.
+import {Deck} from '@deck.gl/core'
+import {GL} from '@luma.gl/constants' // Note the ESM import
+
+new Deck({
+  parameters: {
+    blendEquation: [GL.ADD, GL.ADD],
+    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
+  }
+})
+
+// deck.gl v8
+import {Deck} from '@deck.gl/core/typed'
+import GL from '@luma.gl/constants';
+
+new Deck({
+  parameters: {
+    blendEquation: [GL.ADD, GL.ADD],
+    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
+  }
+})
+```
 
 #### Custom Layers
 
@@ -112,13 +216,18 @@ class MyLayer {
 }
 ```
 
-
 While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl curtom layers:
 
 - deck.gl now uses uniform buffers instead of global uniforms. It is not yet required to use uniform buffers but it will be necessary if you would like to run deck.gl on WebGPU in future releases.
 - When defining an attribute, `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of GL constant, and `divisor` is replaced by `stepMode`. See [AttributeManager.add](./api-reference/core/attribute-manager.md#add)
 - WebGL draw modes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
 - The luma picking module now [uses uniform buffers](https://github.com/visgl/luma.gl/blob/master/modules/shadertools/src/modules/engine/picking/picking.ts#L34-L50). To access picking state in shaders use `picking.isActive` rather than `picking_isActive`
+
+#### Additional Changes
+
+- When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
+- GPU resources should no longer be created by directly instantiating classes. For example, instead of `new Buffer(gl)` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
+
 
 ### @deck.gl/mapbox
 

@@ -131,6 +131,13 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
 | `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)` |
 | `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+| `--button-text-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+
+### Menu
+
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--menu-gap` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `4px` |
 
 ### Icon
 

@@ -5,7 +5,9 @@ import {_InfoWidget} from '@deck.gl/widgets';
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
-The InfoWidget shows a popup when an item in a layer has been clicked.
+This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
+
+## Usage
 
 <WidgetPreview cls={_InfoWidget} props={{
   visible: true,
@@ -15,10 +17,10 @@ The InfoWidget shows a popup when an item in a layer has been clicked.
 }}/>
 
 ```ts
-import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
 
-const deck = new Deck({
+new Deck({
   widgets: [
     new InfoWidget({
       visible: true,
@@ -34,35 +36,60 @@ const deck = new Deck({
 
 ### `InfoWidgetProps` {#infowidgetprops}
 
-The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
-
-- `id` (default `'info'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### position ([number, number]) {#position}
+
+* Default: `[0, 0]`
 
 Position at which to place popup (e.g. [longitude, latitude]).
 
 #### text (string, optional) {#text}
 
+* Default: `''`
+
 Text to display within widget.
 
 #### visible (boolean, optional) {#visible}
 
+* Default: `false`
+
 Whether the widget is visible.
 
-Default: `false`
+#### mode (string, optional) {#mode}
+
+* Default: `'hover'`
+
+Determines the interaction mode of the widget:
+* `'click'`: The widget is triggered by a user click.
+* `'hover'`: The widget is triggered when the user hovers over an element.
+* `'static'`: The widget remains visible at a fixed position.
 
 #### minOffset (number, optional) {#minoffset}
 
+* Default: `0`
+
 Minimum offset (in pixels) to keep the popup away from the canvas edges.
+
+#### getTooltip (Function, optional) {#gettooltip}
+
+```ts
+(info: PickingInfo, widget: InfoWidget) => InfoWidgetProps | null
+```
+
+* Default: `undefined`
+
+Function to generate the popup contents from the selected element.
 
 #### onClick (Function, optional) {#onclick}
 
-`(widget: _InfoWidget, info: PickingInfo) => boolean`
+```ts
+(widget: InfoWidget, info: PickingInfo) => boolean
+```
+
+* Default: `undefined`
+
+Callback triggered when the widget is clicked.
 
 ## Source
 

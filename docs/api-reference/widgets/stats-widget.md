@@ -3,6 +3,8 @@ import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 
 # StatsWidget (Experimental)
 
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
 Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget.
 
 ## Usage
@@ -29,7 +31,6 @@ const deck = new Deck({
 
 The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `id` (string, default: `'stats'`) - **Required.** Unique id for this widget
 - `type` (string, default `'deck'`) - Type of stats to display: `'deck'`, `'luma'`, `'device'`, or `'custom'`
 - `stats` (Stats, optional) - Custom stats object when using `type: 'custom'`
 - `title` (string, default `'Stats'`) - Title shown in the widget header
@@ -54,3 +55,7 @@ The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
   - `'luma'`: luma.gl WebGL statistics
   - `'device'`: GPU device statistics
   - `'custom'`: User-provided stats object
+
+## Source
+
+[modules/widgets/src/stats-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/stats-widget.tsx)

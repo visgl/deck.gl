@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.2 Prereleases
 
+#### deck.gl [v9.2.0-beta.2] - Sep 25 2025
+
+- chore: bump luma to 9.2.0 (#9792)
+- fix: HeatmapLayer working with binary data (#9787)
+- fix: picking on non-geospatial tile layer with modelMatrix (#9703)
+- CARTO: Support h3 in ClusterTileLayer (#9755)
+
 #### deck.gl [v9.2.0-beta.1] - Sep 19 2025
 
 #### deck.gl [v9.2.0-alpha.3] - Sep 15 2025
