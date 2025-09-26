@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {Deck, PickingInfo} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {Deck, PickingInfo, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 import {SimpleMenu} from './lib/components/simple-menu';
 
@@ -32,6 +36,7 @@ export type ContextMenuWidgetProps = WidgetProps & {
 export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   static defaultProps: Required<ContextMenuWidgetProps> = {
     ...Widget.defaultProps,
+    id: 'context',
     viewId: null,
     visible: false,
     position: {x: 0, y: 0},
@@ -49,7 +54,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   constructor(props: ContextMenuWidgetProps) {
     super(props, ContextMenuWidget.defaultProps);
     this.pickInfo = null;
-    this.setProps(props);
+    this.setProps(this.props);
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {

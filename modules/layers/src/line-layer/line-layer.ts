@@ -5,6 +5,7 @@
 import {
   Layer,
   project32,
+  color,
   picking,
   UNIT,
   LayerProps,
@@ -16,6 +17,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
+import {Parameters} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
@@ -113,7 +115,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, source, modules: [project32, picking, lineUniforms]});
+    return super.getShaders({vs, fs, source, modules: [project32, color, picking, lineUniforms]});
   }
 
   // This layer has its own wrapLongitude logic
@@ -188,6 +190,15 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -207,6 +218,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
+      parameters,
       isInstanced: true
     });
   }

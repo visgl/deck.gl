@@ -41,7 +41,8 @@
           "developer-guide/tips-and-tricks",
           "developer-guide/building-apps",
           "developer-guide/debugging",
-          "developer-guide/testing"
+          "developer-guide/testing",
+          "developer-guide/webgpu"
         ]
       },
       {
@@ -59,6 +60,7 @@
         "label": "Writing Custom Layers",
         "items": [
           "developer-guide/custom-layers/README",
+          "developer-guide/custom-layers/layer-attributes",
           "developer-guide/custom-layers/layer-lifecycle",
           "developer-guide/custom-layers/picking",
           "developer-guide/custom-layers/composite-layers",
@@ -316,8 +318,10 @@
           "api-reference/widgets/overview",
           "api-reference/widgets/styling",
           "api-reference/widgets/compass-widget",
+          "api-reference/widgets/context-menu-widget",
           "api-reference/widgets/fps-widget",
           "api-reference/widgets/fullscreen-widget",
+          "api-reference/widgets/geocoder-widget",
           "api-reference/widgets/gimbal-widget",
           "api-reference/widgets/info-widget",
           "api-reference/widgets/loading-widget",
@@ -325,8 +329,10 @@
           "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
           "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/stats-widget",
           "api-reference/widgets/theme-widget",
           "api-reference/widgets/timeline-widget",
+          "api-reference/widgets/view-selector-widget",
           "api-reference/widgets/zoom-widget"
         ]
       }

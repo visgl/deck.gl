@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
@@ -20,6 +20,7 @@ import type {
   Color,
   DefaultProps
 } from '@deck.gl/core';
+import {Parameters} from '@luma.gl/core';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -174,7 +175,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       vs,
       fs,
       source,
-      modules: [project32, picking, scatterplotUniforms]
+      modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 
@@ -257,10 +258,23 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     };
     const model = this.state.model!;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
+    if (this.context.device.type === 'webgpu') {
+      // @ts-expect-error TODO - this line was needed during WebGPU port
+      model.instanceCount = this.props.data.length;
+    }
     model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
     return new Model(this.context.device, {
@@ -273,7 +287,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
-      isInstanced: true
+      isInstanced: true,
+      parameters
     });
   }
 }

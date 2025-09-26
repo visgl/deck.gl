@@ -21,7 +21,7 @@ import {webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import type {Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
+import type {CanvasContextProps, Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -374,21 +374,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Create a new device
     if (!deviceOrPromise) {
-      // Create the "best" device supported from the registered adapters
-      deviceOrPromise = luma.createDevice({
-        type: 'webgl',
-        // luma by default throws if a device is already attached
-        // asynchronous device creation could happen after finalize() is called
-        // TODO - createDevice should support AbortController?
-        _reuseDevices: true,
-        adapters: [webgl2Adapter],
-        ...props.deviceProps,
-        createCanvasContext: {
-          canvas: this._createCanvas(props),
-          useDevicePixels: this.props.useDevicePixels,
-          autoResize: true
-        }
-      });
+      deviceOrPromise = this._createDevice(props);
     }
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
@@ -476,6 +462,25 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       height: this.height,
       viewState: this._getViewState()
     });
+
+    if (props.device && props.device.id !== this.device?.id) {
+      this.animationLoop?.stop();
+      if (this.canvas !== props.device.canvasContext?.canvas) {
+        // remove old canvas if new one being used and de-register events
+        // TODO (ck): We might not own this canvas depending it's source, so removing it from the
+        // DOM here might be a bit unexpected but it should be ok for most users.
+        this.canvas?.remove();
+        this.eventManager?.destroy();
+
+        // ensure we will re-attach ourselves after createDevice callbacks
+        this.canvas = null;
+      }
+
+      log.log(`recreating animation loop for new device! id=${props.device.id}`)();
+
+      this.animationLoop = this._createAnimationLoop(props.device, props);
+      this.animationLoop.start();
+    }
 
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
@@ -842,6 +847,44 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
   }
 
+  // Create a device from the deviceProps, assigning required defaults
+  private _createDevice(props: DeckProps<ViewsT>): Promise<Device> {
+    const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
+    const canvasContextProps =
+      typeof canvasContextUserProps === 'object' ? canvasContextUserProps : undefined;
+
+    // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
+    // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
+    const deviceProps = {adapters: [], ...props.deviceProps};
+    if (!deviceProps.adapters.includes(webgl2Adapter)) {
+      deviceProps.adapters.push(webgl2Adapter);
+    }
+
+    const defaultCanvasProps: CanvasContextProps = {
+      // we must use 'premultiplied' canvas for webgpu to enable transparency and match shaders
+      alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
+    };
+
+    // Create the "best" device supported from the registered adapters
+    return luma.createDevice({
+      // luma by default throws if a device is already attached
+      // asynchronous device creation could happen after finalize() is called
+      // TODO - createDevice should support AbortController?
+      _reuseDevices: true,
+      // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
+      type: 'webgl',
+      ...deviceProps,
+      // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
+      createCanvasContext: {
+        ...defaultCanvasProps,
+        ...canvasContextProps,
+        canvas: this._createCanvas(props),
+        useDevicePixels: this.props.useDevicePixels,
+        autoResize: true
+      }
+    });
+  }
+
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
   private _getViewState(): ViewStateObject<ViewsT> | null {
@@ -961,6 +1004,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+
+      // external canvas may not be in DOM
+      if (!this.canvas.isConnected && this.props.parent) {
+        this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
+      }
       // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device

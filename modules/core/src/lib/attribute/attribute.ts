@@ -255,9 +255,18 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Use generic value
   // Returns true if successful
   setConstantValue(value?: NumericArray): boolean {
-    // TODO(ibgreen): WebGPU does not support constant values
+    // TODO(ibgreen): WebGPU does not support constant values,
+    // they will be emulated as buffers instead for now.
     const isWebGPU = this.device.type === 'webgpu';
     if (isWebGPU || value === undefined || typeof value === 'function') {
+      if (isWebGPU && typeof value !== 'function') {
+        const normalisedValue = this._normalizeValue(value, [], 0);
+        // ensure we trigger an update for the attribute's emulated buffer
+        // where webgl would perform the update here
+        if (!this._areValuesEqual(normalisedValue, this.value)) {
+          this.setNeedsUpdate('WebGPU constant updated');
+        }
+      }
       return false;
     }
 
@@ -435,8 +444,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
     // TODO(ibgreen) WebGPU needs buffers, generate an accessor function from a constant
-    if (typeof accessorFunc !== 'function') {
-      accessorFunc = () => accessorFunc;
+    if (typeof accessorFunc !== 'function' && typeof accessor === 'string') {
+      accessorFunc = () => props[accessor];
     }
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 

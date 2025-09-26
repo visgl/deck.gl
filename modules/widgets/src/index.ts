@@ -5,25 +5,31 @@
 // Navigation widgets
 export {ZoomWidget} from './zoom-widget';
 export {ResetViewWidget} from './reset-view-widget';
+export {GimbalWidget} from './gimbal-widget';
 
 // Geospatial widgets
 export {CompassWidget} from './compass-widget';
-export {GimbalWidget} from './gimbal-widget';
 export {ScaleWidget as _ScaleWidget} from './scale-widget';
 export {GeocoderWidget as _GeocoderWidget} from './geocoder-widget';
 
-// Utility widgets
+// View widgets
 export {FullscreenWidget} from './fullscreen-widget';
+export {SplitterWidget as _SplitterWidget} from './splitter-widget';
+export {ViewSelectorWidget as _ViewSelectorWidget} from './view-selector-widget';
+
+// Information widgets
+export {InfoWidget as _InfoWidget} from './info-widget';
+export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
+
+// Control widgets
+export {TimelineWidget as _TimelineWidget} from './timeline-widget';
+
+// Utility widgets
 export {ScreenshotWidget} from './screenshot-widget';
+export {ThemeWidget as _ThemeWidget} from './theme-widget';
 export {LoadingWidget as _LoadingWidget} from './loading-widget';
 export {FpsWidget as _FpsWidget} from './fps-widget';
-export {ThemeWidget as _ThemeWidget} from './theme-widget';
-export {InfoWidget as _InfoWidget} from './info-widget';
 export {StatsWidget as _StatsWidget} from './stats-widget';
-export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
-export {SplitterWidget as _SplitterWidget} from './splitter-widget';
-export {TimelineWidget as _TimelineWidget} from './timeline-widget';
-export {ViewSelectorWidget as _ViewSelectorWidget} from './view-selector-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
@@ -46,8 +52,7 @@ export type {GimbalWidgetProps} from './gimbal-widget';
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';
 
-// Experimental exports
-
+// Experimental preact components
 export {ButtonGroup as _ButtonGroup, type ButtonGroupProps} from './lib/components/button-group';
 export {IconButton as _IconButton, type IconButtonProps} from './lib/components/icon-button';
 export {
