@@ -133,7 +133,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
         >
           {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
         </div>
-        {!collapsed && <div className="deck-widget-stats-content deck-widget-common">{items}</div>}
+        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
       </div>,
       rootElement
     );
@@ -142,7 +142,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   onRedraw(): void {
     const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
     if (this._counter++ % framesPerUpdate === 0) {
-      console.log('Redrawing stats widget');
+      this._stats = this._getStats();
       this.updateHTML();
     }
   }
