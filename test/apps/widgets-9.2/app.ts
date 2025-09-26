@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, PickingInfo} from '@deck.gl/core';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import {
@@ -38,10 +39,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const deck = new Deck({
-  initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
-  layers: [
+function getLayers(filterRange = [2, 9]) {
+  return [
     new WMSLayer({
       data: 'https://ows.terrestris.de/osm/service',
       serviceType: 'wms',
@@ -69,7 +68,11 @@ const deck = new Deck({
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
-      autoHighlight: true
+      autoHighlight: true,
+
+      getFilterValue: f => f.properties.scalerank,
+      filterRange,
+      extensions: [new DataFilterExtension({filterSize: 1})]
     }),
     new ArcLayer({
       id: 'arcs',
@@ -82,7 +85,13 @@ const deck = new Deck({
       getTargetColor: [200, 0, 80],
       getWidth: 1
     })
-  ],
+  ];
+}
+
+const deck = new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: getLayers(),
   widgets: [
     new _GeocoderWidget(),
     new ZoomWidget(),
@@ -112,12 +121,15 @@ const deck = new Deck({
     new _InfoWidget({mode: 'click', getTooltip}),
     new _TimelineWidget({
       placement: 'bottom-left',
-      timeRange: [0, 24],
+      timeRange: [2, 9],
       step: 1,
       initialTime: 0,
       playInterval: 1000,
       // eslint-disable-next-line no-console, no-undef
-      onTimeChange: time => console.log('Time:', time)
+      onTimeChange: time =>
+        deck.setProps({
+          layers: getLayers([2, time])
+        })
     }),
     new _ViewSelectorWidget(),
     new _StatsWidget({type: 'deck'})
