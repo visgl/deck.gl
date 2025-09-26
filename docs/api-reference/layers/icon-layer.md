@@ -346,6 +346,19 @@ If you choose to use auto packing, this prop should be left empty.
 
 Icon size multiplier.
 
+
+#### `sizeBasis` (string, optional) {#sizebasis}
+
+- Default: 'height'
+
+Determines which dimension the size controls when scaling the icon. Valid values:
+
+'height': The icon size controls the height of the icon (default).
+
+'width': The icon size controls the width of the icon.
+
+This affects how the icon is scaled to maintain its aspect ratio based on the chosen size basis.
+
 #### `sizeUnits` (string, optional) {#sizeunits}
 
 * Default: `pixels`
@@ -436,7 +449,7 @@ Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
 - Default: `1`
 
-The height of each object, in units specified by `sizeUnits` (default pixels).
+The size of each object, in units specified by `sizeUnits` (default pixels). By default the size controls the height of the object, this can be changed with the sizeBasis property.
 
 - If a number is provided, it is used as the size for all objects.
 - If a function is provided, it is called on each object to retrieve its size.
