@@ -49,7 +49,7 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
       // TODO(ibgreen) - this should not be a button, but styling is so nested that it is easier to reuse this component.
       this.loading && (
         <IconButton
-          className="deck-widget-spinner-icon"
+          className="deck-widget-spinner"
           label={this.props.label}
           onClick={this.handleClick.bind(this)}
         />
@@ -59,7 +59,7 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
   }
 
   onRedraw({layers}: {layers: Layer[]}): void {
-    const loading = !layers.some(layer => !layer.isLoaded);
+    const loading = layers.some(layer => !layer.isLoaded);
     if (loading !== this.loading) {
       this.loading = loading;
       this.updateHTML();

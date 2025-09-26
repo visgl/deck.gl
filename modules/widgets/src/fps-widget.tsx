@@ -3,7 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget} from '@deck.gl/core';
+import {render} from 'preact';
 import type {WidgetPlacement, Deck, WidgetProps} from '@deck.gl/core';
+import {IconButton} from './lib/components/icon-button';
 
 /** Properties for the FpsWidget. */
 export type FpsWidgetProps = WidgetProps & {
@@ -42,25 +44,30 @@ export class FpsWidget extends Widget<FpsWidgetProps> {
 
   onAdd({}: {deck: Deck<any>; viewId: string | null}): void {
     this._lastFps = this._getFps();
-    this.updateHTML();
+    requestAnimationFrame(() => this._animate());
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
     const fps = this._getFps();
-    // TODO - avoid changing the root element, instead create a child for better styling.
-    rootElement.innerText = `FPS:\n${fps}`;
-    rootElement.style.backgroundColor = 'white';
-    rootElement.style.fontFamily = 'monospace';
-    rootElement.style.fontSize = '8px';
-    rootElement.style.fontWeight = '700'; // Make font bolder on click
+    render(
+      <IconButton>
+        <div className="text">
+          FPS
+          <br />
+          {fps}
+        </div>
+      </IconButton>,
+      rootElement
+    );
   }
 
-  onRedraw({}: {viewports: any[]; layers: any[]}): void {
+  _animate(): void {
     const fps = this._getFps();
-    if (fps !== this._lastFps) {
+    if (this._lastFps !== fps) {
       this._lastFps = fps;
       this.updateHTML();
     }
+    requestAnimationFrame(() => this._animate());
   }
 
   _getFps(): number {

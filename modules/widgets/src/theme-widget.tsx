@@ -57,7 +57,6 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
 
-    // Update if current theme definition changed
     switch (this.themeMode) {
       case 'light':
         if (props.lightModeTheme && !deepEqual(props.lightModeTheme, lightModeTheme, 1)) {
@@ -69,6 +68,8 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
           this._setThemeMode('dark');
         }
         break;
+      default:
+        log.warn(`Invalid theme mode ${this.themeMode}`)();
     }
   }
 
@@ -106,7 +107,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
 
       const label =
         this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel;
-      log.log(1, `Switched theme to ${label}`, themeStyle);
+      log.log(1, `Switched theme to ${label}`, themeStyle)();
 
       this.updateHTML();
     }

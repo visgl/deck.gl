@@ -4,6 +4,7 @@
 
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
+import {IconButton} from './lib/components/icon-button';
 
 export type TimelineWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'bottom-left'. */
@@ -67,14 +68,9 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     render(
       <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'auto'}}>
-        <button
-          type="button"
-          className="timeline-play-pause"
-          title={this.playing ? 'Pause' : 'Play'}
-          onClick={this.handlePlayPause}
-        >
-          {this.playing ? '⏸' : '▶'}
-        </button>
+        <IconButton label={this.playing ? 'Pause' : 'Play'} onClick={this.handlePlayPause}>
+          <div className="text">{this.playing ? '⏸' : '▶'}</div>
+        </IconButton>
         <input
           type="range"
           className="timeline-slider"

@@ -81,7 +81,11 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     if (this.props.transitionDuration > 0) {
       nextViewState.transitionDuration = this.props.transitionDuration;
       nextViewState.transitionInterpolator =
-        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+        'latitude' in nextViewState
+          ? new FlyToInterpolator()
+          : new LinearInterpolator({
+              transitionProps: ['zoom']
+            });
     }
     this.setViewState(viewId, nextViewState);
   }

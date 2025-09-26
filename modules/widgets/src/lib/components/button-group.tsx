@@ -6,11 +6,11 @@ import type {ComponentChildren} from 'preact';
 
 export type ButtonGroupProps = {
   children: ComponentChildren;
-  orientation;
+  orientation: 'vertical' | 'horizontal';
 };
 
 /** Renders a group of buttons with Widget CSS */
 export const ButtonGroup = (props: ButtonGroupProps) => {
-  const {children, orientation} = props;
+  const {children, orientation = 'horizontal'} = props;
   return <div className={`deck-widget-button-group ${orientation}`}>{children}</div>;
 };
