@@ -72,6 +72,6 @@ export class FpsWidget extends Widget<FpsWidgetProps> {
 
   _getFps(): number {
     // @ts-expect-error protected
-    return Math.round(this.deck.metrics.fps ?? 0);
+    return Math.round(this.deck?.metrics.fps ?? 0);
   }
 }
