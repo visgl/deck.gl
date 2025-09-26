@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
 import {Widget} from '@deck.gl/core';
 import type {Deck, PickingInfo, Viewport, WidgetProps} from '@deck.gl/core';
 import {render, JSX} from 'preact';

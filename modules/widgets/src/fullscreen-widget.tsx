@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
+import {log, Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './lib/components/icon-button';
 
@@ -57,7 +57,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     render(
       <IconButton
-        onClick={this.handleClick.bind(this)}
+        onClick={() => {
+          this.handleClick().catch(err => log.error(err)());
+        }}
         label={this.fullscreen ? this.props.exitLabel : this.props.enterLabel}
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />,

@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ComponentChildren} from 'preact';
+import type {ComponentChildren, JSX} from 'preact';
 
 export type IconButtonProps = {
   className?: string;
   label?: string;
-  onClick?: (event?) => unknown;
-  /** Optional icon or element to render inside the button */
+  onClick?: JSX.MouseEventHandler<HTMLButtonElement>;
   children?: ComponentChildren;
 };
 
