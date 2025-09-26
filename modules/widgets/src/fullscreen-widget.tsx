@@ -13,6 +13,8 @@ export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip message when out of fullscreen. */
   enterLabel?: string;
   /** Tooltip message when fullscreen. */
@@ -29,6 +31,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     ...Widget.defaultProps,
     id: 'fullscreen',
     placement: 'top-left',
+    viewId: null,
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
     container: undefined!
@@ -40,7 +43,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   constructor(props: FullscreenWidgetProps = {}) {
     super(props, FullscreenWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    this.setProps(this.props);
   }
 
   onAdd(): void {
@@ -64,6 +67,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   setProps(props: Partial<FullscreenWidgetProps>) {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 

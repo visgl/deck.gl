@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import type {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
 import {GroupedIconButton} from './lib/components/grouped-icon-button';
@@ -32,18 +32,16 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
-    viewId: undefined!
+    viewId: null
   };
 
   className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: ZoomWidgetProps = {}) {
     super(props, ZoomWidget.defaultProps);
-    this.viewId = props.viewId ?? this.viewId;
-    this.placement = props.placement ?? this.placement;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ZoomWidgetProps>) {

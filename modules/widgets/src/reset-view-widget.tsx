@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {WidgetPlacement} from '@deck.gl/core';
+import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
-import {Widget, WidgetProps} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
 
 /** @todo - is the the best we can do? */
@@ -32,7 +32,7 @@ export class ResetViewWidget extends Widget<ResetViewWidgetProps> {
     placement: 'top-left',
     label: 'Reset View',
     initialViewState: undefined!,
-    viewId: undefined!
+    viewId: null
   };
 
   className = 'deck-widget-reset-view';
@@ -40,11 +40,12 @@ export class ResetViewWidget extends Widget<ResetViewWidgetProps> {
 
   constructor(props: ResetViewWidgetProps = {}) {
     super(props, ResetViewWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ResetViewWidgetProps>) {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 
