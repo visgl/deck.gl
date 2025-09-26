@@ -180,7 +180,6 @@ new Deck({
 Notes:
 
 - Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
-- An alternative way to set `parameters`  is to instead define the `onDeviceInitialized` callback (it receives the `device.handle` context as parameter) and call the luma.gl `setParameters` method inside it.
 
 #### `layers` (LayersList) {#layers}
 
