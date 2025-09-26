@@ -62,7 +62,10 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
     render(
       <IconMenu<ViewMode>
         className="deck-widget-view-selector"
-        menuItems={MENU_ITEMS}
+        menuItems={MENU_ITEMS.map(item => ({
+          ...item,
+          icon: item.icon()
+        }))}
         initialItem={this.props.initialViewMode}
         onItemSelected={this.handleSelectMode}
       />,
@@ -77,26 +80,65 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   };
 }
 
-// Define common icon style.
 const ICON_STYLE = {width: '24px', height: '24px'};
 
-// Define inline SVG icons for each view mode.
+// JSX wrapped in a function to fix deck's Node tests
 const ICONS: Record<ViewMode, () => JSX.Element> = {
   single: () => (
     <svg width="24" height="24" style={ICON_STYLE}>
-      <rect x="4" y="4" width="16" height="16" stroke="black" fill="none" strokeWidth="2" />
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
     </svg>
   ),
   'split-horizontal': () => (
     <svg width="24" height="24" style={ICON_STYLE}>
-      <rect x="4" y="4" width="16" height="7" stroke="black" fill="none" strokeWidth="2" />
-      <rect x="4" y="13" width="16" height="7" stroke="black" fill="none" strokeWidth="2" />
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="7"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
+      <rect
+        x="4"
+        y="13"
+        width="16"
+        height="7"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
     </svg>
   ),
   'split-vertical': () => (
     <svg width="24" height="24" style={ICON_STYLE}>
-      <rect x="4" y="4" width="7" height="16" stroke="black" fill="none" strokeWidth="2" />
-      <rect x="13" y="4" width="7" height="16" stroke="black" fill="none" strokeWidth="2" />
+      <rect
+        x="4"
+        y="4"
+        width="7"
+        height="16"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
+      <rect
+        x="13"
+        y="4"
+        width="7"
+        height="16"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
     </svg>
   )
 };
