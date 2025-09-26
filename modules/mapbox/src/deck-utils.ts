@@ -184,7 +184,7 @@ export function drawLayer(
   });
 }
 
-function getProjection(map: Map): 'mercator' | 'globe' {
+export function getProjection(map: Map): 'mercator' | 'globe' {
   const projection = map.getProjection?.();
   const type =
     // maplibre projection spec

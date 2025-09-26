@@ -4,30 +4,57 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.2
 
-Target release date: July, 2025
-
-### WebGPU Early Preview
-
-A few deck.gl layers can now be run on WebGPU in the website, by selecting the `WebGPU` tab. See documentation about how to [test WebGPU support](./developer-guide/webgpu.md).
+Target release date: September, 2025
 
 ### Widgets
 
- A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
+- A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
+  - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md)
+  - [FpsWidget](./api-reference/widgets/fps-widget.md)
+  - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
+  - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
+  - [InfoWidget](./api-reference/widgets/info-widget.md)
+  - [LoadingWidget](./api-reference/widgets/loading-widget.md)
+  - [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
+  - [ScaleWidget](./api-reference/widgets/scale-widget.md)
+  - [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
+  - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+  - [StatsWidget](./api-reference/widgets/stats-widget.md)
+  - [ThemeWidget](./api-reference/widgets/theme-widget.md)
+  - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
+  - [ViewSelectorWidget](./api-reference/widgets/view-selector-widget.md)
+- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
+- Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
+- Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)
 
-- [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
-- [ScaleWidget](./api-reference/widgets/scale-widget.md)
-- [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
-- [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
-- [LoadingWidget](./api-reference/widgets/loading-widget.md)
-- [ThemeWidget](./api-reference/widgets/theme-widget.md)
-- [InfoWidget](./api-reference/widgets/info-widget.md)
-- [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+### WebGPU Early Preview
 
-Pre-wrapped React components for the new deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package.
+A few deck.gl layers can now be run on WebGPU in the website, by selecting the `WebGPU` tab:
+
+- [LineLayer](../examples/line-layer)
+- [PointCloudLayer](../examples/point-cloud-layer)
+- [ScatterplotLayer](../examples/scatterplot-layer)
+
+See documentation about how to [test WebGPU support](./developer-guide/webgpu.md).
 
 ### Core
 
-- [`View.clone()`](./api-reference/core/view.md) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`.
+- [`View.clone()`](./api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
+- Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearcolor), [`clearDepth`](./api-reference/core/view.md#cleardepth), [`clearStencil`](./api-reference/core/view.md#clearstencil) props
+
+### Layers
+
+- New [A5Layer](./api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](../examples/global-grids) example
+- TextLayer - new [`backgroundBorderRadius`](./api-reference/layers/text-layer#backgroundborderradius) prop
+
+### CARTO
+
+- [ClusterTileLayer](./api-reference/carto/cluster-tile-layer) and [HeatmapTileLayer](./api-reference/carto/heatmap-tile-layer) support H3 data
+- [VectorTileLayer](./api-reference/carto/vector-tile-layer) supports labels for line & polygon data, via new `autoLabels` prop
+
+### Mapbox
+
+- [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md#constructor) - When using `interleaved: true` and a Mapbox v3 Standard style, you may now control the ordering of layers by adding the [`slot`](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to a layer.
 
 ## deck.gl v9.1
 

@@ -1,4 +1,3 @@
-// ViewSelectorWidget.tsx
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
@@ -14,6 +13,8 @@ export type ViewMode = 'single' | 'split-horizontal' | 'split-vertical';
 export type ViewSelectorWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip label */
   label?: string;
   /** The initial view mode. Defaults to 'single'. */
@@ -33,14 +34,12 @@ export type ViewSelectorWidgetProps = WidgetProps & {
 export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   static defaultProps: Required<ViewSelectorWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'view-selector-widget',
+    id: 'view-selector',
     placement: 'top-left',
+    viewId: null,
     label: 'Split View',
     initialViewMode: 'single',
-    onViewModeChange: (viewMode: string) => {
-      // eslint-disable-next-line no-console
-      console.log(viewMode);
-    }
+    onViewModeChange: () => {}
   };
 
   className = 'deck-widget-view-selector';
@@ -49,13 +48,14 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
 
   constructor(props: ViewSelectorWidgetProps = {}) {
     super(props, ViewSelectorWidget.defaultProps);
-    this.placement = this.props.placement;
     this.viewMode = this.props.initialViewMode;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ViewSelectorWidgetProps>) {
-    super.setProps(props);
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    super.setProps(props);
   }
 
   onRenderHTML(rootElement: HTMLElement) {
@@ -73,6 +73,7 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   handleSelectMode = (viewMode: ViewMode) => {
     this.viewMode = viewMode;
     this.updateHTML();
+    this.props.onViewModeChange(viewMode);
   };
 }
 

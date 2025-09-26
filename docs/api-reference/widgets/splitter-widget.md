@@ -7,6 +7,8 @@ import {_SplitterWidget} from '@deck.gl/widgets';
 
 This widget renders a draggable splitter line across the deck.gl canvas to divide two views. It supports both vertical and horizontal orientations, allowing users to compare two views (e.g., two map or globe views) by dragging the splitter handle.
 
+## Usage
+
 <WidgetPreview cls={_SplitterWidget} props={{
   orientation: 'vertical',
   initialSplit: 0.5
@@ -39,51 +41,61 @@ const deck = new Deck({
 });
 ```
 
-### `SplitterWidgetProps`
+### `SplitterWidgetProps` {#splitterwidgetprops}
 
-The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'splitter'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `viewId1` (string, required) {#viewid1}
+
+* Default: `''`
 
 The `id` of the first (resizable) view.
 
 #### `viewId2` (string, required) {#viewid2}
 
+* Default: `''`
+
 The `id` of the second view to compare against.
 
 #### `orientation` ('vertical' | 'horizontal', optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Orientation of the splitter line. Use `vertical` for side-by-side comparison or `horizontal` for top-bottom.
 
 #### `initialSplit` (number, optional) {#initialsplit}
 
-Default: `0.5`
+* Default: `0.5`
 
 Initial split ratio (between 0 and 1) for the first view.
 
 #### `onChange` (Function, optional) {#onchange}
 
-`(newSplit: number) => void`
+```ts
+(newSplit: number) => void
+```
+
+* Default: `() => {}`
 
 Callback invoked during dragging with the updated split ratio.
 
 #### `onDragStart` (Function, optional) {#ondragstart}
 
-`() => void`
+```ts
+() => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the user begins dragging the splitter.
 
 #### `onDragEnd` (Function, optional) {#ondragend}
 
-`() => void`
+```ts
+() => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the user releases the splitter.
 
