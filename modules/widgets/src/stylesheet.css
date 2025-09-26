@@ -93,6 +93,15 @@
   background-color: var(--button-icon-hover, rgb(24, 24, 26));
 }
 
+/* Icon menu styles */
+.deck-widget .deck-widget-icon-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: var(--menu-gap, 4px);
+  z-index: 100;
+}
+
 /* Fullscreen styles */
 .deck-widget.deck-widget-fullscreen button.deck-widget-fullscreen-enter .deck-widget-icon {
   mask-image: var(
