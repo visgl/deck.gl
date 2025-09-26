@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.2 Prereleases
 
+#### deck.gl [v9.2.0-beta.3] - Sep 26 2025
+
+- fix(extensions): correctly activate picking module in terrain picking pass (#9768)
+- fix(widgets): widget bug bash (#9797)
+- chore(widgets) audit props and docs (#9796)
+- fix(maplibre): Update default view once projection is known (#9794)
+
 #### deck.gl [v9.2.0-beta.2] - Sep 25 2025
 
 - chore: bump luma to 9.2.0 (#9792)
