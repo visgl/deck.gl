@@ -12,44 +12,48 @@ Only the deck.gl canvas is captured, not other HTML DOM element underneath or on
 It is possible to use `props.onCapture` to integrate with more advanced screen capture modules such as [html2canvas](https://html2canvas.hertzen.com/)
 :::
 
+## Usage
+
 <WidgetPreview cls={ScreenshotWidget}/>
 
 ```ts
 import {ScreenshotWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
-const deck = new Deck({
+new Deck({
   widgets: [new ScreenshotWidget()]
 });
 ```
 
-### `ScreenshotWidgetProps`
+### `ScreenshotWidgetProps` {#screenshotwidgetprops}
 
-The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'screenshot'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Screenshot'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Screenshot'`
+#### `filename` (string, optional) {#filename}
 
-#### `imageFormat` (string, optional) {#imageFormat}
+* Default: `'screenshot.png'`
+
+Filename for captured screenshot.
+
+#### `imageFormat` (string, optional) {#imageformat}
+
+* Default: `'image/png'`
 
 Format of the downloaded image. Browser dependent, may support `image/jpeg`, `image/webp`, `image/avif`
-
-Default: `'image/png'`
 
 #### `onCapture` (function, optional) {#oncapture}
 
 ```ts
-onCapture(widget: ScreenshotWidget): void
+(widget: ScreenshotWidget) => void
 ```
+
+* Default: `undefined`
 
 Allows the application to define its own capture logic, perhaps to integrate a more advanced screen capture module such as [html2canvas](https://html2canvas.hertzen.com/).
 

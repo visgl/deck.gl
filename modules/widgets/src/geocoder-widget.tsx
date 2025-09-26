@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {WidgetPlacement, Viewport} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {WidgetPlacement, Viewport, WidgetProps} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
 import {DropdownMenu} from './lib/components/dropdown-menu';
@@ -24,11 +24,12 @@ const CURRENT_LOCATION = 'current';
 
 /** Properties for the GeocoderWidget */
 export type GeocoderWidgetProps = WidgetProps & {
-  viewId?: string;
+  viewId?: string | null;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
+  /** View state reset transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
   /** Geocoding service selector, for declarative usage */
   geocoder?: 'google' | 'mapbox' | 'opencage' | 'coordinates' | 'custom';
@@ -48,10 +49,10 @@ export type GeocoderWidgetProps = WidgetProps & {
 export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   static defaultProps: Required<GeocoderWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'geolocate',
-    viewId: undefined!,
+    id: 'geocoder',
+    viewId: null,
     placement: 'top-left',
-    label: 'Geolocate',
+    label: 'Geocoder',
     transitionDuration: 200,
     geocoder: 'coordinates',
     customGeocoder: CoordinatesGeocoder,
@@ -68,18 +69,17 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
 
   constructor(props: GeocoderWidgetProps = {}) {
     super(props, GeocoderWidget.defaultProps);
-    this.placement = this.props.placement ?? this.placement;
     this.setProps(this.props);
-    this.geocoder = getGeocoder(this.props);
   }
 
   setProps(props: Partial<GeocoderWidgetProps>): void {
-    super.setProps(props);
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     this.geocoder = getGeocoder(this.props);
     if (this.geocoder.requiresApiKey && !this.props.apiKey) {
       throw new Error(`API key is required for the ${this.geocoder.name} geocoder`);
     }
+    super.setProps(props);
   }
 
   onRenderHTML(rootElement: HTMLElement): void {

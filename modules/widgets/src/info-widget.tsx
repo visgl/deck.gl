@@ -1,33 +1,38 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {Deck, PickingInfo, Viewport} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
+import type {Deck, PickingInfo, Viewport, WidgetProps} from '@deck.gl/core';
 import {render, JSX} from 'preact';
 
 export type InfoWidgetProps = WidgetProps & {
-  /** View to attach to and interact with. Required when using multiple views. */
+  /** View to attach to and interact with. Required when using multiple views */
   viewId?: string | null;
-  /** InfoWidget mode */
+  /** Determines the interaction mode of the widget */
   mode: 'click' | 'hover' | 'static';
-  /** Get the popup contents from the selected element */
-  getTooltip?: (info: PickingInfo, widget: InfoWidget) => any;
-  /** Position at which to place popup (clicked point: [longitude, latitude]). */
+  /** Function to generate the popup contents from the selected element */
+  getTooltip?: (info: PickingInfo, widget: InfoWidget) => InfoWidgetProps | null;
+  /** Position at which to place popup (clicked point: [longitude, latitude]) */
   position: [number, number];
-  /** Text of popup */
+  /** Text content of popup */
   text?: string;
   /** Visibility of info widget */
   visible?: boolean;
   /** Minimum offset (in pixels) to keep the popup away from the canvas edges. */
   minOffset?: number;
+  /** Callback triggered when the widget is clicked. */
   onClick?: (widget: InfoWidget, info: PickingInfo) => boolean;
 };
 
 export class InfoWidget extends Widget<InfoWidgetProps> {
   static defaultProps: Required<InfoWidgetProps> = {
     ...Widget.defaultProps,
+    id: 'info',
     position: [0, 0],
     text: '',
     visible: false,
-    // Set default minOffset if not provided
     minOffset: 0,
     viewId: null,
     mode: 'hover',
@@ -37,19 +42,15 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
 
   className = 'deck-widget-info';
   placement = 'fill' as const;
-  viewId?: string | null = null;
   viewport?: Viewport;
 
   constructor(props: InfoWidgetProps) {
     super(props, InfoWidget.defaultProps);
-    props.position = props.position || [0, 0];
-    props.text = props.text || '';
-    props.visible = props.visible || false;
-    // Set default minOffset if not provided
-    props.minOffset = props.minOffset ?? 0;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<InfoWidgetProps>) {
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 
@@ -72,7 +73,7 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
       this.setProps({
         visible: tooltip !== null,
         ...tooltip,
-        style: {zIndex: 1, ...tooltip?.style}
+        style: {zIndex: '1', ...tooltip?.style}
       });
     }
   }
