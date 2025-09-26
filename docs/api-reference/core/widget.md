@@ -27,7 +27,7 @@ Remarks:
 
 * Default: `{}`
 
-Additional inline CSS styles on the top HTML element of the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
+Additional inline CSS styles on the top HTML element of the widget. camelCase CSS properties (e.g. `backgroundColor`) and kebab-case CSS variables are accepted (e.g. `--button-size`).
 
 ```ts
   style?: Partial<CSSStyleDeclaration>;
