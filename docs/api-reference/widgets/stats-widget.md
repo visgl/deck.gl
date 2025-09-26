@@ -31,7 +31,6 @@ const deck = new Deck({
 
 The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `id` (string, default: `'stats'`) - **Required.** Unique id for this widget
 - `type` (string, default `'deck'`) - Type of stats to display: `'deck'`, `'luma'`, `'device'`, or `'custom'`
 - `stats` (Stats, optional) - Custom stats object when using `type: 'custom'`
 - `title` (string, default `'Stats'`) - Title shown in the widget header
