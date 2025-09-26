@@ -66,9 +66,9 @@ export class ResetViewWidget extends Widget<ResetViewWidgetProps> {
   }
 
   setViewState(viewState: ViewState) {
-    const viewId = this.props.viewId || viewState?.id || 'default-view';
+    const viewId = (this.props.viewId || viewState?.id || 'default-view') as unknown as string;
     const nextViewState = {
-      ...viewState
+      ...(viewId !== 'default-view' ? viewState[viewId] : viewState)
       // only works for geospatial?
       // transitionDuration: this.props.transitionDuration,
       // transitionInterpolator: new FlyToInterpolator()
