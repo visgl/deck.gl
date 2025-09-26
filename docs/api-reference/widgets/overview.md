@@ -6,15 +6,15 @@ This module contains the following widgets:
 
 ### Navigation Widgets
 
-- [ZoomWidget](./zoom-widget.md)
-- [ResetViewWidget](./reset-view-widget.md)
 - [GimbalWidget](./gimbal-widget.md)
+- [ResetViewWidget](./reset-view-widget.md)
+- [ZoomWidget](./zoom-widget.md)
 
 ### Geospatial Widgets
 
 - [CompassWidget](./compass-widget.md)
-- [ScaleWidget](./scale-widget.md)
 - [GeocoderWidget](./geocoder-widget.md)
+- [ScaleWidget](./scale-widget.md)
 
 ### View Widgets
 
@@ -24,8 +24,8 @@ This module contains the following widgets:
 
 ### Information Widgets
 
-- [InfoWidget](./info-widget.md)
 - [ContextMenuWidget](./context-menu-widget.md)
+- [InfoWidget](./info-widget.md)
 
 ### Control Widgets
 
@@ -33,11 +33,11 @@ This module contains the following widgets:
 
 ### Utility Widgets
 
-- [ScreenshotWidget](./screenshot-widget.md)
-- [ThemeWidget](./theme-widget.md)
-- [LoadingWidget](./loading-widget.md)
 - [FpsWidget](./fps-widget.md)
+- [LoadingWidget](./loading-widget.md)
+- [ScreenshotWidget](./screenshot-widget.md)
 - [StatsWidget](./stats-widget.md)
+- [ThemeWidget](./theme-widget.md)
 
 ## Installation
 
