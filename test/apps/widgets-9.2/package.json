@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-example-pure-js-basic",
+  "name": "deckgl-example-widgets",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,9 +10,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.1.0",
-    "@deck.gl/layers": "^9.1.0",
-    "@deck.gl/widgets": "^9.1.0"
+    "@deck.gl/core": "^9.2.0-beta.1",
+    "@deck.gl/layers": "^9.2.0-beta.1",
+    "@deck.gl/widgets": "^9.2.0-beta.1"
   },
   "devDependencies": {
     "vite": "^4.0.0"

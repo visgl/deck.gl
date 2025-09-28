@@ -6,7 +6,7 @@ import './aggregation-layer.spec';
 import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
 import './grid-layer.spec';
-// import './heatmap-layer/heatmap-layer.spec';
+import './heatmap-layer/heatmap-layer.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
 import './hexagon-layer.spec';
 import './hexbin.spec';

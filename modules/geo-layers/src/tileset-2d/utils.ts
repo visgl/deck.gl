@@ -39,7 +39,7 @@ export const urlType = {
   }
 };
 
-function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
+export function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   const transformedCoords = [
     // top-left
     modelMatrix.transformAsPoint([bbox[0], bbox[1]]),

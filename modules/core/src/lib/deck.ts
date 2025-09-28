@@ -21,7 +21,7 @@ import {webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import type {Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
+import type {CanvasContextProps, Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -374,34 +374,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Create a new device
     if (!deviceOrPromise) {
-      const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
-      const canvasContextProps =
-        typeof canvasContextUserProps === 'object' ? canvasContextUserProps : undefined;
-
-      // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
-      // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
-      const deviceProps = {adapters: [], ...props.deviceProps};
-      if (!deviceProps.adapters.includes(webgl2Adapter)) {
-        deviceProps.adapters.push(webgl2Adapter);
-      }
-
-      // Create the "best" device supported from the registered adapters
-      deviceOrPromise = luma.createDevice({
-        // luma by default throws if a device is already attached
-        // asynchronous device creation could happen after finalize() is called
-        // TODO - createDevice should support AbortController?
-        _reuseDevices: true,
-        // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
-        type: 'webgl',
-        ...deviceProps,
-        // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
-        createCanvasContext: {
-          ...canvasContextProps,
-          canvas: this._createCanvas(props),
-          useDevicePixels: this.props.useDevicePixels,
-          autoResize: true
-        }
-      });
+      deviceOrPromise = this._createDevice(props);
     }
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
@@ -503,7 +476,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         this.canvas = null;
       }
 
-      log.log(`recreating animation loop for new device! id=${props.device.id}`);
+      log.log(`recreating animation loop for new device! id=${props.device.id}`)();
 
       this.animationLoop = this._createAnimationLoop(props.device, props);
       this.animationLoop.start();
@@ -871,6 +844,44 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
       // onBeforeRender,
       // onAfterRender,
+    });
+  }
+
+  // Create a device from the deviceProps, assigning required defaults
+  private _createDevice(props: DeckProps<ViewsT>): Promise<Device> {
+    const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
+    const canvasContextProps =
+      typeof canvasContextUserProps === 'object' ? canvasContextUserProps : undefined;
+
+    // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
+    // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
+    const deviceProps = {adapters: [], ...props.deviceProps};
+    if (!deviceProps.adapters.includes(webgl2Adapter)) {
+      deviceProps.adapters.push(webgl2Adapter);
+    }
+
+    const defaultCanvasProps: CanvasContextProps = {
+      // we must use 'premultiplied' canvas for webgpu to enable transparency and match shaders
+      alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
+    };
+
+    // Create the "best" device supported from the registered adapters
+    return luma.createDevice({
+      // luma by default throws if a device is already attached
+      // asynchronous device creation could happen after finalize() is called
+      // TODO - createDevice should support AbortController?
+      _reuseDevices: true,
+      // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
+      type: 'webgl',
+      ...deviceProps,
+      // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
+      createCanvasContext: {
+        ...defaultCanvasProps,
+        ...canvasContextProps,
+        canvas: this._createCanvas(props),
+        useDevicePixels: this.props.useDevicePixels,
+        autoResize: true
+      }
     });
   }
 

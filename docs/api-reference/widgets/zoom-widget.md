@@ -3,7 +3,11 @@ import {ZoomWidget} from '@deck.gl/widgets';
 
 # ZoomWidget
 
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
+
+## Usage
 
 <WidgetPreview cls={ZoomWidget} props={{orientation: 'horizontal'}}/>
 
@@ -16,37 +20,31 @@ const deck = new Deck({
 });
 ```
 
-### `ZoomProps`
+### `ZoomProps` {#zoomprops}
 
-The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'zoom'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `orientation` (string, optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom in button.
+* Default: `'Zoom In'`
 
-Default: `'Zoom In'`
+Tooltip message displayed while hovering a mouse over the zoom in button.
 
 #### `zoomOutLabel` (string, optional) {#zoomoutlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom out button.
+* Default: `'Zoom Out'`
 
-Default: `'Zoom Out'`
+Tooltip message displayed while hovering a mouse over the zoom out button.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Zoom transition duration in milliseconds.
 

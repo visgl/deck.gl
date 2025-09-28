@@ -1,33 +1,37 @@
-/* global document */
-import {Widget, WidgetProps} from '@deck.gl/core';
-import type {Deck, PickingInfo, Viewport} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Widget} from '@deck.gl/core';
+import type {Deck, PickingInfo, Viewport, WidgetProps} from '@deck.gl/core';
 import {render, JSX} from 'preact';
 
 export type InfoWidgetProps = WidgetProps & {
-  /** View to attach to and interact with. Required when using multiple views. */
+  /** View to attach to and interact with. Required when using multiple views */
   viewId?: string | null;
-  /** InfoWidget mode */
+  /** Determines the interaction mode of the widget */
   mode: 'click' | 'hover' | 'static';
-  /** Get the popup contents from the selected element */
-  getTooltip?: (info: PickingInfo, widget: InfoWidget) => any;
-  /** Position at which to place popup (clicked point: [longitude, latitude]). */
+  /** Function to generate the popup contents from the selected element */
+  getTooltip?: (info: PickingInfo, widget: InfoWidget) => InfoWidgetProps | null;
+  /** Position at which to place popup (clicked point: [longitude, latitude]) */
   position: [number, number];
-  /** Text of popup */
+  /** Text content of popup */
   text?: string;
   /** Visibility of info widget */
   visible?: boolean;
   /** Minimum offset (in pixels) to keep the popup away from the canvas edges. */
   minOffset?: number;
+  /** Callback triggered when the widget is clicked. */
   onClick?: (widget: InfoWidget, info: PickingInfo) => boolean;
 };
 
 export class InfoWidget extends Widget<InfoWidgetProps> {
   static defaultProps: Required<InfoWidgetProps> = {
     ...Widget.defaultProps,
+    id: 'info',
     position: [0, 0],
     text: '',
     visible: false,
-    // Set default minOffset if not provided
     minOffset: 0,
     viewId: null,
     mode: 'hover',
@@ -37,20 +41,23 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
 
   className = 'deck-widget-info';
   placement = 'fill' as const;
-  viewId?: string | null = null;
   viewport?: Viewport;
 
   constructor(props: InfoWidgetProps) {
     super(props, InfoWidget.defaultProps);
-    props.position = props.position || [0, 0];
-    props.text = props.text || '';
-    props.visible = props.visible || false;
-    // Set default minOffset if not provided
-    props.minOffset = props.minOffset ?? 0;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<InfoWidgetProps>) {
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
+  }
+
+  onCreateRootElement(): HTMLDivElement {
+    const element = super.onCreateRootElement();
+    const style = {margin: '0px', top: '0px', left: '0px', position: 'absolute'};
+    Object.entries(style).forEach(([key, value]) => element.style.setProperty(key, value));
+    return element;
   }
 
   onViewportChange(viewport) {
@@ -65,7 +72,7 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
       this.setProps({
         visible: tooltip !== null,
         ...tooltip,
-        style: {zIndex: 1, ...tooltip?.style}
+        style: {zIndex: '1', ...tooltip?.style}
       });
     }
   }
@@ -84,24 +91,13 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
     return this.props.onClick?.(this, info) || false;
   }
 
-  // TODO - Align with onCreateRootElement
-  onAdd({deck, viewId}: {deck: Deck<any>; viewId: string | null}): HTMLDivElement {
-    const {className} = this.props;
-    const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-info');
-    if (className) element.classList.add(className);
-    // Ensure absolute positioning relative to the deck container
-    const style = {margin: '0px', top: '0px', left: '0px', position: 'absolute'};
-    Object.entries(style).forEach(([key, value]) => element.style.setProperty(key, value));
+  onAdd({deck, viewId}: {deck: Deck<any>; viewId: string | null}) {
     this.deck = deck;
     if (!viewId) {
       this.viewport = deck.getViewports()[0];
     } else {
       this.viewport = deck.getViewports().find(viewport => viewport.id === viewId);
     }
-    this.rootElement = element;
-    this.updateHTML();
-    return element;
   }
 
   onRenderHTML(rootElement: HTMLElement): void {

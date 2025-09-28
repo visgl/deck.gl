@@ -7,7 +7,7 @@ const MENU_STYLE: JSX.CSSProperties = {
   background: 'white',
   border: '1px solid #ccc',
   borderRadius: '4px',
-  marginTop: '4px',
+  marginTop: 'var(--menu-gap, 4px)',
   zIndex: 100
 };
 

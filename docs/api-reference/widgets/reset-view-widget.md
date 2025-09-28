@@ -7,11 +7,13 @@ import {ResetViewWidget} from '@deck.gl/widgets';
 
 This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
 
+## Usage
+
 <WidgetPreview cls={ResetViewWidget}/>
 
 ```ts
-import {ResetViewWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {ResetViewWidget} from '@deck.gl/widgets';
 
 const deck = new Deck({
   widgets: [new ResetViewWidget()]
@@ -20,21 +22,21 @@ const deck = new Deck({
 
 ## Types
 
-### `ResetViewWidgetProps`
+### `ResetViewWidgetProps` {#resetviewwidgetprops}
 
-The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'reset-view'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Reset View'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Reset View'`
+#### `initialViewState` (ViewState, optional) {#initialviewstate}
+
+* Default: `deck.props.initialViewState`
+
+The initial view state to reset the view to.
 
 ## Styles
 

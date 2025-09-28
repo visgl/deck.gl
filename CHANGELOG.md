@@ -21,6 +21,43 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.2 Prereleases
 
+#### deck.gl [v9.2.0-beta.3] - Sep 26 2025
+
+- fix(extensions): correctly activate picking module in terrain picking pass (#9768)
+- fix(widgets): widget bug bash (#9797)
+- chore(widgets) audit props and docs (#9796)
+- fix(maplibre): Update default view once projection is known (#9794)
+
+#### deck.gl [v9.2.0-beta.2] - Sep 25 2025
+
+- chore: bump luma to 9.2.0 (#9792)
+- fix: HeatmapLayer working with binary data (#9787)
+- fix: picking on non-geospatial tile layer with modelMatrix (#9703)
+- CARTO: Support h3 in ClusterTileLayer (#9755)
+
+#### deck.gl [v9.2.0-beta.1] - Sep 19 2025
+
+#### deck.gl [v9.2.0-alpha.3] - Sep 15 2025
+
+- fix(core): orthographic scroll zoom transitions (#9769)
+- fix(widgets): Minor widget fixes (#9758)
+- CARTO: Support h3 in HeatmapTileLayer (#9753)
+- feat(widgets): Support custom widgets in pydeck via custom_libraries (#9745)
+- feat(core): Add async DeckPicker methods (#9732)
+- feat(webgpu): Enable transparency for WebGPU and ported example layers (#9730)
+- fix(webgpu): Emulate constant attributes as buffers and trigger update on constant change (#9726)
+- fix(layers): correctly identify elevationData strings using TMS (#9712)
+- fix(mesh-layers): Include `@loaders.gl/schema` dependency (#9697)
+- feat(layers): Port ScatterplotLayer to WebGPU / WGSL (#9432)
+- chore(geo-layers): version bump A5 (#9707)
+- fix(core): correct opacity in interleaved mode (#9642)
+- feat(core): Support clear color, depth, and stencil on multiple views (#9650)
+- fix(mapbox): Fix view selection logic in getViewport (#9688)
+- chore: Bump to luma.gl@9.2.0-alpha (#9241)
+- fix(google): Do not force canvas resize (#9695)
+- fix(CARTO): H3 tile bounding box includes edge children (#9693)
+- fix(core): onClick callback does not handle dblclick (#9629)
+
 #### deck.gl [v9.2.0-alpha.2] - Jun 4 2025
 
 - CARTO: refactor to remove fetchmap code  (#9619)
