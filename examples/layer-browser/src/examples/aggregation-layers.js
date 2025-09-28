@@ -1,7 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   GridLayer,
-  GPUGridLayer,
-  CPUGridLayer,
   HexagonLayer,
   ContourLayer,
   ScreenGridLayer,
@@ -70,22 +72,6 @@ function getMax(pts, key) {
     : null;
 }
 
-const CPUGridLayerExample = {
-  layer: CPUGridLayer,
-  props: {
-    id: 'gridLayer',
-    data: dataSamples.points,
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: true,
-    colorScaleType: 'quantize',
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
-
 const HexagonLayerExample = {
   layer: HexagonLayer,
   props: {
@@ -114,36 +100,27 @@ const GRID_LAYER_PROPS_OBJECT = {
   getPosition: d => d.COORDINATES
 };
 
-const GPU_GRID_LAYER_PROPS_OBJECT = Object.assign({}, GRID_LAYER_PROPS_OBJECT, {
-  id: 'gpu-grid-layer'
-});
-
 const GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
   props: GRID_LAYER_PROPS_OBJECT
 };
 
-const GPU_GRID_LAYER_PROPS = {
-  getData: () => dataSamples.points,
-  props: GPU_GRID_LAYER_PROPS_OBJECT
-};
-
 const HEAT_LAYER_PROPS = {
   getData: () => dataSamples.points,
   props: {
-    id: 'heatmp-layer',
+    id: 'heatmap-layer',
     opacity: 1,
     pickable: false,
     getPosition: d => d.COORDINATES
   }
 };
 
-const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GPU_GRID_LAYER_PROPS);
 const GridLayerExample = Object.assign({}, {layer: GridLayer}, GRID_LAYER_PROPS);
 const HeatmapLayerExample = Object.assign({}, {layer: HeatmapLayer}, HEAT_LAYER_PROPS);
 
 const GPUGridLayerPerfExample = (id, getData) => ({
-  layer: GPUGridLayer,
+  layer: GridLayer,
+  gpuAggregation: true,
   getData,
   props: {
     id: `gpuGridLayerPerf-${id}`,
@@ -158,12 +135,10 @@ const GPUGridLayerPerfExample = (id, getData) => ({
 /* eslint-disable quote-props */
 export default {
   'Aggregation Layers': {
-    CPUGridLayer: CPUGridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonLayer: HexagonLayerExample,
     ContourLayer: ContourLayerExample,
     'ContourLayer (Bands)': ContourLayerBandsExample,
-    GPUGridLayer: GPUGridLayerExample,
     GridLayer: GridLayerExample,
     HeatmapLayer: HeatmapLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),

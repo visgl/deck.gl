@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 let result = [];
 let count = 0;
@@ -5,10 +9,10 @@ let vertexCount = 0;
 
 const ID_PATTERN = /(\w\w)(I|US|SR)(.*)/;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -24,7 +28,7 @@ onmessage = function(e) {
 
     const coordinates = [];
 
-    parts.slice(3).forEach(function(str) {
+    parts.slice(3).forEach(function (str) {
       const lineString = decodePolyline(str, 5);
       coordinates.push(lineString);
       count++;
@@ -39,7 +43,6 @@ onmessage = function(e) {
       },
       properties: {state, type, id, name, length}
     });
-
   });
 
   if (e.data.event === 'load') {

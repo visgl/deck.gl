@@ -1,46 +1,136 @@
-import {TripsLayerDemo} from 'website-components/doc-demos/geo-layers';
+# TripsLayer
+
+import {TripsLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <TripsLayerDemo />
 
-# Trips Layer
-
 The `TripsLayer` renders animated paths that represent vehicle trips.
 
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
+import {Deck} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {
-   *     waypoints: [
-   *      {coordinates: [-122.3907988, 37.7664413], timestamp: 1554772579000}
-   *      {coordinates: [-122.3908298,37.7667706], timestamp: 1554772579010}
-   *       ...,
-   *      {coordinates: [-122.4485672, 37.8040182], timestamp: 1554772580200}
-   *     ]
-   *   }
-   * ]
-   */
-  const layer = new TripsLayer({
-    id: 'trips-layer',
-    data,
-    getPath: d => d.waypoints.map(p => p.coordinates),
-    // deduct start timestamp from each data point to avoid overflow
-    getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
+const layer = new TripsLayer({
+  id: 'TripsLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.trips.json',
+  
+  getPath: d => d.waypoints.map(p => p.coordinates),
+  // Timestamp is stored as float32, do not return a long int as it will cause precision loss
+  getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
+  getColor: [253, 128, 93],
+  currentTime: 500,
+  trailLength: 600,
+  capRounded: true,
+  jointRounded: true,
+  widthMinPixels: 8
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {TripsLayer} from '@deck.gl/geo-layers';
+
+type DataType = {
+  waypoints: {
+    coordinates: [longitude: number, latitude: number];
+    timestamp: number;
+  }[]
+};
+
+const layer = new TripsLayer<DataType>({
+  id: 'TripsLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.trips.json',
+  
+  getPath: (d: DataType) => d.waypoints.map(p => p.coordinates),
+  // Timestamp is stored as float32, do not return a long int as it will cause precision loss
+  getTimestamps: (d: DataType) => d.waypoints.map(p => p.timestamp - 1554772579000),
+  getColor: [253, 128, 93],
+  currentTime: 500,
+  trailLength: 600,
+  capRounded: true,
+  jointRounded: true,
+  widthMinPixels: 8
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL} from '@deck.gl/react';
+import {TripsLayer} from '@deck.gl/geo-layers';
+
+type DataType = {
+  waypoints: {
+    coordinates: [longitude: number, latitude: number];
+    timestamp: number;
+  }[]
+};
+
+function App() {
+  const layer = new TripsLayer<DataType>({
+    id: 'TripsLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.trips.json',
+    
+    getPath: (d: DataType) => d.waypoints.map(p => p.coordinates),
+    // Timestamp is stored as float32, do not return a long int as it will cause precision loss
+    getTimestamps: (d: DataType) => d.waypoints.map(p => p.timestamp - 1554772579000),
     getColor: [253, 128, 93],
-    opacity: 0.8,
-    widthMinPixels: 5,
-    rounded: true,
-    fadeTrail: true,
-    trailLength: 200,
-    currentTime: 100
+    currentTime: 500,
+    trailLength: 600,
+    capRounded: true,
+    jointRounded: true,
+    widthMinPixels: 8
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+
 
 ## Installation
 
@@ -52,19 +142,21 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {TripsLayer} from '@deck.gl/geo-layers';
-new TripsLayer({});
+import type {TripsLayerProps} from '@deck.gl/geo-layers';
+
+new TripsLayer<DataT>(...props: TripsLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -74,11 +166,11 @@ new deck.TripsLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [PathLayer](/docs/api-reference/layers/path-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md) and [PathLayer](../layers/path-layer.md) properties, plus the following:
 
 ### Render Options
 
-##### `currentTime` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+#### `currentTime` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#currenttime}
 
 - Default: `0`
 
@@ -86,7 +178,7 @@ The current time of the frame, i.e. the playhead of the animation.
 
 This value should be in the same units as the timestamps from `getPath`.
 
-##### `fadeTrail` (Boolean, optional)
+#### `fadeTrail` (boolean, optional) {#fadetrail}
 
 - Default: `true`
 
@@ -94,7 +186,7 @@ Whether or not the path fades out.
 
 If `false`, `trailLength` has no effect.
 
-##### `trailLength` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+#### `trailLength` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#traillength}
 
 - Default: `120`
 
@@ -104,26 +196,22 @@ This value should be in the same units as the timestamps from `getPath`.
 
 ### Data Accessors
 
-##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+#### `getPath` ([Accessor&lt;PathGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getpath}
 
 - Default: `d => d.path`
 
 Called for each data object to retrieve paths.
 Returns an array of navigation points on a single path.
 
-See [PathLayer](/docs/api-reference/layers/path-layer.md) documentation for supported path formats.
+See [PathLayer](../layers/path-layer.md) documentation for supported path formats.
 
-##### `getTimestamps` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+#### `getTimestamps` ([Accessor&lt;number[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettimestamps}
 
 - Default: `d => d.timestamps`
 
 Returns an array of timestamps, one for each navigation point in the geometry returned by `getPath`, representing the time that the point is visited.
 
 Because timestamps are stored as 32-bit floating numbers, raw unix epoch time can not be used. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
-
-> **<span style="color:red">Legacy API, removing in a future major release:</span>**
->
-> If `getTimestamps` is not supplied, each navigation point in the path is interpreted as `[longitude, latitude, timestamp]`, and the paths will always be rendered flat against the ground.
 
 
 # Source

@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable max-statements, max-params, complexity, max-depth */
 // TODO merge with icon-layer/icon-manager
 import {log} from '@deck.gl/core';
@@ -308,6 +312,8 @@ export function transformParagraph(
 
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
+          // const rowOffsetLeft = x[j] - rowSize[0] / 2;
+          // eslint-disable-next-line @typescript-eslint/no-shadow
           const char = characters[j];
           const layoutOffsetY = iconMapping[char]?.layoutOffsetY || 0;
           y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;

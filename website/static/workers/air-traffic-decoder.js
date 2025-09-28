@@ -1,14 +1,21 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 let count = 0;
+let dayIndex = 0;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
+  const SEC_PER_DAY = 60 * 60 * 24;
 
   for (const line of lines) {
     if (!line) {
       continue;
     }
 
+    const timeOffset = dayIndex * SEC_PER_DAY;
     const date = line.slice(0, 10);
     const flights = [];
     let i = 10;
@@ -24,14 +31,19 @@ onmessage = function(e) {
       const alt2 = decodeNumber(line.slice(i, (i += 1)), 90, 32) * 100;
 
       flights.push({
-        time1: time,
-        time2,
-        lon1, lat1, alt1,
-        lon2, lat2, alt2
+        time1: time + timeOffset,
+        time2: time2 + timeOffset,
+        lon1,
+        lat1,
+        alt1,
+        lon2,
+        lat2,
+        alt2
       });
     }
 
     count += flights.length;
+    dayIndex++;
     postMessage({
       action: 'add',
       data: [{date, flights}],

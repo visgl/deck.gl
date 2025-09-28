@@ -1,31 +1,56 @@
-import GL from '@luma.gl/constants';
-import type {TypedArrayConstructor} from '../../types/types';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-/* eslint-disable complexity */
-export function glArrayFromType(glType: number): TypedArrayConstructor {
+import {getTypedArrayConstructor, getDataType} from '@luma.gl/core';
+import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
+import type {TypedArrayConstructor} from '../../types/types';
+import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
+
+export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
-  switch (glType) {
-    case GL.FLOAT:
-      return Float32Array;
-    case GL.DOUBLE:
+  switch (type) {
+    case 'float64':
       return Float64Array;
-    case GL.UNSIGNED_SHORT:
-    case GL.UNSIGNED_SHORT_5_6_5:
-    case GL.UNSIGNED_SHORT_4_4_4_4:
-    case GL.UNSIGNED_SHORT_5_5_5_1:
-      return Uint16Array;
-    case GL.UNSIGNED_INT:
-      return Uint32Array;
-    case GL.UNSIGNED_BYTE:
+    case 'uint8':
+    case 'unorm8':
       return Uint8ClampedArray;
-    case GL.BYTE:
-      return Int8Array;
-    case GL.SHORT:
-      return Int16Array;
-    case GL.INT:
-      return Int32Array;
     default:
-      throw new Error('Unknown GL type');
+      return getTypedArrayConstructor(type);
   }
 }
-/* eslint-enable complexity */
+
+export const dataTypeFromTypedArray = getDataType;
+
+export function getBufferAttributeLayout(
+  name: string,
+  accessor: BufferAccessor,
+  deviceType: 'webgpu' | 'wegbgl' | string
+): BufferAttributeLayout {
+  // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
+  const type = deviceType === 'webgpu' && accessor.type === 'uint8' ? 'unorm8' : accessor.type;
+  return {
+    attribute: name,
+    // @ts-expect-error Not all combinations are valid vertex formats; it's up to DataColumn to ensure
+    format:
+      (accessor.size as number) > 1 ? (`${type}x${accessor.size}` as VertexFormat) : accessor.type,
+    byteOffset: accessor.offset || 0
+    // Note stride is set on the top level
+  };
+}
+
+export function getStride(accessor: DataColumnSettings<unknown>): number {
+  return accessor.stride || accessor.size * accessor.bytesPerElement;
+}
+
+export function bufferLayoutEqual(
+  accessor1: DataColumnSettings<unknown>,
+  accessor2: DataColumnSettings<unknown>
+) {
+  return (
+    accessor1.type === accessor2.type &&
+    accessor1.size === accessor2.size &&
+    getStride(accessor1) === getStride(accessor2) &&
+    (accessor1.offset || 0) === (accessor2.offset || 0)
+  );
+}

@@ -23,9 +23,9 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src='app.js'></script>
   </body>
-  <script type="text/javascript">
-    App.renderToDOM(document.getElementById('app'));
+  <script type="module">
+    import {renderToDOM} from './app.js';
+    renderToDOM(document.getElementById('app'));
   </script>
 </html>

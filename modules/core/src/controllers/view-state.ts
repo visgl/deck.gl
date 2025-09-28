@@ -1,6 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type Viewport from '../viewports/viewport';
 
-export default abstract class ViewState<T, Props, State> implements IViewState<T> {
+export default abstract class ViewState<
+  T,
+  Props extends Record<string, any>,
+  State extends Record<string, any>
+> implements IViewState<T>
+{
   private _viewportProps: Required<Props>;
   private _state: State;
 

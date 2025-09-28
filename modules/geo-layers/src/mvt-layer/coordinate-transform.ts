@@ -1,6 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Viewport} from '@deck.gl/core';
 import {lerp} from '@math.gl/core';
-import {GeoBoundingBox} from '../tile-layer/types';
+import {GeoBoundingBox} from '../tileset-2d/index';
 
 const availableTransformations = {
   Point,

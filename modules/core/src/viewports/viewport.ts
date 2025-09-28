@@ -1,28 +1,11 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import log from '../utils/log';
 import {createMat4, getCameraPosition, getFrustumPlanes, FrustumPlane} from '../utils/math-utils';
 
-import {Matrix4, Vector3, equals, clamp} from '@math.gl/core';
-import * as mat4 from 'gl-matrix/mat4';
+import {Matrix4, Vector3, equals, clamp, mat4} from '@math.gl/core';
 
 import {
   getDistanceScales,
@@ -62,7 +45,7 @@ export type ViewportOptions = {
   longitude?: number;
   /** Latitude in degrees (geospatial only) */
   latitude?: number;
-  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat */
+  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
   /** Zoom level */
   zoom?: number;
@@ -178,6 +161,7 @@ export default class Viewport {
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
+  // eslint-disable-next-line complexity
   constructor(opts: ViewportOptions = {}) {
     // @ts-ignore
     this.id = opts.id || this.constructor.displayName || 'viewport';
@@ -208,6 +192,10 @@ export default class Viewport {
     this.unprojectPosition = this.unprojectPosition.bind(this);
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
+  }
+
+  get subViewports(): Viewport[] | null {
+    return null;
   }
 
   get metersPerPixel(): number {
@@ -363,7 +351,7 @@ export default class Viewport {
   }
 
   getDistanceScales(coordinateOrigin?: number[]): DistanceScales {
-    if (coordinateOrigin) {
+    if (coordinateOrigin && this.isGeospatial) {
       return getDistanceScales({
         longitude: coordinateOrigin[0],
         latitude: coordinateOrigin[1],

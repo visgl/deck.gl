@@ -1,12 +1,45 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as React from 'react';
 import {createElement} from 'react';
 import {inheritsFrom} from './inherits-from';
 import {Layer, View} from '@deck.gl/core';
 import {isComponent} from './evaluate-children';
-import type {LayersList} from '@deck.gl/core';
+import type {LayersList, Viewport} from '@deck.gl/core';
+
+export type DeckGLRenderCallbackArgs = {
+  /**
+   * the left offset of the current view, in pixels
+   */
+  x: number;
+  /**
+   * the top offset of the current view, in pixels
+   */
+  y: number;
+  /**
+   * the width of the current view, in pixels
+   */
+  width: number;
+  /**
+   * the height of the current view, in pixels
+   */
+  height: number;
+  /**
+   * the view state of the current view
+   */
+  viewState: any;
+  /**
+   * the `Viewport` instance of the current view
+   */
+  viewport: Viewport;
+};
+
+export type DeckGLRenderCallback = (args: DeckGLRenderCallbackArgs) => React.ReactNode;
 
 // recursively wrap render callbacks in `View`
-function wrapInView(node: React.ReactNode): React.ReactNode {
+function wrapInView(node: React.ReactNode | DeckGLRenderCallback): React.ReactNode {
   if (typeof node === 'function') {
     // React.Children does not traverse functions.
     // All render callbacks must be protected under a <View>
@@ -33,7 +66,7 @@ export default function extractJSXLayers({
   layers = [],
   views = null
 }: {
-  children?: React.ReactNode;
+  children?: React.ReactNode | DeckGLRenderCallback;
   layers?: LayersList;
   views?: View | View[] | null;
 }): {

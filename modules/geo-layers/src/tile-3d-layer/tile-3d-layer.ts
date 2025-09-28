@@ -1,5 +1,8 @@
-import GL from '@luma.gl/constants';
-import {Geometry} from '@luma.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Geometry} from '@luma.gl/engine';
 
 import {
   Accessor,
@@ -32,22 +35,23 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
-  // @ts-expect-error Disable async data loading (handling it in _loadTileSet)
-  data: null,
+  // Disable async data loading (handling it in _loadTileSet)
+  data: '',
   loader: Tiles3DLoader,
 
-  onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
-  onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
-  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
+  onTilesetLoad: {type: 'function', value: tileset3d => {}},
+  onTileLoad: {type: 'function', value: tileHeader => {}},
+  onTileUnload: {type: 'function', value: tileHeader => {}},
+  onTileError: {type: 'function', value: (tile, message, url) => {}},
+  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255]}
 };
 
 /** All properties supported by Tile3DLayer */
-export type Tile3DLayerProps<DataT = any> = _Tile3DLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type Tile3DLayerProps<DataT = unknown> = _Tile3DLayerProps<DataT> & CompositeLayerProps;
 
 /** Props added by the Tile3DLayer */
 type _Tile3DLayerProps<DataT> = {
+  data: string;
   /** Color Accessor for point clouds. **/
   getPointColor?: Accessor<DataT, Color>;
 
@@ -76,10 +80,10 @@ type _Tile3DLayerProps<DataT> = {
 };
 
 /** Render 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) */
-export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_Tile3DLayerProps<DataT>>
 > {
-  static defaultProps = defaultProps as any;
+  static defaultProps = defaultProps;
   static layerName = 'Tile3DLayer';
 
   state!: {
@@ -104,8 +108,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   get isLoaded(): boolean {
-    const {tileset3d} = this.state;
-    return tileset3d !== null && tileset3d.isLoaded();
+    return Boolean(this.state?.tileset3d?.isLoaded() && super.isLoaded);
   }
 
   shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
@@ -114,6 +117,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     if (props.data && props.data !== oldProps.data) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._loadTileset(props.data);
     }
 
@@ -147,14 +151,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   getPickingInfo({info, sourceLayer}: GetPickingInfoParams) {
-    const {layerMap} = this.state;
-    const layerId = sourceLayer && sourceLayer.id;
-    if (layerId) {
-      // layerId: this.id-[scenegraph|pointcloud]-tileId
-      const substr = layerId.substring(this.id.length + 1);
-      const tileId = substr.substring(substr.indexOf('-') + 1);
-      info.object = layerMap[tileId] && layerMap[tileId].tile;
+    const sourceTile = sourceLayer && (sourceLayer.props as any).tile;
+    if (info.picked) {
+      info.object = sourceTile;
     }
+    (info as any).sourceTile = sourceTile;
 
     return info;
   }
@@ -167,8 +168,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
-    if (info.sourceLayer) {
-      info.sourceLayer.updateAutoHighlight(info);
+    const sourceTile = (info as any).sourceTile;
+    const layerCache = this.state.layerMap[sourceTile?.id];
+    if (layerCache && layerCache.layer) {
+      layerCache.layer.updateAutoHighlight(info);
     }
   }
 
@@ -177,14 +180,16 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
 
     // TODO: deprecate `loader` in v9.0
     // @ts-ignore
-    let loader = this.props.loader || this.props.loaders;
-    if (Array.isArray(loader)) {
-      loader = loader[0];
-    }
+    const loaders = this.props.loader || this.props.loaders;
+    const loader = Array.isArray(loaders) ? loaders[0] : loaders;
 
     const options = {loadOptions: {...loadOptions}};
+    let actualTilesetUrl = tilesetUrl;
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
+      if (preloadOptions.url) {
+        actualTilesetUrl = preloadOptions.url;
+      }
 
       if (preloadOptions.headers) {
         options.loadOptions.fetch = {
@@ -194,7 +199,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
       }
       Object.assign(options, preloadOptions);
     }
-    const tilesetJson = await load(tilesetUrl, loader, options.loadOptions);
+    const tilesetJson = await load(actualTilesetUrl, loader, options.loadOptions);
 
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
@@ -235,6 +240,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
     if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     tileset3d.selectTiles(Object.values(viewports)).then(frameNumber => {
       const tilesetChanged = this.state.frameNumber !== frameNumber;
       if (tilesetChanged) {
@@ -251,7 +258,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
       return null;
     }
 
-    switch (tileHeader.type) {
+    switch (tileHeader.type as TILE_TYPE) {
       case TILE_TYPE.POINTCLOUD:
         return this._makePointCloudLayer(tileHeader, oldLayer as PointCloudLayer<DataT>);
       case TILE_TYPE.SCENEGRAPH:
@@ -351,7 +358,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
       new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: getMeshGeometry(attributes),
         indices
       });

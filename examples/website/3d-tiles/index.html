@@ -3,6 +3,7 @@
   <head>
     <meta charset='UTF-8' />
     <title>3D Tiles Example</title>
+    <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
     <style>
       body {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -16,9 +17,9 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src='./app.js'></script>
   </body>
-  <script type="text/javascript">
-    App.renderToDOM(document.getElementById('app'));
+  <script type="module">
+    import {renderToDOM} from './app.tsx';
+    renderToDOM(document.getElementById('app'));
   </script>
 </html>

@@ -1,16 +1,16 @@
-import {
-  CompositeLayer,
-  CompositeLayerProps,
-  Layer,
-  LayersList,
-  UpdateParameters,
-  DefaultProps
-} from '@deck.gl/core';
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
-import SpatialIndexTileLayer from './spatial-index-tile-layer';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-const renderSubLayers = props => {
+import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
+import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
+import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
+import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
+import type {TilejsonResult} from '@carto/api-client';
+import {TilejsonPropType, mergeLoadOptions} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
+
+export const renderSubLayers = props => {
   const {data} = props;
   const {index} = props.tile;
   if (!data || !data.length) return null;
@@ -22,86 +22,72 @@ const renderSubLayers = props => {
   });
 };
 
-const defaultProps: DefaultProps<H3HexagonLayerProps> = {
-  aggregationResLevel: 4
+const defaultProps: DefaultProps<H3TileLayerProps> = {
+  data: TilejsonPropType,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by H3TileLayer. */
-export type H3TileLayerProps<DataT = any> = _H3TileLayerProps<DataT> & CompositeLayerProps<DataT>;
-
-// TODO: use type from h3-hexagon-layer when available
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type H3HexagonLayerProps<DataT = any> = Record<string, any>;
+export type H3TileLayerProps<DataT = unknown> = _H3TileLayerProps<DataT> & CompositeLayerProps;
 
 /** Properties added by H3TileLayer. */
-type _H3TileLayerProps<DataT> = H3HexagonLayerProps<DataT> & {
-  aggregationResLevel?: number;
-};
+type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> &
+  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
-export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_H3TileLayerProps<DataT>>
 > {
   static layerName = 'H3TileLayer';
   static defaultProps = defaultProps;
 
-  state!: {
-    tileJSON: any;
-    data: any;
-  };
-
   initializeState(): void {
     H3HexagonLayer._checkH3Lib();
-    this.setState({data: null, tileJSON: null});
   }
 
-  updateState({changeFlags}: UpdateParameters<this>): void {
-    if (changeFlags.dataChanged) {
-      let {data} = this.props;
-      const tileJSON = data;
-      data = (tileJSON as any).tiles;
-      this.setState({data, tileJSON});
-    }
+  getLoadOptions(): any {
+    const tileJSON = this.props.data as TilejsonResult;
+    return mergeLoadOptions(super.getLoadOptions(), {
+      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      cartoSpatialTile: {scheme: 'h3'}
+    });
   }
 
-  renderLayers(): Layer | null | LayersList {
-    const {data, tileJSON} = this.state;
-    let minresolution = parseInt(tileJSON.minresolution);
-    let maxresolution = parseInt(tileJSON.maxresolution);
+  renderLayers(): SpatialIndexTileLayer | null {
+    const tileJSON = this.props.data as TilejsonResult;
+    if (!tileJSON) return null;
 
+    const {tiles: data} = tileJSON;
+    let {minresolution, maxresolution} = tileJSON;
     // Convert Mercator zooms provided in props into H3 res levels
     // and clip into valid range provided from the tilejson
     if (this.props.minZoom) {
       minresolution = Math.max(
         minresolution,
-        getHexagonResolution({zoom: this.props.minZoom, latitude: 0})
+        getHexagonResolution({zoom: this.props.minZoom, latitude: 0}, this.props.tileSize)
       );
     }
     if (this.props.maxZoom) {
       maxresolution = Math.min(
         maxresolution,
-        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0})
+        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0}, this.props.tileSize)
       );
     }
 
+    const SubLayerClass = this.getSubLayerClass('spatial-index-tile', SpatialIndexTileLayer);
     // The naming is unfortunate, but minZoom & maxZoom in the context
     // of a Tileset2D refer to the resolution levels, not the Mercator zooms
-    return [
-      new SpatialIndexTileLayer(this.props, {
-        id: `h3-tile-layer-${this.props.id}`,
-        data,
-        // @ts-expect-error Tileset2D should be generic over TileIndex
-        TilesetClass: H3Tileset2D,
-        renderSubLayers,
-        // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
-        minZoom: minresolution,
-        maxZoom: maxresolution,
-        loadOptions: {
-          ...this.getLoadOptions(),
-          cartoSpatialTile: {
-            scheme: 'h3'
-          }
-        }
-      })
-    ];
+    return new SubLayerClass(this.props, {
+      id: `h3-tile-layer-${this.props.id}`,
+      data,
+      // TODO: Tileset2D should be generic over TileIndex type
+      TilesetClass: H3Tileset2D as any,
+      renderSubLayers,
+      // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
+      minZoom: minresolution,
+      maxZoom: maxresolution,
+      loadOptions: this.getLoadOptions()
+    });
   }
 }

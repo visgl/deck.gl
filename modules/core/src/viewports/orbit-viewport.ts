@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Viewport from '../viewports/viewport';
 
 import {Matrix4} from '@math.gl/core';

@@ -1,6 +1,16 @@
 {
+  "ts-node": {
+    "include": [
+      "modules",
+      "test/modules"
+    ],
+    // It is faster to skip typechecking. Remove if you want ts-node to do typechecking.
+    "transpileOnly": true
+  },
   "compilerOptions": {
     "target": "es2020",
+    "module": "es2020",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "jsx": "react",
     "strict": true,
     "noImplicitAny": false,
@@ -9,52 +19,59 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@deck.gl/core": ["modules/core/src"],
-      "@deck.gl/core/test": ["modules/core/test"],
-      "@deck.gl/extensions": ["modules/extensions/src"],
-      "@deck.gl/extensions/test": ["modules/extensions/test"],
-      "@deck.gl/json": ["modules/json/src"],
-      "@deck.gl/json/test": ["modules/json/test"],
-      "@deck.gl/main": ["modules/main/src"],
-      "@deck.gl/main/test": ["modules/main/test"],
-      "@deck.gl/test-utils": ["modules/test-utils/src"],
-      "@deck.gl/test-utils/test": ["modules/test-utils/test"],
-
-      "@deck.gl/react": ["modules/react/src"],
-      "@deck.gl/react/test": ["modules/react/test"],
-
-      "@deck.gl/jupyter-widget": ["modules/jupyter-widget/src"],
-      "@deck.gl/jupyter-widget/test": ["modules/jupyter-widget/test"],
-
-      "@deck.gl/arcgis": ["modules/arcgis/src"],
-      "@deck.gl/arcgis/test": ["modules/arcgis/test"],
-      "@deck.gl/carto": ["modules/carto/src"],
-      "@deck.gl/carto/test": ["modules/carto/test"],
-      "@deck.gl/mapbox": ["modules/mapbox/src"],
-      "@deck.gl/mapbox/test": ["modules/mapbox/test"],
-      "@deck.gl/google": ["modules/google/src"],
-      "@deck.gl/google/test": ["modules/google/test"],
-
-      "@deck.gl/layers": ["modules/layers/src"],
-      "@deck.gl/layers/test": ["modules/layers/test"],
-      "@deck.gl/geo-layers": ["modules/geo-layers/src"],
-      "@deck.gl/geo-layers/test": ["modules/geo-layers/test"],
       "@deck.gl/aggregation-layers": ["modules/aggregation-layers/src"],
-      "@deck.gl/aggregation-layers/test": ["modules/aggregation-layers/test"],
+      "@deck.gl/arcgis": ["modules/arcgis/src"],
+      "@deck.gl/carto": ["modules/carto/src"],
+      "@deck.gl/core": ["modules/core/src"],
+      "@deck.gl/extensions": ["modules/extensions/src"],
+      "@deck.gl/geo-layers": ["modules/geo-layers/src"],
+      "@deck.gl/google-maps": ["modules/google-maps/src"],
+      "@deck.gl/json": ["modules/json/src"],
+      "@deck.gl/jupyter-widget": ["modules/jupyter-widget/src"],
+      "@deck.gl/layers": ["modules/layers/src"],
+      "deck.gl": ["modules/main/src"],
+      "@deck.gl/mapbox": ["modules/mapbox/src"],
       "@deck.gl/mesh-layers": ["modules/mesh-layers/src"],
-      "@deck.gl/mesh-layers/test": ["modules/mesh-layers/test"],
+      "@deck.gl/react": ["modules/react/src"],
+      "@deck.gl/test-utils": ["modules/test-utils/src"],
 
-      "test": ["test"]
-    }
+      "deck.gl-test/*": ["test/*"]
+    },
+    "typeRoots" : ["./node_modules/@types"],
+    "plugins": [
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-version-inline"
+      },
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-remove-glsl-comments",
+        "pattern": ["**/*.glsl.ts"]
+      },
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-inline-webgl-constants"
+      },
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
+        "extensions": [".js", ".glsl.js", ".wgsl.js"],
+        "after": true
+      },
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
+        "extensions": [".js", ".glsl.js", ".wgsl.js"],
+        "afterDeclarations": true
+      }
+    ]
   },
   "include": [
-    "modules"
+    "modules",
+    "test",
+    "examples"
   ],
   "exclude": [
+    "**/node_modules",
+    "**/dist"
   ]
 }

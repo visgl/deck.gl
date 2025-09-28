@@ -1,11 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 let total = 0;
 const result = [];
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }

@@ -1,40 +1,37 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {isAsyncIterable} from '../utils/iterable-utils';
-import {ASYNC_ORIGINAL_SYMBOL, ASYNC_RESOLVED_SYMBOL, ASYNC_DEFAULTS_SYMBOL} from './constants';
+import {
+  COMPONENT_SYMBOL,
+  PROP_TYPES_SYMBOL,
+  ASYNC_ORIGINAL_SYMBOL,
+  ASYNC_RESOLVED_SYMBOL,
+  ASYNC_DEFAULTS_SYMBOL
+} from './constants';
 import type Component from './component';
 import {PropType} from './prop-types';
 
 const EMPTY_PROPS = Object.freeze({});
 
+/** Internal state of an async prop */
 type AsyncPropState = {
-  type: PropType;
+  /** The prop type definition from component.defaultProps, if exists */
+  type: PropType | null;
+  /** Supplied prop value (can be url/promise, not visible to the component) */
   lastValue: any;
+  /** Resolved prop value (valid data, can be "shown" to the component) */
   resolvedValue: any;
+  /** How many loads have been issued */
   pendingLoadCount: number;
+  /** Latest resolved load, (earlier loads will be ignored) */
   resolvedLoadCount: number;
 };
 
 export default class ComponentState<ComponentT extends Component> {
-  component: ComponentT;
+  /** The component that this state instance belongs to. `null` if this state has been finalized. */
+  component: ComponentT | null;
   onAsyncPropUpdated: (propName: string, value: any) => void;
 
   private asyncProps: Partial<Record<string, AsyncPropState>>;
@@ -61,6 +58,9 @@ export default class ComponentState<ComponentT extends Component> {
         );
       }
     }
+    this.asyncProps = {};
+    this.component = null;
+    this.resetOldProps();
   }
 
   /* Layer-facing props API */
@@ -71,7 +71,7 @@ export default class ComponentState<ComponentT extends Component> {
 
   resetOldProps() {
     this.oldAsyncProps = null;
-    this.oldProps = this.component.props;
+    this.oldProps = this.component ? this.component.props : null;
   }
 
   // Checks if a prop is overridden
@@ -110,6 +110,8 @@ export default class ComponentState<ComponentT extends Component> {
   // Updates all async/overridden props (when new props come in)
   // Checks if urls have changed, starts loading, or removes override
   setAsyncProps(props: ComponentT['props']) {
+    this.component = (props[COMPONENT_SYMBOL] as ComponentT) || this.component;
+
     // NOTE: prop param and default values are only support for testing
     const resolvedValues = props[ASYNC_RESOLVED_SYMBOL] || {};
     const originalValues = props[ASYNC_ORIGINAL_SYMBOL] || props;
@@ -235,6 +237,10 @@ export default class ComponentState<ComponentT extends Component> {
       const loadCount = asyncProp.pendingLoadCount;
       promise
         .then(data => {
+          if (!this.component) {
+            // This component state has been finalized
+            return;
+          }
           data = this._postProcessValue(asyncProp, data);
           this._setAsyncPropValue(propName, data, loadCount);
           this._onResolve(propName, data);
@@ -266,6 +272,11 @@ export default class ComponentState<ComponentT extends Component> {
     let count = 0;
 
     for await (const chunk of iterable) {
+      if (!this.component) {
+        // This component state has been finalized
+        return;
+      }
+
       // @ts-expect-error (2339) dataTransform is not decared in base component props
       const {dataTransform} = this.component.props;
       if (dataTransform) {
@@ -288,9 +299,9 @@ export default class ComponentState<ComponentT extends Component> {
   }
 
   // Give the app a chance to post process the loaded data
-  private _postProcessValue(asyncProp, value: any) {
+  private _postProcessValue(asyncProp: AsyncPropState, value: any) {
     const propType = asyncProp.type;
-    if (propType) {
+    if (propType && this.component) {
       if (propType.release) {
         propType.release(asyncProp.resolvedValue, propType, this.component);
       }
@@ -305,15 +316,14 @@ export default class ComponentState<ComponentT extends Component> {
   private _createAsyncPropData(propName: string, defaultValue: any) {
     const asyncProp = this.asyncProps[propName];
     if (!asyncProp) {
-      // @ts-expect-error
-      const propTypes = this.component && this.component.constructor._propTypes;
+      const propTypes = this.component && this.component.props[PROP_TYPES_SYMBOL];
       // assert(defaultValue !== undefined);
       this.asyncProps[propName] = {
         type: propTypes && propTypes[propName],
-        lastValue: null, // Supplied prop value (can be url/promise, not visible to layer)
-        resolvedValue: defaultValue, // Resolved prop value (valid data, can be "shown" to layer)
-        pendingLoadCount: 0, // How many loads have been issued
-        resolvedLoadCount: 0 // Latest resolved load, (earlier loads will be ignored)
+        lastValue: null,
+        resolvedValue: defaultValue,
+        pendingLoadCount: 0,
+        resolvedLoadCount: 0
       };
     }
   }

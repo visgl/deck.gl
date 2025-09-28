@@ -1,42 +1,17 @@
-// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* global setTimeout clearTimeout */
-import GL from '@luma.gl/constants';
 import {
   getBounds,
   boundsContain,
   packVertices,
   scaleToAspectRatio,
-  getTextureCoordinates,
-  getTextureParams
+  getTextureCoordinates
 } from './heatmap-layer-utils';
-import {
-  Buffer,
-  Texture2D,
-  Transform,
-  getParameters,
-  withParameters,
-  FEATURES,
-  hasFeatures
-} from '@luma.gl/core';
+import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
+import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
 import {
   Accessor,
   AccessorFunction,
@@ -50,26 +25,35 @@ import {
   log,
   Position,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
-import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
+import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
+import {defaultColorRange, colorRangeToFlatArray} from '../common/utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
-import vsMax from './max-vs.glsl';
-import fsMax from './max-fs.glsl';
+import maxVs from './max-vs.glsl';
+import maxFs from './max-fs.glsl';
+import {
+  MaxWeightProps,
+  maxWeightUniforms,
+  WeightProps,
+  weightUniforms
+} from './heatmap-layer-uniforms';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
-const TEXTURE_OPTIONS = {
-  mipmaps: false,
-  parameters: {
-    [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-    [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-    [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-    [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-  },
-  dataFormat: GL.RGBA
+const TEXTURE_PROPS: TextureProps = {
+  format: 'rgba8unorm',
+  dimension: '2d',
+  width: 1,
+  height: 1,
+  sampler: {
+    minFilter: 'linear',
+    magFilter: 'linear',
+    addressModeU: 'clamp-to-edge',
+    addressModeV: 'clamp-to-edge'
+  }
 };
 const DEFAULT_COLOR_DOMAIN = [0, 0];
 const AGGREGATION_MODE = {
@@ -78,7 +62,7 @@ const AGGREGATION_MODE = {
 };
 
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
@@ -91,14 +75,9 @@ const defaultProps: DefaultProps<HeatmapLayerProps> = {
   debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500}
 };
 
-const REQUIRED_FEATURES = [
-  FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
-  FEATURES.TEXTURE_FLOAT // weight-map as texture
-];
-
-const FLOAT_TARGET_FEATURES = [
-  FEATURES.COLOR_ATTACHMENT_RGBA32F, // ability to render to float texture
-  FEATURES.FLOAT_BLEND // ability to blend when rendering to float texture
+const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
+  'float32-renderable-webgl', // ability to render to float texture
+  'texture-blend-float-webgl' // ability to blend when rendering to float texture
 ];
 
 const DIMENSIONS = {
@@ -107,7 +86,7 @@ const DIMENSIONS = {
   }
 };
 
-export type HeatmapLayerProps<DataT = any> = _HeatmapLayerProps<DataT> &
+export type HeatmapLayerProps<DataT = unknown> = _HeatmapLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 type _HeatmapLayerProps<DataT> = {
@@ -187,34 +166,46 @@ type _HeatmapLayerProps<DataT> = {
 };
 
 /** Visualizes the spatial distribution of data. */
-export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
-  ExtraPropsT & Required<_HeatmapLayerProps<DataT>>
-> {
+export default class HeatmapLayer<
+  DataT = any,
+  ExtraPropsT extends {} = {}
+> extends AggregationLayer<DataT, ExtraPropsT & Required<_HeatmapLayerProps<DataT>>> {
   static layerName = 'HeatmapLayer';
   static defaultProps = defaultProps;
 
-  state!: AggregationLayer['state'] & {
-    supported: boolean;
+  state!: AggregationLayer<DataT>['state'] & {
     colorDomain?: number[];
     isWeightMapDirty?: boolean;
-    weightsTexture?: Texture2D;
+    weightsTexture?: Texture;
+    maxWeightsTexture?: Texture;
+    colorTexture?: Texture;
     zoom?: number;
     worldBounds?: number[];
     normalizedCommonBounds?: number[];
     updateTimer?: any;
     triPositionBuffer?: Buffer;
     triTexCoordBuffer?: Buffer;
+    weightsTransform?: TextureTransform;
+    maxWeightTransform?: TextureTransform;
+    textureSize: number;
+    format: TextureFormat;
+    weightsScale: number;
+    visibleWorldBounds: number[];
+    viewportCorners: number[][];
   };
 
-  initializeState() {
-    const {gl} = this.context;
-    if (!hasFeatures(gl, REQUIRED_FEATURES)) {
-      this.setState({supported: false});
-      log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
-      return;
+  getShaders(shaders: any) {
+    let modules = [project32];
+    if (shaders.modules) {
+      modules = [...modules, ...shaders.modules];
     }
+
+    return super.getShaders({...shaders, modules});
+  }
+
+  initializeState() {
     super.initializeAggregationLayer(DIMENSIONS);
-    this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
+    this.setState({colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
@@ -227,9 +218,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
 
   /* eslint-disable max-statements,complexity */
   updateState(opts: UpdateParameters<this>) {
-    if (!this.state.supported) {
-      return;
-    }
     super.updateState(opts);
     this._updateHeatmapState(opts);
   }
@@ -248,6 +236,13 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
+
+      if (changeFlags.dataChanged) {
+        // Recreate weights transform if data changed, as buffer layout may have changed,
+        // happens when binary attibutes passed.
+        const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
+        this._createWeightsTransform(weightsTransformShaders);
+      }
     } else if (changeFlags.viewportZoomChanged) {
       // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
@@ -265,9 +260,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   renderLayers(): LayersList | Layer {
-    if (!this.state.supported) {
-      return [];
-    }
     const {
       weightsTexture,
       triPositionBuffer,
@@ -299,7 +291,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
         maxTexture: maxWeightsTexture,
         colorTexture,
         aggregationMode: AGGREGATION_MODE[aggregation] || 0,
-        texture: weightsTexture,
+        weightsTexture,
         intensity,
         threshold,
         colorDomain
@@ -319,13 +311,13 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       colorTexture,
       updateTimer
     } = this.state;
-    weightsTransform?.delete();
-    weightsTexture?.delete();
-    maxWeightTransform?.delete();
-    maxWeightsTexture?.delete();
-    triPositionBuffer?.delete();
-    triTexCoordBuffer?.delete();
-    colorTexture?.delete();
+    weightsTransform?.destroy();
+    weightsTexture?.destroy();
+    maxWeightTransform?.destroy();
+    maxWeightsTexture?.destroy();
+    triPositionBuffer?.destroy();
+    triTexCoordBuffer?.destroy();
+    colorTexture?.destroy();
     if (updateTimer) {
       clearTimeout(updateTimer);
     }
@@ -335,7 +327,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
+    return new AttributeManager(this.context.device, {
       id: this.props.id,
       stats: this.context.stats
     });
@@ -348,11 +340,12 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
-      this.isAttributeChanged() || // if any attribute is changed
-      this.isAggregationDirty(opts, {
+      (this.isAttributeChanged() && 'attribute changed') || // if any attribute is changed
+      (this.isAggregationDirty(opts, {
         compareAll: true,
         dimension: dimensions.data
-      });
+      }) &&
+        'aggregation is dirty');
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
 
     const {zoom} = this.state;
@@ -364,94 +357,112 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   _createTextures() {
-    const {gl} = this.context;
-    const {textureSize, format, type} = this.state;
+    const {textureSize, format} = this.state;
 
     this.setState({
-      weightsTexture: new Texture2D(gl, {
+      weightsTexture: this.context.device.createTexture({
+        ...TEXTURE_PROPS,
         width: textureSize,
         height: textureSize,
-        format,
-        type,
-        ...TEXTURE_OPTIONS
+        format
       }),
-      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
+      maxWeightsTexture: this.context.device.createTexture({
+        ...TEXTURE_PROPS,
+        width: 1,
+        height: 1,
+        format
+      })
     });
   }
 
   _setupAttributes() {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
-      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'},
+      positions: {size: 3, type: 'float64', accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
     this.setState({positionAttributeName: 'positions'});
   }
 
   _setupTextureParams() {
-    const {gl} = this.context;
+    const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
-    const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = hasFeatures(gl, FLOAT_TARGET_FEATURES);
-    const {format, type} = getTextureParams({gl, floatTargetSupport});
+    const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
+    const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
+    const format: TextureFormat = floatTargetSupport ? 'rgba32float' : 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
-    this.setState({textureSize, format, type, weightsScale});
+    this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {
       log.warn(
-        `HeatmapLayer: ${this.id} rendering to float texture not supported, fallingback to low precession format`
+        `HeatmapLayer: ${this.id} rendering to float texture not supported, falling back to low precision format`
       )();
     }
   }
 
-  getShaders(type) {
-    return super.getShaders(
-      type === 'max-weights-transform'
-        ? {
-            vs: vsMax,
-            _fs: fsMax
-          }
-        : {
-            vs: weightsVs,
-            _fs: weightsFs
-          }
-    );
-  }
-
-  _createWeightsTransform(shaders = {}) {
-    const {gl} = this.context;
+  _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
-    weightsTransform?.delete();
+    const attributeManager = this.getAttributeManager()!;
 
-    weightsTransform = new Transform(gl, {
+    weightsTransform?.destroy();
+    weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
-      elementCount: 1,
-      _targetTexture: weightsTexture,
-      _targetTextureVarying: 'weightsTexture',
-      ...shaders
-    });
+      bufferLayout: attributeManager.getBufferLayouts(),
+      vertexCount: 1,
+      targetTexture: weightsTexture!,
+      parameters: {
+        depthWriteEnabled: false,
+        blendColorOperation: 'add',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
+      },
+      topology: 'point-list',
+      ...shaders,
+      modules: [...shaders.modules, weightUniforms]
+    } as TextureTransformProps);
+
     this.setState({weightsTransform});
   }
 
   _setupResources() {
-    const {gl} = this.context;
     this._createTextures();
+    const {device} = this.context;
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
 
-    const weightsTransformShaders = this.getShaders('weights-transform');
+    const weightsTransformShaders = this.getShaders({
+      vs: weightsVs,
+      fs: weightsFs
+    });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
-    const maxWeightTransform = new Transform(gl, {
+    const maxWeightsTransformShaders = this.getShaders({
+      vs: maxVs,
+      fs: maxFs,
+      modules: [maxWeightUniforms]
+    });
+    const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
-      _sourceTextures: {
-        inTexture: weightsTexture
-      },
-      _targetTexture: maxWeightsTexture,
-      _targetTextureVarying: 'outTexture',
+      targetTexture: maxWeightsTexture!,
       ...maxWeightsTransformShaders,
-      elementCount: textureSize * textureSize
+      vertexCount: textureSize * textureSize,
+      topology: 'point-list',
+      parameters: {
+        depthWriteEnabled: false,
+        blendColorOperation: 'max',
+        blendAlphaOperation: 'max',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
+      }
+    });
+
+    const maxWeightProps: MaxWeightProps = {inTexture: weightsTexture!, textureSize};
+    maxWeightTransform.model.shaderInputs.setProps({
+      maxWeight: maxWeightProps
     });
 
     this.setState({
@@ -459,32 +470,27 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       maxWeightsTexture,
       maxWeightTransform,
       zoom: null,
-      triPositionBuffer: new Buffer(gl, {
-        byteLength: 48,
-        accessor: {size: 3}
-      }),
-      triTexCoordBuffer: new Buffer(gl, {
-        byteLength: 48,
-        accessor: {size: 2}
-      })
+      triPositionBuffer: device.createBuffer({byteLength: 48}),
+      triTexCoordBuffer: device.createBuffer({byteLength: 48})
     });
   }
 
   // overwrite super class method to update transform model
   updateShaders(shaderOptions) {
-    // sahder params (modules, injects) changed, update model object
-    this._createWeightsTransform(shaderOptions);
+    // shader params (modules, injects) changed, update model object
+    this._createWeightsTransform({
+      vs: weightsVs,
+      fs: weightsFs,
+      ...shaderOptions
+    });
   }
 
   _updateMaxWeightValue() {
     const {maxWeightTransform} = this.state;
-    maxWeightTransform.run({
-      parameters: {
-        blend: true,
-        depthTest: false,
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: GL.MAX
-      }
+
+    maxWeightTransform!.run({
+      parameters: {viewport: [0, 0, 1, 1]},
+      clearColor: [0, 0, 0, 0]
     });
   }
 
@@ -497,8 +503,8 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     const viewportCorners = [
       viewport.unproject([0, 0]),
       viewport.unproject([viewport.width, 0]),
-      viewport.unproject([viewport.width, viewport.height]),
-      viewport.unproject([0, viewport.height])
+      viewport.unproject([0, viewport.height]),
+      viewport.unproject([viewport.width, viewport.height])
     ].map(p => p.map(Math.fround));
 
     // #1: get world bounds for current viewport extends
@@ -546,12 +552,12 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
 
     const {viewport} = this.context;
 
-    triPositionBuffer.subData(packVertices(viewportCorners, 3));
+    triPositionBuffer!.write(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
-    triTexCoordBuffer.subData(packVertices(textureBounds, 2));
+    triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {
@@ -559,25 +565,20 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
-    if (colorTexture) {
-      colorTexture.setImageData({
-        data: colors,
-        width: colorRange.length
-      });
-    } else {
-      colorTexture = new Texture2D(this.context.gl, {
-        data: colors,
-        width: colorRange.length,
-        height: 1,
-        ...TEXTURE_OPTIONS
-      });
-    }
+    colorTexture?.destroy();
+    colorTexture = this.context.device.createTexture({
+      ...TEXTURE_PROPS,
+      data: colors,
+      width: colorRange.length,
+      height: 1
+    });
     this.setState({colorTexture});
   }
 
   _updateWeightmap() {
     const {radiusPixels, colorDomain, aggregation} = this.props;
-    const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
+    const {worldBounds, textureSize, weightsScale, weightsTexture} = this.state;
+    const weightsTransform = this.state.weightsTransform!;
     this.state.isWeightMapDirty = false;
 
     // convert world bounds to common using Layer's coordiante system and origin
@@ -596,39 +597,31 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
 
-    const uniforms = {
+    const attributeManager = this.getAttributeManager()!;
+    const attributes = attributeManager.getAttributes();
+    const moduleSettings = this.getModuleSettings();
+    this._setModelAttributes(weightsTransform.model, attributes);
+    weightsTransform.model.setVertexCount(this.getNumInstances());
+
+    const weightProps: WeightProps = {
       radiusPixels,
       commonBounds,
       textureWidth: textureSize,
-      weightsScale
+      weightsScale,
+      weightsTexture: weightsTexture!
     };
-    // Attribute manager sets data array count as instaceCount on model
-    // we need to set that as elementCount on 'weightsTransform'
-    weightsTransform.update({
-      elementCount: this.getNumInstances()
+    const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleSettings;
+    const {modelMatrix} = this.props;
+    weightsTransform.model.shaderInputs.setProps({
+      project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin},
+      weight: weightProps
     });
-    // Need to explictly specify clearColor as external context may have modified it
-    withParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
-      weightsTransform.run({
-        uniforms,
-        parameters: {
-          blend: true,
-          depthTest: false,
-          blendFunc: [GL.ONE, GL.ONE],
-          blendEquation: GL.FUNC_ADD
-        },
-        clearRenderTarget: true,
-        attributes: this.getAttributes(),
-        moduleSettings: this.getModuleSettings()
-      });
+    weightsTransform.run({
+      parameters: {viewport: [0, 0, textureSize, textureSize]},
+      clearColor: [0, 0, 0, 0]
     });
-    this._updateMaxWeightValue();
 
-    // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
-    weightsTexture.setParameters({
-      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
-    });
+    this._updateMaxWeightValue();
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {
@@ -653,7 +646,10 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   // input: worldBounds: [minLong, minLat, maxLong, maxLat]
   // input: opts.useLayerCoordinateSystem : layers coordiante system is used
   // optput: commonBounds: [minX, minY, maxX, maxY] scaled to fit the current texture
-  _worldToCommonBounds(worldBounds, opts: {useLayerCoordinateSystem?: boolean} = {}) {
+  _worldToCommonBounds(
+    worldBounds,
+    opts: {useLayerCoordinateSystem?: boolean} = {}
+  ): [number, number, number, number] {
     const {useLayerCoordinateSystem = false} = opts;
     const [minLong, minLat, maxLong, maxLat] = worldBounds;
     const {viewport} = this.context;

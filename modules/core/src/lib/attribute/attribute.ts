@@ -1,12 +1,21 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable complexity */
-import DataColumn, {DataColumnOptions, ShaderAttributeOptions, BufferAccessor} from './data-column';
-import {IShaderAttribute} from './shader-attribute';
+import DataColumn, {
+  DataColumnOptions,
+  ShaderAttributeOptions,
+  BufferAccessor,
+  DataColumnSettings
+} from './data-column';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
-import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
-import type {Buffer} from '@luma.gl/webgl';
+import {bufferLayoutEqual} from './gl-utils';
+import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
+import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -38,6 +47,7 @@ export type Updater = (
 
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
+  stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
@@ -56,6 +66,7 @@ type AttributeInternalState = {
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
+  layoutChanged: boolean;
   updateRanges: number[][];
 };
 
@@ -63,14 +74,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Legacy approach to set attribute value - read `isConstant` instead for attribute state */
   constant: boolean = false;
 
-  constructor(gl: WebGLRenderingContext, opts: AttributeOptions) {
-    super(gl, opts, {
+  constructor(device: Device, opts: AttributeOptions) {
+    super(device, opts, {
       startIndices: null,
       lastExternalBuffer: null,
       binaryValue: null,
       binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
+      layoutChanged: false,
       updateRanges: range.FULL
     });
 
@@ -100,6 +112,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const needsRedraw = this.state.needsRedraw;
     this.state.needsRedraw = needsRedraw && !clearChangedFlags;
     return needsRedraw;
+  }
+
+  layoutChanged(): boolean {
+    return this.state.layoutChanged;
+  }
+
+  setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
+    this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
+    super.setAccessor(accessor);
   }
 
   getUpdateTriggers(): string[] {
@@ -198,6 +219,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         // no value was assigned during update
       } else if (
         this.constant ||
+        !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
         this.setData({
@@ -213,8 +235,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           const endOffset = Number.isFinite(endRow)
             ? this.getVertexOffset(endRow)
             : noAlloc || !Number.isFinite(numInstances)
-            ? this.value.length
-            : numInstances * this.size;
+              ? this.value.length
+              : numInstances * this.size;
 
           super.updateSubBuffer({startOffset, endOffset});
         }
@@ -233,7 +255,18 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Use generic value
   // Returns true if successful
   setConstantValue(value?: NumericArray): boolean {
-    if (value === undefined || typeof value === 'function') {
+    // TODO(ibgreen): WebGPU does not support constant values,
+    // they will be emulated as buffers instead for now.
+    const isWebGPU = this.device.type === 'webgpu';
+    if (isWebGPU || value === undefined || typeof value === 'function') {
+      if (isWebGPU && typeof value !== 'function') {
+        const normalisedValue = this._normalizeValue(value, [], 0);
+        // ensure we trigger an update for the attribute's emulated buffer
+        // where webgl would perform the update here
+        if (!this._areValuesEqual(normalisedValue, this.value)) {
+          this.setNeedsUpdate('WebGPU constant updated');
+        }
+      }
       return false;
     }
 
@@ -323,22 +356,61 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   getVertexOffset(row: number): number {
     const {startIndices} = this;
-    const vertexIndex = startIndices ? startIndices[row] : row;
+    const vertexIndex = startIndices
+      ? row < startIndices.length
+        ? startIndices[row]
+        : this.numInstances
+      : row;
     return vertexIndex * this.size;
   }
 
-  getShaderAttributes(): Record<string, IShaderAttribute> {
-    const shaderAttributeDefs = this.settings.shaderAttributes || {[this.id]: null};
-    const shaderAttributes: Record<string, IShaderAttribute> = {};
-
+  getValue(): Record<string, Buffer | TypedArray | null> {
+    const shaderAttributeDefs = this.settings.shaderAttributes;
+    const result = super.getValue();
+    if (!shaderAttributeDefs) {
+      return result;
+    }
     for (const shaderAttributeName in shaderAttributeDefs) {
       Object.assign(
-        shaderAttributes,
-        super.getShaderAttributes(shaderAttributeName, shaderAttributeDefs[shaderAttributeName])
+        result,
+        super.getValue(shaderAttributeName, shaderAttributeDefs[shaderAttributeName])
       );
     }
+    return result;
+  }
 
-    return shaderAttributes;
+  /** Generate WebGPU-style buffer layout descriptor from this attribute */
+  getBufferLayout(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {isInstanced?: boolean}
+  ): BufferLayout {
+    // Clear change flag
+    this.state.layoutChanged = false;
+
+    const shaderAttributeDefs = this.settings.shaderAttributes;
+    const result: BufferLayout = super._getBufferLayout();
+    const {stepMode} = this.settings;
+    if (stepMode === 'dynamic') {
+      // If model info is provided, use isInstanced flag to determine step mode
+      // If no model info is provided, assume it's an instanced model (most common use case)
+      result.stepMode = modelInfo ? (modelInfo.isInstanced ? 'instance' : 'vertex') : 'instance';
+    } else {
+      result.stepMode = stepMode ?? 'vertex';
+    }
+
+    if (!shaderAttributeDefs) {
+      return result;
+    }
+
+    for (const shaderAttributeName in shaderAttributeDefs) {
+      const map = super._getBufferLayout(
+        shaderAttributeName,
+        shaderAttributeDefs[shaderAttributeName]
+      );
+      // @ts-ignore
+      result.attributes.push(...map.attributes);
+    }
+    return result;
   }
 
   /* eslint-disable max-depth, max-statements */
@@ -359,16 +431,22 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
   ): void {
     if (attribute.constant) {
-      return;
+      // @ts-ignore TODO(ibgreen) declare context?
+      if (this.context.device.type !== 'webgpu') {
+        return;
+      }
     }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    const accessorFunc: Accessor<any, any> =
+    let accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
-
+    // TODO(ibgreen) WebGPU needs buffers, generate an accessor function from a constant
+    if (typeof accessorFunc !== 'function' && typeof accessor === 'string') {
+      accessorFunc = () => props[accessor];
+    }
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = attribute.getVertexOffset(startRow);

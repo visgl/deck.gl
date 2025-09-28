@@ -1,14 +1,17 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck} from '@deck.gl/core';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {Framebuffer, Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
 
 import sfZipcodes from '../../../examples/layer-browser/data/sf.zip.geo.json';
 
 let framebuffer;
+let texture;
 
 const deck = new Deck({
-  onWebGLInitialized: onInitialize,
+  onDeviceInitialized: onInitialize,
   onLoad,
   initialViewState: {
     longitude: -122.45,
@@ -22,23 +25,24 @@ const deck = new Deck({
 
 function noop() {}
 
-function onInitialize(gl) {
-  framebuffer = new Framebuffer(gl);
-  framebuffer.attach({
-    [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
-      mipmaps: false,
-      parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-      }
-    })
+function onInitialize(device) {
+  texture = device.createTexture({
+    format: 'rgba8unorm',
+    mipmaps: false,
+    sampler: {
+      minFilter: 'linear',
+      magFilter: 'linear'
+    }
+  });
+
+  framebuffer = device.createFramebuffer({
+    colorAttachments: [texture],
+    depthStencilAttachment: 'depth16unorm'
   });
 }
 
 function onLoad() {
-  framebuffer.resize();
+  framebuffer.resize({width: deck.width, height: deck.height});
 
   deck.setProps({
     layers: [
@@ -56,11 +60,6 @@ function onLoad() {
 }
 
 function onAfterRender() {
-  const texture = framebuffer.color;
-  framebuffer.attach({
-    [GL.COLOR_ATTACHMENT0]: null
-  });
-
   deck.setProps({
     layers: [
       new BitmapLayer({

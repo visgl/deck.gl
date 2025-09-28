@@ -1,7 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global document */
-import GL from '@luma.gl/constants';
-import {Texture2D, copyToTexture} from '@luma.gl/core';
-import {ImageLoader} from '@loaders.gl/images';
+import {Device, Texture, SamplerProps} from '@luma.gl/core';
+import {AsyncTexture} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -12,13 +15,14 @@ const DEFAULT_BUFFER = 4;
 
 const noop = () => {};
 
-const DEFAULT_TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-  // GL.LINEAR is the default value but explicitly set it here
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  // for texture boundary artifact
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+const DEFAULT_SAMPLER_PARAMETERS: SamplerProps = {
+  minFilter: 'linear',
+  mipmapFilter: 'linear',
+  // LINEAR is the default value but explicitly set it here
+  magFilter: 'linear',
+  // minimize texture boundary artifacts
+  addressModeU: 'clamp-to-edge',
+  addressModeV: 'clamp-to-edge'
 };
 
 type IconDef = {
@@ -53,6 +57,13 @@ type PrepackedIcon = {
   y: number;
 } & IconDef;
 
+const MISSING_ICON: PrepackedIcon = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0
+};
+
 export type IconMapping = Record<string, PrepackedIcon>;
 
 export type LoadIconErrorContext = {
@@ -75,22 +86,30 @@ function nextPowOfTwo(number: number): number {
 function resizeImage(
   ctx: CanvasRenderingContext2D,
   imageData: HTMLImageElement | ImageBitmap,
-  width: number,
-  height: number
-): HTMLImageElement | HTMLCanvasElement | ImageBitmap {
-  if (width === imageData.width && height === imageData.height) {
-    return imageData;
+  maxWidth: number,
+  maxHeight: number
+): {
+  image: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
+  width: number;
+  height: number;
+} {
+  const resizeRatio = Math.min(maxWidth / imageData.width, maxHeight / imageData.height);
+  const width = Math.floor(imageData.width * resizeRatio);
+  const height = Math.floor(imageData.height * resizeRatio);
+
+  if (resizeRatio === 1) {
+    // No resizing required
+    return {image: imageData, width, height};
   }
 
   ctx.canvas.height = height;
   ctx.canvas.width = width;
 
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, width, height);
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
   ctx.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
-
-  return ctx.canvas;
+  return {image: ctx.canvas, width, height};
 }
 
 function getIconId(icon: UnpackedIcon): string {
@@ -99,22 +118,32 @@ function getIconId(icon: UnpackedIcon): string {
 
 // resize texture without losing original data
 function resizeTexture(
-  texture: Texture2D,
+  texture: Texture,
   width: number,
   height: number,
-  parameters: any
-): Texture2D {
-  const oldWidth = texture.width;
-  const oldHeight = texture.height;
+  sampler: SamplerProps
+): Texture {
+  const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = new Texture2D(texture.gl, {width, height, parameters});
-  copyToTexture(texture, newTexture, {
-    targetY: 0,
+  const newTexture = device.createTexture({
+    format: 'rgba8unorm',
+    width,
+    height,
+    sampler,
+    mipLevels: device.getMipLevelCount(width, height)
+  });
+
+  const commandEncoder = device.createCommandEncoder();
+  commandEncoder.copyTextureToTexture({
+    sourceTexture: texture,
+    destinationTexture: newTexture,
     width: oldWidth,
     height: oldHeight
   });
+  commandEncoder.finish();
+  newTexture.generateMipmapsWebGL();
 
-  texture.delete();
+  texture.destroy();
   return newTexture;
 }
 
@@ -265,15 +294,15 @@ export function getDiffIcons(
 }
 
 export default class IconManager {
-  gl: WebGLRenderingContext;
+  device: Device;
 
   private onUpdate: () => void;
   private onError: (context: LoadIconErrorContext) => void;
   private _loadOptions: any = null;
-  private _texture: Texture2D | null = null;
-  private _externalTexture: Texture2D | null = null;
+  private _texture: Texture | null = null;
+  private _externalTexture: Texture | null = null;
   private _mapping: IconMapping = {};
-  private _textureParameters: Record<number, number> | null = null;
+  private _samplerParameters: SamplerProps | null = null;
 
   /** count of pending requests to fetch icons */
   private _pendingCount: number = 0;
@@ -291,7 +320,7 @@ export default class IconManager {
   private _canvas: HTMLCanvasElement | null = null;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       onUpdate = noop,
       onError = noop
@@ -302,7 +331,7 @@ export default class IconManager {
       onError: (context: LoadIconErrorContext) => void;
     }
   ) {
-    this.gl = gl;
+    this.device = device;
     this.onUpdate = onUpdate;
     this.onError = onError;
   }
@@ -311,13 +340,13 @@ export default class IconManager {
     this._texture?.delete();
   }
 
-  getTexture(): Texture2D | null {
+  getTexture(): Texture | null {
     return this._texture || this._externalTexture;
   }
 
   getIconMapping(icon: string | UnpackedIcon): PrepackedIcon {
     const id = this._autoPacking ? getIconId(icon as UnpackedIcon) : (icon as string);
-    return this._mapping[id] || {};
+    return this._mapping[id] || MISSING_ICON;
   }
 
   setProps({
@@ -329,9 +358,9 @@ export default class IconManager {
   }: {
     loadOptions?: any;
     autoPacking?: boolean;
-    iconAtlas?: Texture2D | null;
+    iconAtlas?: Texture | null;
     iconMapping?: IconMapping | null;
-    textureParameters?: Record<number, number> | null;
+    textureParameters?: SamplerProps | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;
@@ -352,7 +381,7 @@ export default class IconManager {
     }
 
     if (textureParameters) {
-      this._textureParameters = textureParameters;
+      this._samplerParameters = textureParameters;
     }
   }
 
@@ -387,10 +416,13 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        this._texture = new Texture2D(this.gl, {
+        this._texture = this.device.createTexture({
+          format: 'rgba8unorm',
+          data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
-          parameters: this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
+          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
+          mipLevels: this.device.getMipLevelCount(this._canvasWidth, this._canvasHeight)
         });
       }
 
@@ -399,7 +431,7 @@ export default class IconManager {
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
-          this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
+          this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS
         );
       }
 
@@ -408,6 +440,7 @@ export default class IconManager {
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
+      this._texture?.generateMipmapsWebGL();
     }
   }
 
@@ -418,27 +451,38 @@ export default class IconManager {
     })[]
   ): void {
     // This method is only called in the auto packing case, where _canvas is defined
-    const ctx = this._canvas!.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = this._canvas!.getContext('2d', {
+      willReadFrequently: true
+    }) as CanvasRenderingContext2D;
 
     for (const icon of icons) {
       this._pendingCount++;
-      load(icon.url, ImageLoader, this._loadOptions)
+      load(icon.url, this._loadOptions)
         .then(imageData => {
           const id = getIconId(icon);
-          const {x, y, width, height} = this._mapping[id];
 
-          const data = resizeImage(ctx, imageData, width, height);
+          const iconDef = this._mapping[id];
+          const {x, y, width: maxWidth, height: maxHeight} = iconDef;
 
-          this._texture.setSubImageData({
-            data,
-            x,
-            y,
+          const {image, width, height} = resizeImage(
+            ctx,
+            imageData as ImageBitmap,
+            maxWidth,
+            maxHeight
+          );
+
+          this._texture?.copyExternalImage({
+            image,
+            x: x + (maxWidth - width) / 2,
+            y: y + (maxHeight - height) / 2,
             width,
             height
           });
+          iconDef.width = width;
+          iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          this._texture.generateMipmap();
+          this._texture?.generateMipmapsWebGL();
 
           this.onUpdate();
         })

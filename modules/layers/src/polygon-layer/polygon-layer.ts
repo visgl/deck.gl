@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Accessor,
@@ -26,6 +10,7 @@ import {
   CompositeLayerProps,
   createIterable,
   Layer,
+  LayerDataSource,
   LayersList,
   log,
   Unit,
@@ -41,12 +26,13 @@ import {replaceInRange} from '../utils';
 /**
  * All properties supported by `PolygonLayer`.
  */
-export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type PolygonLayerProps<DataT = unknown> = _PolygonLayerProps<DataT> & CompositeLayerProps;
 
 /**
  * Properties added by `PolygonLayer`.
  */
-type _PolygonLayerProps<DataT = any> = {
+type _PolygonLayerProps<DataT = unknown> = {
+  data: LayerDataSource<DataT>;
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *
@@ -165,7 +151,7 @@ type _PolygonLayerProps<DataT = any> = {
   /**
    * Line width value or accessor.
    *
-   * @default [0, 0, 0, 255]
+   * @default 1
    */
   getLineWidth?: Accessor<DataT, number>;
 
@@ -231,7 +217,7 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   lineJointRounded: false,
   lineMiterLimit: 4,
 
-  getPolygon: {type: 'accessor', value: f => f.polygon},
+  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
   // Polygon fill color
   getFillColor: {type: 'accessor', value: defaultFillColor},
   // Point, line and polygon outline color
@@ -246,15 +232,26 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
 };
 
 /** A composite layer that renders filled, stroked and/or extruded polygons. */
-export default class PolygonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> extends CompositeLayer<
   Required<_PolygonLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    paths: number[][];
+    pathsDiff:
+      | {
+          startRow: number;
+          endRow: number;
+        }[]
+      | null;
+  };
+
   initializeState(): void {
     this.state = {
-      paths: []
+      paths: [],
+      pathsDiff: null
     };
 
     if (this.props.getLineDashArray) {

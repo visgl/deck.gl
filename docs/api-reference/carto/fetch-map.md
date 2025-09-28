@@ -23,20 +23,21 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ### Integration with CARTO basemaps
 
-```js
-import mapboxgl from 'mapbox-gl';
 
-fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-  // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
-  const deckgl = new deck.DeckGL({
-    container: 'container',
-    controller: true,
-    mapStyle: MAP_STYLE,
-    initialViewState,
-    layers
-  });
-});
+```js
+import { fetchMap } from '@deck.gl/carto';
+import { MapboxOverlay } from '@deck.gl/mapbox';
+import maplibregl from 'maplibre-gl';
+
+fetchMap({ cartoMapId }).then(({ basemap, layers }) => {
+  const map = new maplibregl.Map({
+    container: '...',
+    ...basemap?.props, // basemap.props contain all props required to setup basemap
+    interactive: true
+  })
+  const overlay = new MapboxOverlay({layers: result.layers});
+  map.addControl(overlay);
+})
 ```
 
 ## Parameters
@@ -45,23 +46,29 @@ fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
 const map = await fetchMap({cartoMapId, credentials, autoRefresh, onNewData});
 ```
 
-##### `cartoMapId` (String)
+#### `cartoMapId` (string) {#cartomapid}
 
 Required. Identifier of map created in CARTO Builder.
 
-##### `credentials` (Object, optional)
+#### `accessToken` (string, optional) {#accesstoken}
 
-[CARTO Credentials](/docs/api-reference/carto/overview.md#carto-credentials) to use in API requests.
+CARTO platform access token. Only required for private maps.
 
-##### `headers` (Object, optional)
+#### `apiBaseUrl` (string, optional) {#apibaseurl}
 
-Custom headers to include in the map instantiation requests.
+Base URL of the CARTO Maps API.
+  
+Example for account located in EU-west region: `https://gcp-eu-west1.api.carto.com`
 
-##### `autoRefresh` (Number, optional)
+#### `headers` (object, optional) {#headers}
+
+Custom HTTP headers to include in the map instantiation requests.
+
+#### `autoRefresh` (number, optional) {#autorefresh}
 
 Interval in seconds at which to autoRefresh the data. If provided, `onNewData` must also be provided.
 
-##### `onNewData` (Function, Optional)
+#### `onNewData` (Function, Optional) {#onnewdata}
 
 Callback function that will be invoked whenever data in layers is changed. If provided, `autoRefresh` must also be provided.
 
@@ -69,39 +76,59 @@ Callback function that will be invoked whenever data in layers is changed. If pr
 
 When invoked with a given `cartoMapId`, `fetchMap` will retrieve the information about the map from CARTO, generate appropriate layers and populate them with data. The properties of the `map` are as follows:
 
-##### `id` (String)
+#### `id` (string) {#id}
 
 The `cartoMapId`.
 
-##### `title` (String)
+#### `title` (string) {#title}
 
 The title given to the map in CARTO Builder.
 
-##### `description` (String)
+#### `description` (string) {#description}
 
 The description given to the map in CARTO Builder.
 
-##### `createdAt` (String)
+#### `createdAt` (string) {#createdat}
 
 When the map was created.
 
-##### `updatedAt` (String)
+#### `updatedAt` (string) {#updatedat}
 
 When the map was last updated.
 
-##### `initialViewState` (String)
+#### `initialViewState` (string) {#initialviewstate}
 
-The [view state](docs/developer-guide/views.md#view-state).
+The [view state](../../developer-guide/views.md#view-state).
 
-##### `mapStyle` (String)
+#### `layers` (Layer[]) {#layers}
 
-An identifier describing the [basemap](docs/api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
+A collection of deck.gl [layers](../core/layer.md).
 
-##### `layers` (Array)
+#### `basemap` (object) {#basemap}
 
-A collection of deck.gl [layers](docs/api-reference/layers.md).
+An object describing the [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
 
-##### `stopAutoRefresh` (Function)
+Properties:
+ * `type` **(string)** - type of basemap: `'maplibre'` or `'google-maps'`
+ * `props` **(string or object)** - props that should be passed to basemap implementation
+    * if `type` is `'maplibre'` then it contains
+      * `style` **(string or object)** - URL of basemap style or style object if custom basemap is configured
+      * `center` **([number, number])** - center of map as `[latitude, longitude]`
+      * `zoom` **(number)** - zoom level
+      * `pitch` **(number)**
+      * `bearing` **(number)**
+    * if `type` is `'google-maps'`, then it contains those props
+      * `mapTypeId` **(string)** - type id of map
+      * `mapId` **(string, optional)** - map id
+      * `center` **(object)** - center of map as `{lat: number; lng: number}`
+      * `zoom`: **(number)** - zoom level (note, it has +1 offset applied versus deck.gl zoom)
+      * `tilt`: **(number)** - tilt, same as `pitch` in deck.gl API
+      * `heading`: **(number)** - heading, same as `bearing` in deck.gl API
+ * `rawStyle` **(string or object)** - for `maplibre` basemaps, original `style` before applying layer filtering
+ * `visibleLayerGroups` **(object, optional)** - layer groups to be displayed in the basemap.
+ * `attribution` **(string, optional)** - custom attribution HTML for this basemap
+
+#### `stopAutoRefresh` (Function) {#stopautorefresh}
 
 A function to invoke to stop auto-refreshing. Only present if `autoRefresh` option was provided to `fetchMap`.
 

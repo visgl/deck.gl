@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   ScatterplotLayer,
   ArcLayer,
@@ -378,7 +382,7 @@ const TextLayerExample = {
     maxWidth: {
       name: 'maxWidth',
       type: 'number',
-      max: 5000
+      max: 100
     },
     backgroundPadding: {type: 'compound', elements: ['padding']},
     padding: {
@@ -386,6 +390,15 @@ const TextLayerExample = {
       max: 100,
       onUpdate: (newValue, newSettings, change) => {
         change('backgroundPadding', [newValue, newValue]);
+      }
+    },
+    backgroundBorderRadius: {type: 'compound', elements: ['borderRadius']},
+    borderRadius: {
+      type: 'number',
+      min: 0,
+      max: 100,
+      onUpdate: (newValue, newSettings, change) => {
+        change('backgroundBorderRadius', newValue);
       }
     }
   },
@@ -399,11 +412,11 @@ const TextLayerExample = {
       buffer: 16,
       radius: 12,
       cutoff: 0.25,
-      smoothing: 0.1,
+      smoothing: 0.1
     },
     autoHighlight: true,
     pickable: true,
-    maxWidth: 500,
+    maxWidth: 50,
     wordBreak: 'break-word',
     highlightColor: [0, 0, 128, 128],
     getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,

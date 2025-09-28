@@ -2,6 +2,285 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.2
+
+Target release date: September, 2025
+
+### Widgets
+
+- A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
+  - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md)
+  - [FpsWidget](./api-reference/widgets/fps-widget.md)
+  - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
+  - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
+  - [InfoWidget](./api-reference/widgets/info-widget.md)
+  - [LoadingWidget](./api-reference/widgets/loading-widget.md)
+  - [ResetViewWidget](./api-reference/widgets/reset-view-widget.md)
+  - [ScaleWidget](./api-reference/widgets/scale-widget.md)
+  - [ScreenshotWidget](./api-reference/widgets/screenshot-widget.md)
+  - [SplitterWidget](./api-reference/widgets/splitter-widget.md)
+  - [StatsWidget](./api-reference/widgets/stats-widget.md)
+  - [ThemeWidget](./api-reference/widgets/theme-widget.md)
+  - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
+  - [ViewSelectorWidget](./api-reference/widgets/view-selector-widget.md)
+- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
+- Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
+- Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)
+
+### WebGPU Early Preview
+
+A few deck.gl layers can now be run on WebGPU in the website, by selecting the `WebGPU` tab:
+
+- [LineLayer](../examples/line-layer)
+- [PointCloudLayer](../examples/point-cloud-layer)
+- [ScatterplotLayer](../examples/scatterplot-layer)
+
+See documentation about how to [test WebGPU support](./developer-guide/webgpu.md).
+
+### Core
+
+- [`View.clone()`](./api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
+- Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearcolor), [`clearDepth`](./api-reference/core/view.md#cleardepth), [`clearStencil`](./api-reference/core/view.md#clearstencil) props
+
+### Layers
+
+- New [A5Layer](./api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](../examples/global-grids) example
+- TextLayer - new [`backgroundBorderRadius`](./api-reference/layers/text-layer#backgroundborderradius) prop
+
+### CARTO
+
+- [ClusterTileLayer](./api-reference/carto/cluster-tile-layer) and [HeatmapTileLayer](./api-reference/carto/heatmap-tile-layer) support H3 data
+- [VectorTileLayer](./api-reference/carto/vector-tile-layer) supports labels for line & polygon data, via new `autoLabels` prop
+
+### Mapbox
+
+- [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md#constructor) - When using `interleaved: true` and a Mapbox v3 Standard style, you may now control the ordering of layers by adding the [`slot`](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to a layer.
+
+## deck.gl v9.1
+
+Release date: Jan 21, 2025
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/e522d961-600a-4405-9f09-c247b42f7e62" />
+        <p><i>Maplibre Globe View</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>React Widgets</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
+        <p><i>Aggregation Layers</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
+        <p><i>WebGPU readiness</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+### Globe View ♥ MapLibre
+
+deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.org/maplibre-gl-js/docs/examples/globe-vector-tiles/) for all three [Basemap Intergration Modes](./developer-guide/base-maps/using-with-maplibre.md#integration-modes). The experimental [`GlobeView`](./api-reference/core/globe-view.md) has been updated to match MapLibre's camera at the same zoom level. [`MapboxOverlay`](./api-reference/mapbox/mapbox-overlay.md) works with maplibre-gl globe map without additional configuration.
+
+*The Maplibre globe view integration was done in close collaboration with the MapLibre team.*
+
+### React Widgets
+
+deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
+- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
+- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
+- To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
+
+##### Widgets Developer Guide
+
+deck.gl v9.1 provides the ability to for applications to write React component that integrate with deck.gl using the widget interface.
+
+### Aggregation layers upgrade
+
+v9.1 restores the GPU aggregation functionality that was temporarily disabled in v9.0. It brings a major refactor of the aggregation layers, with full TypeScript and unit test coverage.
+A new generic `Aggregator` interface makes it much easier to support custom aggregation operations. The current implementations of this interface include `CPUAggregator` and `WebGLAggregator`, with `WebGPUAggregator` on the roadmap.
+
+Highlights:
+
+- `GridLayer` now utilized both CPU and GPU aggregators in the same code path.
+- `HexagonLayer` now supports GPU aggregation. Enable with `gpuAggregation: true`.
+- `GridLayer` and `HexagonLayer` can use `*ScaleType`, `*UpperPercentile`, `*LowerPercentile`, `onSet*Domain` props along with GPU aggregation.
+- `GridLayer` and `HexagonLayer` now support non-geospatial views.
+- New picking info types for each aggregation layer.
+
+See [upgrade guide](./upgrade-guide.md) for more details.
+
+### WebGPU readiness
+
+- luma.gl has been updated to v9.1 which focuses on improved WebGPU support. For details see [release notes](https://luma.gl/docs/whats-new#version-91-in-development) and [upgrade-guide](https://luma.gl/docs/upgrade-guide#upgrading-to-v91).
+- As part of WebGPU readiness, all shader code in deck.gl v9.1 (layers and extensions) have been migrated to use uniform buffers instead of WebGL1 style uniforms. 
+- For most users this change should be transparent, but custom layers that add `uniforms` should [start migrating asap](./upgrade-guide.md) as WebGL1 style uniform support is being actively phased out.
+
+## deck.gl v9.0
+
+Release date: March 21, 2024
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
+        <p><i>WebGPU</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/480px-Typescript_logo_2020.svg.png" />
+        <p><i>Typescript</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>Widgets</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/e05863e2-777f-46fa-a04a-1bf4aa0625e2" />
+        <p><i>Category filtering</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### WebGPU enablement
+
+deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU in future releases, however it does cause some unavoidable breaking changes.
+
+WebGPU is the next generation API for accessing GPU capabilities on the web. Unlike the incremental transition from WebGL to WebGL2, the shift to WebGPU completely changes the way the browser will interact with the GPU. The new (v9) version of [luma.gl](https://luma.gl/) has been rewritten to adopt a WebGPU-compatible interface, while maintaining full support for WebGL2. deck.gl v9 has been extensively refactored on top of the new luma.gl API, but the deck.gl API itself includes minimal changes. This should allow applications to smoothly update to the latest version.
+
+While the v9 luma.gl release is feature-complete and well-tested for the WebGL2 adapter, work is still required to provide full WebGPU support. The team is planning to follow the v9 releases soon with v9.1, which will provide the WebGPU implementation in luma.gl along with the complimentary updates in deck.gl.
+
+### Development experience
+
+Typescript types, which were provided as an opt-in in 8.9, has now been enabled by default in v9.
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr style={{borderTop: 0}}>
+      <td style={{border: 0, padding: 0}}>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/d92fb611-8e86-428a-a524-e9cc313c7252" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+All the deck.gl packages are now published as fully ESM-compatible.
+
+### Improved FirstPersonController
+
+The behavior of the [FirstPersonController](./api-reference/core/first-person-controller) has been modified to more accurately reflect the motion of a human, making it more intuitive to navigate a 3D space. In addition, panning is supported.
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr style={{borderTop: 0}}>
+      <td style={{border: 0, padding: 0}}>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/2461547/ea476da0-6943-4a08-9c3d-aa86f13629a8" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Category filtering in DataFilterExtension
+
+The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has been enhanced to support filtering based on categories. A new accessor, [getFilterCategory](./api-reference/extensions/data-filter-extension), is added which allows filtering using the new [filterCategories](./api-reference/extensions/data-filter-extension#filtercategories).
+
+
+### `@deck.gl/widgets` (New module)
+
+You can now add UI components to deck.gl. This new module lets apps add controls and information that can interact with deck.gl's cameras and layers for a better user experience. To get started, check out [the example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/widgets) and [the documentation](./api-reference/widgets/overview.md).
+
+This module initially contains the following widgets:
+
+- [FullscreenWidget](./api-reference/widgets/fullscreen-widget.md)
+- [ZoomWidget](./api-reference/widgets/zoom-widget.md)
+- [CompassWidget](./api-reference/widgets/compass-widget.md)
+
+You can also create your own widget by implementing the [`Widget`](./api-reference/core/widget.md) interface.
+
+
+### `@deck.gl/carto`
+
+- New CARTO module architecture: Sources and Layers replace the CartoLayer. Read more in the [Upgrade Guide](./upgrade-guide.md#deckglcarto).
+
+- Public preview for Boundary Sources (experimental): easily aggregate large data volumes aggregated into common or custom geographic boundaries, such as postal codes. Learn more about Boundaries in the CARTO [documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+
+
+### Known Limitations
+
+The following issues are known and will be resolved in a v9.0 patch release:
+
+- `@deck.gl/aggregation-layers` (`ScreenGridLayer`, ...) performance - aggregation layers temporarily use CPU fallbacks which are less performant.
+
+## deck.gl v8.9
+
+Release date: March 9, 2023
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/collision-filter-extension.gif?raw=true" />
+        <p><i>CollisionFilterExtension</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/terrain-extension.gif?raw=true" />
+        <p><i>TerrainExtension</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/wms-layer.gif?raw=true" />
+        <p><i>WMSLayer</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Extensions
+
+Two new extensions are added in the 8.9 release: `CollisionFilterExtension` and `TerrainExtension`.
+
+The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame. Visit the [documentation](./api-reference/extensions/collision-filter-extension.md) and [example](https://deck.gl/examples/text-layer) to get started.
+
+The experimental `TerrainExtension` renders otherwise 2D data along a 3D surface. For example, a GeoJSON of city streets and building footprints can be overlaid on top of a [elevation model](https://en.wikipedia.org/wiki/Digital_elevation_model). It is useful when viewing a mixture of 2D and 3D data sources. The re-positioning of geometries is performed on the GPU. Visit the [documentation](./api-reference/extensions/terrain-extension.md) and [example](https://deck.gl/examples/terrain-extension) to get started.
+
+In addition, `MaskExtension` now supports `FirstPersonView`, and supports a new `maskInverted` prop.
+
+### WMSLayer
+
+The new experimental [`WMSLayer`](./api-reference/geo-layers/wms-layer.md) simplifies connection to WMS and similar map image services. In contrast to the `TileLayer` which loads many small image tiles, the `WMSLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+
+### Other Enhancements
+
+- [MapLibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deckgl.md#map).
+- `BitmapLayer` now mixes translucent pixels correctly (Note: [breaking change](./upgrade-guide.md))
+- `TextLayer` handles text outlines better in sdf mode. Outlines are no longer clipped and responds to `outlineWidth` as expected.
+- `TextLayer`'s `maxWidth` is changed to use a more intuitive unit. See upgrade guide for details.
+- `IconLayer` when used with auto packing preserves the aspect ratio of icons.
+- `SolidPolygonLayer` and `GeoJsonLayer` add a `_full3d` prop that tesselate 3D polygons better.
+- `@deck.gl/mapbox` now synchronizes camera better when the base map contains terrain.
+- TypeScript: data prop now correctly typed for each layer class
+
+### Code base upgrades
+
+In preparation for the 8.9 release, we made major upgrades to the tools that support the development and publishing of deck.gl. This allows us to iterate faster and makes it easier for first-time users to get started.
+
+- All examples are bootstrapped with [vite](https://vitejs.dev)
+- Pre-bundled scripts built with [esbuild](https://esbuild.github.io)
+- Website rewritten using [Docusaurus](https://docusaurus.io)
+- Tests are run with `tsnode` with ESM modules for node, and `vite` for the browser
+
+### pydeck 0.8
+
+- Compatibility with JupyterLab 3 and Google Colab
+- Support `types.Function` in [JSON Converter](https://deck.gl/docs/api-reference/json/conversion-reference), `configuration` and `default_layer_attributes` in settings
+- pydeck-carto: support `CartoLayer`, styling functions (`color_bins`, `color_categories`, `color continuous`), and authentication using [carto-auth](https://github.com/CartoDB/carto-auth)
+
 ## deck.gl v8.8
 
 Release date: June, 2022
@@ -10,29 +289,29 @@ Release date: June, 2022
 
 Official typings are now available in deck.gl for public preview. It was a tremendous effort converting the deck.gl code base into TypeScript. We did it not just for TypeScript users to easily consume this library, but also for the overall robustness and maintainability of our own code base.
 
-In v8.x, the types will not be exposed by default to prevent any typing errors from breaking existing TypeScript applications. You can opt in to using the typed version by switching your import statements to the `@deck.gl/*/typed` endpoints. Visit [getting started with TypeScript](/docs/get-started/using-with-typescript.md) to find out more.
+In v8.x, the types will not be exposed by default to prevent any typing errors from breaking existing TypeScript applications. You can opt in to using the typed version by switching your import statements to the `@deck.gl/*/typed` endpoints. Visit [getting started with TypeScript](./get-started/using-with-typescript.md) to find out more.
 
 ### Custom Indexing System in TileLayer
 
-The [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
+The [TileLayer](./api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
 
-Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](/docs/api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
+Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](./api-reference/geo-layers/tile-layer.md#tileset2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
 
-Due to this generalization, there is a breaking change affecting indexing properties (`x`, `y` and `z`) in the `TileLayer` API. See [upgrade guide](/docs/upgrade-guide.md) for details.
+Due to this generalization, there is a breaking change affecting indexing properties (`x`, `y` and `z`) in the `TileLayer` API. See [upgrade guide](./upgrade-guide.md) for details.
 
 ### MapboxOverlay
 
-The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](/docs/api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](/docs/get-started/using-with-map.md) rendering modes. See the new [get started example](/examples/get-started/pure-js/mapbox/).
+The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/).
 
 If you are using react-map-gl v7, this is the only solution to use deck.gl with React map control components (`Navigationcontrol`, `GeolocateControl`, etc.). See [example](https://github.com/visgl/react-map-gl/blob/master/examples/deckgl-overlay/src/app.tsx).
 
 ### `@deck.gl/carto`
 
-CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin). More info [here](/docs/api-reference/carto/carto-layer#spatial-index-data).
+CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin). More info [here](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes).
 
 ### Enhancements
 
-- Views now accept a [padding](/docs/api-reference/core/view.md#padding) option to offset the focal point.
+- Views now accept a [padding](./api-reference/core/view.md#padding) option to offset the focal point.
 - Improved performance when there are many invisible layers
 - Improved picking performance when using the `TileLayer`
 
@@ -42,13 +321,13 @@ Release date: February 25, 2022
 
 ### MaskExtension
 
-The new [MaskExtension](/docs/api-reference/extensions/mask-extension) allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area.
+The new [MaskExtension](./api-reference/extensions/mask-extension) allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area.
 
 ![Masking Manhattan buildings](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/whats-new/mask-extension.gif)
 
 ### QuadkeyLayer
 
-The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
+The new [QuadkeyLayer](./api-reference/geo-layers/quadkey-layer) renders filled and/or stroked polygons, with geometry automatically calculated based on a quadkey (geospatial index).
 
 ### Enhancements
 
@@ -64,7 +343,7 @@ The new [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer) renders fil
 
 ### `@deck.gl/carto`
 
-- **fetchMap** - [fetchMap](/docs/api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](/docs/api-reference/carto/overview), streamlining the display of maps created using CARTO platform.
+- **fetchMap** - [fetchMap](./api-reference/carto/fetch-map) is added to the [CARTO deck.gl submodule](./api-reference/carto/overview), streamlining the display of maps created using CARTO platform.
 - **Support for large tables and Databricks**. See [CARTO documentation](https://docs.carto.com/deck-gl/getting-started/) for more details.
 
 ## deck.gl v8.6
@@ -75,7 +354,7 @@ Release date: October 11, 2021
 
 ![Interleaving deck.gl layers with Google Maps vector buildings](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/googlemaps-scenegraph.png?raw=true)
 
-The [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overlay.md) supports Google Maps' new [vector map](https://developers.google.com/maps/documentation/javascript/vector-map), providing the following advantages:
+The [GoogleMapsOverlay class](./api-reference/google-maps/google-maps-overlay.md) supports Google Maps' new [vector map](https://developers.google.com/maps/documentation/javascript/vector-map), providing the following advantages:
 
 * Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps.
 * Tilting and rotating the view is supported.
@@ -83,7 +362,7 @@ The [GoogleMapsOverlay class](/docs/api-reference/google-maps/google-maps-overla
 
 See blog posts from [Google Cloud](https://cloud.google.com/blog/products/maps-platform/richer-data-visualization-google-maps-platform-using-deckgl) and [our own](https://medium.com/vis-gl/deck-gl-v8-6-now-available-with-deeper-google-maps-support-b734719076a7) for the potentials of this feature.
 
-Visit the new [Google Maps integration example](/examples/google-maps) to get started.
+Visit the new [Google Maps integration example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) to get started.
 
 ### OrthographicView
 
@@ -94,15 +373,15 @@ It is now possible to independently control the zoom of the X and Y axes.
 
 ### MapView
 
-<table style="border: 0;" align="center">
+<table style={{border: 0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/2059298/129981707-46532b3b-6e84-4cc3-bec5-af083a71e5c7.gif" />
+        <img style={{maxHeight:200}} src="https://user-images.githubusercontent.com/2059298/129981707-46532b3b-6e84-4cc3-bec5-af083a71e5c7.gif" />
         <p><i>Meter sizes in 8.5</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/2059298/129981718-21ab67a0-31a5-4866-8469-f9acf37c983a.gif" />
+        <img style={{maxHeight:200}} src="https://user-images.githubusercontent.com/2059298/129981718-21ab67a0-31a5-4866-8469-f9acf37c983a.gif" />
         <p><i>Meter sizes in 8.6</i></p>
       </td>
     </tr>
@@ -110,7 +389,7 @@ It is now possible to independently control the zoom of the X and Y axes.
 </table>
 
 - Meter sizes are now correctly calculated based on the latitude of the point being drawn, whereas they previously were based on the center point of the viewport. This brings the view into full compliance with the Web Mercator projection.
-- A new unit enum `common` is added for scaling geometries without the distortion of the projection method. See updated documentation about the [unit system](/docs/developer-guide/coordinate-systems.md#dimensions).
+- A new unit enum `common` is added for scaling geometries without the distortion of the projection method. See updated documentation about the [unit system](./developer-guide/coordinate-systems.md#dimensions).
 - A new `projectionMatrix` option allows overriding of the matrix that would otherwise be created from the other view states.
 
 ### Layer Enhancements
@@ -128,19 +407,19 @@ It is now possible to independently control the zoom of the X and Y axes.
 Release date: July 26, 2021
 
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-layer-styling.gif?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-layer-styling.gif?raw=true" />
         <p><i>TextLayer background, border, padding and outline</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/geojson-point-type.png?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/geojson-point-type.png?raw=true" />
         <p><i>GeoJsonLayer pointType</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/i3s-picking.gif?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/i3s-picking.gif?raw=true" />
         <p><i>Tile3DLayer+I3S picking individual objects</i></p>
       </td>
     </tr>
@@ -175,7 +454,7 @@ new GeoJsonLayer({
 })
 ```
 
-For a full list of new props, visit the updated [documentation](/docs/api-reference/layers/geojson-layer.md).
+For a full list of new props, visit the updated [documentation](./api-reference/layers/geojson-layer.md).
 
 
 #### TextLayer
@@ -192,7 +471,7 @@ New props are added for more flexible styling of the texts:
 * `getBorderWidth`
 * `getBorderColor`
 
-See [documentation](/docs/api-reference/layers/text-layer.md) for details.
+See [documentation](./api-reference/layers/text-layer.md) for details.
 
 
 #### Tile3DLayer
@@ -242,8 +521,8 @@ The `DeckGL` React component is rewritten using functional component and hooks.
 ### @deck.gl/carto
 
 - Integration with **CARTO 3 platform**. With deck.gl and the CARTO 3 platform you can access directly your datasets and tilesets hosted in your current data warehouse (BigQuery, Snowflake, Redshift, Postgres). You don't need to move your data to CARTO plaform.
-- A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are migration guides for both: [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer) and [CartoBQTilerLayer](/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer).
-- New `getData` method in CARTO 3 [to support other deck.gl layers](/docs/api-reference/carto/overview.md#support-for-other-deck.gl-layers). 
+- A new `CartoLayer` is available to unify `CartoBQTilerLayer` and `CartoSQLLayer`. There are migration guides for both: [CartoSQLLayer](https://github.com/visgl/deck.gl/blob/8.5-release/docs/api-reference/carto/carto-sql-layer.md#migration-to-cartolayer#migration-to-cartolayer) and [CartoBQTilerLayer](https://github.com/visgl/deck.gl/blob/8.5-release/docs/api-reference/carto/carto-bqtiler-layer.md#migration-to-cartolayer#migration-to-cartolayer).
+- New `getData` method in CARTO 3 [to support other deck.gl layers](./api-reference/carto/overview.md#support-for-other-deckgl-layers). 
 
 ## deck.gl v8.4
 
@@ -253,7 +532,7 @@ Release date: Jan 31, 2021
 
 #### Improved experience on mobile devices
 
-All controllers now support smooth easing at the end of dragging and pinching. This can be turned on via the new [inertia](/docs/api-reference/core/controller.md#options) option:
+All controllers now support smooth easing at the end of dragging and pinching. This can be turned on via the new [inertia](./api-reference/core/controller.md#options) option:
 
 ```js
 controller: {inertia: true}
@@ -304,7 +583,7 @@ A new prop `binary` is added to the MVTLayer. If set to `true`, it removes the n
 ### Layer improvements
 
 - **All layers**
-  + Add a new `loaders` prop to support additional data formats. See the [Data Loading Guide](/docs/developer-guide/loading-data.md) for examples.
+  + Add a new `loaders` prop to support additional data formats. See the [Data Loading Guide](./developer-guide/loading-data.md) for examples.
   + Layers that use a texture (e.g. `BitmapLayer`, `IconLayer`, `SimpleMeshLayer`) now offer consistent support for a variety of input formats. Newly supported are plain object descriptors (e.g. `{data: <Uint8Array>, width, height}`) and `HTMLVideoElement` that continuously updates. A new prop `textureParameters` also allows easy customization of texture settings.
 - **HeatmapLayer** adds new prop `aggregation` which can be either `SUM` (default) or `MEAN`.
 - **BitmapLayer**
@@ -316,15 +595,15 @@ A new prop `binary` is added to the MVTLayer. If set to `true`, it removes the n
 - **OrthographicView** adds `flipY` option.
 - **ArcLayer** and **LineLayer** now render the shortest path with `wrapLongitude: true`.
 
-Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See [upgrade guide](/docs/upgrade-guide.md) for a list breaking changes in this release.
+Additionally, various layers received performance optimization, corrected lighting calculation, and API consistency improvements. See [upgrade guide](./upgrade-guide.md) for a list breaking changes in this release.
 
 ### Functions in declarative language
 
-[@@function](/docs/api-reference/json/conversion-reference.md#functions-and-using-function) prefix is included to interpret a string as a JavaScript function. 
+[@@function](./api-reference/json/conversion-reference.md#functions-and-using-function) prefix is included to interpret a string as a JavaScript function. 
 
 ### @deck.gl/carto
 
-Adds [helper functions](/docs/api-reference/carto/styles.md) to create data-driven map visualizations using [CARTOColors](https://carto.com/carto-colors/)
+Adds [helper functions](./api-reference/carto/styles.md) to create data-driven map visualizations using [CARTOColors](https://carto.com/carto-colors/)
 
 ## deck.gl v8.3
 
@@ -332,14 +611,14 @@ Release Date: Oct 12, 2020
 
 ### New module: @deck.gl/carto
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-01.gif?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-01.gif?raw=true" />
       </td>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-02.gif?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/carto-02.gif?raw=true" />
       </td>
     </tr>
   </tbody>
@@ -349,10 +628,10 @@ Integration with the powerful geospatial analytics platform [CARTO](https://cart
 
 This new modules makes it easy to visualize regular Tables and vector tilesets in CARTO. It offers two new layers:
 
-- [CartoSQLLayer](/docs/api-reference/carto/carto-sql-layer.md): a layer to visualize data hosted in your CARTO account and to apply custom SQL.
-- [CartoBQTilerLayer](/docs/api-reference/carto/carto-bqtiler-layer.md): a layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery).
+- [CartoSQLLayer](https://github.com/visgl/deck.gl/blob/8.3-release/docs/api-reference/carto/carto-sql-layer.md): a layer to visualize data hosted in your CARTO account and to apply custom SQL.
+- [CartoBQTilerLayer](https://github.com/visgl/deck.gl/blob/8.3-release/docs/api-reference/carto/carto-bqtiler-layer.md): a layer to visualize large datasets (millions or billions of rows) directly from [Google BigQuery](https://cloud.google.com/bigquery).
 
-This effort enables applications to leverage CARTO's smart back-end capabilities, dynamic queries and much more. Visit the module's [documentation](/docs/api-reference/carto/overview.md) to get started.
+This effort enables applications to leverage CARTO's smart back-end capabilities, dynamic queries and much more. Visit the module's [documentation](./api-reference/carto/overview.md) to get started.
 
 ### TileLayer
 
@@ -369,21 +648,21 @@ Layers with `pickable` disabled (the default) skip generating picking attributes
 
 If no layer is pickable, deck no longer creates the picking FrameBuffer to save memory.
 
-`Deck` also added some experimental [optimization options](/docs/developer-guide/tips-and-tricks.md#optimization-for-mobile) to allow more fine-grained control of memory usage on memory-restricted devices.
+`Deck` also added some experimental [optimization options](./developer-guide/tips-and-tricks.md#optimization-for-mobile) to allow more fine-grained control of memory usage on memory-restricted devices.
 
 ### pydeck 0.5
 
 pydeck 0.5 includes new event handlers — `on_hover`, `on_click`, `on_view_state_change`, and `on_resize` — which can be used to create rich interactive applications in Jupyter. This release works in sync with deck.gl 8.3.
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/pydeck-event-handling.gif?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/pydeck-event-handling.gif?raw=true" />
         <p><i>Event handling in pydeck</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/high-precision-dash.png?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/high-precision-dash.png?raw=true" />
         <p><i>highPrecisionDash in PathStyleExtension</i></p>
       </td>
     </tr>
@@ -401,19 +680,19 @@ pydeck 0.5 includes new event handlers — `on_hover`, `on_click`, `on_view_stat
 
 Release Date: June 28, 2020
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/2059298/84559353-a9d93600-acee-11ea-89ff-b404d798ba17.gif" />
+        <img style={{maxHeight:200}} src="https://user-images.githubusercontent.com/2059298/84559353-a9d93600-acee-11ea-89ff-b404d798ba17.gif" />
         <p><i>FillStyleExtension</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/4319728/85549259-183bc380-b620-11ea-83c8-8f4abec732f6.gif" />
+        <img style={{maxHeight:200}} src="https://user-images.githubusercontent.com/4319728/85549259-183bc380-b620-11ea-83c8-8f4abec732f6.gif" />
         <p><i>MVTLayer highlight - v8.1</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://user-images.githubusercontent.com/4319728/85549267-1a9e1d80-b620-11ea-9aa4-3ec108d08db7.gif" />
+        <img style={{maxHeight:200}} src="https://user-images.githubusercontent.com/4319728/85549267-1a9e1d80-b620-11ea-9aa4-3ec108d08db7.gif" />
         <p><i>MVTLayer highlight - v8.2</i></p>
       </td>
     </tr>
@@ -432,18 +711,18 @@ Many new features are added to `TileLayer`, `MVTLayer` and `TerrainLayer` to imp
 - Fine-tune the tiles displayed by the `TileLayer` with the new `zRange` prop when dealing with 3D content. This is used by the `TerrainLayer` when viewing high-altitude regions.
 - `TileLayer`'s `tileSize` prop can be used to fine-tune the zoom level at which tiles are loaded.
 - `TileLayer`'s `renderSubLayers` is now always called after the tile layer is loaded, i.e. `props.data` is never a Promise.
-- `TileLayer` can now be used in multi-view applications, as long as each `TileLayer` instance is rendered into one view. See [documentation](/docs/developer-guide/views.md#rendering-layers-in-multiple-views) for an example.
+- `TileLayer` can now be used in multi-view applications, as long as each `TileLayer` instance is rendered into one view. See [documentation](./developer-guide/views.md#rendering-layers-in-multiple-views) for an example.
 
 
 ### GlobeView
 
-<img style="max-height:400px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/globe.gif" />
+<img style={{maxHeight:400}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/globe.gif" />
 
 For geospatial data, a new projection mode -- globe projection is now available alongside Web Mercator projection. In this release, the feature is exposed via the experimental `GlobeView` class.
 
 Currently there is no base map provider under this view. You may use the `BitmapLayer` or `GeoJsonLayer` to render a backdrop for your data.
 
-Before getting started with [this example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/globe), make sure you check out the [docs](/docs/api-reference/core/globe-view.md) for the limitations of the current implementation.
+Before getting started with [this example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/globe), make sure you check out the [docs](./api-reference/core/globe-view.md) for the limitations of the current implementation.
 
 
 ### Antimeridian Handling
@@ -471,19 +750,19 @@ Release Date: Mar 17, 2020
 
 ### Growing Tile Solutions
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-2d.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-2d.gif" />
         <p><i>Non-geospatial TileLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mvt-layer.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mvt-layer.jpg" />
         <p><i>MVTLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/terrain.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/terrain.jpg" />
         <p><i>TerrainLayer</i></p>
       </td>
     </tr>
@@ -495,7 +774,7 @@ The `@deck.gl/geo-layers` module added many new features to address popular tile
 
 #### TileLayer
 
-Multiple bugs have been fixed in the [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) regarding data fetching and tree traversal.
+Multiple bugs have been fixed in the [TileLayer](./api-reference/geo-layers/tile-layer.md) regarding data fetching and tree traversal.
 
 The layer now supports non-geospatial views. Check out this [example](https://github.com/visgl/deck.gl/tree/master/examples/website/image-tile) by [@ilan-gold](https://github.com/ilan-gold) that renders a 576 Megapixel image of the moon.
 
@@ -507,26 +786,26 @@ New props are added to better control the layer's behavior:
 
 #### MVTTileLayer
 
-Based on the `TileLayer`, [MVTTileLayer](/docs/api-reference/geo-layers/mvt-layer.md) loads and renders tiles in the [Mapbox Vector Tiles specification](https://github.com/mapbox/vector-tile-spec). This new layer make it easier to leverage the many great [open source tools](https://github.com/mapbox/awesome-vector-tiles) in use with deck.gl.
+Based on the `TileLayer`, [MVTTileLayer](./api-reference/geo-layers/mvt-layer.md) loads and renders tiles in the [Mapbox Vector Tiles specification](https://github.com/mapbox/vector-tile-spec). This new layer make it easier to leverage the many great [open source tools](https://github.com/mapbox/awesome-vector-tiles) in use with deck.gl.
 
 This effort is led by contributors from [CARTO](https://carto.com/).
 
 #### TerrainLayer
 
-[TerrainLayer](/docs/api-reference/geo-layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/master/examples/website/terrain).
+[TerrainLayer](./api-reference/geo-layers/terrain-layer.md) loads color-encoded heightmap and reconstructs 3D mesh surfaces. Check out our [example](https://github.com/visgl/deck.gl/tree/master/examples/website/terrain).
 
 ### ESRI + deck.gl
 
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/arcgis.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/arcgis.jpg" />
         <p><i>deck.gl + ArcGIS basemap</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/esri-i3s.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/esri-i3s.gif" />
         <p><i>Tile3DLayer + I3S</i></p>
       </td>
     </tr>
@@ -537,11 +816,11 @@ In collaboration with GIS industry leader [ESRI](https://www.esri.com), we are r
 
 #### @deck.gl/arcgis
 
-You can now use ArcGIS basemaps with deck.gl. This new module lets apps render deck.gl layers into the WebGL context of [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/). 3D scene view support is experimental in this initial release. To get started, check out [the example](https://deck.gl/gallery/boiler-plate-arcgis) and [the documentation](/docs/api-reference/arcgis/overview.md).
+You can now use ArcGIS basemaps with deck.gl. This new module lets apps render deck.gl layers into the WebGL context of [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/). 3D scene view support is experimental in this initial release. To get started, check out [the example](https://deck.gl/gallery/boiler-plate-arcgis) and [the documentation](./api-reference/arcgis/overview.md).
 
 #### Tile3DLayer and I3S format
 
-`Tile3DLayer` is adding preliminary support for the [OGC Indexed 3d Scene (I3S)](https://docs.opengeospatial.org/cs/17-014r5/17-014r5.html) format. See [documentation](/docs/api-reference/geo-layers/tile-3d-layer.md) for details.
+`Tile3DLayer` is adding preliminary support for the [OGC Indexed 3d Scene (I3S)](https://docs.opengeospatial.org/cs/17-014r5/17-014r5.html) format. See [documentation](./api-reference/geo-layers/tile-3d-layer.md) for details.
 
 ### World Repeating in Web Mercator Maps
 
@@ -549,13 +828,13 @@ You can now use ArcGIS basemaps with deck.gl. This new module lets apps render d
 
 The `MapView` now supports repeating worlds at low zoom levels. For backward compatibility, this feature is opt-in. Apps may turn it on by setting `views: new MapView({repeat: true})` on `Deck` or `DeckGL`.
 
-Repeating is always on when using [MapboxLayer](/docs/api-reference/mapbox/mapbox-layer.md) and [GoogleMapsOverlay](/docs/api-reference/google-maps/google-maps-overlay.md).
+Repeating is always on when using [MapboxLayer](./api-reference/mapbox/mapbox-layer.md) and [GoogleMapsOverlay](./api-reference/google-maps/google-maps-overlay.md).
 
 As a result, `GoogleMapsOverlay` now supports all Google Maps zoom levels.
 
 ### pydeck 0.3.0
 
-pydeck now uses the [binary attribute API](/docs/developer-guide/performance.md#supply-attributes-directly) to communicate between Python and JavaScript. This greatly increases the speed and the amount of data that it can render.
+pydeck now uses the [binary attribute API](./developer-guide/performance.md#supply-attributes-directly) to communicate between Python and JavaScript. This greatly increases the speed and the amount of data that it can render.
 
 pydeck now supports external layer modules via a new `custom_libraries` setting.
 
@@ -567,7 +846,7 @@ pydeck now supports external layer modules via a new `custom_libraries` setting.
 - `PathLayer`'s joint calculation is improved when using with short line segments and extreme angles.
 - `BrushingExtension` supports a new `brushingTarget` mode `source_target`.
 - `PathStyleExtension` now has a new mode `offset`. This feature can be used for positioning polygon strokes inside/outside, or rendering overlapped paths in opposite directions.
-- `TextLayer` now supports [binary attributes](/docs/api-reference/layers/text-layer.md#use-binary-attributes).
+- `TextLayer` now supports [binary attributes](./api-reference/layers/text-layer.md#use-binary-attributes).
 
 
 ## deck.gl v8.0
@@ -615,11 +894,11 @@ new deck.ScatterplotLayer({
 })
 ```
 
-This use case is discussed in detail in the [performance developer guide](/docs/developer-guide/performance.md#supply-attributes-directly).
+This use case is discussed in detail in the [performance developer guide](./developer-guide/performance.md#supply-attributes-directly).
 
 ### GPU Data Filter in Aggregation Layers
 
-[DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md) now supports the following layers from `@deck.gl/aggregation-layers`:
+[DataFilterExtension](./api-reference/extensions/data-filter-extension.md) now supports the following layers from `@deck.gl/aggregation-layers`:
 
 - `HeatMapLayer`
 - `GPUGridLayer`
@@ -637,12 +916,12 @@ This use case is discussed in detail in the [performance developer guide](/docs/
 
 ### Other New Features and Improvements
 
-- Render to a frame buffer by specifying the `_framebuffer` prop of [Deck](/docs/api-reference/core/deck.md).
+- Render to a frame buffer by specifying the `_framebuffer` prop of [Deck](./api-reference/core/deck.md).
 - Pick a 3d surface point in the scene by passing `unproject3D: true` to `deck.pickObject` or `deck.pickMultipleObjects`.
-- [ArcLayer](/docs/api-reference/layers/arc-layer.md) supports drawing arcs between two 3D positions.
-- [TextLayer](/docs/api-reference/layers/text-layer.md) adds a new prop `backgroundColor`. Picking works when the cursor is over an empty pixel in the text.
-- [TextLayer](/docs/api-reference/layers/text-layer.md) adds `maxWidth` and `wordBreak` props to support text wrapping.
-- [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) adds props `sizeMinPixels` and `sizeMaxPixels`.
+- [ArcLayer](./api-reference/layers/arc-layer.md) supports drawing arcs between two 3D positions.
+- [TextLayer](./api-reference/layers/text-layer.md) adds a new prop `backgroundColor`. Picking works when the cursor is over an empty pixel in the text.
+- [TextLayer](./api-reference/layers/text-layer.md) adds `maxWidth` and `wordBreak` props to support text wrapping.
+- [ScenegraphLayer](./api-reference/mesh-layers/scenegraph-layer.md) adds props `sizeMinPixels` and `sizeMaxPixels`.
 - 64-bit positions are now 3D instead of 2D. This improves render precision when using `OrbitView`.
 - `FirstPersonView` now supports pitch; controller works more intuitively; graduates from experimental status.
 - `FlyToInterpolator` now supports `duration: 'auto'`.
@@ -652,19 +931,19 @@ This use case is discussed in detail in the [performance developer guide](/docs/
 
 Release Date: Sep 26, 2019
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-3d-layer.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-3d-layer.gif" />
         <p><i>Tile3DLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/jupyter-integration.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/jupyter-integration.gif" />
         <p><i>Jupyter Widget</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/spring-transition.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/spring-transition.gif" />
         <p><i>Spring Transition</i></p>
       </td>
     </tr>
@@ -676,7 +955,7 @@ Release Date: Sep 26, 2019
 
 deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the OGC [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to to render city-scale (billions of points/features) and country-scale (trillions of features) datasets in the browser.
 
-In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo]() for yourself.
+In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo](https://deck.gl/examples/tile-3d-layer) for yourself.
 
 ### pydeck: deck.gl for Python and Jupyter Notebooks
 
@@ -691,7 +970,7 @@ pip install pydeck
 ### Transition System Improvements
 
 - Generic prop transition: the layer `transitions` prop now supports many more props than just accessors! Any prop of type `number` or `array` can now also use the built-in transition system.
-- New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/core/layer.md#transitions) for details.
+- New transition type: spring-based transition support is added to the transition settings. See [documentation](./api-reference/core/layer.md#transitions) for details.
 
 ### @deck.gl/json
 
@@ -707,7 +986,7 @@ For custom layer authors: the attribute system is simplified. One may now use `t
 
 ### Auto Tooltip
 
-A new prop [getTooltip](/docs/api-reference/core/deck.md#gettooltip) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
+A new prop [getTooltip](./api-reference/core/deck.md#gettooltip) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
 
 ### Other Features/Improvements
 
@@ -724,28 +1003,28 @@ Release Date: Aug 10, 2019
 
 ### Layer Extensions
 
-A new module [`@deck.gl/extensions`](/docs/api-reference/extensions/overview.md) has joined the deck.gl family.
+A new module [`@deck.gl/extensions`](./api-reference/extensions/overview.md) has joined the deck.gl family.
 Layer extensions are bonus features that you can optionally add to the core deck.gl layers. As a start, this module offers the following extensions:
 
-- [BrushingExtension](/docs/api-reference/extensions/brushing-extension.md): GPU-based data brushing, see "examples" section of this website
-- [DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md): GPU-based data filtering, see "examples" section of this website
-- [Fp64Extension](/docs/api-reference/extensions/fp64-extension.md): See [upgrade guide](/docs/upgrade-guide.md) if you are using the deprecated `fp64` mode.
+- [BrushingExtension](./api-reference/extensions/brushing-extension.md): GPU-based data brushing, see "examples" section of this website
+- [DataFilterExtension](./api-reference/extensions/data-filter-extension.md): GPU-based data filtering, see "examples" section of this website
+- [Fp64Extension](./api-reference/extensions/fp64-extension.md): See [upgrade guide](./upgrade-guide.md) if you are using the deprecated `fp64` mode.
 
-For instructions on authoring your own layer extensions, visit [developer guide](/docs/developer-guide/custom-layers/layer-extensions.md).
+For instructions on authoring your own layer extensions, visit [developer guide](./developer-guide/custom-layers/layer-extensions.md).
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/heatmap-layer.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/heatmap-layer.gif" />
         <p><i>HeatmapLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/shadow-nyc.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/shadow-nyc.jpg" />
         <p><i>GeoJsonLayer with shadow</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/shadow-uk.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/shadow-uk.jpg" />
         <p><i>HexagonLayer with shadow</i></p>
       </td>
     </tr>
@@ -758,30 +1037,30 @@ The ` @deck.gl/aggregation-layers` module now offers `HeatmapLayer` as an experi
 
 ### Shadows in LightingEffect
 
-As an experimental feature, the [LightingEffect](/docs/api-reference/core/lighting-effect.md) can now render shadows from up to two directional light sources. To enable shadows, set `_shadow: true` when constructing a
-[DirectionalLight](/docs/api-reference/core/directional-light.md) or [SunLight](/docs/api-reference/core/sun-light.md).
+As an experimental feature, the [LightingEffect](./api-reference/core/lighting-effect.md) can now render shadows from up to two directional light sources. To enable shadows, set `_shadow: true` when constructing a
+[DirectionalLight](./api-reference/core/directional-light.md) or [SunLight](./api-reference/core/sun-light.md).
 
 ### New Ways to Supply and Update Layer Data
 
 #### Streaming Data Support
 
 Layers now have built-in streaming support. The `data` prop now accepts an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object. As new batches of data are resolved, the layer is updated incrementally. This eliminates the need to manually merge chunks of data or manage multiple layer instances.
-See details in the [data prop](/docs/api-reference/core/layer.md#basic-properties) documentation and the updated [performance optimization](/docs/developer-guide/performance.md) examples.
+See details in the [data prop](./api-reference/core/layer.md#basic-properties) documentation and the updated [performance optimization](./developer-guide/performance.md) examples.
 
 #### Partial Data Update
 
-By default, when the `data` prop value of a layer changes shallowly, all of its attributes are recalculated and re-uploaded to the GPU. You may now compare the old and new data arrays and only update the range of elements that have actually changed. This can lead to significant performance improvement if a few rows in a large data table need to change frequently. See the [_dataDiff prop](/docs/api-reference/core/layer.md#data-properties) documentation.
+By default, when the `data` prop value of a layer changes shallowly, all of its attributes are recalculated and re-uploaded to the GPU. You may now compare the old and new data arrays and only update the range of elements that have actually changed. This can lead to significant performance improvement if a few rows in a large data table need to change frequently. See the [_dataDiff prop](./api-reference/core/layer.md#data-properties) documentation.
 
 #### Using External Buffers
 
-It is now easier to build attributes as typed arrays outside of a layer, e.g. in a web worker or on the server. See the "Supplying attributes directly" section in [performance optimization](/docs/developer-guide/performance.md).
+It is now easier to build attributes as typed arrays outside of a layer, e.g. in a web worker or on the server. See the "Supplying attributes directly" section in [performance optimization](./developer-guide/performance.md).
 
 ### Other Layer Features and Optimizations
 
-- [BitmapLayer](/docs/api-reference/layers/bitmap-layer.md)'s `image` prop now accepts a `HTMLVideoElement`.
-- [TextLayer](/docs/api-reference/layers/text-layer.md) now supports line breaks in the text string. A new prop `lineHeight` is added.
+- [BitmapLayer](./api-reference/layers/bitmap-layer.md)'s `image` prop now accepts a `HTMLVideoElement`.
+- [TextLayer](./api-reference/layers/text-layer.md) now supports line breaks in the text string. A new prop `lineHeight` is added.
 - Layer matching performance is improved. This affects applications with a large number of layers.
-- [HeatmapLayer](/docs/api-reference/aggregation-layers/heatmap-layer.md) now supports WebGL1.
+- [HeatmapLayer](./api-reference/aggregation-layers/heatmap-layer.md) now supports WebGL1.
 
 
 ## deck.gl v7.1
@@ -790,27 +1069,27 @@ Release Date: 2019
 
 ### Post-processing Effects
 
-A new [PostProcessEffect](/docs/api-reference/core/post-process-effect.md) class, working with ` @luma.gl/effects` module,  offers screen-space post-processing effects such as blur, noise, halftone, ink, etc.
+A new [PostProcessEffect](./api-reference/core/post-process-effect.md) class, working with ` @luma.gl/effects` module,  offers screen-space post-processing effects such as blur, noise, halftone, ink, etc.
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/noise.jpg" />
+        <img style={{maxHeight:240}} src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/noise.jpg" />
         <p><i>noise effect</i></p>
       </td>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/colorhalftone.gif" />
+        <img style={{maxHeight:240}} src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/colorhalftone.gif" />
         <p><i>colorHalftone effect</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/tiltshift.jpg" />
+        <img style={{maxHeight:240}} src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/tiltshift.jpg" />
         <p><i>tiltShift effect</i></p>
       </td>
       <td>
-        <img style="max-height:240px" src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/zoomblur.jpg" />
+        <img style={{maxHeight:240}} src="https://raw.github.com/visgl/deck.gl-data/master/images/samples/post-processing/zoomblur.jpg" />
         <p><i>zoomBlur effect</i></p>
       </td>
     </tr>
@@ -821,15 +1100,15 @@ A new [PostProcessEffect](/docs/api-reference/core/post-process-effect.md) class
 
 #### GridLayer
 
-`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md). Two new layers [GPUGridLayer](/docs/api-reference/aggregation-layers/gpu-grid-layer.md) and [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) are also offered, which perform aggregation on CPU and GPU respectively.
+`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](./api-reference/aggregation-layers/grid-layer.md). Two new layers GPUGridLayer and CPUGridLayer are also offered, which perform aggregation on CPU and GPU respectively.
 
 The following table compares the performance between CPU and GPU aggregations using random data points:
 
 | #points | CPU #iternations/sec | GPU #iterations/sec | Notes |
 | ---- | --- | --- | --- |
-| 25K | 535 | 359 | GPU is <b style="color:red">33%</b> slower |
-| 100K | 119 | 437 | GPU is <b style="color:green">267%</b> faster |
-| 1M | 12.7 | 158 | GPU is <b style="color:green">1144%</b> faster |
+| 25K | 535 | 359 | GPU is <b style={{color:'red'}}>33%</b> slower |
+| 100K | 119 | 437 | GPU is <b style={{color:'green'}}>267%</b> faster |
+| 1M | 12.7 | 158 | GPU is <b style={{color:'green'}}>1144%</b> faster |
 
 *Numbers are collected on a 2018 15-inch Macbook Pro (CPU: 2.6 GHz Intel Core i7 and GPU: Radeon Pro 560X 4 GB)*
 
@@ -864,7 +1143,7 @@ For React users, it is now easy to use [react-map-gl](https://visgl.github.io/re
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 <DeckGL ... ContextProvider={MapContext.Provider}>
@@ -876,7 +1155,7 @@ import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 ### Performance Metrics
 
-- Added a `metrics` property to `Deck` instances that tracks performance statistics like fps, CPU/GPU render time and memory usage. See [Deck](/docs/api-reference/core/deck.md) class documentation for details.
+- Added a `metrics` property to `Deck` instances that tracks performance statistics like fps, CPU/GPU render time and memory usage. See [Deck](./api-reference/core/deck.md) class documentation for details.
 
 
 ## deck.gl v7.0
@@ -885,47 +1164,47 @@ Release Date: April 19, 2019
 
 ### New Layer Catalog
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/bitmap-layer.png" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/bitmap-layer.png" />
         <p><i>BitmapLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/column-layer.png" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/column-layer.png" />
         <p><i>ColumnLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-layer.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/tile-layer.gif" />
         <p><i>TileLayer</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/s2-layer.png" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/s2-layer.png" />
         <p><i>S2Layer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/h3-layer.png" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/h3-layer.png" />
         <p><i>H3HexagonLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/h3-cluster-layer.png" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/h3-cluster-layer.png" />
         <p><i>H3ClusterLayer</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/trips-layer.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/trips-layer.gif" />
         <p><i>TripsLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
         <p><i>ScenegraphLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/great-circle-layer.png" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/great-circle-layer.png" />
         <p><i>GreatCircleLayer</i></p>
       </td>
     </tr>
@@ -935,81 +1214,81 @@ Release Date: April 19, 2019
 As the number of deck.gl layers grow, we are splitting existing and new layers into multiple submodules for better dependency management. These new layer modules are:
 
 * ` @deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
-  - [ArcLayer](/docs/api-reference/layers/arc-layer.md)
-  - [BitmapLayer](/docs/api-reference/layers/bitmap-layer.md) **<sup>New</sup>**
-  - [ColumnLayer](/docs/api-reference/layers/column-layer.md) **<sup>New</sup>**
-  - [GeoJsonLayer](/docs/api-reference/layers/geojson-layer.md)
-  - [GridCellLayer](/docs/api-reference/layers/grid-cell-layer.md)
-  - [IconLayer](/docs/api-reference/layers/icon-layer.md)
-  - [LineLayer](/docs/api-reference/layers/line-layer.md)
-  - [PathLayer](/docs/api-reference/layers/path-layer.md)
-  - [PointCloudLayer](/docs/api-reference/layers/point-cloud-layer.md)
-  - [PolygonLayer](/docs/api-reference/layers/polygon-layer.md)
-  - [ScatterplotLayer](/docs/api-reference/layers/scatterplot-layer.md)
-  - [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md)
-  - [TextLayer](/docs/api-reference/layers/text-layer.md)
+  - [ArcLayer](./api-reference/layers/arc-layer.md)
+  - [BitmapLayer](./api-reference/layers/bitmap-layer.md) **<sup>New</sup>**
+  - [ColumnLayer](./api-reference/layers/column-layer.md) **<sup>New</sup>**
+  - [GeoJsonLayer](./api-reference/layers/geojson-layer.md)
+  - [GridCellLayer](./api-reference/layers/grid-cell-layer.md)
+  - [IconLayer](./api-reference/layers/icon-layer.md)
+  - [LineLayer](./api-reference/layers/line-layer.md)
+  - [PathLayer](./api-reference/layers/path-layer.md)
+  - [PointCloudLayer](./api-reference/layers/point-cloud-layer.md)
+  - [PolygonLayer](./api-reference/layers/polygon-layer.md)
+  - [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md)
+  - [SolidPolygonLayer](./api-reference/layers/solid-polygon-layer.md)
+  - [TextLayer](./api-reference/layers/text-layer.md)
 * ` @deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
-  - [ContourLayer](/docs/api-reference/aggregation-layers/contour-layer.md)
-  - [GPUGridLayer](/docs/api-reference/aggregation-layers/gpu-grid-layer.md)
-  - [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md)
-  - [HexagonLayer](/docs/api-reference/aggregation-layers/hexagon-layer.md)
-  - [ScreenGridLayer](/docs/api-reference/aggregation-layers/screen-grid-layer.md)
+  - [ContourLayer](./api-reference/aggregation-layers/contour-layer.md)
+  - GPUGridLayer
+  - [GridLayer](./api-reference/aggregation-layers/grid-layer.md)
+  - [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md)
+  - [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md)
 * ` @deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
-  - [GreatCircleLayer](/docs/api-reference/geo-layers/great-circle-layer.md) **<sup>New</sup>**
-  - [H3ClusterLayer](/docs/api-reference/geo-layers/h3-cluster-layer.md) **<sup>New</sup>**
-  - [H3HexagonLayer](/docs/api-reference/geo-layers/h3-hexagon-layer.md) **<sup>New</sup>**
-  - [S2Layer](/docs/api-reference/geo-layers/s2-layer.md) **<sup>New</sup>**
-  - [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) **<sup>New</sup>**
-  - [TripsLayer](/docs/api-reference/geo-layers/trips-layer.md) **<sup>New</sup>**
+  - [GreatCircleLayer](./api-reference/geo-layers/great-circle-layer.md) **<sup>New</sup>**
+  - [H3ClusterLayer](./api-reference/geo-layers/h3-cluster-layer.md) **<sup>New</sup>**
+  - [H3HexagonLayer](./api-reference/geo-layers/h3-hexagon-layer.md) **<sup>New</sup>**
+  - [S2Layer](./api-reference/geo-layers/s2-layer.md) **<sup>New</sup>**
+  - [TileLayer](./api-reference/geo-layers/tile-layer.md) **<sup>New</sup>**
+  - [TripsLayer](./api-reference/geo-layers/trips-layer.md) **<sup>New</sup>**
 * ` @deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
-  - [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) **<sup>New</sup>**
-  - [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) **<sup>New</sup>**
+  - [SimpleMeshLayer](./api-reference/mesh-layers/simple-mesh-layer.md) **<sup>New</sup>**
+  - [ScenegraphLayer](./api-reference/mesh-layers/scenegraph-layer.md) **<sup>New</sup>**
 
 ### glTF Support and Loaders.gl
 
 <img height="150" src="https://raw.github.com/visgl/deck.gl-data/master/images/branding/gltf.png" />
 
-The new [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
+The new [ScenegraphLayer](./api-reference/mesh-layers/scenegraph-layer.md) and [SimpleMeshLayer](./api-reference/mesh-layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
 We are releasing [loaders.gl](https://loaders.gl/) as a major new companion framework to deck.gl and luma.gl. Loaders.gl provides a suite of 3D file format loaders.  See [What's New in luma.gl v7.0](https://github.com/visgl/luma.gl/blob/master/docs/whats-new.md) for more details.
 
 ### New Effects System
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/ambient-light.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/ambient-light.gif" />
         <p><i>Ambient Light</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/point-light.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/point-light.gif" />
         <p><i>Point Light</i></p>
       </td>
     </tr>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/directional-light.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/directional-light.gif" />
         <p><i>Directional Light</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/camera-light.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/camera-light.gif" />
         <p><i>Camera Light</i></p>
       </td>
     </tr>
   </tbody>
 </table>
 
-A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](/docs/api-reference/core/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers. See [Using Lighting](/docs/developer-guide/using-lighting.md) for details.
+A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](./api-reference/core/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers. See [Using Lighting](./developer-guide/using-effects.md#lighting) for details.
 ### Layer API
 
-* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](/docs/developer-guide/performance.md#on-using-binary-data).
+* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](./developer-guide/performance.md#use-binary-data).
 * **Size units**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
 * **Billboard**: Prior this v7.0, `IconLayer` and `TextLayer` are rendered as billboards (i.e. always facing the camera). A prop `billboard` is added to these layers so that you can place icons and texts relative to the world.
 
 ### Google Maps Integration
 
-Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView). See module documentation page for a full list of supported features.
+Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.gl/google-maps](./api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView). See module documentation page for a full list of supported features.
 
 <img height="300" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg" />
 <p><i>GoogleMapsOverlay</i></p>
@@ -1017,28 +1296,28 @@ Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.
 ### Improved Test Utilities
 
 The ` @deck.gl/test-utils` module is revamped with two new exports:
-* `generateLayerTests` - automatically create test cases for use with [`testLayer`](/docs/api-reference/test-utils/test-layer.md) to test layer conformance.
+* `generateLayerTests` - automatically create test cases for use with [`testLayer`](./api-reference/test-utils/test-layer.md) to test layer conformance.
 * `SnapshotTestRunner` - automated integration test for WebGL. Renders deck.gl layers, takes screenshot and compare with golden images in headless Chromium.
 
-Read more in [Developer Guide: Testing](/docs/developer-guide/testing.md).
+Read more in [Developer Guide: Testing](./developer-guide/testing.md).
 
 ## deck.gl v6.4
 
 Release Date: Jan 29, 2019
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-sdf.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-sdf.gif" />
         <p><i>SDF font in TextLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-scatterplot.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-scatterplot.jpg" />
         <p><i>Stroke and fill in ScatterplotLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-isoband.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/deck64-isoband.jpg" />
         <p><i>Isoband in ContourLayer</i></p>
       </td>
     </tr>
@@ -1061,7 +1340,7 @@ See each layer's documentation for full API changes.
 
 It is now possible to fine-tune sublayer appearances by passing a new experimental prop `_subLayerProps` to a composite layer. For example, in a `GeoJsonLayer`, one may wish to make only the point features interactive, or replace the circles with icons.
 
-This offers a light alternative to overriding composite layer behaviors without creating a custom class. See [CompositeLayer](/docs/api-reference/core/composite-layer.md) for details.
+This offers a light alternative to overriding composite layer behaviors without creating a custom class. See [CompositeLayer](./api-reference/core/composite-layer.md) for details.
 
 ## deck.gl v6.3
 
@@ -1069,7 +1348,7 @@ Release Date: Nov 19, 2018
 
 ### Prop Types System
 
-Layers can now supply rich definitions to their default props. This enables prop validation in debug mode and aggressively blocks unnecessary layer update to boost rendering performance. Complex composite layers such as the GeoJsonLayer can be up to 2x faster in certain React applications. See [upgrade guide](/docs/upgrade-guide.md) if you are an author of custom layers.
+Layers can now supply rich definitions to their default props. This enables prop validation in debug mode and aggressively blocks unnecessary layer update to boost rendering performance. Complex composite layers such as the GeoJsonLayer can be up to 2x faster in certain React applications. See [upgrade guide](./upgrade-guide.md) if you are an author of custom layers.
 
 ### New Interaction Callbacks
 
@@ -1084,15 +1363,15 @@ The experimental `GPUAggregator` class now supports Min/Max/Mean in addition to 
 
 Release Date: Oct 15, 2018
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/new-projection-mode.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/new-projection-mode.gif" />
         <p><i>32-bit High-Precision Projection</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
         <p><i>Mixing Mapbox and deck.gl Layers</i></p>
       </td>
     </tr>
@@ -1101,11 +1380,11 @@ Release Date: Oct 15, 2018
 
 ### Mapbox Custom Layer API
 
-A new experimental module ` @deck.gl/mapbox` makes deck.gl work with the custom layers API in the latest Mapbox release. Using this feature, mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc. For usage and limitations, see [module documentation](/docs/api-reference/mapbox/overview.md).
+A new experimental module ` @deck.gl/mapbox` makes deck.gl work with the custom layers API in the latest Mapbox release. Using this feature, mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc. For usage and limitations, see [module documentation](./api-reference/mapbox/overview.md).
 
 ### 32-bit High-Precision Projection
 
-First introduced in v6.1 as `COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL`, the new projection system offers high-precision results similar to that of the old `fp64` mode without the compatibility issues or performance hit of running the much heavier 64-bit shader. Starting v6.2, this coordinate system becomes the default for all layers. See [upgrade guide](/docs/upgrade-guide.md) if you still need the old `fp64` mode.
+First introduced in v6.1 as `COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL`, the new projection system offers high-precision results similar to that of the old `fp64` mode without the compatibility issues or performance hit of running the much heavier 64-bit shader. Starting v6.2, this coordinate system becomes the default for all layers. See [upgrade guide](./upgrade-guide.md) if you still need the old `fp64` mode.
 
 ### CPU/GPU Parity in Projection
 
@@ -1116,19 +1395,19 @@ The `layer.project()` method now supports all coordinate systems including METER
 
 Release date: Sep 7, 2018
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
         <p><i>JSON API</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
         <p><i>Enhanced Multi-View API</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
         <p><i>ContourLayer</i></p>
       </td>
     </tr>
@@ -1175,19 +1454,19 @@ Several under the hood changes in GPU Aggregation flow to support multiple layer
 
 Release date: July 18, 2018
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/attribute-transition.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/attribute-transition.gif" />
         <p><i>GeoJson Transition</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
         <p><i>ViewState flyTo Transitions</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/GPUAcceleratedScreenGridAggregation.gif" />
+        <img style={{maxHeight:200}} src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/GPUAcceleratedScreenGridAggregation.gif" />
         <p><i>GPU Accelerated ScreenGrid Layer</i></p>
       </td>
     </tr>
@@ -1197,12 +1476,12 @@ Release date: July 18, 2018
 
 #### Attribute Transitions (WebGL2-compatible browsers only)
 
-Attribute transitions enable applications to simultaneously animate changes in positions, colors and other attributes of all objects in a layer. GPU acceleration to  All core deck.gl layers now support attribute transitions, including `HexagonLayer`, `GridLayer` and `GeoJsonLayer`. GPU Accelerations allow millions of objects to be animated. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/core/layer.md).
+Attribute transitions enable applications to simultaneously animate changes in positions, colors and other attributes of all objects in a layer. GPU acceleration to  All core deck.gl layers now support attribute transitions, including `HexagonLayer`, `GridLayer` and `GeoJsonLayer`. GPU Accelerations allow millions of objects to be animated. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](./api-reference/core/layer.md).
 
 
 #### View State Transitions
 
-View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](/docs/api-reference/core/view-state-transitions.md) documentation.
+View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](./developer-guide/animations-and-transitions.md#camera-transitions) documentation.
 
 
 #### ScreenGridLayer: GPU accelerated aggregation
@@ -1212,7 +1491,7 @@ ScreenGridLayer is updated to support aggregation on GPU. GPU aggregation can be
 
 #### Controllers: Simplified Usage
 
-deck.gl can now infer appropriate `Controller` types from the types of your `View`. For example, when using the default geospatial view (`MapView`), a `MapController` can now be requested simply by setting the view's `controller` props to `true`. You may also pass an object with additional controller options to this prop, for example `controller={{doubleClickZoom: false}}`. See documentation of [View](/docs/api-reference/core/view.md).
+deck.gl can now infer appropriate `Controller` types from the types of your `View`. For example, when using the default geospatial view (`MapView`), a `MapController` can now be requested simply by setting the view's `controller` props to `true`. You may also pass an object with additional controller options to this prop, for example `controller={{doubleClickZoom: false}}`. See documentation of [View](./api-reference/core/view.md).
 
 
 #### Pixel Sizes aligned with HTML/CSS
@@ -1233,14 +1512,14 @@ The `DeckGL` React component now provides a more powerful API to create sophisti
 * You can now specify deck.gl views (in addition to layers) directly using JSX
 * Adds "render callbacks" for dynamically rendering React children based on deck.gl view states, providing more control over synchronization of positions and sizes between deck.gl's WebGL view layouts and React's DOM components.
 
-See [Use with React](/docs/get-started/using-with-react.md) for more details.
+See [Use with React](./get-started/using-with-react.md) for more details.
 
 
 ## deck.gl v5.3
 
 Release date: June 01, 2018
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
@@ -1269,7 +1548,7 @@ deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` m
 
 #### Switch between Perspective and Orthographic mode
 
-The [`View`](/docs/api-reference/core/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orthographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
+The [`View`](./api-reference/core/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orthographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
 
 #### Per-instance stroke width in LineLayer and ArcLayer
@@ -1291,7 +1570,7 @@ Core layers are broken out from ` @deck.gl/core` to a new submodule ` @deck.gl/l
 
 Release date: April 24, 2018
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
@@ -1313,7 +1592,7 @@ Release date: April 24, 2018
 
 ### Use deck.gl without React
 
-deck.gl can now be used in non-React applications. A new top-level JavaScript class [`Deck`](/docs/api-reference/core/deck.md) is provided as an alternative to the traditional top-level `DeckGL` React component, and the core deck.gl npm module no longer has any React dependencies. This allows deck.gl to be used in any JavaScript application or framework.
+deck.gl can now be used in non-React applications. A new top-level JavaScript class [`Deck`](./api-reference/core/deck.md) is provided as an alternative to the traditional top-level `DeckGL` React component, and the core deck.gl npm module no longer has any React dependencies. This allows deck.gl to be used in any JavaScript application or framework.
 
 The new non-React API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" intended for early adopters.
 
@@ -1338,7 +1617,7 @@ deck.gl is now published as multiple npm modules allowing applications to choose
 
 deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
 
-The [`Deck.views`](/docs/developer-guide/views.md) property accepts instances of [`View`](/docs/api-reference/core/view.md) classes, such as [`MapView`](/docs/api-reference/core/view.md) and [`FirstPersonView`](/docs/api-reference/core/first-person-view.md):
+The [`Deck.views`](./developer-guide/views.md) property accepts instances of [`View`](./api-reference/core/view.md) classes, such as [`MapView`](./api-reference/core/view.md) and [`FirstPersonView`](./api-reference/core/first-person-view.md):
 
 ```jsx
 <DeckGL
@@ -1368,7 +1647,7 @@ It is no longer necessary for deck.gl applications to track screen size and mana
 
 #### TextLayer (New)
 
-A [TextLayer](/docs/api-reference/layers/text-layer.md) has been added to the core layer catalog for rendering labels with WebGL.
+A [TextLayer](./api-reference/layers/text-layer.md) has been added to the core layer catalog for rendering labels with WebGL.
 
 
 #### ScreenGridLayer
@@ -1378,24 +1657,24 @@ A [TextLayer](/docs/api-reference/layers/text-layer.md) has been added to the co
 
 #### Experimental Layers
 
-A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](/docs/roadmap.md) for more information.
+A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](./roadmap.md) for more information.
 
 
 ### Test Utilities
 
-deck.gl now provides a suite of [test utilities](/docs/developer-guide/testing) that make it easy to test both layers and applications. The utilities support visual regression testing against "golden" images, as well as utilities for traditional unit testing of layers. The utilities come pre-integrated with tools that help automate the running of browser based render tests from the console. To start using the utilities, install the new ([@deck.gl/test-utils](https://www.npmjs.com/package/@deck.gl/test-utils)) module.
+deck.gl now provides a suite of [test utilities](./developer-guide/testing) that make it easy to test both layers and applications. The utilities support visual regression testing against "golden" images, as well as utilities for traditional unit testing of layers. The utilities come pre-integrated with tools that help automate the running of browser based render tests from the console. To start using the utilities, install the new ([@deck.gl/test-utils](https://www.npmjs.com/package/@deck.gl/test-utils)) module.
 
 
 ### Dist Size Reduction
 
-Work on bundle size reduction continues. In this release, the focus has been on leveraging the tree-shaking abilities of the Babel 7 and Webpack 4 combination. In addition, new article about [Application Bundling and Tree Shaking](/docs/developer-guide/building-apps.md) has been added to the docs.
+Work on bundle size reduction continues. In this release, the focus has been on leveraging the tree-shaking abilities of the Babel 7 and Webpack 4 combination. In addition, new article about [Application Bundling and Tree Shaking](./developer-guide/building-apps.md) has been added to the docs.
 
 
 ### Shader Modules
 
 #### project32 (New)
 
-**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](/docs/api-reference/core/project32.md) for more details.
+**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](./api-reference/core/project32.md) for more details.
 
 
 
@@ -1403,7 +1682,7 @@ Work on bundle size reduction continues. In this release, the focus has been on 
 
 Release date: Feb 16, 2018
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
@@ -1423,7 +1702,7 @@ Release date: Feb 16, 2018
 
 #### Layer Transitions
 
-Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large number of elements. Use the new [`transitions`](/docs/api-reference/core/layer.md) prop on the `Layer` class to specify things like *transition duration*, *easing function* and *callbacks*.
+Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large number of elements. Use the new [`transitions`](./api-reference/core/layer.md) prop on the `Layer` class to specify things like *transition duration*, *easing function* and *callbacks*.
 
 > Transitions are only supported on WebGL2-capable browsers such as Chrome and Firefox. The `transitions` prop will simply be ignored on WebGL1 browsers.
 
@@ -1440,14 +1719,14 @@ It is now possible to use JSX syntax to create (or "render") deck.gl layers. Man
   <DeckGL />
 ```
 
-> There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](/docs/get-started/using-with-react.md).
+> There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](./get-started/using-with-react.md).
 
 
 ## deck.gl v5
 
 Release date: Dec 21, 2017
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
@@ -1469,7 +1748,7 @@ Release date: Dec 21, 2017
 
 All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
-As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [upgrade Guide](/docs/upgrade-guide.md).
+As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [upgrade Guide](./upgrade-guide.md).
 
 
 ### DeckGL Component
@@ -1543,7 +1822,7 @@ As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi vi
 
 Release date: July 27th, 2017
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
@@ -1698,7 +1977,7 @@ All layers now have a `getShaders` method that can be overridden by subclasses, 
 
 ### New Features for Layer Writers
 
-#### `defaultProps`
+#### `defaultProps` {#defaultprops}
 
 Layers are now encouraged to define a `defaultProps` static member listing their props and default values, rather than programmatically declaring the props in constructor parameters etc. Using `defaultProps` means that many layer classes no longer need a constructor.
 
@@ -1706,7 +1985,7 @@ Layers are now encouraged to define a `defaultProps` static member listing their
 
 Can be a string or a an array of strings. Will be used to match `updateTriggers` accessor names with instance attributes.
 
-#### `getPickingInfo()`
+#### `getPickingInfo()` {#getpickinginfo}
 
 This method replaces the old `pick()` method and is expected to return an info object. Layers can block the execution of callback functions by returning `null`.
 
@@ -1743,7 +2022,7 @@ The various Choropleth layers have been deprecated since deck.gl has new and bet
 A careful API audit has also been done to align property names between old and
 new layers. While this will makes the layers more consistent and the combined API easier to learn and work with, it does mean that some properties have been renamed, with the old name being deprecated, and in some very few cases, default values have changed.
 
-For more information on deprecations and how to update your code in response to these changes, please consult the deck.gl [Upgrade Guide](/docs/upgrade-guide.md).
+For more information on deprecations and how to update your code in response to these changes, please consult the deck.gl [Upgrade Guide](./upgrade-guide.md).
 
 ## deck.gl v3.0
 

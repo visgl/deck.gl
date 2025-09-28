@@ -1,13 +1,18 @@
-<div align="center">
-   <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
-</div>
+## Example: Use deck.gl with react-map-gl and Mapbox
 
-## Example: Use deck.gl with react-map-gl and Webpack
-
-Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
-with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
+Uses [Vite](https://vitejs.dev/) to bundle and serve files.
 
 ## Usage
+
+To run this example, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
+
+```bash
+export MapboxAccessToken=<mapbox_access_token>
+```
+
+Or set `MAPBOX_TOKEN` directly in `app.jsx`.
+
+Other options can be found at [using with Mapbox GL](../../../../docs/developer-guide/base-maps/using-with-mapbox.md).
 
 To install dependencies:
 
@@ -20,7 +25,3 @@ yarn
 Commands:
 * `npm start` is the development target, to serve the app and hot reload.
 * `npm run build` is the production target, to create the final bundle and write to disk.
-
-### Basemap
-
-The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)

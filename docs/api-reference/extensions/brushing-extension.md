@@ -3,9 +3,9 @@
 
 The `BrushingExtension` adds GPU-based data brushing functionalities to layers. It allows the layer to show/hide objects based on the current pointer position.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl BrushingExtension" src="https://codepen.io/vis-gl/embed/NWbxdKP?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl BrushingExtension" src="https://codepen.io/vis-gl/embed/NWbxdKP?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/NWbxdKP'>deck.gl BrushingExtension</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -51,11 +51,11 @@ new BrushingExtension();
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -74,12 +74,12 @@ new BrushingExtension();
 When added to a layer via the `extensions` prop, the `BrushingExtension` adds the following properties to the layer:
 
 
-##### `brushingRadius` (Number)
+#### `brushingRadius` (number) {#brushingradius}
 
 The brushing radius centered at the pointer, in meters. If a data object is within this circle, it is rendered; otherwise it is hidden.
 
 
-##### `brushingEnabled` (Boolean, optional)
+#### `brushingEnabled` (boolean, optional) {#brushingenabled}
 
 * Default: `true`
 
@@ -88,7 +88,7 @@ Enable/disable brushing. If brushing is disabled, all objects are rendered.
 Brushing is always disabled when the pointer leaves the current viewport.
 
 
-##### `brushingTarget` (Enum, optional)
+#### `brushingTarget` (string, optional) {#brushingtarget}
 
 * Default: `source`
 
@@ -100,7 +100,7 @@ The position used to filter each object by. One of the following:
 - `'custom'`: Some layers may not describe their data objects with one or two coordinates, for example `PathLayer` and `PolygonLayer`. Use this option with the `getBrushingTarget` prop to provide a custom position that each object should be filtered by.
 
 
-##### `getBrushingTarget` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+#### `getBrushingTarget` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getbrushingtarget}
 
 * Default: `null`
 

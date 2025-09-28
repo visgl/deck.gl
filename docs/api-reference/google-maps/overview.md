@@ -7,10 +7,10 @@ Use deck.gl layers as a custom Google Maps overlay.
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/google-maps@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/google-maps@^9.0.0/dist.min.js"></script>
 <!-- usage -->
 <script type="text/javascript">
   const {GoogleMapsOverlay} = deck;
@@ -37,7 +37,7 @@ From v8.6, the `GoogleMapsOverlay` class automatically detects at runtime which 
 
 - Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
 - Tilting and rotating the view is supported
-- Rendering uses the same WebGL context as Google Maps, improving performance
+- Rendering uses the same WebGL2 context as Google Maps, improving performance
 
 ## Supported Features and Limitations
 

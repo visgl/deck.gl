@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /**
  * Pack the top 12 bits of two normalized floats into 3 8-bit (rgb) values
  * This enables addressing 4096x4096 individual pixels
@@ -24,7 +28,8 @@ vec3 packUVsIntoRGB(vec2 uv) {
 }
 `;
 
-export default `
+export default `\
+#version 300 es
 #define SHADER_NAME bitmap-layer-fragment-shader
 
 #ifdef GL_ES
@@ -33,16 +38,10 @@ precision highp float;
 
 uniform sampler2D bitmapTexture;
 
-varying vec2 vTexCoord;
-varying vec2 vTexPos;
+in vec2 vTexCoord;
+in vec2 vTexPos;
 
-uniform float desaturate;
-uniform vec4 transparentColor;
-uniform vec3 tintColor;
-uniform float opacity;
-
-uniform float coordinateConversion;
-uniform vec4 bounds;
+out vec4 fragColor;
 
 /* projection utils */
 const float TILE_SIZE = 512.0;
@@ -72,23 +71,29 @@ vec2 mercator_to_lnglat(vec2 xy) {
 // apply desaturation
 vec3 color_desaturate(vec3 color) {
   float luminance = (color.r + color.g + color.b) * 0.333333333;
-  return mix(color, vec3(luminance), desaturate);
+  return mix(color, vec3(luminance), bitmap.desaturate);
 }
 
 // apply tint
 vec3 color_tint(vec3 color) {
-  return color * tintColor;
+  return color * bitmap.tintColor;
 }
 
 // blend with background color
 vec4 apply_opacity(vec3 color, float alpha) {
-  return mix(transparentColor, vec4(color, 1.0), alpha);
+  if (bitmap.transparentColor.a == 0.0) {
+    return vec4(color, alpha);
+  }
+  float blendedAlpha = alpha + bitmap.transparentColor.a * (1.0 - alpha);
+  float highLightRatio = alpha / blendedAlpha;
+  vec3 blendedRGB = mix(bitmap.transparentColor.rgb, color, highLightRatio);
+  return vec4(blendedRGB, blendedAlpha);
 }
 
 vec2 getUV(vec2 pos) {
   return vec2(
-    (pos.x - bounds[0]) / (bounds[2] - bounds[0]),
-    (pos.y - bounds[3]) / (bounds[1] - bounds[3])
+    (pos.x - bitmap.bounds[0]) / (bitmap.bounds[2] - bitmap.bounds[0]),
+    (pos.y - bitmap.bounds[3]) / (bitmap.bounds[1] - bitmap.bounds[3])
   );
 }
 
@@ -96,23 +101,23 @@ ${packUVsIntoRGB}
 
 void main(void) {
   vec2 uv = vTexCoord;
-  if (coordinateConversion < -0.5) {
+  if (bitmap.coordinateConversion < -0.5) {
     vec2 lnglat = mercator_to_lnglat(vTexPos);
     uv = getUV(lnglat);
-  } else if (coordinateConversion > 0.5) {
+  } else if (bitmap.coordinateConversion > 0.5) {
     vec2 commonPos = lnglat_to_mercator(vTexPos);
     uv = getUV(commonPos);
   }
-  vec4 bitmapColor = texture2D(bitmapTexture, uv);
+  vec4 bitmapColor = texture(bitmapTexture, uv);
 
-  gl_FragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * opacity);
+  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * layer.opacity);
 
   geometry.uv = uv;
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 
-  if (picking_uActive) {
+  if (bool(picking.isActive) && !bool(picking.isAttribute)) {
     // Since instance information is not used, we can use picking color for pixel index
-    gl_FragColor.rgb = packUVsIntoRGB(uv);
+    fragColor.rgb = packUVsIntoRGB(uv);
   }
 }
 `;

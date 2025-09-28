@@ -1,7 +1,10 @@
-import * as cartoColors from 'cartocolor';
-import {assert} from './utils';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-export type Color = [r: number, b: number, g: number, a?: number];
+import * as cartoColors from 'cartocolor';
+import {assert} from '../utils';
+import {Color} from '@deck.gl/core';
 
 export const DEFAULT_PALETTE = 'PurpOr';
 export const NULL_COLOR: Color = [204, 204, 204];

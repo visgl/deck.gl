@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* global requestAnimationFrame */
 import React, {Component} from 'react';
 import styled from 'styled-components';
 import {GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/image-tile/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const ImageTileDemoContainer = styled.div`
   position: absolute;
@@ -19,25 +24,27 @@ class ImageTileDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/image-tile`;
 
   static parameters = {
-    autoHighlight: {displayName: 'Highlight tile on hover', type: 'checkbox', value: false},
+    autoHighlight: {displayName: 'Highlight tile on hover', type: 'checkbox', value: false}
   };
 
   static renderInfo(meta) {
     return (
       <div>
-        <p>Data source:
+        <p>
+          Data source:
           <a href="http://lroc.sese.asu.edu/posts/293">NASA/GSFC/Arizona State University</a>
         </p>
         <div className="layout">
-          <div className="stat col-1-2">No. of Tiles Loaded
-            <b>{ readableInteger(meta.tileCount || 0) }</b>
+          <div className="stat col-1-2">
+            No. of Tiles Loaded
+            <b>{readableInteger(meta.tileCount || 0)}</b>
           </div>
         </div>
       </div>
     );
   }
 
-  _onTilesLoad = (tiles) => {
+  _onTilesLoad = tiles => {
     // onViewportLoad is called during tileLayer.updateState
     // Updating React state here may trigger another round of layer updates and create a racing condition
     // TODO - Fix this in TileLayer
@@ -52,7 +59,8 @@ class ImageTileDemo extends Component {
         <App
           {...otherProps}
           autoHighlight={params.autoHighlight.value}
-          onTilesLoad={this._onTilesLoad} />
+          onTilesLoad={this._onTilesLoad}
+        />
       </ImageTileDemoContainer>
     );
   }

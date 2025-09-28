@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 const FLUSH_LIMIT = 100000;
 const COORDINATE_PRECISION = 7;
@@ -5,10 +9,10 @@ let sequence;
 let result = [];
 let count = 0;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(l, i) {
+  lines.forEach(function (l, i) {
     if (!l.length) {
       return;
     }
@@ -55,7 +59,7 @@ function flush() {
 
 function decodeSequence(str) {
   const seq = [];
-  const tokens = str.split(/([A-Z])/).map(function(v) {
+  const tokens = str.split(/([A-Z])/).map(function (v) {
     return parseInt(v, 36);
   });
   for (let i = 0; i < tokens.length - 1; i += 2) {
@@ -66,7 +70,7 @@ function decodeSequence(str) {
 
 function decodeBbox(str) {
   const multiplyer = Math.pow(10, COORDINATE_PRECISION);
-  return decodeNumberArr(str, 90, 32, 5).map(function(x) {
+  return decodeNumberArr(str, 90, 32, 5).map(function (x) {
     return x / multiplyer - 180;
   });
 }
@@ -77,7 +81,7 @@ function decodeBitmap(str) {
   for (let i = 0; i < str.length; i++) {
     let seg = (str.charCodeAt(i) - 32).toString(3);
     while (seg.length < chunkSize) {
-      seg = `0${ seg}`;
+      seg = `0${seg}`;
     }
     match += seg;
   }

@@ -1,10 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {Parser} from 'expr-eval';
 import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/plot/app';
 import {_memoize as memoize} from '@deck.gl/core';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const evaluateEquation = memoize(({value}) => {
   try {
@@ -26,8 +30,14 @@ class PlotDemo extends Component {
 
   static parameters = {
     equation: {displayName: 'Z = f(x, y)', type: 'text', value: 'sin(x ^ 2 + y ^ 2) * x / 3.14'},
-    resolution: {displayName: 'Resolution', type: 'range',
-      value: 200, step: 10, min: 10, max: 1000},
+    resolution: {
+      displayName: 'Resolution',
+      type: 'range',
+      value: 200,
+      step: 10,
+      min: 10,
+      max: 1000
+    },
     showAxis: {displayName: 'Grid', type: 'checkbox', value: true}
   };
 
@@ -59,7 +69,8 @@ class PlotDemo extends Component {
       <App
         equation={evaluatedEquation.valid ? evaluatedEquation.func : null}
         resolution={resolution.value}
-        showAxis={showAxis.value} />
+        showAxis={showAxis.value}
+      />
     );
   }
 }

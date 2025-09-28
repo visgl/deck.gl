@@ -1,16 +1,27 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // This module implement some utility functions to work with
 // the geojson-binary format defined at loaders.gl:
 // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
 
+import {BinaryAttribute} from '@deck.gl/core';
 import {
-  BinaryFeatures,
-  BinaryLineFeatures,
-  BinaryPointFeatures,
-  BinaryPolygonFeatures,
+  BinaryFeatureCollection,
+  BinaryLineFeature,
+  BinaryPointFeature,
+  BinaryPolygonFeature,
   Feature
 } from '@loaders.gl/schema';
 
-export type BinaryFeatureTypes = BinaryPointFeatures | BinaryLineFeatures | BinaryPolygonFeatures;
+export type BinaryFeatureTypes = BinaryPointFeature | BinaryLineFeature | BinaryPolygonFeature;
+
+export type ExtendedBinaryFeatureCollection = {
+  [P in keyof Omit<BinaryFeatureCollection, 'shape'>]: BinaryFeatureCollection[P] & {
+    attributes?: Record<string, BinaryAttribute>;
+  };
+};
 
 type FeaureOnlyProperties = Pick<Feature, 'properties'>;
 
@@ -53,7 +64,7 @@ function getPropertiesForIndex(
 
 // Custom picking color to keep binary indexes
 export function calculatePickingColors(
-  geojsonBinary: BinaryFeatures,
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
   encodePickingColor: (id: number, result: number[]) => void
 ): Record<string, Uint8ClampedArray | null> {
   const pickingColors: Record<string, Uint8ClampedArray | null> = {
@@ -63,13 +74,14 @@ export function calculatePickingColors(
   };
   for (const key in pickingColors) {
     const featureIds = geojsonBinary[key].globalFeatureIds.value;
-    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 3);
+    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 4);
     const pickingColor = [];
     for (let i = 0; i < featureIds.length; i++) {
       encodePickingColor(featureIds[i], pickingColor);
-      pickingColors[key]![i * 3 + 0] = pickingColor[0];
-      pickingColors[key]![i * 3 + 1] = pickingColor[1];
-      pickingColors[key]![i * 3 + 2] = pickingColor[2];
+      pickingColors[key][i * 4 + 0] = pickingColor[0];
+      pickingColors[key][i * 4 + 1] = pickingColor[1];
+      pickingColors[key][i * 4 + 2] = pickingColor[2];
+      pickingColors[key][i * 4 + 3] = 255;
     }
   }
 

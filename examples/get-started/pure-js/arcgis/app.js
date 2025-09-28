@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {DeckLayer} from '@deck.gl/arcgis';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import ArcGISMap from '@arcgis/core/Map';
@@ -8,7 +12,7 @@ const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
 const layer = new DeckLayer({
-  effect: 'bloom(1.5, 0.5px, 0.1)',
+  // effect: 'bloom(1.5, 0.5px, 0.1)',
   'deck.getTooltip': info => info.object && info.object.properties.name,
   'deck.layers': [
     new GeoJsonLayer({

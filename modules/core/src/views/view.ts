@@ -1,7 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, Position} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
-import assert from '../utils/assert';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
@@ -10,7 +13,7 @@ import type {ConstructorOf} from '../types/types';
 
 export type CommonViewState = TransitionProps;
 
-type CommonViewProps<ViewState> = {
+export type CommonViewProps<ViewState> = {
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
@@ -28,6 +31,14 @@ type CommonViewProps<ViewState> = {
     top?: number | string;
     bottom?: number | string;
   } | null;
+  /** When using multiple views, set this flag to wipe the pixels drawn by other overlapping views. Default `false` */
+  clear?: boolean;
+  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent). */
+  clearColor?: number[] | false;
+  /** Depth buffer value to clear the viewport with, between 0.0 - 1.0. Default `1.0` (far plane). */
+  clearDepth?: number | false;
+  /** Stencil buffer Value to clear the viewport with, between 0 - 255. Default `0` (clear). */
+  clearStencil?: number | false;
   /** State of the view */
   viewState?:
     | string
@@ -42,20 +53,16 @@ type CommonViewProps<ViewState> = {
     | (ControllerOptions & {
         type?: ConstructorOf<Controller<any>>;
       });
-
-  /** @deprecated Directly wrap a viewport instance */
-  viewportInstance?: Viewport;
 };
 
 export default abstract class View<
   ViewState extends CommonViewState = CommonViewState,
-  ViewProps = {}
+  ViewProps extends CommonViewProps<ViewState> = CommonViewProps<ViewState>
 > {
   id: string;
-  abstract get ViewportType(): ConstructorOf<Viewport>;
-  abstract get ControllerType(): ConstructorOf<Controller<any>>;
+  abstract getViewportType(viewState: ViewState): ConstructorOf<Viewport>;
+  protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
-  private viewportInstance?: Viewport;
   private _x: Position;
   private _y: Position;
   private _width: Position;
@@ -67,21 +74,10 @@ export default abstract class View<
     bottom: Position;
   } | null;
 
-  readonly props: ViewProps & CommonViewProps<ViewState>;
+  readonly props: ViewProps;
 
-  constructor(props: ViewProps & CommonViewProps<ViewState>) {
-    const {
-      id,
-      x = 0,
-      y = 0,
-      width = '100%',
-      height = '100%',
-      padding = null,
-      viewportInstance
-    } = props || {};
-
-    assert(!viewportInstance || viewportInstance instanceof Viewport);
-    this.viewportInstance = viewportInstance;
+  constructor(props: ViewProps) {
+    const {id, x = 0, y = 0, width = '100%', height = '100%', padding = null} = props;
 
     // @ts-ignore
     this.id = id || this.constructor.displayName || 'view';
@@ -106,31 +102,32 @@ export default abstract class View<
     Object.seal(this);
   }
 
-  equals(view: View<ViewState, ViewProps>): boolean {
+  equals(view: this): boolean {
     if (this === view) {
       return true;
     }
 
-    // if `viewportInstance` is set, it is the only prop that is used
-    // Delegate to `Viewport.equals`
-    if (this.viewportInstance) {
-      return view.viewportInstance ? this.viewportInstance.equals(view.viewportInstance) : false;
-    }
+    // To correctly compare padding use depth=2
+    return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
+  }
 
-    return this.ViewportType === view.ViewportType && deepEqual(this.props, view.props);
+  /** Clone this view with modified props */
+  clone(newProps: Partial<ViewProps>): this {
+    const ViewConstructor = this.constructor as new (props: ViewProps) => this;
+    return new ViewConstructor({...this.props, ...newProps});
   }
 
   /** Make viewport from canvas dimensions and view state */
-  makeViewport({width, height, viewState}: {width: number; height: number; viewState: any}) {
-    if (this.viewportInstance) {
-      return this.viewportInstance;
-    }
-
+  makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
 
     // Resolve relative viewport dimensions
     const viewportDimensions = this.getDimensions({width, height});
-    return new this.ViewportType({...viewState, ...this.props, ...viewportDimensions});
+    if (!viewportDimensions.height || !viewportDimensions.width) {
+      return null;
+    }
+    const ViewportType = this.getViewportType(viewState);
+    return new ViewportType({...viewState, ...this.props, ...viewportDimensions});
   }
 
   getViewStateId(): string {

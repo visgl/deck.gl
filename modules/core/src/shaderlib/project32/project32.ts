@@ -1,27 +1,57 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
+import type {ShaderModule} from '@luma.gl/shadertools';
 import project from '../project/project';
-import type {ShaderModule} from '../../types/types';
 
-const vs = `
+const source = /* wgsl */ `\
+// Define a structure to hold both the clip-space position and the common position.
+struct ProjectResult {
+  clipPosition: vec4<f32>,
+  commonPosition: vec4<f32>,
+};
+
+// This function mimics the GLSL version with the 'out' parameter by returning both values.
+fn project_position_to_clipspace_and_commonspace(
+    position: vec3<f32>,
+    position64Low: vec3<f32>,
+    offset: vec3<f32>
+) -> ProjectResult {
+  // Compute the projected position.
+  let projectedPosition: vec3<f32> = project_position_vec3_f64(position, position64Low);
+
+  // Start with the provided offset.
+  var finalOffset: vec3<f32> = offset;
+
+  // Get whether a rotation is needed and the rotation matrix.
+  let rotationResult = project_needs_rotation(projectedPosition);
+
+  // If rotation is needed, update the offset.
+  if (rotationResult.needsRotation) {
+    finalOffset = rotationResult.transform * offset;
+  }
+
+  // Compute the common position.
+  let commonPosition: vec4<f32> = vec4<f32>(projectedPosition + finalOffset, 1.0);
+
+  // Convert to clip-space.
+  let clipPosition: vec4<f32> = project_common_position_to_clipspace(commonPosition);
+
+  return ProjectResult(clipPosition, commonPosition);
+}
+
+// A convenience overload that returns only the clip-space position.
+fn project_position_to_clipspace(
+    position: vec3<f32>,
+    position64Low: vec3<f32>,
+    offset: vec3<f32>
+) -> vec4<f32> {
+  return project_position_to_clipspace_and_commonspace(position, position64Low, offset).clipPosition;
+}
+`;
+
+const vs = /* glsl */ `\
 vec4 project_position_to_clipspace(
   vec3 position, vec3 position64Low, vec3 offset, out vec4 commonPosition
 ) {
@@ -47,5 +77,6 @@ vec4 project_position_to_clipspace(
 export default {
   name: 'project32',
   dependencies: [project],
+  source,
   vs
 } as ShaderModule;

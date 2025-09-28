@@ -24,16 +24,13 @@
                 height: 100%;
             }
         </style>
-        <link
-            href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css"
-            rel="stylesheet"
-        />
+        <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
     </head>
     <body>
         <div id="container">
             <div id="map"></div>
             <canvas id="deck-canvas"></canvas>
         </div>
-        <script src="app.js"></script>
+        <script type="module" src="app.js"></script>
     </body>
 </html>

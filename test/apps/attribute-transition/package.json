@@ -1,18 +1,14 @@
 {
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --port 3000 --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open"
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "deck.gl": "^8.4.0",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "deck.gl": "^9.0.0-beta",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "buble": "^0.19.3",
-    "buble-loader": "^0.5.0",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   }
 }

@@ -1,10 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/trips/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class TripsDemo extends Component {
   static title = 'Yellow Cab Vs. Green Cab Trips in Manhattan';
@@ -32,25 +36,31 @@ class TripsDemo extends Component {
     return (
       <div>
         <p>Trips are taken from June 16, 2016 21:00 to 21:30</p>
-        <p>Trip data source:&nbsp;
+        <p>
+          Trip data source:&nbsp;
           <a href="http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml">
-          NYC Taxi & Limousine Commission Trip Records</a>
+            NYC Taxi & Limousine Commission Trip Records
+          </a>
         </p>
-        <p>Building data source:&nbsp;
+        <p>
+          Building data source:&nbsp;
           <a href="http://openstreetmap.org">OpenStreetMap</a> via&nbsp;
           <a href="https://mapzen.com/">Mapzen Vector Tiles API</a>
         </p>
         <div className="layout">
-          <div className="stat col-1-2">No. of Trips
-            <b>{ readableInteger(meta.trips || 0) }</b>
+          <div className="stat col-1-2">
+            No. of Trips
+            <b>{readableInteger(meta.trips || 0)}</b>
           </div>
-          <div className="stat col-1-2">No. of Buildings
-            <b>{ readableInteger(meta.buildings || 0) }</b>
+          <div className="stat col-1-2">
+            No. of Buildings
+            <b>{readableInteger(meta.buildings || 0)}</b>
           </div>
         </div>
         <div className="layout">
-          <div className="stat col-1-2">Vertices
-            <b>{ readableInteger((meta.vertices || 0) + (meta.triangles || 0) * 3) }</b>
+          <div className="stat col-1-2">
+            Vertices
+            <b>{readableInteger((meta.vertices || 0) + (meta.triangles || 0) * 3)}</b>
           </div>
         </div>
       </div>
@@ -65,8 +75,9 @@ class TripsDemo extends Component {
         {...otherProps}
         trips={data && data[0]}
         buildings={data && data[1]}
-        animationSpeed={0.5}
-        trailLength={params.trail.value} />
+        animationSpeed={1}
+        trailLength={params.trail.value}
+      />
     );
   }
 }

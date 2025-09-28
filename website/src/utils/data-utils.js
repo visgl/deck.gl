@@ -1,20 +1,19 @@
-import {request, json, text} from 'd3-request';
-import {withPrefix} from 'gatsby';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
+import {request, json, text} from 'd3-request';
 import {StreamParser} from './worker-utils';
 
 export function loadData(url, worker, onSuccess) {
   if (worker) {
     const req = request(url);
     // use a web worker to parse data
-    const dataParser = new StreamParser(withPrefix(worker), (data, meta) => {
+    const dataParser = new StreamParser(worker, (data, meta) => {
       onSuccess(data, meta);
     });
 
-    req
-      .on('progress', dataParser.onProgress)
-      .on('load', dataParser.onLoad)
-      .get();
+    req.on('progress', dataParser.onProgress).on('load', dataParser.onLoad).get();
   } else if (/\.(json|geojson)$/.test(url)) {
     // load as json
     json(url, (error, response) => {
@@ -30,4 +29,12 @@ export function loadData(url, worker, onSuccess) {
       }
     });
   }
+}
+
+export function joinPath(base, path) {
+  if (path.match(/^\w+:\/\//)) {
+    // has protocol
+    return path;
+  }
+  return `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 }

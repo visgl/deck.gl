@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.2.0-beta.1",
+    "@deck.gl/layers": "^9.2.0-beta.1",
+    "@deck.gl/widgets": "^9.2.0-beta.1"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
+}

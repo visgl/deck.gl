@@ -1,45 +1,33 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
+import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
+import {SamplerProps, Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+
+import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
 import IconManager from './icon-manager';
 
 import type {
   LayerProps,
+  LayerDataSource,
   Accessor,
   AccessorFunction,
   Position,
   Color,
-  Texture,
   Unit,
   UpdateParameters,
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
+
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** A prepacked image that contains all icons. */
   iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
@@ -104,10 +92,10 @@ type _IconLayerProps<DataT> = {
   onIconError?: ((context: LoadIconErrorContext) => void) | null;
 
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
-  textureParameters?: Record<number, number> | null;
+  textureParameters?: SamplerProps | null;
 };
 
-export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps<DataT>;
+export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -121,18 +109,20 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: {type: 'accessor', value: x => x.position},
-  getIcon: {type: 'accessor', value: x => x.icon},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getIcon: {type: 'accessor', value: (x: any) => x.icon},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
 
-  onIconError: {type: 'function', value: null, compare: false, optional: true}
+  onIconError: {type: 'function', value: null, optional: true},
+
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** Render raster icons at given coordinates. */
-export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_IconLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;
@@ -144,12 +134,12 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, iconUniforms]});
   }
 
   initializeState() {
     this.state = {
-      iconManager: new IconManager(this.context.gl, {
+      iconManager: new IconManager(this.context.device, {
         onUpdate: this._onUpdate.bind(this),
         onError: this._onError.bind(this)
       })
@@ -160,7 +150,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -185,15 +175,14 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       },
       instanceColorModes: {
         size: 1,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         accessor: 'getIcon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         transform: this.getInstanceColorMode
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
@@ -221,6 +210,10 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
     const {iconManager} = this.state;
 
+    if (typeof iconAtlas === 'string') {
+      return;
+    }
+
     // internalState is always defined during updateState
     const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
     iconManager.setProps({
@@ -246,9 +239,8 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       attributeManager!.invalidateAll();
     }
   }
@@ -270,32 +262,34 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model
-        .setUniforms(uniforms)
-        .setUniforms({
-          iconsTexture,
-          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeUnits: UNIT[sizeUnits],
-          sizeScale,
-          sizeMinPixels,
-          sizeMaxPixels,
-          billboard,
-          alphaCutoff
-        })
-        .draw();
+      const model = this.state.model!;
+      const iconProps: IconProps = {
+        iconsTexture,
+        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+        sizeUnits: UNIT[sizeUnits],
+        sizeScale,
+        sizeMinPixels,
+        sizeMaxPixels,
+        billboard,
+        alphaCutoff
+      };
+
+      model.shaderInputs.setProps({icon: iconProps});
+      model.draw(this.context.renderPass);
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
-    // specifed via: attribute vec2 positions;
-    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
+    // specifed via: in vec2 positions;
+    const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-strip',
         attributes: {
           // The size must be explicitly passed here otherwise luma.gl
           // will default to assuming that positions are 3D (x,y,z)

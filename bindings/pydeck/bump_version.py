@@ -37,7 +37,8 @@ def rewrite_version_file(semver):
 
 def rewrite_frontend_version_file():
     """Current associated version of NPM modules deck.gl and @deck.gl/jupyter-widget"""
-    lerna_version = json.loads(open("../../lerna.json").read())["version"]
+    with open("../../lerna.json") as f:
+        lerna_version = json.loads(f.read())["version"]
     with open("pydeck/frontend_semver.py", "w+") as f:
         t = jinja2.Template("DECKGL_SEMVER = '{{semver_str}}'")
         contents = t.render(semver_str=str(lerna_version))

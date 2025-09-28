@@ -21,7 +21,8 @@ def in_jupyter():
 
 
 def convert_js_bool(py_bool):
-    if type(py_bool) != bool:
+    """Serializes Python booleans to JavaScript. Returns non-boolean values unchanged."""
+    if type(py_bool) is not bool:
         return py_bool
     return "true" if py_bool else "false"
 
@@ -33,6 +34,7 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./tem
 j2_loader = jinja2.FileSystemLoader(TEMPLATES_PATH)
 j2_env = jinja2.Environment(loader=j2_loader, trim_blocks=True)
 CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(DECKGL_SEMVER)
+CDN_CSS_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/widgets@{}/dist/stylesheet.css".format(DECKGL_SEMVER)
 
 
 def cdn_picker(offline=False):
@@ -62,6 +64,7 @@ def render_json_to_html(
     custom_libraries=None,
     configuration=None,
     offline=False,
+    show_error=False,
 ):
     js = j2_env.get_template("index.j2")
     css = j2_env.get_template("style.j2")
@@ -71,10 +74,12 @@ def render_json_to_html(
         google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
+        deckgl_widget_css_url=CDN_CSS_URL,
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
         custom_libraries=custom_libraries,
         configuration=configuration,
+        show_error=show_error,
     )
     return html_str
 
@@ -112,7 +117,7 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
 def render_for_colab(html_str, iframe_height):
     from IPython.display import HTML, Javascript  # noqa
 
-    js_height_snippet = f"google.colab.output.setIframeHeight({iframe_height}, true, {{minHeight: {iframe_height}}})"
+    js_height_snippet = f"google.colab.output.setIframeHeight({iframe_height}, true, {{minHeight: {iframe_height}, maxHeight: {iframe_height}}})"
     display(Javascript(js_height_snippet))  # noqa
     display(HTML(html_str))  # noqa
 
@@ -132,6 +137,7 @@ def deck_to_html(
     configuration=None,
     as_string=False,
     offline=False,
+    show_error=False,
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html_str = render_json_to_html(
@@ -143,6 +149,7 @@ def deck_to_html(
         custom_libraries=custom_libraries,
         configuration=configuration,
         offline=offline,
+        show_error=show_error,
     )
 
     if filename:

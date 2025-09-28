@@ -1,37 +1,67 @@
 {
   "name": "project-website",
-  "version": "0.0.0",
+  "version": "9.1.0-beta.1",
+  "private": true,
   "description": "Website for vis.gl project",
-  "license": "MIT",
-  "keywords": [
-    "ocular"
-  ],
-  "main": "gatsby-config.js",
   "scripts": {
-    "install-deps": "yarn && find ../examples/website -name 'package.json' -maxdepth 2 -execdir yarn \\;",
-    "start": "yarn clean && yarn develop",
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
     "build": "./scripts/build.sh prod",
     "build-staging": "./scripts/build.sh staging",
-    "clean": "rm -rf ./.cache ./public",
-    "develop": "yarn clean && gatsby develop",
-    "serve": "gatsby serve",
-    "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
+    "test-build": "./scripts/test-build.sh",
+    "swizzle": "docusaurus swizzle",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve",
+    "write-heading-ids": "node --loader ts-node/esm ../scripts/write-heading-ids.ts"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^3.2.10",
-    "@loaders.gl/ply": "^3.2.10",
+    "@googlemaps/js-api-loader": "^1.16.0",
+    "@loaders.gl/core": "^4.2.0",
+    "@loaders.gl/i3s": "^4.2.0",
+    "@loaders.gl/las": "^4.2.0",
+    "@loaders.gl/obj": "^4.2.0",
+    "@loaders.gl/ply": "^4.2.0",
+    "@material-ui/core": "^4.10.2",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.57",
+    "@monaco-editor/react": "^4.4.6",
+    "@turf/turf": "^6.5.0",
+    "@vis.gl/react-maplibre": "^1.0.0-alpha.5",
     "d3-color": "^3.1.0",
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
-    "d3-scale": "^3.2.1",
-    "expr-eval": "^2.0.2"
+    "d3-scale": "^4.0.0",
+    "expr-eval": "^2.0.2",
+    "mapbox-gl": "^3.0.0",
+    "maplibre-gl": "^5.0.0",
+    "monaco-editor": "^0.39.0",
+    "popmotion": "^11.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^8.0.0",
+    "react-virtualized-auto-sizer": "^1.0.2",
+    "styled-components": "^5.3.3",
+    "supercluster": "^8.0.1",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "gatsby": "^2.20.0",
-    "gatsby-plugin-no-sourcemaps": "^2.1.2",
-    "gatsby-theme-ocular": "^1.2.3",
-    "gh-pages": "^2.2.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
-  }
+    "@docusaurus/core": "^3.6.3",
+    "@docusaurus/plugin-content-docs": "^3.6.3",
+    "@docusaurus/preset-classic": "^3.6.3",
+    "@mdx-js/react": "^3.1.0",
+    "algoliasearch": "^4.18.0",
+    "algoliasearch-helper": "^3.13.3",
+    "babel-plugin-styled-components": "^2.0.0",
+    "prism-react-renderer": "^2.3.0",
+    "ts-node": "~10.9.1"
+  },
+  "browserslist": [
+    ">0.2% and supports async-functions",
+    "not dead"
+  ],
+  "volta": {
+    "node": "18.19.0",
+    "yarn": "1.22.19"
+  },
+  "packageManager": "yarn@1.22.19"
 }

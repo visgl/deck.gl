@@ -1,18 +1,12 @@
-import {picking} from '@luma.gl/core';
-import type {ShaderModule} from '../../types/types';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-type PickingModuleSettings = {
-  /** Set to a picking color to visually highlight that item */
-  pickingSelectedColor?: [number, number, number] | null;
-  /** Color of the highlight */
-  pickingHighlightColor?: [number, number, number, number];
-  /** Set to true when rendering to off-screen "picking" buffer */
-  pickingActive?: boolean;
-  /** Set to true when picking an attribute value instead of object index */
-  pickingAttribute?: boolean;
-};
+import {picking} from '@luma.gl/shadertools';
 
 export default {
+  ...picking,
+  defaultUniforms: {...picking.defaultUniforms, useFloatColors: false},
   inject: {
     'vs:DECKGL_FILTER_GL_POSITION': `
     // for picking depth values
@@ -31,6 +25,5 @@ export default {
   color = picking_filterPickingColor(color);
     `
     }
-  },
-  ...picking
-} as ShaderModule<PickingModuleSettings>;
+  }
+};

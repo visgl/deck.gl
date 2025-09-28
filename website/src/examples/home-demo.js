@@ -1,10 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../constants/defaults';
 import App from 'website-examples/trips/app'; // eslint-disable-line
 
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class HomeDemo extends Component {
   static data = [
@@ -71,7 +75,7 @@ class HomeDemo extends Component {
         trips={(data && data[0]) || null}
         buildings={(data && data[1]) || null}
         trailLength={180}
-        animationSpeed={0.5}
+        animationSpeed={1}
         theme={this.theme}
         initialViewState={this.initialViewState}
       />

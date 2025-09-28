@@ -1,4 +1,8 @@
-import View, {CommonViewState} from './view';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import View, {CommonViewState, CommonViewProps} from './view';
 import FirstPersonViewport from '../viewports/first-person-viewport';
 import FirstPersonController from '../controllers/first-person-controller';
 
@@ -21,7 +25,7 @@ export type FirstPersonViewState = {
   modelMatrix?: number[] | null;
 } & CommonViewState;
 
-type FirstPersonViewProps = {
+export type FirstPersonViewProps = {
   /** Custom projection matrix */
   projectionMatrix?: number[];
   /** Field of view covered by camera, in degrees. Default `75`. */
@@ -32,12 +36,16 @@ type FirstPersonViewProps = {
   far?: number;
   /** Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`. */
   focalDistance?: number;
-};
+} & CommonViewProps<FirstPersonViewState>;
 
 export default class FirstPersonView extends View<FirstPersonViewState, FirstPersonViewProps> {
   static displayName = 'FirstPersonView';
 
-  get ViewportType() {
+  constructor(props: FirstPersonViewProps = {}) {
+    super(props);
+  }
+
+  getViewportType() {
     return FirstPersonViewport;
   }
 

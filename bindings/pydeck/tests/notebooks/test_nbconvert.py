@@ -16,5 +16,8 @@ def test_nbconvert():
         # NOTE skipping 03 (which contains live singapore taxi data) until I can provide a static version of that data
         if "04" in fname or "06" in fname or "03" in fname:
             continue
+        # NOTE Jupyter-specific features not currently supported in pydeck v0.9.
+        if "01" in fname or "02" in fname:
+            continue
         print(fname)
         assert nbconvert(fname)

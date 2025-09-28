@@ -12,7 +12,6 @@ good technique to add it.
 ```js
 // Example to add per-segment color to PathLayer
 import {PathLayer} from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
 
 // Allow accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
@@ -22,7 +21,7 @@ export default class MultiColorPathLayer extends PathLayer {
     this.getAttributeManager().addInstanced({
       instanceColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: "unorm8",
         normalized: true,
         update: this.calculateColors
       }
@@ -75,7 +74,7 @@ returns the shaders and modules used by the layer in an object:
 * `modules`: Array, list of shader modules to be used
 * `inject`: Object, map from injection points to custom GLSL code to be injected
 
-Read about [writing your own shaders](/docs/developer-guide/custom-layers/writing-shaders.md).
+Read about [writing your own shaders](./writing-shaders.md).
 
 When you are implementing your own custom layers, and want to change the shaders
 it is encouraged that you also define a `getShaders()` function and selectively
@@ -124,7 +123,7 @@ RoundedRectangleLayer.defaultProps = {
 }
 ```
 
-Modified fragment shader that uses this uniform (learn more in [writing your own shaders](/docs/developer-guide/custom-layers/writing-shaders.md)):
+Modified fragment shader that uses this uniform (learn more in [writing your own shaders](./writing-shaders.md)):
 
 ```js
 /// rounded-rectangle-layer-fragment.js
@@ -162,7 +161,7 @@ void main(void) {
 ## Defining Additional Attributes
 
 During initialization, you may define additional attributes by accessing the
-layer's [attribute manager](/docs/developer-guide/custom-layers/attribute-management.md):
+layer's [attribute manager](./attribute-management.md):
 
 ```js
 // my-point-cloud-layer.js
@@ -193,7 +192,7 @@ MyPointCloudLayer.defaultProps = {
 };
 ```
 
-Modified vertex shader that uses this attribute (learn more in [writing your own shaders](/docs/developer-guide/custom-layers/writing-shaders.md)):
+Modified vertex shader that uses this attribute (learn more in [writing your own shaders](./writing-shaders.md)):
 
 ```js
 // my-point-cloud-layer-vertex.js
@@ -225,7 +224,7 @@ void main(void) {
   /* replaced uniform 'radiusPixels' with 'instanceRadiusPixels' */
   gl_Position.xy += project_pixel_size_to_clipspace(positions.xy * instanceRadiusPixels);
 
-  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
 
   vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
 
@@ -237,4 +236,4 @@ void main(void) {
 ## Layer Extensions
 
 Sometimes we need to subclass multiple layers to add similar functionalities.
-[Layer extension](/docs/api-reference/extensions/overview.md) is a way to generalize, reuse, and share subclassed layer code. [Read on](/docs/developer-guide/custom-layers/layer-extensions.md) about how to package up a subclassed layer code into a layer extension.
+[Layer extension](../../api-reference/extensions/overview.md) is a way to generalize, reuse, and share subclassed layer code. [Read on](./layer-extensions.md) about how to package up a subclassed layer code into a layer extension.

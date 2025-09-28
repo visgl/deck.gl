@@ -3,8 +3,8 @@
 The `project` shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
 
 The `project` module has two extensions:
-- [project32](/docs/api-reference/core/project32.md) shorthand functions for projecting directly from worldspace to clipspace.
-- [project64](/docs/api-reference/core/project64.md) counterpart of `project32` that enables 64 bit projections, providing an increase in precision, at the cost of performance.
+- [project32](./project32.md) shorthand functions for projecting directly from worldspace to clipspace.
+- [project64](./project64.md) counterpart of `project32` that enables 64 bit projections, providing an increase in precision, at the cost of performance.
 
 
 ## Usage
@@ -13,10 +13,10 @@ Projects worldspace coordinates to clipspace coordinates.
 
 ```glsl
 // instanced geometry
-attribute vec3 positions;
+in vec3 positions;
 // instance attributes
-attribute vec3 instanceCenter;
-attribute float instanceSize;
+in vec3 instanceCenter;
+in float instanceSize;
 
 void main(void) {
   vec3 center = project_position(instanceCenter);
@@ -50,12 +50,12 @@ The functions converts positions/vectors between 4 coordinate spaces:
 
 | Name | Short Name | Description |
 |------|------|-------------|
-| World space | `world` | The [coordinate system](/docs/developer-guide/coordinate-systems.md) defined by the layer, not necessarily linear or uniform. |
+| World space | `world` | The [coordinate system](../../developer-guide/coordinate-systems.md) defined by the layer, not necessarily linear or uniform. |
 | Common space | `common` | A normalized intermediate 3D space that deck.gl uses for consistent processing of geometries, guaranteed to be linear and uniform. Therefore, it is safe to add/rotate/scale positions and vectors in this space. |
 | Screen space | `pixel` | Top-left coordinate system runs from `[0, 0]` to `[viewportWidth, viewportHeight]` (see remarks below). |
 | [Clip space](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#Clip_space) | `clipspace` | Output of the vertex shader. |
 
-More detailed explanation of each coordinate space can be found in the [coordinate systems guide](/docs/developer-guide/coordinate-systems.md).
+More detailed explanation of each coordinate space can be found in the [coordinate systems guide](../../developer-guide/coordinate-systems.md).
 
 The GLSL functions of the `project` shader module uses the following naming convention:
 
@@ -151,6 +151,6 @@ Returns a matrix that rotates any vector defined in the default common space to 
 
 ## Remarks
 
-* For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. functions in the project module multiply `pixels` with `project_uDevicePixelRatio`.
+* For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. functions in the project module multiply `pixels` with `project.devicePixelRatio`.
 * The pixels offsets will be divided by the `w` coordinate of `gl_Position`. This is simply the GPUs standard treatment of any coordinate. This means that there will be more pixels closer to the camera and less pixels further away from the camer. Setting the `focalDistance` uniform controls this.
 * To avoid pixel sizes scaling with distance from camera, simply set `focalDistance` to 1 and multiply clipspace offset with `gl_Position.w`

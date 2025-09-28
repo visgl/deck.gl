@@ -54,7 +54,7 @@ Each prop in `defaultProps` may be an object in the following shape:
 
 - `type` (string, required)
 - `value` (any, required) - the default value if this prop is not supplied
-- `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](/docs/api-reference/core/layer.md) prop).
+- `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](../../api-reference/core/layer.md) prop).
 - `transform` (function, optional) - transforms an asynchronously loaded value and returns a new form. Receives the following arguments:
   + `value` - the new value of this prop
   + `propType` - this prop type definition
@@ -70,12 +70,12 @@ Each prop in `defaultProps` may be an object in the following shape:
   + `value` - the new value of this prop
   + `oldValue` - the previous value of this prop
   + `propType` - this prop type definition
-- `deprecatedFor` (string|array, optional) - mark this prop as deprecated. The value is the new prop name(s) that this prop has been deprecated for. If the old prop is supplied instead of the new one, its value will be transferred to the new prop. The user will get a warning about the deprecation.
+- `deprecatedFor` (string | string[], optional) - mark this prop as deprecated. The value is the new prop name(s) that this prop has been deprecated for. If the old prop is supplied instead of the new one, its value will be transferred to the new prop. The user will get a warning about the deprecation.
 - Any additional options, see individual types below.
 
 ### Built-in Types
 
-##### `boolean`
+##### `boolean` {#boolean}
 
 Any value.
 
@@ -91,7 +91,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `number`
+##### `number` {#number}
 
 A numeric value.
 
@@ -110,11 +110,11 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `color`
+##### `color` {#color}
 
 A RGBA color.
 
-- Default `validate`: value is an array of 3 or 4 elements
+- Default `validate`: value is an array of 3 or 4 numbers
 - Default `equal`: deep equal
 
 ```js
@@ -124,20 +124,34 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `image`
+##### `image` {#image}
 
-One of: URL string, [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
+One of: URL string, luma.gl [Texture](https://luma.gl/docs/api-reference/core/resources/texture) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
+
+- Options:
+  + `parameters` (object, optional) - custom [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops) of the texture. If not specified, the following defaults are used:
+
+  ```js
+  {
+    minFilter: 'linear',
+    magFilter: 'linear',
+    mipmapFilter: 'linear',
+    addressModeU: 'clamp-to-edge',
+    addressModeV: 'clamp-to-edge'
+  }
+  ```
 
 - Default `transform`: converts to a `Texture2D` object
 
-##### `array`
+##### `array` {#array}
 
 An array of objects.
 
 - Options:
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
-  + `compare` (boolean, optional) - compare deeply during prop comparison. Default `false`.
-- Default `validate`: value is an array of 3 or 4 elements
+  + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `false`.
+  + `compare` (boolean | number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
+- Default `validate`: value is an array
 - Default `equal`: shallow equal if `compare: false`, otherwise deep equal
 
 ```js
@@ -149,7 +163,26 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `accessor`
+##### `object` {#object}
+
+An arbitrary object.
+
+- Options:
+  + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
+  + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `false`.
+  + `compare` (boolean | number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
+- Default `equal`: shallow equal if `compare: false`, otherwise deep equal
+
+```js
+MyLayerClass.defaultProps = {
+  // explicit
+  parameters: {type: 'object', value: {}, compare: 2}
+  // inferred
+  loadOptions: {}
+}
+```
+
+##### `accessor` {#accessor}
 
 An accessor used to update shader attributes.
 
@@ -163,20 +196,20 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `function`
+##### `function` {#function}
 
 A function.
 
 - Options:
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
-  + `compare` (boolean, optional) - compare strictly during prop comparison. Default `true`.
+  + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `true`.
 - Default `validate`: value is a function
-- Default `equal`: `true` if `compare: false`, otherwise strict equal
+- Default `equal`: `true` if `ignore: true`, otherwise strict equal
 
 ```js
 MyLayerClass.defaultProps = {
   // explicit
-  sizeScale: {type: 'function', value: x => Math.sqrt(x), compare: false}
+  sizeScale: {type: 'function', value: x => Math.sqrt(x), ignore: false}
   // inferred
   sizeScale: x => Math.sqrt(x)
 }

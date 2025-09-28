@@ -1,14 +1,17 @@
-const CartoUtils = require('./src');
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-const deck = globalThis.deck || {};
+// Import from package name instead of relative path
+// This will be resolved to src or dist by esbuild depending on bundle settings
+// dist has TS transformers applied
+/* eslint-disable import/no-extraneous-dependencies */
+import * as CartoUtils from '@deck.gl/carto';
 
-// Check if peer dependencies are included
-if (!deck.LineLayer) {
-  throw new Error('@deck.gl/layers is not found');
-}
+export * from '../layers/bundle/peer-dependency';
 
-// Export carto layer library for pydeck integration
+export const carto = CartoUtils;
+
+// Export CARTO library for pydeck integration.
 // More info: https://github.com/ajduberstein/pydeck_custom_layer
-globalThis.CartoLayerLibrary = CartoUtils;
-
-module.exports = Object.assign(deck, {carto: CartoUtils});
+globalThis.CartoLibrary = CartoUtils;

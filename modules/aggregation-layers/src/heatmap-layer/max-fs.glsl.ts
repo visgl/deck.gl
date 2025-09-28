@@ -1,7 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `\
-varying vec4 outTexture;
+#version 300 es
+in vec4 outTexture;
+out vec4 fragColor;
 void main() {
-  gl_FragColor = outTexture;
-  gl_FragColor.g = outTexture.r / max(1.0, outTexture.a);
+  fragColor = outTexture;
+  fragColor.g = outTexture.r / max(1.0, outTexture.a);
 }
 `;

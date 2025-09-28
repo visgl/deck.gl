@@ -1,6 +1,6 @@
 # CameraLight (Experimental)
 
-CameraLight is a special [point light](/docs/api-reference/core/point-light.md) source which always emits from the camera position.
+CameraLight is a special [point light](./point-light.md) source which always emits from the camera position.
 
 <div align="center">
   <div>
@@ -30,8 +30,8 @@ The constructor for the `CameraLight` class. Use this to create a new `CameraLig
 const cameraLight = new CameraLight({color, intensity});
 ```
 
-* `color` - (*array*)  RGB color of camera light source, default value is `[255, 255, 255]`.
-* `intensity` - (*number*) Strength of camera light source, default value is `1.0`.
+* `color` - (number[3])  RGB color of camera light source, default value is `[255, 255, 255]`.
+* `intensity` - (number) Strength of camera light source, default value is `1.0`.
 
 ## Source
 

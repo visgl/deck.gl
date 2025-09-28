@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {GeohashLayer} from '@deck.gl/geo-layers';
 import {geohashes} from 'deck.gl-test/data';
 

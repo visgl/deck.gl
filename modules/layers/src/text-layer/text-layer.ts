@@ -1,24 +1,8 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import {CompositeLayer, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_FONT_SETTINGS,
@@ -31,8 +15,10 @@ import TextBackgroundLayer from './text-background-layer/text-background-layer';
 import type {FontSettings} from './font-atlas-manager';
 import type {
   LayerProps,
+  LayerDataSource,
   Accessor,
   AccessorFunction,
+  AccessorContext,
   Unit,
   Position,
   Color,
@@ -59,6 +45,7 @@ const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 const DEFAULT_LINE_HEIGHT = 1.0;
 
 type _TextLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** If `true`, the text always faces camera. Otherwise the text faces up (z).
    * @default true
    */
@@ -100,6 +87,12 @@ type _TextLayerProps<DataT> = {
    * @default 0
    */
   getBorderWidth?: Accessor<DataT, number>;
+  /** The border radius of the background.
+   * If a number is supplied, it is the same border radius in pixel for all corners.
+   * If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
+   * @default 0
+   */
+  backgroundBorderRadius?: number | [number, number, number, number];
   /**
    * The padding of the background..
    * If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
@@ -120,12 +113,12 @@ type _TextLayerProps<DataT> = {
    * @default 'normal'
    */
   fontWeight?: FontSettings['fontWeight'];
-  /** A unitless number that will be multiplied with the current font size to set the line height.
+  /** A unitless number that will be multiplied with the current text size to set the line height.
    * @default 'normal'
    */
   lineHeight?: number;
   /**
-   * Width of outline around the text, relative to the font size. Only effective if `fontSettings.sdf` is `true`.
+   * Width of outline around the text, relative to the text size. Only effective if `fontSettings.sdf` is `true`.
    * @default 0
    */
   outlineWidth?: number;
@@ -144,7 +137,9 @@ type _TextLayerProps<DataT> = {
    */
   wordBreak?: 'break-word' | 'break-all';
   /**
-   * `maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
+   * A unitless number that will be multiplied with the current text size to set the width limit of a string.
+   * If specified, when the text is longer than the width limit, it will be wrapped into multiple lines using
+   * the strategy of `wordBreak`.
    * @default -1
    */
   maxWidth?: number;
@@ -192,7 +187,7 @@ type _TextLayerProps<DataT> = {
   backgroundColor?: Color;
 };
 
-export type TextLayerProps<DataT = any> = _TextLayerProps<DataT> & LayerProps<DataT>;
+export type TextLayerProps<DataT = unknown> = _TextLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<TextLayerProps> = {
   billboard: true,
@@ -205,6 +200,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
+  backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
   characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
@@ -213,14 +209,14 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   lineHeight: DEFAULT_LINE_HEIGHT,
   outlineWidth: {type: 'number', value: 0, min: 0},
   outlineColor: {type: 'color', value: DEFAULT_COLOR},
-  fontSettings: {},
+  fontSettings: {type: 'object', value: {}, compare: 1},
 
   // auto wrapping options
   wordBreak: 'break-word',
   maxWidth: {type: 'number', value: -1},
 
-  getText: {type: 'accessor', value: x => x.text},
-  getPosition: {type: 'accessor', value: x => x.position},
+  getText: {type: 'accessor', value: (x: any) => x.text},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 32},
   getAngle: {type: 'accessor', value: 0},
@@ -233,7 +229,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
 };
 
 /** Render text labels at given coordinates. */
-export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TextLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;
@@ -253,6 +249,11 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       styleVersion: 0,
       fontAtlasManager: new FontAtlasManager()
     };
+
+    // Breaking change in v8.9
+    if (this.props.maxWidth > 0) {
+      log.once(1, 'v8.9 breaking change: TextLayer maxWidth is now relative to text size')();
+    }
   }
 
   // eslint-disable-next-line complexity
@@ -285,7 +286,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     // because `TextLayer` assign the same pickingInfoIndex for one text label,
     // here info.index refers the index of text label in props.data
-    info.object = info.index >= 0 ? this.props.data[info.index] : null;
+    info.object = info.index >= 0 ? (this.props.data as any[])[info.index] : null;
     return info;
   }
 
@@ -365,19 +366,54 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     });
   }
 
-  // Returns the x, y offsets of each character in a text string
+  /** There are two size systems in this layer:
+
+    + Pixel size: user-specified text size, via getSize, sizeScale, sizeUnits etc.
+      The layer roughly matches the output of the layer to CSS pixels, e.g. getSize: 12, sizeScale: 2
+      in layer props is roughly equivalent to font-size: 24px in CSS.
+    + Texture size: internally, character positions in a text blob are calculated using the sizes of iconMapping,
+      which depends on how large each character is drawn into the font atlas. This is controlled by
+      fontSettings.fontSize (default 64) and most users do not set it manually.
+      These numbers are intended to be used in the vertex shader and never to be exposed to the end user.
+
+    All surfaces exposed to the user should either use the pixel size or a multiplier relative to the pixel size. */
+
+  /** Calculate the size and position of each character in a text string.
+   * Values are in texture size */
+  private transformParagraph(
+    object: DataT,
+    objectInfo: AccessorContext<DataT>
+  ): ReturnType<typeof transformParagraph> {
+    const {fontAtlasManager} = this.state;
+    const iconMapping = fontAtlasManager.mapping!;
+    const getText = this.state.getText!;
+    const {wordBreak, lineHeight, maxWidth} = this.props;
+
+    const paragraph = getText(object, objectInfo) || '';
+    return transformParagraph(
+      paragraph,
+      lineHeight,
+      wordBreak,
+      maxWidth * fontAtlasManager.props.fontSize,
+      iconMapping
+    );
+  }
+
+  /** Returns the x, y, width, height of each text string, relative to pixel size.
+   * Used to render the background.
+   */
   private getBoundingRect: AccessorFunction<DataT, [number, number, number, number]> = (
     object,
     objectInfo
   ) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
-    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
-
-    const paragraph = getText(object, objectInfo) || '';
-    const {
+    let {
       size: [width, height]
-    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = this.transformParagraph(object, objectInfo);
+    const {fontSize} = this.state.fontAtlasManager.props;
+    width /= fontSize;
+    height /= fontSize;
+
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -392,19 +428,18 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
   };
 
-  // Returns the x, y, w, h of each text object
+  /** Returns the x, y offsets of each character in a text string, in texture size.
+   * Used to layout characters in the vertex shader.
+   */
   private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
-    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
 
-    const paragraph = getText(object, objectInfo) || '';
     const {
       x,
       y,
       rowWidth,
       size: [width, height]
-    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -435,7 +470,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, texture, mapping},
+      fontAtlasManager: {scale, atlas, mapping},
       styleVersion
     } = this.state;
 
@@ -450,6 +485,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
+      backgroundBorderRadius,
       backgroundPadding,
       background,
       billboard,
@@ -475,6 +511,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
             getFillColor: getBackgroundColor,
             getLineColor: getBorderColor,
             getLineWidth: getBorderWidth,
+            borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
 
             // props shared with characters layer
@@ -483,7 +520,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
             getAngle,
             getPixelOffset,
             billboard,
-            sizeScale: sizeScale / this.state.fontAtlasManager.props.fontSize,
+            sizeScale,
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,
@@ -537,7 +574,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
             : DEFAULT_FONT_SETTINGS.smoothing,
           outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
-          iconAtlas: texture,
+          iconAtlas: atlas,
           iconMapping: mapping,
 
           getPosition,
@@ -563,14 +600,13 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
         this.getSubLayerProps({
           id: 'characters',
           updateTriggers: {
-            getIcon: updateTriggers.getText,
+            all: updateTriggers.getText,
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getIconOffsets: {
-              getText: updateTriggers.getText,
               getTextAnchor: updateTriggers.getTextAnchor,
               getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
               styleVersion

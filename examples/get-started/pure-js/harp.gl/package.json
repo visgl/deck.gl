@@ -1,15 +1,15 @@
 {
-  "name": "pure-js-harp.gl",
+  "name": "deckgl-example-pure-js-harp.gl",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.8.0",
-    "@deck.gl/layers": "^8.8.0",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
     "@here/harp-datasource-protocol": "^0.14.0",
     "@here/harp-geoutils": "^0.14.0",
     "@here/harp-mapview": "^0.14.0",

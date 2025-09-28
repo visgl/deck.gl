@@ -2,27 +2,36 @@
 set -e
 
 node scripts/validate-token.js
+npm run write-heading-ids
+npm pkg set version=$(node -p "require('../modules/core/package.json').version")
 
 # staging or prod
 MODE=$1
 WEBSITE_DIR=`pwd`
+OUTPUT_DIR=build
+
+# rebuild modules from source
+(
+  cd ..
+  yarn build
+)
 
 # clean up cache
-rm -rf ./.cache ./public
+docusaurus clear
 
 case $MODE in
   "prod")
-    gatsby build
+    docusaurus build
     ;;
   "staging")
-    gatsby build --prefix-paths
+    STAGING=true docusaurus build
     ;;
 esac
 
 # transpile workers
 (
   cd ..
-  BABEL_ENV=es5 npx babel ./website/static/workers --out-dir ./website/public/workers
+  BABEL_ENV=es5 npx babel ./website/static/workers --out-dir ./website/$OUTPUT_DIR/workers
 )
 
 # build gallery (scripting) examples
@@ -31,14 +40,5 @@ esac
   yarn
   yarn build
 )
-mkdir public/gallery
-cp -r ../examples/gallery/dist/* public/gallery/
-
-# build playground (json) examples
-(
-  cd ../examples/playground
-  yarn
-  yarn build
-)
-mkdir public/playground
-cp -r ../examples/playground/dist/* public/playground/
+mkdir $OUTPUT_DIR/gallery
+cp -r ../examples/gallery/dist/* $OUTPUT_DIR/gallery/

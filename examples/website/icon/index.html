@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>deck.gl Example</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
   <style>
     body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: hidden;}
     .tooltip {pointer-events: none; position: absolute; z-index: 9; font-size: 12px; padding: 8px; background: #000; color: #fff; min-width: 160px; max-height: 240px; overflow-y: hidden;}
@@ -13,8 +14,8 @@
 <body>
 <div id="app"></div>
 </body>
-<script type="text/javascript" src="app.js"></script>
-<script type="text/javascript">
-  App.renderToDOM(document.getElementById('app'));
+<script type="module">
+  import {renderToDOM} from './app.tsx';
+  renderToDOM(document.getElementById('app'));
 </script>
 </html>

@@ -1,15 +1,20 @@
-import {h3SetToMultiPolygon, H3IndexInput} from 'h3-js';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
 import {AccessorFunction, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
+import {default as H3HexagonLayer} from './h3-hexagon-layer';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
+import {normalizeLongitudes} from './h3-utils';
 
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
-  getHexagons: {type: 'accessor', value: d => d.hexagons}
+  getHexagons: {type: 'accessor', value: (d: any) => d.hexagons}
 };
 
 /** All properties supported by H3ClusterLayer. */
-export type H3ClusterLayerProps<DataT = any> = _H3ClusterLayerProps<DataT> &
+export type H3ClusterLayerProps<DataT = unknown> = _H3ClusterLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by H3ClusterLayer. */
@@ -22,12 +27,16 @@ type _H3ClusterLayerProps<DataT> = {
   getHexagons?: AccessorFunction<DataT, H3IndexInput[]>;
 };
 
-export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<_H3ClusterLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'H3ClusterLayer';
   static defaultProps = defaultProps;
+
+  state!: {
+    polygons: {polygon: number[][][]}[];
+  };
 
   initializeState(): void {
     H3HexagonLayer._checkH3Lib();
@@ -45,9 +54,13 @@ export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCel
       for (const object of iterable) {
         objectInfo.index++;
         const hexagons = getHexagons(object, objectInfo);
-        const multiPolygon = h3SetToMultiPolygon(hexagons, true);
+        const multiPolygon = cellsToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
+          // Normalize polygons to prevent wrapping over the anti-meridian
+          for (const ring of polygon) {
+            normalizeLongitudes(ring);
+          }
           polygons.push(this.getSubLayerRow({polygon}, object, objectInfo.index));
         }
       }
@@ -57,9 +70,16 @@ export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCel
   }
 
   indexToBounds(): Partial<GeoCellLayer['props']> {
+    const {getElevation, getFillColor, getLineColor, getLineWidth} = this.props;
+
     return {
       data: this.state.polygons,
-      getPolygon: d => d.polygon
+      getPolygon: d => d.polygon,
+
+      getElevation: this.getSubLayerAccessor(getElevation),
+      getFillColor: this.getSubLayerAccessor(getFillColor),
+      getLineColor: this.getSubLayerAccessor(getLineColor),
+      getLineWidth: this.getSubLayerAccessor(getLineWidth)
     };
   }
 }

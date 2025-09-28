@@ -2,13 +2,13 @@
 
 > This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
 
-The `GlobeView` class is a subclass of [View](/docs/api-reference/core/view.md). This view projects the earth into a 3D globe.
+The `GlobeView` class is a subclass of [View](./view.md). This view projects the earth into a 3D globe.
 
-It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
+It's recommended that you read the [Views and Projections guide](../../developer-guide/views.md) before using this class.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl GlobeView" src="https://codepen.io/vis-gl/embed/JjbdXjr?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl GlobeView" src="https://codepen.io/vis-gl/embed/JjbdXjr?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/JjbdXjr'>deck.gl GlobeView</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -28,9 +28,9 @@ In the initial release, this class mainly addresses the need to render an overvi
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
   + `TerrainLayer`
-- [MaskExtension](/docs/api-reference/extensions/mask-extension.md) is not supported in this view.
+- [MaskExtension](../extensions/mask-extension.md) is not supported in this view.
 
-When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](/docs/api-reference/geo-layers/great-circle-layer.md).
+When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](../geo-layers/great-circle-layer.md).
 
 
 ## Constructor
@@ -40,17 +40,17 @@ import {_GlobeView as GlobeView} from '@deck.gl/core';
 const view = new GlobeView({id, ...});
 ```
 
-`GlobeView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor, plus the following:
+`GlobeView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `resolution` (Number, optional)
+#### `resolution` (number, optional) {#resolution}
 
 The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
-##### `nearZMultiplier` (Number, optional)
+#### `nearZMultiplier` (number, optional) {#nearzmultiplier}
 
 Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter.
 
-##### `farZMultiplier` (Number, optional)
+#### `farZMultiplier` (number, optional) {#farzmultiplier}
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
@@ -59,11 +59,11 @@ Scaler for the far plane, 1 unit equals to the distance from the camera to the e
 
 To render, `GlobeView` needs to be used together with a `viewState` with the following parameters:
 
-- `longitude` (Number) - longitude at the viewport center
-- `latitude` (Number) - latitude at the viewport center
-- `zoom` (Number) - zoom level
-- `maxZoom` (Number, optional) - max zoom level. Default `20`.
-- `minZoom` (Number, optional) - min zoom level. Default `0`.
+- `longitude` (number) - longitude at the viewport center
+- `latitude` (number) - latitude at the viewport center
+- `zoom` (number) - zoom level
+- `maxZoom` (number, optional) - max zoom level. Default `20`.
+- `minZoom` (number, optional) - min zoom level. Default `0`.
 
 
 ## Controller
@@ -74,7 +74,7 @@ By default, `GlobeView` uses the `GlobeController` to handle interactivity. To e
 const view = new GlobeView({id: 'globe', controller: true});
 ```
 
-Visit the [GlobeController](/docs/api-reference/core/globe-controller.md) documentation for a full list of supported options.
+Visit the [GlobeController](./globe-controller.md) documentation for a full list of supported options.
 
 
 # Remarks

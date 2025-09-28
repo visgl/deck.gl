@@ -1,7 +1,3 @@
-<div align="center">
-   <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
-</div>
-
 ## Example: Use deck.gl with harp.gl
 
 Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it

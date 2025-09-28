@@ -1,11 +1,6 @@
-<div align="center">
-   <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
-</div>
-
 ## Example: Use deck.gl with React
 
-Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
-with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
+Uses [Vite](https://vitejs.dev/) to bundle and serve files.
 
 ## Usage
 
@@ -16,7 +11,7 @@ export GoogleMapsAPIKey=<google_maps_api_key>
 export GoogleMapsMapId=<google_maps_map_id>
 ```
 
-Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAP_ID` variables in `app.js`.
+Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAP_ID` variables in `app.jsx`.
 
 To install dependencies:
 

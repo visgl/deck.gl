@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import styled from 'styled-components';
-
+import {useColorMode} from '@docusaurus/theme-common';
 import {MAPBOX_STYLES} from '../constants/defaults';
 import {gotoLayerSource} from './codepen-automation';
 
@@ -25,78 +29,96 @@ const TOOLTIP_STYLE = {
 };
 
 const DemoPlaceholder = styled.div`
-height: 50vh;
-min-height: 200px;
+  height: 50vh;
+  min-height: 200px;
+  position: relative;
+  margin-bottom: 24px;
 
-@media screen and (max-width: 768px) {
-  height: 60vh;
-}
+  @media screen and (max-width: 768px) {
+    height: 60vh;
+  }
 `;
 
 const DemoContainer = styled.div`
-height: 50vh;
-min-height: 200px;
-position: absolute;
-width: 100%;
-left: 0;
-top: 0;
-overflow: hidden;
+  height: 50vh;
+  min-height: 200px;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
 
-@media screen and (max-width: 768px) {
-  height: 60vh;
-}
+  @media screen and (max-width: 768px) {
+    height: 60vh;
+  }
 `;
 
 const DemoSourceLink = styled.div`
-position: absolute;
-top: 0;
-right: 0;
-padding: 8px;
-background: #fff;
-margin: 12px;
-box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-cursor: pointer;
-font-weight: bold;
-font-size: 12px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 8px;
+  background: var(--ifm-background-surface-color);
+  margin: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
 
-&:hover {
-  color: ${props => props.theme.colors.primary};
-}
+  &:hover {
+    color: var(--ifm-color-primary);
+  }
 
-svg {
-  width: 20px;
-  vertical-align: middle;
-  margin-right: 4px;
-}
+  svg {
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
 `;
 
+/* eslint-disable no-eval */
 function evalObject(source, globals, output) {
   return eval(`(function evalObject(globals){
-    const _global = typeof global === 'undefined' ? self : global;
-    Object.assign(_global, globals);
+    Object.assign(globalThis, globals);
     ${
-      output ? `${source}
-      return {${output.join(',')}};` : `return ${source};`
+      output
+        ? `${source}
+      return {${output.join(',')}};`
+        : `return ${source};`
     }
   })`)(globals);
 }
 
 export function makeLayerDemo(config) {
-  const {Layer, getTooltip, props, mapStyle = MAPBOX_STYLES.LIGHT, initialViewState = INITIAL_VIEW_STATE, imports} = config;
+  const {
+    Layer,
+    getTooltip,
+    props,
+    mapStyle = true,
+    initialViewState = INITIAL_VIEW_STATE,
+    imports
+  } = config;
   config.initialViewState = initialViewState;
 
-  function Demo() {
-    const _getTooltip = getTooltip && eval(getTooltip);
-    const styledGetTooltip = pickingInfo => {
-      const text = _getTooltip && _getTooltip(pickingInfo);
-      return text && {
+  const _getTooltip = getTooltip && eval(getTooltip);
+  const styledGetTooltip = pickingInfo => {
+    const text = _getTooltip && _getTooltip(pickingInfo);
+    return (
+      text && {
         text,
         style: TOOLTIP_STYLE
-      };
-    };
+      }
+    );
+  };
 
-    const layerProps = evalObject(props, imports);
+  const layerProps = evalObject(props, imports);
+
+  function Demo() {
+    const {colorMode} = useColorMode();
+
     const layer = new Layer(layerProps);
+
+    const mapStyleSheet = colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
 
     return (
       <DemoPlaceholder>
@@ -108,11 +130,22 @@ export function makeLayerDemo(config) {
             controller={true}
             layers={[layer]}
           >
-            {mapStyle && <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />}
+            {mapStyle && (
+              <Map
+                reuseMaps
+                mapStyle={mapStyleSheet}
+              />
+            )}
           </DeckGL>
         </DemoContainer>
         <DemoSourceLink onClick={() => gotoLayerSource(config, layer)}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ><path d="M0 0h24v24H0V0z" fill="none"/><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path
+              fill="currentcolor"
+              d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+            />
+          </svg>
           Edit on Codepen
         </DemoSourceLink>
       </DemoPlaceholder>

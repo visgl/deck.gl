@@ -1,104 +1,101 @@
-import {default as LayersPass} from './layers-pass';
-import {
-  Framebuffer,
-  Texture2D,
-  Renderbuffer,
-  withParameters,
-  cssToDeviceRatio
-} from '@luma.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Device, Framebuffer, Parameters, Texture} from '@luma.gl/core';
+import type Layer from '../lib/layer';
+import type Viewport from '../viewports/viewport';
+import LayersPass from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
-  shadowMap: Texture2D;
-  depthBuffer: Renderbuffer;
   fbo: Framebuffer;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     props?: {
       id;
     }
   ) {
-    super(gl, props);
+    super(device, props);
 
     // The shadowMap texture
-    this.shadowMap = new Texture2D(gl, {
+    const shadowMap = device.createTexture({
+      format: 'rgba8unorm',
       width: 1,
       height: 1,
-      parameters: {
-        [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+      sampler: {
+        minFilter: 'linear',
+        magFilter: 'linear',
+        addressModeU: 'clamp-to-edge',
+        addressModeV: 'clamp-to-edge'
       }
+      // TODO - texture API change in luma.gl v9.2
+      // mipmaps: true
     });
 
-    this.depthBuffer = new Renderbuffer(gl, {
-      format: gl.DEPTH_COMPONENT16,
-      width: 1,
-      height: 1
-    });
+    const depthBuffer = device.createTexture({format: 'depth16unorm', width: 1, height: 1});
 
-    this.fbo = new Framebuffer(gl, {
+    this.fbo = device.createFramebuffer({
       id: 'shadowmap',
       width: 1,
       height: 1,
-      attachments: {
-        [gl.COLOR_ATTACHMENT0]: this.shadowMap,
-        // Depth attachment has to be specified for depth test to work
-        [gl.DEPTH_ATTACHMENT]: this.depthBuffer
-      }
+      colorAttachments: [shadowMap],
+      // Depth attachment has to be specified for depth test to work
+      depthStencilAttachment: depthBuffer
     });
+  }
+
+  delete() {
+    if (this.fbo) {
+      this.fbo.destroy();
+      this.fbo = null!;
+    }
+  }
+
+  getShadowMap(): Texture {
+    return this.fbo.colorAttachments[0].texture;
   }
 
   render(params) {
     const target = this.fbo;
 
-    withParameters(
-      this.gl,
-      {
-        depthRange: [0, 1],
-        depthTest: true,
-        blend: false,
-        clearColor: [1, 1, 1, 1]
-      },
-      () => {
-        const viewport = params.viewports[0];
-        const pixelRatio = cssToDeviceRatio(this.gl);
-        const width = viewport.width * pixelRatio;
-        const height = viewport.height * pixelRatio;
-        if (width !== target.width || height !== target.height) {
-          target.resize({width, height});
-        }
+    // @ts-expect-error TODO - assuming WebGL context
+    const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
-        super.render({...params, target, pass: 'shadow'});
-      }
-    );
+    const viewport = params.viewports[0];
+    const width = viewport.width * pixelRatio;
+    const height = viewport.height * pixelRatio;
+    const clearColor = [1, 1, 1, 1];
+    if (width !== target.width || height !== target.height) {
+      target.resize({width, height});
+    }
+
+    super.render({...params, clearColor, target, pass: 'shadow'});
+  }
+
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): Parameters {
+    return {
+      ...layer.props.parameters,
+      blend: false,
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal'
+    };
   }
 
   shouldDrawLayer(layer) {
     return layer.props.shadowEnabled !== false;
   }
 
-  getModuleParameters() {
+  getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
     return {
-      drawToShadowMap: true
+      shadow: {
+        project: otherShaderModuleProps.project,
+        drawToShadowMap: true
+      }
     };
-  }
-
-  delete() {
-    if (this.fbo) {
-      this.fbo.delete();
-      this.fbo = null;
-    }
-
-    if (this.shadowMap) {
-      this.shadowMap.delete();
-      this.shadowMap = null;
-    }
-
-    if (this.depthBuffer) {
-      this.depthBuffer.delete();
-      this.depthBuffer = null;
-    }
   }
 }

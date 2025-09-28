@@ -1,24 +1,27 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
-import App from 'website-examples/tagmap/app';
+import App from 'website-examples/text/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class TextDemo extends Component {
-  static title = 'Twitter Hashtags';
+  static title = 'World Cities by Population';
 
   static data = {
-    url: `${DATA_URI}/hashtags100k.txt`,
-    worker: '/workers/hashtags-decoder.js'
+    url: `${DATA_URI}/geonames.txt`,
+    worker: '/workers/geonames-decoder.js'
   };
 
-  static code = `${GITHUB_TREE}/examples/website/tagmap`;
+  static code = `${GITHUB_TREE}/examples/website/text`;
 
   static parameters = {
-    cluster: {displayName: 'Dynamic Cluster', type: 'checkbox', value: true},
-    fontSize: {displayName: 'Font Size',
-      type: 'range', value: 32, step: 1, min: 20, max: 80}
+    noOverlap: {displayName: 'Prevent overlap', type: 'checkbox', value: true},
+    fontSize: {displayName: 'Font Size', type: 'range', value: 32, step: 1, min: 20, max: 80}
   };
 
   static mapStyle = MAPBOX_STYLES.DARK;
@@ -26,13 +29,17 @@ class TextDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Data set from Twitter showing hashtags with geolocation.</p>
-        <p>Data source:
-          <a href="https://developer.twitter.com/">Twitter</a>
+        <p>World cities with population more than 1000</p>
+        <p>
+          Data source:
+          <a href="https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/information/?disjunctive.cou_name_en">
+            GeoNames
+          </a>
         </p>
         <div className="layout">
-          <div className="stat col-1-2">No. of Tweets
-            <b>{ readableInteger(meta.count || 0) }</b>
+          <div className="stat col-1-2">
+            No. of cities
+            <b>{readableInteger(meta.count || 0)}</b>
           </div>
         </div>
       </div>
@@ -46,8 +53,9 @@ class TextDemo extends Component {
       <App
         {...this.props}
         data={data}
-        cluster={params.cluster.value}
-        fontSize={params.fontSize.value} />
+        noOverlap={params.noOverlap.value}
+        fontSize={params.fontSize.value}
+      />
     );
   }
 }

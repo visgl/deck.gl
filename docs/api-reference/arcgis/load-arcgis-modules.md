@@ -42,11 +42,11 @@ Arguments:
 loadArcGISModules(modules, loadScriptOptions);
 ```
 
-- `modules` (Array, optional) - Array of esri modules to load, passed to [esri-loader](https://github.com/Esri/esri-loader)'s `loadModules`
-- `loadScriptOptions` (Object, optional) - [esri-loader options](https://github.com/Esri/esri-loader#configuring-esri-loader)
+- `modules` (string[], optional) - Array of esri modules to load, passed to [esri-loader](https://github.com/Esri/esri-loader)'s `loadModules`
+- `loadScriptOptions` (object, optional) - [esri-loader options](https://github.com/Esri/esri-loader#configuring-esri-loader)
 
 Returns: a promise that resolves to an object with the following fields:
 
-- [DeckLayer](/docs/api-reference/arcgis/deck-layer.md)
-- [DeckRenderer](/docs/api-reference/core/deck-renderer.md)
-- `modules` (Array) - if the `modules` argument was specified, will represent an array of the resolved objects
+- [DeckLayer](./deck-layer.md)
+- [DeckRenderer](./deck-renderer.md)
+- `modules` (object[]) - if the `modules` argument was specified, will represent an array of the resolved objects

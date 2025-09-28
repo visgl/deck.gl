@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
@@ -35,9 +19,7 @@ import {
 } from '@math.gl/web-mercator';
 import {Padding} from './viewport';
 
-// TODO - import from math.gl
-import * as vec2 from 'gl-matrix/vec2';
-import {Matrix4, clamp} from '@math.gl/core';
+import {Matrix4, clamp, vec2} from '@math.gl/core';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
@@ -62,7 +44,7 @@ export type WebMercatorViewportOptions = {
   altitude?: number;
   /** Camera fovy in degrees. If provided, overrides `altitude` */
   fovy?: number;
-  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat */
+  /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
   /** Zoom level */
   zoom?: number;
@@ -78,6 +60,10 @@ export type WebMercatorViewportOptions = {
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1.01` */
   farZMultiplier?: number;
+  /** Optionally override the near plane position. `nearZMultiplier` is ignored if `nearZ` is supplied. */
+  nearZ?: number;
+  /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
+  farZ?: number;
   /** Render multiple copies of the world */
   repeat?: boolean;
   /** Internal use */
@@ -115,6 +101,8 @@ export default class WebMercatorViewport extends Viewport {
       bearing = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
+      nearZ,
+      farZ,
       orthographic = false,
       projectionMatrix,
 
@@ -165,6 +153,13 @@ export default class WebMercatorViewport extends Viewport {
         nearZMultiplier,
         farZMultiplier
       });
+
+      if (Number.isFinite(nearZ)) {
+        projectionParameters.near = nearZ;
+      }
+      if (Number.isFinite(farZ)) {
+        projectionParameters.far = farZ;
+      }
     }
 
     // The uncentered matrix allows us two move the center addition to the

@@ -2,16 +2,16 @@
 
 `DeckGL` is the main interface to deck.gl for React applications. `DeckGL` is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
 
-Make sure to read the [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
+Make sure to read the [Using deck.gl with React](../../get-started/using-with-react.md) article.
 
-The `DeckGL` class is a React wrapper of the [Deck](/docs/api-reference/core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
+The `DeckGL` class is a React wrapper of the [Deck](../core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
 
 
 ## Usage
 
 ```js
 // Basic usage
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 const App = (data) => (
@@ -23,11 +23,15 @@ const App = (data) => (
 );
 ```
 
-Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `StaticMap` component from react-map-gl), but can be any React components.
+Like any React component, `DeckGL` can accept child components. Typical React components include:
+
+- Base maps such as the [`Map`](https://visgl.github.io/react-map-gl/docs/api-reference/map) component from `react-map-gl`, which can synchronize with deck.gl's view state.
+- [Widgets](./overview.md#using-react-wrapped-widgets), which can display and control deck.gl state.
 
 ```js
-import DeckGL from '@deck.gl/react';
-import {StaticMap} from 'react-map-gl';
+import {DeckGL} from '@deck.gl/react';
+import {Map} from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 const App = (data) => (
   <DeckGL
@@ -35,9 +39,7 @@ const App = (data) => (
     controller={true}
     layers={[new ScatterplotLayer({data})]}
   >
-    <StaticMap
-      mapStyle="mapbox://styles/mapbox/dark-v9"
-      mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+    <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
   </DeckGL>
 );
 
@@ -45,22 +47,25 @@ const App = (data) => (
 
 ## Properties
 
-`DeckGL` accepts all [Deck](/docs/api-reference/core/deck.md#properties) properties, with these additional semantics:
+`DeckGL` accepts all [Deck](../core/deck.md#properties) properties, with these additional semantics:
 
 ### React Context
 
-##### `ContextProvider` (React.Component, optional)
+#### `ContextProvider` (React.Component, optional) {#contextprovider}
 
 A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancestor to all children. The passed through context contains the following values:
 
-- `viewport` ([Viewport](/docs/api-reference/core/viewport.md)) - the current viewport
+- `viewport` ([Viewport](../core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
-- `eventManager` ([EventManager](https://uber-web.github.io/mjolnir.js/docs/api-reference/event-manager))
+- `eventManager` ([EventManager](https://visgl.github.io/mjolnir.js/docs/api-reference/event-manager))
+- `onViewStateChange` ([onViewStateChange](../core/deck.md#onviewstatechange)) - the view state change handler 
+- `deck` ([Deck](../core/deck.md)) - the current deck instance, if present
+- `widgets` ([Widget](../core/widget.md)[]) - the current jsx widgets, if any
 
 ```jsx
 /// Example using react-map-gl v6 controls with deck.gl
 /// To use react-map-gl v7, see https://deck.gl/docs/api-reference/mapbox/mapbox-overlay
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 <DeckGL ... ContextProvider={MapContext.Provider}>
@@ -81,7 +86,7 @@ The following semantics of the standard React `children` property are considered
 It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop.
 
 ```jsx
-  <DeckGL {...viewState}>
+  <DeckGL initialViewState={...viewState}>
     <LineLayer id="line-layer" data={data} />
   <DeckGL />
 ```
@@ -96,7 +101,7 @@ It is possible to use JSX syntax to create deck.gl views as React children of th
 ```jsx
   <DeckGL initialViewState={...viewState} layers={layers} >
     <MapView id="map" width="50%" controller={true} >
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
     </MapView>
     <FirstPersonView width="50%" x="50%" fovy={50} />
   <DeckGL />
@@ -112,11 +117,22 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
 
   <DeckGL initialViewState={...viewState} layers={layers} views={views} >
     <View id="map">
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
     </View>
   <DeckGL />
 ```
 
+#### JSX Widgets
+
+It is possible to use JSX syntax to create deck.gl widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `widgets` props.
+
+```jsx
+  <DeckGL initialViewState={...viewState}>
+    <ZoomWidget id="zoom-widget" placement="top-right" />
+  <DeckGL />
+```
+
+Learn how to use widgets in JSX by reading [Using React-wrapped widgets](./overview.md#using-react-wrapped-widgets).
 
 #### Position Children in Views
 
@@ -172,7 +188,7 @@ Additional Notes:
 
 ## Methods
 
-All [Deck](/docs/api-reference/core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
+All [Deck](../core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
 
 The public methods you can call explicitly list below:
 

@@ -1,0 +1,19 @@
+{
+  "name": "deckgl-examples-tfjs",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.2.0",
+    "deck.gl": "^9.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
+  }
+}

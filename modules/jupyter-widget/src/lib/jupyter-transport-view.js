@@ -1,56 +1,68 @@
-import {DOMWidgetView} from '@jupyter-widgets/base';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import * as widgets from '@jupyter-widgets/base';
 import JupyterTransport from './jupyter-transport';
 
-export default class JupyterTransportView extends DOMWidgetView {
-  initialize() {
-    this.listenTo(this.model, 'destroy', this.remove);
+let JupyterTransportView = null;
+const DOMWidgetView = widgets && widgets.DOMWidgetView;
 
-    // TODO - is there any variable information on the model we can use to
-    // give an interesting name or id to this instance?
-    this.transport = new JupyterTransport();
+if (DOMWidgetView) {
+  class View extends DOMWidgetView {
+    initialize() {
+      this.listenTo(this.model, 'destroy', this.remove);
 
-    // Expose Jupyter internals to enable work-arounds
-    this.transport.jupyterModel = this.model;
-    this.transport.jupyterView = this;
-    this.transport._initialize();
-    super.initialize.apply(this, arguments);
-  }
+      // TODO - is there any variable information on the model we can use to
+      // give an interesting name or id to this instance?
+      this.transport = new JupyterTransport();
 
-  remove() {
-    if (this.transport) {
-      this.transport._finalize();
-      this.transport.jupyterModel = null;
-      this.transport.jupyterView = null;
-      this.transport = null;
+      // Expose Jupyter internals to enable work-arounds
+      this.transport.jupyterModel = this.model;
+      this.transport.jupyterView = this;
+      this.transport._initialize();
+      super.initialize.apply(this, arguments);
     }
-  }
 
-  render() {
-    super.render();
+    remove() {
+      if (this.transport) {
+        this.transport._finalize();
+        this.transport.jupyterModel = null;
+        this.transport.jupyterView = null;
+        this.transport = null;
+      }
+    }
 
-    this.model.on('change:json_input', this.onJsonChanged.bind(this));
-    this.model.on('change:data_buffer', this.onDataBufferChanged.bind(this));
+    render() {
+      super.render();
 
-    this.onDataBufferChanged();
-  }
+      this.model.on('change:json_input', this.onJsonChanged.bind(this));
+      this.model.on('change:data_buffer', this.onDataBufferChanged.bind(this));
 
-  onJsonChanged() {
-    const json = JSON.parse(this.model.get('json_input'));
-    this.transport._messageReceived({type: 'json', json});
-  }
+      this.onDataBufferChanged();
+    }
 
-  onDataBufferChanged() {
-    const json = this.model.get('json_input');
-    const dataBuffer = this.model.get('data_buffer');
-
-    if (json && dataBuffer) {
-      this.transport._messageReceived({
-        type: 'json-with-binary',
-        json,
-        binary: dataBuffer
-      });
-    } else {
+    onJsonChanged() {
+      const json = JSON.parse(this.model.get('json_input'));
       this.transport._messageReceived({type: 'json', json});
     }
+
+    onDataBufferChanged() {
+      const json = this.model.get('json_input');
+      const dataBuffer = this.model.get('data_buffer');
+
+      if (json && dataBuffer) {
+        this.transport._messageReceived({
+          type: 'json-with-binary',
+          json,
+          binary: dataBuffer
+        });
+      } else {
+        this.transport._messageReceived({type: 'json', json});
+      }
+    }
   }
+  JupyterTransportView = View;
 }
+
+export default JupyterTransportView;

@@ -1,3 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {readPackedTypedArray} from './fast-pbf';
+import {TypedArray} from '@loaders.gl/loader-utils';
+
 // KeyValueObject ========================================
 interface KeyValueObject {
   key: string;
@@ -6,7 +13,7 @@ interface KeyValueObject {
 
 class KeyValueObjectReader {
   static read(pbf, end?: number): KeyValueObject {
-    return pbf.readFields(KeyValueObjectReader._readField, {key: '', value: ''}, end);
+    return pbf.readFields(KeyValueObjectReader._readField, {key: '', value: null}, end);
   }
   static _readField(this: void, tag: number, obj: KeyValueObject, pbf) {
     if (tag === 1) obj.key = pbf.readString();
@@ -16,35 +23,32 @@ class KeyValueObjectReader {
 
 // Properties ========================================
 
-export interface KeyValueProperties {
-  data: KeyValueObject[];
-}
-
 export class PropertiesReader {
   static read(pbf, end?: number) {
-    return pbf.readFields(PropertiesReader._readField, {data: []}, end);
+    return pbf.readFields(PropertiesReader._readField, {}, end);
   }
-  static _readField(this: void, tag: number, obj: KeyValueProperties, pbf) {
-    if (tag === 1) obj.data.push(KeyValueObjectReader.read(pbf, pbf.readVarint() + pbf.pos));
+  static _readField(this: void, tag: number, obj: Record<string, string>, pbf) {
+    if (tag === 1) {
+      const {key, value} = KeyValueObjectReader.read(pbf, pbf.readVarint() + pbf.pos);
+      obj[key] = value;
+    }
   }
 }
 
 // Doubles ========================================
 
 interface Doubles {
-  value: Float32Array;
+  value: Float64Array;
   size: number;
 }
 
 class DoublesReader {
   static read(pbf, end?: number): Doubles {
-    // TODO perhaps we can do better and directly map from the source
-    // ArrayBuffer using ArrayBuffer.slice()
     const {value, size} = pbf.readFields(DoublesReader._readField, {value: [], size: 0}, end);
-    return {value: new Float32Array(value), size};
+    return {value, size};
   }
   static _readField(this: void, tag: number, obj, pbf) {
-    if (tag === 1) pbf.readPackedDouble(obj.value);
+    if (tag === 1) readPackedTypedArray(Float64Array, pbf, obj);
     else if (tag === 2) obj.size = pbf.readVarint(true);
   }
 }
@@ -85,7 +89,8 @@ class FieldsReader {
 // NumericProp ========================================
 
 export interface NumericProp {
-  value: number[];
+  value: TypedArray;
+  size: number;
 }
 
 class NumericPropReader {
@@ -93,7 +98,7 @@ class NumericPropReader {
     return pbf.readFields(NumericPropReader._readField, {value: []}, end);
   }
   static _readField(this: void, tag: number, obj: NumericProp, pbf) {
-    if (tag === 1) pbf.readPackedDouble(obj.value);
+    if (tag === 1) readPackedTypedArray(Float64Array, pbf, obj);
   }
 }
 
@@ -119,7 +124,7 @@ interface Points {
   positions: Doubles;
   globalFeatureIds: Ints;
   featureIds: Ints;
-  properties: KeyValueProperties[];
+  properties: Record<string, string>[];
   numericProps: Record<string, NumericProp>;
   fields: Fields[];
 }

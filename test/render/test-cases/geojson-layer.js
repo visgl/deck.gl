@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   LightingEffect,
   AmbientLight,
@@ -13,7 +17,7 @@ import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
 import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/color';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 
 import {OS} from '../constants';
 
@@ -463,7 +467,7 @@ export default [
         iconSizeUnits: 'pixels',
         getIconSize: 10,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning'),
-        iconAlphaCutoff: 1.0 // icon edge is not sharp anymore
+        iconAlphaCutoff: 0.99 // icon edge is not sharp anymore
       })
     ],
     goldenImage: './test/render/golden-images/geojson-icon-alpha-cutoff.png'

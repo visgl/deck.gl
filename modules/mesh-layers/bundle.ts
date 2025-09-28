@@ -1,10 +1,11 @@
-const deckGLLayers = require('./src');
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-const deck = globalThis.deck || {};
+export * from '../core/bundle/peer-dependency';
 
-// Check if peer dependencies are included
-if (!deck.Layer) {
-  throw new Error('@deck.gl/core is not found');
-}
-
-module.exports = Object.assign(deck, deckGLLayers);
+// Import from package name instead of relative path
+// This will be resolved to src or dist by esbuild depending on bundle settings
+// dist has TS transformers applied
+/* eslint-disable import/no-extraneous-dependencies */
+export * from '@deck.gl/mesh-layers';

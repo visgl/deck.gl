@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App, {BANDS, LINES} from 'website-examples/contour/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 
@@ -13,12 +17,24 @@ class ContourDemo extends Component {
     url: `${DATA_URI}/covid-by-county.txt`,
     worker: '/workers/contour-data-decoder.js'
   };
-  
+
   static code = `${GITHUB_TREE}/examples/website/contour`;
 
   static parameters = {
-    style: {displayName: 'Style', type: 'select', options: ['Isoband', 'Isoline'], value: 'Isoband'},
-    cellSize: {displayName: 'Cell size', type: 'range', value: 60000, step: 5000, min: 30000, max: 100000},
+    style: {
+      displayName: 'Style',
+      type: 'select',
+      options: ['Isoband', 'Isoline'],
+      value: 'Isoband'
+    },
+    cellSize: {
+      displayName: 'Cell size',
+      type: 'range',
+      value: 60000,
+      step: 5000,
+      min: 30000,
+      max: 100000
+    },
     week: {displayName: 'Week', type: 'range', value: 30, step: 1, min: 0, max: 30}
   };
 
@@ -27,17 +43,28 @@ class ContourDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Reported new COVID-19 cases per 100,000 residents {meta.date ? `during ${meta.date}` : null}</p>
+        <p>
+          Reported new COVID-19 cases per 100,000 residents{' '}
+          {meta.date ? `during ${meta.date}` : null}
+        </p>
         <div className="layout">
-          {LINES.map((c, i) => <div className="legend" key={i}
-            style={{
-              background: `rgb(${c.color.join(',')})`,
-              width: `${100 / LINES.length}%`
-            }} />)}
+          {LINES.map((c, i) => (
+            <div
+              className="legend"
+              key={i}
+              style={{
+                background: `rgb(${c.color.join(',')})`,
+                width: `${100 / LINES.length}%`
+              }}
+            />
+          ))}
         </div>
         <p className="layout">
-        {LINES.map((c, i) => <div key={i} className="text-right"
-            style={{width: `${100 / LINES.length}%`}} >{i < LINES.length - 1 ? c.threshold : ''}</div>)}
+          {LINES.map((c, i) => (
+            <div key={i} className="text-right" style={{width: `${100 / LINES.length}%`}}>
+              {i < LINES.length - 1 ? c.threshold : ''}
+            </div>
+          ))}
         </p>
         <p>
           Data source: <a href="https://github.com/nytimes/covid-19-data">New York Times </a>
@@ -65,7 +92,11 @@ class ContourDemo extends Component {
     const date = new Date(Date.UTC(2020, 0, 20) + week * MS_PER_WEEK);
 
     this.props.onStateChange({
-      date: `the week of ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`
+      date: `the week of ${date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })}`
     });
   }
 
@@ -74,7 +105,9 @@ class ContourDemo extends Component {
     if (data) {
       let maxWeek = 0;
       for (const d of data) {
-        const weeks = Object.keys(d.casesByWeek).map(Number).sort((a, b) => a - b);
+        const weeks = Object.keys(d.casesByWeek)
+          .map(Number)
+          .sort((a, b) => a - b);
         maxWeek = Math.max(maxWeek, weeks.pop());
       }
       this.props.useParam({

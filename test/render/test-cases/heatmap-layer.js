@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {points} from 'deck.gl-test/data';

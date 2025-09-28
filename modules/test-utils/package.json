@@ -2,7 +2,8 @@
   "name": "@deck.gl/test-utils",
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
-  "version": "8.9.0-alpha.5",
+  "type": "module",
+  "version": "9.2.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -16,19 +17,29 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
-    "src",
-    "typed"
+    "src"
   ],
-  "peerDependencies": {
-    "@deck.gl/core": "^8.0.0",
-    "@luma.gl/test-utils": "^8.5.0",
-    "@luma.gl/webgl": "^8.5.0",
-    "@probe.gl/test-utils": "^3.5.0"
+  "dependencies": {
+    "@luma.gl/test-utils": "^9.2.0",
+    "@luma.gl/webgl": "^9.2.0"
   },
-  "scripts": {},
+  "peerDependencies": {
+    "@deck.gl/core": "^9.1.0",
+    "@luma.gl/core": "^9.2.0",
+    "@luma.gl/engine": "^9.2.0",
+    "@probe.gl/test-utils": "^4.1.0"
+  },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

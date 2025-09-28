@@ -1,58 +1,128 @@
-import {H3ClusterLayerDemo} from 'website-components/doc-demos/geo-layers';
+# H3ClusterLayer
+
+import {H3ClusterLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <H3ClusterLayerDemo />
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# H3ClusterLayer
-
 The `H3ClusterLayer` renders regions represented by hexagon sets from the [H3](https://h3geo.org/) geospatial indexing system.
 
-`H3ClusterLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`H3ClusterLayer` is a [CompositeLayer](../core/composite-layer.md).
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {
-   *     mean: 73.333,
-   *     count: 440,
-   *     hexIds: [
-   *       '88283082b9fffff',
-   *       '88283082b1fffff',
-   *       '88283082b5fffff',
-   *       '88283082b7fffff',
-   *       '88283082bbfffff',
-   *       '882830876dfffff'
-   *     ]
-   *   },
-   *   ...
-   * ]
-   */
-  const layer = new H3ClusterLayer({
-    id: 'h3-cluster-layer',
-    data,
-    pickable: true,
+const layer = new H3ClusterLayer({
+  id: 'H3ClusterLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3clusters.json',
+  
+  stroked: true,
+  getHexagons: d => d.hexIds,
+  getFillColor: d => [255, (1 - d.mean / 500) * 255, 0],
+  getLineColor: [255, 255, 255],
+  lineWidthMinPixels: 2,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `density: ${object.mean}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {} from '@deck.gl/geo-layers';
+
+type DataType = {
+  mean: number;
+  count: number;
+  hexIds: string[];
+};
+
+const layer = new H3ClusterLayer<DataType>({
+  id: 'H3ClusterLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3clusters.json',
+  
+  stroked: true,
+  getHexagons: (d: DataType) => d.hexIds,
+  getFillColor: (d: DataType) => [255, (1 - d.mean / 500) * 255, 0],
+  getLineColor: [255, 255, 255],
+  lineWidthMinPixels: 2,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<DataType>) => object && `density: ${object.mean}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL} from '@deck.gl/react';
+import {H3ClusterLayer} from '@deck.gl/geo-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type DataType = {
+  mean: number;
+  count: number;
+  hexIds: string[];
+};
+
+function App() {
+  const layer = new H3ClusterLayer<DataType>({
+    id: 'H3ClusterLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3clusters.json',
+    
     stroked: true,
-    filled: true,
-    extruded: false,
-    getHexagons: d => d.hexIds,
-    getFillColor: d => [255, (1 - d.mean / 500) * 255, 0],
+    getHexagons: (d: DataType) => d.hexIds,
+    getFillColor: (d: DataType) => [255, (1 - d.mean / 500) * 255, 0],
     getLineColor: [255, 255, 255],
-    lineWidthMinPixels: 2
+    lineWidthMinPixels: 2,
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<DataType>) => object && `density: ${object.mean}`}
     layers={[layer]}
-    getTooltip={({object}) => object && `density: ${object.mean}`} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -65,20 +135,22 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
-new H3ClusterLayer({});
+import type {H3ClusterLayerProps} from '@deck.gl/geo-layers';
+
+new H3ClusterLayer<DataT>(...props: H3ClusterLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/h3-js@^3.0.0"></script>
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/h3-js@^4.0.0"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -89,11 +161,11 @@ Note that `h3-js` must be included before `deck.gl`.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLayer](/docs/api-reference/core/composite-layer.md), and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/composite-layer.md), and [PolygonLayer](../layers/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-##### `getHexagons` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+#### `getHexagons` ([Accessor&lt;string[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagons}
 
 Method called to retrieve the hexagon cluster from each object, as an array of [H3](https://h3geo.org/) hexagon indices. These hexagons are joined into polygons that represent the geospatial outline of the cluster.
 
@@ -102,7 +174,7 @@ Method called to retrieve the hexagon cluster from each object, as an array of [
 
 The `H3ClusterLayer` renders the following sublayers:
 
-* `cell` - a [PolygonLayer](/docs/api-reference/layers/column-layer.md) rendering all clusters.
+* `cell` - a [PolygonLayer](../layers/column-layer.md) rendering all clusters.
 
 
 ## Source

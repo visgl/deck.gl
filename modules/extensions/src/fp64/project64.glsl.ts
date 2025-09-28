@@ -1,28 +1,16 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export default `\
 
 const vec2 WORLD_SCALE_FP64 = vec2(81.4873275756836, 0.0000032873668232014097);
 
-uniform vec2 project_uViewProjectionMatrixFP64[16];
+uniform project64Uniforms {
+  vec2 scale;
+  mat4 viewProjectionMatrix;
+  mat4 viewProjectionMatrix64Low;
+} project64;
 
 // longitude: lnglat_fp64.xy; latitude: lnglat_fp64.zw
 void mercatorProject_fp64(vec4 lnglat_fp64, out vec2 out_val[2]) {
@@ -56,7 +44,16 @@ void project_position_fp64(vec2 position, vec2 position64xyLow, out vec2 out_val
 
 vec4 project_common_position_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
   vec2 vertex_pos_clipspace[4];
-  mat4_vec4_mul_fp64(project_uViewProjectionMatrixFP64, vertex_pos_modelspace,
+  vec2 viewProjectionMatrixFP64[16];
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      viewProjectionMatrixFP64[4 * i + j] = vec2(
+        project64.viewProjectionMatrix[j][i],
+        project64.viewProjectionMatrix64Low[j][i]
+      );
+    }   
+  }
+  mat4_vec4_mul_fp64(viewProjectionMatrixFP64, vertex_pos_modelspace,
     vertex_pos_clipspace);
   return vec4(
     vertex_pos_clipspace[0].x,

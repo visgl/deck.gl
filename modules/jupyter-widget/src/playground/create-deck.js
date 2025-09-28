@@ -1,9 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global console, window */
 /* eslint-disable no-console */
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
+
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import GLConstants from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/constants';
 
 import makeTooltip from './widget-tooltip';
 
@@ -13,10 +18,14 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 
 import {addSupportComponents} from '../lib/components/index';
 
-import * as deck from '../deck-bundle';
+/* eslint-disable import/namespace */
+import * as deckExports from '../deck-bundle';
+import {COORDINATE_SYSTEM, log, WebMercatorViewport} from '@deck.gl/core';
+import {JSONConverter} from '@deck.gl/json';
+import DeckGL from '@deck.gl/core/scripting/deckgl';
 
 const classesFilter = x => x.charAt(0) === x.charAt(0).toUpperCase();
-const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';
+const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) !== '_';
 
 function extractElements(library = {}, filter) {
   // Extracts exported elements as a dictionary from a library
@@ -30,17 +39,17 @@ function extractElements(library = {}, filter) {
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractElements(deck, classesFilter),
+  classes: extractElements(deckExports, classesFilter),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
+    COORDINATE_SYSTEM,
     GL: GLConstants
   }
 };
 
 registerLoaders([CSVLoader]);
 
-const jsonConverter = new deck.JSONConverter({
+const jsonConverter = new JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
@@ -102,8 +111,8 @@ function updateDeck(inputJson, deckgl) {
   deckgl.setProps(results);
 }
 
-function missingLayers(oldLayers, newLayers) {
-  return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
+function missingProps(oldProps, newProps) {
+  return oldProps.filter(op => op && op.id && !newProps.find(np => np.id === op.id));
 }
 
 function createStandaloneFromProvider({
@@ -113,7 +122,8 @@ function createStandaloneFromProvider({
   googleMapsKey,
   handleEvent,
   getTooltip,
-  container
+  container,
+  onError
 }) {
   // Common deck.gl props for all basemaos
   const handlers = handleEvent
@@ -122,7 +132,7 @@ function createStandaloneFromProvider({
         onHover: info => handleEvent('deck-hover-event', info),
         onResize: size => handleEvent('deck-resize-event', size),
         onViewStateChange: ({viewState, interactionState, oldViewState}) => {
-          const viewport = new deck.WebMercatorViewport(viewState);
+          const viewport = new WebMercatorViewport(viewState);
           viewState.nw = viewport.unproject([0, 0]);
           viewState.se = viewport.unproject([viewport.width, viewport.height]);
           handleEvent('deck-view-state-change-event', viewState);
@@ -131,7 +141,8 @@ function createStandaloneFromProvider({
         onDrag: info => handleEvent('deck-drag-event', info),
         onDragEnd: info => handleEvent('deck-drag-end-event', info)
       }
-    : null;
+    : {};
+  handlers.onError = onError;
 
   const sharedProps = {
     ...handlers,
@@ -141,8 +152,8 @@ function createStandaloneFromProvider({
 
   switch (mapProvider) {
     case 'mapbox':
-      deck.log.info('Using Mapbox base maps')();
-      return new deck.DeckGL({
+      log.info('Using Mapbox base maps')();
+      return new DeckGL({
         ...sharedProps,
         ...props,
         map: mapboxgl,
@@ -150,22 +161,22 @@ function createStandaloneFromProvider({
         onLoad: modifyMapboxElements
       });
     case 'carto':
-      deck.log.info('Using Carto base maps')();
-      return new deck.DeckGL({
+      log.info('Using Carto base maps')();
+      return new DeckGL({
         map: mapboxgl,
         ...sharedProps,
         ...props
       });
     case 'google_maps':
-      deck.log.info('Using Google Maps base maps')();
+      log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
         ...sharedProps,
         ...props,
         googleMapsKey
       });
     default:
-      deck.log.info('No recognized map provider specified')();
-      return new deck.DeckGL({
+      log.info('No recognized map provider specified')();
+      return new DeckGL({
         ...sharedProps,
         ...props,
         map: null,
@@ -182,23 +193,41 @@ function createDeck({
   tooltip,
   handleEvent,
   customLibraries,
-  configuration
+  configuration,
+  showError
 }) {
   let deckgl;
+  const onError = e => {
+    if (showError) {
+      const uiErrorText = window.document.createElement('pre');
+      uiErrorText.textContent = `Error: ${e.message}\nSource: ${e.source}\nLine: ${e.lineno}:${e.colno}\n${e.error ? e.error.stack : ''}`;
+      uiErrorText.className = 'error_text';
+
+      container.appendChild(uiErrorText);
+    }
+
+    // This will fail in node tests
+    // eslint-disable-next-line
+    console.error(e);
+  };
+
   try {
     if (configuration) {
       jsonConverter.mergeConfiguration(configuration);
     }
 
     const oldLayers = jsonInput.layers || [];
+    const oldWidgets = jsonInput.widgets || [];
     const props = jsonConverter.convert(jsonInput);
 
     addSupportComponents(container, props);
 
     const convertedLayers = (props.layers || []).filter(l => l);
+    const convertedWidgets = (props.widgets || []).filter(w => w);
 
-    // loading custom library is async, some layers might not be convertable before custom library loads
-    const layerToLoad = missingLayers(oldLayers, convertedLayers);
+    // loading custom library is async, some layers/widgets might not be convertable before custom library loads
+    const layersToLoad = missingProps(oldLayers, convertedLayers);
+    const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
     const getTooltip = makeTooltip(tooltip);
     const {mapProvider} = props;
 
@@ -209,27 +238,33 @@ function createDeck({
       googleMapsKey,
       handleEvent,
       getTooltip,
-      container
+      container,
+      onError
     });
 
     const onComplete = () => {
-      if (layerToLoad.length) {
-        // convert input layer again to presist layer order
-        const newProps = jsonConverter.convert({layers: jsonInput.layers});
-        const newLayers = (newProps.layers || []).filter(l => l);
+      if (layersToLoad.length || widgetsToLoad.length) {
+        const newProps = jsonConverter.convert({
+          layers: jsonInput.layers,
+          widgets: jsonInput.widgets
+        });
 
-        if (newLayers.length > convertedLayers.length) {
-          // if more layers are converted
-          deckgl.setProps({layers: newLayers});
+        const newLayers = (newProps.layers || []).filter(l => l);
+        const newWidgets = (newProps.widgets || []).filter(w => w);
+
+        if (
+          newLayers.length > convertedLayers.length ||
+          newWidgets.length > convertedWidgets.length
+        ) {
+          // if more layers/widgets are converted
+          deckgl.setProps({layers: newLayers, widgets: newWidgets});
         }
       }
     };
 
     addCustomLibraries(customLibraries, onComplete);
   } catch (err) {
-    // This will fail in node tests
-    // eslint-disable-next-line
-    console.error(err);
+    onError(err);
   }
   return deckgl;
 }

@@ -1,16 +1,13 @@
-/* global process, document */
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* global document */
 import {loadCSS} from './css-utils';
 
-// SSR safe import (ensures this file can be imported under Node.js e.g. for tests)
-// From https://github.com/mapbox/mapbox-gl-js/issues/4593#issuecomment-546290823
-// eslint-disable-next-line no-undef
-let mapboxgl;
+import mapboxgl from 'mapbox-gl';
 
-if (process.browser) {
-  mapboxgl = require('mapbox-gl');
-}
-
-const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
+const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl.css';
 
 export default mapboxgl;
 

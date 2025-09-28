@@ -10,9 +10,9 @@ For each layer that should be masked, add the `MaskExtension` to its `extensions
 
 > Note: This extension does not work with all deck.gl layers. See "limitations" below.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl MaskExtension" src="https://codepen.io/vis-gl/embed/ExbKoYg?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl MaskExtension" src="https://codepen.io/vis-gl/embed/ExbKoYg?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/ExbKoYg'>deck.gl MaskFilterExtension</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -59,10 +59,10 @@ new MaskExtension();
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -79,17 +79,17 @@ new MaskExtension();
 
 When added to a layer via the `extensions` prop, the `MaskExtension` adds the following properties to the layer:
 
-##### `maskId` (String)
+#### `maskId` (string) {#maskid}
 
 Id of the layer that defines the mask. The mask layer must use the prop `operation: 'mask'`. Masking is disabled if `maskId` is empty or no valid mask layer with the specified id is found.
 
-##### `maskByInstance` (Boolean, optional)
+#### `maskByInstance` (boolean, optional) {#maskbyinstance}
 
 `maskByInstance` controls whether an object is clipped by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon). If not specified, it is automatically deduced from the layer type.
 
 ![maskByInstance](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/mask-by-instance.png)
 
-##### `maskInverted` (Boolean, optional)
+#### `maskInverted` (boolean, optional) {#maskinverted}
 
 When `maskInverted` is true the result of the masking operation is inverted. Inversion is applied when reading the mask, thus it is possible to use the same mask normally on some layers and inverted on other layers. Defaults to `false`.
 
@@ -97,7 +97,7 @@ When `maskInverted` is true the result of the masking operation is inverted. Inv
 
 - The current implementation supports up to 4 masks at the same time.
 - Given that masking is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- Masking is not supported in [GlobeView](/docs/api-reference/core/globe-view.md)
+- Masking is not supported in [GlobeView](../core/globe-view.md)
 
 ## Source
 

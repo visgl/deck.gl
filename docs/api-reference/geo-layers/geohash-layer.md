@@ -1,55 +1,126 @@
-import {GeohashLayerDemo} from 'website-components/doc-demos/geo-layers';
+# GeohashLayer
+
+import {GeohashLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <GeohashLayerDemo/>
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# GeohashLayer
-
 The `GeohashLayer` renders filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system.
 
-`GeohashLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`GeohashLayer` is a [CompositeLayer](../core/composite-layer.md).
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {GeohashLayer} from '@deck.gl/geo-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {
-   *     // Geohash in SF Bay Area
-   *     geohash: "9q8yv",
-   *     value: 0.7668453218020029
-   *   },
-   *   {
-   *     geohash: "9q8yyp",
-   *     value: 0.8789404786833306
-   *   },
-   *   ...
-   * ]
-   */
-  const layer = new GeohashLayer({
-    id: 'geohash-layer',
-    data,
-    pickable: true,
-    wireframe: false,
-    filled: true,
+const layer = new GeohashLayer({
+  id: 'GeohashLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.geohashes.json',
+  
+  extruded: true,
+  getGeohash: d => d.geohash,
+  getElevation: d => d.value,
+  getFillColor: d => [d.value * 255, (1 - d.value) * 128, (1 - d.value) * 255],
+  elevationScale: 1000,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `${object.geohash} value: ${object.value}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {GeohashLayer} from '@deck.gl/geo-layers';
+
+type DataType = {
+  geohash: string;
+  value: number;
+};
+
+const layer = new GeohashLayer<DataType>({
+  id: 'GeohashLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.geohashes.json',
+  
+  extruded: true,
+  getGeohash: (d: DataType) => d.geohash,
+  getElevation: (d: DataType) => d.value,
+  getFillColor: (d: DataType) => [d.value * 255, (1 - d.value) * 128, (1 - d.value) * 255],
+  elevationScale: 1000,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<DataType>) => object && `${object.geohash} value: ${object.value}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL} from '@deck.gl/react';
+import {GeohashLayer} from '@deck.gl/geo-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type DataType = {
+  geohash: string;
+  value: number;
+};
+
+function App() {
+  const layer = new GeohashLayer<DataType>({
+    id: 'GeohashLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.geohashes.json',
+    
     extruded: true,
+    getGeohash: (d: DataType) => d.geohash,
+    getElevation: (d: DataType) => d.value,
+    getFillColor: (d: DataType) => [d.value * 255, (1 - d.value) * 128, (1 - d.value) * 255],
     elevationScale: 1000,
-    getGeohash: d => d.geohash,
-    getFillColor: d => [d.value * 255, (1 - d.value) * 128, (1 - d.value) * 255],
-    getElevation: d => d.value
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<DataType>) => object && `${object.geohash} value: ${object.value}`}
     layers={[layer]}
-    getTooltip={({object}) => object && `${object.geohash} value: ${object.value}`} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -62,19 +133,21 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {GeohashLayer} from '@deck.gl/geo-layers';
-new GeohashLayer({});
+import type {GeohashLayerProps} from '@deck.gl/geo-layers';
+
+new GeohashLayer<DataT>(...props: GeohashLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -84,11 +157,11 @@ new deck.GeohashLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLayer](/docs/api-reference/core/composite-layer.md), and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/composite-layer.md), and [PolygonLayer](../layers/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-##### `getGeohash` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+#### `getGeohash` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getgeohash}
 
 Called for each data object to retrieve the geohash string identifier.
 
@@ -99,7 +172,7 @@ Called for each data object to retrieve the geohash string identifier.
 
 The `GeohashLayer` renders the following sublayers:
 
-* `cell` - a [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) rendering all geohash cells.
+* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all geohash cells.
 
 
 ## Source

@@ -24,9 +24,9 @@ The constructor for the `SunLight` class. Use this to create a new `SunLight`.
 const sunLight = new SunLight({timestamp, color, intensity});
 ```
 
-* `timestamp` - (*number*) - Unix timestamp in milliseconds.
-* `color` - (*array*)  RGB color of sun light source, default value is `[255, 255, 255]`.
-* `intensity` - (*number*) Strength of sun light source, default value is `1.0`.
+* `timestamp` - (number) - Unix timestamp in milliseconds.
+* `color` - (number[3])  RGB color of sun light source, default value is `[255, 255, 255]`.
+* `intensity` - (number) Strength of sun light source, default value is `1.0`.
 
 ## Source
 

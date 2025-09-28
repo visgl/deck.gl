@@ -1,8 +1,11 @@
-import {COMPONENT_SYMBOL} from './constants';
-import {PropType} from './prop-types';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {PROP_TYPES_SYMBOL} from './constants';
 
 export function validateProps(props) {
-  const propTypes = getPropTypes(props);
+  const propTypes = props[PROP_TYPES_SYMBOL];
 
   for (const propName in propTypes) {
     const propType = propTypes[propName];
@@ -28,7 +31,7 @@ export function diffProps(
   const propsChangedReason = compareProps({
     newProps: props,
     oldProps,
-    propTypes: getPropTypes(props),
+    propTypes: props[PROP_TYPES_SYMBOL],
     ignoreProps: {data: null, updateTriggers: null, extensions: null, transitions: null}
   });
 
@@ -56,7 +59,7 @@ function diffTransitions(props, oldProps): false | Record<string, true> {
     return false;
   }
   const result: Record<string, true> = {};
-  const propTypes = getPropTypes(props);
+  const propTypes = props[PROP_TYPES_SYMBOL];
   let changed = false;
 
   for (const key in props.transitions) {
@@ -256,10 +259,4 @@ function diffUpdateTrigger(props, oldProps, triggerName) {
     triggerName
   });
   return diffReason;
-}
-
-function getPropTypes(props): Record<string, PropType> {
-  const layer = props[COMPONENT_SYMBOL];
-  const LayerType = layer && layer.constructor;
-  return LayerType ? LayerType._propTypes : {};
 }

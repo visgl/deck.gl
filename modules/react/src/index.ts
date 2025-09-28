@@ -1,26 +1,26 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export {default as DeckGL} from './deckgl';
 export {default} from './deckgl';
 
+// Widgets
+export {CompassWidget} from './widgets/compass-widget';
+export {FullscreenWidget} from './widgets/fullscreen-widget';
+export {ZoomWidget} from './widgets/zoom-widget';
+export {GeocoderWidget as _GeocoderWidget} from './widgets/geocoder-widget';
+export {InfoWidget as _InfoWidget} from './widgets/info-widget';
+export {ContextMenuWidget as _ContextMenuWidget} from './widgets/context-menu-widget';
+export {LoadingWidget as _LoadingWidget} from './widgets/loading-widget';
+export {ResetViewWidget as _ResetViewWidget} from './widgets/reset-view-widget';
+export {ScaleWidget as _ScaleWidget} from './widgets/scale-widget';
+export {ScreenshotWidget as _ScreenshotWidget} from './widgets/screenshot-widget';
+export {SplitterWidget as _SplitterWidget} from './widgets/splitter-widget';
+export {ThemeWidget as _ThemeWidget} from './widgets/theme-widget';
+export {useWidget} from './utils/use-widget';
+export type {ContextMenuWidgetProps} from '@deck.gl/widgets';
+
 // Types
-export type {DeckGLContextValue} from './utils/position-children-under-views';
+export type {DeckGLContextValue} from './utils/deckgl-context';
 export type {DeckGLRef, DeckGLProps} from './deckgl';

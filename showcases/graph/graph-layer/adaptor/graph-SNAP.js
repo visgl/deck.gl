@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default class GraphAdaptor {
   constructor(data) {
     this._processData(data);

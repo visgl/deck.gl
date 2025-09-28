@@ -7,12 +7,12 @@ import sys
 sys.path.insert(0, os.path.abspath("../"))
 
 project = "pydeck"
-copyright = "2021, vis.gl, a Series of LF Projects, LLC"
+copyright = "2024, vis.gl, a Series of LF Projects, LLC"
 author = "Andrew Duberstein"
 # The short X.Y version
-version = "0.8"
+version = "0.9"
 # The full version, including alpha/beta/rc tags
-release = "0.8.0b4"
+release = "0.9.1"
 # Extensions to generate documents from our docstrings here
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_rtd_theme"]
 templates_path = ["_templates"]

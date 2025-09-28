@@ -3,12 +3,41 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.9 Releases
+------------
+
+0.9.2 - Jan XX 2025
+^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v9.1
+- Add support for deck.gl widgets (#9342)
+
+0.9.1 - May 10 2024
+^^^^^^^^^^^^^^^^^^^
+- Fix pydeck iframe height in Google Colab (#8881)
+
+0.9.0 - Apr 29 2024
+^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v9.0
+- BREAKING CHANGE: Jupyter-specific features not currently supported
+
+0.9.0b0 - Apr 24 2024
+^^^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v9.0
+
 0.8 Releases
 ------------
 
+0.8.1b1 - Apr 24 2024
+^^^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v8.9
+
+0.8.0 - Nov 04 2022
+^^^^^^^^^^^^^^^^^^^
+
 0.8.0b4 - Oct 12 2022
 ^^^^^^^^^^^^^^^^^^^^^
-- Add default_layer_attributes in settings. Improve variable substitution in tooltips (#)
+- Fix pydeck render in Google Colab (#7325)
+- Add default_layer_attributes in settings. Improve variable substitution in tooltips (#7330)
 
 0.8.0b3 - Sep 09 2022
 ^^^^^^^^^^^^^^^^^^^^^

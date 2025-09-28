@@ -1,11 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 let total = 0;
 
-onmessage = function(e) {
-
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
-  
-  const result = lines.reduce(function(acc, line) {
+
+  const result = lines.reduce(function (acc, line) {
     if (line) {
       const pts = decodePolyline(line);
       return acc.concat(pts);

@@ -1,29 +1,9 @@
 {
-  "name": "@deck.gl/lite",
-  "description": "Scripting with deck.gl",
-  "license": "MIT",
-  "version": "0.0.0",
-  "private": "true",
-  "publishConfig": {
-    "access": "public"
-  },
-  "keywords": [
-    "webgl",
-    "visualization"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/visgl/deck.gl.git"
-  },
-  "main": "dist/deckgl.min.js",
   "scripts": {
-    "start-local": "webpack-dev-server --env.local --progress --open"
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "devDependencies": {
-    "buble": "^0.19.3",
-    "buble-loader": "^0.5.0",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   }
 }

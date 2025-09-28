@@ -1,27 +1,12 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {createIterable, getAccessorFromBuffer} from './iterable-utils';
 import defaultTypedArrayManager from './typed-array-manager';
 import assert from './assert';
 
-import {Buffer} from '@luma.gl/webgl';
+import {Buffer} from '@luma.gl/core';
 
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {TypedArray} from '../types/types';
@@ -104,10 +89,10 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       if (!normalize) {
         // skip packing and set attribute value directly
         // TODO - avoid mutating user-provided object
-        buffers.positions = geometryBuffer;
+        buffers.vertexPositions = geometryBuffer;
       }
     }
-    this.geometryBuffer = buffers.positions;
+    this.geometryBuffer = buffers.vertexPositions;
 
     if (Array.isArray(dataChanged)) {
       // is partial update
@@ -233,8 +218,7 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       if (ArrayBuffer.isView(geometryBuffer)) {
         instanceCount = instanceCount || geometryBuffer.length / this.positionSize;
       } else if (geometryBuffer instanceof Buffer) {
-        // @ts-expect-error (2339) accessor is not typed
-        const byteStride = geometryBuffer.accessor.stride || this.positionSize * 4;
+        const byteStride = this.positionSize * 4;
         instanceCount = instanceCount || geometryBuffer.byteLength / byteStride;
       } else if (geometryBuffer.buffer) {
         const byteStride = geometryBuffer.stride || this.positionSize * 4;
@@ -261,9 +245,7 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
     this._forEachGeometry(
       (geometry: GeometryT | null, dataIndex: number) => {
         const normalizedGeometry =
-          normalizedData[dataIndex] ||
-          // @ts-expect-error (2352) GeometryT cannot be casted to NormalizedGeometryT. We are assuming the user passed already normalized data if opts.normalize is set to false.
-          (geometry as NormalizedGeometryT);
+          normalizedData[dataIndex] || (geometry as unknown as NormalizedGeometryT);
         context.vertexStart = vertexStarts[dataIndex];
         context.indexStart = indexStarts[dataIndex];
         const vertexEnd =

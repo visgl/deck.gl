@@ -1,58 +1,34 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export default `\
+#version 300 es
 #define SHADER_NAME path-layer-vertex-shader
 
-attribute vec2 positions;
+in vec2 positions;
 
-attribute float instanceTypes;
-attribute vec3 instanceStartPositions;
-attribute vec3 instanceEndPositions;
-attribute vec3 instanceLeftPositions;
-attribute vec3 instanceRightPositions;
-attribute vec3 instanceLeftPositions64Low;
-attribute vec3 instanceStartPositions64Low;
-attribute vec3 instanceEndPositions64Low;
-attribute vec3 instanceRightPositions64Low;
-attribute float instanceStrokeWidths;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
-
-uniform float widthScale;
-uniform float widthMinPixels;
-uniform float widthMaxPixels;
-uniform float jointType;
-uniform float capType;
-uniform float miterLimit;
-uniform bool billboard;
-uniform int widthUnits;
+in float instanceTypes;
+in vec3 instanceStartPositions;
+in vec3 instanceEndPositions;
+in vec3 instanceLeftPositions;
+in vec3 instanceRightPositions;
+in vec3 instanceLeftPositions64Low;
+in vec3 instanceStartPositions64Low;
+in vec3 instanceEndPositions64Low;
+in vec3 instanceRightPositions64Low;
+in float instanceStrokeWidths;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
 
 uniform float opacity;
 
-varying vec4 vColor;
-varying vec2 vCornerOffset;
-varying float vMiterLength;
-varying vec2 vPathPosition;
-varying float vPathLength;
-varying float vJointType;
+out vec4 vColor;
+out vec2 vCornerOffset;
+out float vMiterLength;
+out vec2 vPathPosition;
+out float vPathLength;
+out float vJointType;
 
 const float EPSILON = 0.001;
 const vec3 ZERO_OFFSET = vec3(0.0);
@@ -62,7 +38,7 @@ float flipIfTrue(bool flag) {
 }
 
 // calculate line join positions
-vec3 lineJoin(
+vec3 getLineJoinOffset(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   vec2 width
 ) {
@@ -75,7 +51,7 @@ vec3 lineJoin(
   vec3 deltaB3 = (nextPoint - currPoint);
 
   mat3 rotationMatrix;
-  bool needsRotation = !billboard && project_needs_rotation(currPoint, rotationMatrix);
+  bool needsRotation = !path.billboard && project_needs_rotation(currPoint, rotationMatrix);
   if (needsRotation) {
     deltaA3 = deltaA3 * rotationMatrix;
     deltaB3 = deltaB3 * rotationMatrix;
@@ -135,10 +111,10 @@ vec3 lineJoin(
 
   // extend out a triangle to envelope the round cap
   if (isCap) {
-    offsetVec = mix(perp * sideOfPath, dir * capType * 4.0 * flipIfTrue(isStartCap), isJoint);
-    vJointType = capType;
+    offsetVec = mix(perp * sideOfPath, dir * path.capType * 4.0 * flipIfTrue(isStartCap), isJoint);
+    vJointType = path.capType;
   } else {
-    vJointType = jointType;
+    vJointType = path.jointType;
   }
 
   // Generate variables for fragment shader
@@ -160,7 +136,7 @@ vec3 lineJoin(
   if (needsRotation) {
     offset = rotationMatrix * offset;
   }
-  return currPoint + offset;
+  return offset;
 }
 
 // In clipspace extrusion, if a line extends behind the camera, clip it to avoid visual artifacts
@@ -174,7 +150,7 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 void main() {
   geometry.pickingColor = instancePickingColors;
 
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
+  vColor = vec4(instanceColors.rgb, instanceColors.a * layer.opacity);
 
   float isEnd = positions.x;
 
@@ -189,11 +165,11 @@ void main() {
 
   geometry.worldPosition = currPosition;
   vec2 widthPixels = vec2(clamp(
-    project_size_to_pixel(instanceStrokeWidths * widthScale, widthUnits),
-    widthMinPixels, widthMaxPixels) / 2.0);
+    project_size_to_pixel(instanceStrokeWidths * path.widthScale, path.widthUnits),
+    path.widthMinPixels, path.widthMaxPixels) / 2.0);
   vec3 width;
 
-  if (billboard) {
+  if (path.billboard) {
     // Extrude in clipspace
     vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
     vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET, geometry.position);
@@ -206,14 +182,15 @@ void main() {
     width = vec3(widthPixels, 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
 
-    vec3 pos = lineJoin(
+    vec3 offset = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(width.xy)
     );
 
-    gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
+    DECKGL_FILTER_GL_POSITION(currPositionScreen, geometry);
+    gl_Position = vec4(currPositionScreen.xyz + offset * currPositionScreen.w, currPositionScreen.w);
   } else {
     // Extrude in commonspace
     prevPosition = project_position(prevPosition, prevPosition64Low);
@@ -223,13 +200,11 @@ void main() {
     width = vec3(project_pixel_size(widthPixels), 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
 
-    vec4 pos = vec4(
-      lineJoin(prevPosition, currPosition, nextPosition, width.xy),
-      1.0);
-    geometry.position = pos;
-    gl_Position = project_common_position_to_clipspace(pos);
+    vec3 offset = getLineJoinOffset(prevPosition, currPosition, nextPosition, width.xy);
+    geometry.position = vec4(currPosition + offset, 1.0);
+    gl_Position = project_common_position_to_clipspace(geometry.position);
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   }
-  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;

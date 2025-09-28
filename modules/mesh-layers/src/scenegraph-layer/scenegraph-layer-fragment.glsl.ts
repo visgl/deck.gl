@@ -1,36 +1,39 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `\
 #version 300 es
 
-// Uniforms
-uniform float opacity;
+#define SHADER_NAME scenegraph-layer-fragment-shader
 
 // Varying
 in vec4 vColor;
 
-out vec4 fragmentColor;
+out vec4 fragColor;
 
-// MODULE_PBR contains all the varying definitions needed
-#ifndef MODULE_PBR
+// pbrMaterial contains all the varying definitions needed
+#ifndef LIGHTING_PBR
   #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
     in vec2 vTEXCOORD_0;
-    uniform sampler2D u_BaseColorSampler;
+    uniform sampler2D pbr_baseColorSampler;
   #endif
 #endif
 
 void main(void) {
-  #ifdef MODULE_PBR
-    fragmentColor = vColor * pbr_filterColor(vec4(0));
+  #ifdef LIGHTING_PBR
+    fragColor = vColor * pbr_filterColor(vec4(0));
     geometry.uv = pbr_vUV;
   #else
     #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
-      fragmentColor = vColor * texture2D(u_BaseColorSampler, vTEXCOORD_0);
+      fragColor = vColor * texture(pbr_baseColorSampler, vTEXCOORD_0);
       geometry.uv = vTEXCOORD_0;
     #else
-      fragmentColor = vColor;
+      fragColor = vColor;
     #endif
   #endif
 
-  fragmentColor.a *= opacity;
-  DECKGL_FILTER_COLOR(fragmentColor, geometry);
+  fragColor.a *= layer.opacity;
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

@@ -1,10 +1,8 @@
-const ArcGISUtils = require('./src/load-modules');
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-const deck = globalThis.deck || {};
+export * from '../core/bundle/peer-dependency';
 
-// Check if peer dependencies are included
-if (!deck.Layer) {
-  throw new Error('@deck.gl/core is not found');
-}
-
-module.exports = Object.assign(deck, ArcGISUtils);
+// @ts-ignore import from transpiled code to leverage TS transforms
+export * from './dist/load-modules';

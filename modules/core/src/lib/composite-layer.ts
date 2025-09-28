@@ -1,24 +1,9 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import Layer, {UpdateParameters} from './layer';
-import debug from '../debug';
+import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 
 import type AttributeManager from './attribute/attribute-manager';
@@ -27,10 +12,11 @@ import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
 import {ConstructorOf} from '../types/types';
+import {PROP_TYPES_SYMBOL} from '../lifecycle/constants';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<PropsT = {}> extends Layer<
+export default abstract class CompositeLayer<PropsT extends {} = {}> extends Layer<
   PropsT & Required<CompositeLayerProps>
 > {
   static layerName: string = 'CompositeLayer';
@@ -38,6 +24,11 @@ export default abstract class CompositeLayer<PropsT = {}> extends Layer<
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return true;
+  }
+
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return false;
   }
 
   /** Returns true if all async resources are loaded */
@@ -151,8 +142,8 @@ export default abstract class CompositeLayer<PropsT = {}> extends Layer<
     return accessor;
   }
 
-  // eslint-disable-next-line complexity
   /** Returns sub layer props for a specific sublayer */
+  // eslint-disable-next-line complexity
   protected getSubLayerProps(
     sublayerProps: {
       id?: string;
@@ -207,8 +198,7 @@ export default abstract class CompositeLayer<PropsT = {}> extends Layer<
     const sublayerId = sublayerProps.id || 'sublayer';
 
     if (overridingSublayerProps) {
-      // @ts-ignore (TS2339) hidden property
-      const propTypes = this.constructor._propTypes;
+      const propTypes = this.props[PROP_TYPES_SYMBOL];
       const subLayerPropTypes = sublayerProps.type ? sublayerProps.type._propTypes : {};
       for (const key in overridingSublayerProps) {
         const propType = subLayerPropTypes[key] || propTypes[key];

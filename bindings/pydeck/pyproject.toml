@@ -1,7 +1,7 @@
 [project]
 name = "pydeck"
-version = "0.8.0b4"
-requires-python = ">=3.7"
+version = "0.9.1"
+requires-python = ">=3.8"
 
 [build-system]
 requires = [

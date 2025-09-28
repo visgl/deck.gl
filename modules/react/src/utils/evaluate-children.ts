@@ -1,10 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import * as React from 'react';
 import {cloneElement} from 'react';
 
 const MAP_STYLE = {position: 'absolute', zIndex: -1};
 
 export default function evaluateChildren(
-  children: React.ReactNode,
+  children: React.ReactNode | Function,
   childProps: any
 ): React.ReactNode {
   if (typeof children === 'function') {
@@ -34,10 +38,7 @@ export function isComponent(child: React.ReactNode): child is React.ReactElement
 }
 
 function isReactMap(child: React.ReactElement): boolean {
-  const componentClass = child.type;
-  // @ts-expect-error defaultProps is not defined on JSXElementConstructor
-  const componentProps = componentClass && componentClass.defaultProps;
-  return componentProps && componentProps.mapStyle;
+  return child.props?.mapStyle;
 }
 
 function needsDeckGLViewProps(child: React.ReactElement): boolean {

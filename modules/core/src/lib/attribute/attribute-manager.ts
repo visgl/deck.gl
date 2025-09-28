@@ -1,33 +1,19 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
-import {IShaderAttribute} from './shader-attribute';
 import log from '../../utils/log';
-import debug from '../../debug';
+import memoize from '../../utils/memoize';
+import {mergeBounds} from '../../utils/math-utils';
+import debug from '../../debug/index';
 import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Stat} from 'probe.gl';
+import type {Device, BufferLayout} from '@luma.gl/core';
+import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
 const TRACE_INVALIDATE = 'attributeManager.invalidate';
@@ -62,29 +48,30 @@ export default class AttributeManager {
    * by offering the ability to "invalidate" each attribute separately.
    */
   id: string;
-  gl: WebGLRenderingContext;
+  device: Device;
   attributes: Record<string, Attribute>;
   updateTriggers: {[name: string]: string[]};
   needsRedraw: string | boolean;
   userData: any;
 
-  private stats?: Stat;
+  private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
+  private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       id = 'attribute-manager',
       stats,
       timeline
     }: {
       id?: string;
-      stats?: Stat;
+      stats?: Stats;
       timeline?: Timeline;
     } = {}
   ) {
     this.id = id;
-    this.gl = gl;
+    this.device = device;
 
     this.attributes = {};
 
@@ -94,7 +81,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = stats;
 
-    this.attributeTransitionManager = new AttributeTransitionManager(gl, {
+    this.attributeTransitionManager = new AttributeTransitionManager(device, {
       id: `${id}-transitions`,
       timeline
     });
@@ -135,7 +122,7 @@ export default class AttributeManager {
 
   // Adds attributes
   addInstanced(attributes: {[id: string]: AttributeOptions}) {
-    this._add(attributes, {instanced: 1});
+    this._add(attributes, {stepMode: 'instance'});
   }
 
   /**
@@ -173,6 +160,7 @@ export default class AttributeManager {
   }
 
   // Ensure all attribute buffers are updated from props or data.
+  // eslint-disable-next-line complexity
   update({
     data,
     numInstances,
@@ -271,7 +259,15 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes(): {[id: string]: Attribute} {
-    return this.attributes;
+    return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
+  }
+
+  /**
+   * Computes the spatial bounds of a given set of attributes
+   */
+  getBounds(attributeNames: string[]) {
+    const bounds = attributeNames.map(attributeName => this.attributes[attributeName]?.getBounds());
+    return this.mergeBoundsMemoized(bounds);
   }
 
   /**
@@ -296,50 +292,43 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  // Returns shader attributes
-  getShaderAttributes(
-    attributes?: {[id: string]: Attribute},
-    excludeAttributes: Record<string, boolean> = {}
-  ): {[id: string]: IShaderAttribute} {
-    if (!attributes) {
-      attributes = this.getAttributes();
+  /** Generate WebGPU-style buffer layout descriptors from all attributes */
+  getBufferLayouts(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {
+      /** Whether the model is instanced */
+      isInstanced?: boolean;
     }
-    const shaderAttributes = {};
-    for (const attributeName in attributes) {
-      if (!excludeAttributes[attributeName]) {
-        Object.assign(shaderAttributes, attributes[attributeName].getShaderAttributes());
-      }
-    }
-    return shaderAttributes;
+  ): BufferLayout[] {
+    return Object.values(this.getAttributes()).map(attribute =>
+      attribute.getBufferLayout(modelInfo)
+    );
   }
 
   // PRIVATE METHODS
 
-  // Used to register an attribute
-  private _add(attributes: {[id: string]: AttributeOptions}, extraProps: any = {}) {
+  /** Register new attributes */
+  private _add(
+    /** A map from attribute name to attribute descriptors */
+    attributes: {[id: string]: AttributeOptions},
+    /** Additional attribute settings to pass to all attributes */
+    overrideOptions?: Partial<AttributeOptions>
+  ) {
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
 
+      const props: AttributeOptions = {
+        ...attribute,
+        id: attributeName,
+        size: (attribute.isIndexed && 1) || attribute.size || 1,
+        ...overrideOptions
+      };
+
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      this.attributes[attributeName] = this._createAttribute(attributeName, attribute, extraProps);
+      this.attributes[attributeName] = new Attribute(this.device, props);
     }
 
     this._mapUpdateTriggersToAttributes();
-  }
-  /* eslint-enable max-statements */
-
-  private _createAttribute(name: string, attribute: AttributeOptions, extraProps: any) {
-    // For expected default values see:
-    // https://github.com/visgl/luma.gl/blob/1affe21352e289eeaccee2a876865138858a765c/modules/webgl/src/classes/accessor.js#L5-L13
-    // and https://deck.gl/docs/api-reference/core/attribute-manager#add
-    const props: AttributeOptions = {
-      ...attribute,
-      id: name,
-      size: (attribute.isIndexed && 1) || attribute.size || 1,
-      divisor: extraProps.instanced ? 1 : attribute.divisor || 0
-    };
-
-    return new Attribute(this.gl, props);
   }
 
   // build updateTrigger name to attribute name mapping
@@ -390,7 +379,8 @@ export default class AttributeManager {
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
-      attribute.setConstantValue(attribute.value as NumericArray);
+      // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
+      attribute.setConstantValue(attribute.value);
       return;
     }
 

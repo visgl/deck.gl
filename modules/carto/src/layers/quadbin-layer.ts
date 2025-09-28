@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import {
   _GeoCellLayer as GeoCellLayer,
@@ -6,11 +10,12 @@ import {
 import {getQuadbinPolygon} from './quadbin-utils';
 
 const defaultProps: DefaultProps<QuadbinLayerProps> = {
-  getQuadbin: {type: 'accessor', value: d => d.quadbin}
+  getQuadbin: {type: 'accessor', value: (d: any) => d.quadbin}
 };
 
 /** All properties supported by QuadbinLayer. */
-export type QuadbinLayerProps<DataT = any> = _QuadbinLayerProps<DataT> & GeoCellLayerProps<DataT>;
+export type QuadbinLayerProps<DataT = unknown> = _QuadbinLayerProps<DataT> &
+  GeoCellLayerProps<DataT>;
 
 /** Properties added by QuadbinLayer. */
 type _QuadbinLayerProps<DataT> = {
@@ -22,7 +27,7 @@ type _QuadbinLayerProps<DataT> = {
   getQuadbin?: AccessorFunction<DataT, bigint>;
 };
 
-export default class QuadbinLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class QuadbinLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<_QuadbinLayerProps<DataT>> & ExtraProps
 > {
@@ -30,14 +35,17 @@ export default class QuadbinLayer<DataT = any, ExtraProps = {}> extends GeoCellL
   static defaultProps = defaultProps;
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
-    const {data, getQuadbin} = this.props;
+    const {data, extruded, getQuadbin} = this.props;
+    // To avoid z-fighting reduce polygon footprint when extruding
+    const coverage = extruded ? 0.99 : 1;
 
     return {
       data,
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo), coverage),
+      updateTriggers: {getPolygon: coverage}
     };
   }
 }

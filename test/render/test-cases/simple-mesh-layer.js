@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   OrbitView,
   COORDINATE_SYSTEM,
@@ -7,7 +11,7 @@ import {
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {Matrix4} from '@math.gl/core';
-import {CubeGeometry, SphereGeometry} from '@luma.gl/core';
+import {CubeGeometry, SphereGeometry} from '@luma.gl/engine';
 const cube = new CubeGeometry();
 
 const sphere = new SphereGeometry({

@@ -1,9 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/line/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class LineDemo extends Component {
   static title = 'Flights To And From London Heathrow Airport';
@@ -17,8 +21,10 @@ class LineDemo extends Component {
       url: `${DATA_URI}/airports.json`
     }
   ];
-  
+
   static code = `${GITHUB_TREE}/examples/website/line`;
+
+  static hasDeviceTabs = true;
 
   static parameters = {
     width: {
@@ -58,9 +64,11 @@ class LineDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type} 
+        device={this.props.device}
         flightPaths={data && data[0]}
         airports={data && data[1]}
-        getWidth={params.width.value}
+        lineWidth={params.width.value}
       />
     );
   }

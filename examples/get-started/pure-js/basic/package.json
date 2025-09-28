@@ -1,20 +1,18 @@
 {
-  "name": "pure-js-basic",
+  "name": "deckgl-example-pure-js-basic",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "webpack -p"
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.8.0",
-    "@deck.gl/layers": "^8.8.0"
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0"
   },
   "devDependencies": {
-    "html-webpack-plugin": "^3.0.7",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   }
 }

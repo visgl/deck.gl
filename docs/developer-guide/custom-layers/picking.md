@@ -1,6 +1,6 @@
 # Picking
 
-> Make sure you have read [Interactivity](/docs/developer-guide/interactivity.md) before reading this section.
+> Make sure you have read [Interactivity](../interactivity.md) before reading this section.
 
 ## How It Works
 
@@ -8,16 +8,16 @@
 
 Rather than doing traditional ray-casting or building octrees etc in JavaScript, deck.gl implements picking on the GPU using a technique we refer to as "color picking". When deck.gl needs to determine what is under the mouse (e.g. when the user moves or clicks the pointer over the deck.gl canvas), all pickable layers are rendered into an off-screen buffer, but in a special mode activated by a GLSL uniform. In this mode, the shaders of the core layers render picking colors instead of their normal visual colors.
 
-Each object in each layer gets its own picking color assigned. The picking color is determined using [`layer.encodePickingColor()`](/docs/api-reference/core/layer.md#encodepickingcolor) that converts the index of a object of a given layer into a 3-byte color array (the color buffer allows us to distinguish between 16M unique colors per layer, and between 256 different layers).
+Each object in each layer gets its own picking color assigned. The picking color is determined using [`layer.encodePickingColor()`](../../api-reference/core/layer.md#encodepickingcolor) that converts the index of a object of a given layer into a 3-byte color array (the color buffer allows us to distinguish between 16M unique colors per layer, and between 256 different layers).
 
-After the picking buffer is rendered, deck.gl looks at the color of the pixel under the pointer, and decodes it back to the index number using [`layer.decodePickingColor()`](/docs/api-reference/core/layer.md#decodepickingcolor).
+After the picking buffer is rendered, deck.gl looks at the color of the pixel under the pointer, and decodes it back to the index number using [`layer.decodePickingColor()`](../../api-reference/core/layer.md#decodepickingcolor).
 
 
 ### Event Propagation
 
-Once an object is picked, deck.gl creates a [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) object that describes what is under the pointer.
+Once an object is picked, deck.gl creates a [picking info](../interactivity.md#the-pickinginfo-object) object that describes what is under the pointer.
 
-The [`layer.getPickingInfo()`](/docs/api-reference/core/layer.md#getpickinginfo) method is called first on the layer that directly rendered the picked object, to modify or add additional fields to the info.
+The [`layer.getPickingInfo()`](../../api-reference/core/layer.md#getpickinginfo) method is called first on the layer that directly rendered the picked object, to modify or add additional fields to the info.
 
 The info object is then passed to the `getPickingInfo()` of its parent layer, and then its grandparent, and so on. This is so that composite layers can further augment the `info` object after it is processed by the picked sublayer. This allows the composite layer to hide implementation details and expose only user-friendly information.
 
@@ -37,7 +37,7 @@ If any of the callback functions return `true`, the event is marked handled and 
 Whenever the pointer moves over the canvas, deck.gl performs a new picking pass, yielding a picking info object describing the result. This object is used for multiple purposes:
 
 - The `onHover` callbacks are called with it
-- To update the picked layer if [autoHighlight](/docs/api-reference/core/layer.md#autohighlight-boolean-optional) is enabled
+- To update the picked layer if [autoHighlight](../../api-reference/core/layer.md#autohighlight) is enabled
 - Saved for later use
 
 When other gestures (click, drag, etc.) are detected, deck.gl does not repeat picking. Instead, their callbacks are called with the last picked info from `hover`.
@@ -53,7 +53,7 @@ To take full control of picking, a layer need to take the following steps:
 
 ### Creating A Picking Color Attribute
 
-Add an attribute for each vertex using the layer's [AttributeManager](/docs/api-reference/core/attribute-manager.md):
+Add an attribute for each vertex using the layer's [AttributeManager](../../api-reference/core/attribute-manager.md):
 
 ```js
 import GL from '@luma.gl/constants';
@@ -71,7 +71,7 @@ class MyLayer extends Layer {
 }
 ```
 
-Populate the attribute by providing a different picking color for every object that you need to differentiate. The default implementation of [`layer.encodePickingColor()`](/docs/api-reference/core/layer.md#encodepickingcolor) and [`layer.decodePickingColor()`](/docs/api-reference/core/layer.md#decodepickingcolor) is likely sufficient, but you may need to implement your own pair.
+Populate the attribute by providing a different picking color for every object that you need to differentiate. The default implementation of [`layer.encodePickingColor()`](../../api-reference/core/layer.md#encodepickingcolor) and [`layer.decodePickingColor()`](../../api-reference/core/layer.md#decodepickingcolor) is likely sufficient, but you may need to implement your own pair.
 
 ```js
 class MyLayer extends Layer {
@@ -94,7 +94,7 @@ class MyLayer extends Layer {
 }
 ```
 
-By default, the `object` field of the picking `info` object is indexed from the layer's `data` prop. Custom layers often need to define on their own terms what constitutes meaningful information to the user's callbacks. A layer can achieve this by overriding [`layer.getPickingInfo()`](/docs/api-reference/core/layer.md#getpickinginfo) to add or modify fields to the `info` object.
+By default, the `object` field of the picking `info` object is indexed from the layer's `data` prop. Custom layers often need to define on their own terms what constitutes meaningful information to the user's callbacks. A layer can achieve this by overriding [`layer.getPickingInfo()`](../../api-reference/core/layer.md#getpickinginfo) to add or modify fields to the `info` object.
 
 
 ### Model object creation

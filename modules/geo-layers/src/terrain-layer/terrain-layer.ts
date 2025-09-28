@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Color,
@@ -27,7 +11,7 @@ import {
   LayersList,
   log,
   Material,
-  Texture,
+  TextureSource,
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -35,9 +19,14 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
-import Tile2DHeader from '../tile-layer/tile-2d-header';
-import {Bounds, GeoBoundingBox, TileBoundingBox, TileLoadProps, ZRange} from '../tile-layer/types';
-import {urlType, getURLFromTemplate} from '../tile-layer/utils';
+import type {
+  Bounds,
+  GeoBoundingBox,
+  TileBoundingBox,
+  TileLoadProps,
+  ZRange
+} from '../tileset-2d/index';
+import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
 
 const DUMMY_DATA = [1];
 
@@ -64,7 +53,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
     }
   },
   // Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
-  workerUrl: {type: 'string', value: null},
+  workerUrl: '',
   // Same as SimpleMeshLayer wireframe
   wireframe: false,
   material: true,
@@ -72,10 +61,8 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   loaders: [TerrainWorkerLoader]
 };
 
-type URLTemplate = string | string[];
-
 // Turns array of templates into a single string to work around shallow change
-function urlTemplateToUpdateTrigger(template: URLTemplate | null): string {
+function urlTemplateToUpdateTrigger(template: URLTemplate): string {
   if (Array.isArray(template)) {
     return template.join(';');
   }
@@ -91,7 +78,7 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [MeshAttributes | null, Texture | null];
+type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
 
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps = _TerrainLayerProps &
@@ -104,7 +91,7 @@ type _TerrainLayerProps = {
   elevationData: URLTemplate;
 
   /** Image url to use as texture. **/
-  texture?: URLTemplate | null;
+  texture?: URLTemplate;
 
   /** Martini error tolerance in meters, smaller number -> more detailed mesh. **/
   meshMaxError?: number;
@@ -123,10 +110,15 @@ type _TerrainLayerProps = {
 
   /** Material props for lighting effect. **/
   material?: Material;
+
+  /**
+   * @deprecated Use `loadOptions.terrain.workerUrl` instead
+   */
+  workerUrl?: string;
 };
 
 /** Render mesh surfaces from height map images. */
-export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
+export default class TerrainLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TerrainLayerProps & Required<TileLayerProps<MeshAndTexture>>>
 > {
   static defaultProps = defaultProps;
@@ -134,7 +126,7 @@ export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
 
   state!: {
     isTiled?: boolean;
-    terrain: MeshAttributes;
+    terrain?: MeshAttributes;
     zRange?: ZRange | null;
   };
 
@@ -143,9 +135,7 @@ export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
     if (elevationDataChanged) {
       const {elevationData} = props;
       const isTiled =
-        elevationData &&
-        (Array.isArray(elevationData) ||
-          (elevationData.includes('{x}') && elevationData.includes('{y}')));
+        elevationData && (Array.isArray(elevationData) || isTileSetURL(elevationData));
       this.setState({isTiled});
     }
 
@@ -341,6 +331,10 @@ export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
       );
     }
 
+    if (!elevationData) {
+      return null;
+    }
+
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
     return new SubLayerClass(
       this.getSubLayerProps({
@@ -359,3 +353,6 @@ export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
     );
   }
 }
+
+const isTileSetURL = (url: string): boolean =>
+  url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));

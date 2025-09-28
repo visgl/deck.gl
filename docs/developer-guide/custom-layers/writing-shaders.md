@@ -3,12 +3,12 @@
 A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
-import {picking, project32, gouraudLighting} from '@deck.gl/core';
+import {picking, project32, gouraudMaterial} from '@deck.gl/core';
 
 const model = new Model(gl, {
   vs: '// vertex shader GLSL source'
   fs: '// fragment shader GLSL source',
-  modules: [picking, project32, gouraudLighting] // list of optional module names
+  modules: [picking, project32, gouraudMaterial] // list of optional module names
 });
 ```
 
@@ -25,17 +25,17 @@ This "virtual" module is a dynamically generated prologue containing #defines de
 
 #### projection
 
-The [project](/docs/api-reference/core/project.md) shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
+The [project](../../api-reference/core/project.md) shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
 
-The `project` module also has two extensions, [project32](/docs/api-reference/core/project32.md) and [project64](/docs/api-reference/core/project64.md).
+The `project` module also has two extensions, [project32](../../api-reference/core/project32.md) and [project64](../../api-reference/core/project64.md).
 
 
 #### lighting
 
 A simple lighting package is provided in deck.gl, supporting a single directional light in addition to ambient light. Turning on lighting requires normals to be provided for each vertex. There are two flavors:
 
-- [gouraudLighting] - for lighting calculated in the vertex shader
-- [phongLighting] - for lighting calculated in the fragment shader
+- [gouraudMaterial] - for lighting calculated in the vertex shader
+- [phongMaterial] - for lighting calculated in the fragment shader
 
 
 #### fp64
@@ -51,7 +51,7 @@ Picking is supported using luma.gl [picking shader module](https://github.com/vi
 
 ### Standard Shader Hooks
 
-When [subclassing](/docs/developer-guide/custom-layers/subclassed-layers.md) an official deck.gl layer with minor feature additions, it is possible to inject custom code into predefined locations into the original shaders. These hooks are considered the public API of layers that will work consistently cross minor releases.
+When [subclassing](./subclassed-layers.md) an official deck.gl layer with minor feature additions, it is possible to inject custom code into predefined locations into the original shaders. These hooks are considered the public API of layers that will work consistently cross minor releases.
 
 ```js
 const shaders = this.getShaders();
@@ -59,7 +59,7 @@ const shaders = this.getShaders();
 const model = new Model(gl, {
   ...this.getShaders(),
   inject: {
-    'fs:decl': `
+    'fs:#decl': `
       uniform float coverage;
     `
     'fs:DECKGL_FILTER_COLOR': `
@@ -169,17 +169,17 @@ Creating an animated layer can be as easy as having the application supply start
 
 ### Layer prop uniforms
 
-##### `float layerIndex`
+##### `float layerIndex` {#float}
 
 The layerIndex is a small integer that starts at zero and is incremented for each layer that is rendered. It can be used to add small offsets to the z coordinate of layers to resolve z-fighting between overlapping layers.
 
-##### `float opacity`
+##### `float opacity` {#float}
 
 In the fragment shader, multiply the fragment color with the opacity uniform.
 
 ### Shader Module Uniforms
 
-The luma.gl/deck.gl shader modules provide javascript functions to set their uniforms but the actual GLSL uniforms are typically considered implementation dependent. The intention is that you should use the public functions exposed by each shader module. That said, some uniforms from the [`project`](/docs/api-reference/core/project.md) module are considered special and are documented.
+The luma.gl/deck.gl shader modules provide javascript functions to set their uniforms but the actual GLSL uniforms are typically considered implementation dependent. The intention is that you should use the public functions exposed by each shader module. That said, some uniforms from the [`project`](../../api-reference/core/project.md) module are considered special and are documented.
 
 ## Remarks
 

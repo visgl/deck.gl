@@ -3,12 +3,16 @@
 
 ## Rendering Tips
 
-### Per Layer Control of WebGL parameters
+### Per Layer Control of GPU parameters
 
-The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering.
+The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of GPU parameters such as blending mode, depth testing etc. This can provide significant extra control over rendering.
 
-The new `parameters` prop leverages the luma.gl v4 [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
-
+```js
+const layer = new ScatterplotLayer({
+  ...,
+  parameters: {depthTest: false}
+});
+```
 
 ### z-fighting and Depth Testing
 
@@ -59,10 +63,10 @@ If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element
 
 The `Deck` class supports the following experimental props to aggressively reduce memory usage on memory-restricted devices:
 
-- [_pickable](/docs/api-reference/core/deck.md#_pickable)
-- [_typedArrayManagerProps](/docs/api-reference/core/deck.md#_typedArrayManagerProps)
+- [_pickable](../api-reference/core/deck.md#_pickable)
+- [_typedArrayManagerProps](../api-reference/core/deck.md#_typedarraymanagerprops)
 
-The app can sacrefice certain features and/or runtime performance in exchange for a smaller memory footprint:
+The app can sacrifice certain features and/or runtime performance in exchange for a smaller memory footprint:
 
 ```js
 new Deck({

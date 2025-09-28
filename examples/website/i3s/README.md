@@ -12,7 +12,7 @@ Copy the content of this folder to your project.
 npm install
 # or
 yarn
-# bundle and serve the app with webpack
+# bundle and serve the app with vite
 npm start
 ```
 

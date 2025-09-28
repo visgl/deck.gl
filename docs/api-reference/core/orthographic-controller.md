@@ -1,10 +1,10 @@
 # OrthographicController
 
-Inherits from [Base Controller](/docs/api-reference/core/controller.md).
+Inherits from [Base Controller](./controller.md).
 
-The `OrthographicController` class can be passed to either the `Deck` class's [controller](/docs/api-reference/core/deck.md#controller) prop or a `View` class's [controller](/docs/api-reference/core/view.md#controller) prop to specify that viewport interaction should be enabled.
+The `OrthographicController` class can be passed to either the `Deck` class's [controller](./deck.md#controller) prop or a `View` class's [controller](./view.md#controller) prop to specify that viewport interaction should be enabled.
 
-`OrthographicController` is the default controller for [OrthographicView](/docs/api-reference/core/orthographic-view.md).
+`OrthographicController` is the default controller for [OrthographicView](./orthographic-view.md).
 
 ## Usage
 
@@ -35,7 +35,7 @@ new Deck({
 
 ## Options
 
-Supports all [Controller options](/docs/api-reference/core/controller.md#options) with the following default behavior:
+Supports all [Controller options](./controller.md#options) with the following default behavior:
 
 
 - `dragPan`: default `'pan'` (drag to pan)
@@ -45,7 +45,7 @@ Supports all [Controller options](/docs/api-reference/core/controller.md#options
 
 Also accepts additional options:
 
-- `zoomAxis` (String) - which axes to apply zoom to. Affects scroll, keyboard +/- and double tap. One of `X` (zoom along the X axis only), `Y` (zoom along the Y axis only), `all`. Default `all`. If this option is set to `X` or `Y`, `viewState.zoom` must be an array to enable independent zoom for each axis.
+- `zoomAxis` (string) - which axes to apply zoom to. Affects scroll, keyboard +/- and double tap. One of `X` (zoom along the X axis only), `Y` (zoom along the Y axis only), `all`. Default `all`. If this option is set to `X` or `Y`, `viewState.zoom` must be an array to enable independent zoom for each axis.
 
 ## Custom OrthographicController
 
@@ -72,7 +72,7 @@ new Deck({
 })
 ```
 
-See the `Controller` class [documentation](/docs/api-reference/core/controller.md#methods) for the methods that you can use and/or override.
+See the `Controller` class [documentation](./controller.md#methods) for the methods that you can use and/or override.
 
 
 ## Source

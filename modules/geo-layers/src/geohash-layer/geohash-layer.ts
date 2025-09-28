@@ -1,15 +1,19 @@
-import {AccessorFunction} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
 
-const defaultProps = {
-  getGeohash: {type: 'accessor', value: d => d.geohash}
+const defaultProps: DefaultProps<GeohashLayerProps> = {
+  getGeohash: {type: 'accessor', value: (d: any) => d.geohash}
 };
 
 /**
  * Properties of `GeohashLayer`.
  */
-type GeohashLayerProps<DataT = any> = {
+export type GeohashLayerProps<DataT = unknown> = {
   /**
    * Called for each data object to retrieve the geohash string identifier.
    *
@@ -19,12 +23,12 @@ type GeohashLayerProps<DataT = any> = {
 };
 
 /** Render filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system. */
-export default class GeohashLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class GeohashLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<GeohashLayerProps> & ExtraProps
 > {
   static layerName = 'GeohashLayer';
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
     const {data, getGeohash} = this.props;

@@ -1,0 +1,19 @@
+version: 2
+sphinx:
+  configuration: docs/conf.py
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+build:
+  os: "ubuntu-22.04"
+  tools:
+    python: "3.9"
+  jobs:
+    post_checkout:
+      # CWD for readthedocs is repository root.
+      - cp -r bindings/pydeck-carto/* .
+    post_install:
+      - python -m pip install --upgrade --no-cache-dir -r requirements/requirements-dev.txt

@@ -33,11 +33,11 @@ The module was created to enable specifying deck.gl visualizations using [JSON f
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/json@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/json@^9.0.0/dist.min.js"></script>
 <!-- usage -->
 <script type="text/javascript">
   const {JSONConverter} = deck;
@@ -58,7 +58,7 @@ import {JSONConverter} from '@deck.gl/json';
 
 ## Schema
 
-The valid combinations are defined by the [documented API](/docs/api-reference/json/conversion-reference.md).
+The valid combinations are defined by the [documented API](./conversion-reference.md).
 
 ## Error Handling
 

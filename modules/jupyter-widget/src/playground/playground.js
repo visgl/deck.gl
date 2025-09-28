@@ -1,4 +1,8 @@
-import * as deckBundle from '../deck-bundle';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Layer} from '@deck.gl/core';
 
 import {Transport} from '@deck.gl/json';
 
@@ -83,7 +87,8 @@ export function processDataBuffer({binary, convertedJson}) {
 
 // Filters circular references on JSON string conversion
 function filterJsonValue(key, value) {
-  return value instanceof deckBundle.Layer ? value.id : value;
+  // eslint-disable-next-line
+  return value instanceof Layer ? value.id : value;
 }
 
 // Handles a general event

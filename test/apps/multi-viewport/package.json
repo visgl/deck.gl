@@ -1,22 +1,17 @@
 {
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
     "deck.gl": "^8.4.0",
-    "@math.gl/core": "3.6.0",
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "react-map-gl": "^4.1.2"
+    "@math.gl/core": "^4.1.0",
+    "maplibre-gl": "^3.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   }
 }

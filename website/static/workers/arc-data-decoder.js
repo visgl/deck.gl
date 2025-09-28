@@ -1,13 +1,16 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 
 const result = [];
 let flowCount = 0;
 
-onmessage = function(e) {
-
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -15,7 +18,7 @@ onmessage = function(e) {
     const f = {
       type: 'Feature',
       properties: {
-        name: `${parts[0].slice(0, -2) }, ${ parts[0].slice(-2)}`,
+        name: `${parts[0].slice(0, -2)}, ${parts[0].slice(-2)}`,
         flows: decodeLinks(parts[1])
       },
       geometry: {
@@ -29,9 +32,9 @@ onmessage = function(e) {
     let sumY = 0;
     let len = 0;
 
-    f.geometry.coordinates = parts.slice(2).map(function(str) {
+    f.geometry.coordinates = parts.slice(2).map(function (str) {
       const coords = decodePolyline(str);
-      coords.forEach(function(c) {
+      coords.forEach(function (c) {
         sumX += c[0];
         sumY += c[1];
         len++;
@@ -43,7 +46,7 @@ onmessage = function(e) {
   });
 
   if (e.data.event === 'load') {
-    result.forEach(function(f, i) {
+    result.forEach(function (f, i) {
       const flows = f.properties.flows;
       for (const toId in flows) {
         result[toId].properties.flows[i] = -flows[toId];

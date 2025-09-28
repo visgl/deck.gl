@@ -13,35 +13,26 @@ The deck.gl test utilities are published as a separate npm module that is only i
 
 ```bash
 npm install --save-dev @deck.gl/test-utils
-```
-
-or
-
-```bash
+# or
 yarn add -D @deck.gl/test-utils
 ```
 
-You typically want the major and minor version of ` @deck.gl/test-utils` to match the version of `@deck.gl/core` that you are using. i.e. you want to use `5.2.x` and `5.2.y` together. Check and if necessary edit your `package.json` to make sure things align.
+You typically want the major and minor version of ` @deck.gl/test-utils` to match the version of `@deck.gl/core` that you are using. i.e. you want to use `9.0.x` and `9.0.y` together. Check and if necessary edit your `package.json` to make sure things align.
 
 
 ## Layer Conformance Tests
 
 Layer conformance tests are designed to verify deck.gl that layers update their internal state correctly in response to various props and prop changes. The layer update test support includes test drivers to initialize a layer and then run a sequence of successive updates, with facilities for validating the layer after each change, and also provides functions to initialize, update and render layers in a test environment.
 
-Note that internally in deck.gl, updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment than rendering tests described below and are thus easily integrated in traditional Node.js unit test suites (e.g. based on `tape`, `jest` or similar unit test frameworks).
+Note that internally in deck.gl, updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL2/WebGPU environment than rendering tests described below and are thus easily integrated in traditional Node.js unit test suites (e.g. based on `tape`, `jest` or similar unit test frameworks).
 
 
-## Layer Rendering Tests
+## Rendering Tests
 
-Rendering tests are a key feature of deck.gl's test utils. Rendering tests involve rendering layers with known inputs and performing pixel-comparison between the results against "golden images".
+Rendering tests involve creating a `Deck` instance with known props, capturing the pixel output of the canvas, and then comparing the result against a "golden image". Tools such as [puppeteer](https://pptr.dev/) and [Selenium](https://www.selenium.dev/) have extensive capabilities that allow programatical control of such a process. 
 
-Currently, rendering tests requires running layers with predefined props and views in a controlled Chrome instance, reporting values back to Node.js.
+One of the core features of this module is to validate layers through rendering tests. This is supported through [SnapshotTestRunner](./snapshot-test-runner.md), which works with probe.gl's [BrowserTestDriver](https://uber-web.github.io/probe.gl/docs/modules/test-utils/browser-test-driver) (which uses Puppeteer) out of the box but can also work with a custom testing stack with some plumbing.
 
+The current test utilities are focused on the testing of layers. To test the render output of an application that uses deck.gl, a common technique is to run a rendering test of the whole application using mock input.
 
-## Testing Applications instead of Layers
-
-The current test utilities are focused on testing of layers. This might seem to make them less suited for testing deck.gl code in applications. Still, there are techniques that can be used to get parts of the application's rendering stack tested.
-
-Applications that render multiple layers can e.g. render them with mock application data, and compare the result against a golden image.
-
-> More direct support for application testing is under consideration. Future support might include rendering layers directly in Node.js under headless gl, enabling apps to be tested in CI environments, as well as support for "snapshotting" deck.gl output inside live applications and comparing against golden images.
+Future work might include running rendering tests directly in Node.js using a Node implementation of WebGPU.

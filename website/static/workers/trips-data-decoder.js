@@ -1,11 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 
 const FLUSH_LIMIT = 5000;
 let LOOP_LENGTH = 3600;
 let TRAIL_LENGTH = 180;
 
-const args = location.search.match((/[^&?]+/g)) || [];
-args.forEach(function(arg) {
+const args = location.search.match(/[^&?]+/g) || [];
+args.forEach(function (arg) {
   const tokens = arg.split('=');
   if (tokens[0] === 'loop') {
     LOOP_LENGTH = Number(tokens[1]);
@@ -20,11 +24,10 @@ let result = [];
 let vertexCount = 0;
 let tripsCount = 0;
 
-onmessage = function(e) {
-
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(l, i) {
+  lines.forEach(function (l, i) {
     if (!l) {
       return;
     }
@@ -62,13 +65,15 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {trips: tripsCount, vertices: vertexCount, progress: tripsCount / 9970 * 0.8}
+    meta: {trips: tripsCount, vertices: vertexCount, progress: (tripsCount / 9970) * 0.8}
   });
   result = [];
 }
 
 function sliceTrip(trip, start, end) {
-  let i, startIndex = -1, endIndex = -1;
+  let i,
+    startIndex = -1,
+    endIndex = -1;
   for (i = 0; i < trip.timestamps.length; i++) {
     const t = trip.timestamps[i];
     if (t > start && startIndex === -1) {
@@ -96,7 +101,7 @@ function shiftTrip(trip, offset) {
     startTime: trip.startTime + offset,
     endTime: trip.endTime + offset,
     path: trip.path,
-    timestamps: trip.timestamps.map(function(t) {
+    timestamps: trip.timestamps.map(function (t) {
       return t + offset;
     })
   };
@@ -108,15 +113,18 @@ function decodeTrip(str, segments) {
   const endTime = decodeNumber(str.slice(3, 5), 90, 32);
   const segs = decodeSegmentsArray(str.slice(5), segments);
 
-  const projectedTimes = segs.reduce(function(acc, seg, i) {
-    const t = acc[i] + seg[seg.length - 1][2];
-    return acc.concat(t);
-  }, [0]);
+  const projectedTimes = segs.reduce(
+    function (acc, seg, i) {
+      const t = acc[i] + seg[seg.length - 1][2];
+      return acc.concat(t);
+    },
+    [0]
+  );
   const rT = (endTime - startTime) / projectedTimes[projectedTimes.length - 1];
   const z = Math.random() * 20;
   const path = [];
   const timestamps = [];
-  segs.forEach(function(seg, i) {
+  segs.forEach(function (seg, i) {
     const t0 = projectedTimes[i];
     seg.forEach(function (s, j) {
       if (i === 0 || j > 0) {
@@ -131,7 +139,7 @@ function decodeTrip(str, segments) {
     startTime,
     endTime,
     path,
-    timestamps,
+    timestamps
   };
 }
 
@@ -154,7 +162,7 @@ function decodeSegments(str) {
     var T = decodeNumber(tokens[i], 30, 32);
     var coords = decodePolyline(tokens[i + 1]);
 
-    var distances = coords.reduce(function(acc, c, j) {
+    var distances = coords.reduce(function (acc, c, j) {
       let d = 0;
       if (j > 0) {
         d = acc[j - 1] + distance(coords[j], coords[j - 1]);
@@ -163,8 +171,8 @@ function decodeSegments(str) {
     }, []);
     var D = distances[distances.length - 1];
 
-    result[i / 2] = coords.map(function(c, j) {
-      return [c[0], c[1], distances[j] / D * T];
+    result[i / 2] = coords.map(function (c, j) {
+      return [c[0], c[1], (distances[j] / D) * T];
     });
   }
 
@@ -172,8 +180,8 @@ function decodeSegments(str) {
 }
 
 /*
-* adapted from turf-distance http://turfjs.org
-*/
+ * adapted from turf-distance http://turfjs.org
+ */
 function distance(from, to) {
   const degrees2radians = Math.PI / 180;
   const dLat = degrees2radians * (to[1] - from[1]);
@@ -181,7 +189,8 @@ function distance(from, to) {
   const lat1 = degrees2radians * from[1];
   const lat2 = degrees2radians * to[1];
 
-  const a = Math.pow(Math.sin(dLat / 2), 2) +
-        Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+  const a =
+    Math.pow(Math.sin(dLat / 2), 2) +
+    Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
   return Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

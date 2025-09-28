@@ -5,14 +5,14 @@ on [deck.gl](http://deck.gl) website.
 
 Copy the content of this folder to your project. 
 
-To download the Cesium 3D tileset, you need a Cesium ion access token, and set it to `ION_TOKEN` in `app.js`.
+To download the Cesium 3D tileset, you need a Cesium ion access token, and set it to `ION_TOKEN` in `app.jsx`.
 
 ```bash
 # install dependencies
 npm install
 # or
 yarn
-# bundle and serve the app with webpack
+# bundle and serve the app with vite
 npm start
 ```
 

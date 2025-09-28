@@ -1,4 +1,8 @@
-import type {Timeline} from '@luma.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import type {Timeline} from '@luma.gl/engine';
 
 export type TransitionSettings = {
   duration: number;
@@ -9,24 +13,21 @@ export type TransitionSettings = {
 };
 
 export default class Transition {
-  private _inProgress: boolean;
-  private _handle: number | null;
+  private _inProgress: boolean = false;
+  private _handle: number | null = null;
   private _timeline: Timeline;
 
-  time: number;
-  settings: TransitionSettings;
+  time: number = 0;
+  // @ts-expect-error
+  settings: TransitionSettings & {fromValue; toValue; duration; easing; damping; stiffness} = {
+    duration: 0
+  };
 
   /**
    * @params timeline {Timeline}
    */
   constructor(timeline: Timeline) {
-    this._inProgress = false;
-    this._handle = null;
     this._timeline = timeline;
-    this.time = 0;
-
-    // Defaults
-    this.settings = {duration: 0};
   }
 
   /* Public API */
@@ -40,6 +41,7 @@ export default class Transition {
    */
   start(settings: TransitionSettings) {
     this.cancel();
+    // @ts-expect-error
     this.settings = settings;
     this._inProgress = true;
     this.settings.onStart?.(this);
@@ -50,7 +52,7 @@ export default class Transition {
    */
   end() {
     if (this._inProgress) {
-      this._timeline.removeChannel(this._handle);
+      this._timeline.removeChannel(this._handle as number);
       this._handle = null;
       this._inProgress = false;
       this.settings.onEnd?.(this);
@@ -63,7 +65,7 @@ export default class Transition {
   cancel() {
     if (this._inProgress) {
       this.settings.onInterrupt?.(this);
-      this._timeline.removeChannel(this._handle);
+      this._timeline.removeChannel(this._handle as number);
       this._handle = null;
       this._inProgress = false;
     }

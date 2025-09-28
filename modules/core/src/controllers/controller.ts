@@ -1,22 +1,6 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable max-statements, complexity */
 import TransitionManager, {TransitionProps} from './transition-manager';
@@ -27,7 +11,7 @@ import {ConstructorOf} from '../types/types';
 import type Viewport from '../viewports/viewport';
 
 import type {EventManager, MjolnirEvent, MjolnirGestureEvent, MjolnirWheelEvent, MjolnirKeyEvent} from 'mjolnir.js';
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -40,8 +24,8 @@ const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
-  TRIPLE_PAN: ['tripanstart', 'tripanmove', 'tripanend'],
-  DOUBLE_TAP: ['doubletap'],
+  MULTI_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
+  DOUBLE_CLICK: ['dblclick'],
   KEYBOARD: ['keydown']
 } as const;
 
@@ -111,13 +95,14 @@ export type InteractionState = {
 }
 
 /** Parameters passed to the onViewStateChange callback */
-export type ViewStateChangeParameters = {
+export type ViewStateChangeParameters<ViewStateT = any> = {
+  viewId: string;
   /** The next view state, either from user input or transition */
-  viewState: Record<string, any>;
+  viewState: ViewStateT;
   /** Object describing the nature of the view state change */
   interactionState: InteractionState;
   /** The current view state */
-  oldViewState?: Record<string, any>;
+  oldViewState?: ViewStateT;
 }
 
 const pinchEventWorkaround: any = {};
@@ -227,18 +212,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         return this._onPinch(event);
       case 'pinchend':
         return this._onPinchEnd(event);
-      case 'tripanstart':
-        return eventStartBlocked ? false : this._onTriplePanStart(event);
-      case 'tripanmove':
-        return this._onTriplePan(event);
-      case 'tripanend':
-        return this._onTriplePanEnd(event);
-      case 'doubletap':
-        return this._onDoubleTap(event);
+      case 'multipanstart':
+        return eventStartBlocked ? false : this._onMultiPanStart(event);
+      case 'multipanmove':
+        return this._onMultiPan(event);
+      case 'multipanend':
+        return this._onMultiPanEnd(event);
+      case 'dblclick':
+        return this._onDoubleClick(event);
       case 'wheel':
-        return this._onWheel(event);
+        return this._onWheel(event as MjolnirWheelEvent);
       case 'keydown':
-        return this._onKeyDown(event);
+        return this._onKeyDown(event as MjolnirKeyEvent);
       default:
         return false;
     }
@@ -329,10 +314,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     // Register/unregister events
     const isInteractive = Boolean(this.onViewStateChange);
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
-    this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
+    // We always need the pan events to set the correct isDragging state, even if dragPan & dragRotate are both false
+    this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
-    this.toggleEvents(EVENT_TYPES.TRIPLE_PAN, isInteractive && touchRotate);
-    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && touchRotate);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
     // Interaction toggles
@@ -384,13 +370,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (changed) {
       const oldViewState = this.controllerState && this.controllerState.getViewportProps();
       if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState});
+        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState, viewId: this.props.id});
       }
     }
   }
 
   private _onTransition(params: {viewState: Record<string, any>, oldViewState: Record<string, any>}) {
-    this.onViewStateChange({...params, interactionState: this._interactionState});
+    this.onViewStateChange({...params, interactionState: this._interactionState, viewId: this.props.id});
   }
 
   private _setInteractionState(newStates: InteractionState) {
@@ -531,12 +517,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.scrollZoom) {
       return false;
     }
-    event.srcEvent.preventDefault();
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
+    event.srcEvent.preventDefault();
 
     const {speed = 0.01, smooth = false} = this.scrollZoom === true ? {} : this.scrollZoom;
     const {delta} = event;
@@ -547,10 +533,14 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       scale = 1 / scale;
     }
 
+    const transitionProps = smooth
+      ? {...this._getTransitionProps({around: pos}), transitionDuration: 250}
+      : NO_TRANSITION_PROPS;
+
     const newControllerState = this.controllerState.zoom({pos, scale});
     this.updateViewport(
       newControllerState,
-      {...this._getTransitionProps({around: pos}), transitionDuration: smooth ? 250 : 1},
+      transitionProps,
       {
         isZooming: true,
         isPanning: true
@@ -559,7 +549,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onTriplePanStart(event: MjolnirGestureEvent): boolean {
+  protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -569,7 +559,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onTriplePan(event: MjolnirGestureEvent): boolean {
+  protected _onMultiPan(event: MjolnirGestureEvent): boolean {
     if (!this.touchRotate) {
       return false;
     }
@@ -588,7 +578,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onTriplePanEnd(event: MjolnirGestureEvent): boolean {
+  protected _onMultiPanEnd(event: MjolnirGestureEvent): boolean {
     if (!this.isDragging()) {
       return false;
     }
@@ -711,8 +701,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  // Default handler for the `doubletap` event.
-  protected _onDoubleTap(event: MjolnirGestureEvent): boolean {
+  // Default handler for the `dblclick` event.
+  protected _onDoubleClick(event: MjolnirGestureEvent): boolean {
     if (!this.doubleClickZoom) {
       return false;
     }

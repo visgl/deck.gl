@@ -1,24 +1,19 @@
 {
-  "name": "pure-js-carto",
+  "name": "deckgl-example-pure-js-carto",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "webpack -p"
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.8.0",
-    "@deck.gl/layers": "^8.8.0",
-    "@deck.gl/geo-layers": "^8.8.0",
-    "@deck.gl/mesh-layers": "^8.8.0",
-    "@deck.gl/carto": "^8.8.0",
-    "mapbox-gl": "^1.13.0"
+    "deck.gl": "^9.0.0",
+    "maplibre-gl": "^5.0.0"
   },
   "devDependencies": {
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   },
   "eslintConfig": {
     "globals": {

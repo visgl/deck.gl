@@ -1,14 +1,26 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* global deck, requestAnimationFrame, setTimeout */
 const lng = -3.7082998;
 const lat = 40.4205556;
 
 deck.carto.setDefaultCredentials({
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
   apiVersion: deck.carto.API_VERSIONS.V3,
-  accessToken: 'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJhMjQyNDM4MSJ9.5bAXb8y7PyIOB__X7i-iQUWCZgLkedtGoqRI25HuQxc'
+  accessToken:
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJhMjQyNDM4MSJ9.5bAXb8y7PyIOB__X7i-iQUWCZgLkedtGoqRI25HuQxc'
 });
 
 const POLYGON_COLORS = [
-  '#fcde9c', '#faa476', '#f0746e', '#e34f6f', '#dc3977', '#b9257a', '#7c1d6f'
+  '#fcde9c',
+  '#faa476',
+  '#f0746e',
+  '#e34f6f',
+  '#dc3977',
+  '#b9257a',
+  '#7c1d6f'
 ].map(hex2rgb);
 
 // Create Deck.GL map
@@ -22,7 +34,14 @@ const deckgl = new deck.DeckGL({
     zoom: 15,
     pitch: 60
   },
-  controller: {scrollZoom: false, touchZoom: false, dragPan: false, dragRotate: false, keyboard: false, doubleClickZoom: false}
+  controller: {
+    scrollZoom: false,
+    touchZoom: false,
+    dragPan: false,
+    dragRotate: false,
+    keyboard: false,
+    doubleClickZoom: false
+  }
 });
 
 function colorForBuilding(d, alpha) {
@@ -33,9 +52,6 @@ function colorForBuilding(d, alpha) {
   })(d);
   return [...rgb, alpha || 255];
 }
-
-// SVG CARTO logo
-const logo = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23162945' fill-rule='evenodd'%3E%3Ccircle cx='90' cy='90' r='90' fill-opacity='.1'/%3E%3Ccircle cx='90' cy='90' r='30'/%3E%3C/g%3E%3C/svg%3E";
 
 let rangeMax = 0;
 const animationSpeed = 1.8;
@@ -62,14 +78,18 @@ function render() {
     getElevation: d => 15 + 30 * Math.random(), // Random heights
 
     // Data filter to fade in buildings
-    extensions: [new deck.DataFilterExtension({
-      filterSize: 1
-    })],
+    extensions: [
+      new deck.DataFilterExtension({
+        filterSize: 1
+      })
+    ],
     getFilterValue: (value, data) => {
       // Extract position of polygon from binary data
       const i = data.index;
-      const startIndex = data.data.startIndices[i]
-      const [lng0, lat0] = [...data.data.attributes.positions.value.subarray(2 * startIndex, 2 * startIndex + 2)];
+      const startIndex = data.data.startIndices[i];
+      const [lng0, lat0] = [
+        ...data.data.attributes.positions.value.subarray(2 * startIndex, 2 * startIndex + 2)
+      ];
 
       // Calculate distance from center
       const d = 100000 * D(lng0 - lng, lat0 - lat);
@@ -79,7 +99,7 @@ function render() {
       return d + jitter;
     },
     filterSoftRange: [0, rangeMax],
-    filterRange: [0, rangeMax + 40],
+    filterRange: [0, rangeMax + 40]
   });
 
   // Logo layer
@@ -92,7 +112,7 @@ function render() {
     sizeScale: 40,
     getScale: d => [d, d, d],
     getPosition: d => [lng, lat, 100],
-    getColor: d => d === 1 ? [140, 49, 83, 255] : [232, 234, 236, 60],
+    getColor: d => (d === 1 ? [140, 49, 83, 255] : [232, 234, 236, 60]),
     getOrientation: d => [90, 90, 0],
 
     parameters: {
@@ -129,7 +149,7 @@ function rotate() {
       transitionDuration: 30000,
       transitionInterpolator: new deck.LinearInterpolator(['bearing']),
       onTransitionEnd: rotate
-    },
+    }
   });
 }
 setTimeout(rotate, 200);
@@ -139,18 +159,16 @@ function D(a, b) {
 }
 
 function hex2rgb(hex) {
-  const c = '0x' + hex.substring(1);
+  const c = `0x${hex.substring(1)}`;
   return [(c >> 16) & 255, (c >> 8) & 255, c & 255];
 }
 
 function makeCircle(n) {
-  const step = 2 * Math.PI / n;
+  const step = (2 * Math.PI) / n;
   const degrees = [...Array(n).keys()].map(i => i * step);
-  return degrees.map(a => {
-    return [
-      0, 0, 0,
-      Math.sin(a), Math.cos(a), 0,
-      Math.sin(a + step), Math.cos(a + step), 0
-    ]
-  }).flat();
+  return degrees
+    .map(a => {
+      return [0, 0, 0, Math.sin(a), Math.cos(a), 0, Math.sin(a + step), Math.cos(a + step), 0];
+    })
+    .flat();
 }

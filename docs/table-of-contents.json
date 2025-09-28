@@ -1,269 +1,341 @@
-{
-  "id": "table-of-contents",
-  "chapters": [
-    {
-      "title": "Overview",
-      "entries": [
-        {"entry": "docs"},
-        {"entry": "docs/whats-new"},
-        {"entry": "docs/upgrade-guide"},
-        {"entry": "docs/contributing"},
-        {"entry": "docs/faq"}
-      ]
-    },
-    {
-      "title": "Getting Started",
-      "entries": [
-        {"entry": "docs/get-started/getting-started"},
-        {"entry": "docs/get-started/using-standalone"},
-        {"entry": "docs/get-started/using-with-map"},
-        {"entry": "docs/get-started/using-with-react"},
-        {"entry": "docs/get-started/using-with-typescript"},
-        {"entry": "docs/get-started/learning-resources"}
-      ]
-    },
-    {
-      "title": "Developer Guide",
-      "chapters": [
-        {
-          "title": "Using the API",
-          "entries": [
-            {"entry": "docs/developer-guide/using-layers"},
-            {"entry": "docs/developer-guide/interactivity"},
-            {"entry": "docs/developer-guide/coordinate-systems"},
-            {"entry": "docs/developer-guide/views"},
-            {"entry": "docs/developer-guide/view-state-transitions"},
-            {"entry": "docs/developer-guide/loading-data"},
-            {"entry": "docs/developer-guide/using-lighting"},
-            {"entry": "docs/developer-guide/performance"},
-            {"entry": "docs/developer-guide/64-bits"},
-            {"entry": "docs/developer-guide/tips-and-tricks"},
-            {"entry": "docs/developer-guide/building-apps"},
-            {"entry": "docs/developer-guide/debugging"},
-            {"entry": "docs/developer-guide/testing"}
-          ]
-        },
-        {
-          "title": "Writing Custom Layers",
-          "entries": [
-            {"entry": "docs/developer-guide/custom-layers"},
-            {"entry": "docs/developer-guide/custom-layers/layer-lifecycle"},
-            {"entry": "docs/developer-guide/custom-layers/picking"},
-            {"entry": "docs/developer-guide/custom-layers/composite-layers"},
-            {"entry": "docs/developer-guide/custom-layers/subclassed-layers"},
-            {"entry": "docs/developer-guide/custom-layers/primitive-layers"},
-            {"entry": "docs/developer-guide/custom-layers/prop-types"},
-            {"entry": "docs/developer-guide/custom-layers/attribute-management"},
-            {"entry": "docs/developer-guide/custom-layers/writing-shaders"}
-          ]
-        },
-        {
-          "title": "Using with Supported Base Maps",
-          "entries": [
-            {"entry": "docs/developer-guide/base-maps/using-with-arcgis"},
-            {"entry": "docs/developer-guide/base-maps/using-with-google-maps"},
-            {"entry": "docs/developer-guide/base-maps/using-with-mapbox"}
-          ]
-        }
-      ]
-    },
-    {
-      "title": "API Reference",
-      "chapters": [
-        {
-          "title": "Core Classes",
-          "entries": [
-            {"entry": "docs/api-reference/core/deck"},
-            {"entry": "docs/api-reference/core/attribute-manager"}
-          ]
-        },
-        {
-          "title": "Layers",
-          "entries": [
-            {"entry": "docs/api-reference/layers"},
-            {"entry": "docs/api-reference/core/layer"},
-            {"entry": "docs/api-reference/core/composite-layer"},
-            {"entry": "docs/api-reference/layers/arc-layer"},
-            {"entry": "docs/api-reference/layers/bitmap-layer"},
-            {"entry": "docs/api-reference/layers/column-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/cpu-grid-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/contour-layer"},
-            {"entry": "docs/api-reference/layers/geojson-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/gpu-grid-layer"},
-            {"entry": "docs/api-reference/geo-layers/great-circle-layer"},
-            {"entry": "docs/api-reference/layers/grid-cell-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/grid-layer"},
-            {"entry": "docs/api-reference/geo-layers/h3-cluster-layer"},
-            {"entry": "docs/api-reference/geo-layers/h3-hexagon-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/heatmap-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/hexagon-layer"},
-            {"entry": "docs/api-reference/layers/icon-layer"},
-            {"entry": "docs/api-reference/layers/line-layer"},
-            {"entry": "docs/api-reference/geo-layers/mvt-layer"},
-            {"entry": "docs/api-reference/layers/path-layer"},
-            {"entry": "docs/api-reference/layers/point-cloud-layer"},
-            {"entry": "docs/api-reference/layers/polygon-layer"},
-            {"entry": "docs/api-reference/geo-layers/geohash-layer"},
-            {"entry": "docs/api-reference/geo-layers/quadkey-layer"},
-            {"entry": "docs/api-reference/geo-layers/s2-layer"},
-            {"entry": "docs/api-reference/layers/scatterplot-layer"},
-            {"entry": "docs/api-reference/mesh-layers/scenegraph-layer"},
-            {"entry": "docs/api-reference/aggregation-layers/screen-grid-layer"},
-            {"entry": "docs/api-reference/mesh-layers/simple-mesh-layer"},
-            {"entry": "docs/api-reference/layers/solid-polygon-layer"},
-            {"entry": "docs/api-reference/geo-layers/terrain-layer"},
-            {"entry": "docs/api-reference/layers/text-layer"},
-            {"entry": "docs/api-reference/geo-layers/tile-layer"},
-            {"entry": "docs/api-reference/geo-layers/tile-3d-layer"},
-            {"entry": "docs/api-reference/geo-layers/trips-layer"}
-          ]
-        },
-        {
-          "title": "Scripting Interface",
-          "entries": [
-            {"entry": "docs/api-reference/core/deckgl"}
-          ]
-        },
-        {
-          "title": "Shader Modules",
-          "entries": [
-            {"entry": "docs/api-reference/core/project"},
-            {"entry": "docs/api-reference/core/project32"},
-            {"entry": "docs/api-reference/core/project64"}
-          ]
-        },
-        {
-          "title": "Viewports",
-          "entries": [
-            {"entry": "docs/api-reference/core/viewport"},
-            {"entry": "docs/api-reference/core/globe-viewport"},
-            {"entry": "docs/api-reference/core/web-mercator-viewport"}
-          ]
-        },
-        {
-          "title": "Views",
-          "entries": [
-            {"entry": "docs/api-reference/core/view"},
-            {"entry": "docs/api-reference/core/map-view"},
-            {"entry": "docs/api-reference/core/globe-view"},
-            {"entry": "docs/api-reference/core/first-person-view"},
-            {"entry": "docs/api-reference/core/orthographic-view"},
-            {"entry": "docs/api-reference/core/orbit-view"}
-          ]
-        },
-        {
-          "title": "Controllers",
-          "entries": [
-            {"entry": "docs/api-reference/core/controller"},
-            {"entry": "docs/api-reference/core/map-controller"},
-            {"entry": "docs/api-reference/core/globe-controller"},
-            {"entry": "docs/api-reference/core/first-person-controller"},
-            {"entry": "docs/api-reference/core/orthographic-controller"},
-            {"entry": "docs/api-reference/core/orbit-controller"}
-          ]
-        },
-        {
-          "title": "Transitions",
-          "entries": [
-            {"entry": "docs/api-reference/core/linear-interpolator"},
-            {"entry": "docs/api-reference/core/fly-to-interpolator"},
-            {"entry": "docs/api-reference/core/transition-interpolator"}
-          ]
-        },
-        {
-          "title": "Effects",
-          "entries": [
-            {"entry": "docs/api-reference/core/lighting-effect"},
-            {"entry": "docs/api-reference/core/post-process-effect"}
-          ]
-        },
-        {
-          "title": "Lights",
-          "entries": [
-            {"entry": "docs/api-reference/core/ambient-light"},
-            {"entry": "docs/api-reference/core/point-light"},
-            {"entry": "docs/api-reference/core/directional-light"},
-            {"entry": "docs/api-reference/core/camera-light"},
-            {"entry": "docs/api-reference/core/sun-light"}
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Submodule API Reference",
-      "chapters": [
-        {
-          "title": "@deck.gl/arcgis",
-          "entries": [
-            {"entry": "docs/api-reference/arcgis/overview"},
-            {"entry": "docs/api-reference/arcgis/deck-layer"},
-            {"entry": "docs/api-reference/arcgis/deck-renderer"},
-            {"entry": "docs/api-reference/arcgis/load-arcgis-modules"}
-          ]
-        },
-        {
-          "title": "@deck.gl/carto",
-          "entries": [
-            {"entry": "docs/api-reference/carto/overview"},
-            {"entry": "docs/api-reference/carto/fetch-map"},
-            {"entry": "docs/api-reference/carto/carto-layer"},
-            {"entry": "docs/api-reference/carto/basemap"},
-            {"entry": "docs/api-reference/carto/styles"}
-          ]
-        },
-        {
-          "title": "@deck.gl/google-maps",
-          "entries": [
-            {"entry": "docs/api-reference/google-maps/overview"},
-            {"entry": "docs/api-reference/google-maps/google-maps-overlay"}
-          ]
-        },
-        {
-          "title": "@deck.gl/extensions",
-          "entries": [
-            {"entry": "docs/api-reference/extensions/overview"},
-            {"entry": "docs/api-reference/extensions/brushing-extension"},
-            {"entry": "docs/api-reference/extensions/clip-extension"},
-            {"entry": "docs/api-reference/extensions/data-filter-extension"},
-            {"entry": "docs/api-reference/extensions/fill-style-extension"},
-            {"entry": "docs/api-reference/extensions/fp64-extension"},
-            {"entry": "docs/api-reference/extensions/mask-extension"},
-            {"entry": "docs/api-reference/extensions/path-style-extension"}
-          ]
-        },
-        {
-          "title": "@deck.gl/json",
-          "entries": [
-            {"entry": "docs/api-reference/json/overview"},
-            {"entry": "docs/api-reference/json/json-converter"},
-            {"entry": "docs/api-reference/json/json-configuration"},
-            {"entry": "docs/api-reference/json/conversion-reference"}
-          ]
-        },
-        {
-          "title": "@deck.gl/mapbox",
-          "entries": [
-            {"entry": "docs/api-reference/mapbox/overview"},
-            {"entry": "docs/api-reference/mapbox/mapbox-layer"},
-            {"entry": "docs/api-reference/mapbox/mapbox-overlay"}
-          ]
-        },
-        {
-          "title": "@deck.gl/react",
-          "entries": [
-            {"entry": "docs/api-reference/react/deckgl"}
-          ]
-        },
-        {
-          "title": "@deck.gl/test-utils",
-          "entries": [
-            {"entry": "docs/api-reference/test-utils/overview"},
-            {"entry": "docs/api-reference/test-utils/generate-layer-tests"},
-            {"entry": "docs/api-reference/test-utils/test-layer"},
-            {"entry": "docs/api-reference/test-utils/snapshot-test-runner"}
-          ]
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "type": "category",
+    "label": "Overview",
+    "items": [
+      "README",
+      "whats-new",
+      "upgrade-guide",
+      "contributing",
+      "faq"
+    ]
+  },
+  {
+    "type": "category",
+    "label": "Getting Started",
+    "items": [
+      "get-started/getting-started",
+      "get-started/using-standalone",
+      "get-started/using-with-react",
+      "get-started/using-with-typescript",
+      "get-started/using-with-map",
+      "get-started/learning-resources"
+    ]
+  },
+  {
+    "type": "category",
+    "label": "Developer Guide",
+    "items": [
+      {
+        "type": "category",
+        "label": "Using the API",
+        "items": [
+          "developer-guide/using-layers",
+          "developer-guide/interactivity",
+          "developer-guide/coordinate-systems",
+          "developer-guide/views",
+          "developer-guide/animations-and-transitions",
+          "developer-guide/loading-data",
+          "developer-guide/using-effects",
+          "developer-guide/performance",
+          "developer-guide/tips-and-tricks",
+          "developer-guide/building-apps",
+          "developer-guide/debugging",
+          "developer-guide/testing",
+          "developer-guide/webgpu"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Supported Base Maps",
+        "items": [
+          "developer-guide/base-maps/using-with-arcgis",
+          "developer-guide/base-maps/using-with-google-maps",
+          "developer-guide/base-maps/using-with-mapbox",
+          "developer-guide/base-maps/using-with-maplibre"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Writing Custom Layers",
+        "items": [
+          "developer-guide/custom-layers/README",
+          "developer-guide/custom-layers/layer-attributes",
+          "developer-guide/custom-layers/layer-lifecycle",
+          "developer-guide/custom-layers/picking",
+          "developer-guide/custom-layers/composite-layers",
+          "developer-guide/custom-layers/subclassed-layers",
+          "developer-guide/custom-layers/layer-extensions",
+          "developer-guide/custom-layers/primitive-layers",
+          "developer-guide/custom-layers/prop-types",
+          "developer-guide/custom-layers/attribute-management",
+          "developer-guide/custom-layers/writing-shaders"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "category",
+    "label": "API Reference",
+    "items": [
+      {
+        "type": "category",
+        "label": "Core Classes",
+        "items": [
+          "api-reference/core/deck",
+          "api-reference/core/attribute-manager",
+          "api-reference/core/widget"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Layers",
+        "items": [
+          "api-reference/layers/README",
+          "api-reference/core/layer",
+          "api-reference/core/composite-layer",
+          "api-reference/geo-layers/a5-layer",
+          "api-reference/layers/arc-layer",
+          "api-reference/layers/bitmap-layer",
+          "api-reference/layers/column-layer",
+          "api-reference/aggregation-layers/contour-layer",
+          "api-reference/geo-layers/geohash-layer",
+          "api-reference/layers/geojson-layer",
+          "api-reference/geo-layers/great-circle-layer",
+          "api-reference/layers/grid-cell-layer",
+          "api-reference/aggregation-layers/grid-layer",
+          "api-reference/geo-layers/h3-cluster-layer",
+          "api-reference/geo-layers/h3-hexagon-layer",
+          "api-reference/aggregation-layers/heatmap-layer",
+          "api-reference/aggregation-layers/hexagon-layer",
+          "api-reference/layers/icon-layer",
+          "api-reference/layers/line-layer",
+          "api-reference/geo-layers/mvt-layer",
+          "api-reference/layers/path-layer",
+          "api-reference/layers/point-cloud-layer",
+          "api-reference/layers/polygon-layer",
+          "api-reference/geo-layers/quadkey-layer",
+          "api-reference/geo-layers/s2-layer",
+          "api-reference/layers/scatterplot-layer",
+          "api-reference/mesh-layers/scenegraph-layer",
+          "api-reference/aggregation-layers/screen-grid-layer",
+          "api-reference/mesh-layers/simple-mesh-layer",
+          "api-reference/layers/solid-polygon-layer",
+          "api-reference/geo-layers/terrain-layer",
+          "api-reference/layers/text-layer",
+          "api-reference/geo-layers/tile-layer",
+          "api-reference/geo-layers/tile-3d-layer",
+          "api-reference/geo-layers/trips-layer",
+          "api-reference/geo-layers/wms-layer"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Aggregation Layers",
+        "items": [
+          "api-reference/aggregation-layers/overview",
+          "api-reference/aggregation-layers/aggregation-layer",
+          "api-reference/aggregation-layers/aggregator",
+          "api-reference/aggregation-layers/cpu-aggregator",
+          "api-reference/aggregation-layers/webgl-aggregator"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Scripting Interface",
+        "items": [
+          "api-reference/core/deckgl"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Shader Modules",
+        "items": [
+          "api-reference/core/project",
+          "api-reference/core/project32",
+          "api-reference/core/project64"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Viewports",
+        "items": [
+          "api-reference/core/viewport",
+          "api-reference/core/globe-viewport",
+          "api-reference/core/web-mercator-viewport"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Views",
+        "items": [
+          "api-reference/core/view",
+          "api-reference/core/map-view",
+          "api-reference/core/globe-view",
+          "api-reference/core/first-person-view",
+          "api-reference/core/orthographic-view",
+          "api-reference/core/orbit-view"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Controllers",
+        "items": [
+          "api-reference/core/controller",
+          "api-reference/core/map-controller",
+          "api-reference/core/globe-controller",
+          "api-reference/core/first-person-controller",
+          "api-reference/core/orthographic-controller",
+          "api-reference/core/orbit-controller"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Transitions",
+        "items": [
+          "api-reference/core/linear-interpolator",
+          "api-reference/core/fly-to-interpolator",
+          "api-reference/core/transition-interpolator"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Effects",
+        "items": [
+          "api-reference/core/lighting-effect",
+          "api-reference/core/post-process-effect"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Lights",
+        "items": [
+          "api-reference/core/ambient-light",
+          "api-reference/core/point-light",
+          "api-reference/core/directional-light",
+          "api-reference/core/camera-light",
+          "api-reference/core/sun-light"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "category",
+    "label": "Submodule API Reference",
+    "items": [
+      {
+        "type": "category",
+        "label": "@deck.gl/arcgis",
+        "items": [
+          "api-reference/arcgis/overview",
+          "api-reference/arcgis/deck-layer",
+          "api-reference/arcgis/deck-renderer",
+          "api-reference/arcgis/load-arcgis-modules"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/carto",
+        "items": [
+          "api-reference/carto/overview",
+          "api-reference/carto/basemap",
+          "api-reference/carto/fetch-map",
+          "api-reference/carto/data-sources",
+          "api-reference/carto/cluster-tile-layer",
+          "api-reference/carto/h3-tile-layer",
+          "api-reference/carto/heatmap-tile-layer",
+          "api-reference/carto/quadbin-tile-layer",
+          "api-reference/carto/raster-tile-layer",
+          "api-reference/carto/vector-tile-layer",
+          "api-reference/carto/styles"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/google-maps",
+        "items": [
+          "api-reference/google-maps/overview",
+          "api-reference/google-maps/google-maps-overlay"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/extensions",
+        "items": [
+          "api-reference/extensions/overview",
+          "api-reference/extensions/brushing-extension",
+          "api-reference/extensions/clip-extension",
+          "api-reference/extensions/collision-filter-extension",
+          "api-reference/extensions/data-filter-extension",
+          "api-reference/extensions/fill-style-extension",
+          "api-reference/extensions/fp64-extension",
+          "api-reference/extensions/mask-extension",
+          "api-reference/extensions/path-style-extension",
+          "api-reference/extensions/terrain-extension"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/json",
+        "items": [
+          "api-reference/json/overview",
+          "api-reference/json/json-converter",
+          "api-reference/json/json-configuration",
+          "api-reference/json/conversion-reference"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/mapbox",
+        "items": [
+          "api-reference/mapbox/overview",
+          "api-reference/mapbox/mapbox-overlay"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/react",
+        "items": [
+          "api-reference/react/overview",    
+          "api-reference/react/deckgl",
+          "api-reference/react/use-widget"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/test-utils",
+        "items": [
+          "api-reference/test-utils/overview",
+          "api-reference/test-utils/generate-layer-tests",
+          "api-reference/test-utils/test-layer",
+          "api-reference/test-utils/snapshot-test-runner"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/widgets",
+        "items": [
+          "api-reference/widgets/overview",
+          "api-reference/widgets/styling",
+          "api-reference/widgets/compass-widget",
+          "api-reference/widgets/context-menu-widget",
+          "api-reference/widgets/fps-widget",
+          "api-reference/widgets/fullscreen-widget",
+          "api-reference/widgets/geocoder-widget",
+          "api-reference/widgets/gimbal-widget",
+          "api-reference/widgets/info-widget",
+          "api-reference/widgets/loading-widget",
+          "api-reference/widgets/reset-view-widget",
+          "api-reference/widgets/scale-widget",
+          "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/stats-widget",
+          "api-reference/widgets/theme-widget",
+          "api-reference/widgets/timeline-widget",
+          "api-reference/widgets/view-selector-widget",
+          "api-reference/widgets/zoom-widget"
+        ]
+      }
+    ]
+  }
+]

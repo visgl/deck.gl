@@ -1,4 +1,8 @@
-import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {CompositeLayer, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 const defaultProps: DefaultProps<GeoCellLayerProps> = {
@@ -6,13 +10,13 @@ const defaultProps: DefaultProps<GeoCellLayerProps> = {
 };
 
 /** All properties supported by GeoCellLayer. */
-export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type GeoCellLayerProps<DataT = unknown> = PolygonLayerProps<DataT>;
 
-export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+export default class GeoCellLayer<DataT = any, ExtraProps extends {} = {}> extends CompositeLayer<
   Required<GeoCellLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'GeoCellLayer';
-  static defaultProps = defaultProps;
+  static defaultProps: DefaultProps = defaultProps;
 
   /** Implement to generate props to create geometry. */
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
@@ -45,6 +49,7 @@ export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends Composit
 
     // Filled Polygon Layer
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
+    const {updateTriggers: boundsUpdateTriggers, ...boundsProps} = this.indexToBounds() || {};
     return new CellLayer(
       {
         filled,
@@ -73,13 +78,14 @@ export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends Composit
       this.getSubLayerProps({
         id: 'cell',
         updateTriggers: updateTriggers && {
+          ...boundsUpdateTriggers,
           getElevation: updateTriggers.getElevation,
           getFillColor: updateTriggers.getFillColor,
           getLineColor: updateTriggers.getLineColor,
           getLineWidth: updateTriggers.getLineWidth
         }
       }),
-      this.indexToBounds()
+      boundsProps
     );
   }
 }

@@ -1,61 +1,75 @@
-import {Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import type Layer from '../lib/layer';
+import {Device, Texture, SamplerProps} from '@luma.gl/core';
 
-const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+const DEFAULT_TEXTURE_PARAMETERS: SamplerProps = {
+  minFilter: 'linear',
+  mipmapFilter: 'linear',
+  magFilter: 'linear',
+  addressModeU: 'clamp-to-edge',
+  addressModeV: 'clamp-to-edge'
 };
 
 // Track the textures that are created by us. They need to be released when they are no longer used.
-const internalTextures: Record<string, Texture2D> = {};
+const internalTextures: Record<string, string> = {};
 
-export function createTexture(layer: Layer, image: any): Texture2D | null {
-  const gl = layer.context && layer.context.gl;
-  if (!gl || !image) {
-    return null;
-  }
-
-  // image could be one of:
-  //  - Texture2D
-  //  - Browser object: Image, ImageData, ImageData, HTMLCanvasElement, HTMLVideoElement, ImageBitmap
-  //  - Plain object: {width: <number>, height: <number>, data: <Uint8Array>}
-  if (image instanceof Texture2D) {
+/**
+ *
+ * @param owner
+ * @param device
+ * @param image could be one of:
+ *   - Texture
+ *   - Browser object: Image, ImageData, ImageData, HTMLCanvasElement, HTMLVideoElement, ImageBitmap
+ *   - Plain object: {width: <number>, height: <number>, data: <Uint8Array>}
+ * @param parameters
+ * @returns
+ */
+export function createTexture(
+  owner: string,
+  device: Device,
+  image: any,
+  sampler: SamplerProps
+): Texture | null {
+  if (image instanceof Texture) {
     return image;
   } else if (image.constructor && image.constructor.name !== 'Object') {
     // Browser object
     image = {data: image};
   }
 
-  let specialTextureParameters: Record<string, any> | null = null;
+  let samplerParameters: SamplerProps | null = null;
   if (image.compressed) {
-    specialTextureParameters = {
-      [GL.TEXTURE_MIN_FILTER]: image.data.length > 1 ? GL.LINEAR_MIPMAP_NEAREST : GL.LINEAR
+    samplerParameters = {
+      minFilter: 'linear',
+      mipmapFilter: image.data.length > 1 ? 'nearest' : 'linear'
     };
   }
 
-  const texture = new Texture2D(gl, {
+  const {width, height} = image.data;
+  const texture = device.createTexture({
     ...image,
-    parameters: {
+    sampler: {
       ...DEFAULT_TEXTURE_PARAMETERS,
-      ...specialTextureParameters,
-      // @ts-expect-error textureParameter may not be defined
-      ...layer.props.textureParameters
-    }
+      ...samplerParameters,
+      ...sampler
+    },
+    mipLevels: device.getMipLevelCount(width, height)
   });
+  texture.generateMipmapsWebGL();
+
   // Track this texture
-  internalTextures[texture.id] = true;
+  internalTextures[texture.id] = owner;
   return texture;
 }
 
-export function destroyTexture(texture: Texture2D) {
-  if (!texture || !(texture instanceof Texture2D)) {
+export function destroyTexture(owner: string, texture: Texture) {
+  if (!texture || !(texture instanceof Texture)) {
     return;
   }
-  if (internalTextures[texture.id]) {
+  // Only delete the texture if requested by the same layer that created it
+  if (internalTextures[texture.id] === owner) {
     texture.delete();
     delete internalTextures[texture.id];
   }

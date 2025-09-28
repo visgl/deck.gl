@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global fetch */
 import TEST_CASES from './test-cases';
 import {LayerManager} from '@deck.gl/core';

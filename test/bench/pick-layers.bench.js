@@ -1,7 +1,12 @@
-import {Layer} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Layer, Viewport} from '@deck.gl/core';
 import {getClosestObject} from '@deck.gl/core/lib/picking/query-object';
 
-const SAMPLE_LAYERS = [new Layer()];
+const SAMPLE_LAYER = new Layer();
+const SAMPLE_VIEWPORT = new Viewport();
 const OBJECT_COLOR = [0, 10, 20, 1];
 const NULL_COLOR = [0, 0, 0, 0];
 
@@ -67,7 +72,21 @@ function generateSampleData({pickingRadius, getColor}) {
 
   return {
     pickedColors: pixels,
-    layers: SAMPLE_LAYERS,
+    decodePickingColor: color => {
+      if (color[3] === 0) {
+        return {
+          pickedLayer: null,
+          pickedViewports: [],
+          pickedObjectIndex: -1
+        };
+      }
+
+      return {
+        pickedLayer: SAMPLE_LAYER,
+        pickedViewports: [SAMPLE_VIEWPORT],
+        pickedObjectIndex: SAMPLE_LAYER.decodePickingColor(color)
+      };
+    },
     deviceX: pickingRadius,
     deviceY: pickingRadius,
     deviceRadius: pickingRadius,

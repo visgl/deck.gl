@@ -1,1 +1,1 @@
-pydeck-carto>=0.1.0b7
+pydeck-carto>=0.2.0

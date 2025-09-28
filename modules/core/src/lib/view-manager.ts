@@ -1,22 +1,6 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
@@ -29,12 +13,45 @@ import type View from '../views/view';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
+import type {default as MapView, MapViewState} from '../views/map-view';
 
-export default class ViewManager {
+export type ViewOrViews = View | View[] | null;
+type ViewStateOf<ViewT> = ViewT extends View<infer ViewStateT> ? ViewStateT : never;
+type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
+  ? MapView
+  : ViewsT extends View[]
+    ? ViewsT[number]
+    : ViewsT;
+export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStateOf<OneOfViews<ViewsT>>;
+export type ViewStateMap<ViewsT extends ViewOrViews> = ViewsT extends null
+  ? MapViewState
+  : ViewsT extends View
+    ? ViewStateOf<ViewsT>
+    : {[viewId: string]: AnyViewStateOf<ViewsT>};
+
+/** This is a very lose type of all "acceptable" viewState
+ * It's not good for type hinting but matches what may exist internally
+ */
+export type ViewStateObject<ViewsT extends ViewOrViews> =
+  | ViewStateMap<ViewsT>
+  | AnyViewStateOf<ViewsT>
+  | {[viewId: string]: AnyViewStateOf<ViewsT>};
+
+/** ViewManager props directly supplied by the user */
+type ViewManagerProps<ViewsT extends ViewOrViews> = {
+  views: ViewsT;
+  viewState: ViewStateObject<ViewsT> | null;
+  onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
+  onInteractionStateChange?: (state: InteractionState) => void;
+  width?: number;
+  height?: number;
+};
+
+export default class ViewManager<ViewsT extends View[]> {
   width: number;
   height: number;
   views: View[];
-  viewState: any;
+  viewState: ViewStateObject<ViewsT>;
   controllers: {[viewId: string]: Controller<any> | null};
   timeline: Timeline;
 
@@ -45,27 +62,22 @@ export default class ViewManager {
   private _needsUpdate: string | false;
   private _eventManager: EventManager;
   private _eventCallbacks: {
-    onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
+    onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
 
-  constructor(props: {
-    // Initial options
-    timeline: Timeline;
-    eventManager: EventManager;
-    onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
-    onInteractionStateChange?: (state: InteractionState) => void;
-    // Props
-    views?: View[];
-    viewState?: any;
-    width?: number;
-    height?: number;
-  }) {
+  constructor(
+    props: ViewManagerProps<ViewsT> & {
+      // Initial options
+      timeline: Timeline;
+      eventManager: EventManager;
+    }
+  ) {
     // List of view descriptors, gets re-evaluated when width/height changes
     this.views = [];
     this.width = 100;
     this.height = 100;
-    this.viewState = {};
+    this.viewState = {} as any;
     this.controllers = {};
     this.timeline = props.timeline;
 
@@ -161,7 +173,7 @@ export default class ViewManager {
     2. view.id
     3. root viewState
     then applies the view's filter if any */
-  getViewState(viewOrViewId: string | View): any {
+  getViewState(viewOrViewId: string | View): AnyViewStateOf<ViewsT> {
     const view: View | undefined =
       typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
@@ -199,7 +211,7 @@ export default class ViewManager {
   }
 
   /** Update the manager with new Deck props */
-  setProps(props: {views?: View[]; viewState?: any; width?: number; height?: number}) {
+  setProps(props: Partial<ViewManagerProps<ViewsT>>) {
     if (props.views) {
       this._setViews(props.views);
     }
@@ -264,9 +276,10 @@ export default class ViewManager {
     this.views = views;
   }
 
-  private _setViewState(viewState: any): void {
+  private _setViewState(viewState: ViewStateObject<ViewsT>): void {
     if (viewState) {
-      const viewStateChanged = !deepEqual(viewState, this.viewState);
+      // depth = 3 when comparing viewStates: viewId.position.0
+      const viewStateChanged = !deepEqual(viewState, this.viewState, 3);
 
       if (viewStateChanged) {
         this.setNeedsUpdate('viewState changed');
@@ -275,12 +288,6 @@ export default class ViewManager {
       this.viewState = viewState;
     } else {
       log.warn('missing `viewState` or `initialViewState`')();
-    }
-  }
-
-  private _onViewStateChange(viewId: string, event: ViewStateChangeParameters) {
-    if (this._eventCallbacks.onViewStateChange) {
-      this._eventCallbacks.onViewStateChange({...event, viewId});
     }
   }
 
@@ -294,7 +301,7 @@ export default class ViewManager {
       timeline: this.timeline,
       eventManager: this._eventManager,
       // Set an internal callback that calls the prop callback if provided
-      onViewStateChange: this._onViewStateChange.bind(this, props.id),
+      onViewStateChange: this._eventCallbacks.onViewStateChange,
       onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: viewState =>
         this.getView(view.id)?.makeViewport({
@@ -309,12 +316,12 @@ export default class ViewManager {
 
   private _updateController(
     view: View,
-    viewState: any,
-    viewport: Viewport,
+    viewState: AnyViewStateOf<ViewsT>,
+    viewport: Viewport | null,
     controller?: Controller<any> | null
   ): Controller<any> | null {
     const controllerProps = view.controller;
-    if (controllerProps) {
+    if (controllerProps && viewport) {
       const resolvedProps = {
         ...viewState,
         ...controllerProps,
@@ -325,8 +332,9 @@ export default class ViewManager {
         height: viewport.height
       };
 
-      // TODO - check if view / controller type has changed, and replace the controller
-      if (!controller) {
+      // Create controller if not already existing or if the type of the
+      // controller has changed.
+      if (!controller || controller.constructor !== controllerProps.type) {
         controller = this._createController(view, resolvedProps);
       }
       if (controller) {
@@ -368,7 +376,9 @@ export default class ViewManager {
       // Update the controller
       this.controllers[view.id] = this._updateController(view, viewState, viewport, oldController);
 
-      this._viewports.unshift(viewport);
+      if (viewport) {
+        this._viewports.unshift(viewport);
+      }
     }
 
     // Remove unused controllers

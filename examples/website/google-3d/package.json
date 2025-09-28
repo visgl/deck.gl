@@ -1,19 +1,21 @@
 {
-  "name": "google-maps",
+  "name": "deckgl-examples-google-maps-3d",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.0",
     "@turf/rhumb-bearing": "^6.5.0",
     "@turf/rhumb-distance": "^6.5.0",
-    "deck.gl": "^8.8.0"
+    "deck.gl": "^9.0.0"
   },
   "devDependencies": {
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.11"
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
   }
 }

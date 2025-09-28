@@ -1,33 +1,31 @@
 {
-  "name": "playground",
+  "name": "deckgl-examples-playground",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.local --env.production=true"
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^3.2.10",
-    "@loaders.gl/core": "^3.2.10",
-    "@loaders.gl/csv": "^3.2.10",
-    "@loaders.gl/draco": "^3.2.10",
-    "@loaders.gl/gltf": "^3.2.10",
-    "@luma.gl/constants": "^8.5.12",
-    "brace": "^0.11.1",
-    "deck.gl": "^8.8.0",
-    "react": "~16.9.0",
-    "react-ace": "^6.1.4",
-    "react-dom": "~16.9.0",
-    "react-map-gl": "^5.0.0",
+    "@loaders.gl/3d-tiles": "^4.2.0",
+    "@loaders.gl/core": "^4.2.0",
+    "@loaders.gl/csv": "^4.2.0",
+    "@loaders.gl/draco": "^4.2.0",
+    "@loaders.gl/gltf": "^4.2.0",
+    "@luma.gl/constants": "^9.2.0",
+    "deck.gl": "^9.0.0",
+    "maplibre-gl": "^5.0.0",
+    "monaco-editor": "^0.39.0",
+    "@monaco-editor/react": "^4.4.6",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^8.0.0",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
   }
 }

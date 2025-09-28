@@ -1,6 +1,9 @@
 Binary data transfer
 ====================
 
+.. WARNING::
+   Jupyter-specific features are not currently supported in pydeck v0.9+.
+
 Motivation
 ^^^^^^^^^^
 
@@ -26,7 +29,7 @@ Binary transport will only work if the following requirements are met:
 - Accessor names must be strings representing column names within the data frame,
   e.g., ``get_position='position'`` is correct, **not** ``get_position=['x', 'y']``.
   For example,
- 
+
   This data format, where ``x`` & ``y`` represent a position and ``r``, ``g``, and ``b`` represent color values,
 
     +---+---+-----+-----+---+

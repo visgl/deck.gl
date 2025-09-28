@@ -1,13 +1,17 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 const FLUSH_LIMIT = 20000;
 let result = [];
 let count = 0;
 let triangleCount = 0;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -15,7 +19,7 @@ onmessage = function(e) {
     const height = decodeNumber(parts[0], 90, 32);
 
     // footprints
-    parts.slice(1).forEach(function(str) {
+    parts.slice(1).forEach(function (str) {
       const coords = decodePolyline(str);
       triangleCount += coords.length * 3 - 2;
       coords.push(coords[0]);
@@ -42,7 +46,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {buildings: count, triangles: triangleCount, progressAlt: count / 3895 * 0.2}
+    meta: {buildings: count, triangles: triangleCount, progressAlt: (count / 3895) * 0.2}
   });
   result = [];
 }

@@ -1,25 +1,8 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import GL from '@luma.gl/constants';
-import {Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/core';
+import {GL, Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -42,10 +25,10 @@ export default class WBOITLayer extends SolidPolygonLayer {
   initializeState() {
     super.initializeState();
 
-    const {gl} = this.context;
+    const [drawingBufferWidth, drawingBufferHeight] = this.context.device.canvasContext.getDra;
 
     const textureOpts = {
-      type: gl.FLOAT,
+      type: GL.FLOAT,
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
       mipmaps: false,
@@ -59,7 +42,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
 
     const accumulationTexture = new Texture2D(gl, {
       ...textureOpts,
-      format: gl.RGBA32F
+      format: 'rgba32float'
     });
 
     const revealageTexture = new Texture2D(gl, {
@@ -71,7 +54,6 @@ export default class WBOITLayer extends SolidPolygonLayer {
     // const accumulationDepthTexture = new Texture2D(gl, {
     //   ...textureOpts,
     //   format: GL.DEPTH_COMPONENT32F,
-    //   dataFormat: GL.DEPTH_COMPONENT
     // });
 
     const accumulationFramebuffer = new Framebuffer(gl, {
@@ -107,14 +89,12 @@ export default class WBOITLayer extends SolidPolygonLayer {
   }
 
   draw(opts) {
-    const {gl} = this.context;
-
     this.state.accumulationFramebuffer.clear({color: [0, 0, 0, 1], depth: 1});
 
     withParameters(
-      gl,
+      this.context.device,
       {
-        blendFunc: [gl.ONE, gl.ONE, gl.ZERO, gl.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [GL.ONE, GL.ONE, GL.ZERO, GL.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthMask: false,
         cull: false,
@@ -134,9 +114,9 @@ export default class WBOITLayer extends SolidPolygonLayer {
     );
 
     withParameters(
-      gl,
+      this.context.device,
       {
-        blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [GL.ONE, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthTest: false,
         framebuffer: null
@@ -147,7 +127,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
     );
 
     withParameters(
-      gl,
+      this.context.device,
       {
         blend: false,
         depthTest: false,
@@ -166,13 +146,16 @@ export default class WBOITLayer extends SolidPolygonLayer {
     );
   }
 
-  _getModels(gl) {
-    const oitModel = new Model(gl, {
+  _getModels() {
+    const oitModel = new Model(this.context.device, {
       vs: oitBlendVs,
       fs: oitBlendFs,
-      drawMode: GL.TRIANGLE_STRIP,
+      topology: 'triangle-strip',
       attributes: {
-        positions: [new Buffer(gl, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])), {size: 2}]
+        positions: [
+          new Buffer(this.context.device, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])),
+          {size: 2}
+        ]
       },
       vertexCount: 4,
       uniforms: {
@@ -183,7 +166,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
 
     this.setState({oitModel});
 
-    return super._getModels(gl);
+    return super._getModels();
   }
 }
 

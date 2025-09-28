@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 importScripts('./util.js');
 
 let result = [];
@@ -7,12 +11,12 @@ let timestamp = 0;
 
 const pattern = /^(.)(.+)\x01(.{4})(.{4})(.+)$/;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = (blob + e.data.text).split('\n');
   blob = lines.pop();
 
   // time,latitude,longitude,depth,mag
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }

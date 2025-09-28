@@ -1,11 +1,7 @@
-const MapboxUtils = require('./src');
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-// @ts-ignore (2339) undefined property
-const deck = globalThis.deck || {};
+export * from '../core/bundle/peer-dependency';
 
-// Check if peer dependencies are included
-if (!deck.Layer) {
-  throw new Error('@deck.gl/core is not found');
-}
-
-module.exports = Object.assign(deck, MapboxUtils);
+export * from './src';

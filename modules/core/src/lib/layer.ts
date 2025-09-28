@@ -1,34 +1,18 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
-import {COORDINATE_SYSTEM, OPERATION} from './constants';
+import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
+import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import debug from '../debug';
-import GL from '@luma.gl/constants';
-import {withParameters, setParameters} from '@luma.gl/core';
+import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
@@ -50,8 +34,11 @@ import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
-import type {LayerProps} from '../types/layer-props';
+import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
+import type {BinaryAttribute} from './attribute/attribute';
+import {RenderPass} from '@luma.gl/core';
+import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -75,17 +62,16 @@ let pickingColorCache = new Uint8ClampedArray(0);
 const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataComparator: {type: 'function', value: null, compare: false, optional: true},
+  dataComparator: {type: 'function', value: null, optional: true},
   _dataDiff: {
     type: 'function',
     // @ts-ignore __diff is not defined on data
     value: data => data && data.__diff,
-    compare: false,
     optional: true
   },
-  dataTransform: {type: 'function', value: null, compare: false, optional: true},
-  onDataLoad: {type: 'function', value: null, compare: false, optional: true},
-  onError: {type: 'function', value: null, compare: false, optional: true},
+  dataTransform: {type: 'function', value: null, optional: true},
+  onDataLoad: {type: 'function', value: null, optional: true},
+  onError: {type: 'function', value: null, optional: true},
   fetch: {
     type: 'function',
     value: <LayerT extends Layer>(
@@ -134,21 +120,20 @@ const defaultProps: DefaultProps<LayerProps> = {
       }
 
       return load(url, loaders, loadOptions);
-    },
-    compare: false
+    }
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
 
   visible: true,
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 1},
-  operation: OPERATION.DRAW,
+  operation: 'draw',
 
-  onHover: {type: 'function', value: null, compare: false, optional: true},
-  onClick: {type: 'function', value: null, compare: false, optional: true},
-  onDragStart: {type: 'function', value: null, compare: false, optional: true},
-  onDrag: {type: 'function', value: null, compare: false, optional: true},
-  onDragEnd: {type: 'function', value: null, compare: false, optional: true},
+  onHover: {type: 'function', value: null, optional: true},
+  onClick: {type: 'function', value: null, optional: true},
+  onDragStart: {type: 'function', value: null, optional: true},
+  onDrag: {type: 'function', value: null, optional: true},
+  onDragEnd: {type: 'function', value: null, optional: true},
 
   coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
@@ -157,18 +142,18 @@ const defaultProps: DefaultProps<LayerProps> = {
   positionFormat: 'XYZ',
   colorFormat: 'RGBA',
 
-  parameters: {type: 'object', value: {}, optional: true, compare: true},
+  parameters: {type: 'object', value: {}, optional: true, compare: 2},
+  loadOptions: {type: 'object', value: null, optional: true, ignore: true},
   transitions: null,
   extensions: [],
-  loaders: {type: 'array', value: [], optional: true, compare: true},
+  loaders: {type: 'array', value: [], optional: true, ignore: true},
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
   getPolygonOffset: {
     type: 'function',
-    value: ({layerIndex}) => [0, -layerIndex * 100],
-    compare: false
+    value: ({layerIndex}) => [0, -layerIndex * 100]
   },
 
   // Selection/Highlighting
@@ -184,9 +169,27 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
-export default abstract class Layer<PropsT = {}> extends Component<PropsT & Required<LayerProps>> {
-  static defaultProps = defaultProps;
+type DrawOptions = {
+  renderPass: RenderPass;
+  shaderModuleProps: any;
+  uniforms: any;
+  parameters: any;
+  context: LayerContext;
+};
+
+type SharedLayerState = {
+  [key: string]: unknown;
+};
+
+export default abstract class Layer<PropsT extends {} = {}> extends Component<
+  PropsT & Required<LayerProps>
+> {
+  static defaultProps: DefaultProps = defaultProps;
   static layerName: string = 'Layer';
+
+  static override get componentName() {
+    return Object.prototype.hasOwnProperty.call(this, 'layerName') ? this.layerName : '';
+  }
 
   internalState: LayerState<this> | null = null;
   lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
@@ -195,7 +198,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
   // Checking for null state constantly in layer implementation is unnecessarily verbose.
   context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
-  state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
+  state!: SharedLayerState; // Will be set to the shared layer state object during layer matching
 
   parent: Layer | null = null;
 
@@ -248,6 +251,12 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       fromCoordinateSystem?: CoordinateSystem;
       /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
       fromCoordinateOrigin?: [number, number, number];
+      /** Whether to apply offset mode automatically as does the project shader module.
+       * Offset mode places the origin of the common space at the given viewport's center. It is used in some use cases
+       * to improve precision in the vertex shader due to the fp32 float limitation.
+       * Use `autoOffset:false` if the returned position should not be dependent on the current viewport.
+       * Default `true` */
+      autoOffset?: boolean;
     }
   ): [number, number, number] {
     assert(this.internalState);
@@ -267,6 +276,11 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return false;
+  }
+
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return true;
   }
 
   /** Updates selected state members and marks the layer for redraw */
@@ -301,20 +315,24 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     return this.props.wrapLongitude;
   }
 
-  /** Returns true if the layer is visible in the picking pass */
+  /** @deprecated Returns true if the layer is visible in the picking pass */
   isPickable(): boolean {
     return this.props.pickable && this.props.visible;
   }
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
   getModels(): Model[] {
-    return (this.state && (this.state.models || (this.state.model && [this.state.model]))) || [];
+    const state = this.state as {
+      models?: Model[];
+      model: Model;
+    };
+    return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
-  /** Update shader module parameters */
-  setModuleParameters(moduleParameters: any): void {
+  /** Update shader input parameters */
+  setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
     for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
+      model.shaderInputs.setProps(...props);
     }
   }
 
@@ -367,11 +385,11 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
-  encodePickingColor(i, target: number[] = []): number[] {
+  encodePickingColor(i, target: number[] = []): [number, number, number] {
     target[0] = (i + 1) & 255;
     target[1] = ((i + 1) >> 8) & 255;
     target[2] = (((i + 1) >> 8) >> 8) & 255;
-    return target;
+    return target as [number, number, number];
   }
 
   // Returns the index corresponding to a picking color that doesn't match any subfeature
@@ -398,7 +416,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     // Second check if the layer has set its own value
     if (this.state && this.state.numInstances !== undefined) {
-      return this.state.numInstances;
+      return this.state.numInstances as number;
     }
 
     // Use container library to get a count for any ES6 container or object
@@ -417,19 +435,15 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     // Second check if the layer has set its own value
     if (this.state && this.state.startIndices) {
-      return this.state.startIndices;
+      return this.state.startIndices as NumericArray;
     }
 
     return null;
   }
 
   // Default implementation
-  // Sublayers chould override this method to provide an accurate calculation of the bounds
   getBounds(): [number[], number[]] | null {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return null;
-    const {positions, instancePositions} = attributeManager.attributes;
-    return (positions || instancePositions)?.getBounds();
+    return this.getAttributeManager()?.getBounds(['positions', 'instancePositions']);
   }
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses
@@ -438,6 +452,10 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    shaders = mergeShaders(shaders, {
+      disableWarnings: true,
+      modules: this.context.defaultShaderModules
+    });
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
@@ -449,8 +467,8 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     return params.changeFlags.propsOrDataChanged;
   }
 
-  /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
+  // eslint-disable-next-line complexity
   updateState(params: UpdateParameters<Layer<PropsT>>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
@@ -465,21 +483,29 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       }
     }
 
-    const {props, oldProps} = params;
-    const neededPickingBuffer =
-      Number.isInteger(oldProps.highlightedObjectIndex) || oldProps.pickable;
-    const needPickingBuffer = Number.isInteger(props.highlightedObjectIndex) || props.pickable;
-    if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
-      const {pickingColors, instancePickingColors} = attributeManager.attributes;
-      const pickingColorsAttribute = pickingColors || instancePickingColors;
-      if (pickingColorsAttribute) {
-        if (needPickingBuffer && pickingColorsAttribute.constant) {
-          pickingColorsAttribute.constant = false;
-          attributeManager.invalidate(pickingColorsAttribute.id);
-        }
-        if (!pickingColorsAttribute.value && !needPickingBuffer) {
-          pickingColorsAttribute.constant = true;
-          pickingColorsAttribute.value = [0, 0, 0];
+    // Enable/disable picking buffer
+    if (attributeManager) {
+      const {props} = params;
+      const hasPickingBuffer = this.internalState!.hasPickingBuffer;
+      const needsPickingBuffer =
+        Number.isInteger(props.highlightedObjectIndex) ||
+        props.pickable ||
+        props.extensions.some(extension => extension.getNeedsPickingBuffer.call(this, extension));
+
+      // Only generate picking buffer if needed
+      if (hasPickingBuffer !== needsPickingBuffer) {
+        this.internalState!.hasPickingBuffer = needsPickingBuffer;
+        const {pickingColors, instancePickingColors} = attributeManager.attributes;
+        const pickingColorsAttribute = pickingColors || instancePickingColors;
+        if (pickingColorsAttribute) {
+          if (needsPickingBuffer && pickingColorsAttribute.constant) {
+            pickingColorsAttribute.constant = false;
+            attributeManager.invalidate(pickingColorsAttribute.id);
+          }
+          if (!pickingColorsAttribute.value && !needsPickingBuffer) {
+            pickingColorsAttribute.constant = true;
+            pickingColorsAttribute.value = [0, 0, 0];
+          }
         }
       }
     }
@@ -488,7 +514,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here. */
   finalizeState(context: LayerContext): void {
     for (const model of this.getModels()) {
-      model.delete();
+      model.destroy();
     }
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
@@ -504,9 +530,9 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw(opts) {
+  draw(opts: DrawOptions) {
     for (const model of this.getModels()) {
-      model.draw(opts);
+      model.draw(opts.renderPass);
     }
   }
 
@@ -532,7 +558,9 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** (Internal) Propagate an error event through the system */
   raiseError(error: Error, message: string): void {
     if (message) {
-      error.message = `${message}: ${error.message}`;
+      // Duplicating error message for backward compatibility, see #7986
+      // TODO - revisit in v9
+      error = new Error(`${message}: ${error.message}`, {cause: error});
     }
     if (!this.props.onError?.(error)) {
       this.context?.onError?.(error, this);
@@ -610,8 +638,16 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
   /** Send updated attributes to the WebGL model */
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
+    // If some buffer layout changed
+    let bufferLayoutChanged = false;
+    for (const id in changedAttributes) {
+      if (changedAttributes[id].layoutChanged()) {
+        bufferLayoutChanged = true;
+      }
+    }
+
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
     }
   }
 
@@ -677,7 +713,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = Math.floor(pickingColorCache.length / 3);
+    const cacheSize = Math.floor(pickingColorCache.length / 4);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
     // @ts-ignore (TS2531) internalState is always defined when this method is called
@@ -691,48 +727,104 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       }
 
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
-        size: 3,
+        size: 4,
         copy: true,
         maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newCacheSize = Math.floor(pickingColorCache.length / 3);
-      const pickingColor = [];
+      const newCacheSize = Math.floor(pickingColorCache.length / 4);
+      const pickingColor: [number, number, number] = [0, 0, 0];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
-        pickingColorCache[i * 3 + 0] = pickingColor[0];
-        pickingColorCache[i * 3 + 1] = pickingColor[1];
-        pickingColorCache[i * 3 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 0] = pickingColor[0];
+        pickingColorCache[i * 4 + 1] = pickingColor[1];
+        pickingColorCache[i * 4 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 3] = 0;
       }
     }
 
-    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
+    attribute.value = pickingColorCache.subarray(0, numInstances * 4);
   }
 
-  /** Apply changed attributes to  */
+  /** Apply changed attributes to model */
   protected _setModelAttributes(
     model: Model,
     changedAttributes: {
       [id: string]: Attribute;
-    }
+    },
+    bufferLayoutChanged = false
   ) {
-    const attributeManager = this.getAttributeManager();
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData.excludeAttributes || {};
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const shaderAttributes = attributeManager.getShaderAttributes(
-      changedAttributes,
-      excludeAttributes
-    );
+    if (!Object.keys(changedAttributes).length) {
+      return;
+    }
 
-    model.setAttributes(shaderAttributes);
+    if (bufferLayoutChanged) {
+      // AttributeManager is always defined when this method is called
+      const attributeManager = this.getAttributeManager()!;
+      model.setBufferLayout(attributeManager.getBufferLayouts(model));
+      // All attributes must be reset after buffer layout change
+      changedAttributes = attributeManager.getAttributes();
+    }
+
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const attributeBuffers: Record<string, Buffer> = {};
+    const constantAttributes: Record<string, TypedArray> = {};
+
+    for (const name in changedAttributes) {
+      if (excludeAttributes[name]) {
+        continue;
+      }
+      const values = changedAttributes[name].getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (changedAttributes[name].settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
+          constantAttributes[attributeName] = value;
+        }
+      }
+    }
+    // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
      This method may be overriden by layer implementations */
-  disablePickingIndex(objectIndex: number): void {
-    this._disablePickingIndex(objectIndex);
+  disablePickingIndex(objectIndex: number) {
+    const data = this.props.data as LayerData<any>;
+    if (!('attributes' in data)) {
+      this._disablePickingIndex(objectIndex);
+      return;
+    }
+
+    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+    const externalColorAttribute =
+      colors && data.attributes && (data.attributes[colors.id] as BinaryAttribute);
+    if (externalColorAttribute && externalColorAttribute.value) {
+      const values = externalColorAttribute.value;
+      const objectColor = this.encodePickingColor(objectIndex);
+      for (let index = 0; index < data.length; index++) {
+        const i = colors.getVertexOffset(index);
+        if (
+          values[i] === objectColor[0] &&
+          values[i + 1] === objectColor[1] &&
+          values[i + 2] === objectColor[2]
+        ) {
+          this._disablePickingIndex(index);
+        }
+      }
+    } else {
+      this._disablePickingIndex(objectIndex);
+    }
   }
 
   // TODO - simplify subclassing interface
@@ -747,11 +839,8 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     const start = colors.getVertexOffset(objectIndex);
     const end = colors.getVertexOffset(objectIndex + 1);
 
-    // Fill the sub buffer with 0s
-    colors.buffer.subData({
-      data: new Uint8Array(end - start),
-      offset: start // 1 byte per element
-    });
+    // Fill the sub buffer with 0s, 1 byte per element
+    colors.buffer.write(new Uint8Array(end - start), start);
   }
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
@@ -789,8 +878,8 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       // TODO - this slightly slows down non instanced layers
       attributeManager.addInstanced({
         instancePickingColors: {
-          type: GL.UNSIGNED_BYTE,
-          size: 3,
+          type: 'uint8',
+          size: 4,
           noAlloc: true,
           // Updaters are always called with `this` pointing to the layer
           // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -817,7 +906,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     });
     /* eslint-enable accessor-pairs */
 
-    this.internalState.layer = this;
     this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
@@ -856,7 +944,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     // Move internalState
     this.internalState = internalState as LayerState<this>;
-    this.internalState.layer = this;
 
     // Move state
     this.state = state;
@@ -899,7 +986,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       const oldModels = this.getModels();
 
       // Safely call subclass lifecycle methods
-      if (context.gl) {
+      if (context.device) {
         this.updateState(updateParams);
       } else {
         try {
@@ -912,6 +999,10 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       for (const extension of this.props.extensions) {
         extension.updateState.call(this, updateParams, extension);
       }
+
+      this.setNeedsRedraw();
+      // Check if attributes need recalculation
+      this._updateAttributes();
 
       const modelChanged = this.getModels()[0] !== oldModels[0];
       this._postUpdate(updateParams, modelChanged);
@@ -936,19 +1027,21 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     this.finalizeState(this.context);
     // Finalize extensions
     for (const extension of this.props.extensions) {
-      extension.finalizeState.call(this, extension);
+      extension.finalizeState.call(this, this.context, extension);
     }
   }
 
   // Calculates uniforms
   _drawLayer({
-    moduleParameters = null,
+    renderPass,
+    shaderModuleProps = null,
     uniforms = {},
     parameters = {}
   }: {
-    moduleParameters: any;
+    renderPass: RenderPass;
+    shaderModuleProps: any;
     uniforms: any;
-    parameters: any;
+    parameters: LumaParameters;
   }): void {
     this._updateAttributeTransition();
 
@@ -959,14 +1052,10 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const opacity = this.props.opacity;
-    // apply gamma to opacity to make it visually "linear"
-    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
-
     try {
       // TODO/ib - hack move to luma Model.draw
-      if (moduleParameters) {
-        this.setModuleParameters(moduleParameters);
+      if (shaderModuleProps) {
+        this.setShaderModuleProps(shaderModuleProps);
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -974,11 +1063,33 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setParameters(context.gl, {polygonOffset: offsets});
+      if (context.device instanceof WebGLDevice) {
+        context.device.setParametersWebGL({polygonOffset: offsets});
+      }
+
+      for (const model of this.getModels()) {
+        if (model.device.type === 'webgpu') {
+          // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
+          model.setParameters({...model.parameters, ...parameters});
+        } else {
+          model.setParameters(parameters);
+        }
+      }
 
       // Call subclass lifecycle method
-      withParameters(context.gl, parameters, () => {
-        const opts = {moduleParameters, uniforms, parameters, context};
+      if (context.device instanceof WebGLDevice) {
+        context.device.withParametersWebGL(parameters, () => {
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+
+          // extensions
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
+
+          this.draw(opts);
+        });
+      } else {
+        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {
@@ -986,7 +1097,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
         }
 
         this.draw(opts);
-      });
+      }
     } finally {
       this.props = currentProps;
     }
@@ -1115,22 +1226,24 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   // TODO - simplify subclassing interface
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
-    const pickingModuleParameters: any = {
-      pickingSelectedColor: info.picked ? info.color : null
+    const picking: PickingProps = {
+      // @ts-ignore
+      highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
-      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+      // @ts-ignore
+      picking.highlightColor = highlightColor(info);
     }
-    this.setModuleParameters(pickingModuleParameters);
-    // setModuleParameters does not trigger redraw
+    this.setShaderModuleProps({picking});
+    // setShaderModuleProps does not trigger redraw
     this.setNeedsRedraw();
   }
 
   /** Create new attribute manager */
   protected _getAttributeManager(): AttributeManager | null {
     const context = this.context;
-    return new AttributeManager(context.gl, {
+    return new AttributeManager(context.device, {
       id: this.props.id,
       stats: context.stats,
       timeline: context.timeline
@@ -1140,16 +1253,15 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   // Private methods
 
   /** Called after updateState to perform common tasks */
+  // eslint-disable-next-line complexity
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
-    this.setNeedsRedraw();
-    // Check if attributes need recalculation
-    this._updateAttributes();
-
     // Note: Automatic instance count update only works for single layers
-    const {model} = this.state;
-    model?.setInstanceCount(this.getNumInstances());
+    const model = this.state.model as Model | undefined;
+    if (model?.isInstanced) {
+      model.setInstanceCount(this.getNumInstances());
+    }
 
     // Set picking module parameters to match props
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
@@ -1159,23 +1271,26 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const parameters: any = {};
-      if (!autoHighlight) {
-        parameters.pickingSelectedColor = null;
-      }
+      const picking: PickingProps = {};
+
       if (Array.isArray(highlightColor)) {
-        parameters.pickingHighlightColor = highlightColor;
+        picking.highlightColor = highlightColor as [number, number, number];
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
-      if (Number.isInteger(highlightedObjectIndex)) {
-        parameters.pickingSelectedColor =
+      // Do not reset unless the value has changed.
+      if (
+        forceUpdate ||
+        oldProps.autoHighlight !== autoHighlight ||
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+      ) {
+        picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }
 
-      this.setModuleParameters(parameters);
+      this.setShaderModuleProps({picking});
     }
   }
 
@@ -1200,7 +1315,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     let redraw: string | false = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
-    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
@@ -1209,6 +1323,13 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       : false;
     redraw = redraw || attributeManagerNeedsRedraw;
 
+    if (redraw) {
+      for (const extension of this.props.extensions) {
+        extension.onNeedsRedraw.call(this, extension);
+      }
+    }
+
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
     return redraw;
   }
 

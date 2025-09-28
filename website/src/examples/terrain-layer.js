@@ -1,8 +1,12 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/terrain/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
@@ -13,7 +17,7 @@ const LOCATIONS = {
     zoom: 12.5,
     bearing: 120
   },
-  "Grand Canyon": {
+  'Grand Canyon': {
     latitude: 36.1101,
     longitude: -112.1906,
     zoom: 12.5
@@ -26,7 +30,7 @@ const LOCATIONS = {
   'Los Angeles': {
     latitude: 34.0524,
     longitude: -118.2413,
-    zoom: 10,
+    zoom: 10
   },
   'New York City': {
     latitude: 40.7311,
@@ -58,8 +62,18 @@ class TerrainDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/terrain`;
 
   static parameters = {
-    location: {displayName: 'Location', type: 'select', options: Object.keys(LOCATIONS), value: 'Mt. St Helens'},
-    surface: {displayName: 'Surface', type: 'select', options: Object.keys(SURFACE_IMAGES), value: 'Satellite'},
+    location: {
+      displayName: 'Location',
+      type: 'select',
+      options: Object.keys(LOCATIONS),
+      value: 'Mt. St Helens'
+    },
+    surface: {
+      displayName: 'Surface',
+      type: 'select',
+      options: Object.keys(SURFACE_IMAGES),
+      value: 'Satellite'
+    },
     wireframe: {displayName: 'Wireframe', type: 'checkbox', value: false}
   };
 
@@ -69,10 +83,21 @@ class TerrainDemo extends Component {
     return (
       <div>
         <p>Reconstructed 3D terrain from mapbox's Elevation service.</p>
-        <p>Data sources:
-          <div>Mapbox <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/">Terrain-RGB</a> and <a href="https://www.mapbox.com/maps/satellite/">Satellite</a></div>
-          <div><a href="http://www.chartbundle.com/charts/">Chartbundle US Sectional</a></div>
-          <div><a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></div>
+        <p>
+          Data sources:
+          <div>
+            Mapbox{' '}
+            <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/">
+              Terrain-RGB
+            </a>{' '}
+            and <a href="https://www.mapbox.com/maps/satellite/">Satellite</a>
+          </div>
+          <div>
+            <a href="http://www.chartbundle.com/charts/">Chartbundle US Sectional</a>
+          </div>
+          <div>
+            <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
+          </div>
         </p>
       </div>
     );
@@ -92,7 +117,8 @@ class TerrainDemo extends Component {
           data={data}
           initialViewState={initialViewState}
           texture={SURFACE_IMAGES[surface.value]}
-          wireframe={wireframe.value} />
+          wireframe={wireframe.value}
+        />
       </div>
     );
   }

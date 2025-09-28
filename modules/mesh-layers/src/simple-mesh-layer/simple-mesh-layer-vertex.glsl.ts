@@ -1,9 +1,9 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 export default `#version 300 es
 #define SHADER_NAME simple-mesh-layer-vs
-
-// Scale the model
-uniform float sizeScale;
-uniform bool composeModelMatrix;
 
 // Primitive attributes
 in vec3 positions;
@@ -16,7 +16,9 @@ in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
-in mat3 instanceModelMatrix;
+in vec3 instanceModelMatrixCol0;
+in vec3 instanceModelMatrixCol1;
+in vec3 instanceModelMatrixCol2;
 in vec3 instanceTranslation;
 
 // Outputs to fragment shader
@@ -32,17 +34,19 @@ void main(void) {
   geometry.pickingColor = instancePickingColors;
 
   vTexCoord = texCoords;
-  cameraPosition = project_uCameraPosition;
+  cameraPosition = project.cameraPosition;
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
-  vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
+  mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
+  vec3 pos = (instanceModelMatrix * positions) * simpleMesh.sizeScale + instanceTranslation;
 
-  if (composeModelMatrix) {
+  if (simpleMesh.composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
     // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
     // call project_normal before setting position to avoid rotation
     normals_commonspace = project_normal(instanceModelMatrix * normals);
+    geometry.worldPosition += pos;
     gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), position_commonspace);
     geometry.position = position_commonspace;
   }

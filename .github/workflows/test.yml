@@ -7,31 +7,59 @@ on:
     - master
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test-node:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
 
     steps:
-      - uses: actions/checkout@v2.1.1
-
-      - name: Use Node.js
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: volta-cli/action@5c175f92dea6f48441c436471e6479dbc192e194 # v4.2.1
         with:
-          node-version: '14.x'
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: |
-          sudo apt-get install -y mesa-utils xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
-          yarn bootstrap
+        run: yarn bootstrap
+
+      - name: Build packages
+        run: yarn build
 
       - name: Run tests
         run: |
-          xvfb-run -s "-ac -screen 0 1280x1024x16" yarn test ci
+          yarn lint
+          yarn test ci
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+  
+  test-website:
+    runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: volta-cli/action@5c175f92dea6f48441c436471e6479dbc192e194 # v4.2.1
+        with:
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn bootstrap
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Test website build
+        run: |
+          yarn test-website
 
   test-python:
     runs-on: ubuntu-latest
@@ -40,17 +68,18 @@ jobs:
         python-version: [3.8]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: volta-cli/action@5c175f92dea6f48441c436471e6479dbc192e194 # v4.2.1
+        with:
+          cache: 'yarn'
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Use Python ${{ matrix.python-version }}
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.1/install.sh | bash
-          nvm install 12.12.0 && nvm use 12.12.0
           cd bindings/pydeck
           make setup-env
           make init

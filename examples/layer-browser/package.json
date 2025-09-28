@@ -1,34 +1,32 @@
 {
-  "name": "layer-browser",
+  "name": "deckgl-examples-layer-browser",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "start-local": "webpack-dev-server --env.es6 --progress --hot --open",
-    "start-local-luma": "webpack-dev-server --env.es6 --env.local --env.local-luma --progress --hot --open",
-    "start-local-es5": "webpack-dev-server --env.local --progress --hot --open",
-    "start-local-production": "webpack-dev-server --env.local --env.production --progress --hot --open"
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@loaders.gl/ply": "^3.2.10",
-    "@loaders.gl/gltf": "^3.2.10",
-    "@luma.gl/experimental": "^8.5.2",
-    "@luma.gl/debug": "^8.5.2",
+    "@loaders.gl/core": "^4.2.0",
+    "@loaders.gl/gltf": "^4.2.0",
+    "@loaders.gl/ply": "^4.2.0",
+    "@probe.gl/log": "^4.0.9",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",
     "extrude-polyline": "^1.0.6",
-    "react": "^16.3.0",
+    "h3-js": "^4.1.0",
+    "maplibre-gl": "^5.0.0",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
     "react-autobind": "^1.0.6",
-    "react-dom": "^16.3.0",
-    "react-map-gl": "^5.1.0",
+    "react-dom": "^18.2.0",
+    "react-map-gl": "^8.0.0",
     "react-stats-zavatta": "^0.0.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.8.1"
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
   }
 }

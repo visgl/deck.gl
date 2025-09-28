@@ -1,14 +1,17 @@
-export default `
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+export default `\
+#version 300 es
 #define SHADER_NAME bitmap-layer-vertex-shader
 
-attribute vec2 texCoords;
-attribute vec3 positions;
-attribute vec3 positions64Low;
+in vec2 texCoords;
+in vec3 positions;
+in vec3 positions64Low;
 
-varying vec2 vTexCoord;
-varying vec2 vTexPos;
-
-uniform float coordinateConversion;
+out vec2 vTexCoord;
+out vec2 vTexPos;
 
 const vec3 pickingColor = vec3(1.0, 0.0, 0.0);
 
@@ -22,9 +25,9 @@ void main(void) {
 
   vTexCoord = texCoords;
 
-  if (coordinateConversion < -0.5) {
-    vTexPos = geometry.position.xy + project_uCommonOrigin.xy;
-  } else if (coordinateConversion > 0.5) {
+  if (bitmap.coordinateConversion < -0.5) {
+    vTexPos = geometry.position.xy + project.commonOrigin.xy;
+  } else if (bitmap.coordinateConversion > 0.5) {
     vTexPos = geometry.worldPosition.xy;
   }
 

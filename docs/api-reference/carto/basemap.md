@@ -22,7 +22,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/carto
 
 ```js
 import {DeckGL} from '@deck.gl/react';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import {BASEMAP} from '@deck.gl/carto';
 <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
   <StaticMap mapStyle={BASEMAP.POSITRON} />
@@ -34,25 +34,38 @@ import {BASEMAP} from '@deck.gl/carto';
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/carto@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
 
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/carto@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core/@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/mesh-layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
+
+<!-- basemap provider -->
+<script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
 ```
 
 ```js
-const deckgl = new deck.DeckGL({
+const map = new maplibregl.Map({
   container: 'map',
-  mapStyle: deck.carto.BASEMAP.POSITRON,
+  style: deck.carto.BASEMAP.POSITRON,
+  interactive: false
+})
+const deckgl = new deck.DeckGL({
+  canvas: 'deck-canvas',
   initialViewState: {
     latitude: 0,
     longitude: 0,
     zoom: 1
   },
+  onViewStateChange: ({viewState}) => {
+    const {longitude, latitude, ...rest} = viewState;
+    map.jumpTo({center: [longitude, latitude], ...rest});
+  }
   controller: true
 });
 ```

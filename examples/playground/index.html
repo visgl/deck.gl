@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <title>deck.gl Playground</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
+  <link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
   <style>
     body {margin: 0; font-family: sans-serif; overflow: hidden;}
     #app {width: 100vw; height: 100vh; display: flex; flex-direction: row; align-items: stretch;}
@@ -16,8 +18,8 @@
 <body>
   <div id="app"></div>
 </body>
-<script type="text/javascript" src="app.js"></script>
-<script type="text/javascript">
-  App.renderToDOM(document.getElementById('app'));
+<script type="module">
+  import {renderToDOM} from './src/app.tsx';
+  renderToDOM(document.getElementById('app'));
 </script>
 </html>

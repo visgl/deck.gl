@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /*
  * range (Array)
  *   + start (Number) - the start index (incl.)

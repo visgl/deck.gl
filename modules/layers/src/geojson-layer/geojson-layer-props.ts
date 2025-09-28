@@ -1,21 +1,21 @@
-import {BinaryAttribute, LayerData, LayerProps} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {LayerData, LayerProps} from '@deck.gl/core';
 import {PolygonLayerProps, ScatterplotLayerProps} from '..';
 import {calculatePickingColors} from './geojson-binary';
-import {BinaryFeatures} from '@loaders.gl/schema';
+import type {ExtendedBinaryFeatureCollection} from './geojson-binary';
 import {SeparatedGeometries} from './geojson';
 
 // TODO: PathLayer is not yet typed
 type PathLayerProps = LayerProps & Record<string, any>;
 
-type SubLayersProps = {
+export type SubLayersProps = {
   points: Partial<ScatterplotLayerProps>;
   lines: Partial<PathLayerProps>;
   polygons: Partial<PolygonLayerProps>;
   polygonsOutline: Partial<PathLayerProps>;
-};
-
-type ExtendedBinaryFeatures = {
-  [P in keyof BinaryFeatures]: BinaryFeatures[P] & {attributes?: Record<string, BinaryAttribute>};
 };
 
 function createEmptyLayerProps(): SubLayersProps {
@@ -60,8 +60,8 @@ export function createLayerPropsFromFeatures(
 }
 
 export function createLayerPropsFromBinary(
-  geojsonBinary: Required<ExtendedBinaryFeatures>,
-  encodePickingColor
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
+  encodePickingColor: (id: number, result: number[]) => void
 ): SubLayersProps {
   // The binary data format is documented here
   // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
@@ -78,7 +78,7 @@ export function createLayerPropsFromBinary(
       ...points.attributes,
       getPosition: points.positions,
       instancePickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.points!
       }
     },
@@ -94,7 +94,7 @@ export function createLayerPropsFromBinary(
       ...lines.attributes,
       getPath: lines.positions,
       instancePickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.lines!
       }
     },
@@ -111,7 +111,7 @@ export function createLayerPropsFromBinary(
       ...polygons.attributes,
       getPolygon: polygons.positions,
       pickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.polygons!
       }
     },
@@ -131,7 +131,7 @@ export function createLayerPropsFromBinary(
       ...polygons.attributes,
       getPath: polygons.positions,
       instancePickingColors: {
-        size: 3,
+        size: 4,
         value: customPickingColors.polygons!
       }
     },

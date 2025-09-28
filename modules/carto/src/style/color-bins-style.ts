@@ -1,8 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {scaleThreshold} from 'd3-scale';
-import {AccessorFunction} from '@deck.gl/core';
+import {AccessorFunction, Color} from '@deck.gl/core';
 import {Feature} from 'geojson';
-import getPalette, {Color, DEFAULT_PALETTE, NULL_COLOR} from './palette';
-import {assert, AttributeSelector, getAttrValue} from './utils';
+import getPalette, {DEFAULT_PALETTE, NULL_COLOR} from './palette';
+import {assert} from '../utils';
+import {AttributeSelector, getAttrValue} from './utils';
 
 /**
  * Helper function for quickly creating a color bins style based on `d3` `scaleThreshold`.
@@ -41,8 +46,8 @@ export default function colorBins<DataT = Feature>({
 
   const color = scaleThreshold<number, Color>().domain(domain).range(palette);
 
-  return d => {
-    const value = getAttrValue(attr, d);
+  return (d, info) => {
+    const value = getAttrValue(attr, d, info);
     return typeof value === 'number' && Number.isFinite(value) ? color(value) : nullColor;
   };
 }

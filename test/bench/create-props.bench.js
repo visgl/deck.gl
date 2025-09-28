@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Layer} from '@deck.gl/core';
 import Component from '@deck.gl/core/lifecycle/component';
 
@@ -31,6 +35,22 @@ TestLayer.defaultProps = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
+class TestExtensionA {}
+TestExtensionA.extensionName = 'TestExtensionA';
+TestExtensionA.defaultProps = {
+  extAEnabled: true,
+  extAValue: {type: 'number', value: 10},
+  extARange: {type: 'array', value: [0, 1], compare: true}
+};
+
+class TestExtensionB {}
+TestExtensionB.extensionName = 'TestExtensionB';
+TestExtensionB.defaultProps = {
+  extBEnabled: true,
+  extBValue: {type: 'number', value: 10},
+  extBRange: {type: 'array', value: [0, 1], compare: true}
+};
+
 // eslint-disable-next-line
 let testInstance;
 
@@ -53,6 +73,22 @@ export default function comparePropsBench(suite) {
           data: 'http://deck.gl',
           getPosition: d => d.coordinates,
           getRadius: d => d.count
+        }
+      );
+    })
+    .add('createProps#with extensions', () => {
+      testInstance = new TestLayer(
+        {
+          stroked: true,
+          getFillColor: [255, 0, 0],
+          getLineColor: [255, 255, 255]
+        },
+        {
+          id: 'scatterplot',
+          data: 'http://deck.gl',
+          getPosition: d => d.coordinates,
+          getRadius: d => d.count,
+          extensions: [new TestExtensionA(), new TestExtensionB()]
         }
       );
     });

@@ -1,22 +1,29 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   COMPONENT_SYMBOL,
+  PROP_TYPES_SYMBOL,
   ASYNC_ORIGINAL_SYMBOL,
   ASYNC_RESOLVED_SYMBOL,
   ASYNC_DEFAULTS_SYMBOL
 } from './constants';
+import {PropType} from './prop-types';
 import {createProps} from './create-props';
 
 let counter = 0;
 
-export type StatefulComponentProps<PropsT> = PropsT & {
+export type StatefulComponentProps<PropsT extends {}> = PropsT & {
   id: string;
   [COMPONENT_SYMBOL]: Component<PropsT>;
+  [PROP_TYPES_SYMBOL]: Record<string, PropType>;
   [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
   [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
   [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
 };
 
-export default class Component<PropsT = {}> {
+export default class Component<PropsT extends {} = {}> {
   static componentName: string = 'Component';
   static defaultProps: Readonly<{}> = {};
 

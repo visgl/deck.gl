@@ -2,7 +2,8 @@
   "name": "@deck.gl/arcgis",
   "description": "Use deck.gl as a custom ArcGIS API for JavaScript layer",
   "license": "MIT",
-  "version": "8.9.0-alpha.5",
+  "type": "module",
+  "version": "9.2.0-beta.3",
   "publishConfig": {
     "access": "public"
   },
@@ -16,25 +17,37 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "src",
-    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
   "scripts": {
-    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
-    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
+    "build-bundle": "ocular-bundle ./bundle.ts",
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
+  },
+  "dependencies": {
+    "@luma.gl/constants": "^9.2.0",
+    "esri-loader": "^3.7.0"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
-    "@deck.gl/core": "^8.0.0"
+    "@deck.gl/core": "^9.1.0",
+    "@luma.gl/core": "^9.2.0",
+    "@luma.gl/engine": "^9.2.0",
+    "@luma.gl/webgl": "^9.2.0"
   },
-  "dependencies": {
-    "esri-loader": "^3.3.0"
+  "devDependencies": {
+    "@arcgis/core": "^4.21.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

@@ -1,13 +1,20 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
+import type LayerExtension from '../lib/layer-extension';
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
-import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
+import type {Texture, TextureProps} from '@luma.gl/core';
+import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {LightingModuleSettings} from '../shaderlib';
+import type {LightingModuleSettings} from '../shaderlib/index';
+import type {Matrix4Like} from '@math.gl/core';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -62,9 +69,12 @@ export type Material = LightingModuleSettings['material'];
  */
 export type Unit = 'meters' | 'common' | 'pixels';
 
-export type Texture =
-  | Texture2D
-  | Texture2DProps
+/** Rendering operation of the layer. */
+export type Operation = 'draw' | 'mask' | 'terrain';
+
+export type TextureSource =
+  | Texture
+  | TextureProps
   | HTMLImageElement
   | ImageData
   | HTMLCanvasElement
@@ -72,9 +82,25 @@ export type Texture =
   | ImageBitmap;
 
 /**
+ * Typical types that can be supplied to the `data` property. Can be either:
+ * * An `Iterable` - a list of objects to visualize.
+ * * A non-iterable - an object with a `length` field.
+ * * A `Promise` whose resolved value will be used as the value of the `data` prop.
+ * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
+ * * `string` - a URL to load data from
+ * * `null` - empty data
+ */
+export type LayerDataSource<DataType> =
+  | LayerData<DataType>
+  | string
+  | AsyncIterable<DataType[]>
+  | Promise<LayerData<DataType>>
+  | null;
+
+/**
  * Base Layer prop types
  */
-export type LayerProps<DataType = any> = {
+export type LayerProps = {
   /**
    * Unique identifier of the layer.
    */
@@ -82,36 +108,36 @@ export type LayerProps<DataType = any> = {
   /**
    * The data to visualize.
    */
-  data?: LayerData<DataType> | string | AsyncIterable<DataType> | Promise<LayerData<DataType>>;
+  data?: unknown;
   /**
    * Callback to determine if two data values are equal.
    */
   dataComparator?:
-    | ((newData: LayerData<DataType>, oldData?: LayerData<DataType>) => boolean)
+    | (<LayerDataT = LayerData<unknown>>(newData: LayerDataT, oldData?: LayerDataT) => boolean)
     | null;
   /**
    * Callback to determine the difference between two data values, in order to perform a partial update.
    */
   _dataDiff?:
-    | ((
-        newData: LayerData<DataType>,
-        oldData?: LayerData<DataType>
+    | (<LayerDataT = LayerData<unknown>>(
+        newData: LayerDataT,
+        oldData?: LayerDataT
       ) => {startRow: number; endRow?: number}[])
     | null;
   /**
    * Callback to manipulate remote data when it's fetched and parsed.
    */
   dataTransform?:
-    | ((data: LayerData<DataType>, previousData?: LayerData<DataType>) => LayerData<DataType>)
+    | (<LayerDataT = LayerData<unknown>>(data: unknown, previousData?: LayerDataT) => LayerDataT)
     | null;
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
-  fetch?: <PropsT>(
+  fetch?: (
     url: string,
     context: {
       propName: string;
-      layer: Layer<PropsT>;
+      layer: Layer;
       loaders?: Loader[];
       loadOptions?: any;
       signal?: AbortSignal;
@@ -122,9 +148,9 @@ export type LayerProps<DataType = any> = {
    */
   updateTriggers?: Record<string, any>;
   /**
-   * The purpose of the layer
+   * Rendering operation of the layer. `+` separated list of names.
    */
-  operation?: 'draw' | 'mask';
+  operation?: Operation | `${Operation}+${Operation}`;
   /**
    * If the layer should be rendered. Default true.
    */
@@ -148,7 +174,7 @@ export type LayerProps<DataType = any> = {
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
-  modelMatrix?: NumericArray | null;
+  modelMatrix?: Matrix4Like | null;
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */
@@ -164,7 +190,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
-  parameters?: any;
+  parameters?: Parameters;
   /**
    * Create smooth transitions when prop values update.
    */
@@ -172,7 +198,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add additional functionalities to this layer.
    */
-  extensions?: any[];
+  extensions?: LayerExtension[];
   /**
    * Add support for additional data formats.
    */
@@ -203,9 +229,9 @@ export type LayerProps<DataType = any> = {
    * Called when remote data is fetched and parsed.
    */
   onDataLoad?:
-    | (<PropsT>(
-        data: LayerData<DataType>,
-        context: {propName: string; layer: Layer<PropsT>}
+    | (<LayerDataT = LayerData<unknown>>(
+        data: LayerDataT,
+        context: {propName: string; layer: Layer}
       ) => void)
     | null;
   /**
@@ -240,7 +266,7 @@ export type LayerProps<DataType = any> = {
   startIndices?: NumericArray | null;
 };
 
-export type CompositeLayerProps<DataType = any> = LayerProps<DataType> & {
+export type CompositeLayerProps = LayerProps & {
   /** (Experimental) override sub layer props. Only works on a composite layer. */
   _subLayerProps?: {
     [subLayerId: string]: {

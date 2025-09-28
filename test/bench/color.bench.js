@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import color from '@deck.gl/core/utils/color';
 const {parseColor} = color;
 
@@ -17,39 +21,53 @@ export default function benchColor(bench) {
     .group('Write into target array')
     .add(
       'color#parseColor (3 element array) with array target',
-      () => [],
+      {
+        initialize: () => []
+      },
       target => parseColor(COLOR_ARRAY, target)
     )
     .add(
       'color#parseColor (4 element array) with array target',
-      () => [],
+      {
+        initialize: () => []
+      },
       target => parseColor(COLOR_ARRAY_4, target)
     )
     .add(
       'color#parseColor (3 element array) with Uint8ClampedArray target',
-      () => new Uint8ClampedArray(4),
+      {
+        initialize: () => new Uint8ClampedArray(4)
+      },
       target => parseColor(COLOR_ARRAY_4, target)
     )
     .add(
       'color#parseColor (3 element typed array) with Uint8ClampedArray target',
-      () => new Uint8ClampedArray(4),
+      {
+        initialize: () => new Uint8ClampedArray(4)
+      },
       target => parseColor(COLOR_TYPED_ARRAY, target)
     )
     .add(
       'color#parseColor (4 element typed array) with Uint8ClampedArray target',
-      () => new Uint8ClampedArray(4),
+      {
+        initialize: () => new Uint8ClampedArray(4)
+      },
       target => parseColor(COLOR_TYPED_ARRAY_4, target)
     )
     .group('String arguments')
     .add('color#parseColor (string)', () => parseColor(COLOR_STRING))
     .add(
       'color#parseColor (string) with array target',
-      () => [],
+      {
+        initialize: () => []
+      },
       target => parseColor(COLOR_STRING, target)
     )
     .add(
       'color#parseColor (string) with typed array target',
-      () => new Uint8ClampedArray(4),
+      {
+        initialize: () => new Uint8ClampedArray(4)
+      },
       target => parseColor(COLOR_STRING, target)
     );
 }

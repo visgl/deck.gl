@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {SolidPolygonLayer, GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
@@ -13,7 +17,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 0
 };
 
-export const deck = new Deck({
+new Deck({
   views: new GlobeView(),
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
@@ -71,8 +75,3 @@ export const deck = new Deck({
     })
   ]
 });
-
-// For automated test cases
-/* global document */
-document.body.style.margin = '0px';
-document.body.style.background = '#111';

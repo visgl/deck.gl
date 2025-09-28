@@ -1,30 +1,15 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {
   Layer,
+  color,
   project32,
-  gouraudLighting,
   picking,
   UNIT,
   LayerProps,
+  LayerDataSource,
   UpdateParameters,
   Unit,
   AccessorFunction,
@@ -34,11 +19,14 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Parameters} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {gouraudMaterial} from '@luma.gl/shadertools';
 
+import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
+import source from './point-cloud-layer.wgsl';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 const DEFAULT_NORMAL: [number, number, number] = [0, 0, 1];
@@ -47,7 +35,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -73,15 +61,17 @@ function normalizeData(data) {
     attributes.instanceNormals = attributes.NORMAL;
   }
   if (attributes.COLOR_0) {
-    attributes.instanceColors = attributes.COLOR_0;
+    const {size, value} = attributes.COLOR_0;
+    attributes.instanceColors = {size, type: 'unorm8', value};
   }
 }
 
 /** All properties supported by PointCloudLayer. */
-export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps<DataT>;
+export type PointCloudLayerProps<DataT = unknown> = _PointCloudLayerProps<DataT> & LayerProps;
 
 /** Properties added by PointCloudLayer. */
 type _PointCloudLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`.
    * @default 'pixels'
@@ -127,21 +117,30 @@ type _PointCloudLayerProps<DataT> = {
 };
 
 /** Render a point cloud with 3D positions, normals and colors. */
-export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_PointCloudLayerProps<DataT>>
 > {
   static layerName = 'PointCloudLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    model?: Model;
+  };
+
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
+    return super.getShaders({
+      vs,
+      fs,
+      source,
+      modules: [project32, color, gouraudMaterial, picking, pointCloudUniforms]
+    });
   }
 
   initializeState() {
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -154,8 +153,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Laye
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
@@ -167,9 +165,8 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Laye
     const {changeFlags, props} = params;
     super.updateState(params);
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
     if (changeFlags.dataChanged) {
@@ -179,17 +176,29 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Laye
 
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
-
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        sizeUnits: UNIT[sizeUnits],
-        radiusPixels: pointSize
-      })
-      .draw();
+    const model = this.state.model!;
+    const pointCloudProps: PointCloudProps = {
+      sizeUnits: UNIT[sizeUnits],
+      radiusPixels: pointSize
+    };
+    model.shaderInputs.setProps({pointCloud: pointCloudProps});
+    if (this.context.device.type === 'webgpu') {
+      // @ts-expect-error TODO - this line was needed during WebGPU port
+      model.instanceCount = this.props.data.length;
+    }
+    model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     // a triangle that minimally cover the unit circle
     const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
@@ -197,15 +206,17 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Laye
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           positions: new Float32Array(positions)
         }
       }),
+      parameters,
       isInstanced: true
     });
   }

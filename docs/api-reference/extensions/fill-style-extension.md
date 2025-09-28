@@ -3,9 +3,9 @@
 
 The `FillStyleExtension` adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl FillStyleExtension" src="https://codepen.io/vis-gl/embed/eYBJWKz?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl FillStyleExtension" src="https://codepen.io/vis-gl/embed/eYBJWKz?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/eYBJWKz'>deck.gl FillStyleExtension</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -54,11 +54,11 @@ new FillStyleExtension({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -71,7 +71,7 @@ new deck.FillStyleExtension({});
 new FillStyleExtension({pattern});
 ```
 
-* `pattern` (Boolean) - if `true`, adds the ability to tile the filled area with a pattern.
+* `pattern` (boolean) - if `true`, adds the ability to tile the filled area with a pattern.
 
 
 ## Layer Properties
@@ -83,28 +83,28 @@ When added to a layer via the `extensions` prop, the `FillStyleExtension` adds t
 The following properties are available if the `pattern` option is enabled.
 
 
-##### `fillPatternAtlas` (Texture2D | String)
+#### `fillPatternAtlas` (Texture2D | String) {#fillpatternatlas}
 
 Sprite image url or texture that packs all your patterns into one layout.
 You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker).
 
-##### `fillPatternEnabled` (Boolean)
+#### `fillPatternEnabled` (boolean) {#fillpatternenabled}
 
 - Default: `true`
 
 Whether to use pattern fill. If `false`, then the extension has no effect.
 
-##### `fillPatternMapping` (Object | String)
+#### `fillPatternMapping` (object | String) {#fillpatternmapping}
 
 Pattern names mapped to pattern definitions. Each pattern is defined with the following values:
 
-- `x` (Number, required): x position of pattern on the atlas image
-- `y` (Number, required): y position of pattern on the atlas image
-- `width` (Number, required): width of pattern on the atlas image
-- `height` (Number, required): height of pattern on the atlas image
+- `x` (number, required): x position of pattern on the atlas image
+- `y` (number, required): y position of pattern on the atlas image
+- `width` (number, required): width of pattern on the atlas image
+- `height` (number, required): height of pattern on the atlas image
 
 
-##### `fillPatternMask` (Boolean)
+#### `fillPatternMask` (boolean) {#fillpatternmask}
 
 - Default: `true`
  
@@ -113,12 +113,12 @@ Whether to treat the patterns as transparency masks.
 + If `false`, pixel color from the image is applied.
 
 
-##### `getFillPattern` ([Function](/docs/developer-guide/using-layers.md#accessors))
+#### `getFillPattern` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
 
 Called to retrieve the name of the pattern. Returns a string key from the `fillPatternMapping` object.
 
 
-##### `getFillPatternScale` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number)
+#### `getFillPatternScale` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternscale}
 
 - Default: `1`
 
@@ -128,7 +128,7 @@ The scale of the pattern, relative to the original size. If the pattern is 24 x 
 - If a function is provided, it is called on each object to retrieve its pattern scale.
 
 
-##### `getFillPatternOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array)
+#### `getFillPatternOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternoffset}
 
 - Default: `[0, 0]`
 

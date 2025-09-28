@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {
   CompositeLayer,
   CompositeLayerProps,
@@ -12,24 +16,30 @@ import {
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
-import Tile2DHeader from './tile-2d-header';
 
-import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';
-import {TileLoadProps, ZRange} from './types';
-import {urlType, getURLFromTemplate} from './utils';
+import type {TileLoadProps, ZRange} from '../tileset-2d/index';
+import {
+  Tileset2D,
+  Tile2DHeader,
+  RefinementStrategy,
+  STRATEGY_DEFAULT,
+  Tileset2DProps
+} from '../tileset-2d/index';
+import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
+import {Matrix4} from '@math.gl/core';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
-  dataComparator: urlType.equals,
-  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
-  getTileData: {type: 'function', optional: true, value: null, compare: false},
+  dataComparator: urlType.equal,
+  renderSubLayers: {type: 'function', value: (props: any) => new GeoJsonLayer(props)},
+  getTileData: {type: 'function', optional: true, value: null},
   // TODO - change to onViewportLoad to align with Tile3DLayer
-  onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
-  onTileLoad: {type: 'function', value: tile => {}, compare: false},
-  onTileUnload: {type: 'function', value: tile => {}, compare: false},
+  onViewportLoad: {type: 'function', optional: true, value: null},
+  onTileLoad: {type: 'function', value: tile => {}},
+  onTileUnload: {type: 'function', value: tile => {}},
   // eslint-disable-next-line
-  onTileError: {type: 'function', value: err => console.error(err), compare: false},
+  onTileError: {type: 'function', value: err => console.error(err)},
   extent: {type: 'array', optional: true, value: null, compare: true},
   tileSize: 512,
   maxZoom: null,
@@ -39,18 +49,20 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   maxRequests: 6,
+  debounceTime: 0,
   zoomOffset: 0
 };
 
 /** All props supported by the TileLayer */
-export type TileLayerProps<DataT = any> = CompositeLayerProps<any> & _TileLayerProps<DataT>;
+export type TileLayerProps<DataT = unknown> = CompositeLayerProps & _TileLayerProps<DataT>;
 
 /** Props added by the TileLayer */
 type _TileLayerProps<DataT> = {
+  data: URLTemplate;
   /**
    * Optionally implement a custom indexing scheme.
    */
-  TilesetClass: typeof Tileset2D;
+  TilesetClass?: typeof Tileset2D;
   /**
    * Renders one or an array of Layer instances.
    */
@@ -77,7 +89,7 @@ type _TileLayerProps<DataT> = {
   onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
 
   /** Called when a tile failed to load. */
-  onTileError?: (err: any) => void;
+  onTileError?: (err: any, tile?) => void;
 
   /** The bounding box of the layer's data. */
   extent?: number[] | null;
@@ -123,6 +135,13 @@ type _TileLayerProps<DataT> = {
   maxRequests?: number;
 
   /**
+   * Queue tile requests until no new tiles have been requested for at least `debounceTime` milliseconds.
+   *
+   * @default 0
+   */
+  debounceTime?: number;
+
+  /**
    * This offset changes the zoom level at which the tiles are fetched.
    *
    * Needs to be an integer.
@@ -132,8 +151,16 @@ type _TileLayerProps<DataT> = {
   zoomOffset?: number;
 };
 
-export type TiledPickingInfo<DataT = any> = PickingInfo & {
+export type TileLayerPickingInfo<
+  DataT = any,
+  SubLayerPickingInfo = PickingInfo
+> = SubLayerPickingInfo & {
+  /** The picked tile */
   tile?: Tile2DHeader<DataT>;
+  /** the tile that emitted the picking event */
+  sourceTile: Tile2DHeader<DataT>;
+  /** a layer created by props.renderSubLayer() that emitted the picking event */
+  sourceTileSubLayer: Layer;
 };
 
 /**
@@ -141,11 +168,17 @@ export type TiledPickingInfo<DataT = any> = PickingInfo & {
  *
  * Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
  */
-export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TileLayerProps<DataT>>
 > {
-  static defaultProps = defaultProps as any;
+  static defaultProps: DefaultProps = defaultProps;
   static layerName = 'TileLayer';
+
+  state!: {
+    tileset: Tileset2D | null;
+    isLoaded: boolean;
+    frameNumber?: number;
+  };
 
   initializeState() {
     this.state = {
@@ -159,8 +192,10 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   }
 
   get isLoaded(): boolean {
-    return this.state?.tileset?.selectedTiles.every(
-      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+    return Boolean(
+      this.state?.tileset?.selectedTiles?.every(
+        tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+      )
     );
   }
 
@@ -188,7 +223,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
         tileset.reloadAll();
       } else {
         // some render options changed, regenerate sub layers now
-        this.state.tileset.tiles.forEach(tile => {
+        tileset.tiles.forEach(tile => {
           tile.layers = null;
         });
       }
@@ -207,6 +242,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       maxZoom,
       minZoom,
       maxRequests,
+      debounceTime,
       zoomOffset
     } = this.props;
 
@@ -219,6 +255,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       refinementStrategy,
       extent,
       maxRequests,
+      debounceTime,
       zoomOffset,
 
       getTileData: this.getTileData.bind(this),
@@ -229,7 +266,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   }
 
   private _updateTileset(): void {
-    const {tileset} = this.state;
+    const tileset = this.state.tileset!;
     const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
@@ -254,7 +291,8 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles);
+      // This method can only be called when tileset is defined and updated
+      onViewportLoad(tileset!.selectedTiles!);
     }
   }
 
@@ -309,21 +347,25 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return null;
   }
 
-  getPickingInfo({info, sourceLayer}: GetPickingInfoParams): TiledPickingInfo<DataT> {
+  getPickingInfo(params: GetPickingInfoParams): TileLayerPickingInfo<DataT> {
+    // TileLayer does not directly render anything, sourceLayer cannot be null
+    const sourceLayer = params.sourceLayer!;
+    const sourceTile: Tile2DHeader<DataT> = (sourceLayer.props as any).tile;
+    const info = params.info as TileLayerPickingInfo<DataT>;
     if (info.picked) {
-      (info as any).tile = (sourceLayer as any).props.tile;
+      info.tile = sourceTile;
     }
+    info.sourceTile = sourceTile;
+    info.sourceTileSubLayer = sourceLayer;
     return info;
   }
 
-  protected _updateAutoHighlight(info: PickingInfo): void {
-    if (info.sourceLayer) {
-      info.sourceLayer.updateAutoHighlight(info);
-    }
+  protected _updateAutoHighlight(info: TileLayerPickingInfo<DataT>): void {
+    info.sourceTileSubLayer.updateAutoHighlight(info);
   }
 
   renderLayers(): Layer | null | LayersList {
-    return this.state.tileset.tiles.map((tile: Tile2DHeader) => {
+    return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded && !tile.content) {
@@ -331,7 +373,10 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.id}`,
+          ...this.getSubLayerProps({
+            id: tile.id,
+            updateTriggers: this.props.updateTriggers
+          }),
           data: tile.content,
           _offset: 0,
           tile
@@ -357,6 +402,11 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
 
   filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-    return this.state.tileset.isTileVisible(tile, cullRect);
+    const {modelMatrix} = this.props;
+    return this.state.tileset!.isTileVisible(
+      tile,
+      cullRect,
+      modelMatrix ? new Matrix4(modelMatrix) : null
+    );
   }
 }

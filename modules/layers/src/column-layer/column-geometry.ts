@@ -1,5 +1,10 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {log, BinaryAttribute} from '@deck.gl/core';
-import {Geometry, uid} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
 type ColumnGeometryProps = {
@@ -12,12 +17,11 @@ type ColumnGeometryProps = {
 
 export default class ColumnGeometry extends Geometry {
   constructor(props: ColumnGeometryProps) {
-    const {id = uid('column-geometry')} = props;
     const {indices, attributes} = tesselateColumn(props);
     super({
       ...props,
-      id,
       indices,
+      // @ts-expect-error
       attributes
     });
   }

@@ -1,32 +1,15 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import GL from '@luma.gl/constants';
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
+import {SdfProps, sdfUniforms} from './sdf-uniforms';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
 import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
-import {Character} from '../utils';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
@@ -40,17 +23,18 @@ type _MultiIconLayerProps<DataT> = {
   outlineColor?: Color;
 };
 
-export type MultiIconLayerProps<DataT = any> = _MultiIconLayerProps<DataT> & IconLayerProps<DataT>;
+export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
+  IconLayerProps<DataT>;
 
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
-  getIconOffsets: {type: 'accessor', value: x => x.offsets},
+  getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
   alphaCutoff: 0.001,
   smoothing: 0.1,
   outlineWidth: 0,
   outlineColor: {type: 'color', value: [0, 0, 0, 255]}
 };
 
-export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
+export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends IconLayer<
   DataT,
   ExtraPropsT & Required<_MultiIconLayerProps<DataT>>
 > {
@@ -58,11 +42,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
   static layerName = 'MultiIconLayer';
 
   state!: IconLayer['state'] & {
-    outlineColor: Color;
+    outlineColor: [number, number, number, number];
   };
 
   getShaders() {
-    return {...super.getShaders(), fs};
+    const shaders = super.getShaders();
+    return {...shaders, modules: [...shaders.modules, sdfUniforms], fs};
   }
 
   initializeState() {
@@ -75,7 +60,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
         accessor: 'getIconOffsets'
       },
       instancePickingColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         size: 3,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       }
@@ -107,17 +92,15 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
       ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth))
       : -1;
 
-    params.uniforms = {
-      ...params.uniforms,
-      // Refer the following doc about gamma and buffer
-      // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
+    const model = this.state.model!;
+    const sdfProps: SdfProps = {
       buffer: DEFAULT_BUFFER,
       outlineBuffer,
       gamma: smoothing,
-      sdf: Boolean(sdf),
+      enabled: Boolean(sdf),
       outlineColor
     };
-
+    model.shaderInputs.setProps({sdf: sdfProps});
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
@@ -126,7 +109,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
       const iconsTexture = iconManager.getTexture();
 
       if (iconsTexture) {
-        this.state.model.draw({uniforms: {outlineBuffer: DEFAULT_BUFFER}});
+        model.shaderInputs.setProps({sdf: {...sdfProps, outlineBuffer: DEFAULT_BUFFER}});
+        model.draw(this.context.renderPass);
       }
     }
   }

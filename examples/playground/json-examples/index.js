@@ -1,18 +1,37 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import heatmap from './3d-heatmap.json';
+import heatmapMinimap from './3d-heatmap-minimap.json';
+import geojson from './geojson.json';
+import line from './line.json';
+import scatterplot from './scatterplot.json';
+import screenGrid from './screen-grid.json';
+import tagmap from './tagmap.json';
+import tile3DRoyal from './3d-tiles-royal.json';
+import tile3DStHelens from './3d-tiles-st-helens.json';
+import tile3DCairo from './3d-tiles-cairo-vricon.json';
+import tile3DNY from './3d-tiles-new-york.json';
+import carto from './carto.json';
+import usMap from './us-map.json';
+import dotText from './dot-text.json';
+
 export default {
   // WEBSITE EXAMPLES AS JSON PAYLOADS
-  'website/3D Heatmap (HexagonLayer)': require('./3d-heatmap.json'),
-  'website/3D Heatmap (wth Minimap)': require('./3d-heatmap-minimap.json'),
-  'website/GeoJSON (GeoJsonLayer)': require('./geojson.json'),
-  'website/Line (LineLayer)': require('./line.json'),
-  'website/Scatterplot (ScatterplotLayer)': require('./scatterplot.json'),
-  'website/Screen Grid (ScreenGridLayer)': require('./screen-grid.json'),
-  'website/TagMap (TextLayer)': require('./tagmap.json'),
-  'website/3D Tiles (Tile3DLayer, Royal)': require('./3d-tiles-royal.json'),
-  'website/3D Tiles (Tile3DLayer, St Helens)': require('./3d-tiles-st-helens.json'),
-  'website/3D Tiles (Tile3DLayer, Cairo/vricon)': require('./3d-tiles-cairo-vricon.json'),
-  'website/3D Tiles (Tile3DLayer, New York)': require('./3d-tiles-new-york.json'),
-  'website/CartoLayer': require('./carto.json'),
+  'website/3D Heatmap (HexagonLayer)': heatmap,
+  'website/3D Heatmap (wth Minimap)': heatmapMinimap,
+  'website/GeoJSON (GeoJsonLayer)': geojson,
+  'website/Line (LineLayer)': line,
+  'website/Scatterplot (ScatterplotLayer)': scatterplot,
+  'website/Screen Grid (ScreenGridLayer)': screenGrid,
+  'website/TagMap (TextLayer)': tagmap,
+  'website/3D Tiles (Tile3DLayer, Royal)': tile3DRoyal,
+  'website/3D Tiles (Tile3DLayer, St Helens)': tile3DStHelens,
+  'website/3D Tiles (Tile3DLayer, Cairo/vricon)': tile3DCairo,
+  'website/3D Tiles (Tile3DLayer, New York)': tile3DNY,
+  'website/CARTO VectorTileLayer': carto,
   // GET STARTED EXAMPLES AS JSON PAYLOADS
-  'get-started/US map (GeoJsonLayer)': require('./us-map.json'),
-  'get-started/Dot Text (Scatterplot/TextLayer)': require('./dot-text.json')
+  'get-started/US map (GeoJsonLayer)': usMap,
+  'get-started/Dot Text (Scatterplot/TextLayer)': dotText
 };

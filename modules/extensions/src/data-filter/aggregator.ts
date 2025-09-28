@@ -1,18 +1,23 @@
-import {Model, Texture2D, Framebuffer, isWebGL2} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Device, DeviceFeature, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
+import {Model, ModelProps} from '@luma.gl/engine';
 
 const AGGREGATE_VS = `\
+#version 300 es
 #define SHADER_NAME data-filter-vertex-shader
 
 #ifdef FLOAT_TARGET
-  attribute float filterIndices;
-  attribute float filterPrevIndices;
+  in float filterIndices;
+  in float filterPrevIndices;
 #else
-  attribute vec2 filterIndices;
-  attribute vec2 filterPrevIndices;
+  in vec2 filterIndices;
+  in vec2 filterPrevIndices;
 #endif
 
-varying vec4 vColor;
+out vec4 vColor;
 const float component = 1.0 / 255.0;
 
 void main() {
@@ -35,55 +40,60 @@ void main() {
 `;
 
 const AGGREGATE_FS = `\
+#version 300 es
 #define SHADER_NAME data-filter-fragment-shader
 precision highp float;
 
-varying vec4 vColor;
+in vec4 vColor;
+
+out vec4 fragColor;
 
 void main() {
   if (dataFilter_value < 0.5) {
     discard;
   }
-  gl_FragColor = vColor;
+  fragColor = vColor;
 }
 `;
 
-export function supportsFloatTarget(gl: WebGLRenderingContext): boolean {
-  // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
-  return Boolean(
-    gl.getExtension('EXT_float_blend') &&
-      // WebGL 2
-      (gl.getExtension('EXT_color_buffer_float') ||
-        // WebGL 1
-        gl.getExtension('WEBGL_color_buffer_float'))
-  );
+const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
+  'float32-renderable-webgl', // ability to render to float texture
+  'texture-blend-float-webgl' // ability to blend when rendering to float texture
+];
+
+export function supportsFloatTarget(device: Device): boolean {
+  return FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
 }
 
 // A 1x1 framebuffer object that encodes the total count of filtered items
-export function getFramebuffer(gl: WebGLRenderingContext, useFloatTarget: boolean): Framebuffer {
+export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebuffer {
   if (useFloatTarget) {
-    return new Framebuffer(gl, {
+    return device.createFramebuffer({
       width: 1,
       height: 1,
-      attachments: {
-        [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
-          format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
-          type: GL.FLOAT,
-          mipmaps: false
+      colorAttachments: [
+        device.createTexture({
+          format: 'rgba32float',
+          dimension: '2d',
+          width: 1,
+          height: 1
         })
-      }
+      ]
     });
   }
-  return new Framebuffer(gl, {
+  return device.createFramebuffer({
     width: 256,
     height: 64,
-    depth: false
+    colorAttachments: [
+      device.createTexture({format: 'rgba8unorm', dimension: '2d', width: 256, height: 64})
+    ]
   });
 }
 
 // Increments the counter based on dataFilter_value
 export function getModel(
-  gl: WebGLRenderingContext,
+  device: Device,
+  bufferLayout: ModelProps['bufferLayout'],
   shaderOptions: any,
   useFloatTarget: boolean
 ): Model {
@@ -92,20 +102,26 @@ export function getModel(
     shaderOptions.defines.FLOAT_TARGET = 1;
   }
 
-  return new Model(gl, {
+  return new Model(device, {
     id: 'data-filter-aggregation-model',
     vertexCount: 1,
     isInstanced: false,
-    drawMode: GL.POINTS,
+    topology: 'point-list',
+    disableWarnings: true,
     vs: AGGREGATE_VS,
     fs: AGGREGATE_FS,
+    bufferLayout,
     ...shaderOptions
   });
 }
 
-export const parameters = {
+export const parameters: RenderPipelineParameters = {
   blend: true,
-  blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-  blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
-  depthTest: false
-};
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one',
+  blendColorOperation: 'add',
+  blendAlphaOperation: 'add',
+  depthCompare: 'never'
+} as const;

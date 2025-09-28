@@ -1,10 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/heatmap/app';
-import {withPrefix} from 'gatsby';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class HeatmapDemo extends Component {
   static title = 'Uber Pickup Locations In NewYork City';
@@ -13,7 +16,7 @@ class HeatmapDemo extends Component {
     url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
     worker: '/workers/screen-grid-data-decoder.js'
   };
-  
+
   static code = `${GITHUB_TREE}/examples/website/heatmap`;
 
   static parameters = {
@@ -29,7 +32,11 @@ class HeatmapDemo extends Component {
       <div>
         <p>Pickup locations form April to September 2014.</p>
         <div>
-          <img src={withPrefix('/images/colorbrewer_YlOrRd_6.png')} alt="color scale" style={{height: 8, width: '100%'}} />
+          <img
+            src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"
+            alt="color scale"
+            style={{height: 8, width: '100%'}}
+          />
         </div>
         <p className="layout">
           <span className="col-1-2">Fewer</span>

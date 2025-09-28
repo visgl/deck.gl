@@ -1,36 +1,22 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeatures, FEATURES} from '@luma.gl/core';
+import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
+import {solidPolygonUniforms, SolidPolygonProps} from './solid-polygon-layer-uniforms';
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 import type {
   LayerProps,
+  LayerDataSource,
   Color,
   Material,
   Accessor,
@@ -43,6 +29,7 @@ import type {
 import type {PolygonGeometry} from './polygon';
 
 type _SolidPolygonLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** Whether to fill the polygons
    * @default true
    */
@@ -103,8 +90,7 @@ type _SolidPolygonLayerProps<DataT> = {
 };
 
 /** Render filled and/or extruded polygons. */
-export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> &
-  LayerProps<DataT>;
+export type SolidPolygonLayerProps<DataT = unknown> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -118,7 +104,7 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
-  getPolygon: {type: 'accessor', value: f => f.polygon},
+  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
   getElevation: {type: 'accessor', value: 1000},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -132,7 +118,7 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
-export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_SolidPolygonLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;
@@ -141,6 +127,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
   state!: {
     topModel?: Model;
     sideModel?: Model;
+    wireframeModel?: Model;
     models?: Model[];
     numInstances: number;
     polygonTesselator: PolygonTesselator;
@@ -153,7 +140,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
       defines: {
         RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
       },
-      modules: [project32, gouraudLighting, picking]
+      modules: [project32, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 
@@ -161,8 +148,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
     return false;
   }
 
+  getBounds(): [number[], number[]] | null {
+    return this.getAttributeManager()?.getBounds(['vertexPositions']);
+  }
+
   initializeState() {
-    const {gl, viewport} = this.context;
+    const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
     if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
@@ -186,7 +177,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+        IndexType: Uint32Array
       })
     });
 
@@ -204,9 +195,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
         update: this.calculateIndices,
         noAlloc
       },
-      positions: {
+      vertexPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
+        stepMode: 'dynamic',
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
@@ -214,86 +206,47 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
         update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
-          positions: {
-            vertexOffset: 0,
-            divisor: 0
-          },
-          instancePositions: {
-            vertexOffset: 0,
-            divisor: 1
-          },
-          nextPositions: {
-            vertexOffset: 1,
-            divisor: 1
+          nextVertexPositions: {
+            vertexOffset: 1
           }
         }
       },
-      vertexValid: {
+      instanceVertexValid: {
         size: 1,
-        divisor: 1,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint16',
+        stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
         noAlloc
       },
       elevations: {
         size: 1,
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getElevation',
-        shaderAttributes: {
-          elevations: {
-            divisor: 0
-          },
-          instanceElevations: {
-            divisor: 1
-          }
-        }
+        accessor: 'getElevation'
       },
       fillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          fillColors: {
-            divisor: 0
-          },
-          instanceFillColors: {
-            divisor: 1
-          }
-        }
+        defaultValue: DEFAULT_COLOR
       },
       lineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          lineColors: {
-            divisor: 0
-          },
-          instanceLineColors: {
-            divisor: 1
-          }
-        }
+        defaultValue: DEFAULT_COLOR
       },
       pickingColors: {
-        size: 3,
-        type: GL.UNSIGNED_BYTE,
+        size: 4,
+        type: 'uint8',
+        stepMode: 'dynamic',
         accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value),
-        shaderAttributes: {
-          pickingColors: {
-            divisor: 0
-          },
-          instancePickingColors: {
-            divisor: 1
-          }
-        }
+          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
       }
     });
     /* eslint-enable max-len */
@@ -302,59 +255,59 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
   getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = (data as any[]).find(d => d.__source.index === index);
+      info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }
 
   disablePickingIndex(objectIndex: number) {
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < (data as any[]).length; i++) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }
       }
     } else {
-      this._disablePickingIndex(objectIndex);
+      super.disablePickingIndex(objectIndex);
     }
   }
 
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
-    const {topModel, sideModel, polygonTesselator} = this.state;
+    const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
-    const renderUniforms = {
-      ...uniforms,
+    const renderUniforms: SolidPolygonProps = {
       extruded: Boolean(extruded),
-      elevationScale
+      elevationScale,
+      isWireframe: false
     };
 
-    // Note: the order is important
-    if (sideModel) {
-      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      sideModel.setUniforms(renderUniforms);
-      if (wireframe) {
-        sideModel.setDrawMode(GL.LINE_STRIP);
-        sideModel.setUniforms({isWireframe: true}).draw();
-      }
-      if (filled) {
-        sideModel.setDrawMode(GL.TRIANGLE_FAN);
-        sideModel.setUniforms({isWireframe: false}).draw();
-      }
+    // Note - the order is important
+    if (wireframeModel && wireframe) {
+      wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+      wireframeModel.shaderInputs.setProps({solidPolygon: {...renderUniforms, isWireframe: true}});
+      wireframeModel.draw(this.context.renderPass);
     }
 
-    if (topModel) {
+    if (sideModel && filled) {
+      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+      sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+      sideModel.draw(this.context.renderPass);
+    }
+
+    if (topModel && filled) {
       topModel.setVertexCount(polygonTesselator.vertexCount);
-      topModel.setUniforms(renderUniforms).draw();
+      topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+      topModel.draw(this.context.renderPass);
     }
   }
 
@@ -372,9 +325,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
       props.extruded !== oldProps.extruded;
 
     if (regenerateModels) {
-      this.state.models?.forEach(model => model.delete());
+      this.state.models?.forEach(model => model.destroy());
 
-      this.setState(this._getModels(this.context.gl));
+      this.setState(this._getModels());
       attributeManager!.invalidateAll();
     }
   }
@@ -418,57 +371,78 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
     }
   }
 
-  protected _getModels(gl: WebGLRenderingContext): Model {
+  protected _getModels() {
     const {id, filled, extruded} = this.props;
 
     let topModel;
     let sideModel;
+    let wireframeModel;
 
     if (filled) {
       const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
 
-      topModel = new Model(gl, {
+      topModel = new Model(this.context.device, {
         ...shaders,
         id: `${id}-top`,
-        drawMode: GL.TRIANGLES,
-        attributes: {
-          vertexPositions: new Float32Array([0, 1])
-        },
-        uniforms: {
-          isWireframe: false,
-          isSideVertex: false
-        },
-        vertexCount: 0,
-        isIndexed: true
+        topology: 'triangle-list',
+        bufferLayout,
+        isIndexed: true,
+        userData: {
+          excludeAttributes: {instanceVertexValid: true}
+        }
       });
     }
     if (extruded) {
-      sideModel = new Model(gl, {
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+
+      sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
+        bufferLayout,
         geometry: new Geometry({
-          drawMode: GL.LINES,
-          vertexCount: 4,
+          topology: 'triangle-strip',
           attributes: {
-            // top right - top left - bootom left - bottom right
-            vertexPositions: {
+            // top right - top left - bottom right - bottom left
+            positions: {
+              size: 2,
+              value: new Float32Array([1, 0, 0, 0, 1, 1, 0, 1])
+            }
+          }
+        }),
+        isInstanced: true,
+        userData: {
+          excludeAttributes: {indices: true}
+        }
+      });
+
+      wireframeModel = new Model(this.context.device, {
+        ...this.getShaders('side'),
+        id: `${id}-wireframe`,
+        bufferLayout,
+        geometry: new Geometry({
+          topology: 'line-strip',
+          attributes: {
+            // top right - top left - bottom left - bottom right
+            positions: {
               size: 2,
               value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
             }
           }
         }),
-        instanceCount: 0,
-        isInstanced: 1
+        isInstanced: true,
+        userData: {
+          excludeAttributes: {indices: true}
+        }
       });
-
-      sideModel.userData.excludeAttributes = {indices: true};
     }
 
     return {
-      models: [sideModel, topModel].filter(Boolean),
+      models: [sideModel, wireframeModel, topModel].filter(Boolean),
       topModel,
-      sideModel
+      sideModel,
+      wireframeModel
     };
   }
 

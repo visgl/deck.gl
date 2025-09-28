@@ -14,11 +14,10 @@ new PointCloudLayer({
   coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
   coordinateOrigin: [-122.4004935, 37.7900486, 0],  // anchor point in longitude/latitude/altitude
   data: [
-    {position: [33.22, 109.87, 1.455]}, // meter offsets from the coordinate origin
-    ...
+    {position: [33.22, 109.87, 1.455]}, // offsets from the coordinate origin in meters
   ],
-  radiusPixels: 2,
-  sizeUnits: 'pixels'
+  getPosition: d => d.position,
+  pointSize: 2
 })
 ```
 
@@ -39,7 +38,7 @@ Positions in different world spaces come with different scales and orientations,
 
 To correctly compose data from various world spaces together, deck.gl transforms them into common space - a unified, intermediate 3D space that is a [right-handed Cartesian coordinate system](https://en.wikipedia.org/wiki/Cartesian_coordinate_system#In_three_dimensions). Once positions are in the common space, it is safe to add, substract, rotate, scale and extrude them as 3D vectors using standard linear algebra. This is the basis of all geometry processing in deck.gl layers.
 
-The transformation between the world space and the common space is referred to in deck.gl documentation as "project" (world space to common space) and "unproject" (common space to world space), a process controlled by both the specification of the world space, such as WGS84, and the [projection mode](/docs/developer-guide/views.md), such as Web Mercator. Projections are implemented as part of deck.gl's core.
+The transformation between the world space and the common space is referred to in deck.gl documentation as "project" (world space to common space) and "unproject" (common space to world space), a process controlled by both the specification of the world space, such as WGS84, and the [projection mode](./views.md), such as Web Mercator. Projections are implemented as part of deck.gl's core.
 
 ##### Screen space
 
@@ -52,9 +51,9 @@ For a given dataset, positions in the common space normally do not change with u
 
 Each layer is expected to specify its `coordinateSystem` prop to match the world space of its `data`. Within the data supplied to a single layer, all positions will be interpreted in the same coordinate system.
 
-By default, a layer's [coordinateSystem](/docs/api-reference/core/layer.md#coordinatesystem) is assumed to be `COORDINATE_SYSTEM.LNGLAT` if rendered in a geospatial view (e.g. `MapView`, `GlobeView`) and `COORDINATE_SYSTEM.CARTESIAN` if rendered in a non-geospatial view (e.g. `OrbitView`, `OrthographicView`).
+By default, a layer's [coordinateSystem](../api-reference/core/layer.md#coordinatesystem) is assumed to be `COORDINATE_SYSTEM.LNGLAT` if rendered in a geospatial view (e.g. `MapView`, `GlobeView`) and `COORDINATE_SYSTEM.CARTESIAN` if rendered in a non-geospatial view (e.g. `OrbitView`, `OrthographicView`).
 
-Some coordinate systems need to be used with the [coordinateOrigin](/docs/api-reference/core/layer.md#coordinateorigin) prop, which specifies where the positions are measured from.
+Some coordinate systems need to be used with the [coordinateOrigin](../api-reference/core/layer.md#coordinateorigin) prop, which specifies where the positions are measured from.
 
 
 ### Supported coordinate systems
@@ -68,8 +67,8 @@ Some coordinate systems need to be used with the [coordinateOrigin](/docs/api-re
 
 Remarks:
 
-* Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-system) section for details.
-* The `CARTESIAN` mode describes positions that are identical in the world space and the common space. It is the default coordinate system when rendering into non-geospatial views. When combined with geospatial views, the positions are treated as common space coordinates for that particular projection mode. The latter can be seen used by the [MVTLayer](/docs/api-reference/geo-layers/mvt-layer.md), where the data decoded from the tiles are already pre-projected onto the Web Mercator plane.
+* Although [Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system) uses similar notions as the `METER_OFFSETS` mode, be aware that the deck.gl offset system does not have the sophistication of the UTM spec and should not be used interchangeably. See the [limitations](#limitations-of-the-offset-systems) section for details.
+* The `CARTESIAN` mode describes positions that are identical in the world space and the common space. It is the default coordinate system when rendering into non-geospatial views. When combined with geospatial views, the positions are treated as common space coordinates for that particular projection mode. The latter can be seen used by the [MVTLayer](../api-reference/geo-layers/mvt-layer.md), where the data decoded from the tiles are already pre-projected onto the Web Mercator plane.
 
 
 ### Limitations of the offset systems
@@ -99,7 +98,7 @@ Most deck.gl layers that deal with dimensions allow specifying the dimensions in
 
 ### Supported units
 
-##### `meters`
+##### `meters` {#meters}
 
 The universal metric unit.
 
@@ -109,13 +108,13 @@ Exactly how big one meter will appear after projection subjects to the projectio
 
 When used with non-geospatial views, this value does not have any tangible meaning and is treated as identical to `common`.
 
-##### `common`
+##### `common` {#common}
 
 One unit in the [common space](#common-space). When zooming in and out, common sizes scale with the base map.
 
 When visualizing numeric values that do not have any cartographic meaning (e.g. population or income), layers often map them to the size of geometries (e.g. radius of circles). In this case, using `common` units may be preferrable as one common unit projects to the same size regardless of where it is on the map. It offers the visual consistency and comparability that `meters` lacks, especially when viewing data on a global scale.
 
-##### `pixels`
+##### `pixels` {#pixels}
 
 One unit in the [screen space](#screen-space). When zooming in and out, pixel sizes remain the same on screen.
 
@@ -132,9 +131,9 @@ The most performant way to transform the dimensions for each object is to use an
 
 The conversion between meter sizes and common sizes depend on the projection mode:
 
-- [MapView](/docs/api-reference/core/map-view.md) and [FirstPersonView](/docs/api-reference/core/first-person-view.md): 512 common units equals `C / cos(phi)` where `C` is the circumference of earth, and `phi` is the latitude in radians.
-- [GlobeView](/docs/api-reference/core/globe-view.md): 512 common units equals the diameter of the earth.
-- [OrbitView](/docs/api-reference/core/orbit-view.md) and [OrthographicView](/docs/api-reference/core/orthographic-view.md): 1 meter unit equals 1 common unit.
+- [MapView](../api-reference/core/map-view.md) and [FirstPersonView](../api-reference/core/first-person-view.md): 512 common units equals `C * cos(phi)` where `C` is the circumference of earth, and `phi` is the latitude in radians.
+- [GlobeView](../api-reference/core/globe-view.md): 512 common units equals the diameter of the earth.
+- [OrbitView](../api-reference/core/orbit-view.md) and [OrthographicView](../api-reference/core/orthographic-view.md): 1 meter unit equals 1 common unit.
 
 The conversion between common sizes and pixel sizes: 1 common unit equals `2 ** z` pixel where `z` is the zoom of the current viewport.
 
@@ -144,5 +143,5 @@ The conversion between common sizes and pixel sizes: 1 common unit equals `2 ** 
 If you are familiar with the traditional 3D graphics/game engine terminologies, here is how they map to deck.gl's coordinate spaces:
 
 - deck.gl's world space maps to the standard "model space", i.e. the data that comes in before any transforms have been applied.
-- deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
+- deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL2/WebGPU, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
 - Zoom levels are applied by scaling the view matrix with `Math.pow(2, zoom)`.

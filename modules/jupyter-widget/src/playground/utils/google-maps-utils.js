@@ -1,5 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* global window */
-import * as deck from '../../deck-bundle';
+/* eslint-disable import/namespace */
+import {log} from '@deck.gl/core';
+import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 
 export function createGoogleMapsDeckOverlay({
   container,
@@ -12,10 +18,10 @@ export function createGoogleMapsDeckOverlay({
   initialViewState = {latitude: 0, longitude: 0, zoom: 1}
 }) {
   if (!googleMapsKey) {
-    deck.log.warn('No Google Maps API key set')();
+    log.warn('No Google Maps API key set')();
     return null;
   }
-  const deckOverlay = new deck.GoogleMapsOverlay({layers});
+  const deckOverlay = new GoogleMapsOverlay({layers});
   const view = {
     center: {lat: initialViewState.latitude, lng: initialViewState.longitude},
     mapTypeId: mapStyle,

@@ -1,183 +1,74 @@
-// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import GL from '@luma.gl/constants';
-import {Model, Geometry, FEATURES, hasFeatures, Texture2D, DefaultProps} from '@luma.gl/core';
-import {Layer, LayerProps, log, picking, UpdateParameters} from '@deck.gl/core';
-import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
+import {Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {Layer, picking, UpdateParameters, Color} from '@deck.gl/core';
+import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
-import type {_ScreenGridLayerProps} from './screen-grid-layer';
-
-const DEFAULT_MINCOLOR = [0, 0, 0, 0];
-const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
-const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
-
-const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
-  cellSizePixels: {value: 100, min: 1},
-  cellMarginPixels: {value: 2, min: 0, max: 5},
-
-  colorDomain: null,
-  colorRange: defaultColorRange
-};
-
-/** All properties supported by ScreenGridCellLayer. */
-export type ScreenGridCellLayerProps<DataT = any> = _ScreenGridCellLayerProps<DataT> &
-  LayerProps<DataT>;
+import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
+import {ShaderModule} from '@luma.gl/shadertools';
+import type {ScaleType} from '../common/types';
 
 /** Proprties added by ScreenGridCellLayer. */
-export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {
-  maxTexture: Texture2D;
+export type _ScreenGridCellLayerProps = {
+  cellSizePixels: number;
+  cellMarginPixels: number;
+  colorScaleType: ScaleType;
+  colorDomain: () => [number, number];
+  colorRange?: Color[];
 };
 
-export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends Layer<
-  ExtraPropsT & Required<_ScreenGridCellLayerProps<DataT>>
+export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends Layer<
+  ExtraPropsT & Required<_ScreenGridCellLayerProps>
 > {
   static layerName = 'ScreenGridCellLayer';
-  static defaultProps = defaultProps;
 
-  static isSupported(gl) {
-    return hasFeatures(gl, [FEATURES.TEXTURE_FLOAT]);
-  }
-
-  state!: Layer['state'] & {
-    model: Model;
+  state!: {
+    model?: Model;
+    colorTexture: Texture;
   };
-  getShaders() {
-    return {vs, fs, modules: [picking]};
+
+  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
+    return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
   }
 
   initializeState() {
-    const {gl} = this.context;
-    const attributeManager = this.getAttributeManager()!;
-    attributeManager.addInstanced({
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceCounts: {size: 4, noAlloc: true}
+    this.getAttributeManager()!.addInstanced({
+      instancePositions: {
+        size: 2,
+        type: 'float32',
+        accessor: 'getBin'
+      },
+      instanceWeights: {
+        size: 1,
+        type: 'float32',
+        accessor: 'getWeight'
+      }
     });
-    this.setState({
-      model: this._getModel(gl)
-    });
-  }
 
-  shouldUpdateState({changeFlags}) {
-    // 'instanceCounts' buffer contetns change on viewport change.
-    return changeFlags.somethingChanged;
+    this.state.model = this._getModel();
   }
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
 
-    const {oldProps, props, changeFlags} = params;
-
-    const attributeManager = this.getAttributeManager()!;
-    if (props.numInstances !== oldProps.numInstances) {
-      attributeManager.invalidateAll();
-    } else if (oldProps.cellSizePixels !== props.cellSizePixels) {
-      attributeManager.invalidate('instancePositions');
-    }
-
-    this._updateUniforms(oldProps, props, changeFlags);
-  }
-
-  draw({uniforms}) {
-    const {parameters, maxTexture} = this.props;
-    const minColor = this.props.minColor || DEFAULT_MINCOLOR;
-    const maxColor = this.props.maxColor || DEFAULT_MAXCOLOR;
-
-    // If colorDomain not specified we use default domain [1, maxCount]
-    // maxCount value will be sampled form maxTexture in vertex shader.
-    const colorDomain = this.props.colorDomain || [1, 0];
-    const {model} = this.state;
-    model
-      .setUniforms(uniforms)
-      .setUniforms({
-        minColor,
-        maxColor,
-        maxTexture,
-        colorDomain
-      })
-      .draw({
-        parameters: {
-          depthTest: false,
-          depthMask: false,
-          ...parameters
-        }
-      });
-  }
-
-  calculateInstancePositions(attribute, {numInstances}) {
-    const {width, height} = this.context.viewport;
-    const {cellSizePixels} = this.props;
-    const numCol = Math.ceil(width / cellSizePixels);
-
-    const {value, size} = attribute;
-
-    for (let i = 0; i < numInstances; i++) {
-      const x = i % numCol;
-      const y = Math.floor(i / numCol);
-      value[i * size + 0] = ((x * cellSizePixels) / width) * 2 - 1;
-      value[i * size + 1] = 1 - ((y * cellSizePixels) / height) * 2;
-      value[i * size + 2] = 0;
-    }
-  }
-
-  // Private Methods
-
-  _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
-      ...this.getShaders(),
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        attributes: {
-          positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
-        }
-      }),
-      isInstanced: true
-    });
-  }
-
-  _shouldUseMinMax(): boolean {
-    const {minColor, maxColor, colorDomain, colorRange} = this.props;
-    if (minColor || maxColor) {
-      log.deprecated('ScreenGridLayer props: minColor and maxColor', 'colorRange, colorDomain')();
-      return true;
-    }
-    // minColor and maxColor not supplied, check if colorRange or colorDomain supplied.
-    // NOTE: colorDomain and colorRange are experimental features, use them only when supplied.
-    if (colorDomain || colorRange) {
-      return false;
-    }
-    // None specified, use default minColor and maxColor
-    return true;
-  }
-
-  _updateUniforms(oldProps, props, changeFlags): void {
-    const {model} = this.state;
-    if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
-      model.setUniforms({shouldUseMinMax: this._shouldUseMinMax()});
-    }
+    const {props, oldProps, changeFlags} = params;
+    const model = this.state.model!;
 
     if (oldProps.colorRange !== props.colorRange) {
-      model.setUniforms({colorRange: colorRangeToFlatArray(props.colorRange)});
+      this.state.colorTexture?.destroy();
+      this.state.colorTexture = createColorRangeTexture(
+        this.context.device,
+        props.colorRange,
+        props.colorScaleType
+      );
+      const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
+    } else if (oldProps.colorScaleType !== props.colorScaleType) {
+      updateColorRangeTexture(this.state.colorTexture, props.colorScaleType);
     }
 
     if (
@@ -186,15 +77,49 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends 
       changeFlags.viewportChanged
     ) {
       const {width, height} = this.context.viewport;
-      const {cellSizePixels, cellMarginPixels} = this.props;
-      const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
+      const {cellSizePixels: gridSize, cellMarginPixels} = this.props;
+      const cellSize = Math.max(gridSize - cellMarginPixels, 0);
 
-      const cellScale = new Float32Array([
-        ((cellSizePixels - margin) / width) * 2,
-        (-(cellSizePixels - margin) / height) * 2,
-        1
-      ]);
-      model.setUniforms({cellScale});
+      const screenGridProps: Partial<ScreenGridProps> = {
+        gridSizeClipspace: [(gridSize / width) * 2, (gridSize / height) * 2],
+        cellSizeClipspace: [(cellSize / width) * 2, (cellSize / height) * 2]
+      };
+      model.shaderInputs.setProps({screenGrid: screenGridProps});
     }
+  }
+
+  finalizeState(context) {
+    super.finalizeState(context);
+
+    this.state.colorTexture?.destroy();
+  }
+
+  draw({uniforms}) {
+    const colorDomain = this.props.colorDomain();
+    const model = this.state.model!;
+
+    const screenGridProps: Partial<ScreenGridProps> = {colorDomain};
+    model.shaderInputs.setProps({screenGrid: screenGridProps});
+    model.draw(this.context.renderPass);
+  }
+
+  // Private Methods
+
+  _getModel(): Model {
+    return new Model(this.context.device, {
+      ...this.getShaders(),
+      id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      geometry: new Geometry({
+        topology: 'triangle-strip',
+        attributes: {
+          positions: {
+            value: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+            size: 2
+          }
+        }
+      }),
+      isInstanced: true
+    });
   }
 }

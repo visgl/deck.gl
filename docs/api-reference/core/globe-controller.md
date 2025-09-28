@@ -1,10 +1,10 @@
 # GlobeController (Experimental)
 
-Inherits from [Base Controller](/docs/api-reference/core/controller.md).
+Inherits from [Base Controller](./controller.md).
 
-The `GlobeController` class can be passed to either the `Deck` class's [controller](/docs/api-reference/core/deck.md#controller) prop or a `View` class's [controller](/docs/api-reference/core/view.md#controller) prop to specify that viewport interaction should be enabled.
+The `GlobeController` class can be passed to either the `Deck` class's [controller](./deck.md#controller) prop or a `View` class's [controller](./view.md#controller) prop to specify that viewport interaction should be enabled.
 
-`GlobeController` is the default controller for [GlobeView](/docs/api-reference/core/globe-view.md).
+`GlobeController` is the default controller for [GlobeView](./globe-view.md).
 
 ## Usage
 
@@ -35,7 +35,7 @@ new Deck({
 
 ## Options
 
-Supports all [Controller options](/docs/api-reference/core/controller.md#options) with the following default behavior:
+Supports all [Controller options](./controller.md#options) with the following default behavior:
 
 - `dragPan`: default `'pan'` (drag to pan)
 - `dragRotate`: not effective, this view does not currently support rotation
@@ -67,7 +67,7 @@ new Deck({
 })
 ```
 
-See the `Controller` class [documentation](/docs/api-reference/core/controller.md#methods) for the methods that you can use and/or override.
+See the `Controller` class [documentation](./controller.md#methods) for the methods that you can use and/or override.
 
 
 ## Source

@@ -1,24 +1,22 @@
 {
-  "name": "mesh-layer-example",
+  "name": "deckgl-examples-mesh",
   "version": "0.0.1",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^3.2.10",
-    "@math.gl/core": "^3.6.0",
-    "deck.gl": "^8.8.0",
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0"
+    "@loaders.gl/obj": "^4.2.0",
+    "@math.gl/core": "^4.1.0",
+    "deck.gl": "^9.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.11"
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
   }
 }

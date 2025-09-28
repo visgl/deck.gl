@@ -1,60 +1,139 @@
-import {GreatCircleLayerDemo} from 'website-components/doc-demos/geo-layers';
+# GreatCircleLayer
+
+import {GreatCircleLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <GreatCircleLayerDemo />
 
-# GreatCircleLayer
-
-The `GreatCircleLayer` is a variation of the [ArcLayer](/docs/api-reference/layers/arc-layer.md). It renders flat arcs along the great circle joining pairs of source and target points,
+The `GreatCircleLayer` is a variation of the [ArcLayer](../layers/arc-layer.md). It renders flat arcs along the great circle joining pairs of source and target points,
 specified as latitude/longitude coordinates.
 
 > Starting v8.2, using this layer is identical to using the `ArcLayer` with props `greatCircle: true` and `getHeight: 0`.
 
 
-```js
-import DeckGL, {GreatCircleLayer} from 'deck.gl';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   * {
-   *   "from": {
-   *     "type": "major",
-   *     "name": "San Francisco Int'l",
-   *     "abbrev": "SFO",
-   *     "coordinates": [
-   *       -122.38347034444931,
-   *       37.61702508680534
-   *     ]
-   *   },
-   *   "to": {
-   *     "type": "major",
-   *     "name": "Liverpool John Lennon",
-   *     "abbrev": "LPL",
-   *     "coordinates": [
-   *       -2.858620657849378,
-   *       53.3363751054422
-   *     ]
-   *   }
-   *   ...
-   * ]
-   */
-  const layer = new GreatCircleLayer({
-    id: 'great-circle-layer',
-    data,
-    pickable: true,
-    getStrokeWidth: 12,
-    getSourcePosition: d => d.from.coordinates,
-    getTargetPosition: d => d.to.coordinates,
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {GreatCircleLayer} from '@deck.gl/geo-layers';
+
+const layer = new GreatCircleLayer({
+  id: 'GreatCircleLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
+  
+  getSourcePosition: d => d.from.coordinates,
+  getTargetPosition: d => d.to.coordinates,
+  getSourceColor: [64, 255, 0],
+  getTargetColor: [0, 128, 200],
+  getWidth: 5,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `${object.from.name} to ${object.to.name}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {GreatCircleLayer} from '@deck.gl/geo-layers';
+
+type Flight = {
+  from: {
+    name: string;
+    coordinates: [longitude: number, latitude: number];
+  };
+  to: {
+    name: string;
+    coordinates: [longitude: number, latitude: number];
+  };
+};
+
+const layer = new GreatCircleLayer<Flight>({
+  id: 'GreatCircleLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
+  
+  getSourcePosition: (d: Flight) => d.from.coordinates,
+  getTargetPosition: (d: Flight) => d.to.coordinates,
+  getSourceColor: [64, 255, 0],
+  getTargetColor: [0, 128, 200],
+  getWidth: 5,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<Flight>) => object && `${object.from.name} to ${object.to.name}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL} from '@deck.gl/react';
+import {GreatCircleLayer} from '@deck.gl/geo-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type Flight = {
+  from: {
+    name: string;
+    coordinates: [longitude: number, latitude: number];
+  };
+  to: {
+    name: string;
+    coordinates: [longitude: number, latitude: number];
+  };
+};
+
+function App() {
+  const layer = new GreatCircleLayer<Flight>({
+    id: 'GreatCircleLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
+    
+    getSourcePosition: (d: Flight) => d.from.coordinates,
+    getTargetPosition: (d: Flight) => d.to.coordinates,
     getSourceColor: [64, 255, 0],
-    getTargetColor: [0, 128, 200]
+    getTargetColor: [0, 128, 200],
+    getWidth: 5,
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<Flight>) => object && `${object.from.name} to ${object.to.name}`}
     layers={[layer]}
-    getTooltip={({object}) => object && `${object.from.name} to ${object.to.name}`} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -67,19 +146,21 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {GreatCircleLayer} from '@deck.gl/geo-layers';
-new GreatCircleLayer({});
+import type {GreatCircleLayerProps} from '@deck.gl/geo-layers';
+
+new GreatCircleLayer<DataT>(...props: GreatCircleLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -89,7 +170,7 @@ new deck.GreatCircleLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [ArcLayer](/docs/api-reference/layers/arc-layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) and [ArcLayer](../layers/arc-layer.md) properties.
 
 ## Source
 
