@@ -364,12 +364,21 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
 
-    // Attach a new luma.gl device to a WebGL2 context if supplied
+    // Create a new luma.gl adapter with a WebGL2 context if supplied
     if (!deviceOrPromise && props.gl) {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
-      deviceOrPromise = webgl2Adapter.attach(props.gl);
+      const {canvas} = props.gl;
+      let createCanvasContext = props.deviceProps?.createCanvasContext;
+      if (typeof createCanvasContext !== 'object') {
+        createCanvasContext = {};
+      }
+      const deviceProps = {
+        ...props.deviceProps,
+        createCanvasContext: {canvas, ...createCanvasContext}
+      };
+      deviceOrPromise = webgl2Adapter.create(deviceProps);
     }
 
     // Create a new device
