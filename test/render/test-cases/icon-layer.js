@@ -38,34 +38,40 @@ export default [
   {
     name: 'icon-lnglat-rectangle',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
+      longitude: -122.4269,
+      latitude: 37.75,
+      zoom: 15.6,
       pitch: 0,
-      bearing: 0
+      bearing: 0,
+      padding: {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0
+      }
     },
-    // rendering times
     layers: [
       new IconLayer({
-        id: 'icon-lnglat-rectangle',
-        data: points,
-        iconAtlas: './test/data/rectangle.png',
+        id: 'icon-lnglat-multi',
+        data: [
+          {position: [-122.4269, 37.7515], icon: 'tall'},
+          {position: [-122.4269, 37.7505], icon: 'wide'},
+          {position: [-122.4269, 37.7495], icon: 'square'},
+          {position: [-122.4269, 37.7485], icon: 'short'}
+        ],
+        iconAtlas: './test/data/icons.png',
         iconMapping: {
-          rectangle: {
-            x: 0,
-            y: 0,
-            width: 197,
-            height: 133,
-            anchorY: 66,
-            mask: true
-          }
+          tall: {x: 0, y: 0, width: 40, height: 80, mask: true, anchorY: 40},
+          wide: {x: 40, y: 0, width: 80, height: 40, mask: true, anchorY: 20},
+          square: {x: 120, y: 0, width: 60, height: 60, mask: true, anchorY: 30},
+          short: {x: 180, y: 0, width: 60, height: 20, mask: true, anchorY: 10}
         },
-        sizeScale: 12,
+        sizeUnits: 'pixels',
+        sizeScale: 1,
         sizeBasis: 'width',
-        getPosition: d => d.COORDINATES,
-        getColor: d => [64, 64, 72],
-        getIcon: d => 'rectangle',
-        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        getPosition: d => d.position,
+        getIcon: d => d.icon,
+        getSize: 40, // target width in px
         opacity: 0.8
       })
     ],
