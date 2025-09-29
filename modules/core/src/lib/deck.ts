@@ -375,6 +375,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         createCanvasContext = {};
       }
       const deviceProps = {
+        _reuseDevices: true,
         ...props.deviceProps,
         createCanvasContext: {canvas, ...createCanvasContext}
       };
