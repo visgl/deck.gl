@@ -6,6 +6,26 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: September, 2025
 
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/e522d961-600a-4405-9f09-c247b42f7e62" />
+        <p><i>New widgets</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>WebGPU layers</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
+        <p><i>Interleaved postprocessing</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 ### Widgets
 
 - A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
@@ -39,6 +59,7 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 
 ### Core
 
+- [`PostProcessEffect`](./api-reference/core/post-process-effect.md) now works correctly in interleaved mode
 - [`View.clone()`](./api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
 - Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearcolor), [`clearDepth`](./api-reference/core/view.md#cleardepth), [`clearStencil`](./api-reference/core/view.md#clearstencil) props
 
