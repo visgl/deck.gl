@@ -364,13 +364,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
 
-    // Create a new luma.gl adapter with a WebGL2 context if supplied
+    // Attach a new luma.gl device to a WebGL2 context if supplied
     if (!deviceOrPromise && props.gl) {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
-        reuseDevices: true,
         createCanvasContext: {
           autoResize: true,
           useDevicePixels: this.props.useDevicePixels
@@ -490,26 +489,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
-
-    if (
-      props.useDevicePixels !== undefined &&
-      this.device?.canvasContext?.canvas instanceof HTMLCanvasElement
-    ) {
-      // TODO: It would be much cleaner if CanvasContext had a setProps method
-      this.device.canvasContext.props.useDevicePixels = props.useDevicePixels;
-      const canvas = this.device.canvasContext.canvas;
-      const entry = {
-        target: canvas,
-        contentBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}],
-        devicePixelContentBoxSize: [
-          {inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}
-        ],
-        borderBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}]
-      };
-      // Access the protected _handleResize method through the canvas context
-      (this.device.canvasContext as any)._handleResize([entry]);
-      console.log('PAIN');
-    }
 
     // If initialized, update sub manager props
     if (this.layerManager) {
