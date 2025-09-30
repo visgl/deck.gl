@@ -508,6 +508,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       };
       // Access the protected _handleResize method through the canvas context
       (this.device.canvasContext as any)._handleResize([entry]);
+      console.log('PAIN');
     }
 
     // If initialized, update sub manager props
