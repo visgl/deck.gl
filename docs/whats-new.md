@@ -10,15 +10,15 @@ Target release date: September, 2025
   <tbody>
     <tr>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/e522d961-600a-4405-9f09-c247b42f7e62" />
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/df179a80-c82e-4677-87aa-52388a3a64cb" />
         <p><i>New widgets</i></p>
       </td>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/dd797761-28bb-4b9a-927c-ab56bcafb8c3" />
         <p><i>WebGPU layers</i></p>
       </td>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/a3cc7c70-10a5-40c1-a5a8-d5d8b2d165ba" />
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/b7168647-d318-486e-bf34-747b1ff8865a" />
         <p><i>Interleaved postprocessing</i></p>
       </td>
     </tr>
