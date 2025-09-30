@@ -215,8 +215,7 @@ test('MapboxOverlay#interleaved', t => {
       'Overlay parameters are intact'
     );
 
-    t.is(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
-    t.is(overlay._props.useDevicePixels, 1, 'useDevicePixels are intact');
+    t.is(overlay._props.useDevicePixels, undefined, 'useDevicePixels is not forwarded');
 
     await sleep(100);
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
@@ -294,8 +293,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     );
     t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
-    t.true(overlay._deck.props.useDevicePixels === false, 'useDevicePixels is set correctly');
-    t.true(overlay._props.useDevicePixels === false, 'useDevicePixels are intact');
+    t.is(overlay._props.useDevicePixels, undefined, 'useDevicePixels is not forwarded');
 
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})],
