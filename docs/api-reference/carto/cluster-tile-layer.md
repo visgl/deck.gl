@@ -1,12 +1,13 @@
 # ClusterTileLayer
 
-`ClusterTileLayer` is a layer for visualizing point data aggregated using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) with dynamic clustering. It provides efficient visualization of large point datasets with automatic clustering based on zoom level and customizable aggregation strategies.
+`ClusterTileLayer` is a layer for visualizing point data aggregated using spatial indexes like [Quadbin](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) or [H3](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3) with dynamic clustering. It provides efficient visualization of large point datasets with automatic clustering based on zoom level and customizable aggregation strategies. The layer automatically detects the spatial index type and renders cells accordingly.
 
-## Usage 
+## Usage
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';
-import {ClusterTileLayer, quadbinTableSource} from '@deck.gl/carto';
+import {ClusterTileLayer} from '@deck.gl/carto';
+import {quadbinTableSource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = quadbinTableSource({
@@ -77,13 +78,19 @@ Required. A valid `TilejsonResult` object.
 
 Use one of the following [Data Sources](./data-sources.md) to fetch this from the CARTO API:
 
+**Quadbin sources:**
 - [quadbinTableSource](./data-sources#quadbintablesource)
 - [quadbinQuerySource](./data-sources#quadbinquerysource)
 - [quadbinTilesetSource](./data-sources#quadbintilesetsource)
 
+**H3 sources:**
+- [h3TableSource](./data-sources#h3tablesource)
+- [h3QuerySource](./data-sources#h3querysource)
+- [h3TilesetSource](./data-sources#h3tilesetsource)
+
 ### Clustering Options
 
-The following props control how the data is grouped into clusters. The accessor methods will be called on each quadbin cell in the data to retrieve the position and weight of the cell. All of the properties are then aggregated and made available to the `GeoJsonLayer` accessors for styling.
+The following props control how the data is grouped into clusters. The accessor methods will be called on each spatial index cell (quadbin or H3) in the data to retrieve the position and weight of the cell. All of the properties are then aggregated and made available to the `GeoJsonLayer` accessors for styling.
 
 #### `clusterLevel` (number, optional) {#clusterlevel}
 
@@ -93,7 +100,7 @@ The number of aggregation levels to cluster cells by. Larger values increase the
 
 #### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
-The (average) position of points in a cell used for clustering. If not supplied the center of the quadbin cell is used.
+The (average) position of points in a cell used for clustering. If not supplied the center of the spatial index cell (quadbin or H3) is used.
 
 #### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getweight}
 
@@ -107,7 +114,7 @@ When using the `GeoJsonLayer` accessors to style the clusters, aggregated values
 
 ### Aggregation types
 
-The type aggregation is infered based on the property name, for example `population_average` will be aggregated using a (mean) average operation across all the quadbin cells that are present in the cluster, while `age_min` will give the minimum value present in the cluster.
+The type aggregation is infered based on the property name, for example `population_average` will be aggregated using a (mean) average operation across all the spatial index cells that are present in the cluster, while `age_min` will give the minimum value present in the cluster.
 
 The following suffixes are supported:
 
@@ -129,7 +136,7 @@ In addition to the aggregated values across the cluster, the features passed to 
 Display clusters using an `'cluster'` icon scaled between 20 and 80, switching to an icon defined by the `icon_any` property once the cluster only contains a single point.
 
 ```ts
-// Data present in quadbin cell
+// Data present in spatial index cell (quadbin or H3)
 type PropertiesType = {
   longitude_count: number; // count of points in cell
   longitude_average: number;
@@ -138,12 +145,12 @@ type PropertiesType = {
 };
 
 const layer = new ClusterTileLayer<PropertiesType>({
-  data, // Defined using `quadbinTableSource` or similar
+  data, // Defined using `quadbinTableSource`, `h3TableSource` or similar
 
   // Clustering props
   getWeight: d => d.properties.longitude_count,
   getPosition: d => [d.properties.longitude_average, d.properties.latitude_average];
-  
+
   // Style
   pointType: 'icon',
   iconAtlas,
