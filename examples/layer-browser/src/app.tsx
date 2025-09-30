@@ -28,7 +28,7 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import Map from './map';
 
-import {zoomBlur} from '@luma.gl/effects';
+import {ink} from '@luma.gl/effects';
 
 const AMBIENT_LIGHT = new AmbientLight({
   color: [255, 255, 255],
@@ -58,7 +58,7 @@ const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
   DIRECTIONAL_LIGHT_SHADOW
 });
 
-const POST_PROCESS = new PostProcessEffect(zoomBlur, {strength: 0.5});
+const POST_PROCESS = new PostProcessEffect(ink, {strength: 0.5});
 
 const LAND_COVER = [
   [
