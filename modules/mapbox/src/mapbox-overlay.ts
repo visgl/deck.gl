@@ -47,9 +47,20 @@ export default class MapboxOverlay implements IControl {
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
 
   constructor(props: MapboxOverlayProps) {
-    const {interleaved = false, ...otherProps} = props;
+    const {interleaved = false} = props;
     this._interleaved = interleaved;
-    this._props = otherProps;
+    this._props = this.filterProps(props);
+  }
+
+  /** Filter out props to pass to Deck **/
+  filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
+    const {interleaved = false, useDevicePixels, ...deckProps} = props;
+    this._interleaved = interleaved;
+    if (!interleaved && useDevicePixels !== undefined) {
+      // useDevicePixels cannot be used in interleaved mode
+      (deckProps as MapboxOverlayProps).useDevicePixels = useDevicePixels;
+    }
+    return deckProps;
   }
 
   /** Update (partial) props of the underlying Deck instance. */
@@ -58,7 +69,7 @@ export default class MapboxOverlay implements IControl {
       resolveLayers(this._map, this._deck, this._props.layers, props.layers);
     }
 
-    Object.assign(this._props, props);
+    Object.assign(this._props, this.filterProps(props));
 
     if (this._deck && this._map) {
       this._deck.setProps({
@@ -129,7 +140,7 @@ export default class MapboxOverlay implements IControl {
         ...this._props,
         gl,
         deviceProps: {
-          createCanvasContext: {autoResize: true, useDevicePixels: true}
+          createCanvasContext: {autoResize: true}
         }
       })
     });
