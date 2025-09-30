@@ -70,3 +70,45 @@ export type {
   MapLibreBasemap as _MapLibreBasemap,
   GoogleBasemap as _GoogleBasemap
 } from './api/index';
+
+// TODO(v10): Consider removing re-exports from '@carto/api-client' below.
+
+export {
+  CARTO_SOURCES,
+  boundaryQuerySource,
+  boundaryTableSource,
+  h3QuerySource,
+  h3TableSource,
+  h3TilesetSource,
+  rasterSource,
+  quadbinQuerySource,
+  quadbinTableSource,
+  quadbinTilesetSource,
+  vectorQuerySource,
+  vectorTableSource,
+  vectorTilesetSource,
+  query,
+  CartoAPIError,
+  SOURCE_DEFAULTS
+} from '@carto/api-client';
+
+export type {
+  TilejsonResult,
+  SourceOptions,
+  QuerySourceOptions,
+  TableSourceOptions,
+  TilesetSourceOptions,
+  BoundaryQuerySourceOptions,
+  BoundaryTableSourceOptions,
+  H3QuerySourceOptions,
+  H3TableSourceOptions,
+  H3TilesetSourceOptions,
+  RasterSourceOptions,
+  QuadbinQuerySourceOptions,
+  QuadbinTableSourceOptions,
+  QuadbinTilesetSourceOptions,
+  VectorQuerySourceOptions,
+  VectorTableSourceOptions,
+  VectorTilesetSourceOptions,
+  QueryParameters
+} from '@carto/api-client';

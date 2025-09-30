@@ -38,7 +38,8 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ```jsx
 import {DeckGL} from '@deck.gl/react';
-import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+import {VectorTileLayer} from '@deck.gl/carto';
+import {vectorQuerySource} from '@carto/api-client';
 
 function App() {
   const data = vectorQuerySource({
