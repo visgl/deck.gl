@@ -128,7 +128,9 @@ export default class MapboxOverlay implements IControl {
       deck: new Deck({
         ...this._props,
         gl,
-        deviceProps: {createCanvasContext: {autoResize: true}}
+        deviceProps: {
+          createCanvasContext: {autoResize: true, useDevicePixels: true}
+        }
       })
     });
 

@@ -369,12 +369,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
-      deviceOrPromise = webgl2Adapter.attach(props.gl, {
-        createCanvasContext: {
-          autoResize: true,
-          useDevicePixels: this.props.useDevicePixels
-        }
-      });
+      deviceOrPromise = webgl2Adapter.attach(props.gl, this.props.deviceProps);
     }
 
     // Create a new device
