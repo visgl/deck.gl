@@ -55,7 +55,6 @@ export default class MapboxOverlay implements IControl {
   /** Filter out props to pass to Deck **/
   filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
     const {interleaved = false, useDevicePixels, ...deckProps} = props;
-    this._interleaved = interleaved;
     if (!interleaved && useDevicePixels !== undefined) {
       // useDevicePixels cannot be used in interleaved mode
       (deckProps as MapboxOverlayProps).useDevicePixels = useDevicePixels;
@@ -139,6 +138,7 @@ export default class MapboxOverlay implements IControl {
       deck: new Deck({
         ...this._props,
         gl,
+        parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
         deviceProps: {
           createCanvasContext: {autoResize: true}
         }
