@@ -61,10 +61,10 @@ export default [
         ],
         iconAtlas: './test/data/icons.png',
         iconMapping: {
-          tall: {x: 0, y: 0, width: 40, height: 80, mask: true, anchorY: 40},
-          wide: {x: 40, y: 0, width: 80, height: 40, mask: true, anchorY: 20},
-          square: {x: 120, y: 0, width: 60, height: 60, mask: true, anchorY: 30},
-          short: {x: 180, y: 0, width: 60, height: 20, mask: true, anchorY: 10}
+          tall: {x: 0, y: 0, width: 40, height: 80, anchorY: 40},
+          wide: {x: 40, y: 0, width: 80, height: 40, anchorY: 20},
+          square: {x: 120, y: 0, width: 60, height: 60, anchorY: 30},
+          short: {x: 180, y: 0, width: 60, height: 20, anchorY: 10}
         },
         sizeUnits: 'pixels',
         sizeScale: 1,
