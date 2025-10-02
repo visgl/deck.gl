@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.1
 
+#### deck.gl [v9.1.15] - Oct 2 2025
+
+- Fix orthographic scroll zoom transitions (#9769) (#9799)
+
 #### deck.gl [v9.1.14] - Jul 28 2025
 
 - chore: Lock luma.gl to v9.1 (#9705)
