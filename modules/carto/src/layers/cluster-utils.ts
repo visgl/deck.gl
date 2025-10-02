@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {cellToParent} from 'quadbin';
+import {cellToParent as h3CellToParent, getResolution as getH3Resolution} from 'h3-js';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Accessor, log} from '@deck.gl/core';
 import {BinaryFeatureCollection} from '@loaders.gl/schema';
@@ -14,12 +15,14 @@ export type AggregationProperties<FeaturePropertiesT> = {
   name: keyof FeaturePropertiesT;
 }[];
 export type ClusteredFeaturePropertiesT<FeaturePropertiesT> = FeaturePropertiesT & {
-  id: bigint;
+  id: bigint | string;
   count: number;
   position: [number, number];
 };
 export type ParsedQuadbinCell<FeaturePropertiesT> = {id: bigint; properties: FeaturePropertiesT};
 export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePropertiesT>[];
+export type ParsedH3Cell<FeaturePropertiesT> = {id: string; properties: FeaturePropertiesT};
+export type ParsedH3Tile<FeaturePropertiesT> = ParsedH3Cell<FeaturePropertiesT>[];
 
 /**
  * Aggregates tile by specified properties, caching result in tile.userData
@@ -27,12 +30,19 @@ export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePro
  * @returns true if data was aggregated, false if cache used
  */
 export function aggregateTile<FeaturePropertiesT>(
-  tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>,
+  tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>,
   tileAggregationCache: Map<number, ClusteredFeaturePropertiesT<FeaturePropertiesT>[]>,
   aggregationLevels: number,
   properties: AggregationProperties<FeaturePropertiesT> = [],
-  getPosition: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>,
-  getWeight: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, number>
+  getPosition: Accessor<
+    ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>,
+    [number, number]
+  >,
+  getWeight: Accessor<
+    ParsedQuadbinCell<FeaturePropertiesT> | ParsedH3Cell<FeaturePropertiesT>,
+    number
+  >,
+  scheme: 'quadbin' | 'h3' = 'quadbin'
 ): boolean {
   if (!tile.content) return false;
 
@@ -50,19 +60,24 @@ export function aggregateTile<FeaturePropertiesT>(
     tileAggregationCache.clear();
   }
 
-  const out: Record<number, any> = {};
+  const out: Record<string, any> = {};
   for (const cell of tile.content) {
     let id = cell.id;
     const position = typeof getPosition === 'function' ? getPosition(cell, {} as any) : getPosition;
 
     // Aggregate by parent rid
     for (let i = 0; i < aggregationLevels - 1; i++) {
-      id = cellToParent(id);
+      if (scheme === 'h3') {
+        const currentResolution = getH3Resolution(id as string);
+        id = h3CellToParent(id as string, Math.max(0, currentResolution - 1));
+      } else {
+        id = cellToParent(id as bigint);
+      }
     }
 
-    // Unfortunately TS doesn't support Record<bigint, any>
+    // Use string key for both H3 and Quadbin to avoid TypeScript Record<bigint, any> issues
     // https://github.com/microsoft/TypeScript/issues/46395
-    const parentId = Number(id);
+    const parentId = String(id);
     if (!(parentId in out)) {
       out[parentId] = {id, count: 0, position: [0, 0]};
       for (const {name, aggregation} of properties) {
@@ -104,7 +119,7 @@ export function aggregateTile<FeaturePropertiesT>(
 }
 
 export function extractAggregationProperties<FeaturePropertiesT extends {}>(
-  tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>
+  tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT> | ParsedH3Tile<FeaturePropertiesT>>
 ): AggregationProperties<FeaturePropertiesT> {
   const properties: AggregationProperties<FeaturePropertiesT> = [];
   const validAggregations: Aggregation[] = ['any', 'average', 'count', 'min', 'max', 'sum'];

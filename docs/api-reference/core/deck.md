@@ -147,27 +147,32 @@ Note:
 
 #### `parameters` (object) {#parameters}
 
-Expects an object with GPU parameters. Before each frame is rendered, this object will be passed to luma.gl's `setParameters` function to reset the GPU context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
+Expects an object with GPU parameters. Before each frame is rendered, this object will be passed to luma.gl's `RenderPass` to reset the GPU context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
 
 ```js
 {
   blend: true,
-  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendColorSrcFactor: 'src-alpha',
+  blendColorDstFactor: 'one-minus-src-alpha',  
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha'
   polygonOffsetFill: true,
-  depthTest: true,
-  depthFunc: GL.LEQUAL
+  depthWriteEnabled: true,
+  depthCompare: 'less-equal'
 }
 ```
 
-Refer to the luma.gl [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
+Refer to the luma.gl [GPU parameters](https://luma.gl/docs/api-reference/core/parameters) API for documentation on supported parameters and values.
 
 ```js
-import GL from '@luma.gl/constants';
 new Deck({
   // ...
   parameters: {
-    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-    depthTest: false
+    blendColorSrcFactor: 'one',
+    blendColorDstFactor: 'one',
+    blendAlphaSrcFactor: 'one',
+    blendAlphaDstFactor: 'one'
+    depthWriteEnabled: false
   }
 });
 ```
@@ -175,7 +180,6 @@ new Deck({
 Notes:
 
 - Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
-- An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setParameters` method inside it.
 
 #### `layers` (LayersList) {#layers}
 

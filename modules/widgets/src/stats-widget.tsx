@@ -1,4 +1,8 @@
-import {Widget, WidgetPlacement, WidgetProps} from '@deck.gl/core';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render} from 'preact';
 import type {Stats, Stat} from '@probe.gl/stats';
@@ -26,6 +30,11 @@ export const DEFAULT_FORMATTERS: Record<string, (stat: Stat) => string> = {
 };
 
 export type StatsWidgetProps = WidgetProps & {
+  /** Widget positioning within the view. Default 'top-left'. */
+  placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
+  /** Type of stats to display. */
   type?: 'deck' | 'luma' | 'device' | 'custom';
   /** Stats object to visualize. */
   stats?: Stats;
@@ -44,6 +53,8 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   static defaultProps: Required<StatsWidgetProps> = {
     ...Widget.defaultProps,
     type: 'deck',
+    placement: 'top-left',
+    viewId: null,
     stats: undefined!,
     title: 'Stats',
     framesPerUpdate: 1,
@@ -64,13 +75,14 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   constructor(props: StatsWidgetProps = {}) {
     super(props, StatsWidget.defaultProps);
     this._formatters = {...DEFAULT_FORMATTERS};
-    this.setProps(props);
     this._resetOnUpdate = {...this.props.resetOnUpdate};
     this._stats = this.props.stats;
+    this.setProps(props);
   }
 
   setProps(props: Partial<StatsWidgetProps>): void {
-    super.setProps(props);
+    this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     this._stats = this._getStats();
     if (props.formatters) {
       for (const name in props.formatters) {
@@ -82,6 +94,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     if (props.resetOnUpdate) {
       this._resetOnUpdate = {...props.resetOnUpdate};
     }
+    super.setProps(props);
   }
 
   onAdd(): void {
@@ -120,7 +133,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
         >
           {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
         </div>
-        {!collapsed && <div className="deck-widget-stats-content deck-widget-common">{items}</div>}
+        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
       </div>,
       rootElement
     );
@@ -129,7 +142,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   onRedraw(): void {
     const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
     if (this._counter++ % framesPerUpdate === 0) {
-      console.log('Redrawing stats widget');
+      this._stats = this._getStats();
       this.updateHTML();
     }
   }

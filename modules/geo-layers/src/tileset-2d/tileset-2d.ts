@@ -9,7 +9,7 @@ import {Matrix4, equals, NumericArray} from '@math.gl/core';
 
 import {Tile2DHeader} from './tile-2d-header';
 
-import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
+import {getTileIndices, tileToBoundingBox, getCullBounds, transformBox} from './utils';
 import {Bounds, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
@@ -291,7 +291,8 @@ export class Tileset2D {
   // eslint-disable-next-line complexity
   isTileVisible(
     tile: Tile2DHeader,
-    cullRect?: {x: number; y: number; width: number; height: number}
+    cullRect?: {x: number; y: number; width: number; height: number},
+    modelMatrix?: Matrix4 | null
   ): boolean {
     if (!tile.isVisible) {
       return false;
@@ -303,12 +304,19 @@ export class Tileset2D {
         z: this._zRange,
         cullRect
       });
-      const {bbox} = tile;
+      let {bbox} = tile;
       for (const [minX, minY, maxX, maxY] of boundsArr) {
         let overlaps;
         if ('west' in bbox) {
           overlaps = bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
         } else {
+          if (modelMatrix && !Matrix4.IDENTITY.equals(modelMatrix)) {
+            const [left, top, right, bottom] = transformBox(
+              [bbox.left, bbox.top, bbox.right, bbox.bottom],
+              modelMatrix
+            );
+            bbox = {left, top, right, bottom};
+          }
           // top/bottom could be swapped depending on the indexing system
           const y0 = Math.min(bbox.top, bbox.bottom);
           const y1 = Math.max(bbox.top, bbox.bottom);

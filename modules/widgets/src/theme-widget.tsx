@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {log, _deepEqual as deepEqual, _applyStyles as applyStyles} from '@deck.gl/core';
-import {Widget, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 // import {useCallback} from 'preact/hooks';
 import {IconButton} from './lib/components/icon-button';
@@ -13,6 +13,8 @@ import {LightGlassTheme, DarkGlassTheme} from './themes';
 export type ThemeWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip message when dark mode is selected. */
   lightModeLabel?: string;
   /** Styles for light mode theme */
@@ -30,6 +32,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
     ...Widget.defaultProps,
     id: 'theme',
     placement: 'top-left',
+    viewId: null,
     lightModeLabel: 'Light Mode',
     lightModeTheme: LightGlassTheme,
     darkModeLabel: 'Dark Mode',
@@ -43,17 +46,17 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
 
   constructor(props: ThemeWidgetProps = {}) {
     super(props, ThemeWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
     this.themeMode = this._getInitialThemeMode();
+    this.setProps(this.props);
   }
 
   // eslint-disable-next-line complexity
   setProps(props: Partial<ThemeWidgetProps>) {
     const {lightModeTheme, darkModeTheme} = this.props;
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
 
-    // Update if current theme definition changed
     switch (this.themeMode) {
       case 'light':
         if (props.lightModeTheme && !deepEqual(props.lightModeTheme, lightModeTheme, 1)) {
@@ -65,6 +68,8 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
           this._setThemeMode('dark');
         }
         break;
+      default:
+        log.warn(`Invalid theme mode ${this.themeMode}`)();
     }
   }
 
@@ -102,7 +107,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
 
       const label =
         this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel;
-      log.log(1, `Switched theme to ${label}`, themeStyle);
+      log.log(1, `Switched theme to ${label}`, themeStyle)();
 
       this.updateHTML();
     }

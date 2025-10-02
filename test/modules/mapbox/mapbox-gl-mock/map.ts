@@ -19,6 +19,9 @@ export default class Map extends Evented {
     this.options = options;
     this.version = options.version;
     this.style = new Style(options.style);
+    this.projection = {
+      type: options.projection || 'mercator'
+    };
     this._controls = [];
     this.transform = new Transform(options);
     this._loaded = false;
@@ -75,6 +78,9 @@ export default class Map extends Evented {
   }
   setRenderWorldCopies(value) {
     this.transform.renderWorldCopies = value;
+  }
+  getProjection() {
+    return this.projection;
   }
 
   addControl(control) {

@@ -59,7 +59,7 @@ const shaders = this.getShaders();
 const model = new Model(gl, {
   ...this.getShaders(),
   inject: {
-    'fs:decl': `
+    'fs:#decl': `
       uniform float coverage;
     `
     'fs:DECKGL_FILTER_COLOR': `
