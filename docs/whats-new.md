@@ -66,6 +66,7 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 ### Layers
 
 - New [A5Layer](./api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](../examples/global-grids) example
+- IconLayer - new [`sizeBasis`](./api-reference/layers/icon-layer#sizebasis) prop
 - TextLayer - new [`backgroundBorderRadius`](./api-reference/layers/text-layer#backgroundborderradius) prop
 
 ### CARTO
