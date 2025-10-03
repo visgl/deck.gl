@@ -58,9 +58,16 @@ const ArcLayerExample = {
 const IconLayerExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
+  propTypes: {
+    sizeBasis: {
+      type: 'category',
+      value: ['height', 'width']
+    }
+  },
   props: {
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
+    sizeBasis: 'height',
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
