@@ -6,6 +6,26 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: September, 2025
 
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/df179a80-c82e-4677-87aa-52388a3a64cb" />
+        <p><i>New widgets</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/dd797761-28bb-4b9a-927c-ab56bcafb8c3" />
+        <p><i>WebGPU layers</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/user-attachments/assets/b7168647-d318-486e-bf34-747b1ff8865a" />
+        <p><i>Interleaved postprocessing</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 ### Widgets
 
 - A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
@@ -39,12 +59,14 @@ See documentation about how to [test WebGPU support](./developer-guide/webgpu.md
 
 ### Core
 
+- [`PostProcessEffect`](./api-reference/core/post-process-effect.md) now works correctly in interleaved mode
 - [`View.clone()`](./api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
 - Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](./api-reference/core/view.md#clear), [`clearColor`](./api-reference/core/view.md#clearcolor), [`clearDepth`](./api-reference/core/view.md#cleardepth), [`clearStencil`](./api-reference/core/view.md#clearstencil) props
 
 ### Layers
 
 - New [A5Layer](./api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](../examples/global-grids) example
+- IconLayer - new [`sizeBasis`](./api-reference/layers/icon-layer#sizebasis) prop
 - TextLayer - new [`backgroundBorderRadius`](./api-reference/layers/text-layer#backgroundborderradius) prop
 
 ### CARTO
