@@ -1,11 +1,10 @@
-// SplitterWidget.tsx
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
 import {h, render} from 'preact';
 import {useState, useRef} from 'preact/hooks';
-import {Widget, WidgetProps} from '@deck.gl/core';
+import {Widget, type WidgetProps} from '@deck.gl/core';
 
 /** Properties for the SplitterWidget */
 export type SplitterWidgetProps = WidgetProps & {
@@ -47,7 +46,6 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
   placement = 'fill' as const;
 
   constructor(props: SplitterWidgetProps) {
-    // No placement prop is used.
     super(props, SplitterWidget.defaultProps);
   }
 

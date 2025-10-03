@@ -12,7 +12,7 @@ export type GimbalWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message. */
   label?: string;
-  /** Width of gimbal lines */
+  /** Width of gimbal lines. */
   strokeWidth?: number;
   /** Transition duration in ms when resetting rotation. */
   transitionDuration?: number;
@@ -23,7 +23,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     ...Widget.defaultProps,
     id: 'gimbal',
     placement: 'top-left',
-    viewId: undefined!,
+    viewId: null,
     label: 'Gimbal',
     strokeWidth: 1.5,
     transitionDuration: 200
@@ -31,7 +31,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
 
   className = 'deck-widget-gimbal';
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
+  viewports: {[id: string]: Viewport} = {};
 
   constructor(props: GimbalWidgetProps = {}) {
     super(props, GimbalWidget.defaultProps);
@@ -45,14 +45,18 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {rotationOrbit, rotationX} = this.getNormalizedRotation();
+    const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
+    const widgetViewport = this.viewports[viewId];
+    const {rotationOrbit, rotationX} = this.getNormalizedRotation(widgetViewport);
     // Note - we use CSS 3D transforms instead of SVG 2D transforms
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100, pointerEvents: 'auto'}}>
         <button
           type="button"
           onClick={() => {
-            this.resetOrbitView();
+            for (const viewport of Object.values(this.viewports)) {
+              this.resetOrbitView(viewport);
+            }
           }}
           title={this.props.label}
           style={{position: 'relative', width: 26, height: 26}}
@@ -110,11 +114,12 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
   }
 
   onViewportChange(viewport: Viewport) {
+    this.viewports[viewport.id] = viewport;
     this.updateHTML();
   }
 
-  resetOrbitView() {
-    const viewId = this.getViewId();
+  resetOrbitView(viewport?: Viewport) {
+    const viewId = this.getViewId(viewport);
     const viewState = this.getViewState(viewId);
     if ('rotationOrbit' in viewState || 'rotationX' in viewState) {
       const nextViewState = {
@@ -131,8 +136,8 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     }
   }
 
-  getNormalizedRotation() {
-    const viewState = this.getViewState(this.getViewId());
+  getNormalizedRotation(viewport?: Viewport): {rotationOrbit: number; rotationX: number} {
+    const viewState = this.getViewState(this.getViewId(viewport));
     const [rz, rx] = this.getRotation(viewState);
     const rotationOrbit = normalizeAndClampAngle(rz);
     const rotationX = normalizeAndClampAngle(rx);
@@ -148,8 +153,8 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
 
   // Move to Widget/WidgetManager?
 
-  getViewId() {
-    const viewId = this.viewId || 'OrbitView';
+  getViewId(viewport?: Viewport) {
+    const viewId = this.viewId || viewport?.id || 'OrbitView';
     return viewId;
   }
 

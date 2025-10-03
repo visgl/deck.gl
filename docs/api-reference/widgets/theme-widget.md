@@ -11,7 +11,9 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 :::info
 
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
-  :::
+:::
+
+## Usage
 
 <BrowserOnly>{() => <WidgetPreview cls={_ThemeWidget}/>}</BrowserOnly>
 
@@ -19,50 +21,44 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 
-const deck = new Deck({
+new Deck({
   widgets: [new ThemeWidget()]
 });
 ```
 
-### `ThemeWidgetProps`
+### `ThemeWidgetProps` {#themewidgetprops}
 
-The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'theme'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `lightModeTheme` (object, optional) {#lightmodetheme}
 
-Styles for light mode theme.
+* Default: Light Glass Theme
 
-Default: Light Glass Theme
+Styles for light mode theme.
 
 #### `darkModeTheme` (object, optional) {#darkmodetheme}
 
+* Default: Dark Glass Theme
+
 Styles for dark mode theme.
 
-Default: Dark Glass Theme
+#### `initialTheme` (`'auto' | 'light' | 'dark'`) {#initialtheme}
 
-#### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
+* Default: `'auto'`
 
-Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
-
-Default: `'auto'`
+Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+* Default: `'Light Theme'`
 
-Default: `'Light Theme'`
+Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
 
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when fullscreen.
+* Default: `'Dark Theme'`
 
-Default: `'Dark Theme'`
+Tooltip message displayed while hovering a mouse over the widget when fullscreen.
 
 ## Styles
 

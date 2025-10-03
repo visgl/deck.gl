@@ -3,40 +3,38 @@ import {CompassWidget} from '@deck.gl/widgets';
 
 # CompassWidget
 
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
 This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports Map and Globe view.
+
+## Usage
 
 <WidgetPreview cls={CompassWidget}/>
 
 ```ts
-import {CompassWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {CompassWidget} from '@deck.gl/widgets';
 
-const deck = new Deck({
+new Deck({
   widgets: [new CompassWidget()]
 });
 ```
 
 ## Types
 
-### `CompassWidgetProps`
+### `CompassWidgetProps` {#compasswidgetprops}
 
-The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'compass'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
-Tooltip message displayed while hovering a mouse over the widget.
+* Default: `'Compass'`
 
-Default: `'Compass'`
+Tooltip message displayed while hovering a mouse over the widget.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Bearing and pitch reset transition duration in milliseconds.
 

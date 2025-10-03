@@ -8,6 +8,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
 import type {WidgetManager, WidgetPlacement} from './widget-manager';
+import type {ViewOrViews} from './view-manager';
 import {deepEqual} from '../utils/deep-equal';
 import {applyStyles, removeStyles} from '../utils/apply-styles';
 
@@ -19,7 +20,10 @@ export type WidgetProps = {
   className?: string;
 };
 
-export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
+export abstract class Widget<
+  PropsT extends WidgetProps = WidgetProps,
+  ViewsT extends ViewOrViews = null
+> {
   static defaultProps: Required<WidgetProps> = {
     id: 'widget',
     style: {},
@@ -43,7 +47,7 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
 
   // Populated by core when mounted
   widgetManager?: WidgetManager;
-  deck?: Deck<any>;
+  deck?: Deck<ViewsT>;
   rootElement?: HTMLDivElement | null;
 
   constructor(props: PropsT, defaultProps: Required<PropsT>) {

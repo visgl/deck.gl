@@ -198,7 +198,7 @@ If `true`, the text always faces camera. Otherwise the text faces up (z).
 
 Whether to render background for the text blocks.
 
-#### `backgroundBorderRadius` (number | number[4], optional) {#backgroundBorderRadius}
+#### `backgroundBorderRadius` (number | number[4], optional) {#backgroundborderradius}
 
 - Default `0`
 

@@ -4,7 +4,13 @@
 
 import {Deck, OrbitView, OrbitViewState} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {GimbalWidget, ZoomWidget, FullscreenWidget} from '@deck.gl/widgets';
+import {
+  GimbalWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  ResetViewWidget,
+  _FpsWidget
+} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 function generateData(count) {
@@ -26,7 +32,7 @@ const INITIAL_VIEW_STATE = {
 } as const satisfies OrbitViewState;
 
 new Deck({
-  views: new OrbitView(),
+  views: new OrbitView({id: 'default-view'}),
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
@@ -41,5 +47,11 @@ new Deck({
       billboard: true
     })
   ],
-  widgets: [new ZoomWidget(), new GimbalWidget(), new FullscreenWidget()]
+  widgets: [
+    new ZoomWidget(),
+    new GimbalWidget(),
+    new FullscreenWidget(),
+    new ResetViewWidget(),
+    new _FpsWidget()
+  ]
 });

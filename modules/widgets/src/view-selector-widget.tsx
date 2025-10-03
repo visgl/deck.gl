@@ -1,4 +1,3 @@
-// ViewSelectorWidget.tsx
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
@@ -14,6 +13,8 @@ export type ViewMode = 'single' | 'split-horizontal' | 'split-vertical';
 export type ViewSelectorWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip label */
   label?: string;
   /** The initial view mode. Defaults to 'single'. */
@@ -33,14 +34,12 @@ export type ViewSelectorWidgetProps = WidgetProps & {
 export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   static defaultProps: Required<ViewSelectorWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'view-selector-widget',
+    id: 'view-selector',
     placement: 'top-left',
+    viewId: null,
     label: 'Split View',
     initialViewMode: 'single',
-    onViewModeChange: (viewMode: string) => {
-      // eslint-disable-next-line no-console
-      console.log(viewMode);
-    }
+    onViewModeChange: () => {}
   };
 
   className = 'deck-widget-view-selector';
@@ -49,20 +48,24 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
 
   constructor(props: ViewSelectorWidgetProps = {}) {
     super(props, ViewSelectorWidget.defaultProps);
-    this.placement = this.props.placement;
     this.viewMode = this.props.initialViewMode;
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ViewSelectorWidgetProps>) {
-    super.setProps(props);
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
+    super.setProps(props);
   }
 
   onRenderHTML(rootElement: HTMLElement) {
     render(
       <IconMenu<ViewMode>
         className="deck-widget-view-selector"
-        menuItems={MENU_ITEMS}
+        menuItems={MENU_ITEMS.map(item => ({
+          ...item,
+          icon: item.icon()
+        }))}
         initialItem={this.props.initialViewMode}
         onItemSelected={this.handleSelectMode}
       />,
@@ -73,29 +76,69 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   handleSelectMode = (viewMode: ViewMode) => {
     this.viewMode = viewMode;
     this.updateHTML();
+    this.props.onViewModeChange(viewMode);
   };
 }
 
-// Define common icon style.
 const ICON_STYLE = {width: '24px', height: '24px'};
 
-// Define inline SVG icons for each view mode.
+// JSX wrapped in a function to fix deck's Node tests
 const ICONS: Record<ViewMode, () => JSX.Element> = {
   single: () => (
     <svg width="24" height="24" style={ICON_STYLE}>
-      <rect x="4" y="4" width="16" height="16" stroke="black" fill="none" strokeWidth="2" />
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
     </svg>
   ),
   'split-horizontal': () => (
     <svg width="24" height="24" style={ICON_STYLE}>
-      <rect x="4" y="4" width="16" height="7" stroke="black" fill="none" strokeWidth="2" />
-      <rect x="4" y="13" width="16" height="7" stroke="black" fill="none" strokeWidth="2" />
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="7"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
+      <rect
+        x="4"
+        y="13"
+        width="16"
+        height="7"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
     </svg>
   ),
   'split-vertical': () => (
     <svg width="24" height="24" style={ICON_STYLE}>
-      <rect x="4" y="4" width="7" height="16" stroke="black" fill="none" strokeWidth="2" />
-      <rect x="13" y="4" width="7" height="16" stroke="black" fill="none" strokeWidth="2" />
+      <rect
+        x="4"
+        y="4"
+        width="7"
+        height="16"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
+      <rect
+        x="13"
+        y="4"
+        width="7"
+        height="16"
+        stroke="var(--button-icon-hover, rgb(24, 24, 26))"
+        fill="none"
+        strokeWidth="2"
+      />
     </svg>
   )
 };
