@@ -104,9 +104,8 @@ export function createLayerPropsFromBinary(
   } as LayerData<any>;
   layerProps.lines._pathType = 'open';
 
-  const lastIndex =
-    polygons.primitivePolygonIndices.value[polygons.primitivePolygonIndices.value.length - 1];
-  const vertexValid = Array(lastIndex).fill(1);
+  const vertexCount = polygons.positions.value.length / polygons.positions.size;
+  const vertexValid = Array(vertexCount).fill(1);
   for (const index of polygons.primitivePolygonIndices.value) {
     vertexValid[index - 1] = 0;
   }
