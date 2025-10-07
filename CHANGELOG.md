@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.0] - Oct 7 2025
+
+The v9.2 release comes with preview of WebGPU support, and a trove of new widgets. See https://deck.gl/docs/whats-new for a full list.
+
 ### deck.gl v9.2 Prereleases
 
 #### deck.gl [v9.2.0-beta.4] - Oct 6 2025
