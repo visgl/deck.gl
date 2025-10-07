@@ -28,4 +28,4 @@ The `FpsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprop
 
 ## Source
 
-[modules/widgets/src/fps-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/fps-widget.tsx)
+[modules/widgets/src/fps-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/fps-widget.tsx)

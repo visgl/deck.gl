@@ -192,5 +192,5 @@ The `A5Layer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/a5-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/a5-layer)
+[modules/geo-layers/src/a5-layer](https://github.com/visgl/deck.gl/tree/9.2-release/modules/geo-layers/src/a5-layer)
 

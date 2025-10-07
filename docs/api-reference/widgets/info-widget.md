@@ -93,4 +93,4 @@ Callback triggered when the widget is clicked.
 
 ## Source
 
-[modules/widgets/src/info-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/info-widget.tsx)
+[modules/widgets/src/info-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/info-widget.tsx)

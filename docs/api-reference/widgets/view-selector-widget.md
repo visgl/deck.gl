@@ -59,4 +59,4 @@ This widget provides the UI for view mode selection but does not currently trigg
 
 ## Source
 
-[modules/widgets/src/view-selector-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/view-selector-widget.tsx)
+[modules/widgets/src/view-selector-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/view-selector-widget.tsx)

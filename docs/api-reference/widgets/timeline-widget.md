@@ -66,4 +66,4 @@ Interval in milliseconds between automatic time increments when playing.
 
 ## Source
 
-[modules/widgets/src/timeline-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/timeline-widget.tsx)
+[modules/widgets/src/timeline-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/timeline-widget.tsx)

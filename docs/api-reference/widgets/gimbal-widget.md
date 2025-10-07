@@ -53,4 +53,4 @@ View state transition duration in milliseconds.
 
 ## Source
 
-[modules/widgets/src/gimbal-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/gimbal-widget.tsx)
+[modules/widgets/src/gimbal-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/gimbal-widget.tsx)

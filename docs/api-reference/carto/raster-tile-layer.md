@@ -73,4 +73,4 @@ Use the [rasterSource](./data-sources.md#rastersource) to fetch this from the CA
 
 ## Source
 
-[modules/carto/src/layers/raster-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/raster-tile-layer.ts)
+[modules/carto/src/layers/raster-tile-layer.ts](https://github.com/visgl/deck.gl/tree/9.2-release/modules/carto/src/layers/raster-tile-layer.ts)

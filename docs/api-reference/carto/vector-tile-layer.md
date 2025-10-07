@@ -84,4 +84,4 @@ For more control over labeling, pass an object with the following properties:
 
 ## Source
 
-[modules/carto/src/layers/vector-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/vector-tile-layer.ts)
+[modules/carto/src/layers/vector-tile-layer.ts](https://github.com/visgl/deck.gl/tree/9.2-release/modules/carto/src/layers/vector-tile-layer.ts)

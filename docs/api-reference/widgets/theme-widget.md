@@ -73,4 +73,4 @@ Tooltip message displayed while hovering a mouse over the widget when fullscreen
 
 ## Source
 
-[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/theme-widget.tsx)
+[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/theme-widget.tsx)

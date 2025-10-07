@@ -177,4 +177,4 @@ The `QuadkeyLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/quadkey-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/quadkey-layer)
+[modules/geo-layers/src/quadkey-layer](https://github.com/visgl/deck.gl/tree/9.2-release/modules/geo-layers/src/quadkey-layer)

@@ -53,4 +53,4 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 
 ## Source
 
-[modules/widgets/src/compass-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/compass-widget.tsx)
+[modules/widgets/src/compass-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/compass-widget.tsx)

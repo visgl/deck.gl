@@ -34,4 +34,4 @@ Tooltip label for the widget.
 
 ## Source
 
-[modules/widgets/src/scale-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/scale-widget.tsx)
+[modules/widgets/src/scale-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/scale-widget.tsx)

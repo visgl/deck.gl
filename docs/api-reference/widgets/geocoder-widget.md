@@ -66,4 +66,4 @@ If `props._geolocation` **Current position** from the drop-down uses `navigator.
 
 ## Source
 
-[modules/widgets/src/geocoder-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/geocoder-widget.tsx)
+[modules/widgets/src/geocoder-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/geocoder-widget.tsx)

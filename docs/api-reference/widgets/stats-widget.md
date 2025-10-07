@@ -58,4 +58,4 @@ The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
 
 ## Source
 
-[modules/widgets/src/stats-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/stats-widget.tsx)
+[modules/widgets/src/stats-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/stats-widget.tsx)

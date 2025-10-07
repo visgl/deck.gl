@@ -34,4 +34,4 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 ## Source
 
-[modules/widgets/src/loading-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/loading-widget.tsx)
+[modules/widgets/src/loading-widget.tsx](https://github.com/visgl/deck.gl/tree/9.2-release/modules/widgets/src/loading-widget.tsx)
