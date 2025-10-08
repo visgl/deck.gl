@@ -40,7 +40,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: ZoomWidgetProps = {}) {
-    super(props, ZoomWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 

@@ -47,7 +47,7 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   viewMode: ViewMode;
 
   constructor(props: ViewSelectorWidgetProps = {}) {
-    super(props, ViewSelectorWidget.defaultProps);
+    super(props);
     this.viewMode = this.props.initialViewMode;
     this.setProps(this.props);
   }
