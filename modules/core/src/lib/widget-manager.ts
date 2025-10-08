@@ -201,12 +201,11 @@ export class WidgetManager {
     widget.deck = this.deck;
 
     // Create an attach the HTML root element
-    widget.rootElement = widget.onCreateRootElement();
+    widget.rootElement = widget._onAdd({deck: this.deck, viewId});
     if (widget.rootElement) {
       this._getContainer(viewId, placement).append(widget.rootElement);
     }
 
-    widget.onAdd?.({deck: this.deck, viewId});
     widget.updateHTML();
   }
 
