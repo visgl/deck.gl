@@ -40,7 +40,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
   placement: WidgetPlacement = 'top-left';
 
   constructor(props: ResetViewWidgetProps<ViewsT> = {}) {
-    super(props, ResetViewWidget.defaultProps as Required<ResetViewWidgetProps<ViewsT>>);
+    super(props);
     this.setProps(this.props);
   }
 

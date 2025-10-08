@@ -73,7 +73,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   _stats: Stats;
 
   constructor(props: StatsWidgetProps = {}) {
-    super(props, StatsWidget.defaultProps);
+    super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
     this._stats = this.props.stats;
