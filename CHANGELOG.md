@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.1] - Oct 7 2025
+
+- Avoid 9.2 breaking change in Widget base class (#9814)
+- Simplify Widget class constructor (#9815)
+
 #### deck.gl [v9.2.0] - Oct 7 2025
 
 The v9.2 release comes with preview of WebGPU support, and a trove of new widgets. See https://deck.gl/docs/whats-new for a full list.
