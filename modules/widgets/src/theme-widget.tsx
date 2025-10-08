@@ -45,7 +45,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
   themeMode: 'light' | 'dark' = 'dark';
 
   constructor(props: ThemeWidgetProps = {}) {
-    super(props, ThemeWidget.defaultProps);
+    super(props);
     this.themeMode = this._getInitialThemeMode();
     this.setProps(this.props);
   }

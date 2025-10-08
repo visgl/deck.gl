@@ -44,7 +44,7 @@ export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
   placement: WidgetPlacement = 'top-left';
 
   constructor(props: ScreenshotWidgetProps = {}) {
-    super(props, ScreenshotWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 

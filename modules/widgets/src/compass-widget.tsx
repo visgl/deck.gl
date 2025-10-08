@@ -32,7 +32,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: CompassWidgetProps = {}) {
-    super(props, CompassWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 
