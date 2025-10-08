@@ -34,7 +34,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: GimbalWidgetProps = {}) {
-    super(props, GimbalWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 

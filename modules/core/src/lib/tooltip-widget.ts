@@ -45,7 +45,7 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
   lastViewport?: Viewport;
 
   constructor(props: TooltipWidgetProps = {}) {
-    super(props, TooltipWidget.defaultProps);
+    super(props);
     this.setProps(props);
   }
 
