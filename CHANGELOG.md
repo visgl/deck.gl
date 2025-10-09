@@ -21,6 +21,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.2 Prereleases
 
+#### deck.gl [v9.2.0-beta.4] - Oct 6 2025
+
+- Invoke transform function for constant attributes (#9741)
+- Pass `vertexValid` to SolidPolygonLayer when using binary GeoJSON (#9805)
+- Add IconLayer sizeBasis prop (#9736)
+- fix: Maplibre interleaved resize handling (#9803)
+- Fix potential undefined deck in FPS calculation (#9800)
+
 #### deck.gl [v9.2.0-beta.3] - Sep 26 2025
 
 - fix(extensions): correctly activate picking module in terrain picking pass (#9768)
