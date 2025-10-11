@@ -268,11 +268,10 @@ export default class DataColumn<Options, State> {
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {
     const accessor = this.getAccessor();
-    const attributes: BufferAttributeLayout[] = [];
+    const attributes: (BufferAttributeLayout | null)[] = [];
     const result: BufferLayout = {
       name: this.id,
-      byteStride: getStride(accessor),
-      attributes
+      byteStride: getStride(accessor)
     };
 
     if (this.doublePrecision) {
@@ -307,6 +306,7 @@ export default class DataColumn<Options, State> {
     } else {
       attributes.push(getBufferAttributeLayout(attributeName, accessor, this.device.type));
     }
+    result.attributes = attributes.filter(Boolean) as BufferAttributeLayout[];
     return result;
   }
 
