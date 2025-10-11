@@ -452,9 +452,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies LumaParameters)
+        : undefined;
+
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
-      modules: this.context.defaultShaderModules
+      modules: this.context.defaultShaderModules,
+      parameters
     });
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
