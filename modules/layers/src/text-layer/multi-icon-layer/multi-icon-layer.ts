@@ -115,17 +115,13 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     }
   }
 
-  protected getInstanceOffset(icons: string): number[] {
-    return icons ? Array.from(icons).flatMap(icon => super.getInstanceOffset(icon)) : EMPTY_ARRAY;
-  }
-
-  getInstanceColorMode(icons: string): number {
-    return 1; // mask
-  }
-
-  getInstanceIconFrame(icons: string): number[] {
+  protected getInstanceIconDef(icons: string): number[] {
     return icons
-      ? Array.from(icons).flatMap(icon => super.getInstanceIconFrame(icon))
+      ? Array.from(icons).flatMap(icon => {
+          const def = super.getInstanceIconDef(icon);
+          def[6] = 1; // mask
+          return def;
+        })
       : EMPTY_ARRAY;
   }
 }
