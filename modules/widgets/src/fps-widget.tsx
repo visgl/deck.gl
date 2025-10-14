@@ -32,7 +32,7 @@ export class FpsWidget extends Widget<FpsWidgetProps> {
   private _lastFps: number = -1;
 
   constructor(props: FpsWidgetProps = {}) {
-    super(props);
+    super(props, FpsWidget.defaultProps);
     this.setProps(this.props);
   }
 

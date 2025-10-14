@@ -45,7 +45,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   };
 
   constructor(props: TimelineWidgetProps = {}) {
-    super(props);
+    super(props, TimelineWidget.defaultProps);
     this.currentTime = this.props.initialTime ?? this.props.timeRange[0];
     this.setProps(this.props);
   }
