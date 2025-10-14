@@ -93,7 +93,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Controls the resolution of drawing buffer used for rendering.
    * @default `true` (use browser devicePixelRatio)
    */
-  useDevicePixels?: boolean;
+  useDevicePixels?: boolean | number;
   /** Extra pixels around the pointer to include while picking.
    * @default `0`
    */
