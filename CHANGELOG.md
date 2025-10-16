@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.2] - Oct 16 2025
+
+- chore: tighten peerDependency range to patch (#9821)
+- Fix type hint of useDevicePixels to allow number input (#9826)
+
 #### deck.gl [v9.2.1] - Oct 7 2025
 
 - Avoid 9.2 breaking change in Widget base class (#9814)
