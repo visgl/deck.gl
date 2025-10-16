@@ -41,10 +41,10 @@
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
-    "@deck.gl/core": "^9.1.0",
-    "@luma.gl/core": "^9.2.2",
-    "@luma.gl/engine": "^9.2.2",
-    "@luma.gl/webgl": "^9.2.2"
+    "@deck.gl/core": "~9.2.0",
+    "@luma.gl/core": "~9.2.2",
+    "@luma.gl/engine": "~9.2.2",
+    "@luma.gl/webgl": "~9.2.2"
   },
   "devDependencies": {
     "@arcgis/core": "^4.21.0"
