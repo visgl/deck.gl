@@ -3,10 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
-import type {ViewStateMap, ViewOrViews} from '@deck.gl/core/src/lib/view-manager';
+import type {ViewStateMap, View} from '@deck.gl/core';
 import {render} from 'preact';
 import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
+
+/** @note Mirrors an internal calss in deck.gl/core. We can easily redefine it here */
+type ViewOrViews = View | View[] | null;
 
 /** Properties for the ResetViewWidget */
 export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProps & {
