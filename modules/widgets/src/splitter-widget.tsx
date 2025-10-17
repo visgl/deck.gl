@@ -46,7 +46,7 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
   placement = 'fill' as const;
 
   constructor(props: SplitterWidgetProps) {
-    super(props);
+    super(props, SplitterWidget.defaultProps);
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
