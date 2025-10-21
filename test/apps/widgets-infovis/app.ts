@@ -18,6 +18,7 @@ import {
   _FpsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
+import { ScrollbarWidget } from './scrollbar-widget';
 
 function generateData(count) {
   const result: {position: number[]; color: number[]}[] = [];
@@ -90,5 +91,6 @@ new Deck({
     new ResetViewWidget({id: 'reset-orbit', viewId: 'orbit-view', placement: 'top-right'}),
     new ResetViewWidget({id: 'reset-ortho', viewId: 'ortho-view', placement: 'top-right'}),
     new ZoomWidget({viewId: 'ortho-view'}),
+    new ScrollbarWidget({viewId: 'ortho-view', orientation: 'vertical', contentBounds: [[-50, -50], [50, 50]]})
   ]
 });
