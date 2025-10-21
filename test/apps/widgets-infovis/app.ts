@@ -56,11 +56,10 @@ const ORTHOGRAPHIC_POINTS = [
 
 new Deck({
   views: [
-    new OrbitView({id: 'orbit-view', x: 0, width: '50%'}),
-    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%'})
+    new OrbitView({id: 'orbit-view', x: 0, width: '50%', controller: true}),
+    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%', controller: true})
   ],
   initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
   layers: [
     new ScatterplotLayer({
       id: 'scatter',
@@ -85,10 +84,11 @@ new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget(),
-    new GimbalWidget(),
     new FullscreenWidget(),
-    new ResetViewWidget(),
-    new _FpsWidget()
+    new GimbalWidget(),
+    new _FpsWidget(),
+    new ResetViewWidget({id: 'reset-orbit', viewId: 'orbit-view', placement: 'top-right'}),
+    new ResetViewWidget({id: 'reset-ortho', viewId: 'ortho-view', placement: 'top-right'}),
+    new ZoomWidget({viewId: 'ortho-view'}),
   ]
 });
