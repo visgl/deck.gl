@@ -89,6 +89,7 @@ new Deck({
     new GimbalWidget(),
     new _FpsWidget(),
     new ResetViewWidget({id: 'reset-orbit', viewId: 'orbit-view', placement: 'top-right'}),
+    new ScrollbarWidget({id: 'scroll-orbit', viewId: 'orbit-view', orientation: 'horizontal', contentBounds: [[-50, -50], [50, 50]]}),
     new ResetViewWidget({id: 'reset-ortho', viewId: 'ortho-view', placement: 'top-right'}),
     new ZoomWidget({viewId: 'ortho-view'}),
     new ScrollbarWidget({viewId: 'ortho-view', orientation: 'vertical', contentBounds: [[-50, -50], [50, 50]]})
