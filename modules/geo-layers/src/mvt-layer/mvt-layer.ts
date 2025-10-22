@@ -29,7 +29,7 @@ import findIndexBinary from './find-index-binary';
 
 import TileLayer, {TileLayerPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
-import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
+import type {Tileset2DProps, TileLoadProps, GeoBoundingBox, NonGeoBoundingBox} from '../tileset-2d/index';
 import {
   urlType,
   Tileset2D,
@@ -263,8 +263,15 @@ export default class MVTLayer<
     props.autoHighlight = false;
 
     if (!this.context.viewport.resolution) {
-      props.modelMatrix = modelMatrix;
-      props.coordinateOrigin = [xOffset, yOffset, 0];
+      if (this.context.viewport.isGeospatial) {
+        props.modelMatrix = modelMatrix;
+        props.coordinateOrigin = [xOffset, yOffset, 0];
+      } else {
+        const bbox = props.tile.bbox as NonGeoBoundingBox;
+        props.modelMatrix = new Matrix4()
+          .translate([bbox.left, bbox.top, 0])
+          .scale(bbox.bottom - bbox.top);
+      }
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
