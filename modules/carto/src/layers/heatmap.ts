@@ -89,6 +89,9 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   color.a = pow(color.a, 1.0 / 2.2);
   color.a *= heatmap.opacity;
 
+  // Use premultiplied alpha for compatibility with blending in ScreenPass
+  color.rgb *= color.a;
+
   return color;
 }
 `;

@@ -2,7 +2,7 @@ Contributing to pydeck
 ======================
 
 We encourage users to report bugs, fix them, and add features as desired.
-We support our contributors in the #pydeck channel in the `deck.gl Slack workspace <https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg>`__.
+We support our contributors in the #pydeck channel in the `OpenJS Slack workspace <https://slack-invite.openjsf.org>`__.
 If you run into issues while using this guide, let us know.
 
 For governance policy and code of conduct, please see the `deck.gl contribution guidelines <https://deck.gl/docs/contributing>`__.

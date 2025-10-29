@@ -3,13 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 export const shaderWGSL = /* wgsl */ `\
-// TODO(ibgreen): Hack for Layer uniforms (move to new "color" module?)
-struct LayerUniforms {
-  opacity: f32,
-};
-var<private> layer: LayerUniforms = LayerUniforms(1.0);
-// @group(0) @binding(1) var<uniform> layer: LayerUniforms;
-
 // ---------- Helper Structures & Functions ----------
 
 // Placeholder filter functions.
@@ -43,17 +36,17 @@ fn splitLine(a: vec3<f32>, b: vec3<f32>, x: f32) -> vec3<f32> {
 
 // ---------- Uniforms & Global Structures ----------
 
-// Uniforms for line, layer, and project are assumed to be defined elsewhere.
+// Uniforms for line, color, and project are assumed to be defined elsewhere.
 // For example:
 //
 // @group(0) @binding(0)
 // var<uniform> line: LineUniform;
 //
-// struct LayerUniform {
+// struct ColorUniform {
 //   opacity: f32,
 // };
 // @group(0) @binding(1)
-// var<uniform> layer: LayerUniform;
+// var<uniform> color: ColorUniform;
 //
 // struct ProjectUniform {
 //   viewportSize: vec2<f32>,
@@ -150,7 +143,7 @@ fn vertexMain(
   let finalPosition: vec4<f32> = filteredP + vec4<f32>(clipOffset, 0.0, 0.0);
 
   // Compute color.
-  var vColor: vec4<f32> = vec4<f32>(instanceColors.rgb, instanceColors.a * layer.opacity);
+  var vColor: vec4<f32> = vec4<f32>(instanceColors.rgb, instanceColors.a * color.opacity);
   // vColor = deckgl_filter_color(vColor, geometry);
 
   var output: Varyings;
@@ -174,6 +167,9 @@ fn fragmentMain(
 
   // Apply the deck.gl filter to the color.
   fragColor = deckgl_filter_color(fragColor, geometry);
+
+  // Apply premultiplied alpha as required by transparent canvas
+  fragColor = deckgl_premultiplied_alpha(fragColor);
 
   return fragColor;
 }

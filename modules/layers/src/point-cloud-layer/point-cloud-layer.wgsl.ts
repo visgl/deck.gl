@@ -3,16 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 export default /* wgsl */ `\
-// TODO(ibgreen): Hack for Layer uniforms (move to new "color" module?)
-
-struct LayerUniforms {
-  opacity: f32,
-};
-
-var<private> layer: LayerUniforms = LayerUniforms(1.0);
-// @group(0) @binding(1) var<uniform> layer: LayerUniforms;
-
-// Main shaders
 struct ConstantAttributes {
   instanceNormals: vec3<f32>,
   instanceColors: vec4<f32>,
@@ -73,7 +63,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   let lightColor = lighting_getLightColor2(attributes.instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
 
   // Apply opacity to instance color, or return instance picking color
-  varyings.vColor = vec4(lightColor, attributes.instanceColors.a * layer.opacity);
+  varyings.vColor = vec4(lightColor, attributes.instanceColors.a * color.opacity);
   // DECKGL_FILTER_COLOR(vColor, geometry);
 
   return varyings;
@@ -93,6 +83,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   fragColor = varyings.vColor;
   // DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  // Apply premultiplied alpha as required by transparent canvas
+  fragColor = deckgl_premultiplied_alpha(fragColor);
 
   return fragColor;
 }

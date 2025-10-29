@@ -111,8 +111,8 @@ function updateDeck(inputJson, deckgl) {
   deckgl.setProps(results);
 }
 
-function missingLayers(oldLayers, newLayers) {
-  return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
+function missingProps(oldProps, newProps) {
+  return oldProps.filter(op => op && op.id && !newProps.find(np => np.id === op.id));
 }
 
 function createStandaloneFromProvider({
@@ -217,14 +217,17 @@ function createDeck({
     }
 
     const oldLayers = jsonInput.layers || [];
+    const oldWidgets = jsonInput.widgets || [];
     const props = jsonConverter.convert(jsonInput);
 
     addSupportComponents(container, props);
 
     const convertedLayers = (props.layers || []).filter(l => l);
+    const convertedWidgets = (props.widgets || []).filter(w => w);
 
-    // loading custom library is async, some layers might not be convertable before custom library loads
-    const layerToLoad = missingLayers(oldLayers, convertedLayers);
+    // loading custom library is async, some layers/widgets might not be convertable before custom library loads
+    const layersToLoad = missingProps(oldLayers, convertedLayers);
+    const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
     const getTooltip = makeTooltip(tooltip);
     const {mapProvider} = props;
 
@@ -240,14 +243,21 @@ function createDeck({
     });
 
     const onComplete = () => {
-      if (layerToLoad.length) {
-        // convert input layer again to presist layer order
-        const newProps = jsonConverter.convert({layers: jsonInput.layers});
-        const newLayers = (newProps.layers || []).filter(l => l);
+      if (layersToLoad.length || widgetsToLoad.length) {
+        const newProps = jsonConverter.convert({
+          layers: jsonInput.layers,
+          widgets: jsonInput.widgets
+        });
 
-        if (newLayers.length > convertedLayers.length) {
-          // if more layers are converted
-          deckgl.setProps({layers: newLayers});
+        const newLayers = (newProps.layers || []).filter(l => l);
+        const newWidgets = (newProps.widgets || []).filter(w => w);
+
+        if (
+          newLayers.length > convertedLayers.length ||
+          newWidgets.length > convertedWidgets.length
+        ) {
+          // if more layers/widgets are converted
+          deckgl.setProps({layers: newLayers, widgets: newWidgets});
         }
       }
     };

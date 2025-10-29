@@ -9,19 +9,43 @@ The `Widget` class is a base class used to define new widgets and should not be 
 
 ## Types 
 
-#### `WidgetProps` (object) {#props}
+### `WidgetProps` (object) {#widgetprops}
 
 Options for the widget, as passed into the constructor and can be updated with `setProps`.
 
-#### `id` {#id}
+#### `id` (string, optional) {#id}
+
+* Default: the widget's name.
 
 The `id` string must be unique among all your widgets at a given time. While a default `id` is provided, it is recommended to set `id` explicitly if you have multiple widgets of the same type.
 
+Remarks:
+
+* `id` is used to match widgets between rendering calls. deck.gl requires each widget to have a unique `id`. A default `id` is assigned based on widget type, which means if you are using more than one widget of the same type (e.g. two `InfoWidget`s) you need to provide a custom `id` for at least one of them.
+
+#### `style` (object, optional) {#style}
+
+* Default: `{}`
+
+Additional inline CSS styles on the top HTML element of the widget. camelCase CSS properties (e.g. `backgroundColor`) and kebab-case CSS variables are accepted (e.g. `--button-size`).
+
+```ts
+  style?: Partial<CSSStyleDeclaration>;
+```
+
+#### `className` (string, optional) {#classname}
+
+* Default: `''`
+
+Additional CSS classnames on the top HTML element.
+
+### Additional `WidgetProps` on UI Widgets
+
 #### `viewId` (string | null) {#viewid}
 
-The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
-
 * Default: `null`
+
+The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
 
 When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
 
@@ -29,9 +53,9 @@ The id of the view that the widget is attached to. If `null`, the widget receive
 
 #### `placement` (string, optional) {#placement}
 
-Widget position within the view relative to the map container.
-
 * Default: `'top-left'`
+
+Widget position within the view relative to the map container.
 
 Widget positioning within the view. One of:
 
@@ -41,25 +65,9 @@ Widget positioning within the view. One of:
 - `'bottom-right'`
 - `'fill'`
 
-#### `style`
-
-CSS inline style overrides.
-
-```ts
-  style?: Partial<CSSStyleDeclaration>;
-```
-
-#### `className`
-
-Additional CSS classnames for interaction with custom stylesheets.
-  
-```ts
-  className?: string;
-```
-
 ### Methods for Widget Writers
 
-#### `constructor`
+#### `constructor` {#constructor}
 
 Supply the props and default props to the base class.
 
@@ -71,7 +79,7 @@ Called to update widget options.
 
 Updates the widget. Called by the specific widget when state has changed. Calls `onRenderHTML()`
 
-#### `onRenderHTML`
+#### `onRenderHTML` {#onrenderhtml}
 
 This function is implemented by the specific widget subclass to update the HTML for the widget
 

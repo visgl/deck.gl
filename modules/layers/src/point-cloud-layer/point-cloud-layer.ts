@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  color,
   project32,
   picking,
   UNIT,
@@ -131,7 +132,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       vs,
       fs,
       source,
-      modules: [project32, gouraudMaterial, picking, pointCloudUniforms]
+      modules: [project32, color, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
 

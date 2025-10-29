@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, MapViewProps, PickingInfo} from '@deck.gl/core';
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import {
   CompassWidget,
   ZoomWidget,
@@ -17,10 +19,8 @@ import {
   _FpsWidget,
   _InfoWidget,
   _ContextMenuWidget,
-  _SplitterWidget,
   _TimelineWidget,
   _ViewSelectorWidget,
-  _ContextMenuWidget,
   _StatsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
@@ -39,26 +39,13 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-function getViewsForSplit(percentage: number) {
-  const x1 = '0%';
-  const width1 = `${percentage}%`;
-  const x2 = width1;
-  const width2 = `${100 - percentage}%`;
-
+function getLayers(filterRange = [2, 9]) {
   return [
-    new MapView({id: 'left-map', x: x1, width: width1, controller: true}),
-    new MapView({id: 'right-map', x: x2, width: width2, controller: true})
-  ];
-}
-
-const deck = new Deck({
-  initialViewState: {
-    'left-map': INITIAL_VIEW_STATE,
-    'right-map': INITIAL_VIEW_STATE
-  },
-  // controller: true,
-  views: getViewsForSplit(50),
-  layers: [
+    new WMSLayer({
+      data: 'https://ows.terrestris.de/osm/service',
+      serviceType: 'wms',
+      layers: ['OSM-WMS']
+    }),
     new GeoJsonLayer({
       id: 'base-map',
       data: COUNTRIES,
@@ -81,7 +68,11 @@ const deck = new Deck({
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
-      autoHighlight: true
+      autoHighlight: true,
+
+      getFilterValue: f => f.properties.scalerank,
+      filterRange,
+      extensions: [new DataFilterExtension({filterSize: 1})]
     }),
     new ArcLayer({
       id: 'arcs',
@@ -94,8 +85,15 @@ const deck = new Deck({
       getTargetColor: [200, 0, 80],
       getWidth: 1
     })
-  ],
+  ];
+}
+
+const deck = new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
+  layers: getLayers(),
   widgets: [
+    new _GeocoderWidget(),
     new ZoomWidget(),
     new CompassWidget(),
     new FullscreenWidget(),
@@ -104,7 +102,6 @@ const deck = new Deck({
     new _FpsWidget(),
     new _LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-right'}),
-    new _GeocoderWidget({viewId: 'left-map'}),
     new _ThemeWidget(),
     new _ContextMenuWidget({
       getMenuItems: (info: PickingInfo) => {
@@ -120,25 +117,22 @@ const deck = new Deck({
         );
       }
     }),
-    // new _InfoWidget({mode: 'hover', getTooltip}),
-    // new _InfoWidget({mode: 'click', getTooltip}),
+    new _InfoWidget({mode: 'hover', getTooltip}),
+    new _InfoWidget({mode: 'click', getTooltip}),
     new _TimelineWidget({
       placement: 'bottom-left',
-      domain: [0, 24],
+      timeRange: [2, 9],
       step: 1,
-      value: 0,
+      initialTime: 0,
       playInterval: 1000,
       // eslint-disable-next-line no-console, no-undef
-      onTimeChange: time => console.log('Time:', time)
+      onTimeChange: time =>
+        deck.setProps({
+          layers: getLayers([2, time])
+        })
     }),
     new _ViewSelectorWidget(),
-    new _SplitterWidget({
-      viewId1: 'left-map',
-      viewId2: 'right-map',
-      orientation: 'vertical',
-      onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
-    }),
-    new _StatsWidget({type: 'luma'})
+    new _StatsWidget({type: 'deck'})
   ]
 });
 

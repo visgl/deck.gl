@@ -65,11 +65,24 @@ const TextContainer = styled.div`
   }
 `;
 
+const EventBanner = styled.div`
+  position: sticky;
+  width: 100%;
+  top: var(--ifm-navbar-height);
+  background: #a01000;
+  padding: 20px;
+  color: #fff !important;
+`;
+
 export default function IndexPage() {
   const baseUrl = useBaseUrl('/');
 
   return (
     <Layout title="Home" description="deck.gl">
+      <EventBanner >
+        Open Visualization Collaborators Summit 2025: October 8-9 @ Seattle
+        <a href="https://deck.gl/events/seattle-summit-2025/">sign up</a>
+      </EventBanner>
       <Home HeroExample={HeroExample}>
         <div style={{position: 'relative'}}>
           <FeatureImage src={`${baseUrl}images/maps.jpg`} />

@@ -85,7 +85,9 @@ export class TerrainPickingPass extends PickLayersPass {
   }
 
   getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {
+    const base = super.getShaderModuleProps(layer, effects, otherShaderModuleProps);
     return {
+      ...base,
       terrain: {
         project: otherShaderModuleProps.project
       }

@@ -1,5 +1,6 @@
 import type {Viewport, WidgetPlacement, Layer} from '@deck.gl/core';
-import {_WidgetImpl, WidgetImplProps} from '@deck.gl/widgets';
+import {Widget} from '@deck.gl/core';
+import {WidgetImplProps} from '@deck.gl/widgets';
 import {h, Fragment, render} from 'preact';
 
 type LayerListWidgetProps = {
@@ -22,9 +23,9 @@ type LayerListWidgetProps = {
   className?: string;
 };
 
-export class LayerListWidget extends _WidgetImpl<LayerListWidgetProps> {
+export class LayerListWidget extends Widget<LayerListWidgetProps> {
   static defaultProps: Required<LayerListWidgetProps> = {
-    ..._WidgetImpl.defaultProps,
+    ...Widget.defaultProps,
     id: 'layer-list',
     placement: 'top-left'
   };
