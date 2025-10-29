@@ -33,7 +33,7 @@ jobs:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
 
       - name: Use Node.js
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: '18.x'
 
