@@ -855,7 +855,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
     // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
-    const deviceProps = {adapters: [], ...props.deviceProps};
+    const deviceProps = {
+      adapters: [],
+      _cacheShaders: true,
+      _cachePipelines: true,
+      ...props.deviceProps
+    };
     if (!deviceProps.adapters.includes(webgl2Adapter)) {
       deviceProps.adapters.push(webgl2Adapter);
     }
