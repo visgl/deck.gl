@@ -9,8 +9,8 @@ PRs and bug reports are welcome, and we are actively looking for new maintainers
 
 The **master** branch is the active development branch.
 
-Building deck.gl locally from the source requires node.js `>=14`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
-We use [yarn](https://yarnpkg.com/en/docs/install) to manage the dependencies of deck.gl, and [volta](https://docs.volta.sh/guide/getting-started) to manage the Node and yarn version.
+Building deck.gl locally from the source requires node.js `>=18`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
+We use [yarn](https://yarnpkg.com/en/docs/install) to manage the dependencies of deck.gl. We currently use [volta](https://docs.volta.sh/guide/getting-started) to manage the Node and yarn version, and are transitioning to Node [corepack](https://github.com/nodejs/corepack) to manage the yarn version.
 
 ```bash
 git checkout master
@@ -60,7 +60,7 @@ It is possible to test against the local source of other dependency libraries by
 
 ## Community Governance
 
-vis.gl is part of the [OpenJS Foundation](https://openjsf.org/). See the organization's [Technical Charter](https://github.com/visgl/tsc/blob/master/Technical%20Charter.md).
+vis.gl is part of the [OpenJS Foundation](https://openjsf.org/). See the organization's [Technical Charter](https://github.com/visgl/tsc/blob/master/CHARTER.md).
 
 
 ### Technical Steering Committee
@@ -85,15 +85,15 @@ deck.gl development is governed by the vis.gl Technical Steering Committee (TSC)
 
 Maintainers of deck.gl have commit access to this GitHub repository, and take part in the decision making process.
 
-If you are interested in becoming a maintainer, read the [governance guidelines](https://github.com/visgl/tsc/blob/master/governance.md).
+If you are interested in becoming a maintainer, read the [governance guidelines](https://github.com/visgl/tsc/blob/master/GOVERNANCE.md).
 
-The vis.gl TSC meets monthly and publishes meeting notes via a [mailing list](https://lists.uc.foundation/g/visgl).
-This mailing list can also be utilized to reach out to the TSC.
+The vis.gl TSC meets bi-weekly at the Open Visualization Biweekly Meeting via [zoom](https://zoom-lfx.platform.linuxfoundation.org/meetings/ojsf?view=month).
+The [OpenJS Slack](https://slack-invite.openjsf.org/) can also be utilized to reach out to the TSC in the `#deckgl` channel.
 
 
 ## Code of Conduct
 
-Please be mindful of and adhere to the Linux Foundation's [Code of Conduct](https://lfprojects.org/policies/code-of-conduct/) when contributing to deck.gl.
+Please be mindful of and adhere to the OpenJS Foundation's [Code of Conduct](https://github.com/openjs-foundation/cross-project-council/blob/main/CODE_OF_CONDUCT.md) when contributing to deck.gl.
 
 ## Troubleshooting
 
