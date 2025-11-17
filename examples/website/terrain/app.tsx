@@ -25,7 +25,7 @@ const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.
 const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
 
 // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
-// Note - the elevation rendered by this example is greatly exagerated!
+// Note - the elevation rendered by this example is greatly exaggerated!
 const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
   rScaler: 6553.6,
   gScaler: 25.6,

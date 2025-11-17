@@ -34,7 +34,7 @@ function addUpdateTriggersForAccessors(json) {
     for (const [key, value] of Object.entries(layer)) {
       if ((key.startsWith('get') && typeof value === 'string') || isFunctionObject(value)) {
         // it's an accessor and it's a string
-        // we add the value of the accesor to update trigger to refresh when it changes
+        // we add the value of the accessor to update trigger to refresh when it changes
         updateTriggers[key] = value;
       }
     }
