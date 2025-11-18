@@ -158,6 +158,36 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   });
 });
 
+test('MapboxOverlay#overlaid handles resize', t => {
+  let redrawCount = 0;
+  const onRedrawLayer = () => {
+    redrawCount++;
+  };
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    layers: [new TestScatterplotLayer({onAfterRedraw: onRedrawLayer})]
+  });
+
+  map.addControl(overlay);
+  map.triggerRepaint();
+
+  map.once('render', async () => {
+    const initialRedrawCount = redrawCount;
+
+    map.fire('resize');
+    await sleep(0);
+
+    t.ok(redrawCount > initialRedrawCount, 'Overlay redraws immediately after resize');
+
+    map.removeControl(overlay);
+    t.end();
+  });
+});
+
 test('MapboxOverlay#interleaved', t => {
   let drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {

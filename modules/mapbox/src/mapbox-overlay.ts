@@ -246,6 +246,8 @@ export default class MapboxOverlay implements IControl {
         height: `${clientHeight}px`
       });
     }
+
+    this._updateViewState();
   };
 
   private _updateViewState = () => {
