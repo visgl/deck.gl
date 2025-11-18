@@ -4,11 +4,11 @@
 
 /* eslint-disable no-unused-vars */
 import test from 'tape-promise/tape';
-import {createElement, createRef} from 'react';
+import {StrictMode, createElement, createRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {act} from 'react-dom/test-utils';
 
-import {DeckGL, Layer, Widget} from 'deck.gl';
+import {DeckGL, Layer, Widget, useWidget} from 'deck.gl';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
 import {gl} from '@deck.gl/test-utils';
@@ -159,6 +159,68 @@ test('DeckGL#props omitted are reset', t => {
           });
         }
       })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
+});
+
+class StrictModeWidget extends Widget<WidgetProps> {
+  placement: WidgetPlacement = 'top-left';
+  className = 'deck-strict-mode-widget';
+
+  constructor(props: WidgetProps = {}) {
+    super(props, Widget.defaultProps);
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {}
+}
+
+const StrictModeWidgetComponent = (props: WidgetProps) => {
+  useWidget(StrictModeWidget, props);
+  return null;
+};
+
+test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
+  const ref = createRef();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  let onLoadCalled = false;
+
+  act(() => {
+    root.render(
+      createElement(
+        StrictMode,
+        null,
+        createElement(
+          DeckGL,
+          {
+            initialViewState: TEST_VIEW_STATE,
+            ref,
+            width: 100,
+            height: 100,
+            gl: getMockContext(),
+            onLoad: () => {
+              if (onLoadCalled) {
+                return;
+              }
+              onLoadCalled = true;
+
+              const deck = ref.current?.deck;
+              t.ok(deck, 'DeckGL is initialized');
+              const widgets = deck?.props.widgets;
+              t.is(widgets?.length, 1, 'Only one widget instance remains after StrictMode remount');
+
+              act(() => {
+                root.render(null);
+              });
+              container.remove();
+              t.end();
+            }
+          },
+          createElement(StrictModeWidgetComponent, {id: 'strict-mode-widget'})
+        )
+      )
     );
   });
   t.ok(ref.current, 'DeckGL overlay is rendered.');
