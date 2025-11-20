@@ -325,8 +325,13 @@ export default class MapboxOverlay implements IControl {
     // Update viewManager with CSS pixel size
     // @ts-expect-error - accessing protected property
     this._deck.viewManager?.setProps({width: cssWidth, height: cssHeight});
-    // @ts-expect-error - accessing protected property
-    this._deck.layerManager?.activateViewport(this._deck.getViewports()[0]);
+
+    // Activate the viewport if one exists
+    const viewports = this._deck.getViewports();
+    if (viewports.length > 0) {
+      // @ts-expect-error - accessing protected property
+      this._deck.layerManager?.activateViewport(viewports[0]);
+    }
 
     // Request a redraw to ensure deck renders with the new size
     // This is especially important for DPR changes where the map may not immediately trigger a render
