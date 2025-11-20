@@ -298,7 +298,12 @@ export default class MapboxOverlay implements IControl {
     // Synchronize luma.gl's drawing buffer size tracking with the actual canvas dimensions
     // This is needed because in interleaved mode, deck shares the GL context with the map,
     // and the map controls the canvas size, but luma.gl needs to know about size changes
-    device?.canvasContext?.syncDrawingBufferSize(drawingBufferWidth, drawingBufferHeight);
+    if (device?.canvasContext) {
+      // @ts-ignore - directly updating internal state since canvas is externally managed
+      device.canvasContext.drawingBufferWidth = drawingBufferWidth;
+      // @ts-ignore
+      device.canvasContext.drawingBufferHeight = drawingBufferHeight;
+    }
 
     // Also sync CSS size for cssToDeviceRatio() to work correctly
     const cssWidth = canvas.clientWidth;
