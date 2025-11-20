@@ -45,6 +45,9 @@ export default class MapboxOverlay implements IControl {
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
+  private _resizeObserver?: ResizeObserver;
+  private _lastCanvasSize?: {width: number; height: number};
+  private _mapResizeHandler?: () => void;
 
   constructor(props: MapboxOverlayProps) {
     const {interleaved = false} = props;
@@ -141,15 +144,30 @@ export default class MapboxOverlay implements IControl {
         parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
         deviceProps: {
           createCanvasContext: {
-            autoResize: true,
-            useDevicePixels: false
+            autoResize: false
           }
         }
       })
     });
 
     map.on('styledata', this._handleStyleChange);
-    map.on('resize', this._handleInterleavedResize);
+    // Note: map.on('resize') doesn't provide dimensions, so we don't pass arguments
+    this._mapResizeHandler = () => this._handleInterleavedResize();
+    map.on('resize', this._mapResizeHandler);
+
+    // Watch for canvas size changes (including DPR changes)
+    // When DPR changes, the map adjusts canvas.width/height but doesn't fire 'resize' event
+    const canvas = map.getCanvas();
+    this._resizeObserver = new ResizeObserver(() => {
+      this._handleInterleavedResize();
+    });
+    try {
+      this._resizeObserver.observe(canvas, {box: 'device-pixel-content-box'});
+    } catch (e) {
+      // Fallback for Safari - use content-box
+      this._resizeObserver.observe(canvas, {box: 'content-box'});
+    }
+
     resolveLayers(map, this._deck, [], this._props.layers);
 
     return document.createElement('div');
@@ -188,7 +206,12 @@ export default class MapboxOverlay implements IControl {
 
   private _onRemoveInterleaved(map: Map): void {
     map.off('styledata', this._handleStyleChange);
-    map.off('resize', this._handleInterleavedResize);
+    if (this._mapResizeHandler) {
+      map.off('resize', this._mapResizeHandler);
+      this._mapResizeHandler = undefined;
+    }
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = undefined;
     resolveLayers(map, this._deck, this._props.layers, []);
     removeDeckInstance(map);
   }
@@ -246,20 +269,66 @@ export default class MapboxOverlay implements IControl {
   private _handleInterleavedResize = () => {
     if (!this._deck || !this._map) return;
 
+    // Wait for deck to be initialized before syncing sizes
+    // @ts-ignore - accessing private device property
+    if (!this._deck.device || !this._deck.isInitialized) {
+      return;
+    }
+
     const canvas = this._map.getCanvas();
     // @ts-ignore - accessing private device property
     const device = this._deck.device;
 
-    // Synchronize luma.gl's drawing buffer size tracking with the map's canvas
+    // IMPORTANT: In interleaved mode, the map controls the canvas size.
+    // Maplibre/Mapbox may keep canvas.width/height at CSS pixel dimensions,
+    // NOT device pixel dimensions. We should always use the actual canvas.width/height
+    // as the drawing buffer size, not the ResizeObserver's device pixel size.
+    const drawingBufferWidth = canvas.width;
+    const drawingBufferHeight = canvas.height;
+
+    // Skip if size hasn't changed
+    if (
+      this._lastCanvasSize?.width === drawingBufferWidth &&
+      this._lastCanvasSize?.height === drawingBufferHeight
+    ) {
+      return;
+    }
+    this._lastCanvasSize = {width: drawingBufferWidth, height: drawingBufferHeight};
+
+    // Synchronize luma.gl's drawing buffer size tracking with the actual canvas dimensions
     // This is needed because in interleaved mode, deck shares the GL context with the map,
     // and the map controls the canvas size, but luma.gl needs to know about size changes
-    device?.canvasContext?.syncDrawingBufferSize(canvas.width, canvas.height);
+    device?.canvasContext?.syncDrawingBufferSize(drawingBufferWidth, drawingBufferHeight);
 
-    // Update deck's internal size tracking (width, height, viewManager)
-    // @ts-ignore - _updateCanvasSize is private but needed for interleaved mode resize
-    this._deck._updateCanvasSize();
+    // Also sync CSS size for cssToDeviceRatio() to work correctly
+    const cssWidth = canvas.clientWidth;
+    const cssHeight = canvas.clientHeight;
+    if (device?.canvasContext) {
+      // @ts-ignore - cssWidth/cssHeight are public but TS doesn't see them
+      device.canvasContext.cssWidth = cssWidth;
+      // @ts-ignore
+      device.canvasContext.cssHeight = cssHeight;
+    }
 
-    // Note: No need to call redraw() - the map will trigger a render event which will cause deck to draw
+    // In interleaved mode, deck's width/height should be in CSS pixels
+    // The drawing buffer is in device pixels, and cssToDeviceRatio() provides the scaling
+    // @ts-expect-error - writing to readonly property
+    this._deck.width = cssWidth;
+    // @ts-expect-error - writing to readonly property
+    this._deck.height = cssHeight;
+
+    // Update viewManager with CSS pixel size
+    // @ts-expect-error - accessing protected property
+    this._deck.viewManager?.setProps({width: cssWidth, height: cssHeight});
+    // @ts-expect-error - accessing protected property
+    this._deck.layerManager?.activateViewport(this._deck.getViewports()[0]);
+
+    // Request a redraw to ensure deck renders with the new size
+    // This is especially important for DPR changes where the map may not immediately trigger a render
+    this._deck.redraw();
+
+    // Also trigger the map to repaint to fix white-out issue
+    this._map.triggerRepaint();
   };
 
   private _updateContainerSize = () => {
