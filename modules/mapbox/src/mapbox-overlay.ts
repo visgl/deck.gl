@@ -140,12 +140,16 @@ export default class MapboxOverlay implements IControl {
         gl,
         parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
         deviceProps: {
-          createCanvasContext: {autoResize: true}
+          createCanvasContext: {
+            autoResize: true,
+            useDevicePixels: false
+          }
         }
       })
     });
 
     map.on('styledata', this._handleStyleChange);
+    map.on('resize', this._handleInterleavedResize);
     resolveLayers(map, this._deck, [], this._props.layers);
 
     return document.createElement('div');
@@ -184,6 +188,7 @@ export default class MapboxOverlay implements IControl {
 
   private _onRemoveInterleaved(map: Map): void {
     map.off('styledata', this._handleStyleChange);
+    map.off('resize', this._handleInterleavedResize);
     resolveLayers(map, this._deck, this._props.layers, []);
     removeDeckInstance(map);
   }
@@ -236,6 +241,29 @@ export default class MapboxOverlay implements IControl {
     if (projection && !this._props.views) {
       this._deck?.setProps({views: getDefaultView(this._map)});
     }
+  };
+
+  private _handleInterleavedResize = () => {
+    if (!this._deck || !this._map) return;
+
+    const canvas = this._map.getCanvas();
+    // @ts-ignore - accessing private device property
+    const device = this._deck.device;
+
+    // Manually synchronize the drawing buffer size with the map's canvas
+    // This is needed because in interleaved mode, deck shares the GL context with the map
+    // and both need to agree on the drawing buffer dimensions
+    if (device?.canvasContext) {
+      device.canvasContext.drawingBufferWidth = canvas.width;
+      device.canvasContext.drawingBufferHeight = canvas.height;
+    }
+
+    // Update deck's internal size tracking
+    // @ts-ignore - _updateCanvasSize is private but needed for interleaved mode resize
+    this._deck._updateCanvasSize();
+
+    // Trigger a redraw with the new size
+    this._deck.redraw();
   };
 
   private _updateContainerSize = () => {
