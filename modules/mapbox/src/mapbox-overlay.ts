@@ -250,20 +250,16 @@ export default class MapboxOverlay implements IControl {
     // @ts-ignore - accessing private device property
     const device = this._deck.device;
 
-    // Manually synchronize the drawing buffer size with the map's canvas
-    // This is needed because in interleaved mode, deck shares the GL context with the map
-    // and both need to agree on the drawing buffer dimensions
-    if (device?.canvasContext) {
-      device.canvasContext.drawingBufferWidth = canvas.width;
-      device.canvasContext.drawingBufferHeight = canvas.height;
-    }
+    // Synchronize luma.gl's drawing buffer size tracking with the map's canvas
+    // This is needed because in interleaved mode, deck shares the GL context with the map,
+    // and the map controls the canvas size, but luma.gl needs to know about size changes
+    device?.canvasContext?.syncDrawingBufferSize(canvas.width, canvas.height);
 
-    // Update deck's internal size tracking
+    // Update deck's internal size tracking (width, height, viewManager)
     // @ts-ignore - _updateCanvasSize is private but needed for interleaved mode resize
     this._deck._updateCanvasSize();
 
-    // Trigger a redraw with the new size
-    this._deck.redraw();
+    // Note: No need to call redraw() - the map will trigger a render event which will cause deck to draw
   };
 
   private _updateContainerSize = () => {
