@@ -16,6 +16,9 @@ export default class Map extends Evented {
     super();
 
     this._container = document.createElement('div');
+    this._canvas = document.createElement('canvas');
+    this._canvas.width = 800;
+    this._canvas.height = 600;
     this.options = options;
     this.version = options.version;
     this.style = new Style(options.style);
@@ -37,6 +40,14 @@ export default class Map extends Evented {
 
   getContainer() {
     return this._container;
+  }
+
+  getCanvas() {
+    return this._canvas;
+  }
+
+  getPixelRatio() {
+    return 1;
   }
 
   getCenter() {
