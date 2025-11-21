@@ -146,7 +146,7 @@ flat out vec2 values;
 flat out vec3 values;
 #endif
 
-const float NAN = intBitsToFloat(-1);
+const float NAN = 0.0 / 0.0;
 
 void main() {
   int row = gl_VertexID / SAMPLER_WIDTH;
