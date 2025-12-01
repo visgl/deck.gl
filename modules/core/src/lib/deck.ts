@@ -490,7 +490,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
     if (this.device?.canvasContext && this.device?.canvasContext.props.autoResize === false) {
       const {width, height} = this.device.canvasContext.canvas;
-      this.device.canvasContext?.setDrawingBufferSize(width, height);
+      // Manually sync drawing buffer dimensions without modifying canvas
+      // This tests if direct property access fixes DPR changes in interleaved mode
+      // @ts-ignore - accessing public properties to sync state
+      this.device.canvasContext.drawingBufferWidth = width;
+      // @ts-ignore
+      this.device.canvasContext.drawingBufferHeight = height;
     }
 
     // If initialized, update sub manager props
