@@ -227,7 +227,7 @@ export default class VectorTileLayer<
     }
 
     // Sort layers so that label layers are rendered after the main layer
-    const validLayers = layers.flat().filter(Boolean) as Layer[];
+    const validLayers = (layers || []).flat().filter(Boolean) as Layer[];
     validLayers.sort((a: Layer, b: Layer) => {
       const aHasLabel = a.id.includes('labels');
       const bHasLabel = b.id.includes('labels');
