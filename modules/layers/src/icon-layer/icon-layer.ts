@@ -46,7 +46,7 @@ type _IconLayerProps<DataT> = {
   /**
    * The dimension to scale the image
    */
-  sizeBasis: 'height' | 'width';
+  sizeBasis?: 'height' | 'width';
   /**
    * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
    */
