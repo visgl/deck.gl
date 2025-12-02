@@ -25,10 +25,16 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE = 'mapbox://styles/mapbox/light-v9';
+
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);
   return null;
+}
+
+function getTooltip({object}) {
+  if (!object) return null;
+  return object.properties?.name || 'Unknown';
 }
 
 function Root() {
@@ -80,7 +86,7 @@ function Root() {
           {selected.properties.name} ({selected.properties.abbrev})
         </Popup>
       )}
-      <DeckGLOverlay layers={layers} /* interleaved*/ />
+      <DeckGLOverlay layers={layers} interleaved getTooltip={getTooltip} />
       <NavigationControl position="top-left" />
     </Map>
   );
