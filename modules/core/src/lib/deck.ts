@@ -382,6 +382,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
             height: canvasContext.canvas.height
           });
           // Manually sync drawing buffer dimensions (canvas is externally managed)
+          // TODO(v9.3): Use canvasContext.setDrawingBufferSize(width, height) when upgrading to luma 9.3+
           const {width, height} = canvasContext.canvas;
           // @ts-ignore - accessing public properties to sync state
           canvasContext.drawingBufferWidth = width;
@@ -398,6 +399,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
             height: canvasContext.canvas.height
           });
           // Manually sync drawing buffer dimensions (DPR change affects canvas size)
+          // TODO(v9.3): Use canvasContext.setDrawingBufferSize(width, height) when upgrading to luma 9.3+
           const {width, height} = canvasContext.canvas;
           // @ts-ignore - accessing public properties to sync state
           canvasContext.drawingBufferWidth = width;
@@ -525,10 +527,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     if (props.useDevicePixels !== undefined && this.device?.canvasContext) {
       this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
-    }
-    if (this.device?.canvasContext && this.device?.canvasContext.props.autoResize === false) {
-      const {width, height} = this.device.canvasContext.canvas;
-      this.device.canvasContext?.setDrawingBufferSize(width, height);
     }
 
     // If initialized, update sub manager props
