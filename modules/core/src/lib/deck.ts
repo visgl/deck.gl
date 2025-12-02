@@ -867,7 +867,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
-    // Preserve user's callbacks
+    // Preserve user's onResize callback
     const userOnResize = this.props.deviceProps?.onResize;
 
     // Create the "best" device supported from the registered adapters
