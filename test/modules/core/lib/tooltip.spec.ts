@@ -116,12 +116,13 @@ test('TooltipWidget#onViewportChange', t => {
     zoom: 12
   };
 
-  // Create initial viewport and simulate showing tooltip
-  const viewport1 = new WebMercatorViewport(viewportOptions);
+  // Simulate showing tooltip and initial viewport from render loop
   tooltip.setTooltip('Test tooltip', 100, 100);
-  tooltip.lastViewport = viewport1;
+  const viewport1 = new WebMercatorViewport(viewportOptions);
+  tooltip.onViewportChange(viewport1);
 
   t.equals(tooltip.isVisible, true, 'Tooltip is visible');
+  t.equals(tooltip.lastViewport, viewport1, 'lastViewport is set');
 
   // Create new viewport with same properties (simulates redraw without camera change)
   const viewport2 = new WebMercatorViewport(viewportOptions);
@@ -131,6 +132,7 @@ test('TooltipWidget#onViewportChange', t => {
   // onViewportChange should NOT clear the tooltip when viewports are equal by value
   tooltip.onViewportChange(viewport2);
   t.equals(tooltip.isVisible, true, 'Tooltip remains visible when viewport is equal');
+  t.equals(tooltip.lastViewport, viewport2, 'lastViewport is updated');
 
   // Create viewport with different camera position
   const viewport3 = new WebMercatorViewport({...viewportOptions, longitude: -122.5});
@@ -139,56 +141,6 @@ test('TooltipWidget#onViewportChange', t => {
   // onViewportChange SHOULD clear tooltip when camera moves
   tooltip.onViewportChange(viewport3);
   t.equals(tooltip.isVisible, false, 'Tooltip is hidden when camera moves');
-
-  widgetManager.finalize();
-  t.end();
-});
-
-test('TooltipWidget#onViewportChange skips comparison after onHover', t => {
-  const {widgetManager, tooltip} = setupTest();
-
-  const viewportOptions = {
-    width: 800,
-    height: 600,
-    longitude: -122.45,
-    latitude: 37.78,
-    zoom: 12
-  };
-
-  // Simulate the real-world scenario where onHover sets a viewport from picking
-  // and onViewportChange receives a different viewport object from the render loop
-  const pickingViewport = new WebMercatorViewport(viewportOptions);
-  const renderViewport = new WebMercatorViewport({
-    ...viewportOptions,
-    // Slightly different near/far planes as happens in interleaved mapbox mode
-    near: 0.1,
-    far: 1000
-  });
-
-  // These viewports will NOT be equal due to different projection matrices
-  t.notOk(pickingViewport.equals(renderViewport), 'Picking and render viewports are not equal');
-
-  // Simulate onHover being called (sets _skipNextViewportCompare flag)
-  tooltip.setTooltip('Test tooltip', 100, 100);
-  tooltip.lastViewport = pickingViewport;
-  // @ts-ignore - accessing private property for testing
-  tooltip._skipNextViewportCompare = true;
-
-  t.equals(tooltip.isVisible, true, 'Tooltip is visible after hover');
-
-  // First onViewportChange after hover should skip comparison and update lastViewport
-  tooltip.onViewportChange(renderViewport);
-  t.equals(tooltip.isVisible, true, 'Tooltip remains visible (comparison skipped)');
-  t.equals(tooltip.lastViewport, renderViewport, 'lastViewport updated to render viewport');
-
-  // Subsequent onViewportChange with same viewport should not clear tooltip
-  const renderViewport2 = new WebMercatorViewport({
-    ...viewportOptions,
-    near: 0.1,
-    far: 1000
-  });
-  tooltip.onViewportChange(renderViewport2);
-  t.equals(tooltip.isVisible, true, 'Tooltip remains visible when render viewports are equal');
 
   widgetManager.finalize();
   t.end();

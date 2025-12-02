@@ -43,8 +43,6 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
 
   isVisible: boolean = false;
   lastViewport?: Viewport;
-  /** Flag to skip viewport comparison after hover sets a new viewport from a different source */
-  private _skipNextViewportCompare: boolean = false;
 
   constructor(props: TooltipWidgetProps = {}) {
     super(props);
@@ -62,14 +60,6 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {}
 
   onViewportChange(viewport: Viewport) {
-    // Skip the comparison if flagged (after onHover set viewport from picking).
-    // This avoids false positives when comparing viewports from different sources.
-    if (this._skipNextViewportCompare) {
-      this._skipNextViewportCompare = false;
-      this.lastViewport = viewport;
-      return;
-    }
-
     if (
       this.isVisible &&
       viewport.id === this.lastViewport?.id &&
@@ -78,10 +68,9 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
       // Camera has moved, clear tooltip
       this.setTooltip(null);
     }
-    // Update lastViewport for next comparison
-    if (this.lastViewport && viewport.id === this.lastViewport.id) {
-      this.lastViewport = viewport;
-    }
+    // Always update lastViewport from the render loop to ensure consistent
+    // viewport source for comparisons (avoids mismatches with picking viewports)
+    this.lastViewport = viewport;
   }
 
   onHover(info: PickingInfo) {
@@ -91,10 +80,6 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
       return;
     }
     const displayInfo = getTooltip(info);
-    // Flag to skip the next viewport comparison since info.viewport (from picking)
-    // may differ from the viewport passed to onViewportChange (from render loop)
-    this._skipNextViewportCompare = true;
-    this.lastViewport = info.viewport;
     this.setTooltip(displayInfo, info.x, info.y);
   }
 
