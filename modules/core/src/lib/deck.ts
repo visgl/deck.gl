@@ -346,6 +346,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfo: PickingInfo | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
+    console.log('[deck] Deck instance initializing - LOCAL BUILD with DPR fix logs');
     // @ts-ignore views
     this.props = {...defaultProps, ...props};
     props = this.props;
@@ -490,6 +491,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
     if (this.device?.canvasContext && this.device?.canvasContext.props.autoResize === false) {
       const {width, height} = this.device.canvasContext.canvas;
+      console.log('[deck] Manually syncing drawing buffer:', {
+        canvasWidth: width,
+        canvasHeight: height,
+        prevDrawingBufferWidth: this.device.canvasContext.drawingBufferWidth,
+        prevDrawingBufferHeight: this.device.canvasContext.drawingBufferHeight
+      });
       // Manually sync drawing buffer dimensions without modifying canvas
       // This tests if direct property access fixes DPR changes in interleaved mode
       // @ts-ignore - accessing public properties to sync state
@@ -859,8 +866,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
-    // Preserve user's onResize callback
+    // Preserve user's callbacks
     const userOnResize = this.props.deviceProps?.onResize;
+    const userOnDevicePixelRatioChange = this.props.deviceProps?.onDevicePixelRatioChange;
 
     // Create the "best" device supported from the registered adapters
     return luma.createDevice({
@@ -880,11 +888,38 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         autoResize: true
       },
       onResize: (canvasContext, info) => {
+        console.log('[deck] onResize callback fired:', {
+          cssWidth: canvasContext.cssWidth,
+          cssHeight: canvasContext.cssHeight,
+          devicePixelWidth: canvasContext.devicePixelWidth,
+          devicePixelHeight: canvasContext.devicePixelHeight,
+          drawingBufferWidth: canvasContext.drawingBufferWidth,
+          drawingBufferHeight: canvasContext.drawingBufferHeight,
+          canvasWidth: canvasContext.canvas.width,
+          canvasHeight: canvasContext.canvas.height,
+          info
+        });
         // Set redraw flag when luma.gl's CanvasContext detects a resize
         // This restores pre-9.2 behavior where resize automatically triggered redraws
         this._needsRedraw = 'Canvas resized';
         // Call user's onResize if provided
         userOnResize?.(canvasContext, info);
+      },
+      onDevicePixelRatioChange: (canvasContext, info) => {
+        console.log('[deck] onDevicePixelRatioChange callback fired:', {
+          devicePixelRatio: canvasContext.devicePixelRatio,
+          cssWidth: canvasContext.cssWidth,
+          cssHeight: canvasContext.cssHeight,
+          devicePixelWidth: canvasContext.devicePixelWidth,
+          devicePixelHeight: canvasContext.devicePixelHeight,
+          drawingBufferWidth: canvasContext.drawingBufferWidth,
+          drawingBufferHeight: canvasContext.drawingBufferHeight,
+          canvasWidth: canvasContext.canvas.width,
+          canvasHeight: canvasContext.canvas.height,
+          info
+        });
+        this._needsRedraw = 'Device pixel ratio changed';
+        userOnDevicePixelRatioChange?.(canvasContext, info);
       }
     });
   }
