@@ -8,7 +8,8 @@ import {StrictMode, createElement, createRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {act} from 'react-dom/test-utils';
 
-import {DeckGL, Layer, Widget, useWidget} from 'deck.gl';
+import {DeckGL, Layer, Widget} from 'deck.gl';
+import {useWidget} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
 import {gl} from '@deck.gl/test-utils';
