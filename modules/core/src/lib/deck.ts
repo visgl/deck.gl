@@ -369,7 +369,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
-      deviceOrPromise = webgl2Adapter.attach(props.gl, this.props.deviceProps);
+      // Preserve user's callbacks and add resize handling
+      const userOnResize = this.props.deviceProps?.onResize;
+
+      deviceOrPromise = webgl2Adapter.attach(props.gl, {
+        ...this.props.deviceProps,
+        onResize: (canvasContext, info) => {
+          // Manually sync drawing buffer dimensions (canvas is externally managed)
+          // TODO(v9.3): Use canvasContext.setDrawingBufferSize(width, height) when upgrading to luma 9.3+
+          const {width, height} = canvasContext.canvas;
+          // @ts-ignore - accessing public properties to sync state
+          canvasContext.drawingBufferWidth = width;
+          // @ts-ignore
+          canvasContext.drawingBufferHeight = height;
+
+          this._needsRedraw = 'Canvas resized';
+          userOnResize?.(canvasContext, info);
+        }
+      });
     }
 
     // Create a new device
@@ -487,10 +504,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     if (props.useDevicePixels !== undefined && this.device?.canvasContext) {
       this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
-    }
-    if (this.device?.canvasContext && this.device?.canvasContext.props.autoResize === false) {
-      const {width, height} = this.device.canvasContext.canvas;
-      this.device.canvasContext?.setDrawingBufferSize(width, height);
     }
 
     // If initialized, update sub manager props
