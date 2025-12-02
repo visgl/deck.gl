@@ -485,23 +485,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
-    if (
-      props.useDevicePixels !== undefined &&
-      this.device?.canvasContext?.canvas instanceof HTMLCanvasElement
-    ) {
-      // TODO: It would be much cleaner if CanvasContext had a setProps method
-      this.device.canvasContext.props.useDevicePixels = props.useDevicePixels;
-      const canvas = this.device.canvasContext.canvas;
-      const entry = {
-        target: canvas,
-        contentBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}],
-        devicePixelContentBoxSize: [
-          {inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}
-        ],
-        borderBoxSize: [{inlineSize: canvas.clientWidth, blockSize: canvas.clientHeight}]
-      };
-      // Access the protected _handleResize method through the canvas context
-      (this.device.canvasContext as any)._handleResize([entry]);
+    if (props.useDevicePixels !== undefined && this.device?.canvasContext) {
+      this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
+    }
+    if (this.device?.canvasContext && this.device?.canvasContext.props.autoResize === false) {
+      const {width, height} = this.device.canvasContext.canvas;
+      this.device.canvasContext?.setDrawingBufferSize(width, height);
     }
 
     // If initialized, update sub manager props
@@ -865,6 +854,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
+    // Preserve user's onResize callback
+    const userOnResize = this.props.deviceProps?.onResize;
+
     // Create the "best" device supported from the registered adapters
     return luma.createDevice({
       // luma by default throws if a device is already attached
@@ -881,6 +873,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         canvas: this._createCanvas(props),
         useDevicePixels: this.props.useDevicePixels,
         autoResize: true
+      },
+      onResize: (canvasContext, info) => {
+        // Set redraw flag when luma.gl's CanvasContext detects a resize
+        // This restores pre-9.2 behavior where resize automatically triggered redraws
+        this._needsRedraw = 'Canvas resized';
+        // Call user's onResize if provided
+        userOnResize?.(canvasContext, info);
       }
     });
   }
