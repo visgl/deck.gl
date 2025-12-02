@@ -138,10 +138,10 @@ export default class MapboxOverlay implements IControl {
       deck: new Deck({
         ...this._props,
         gl,
-        parameters: {...getDefaultParameters(map, true), ...this._props.parameters},
-        deviceProps: {
-          createCanvasContext: {autoResize: true}
-        }
+        parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
+        // Note: No need to set deviceProps.createCanvasContext.autoResize here
+        // The attach() method in deck.ts will automatically set autoResize: false
+        // for externally managed contexts and add the necessary resize callbacks
       })
     });
 
