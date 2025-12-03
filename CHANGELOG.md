@@ -19,6 +19,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.3] - Dec 3 2025
+
+- Fix DPR changes in interleaved mode by leveraging onResize callback (#9887)
+- fix(core): Correctly resize drawing buffer on resize (#9886)
+- Refactor GeohashLayerProps to extend GeoCellLayerProps (#9875)
+- fix(carto): VectorTileLayer guard against null layers (#9885)
+- Fix: Make sizeBasis optional in IconLayer type definition (#9883)
+- Fix interleaved overlay default parameters (#9871)
+- fix: Remove widget src import (#9833)
+
 #### deck.gl [v9.2.2] - Oct 16 2025
 
 - chore: tighten peerDependency range to patch (#9821)
