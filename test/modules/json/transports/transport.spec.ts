@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import Transport from '@deck.gl/json/transports/transport';
+import {Transport} from '@deck.gl/json';
 
 test('delayed onInitialized()', t => {
   Transport.setCallbacks({

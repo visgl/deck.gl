@@ -4,7 +4,7 @@
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-promise/tape';
-import parseExpressionString from '@deck.gl/json/helpers/parse-expression-string';
+import {_parseExpressionString as parseExpressionString} from '@deck.gl/json';
 
 const row = Object.freeze({
   foo: {

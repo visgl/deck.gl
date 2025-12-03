@@ -38,7 +38,7 @@ function extractElements(library = {}, filter) {
 }
 
 // Handle JSONConverter and loaders configuration
-const jsonConverterConfiguration = {
+const JSON_CONVERTER_CONFIGURATION = {
   classes: extractElements(deckExports, classesFilter),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
@@ -50,7 +50,7 @@ const jsonConverterConfiguration = {
 registerLoaders([CSVLoader]);
 
 const jsonConverter = new JSONConverter({
-  configuration: jsonConverterConfiguration
+  configuration: JSON_CONVERTER_CONFIGURATION
 });
 
 function addModuleToConverter(module, converter) {
