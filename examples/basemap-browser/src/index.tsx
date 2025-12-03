@@ -21,19 +21,27 @@ let currentMapRoot: Root | null = null;
 
 // Load an example into the map div
 function loadExample(example: BasemapExample, interleaved: boolean) {
-  // Clean up previous
-  if (currentMapCleanup) {
-    currentMapCleanup();
-    currentMapCleanup = null;
-  }
-  if (currentMapRoot) {
-    currentMapRoot.unmount();
-    currentMapRoot = null;
-  }
+  // Defer cleanup to avoid synchronous unmount during React render
+  setTimeout(() => {
+    // Clean up previous
+    if (currentMapCleanup) {
+      currentMapCleanup();
+      currentMapCleanup = null;
+    }
+    if (currentMapRoot) {
+      currentMapRoot.unmount();
+      currentMapRoot = null;
+    }
 
-  // Clear the map div
-  mapDiv.innerHTML = '';
+    // Clear the map div
+    mapDiv.innerHTML = '';
 
+    // Mount new example
+    mountExample(example, interleaved);
+  }, 0);
+}
+
+function mountExample(example: BasemapExample, interleaved: boolean) {
   // Mount new example
   if (example.framework === 'pure-js') {
     // Pure JS mounts directly, no React involved
