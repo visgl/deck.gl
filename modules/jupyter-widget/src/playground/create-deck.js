@@ -15,6 +15,7 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
+import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
 import {addSupportComponents} from '../lib/components/index';
 
@@ -137,7 +138,8 @@ function createStandaloneFromProvider({
   handleEvent,
   getTooltip,
   container,
-  onError
+  onError,
+  mapProjection
 }) {
   // Common deck.gl props for all basemaos
   const handlers = handleEvent
@@ -188,6 +190,14 @@ function createStandaloneFromProvider({
         ...props,
         googleMapsKey
       });
+    case 'maplibre':
+      log.info('Using MapLibre')();
+      return createMapLibreDeckOverlay({
+        ...sharedProps,
+        ...props,
+        mapStyle: props.mapStyle,
+        mapProjection
+      });
     default:
       log.info('No recognized map provider specified')();
       return new DeckGL({
@@ -208,7 +218,8 @@ function createDeck({
   handleEvent,
   customLibraries,
   configuration,
-  showError
+  showError,
+  mapProjection
 }) {
   let deckgl;
   const onError = e => {
@@ -253,7 +264,8 @@ function createDeck({
       handleEvent,
       getTooltip,
       container,
-      onError
+      onError,
+      mapProjection
     });
 
     const onComplete = () => {

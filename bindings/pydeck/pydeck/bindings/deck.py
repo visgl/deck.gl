@@ -45,6 +45,7 @@ class Deck(JSONMixin):
         parameters=None,
         widgets=None,
         show_error=False,
+        map_projection=None,
     ):
         """This is the renderer and configuration for a deck.gl visualization, similar to the
         `Deck <https://deck.gl/docs/api-reference/core/deck>`_ class from deck.gl.
@@ -63,7 +64,7 @@ class Deck(JSONMixin):
             ``MAPBOX_API_KEY``, ``GOOGLE_MAPS_API_KEY``, and ``CARTO_API_KEY`` can be set instead of hardcoding the key here.
         map_provider : str, default 'carto'
             If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which basemap provider to prefer.
-            Values can be ``carto``, ``mapbox`` or ``google_maps``
+            Values can be ``carto``, ``mapbox``, ``google_maps``, or ``maplibre``.
         map_style : str or dict, default 'dark'
             One of 'light', 'dark', 'road', 'satellite', 'dark_no_labels', and 'light_no_labels', a URI for a basemap
             style, which varies by provider, or a dict that follows the Mapbox style `specification <https://docs.mapbox.com/mapbox-gl-js/style-spec/>`_.
@@ -87,6 +88,10 @@ class Deck(JSONMixin):
         show_error : bool, default False
             If ``True``, will display the error in the rendered output.
             Otherwise, will only show error in browser console.
+        map_projection : str, default None
+            Map projection to use with ``map_provider='maplibre'``.
+            Values can be ``'globe'`` or ``'mercator'``. Defaults to ``'mercator'`` if not specified.
+            Only supported with ``map_provider='maplibre'``.
 
         .. _Deck:
             https://deck.gl/docs/api-reference/core/deck
@@ -108,6 +113,7 @@ class Deck(JSONMixin):
         self.description = description
         self.effects = effects
         self.map_provider = str(map_provider).lower() if map_provider else None
+        self.map_projection = map_projection
         self._tooltip = tooltip
         self._show_error = show_error
 
@@ -243,6 +249,7 @@ class Deck(JSONMixin):
             as_string=as_string,
             offline=offline,
             show_error=self._show_error,
+            map_projection=self.map_projection,
             **kwargs,
         )
         return f
