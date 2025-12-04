@@ -39,7 +39,21 @@ function extractElements(library = {}, filter) {
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractElements(deckExports, classesFilter),
+  classes: {
+    ...extractElements(deckExports, classesFilter),
+    // Add experimental widgets (exported with _ prefix)
+    FpsWidget: deckExports._FpsWidget,
+    StatsWidget: deckExports._StatsWidget,
+    ScaleWidget: deckExports._ScaleWidget,
+    GeocoderWidget: deckExports._GeocoderWidget,
+    SplitterWidget: deckExports._SplitterWidget,
+    ViewSelectorWidget: deckExports._ViewSelectorWidget,
+    InfoWidget: deckExports._InfoWidget,
+    ContextMenuWidget: deckExports._ContextMenuWidget,
+    TimelineWidget: deckExports._TimelineWidget,
+    ThemeWidget: deckExports._ThemeWidget,
+    LoadingWidget: deckExports._LoadingWidget
+  },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
