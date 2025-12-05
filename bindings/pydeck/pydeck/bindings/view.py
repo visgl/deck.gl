@@ -25,6 +25,7 @@ class View(JSONMixin):
 
         Example to disable scroll zoom::
 
+            view = pdk.View('MapView', {'scrollZoom': False}) # or
             view = pdk.View(type='MapView', controller={'scrollZoom': False})
 
     **kwargs
