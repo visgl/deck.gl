@@ -89,10 +89,9 @@ widgets = [
 
     # Splitter widget to adjust view sizes
     pdk.Widget('SplitterWidget',
-        view_id1='left-map',
-        view_id2='right-map',
-        orientation='vertical'
-    )
+               view_id1='left-map',
+               view_id2='right-map',
+               orientation='vertical')
 ]
 
 # Create deck with multiple views
