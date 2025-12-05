@@ -86,16 +86,6 @@ widgets = [
 
     # Global widgets (not tied to a specific view)
     pdk.Widget('ScaleWidget', placement='bottom-right'),
-    pdk.Widget('InfoWidget', mode='hover'),
-    pdk.Widget('InfoWidget', mode='click'),
-    pdk.Widget('ContextMenuWidget'),
-    pdk.Widget('TimelineWidget',
-        placement='bottom-left',
-        time_range=[0, 24],
-        step=1,
-        initial_time=0,
-        play_interval=1000
-    ),
 
     # Splitter widget to adjust view sizes
     pdk.Widget('SplitterWidget',

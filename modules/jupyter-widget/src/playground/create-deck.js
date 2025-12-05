@@ -47,10 +47,7 @@ const jsonConverterConfiguration = {
     ScaleWidget: deckExports._ScaleWidget,
     GeocoderWidget: deckExports._GeocoderWidget,
     SplitterWidget: deckExports._SplitterWidget,
-    ViewSelectorWidget: deckExports._ViewSelectorWidget,
     InfoWidget: deckExports._InfoWidget,
-    ContextMenuWidget: deckExports._ContextMenuWidget,
-    TimelineWidget: deckExports._TimelineWidget,
     ThemeWidget: deckExports._ThemeWidget,
     LoadingWidget: deckExports._LoadingWidget
   },
