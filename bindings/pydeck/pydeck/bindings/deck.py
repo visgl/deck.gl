@@ -249,7 +249,6 @@ class Deck(JSONMixin):
             as_string=as_string,
             offline=offline,
             show_error=self._show_error,
-            map_projection=self.map_projection,
             **kwargs,
         )
         return f

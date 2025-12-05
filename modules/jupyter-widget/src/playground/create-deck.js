@@ -128,15 +128,13 @@ function missingProps(oldProps, newProps) {
 }
 
 function createStandaloneFromProvider({
-  mapProvider,
   props,
   mapboxApiKey,
   googleMapsKey,
   handleEvent,
   getTooltip,
   container,
-  onError,
-  mapProjection
+  onError
 }) {
   // Common deck.gl props for all basemaos
   const handlers = handleEvent
@@ -163,7 +161,7 @@ function createStandaloneFromProvider({
     container
   };
 
-  switch (mapProvider) {
+  switch (props.mapProvider) {
     case 'mapbox':
       log.info('Using Mapbox base maps')();
       return new DeckGL({
@@ -191,9 +189,7 @@ function createStandaloneFromProvider({
       log.info('Using MapLibre')();
       return createMapLibreDeckOverlay({
         ...sharedProps,
-        ...props,
-        mapStyle: props.mapStyle,
-        mapProjection
+        ...props
       });
     default:
       log.info('No recognized map provider specified')();
@@ -215,8 +211,7 @@ function createDeck({
   handleEvent,
   customLibraries,
   configuration,
-  showError,
-  mapProjection
+  showError
 }) {
   let deckgl;
   const onError = e => {
@@ -251,18 +246,15 @@ function createDeck({
     const layersToLoad = missingProps(oldLayers, convertedLayers);
     const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
     const getTooltip = makeTooltip(tooltip);
-    const {mapProvider} = props;
 
     deckgl = createStandaloneFromProvider({
-      mapProvider,
       props,
       mapboxApiKey,
       googleMapsKey,
       handleEvent,
       getTooltip,
       container,
-      onError,
-      mapProjection
+      onError
     });
 
     const onComplete = () => {

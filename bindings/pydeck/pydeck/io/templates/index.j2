@@ -27,7 +27,6 @@
     const tooltip = {{tooltip}};
     const customLibraries = {{custom_libraries or 'null'}};
     const configuration = {{configuration or 'null'}};
-    const mapProjection = {{map_projection}};
 
     const deckInstance = createDeck({
       {% if mapbox_key %}
@@ -41,7 +40,6 @@
       tooltip,
       customLibraries,
       configuration,
-      mapProjection,
       {% if show_error %}
       showError: true,
       {% endif %}

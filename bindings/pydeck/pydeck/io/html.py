@@ -65,15 +65,10 @@ def render_json_to_html(
     configuration=None,
     offline=False,
     show_error=False,
-    map_projection=None,
 ):
     js = j2_env.get_template("index.j2")
     css = j2_env.get_template("style.j2")
     css_text = css.render(css_background_color=css_background_color)
-
-    # Convert map_projection to JSON string
-    import json
-    map_projection_json = json.dumps(map_projection) if map_projection else 'null'
 
     html_str = js.render(
         mapbox_key=mapbox_key,
@@ -86,7 +81,6 @@ def render_json_to_html(
         custom_libraries=custom_libraries,
         configuration=configuration,
         show_error=show_error,
-        map_projection=map_projection_json,
     )
     return html_str
 
@@ -145,7 +139,6 @@ def deck_to_html(
     as_string=False,
     offline=False,
     show_error=False,
-    map_projection=None,
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html_str = render_json_to_html(
@@ -158,7 +151,6 @@ def deck_to_html(
         configuration=configuration,
         offline=offline,
         show_error=show_error,
-        map_projection=map_projection,
     )
 
     if filename:
