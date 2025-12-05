@@ -60,10 +60,17 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {}
 
   onViewportChange(viewport: Viewport) {
-    if (this.isVisible && viewport.id === this.lastViewport?.id && viewport !== this.lastViewport) {
+    if (
+      this.isVisible &&
+      viewport.id === this.lastViewport?.id &&
+      !viewport.equals(this.lastViewport)
+    ) {
       // Camera has moved, clear tooltip
       this.setTooltip(null);
     }
+    // Always update lastViewport from the render loop to ensure consistent
+    // viewport source for comparisons (avoids mismatches with picking viewports)
+    this.lastViewport = viewport;
   }
 
   onHover(info: PickingInfo) {
@@ -73,7 +80,6 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
       return;
     }
     const displayInfo = getTooltip(info);
-    this.lastViewport = info.viewport;
     this.setTooltip(displayInfo, info.x, info.y);
   }
 
