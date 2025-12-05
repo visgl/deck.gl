@@ -69,7 +69,6 @@ def render_json_to_html(
     js = j2_env.get_template("index.j2")
     css = j2_env.get_template("style.j2")
     css_text = css.render(css_background_color=css_background_color)
-
     html_str = js.render(
         mapbox_key=mapbox_key,
         google_maps_key=google_maps_key,
