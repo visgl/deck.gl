@@ -42,7 +42,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps = {}) {
-    super(props);
+    super(props, FullscreenWidget.defaultProps);
     this.setProps(this.props);
   }
 
