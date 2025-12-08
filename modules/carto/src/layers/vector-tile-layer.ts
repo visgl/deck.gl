@@ -27,6 +27,8 @@ import {createPointsFromLines, createPointsFromPolygons} from './label-utils';
 import {createEmptyBinary} from '../utils';
 import PointLabelLayer from './point-label-layer';
 
+const MVT_BBOX: GeoBoundingBox = {west: 0, east: 1, south: 0, north: 1};
+
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
   autoLabels: false,
@@ -207,9 +209,8 @@ export default class VectorTileLayer<
       if (props.data.polygons && props.data.polygons.positions.value.length > 0) {
         labelData.points = createPointsFromPolygons(
           props.data.polygons,
-          tileBbox,
-          props,
-          this.state.mvt
+          this.state.mvt ? MVT_BBOX : tileBbox,
+          props
         );
       }
 
