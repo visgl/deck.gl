@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.4] - Dec 8 2025
+
+- pydeck: support Maplibre including Globe projection (#9896)
+- fix(carto): autoLabels support with formatTiles=mvt (#9900)
+- pydeck: Update to deck@9.2 (#9895)
+- fix(core): getTooltip disappears when autoHighlight: true and interleaved: true in MapboxOverlay (deck.gl) (#9889)
+
 #### deck.gl [v9.2.3] - Dec 3 2025
 
 - Fix DPR changes in interleaved mode by leveraging onResize callback (#9887)
