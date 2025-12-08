@@ -15,6 +15,7 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
+import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
 import {addSupportComponents} from '../lib/components/index';
 
@@ -127,7 +128,6 @@ function missingProps(oldProps, newProps) {
 }
 
 function createStandaloneFromProvider({
-  mapProvider,
   props,
   mapboxApiKey,
   googleMapsKey,
@@ -161,7 +161,7 @@ function createStandaloneFromProvider({
     container
   };
 
-  switch (mapProvider) {
+  switch (props.mapProvider) {
     case 'mapbox':
       log.info('Using Mapbox base maps')();
       return new DeckGL({
@@ -184,6 +184,12 @@ function createStandaloneFromProvider({
         ...sharedProps,
         ...props,
         googleMapsKey
+      });
+    case 'maplibre':
+      log.info('Using MapLibre')();
+      return createMapLibreDeckOverlay({
+        ...sharedProps,
+        ...props
       });
     default:
       log.info('No recognized map provider specified')();
@@ -240,10 +246,8 @@ function createDeck({
     const layersToLoad = missingProps(oldLayers, convertedLayers);
     const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
     const getTooltip = makeTooltip(tooltip);
-    const {mapProvider} = props;
 
     deckgl = createStandaloneFromProvider({
-      mapProvider,
       props,
       mapboxApiKey,
       googleMapsKey,
