@@ -8,6 +8,8 @@ type TileBBox = GeoBoundingBox;
 type Properties = BinaryPointFeature['properties'];
 type LineInfo = {index: number; length: number};
 
+const MVT_BBOX: TileBBox = {west: 0, east: 0, south: 0, north: 1};
+
 export function createPointsFromLines(
   lines: BinaryLineFeature,
   uniqueIdProperty?: string
@@ -70,11 +72,21 @@ export function createPointsFromLines(
 export function createPointsFromPolygons(
   polygons: Required<BinaryPolygonFeature>,
   tileBbox: TileBBox,
-  props: any
+  props: any,
+  isMVT: boolean = false
 ): BinaryPointFeature {
-  const {west, south, east, north} = tileBbox;
-  const tileArea = (east - west) * (north - south);
-  const minPolygonArea = tileArea * 0.0001; // 0.1% threshold
+  // Calculate tile area and minimum polygon area threshold
+  let tileArea: number;
+  let minPolygonArea: number;
+  if (isMVT) {
+    // For MVT, values are normalized to -0.0625 to 1.0625
+    minPolygonArea = 0.0001; // 0.01% threshold
+  } else {
+    // For lon/lat, use actual bbox
+    const {west, south, east, north} = tileBbox;
+    tileArea = (east - west) * (north - south);
+    minPolygonArea = tileArea * 0.0001; // 0.01% threshold
+  }
 
   const positions: number[] = [];
   const properties: Properties = [];
@@ -94,7 +106,8 @@ export function createPointsFromPolygons(
     const endIndex = polygons.polygonIndices.value[i + 1];
 
     // Skip small polygons
-    if (getPolygonArea(polygons, i) < minPolygonArea) {
+    const polygonArea = getPolygonArea(polygons, i);
+    if (polygonArea < minPolygonArea) {
       continue;
     }
 
@@ -147,7 +160,18 @@ export function createPointsFromPolygons(
     }
 
     const labelPoint = centroidIsInside ? centroid : largestTriangleCenter;
-    if (isPointInBounds(labelPoint, tileBbox)) {
+
+    // Check if point is within bounds
+    let inBounds: boolean;
+    if (isMVT) {
+      // For MVT, values are normalized to 0-1
+      inBounds =
+        labelPoint[0] >= 0 && labelPoint[0] <= 1 && labelPoint[1] >= 0 && labelPoint[1] <= 1;
+    } else {
+      inBounds = isPointInBounds(labelPoint, isMVT ? MVT_BBOX : tileBbox);
+    }
+
+    if (inBounds) {
       positions.push(...labelPoint);
       const featureId = polygons.featureIds.value[startIndex];
       if (extruded) {
@@ -196,7 +220,7 @@ function getPolygonArea(polygons: Required<BinaryPolygonFeature>, index: number)
   let triangleIndex = 0;
 
   // Find first triangle of this polygon
-  // Note: this assumes tirnagles and polygon indices are sorted.
+  // Note: this assumes triangles and polygon indices are sorted.
   // This is true for the current implementation of geojsonToBinary
   while (triangleIndex < triangles.length) {
     const i1 = triangles[triangleIndex];

@@ -205,7 +205,12 @@ export default class VectorTileLayer<
         ) as BinaryPointFeature;
       }
       if (props.data.polygons && props.data.polygons.positions.value.length > 0) {
-        labelData.points = createPointsFromPolygons(props.data.polygons, tileBbox, props);
+        labelData.points = createPointsFromPolygons(
+          props.data.polygons,
+          tileBbox,
+          props,
+          this.state.mvt
+        );
       }
 
       subLayers.push(
