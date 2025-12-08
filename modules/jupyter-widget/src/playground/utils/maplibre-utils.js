@@ -81,7 +81,7 @@ export function createMapLibreDeckOverlay({
   }
 
   // Expose setProps method to update layers
-  deckOverlay.setProps = function(props) {
+  deckOverlay.setProps = function (props) {
     if (props.layers) {
       deckOverlay.setProps({layers: props.layers});
     }
