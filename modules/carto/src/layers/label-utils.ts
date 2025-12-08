@@ -72,7 +72,6 @@ export function createPointsFromPolygons(
   tileBbox: TileBBox,
   props: any
 ): BinaryPointFeature {
-  // Calculate tile area and minimum polygon area threshold
   const {west, south, east, north} = tileBbox;
   const tileArea = (east - west) * (north - south);
   const minPolygonArea = tileArea * 0.0001; // 0.01% threshold
@@ -95,8 +94,7 @@ export function createPointsFromPolygons(
     const endIndex = polygons.polygonIndices.value[i + 1];
 
     // Skip small polygons
-    const polygonArea = getPolygonArea(polygons, i);
-    if (polygonArea < minPolygonArea) {
+    if (getPolygonArea(polygons, i) < minPolygonArea) {
       continue;
     }
 
@@ -149,8 +147,6 @@ export function createPointsFromPolygons(
     }
 
     const labelPoint = centroidIsInside ? centroid : largestTriangleCenter;
-
-    // Check if point is within bounds
     if (isPointInBounds(labelPoint, tileBbox)) {
       positions.push(...labelPoint);
       const featureId = polygons.featureIds.value[startIndex];
