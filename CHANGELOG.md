@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.5] - Dec 9 2025
+
+- chore: bump luma 9.2.4 (#9907)
+- fix(core): Enable shader and pipeline caching by default (#9863)
+- fix(carto): PointLabelLayer used with formatTiles=mvt (#9906)
+
 #### deck.gl [v9.2.4] - Dec 8 2025
 
 - pydeck: support Maplibre including Globe projection (#9896)
