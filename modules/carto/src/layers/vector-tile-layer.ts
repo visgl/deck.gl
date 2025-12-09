@@ -161,7 +161,14 @@ export default class VectorTileLayer<
     };
 
     if (this.state.mvt) {
-      subLayers.push(super.renderSubLayers(props) as GeoJsonLayer);
+      const subLayerProps = {
+        ...props,
+        _subLayerProps: {
+          ...props._subLayerProps,
+          ...defaultToPointLabelLayer
+        }
+      };
+      subLayers.push(super.renderSubLayers(subLayerProps) as GeoJsonLayer);
     } else {
       const {west, south, east, north} = tileBbox;
 
