@@ -27,6 +27,8 @@ import {createPointsFromLines, createPointsFromPolygons} from './label-utils';
 import {createEmptyBinary} from '../utils';
 import PointLabelLayer from './point-label-layer';
 
+const MVT_BBOX: GeoBoundingBox = {west: 0, east: 1, south: 0, north: 1};
+
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
   autoLabels: false,
@@ -205,7 +207,11 @@ export default class VectorTileLayer<
         ) as BinaryPointFeature;
       }
       if (props.data.polygons && props.data.polygons.positions.value.length > 0) {
-        labelData.points = createPointsFromPolygons(props.data.polygons, tileBbox, props);
+        labelData.points = createPointsFromPolygons(
+          props.data.polygons,
+          this.state.mvt ? MVT_BBOX : tileBbox,
+          props
+        );
       }
 
       subLayers.push(
@@ -227,7 +233,7 @@ export default class VectorTileLayer<
     }
 
     // Sort layers so that label layers are rendered after the main layer
-    const validLayers = layers.flat().filter(Boolean) as Layer[];
+    const validLayers = (layers || []).flat().filter(Boolean) as Layer[];
     validLayers.sort((a: Layer, b: Layer) => {
       const aHasLabel = a.id.includes('labels');
       const bHasLabel = b.id.includes('labels');
