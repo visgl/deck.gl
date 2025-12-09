@@ -546,6 +546,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         isPanning: true
       }
     );
+
+    // When there's no transition (duration = 0), immediately reset interaction state
+    // since _onTransitionEnd callback won't fire
+    if (!smooth) {
+      this._setInteractionState({isZooming: false, isPanning: false});
+    }
     return true;
   }
 
