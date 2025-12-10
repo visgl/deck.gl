@@ -96,8 +96,7 @@ export default class GlobeViewport extends Viewport {
     // Exagerate distance by latitude to match the Web Mercator distortion
     // The goal is that globe and web mercator projection results converge at high zoom
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
-    const _scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
-    const scaleAdjust = 1;
+    const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
     const scale = Math.pow(2, zoom) * scaleAdjust;
     const nearZ = opts.nearZ ?? nearZMultiplier;
     const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
@@ -239,8 +238,16 @@ export default class GlobeViewport extends Viewport {
   panByPosition(coords: number[], pixel: number[], startPixel: number[]): GlobeViewportOptions {
     const out = {
       longitude: coords[0] + 0.3 * (startPixel[0] - pixel[0]),
-      latitude: coords[1] - 0.3 * (startPixel[1] - pixel[1])
+      latitude: coords[1] - 0.3 * (startPixel[1] - pixel[1]),
+      zoom: 0
     };
+
+    const scaleAdjust = 1 / Math.PI / Math.cos((out.latitude * Math.PI) / 180);
+    const scale = Math.pow(2, out.zoom);
+    const adjustedScale = scale / scaleAdjust;
+    const adjustedZoom = Math.log2(adjustedScale);
+    out.zoom = adjustedZoom;
+
     return out;
   }
 }
