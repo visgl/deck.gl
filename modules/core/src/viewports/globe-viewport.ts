@@ -234,11 +234,15 @@ export default class GlobeViewport extends Viewport {
    * @param startPixel - the screen position where the pan started
    * @returns updated viewport options with new longitude/latitude
    */
-  panByPosition(coords: number[], pixel: number[], startPixel: number[]): GlobeViewportOptions {
-    const longitude = coords[0] + 0.3 * (startPixel[0] - pixel[0]);
-    let latitude = coords[1] - 0.3 * (startPixel[1] - pixel[1]);
+  panByPosition(
+    [startLng, startLat, startZoom]: number[],
+    pixel: number[],
+    startPixel: number[]
+  ): GlobeViewportOptions {
+    const longitude = startLng + 0.3 * (startPixel[0] - pixel[0]);
+    let latitude = startLat - 0.3 * (startPixel[1] - pixel[1]);
     latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
-    const out = {longitude, latitude, zoom: 0};
+    const out = {longitude, latitude, zoom: startZoom + zoomAdjust(startLat)};
     out.zoom -= zoomAdjust(out.latitude);
     return out;
   }

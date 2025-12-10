@@ -170,9 +170,9 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * Stores both the geographic coordinates and screen position at the start of the pan
    */
   panStart({pos}: {pos: [number, number]}): MapState {
-    const {latitude, longitude} = this.getViewportProps();
+    const {latitude, longitude, zoom} = this.getViewportProps();
     return this._getUpdatedState({
-      startPanLngLat: [longitude, latitude],
+      startPanLngLat: [longitude, latitude, zoom],
       startPanPos: pos
     });
   }
@@ -315,8 +315,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
 
     return this._getUpdatedState({
-      zoom,
-      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
+      zoom
+      //...zoomedViewport.panByPosition(startZoomLngLat, pos)
     });
   }
 
