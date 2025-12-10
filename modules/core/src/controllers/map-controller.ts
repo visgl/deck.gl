@@ -53,6 +53,8 @@ type MapStateInternal = {
   /** Interaction states, required to calculate change during transform */
   /* The point on map being grabbed when the operation first started */
   startPanLngLat?: [number, number];
+  /* Pointer position when pan started */
+  startPanPos?: [number, number];
   /* Center of the zoom when the operation first started */
   startZoomLngLat?: [number, number];
   /* Pointer position when rotation started */
@@ -110,6 +112,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       /** Interaction states, required to calculate change during transform */
       /* The point on map being grabbed when the operation first started */
       startPanLngLat,
+
+      startPanPos,
       /* Center of the zoom when the operation first started */
       startZoomLngLat,
       /* Pointer position when rotation started */
@@ -148,6 +152,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       },
       {
         startPanLngLat,
+        startPanPos,
         startZoomLngLat,
         startRotatePos,
         startBearing,
@@ -164,8 +169,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   panStart({pos}: {pos: [number, number]}): MapState {
+    const {latitude, longitude} = this.getViewportProps();
     return this._getUpdatedState({
-      startPanLngLat: this._unproject(pos)
+      startPanLngLat: [longitude, latitude],
+      startPanPos: pos
     });
   }
 
@@ -177,13 +184,14 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    */
   pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): MapState {
     const startPanLngLat = this.getState().startPanLngLat || this._unproject(startPos);
+    const startPanPos = this.getState().startPanPos || startPos;
 
     if (!startPanLngLat) {
       return this;
     }
 
     const viewport = this.makeViewport(this.getViewportProps());
-    const newProps = viewport.panByPosition(startPanLngLat, pos);
+    const newProps = viewport.panByPosition(startPanLngLat, pos, startPanPos);
 
     return this._getUpdatedState(newProps);
   }
@@ -194,7 +202,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    */
   panEnd(): MapState {
     return this._getUpdatedState({
-      startPanLngLat: null
+      startPanLngLat: null,
+      startPanPos: null
     });
   }
 
