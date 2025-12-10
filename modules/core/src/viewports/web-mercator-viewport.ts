@@ -270,7 +270,7 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords: number[], pixel: number[]): WebMercatorViewportOptions {
+  panByPosition(coords: number[], pixel: number[], startPixel?: number[]): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 

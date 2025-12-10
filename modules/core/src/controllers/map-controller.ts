@@ -112,7 +112,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       /** Interaction states, required to calculate change during transform */
       /* The point on map being grabbed when the operation first started */
       startPanLngLat,
-
+      /* Pointer position when pan started */
       startPanPos,
       /* Center of the zoom when the operation first started */
       startZoomLngLat,
@@ -167,6 +167,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
+   * Stores both the geographic coordinates and screen position at the start of the pan
    */
   panStart({pos}: {pos: [number, number]}): MapState {
     const {latitude, longitude} = this.getViewportProps();
@@ -178,9 +179,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   /**
    * Pan
-   * @param {[Number, Number]} pos - position on screen where the pointer is
+   * @param {[Number, Number]} pos - current position on screen where the pointer is
    * @param {[Number, Number], optional} startPos - where the pointer grabbed at
-   *   the start of the operation. Must be supplied of `panStart()` was not called
+   *   the start of the operation. Must be supplied if `panStart()` was not called
+   * Uses the stored screen position from panStart to calculate delta-based panning
    */
   pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): MapState {
     const startPanLngLat = this.getState().startPanLngLat || this._unproject(startPos);
@@ -199,6 +201,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * End panning
    * Must call if `panStart()` was called
+   * Clears both the stored geographic coordinates and screen position
    */
   panEnd(): MapState {
     return this._getUpdatedState({

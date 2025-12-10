@@ -229,10 +229,17 @@ export default class GlobeViewport extends Viewport {
     return xyz as [number, number];
   }
 
-  panByPosition(coords: number[], pixel: number[], startPanPos): GlobeViewportOptions {
+  /**
+   * Pan the globe using delta-based movement
+   * @param coords - the geographic coordinates where the pan started
+   * @param pixel - the current screen position
+   * @param startPixel - the screen position where the pan started
+   * @returns updated viewport options with new longitude/latitude
+   */
+  panByPosition(coords: number[], pixel: number[], startPixel: number[]): GlobeViewportOptions {
     const out = {
-      longitude: coords[0] + 0.3 * (startPanPos[0] - pixel[0]),
-      latitude: coords[1] - 0.3 * (startPanPos[1] - pixel[1])
+      longitude: coords[0] + 0.3 * (startPixel[0] - pixel[0]),
+      latitude: coords[1] - 0.3 * (startPixel[1] - pixel[1])
     };
     return out;
   }
