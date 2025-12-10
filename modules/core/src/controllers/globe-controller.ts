@@ -8,6 +8,7 @@ import Controller, {ControllerProps} from './controller';
 import {MapState, MapStateProps} from './map-controller';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
+import {zoomAdjust} from '../viewports/globe-viewport';
 
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
@@ -15,10 +16,11 @@ class GlobeState extends MapState {
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
     // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom} = props;
-    props.zoom = clamp(zoom, minZoom, maxZoom);
+    const {longitude, latitude, maxZoom, minZoom, zoom} = props;
 
-    const {longitude, latitude} = props;
+    const zoomAdjustment = zoomAdjust(latitude);
+    props.zoom = clamp(zoom, minZoom - zoomAdjustment, maxZoom - zoomAdjustment);
+
     if (longitude < -180 || longitude > 180) {
       props.longitude = mod(longitude + 180, 360) - 180;
     }
