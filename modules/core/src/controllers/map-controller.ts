@@ -49,12 +49,10 @@ export type MapStateProps = {
   normalize?: boolean;
 };
 
-type MapStateInternal = {
+export type MapStateInternal = {
   /** Interaction states, required to calculate change during transform */
   /* The point on map being grabbed when the operation first started */
   startPanLngLat?: [number, number];
-  /* Pointer position when pan started */
-  startPanPos?: [number, number];
   /* Center of the zoom when the operation first started */
   startZoomLngLat?: [number, number];
   /* Pointer position when rotation started */
@@ -112,8 +110,6 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       /** Interaction states, required to calculate change during transform */
       /* The point on map being grabbed when the operation first started */
       startPanLngLat,
-      /* Pointer position when pan started */
-      startPanPos,
       /* Center of the zoom when the operation first started */
       startZoomLngLat,
       /* Pointer position when rotation started */
@@ -152,7 +148,6 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       },
       {
         startPanLngLat,
-        startPanPos,
         startZoomLngLat,
         startRotatePos,
         startBearing,
@@ -167,46 +162,39 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
-   * Stores both the geographic coordinates and screen position at the start of the pan
    */
   panStart({pos}: {pos: [number, number]}): MapState {
-    const {latitude, longitude, zoom} = this.getViewportProps();
     return this._getUpdatedState({
-      startPanLngLat: [longitude, latitude, zoom],
-      startPanPos: pos
+      startPanLngLat: this._unproject(pos)
     });
   }
 
   /**
    * Pan
-   * @param {[Number, Number]} pos - current position on screen where the pointer is
+   * @param {[Number, Number]} pos - position on screen where the pointer is
    * @param {[Number, Number], optional} startPos - where the pointer grabbed at
-   *   the start of the operation. Must be supplied if `panStart()` was not called
-   * Uses the stored screen position from panStart to calculate delta-based panning
+   *   the start of the operation. Must be supplied of `panStart()` was not called
    */
   pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): MapState {
     const startPanLngLat = this.getState().startPanLngLat || this._unproject(startPos);
-    const startPanPos = this.getState().startPanPos || startPos;
 
     if (!startPanLngLat) {
       return this;
     }
 
     const viewport = this.makeViewport(this.getViewportProps());
-    const newProps = viewport.panByPosition(startPanLngLat, pos, startPanPos);
+    const newProps = viewport.panByPosition(startPanLngLat, pos);
 
     return this._getUpdatedState(newProps);
   }
 
   /**
    * End panning
-   * Must call if `panStart()` was called
-   * Clears both the stored geographic coordinates and screen position
+   * Must call if `panStart()` was not called
    */
   panEnd(): MapState {
     return this._getUpdatedState({
-      startPanLngLat: null,
-      startPanPos: null
+      startPanLngLat: null
     });
   }
 
