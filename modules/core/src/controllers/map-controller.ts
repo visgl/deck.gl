@@ -49,7 +49,7 @@ export type MapStateProps = {
   normalize?: boolean;
 };
 
-type MapStateInternal = {
+export type MapStateInternal = {
   /** Interaction states, required to calculate change during transform */
   /* The point on map being grabbed when the operation first started */
   startPanLngLat?: [number, number];
@@ -190,7 +190,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   /**
    * End panning
-   * Must call if `panStart()` was called
+   * Must call if `panStart()` was not called
    */
   panEnd(): MapState {
     return this._getUpdatedState({
