@@ -239,8 +239,12 @@ export default class GlobeViewport extends Viewport {
     pixel: number[],
     startPixel: number[]
   ): GlobeViewportOptions {
-    const longitude = startLng + 0.3 * (startPixel[0] - pixel[0]);
-    let latitude = startLat - 0.3 * (startPixel[1] - pixel[1]);
+    // Scale rotation speed inversely with zoom, to approximate constant panning speed
+    const scale = Math.pow(2, this.zoom + zoomAdjust(this.latitude));
+    const rotationSpeed = 0.25 / scale;
+
+    const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
+    let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
     latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
     const out = {longitude, latitude, zoom: startZoom + zoomAdjust(startLat)};
     out.zoom -= zoomAdjust(out.latitude);
