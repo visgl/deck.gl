@@ -132,7 +132,11 @@ export default class OrthographicViewport extends Viewport {
   }
 
   /* Needed by LinearInterpolator */
-  panByPosition(coords: number[], pixel: number[], startPixel?: number[]): OrthographicViewportOptions {
+  panByPosition(
+    coords: number[],
+    pixel: number[],
+    startPixel?: number[]
+  ): OrthographicViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 
