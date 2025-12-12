@@ -35,48 +35,34 @@ class GlobeState extends MapState {
   panStart({pos}: {pos: [number, number]}): GlobeState {
     const {latitude, longitude, zoom} = this.getViewportProps();
     return this._getUpdatedState({
-      startPanLngLat: [longitude, latitude, zoom],
-      startPanPos: pos
+      startPanLngLat: [longitude, latitude],
+      startPanPos: pos,
+      startZoom: zoom
     }) as GlobeState;
   }
 
   pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): GlobeState {
-    let startPanLngLat = (this.getState() as GlobeStateInternal).startPanLngLat;
-    if (!startPanLngLat) {
-      const unprojected = this._unproject(startPos);
-      if (unprojected) {
-        const {zoom} = this.getViewportProps();
-        startPanLngLat = [unprojected[0], unprojected[1], zoom];
-      }
-    }
-    const startPanPos = (this.getState() as GlobeStateInternal).startPanPos || startPos;
+    const state = this.getState() as GlobeStateInternal;
+    const startPanLngLat = state.startPanLngLat || this._unproject(startPos);
+    if (!startPanLngLat) return this;
+    const startZoom = state.startZoom ?? this.getViewportProps().zoom;
+    const startPanPos = state.startPanPos || startPos;
 
-    if (!startPanLngLat) {
-      return this;
-    }
-
+    const coords = [startPanLngLat[0], startPanLngLat[1], startZoom];
     const viewport = this.makeViewport(this.getViewportProps());
-    const newProps = viewport.panByPosition(startPanLngLat, pos, startPanPos);
-
+    const newProps = viewport.panByPosition(coords, pos, startPanPos);
     return this._getUpdatedState(newProps) as GlobeState;
   }
 
   panEnd(): GlobeState {
     return this._getUpdatedState({
       startPanLngLat: null,
-      startPanPos: null
+      startPanPos: null,
+      startZoom: null
     }) as GlobeState;
   }
 
-  zoom({
-    pos,
-    startPos,
-    scale
-  }: {
-    pos: [number, number];
-    startPos?: [number, number];
-    scale: number;
-  }): MapState {
+  zoom({scale}: {scale: number}): MapState {
     // In Globe view zoom does not take into account the mouse position
     const startZoom = this.getState().startZoom || this.getViewportProps().zoom;
     const zoom = startZoom + Math.log2(scale);
