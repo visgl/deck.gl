@@ -72,8 +72,9 @@ class GlobeState extends MapState {
     // Ensure zoom is within specified range
     const {longitude, latitude, maxZoom, minZoom, zoom} = props;
 
-    const zoomAdjustment = zoomAdjust(latitude);
-    props.zoom = clamp(zoom, minZoom - zoomAdjustment, maxZoom - zoomAdjustment);
+    const ZOOM0 = zoomAdjust(0);
+    const zoomAdjustment = zoomAdjust(latitude) - ZOOM0;
+    props.zoom = clamp(zoom, minZoom + zoomAdjustment, maxZoom + zoomAdjustment);
 
     if (longitude < -180 || longitude > 180) {
       props.longitude = mod(longitude + 180, 360) - 180;

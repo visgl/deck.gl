@@ -96,7 +96,7 @@ export default class GlobeViewport extends Viewport {
     // Exagerate distance by latitude to match the Web Mercator distortion
     // The goal is that globe and web mercator projection results converge at high zoom
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
-    const scale = Math.pow(2, zoom + zoomAdjust(latitude));
+    const scale = Math.pow(2, zoom - zoomAdjust(latitude));
     const nearZ = opts.nearZ ?? nearZMultiplier;
     const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
 
@@ -240,20 +240,20 @@ export default class GlobeViewport extends Viewport {
     startPixel: number[]
   ): GlobeViewportOptions {
     // Scale rotation speed inversely with zoom, to approximate constant panning speed
-    const scale = Math.pow(2, this.zoom + zoomAdjust(this.latitude));
+    const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
     const rotationSpeed = 0.25 / scale;
 
     const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
     let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
     latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
-    const out = {longitude, latitude, zoom: startZoom + zoomAdjust(startLat)};
-    out.zoom -= zoomAdjust(out.latitude);
+    const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
+    out.zoom += zoomAdjust(out.latitude);
     return out;
   }
 }
 
 export function zoomAdjust(latitude: number): number {
-  const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
+  const scaleAdjust = Math.PI * Math.cos((latitude * Math.PI) / 180);
   return Math.log2(scaleAdjust);
 }
 
