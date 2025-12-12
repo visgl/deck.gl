@@ -68,6 +68,21 @@ class GlobeState extends MapState {
     }) as GlobeState;
   }
 
+  zoom({
+    pos,
+    startPos,
+    scale
+  }: {
+    pos: [number, number];
+    startPos?: [number, number];
+    scale: number;
+  }): MapState {
+    // In Globe view zoom does not take into account the mouse position
+    const startZoom = this.getState().startZoom || this.getViewportProps().zoom;
+    const zoom = startZoom + Math.log2(scale);
+    return this._getUpdatedState({zoom});
+  }
+
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
     // Ensure zoom is within specified range
     const {longitude, latitude, maxZoom, minZoom, zoom} = props;

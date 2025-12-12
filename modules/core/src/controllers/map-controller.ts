@@ -303,8 +303,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
 
     return this._getUpdatedState({
-      zoom
-      //...zoomedViewport.panByPosition(startZoomLngLat, pos)
+      zoom,
+      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
     });
   }
 
