@@ -18,6 +18,7 @@ import {
   _FpsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
+import { ScrollbarWidget } from './scrollbar-widget';
 
 function generateData(count) {
   const result: {position: number[]; color: number[]}[] = [];
@@ -56,11 +57,10 @@ const ORTHOGRAPHIC_POINTS = [
 
 new Deck({
   views: [
-    new OrbitView({id: 'orbit-view', x: 0, width: '50%'}),
-    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%'})
+    new OrbitView({id: 'orbit-view', x: 0, width: '50%', controller: true}),
+    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%', controller: true})
   ],
   initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
   layers: [
     new ScatterplotLayer({
       id: 'scatter',
@@ -85,10 +85,13 @@ new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget(),
-    new GimbalWidget(),
     new FullscreenWidget(),
-    new ResetViewWidget(),
-    new _FpsWidget()
+    new GimbalWidget(),
+    new _FpsWidget(),
+    new ResetViewWidget({id: 'reset-orbit', viewId: 'orbit-view', placement: 'top-right'}),
+    new ScrollbarWidget({id: 'scroll-orbit', viewId: 'orbit-view', orientation: 'horizontal', contentBounds: [[-50, -50], [50, 50]]}),
+    new ResetViewWidget({id: 'reset-ortho', viewId: 'ortho-view', placement: 'top-right'}),
+    new ZoomWidget({viewId: 'ortho-view'}),
+    new ScrollbarWidget({viewId: 'ortho-view', orientation: 'vertical', contentBounds: [[-50, -50], [50, 50]]})
   ]
 });
