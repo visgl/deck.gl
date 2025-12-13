@@ -52,7 +52,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   pickInfo: PickingInfo | null = null;
 
   constructor(props: ContextMenuWidgetProps) {
-    super(props);
+    super(props, ContextMenuWidget.defaultProps);
     this.pickInfo = null;
     this.setProps(this.props);
   }

@@ -50,12 +50,8 @@ export abstract class Widget<
   deck?: Deck<ViewsT>;
   rootElement?: HTMLDivElement | null;
 
-  constructor(props: PropsT) {
-    this.props = {
-      // @ts-expect-error `defaultProps` may not exist on constructor
-      ...(this.constructor.defaultProps as Required<PropsT>),
-      ...props
-    };
+  constructor(props: PropsT, defaultProps: Required<PropsT>) {
+    this.props = {...defaultProps, ...props};
     // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
     this.id = this.props.id;
   }
