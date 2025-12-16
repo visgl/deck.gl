@@ -14,9 +14,15 @@ export function cloneAttribute(attribute: Attribute): Attribute {
   // This ensures that we set the proper `doublePrecision` flag and shader attributes.
   const {device, settings, value} = attribute;
   const newAttribute = new Attribute(device, settings);
+  const placeholder =
+    value instanceof Float64Array
+      ? new Float64Array(0)
+      : value instanceof Float32Array
+        ? new Float32Array(0)
+        : new Float32Array(0);
   // Placeholder value - necessary for generating the correct buffer layout
   newAttribute.setData({
-    value: value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0),
+    value: placeholder,
     normalized: settings.normalized
   });
   return newAttribute;
@@ -69,7 +75,9 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
     }
   }
   return (
-    (settings.noAlloc ? (value as NumericArray).length : (numInstances + maxVertexOffset) * size) *
+    (settings.noAlloc && value
+      ? (value as NumericArray).length
+      : (numInstances + maxVertexOffset) * size) *
     multiplier
   );
 }
@@ -142,18 +150,20 @@ export function padBuffer({
     return buffer;
   }
 
+  const attributeValue = attribute.value as TypedArray | null;
   const ArrayType =
-    attribute.value instanceof Float64Array
+    attributeValue instanceof Float64Array
       ? Float32Array
-      : ((attribute.value as TypedArray).constructor as TypedArrayConstructor);
-  const toData = isConstant
-    ? (attribute.value as TypedArray)
-    : // TODO(v9.1): Avoid non-portable synchronous reads.
-      new ArrayType(
-        attribute
-          .getBuffer()!
-          .readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer
-      );
+      : (attributeValue?.constructor as TypedArrayConstructor) || attribute.settings.defaultType;
+  const toData =
+    isConstant && attributeValue
+      ? attributeValue
+      : // TODO(v9.1): Avoid non-portable synchronous reads.
+        new ArrayType(
+          attribute
+            .getBuffer()!
+            .readSyncWebGL(targetByteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer
+        );
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));

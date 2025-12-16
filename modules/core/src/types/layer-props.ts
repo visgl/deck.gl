@@ -9,6 +9,7 @@ import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
+export type MemoryUsage = 'default' | 'gpu-only';
 
 import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer, Parameters} from '@luma.gl/core';
@@ -207,6 +208,10 @@ export type LayerProps = {
    * Options to customize the behavior of loaders
    */
   loadOptions?: any;
+  /**
+   * Control whether CPU copies of generated attributes are retained after they are uploaded to GPU buffers.
+   */
+  memory?: MemoryUsage;
   /**
    * Callback to calculate the polygonOffset WebGL parameter.
    */

@@ -16,6 +16,7 @@ import {
   getFloat32VertexFormat
 } from './gpu-transition-utils';
 import {GPUTransitionBase} from './gpu-transition';
+import log from '../utils/log';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
@@ -80,6 +81,12 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     }
     model.setVertexCount(vertexCount);
     if (attribute.isConstant) {
+      if (!attribute.value) {
+        log.warn(
+          `${attribute.id}: transition skipped because constant attribute has no CPU value available.`
+        )();
+        return;
+      }
       model.setAttributes({aFrom: buffers[0]});
       model.setConstantAttributes({aTo: attribute.value as TypedArray});
     } else {
