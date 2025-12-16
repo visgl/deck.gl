@@ -9,14 +9,14 @@ import {SdfProps, sdfUniforms} from './sdf-uniforms';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
-import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import type {AccessorFunction, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
 
 type _MultiIconLayerProps<DataT> = {
-  getIconOffsets?: Accessor<DataT, number[]>;
+  getIconOffsets?: AccessorFunction<DataT, number[]>;
   sdf?: boolean;
   smoothing?: number;
   outlineWidth?: number;
@@ -54,14 +54,14 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
+    const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
+    instanceIconDefs.settings.transform = undefined;
+    instanceIconDefs.settings.accessor = (object, objectInfo) =>
+      this.getIconAndOffset(object, objectInfo);
     attributeManager!.addInstanced({
-      instanceOffsets: {
-        size: 2,
-        accessor: 'getIconOffsets'
-      },
       instancePickingColors: {
         type: 'uint8',
-        size: 3,
+        size: 4,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       }
     });
@@ -69,9 +69,16 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const {props, oldProps} = params;
+    const {props, oldProps, changeFlags} = params;
     let {outlineColor} = props;
 
+    if (
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.getIcon ||
+        changeFlags.updateTriggersChanged.getIconOffsets)
+    ) {
+      this.getAttributeManager()!.invalidate('instanceIconDefs');
+    }
     if (outlineColor !== oldProps.outlineColor) {
       outlineColor = outlineColor.map(x => x / 255) as Color;
       outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
@@ -115,10 +122,22 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     }
   }
 
-  protected getInstanceIconDef(icons: string): number[] {
-    return icons
-      ? Array.from(icons).flatMap(icon => {
-          const def = super.getInstanceIconDef(icon);
+  protected getIconAndOffset(
+    object: DataT,
+    objectInfo: {
+      index: number;
+      data: any;
+      target: any[];
+    }
+  ): number[] {
+    const {getIcon, getIconOffsets} = this.props;
+    const text = getIcon(object, objectInfo) as string; // forwarded getText
+    const offsets = getIconOffsets(object, objectInfo); // text length x 2
+    return text
+      ? Array.from(text).flatMap((char, i) => {
+          const def = super.getInstanceIconDef(char);
+          def[0] = offsets[i * 2];
+          def[1] = offsets[i * 2 + 1];
           def[6] = 1; // mask
           return def;
         })
