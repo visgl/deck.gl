@@ -408,6 +408,7 @@ export default class HeatmapLayer<
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
+      ...shaders,
       bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
       targetTexture: weightsTexture!,
@@ -420,7 +421,6 @@ export default class HeatmapLayer<
         blendAlphaDstFactor: 'one'
       },
       topology: 'point-list',
-      ...shaders,
       modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
