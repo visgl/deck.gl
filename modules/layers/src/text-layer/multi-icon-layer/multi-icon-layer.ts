@@ -2,14 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {log} from '@deck.gl/core';
+import {log, createIterable} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import {SdfProps, sdfUniforms} from './sdf-uniforms';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
-import type {AccessorFunction, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import type {
+  Attribute,
+  AccessorFunction,
+  Color,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
@@ -55,8 +61,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
     const attributeManager = this.getAttributeManager();
     const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
-    instanceIconDefs.settings.transform = undefined;
-    instanceIconDefs.settings.accessor = this.getIconAndOffset.bind(this);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
     attributeManager!.addInstanced({
       instancePickingColors: {
         type: 'uint8',
@@ -121,25 +127,30 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     }
   }
 
-  protected getIconAndOffset(
-    object: DataT,
-    objectInfo: {
-      index: number;
-      data: any;
-      target: any[];
-    }
-  ): number[] {
-    const {getIcon, getIconOffsets} = this.getCurrentLayer()!.props;
-    const text = getIcon(object, objectInfo) as string; // forwarded getText
-    const offsets = getIconOffsets(object, objectInfo); // text length x 2
-    return text
-      ? Array.from(text).flatMap((char, i) => {
+  protected calculateInstanceIconDefs(
+    attribute: Attribute,
+    {startRow, endRow}: {startRow: number; endRow: number}
+  ) {
+    const {data, getIcon, getIconOffsets} = this.props;
+    let i = attribute.getVertexOffset(startRow);
+    const output = attribute.value as Float32Array;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = getIcon(object, objectInfo) as string; // forwarded getText
+      const offsets = getIconOffsets(object, objectInfo); // text length x 2
+      if (text) {
+        let j = 0;
+        for (const char of Array.from(text)) {
           const def = super.getInstanceIconDef(char);
-          def[0] = offsets[i * 2];
-          def[1] = offsets[i * 2 + 1];
+          def[0] = offsets[j * 2];
+          def[1] = offsets[j * 2 + 1];
           def[6] = 1; // mask
-          return def;
-        })
-      : EMPTY_ARRAY;
+          output.set(def, i);
+          i += attribute.size;
+          j++;
+        }
+      }
+    }
   }
 }
