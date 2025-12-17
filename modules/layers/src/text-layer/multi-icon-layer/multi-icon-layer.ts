@@ -56,8 +56,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const attributeManager = this.getAttributeManager();
     const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
     instanceIconDefs.settings.transform = undefined;
-    instanceIconDefs.settings.accessor = (object, objectInfo) =>
-      this.getIconAndOffset(object, objectInfo);
+    instanceIconDefs.settings.accessor = this.getIconAndOffset.bind(this);
     attributeManager!.addInstanced({
       instancePickingColors: {
         type: 'uint8',
@@ -130,7 +129,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       target: any[];
     }
   ): number[] {
-    const {getIcon, getIconOffsets} = this.props;
+    const {getIcon, getIconOffsets} = this.getCurrentLayer()!.props;
     const text = getIcon(object, objectInfo) as string; // forwarded getText
     const offsets = getIconOffsets(object, objectInfo); // text length x 2
     return text
