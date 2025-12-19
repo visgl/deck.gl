@@ -88,4 +88,5 @@ test('Viewport#recreate', t => {
     const clone = new ViewportType({...viewport});
     t.ok(viewport.equals(clone), String(viewport.id));
   }
+  t.end();
 });
