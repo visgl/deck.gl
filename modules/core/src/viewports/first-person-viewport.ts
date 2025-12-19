@@ -46,6 +46,8 @@ export type FirstPersonViewportOptions = {
 export default class FirstPersonViewport extends Viewport {
   longitude?: number;
   latitude?: number;
+  pitch: number;
+  bearing: number;
 
   constructor(props: FirstPersonViewportOptions) {
     // TODO - push direction handling into Matrix4.lookAt
@@ -75,5 +77,7 @@ export default class FirstPersonViewport extends Viewport {
 
     this.latitude = latitude;
     this.longitude = longitude;
+    this.pitch = pitch;
+    this.bearing = bearing;
   }
 }

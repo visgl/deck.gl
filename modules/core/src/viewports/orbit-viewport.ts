@@ -87,6 +87,10 @@ export type OrbitViewportOptions = {
 
 export default class OrbitViewport extends Viewport {
   projectedCenter: number[];
+  orbitAxis: 'Y' | 'Z';
+  rotationOrbit: number;
+  rotationX: number;
+  target: [number, number, number];
 
   constructor(props: OrbitViewportOptions) {
     const {
@@ -125,6 +129,10 @@ export default class OrbitViewport extends Viewport {
       zoom
     });
 
+    this.target = target;
+    this.orbitAxis = orbitAxis;
+    this.rotationX = rotationX;
+    this.rotationOrbit = rotationOrbit;
     this.projectedCenter = this.project(this.center);
   }
 

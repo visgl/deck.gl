@@ -67,9 +67,10 @@ export type GlobeViewportOptions = {
 };
 
 export default class GlobeViewport extends Viewport {
-  longitude!: number;
-  latitude!: number;
-  resolution!: number;
+  longitude: number;
+  latitude: number;
+  fovy: number;
+  resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
@@ -129,6 +130,7 @@ export default class GlobeViewport extends Viewport {
     this.scale = scale;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.fovy = fovy;
     this.resolution = resolution;
   }
 

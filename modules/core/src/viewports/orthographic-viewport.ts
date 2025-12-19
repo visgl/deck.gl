@@ -75,6 +75,8 @@ export type OrthographicViewportOptions = {
 };
 
 export default class OrthographicViewport extends Viewport {
+  target: [number, number, number];
+
   constructor(props: OrthographicViewportOptions) {
     const {
       width,
@@ -119,6 +121,8 @@ export default class OrthographicViewport extends Viewport {
       zoom: zoom_,
       distanceScales
     });
+
+    this.target = [target[0], target[1], target[2] ?? 0];
   }
 
   projectFlat([X, Y]: number[]): [number, number] {
