@@ -76,6 +76,7 @@ export {
   fp64LowPart,
   createIterable,
   getShaderAssembler,
+  transformBoundsToWorld,
   // Widgets
   Widget
 } from '@deck.gl/core';

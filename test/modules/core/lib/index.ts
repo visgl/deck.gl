@@ -18,3 +18,4 @@ import './pick-layers.spec';
 import './picking.spec';
 import './view-manager.spec';
 import './widget-manager.spec';
+import './world-bounds.spec';
