@@ -18,6 +18,13 @@ export type WidgetProps = {
   style?: Partial<CSSStyleDeclaration>;
   /** Additional CSS class. */
   className?: string;
+  /**
+   * The container that this widget is being attached to. Default to `viewId`.
+   * If set to `'root'`, the widget is placed relative to the whole deck.gl canvas.
+   * If set to a valid view id, the widget is placed relative to that view.
+   * If set to a HTMLElement, `placement` is ignored and the widget is appended into the given element.
+   */
+  container?: string | HTMLDivElement | null;
 };
 
 export abstract class Widget<
@@ -27,6 +34,7 @@ export abstract class Widget<
   static defaultProps: Required<WidgetProps> = {
     id: 'widget',
     style: {},
+    container: null,
     className: ''
   };
 
@@ -35,7 +43,7 @@ export abstract class Widget<
   /** Widget props, with defaults applied */
   props: Required<PropsT>;
   /**
-   * The view id that this widget is being attached to. Default `null`.
+   * The view id that this widget controls. Default `null`.
    * If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
    */
   viewId?: string | null = null;
