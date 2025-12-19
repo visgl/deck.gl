@@ -14,6 +14,7 @@ import {
 } from './gpu-transition-utils';
 import Attribute from '../lib/attribute/attribute';
 import {GPUTransitionBase} from './gpu-transition';
+import log from '../utils/log';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
@@ -69,6 +70,12 @@ export default class GPUSpringTransition extends GPUTransitionBase<SpringTransit
     const {model} = this.transform;
     model.setVertexCount(Math.floor(this.currentLength / attribute.size));
     if (attribute.isConstant) {
+      if (!attribute.value) {
+        log.warn(
+          `${attribute.id}: spring transition skipped because constant attribute has no CPU value available.`
+        )();
+        return;
+      }
       model.setConstantAttributes({aTo: attribute.value as TypedArray});
     } else {
       model.setAttributes({aTo: attribute.getBuffer()!});

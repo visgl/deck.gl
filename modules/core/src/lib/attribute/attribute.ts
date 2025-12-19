@@ -15,6 +15,7 @@ import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
+import log from '../../utils/log';
 import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
@@ -156,7 +157,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   setNeedsUpdate(reason: string = this.id, dataRange?: {startRow?: number; endRow?: number}): void {
     this.state.needsUpdate = this.state.needsUpdate || reason;
     this.setNeedsRedraw(reason);
-    if (dataRange) {
+    if (dataRange && this.memory !== 'gpu-only') {
       const {startRow = 0, endRow = Infinity} = dataRange;
       this.state.updateRanges = range.add(this.state.updateRanges, [startRow, endRow]);
     } else {
@@ -249,6 +250,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     this.clearNeedsUpdate();
     this.setNeedsRedraw();
 
+    if (updated) {
+      this._releaseCPUData();
+    }
+
     return updated;
   }
 
@@ -333,10 +338,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
     if (needsUpdate) {
-      if (ArrayBuffer.isView(buffer)) {
-        buffer = {value: buffer};
+      const binaryValue = ArrayBuffer.isView(buffer) ? {value: buffer} : (buffer as BinaryAttribute);
+      if (this.memory === 'gpu-only' && !ArrayBuffer.isView(binaryValue.value)) {
+        log.error(
+          `${this.id}: binary attributes that require transformation need a CPU copy. Provide a typed array or use memory=\"default\".`
+        )();
+        return false;
       }
-      const binaryValue = buffer as BinaryAttribute;
       assert(ArrayBuffer.isView(binaryValue.value), `invalid ${settings.accessor}`);
       const needsNormalize = Boolean(binaryValue.size) && binaryValue.size !== this.size;
 

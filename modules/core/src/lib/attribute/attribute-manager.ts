@@ -15,6 +15,7 @@ import AttributeTransitionManager from './attribute-transition-manager';
 import type {Device, BufferLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
+import type {MemoryUsage} from '../../types/layer-props';
 
 const TRACE_INVALIDATE = 'attributeManager.invalidate';
 const TRACE_UPDATE_START = 'attributeManager.updateStart';
@@ -52,26 +53,32 @@ export default class AttributeManager {
   attributes: Record<string, Attribute>;
   updateTriggers: {[name: string]: string[]};
   needsRedraw: string | boolean;
+  memory: MemoryUsage;
   userData: any;
 
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
+  private transitionsWarningIssued: boolean = false;
+  private boundsWarningIssued: boolean = false;
 
   constructor(
     device: Device,
     {
       id = 'attribute-manager',
       stats,
-      timeline
+      timeline,
+      memory = 'default'
     }: {
       id?: string;
       stats?: Stats;
       timeline?: Timeline;
+      memory?: MemoryUsage;
     } = {}
   ) {
     this.id = id;
     this.device = device;
+    this.memory = memory;
 
     this.attributes = {};
 
@@ -237,11 +244,20 @@ export default class AttributeManager {
       this.stats.get('Update Attributes').timeEnd();
     }
 
-    this.attributeTransitionManager.update({
-      attributes: this.attributes,
-      numInstances,
-      transitions
-    });
+    const hasTransitions = transitions && Object.keys(transitions).length > 0;
+
+    if (this.memory !== 'gpu-only') {
+      this.attributeTransitionManager.update({
+        attributes: this.attributes,
+        numInstances,
+        transitions
+      });
+    } else if (!this.transitionsWarningIssued && hasTransitions) {
+      this.transitionsWarningIssued = true;
+      log.warn(
+        `${this.id}: attribute transitions are skipped because memory="gpu-only" does not keep CPU copies.`
+      )();
+    }
   }
 
   // Update attribute transition to the current timestamp
@@ -259,14 +275,35 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes(): {[id: string]: Attribute} {
-    return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
+    const transitionAttributes =
+      this.memory === 'gpu-only' ? {} : this.attributeTransitionManager.getAttributes();
+    return {...this.attributes, ...transitionAttributes};
   }
 
   /**
    * Computes the spatial bounds of a given set of attributes
    */
   getBounds(attributeNames: string[]) {
-    const bounds = attributeNames.map(attributeName => this.attributes[attributeName]?.getBounds());
+    const bounds = attributeNames.map(attributeName => {
+      const attribute = this.attributes[attributeName];
+      if (!attribute) {
+        return null;
+      }
+      const attributeBounds = attribute.getBounds();
+      if (
+        !attributeBounds &&
+        this.memory === 'gpu-only' &&
+        !attribute.isConstant &&
+        !attribute.value &&
+        !this.boundsWarningIssued
+      ) {
+        this.boundsWarningIssued = true;
+        log.warn(
+          `${this.id}: attribute bounds are unavailable in "gpu-only" memory mode. Features that rely on CPU-stored attribute values will be disabled.`
+        )();
+      }
+      return attributeBounds;
+    });
     return this.mergeBoundsMemoized(bounds);
   }
 
@@ -278,9 +315,10 @@ export default class AttributeManager {
   getChangedAttributes(opts: {clearChangedFlags?: boolean} = {clearChangedFlags: false}): {
     [id: string]: Attribute;
   } {
-    const {attributes, attributeTransitionManager} = this;
+    const {attributes, attributeTransitionManager, memory} = this;
 
-    const changedAttributes = {...attributeTransitionManager.getAttributes()};
+    const changedAttributes =
+      memory === 'gpu-only' ? {} : {...attributeTransitionManager.getAttributes()};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
@@ -321,7 +359,8 @@ export default class AttributeManager {
         ...attribute,
         id: attributeName,
         size: (attribute.isIndexed && 1) || attribute.size || 1,
-        ...overrideOptions
+        ...overrideOptions,
+        memory: this.memory
       };
 
       // Initialize the attribute descriptor, with WebGL and metadata fields

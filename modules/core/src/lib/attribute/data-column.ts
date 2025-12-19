@@ -17,6 +17,7 @@ import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
+import type {MemoryUsage} from '../../types/layer-props';
 
 export type DataType = Exclude<NormalizedDataType, 'float16'>;
 export type LogicalDataType = DataType | 'float64';
@@ -95,6 +96,7 @@ export type DataColumnOptions<Options> = Options &
     id?: string;
     vertexOffset?: number;
     fp64?: boolean;
+    memory?: MemoryUsage;
     /** Vertex data type.
      * @default 'float32'
      */
@@ -128,6 +130,7 @@ export default class DataColumn<Options, State> {
   device: Device;
   id: string;
   size: number;
+  memory: MemoryUsage;
   settings: DataColumnSettings<Options>;
   value: NumericArray | null;
   doublePrecision: boolean;
@@ -140,6 +143,7 @@ export default class DataColumn<Options, State> {
     this.device = device;
     this.id = opts.id || '';
     this.size = opts.size || 1;
+    this.memory = opts.memory || 'default';
 
     const logicalType = opts.logicalType || opts.type;
     const doublePrecision = logicalType === 'float64';
@@ -224,7 +228,11 @@ export default class DataColumn<Options, State> {
       this._buffer.delete();
       this._buffer = null;
     }
-    typedArrayManager.release(this.state.allocatedValue);
+    if (this.memory === 'default') {
+      typedArrayManager.release(this.state.allocatedValue);
+    }
+    this.state.allocatedValue = null;
+    this.value = null;
   }
 
   getBuffer(): Buffer | null {
@@ -240,7 +248,11 @@ export default class DataColumn<Options, State> {
   ): Record<string, Buffer | TypedArray | null> {
     const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
-      const value = this.value as TypedArray;
+      const value = this.value as TypedArray | null;
+      if (!value) {
+        result[attributeName] = null;
+        return result;
+      }
       if (options) {
         const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
         const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
@@ -465,6 +477,9 @@ export default class DataColumn<Options, State> {
     this.state.bounds = null; // clear cached bounds
 
     const value = this.value as TypedArray;
+    if (!value) {
+      return;
+    }
     const {startOffset = 0, endOffset} = opts;
     this.buffer.write(
       this.doublePrecision && value instanceof Float64Array
@@ -482,12 +497,7 @@ export default class DataColumn<Options, State> {
     const {state} = this;
     const oldValue = state.allocatedValue;
 
-    // Allocate at least one element to ensure a valid buffer
-    const value = typedArrayManager.allocate(oldValue, numInstances + 1, {
-      size: this.size,
-      type: this.settings.defaultType,
-      copy
-    });
+    const value = this._allocateCPUValue(numInstances, copy, oldValue);
 
     this.value = value;
 
@@ -507,14 +517,44 @@ export default class DataColumn<Options, State> {
       }
     }
 
-    state.allocatedValue = value;
+    state.allocatedValue = this.memory === 'default' ? value : null;
     state.constant = false;
     state.externalBuffer = null;
     this.setAccessor(this.settings);
     return true;
   }
 
+  protected _releaseCPUData() {
+    if (this.memory === 'gpu-only' && !this.state.constant) {
+      this.state.allocatedValue = null;
+      this.value = null;
+      this.state.bounds = null;
+    }
+  }
+
   // PRIVATE HELPER METHODS
+  private _allocateCPUValue(
+    numInstances: number,
+    copy: boolean,
+    oldValue: TypedArray | null
+  ): TypedArray {
+    if (this.memory === 'gpu-only') {
+      const ArrayType = this.settings.defaultType;
+      const length = Math.max((numInstances + 1) * this.size, 1);
+      const value = new ArrayType(length);
+      if (copy && oldValue) {
+        value.set(oldValue.subarray(0, Math.min(oldValue.length, value.length)));
+      }
+      return value;
+    }
+
+    return typedArrayManager.allocate(oldValue, numInstances + 1, {
+      size: this.size,
+      type: this.settings.defaultType,
+      copy
+    });
+  }
+
   protected _checkExternalBuffer(opts: {value?: NumericArray; normalized?: boolean}): void {
     const {value} = opts;
     if (!ArrayBuffer.isView(value)) {

@@ -144,6 +144,7 @@ const defaultProps: DefaultProps<LayerProps> = {
 
   parameters: {type: 'object', value: {}, optional: true, compare: 2},
   loadOptions: {type: 'object', value: null, optional: true, ignore: true},
+  memory: 'default',
   transitions: null,
   extensions: [],
   loaders: {type: 'array', value: [], optional: true, ignore: true},
@@ -1246,7 +1247,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return new AttributeManager(context.device, {
       id: this.props.id,
       stats: context.stats,
-      timeline: context.timeline
+      timeline: context.timeline,
+      memory: this.props.memory
     });
   }
 

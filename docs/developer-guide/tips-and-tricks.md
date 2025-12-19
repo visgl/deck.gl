@@ -75,3 +75,16 @@ new Deck({
   _typedArrayManagerProps: isMobile ? {overAlloc: 1, poolSize: 0} : null
 })
 ```
+
+### GPU-only layer attributes
+
+Layers can opt into storing generated attributes only on the GPU by setting [`memory: 'gpu-only'`](../api-reference/core/layer.md#memory). In this mode, CPU-side typed arrays are released after upload, reducing application memory pressure and avoiding typed array pooling overhead.
+
+Because CPU copies are not retained, features that depend on CPU-side attribute values are disabled or downgraded:
+
+- Bounds calculations (`layer.getBounds()` and any culling logic that relies on it) return `null`.
+- Attribute transitions are skipped.
+- Partial attribute updates regenerate whole attributes or fall back to GPU-side copies, so update ranges are ignored.
+- CPU-side validations or transformations that require staging arrays will emit runtime warnings.
+
+Use this mode when your rendering pipeline is GPU-driven and you do not need CPU inspection of attribute data. Switch back to the default memory behavior if you rely on the features above.
