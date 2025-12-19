@@ -86,6 +86,8 @@ export type OrbitViewportOptions = {
 };
 
 export default class OrbitViewport extends Viewport {
+  static displayName = 'OrbitViewport';
+
   projectedCenter: number[];
   orbitAxis: 'Y' | 'Z';
   rotationOrbit: number;

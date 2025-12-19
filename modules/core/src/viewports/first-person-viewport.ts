@@ -44,6 +44,8 @@ export type FirstPersonViewportOptions = {
 };
 
 export default class FirstPersonViewport extends Viewport {
+  static displayName = 'FirstPersonViewport';
+
   longitude?: number;
   latitude?: number;
   pitch: number;

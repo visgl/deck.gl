@@ -67,6 +67,8 @@ export type GlobeViewportOptions = {
 };
 
 export default class GlobeViewport extends Viewport {
+  static displayName = 'GlobeViewport';
+
   longitude: number;
   latitude: number;
   fovy: number;
