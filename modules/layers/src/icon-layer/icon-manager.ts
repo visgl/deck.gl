@@ -462,7 +462,7 @@ export default class IconManager {
           const id = getIconId(icon);
 
           const iconDef = this._mapping[id];
-          const {x, y, width: maxWidth, height: maxHeight} = iconDef;
+          const {x: initialX, y: initialY, width: maxWidth, height: maxHeight} = iconDef;
 
           const {image, width, height} = resizeImage(
             ctx,
@@ -471,13 +471,18 @@ export default class IconManager {
             maxHeight
           );
 
+          const x = initialX + (maxWidth - width) / 2;
+          const y = initialY + (maxHeight - height) / 2;
+
           this._texture?.copyExternalImage({
             image,
-            x: x + (maxWidth - width) / 2,
-            y: y + (maxHeight - height) / 2,
+            x,
+            y,
             width,
             height
           });
+          iconDef.x = x;
+          iconDef.y = y;
           iconDef.width = width;
           iconDef.height = height;
 
