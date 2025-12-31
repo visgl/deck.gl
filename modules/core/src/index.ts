@@ -64,7 +64,7 @@ export {default as _GlobeView} from './views/globe-view';
 
 // Controllers
 export {default as Controller} from './controllers/controller';
-export {default as MapController} from './controllers/map-controller';
+export {default as MapController, MapState} from './controllers/map-controller';
 export {default as _GlobeController} from './controllers/globe-controller';
 export {default as FirstPersonController} from './controllers/first-person-controller';
 export {default as OrbitController} from './controllers/orbit-controller';
@@ -143,6 +143,7 @@ export type {
   ViewStateChangeParameters,
   InteractionState
 } from './controllers/controller';
+export type {MapStateProps} from './controllers/map-controller';
 
 // INTERNAL, DO NOT USE
 // @deprecated internal do not use
