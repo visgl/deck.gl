@@ -84,6 +84,7 @@ export default class OrthographicViewport extends Viewport {
   target: [number, number, number] | [number, number];
   zoomX: number;
   zoomY: number;
+  flipY: boolean;
 
   constructor(props: OrthographicViewportOptions) {
     const {
@@ -133,6 +134,7 @@ export default class OrthographicViewport extends Viewport {
     this.target = target;
     this.zoomX = zoomX;
     this.zoomY = zoomY;
+    this.flipY = flipY;
   }
 
   projectFlat([X, Y]: number[]): [number, number] {

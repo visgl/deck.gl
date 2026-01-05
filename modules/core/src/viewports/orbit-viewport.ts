@@ -93,6 +93,7 @@ export default class OrbitViewport extends Viewport {
   rotationOrbit: number;
   rotationX: number;
   target: [number, number, number];
+  fovy: number;
 
   constructor(props: OrbitViewportOptions) {
     const {
@@ -135,6 +136,7 @@ export default class OrbitViewport extends Viewport {
     this.orbitAxis = orbitAxis;
     this.rotationX = rotationX;
     this.rotationOrbit = rotationOrbit;
+    this.fovy = fovy;
     this.projectedCenter = this.project(this.center);
   }
 
