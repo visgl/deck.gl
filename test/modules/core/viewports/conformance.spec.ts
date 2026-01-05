@@ -55,7 +55,8 @@ test('Viewport#recreate', t => {
       width: 400,
       height: 300,
       target: [100, 500],
-      zoom: [1, -4]
+      zoom: [1, -4],
+      flipY: false
     }),
     new GlobeViewport({
       width: 100,
