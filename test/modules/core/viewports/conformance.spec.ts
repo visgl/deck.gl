@@ -45,7 +45,8 @@ test('Viewport#recreate', t => {
       orbitAxis: 'Y',
       rotationX: 45,
       rotationOrbit: -111,
-      zoom: -3
+      zoom: -3,
+      fovy: 60
     }),
     new OrthographicViewport({
       width: 100,
