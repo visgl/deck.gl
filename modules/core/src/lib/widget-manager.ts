@@ -196,7 +196,7 @@ export class WidgetManager {
   /** Initialize new widget */
   private _addWidget(widget: Widget) {
     const {viewId = null, placement = DEFAULT_PLACEMENT} = widget;
-    const {container} = widget.props;
+    const container = widget.props._container ?? viewId;
 
     widget.widgetManager = this;
     widget.deck = this.deck;
@@ -204,7 +204,7 @@ export class WidgetManager {
     // Create an attach the HTML root element
     widget.rootElement = widget._onAdd({deck: this.deck, viewId});
     if (widget.rootElement) {
-      this._getContainer(container ?? viewId, placement).append(widget.rootElement);
+      this._getContainer(container, placement).append(widget.rootElement);
     }
 
     widget.updateHTML();

@@ -24,7 +24,7 @@ export type WidgetProps = {
    * If set to a valid view id, the widget is placed relative to that view.
    * If set to a HTMLElement, `placement` is ignored and the widget is appended into the given element.
    */
-  container?: string | HTMLDivElement | null;
+  _container?: string | HTMLDivElement | null;
 };
 
 export abstract class Widget<
@@ -34,7 +34,7 @@ export abstract class Widget<
   static defaultProps: Required<WidgetProps> = {
     id: 'widget',
     style: {},
-    container: null,
+    _container: null,
     className: ''
   };
 

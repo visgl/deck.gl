@@ -342,7 +342,7 @@ test('WidgetManager#onRedraw#container', t => {
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const targetElement = document.createElement('div');
-  const widgetA = new TestWidget({id: 'A', container: targetElement});
+  const widgetA = new TestWidget({id: 'A', _container: targetElement});
   widgetManager.addDefault(widgetA);
 
   t.is(widgetA.rootElement?.parentNode, targetElement, 'widget is attached to external container');
@@ -352,7 +352,7 @@ test('WidgetManager#onRedraw#container', t => {
     'WidgetManager does not create default container'
   );
 
-  const widgetB = new TestWidget({id: 'B', placement: 'bottom-right', container: 'root'});
+  const widgetB = new TestWidget({id: 'B', placement: 'bottom-right', _container: 'root'});
   widgetManager.addDefault(widgetB);
 
   widgetManager.onRedraw({
