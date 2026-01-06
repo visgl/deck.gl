@@ -321,7 +321,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   private _onUpdate(): void {
-    this.setNeedsRedraw();
+    this.getAttributeManager()?.invalidate('getIcon');
+    this.setNeedsUpdate();
   }
 
   private _onError(evt: LoadIconErrorContext): void {
