@@ -115,7 +115,7 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       tileIndex,
       updateTriggers
     } = this.props as typeof this.props & {data: Raster};
-    if (!data || !tileIndex) return null;
+    if (!data || !tileIndex || (data as any).length === 0) return null;
 
     const blockSize = data.blockSize ?? 0;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
