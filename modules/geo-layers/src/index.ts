@@ -40,6 +40,7 @@ export type {GeohashLayerProps} from './geohash-layer/geohash-layer';
 
 export type {GeoBoundingBox, NonGeoBoundingBox} from './tileset-2d/index';
 export type {TileLoadProps as _TileLoadProps} from './tileset-2d/index';
+export type {Tileset2DProps as _Tileset2DProps} from './tileset-2d/index';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tileset-2d/index';
 export {Tileset2D as _Tileset2D} from './tileset-2d/index';
