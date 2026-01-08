@@ -47,6 +47,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   filled: true,
   stroked: false,
   flatShading: false,
+  capShape: 'flat',
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -134,6 +135,12 @@ type _ColumnLayerProps<DataT> = {
    * @default false
    */
   flatShading?: boolean;
+
+  /**
+   * The shape of the column's top cap. Options: 'flat' (default), 'rounded' (dome-like), or 'pointy' (cone-like).
+   * @default 'flat'
+   */
+  capShape?: 'flat' | 'rounded' | 'pointy';
 
   /**
    * The units of the radius.
@@ -305,18 +312,20 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       regenerateModels ||
       props.diskResolution !== oldProps.diskResolution ||
       props.vertices !== oldProps.vertices ||
+      props.capShape !== oldProps.capShape ||
       (props.extruded || props.stroked) !== (oldProps.extruded || oldProps.stroked)
     ) {
       this._updateGeometry(props);
     }
   }
 
-  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThinkness: boolean) {
+  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThinkness: boolean, capShape: 'flat' | 'rounded' | 'pointy') {
     const geometry = new ColumnGeometry({
       radius: 1,
       height: hasThinkness ? 2 : 0,
       vertices,
-      nradial: diskResolution
+      nradial: diskResolution,
+      capShape
     });
 
     let meanVertexDistance = 0;
@@ -360,8 +369,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     };
   }
 
-  protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
-    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
+  protected _updateGeometry({diskResolution, vertices, extruded, stroked, capShape}) {
+    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked, capShape);
 
     this.setState({
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
