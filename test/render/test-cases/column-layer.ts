@@ -165,5 +165,25 @@ export default [
       vertices: polygonCCW,
       getElevation: h => h.value * 5000
     }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-pointy'
+    },
+    {
+      extruded: true,
+      capShape: 'pointy',
+      getElevation: h => h.value * 5000
+    }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-rounded'
+    },
+    {
+      extruded: true,
+      capShape: 'rounded',
+      getElevation: h => h.value * 5000
+    }
   )
 ];

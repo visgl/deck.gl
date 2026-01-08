@@ -237,6 +237,19 @@ Whether to generate a line wireframe of the column. The outline will have
 If `true`, the vertical surfaces of the columns use [flat shading](https://en.wikipedia.org/wiki/Shading#Flat_vs._smooth_shading).
 If `false`, use smooth shading. Only effective if `extruded` is `true`.
 
+#### `capShape` (string, optional) {#capshape}
+
+* Default: `'flat'`
+
+The shape of the column's top cap. Available options:
+- `'flat'`: Flat top (default)
+- `'rounded'`: Dome-shaped top, like a silo
+- `'pointy'`: Cone-shaped top, like a missile
+
+Only effective if `extruded` is `true`.
+
+See the [cap shape example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/column-cap-shape) for an interactive demonstration.
+
 #### `radiusUnits` (string, optional) {#radiusunits}
 
 * Default: `'meters'`

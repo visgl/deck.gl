@@ -96,3 +96,41 @@ test('ColumnGeometry#tesselation', t => {
 
   t.end();
 });
+
+test('ColumnGeometry#capShape', t => {
+  const nradial = 4;
+  const vertsAroundEdge = nradial + 1;
+  
+  t.comment('Flat cap shape');
+  let geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'flat'});
+  let attributes = geometry.getAttributes();
+
+  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'flat cap positions generated');
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'flat cap normals generated');
+  // Flat cap: sides (vertsAroundEdge * 2) + degenerate (1) + top cap (vertsAroundEdge)
+  t.is(attributes.POSITION.value.length, (vertsAroundEdge * 3 + 1) * 3, 'flat cap POSITION has correct size');
+
+  t.comment('Pointy cap shape');
+  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'pointy'});
+  attributes = geometry.getAttributes();
+
+  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'pointy cap positions generated');
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'pointy cap normals generated');
+  t.ok(attributes.POSITION.value.length > 0, 'pointy cap has vertices');
+  
+  // Check that there's a point at the top center
+  const positions = attributes.POSITION.value;
+  const lastVertex = [positions[positions.length - 3], positions[positions.length - 2], positions[positions.length - 1]];
+  t.ok(Math.abs(lastVertex[0]) < 0.01 && Math.abs(lastVertex[1]) < 0.01, 'pointy cap has center point');
+  t.ok(lastVertex[2] > 0, 'pointy cap center point is at top');
+
+  t.comment('Rounded cap shape');
+  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'rounded'});
+  attributes = geometry.getAttributes();
+
+  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'rounded cap positions generated');
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'rounded cap normals generated');
+  t.ok(attributes.POSITION.value.length > (vertsAroundEdge * 3 + 1) * 3, 'rounded cap has more vertices than flat');
+
+  t.end();
+});
