@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl ColumnLayer Cap Shape Example</title>
+  <style>
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+      z-index: 1;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .control-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    select, input {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <h3>ColumnLayer Cap Shape</h3>
+    <div class="control-group">
+      <label>Cap Shape:</label>
+      <select id="capShape">
+        <option value="flat">Flat (Default)</option>
+        <option value="rounded">Rounded (Dome)</option>
+        <option value="pointy">Pointy (Cone)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Disk Resolution: <span id="diskResValue">20</span></label>
+      <input type="range" id="diskResolution" min="4" max="40" value="20">
+    </div>
+  </div>
+</body>
+<script type="module" src="app.js"></script>
+</html>
