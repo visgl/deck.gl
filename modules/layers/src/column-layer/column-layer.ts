@@ -298,13 +298,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const regenerateModels =
       changeFlags.extensionsChanged || props.flatShading !== oldProps.flatShading;
 
-    console.log('[ColumnLayer] updateState called', {
-      capShape: props.capShape,
-      oldCapShape: oldProps.capShape,
-      capShapeChanged: props.capShape !== oldProps.capShape,
-      regenerateModels
-    });
-
     if (regenerateModels) {
       this.state.models?.forEach(model => model.destroy());
       this.setState(this._getModels());
@@ -322,7 +315,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       props.capShape !== oldProps.capShape ||
       (props.extruded || props.stroked) !== (oldProps.extruded || oldProps.stroked)
     ) {
-      console.log('[ColumnLayer] Calling _updateGeometry with capShape:', props.capShape);
       this._updateGeometry(props);
     }
   }
@@ -378,20 +370,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked, capShape}) {
-    console.log('[ColumnLayer] _updateGeometry called with:', {
-      diskResolution,
-      extruded,
-      stroked,
-      capShape,
-      hasThickness: extruded || stroked
-    });
-
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked, capShape);
-
-    console.log('[ColumnLayer] Geometry generated:', {
-      vertexCount: geometry.attributes.POSITION.value.length / 3,
-      capShape
-    });
 
     this.setState({
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
@@ -406,8 +385,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     wireframeModel.setGeometry(geometry);
     wireframeModel.setTopology('line-list');
-
-    console.log('[ColumnLayer] Geometry applied to models');
   }
 
   draw({uniforms}) {
