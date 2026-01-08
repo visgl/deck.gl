@@ -98,16 +98,20 @@ test('ColumnGeometry#tesselation', t => {
 });
 
 test('ColumnGeometry#capShape', t => {
+  const nradial = 4;
+  const vertsAroundEdge = nradial + 1;
+  
   t.comment('Flat cap shape');
-  let geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 4, capShape: 'flat'});
+  let geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'flat'});
   let attributes = geometry.getAttributes();
 
   t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'flat cap positions generated');
   t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'flat cap normals generated');
-  t.is(attributes.POSITION.value.length, (5 * 3 + 1) * 3, 'flat cap POSITION has correct size');
+  // Flat cap: sides (vertsAroundEdge * 2) + degenerate (1) + top cap (vertsAroundEdge)
+  t.is(attributes.POSITION.value.length, (vertsAroundEdge * 3 + 1) * 3, 'flat cap POSITION has correct size');
 
   t.comment('Pointy cap shape');
-  geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 4, capShape: 'pointy'});
+  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'pointy'});
   attributes = geometry.getAttributes();
 
   t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'pointy cap positions generated');
@@ -121,12 +125,12 @@ test('ColumnGeometry#capShape', t => {
   t.ok(lastVertex[2] > 0, 'pointy cap center point is at top');
 
   t.comment('Rounded cap shape');
-  geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 4, capShape: 'rounded'});
+  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'rounded'});
   attributes = geometry.getAttributes();
 
   t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'rounded cap positions generated');
   t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'rounded cap normals generated');
-  t.ok(attributes.POSITION.value.length > (5 * 3 + 1) * 3, 'rounded cap has more vertices than flat');
+  t.ok(attributes.POSITION.value.length > (vertsAroundEdge * 3 + 1) * 3, 'rounded cap has more vertices than flat');
 
   t.end();
 });

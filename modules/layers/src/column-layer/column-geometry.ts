@@ -51,10 +51,13 @@ function tesselateColumn(props: ColumnGeometryProps): {
   if (!isExtruded) {
     numVertices = nradial; // flat disk
   } else if (capShape === 'pointy') {
-    // sides + alternating pattern for cone: edge vertex, center, edge vertex, center...
-    numVertices = vertsAroundEdge * 2 + 1 + vertsAroundEdge * 2; // sides + degenerate + cone
+    // Cone cap: alternating pattern of edge vertex and apex vertex in triangle strip
+    // For each edge around the top (nradial+1 to close the loop): edge vertex + apex vertex
+    numVertices = vertsAroundEdge * 2 + 1 + vertsAroundEdge * 2; // sides + degenerate + cone vertices
   } else if (capShape === 'rounded') {
-    // sides + dome vertices in triangle strip order
+    // Dome cap: multiple latitude rings from base to top, rendered as triangle strips
+    // Each level needs 2 vertices per position (current ring + next ring) for triangle strip
+    // Use ~25% of nradial as number of latitude rings for good balance of quality/performance
     const domeLevels = Math.max(3, Math.floor(nradial / 4)); // number of latitude rings for dome
     // Each level needs vertsAroundEdge * 2 vertices for triangle strip
     numVertices = vertsAroundEdge * 2 + 1 + (domeLevels * vertsAroundEdge * 2 + 1); // sides + degenerate + dome + apex
@@ -108,7 +111,12 @@ function tesselateColumn(props: ColumnGeometryProps): {
   // Generate top cap based on capShape
   if (isExtruded && capShape === 'pointy') {
     // Create cone using triangle strip: edge, apex, edge, apex, ...
-    const apex = [0, 0, height / 2 + radius];
+    const apexHeight = height / 2 + radius; // Cone extends radius distance above cylinder top
+    const apex = [0, 0, apexHeight];
+    
+    // Calculate cone normal (points outward and upward at angle determined by geometry)
+    // Using right triangle: base = radius, height = radius, hypotenuse = slant
+    const slantHeight = Math.sqrt(radius * radius + radius * radius);
     
     for (let j = 0; j < vertsAroundEdge; j++) {
       const a = j * stepAngle;
@@ -121,11 +129,10 @@ function tesselateColumn(props: ColumnGeometryProps): {
       positions[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] : sin * radius;
       positions[i + 2] = height / 2;
       
-      // Normal for cone points outward and upward
-      const edgeNormal = Math.sqrt(radius * radius + radius * radius);
-      normals[i + 0] = vertices ? vertices[vertexIndex * 2] * radius / edgeNormal : cos * radius / edgeNormal;
-      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] * radius / edgeNormal : sin * radius / edgeNormal;
-      normals[i + 2] = radius / edgeNormal;
+      // Normal for cone: outward component proportional to radius, upward component proportional to radius
+      normals[i + 0] = vertices ? vertices[vertexIndex * 2] * radius / slantHeight : cos * radius / slantHeight;
+      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] * radius / slantHeight : sin * radius / slantHeight;
+      normals[i + 2] = radius / slantHeight;
       
       i += 3;
       
@@ -134,9 +141,9 @@ function tesselateColumn(props: ColumnGeometryProps): {
       positions[i + 1] = apex[1];
       positions[i + 2] = apex[2];
       
-      normals[i + 0] = vertices ? vertices[vertexIndex * 2] * radius / edgeNormal : cos * radius / edgeNormal;
-      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] * radius / edgeNormal : sin * radius / edgeNormal;
-      normals[i + 2] = radius / edgeNormal;
+      normals[i + 0] = vertices ? vertices[vertexIndex * 2] * radius / slantHeight : cos * radius / slantHeight;
+      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] * radius / slantHeight : sin * radius / slantHeight;
+      normals[i + 2] = radius / slantHeight;
       
       i += 3;
     }
