@@ -1,0 +1,125 @@
+<html>
+  <head>
+    <title>deck.gl ColumnLayer Cap Shape Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+    <script src='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js'></script>
+
+    <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      #controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+      .control-group {
+        margin-bottom: 10px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      select, input {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="controls">
+      <h3>ColumnLayer Cap Shape</h3>
+      <div class="control-group">
+        <label>Cap Shape:</label>
+        <select id="capShape" onchange="updateLayers()">
+          <option value="flat">Flat (Default)</option>
+          <option value="rounded">Rounded (Dome)</option>
+          <option value="pointy">Pointy (Cone)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Disk Resolution: <span id="diskResValue">20</span></label>
+        <input type="range" id="diskResolution" min="4" max="40" value="20" onchange="updateLayers()">
+      </div>
+    </div>
+  </body>
+
+  <script type="text/javascript">
+
+    const {DeckGL, ColumnLayer} = deck;
+
+    // Create sample data - grid of columns with varying heights
+    const data = [];
+    for (let x = -2; x <= 2; x++) {
+      for (let y = -2; y <= 2; y++) {
+        data.push({
+          position: [-122.4 + x * 0.01, 37.8 + y * 0.01],
+          elevation: Math.random() * 3000 + 1000,
+          color: [
+            Math.floor(Math.random() * 200) + 55,
+            Math.floor(Math.random() * 200) + 55,
+            Math.floor(Math.random() * 200) + 55,
+            255
+          ]
+        });
+      }
+    }
+
+    let deckgl;
+
+    function createColumnLayer() {
+      const capShape = document.getElementById('capShape').value;
+      const diskResolution = parseInt(document.getElementById('diskResolution').value);
+      document.getElementById('diskResValue').textContent = diskResolution;
+
+      return new ColumnLayer({
+        id: 'column-layer',
+        data: data,
+        diskResolution: diskResolution,
+        radius: 200,
+        extruded: true,
+        capShape: capShape, // NEW: 'flat', 'rounded', or 'pointy'
+        elevationScale: 1,
+        getPosition: d => d.position,
+        getFillColor: d => d.color,
+        getElevation: d => d.elevation,
+        pickable: true
+      });
+    }
+
+    function updateLayers() {
+      if (deckgl) {
+        deckgl.setProps({
+          layers: [createColumnLayer()]
+        });
+      }
+    }
+
+    // Initialize DeckGL
+    deckgl = new DeckGL({
+      mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+      initialViewState: {
+        longitude: -122.4,
+        latitude: 37.8,
+        zoom: 13,
+        pitch: 45,
+        bearing: 0
+      },
+      controller: true,
+      layers: [createColumnLayer()],
+      getTooltip: ({object}) => object && `Elevation: ${object.elevation.toFixed(0)}m`
+    });
+
+  </script>
+</html>
