@@ -47,7 +47,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   filled: true,
   stroked: false,
   flatShading: false,
-  capShape: 'flat',
+  capShape: {type: 'string', value: 'flat', compare: true},
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
