@@ -130,9 +130,21 @@ function tesselateColumn(props: ColumnGeometryProps): {
       positions[i + 2] = height / 2;
       
       // Normal for cone: outward component proportional to radius, upward component proportional to radius
-      normals[i + 0] = vertices ? vertices[vertexIndex * 2] * radius / slantHeight : cos * radius / slantHeight;
-      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] * radius / slantHeight : sin * radius / slantHeight;
-      normals[i + 2] = radius / slantHeight;
+      // For custom vertices, normalize the vertex position itself; for circular, use cos/sin
+      if (vertices) {
+        const vertexDist = Math.sqrt(
+          vertices[vertexIndex * 2] * vertices[vertexIndex * 2] + 
+          vertices[vertexIndex * 2 + 1] * vertices[vertexIndex * 2 + 1]
+        );
+        const customSlantHeight = Math.sqrt(vertexDist * vertexDist + radius * radius);
+        normals[i + 0] = vertices[vertexIndex * 2] * vertexDist / customSlantHeight;
+        normals[i + 1] = vertices[vertexIndex * 2 + 1] * vertexDist / customSlantHeight;
+        normals[i + 2] = radius / customSlantHeight;
+      } else {
+        normals[i + 0] = cos * radius / slantHeight;
+        normals[i + 1] = sin * radius / slantHeight;
+        normals[i + 2] = radius / slantHeight;
+      }
       
       i += 3;
       
@@ -141,9 +153,21 @@ function tesselateColumn(props: ColumnGeometryProps): {
       positions[i + 1] = apex[1];
       positions[i + 2] = apex[2];
       
-      normals[i + 0] = vertices ? vertices[vertexIndex * 2] * radius / slantHeight : cos * radius / slantHeight;
-      normals[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] * radius / slantHeight : sin * radius / slantHeight;
-      normals[i + 2] = radius / slantHeight;
+      // Apex uses same normal as the edge vertex it's paired with
+      if (vertices) {
+        const vertexDist = Math.sqrt(
+          vertices[vertexIndex * 2] * vertices[vertexIndex * 2] + 
+          vertices[vertexIndex * 2 + 1] * vertices[vertexIndex * 2 + 1]
+        );
+        const customSlantHeight = Math.sqrt(vertexDist * vertexDist + radius * radius);
+        normals[i + 0] = vertices[vertexIndex * 2] * vertexDist / customSlantHeight;
+        normals[i + 1] = vertices[vertexIndex * 2 + 1] * vertexDist / customSlantHeight;
+        normals[i + 2] = radius / customSlantHeight;
+      } else {
+        normals[i + 0] = cos * radius / slantHeight;
+        normals[i + 1] = sin * radius / slantHeight;
+        normals[i + 2] = radius / slantHeight;
+      }
       
       i += 3;
     }
@@ -220,6 +244,8 @@ function tesselateColumn(props: ColumnGeometryProps): {
       positions[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] : sin * radius;
       positions[i + 2] = height / 2;
 
+      normals[i + 0] = 0;
+      normals[i + 1] = 0;
       normals[i + 2] = 1;
 
       i += 3;
