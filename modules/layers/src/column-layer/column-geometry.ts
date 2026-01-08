@@ -53,14 +53,16 @@ function tesselateColumn(props: ColumnGeometryProps): {
   } else if (capShape === 'pointy') {
     // Cone cap: alternating pattern of edge vertex and apex vertex in triangle strip
     // For each edge around the top (nradial+1 to close the loop): edge vertex + apex vertex
-    numVertices = vertsAroundEdge * 2 + 1 + vertsAroundEdge * 2; // sides + degenerate + cone vertices
+    // +1 for transition degenerate vertex
+    numVertices = vertsAroundEdge * 2 + 1 + 1 + vertsAroundEdge * 2; // sides + degenerate + transition + cone vertices
   } else if (capShape === 'rounded') {
     // Dome cap: multiple latitude rings from base to top, rendered as triangle strips
     // Each level needs 2 vertices per position (current ring + next ring) for triangle strip
     // Use ~25% of nradial as number of latitude rings for good balance of quality/performance
     const domeLevels = Math.max(3, Math.floor(nradial / 4)); // number of latitude rings for dome
     // Each level needs vertsAroundEdge * 2 vertices for triangle strip
-    numVertices = vertsAroundEdge * 2 + 1 + (domeLevels * vertsAroundEdge * 2 + 1); // sides + degenerate + dome + apex
+    // +1 for transition degenerate vertex
+    numVertices = vertsAroundEdge * 2 + 1 + 1 + (domeLevels * vertsAroundEdge * 2 + 1); // sides + degenerate + transition + dome + apex
   } else {
     // flat top (original behavior)
     numVertices = vertsAroundEdge * 3 + 1; // top, side top edge, side bottom edge, one additional degenerate vertex
@@ -118,6 +120,29 @@ function tesselateColumn(props: ColumnGeometryProps): {
     // Using right triangle: base = radius, height = radius, hypotenuse = slant
     const slantHeight = Math.sqrt(radius * radius + radius * radius);
     
+    // Add first vertex of cone cap as degenerate to transition from sides
+    const firstVertexIndex = 0;
+    const firstSin = Math.sin(0);
+    const firstCos = Math.cos(0);
+    positions[i + 0] = vertices ? vertices[firstVertexIndex * 2] : firstCos * radius;
+    positions[i + 1] = vertices ? vertices[firstVertexIndex * 2 + 1] : firstSin * radius;
+    positions[i + 2] = height / 2;
+    if (vertices) {
+      const vertexDist = Math.sqrt(
+        vertices[firstVertexIndex * 2] * vertices[firstVertexIndex * 2] + 
+        vertices[firstVertexIndex * 2 + 1] * vertices[firstVertexIndex * 2 + 1]
+      );
+      const customSlantHeight = Math.sqrt(vertexDist * vertexDist + radius * radius);
+      normals[i + 0] = vertices[firstVertexIndex * 2] * vertexDist / customSlantHeight;
+      normals[i + 1] = vertices[firstVertexIndex * 2 + 1] * vertexDist / customSlantHeight;
+      normals[i + 2] = radius / customSlantHeight;
+    } else {
+      normals[i + 0] = firstCos * radius / slantHeight;
+      normals[i + 1] = firstSin * radius / slantHeight;
+      normals[i + 2] = radius / slantHeight;
+    }
+    i += 3;
+    
     for (let j = 0; j < vertsAroundEdge; j++) {
       const a = j * stepAngle;
       const vertexIndex = j % nradial;
@@ -174,6 +199,21 @@ function tesselateColumn(props: ColumnGeometryProps): {
   } else if (isExtruded && capShape === 'rounded') {
     // Generate dome using triangle strips between latitude rings
     const domeLevels = Math.max(3, Math.floor(nradial / 4));
+    
+    // Add first vertex of dome as degenerate to transition from sides
+    const firstTheta = 0;
+    const firstSin = Math.sin(firstTheta);
+    const firstCos = Math.cos(firstTheta);
+    const firstPhi = 0;
+    const firstR = Math.cos(firstPhi) * radius;
+    const firstZ = height / 2 + Math.sin(firstPhi) * radius;
+    positions[i + 0] = firstCos * firstR;
+    positions[i + 1] = firstSin * firstR;
+    positions[i + 2] = firstZ;
+    normals[i + 0] = firstCos * Math.cos(firstPhi);
+    normals[i + 1] = firstSin * Math.cos(firstPhi);
+    normals[i + 2] = Math.sin(firstPhi);
+    i += 3;
     
     // Start from the base (top edge of cylinder)
     for (let level = 0; level < domeLevels; level++) {
