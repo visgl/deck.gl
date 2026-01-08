@@ -64,10 +64,16 @@ function updateLayers() {
   const diskResolution = parseInt(diskResolutionSlider.value);
   diskResValueSpan.textContent = diskResolution;
   
+  console.log('[Example] Updating layer with:', { capShape, diskResolution });
+  
   deckgl.setProps({
     layers: [createLayer(capShape, diskResolution)]
   });
+  
+  console.log('[Example] Layer update requested');
 }
 
 capShapeSelect.addEventListener('change', updateLayers);
 diskResolutionSlider.addEventListener('input', updateLayers);
+
+console.log('[Example] App initialized with capShape:', capShapeSelect.value);

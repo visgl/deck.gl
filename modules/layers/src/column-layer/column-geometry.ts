@@ -36,6 +36,14 @@ function tesselateColumn(props: ColumnGeometryProps): {
   const {radius, height = 1, nradial = 10, capShape = 'flat'} = props;
   let {vertices} = props;
 
+  console.log('[ColumnGeometry] tesselateColumn called with:', {
+    radius,
+    height,
+    nradial,
+    capShape,
+    hasVertices: !!vertices
+  });
+
   if (vertices) {
     log.assert(vertices.length >= nradial); // `vertices` must contain at least `diskResolution` points
     vertices = vertices.flatMap(v => [v[0], v[1]]);
@@ -49,13 +57,16 @@ function tesselateColumn(props: ColumnGeometryProps): {
   let numVertices: number;
   
   if (!isExtruded) {
+    console.log('[ColumnGeometry] Not extruded, using flat disk');
     numVertices = nradial; // flat disk
   } else if (capShape === 'pointy') {
+    console.log('[ColumnGeometry] Using POINTY cap shape');
     // Cone cap: alternating pattern of edge vertex and apex vertex in triangle strip
     // For each edge around the top (nradial+1 to close the loop): edge vertex + apex vertex
     // +1 for transition degenerate vertex
     numVertices = vertsAroundEdge * 2 + 1 + 1 + vertsAroundEdge * 2; // sides + degenerate + transition + cone vertices
   } else if (capShape === 'rounded') {
+    console.log('[ColumnGeometry] Using ROUNDED cap shape');
     // Dome cap: multiple latitude rings from base to top, rendered as triangle strips
     // Each level needs 2 vertices per position (current ring + next ring) for triangle strip
     // Use ~25% of nradial as number of latitude rings for good balance of quality/performance
@@ -64,9 +75,12 @@ function tesselateColumn(props: ColumnGeometryProps): {
     // +1 for transition degenerate vertex
     numVertices = vertsAroundEdge * 2 + 1 + 1 + (domeLevels * vertsAroundEdge * 2 + 1); // sides + degenerate + transition + dome + apex
   } else {
+    console.log('[ColumnGeometry] Using FLAT cap shape (default)');
     // flat top (original behavior)
     numVertices = vertsAroundEdge * 3 + 1; // top, side top edge, side bottom edge, one additional degenerate vertex
   }
+
+  console.log('[ColumnGeometry] numVertices calculated:', numVertices);
 
   const stepAngle = (Math.PI * 2) / nradial;
 
