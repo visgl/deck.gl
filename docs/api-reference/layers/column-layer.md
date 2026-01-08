@@ -248,6 +248,8 @@ The shape of the column's top cap. Available options:
 
 Only effective if `extruded` is `true`.
 
+See the [cap shape example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/column-cap-shape) for an interactive demonstration.
+
 #### `radiusUnits` (string, optional) {#radiusunits}
 
 * Default: `'meters'`
