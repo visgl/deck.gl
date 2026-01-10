@@ -28,8 +28,65 @@ import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
+/**
+ * Bevel configuration for per-instance getBevel accessor.
+ * - 'flat': No bevel (flat top)
+ * - 'dome': Dome with height = radius
+ * - 'cone': Cone with height = radius
+ * - number: Custom dome height in world units
+ * - {segs, height, bulge?}: Full control
+ *   - segs: number of bevel segments (0-1=flat, 2=cone, 3+=dome)
+ *   - height: bevel height in world units (must be > 0, unbounded)
+ *   - bulge: curve factor (-1 to 1+), 0=standard dome, negative=concave, positive=convex bulge
+ *
+ * Note: height must be positive. Values <= 0 result in flat cap.
+ */
+export type BevelProp =
+  | 'flat'
+  | 'dome'
+  | 'cone'
+  | number
+  | {segs: number; height: number; bulge?: number};
+
+/** Extract height from BevelProp: positive=custom height, -1=use radius */
+function bevelPropToHeight(bevel: BevelProp): number {
+  if (bevel === 'flat') return 0;
+  if (bevel === 'dome') return -1; // use radius
+  if (bevel === 'cone') return -1; // use radius
+  if (typeof bevel === 'number') return bevel;
+  if (typeof bevel === 'object' && bevel !== null) {
+    const {segs, height} = bevel;
+    if (segs <= 1 || height <= 0) return 0;
+    return height;
+  }
+  return 0;
+}
+
+/** Extract segs from BevelProp: 0=flat, 2=cone, 3+=dome with that many segments */
+function bevelPropToSegs(bevel: BevelProp): number {
+  if (bevel === 'flat') return 0;
+  if (bevel === 'dome') return -1; // use geometry's segments
+  if (bevel === 'cone') return 2;
+  if (typeof bevel === 'number') return -1; // use geometry's segments
+  if (typeof bevel === 'object' && bevel !== null) {
+    const {segs, height} = bevel;
+    if (height <= 0) return 0;
+    return segs;
+  }
+  return 0;
+}
+
+/** Extract bulge from BevelProp: 0=standard curve, negative=concave, positive=convex */
+function bevelPropToBulge(bevel: BevelProp): number {
+  if (typeof bevel === 'object' && bevel !== null) {
+    return bevel.bulge ?? 0;
+  }
+  return 0; // default: standard dome curve
+}
+
 const defaultProps: DefaultProps<ColumnLayerProps> = {
   diskResolution: {type: 'number', min: 4, value: 20},
+  bevelSegments: null,
   vertices: null,
   radius: {type: 'number', min: 0, value: 1000},
   angle: {type: 'number', value: 0},
@@ -47,13 +104,13 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   filled: true,
   stroked: false,
   flatShading: false,
-  capShape: {type: 'string', value: 'flat', compare: true},
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
+  getBevel: {type: 'accessor', value: 'flat'},
   material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
@@ -71,7 +128,14 @@ type _ColumnLayerProps<DataT> = {
   diskResolution?: number;
 
   /**
-   * isk size in units specified by `radiusUnits`.
+   * Number of segments for the bevel cap. Higher = smoother dome.
+   * 0 = flat cap, 2 = cone, 3+ = smooth dome.
+   * @default diskResolution / 4
+   */
+  bevelSegments?: number | null;
+
+  /**
+   * Disk size in units specified by `radiusUnits`.
    * @default 1000
    */
   radius?: number;
@@ -135,12 +199,6 @@ type _ColumnLayerProps<DataT> = {
    * @default false
    */
   flatShading?: boolean;
-
-  /**
-   * The shape of the column's top cap. Options: 'flat' (default), 'rounded' (dome-like), or 'pointy' (cone-like).
-   * @default 'flat'
-   */
-  capShape?: 'flat' | 'rounded' | 'pointy';
 
   /**
    * The units of the radius.
@@ -216,6 +274,17 @@ type _ColumnLayerProps<DataT> = {
    * @default 1
    */
   getLineWidth?: Accessor<DataT, number>;
+
+  /**
+   * The bevel configuration for each column.
+   * - 'flat': No bevel (flat top) - default
+   * - 'dome': Rounded dome with smooth normals (height = radius)
+   * - 'cone': Pointed cone (height = radius)
+   * - {segs, height, bulge?}: Full control over bevel shape
+   *
+   * @default 'flat'
+   */
+  getBevel?: Accessor<DataT, BevelProp>;
 };
 
 /** Render extruded cylinders (tessellated regular polygons) at given coordinates. */
@@ -279,13 +348,42 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         size: this.props.colorFormat.length,
         type: 'unorm8',
         transition: true,
-        accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR
+        accessor: 'getLineColor'
       },
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getLineWidth',
         transition: true
+      },
+      instanceBevelHeights: {
+        size: 1,
+        transition: true,
+        accessor: (object: any, {index, data, target}: any) => {
+          const getBevel = this.props.getBevel;
+          const bevel =
+            typeof getBevel === 'function' ? getBevel(object, {index, data, target}) : getBevel;
+          return bevelPropToHeight(bevel);
+        }
+      },
+      instanceBevelSegs: {
+        size: 1,
+        transition: true,
+        accessor: (object: any, {index, data, target}: any) => {
+          const getBevel = this.props.getBevel;
+          const bevel =
+            typeof getBevel === 'function' ? getBevel(object, {index, data, target}) : getBevel;
+          return bevelPropToSegs(bevel);
+        }
+      },
+      instanceBevelBulge: {
+        size: 1,
+        transition: true,
+        accessor: (object: any, {index, data, target}: any) => {
+          const getBevel = this.props.getBevel;
+          const bevel =
+            typeof getBevel === 'function' ? getBevel(object, {index, data, target}) : getBevel;
+          return bevelPropToBulge(bevel);
+        }
       }
     });
     /* eslint-enable max-len */
@@ -311,21 +409,26 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     if (
       regenerateModels ||
       props.diskResolution !== oldProps.diskResolution ||
+      props.bevelSegments !== oldProps.bevelSegments ||
       props.vertices !== oldProps.vertices ||
-      props.capShape !== oldProps.capShape ||
       (props.extruded || props.stroked) !== (oldProps.extruded || oldProps.stroked)
     ) {
       this._updateGeometry(props);
     }
   }
 
-  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThinkness: boolean, capShape: 'flat' | 'rounded' | 'pointy') {
+  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThickness: boolean) {
+    // Always generate geometry with bevel (dome shape)
+    // Per-instance getBevel controls whether each instance shows it
+    const bevelSegments = this.props.bevelSegments ?? Math.max(3, Math.floor(diskResolution / 4));
     const geometry = new ColumnGeometry({
       radius: 1,
-      height: hasThinkness ? 2 : 0,
+      height: hasThickness ? 2 : 0,
       vertices,
       nradial: diskResolution,
-      capShape
+      bevelSegments,
+      bevelHeight: 1, // Full dome by default
+      smoothNormals: true
     });
 
     let meanVertexDistance = 0;
@@ -369,8 +472,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     };
   }
 
-  protected _updateGeometry({diskResolution, vertices, extruded, stroked, capShape}) {
-    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked, capShape);
+  protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
+    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
 
     this.setState({
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
@@ -408,6 +511,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const wireframeModel = this.state.wireframeModel!;
     const {fillVertexCount, edgeDistance} = this.state;
 
+    // Bevel is always enabled (geometry always has dome shape)
+    // Per-instance getBevel controls height via instanceBevelHeights attribute
+    const bevelEnabled = true;
+    // bevelSize is the world-space height of the bevel (1 * radius * coverage for full dome)
+    const bevelSize = radius * coverage;
+    // bevelTopZ is 0 for full dome (bevelHeight = 1)
+    const bevelTopZ = 0;
+
     const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
       angle: (angle / 180) * Math.PI,
@@ -421,7 +532,10 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       widthUnits: UNIT[lineWidthUnits],
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
-      widthMaxPixels: lineWidthMaxPixels
+      widthMaxPixels: lineWidthMaxPixels,
+      bevelEnabled,
+      bevelSize,
+      bevelTopZ
     };
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test

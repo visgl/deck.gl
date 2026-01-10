@@ -237,19 +237,6 @@ Whether to generate a line wireframe of the column. The outline will have
 If `true`, the vertical surfaces of the columns use [flat shading](https://en.wikipedia.org/wiki/Shading#Flat_vs._smooth_shading).
 If `false`, use smooth shading. Only effective if `extruded` is `true`.
 
-#### `capShape` (string, optional) {#capshape}
-
-* Default: `'flat'`
-
-The shape of the column's top cap. Available options:
-- `'flat'`: Flat top (default)
-- `'rounded'`: Dome-shaped top, like a silo
-- `'pointy'`: Cone-shaped top, like a missile
-
-Only effective if `extruded` is `true`.
-
-See the [cap shape example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/column-cap-shape) for an interactive demonstration.
-
 #### `radiusUnits` (string, optional) {#radiusunits}
 
 * Default: `'meters'`
@@ -334,6 +321,45 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 
 * If a number is provided, it is used as the outline width for all columns.
 * If a function is provided, it is called on each object to retrieve its outline width.
+
+#### `getBevel` ([Accessor&lt;BevelProp&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getbevel}
+
+* Default: `'flat'`
+
+Configuration for the column's top cap bevel. The bevel is a convex dome/cone shape that replaces the flat top of the column. The cylinder sides are shortened to accommodate the bevel while preserving total column height.
+
+**String shortcuts:**
+- `'flat'`: No bevel, flat top (default)
+- `'dome'`: Rounded dome shape with smooth normals, height based on radius
+- `'cone'`: Pointed cone shape with planar normals, height based on radius
+
+**Object form (full control):**
+```ts
+getBevel: d => ({
+  segs: number,     // Number of segments (0-1 = flat, 2 = cone, 3+ = smooth dome)
+  height: number,   // Bevel height in world units (e.g., meters)
+  bulge?: number    // Optional curve factor (-1 to 1+, default 0)
+})
+```
+
+- `segs`: Controls the shape - `0` or `1` produces a flat top, `2` produces a cone, `3+` produces a smooth dome
+- `height`: Absolute height of the bevel in world units (meters). Unbounded - can exceed column height.
+- `bulge`: Optional parameter that affects the radius curve. Positive values bulge outward, negative values pinch inward.
+
+**Example - per-instance bevel control:**
+```js
+getBevel: d => {
+  if (d.type === 'standard') return 'flat';
+  if (d.type === 'tower') return 'cone';
+  return {
+    segs: 5,
+    height: d.bevelSize,
+    bulge: 0.3
+  };
+}
+```
+
+Only applies if `extruded: true`.
 
 ## Source
 

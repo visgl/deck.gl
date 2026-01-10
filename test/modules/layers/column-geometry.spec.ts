@@ -97,40 +97,99 @@ test('ColumnGeometry#tesselation', t => {
   t.end();
 });
 
-test('ColumnGeometry#capShape', t => {
+test('ColumnGeometry#bevel', t => {
   const nradial = 4;
   const vertsAroundEdge = nradial + 1;
-  
-  t.comment('Flat cap shape');
-  let geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'flat'});
+
+  t.comment('Flat bevel (bevelSegments=0)');
+  let geometry = new ColumnGeometry({radius: 1, height: 1, nradial, bevelSegments: 0});
   let attributes = geometry.getAttributes();
 
-  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'flat cap positions generated');
-  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'flat cap normals generated');
+  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'flat bevel positions generated');
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'flat bevel normals generated');
   // Flat cap: sides (vertsAroundEdge * 2) + degenerate (1) + top cap (vertsAroundEdge)
-  t.is(attributes.POSITION.value.length, (vertsAroundEdge * 3 + 1) * 3, 'flat cap POSITION has correct size');
+  t.is(
+    attributes.POSITION.value.length,
+    (vertsAroundEdge * 3 + 1) * 3,
+    'flat bevel POSITION has correct size'
+  );
 
-  t.comment('Pointy cap shape');
-  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'pointy'});
+  t.comment('Cone bevel (bevelSegments=2)');
+  geometry = new ColumnGeometry({
+    radius: 1,
+    height: 1,
+    nradial,
+    bevelSegments: 2,
+    bevelHeight: 1,
+    smoothNormals: false
+  });
   attributes = geometry.getAttributes();
 
-  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'pointy cap positions generated');
-  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'pointy cap normals generated');
-  t.ok(attributes.POSITION.value.length > 0, 'pointy cap has vertices');
-  
-  // Check that there's a point at the top center
-  const positions = attributes.POSITION.value;
-  const lastVertex = [positions[positions.length - 3], positions[positions.length - 2], positions[positions.length - 1]];
-  t.ok(Math.abs(lastVertex[0]) < 0.01 && Math.abs(lastVertex[1]) < 0.01, 'pointy cap has center point');
-  t.ok(lastVertex[2] > 0, 'pointy cap center point is at top');
+  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'cone bevel positions generated');
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'cone bevel normals generated');
+  t.ok(attributes.POSITION.value.length > 0, 'cone bevel has vertices');
 
-  t.comment('Rounded cap shape');
-  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, capShape: 'rounded'});
+  // Check that apex is at center (x=0, y=0) and cuts into column (z < 0.5)
+  const conePositions = attributes.POSITION.value;
+  const coneApexZ = conePositions[conePositions.length - 1];
+  t.ok(coneApexZ < 0.5, 'cone apex cuts INTO column (z < top edge)');
+  t.is(conePositions[conePositions.length - 3], 0, 'cone apex at x=0');
+  t.is(conePositions[conePositions.length - 2], 0, 'cone apex at y=0');
+
+  t.comment('Dome bevel (bevelSegments=5, smoothNormals=true)');
+  geometry = new ColumnGeometry({
+    radius: 1,
+    height: 1,
+    nradial,
+    bevelSegments: 5,
+    bevelHeight: 1,
+    smoothNormals: true
+  });
   attributes = geometry.getAttributes();
 
-  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'rounded cap positions generated');
-  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'rounded cap normals generated');
-  t.ok(attributes.POSITION.value.length > (vertsAroundEdge * 3 + 1) * 3, 'rounded cap has more vertices than flat');
+  t.ok(ArrayBuffer.isView(attributes.POSITION.value), 'dome bevel positions generated');
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'dome bevel normals generated');
+  t.ok(
+    attributes.POSITION.value.length > (vertsAroundEdge * 3 + 1) * 3,
+    'dome bevel has more vertices than flat'
+  );
+
+  // Verify apex cuts into column
+  const domePositions = attributes.POSITION.value;
+  const domeApexZ = domePositions[domePositions.length - 1];
+  t.ok(domeApexZ < 0.5, 'dome apex cuts INTO column (z < top edge)');
+
+  t.comment('Bevel with custom height');
+  geometry = new ColumnGeometry({
+    radius: 1,
+    height: 1,
+    nradial,
+    bevelSegments: 2,
+    bevelHeight: 0.5,
+    smoothNormals: false
+  });
+  attributes = geometry.getAttributes();
+
+  const shallowPositions = attributes.POSITION.value;
+  const shallowApexZ = shallowPositions[shallowPositions.length - 1];
+  // With bevelHeight=0.5, apex should be at 0.5 - 0.5*1 = 0 for height=1, radius=1
+  t.ok(shallowApexZ > coneApexZ, 'shallow bevel has apex higher than full bevel');
+
+  t.comment('Bevel with smoothNormals=false (planar normals)');
+  geometry = new ColumnGeometry({
+    radius: 1,
+    height: 1,
+    nradial,
+    bevelSegments: 3,
+    bevelHeight: 1,
+    smoothNormals: false
+  });
+  attributes = geometry.getAttributes();
+
+  t.ok(ArrayBuffer.isView(attributes.NORMAL.value), 'planar normals generated');
+  // Planar normals should have consistent z-component across a face
+  const planarNormals = attributes.NORMAL.value;
+  t.ok(planarNormals.length > 0, 'planar normals have values');
 
   t.end();
 });

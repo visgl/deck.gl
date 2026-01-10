@@ -36,7 +36,7 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
     this.state.fillModel!.setGeometry(geometry);
   }
 
-  draw({uniforms}) {
+  draw() {
     const {elevationScale, extruded, offset, coverage, cellSize, angle, radiusUnits} = this.props;
     const fillModel = this.state.fillModel!;
     const columnProps: ColumnProps = {
@@ -53,7 +53,11 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
       widthUnits: 0,
       widthScale: 0,
       widthMinPixels: 0,
-      widthMaxPixels: 0
+      widthMaxPixels: 0,
+      // GridCellLayer uses CubeGeometry, no bevel support
+      bevelEnabled: false,
+      bevelSize: 0,
+      bevelTopZ: 1
     };
     fillModel.shaderInputs.setProps({column: columnProps});
     fillModel.draw(this.context.renderPass);

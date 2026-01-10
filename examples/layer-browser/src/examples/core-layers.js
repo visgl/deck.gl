@@ -279,6 +279,9 @@ const ScatterplotLayerExample = {
 
 const ColumnLayerExample = {
   layer: ColumnLayer,
+  propTypes: {
+    getBevel: {type: 'category', value: ['flat', 'cone', 'dome']}
+  },
   props: {
     id: 'columnLayer',
     data: dataSamples.worldGrid.data,
@@ -286,6 +289,9 @@ const ColumnLayerExample = {
     pickable: true,
     radius: 100,
     opacity: 1,
+    flatShading: false,
+    diskResolution: 20,
+    getBevel: 'dome',
     getFillColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000
   }

@@ -168,22 +168,37 @@ export default [
   ),
   genColumnLayerTestCase(
     {
-      name: 'column-lnglat-extruded-pointy'
+      name: 'column-lnglat-extruded-cone'
     },
     {
       extruded: true,
-      capShape: 'pointy',
+      bevel: 'cone',
       getElevation: h => h.value * 5000
     }
   ),
   genColumnLayerTestCase(
     {
-      name: 'column-lnglat-extruded-rounded'
+      name: 'column-lnglat-extruded-dome'
     },
     {
       extruded: true,
-      capShape: 'rounded',
+      bevel: 'dome',
       getElevation: h => h.value * 5000
+    }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-getBevel'
+    },
+    {
+      extruded: true,
+      bevel: 'dome',
+      getElevation: h => h.value * 5000,
+      getBevel: (h: {value: number}) => {
+        if (h.value < 0.3) return 'flat';
+        if (h.value < 0.6) return 'dome';
+        return {height: 1.5};
+      }
     }
   )
 ];

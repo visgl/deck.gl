@@ -20,6 +20,9 @@ uniform columnUniforms {
   float widthMaxPixels;
   highp int radiusUnits;
   highp int widthUnits;
+  bool bevelEnabled;
+  float bevelSize;
+  float bevelTopZ;
 } column;
 `;
 
@@ -38,6 +41,12 @@ export type ColumnProps = {
   widthMaxPixels: number;
   radiusUnits: number;
   widthUnits: number;
+  /** Whether bevel is enabled (segments >= 2) */
+  bevelEnabled: boolean;
+  /** World-space bevel height in same units as radius */
+  bevelSize: number;
+  /** Normalized Z where bevel starts (1 - bevelHeight) */
+  bevelTopZ: number;
 };
 
 export const columnUniforms = {
@@ -58,6 +67,9 @@ export const columnUniforms = {
     widthMinPixels: 'f32',
     widthMaxPixels: 'f32',
     radiusUnits: 'i32',
-    widthUnits: 'i32'
+    widthUnits: 'i32',
+    bevelEnabled: 'f32',
+    bevelSize: 'f32',
+    bevelTopZ: 'f32'
   }
 } as const satisfies ShaderModule<ColumnProps>;
