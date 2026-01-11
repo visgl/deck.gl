@@ -322,6 +322,26 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 * If a number is provided, it is used as the outline width for all columns.
 * If a function is provided, it is called on each object to retrieve its outline width.
 
+#### `getRadius` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getradius}
+
+* Default: `1`
+
+The radius of each column, in units specified by `radiusUnits`. The final radius is calculated as `radius * getRadius(d)`, where `radius` acts as a scale factor (similar to `radiusScale` in ScatterplotLayer).
+
+* If a number is provided, it is used as the radius for all columns.
+* If a function is provided, it is called on each object to retrieve its radius.
+
+This accessor enables per-instance radius variation. The `radius` prop acts as a uniform multiplier:
+
+```js
+new ColumnLayer({
+  radius: 1,                      // Scale factor (1 = use getRadius values directly)
+  getRadius: d => d.canopyRadius, // Per-instance radius in meters
+  radiusUnits: 'meters',
+  // ... other props
+});
+```
+
 #### `getBevel` ([Accessor&lt;BevelProp&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getbevel}
 
 * Default: `'flat'`

@@ -15,6 +15,7 @@ in vec3 instancePositions64Low;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in float instanceStrokeWidths;
+in float instanceRadii;
 in float instanceBevelHeights;
 in float instanceBevelSegs;
 in float instanceBevelBulge;
@@ -82,12 +83,14 @@ void main(void) {
     float widthPixels = clamp(
       project_size_to_pixel(instanceStrokeWidths * column.widthScale, column.widthUnits),
       column.widthMinPixels, column.widthMaxPixels) / 2.0;
-    float halfOffset = project_pixel_size(widthPixels) / project_size(column.edgeDistance * column.coverage * column.radius);
+    float effectiveRadius = column.radius * instanceRadii;
+    float halfOffset = project_pixel_size(widthPixels) / project_size(column.edgeDistance * column.coverage * effectiveRadius);
     strokeOffsetRatio -= column.isStroke ? sign(positions.z) * halfOffset : halfOffset;
   }
 
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
-  float dotRadius = column.radius * column.coverage * shouldRender;
+  // Multiply uniform radius by per-instance radius (default instanceRadii = 1)
+  float dotRadius = column.radius * instanceRadii * column.coverage * shouldRender;
 
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 offset = (rotationMatrix * adjustedXY * strokeOffsetRatio + column.offset) * dotRadius;

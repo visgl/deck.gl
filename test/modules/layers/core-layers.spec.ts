@@ -142,6 +142,54 @@ test('ColumnLayer', t => {
   t.end();
 });
 
+test('ColumnLayer#getRadius', t => {
+  const dataWithRadius = [
+    {position: [37, 122], radius: 0.5},
+    {position: [37.1, 122], radius: 1.0},
+    {position: [37, 122.8], radius: 1.5},
+    {position: [37.1, 122.8], radius: 2.0}
+  ];
+
+  const testCases = [
+    {
+      title: 'ColumnLayer with getRadius accessor',
+      props: {
+        data: dataWithRadius,
+        getPosition: d => d.position,
+        radius: 100,
+        getRadius: d => d.radius
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instanceRadii} = layer.getAttributeManager().getAttributes();
+        t.ok(instanceRadii, 'instanceRadii attribute exists');
+        t.equal(instanceRadii.value[0], 0.5, 'first instance radius is 0.5');
+        t.equal(instanceRadii.value[1], 1.0, 'second instance radius is 1.0');
+        t.equal(instanceRadii.value[2], 1.5, 'third instance radius is 1.5');
+        t.equal(instanceRadii.value[3], 2.0, 'fourth instance radius is 2.0');
+      }
+    },
+    {
+      title: 'ColumnLayer with constant getRadius',
+      props: {
+        data: dataWithRadius,
+        getPosition: d => d.position,
+        radius: 100,
+        getRadius: 2.5
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instanceRadii} = layer.getAttributeManager().getAttributes();
+        t.ok(instanceRadii, 'instanceRadii attribute exists');
+        t.equal(instanceRadii.value[0], 2.5, 'all instances have radius 2.5');
+        t.equal(instanceRadii.value[1], 2.5, 'all instances have radius 2.5');
+      }
+    }
+  ];
+
+  testLayer({Layer: ColumnLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('GridCellLayer', t => {
   const testCases = generateLayerTests({
     Layer: GridCellLayer,

@@ -110,6 +110,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
+  getRadius: {type: 'accessor', value: 1},
   getBevel: {type: 'accessor', value: 'flat'},
   material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
@@ -276,6 +277,14 @@ type _ColumnLayerProps<DataT> = {
   getLineWidth?: Accessor<DataT, number>;
 
   /**
+   * The radius of each column, in units specified by `radiusUnits`.
+   * This is multiplied by the `radius` prop to get the final radius.
+   *
+   * @default 1
+   */
+  getRadius?: Accessor<DataT, number>;
+
+  /**
    * The bevel configuration for each column.
    * - 'flat': No bevel (flat top) - default
    * - 'dome': Rounded dome with smooth normals (height = radius)
@@ -353,6 +362,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getLineWidth',
+        transition: true
+      },
+      instanceRadii: {
+        size: 1,
+        accessor: 'getRadius',
+        defaultValue: 1,
         transition: true
       },
       instanceBevelHeights: {
