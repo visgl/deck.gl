@@ -358,32 +358,20 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       instanceBevelHeights: {
         size: 1,
         transition: true,
-        accessor: (object: any, {index, data, target}: any) => {
-          const getBevel = this.props.getBevel;
-          const bevel =
-            typeof getBevel === 'function' ? getBevel(object, {index, data, target}) : getBevel;
-          return bevelPropToHeight(bevel);
-        }
+        accessor: 'getBevel',
+        transform: bevelPropToHeight
       },
       instanceBevelSegs: {
         size: 1,
         transition: true,
-        accessor: (object: any, {index, data, target}: any) => {
-          const getBevel = this.props.getBevel;
-          const bevel =
-            typeof getBevel === 'function' ? getBevel(object, {index, data, target}) : getBevel;
-          return bevelPropToSegs(bevel);
-        }
+        accessor: 'getBevel',
+        transform: bevelPropToSegs
       },
       instanceBevelBulge: {
         size: 1,
         transition: true,
-        accessor: (object: any, {index, data, target}: any) => {
-          const getBevel = this.props.getBevel;
-          const bevel =
-            typeof getBevel === 'function' ? getBevel(object, {index, data, target}) : getBevel;
-          return bevelPropToBulge(bevel);
-        }
+        accessor: 'getBevel',
+        transform: bevelPropToBulge
       }
     });
     /* eslint-enable max-len */
