@@ -12,7 +12,7 @@ A TypeScript/React test application for quickly testing deck.gl with different b
 
 ## Architecture
 
-The basemap-browser uses a two-React-roots architecture with TypeScript throughout:
+The basemap-browser uses a two-React-roots architecture:
 
 ```
 src/
@@ -66,24 +66,24 @@ Open http://localhost:8080 in your browser.
 
 The basemap browser covers these configurations:
 
-| Provider | Framework | Interleaved | Status |
-|----------|-----------|-------------|--------|
-| Google Maps | Pure JS | true | ✅ |
-| Google Maps | Pure JS | false | ✅ |
-| Google Maps | React | true | ✅ |
-| Google Maps | React | false | ✅ |
-| Mapbox | Pure JS | true | ✅ |
-| Mapbox | Pure JS | false | ✅ |
-| Mapbox | React | true | ✅ |
-| Mapbox | React | false | ✅ |
-| MapLibre | Pure JS | true | ✅ |
-| MapLibre | Pure JS | false | ✅ |
-| MapLibre | React | true | ✅ |
-| MapLibre | React | false | ✅ |
-| MapLibre Globe | Pure JS | true | ✅ |
-| MapLibre Globe | Pure JS | false | ✅ |
-| MapLibre Globe | React | true | ✅ |
-| MapLibre Globe | React | false | ✅ |
+| Provider | Framework | Interleaved |
+|----------|-----------|-------------|
+| Google Maps | Pure JS | true |
+| Google Maps | Pure JS | false |
+| Google Maps | React | true |
+| Google Maps | React | false |
+| Mapbox | Pure JS | true |
+| Mapbox | Pure JS | false |
+| Mapbox | React | true |
+| Mapbox | React | false |
+| MapLibre | Pure JS | true |
+| MapLibre | Pure JS | false |
+| MapLibre | React | true |
+| MapLibre | React | false |
+| MapLibre Globe | Pure JS | true |
+| MapLibre Globe | Pure JS | false |
+| MapLibre Globe | React | true |
+| MapLibre Globe | React | false |
 
 ## Google Maps Setup
 

@@ -10,7 +10,6 @@ import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-// MapLibre Overlay wrapper
 function MapLibreDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
   const overlay = useMapLibreControl(() => new MapboxOverlay(props));
   overlay.setProps(props);

@@ -14,7 +14,6 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 // eslint-disable-next-line no-process-env
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 
-// Mapbox Overlay wrapper
 function MapboxDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
   const overlay = useMapboxControl(() => new MapboxOverlay(props));
   overlay.setProps(props);
