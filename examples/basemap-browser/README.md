@@ -133,7 +133,7 @@ This browser extracts the core layer configurations from the get-started example
 
 ## Known Issues
 
-- Google Maps in overlaid mode (interleaved: false) may show a blank canvas when entering fullscreen - this is a pre-existing issue unrelated to the resize/DPR fix
+- Google Maps in overlaid mode (interleaved: false) may show a blank canvas when entering fullscreen
 
 ## Related PRs
 
