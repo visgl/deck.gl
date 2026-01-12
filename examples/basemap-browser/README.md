@@ -12,7 +12,7 @@ A TypeScript/React test application for quickly testing deck.gl with different b
 
 ## Architecture
 
-The basemap-browser uses a two-React-roots architecture:
+This example demonstrates both Pure JS and React integration patterns with deck.gl:
 
 ```
 src/
