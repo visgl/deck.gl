@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
+import {Layer, color, project32, picking, log, UNIT} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
+import {shaderWGSL as source} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 
 import type {
@@ -25,6 +26,7 @@ import type {
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
+import {Parameters} from '@luma.gl/core';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -46,7 +48,7 @@ type _IconLayerProps<DataT> = {
   /**
    * The dimension to scale the image
    */
-  sizeBasis: 'height' | 'width';
+  sizeBasis?: 'height' | 'width';
   /**
    * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
    */
@@ -139,7 +141,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, iconUniforms]});
+    return super.getShaders({vs, fs, source, modules: [project32, color, picking, iconUniforms]});
   }
 
   initializeState() {
@@ -166,24 +168,25 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         accessor: 'getSize',
         defaultValue: 1
       },
-      instanceOffsets: {
-        size: 2,
+      instanceIconDefs: {
+        size: 7,
         accessor: 'getIcon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceOffset
-      },
-      instanceIconFrames: {
-        size: 4,
-        accessor: 'getIcon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceIconFrame
-      },
-      instanceColorModes: {
-        size: 1,
-        type: 'uint8',
-        accessor: 'getIcon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceColorMode
+        transform: this.getInstanceIconDef,
+        shaderAttributes: {
+          instanceOffsets: {
+            size: 2,
+            elementOffset: 0
+          },
+          instanceIconFrames: {
+            size: 4,
+            elementOffset: 2
+          },
+          instanceColorModes: {
+            size: 1,
+            elementOffset: 6
+          }
+        }
       },
       instanceColors: {
         size: this.props.colorFormat.length,
@@ -286,6 +289,13 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -305,7 +315,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         }
       }),
-      isInstanced: true
+      isInstanced: true,
+      parameters
     });
   }
 
@@ -322,23 +333,17 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
-  protected getInstanceOffset(icon: string): number[] {
+  protected getInstanceIconDef(icon: string): number[] {
     const {
+      x,
+      y,
       width,
       height,
+      mask,
       anchorX = width / 2,
       anchorY = height / 2
     } = this.state.iconManager.getIconMapping(icon);
-    return [width / 2 - anchorX, height / 2 - anchorY];
-  }
 
-  protected getInstanceColorMode(icon: string): number {
-    const mapping = this.state.iconManager.getIconMapping(icon);
-    return mapping.mask ? 1 : 0;
-  }
-
-  protected getInstanceIconFrame(icon: string): number[] {
-    const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
-    return [x, y, width, height];
+    return [width / 2 - anchorX, height / 2 - anchorY, x, y, width, height, mask ? 1 : 0];
   }
 }

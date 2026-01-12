@@ -7,3 +7,4 @@ class BaseMapProvider(Enum):
     MAPBOX = "mapbox"
     GOOGLE_MAPS = "google_maps"
     CARTO = "carto"
+    MAPLIBRE = "maplibre"
