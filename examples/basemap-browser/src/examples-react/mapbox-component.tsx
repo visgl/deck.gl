@@ -15,7 +15,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 
 // Mapbox Overlay wrapper
-function MapboxOverlayWrapper(props: MapboxOverlayProps & {interleaved: boolean}) {
+function MapboxDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
   const overlay = useMapboxControl(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
@@ -37,7 +37,7 @@ export default function MapboxComponent({example, interleaved}: MapboxComponentP
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={initialViewState}
       >
-        <MapboxOverlayWrapper layers={getLayers(interleaved)} interleaved={interleaved} />
+        <MapboxDeckOverlay layers={getLayers(interleaved)} interleaved={interleaved} />
       </MapboxMap>
     </div>
   );

@@ -66,14 +66,6 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
     };
   }, [currentDPR, updateCanvasInfo]);
 
-  // Load initial example
-  useEffect(() => {
-    const example = getCurrentExample();
-    if (example) {
-      onExampleChange(example, interleaved);
-    }
-  }, []); // Only on mount
-
   // Handle example or interleaved changes
   useEffect(() => {
     const example = getCurrentExample();

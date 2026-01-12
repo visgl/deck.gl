@@ -12,7 +12,7 @@
     "@deck.gl/google-maps": "*",
     "@deck.gl/layers": "*",
     "@deck.gl/mapbox": "*",
-    "@vis.gl/react-google-maps": "^1.7.1",
+    "@vis.gl/react-google-maps": "1.7.1",
     "deck.gl": "*",
     "mapbox-gl": "^3.8.0",
     "maplibre-gl": "^5.0.0",

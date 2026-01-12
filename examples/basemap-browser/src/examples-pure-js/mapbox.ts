@@ -46,7 +46,6 @@ export function mount(
   map.addControl(new mapboxgl.NavigationControl());
 
   return () => {
-    deckOverlay.finalize();
     map.remove();
   };
 }
