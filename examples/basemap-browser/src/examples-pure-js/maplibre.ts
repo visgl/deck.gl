@@ -39,7 +39,6 @@ export function mount(
   });
 
   return () => {
-    deckOverlay.finalize();
     map.remove();
   };
 }

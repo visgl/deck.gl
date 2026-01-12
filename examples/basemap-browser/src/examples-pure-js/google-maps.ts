@@ -67,10 +67,13 @@ export function mount(
   }
 
   let overlay: GoogleMapsOverlay | null = null;
+  let cancelled = false;
 
   // Load the API and create the map
   loadGoogleMapsAPI(apiKey)
     .then((googlemaps: any) => {
+      if (cancelled) return;
+
       const map = new googlemaps.Map(container, {
         center: {lat: initialViewState.latitude, lng: initialViewState.longitude},
         zoom: initialViewState.zoom,
@@ -87,6 +90,8 @@ export function mount(
       overlay.setMap(map);
     })
     .catch((error: Error) => {
+      if (cancelled) return;
+
       container.innerHTML = `
         <div style="padding: 20px; color: red;">
           <h3>Google Maps Error</h3>
@@ -96,6 +101,7 @@ export function mount(
     });
 
   return () => {
+    cancelled = true;
     if (overlay) {
       overlay.finalize();
       overlay = null;

@@ -10,8 +10,7 @@ import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-// MapLibre Overlay wrapper
-function MapLibreOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
+function MapLibreDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
   const overlay = useMapLibreControl(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
@@ -41,7 +40,7 @@ export default function MapLibreComponent({example, interleaved}: MapLibreCompon
         }}
       >
         {overlayReady && (
-          <MapLibreOverlay layers={getLayers(interleaved)} interleaved={interleaved} />
+          <MapLibreDeckOverlay layers={getLayers(interleaved)} interleaved={interleaved} />
         )}
       </MapLibreMap>
     </div>

@@ -12,26 +12,28 @@ A TypeScript/React test application for quickly testing deck.gl with different b
 
 ## Architecture
 
-The basemap-browser uses TypeScript and React function components with a modular architecture:
+This example demonstrates both Pure JS and React integration patterns with deck.gl:
 
 ```
 src/
-├── types.ts              # TypeScript type definitions
-├── constants.ts          # Shared constants from get-started examples
-├── layers.ts             # Layer configurations (from get-started examples)
+├── types.ts                        # TypeScript type definitions
+├── constants.ts                    # Shared constants
+├── layers.ts                       # Shared layer configurations
 ├── examples/
-│   └── index.ts         # Example configurations matching get-started
-├── app.tsx              # Main app (React function component)
-├── map-container.tsx    # Map rendering (React function components)
-└── index.tsx            # Entry point
+│   └── index.ts                   # Example configurations
+├── examples-pure-js/              # Pure JS implementations
+│   ├── google-maps.ts
+│   ├── mapbox.ts
+│   ├── maplibre.ts
+│   └── index.ts
+├── examples-react/                # React implementations
+│   ├── google-maps-component.tsx
+│   ├── mapbox-component.tsx
+│   ├── maplibre-component.tsx
+│   └── index.ts
+├── control-panel.tsx              # Control panel (separate React root)
+└── index.tsx                      # Entry point
 ```
-
-### Key Design Decisions
-
-1. **TypeScript Throughout**: All files use TypeScript for type safety
-2. **React Function Components**: No class components, uses hooks for state management
-3. **Shared Layer Configs**: Layer definitions extracted from get-started examples into `layers.ts`
-4. **Type-Safe Examples**: Example configurations are fully typed via `types.ts`
 
 ## Usage
 
@@ -64,29 +66,24 @@ Open http://localhost:8080 in your browser.
 
 The basemap browser covers these configurations:
 
-### Google Maps
-- ✅ Pure JS + Interleaved: true
-- ✅ Pure JS + Interleaved: false
-- ✅ React + Interleaved: true
-- ✅ React + Interleaved: false
-
-### Mapbox
-- ✅ Pure JS + Interleaved: true
-- ✅ Pure JS + Interleaved: false
-- ✅ React + Interleaved: true
-- ✅ React + Interleaved: false
-
-### MapLibre
-- ✅ Pure JS + Interleaved: true
-- ✅ Pure JS + Interleaved: false
-- ✅ React + Interleaved: true
-- ✅ React + Interleaved: false
-
-### MapLibre Globe
-- ✅ Pure JS + Interleaved: true
-- ✅ Pure JS + Interleaved: false
-- ✅ React + Interleaved: true
-- ✅ React + Interleaved: false
+| Provider | Framework | Interleaved |
+|----------|-----------|-------------|
+| Google Maps | Pure JS | true |
+| Google Maps | Pure JS | false |
+| Google Maps | React | true |
+| Google Maps | React | false |
+| Mapbox | Pure JS | true |
+| Mapbox | Pure JS | false |
+| Mapbox | React | true |
+| Mapbox | React | false |
+| MapLibre | Pure JS | true |
+| MapLibre | Pure JS | false |
+| MapLibre | React | true |
+| MapLibre | React | false |
+| MapLibre Globe | Pure JS | true |
+| MapLibre Globe | Pure JS | false |
+| MapLibre Globe | React | true |
+| MapLibre Globe | React | false |
 
 ## Google Maps Setup
 
