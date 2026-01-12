@@ -9,7 +9,6 @@ A TypeScript/React test application for quickly testing deck.gl with different b
 - **Interleaved Mode Toggle**: Test both interleaved (shared GL context) and overlaid modes
 - **Live Metrics**: Monitor Device Pixel Ratio and canvas dimensions in real-time
 - **TypeScript**: Fully typed for better development experience
-- **Test Matrix Coverage**: Covers all combinations tested in resize/DPR bug fix
 
 ## Architecture
 
