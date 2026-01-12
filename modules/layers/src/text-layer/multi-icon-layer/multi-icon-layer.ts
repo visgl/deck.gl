@@ -2,21 +2,27 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {log} from '@deck.gl/core';
+import {log, createIterable} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import {SdfProps, sdfUniforms} from './sdf-uniforms';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
-import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import type {
+  Attribute,
+  AccessorFunction,
+  Color,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
 
 type _MultiIconLayerProps<DataT> = {
-  getIconOffsets?: Accessor<DataT, number[]>;
+  getIconOffsets?: AccessorFunction<DataT, number[]>;
   sdf?: boolean;
   smoothing?: number;
   outlineWidth?: number;
@@ -54,14 +60,13 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
+    const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
     attributeManager!.addInstanced({
-      instanceOffsets: {
-        size: 2,
-        accessor: 'getIconOffsets'
-      },
       instancePickingColors: {
         type: 'uint8',
-        size: 3,
+        size: 4,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       }
     });
@@ -69,9 +74,16 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const {props, oldProps} = params;
+    const {props, oldProps, changeFlags} = params;
     let {outlineColor} = props;
 
+    if (
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.getIcon ||
+        changeFlags.updateTriggersChanged.getIconOffsets)
+    ) {
+      this.getAttributeManager()!.invalidate('instanceIconDefs');
+    }
     if (outlineColor !== oldProps.outlineColor) {
       outlineColor = outlineColor.map(x => x / 255) as Color;
       outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
@@ -115,17 +127,30 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     }
   }
 
-  protected getInstanceOffset(icons: string): number[] {
-    return icons ? Array.from(icons).flatMap(icon => super.getInstanceOffset(icon)) : EMPTY_ARRAY;
-  }
-
-  getInstanceColorMode(icons: string): number {
-    return 1; // mask
-  }
-
-  getInstanceIconFrame(icons: string): number[] {
-    return icons
-      ? Array.from(icons).flatMap(icon => super.getInstanceIconFrame(icon))
-      : EMPTY_ARRAY;
+  protected calculateInstanceIconDefs(
+    attribute: Attribute,
+    {startRow, endRow}: {startRow: number; endRow: number}
+  ) {
+    const {data, getIcon, getIconOffsets} = this.props;
+    let i = attribute.getVertexOffset(startRow);
+    const output = attribute.value as Float32Array;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = getIcon(object, objectInfo) as string; // forwarded getText
+      const offsets = getIconOffsets(object, objectInfo); // text length x 2
+      if (text) {
+        let j = 0;
+        for (const char of Array.from(text)) {
+          const def = super.getInstanceIconDef(char);
+          def[0] = offsets[j * 2];
+          def[1] = offsets[j * 2 + 1];
+          def[6] = 1; // mask
+          output.set(def, i);
+          i += attribute.size;
+          j++;
+        }
+      }
+    }
   }
 }
