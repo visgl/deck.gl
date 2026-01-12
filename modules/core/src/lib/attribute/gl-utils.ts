@@ -26,7 +26,11 @@ export function getBufferAttributeLayout(
   name: string,
   accessor: BufferAccessor,
   deviceType: 'webgpu' | 'wegbgl' | string
-): BufferAttributeLayout {
+): BufferAttributeLayout | null {
+  if ((accessor.size as number) > 4) {
+    // Definitely not valid. TODO - stricter validation?
+    return null;
+  }
   // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
   const type = deviceType === 'webgpu' && accessor.type === 'uint8' ? 'unorm8' : accessor.type;
   return {

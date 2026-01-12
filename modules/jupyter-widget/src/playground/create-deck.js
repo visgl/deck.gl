@@ -15,6 +15,7 @@ import makeTooltip from './widget-tooltip';
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
+import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
 import {addSupportComponents} from '../lib/components/index';
 
@@ -39,7 +40,18 @@ function extractElements(library = {}, filter) {
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractElements(deckExports, classesFilter),
+  classes: {
+    ...extractElements(deckExports, classesFilter),
+    // Add experimental widgets (exported with _ prefix)
+    FpsWidget: deckExports._FpsWidget,
+    StatsWidget: deckExports._StatsWidget,
+    ScaleWidget: deckExports._ScaleWidget,
+    GeocoderWidget: deckExports._GeocoderWidget,
+    SplitterWidget: deckExports._SplitterWidget,
+    InfoWidget: deckExports._InfoWidget,
+    ThemeWidget: deckExports._ThemeWidget,
+    LoadingWidget: deckExports._LoadingWidget
+  },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
@@ -116,7 +128,6 @@ function missingProps(oldProps, newProps) {
 }
 
 function createStandaloneFromProvider({
-  mapProvider,
   props,
   mapboxApiKey,
   googleMapsKey,
@@ -150,7 +161,7 @@ function createStandaloneFromProvider({
     container
   };
 
-  switch (mapProvider) {
+  switch (props.mapProvider) {
     case 'mapbox':
       log.info('Using Mapbox base maps')();
       return new DeckGL({
@@ -173,6 +184,12 @@ function createStandaloneFromProvider({
         ...sharedProps,
         ...props,
         googleMapsKey
+      });
+    case 'maplibre':
+      log.info('Using MapLibre')();
+      return createMapLibreDeckOverlay({
+        ...sharedProps,
+        ...props
       });
     default:
       log.info('No recognized map provider specified')();
@@ -229,10 +246,8 @@ function createDeck({
     const layersToLoad = missingProps(oldLayers, convertedLayers);
     const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
     const getTooltip = makeTooltip(tooltip);
-    const {mapProvider} = props;
 
     deckgl = createStandaloneFromProvider({
-      mapProvider,
       props,
       mapboxApiKey,
       googleMapsKey,
