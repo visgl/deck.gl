@@ -190,7 +190,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   /**
    * End panning
-   * Must call if `panStart()` was not called
+   * Must call if `panStart()` was called
    */
   panEnd(): MapState {
     return this._getUpdatedState({
