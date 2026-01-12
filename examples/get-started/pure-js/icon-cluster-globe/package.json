@@ -1,0 +1,21 @@
+{
+  "name": "deckgl-example-icon-cluster-globe",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
+    "@luma.gl/core": "^9.2.0",
+    "@luma.gl/engine": "^9.2.0",
+    "@luma.gl/webgl": "^9.2.0"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
+}

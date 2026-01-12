@@ -44,7 +44,8 @@
     "@math.gl/core": "^4.1.0",
     "@math.gl/polygon": "^4.1.0",
     "@math.gl/web-mercator": "^4.1.0",
-    "earcut": "^2.2.4"
+    "earcut": "^2.2.4",
+    "supercluster": "^8.0.1"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.2.0",

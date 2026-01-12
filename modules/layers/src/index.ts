@@ -18,6 +18,7 @@ export {default as PolygonLayer} from './polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './geojson-layer/geojson-layer';
 export {default as TextLayer} from './text-layer/text-layer';
 export {default as SolidPolygonLayer} from './solid-polygon-layer/solid-polygon-layer';
+export {default as IconClusterLayer} from './icon-cluster-layer/icon-cluster-layer';
 
 // Experimental layer exports
 export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-icon-layer';
@@ -43,3 +44,4 @@ export type {PointCloudLayerProps} from './point-cloud-layer/point-cloud-layer';
 export type {TextBackgroundLayerProps} from './text-layer/text-background-layer/text-background-layer';
 export type {PathLayerProps} from './path-layer/path-layer';
 export type {SolidPolygonLayerProps} from './solid-polygon-layer/solid-polygon-layer';
+export type {IconClusterLayerProps} from './icon-cluster-layer/icon-cluster-layer';
