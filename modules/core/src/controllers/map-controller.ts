@@ -57,8 +57,8 @@ type MapStateInternal = {
   startZoomLngLat?: [number, number];
   /* Pointer position when rotation started */
   startRotatePos?: [number, number];
-  /* The lng/lat point at the rotation pivot (where rotation started) */
-  startRotateLngLat?: [number, number];
+  /* The lng/lat/altitude point at the rotation pivot (where rotation started) */
+  startRotateLngLat?: [number, number, number];
   /** Bearing when current perspective rotate operation started */
   startBearing?: number;
   /** Pitch when current perspective rotate operation started */
@@ -210,7 +210,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   rotateStart({pos}: {pos: [number, number]}): MapState {
     return this._getUpdatedState({
       startRotatePos: pos,
-      startRotateLngLat: this._unproject(pos),
+      startRotateLngLat: this._unproject3D(pos),
       startBearing: this.getViewportProps().bearing,
       startPitch: this.getViewportProps().pitch
     });
@@ -252,7 +252,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       });
       return this._getUpdatedState({
         ...newRotation,
-        ...rotatedViewport.panByPosition(startRotateLngLat, startRotatePos)
+        ...rotatedViewport.panByPosition3D(startRotateLngLat, startRotatePos)
       });
     }
 
@@ -454,6 +454,14 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     const viewport = this.makeViewport(this.getViewportProps());
     // @ts-ignore
     return pos && viewport.unproject(pos);
+  }
+
+  _unproject3D(pos?: [number, number]): [number, number, number] | undefined {
+    const viewport = this.makeViewport(this.getViewportProps());
+    const {position} = this.getViewportProps();
+    const targetZ = position[2]; // Unproject at camera altitude
+    // @ts-ignore
+    return pos && viewport.unproject(pos, {targetZ});
   }
 
   _getNewRotation(
