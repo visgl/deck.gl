@@ -1240,17 +1240,30 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
 
-    // Reuse last picked object
-    const layers = this.layerManager.getLayers();
-    const info = this.deckPicker!.getLastPickedObject(
-      {
+    let info: PickingInfo;
+
+    // For click events with unproject3D enabled, perform a fresh pick to get depth info
+    if (event.type === 'click' && this.props.unproject3D) {
+      const pickResult = this._pick('pickObject', 'pickObject Time', {
         x: pos.x,
         y: pos.y,
-        layers,
-        viewports: this.getViewports(pos)
-      },
-      this._lastPointerDownInfo
-    ) as PickingInfo;
+        radius: this.props.pickingRadius,
+        unproject3D: true
+      });
+      info = pickResult.result[0] || pickResult.emptyInfo;
+    } else {
+      // Reuse last picked object for other events
+      const layers = this.layerManager.getLayers();
+      info = this.deckPicker!.getLastPickedObject(
+        {
+          x: pos.x,
+          y: pos.y,
+          layers,
+          viewports: this.getViewports(pos)
+        },
+        this._lastPointerDownInfo
+      ) as PickingInfo;
+    }
 
     const {layer} = info;
     const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
