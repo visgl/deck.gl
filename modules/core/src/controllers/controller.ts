@@ -94,6 +94,8 @@ export type InteractionState = {
   isRotating?: boolean;
   /** If the view is being zoomed, either from user input or transition */
   isZooming?: boolean;
+  /** World coordinate [lng, lat, altitude] of rotation pivot point when rotating */
+  rotationPivotPosition?: [number, number, number];
 }
 
 /** Parameters passed to the onViewStateChange callback */
@@ -417,7 +419,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       altitude: pickedAltitude
     });
     this._panMove = alternateMode;
-    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+
+    // For rotation, extract the pivot position for visual feedback
+    const interactionState: InteractionState = {isDragging: true};
+    if (!alternateMode) {
+      // Get the rotation pivot position from the state
+      const pivotPos = newControllerState.getState().startRotateLngLat;
+      if (pivotPos) {
+        interactionState.rotationPivotPosition = pivotPos as [number, number, number];
+      }
+    }
+
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, interactionState);
     return true;
   }
 
@@ -491,9 +504,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
     const pos = this.getCenter(event);
     const newControllerState = this.controllerState.rotate({pos});
+
+    // Maintain the rotation pivot position during rotation
+    const pivotPos = newControllerState.getState().startRotateLngLat;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
-      isRotating: true
+      isRotating: true,
+      rotationPivotPosition: pivotPos as [number, number, number] | undefined
     });
     return true;
   }
@@ -516,14 +533,16 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         },
         {
           isDragging: false,
-          isRotating: true
+          isRotating: true,
+          rotationPivotPosition: undefined
         }
       );
     } else {
       const newControllerState = this.controllerState.rotateEnd();
       this.updateViewport(newControllerState, null, {
         isDragging: false,
-        isRotating: false
+        isRotating: false,
+        rotationPivotPosition: undefined
       });
     }
     return true;

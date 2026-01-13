@@ -9,28 +9,34 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const TILESET_URL = 'https://tile.googleapis.com/v1/3dtiles/root.json';
 
-// Sample airports in the region
+// NYC area airports
 const AIRPORTS = [
-  {name: 'Zurich Airport', coordinates: [8.5491, 47.4647]},
-  {name: 'St. Gallen-Altenrhein', coordinates: [9.5608, 47.485]},
-  {name: 'Friedrichshafen', coordinates: [9.5119, 47.6712]},
-  {name: 'Innsbruck', coordinates: [11.344, 47.2602]},
-  {name: 'Bolzano', coordinates: [11.3264, 46.4603]}
+  {name: 'JFK', coordinates: [-73.7781, 40.6413]},
+  {name: 'LaGuardia', coordinates: [-73.874, 40.7769]},
+  {name: 'Newark', coordinates: [-74.1745, 40.6895]},
+  {name: 'Teterboro', coordinates: [-74.0608, 40.8501]},
+  {name: 'Westchester County', coordinates: [-73.7076, 41.067]}
 ];
 
-// Matterhorn coordinates: 45.9763° N, 7.6586° E
 const INITIAL_VIEW_STATE = {
-  latitude: 47,
-  longitude: 9,
+  latitude: 40.7128,
+  longitude: -74.006,
   zoom: 12,
   bearing: 0,
   pitch: 60,
-  position: [0, 0, 0]  // Keep camera at ground level
+  position: [0, 0, 0] // Keep camera at ground level
 };
+
+// Track rotation pivot for visual feedback
+let rotationPivotPosition = null;
 
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
+  onInteractionStateChange: state => {
+    rotationPivotPosition = state.rotationPivotPosition || null;
+    updateLayers();
+  },
   onClick: info => {
     console.log('=== CLICK INFO ===');
     console.log('picked:', info.picked);
@@ -144,40 +150,60 @@ airportsToggle.onclick = () => {
 };
 
 function updateLayers() {
-  deck.setProps({
-    layers: [
-      new Tile3DLayer({
-        id: 'google-3d-tiles',
-        data: TILESET_URL,
-        pickable: '3d',
-        visible: tilesVisible,
-        onTilesetLoad: tileset3d => {
-          tileset3d.options.onTraversalComplete = selectedTiles => {
-            return selectedTiles;
-          };
-        },
-        loadOptions: {
-          fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
-        },
-        operation: 'terrain+draw'
-      }),
+  const layers = [
+    new Tile3DLayer({
+      id: 'google-3d-tiles',
+      data: TILESET_URL,
+      pickable: '3d',
+      visible: tilesVisible,
+      onTilesetLoad: tileset3d => {
+        tileset3d.options.onTraversalComplete = selectedTiles => {
+          return selectedTiles;
+        };
+      },
+      loadOptions: {
+        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
+      },
+      operation: 'terrain+draw'
+    }),
+    new ScatterplotLayer({
+      id: 'airports',
+      data: AIRPORTS,
+      pickable: true,
+      visible: airportsVisible,
+      opacity: 0.8,
+      stroked: true,
+      filled: true,
+      radiusScale: 6,
+      radiusMinPixels: 10,
+      radiusMaxPixels: 100,
+      lineWidthMinPixels: 1,
+      getPosition: d => [...d.coordinates, 10000],
+      getRadius: d => 100,
+      getFillColor: [255, 140, 0],
+      getLineColor: [255, 255, 255]
+    })
+  ];
+
+  // Add rotation pivot indicator when rotating
+  if (rotationPivotPosition) {
+    layers.push(
       new ScatterplotLayer({
-        id: 'airports',
-        data: AIRPORTS,
-        pickable: true,
-        visible: airportsVisible,
-        opacity: 0.8,
+        id: 'rotation-pivot',
+        data: [rotationPivotPosition],
+        getPosition: d => d,
+        getRadius: 8,
+        radiusUnits: 'pixels',
+        getLineColor: [255, 255, 255, 180],
+        getLineWidth: 1,
+        lineWidthUnits: 'pixels',
         stroked: true,
-        filled: true,
-        radiusScale: 6,
-        radiusMinPixels: 10,
-        radiusMaxPixels: 100,
-        lineWidthMinPixels: 1,
-        getPosition: d => [...d.coordinates, 10000],
-        getRadius: d => 100,
-        getFillColor: [255, 140, 0],
-        getLineColor: [255, 255, 255]
+        filled: false,
+        billboard: true,
+        parameters: {depthWriteEnabled: false, depthCompare: 'always'}
       })
-    ]
-  });
+    );
+  }
+
+  deck.setProps({layers});
 }
