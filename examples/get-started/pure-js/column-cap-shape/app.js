@@ -33,11 +33,11 @@ const INITIAL_VIEW_STATE = {
 function createLayer(capShape, diskResolution) {
   return new ColumnLayer({
     id: 'column-layer',
-    data: data,
-    diskResolution: diskResolution,
+    data,
+    diskResolution,
     radius: 200,
     extruded: true,
-    capShape: capShape, // NEW: 'flat', 'rounded', or 'pointy'
+    capShape, // NEW: 'flat', 'rounded', or 'pointy'
     elevationScale: 1,
     getPosition: d => d.position,
     getFillColor: d => d.color,

@@ -32,6 +32,10 @@ interface ExtendedClusterProperties extends ClusterProperties {
 const defaultProps: DefaultProps<IconClusterLayerProps> = {
   sizeScale: {type: 'number', min: 0, value: 1},
   getPosition: {type: 'accessor', value: (x: ClusterData) => (x.position as Position) || [0, 0]},
+  getPointId: {
+    type: 'accessor',
+    value: (x: ClusterData, context: AccessorContext<ClusterData>) => context.index
+  },
 
   // Cluster styling
   clusterRadius: {type: 'number', min: 0, value: 80},
@@ -64,6 +68,9 @@ type _IconClusterLayerProps = {
 
   /** Accessor for position */
   getPosition?: Accessor<ClusterData, Position>;
+
+  /** Accessor for stable point ID - required for smooth transitions */
+  getPointId?: Accessor<ClusterData, string | number>;
 
   /** Cluster radius in pixels */
   clusterRadius?: number;
@@ -178,13 +185,18 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
           position = [0, 0];
         }
 
+        const pointId =
+          typeof props.getPointId === 'function'
+            ? props.getPointId(d, context)
+            : (d as any).id || i;
+
         return {
           type: 'Feature' as const,
           geometry: {
             type: 'Point' as const,
             coordinates: [position[0], position[1]]
           },
-          properties: d
+          properties: {...d, pointId}
         };
       });
 
@@ -197,12 +209,8 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
 
     if (shouldUpdate) {
       if (props.dynamicClustering) {
-        // DYNAMIC MODE: Filter points first, then re-cluster
-        // This causes cluster counts to decrement as points leave viewport
         this._updateDynamicClusters(z);
       } else {
-        // STATIC MODE: Cluster all points, then apply opacity
-        // More performant but less granular
         this._updateStaticClusters(z);
       }
     }
@@ -220,7 +228,6 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
 
     allClusters.forEach(cluster => {
       if (cluster.properties.cluster) {
-        // Get all points in this cluster
         const clusterPoints = this.state.index.getLeaves(cluster.properties.cluster_id, Infinity);
         clusterPoints.forEach(point => {
           allPoints.push({
@@ -229,7 +236,6 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
           });
         });
       } else {
-        // Individual point
         allPoints.push({
           coordinates: cluster.geometry.coordinates,
           properties: cluster.properties
@@ -237,7 +243,7 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
       }
     });
 
-    // Filter points by visibility and calculate opacity
+    // Filter points by visibility
     const visiblePoints = allPoints
       .map(point => ({
         ...point,
@@ -265,21 +271,8 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
     // Get clusters from the dynamically filtered points
     const dynamicClusters = dynamicIndex.getClusters([-180, -85, 180, 85], z);
 
-    // Apply opacity and stable IDs to the new clusters
-    const clustersWithOpacity = dynamicClusters.map(cluster => {
-      const opacity = this._calculateOpacity(cluster.geometry.coordinates);
-      const id = this._getStableId(cluster);
-      return {
-        ...cluster,
-        opacity,
-        id
-      };
-    });
-
-    this.setState({
-      data: clustersWithOpacity,
-      z
-    });
+    // Process clusters
+    this._processClusters(dynamicClusters, z);
   }
 
   /**
@@ -289,23 +282,37 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
   _updateStaticClusters(z: number): void {
     const allClusters = this.state.index.getClusters([-180, -85, 180, 85], z);
 
-    // Calculate opacity and assign stable IDs
-    // This creates smooth fade-out at the edges
-    const clustersWithOpacity = allClusters.map(cluster => {
-      const opacity = this._calculateOpacity(cluster.geometry.coordinates);
-      const id = this._getStableId(cluster);
-      return {
-        ...cluster,
-        opacity,
-        id
-      };
-    });
+    // Process clusters
+    this._processClusters(allClusters, z);
+  }
 
-    // Filter out completely invisible clusters
-    const visibleClusters = clustersWithOpacity.filter(cluster => cluster.opacity > 0);
+  /**
+   * Process clusters and generate output data with stable IDs
+   */
+  _processClusters(
+    clusters: Array<PointFeature<ClusterData> | ClusterFeature<ClusterData>>,
+    z: number
+  ): void {
+    const outputData: ClusteredPoint[] = [];
+
+    for (const cluster of clusters) {
+      const opacity = this._calculateOpacity(cluster.geometry.coordinates);
+
+      if (opacity <= 0) continue; // Skip invisible
+
+      const stableId = this._getStableId(cluster, z);
+
+      const dataPoint: ClusteredPoint = {
+        ...cluster,
+        id: stableId,
+        opacity
+      };
+
+      outputData.push(dataPoint);
+    }
 
     this.setState({
-      data: visibleClusters,
+      data: outputData,
       z
     });
   }
@@ -352,25 +359,21 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
   }
 
   /**
-   * Generate stable ID based on cluster_id from Supercluster or position hash
-   * Supercluster's cluster_id is stable as clusters split/merge
+   * Generate stable ID for a cluster or point
    */
-  _getStableId(cluster: PointFeature<ClusterData> | ClusterFeature<ClusterData>): string {
-    const isCluster =
-      cluster.properties &&
-      typeof cluster.properties === 'object' &&
-      'cluster' in cluster.properties;
+  _getStableId(
+    cluster: PointFeature<ClusterData> | ClusterFeature<ClusterData>,
+    z: number
+  ): string {
+    const isCluster = cluster.properties && 'cluster' in cluster.properties;
 
     if (isCluster) {
-      // Use Supercluster's cluster_id - this is stable across splits/merges
       const clusterId = (cluster.properties as ExtendedClusterProperties).cluster_id;
-      return `cluster-${clusterId}`;
+      return `cluster-z${z}-${clusterId}`;
     }
-    // For individual points, use position-based hash
-    const [lon, lat] = cluster.geometry.coordinates;
-    const roundedLon = Math.round(lon * 10000);
-    const roundedLat = Math.round(lat * 10000);
-    return `point-${roundedLat}-${roundedLon}`;
+    // Individual point
+    const pointId = (cluster.properties as any).pointId;
+    return `point-${pointId}`;
   }
 
   /**
@@ -388,6 +391,20 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
     if (dot <= fadeEndCos) return 0;
     const fadeRange = fadeStartCos - fadeEndCos;
     return (dot - fadeEndCos) / fadeRange;
+  }
+
+  /**
+   * Calculate radius based on count (if sizeByCount enabled)
+   */
+  _calculateRadius(count: number): number {
+    if (!this.props.sizeByCount) {
+      return this.props.clusterRadiusMinPixels || 20;
+    }
+
+    const baseRadius = this.props.clusterRadiusMinPixels || 20;
+    const maxRadius = this.props.clusterRadiusMaxPixels || 100;
+    const scale = Math.log10(count + 1) / 3; // 0-1 range for 1-1000 points
+    return baseRadius + (maxRadius - baseRadius) * scale;
   }
 
   getPickingInfo({
@@ -411,9 +428,14 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
         mode !== 'hover'
       ) {
         const extProps = properties as ExtendedClusterProperties;
-        objects = this.state.index
-          .getLeaves(extProps.cluster_id, 25)
-          .map((f: PointFeature<ClusterData>) => f.properties);
+        try {
+          objects = this.state.index
+            .getLeaves(extProps.cluster_id, 25)
+            .map((f: PointFeature<ClusterData>) => f.properties);
+        } catch (e) {
+          // Cluster may not exist in current index (e.g., during dynamic clustering)
+          objects = undefined;
+        }
       }
 
       return {...info, object: properties, objects};
@@ -438,7 +460,7 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
 
     // Separate clusters and individual points
     const clusters = data.filter(
-      (d): d is ClusterFeature<ClusterData> & {opacity: number} =>
+      (d): d is ClusterFeature<ClusterData> & {opacity: number; id: string} =>
         d.properties &&
         typeof d.properties === 'object' &&
         'cluster' in d.properties &&
@@ -446,7 +468,7 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
     );
 
     const points = data.filter(
-      (d): d is PointFeature<ClusterData> & {opacity: number} =>
+      (d): d is PointFeature<ClusterData> & {opacity: number; id: string} =>
         !d.properties ||
         typeof d.properties !== 'object' ||
         !('cluster' in d.properties) ||
@@ -463,8 +485,9 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
           stroked: false,
           filled: true,
           radiusScale: 1,
-          radiusMinPixels: clusterRadiusMinPixels,
-          radiusMaxPixels: clusterRadiusMaxPixels,
+          radiusMinPixels: 1,
+          radiusMaxPixels: 200,
+          radiusUnits: 'pixels',
           lineWidthMinPixels: 0,
           getPosition: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) =>
             d.geometry.coordinates,
@@ -472,12 +495,11 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
           getRadius: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) => {
             if (this.props.sizeByCount) {
               const pointCount = d.properties.point_count || 1;
-              // Scale radius based on cluster size with more dramatic scaling
-              // 1 point: 20px, 10 points: 50px, 100 points: 100px, 1000 points: 150px
               const baseRadius = clusterRadiusMinPixels || 20;
               const maxRadius = clusterRadiusMaxPixels || 100;
-              // Use log scale for better visual differentiation
-              const scale = Math.log10(pointCount + 1) / 3; // 0-1 range for 1-1000 points
+              // Use sqrt scale for better visual scaling
+              const maxCount = 1000;
+              const scale = Math.min(Math.sqrt(pointCount) / Math.sqrt(maxCount), 1);
               return baseRadius + (maxRadius - baseRadius) * scale;
             }
             // Fixed size mode
@@ -489,12 +511,6 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
               ? clusterFillColor
               : [51, 102, 204, 220];
             return [baseColor[0], baseColor[1], baseColor[2], (baseColor[3] || 255) * d.opacity];
-          },
-          transitions: {
-            getRadius: {
-              duration: 300,
-              easing: (t: number) => t * (2 - t) // ease-out quad
-            }
           }
         })
       ),

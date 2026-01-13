@@ -47,7 +47,6 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   filled: true,
   stroked: false,
   flatShading: false,
-  capShape: {type: 'string', value: 'flat', compare: true},
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -319,7 +318,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
   }
 
-  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThinkness: boolean, capShape: 'flat' | 'rounded' | 'pointy') {
+  getGeometry(
+    diskResolution: number,
+    vertices: number[] | undefined,
+    hasThinkness: boolean,
+    capShape: 'flat' | 'rounded' | 'pointy'
+  ) {
     const geometry = new ColumnGeometry({
       radius: 1,
       height: hasThinkness ? 2 : 0,

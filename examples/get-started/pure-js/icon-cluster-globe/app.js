@@ -95,7 +95,7 @@ new Deck({
       clusterTextColor: [255, 255, 255, 255],
       clusterRadiusScale: 1,
       clusterRadiusMinPixels: 20,
-      clusterRadiusMaxPixels: 80,
+      clusterRadiusMaxPixels: 45,
 
       // Individual point styling - orange dots
       pointFillColor: [255, 140, 0, 220],

@@ -44,10 +44,10 @@ function tesselateColumn(props: ColumnGeometryProps): {
 
   const isExtruded = height > 0;
   const vertsAroundEdge = nradial + 1; // loop
-  
+
   // Calculate number of vertices based on cap shape
   let numVertices: number;
-  
+
   if (!isExtruded) {
     numVertices = nradial; // flat disk
   } else if (capShape === 'pointy') {
@@ -115,11 +115,11 @@ function tesselateColumn(props: ColumnGeometryProps): {
     // Create cone using triangle strip: edge, apex, edge, apex, ...
     const apexHeight = height / 2 + radius; // Cone extends radius distance above cylinder top
     const apex = [0, 0, apexHeight];
-    
+
     // Calculate cone normal (points outward and upward at angle determined by geometry)
     // Using right triangle: base = radius, height = radius, hypotenuse = slant
     const slantHeight = Math.sqrt(radius * radius + radius * radius);
-    
+
     // Add first vertex of cone cap as degenerate to transition from sides
     const firstVertexIndex = 0;
     const firstSin = Math.sin(0);
@@ -129,77 +129,77 @@ function tesselateColumn(props: ColumnGeometryProps): {
     positions[i + 2] = height / 2;
     if (vertices) {
       const vertexDist = Math.sqrt(
-        vertices[firstVertexIndex * 2] * vertices[firstVertexIndex * 2] + 
-        vertices[firstVertexIndex * 2 + 1] * vertices[firstVertexIndex * 2 + 1]
+        vertices[firstVertexIndex * 2] * vertices[firstVertexIndex * 2] +
+          vertices[firstVertexIndex * 2 + 1] * vertices[firstVertexIndex * 2 + 1]
       );
       const customSlantHeight = Math.sqrt(vertexDist * vertexDist + radius * radius);
-      normals[i + 0] = vertices[firstVertexIndex * 2] * vertexDist / customSlantHeight;
-      normals[i + 1] = vertices[firstVertexIndex * 2 + 1] * vertexDist / customSlantHeight;
+      normals[i + 0] = (vertices[firstVertexIndex * 2] * vertexDist) / customSlantHeight;
+      normals[i + 1] = (vertices[firstVertexIndex * 2 + 1] * vertexDist) / customSlantHeight;
       normals[i + 2] = radius / customSlantHeight;
     } else {
-      normals[i + 0] = firstCos * radius / slantHeight;
-      normals[i + 1] = firstSin * radius / slantHeight;
+      normals[i + 0] = (firstCos * radius) / slantHeight;
+      normals[i + 1] = (firstSin * radius) / slantHeight;
       normals[i + 2] = radius / slantHeight;
     }
     i += 3;
-    
+
     for (let j = 0; j < vertsAroundEdge; j++) {
       const a = j * stepAngle;
       const vertexIndex = j % nradial;
       const sin = Math.sin(a);
       const cos = Math.cos(a);
-      
+
       // Edge vertex
       positions[i + 0] = vertices ? vertices[vertexIndex * 2] : cos * radius;
       positions[i + 1] = vertices ? vertices[vertexIndex * 2 + 1] : sin * radius;
       positions[i + 2] = height / 2;
-      
+
       // Normal for cone: outward component proportional to radius, upward component proportional to radius
       // For custom vertices, normalize the vertex position itself; for circular, use cos/sin
       if (vertices) {
         const vertexDist = Math.sqrt(
-          vertices[vertexIndex * 2] * vertices[vertexIndex * 2] + 
-          vertices[vertexIndex * 2 + 1] * vertices[vertexIndex * 2 + 1]
+          vertices[vertexIndex * 2] * vertices[vertexIndex * 2] +
+            vertices[vertexIndex * 2 + 1] * vertices[vertexIndex * 2 + 1]
         );
         const customSlantHeight = Math.sqrt(vertexDist * vertexDist + radius * radius);
-        normals[i + 0] = vertices[vertexIndex * 2] * vertexDist / customSlantHeight;
-        normals[i + 1] = vertices[vertexIndex * 2 + 1] * vertexDist / customSlantHeight;
+        normals[i + 0] = (vertices[vertexIndex * 2] * vertexDist) / customSlantHeight;
+        normals[i + 1] = (vertices[vertexIndex * 2 + 1] * vertexDist) / customSlantHeight;
         normals[i + 2] = radius / customSlantHeight;
       } else {
-        normals[i + 0] = cos * radius / slantHeight;
-        normals[i + 1] = sin * radius / slantHeight;
+        normals[i + 0] = (cos * radius) / slantHeight;
+        normals[i + 1] = (sin * radius) / slantHeight;
         normals[i + 2] = radius / slantHeight;
       }
-      
+
       i += 3;
-      
+
       // Apex vertex
       positions[i + 0] = apex[0];
       positions[i + 1] = apex[1];
       positions[i + 2] = apex[2];
-      
+
       // Apex uses same normal as the edge vertex it's paired with
       if (vertices) {
         const vertexDist = Math.sqrt(
-          vertices[vertexIndex * 2] * vertices[vertexIndex * 2] + 
-          vertices[vertexIndex * 2 + 1] * vertices[vertexIndex * 2 + 1]
+          vertices[vertexIndex * 2] * vertices[vertexIndex * 2] +
+            vertices[vertexIndex * 2 + 1] * vertices[vertexIndex * 2 + 1]
         );
         const customSlantHeight = Math.sqrt(vertexDist * vertexDist + radius * radius);
-        normals[i + 0] = vertices[vertexIndex * 2] * vertexDist / customSlantHeight;
-        normals[i + 1] = vertices[vertexIndex * 2 + 1] * vertexDist / customSlantHeight;
+        normals[i + 0] = (vertices[vertexIndex * 2] * vertexDist) / customSlantHeight;
+        normals[i + 1] = (vertices[vertexIndex * 2 + 1] * vertexDist) / customSlantHeight;
         normals[i + 2] = radius / customSlantHeight;
       } else {
-        normals[i + 0] = cos * radius / slantHeight;
-        normals[i + 1] = sin * radius / slantHeight;
+        normals[i + 0] = (cos * radius) / slantHeight;
+        normals[i + 1] = (sin * radius) / slantHeight;
         normals[i + 2] = radius / slantHeight;
       }
-      
+
       i += 3;
     }
   } else if (isExtruded && capShape === 'rounded') {
     // Generate dome using triangle strips between latitude rings
     const domeLevels = Math.max(3, Math.floor(nradial / 4));
-    
+
     // Add first vertex of dome as degenerate to transition from sides
     const firstTheta = 0;
     const firstSin = Math.sin(firstTheta);
@@ -214,22 +214,22 @@ function tesselateColumn(props: ColumnGeometryProps): {
     normals[i + 1] = firstSin * Math.cos(firstPhi);
     normals[i + 2] = Math.sin(firstPhi);
     i += 3;
-    
+
     // Start from the base (top edge of cylinder)
     for (let level = 0; level < domeLevels; level++) {
-      const phi1 = (Math.PI / 2) * level / domeLevels; // current latitude
-      const phi2 = (Math.PI / 2) * (level + 1) / domeLevels; // next latitude
-      
+      const phi1 = ((Math.PI / 2) * level) / domeLevels; // current latitude
+      const phi2 = ((Math.PI / 2) * (level + 1)) / domeLevels; // next latitude
+
       const r1 = Math.cos(phi1) * radius;
       const z1 = height / 2 + Math.sin(phi1) * radius;
       const r2 = Math.cos(phi2) * radius;
       const z2 = height / 2 + Math.sin(phi2) * radius;
-      
+
       for (let j = 0; j < vertsAroundEdge; j++) {
         const theta = (j % nradial) * stepAngle;
         const sin = Math.sin(theta);
         const cos = Math.cos(theta);
-        
+
         // Lower ring vertex
         positions[i + 0] = cos * r1;
         positions[i + 1] = sin * r1;
@@ -238,7 +238,7 @@ function tesselateColumn(props: ColumnGeometryProps): {
         normals[i + 1] = sin * Math.cos(phi1);
         normals[i + 2] = Math.sin(phi1);
         i += 3;
-        
+
         // Upper ring vertex
         positions[i + 0] = cos * r2;
         positions[i + 1] = sin * r2;
@@ -249,7 +249,7 @@ function tesselateColumn(props: ColumnGeometryProps): {
         i += 3;
       }
     }
-    
+
     // Add final apex point (degenerate to close the dome)
     positions[i + 0] = 0;
     positions[i + 1] = 0;
