@@ -57,6 +57,8 @@ type MapStateInternal = {
   startZoomLngLat?: [number, number];
   /* Pointer position when rotation started */
   startRotatePos?: [number, number];
+  /* The lng/lat point at the rotation pivot (where rotation started) */
+  startRotateLngLat?: [number, number];
   /** Bearing when current perspective rotate operation started */
   startBearing?: number;
   /** Pitch when current perspective rotate operation started */
@@ -114,6 +116,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startZoomLngLat,
       /* Pointer position when rotation started */
       startRotatePos,
+      /* The lng/lat point at the rotation pivot (where rotation started) */
+      startRotateLngLat,
       /** Bearing when current perspective rotate operation started */
       startBearing,
       /** Pitch when current perspective rotate operation started */
@@ -150,6 +154,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         startPanLngLat,
         startZoomLngLat,
         startRotatePos,
+        startRotateLngLat,
         startBearing,
         startPitch,
         startZoom
@@ -205,6 +210,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   rotateStart({pos}: {pos: [number, number]}): MapState {
     return this._getUpdatedState({
       startRotatePos: pos,
+      startRotateLngLat: this._unproject(pos),
       startBearing: this.getViewportProps().bearing,
       startPitch: this.getViewportProps().pitch
     });
@@ -223,7 +229,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     deltaAngleX?: number;
     deltaAngleY?: number;
   }): MapState {
-    const {startRotatePos, startBearing, startPitch} = this.getState();
+    const {startRotatePos, startRotateLngLat, startBearing, startPitch} = this.getState();
 
     if (!startRotatePos || startBearing === undefined || startPitch === undefined) {
       return this;
@@ -237,6 +243,19 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         pitch: startPitch + deltaAngleY
       };
     }
+
+    // If we have a pivot point, adjust the camera position to keep the pivot point fixed
+    if (startRotateLngLat) {
+      const rotatedViewport = this.makeViewport({
+        ...this.getViewportProps(),
+        ...newRotation
+      });
+      return this._getUpdatedState({
+        ...newRotation,
+        ...rotatedViewport.panByPosition(startRotateLngLat, startRotatePos)
+      });
+    }
+
     return this._getUpdatedState(newRotation);
   }
 
@@ -246,6 +265,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    */
   rotateEnd(): MapState {
     return this._getUpdatedState({
+      startRotatePos: null,
+      startRotateLngLat: null,
       startBearing: null,
       startPitch: null
     });
