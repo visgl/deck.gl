@@ -1246,7 +1246,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const layers = this.layerManager.getLayers();
     const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
 
-    if (event.type === 'click' && (this.props.unproject3D || has3DPickableLayers)) {
+    if (event.type === 'click' && has3DPickableLayers) {
       // Perform a fresh pick to get depth info for 3D coordinates
       const pickResult = this._pick('pickObject', 'pickObject Time', {
         x: pos.x,
