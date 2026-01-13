@@ -35,6 +35,7 @@ export {default as AttributeManager} from './lib/attribute/attribute-manager';
 export {default as Layer} from './lib/layer';
 export {default as CompositeLayer} from './lib/composite-layer';
 export {default as DeckRenderer} from './lib/deck-renderer';
+export {transformBoundsToWorld} from './lib/world-bounds';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';

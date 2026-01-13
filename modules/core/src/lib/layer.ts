@@ -18,11 +18,13 @@ import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
+import {deepEqual} from '../utils/deep-equal';
 
 import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
+import {OrientedBoundingBox} from '@math.gl/culling';
 
 import {load} from '@loaders.gl/core';
 
@@ -39,6 +41,7 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
+import {transformBoundsToWorld, WorldBoundsTransformOptions} from './world-bounds';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -201,6 +204,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   state!: SharedLayerState; // Will be set to the shared layer state object during layer matching
 
   parent: Layer | null = null;
+  private _cachedLocalBounds: [number[], number[]] | null = null;
+  private _cachedWorldBounds: OrientedBoundingBox | null = null;
+  private _cachedWorldBoundsCacheKey: unknown;
+  private _cachedWorldBoundsProps: Omit<WorldBoundsTransformOptions, 'bounds' | 'viewport'> | null =
+    null;
+  private _worldBoundsViewportId?: string;
+  private _worldBoundsDirty: boolean = true;
 
   get root(): Layer {
     // eslint-disable-next-line
@@ -446,6 +456,67 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.getAttributeManager()?.getBounds(['positions', 'instancePositions']);
   }
 
+  // Default implementation
+  getWorldBounds(): OrientedBoundingBox | null {
+    const options = this.getWorldBoundsOptions();
+    if (!options) {
+      return null;
+    }
+
+    const {bounds, viewport, worldBoundsCacheKey, ...transformOptions} = options;
+    const cacheKey = worldBoundsCacheKey ?? null;
+    const viewportId = viewport?.id;
+    const useCache =
+      !this._worldBoundsDirty &&
+      this._cachedWorldBounds &&
+      deepEqual(bounds, this._cachedLocalBounds, 3) &&
+      deepEqual(transformOptions, this._cachedWorldBoundsProps, 3) &&
+      deepEqual(cacheKey, this._cachedWorldBoundsCacheKey, 3) &&
+      viewportId === this._worldBoundsViewportId;
+
+    if (useCache) {
+      return this._cachedWorldBounds;
+    }
+
+    const worldBounds = transformBoundsToWorld({
+      bounds,
+      viewport,
+      ...transformOptions
+    });
+
+    this._cachedWorldBounds = worldBounds;
+    this._cachedLocalBounds = bounds;
+    this._cachedWorldBoundsProps = transformOptions;
+    this._cachedWorldBoundsCacheKey = cacheKey;
+    this._worldBoundsViewportId = viewportId;
+    this._worldBoundsDirty = false;
+
+    return worldBounds;
+  }
+
+  /**
+   * Override to customize how world bounds are generated and cached.
+   * Add `worldBoundsCacheKey` to the returned object if additional props affect bounds,
+   * e.g. radius or scale.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getWorldBoundsOptions(): WorldBoundsTransformOptions | null {
+    const bounds = this.getBounds();
+    const viewport = this.internalState?.viewport || this.context.viewport;
+    if (!bounds || !viewport) {
+      return null;
+    }
+
+    const {coordinateOrigin, coordinateSystem, modelMatrix} = this.props;
+    return {
+      bounds,
+      viewport,
+      coordinateOrigin,
+      coordinateSystem,
+      modelMatrix
+    };
+  }
+
   // / LIFECYCLE METHODS - overridden by the layer subclasses
 
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
@@ -472,6 +543,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   updateState(params: UpdateParameters<Layer<PropsT>>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
+    if (params.changeFlags.propsOrDataChanged || params.changeFlags.viewportChanged) {
+      this._worldBoundsDirty = true;
+    }
     if (dataChanged && attributeManager) {
       if (Array.isArray(dataChanged)) {
         // is partial update
