@@ -30,9 +30,7 @@ const INITIAL_VIEW_STATE = {
 
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {
-    rotationPivotAltitude: 2000  // Rotation pivot at 2000m altitude
-  },
+  controller: true,
   onClick: info => {
     console.log('=== CLICK INFO ===');
     console.log('picked:', info.picked);

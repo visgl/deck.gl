@@ -68,6 +68,8 @@ type MapStateInternal = {
   startPitch?: number;
   /** Zoom when current zoom operation started */
   startZoom?: number;
+  /** Picked altitude at rotation start for this interaction */
+  startRotateAltitude?: number;
 };
 
 /* Utils */
@@ -127,6 +129,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startPitch,
       /** Zoom when current zoom operation started */
       startZoom,
+      /** Picked altitude at rotation start for this interaction */
+      startRotateAltitude,
 
       /** Normalize viewport props to fit map height into viewport */
       normalize = true,
@@ -164,7 +168,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         startRotateLngLat,
         startBearing,
         startPitch,
-        startZoom
+        startZoom,
+        startRotateAltitude
       }
     );
 
@@ -213,13 +218,15 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
+   * @param {Number} altitude - optional picked altitude at the rotation start point
    */
-  rotateStart({pos}: {pos: [number, number]}): MapState {
+  rotateStart({pos, altitude}: {pos: [number, number]; altitude?: number}): MapState {
     return this._getUpdatedState({
       startRotatePos: pos,
-      startRotateLngLat: this._unproject3D(pos),
+      startRotateLngLat: this._unproject3D(pos, altitude),
       startBearing: this.getViewportProps().bearing,
-      startPitch: this.getViewportProps().pitch
+      startPitch: this.getViewportProps().pitch,
+      startRotateAltitude: altitude
     });
   }
 
@@ -275,7 +282,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startRotatePos: null,
       startRotateLngLat: null,
       startBearing: null,
-      startPitch: null
+      startPitch: null,
+      startRotateAltitude: null
     });
   }
 
@@ -463,12 +471,17 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     return pos && viewport.unproject(pos);
   }
 
-  _unproject3D(pos?: [number, number]): [number, number, number] | undefined {
+  _unproject3D(pos?: [number, number], altitudeOverride?: number): [number, number, number] | undefined {
     const viewport = this.makeViewport(this.getViewportProps());
     const {position, rotationPivotAltitude} = this.getViewportProps();
-    // Use rotationPivotAltitude if set, otherwise fall back to camera altitude
-    const targetZ = rotationPivotAltitude !== undefined ? rotationPivotAltitude : position[2];
-    console.log('[_unproject3D] rotationPivotAltitude:', rotationPivotAltitude, 'position[2]:', position[2], 'targetZ:', targetZ);
+    const {startRotateAltitude} = this.getState();
+
+    // Priority: 1) explicit parameter, 2) picked altitude for this interaction, 3) manual override, 4) camera altitude
+    const targetZ = altitudeOverride !== undefined ? altitudeOverride
+                  : startRotateAltitude !== undefined ? startRotateAltitude
+                  : rotationPivotAltitude !== undefined ? rotationPivotAltitude
+                  : position[2];
+
     // @ts-ignore
     return pos && viewport.unproject(pos, {targetZ});
   }
@@ -543,8 +556,6 @@ export default class MapController extends Controller<MapState> {
   setProps(props: ControllerProps & MapStateProps) {
     props.position = props.position || [0, 0, 0];
     const oldProps = this.props;
-
-    console.log('[MapController] rotationPivotAltitude from props:', props.rotationPivotAltitude);
 
     super.setProps(props);
 

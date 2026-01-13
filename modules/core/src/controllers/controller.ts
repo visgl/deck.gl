@@ -121,7 +121,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected eventManager: EventManager;
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
-  protected makeViewport: (opts: Record<string, any>) => Viewport
+  protected makeViewport: (opts: Record<string, any>) => Viewport;
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -156,6 +157,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
     onStateChange: (state: InteractionState) => void;
+    pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
@@ -170,6 +172,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onViewStateChange = opts.onViewStateChange || (() => {});
     this.onStateChange = opts.onStateChange || (() => {});
     this.makeViewport = opts.makeViewport;
+    this.pickPosition = opts.pickPosition;
   }
 
   set events(customEvents) {
@@ -398,8 +401,20 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       // invertPan is replaced by props.dragMode, keeping for backward compatibility
       alternateMode = !alternateMode;
     }
+
+    // For rotation, pick the altitude at the interaction start point
+    let pickedAltitude: number | undefined;
+    if (!alternateMode && this.pickPosition) {
+      const {x, y} = this.props;
+      const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
+      if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
+        pickedAltitude = pickResult.coordinate[2];
+      }
+    }
+
     const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos
+      pos,
+      altitude: pickedAltitude
     });
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
