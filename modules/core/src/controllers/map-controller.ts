@@ -47,6 +47,9 @@ export type MapStateProps = {
 
   /** Normalize viewport props to fit map height into viewport. Default `true` */
   normalize?: boolean;
+
+  /** Altitude in meters for rotation pivot point */
+  rotationPivotAltitude?: number;
 };
 
 type MapStateInternal = {
@@ -126,7 +129,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startZoom,
 
       /** Normalize viewport props to fit map height into viewport */
-      normalize = true
+      normalize = true,
+
+      /** Altitude in meters for rotation pivot point */
+      rotationPivotAltitude
     } = options;
 
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
@@ -148,7 +154,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         maxPitch,
         minPitch,
         normalize,
-        position
+        position,
+        rotationPivotAltitude
       },
       {
         startPanLngLat,
@@ -458,8 +465,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   _unproject3D(pos?: [number, number]): [number, number, number] | undefined {
     const viewport = this.makeViewport(this.getViewportProps());
-    const {position} = this.getViewportProps();
-    const targetZ = position[2]; // Unproject at camera altitude
+    const {position, rotationPivotAltitude} = this.getViewportProps();
+    // Use rotationPivotAltitude if set, otherwise fall back to camera altitude
+    const targetZ = rotationPivotAltitude !== undefined ? rotationPivotAltitude : position[2];
+    console.log('[_unproject3D] rotationPivotAltitude:', rotationPivotAltitude, 'position[2]:', position[2], 'targetZ:', targetZ);
     // @ts-ignore
     return pos && viewport.unproject(pos, {targetZ});
   }
@@ -534,6 +543,8 @@ export default class MapController extends Controller<MapState> {
   setProps(props: ControllerProps & MapStateProps) {
     props.position = props.position || [0, 0, 0];
     const oldProps = this.props;
+
+    console.log('[MapController] rotationPivotAltitude from props:', props.rotationPivotAltitude);
 
     super.setProps(props);
 

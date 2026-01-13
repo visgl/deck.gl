@@ -25,12 +25,14 @@ const INITIAL_VIEW_STATE = {
   zoom: 12,
   bearing: 0,
   pitch: 60,
-  position: [0, 0, 2000]
+  position: [0, 0, 0]  // Keep camera at ground level
 };
 
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
+  controller: {
+    rotationPivotAltitude: 2000  // Rotation pivot at 2000m altitude
+  },
   onClick: info => {
     console.log('=== CLICK INFO ===');
     console.log('picked:', info.picked);

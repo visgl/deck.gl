@@ -65,6 +65,8 @@ export type ControllerOptions = {
   dragMode?: 'pan' | 'rotate';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
+  /** Altitude in meters for rotation pivot point. If not specified, uses the camera's position[2]. Default `undefined`. */
+  rotationPivotAltitude?: number;
 };
 
 export type ControllerProps = {
