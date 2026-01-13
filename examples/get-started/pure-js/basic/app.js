@@ -21,7 +21,6 @@ const INITIAL_VIEW_STATE = {
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
-  unproject3D: true,
   onClick: (info) => {
     console.log('=== CLICK INFO ===');
     console.log('picked:', info.picked);
@@ -37,7 +36,7 @@ const deck = new Deck({
     new Tile3DLayer({
       id: 'google-3d-tiles',
       data: TILESET_URL,
-      pickable: true,
+      pickable: '3d',
       onTilesetLoad: tileset3d => {
         tileset3d.options.onTraversalComplete = selectedTiles => {
           const uniqueCredits = new Set();

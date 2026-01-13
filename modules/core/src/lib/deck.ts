@@ -1242,8 +1242,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     let info: PickingInfo;
 
-    // For click events with unproject3D enabled, perform a fresh pick to get depth info
-    if (event.type === 'click' && this.props.unproject3D) {
+    // For click events, check if any layer has pickable: '3d' to determine if we need depth picking
+    const layers = this.layerManager.getLayers();
+    const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+
+    if (event.type === 'click' && (this.props.unproject3D || has3DPickableLayers)) {
+      // Perform a fresh pick to get depth info for 3D coordinates
       const pickResult = this._pick('pickObject', 'pickObject Time', {
         x: pos.x,
         y: pos.y,
@@ -1253,7 +1257,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       info = pickResult.result[0] || pickResult.emptyInfo;
     } else {
       // Reuse last picked object for other events
-      const layers = this.layerManager.getLayers();
       info = this.deckPicker!.getLastPickedObject(
         {
           x: pos.x,
