@@ -331,12 +331,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     x: number;
     y: number;
     radius: number;
+    unproject3D?: boolean;
   } = {
     mode: 'hover',
     x: -1,
     y: -1,
     radius: 0,
-    event: null
+    event: null,
+    unproject3D: false
   };
 
   /**
@@ -972,6 +974,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
+      // Check if any layer has pickable: '3d' to enable depth picking for hover
+      const layers = this.layerManager?.getLayers() || [];
+      const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+      _pickRequest.unproject3D = has3DPickableLayers;
+
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
       this.cursorState.isHovering = result.length > 0;
