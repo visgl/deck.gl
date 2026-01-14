@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck} from '@deck.gl/core';
+import {Deck, _Map3DView, _Map3DController} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -31,8 +31,9 @@ const INITIAL_VIEW_STATE = {
 let rotationPivotPosition = null;
 
 const deck = new Deck({
+  //views: new _Map3DView(),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
+  controller: _Map3DController,
   onInteractionStateChange: state => {
     rotationPivotPosition = state.rotationPivotPosition || null;
     updateLayers();

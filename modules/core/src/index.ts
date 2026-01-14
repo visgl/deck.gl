@@ -57,6 +57,7 @@ export {
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';
+export {default as _Map3DView} from './views/map-3d-view';
 export {default as FirstPersonView} from './views/first-person-view';
 export {default as OrbitView} from './views/orbit-view';
 export {default as OrthographicView} from './views/orthographic-view';
@@ -65,6 +66,7 @@ export {default as _GlobeView} from './views/globe-view';
 // Controllers
 export {default as Controller} from './controllers/controller';
 export {default as MapController} from './controllers/map-controller';
+export {default as _Map3DController} from './controllers/map-3d-controller';
 export {default as _GlobeController} from './controllers/globe-controller';
 export {default as FirstPersonController} from './controllers/first-person-controller';
 export {default as OrbitController} from './controllers/orbit-controller';

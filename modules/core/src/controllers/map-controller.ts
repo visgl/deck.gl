@@ -218,15 +218,14 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
-   * @param {Number} altitude - optional picked altitude at the rotation start point
    */
-  rotateStart({pos, altitude}: {pos: [number, number]; altitude?: number}): MapState {
+  rotateStart({pos}: {pos: [number, number]}): MapState {
     return this._getUpdatedState({
       startRotatePos: pos,
-      startRotateLngLat: this._unproject3D(pos, altitude),
+      startRotateLngLat: undefined,
       startBearing: this.getViewportProps().bearing,
       startPitch: this.getViewportProps().pitch,
-      startRotateAltitude: altitude
+      startRotateAltitude: undefined
     });
   }
 

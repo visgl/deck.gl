@@ -404,33 +404,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       alternateMode = !alternateMode;
     }
 
-    // For rotation, pick the altitude at the interaction start point
-    let pickedAltitude: number | undefined;
-    if (!alternateMode && this.pickPosition) {
-      const {x, y} = this.props;
-      const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
-      if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
-        pickedAltitude = pickResult.coordinate[2];
-      }
-    }
-
     const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos,
-      altitude: pickedAltitude
+      pos
     });
     this._panMove = alternateMode;
-
-    // For rotation, extract the pivot position for visual feedback
-    const interactionState: InteractionState = {isDragging: true};
-    if (!alternateMode) {
-      // Get the rotation pivot position from the state
-      const pivotPos = newControllerState.getState().startRotateLngLat;
-      if (pivotPos) {
-        interactionState.rotationPivotPosition = pivotPos as [number, number, number];
-      }
-    }
-
-    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, interactionState);
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
 
@@ -504,13 +482,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
     const pos = this.getCenter(event);
     const newControllerState = this.controllerState.rotate({pos});
-
-    // Maintain the rotation pivot position during rotation
-    const pivotPos = newControllerState.getState().startRotateLngLat;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
-      isRotating: true,
-      rotationPivotPosition: pivotPos as [number, number, number] | undefined
+      isRotating: true
     });
     return true;
   }
@@ -533,16 +507,14 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         },
         {
           isDragging: false,
-          isRotating: true,
-          rotationPivotPosition: undefined
+          isRotating: true
         }
       );
     } else {
       const newControllerState = this.controllerState.rotateEnd();
       this.updateViewport(newControllerState, null, {
         isDragging: false,
-        isRotating: false,
-        rotationPivotPosition: undefined
+        isRotating: false
       });
     }
     return true;
