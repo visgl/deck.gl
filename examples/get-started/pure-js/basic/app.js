@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, _Map3DView, _Map3DController} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -29,11 +29,11 @@ const INITIAL_VIEW_STATE = {
 
 // Track rotation pivot for visual feedback
 let rotationPivotPosition = null;
+let currentRotatePivot = '3d';
 
 const deck = new Deck({
-  //views: new _Map3DView(),
+  views: new MapView({controller: {rotatePivot: currentRotatePivot}}),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: _Map3DController,
   onInteractionStateChange: state => {
     rotationPivotPosition = state.rotationPivotPosition || null;
     updateLayers();
@@ -131,8 +131,50 @@ airportsToggle.textContent = 'Hide Airports';
 airportsToggle.style.padding = '5px 10px';
 airportsToggle.style.cursor = 'pointer';
 
+// Add rotation pivot mode selector
+const pivotLabel = document.createElement('div');
+pivotLabel.textContent = 'Rotation Pivot:';
+pivotLabel.style.marginTop = '10px';
+pivotLabel.style.marginBottom = '5px';
+
+const pivotOptions = document.createElement('div');
+pivotOptions.style.display = 'flex';
+pivotOptions.style.flexDirection = 'column';
+pivotOptions.style.gap = '5px';
+
+['center', '2d', '3d'].forEach(mode => {
+  const label = document.createElement('label');
+  label.style.cursor = 'pointer';
+  label.style.display = 'flex';
+  label.style.alignItems = 'center';
+  label.style.gap = '5px';
+
+  const radio = document.createElement('input');
+  radio.type = 'radio';
+  radio.name = 'rotatePivot';
+  radio.value = mode;
+  radio.checked = mode === currentRotatePivot;
+  radio.onchange = () => {
+    currentRotatePivot = mode;
+    deck.setProps({
+      views: new MapView({controller: {rotatePivot: mode}})
+    });
+  };
+
+  const text = document.createElement('span');
+  text.textContent = mode === 'center' ? 'Center (default)' :
+                     mode === '2d' ? '2D (ground level)' :
+                     '3D (picked altitude)';
+
+  label.appendChild(radio);
+  label.appendChild(text);
+  pivotOptions.appendChild(label);
+});
+
 controls.appendChild(tilesToggle);
 controls.appendChild(airportsToggle);
+controls.appendChild(pivotLabel);
+controls.appendChild(pivotOptions);
 document.body.appendChild(controls);
 
 let tilesVisible = true;
