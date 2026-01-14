@@ -296,7 +296,7 @@ export function getDiffIcons(
 export default class IconManager {
   device: Device;
 
-  private onUpdate: () => void;
+  private onUpdate: (didFrameChange: boolean) => void;
   private onError: (context: LoadIconErrorContext) => void;
   private _loadOptions: any = null;
   private _texture: Texture | null = null;
@@ -326,7 +326,7 @@ export default class IconManager {
       onError = noop
     }: {
       /** Callback when the texture updates */
-      onUpdate: () => void;
+      onUpdate: (didFrameChange: boolean) => void;
       /** Callback when an error is encountered */
       onError: (context: LoadIconErrorContext) => void;
     }
