@@ -49,7 +49,7 @@ export type MapStateProps = {
   normalize?: boolean;
 };
 
-type MapStateInternal = {
+export type MapStateInternal = {
   /** Interaction states, required to calculate change during transform */
   /* The point on map being grabbed when the operation first started */
   startPanLngLat?: [number, number];

@@ -11,8 +11,23 @@ class View(JSONMixin):
     ---------
     type : str, default None
         deck.gl view to display, e.g., MapView
-    controller : bool, default None
-        If enabled, camera becomes interactive.
+    controller : bool or dict, default None
+        If True, camera becomes interactive with default settings.
+        If False, camera is not interactive.
+        If dict, camera becomes interactive with specified settings.
+        Supported settings include:
+        - scrollZoom : bool or dict, enable/disable scroll zoom
+        - doubleClickZoom : bool, enable/disable double click zoom
+        - touchZoom : bool, enable/disable touch zoom
+        - dragPan : bool, enable/disable drag pan
+        - dragRotate : bool, enable/disable drag rotate
+        - keyboard : bool or dict, enable/disable keyboard controls
+
+        Example to disable scroll zoom::
+
+            view = pdk.View('MapView', {'scrollZoom': False}) # or
+            view = pdk.View(type='MapView', controller={'scrollZoom': False})
+
     **kwargs
         Any of the parameters passable to a deck.gl View
     """

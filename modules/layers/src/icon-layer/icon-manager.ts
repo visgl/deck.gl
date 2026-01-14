@@ -440,7 +440,6 @@ export default class IconManager {
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
-      this._texture?.generateMipmapsWebGL();
     }
   }
 
