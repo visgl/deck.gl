@@ -435,7 +435,7 @@ export default class IconManager {
         );
       }
 
-      this.onUpdate();
+      this.onUpdate(true);
 
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
@@ -489,7 +489,7 @@ export default class IconManager {
           // Call to regenerate mipmaps after modifying texture(s)
           this._texture?.generateMipmapsWebGL();
 
-          this.onUpdate();
+          this.onUpdate(width !== maxWidth || height !== maxHeight);
         })
         .catch(error => {
           this.onError({
