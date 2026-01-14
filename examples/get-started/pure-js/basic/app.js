@@ -4,10 +4,13 @@
 
 import {Deck, MapView} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const TILESET_URL = 'https://tile.googleapis.com/v1/3dtiles/root.json';
+const AIRPLANE_MODEL_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 
 // NYC area airports
 const AIRPORTS = [
@@ -86,21 +89,21 @@ const deck = new Deck({
       },
       operation: 'terrain+draw'
     }),
-    new ScatterplotLayer({
+    new ScenegraphLayer({
       id: 'airports',
       data: AIRPORTS,
       pickable: true,
-      opacity: 0.8,
-      stroked: true,
-      filled: true,
-      radiusScale: 6,
-      radiusMinPixels: 10,
-      radiusMaxPixels: 100,
-      lineWidthMinPixels: 1,
-      getPosition: d => [...d.coordinates, 2000], // Add 2km (2000m) to z coordinate
-      getRadius: d => 100,
-      getFillColor: [255, 140, 0],
-      getLineColor: [255, 255, 255]
+      scenegraph: AIRPLANE_MODEL_URL,
+      sizeScale: 10,
+      sizeMinPixels: 2,
+      sizeMaxPixels: 50,
+      _animations: {
+        '*': {speed: 1}
+      },
+      getPosition: d => [...d.coordinates, 2000],
+      getOrientation: d => [0, 0, 90], // pitch, yaw, roll
+      getScale: [1, 1, 1],
+      _lighting: 'pbr'
     })
   ]
 });
@@ -127,7 +130,7 @@ tilesToggle.style.padding = '5px 10px';
 tilesToggle.style.cursor = 'pointer';
 
 const airportsToggle = document.createElement('button');
-airportsToggle.textContent = 'Hide Airports';
+airportsToggle.textContent = 'Hide Planes';
 airportsToggle.style.padding = '5px 10px';
 airportsToggle.style.cursor = 'pointer';
 
@@ -162,9 +165,12 @@ pivotOptions.style.gap = '5px';
   };
 
   const text = document.createElement('span');
-  text.textContent = mode === 'center' ? 'Center (default)' :
-                     mode === '2d' ? '2D (ground level)' :
-                     '3D (picked altitude)';
+  text.textContent =
+    mode === 'center'
+      ? 'Center (default)'
+      : mode === '2d'
+        ? '2D (ground level)'
+        : '3D (picked altitude)';
 
   label.appendChild(radio);
   label.appendChild(text);
@@ -188,7 +194,7 @@ tilesToggle.onclick = () => {
 
 airportsToggle.onclick = () => {
   airportsVisible = !airportsVisible;
-  airportsToggle.textContent = airportsVisible ? 'Hide Airports' : 'Show Airports';
+  airportsToggle.textContent = airportsVisible ? 'Hide Planes' : 'Show Planes';
   updateLayers();
 };
 
@@ -209,22 +215,22 @@ function updateLayers() {
       },
       operation: 'terrain+draw'
     }),
-    new ScatterplotLayer({
+    new ScenegraphLayer({
       id: 'airports',
       data: AIRPORTS,
       pickable: true,
       visible: airportsVisible,
-      opacity: 0.8,
-      stroked: true,
-      filled: true,
-      radiusScale: 6,
-      radiusMinPixels: 10,
-      radiusMaxPixels: 100,
-      lineWidthMinPixels: 1,
-      getPosition: d => [...d.coordinates, 10000],
-      getRadius: d => 100,
-      getFillColor: [255, 140, 0],
-      getLineColor: [255, 255, 255]
+      scenegraph: AIRPLANE_MODEL_URL,
+      sizeScale: 10,
+      sizeMinPixels: 2,
+      sizeMaxPixels: 50,
+      _animations: {
+        '*': {speed: 1}
+      },
+      getPosition: d => [...d.coordinates, 2000],
+      getOrientation: d => [0, 0, 90], // pitch, yaw, roll
+      getScale: [1, 1, 1],
+      _lighting: 'pbr'
     })
   ];
 
