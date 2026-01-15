@@ -608,13 +608,13 @@ export default class MapController extends Controller<MapState> {
       alternateMode = !alternateMode;
     }
 
-    // Determine rotation pivot altitude based on rotatePivot mode
+    // Determine rotation pivot altitude based on rotationPivot mode
     let pickedAltitude: number | undefined;
-    if (!alternateMode && this.rotatePivot !== 'center') {
-      if (this.rotatePivot === '2d') {
+    if (!alternateMode && this.rotationPivot !== 'center') {
+      if (this.rotationPivot === '2d') {
         // 2D mode: rotate around pointer position at ground level
         pickedAltitude = 0;
-      } else if (this.rotatePivot === '3d') {
+      } else if (this.rotationPivot === '3d') {
         // 3D mode: pick the altitude at the interaction start point
         if (this.pickPosition) {
           const {x, y} = this.props;

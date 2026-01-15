@@ -71,7 +71,7 @@ export type ControllerOptions = {
    * - '2d': Rotate around pointer position at ground level (z=0)
    * - '3d': Rotate around 3D picked point (requires pickPosition callback)
    */
-  rotatePivot?: 'center' | '2d' | '3d';
+  rotationPivot?: 'center' | '2d' | '3d';
 };
 
 export type ControllerProps = {
@@ -143,7 +143,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
   protected inertia: number = 0;
-  protected rotatePivot: 'center' | '2d' | '3d' = 'center';
+  protected rotationPivot: 'center' | '2d' | '3d' = 'center';
   protected scrollZoom: boolean | {speed?: number; smooth?: boolean} = true;
   protected dragPan: boolean = true;
   protected dragRotate: boolean = true;
@@ -301,8 +301,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
-    if (props.rotatePivot) {
-      this.rotatePivot = props.rotatePivot;
+    if (props.rotationPivot) {
+      this.rotationPivot = props.rotationPivot;
     }
     this.props = props;
 

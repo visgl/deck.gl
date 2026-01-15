@@ -32,11 +32,11 @@ const INITIAL_VIEW_STATE = {
 
 // Track rotation pivot for visual feedback
 let rotationPivotPosition = null;
-let currentRotatePivot = '3d';
+let currentRotationPivot = '3d';
 
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {rotatePivot: currentRotatePivot},
+  controller: {rotationPivot: currentRotationPivot},
   onInteractionStateChange: state => {
     rotationPivotPosition = state.rotationPivotPosition || null;
     updateLayers();
@@ -154,13 +154,13 @@ pivotOptions.style.gap = '5px';
 
   const radio = document.createElement('input');
   radio.type = 'radio';
-  radio.name = 'rotatePivot';
+  radio.name = 'rotationPivot';
   radio.value = mode;
-  radio.checked = mode === currentRotatePivot;
+  radio.checked = mode === currentRotationPivot;
   radio.onchange = () => {
-    currentRotatePivot = mode;
+    currentRotationPivot = mode;
     deck.setProps({
-      controller: {rotatePivot: mode}
+      controller: {rotationPivot: mode}
     });
   };
 
