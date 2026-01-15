@@ -73,6 +73,7 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
 
   // Step 3: check the order of layers
   // If beforeId move "group" layers to proper position in the mapbox layer order
+  // @ts-ignore non-public map property
   const mapLayers: string[] = map.style._order;
 
   for (const [groupId, group] of Object.entries(layerGroups)) {
