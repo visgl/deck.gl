@@ -470,15 +470,21 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     return pos && viewport.unproject(pos);
   }
 
-  _unproject3D(pos?: [number, number], altitudeOverride?: number): [number, number, number] | undefined {
+  _unproject3D(
+    pos?: [number, number],
+    altitudeOverride?: number
+  ): [number, number, number] | undefined {
     const viewport = this.makeViewport(this.getViewportProps());
     const {position} = this.getViewportProps();
     const {startRotateAltitude} = this.getState();
 
     // Priority: 1) explicit parameter, 2) picked altitude for this interaction, 3) camera altitude
-    const targetZ = altitudeOverride !== undefined ? altitudeOverride
-                  : startRotateAltitude !== undefined ? startRotateAltitude
-                  : position[2];
+    const targetZ =
+      altitudeOverride !== undefined
+        ? altitudeOverride
+        : startRotateAltitude !== undefined
+          ? startRotateAltitude
+          : position[2];
 
     // @ts-ignore
     return pos && viewport.unproject(pos, {targetZ});
@@ -584,7 +590,7 @@ export default class MapController extends Controller<MapState> {
       const pivotPos = state.startRotateLngLat;
       interactionState = {
         ...interactionState,
-        rotationPivotPosition: pivotPos as [number, number, number]
+        rotationPivotPosition: pivotPos
       };
     } else if (interactionState.isDragging === false) {
       // Clear pivot when drag ends
