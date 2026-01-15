@@ -14,10 +14,11 @@ import {
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {DeckProps} from '@deck.gl/core';
+import type {DeckProps, LayersList} from '@deck.gl/core';
 import {log} from '@deck.gl/core';
 
 import {resolveLayers} from './resolve-layers';
+import {resolveLayerGroups} from './resolve-layer-groups';
 
 export type MapboxOverlayProps = Omit<
   DeckProps,
@@ -32,6 +33,7 @@ export type MapboxOverlayProps = Omit<
   | 'controller'
 > & {
   interleaved?: boolean;
+  _renderLayersInGroups?: boolean;
 };
 
 /**
@@ -143,9 +145,20 @@ export default class MapboxOverlay implements IControl {
     });
 
     map.on('styledata', this._handleStyleChange);
-    resolveLayers(map, this._deck, [], this._props.layers);
+    this._resolveLayers([], this._props.layers);
 
     return document.createElement('div');
+  }
+
+  private _resolveLayers(
+    prevLayers: LayersList | undefined,
+    newLayers: LayersList | undefined
+  ): void {
+    if (this._props._renderLayersInGroups) {
+      resolveLayerGroups(this._map, prevLayers, newLayers);
+    } else {
+      resolveLayers(this._map, this._deck, prevLayers, newLayers);
+    }
   }
 
   /** Called when the control is removed from a map */
@@ -181,7 +194,7 @@ export default class MapboxOverlay implements IControl {
 
   private _onRemoveInterleaved(map: Map): void {
     map.off('styledata', this._handleStyleChange);
-    resolveLayers(map, this._deck, this._props.layers, []);
+    this._resolveLayers(this._props.layers, []);
     removeDeckInstance(map);
   }
 
