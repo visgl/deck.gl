@@ -46,11 +46,13 @@ export default class MapboxOverlay implements IControl {
   private _map?: Map;
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
+  private _renderLayersInGroups: boolean;
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
 
   constructor(props: MapboxOverlayProps) {
     const {interleaved = false} = props;
     this._interleaved = interleaved;
+    this._renderLayersInGroups = props._renderLayersInGroups || false;
     this._props = this.filterProps(props);
   }
 
@@ -154,7 +156,7 @@ export default class MapboxOverlay implements IControl {
     prevLayers: LayersList | undefined,
     newLayers: LayersList | undefined
   ): void {
-    if (this._props._renderLayersInGroups) {
+    if (this._renderLayersInGroups) {
       resolveLayerGroups(this._map, prevLayers, newLayers);
     } else {
       resolveLayers(this._map, this._deck, prevLayers, newLayers);
@@ -238,7 +240,7 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _handleStyleChange = () => {
-    resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    this._resolveLayers(this._props.layers, this._props.layers);
     if (!this._map) return;
 
     // getProjection() returns undefined before style is loaded
