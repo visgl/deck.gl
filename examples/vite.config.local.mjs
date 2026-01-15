@@ -14,8 +14,7 @@ export default defineConfig(async () => {
         ...aliases,
         // Use root dependencies
         'mjolnir.js': join(rootDir, './node_modules/mjolnir.js'),
-        //'@luma.gl': join(rootDir, './node_modules/@luma.gl'),
-        '@luma.gl': join(rootDir, '../luma.gl/modules'),
+        '@luma.gl': join(rootDir, './node_modules/@luma.gl'),
         '@math.gl': join(rootDir, './node_modules/@math.gl'),
         '@arcgis/core': join(rootDir, './node_modules/@arcgis/core'),
         '@loaders.gl/core': join(rootDir, './node_modules/@loaders.gl/core')
