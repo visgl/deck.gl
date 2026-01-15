@@ -7,9 +7,11 @@ import MapboxLayer from './mapbox-layer';
 
 import type {Deck, LayersList, Layer} from '@deck.gl/core';
 import type {Map} from './types';
+import {resolveLayerGroups} from './resolve-layer-groups';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 
+const useLayerGroups = true;
 /** Insert Deck layers into the mapbox Map according to the user-defined order */
 // eslint-disable-next-line complexity, max-statements
 export function resolveLayers(
@@ -18,6 +20,11 @@ export function resolveLayers(
   oldLayers?: LayersList,
   newLayers?: LayersList
 ) {
+  if (useLayerGroups) {
+    resolveLayerGroups(map, deck, oldLayers, newLayers);
+    return;
+  }
+
   // Wait until map style is loaded
   // @ts-ignore non-public map property
   if (!map || !deck || !map.style || !map.style._loaded) {

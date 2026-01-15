@@ -6,7 +6,8 @@ import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck
 import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
 import type MapboxLayer from './mapbox-layer';
-import type {Map} from './types';
+import type MapboxLayerGroup from './mapbox-layer-group';
+import type {Map, OverlayLayer} from './types';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
@@ -179,6 +180,48 @@ export function drawLayer(
     layerFilter: params =>
       (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
       (layer.id === params.layer.id || params.layer.props.operation.includes('terrain')),
+
+    clearStack,
+    clearCanvas: false
+  });
+}
+
+export function drawLayerGroup(
+  deck: Deck,
+  map: Map,
+  group: MapboxLayerGroup,
+  renderParameters: any
+): void {
+  let {currentViewport} = deck.userData as UserData;
+  let clearStack: boolean = false;
+  if (!currentViewport) {
+    // This is the first layer drawn in this render cycle.
+    // Generate viewport from the current map state.
+    currentViewport = getViewport(deck, map, renderParameters);
+    (deck.userData as UserData).currentViewport = currentViewport;
+    clearStack = true;
+  }
+
+  if (!deck.isInitialized) {
+    return;
+  }
+
+  deck._drawLayers('mapbox-repaint', {
+    viewports: [currentViewport],
+    layerFilter: params => {
+      if (deck.props.layerFilter && !deck.props.layerFilter(params)) {
+        return false;
+      }
+
+      const layer = params.layer as OverlayLayer;
+      if (group.beforeId && layer.props.beforeId === group.beforeId) {
+        return true;
+      }
+      if (group.slot && layer.props.slot === group.slot) {
+        return true;
+      }
+      return false;
+    },
     clearStack,
     clearCanvas: false
   });

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {Layer} from '@deck.gl/core';
+
 // Types that offer basic interface compatible with mapbox-gl and maplibre-gl
 
 type Listener = (event?: any) => any;
@@ -123,3 +125,8 @@ export interface Map extends Evented {
 
   triggerRepaint(): void;
 }
+
+export type OverlayLayer = Layer<{
+  slot?: 'bottom' | 'middle' | 'top';
+  beforeId?: string;
+}>;
