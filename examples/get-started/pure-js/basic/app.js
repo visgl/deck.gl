@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -35,8 +35,8 @@ let rotationPivotPosition = null;
 let currentRotatePivot = '3d';
 
 const deck = new Deck({
-  views: new MapView({controller: {rotatePivot: currentRotatePivot}}),
   initialViewState: INITIAL_VIEW_STATE,
+  controller: {rotatePivot: currentRotatePivot},
   onInteractionStateChange: state => {
     rotationPivotPosition = state.rotationPivotPosition || null;
     updateLayers();
@@ -160,7 +160,7 @@ pivotOptions.style.gap = '5px';
   radio.onchange = () => {
     currentRotatePivot = mode;
     deck.setProps({
-      views: new MapView({controller: {rotatePivot: mode}})
+      controller: {rotatePivot: mode}
     });
   };
 
