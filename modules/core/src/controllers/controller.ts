@@ -72,8 +72,6 @@ export type ControllerOptions = {
    * - '3d': Rotate around 3D picked point (requires pickPosition callback)
    */
   rotatePivot?: 'center' | '2d' | '3d';
-  /** Altitude in meters for rotation pivot point. If not specified, uses the camera's position[2]. Default `undefined`. */
-  rotationPivotAltitude?: number;
 };
 
 export type ControllerProps = {

@@ -48,9 +48,6 @@ export type MapStateProps = {
 
   /** Normalize viewport props to fit map height into viewport. Default `true` */
   normalize?: boolean;
-
-  /** Altitude in meters for rotation pivot point */
-  rotationPivotAltitude?: number;
 };
 
 type MapStateInternal = {
@@ -134,10 +131,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startRotateAltitude,
 
       /** Normalize viewport props to fit map height into viewport */
-      normalize = true,
-
-      /** Altitude in meters for rotation pivot point */
-      rotationPivotAltitude = undefined
+      normalize = true
     } = options;
 
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
@@ -159,8 +153,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         maxPitch,
         minPitch,
         normalize,
-        position,
-        rotationPivotAltitude: rotationPivotAltitude as any
+        position
       },
       {
         startPanLngLat,
@@ -479,13 +472,12 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   _unproject3D(pos?: [number, number], altitudeOverride?: number): [number, number, number] | undefined {
     const viewport = this.makeViewport(this.getViewportProps());
-    const {position, rotationPivotAltitude} = this.getViewportProps();
+    const {position} = this.getViewportProps();
     const {startRotateAltitude} = this.getState();
 
-    // Priority: 1) explicit parameter, 2) picked altitude for this interaction, 3) manual override, 4) camera altitude
+    // Priority: 1) explicit parameter, 2) picked altitude for this interaction, 3) camera altitude
     const targetZ = altitudeOverride !== undefined ? altitudeOverride
                   : startRotateAltitude !== undefined ? startRotateAltitude
-                  : rotationPivotAltitude !== undefined ? rotationPivotAltitude
                   : position[2];
 
     // @ts-ignore
