@@ -21,7 +21,7 @@ export function resolveLayers(
   newLayers?: LayersList
 ) {
   if (useLayerGroups) {
-    resolveLayerGroups(map, deck, oldLayers, newLayers);
+    resolveLayerGroups(map, oldLayers, newLayers);
     return;
   }
 

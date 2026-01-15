@@ -4,23 +4,20 @@
 
 import {_flatten as flatten} from '@deck.gl/core';
 
-import type {Deck, LayersList, Layer} from '@deck.gl/core';
+import type {LayersList} from '@deck.gl/core';
 import type {Map, OverlayLayer} from './types';
 import MapboxLayerGroup from './mapbox-layer-group';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 
-/** Insert Deck layers into the mapbox Map according to the user-defined order */
+/** Group Deck layers into buckets (by beforeId or slot) and insert them
+ *  into the mapbox Map according to the user-defined order
+ **/
 // eslint-disable-next-line complexity, max-statements
-export function resolveLayerGroups(
-  map?: Map,
-  deck?: Deck,
-  oldLayers?: LayersList,
-  newLayers?: LayersList
-) {
+export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?: LayersList) {
   // Wait until map style is loaded
   // @ts-ignore non-public map property
-  if (!map || !deck || !map.style || !map.style._loaded) {
+  if (!map || !map.style || !map.style._loaded) {
     return;
   }
 
@@ -38,7 +35,7 @@ export function resolveLayerGroups(
   }
 
   if (oldLayers !== newLayers) {
-    // Step 1: remove layer groups that no longer exist
+    // Step 1: remove "group" layers that no longer exist
     const prevLayers = flatten(oldLayers, Boolean) as OverlayLayer[];
     const prevLayerGroupIds = new Set<string>(prevLayers.map(l => getGroupId(l)));
     const newLayerGroupIds = new Set<string>(layers.map(l => getGroupId(l)));
@@ -52,11 +49,11 @@ export function resolveLayerGroups(
     }
   }
 
-  // Step 2: add missing layers
-  const layerGroups: Record<string, MapboxLayerGroup<OverlayLayer>> = {};
+  // Step 2: add missing "group" layers
+  const layerGroups: Record<string, MapboxLayerGroup> = {};
   for (const layer of layers) {
     const groupId = getGroupId(layer);
-    const mapboxGroup = map.getLayer(groupId) as MapboxLayerGroup<Layer>;
+    const mapboxGroup = map.getLayer(groupId) as MapboxLayerGroup;
     if (mapboxGroup) {
       // Mapbox's map.getLayer() had a breaking change in v3.6.0, see https://github.com/visgl/deck.gl/issues/9086
       // @ts-expect-error not typed
@@ -66,7 +63,6 @@ export function resolveLayerGroups(
     } else {
       const newGroup = new MapboxLayerGroup({
         id: groupId,
-        deck,
         slot: layer.props.slot,
         beforeId: layer.props.beforeId
       });
@@ -76,14 +72,11 @@ export function resolveLayerGroups(
   }
 
   // Step 3: check the order of layers
-  // If beforeId is defined, the deck layer should always render before the mapbox layer [beforeId]
-  // If beforeId is not defined, the deck layer should appear after all mapbox layers
-  // When two deck layers share the same beforeId, they are rendered in the order that is passed into Deck props.layers
-  // @ts-ignore non-public map property
+  // If beforeId move "group" layers to proper position in the mapbox layer order
   const mapLayers: string[] = map.style._order;
 
   for (const [groupId, group] of Object.entries(layerGroups)) {
-    const beforeId = group.props.beforeId || UNDEFINED_BEFORE_ID;
+    const beforeId = group.beforeId || UNDEFINED_BEFORE_ID;
     const expectedGroupIndex =
       beforeId === UNDEFINED_BEFORE_ID ? mapLayers.length : mapLayers.indexOf(beforeId);
 

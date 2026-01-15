@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getDeckInstance, drawLayerGroup, removeLayerGroup, addLayerGroup} from './deck-utils';
+import {getDeckInstance, drawLayerGroup} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import {assert, type Deck} from '@deck.gl/core';
 

@@ -220,6 +220,9 @@ export function drawLayerGroup(
       if (group.slot && layer.props.slot === group.slot) {
         return true;
       }
+      if (layer.props.operation.includes('terrain')) {
+        return true;
+      }
       return false;
     },
     clearStack,
