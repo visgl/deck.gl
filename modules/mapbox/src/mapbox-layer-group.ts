@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {getDeckInstance, drawLayerGroup} from './deck-utils';
-import type {Map, CustomLayerInterface, OverlayLayer} from './types';
+import type {Map, CustomLayerInterface} from './types';
 import {assert, type Deck} from '@deck.gl/core';
 
 export type MapboxLayerGroupProps = {
@@ -46,9 +46,5 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
 
   render(gl, renderParameters) {
     drawLayerGroup(this.deck!, this.map!, this, renderParameters);
-  }
-
-  shouldRenderLayer(layer: OverlayLayer): boolean {
-    return layer.props.beforeId === this.beforeId && layer.props.slot === this.slot;
   }
 }

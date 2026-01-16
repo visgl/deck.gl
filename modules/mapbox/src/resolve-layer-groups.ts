@@ -4,11 +4,15 @@
 
 import {_flatten as flatten} from '@deck.gl/core';
 
-import type {LayersList} from '@deck.gl/core';
-import type {Map, OverlayLayer} from './types';
+import type {Layer, LayersList} from '@deck.gl/core';
+import type {Map, LayerOverlayProps} from './types';
 import MapboxLayerGroup from './mapbox-layer-group';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
+
+function getGroupId(layer: Layer<LayerOverlayProps>): string {
+  return `deck-layer-group:${layer.props.beforeId}:${layer.props.slot}`;
+}
 
 /** Group Deck layers into buckets (by beforeId or slot) and insert them
  *  into the mapbox Map according to the user-defined order
@@ -21,15 +25,11 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
     return;
   }
 
-  const layers = flatten(newLayers, Boolean) as OverlayLayer[];
-
-  function getGroupId(layer: OverlayLayer): string {
-    return `deck-layer-group:${layer.props.beforeId}:${layer.props.slot}`;
-  }
+  const layers = flatten(newLayers, Boolean) as Layer<LayerOverlayProps>[];
 
   if (oldLayers !== newLayers) {
     // Step 1: remove "group" layers that no longer exist
-    const prevLayers = flatten(oldLayers, Boolean) as OverlayLayer[];
+    const prevLayers = flatten(oldLayers, Boolean) as Layer<LayerOverlayProps>[];
     const prevLayerGroupIds = new Set<string>(prevLayers.map(l => getGroupId(l)));
     const newLayerGroupIds = new Set<string>(layers.map(l => getGroupId(l)));
 

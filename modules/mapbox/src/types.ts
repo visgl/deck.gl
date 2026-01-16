@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer} from '@deck.gl/core';
+export type LayerOverlayProps = {
+  slot?: 'bottom' | 'middle' | 'top';
+  beforeId?: string;
+};
 
 // Types that offer basic interface compatible with mapbox-gl and maplibre-gl
 
@@ -125,8 +128,3 @@ export interface Map extends Evented {
 
   triggerRepaint(): void;
 }
-
-export type OverlayLayer = Layer<{
-  slot?: 'bottom' | 'middle' | 'top';
-  beforeId?: string;
-}>;

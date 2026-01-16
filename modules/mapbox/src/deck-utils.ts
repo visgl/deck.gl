@@ -7,7 +7,7 @@ import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
 import type MapboxLayer from './mapbox-layer';
 import type MapboxLayerGroup from './mapbox-layer-group';
-import type {Map, OverlayLayer} from './types';
+import type {LayerOverlayProps, Map} from './types';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
@@ -213,10 +213,11 @@ export function drawLayerGroup(
         return false;
       }
 
-      if (group.shouldRenderLayer(params.layer)) {
+      const layer = params.layer as Layer<LayerOverlayProps>;
+      if (layer.props.beforeId === group.beforeId && layer.props.slot === group.slot) {
         return true;
       }
-      if (params.layer.props.operation.includes('terrain')) {
+      if (layer.props.operation.includes('terrain')) {
         return true;
       }
       return false;
