@@ -180,7 +180,6 @@ export function drawLayer(
     layerFilter: params =>
       (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
       (layer.id === params.layer.id || params.layer.props.operation.includes('terrain')),
-
     clearStack,
     clearCanvas: false
   });
