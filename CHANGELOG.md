@@ -19,6 +19,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.6] - Jan 16 2026
+
+- fix(IconManager) Fix icon frame x/y for auto packed icons (#9928)
+- fix(mapbox): MapboxOverlay: render deck layers in batches (#9939)
+- chore: bump luma to 9.2.6 (#9940)
+- feat(core): Improved GlobeController (#9913)
+- pydeck: Clarify how to pass full controller options (#9897)
+- fix(core): Reset interaction state for smooth=false (#9908)
+- fix(IconLayer): don't generateMipmaps before data loaded (#9909)
+- fix(carto): More defensive code in RasterLayer (#9911)
+- feat(core): Add `container` to WidgetProps (#9922)
+- fix(core): reproduce-able viewports (#9923)
+- Export type hint from  module (#9917)
+
 #### deck.gl [v9.2.5] - Dec 9 2025
 
 - chore: bump luma 9.2.4 (#9907)
