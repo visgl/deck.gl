@@ -77,7 +77,7 @@ export default class MapboxOverlay implements IControl {
   /** Update (partial) props of the underlying Deck instance. */
   setProps(props: MapboxOverlayProps): void {
     if (this._interleaved && props.layers) {
-      resolveLayers(this._map, this._deck, this._props.layers, props.layers);
+      this._resolveLayers(this._props.layers, props.layers);
     }
 
     Object.assign(this._props, this.filterProps(props));
