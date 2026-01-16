@@ -32,7 +32,15 @@ export type MapboxOverlayProps = Omit<
   | 'initialViewState'
   | 'controller'
 > & {
+  /**
+   * deck.gl layers are inserted into mapbox-gl's layer stack, and share the same WebGL2RenderingContext as the base map.
+   */
   interleaved?: boolean;
+
+  /**
+   * (experimental) render deck.gl layers in batches grouped by `beforeId` or `slot` to enable cross-layer extension handling.
+   * @default false
+   */
   _renderLayersInGroups?: boolean;
 };
 
