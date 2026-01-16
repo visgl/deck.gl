@@ -10,8 +10,13 @@ import MapboxLayerGroup from './mapbox-layer-group';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 
-function getGroupId(layer: Layer<LayerOverlayProps>): string {
-  return `deck-layer-group:${layer.props.beforeId}:${layer.props.slot}`;
+function getLayerGroupId(layer: Layer<LayerOverlayProps>): string {
+  if (layer.props.beforeId) {
+    return `deck-layer-group-before:${layer.props.beforeId}`;
+  } else if (layer.props.slot) {
+    return `deck-layer-group-slot:${layer.props.slot}`;
+  }
+  return 'deck-layer-group-last';
 }
 
 /** Group Deck layers into buckets (by beforeId or slot) and insert them
@@ -30,8 +35,8 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
   if (oldLayers !== newLayers) {
     // Step 1: remove "group" layers that no longer exist
     const prevLayers = flatten(oldLayers, Boolean) as Layer<LayerOverlayProps>[];
-    const prevLayerGroupIds = new Set<string>(prevLayers.map(l => getGroupId(l)));
-    const newLayerGroupIds = new Set<string>(layers.map(l => getGroupId(l)));
+    const prevLayerGroupIds = new Set<string>(prevLayers.map(l => getLayerGroupId(l)));
+    const newLayerGroupIds = new Set<string>(layers.map(l => getLayerGroupId(l)));
 
     for (const groupId of prevLayerGroupIds) {
       if (!newLayerGroupIds.has(groupId)) {
@@ -45,7 +50,7 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
   // Step 2: add missing "group" layers
   const layerGroups: Record<string, MapboxLayerGroup> = {};
   for (const layer of layers) {
-    const groupId = getGroupId(layer);
+    const groupId = getLayerGroupId(layer);
     const mapboxGroup = map.getLayer(groupId) as MapboxLayerGroup;
     if (mapboxGroup) {
       // Mapbox's map.getLayer() had a breaking change in v3.6.0, see https://github.com/visgl/deck.gl/issues/9086
