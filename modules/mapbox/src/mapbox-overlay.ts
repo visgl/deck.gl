@@ -76,8 +76,8 @@ export default class MapboxOverlay implements IControl {
 
   /** Update (partial) props of the underlying Deck instance. */
   setProps(props: MapboxOverlayProps): void {
-    if (this._map && this._interleaved && props.layers) {
-      this._resolveLayers(this._map, this._props.layers, props.layers);
+    if (this._interleaved && props.layers) {
+      this._resolveLayers(this._map, this._deck, this._props.layers, props.layers);
     }
 
     Object.assign(this._props, this.filterProps(props));
@@ -155,20 +155,21 @@ export default class MapboxOverlay implements IControl {
     });
 
     map.on('styledata', this._handleStyleChange);
-    this._resolveLayers(map, [], this._props.layers);
+    this._resolveLayers(map, this._deck, [], this._props.layers);
 
     return document.createElement('div');
   }
 
   private _resolveLayers(
-    map: Map,
+    map: Map | undefined,
+    deck: Deck | undefined,
     prevLayers: LayersList | undefined,
     newLayers: LayersList | undefined
   ): void {
     if (this._renderLayersInGroups) {
       resolveLayerGroups(map, prevLayers, newLayers);
     } else {
-      resolveLayers(map, this._deck, prevLayers, newLayers);
+      resolveLayers(map, deck, prevLayers, newLayers);
     }
   }
 
@@ -205,7 +206,7 @@ export default class MapboxOverlay implements IControl {
 
   private _onRemoveInterleaved(map: Map): void {
     map.off('styledata', this._handleStyleChange);
-    this._resolveLayers(map, this._props.layers, []);
+    this._resolveLayers(map, this._deck, this._props.layers, []);
     removeDeckInstance(map);
   }
 
@@ -249,8 +250,8 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _handleStyleChange = () => {
+    this._resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
     if (!this._map) return;
-    this._resolveLayers(this._map, this._props.layers, this._props.layers);
 
     // getProjection() returns undefined before style is loaded
     const projection = getProjection(this._map);
