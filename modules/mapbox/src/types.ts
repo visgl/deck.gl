@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+export type LayerOverlayProps = {
+  slot?: 'bottom' | 'middle' | 'top';
+  beforeId?: string;
+};
+
 // Types that offer basic interface compatible with mapbox-gl and maplibre-gl
 
 type Listener = (event?: any) => any;
