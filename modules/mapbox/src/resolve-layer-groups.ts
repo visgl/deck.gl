@@ -24,14 +24,7 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
   const layers = flatten(newLayers, Boolean) as OverlayLayer[];
 
   function getGroupId(layer: OverlayLayer): string {
-    const props = layer.props;
-    if (props.beforeId) {
-      return `before-${props.beforeId}`;
-    }
-    if (props.slot) {
-      return `slot-${props.slot}`;
-    }
-    return UNDEFINED_BEFORE_ID;
+    return `deck-layer-group:${layer.props.beforeId}:${layer.props.slot}`;
   }
 
   if (oldLayers !== newLayers) {

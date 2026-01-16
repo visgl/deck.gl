@@ -213,14 +213,10 @@ export function drawLayerGroup(
         return false;
       }
 
-      const layer = params.layer as OverlayLayer;
-      if (group.beforeId && layer.props.beforeId === group.beforeId) {
+      if (group.shouldRenderLayer(params.layer)) {
         return true;
       }
-      if (group.slot && layer.props.slot === group.slot) {
-        return true;
-      }
-      if (layer.props.operation.includes('terrain')) {
+      if (params.layer.props.operation.includes('terrain')) {
         return true;
       }
       return false;
