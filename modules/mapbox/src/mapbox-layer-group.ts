@@ -45,6 +45,8 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
   }
 
   render(gl, renderParameters) {
-    drawLayerGroup(this.deck!, this.map!, this, renderParameters);
+    if (!this.deck || !this.map) return;
+
+    drawLayerGroup(this.deck, this.map, this, renderParameters);
   }
 }
