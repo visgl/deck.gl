@@ -51,8 +51,7 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
       // Mapbox's map.getLayer() had a breaking change in v3.6.0, see https://github.com/visgl/deck.gl/issues/9086
       // @ts-expect-error not typed
       const groupInstance = mapboxGroup.implementation || mapboxGroup;
-      groupInstance.updateLayerProps(layer.id, layer.props);
-      layerGroups[groupId] = mapboxGroup;
+      layerGroups[groupId] = groupInstance;
     } else {
       const newGroup = new MapboxLayerGroup({
         id: groupId,
@@ -71,11 +70,12 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
 
   for (const [groupId, group] of Object.entries(layerGroups)) {
     const beforeId = group.beforeId || UNDEFINED_BEFORE_ID;
+
     const expectedGroupIndex =
       beforeId === UNDEFINED_BEFORE_ID ? mapLayers.length : mapLayers.indexOf(beforeId);
 
     const currentGropupIndex = mapLayers.indexOf(groupId);
-    if (currentGropupIndex !== expectedGroupIndex) {
+    if (currentGropupIndex !== expectedGroupIndex - 1) {
       const moveBeforeId = beforeId === UNDEFINED_BEFORE_ID ? undefined : beforeId;
       map.moveLayer(groupId, moveBeforeId);
     }
