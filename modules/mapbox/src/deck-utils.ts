@@ -13,8 +13,9 @@ import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
 const MAPBOX_VIEW_ID = 'mapbox';
 
-type UserData = {
+export type UserData = {
   isExternal: boolean;
+  interleaved: boolean;
   currentViewport?: Viewport | null;
   mapboxLayers: Set<MapboxLayer<any>>;
   // mapboxVersion: {minor: number; major: number};
@@ -371,15 +372,16 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
 }
 
 function afterRender(deck: Deck, map: Map): void {
-  const {mapboxLayers, isExternal} = deck.userData as UserData;
+  const {mapboxLayers, isExternal, interleaved} = deck.userData as UserData;
 
   if (isExternal) {
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
     const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
-    const hasNonMapboxLayers = deckLayers.some(
-      layer => layer && !mapboxLayerIds.includes(layer.id)
-    );
+    const hasNonMapboxLayers =
+      // In interleaved mode _all_ layers are rendered through custom mapbox layer API (either one by one or in groups,
+      // so assume we never have "non-mapbox-managed" layers.
+      !interleaved && deckLayers.some(layer => layer && !mapboxLayerIds.includes(layer.id));
     let viewports = deck.getViewports();
     const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
     const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
@@ -394,7 +396,8 @@ function afterRender(deck: Deck, map: Map): void {
         viewports,
         layerFilter: params =>
           (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-          (params.viewport.id !== MAPBOX_VIEW_ID || !mapboxLayerIds.includes(params.layer.id)),
+          (params.viewport.id !== MAPBOX_VIEW_ID ||
+            (hasNonMapboxLayers && !mapboxLayerIds.includes(params.layer.id))),
         clearCanvas: false
       });
     }

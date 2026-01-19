@@ -9,7 +9,8 @@ import {
   getDeckInstance,
   removeDeckInstance,
   getDefaultParameters,
-  getProjection
+  getProjection,
+  UserData
 } from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
@@ -154,6 +155,7 @@ export default class MapboxOverlay implements IControl {
       })
     });
 
+    (this._deck.userData as UserData).interleaved = true;
     map.on('styledata', this._handleStyleChange);
     this._resolveLayers(map, this._deck, [], this._props.layers);
 
