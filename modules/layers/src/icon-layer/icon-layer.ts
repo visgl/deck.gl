@@ -320,8 +320,13 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
-  private _onUpdate(): void {
-    this.setNeedsRedraw();
+  private _onUpdate(didFrameChange: boolean): void {
+    if (didFrameChange) {
+      this.getAttributeManager()?.invalidate('getIcon');
+      this.setNeedsUpdate();
+    } else {
+      this.setNeedsRedraw();
+    }
   }
 
   private _onError(evt: LoadIconErrorContext): void {
