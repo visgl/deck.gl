@@ -158,6 +158,88 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   });
 });
 
+test('MapboxOverlay#overlaidAutoInjectMapboxView', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const overlay = new MapboxOverlay({
+    layers: [new ScatterplotLayer({id: 'test'})]
+  });
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  t.ok(deck, 'Deck instance is created');
+
+  const views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
+  t.is(views.length, 1, 'Single view is present');
+  t.is(views[0].id, 'mapbox', 'Default mapbox view is auto-injected');
+  t.ok(views[0] instanceof MapView, 'View is a MapView');
+
+  map.removeControl(overlay);
+  t.notOk(overlay._deck, 'Deck instance is finalized');
+  t.end();
+});
+
+test('MapboxOverlay#overlaidAutoInjectMapboxViewWithCustomViews', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const customView = new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'});
+
+  const overlay = new MapboxOverlay({
+    views: [customView],
+    layers: [new ScatterplotLayer({id: 'test'})]
+  });
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  const views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
+
+  t.is(views.length, 2, 'Two views are present');
+  t.is(views[0].id, 'mapbox', 'Mapbox view is auto-injected at the start');
+  t.ok(views[0] instanceof MapView, 'First view is MapView');
+  t.is(views[1].id, 'minimap', 'Custom view is preserved');
+  t.is(views[1], customView, 'Custom view is the same instance');
+
+  map.removeControl(overlay);
+  t.notOk(overlay._deck, 'Deck instance is finalized');
+  t.end();
+});
+
+test('MapboxOverlay#overlaidNoDuplicateWhenMapboxViewProvided', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const explicitMapboxView = new MapView({id: 'mapbox'});
+  const customView = new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'});
+
+  const overlay = new MapboxOverlay({
+    views: [explicitMapboxView, customView],
+    layers: [new ScatterplotLayer({id: 'test'})]
+  });
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  const views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
+
+  t.is(views.length, 2, 'Two views only (no duplicate)');
+  t.is(views[0], explicitMapboxView, 'First view is the explicitly provided mapbox view');
+  t.is(views[1], customView, 'Second view is the custom view');
+
+  map.removeControl(overlay);
+  t.notOk(overlay._deck, 'Deck instance is finalized');
+  t.end();
+});
+
 test('MapboxOverlay#interleaved', t => {
   let drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {
@@ -347,6 +429,104 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
 
     map.setCenter({lng: 0, lat: 1});
     t.true(map._listeners['move'].length === 0, 'Listener detached after it fired');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});
+
+test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    layers: [new ScatterplotLayer({id: 'test'})]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+
+  map.once('render', () => {
+    const views = Array.isArray(overlay._deck.props.views)
+      ? overlay._deck.props.views
+      : [overlay._deck.props.views];
+    t.is(views.length, 1, 'Single view is present');
+    t.is(views[0].id, 'mapbox', 'Default mapbox view is auto-injected');
+    t.ok(views[0] instanceof MapView, 'View is a MapView');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});
+
+test('MapboxOverlay#interleavedAutoInjectMapboxViewWithCustomViews', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const customView = new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'});
+
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    views: [customView],
+    layers: [new ScatterplotLayer({id: 'test'})]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+
+  map.once('render', () => {
+    const views = Array.isArray(overlay._deck.props.views)
+      ? overlay._deck.props.views
+      : [overlay._deck.props.views];
+
+    t.is(views.length, 2, 'Two views are present');
+    t.is(views[0].id, 'mapbox', 'Mapbox view is auto-injected at the start');
+    t.ok(views[0] instanceof MapView, 'First view is MapView');
+    t.is(views[1].id, 'minimap', 'Custom view is preserved');
+    t.is(views[1], customView, 'Custom view is the same instance');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});
+
+test('MapboxOverlay#interleavedNoDuplicateWhenMapboxViewProvided', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const explicitMapboxView = new MapView({id: 'mapbox'});
+  const customView = new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'});
+
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    views: [explicitMapboxView, customView],
+    layers: [new ScatterplotLayer({id: 'test'})]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+
+  map.once('render', () => {
+    const views = Array.isArray(overlay._deck.props.views)
+      ? overlay._deck.props.views
+      : [overlay._deck.props.views];
+
+    t.is(views.length, 2, 'Two views only (no duplicate)');
+    t.is(views[0], explicitMapboxView, 'First view is the explicitly provided mapbox view');
+    t.is(views[1], customView, 'Second view is the custom view');
 
     map.removeControl(overlay);
     t.notOk(overlay._deck, 'Deck instance is finalized');
