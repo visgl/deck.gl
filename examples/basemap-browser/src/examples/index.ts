@@ -3,7 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import type {ExampleCategories} from '../types';
-import {getAirportLayers, getAirportLayersWithGlobe} from '../layers';
+import {
+  getAirportLayers,
+  getAirportLayersWithGlobe,
+  getMultiViewLayers,
+  getMultiViewViews,
+  getMultiViewInitialViewState,
+  getMultiViewLayerFilter
+} from '../layers';
 import {MAPBOX_STYLE, MAPLIBRE_STYLE} from '../constants';
 
 // Configuration matching get-started examples
@@ -64,6 +71,18 @@ const EXAMPLES: ExampleCategories = {
         pitch: 30
       },
       getLayers: interleaved => getAirportLayers(interleaved, 'mapbox')
+    },
+    'Mapbox Multi-View React': {
+      name: 'Mapbox Multi-View React',
+      mapType: 'mapbox',
+      framework: 'react',
+      mapStyle: MAPBOX_STYLE,
+      multiView: true,
+      initialViewState: getMultiViewInitialViewState(),
+      getLayers: interleaved =>
+        getMultiViewLayers(interleaved, 'Mapbox Multi-View React', 'mapbox'),
+      views: getMultiViewViews(),
+      layerFilter: getMultiViewLayerFilter
     }
   },
   MapLibre: {
@@ -124,6 +143,18 @@ const EXAMPLES: ExampleCategories = {
         pitch: 0
       },
       getLayers: interleaved => getAirportLayersWithGlobe(interleaved, 'maplibre')
+    },
+    'MapLibre Multi-View React': {
+      name: 'MapLibre Multi-View React',
+      mapType: 'maplibre',
+      framework: 'react',
+      mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      multiView: true,
+      initialViewState: getMultiViewInitialViewState(),
+      getLayers: interleaved =>
+        getMultiViewLayers(interleaved, 'MapLibre Multi-View React', 'maplibre'),
+      views: getMultiViewViews(),
+      layerFilter: getMultiViewLayerFilter
     }
   }
 };

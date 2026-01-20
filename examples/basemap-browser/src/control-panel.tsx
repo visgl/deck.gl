@@ -16,12 +16,13 @@ type CanvasSize = {
 };
 
 type ControlPanelProps = {
-  onExampleChange: (example: BasemapExample, interleaved: boolean) => void;
+  onExampleChange: (example: BasemapExample, interleaved: boolean, batched: boolean) => void;
 };
 
 export default function ControlPanel({onExampleChange}: ControlPanelProps) {
   const [selectedExample, setSelectedExample] = useState('MapLibre Pure JS');
   const [interleaved, setInterleaved] = useState(true);
+  const [batched, setBatched] = useState(true);
   const [currentDPR, setCurrentDPR] = useState(window.devicePixelRatio);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({width: 0, height: 0});
 
@@ -66,13 +67,13 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
     };
   }, [currentDPR, updateCanvasInfo]);
 
-  // Handle example or interleaved changes
+  // Handle example or interleaved or batched changes
   useEffect(() => {
     const example = getCurrentExample();
     if (example) {
-      onExampleChange(example, interleaved);
+      onExampleChange(example, interleaved, batched);
     }
-  }, [selectedExample, interleaved, getCurrentExample, onExampleChange]);
+  }, [selectedExample, interleaved, batched, getCurrentExample, onExampleChange]);
 
   const example = getCurrentExample();
 
@@ -106,6 +107,15 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
         </label>
       </div>
 
+      {interleaved && (example?.mapType === 'mapbox' || example?.mapType === 'maplibre') && (
+        <div className="section">
+          <label>
+            <input type="checkbox" checked={batched} onChange={() => setBatched(!batched)} />
+            Batched Rendering
+          </label>
+        </div>
+      )}
+
       <div className="section">
         <h3>Current State</h3>
         <div>
@@ -117,6 +127,11 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
         <div>
           <b>Interleaved:</b> {interleaved ? 'true' : 'false'}
         </div>
+        {interleaved && (example?.mapType === 'mapbox' || example?.mapType === 'maplibre') && (
+          <div>
+            <b>Batched:</b> {batched ? 'true' : 'false'}
+          </div>
+        )}
         <div>
           <b>Device Pixel Ratio:</b> {currentDPR.toFixed(2)}
         </div>
