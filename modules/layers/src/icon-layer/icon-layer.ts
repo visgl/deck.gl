@@ -289,13 +289,20 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
-    const parameters =
+    // Merge layer parameters with device-specific defaults
+    // This ensures cullMode: 'none' works for GlobeView text rendering
+    const deviceParams =
       this.context.device.type === 'webgpu'
         ? ({
             depthWriteEnabled: true,
             depthCompare: 'less-equal'
           } satisfies Parameters)
-        : undefined;
+        : {};
+
+    const parameters = {
+      ...deviceParams,
+      ...this.props.parameters // Include layer's parameters (e.g., cullMode: 'none')
+    };
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];

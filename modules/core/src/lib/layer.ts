@@ -1067,19 +1067,29 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         context.device.setParametersWebGL({polygonOffset: offsets});
       }
 
+      // Merge layer-specific parameters with global parameters
+      // Layer parameters take precedence (e.g., cull: false for TextLayer on GlobeView)
+      const mergedParameters = {...parameters, ...this.props.parameters};
+
       for (const model of this.getModels()) {
         if (model.device.type === 'webgpu') {
           // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
-          model.setParameters({...model.parameters, ...parameters});
+          model.setParameters({...model.parameters, ...mergedParameters});
         } else {
-          model.setParameters(parameters);
+          model.setParameters(mergedParameters);
         }
       }
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
-        context.device.withParametersWebGL(parameters, () => {
-          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        context.device.withParametersWebGL(mergedParameters, () => {
+          const opts: DrawOptions = {
+            renderPass,
+            shaderModuleProps,
+            uniforms,
+            parameters: mergedParameters,
+            context
+          };
 
           // extensions
           for (const extension of this.props.extensions) {
@@ -1089,7 +1099,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        const opts: DrawOptions = {
+          renderPass,
+          shaderModuleProps,
+          uniforms,
+          parameters: mergedParameters,
+          context
+        };
 
         // extensions
         for (const extension of this.props.extensions) {
