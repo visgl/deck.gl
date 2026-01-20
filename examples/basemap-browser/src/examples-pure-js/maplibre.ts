@@ -13,7 +13,8 @@ export function mount(
   initialViewState: any,
   mapStyle: string,
   interleaved: boolean,
-  globe?: boolean
+  globe?: boolean,
+  batched?: boolean
 ): () => void {
   const map = new maplibregl.Map({
     container,
@@ -26,6 +27,7 @@ export function mount(
 
   const deckOverlay = new MapboxOverlay({
     interleaved,
+    _renderLayersInGroups: batched,
     layers: getLayers(interleaved)
   });
 

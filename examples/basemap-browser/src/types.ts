@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Layer} from '@deck.gl/core';
+import type {Layer, View} from '@deck.gl/core';
 
 export type MapType = 'google-maps' | 'mapbox' | 'maplibre';
 
@@ -21,9 +21,12 @@ export type BasemapExample = {
   mapType: MapType;
   framework: Framework;
   mapStyle?: string;
-  initialViewState: InitialViewState;
+  initialViewState: InitialViewState | Record<string, any>; // Can be per-view with view IDs as keys
   getLayers: (interleaved?: boolean) => Layer[];
   globe?: boolean;
+  multiView?: boolean;
+  views?: View[];
+  layerFilter?: (args: {layer: Layer; viewport: any}) => boolean;
 };
 
 export type ExampleCategory = {

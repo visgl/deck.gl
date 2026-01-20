@@ -10,7 +10,9 @@ import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-function MapLibreDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
+function MapLibreDeckOverlay(
+  props: MapboxOverlayProps & {interleaved: boolean; batched: boolean; initialViewState?: any}
+) {
   const overlay = useMapLibreControl(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
@@ -19,10 +21,11 @@ function MapLibreDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean})
 type MapLibreComponentProps = {
   example: BasemapExample;
   interleaved: boolean;
+  batched: boolean;
 };
 
-export default function MapLibreComponent({example, interleaved}: MapLibreComponentProps) {
-  const {mapStyle, initialViewState, getLayers, globe} = example;
+export default function MapLibreComponent({example, interleaved, batched}: MapLibreComponentProps) {
+  const {mapStyle, initialViewState, getLayers, globe, views, layerFilter} = example;
   const [overlayReady, setOverlayReady] = React.useState(!globe);
   const isMountedRef = React.useRef(true);
 
@@ -33,12 +36,18 @@ export default function MapLibreComponent({example, interleaved}: MapLibreCompon
     };
   }, []);
 
+  // For multi-view examples, extract the mapbox view state for the base map
+  const mapInitialViewState =
+    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
+      ? initialViewState.mapbox
+      : initialViewState;
+
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapLibreMap
-        key={`maplibre-${interleaved}-${globe || false}`}
+        key={`maplibre-${interleaved}-${batched}-${globe || false}`}
         mapStyle={mapStyle}
-        initialViewState={initialViewState}
+        initialViewState={mapInitialViewState}
         onLoad={e => {
           if (globe && isMountedRef.current) {
             // Set projection before rendering overlay (critical for globe + interleaved mode)
@@ -48,7 +57,15 @@ export default function MapLibreComponent({example, interleaved}: MapLibreCompon
         }}
       >
         {overlayReady && (
-          <MapLibreDeckOverlay layers={getLayers(interleaved)} interleaved={interleaved} />
+          <MapLibreDeckOverlay
+            layers={getLayers(interleaved)}
+            interleaved={interleaved}
+            batched={batched}
+            _renderLayersInGroups={batched}
+            {...(views && {views})}
+            {...(layerFilter && {layerFilter})}
+            {...(views && {initialViewState})}
+          />
         )}
       </MapLibreMap>
     </div>

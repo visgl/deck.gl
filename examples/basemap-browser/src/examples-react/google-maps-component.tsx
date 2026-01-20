@@ -32,6 +32,7 @@ function GoogleMapsDeckOverlay({
 type GoogleMapsComponentProps = {
   example: BasemapExample;
   interleaved: boolean;
+  batched?: boolean; // Not used for Google Maps, but kept for consistent interface
 };
 
 export default function GoogleMapsComponent({example, interleaved}: GoogleMapsComponentProps) {

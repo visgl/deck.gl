@@ -11,7 +11,8 @@ export function mount(
   getLayers: (interleaved?: boolean) => Layer[],
   initialViewState: any,
   mapStyle: string,
-  interleaved: boolean
+  interleaved: boolean,
+  batched: boolean
 ): () => void {
   // eslint-disable-next-line no-process-env
   const mapboxToken = process.env.MapboxAccessToken;
@@ -39,6 +40,7 @@ export function mount(
 
   const deckOverlay = new MapboxOverlay({
     interleaved,
+    _renderLayersInGroups: batched,
     layers: getLayers(interleaved)
   });
 
