@@ -54,6 +54,7 @@ const defaultProps: DefaultProps<IconClusterLayerProps> = {
   // Text styling
   fontFamily: 'Monaco, monospace',
   fontWeight: 'bold',
+  clusterTextSize: {type: 'number', min: 1, value: 16},
 
   // Performance
   pickable: true,
@@ -107,6 +108,9 @@ type _IconClusterLayerProps = {
 
   /** Font weight for cluster text */
   fontWeight?: string;
+
+  /** Font size for cluster count text in pixels */
+  clusterTextSize?: number;
 
   /** Size scale */
   sizeScale?: number;
@@ -451,6 +455,7 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
       clusterTextColor,
       clusterRadiusMinPixels,
       clusterRadiusMaxPixels,
+      clusterTextSize,
       pointFillColor,
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
@@ -533,7 +538,7 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
               : [255, 255, 255, 255];
             return [baseColor[0], baseColor[1], baseColor[2], (baseColor[3] || 255) * d.opacity];
           },
-          getSize: 16,
+          getSize: clusterTextSize || 16,
           getAngle: 0,
           getTextAnchor: 'middle',
           getAlignmentBaseline: 'center',
