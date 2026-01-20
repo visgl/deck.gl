@@ -22,7 +22,7 @@ function GoogleMapsDeckOverlay({
     if (map) {
       overlay.setMap(map);
     }
-    return () => overlay.setMap(null);
+    return () => overlay.finalize();
   }, [map, overlay]);
 
   overlay.setProps({layers: getLayers(interleaved)});
