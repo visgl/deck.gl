@@ -282,6 +282,66 @@ test('Deck#resourceManager', async t => {
   t.end();
 });
 
+test('Deck#getView with single view', t => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    views: new MapView({id: 'map'}),
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    onLoad: () => {
+      const mapView = deck.getView('map');
+      t.ok(mapView, 'getView returns a view for valid id');
+      t.is(mapView?.id, 'map', 'getView returns the correct view');
+
+      const unknownView = deck.getView('unknown');
+      t.notOk(unknownView, 'getView returns undefined for unknown id');
+
+      deck.finalize();
+      t.end();
+    }
+  });
+});
+
+test('Deck#getView with multiple views', t => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    views: [new MapView({id: 'map'}), new MapView({id: 'minimap'})],
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    onLoad: () => {
+      const mapView = deck.getView('map');
+      t.ok(mapView, 'getView returns a view for valid id');
+      t.is(mapView?.id, 'map', 'getView returns the correct view');
+
+      const minimapView = deck.getView('minimap');
+      t.ok(minimapView, 'getView returns a view for second valid id');
+      t.is(minimapView?.id, 'minimap', 'getView returns the correct view');
+
+      const unknownView = deck.getView('unknown');
+      t.notOk(unknownView, 'getView returns undefined for unknown id');
+
+      deck.finalize();
+      t.end();
+    }
+  });
+});
+
 test('Deck#props omitted are unchanged', async t => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',

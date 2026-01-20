@@ -303,10 +303,9 @@ type MaplibreRenderParameters = {
 
 function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport {
   const viewState = getViewState(map);
-  const {views} = deck.props;
-  const view =
-    (views && flatten(views).find((v: {id: string}) => v.id === MAPBOX_VIEW_ID)) ||
-    getDefaultView(map);
+  // View is always MapView or GlobeView in this context
+  const view = ((deck.isInitialized && deck.getView(MAPBOX_VIEW_ID)) ||
+    getDefaultView(map)) as MapView | GlobeView;
 
   if (renderParameters) {
     // Called from MapboxLayer.render
