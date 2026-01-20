@@ -173,10 +173,19 @@ test('MapboxOverlay#overlaidAutoInjectMapboxView', t => {
   const deck = overlay._deck;
   t.ok(deck, 'Deck instance is created');
 
-  const views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
+  let views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
   t.is(views.length, 1, 'Single view is present');
   t.is(views[0].id, 'mapbox', 'Default mapbox view is auto-injected');
   t.ok(views[0] instanceof MapView, 'View is a MapView');
+
+  // Test that setProps with custom views still auto-injects mapbox view
+  const customView = new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'});
+  overlay.setProps({views: [customView]});
+
+  views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
+  t.is(views.length, 2, 'After setProps has two views');
+  t.is(views[0].id, 'mapbox', 'Mapbox view is still auto-injected after setProps');
+  t.is(views[1].id, 'minimap', 'Custom view is added');
 
   map.removeControl(overlay);
   t.notOk(overlay._deck, 'Deck instance is finalized');
@@ -452,12 +461,29 @@ test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
   t.ok(overlay._deck, 'Deck instance is created');
 
   map.once('render', () => {
-    const views = Array.isArray(overlay._deck.props.views)
+    let views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
       : [overlay._deck.props.views];
     t.is(views.length, 1, 'Single view is present');
     t.is(views[0].id, 'mapbox', 'Default mapbox view is auto-injected');
     t.ok(views[0] instanceof MapView, 'View is a MapView');
+
+    // Test that setProps with custom views still auto-injects mapbox view
+    const customView = new MapView({
+      id: 'minimap',
+      x: '75%',
+      y: '75%',
+      width: '25%',
+      height: '25%'
+    });
+    overlay.setProps({views: [customView]});
+
+    views = Array.isArray(overlay._deck.props.views)
+      ? overlay._deck.props.views
+      : [overlay._deck.props.views];
+    t.is(views.length, 2, 'After setProps has two views');
+    t.is(views[0].id, 'mapbox', 'Mapbox view is still auto-injected after setProps');
+    t.is(views[1].id, 'minimap', 'Custom view is added');
 
     map.removeControl(overlay);
     t.notOk(overlay._deck, 'Deck instance is finalized');

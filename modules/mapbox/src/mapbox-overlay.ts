@@ -85,6 +85,7 @@ export default class MapboxOverlay implements IControl {
     if (this._deck && this._map) {
       this._deck.setProps({
         ...this._props,
+        views: this._getViews(this._map),
         parameters: {
           ...getDefaultParameters(this._map, this._interleaved),
           ...this._props.parameters
@@ -149,6 +150,7 @@ export default class MapboxOverlay implements IControl {
       gl,
       deck: new Deck({
         ...this._props,
+        views: this._getViews(map),
         gl,
         parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
       })
@@ -255,8 +257,9 @@ export default class MapboxOverlay implements IControl {
 
     // getProjection() returns undefined before style is loaded
     const projection = getProjection(this._map);
-    if (projection && !this._props.views) {
-      this._deck?.setProps({views: getDefaultView(this._map)});
+    if (projection) {
+      // Update views to match new projection (MapView vs GlobeView)
+      this._deck?.setProps({views: this._getViews(this._map)});
     }
   };
 
