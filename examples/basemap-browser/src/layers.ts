@@ -10,11 +10,13 @@ import type {MapType} from './types';
 // Layer configurations from get-started examples
 export function getAirportLayers(interleaved?: boolean, mapType?: MapType): Layer[] {
   // In interleaved mode, render the layers under map labels
-  // Mapbox uses slot, MapLibre uses beforeId
-  const interleavedProps = interleaved
+  // Mapbox uses slot, MapLibre uses beforeId, Google Maps doesn't support layer positioning
+  const interleavedProps: any = interleaved
     ? mapType === 'mapbox'
       ? {slot: 'middle'}
-      : {beforeId: 'watername_ocean'}
+      : mapType === 'maplibre'
+        ? {beforeId: 'watername_ocean'}
+        : {} // google-maps
     : {};
 
   return [
@@ -46,11 +48,13 @@ export function getAirportLayers(interleaved?: boolean, mapType?: MapType): Laye
 
 export function getAirportLayersWithGlobe(interleaved?: boolean, mapType?: MapType): Layer[] {
   // In interleaved mode, render the layers under map labels
-  // Mapbox uses slot, MapLibre uses beforeId
-  const interleavedProps = interleaved
+  // Mapbox uses slot, MapLibre uses beforeId, Google Maps doesn't support layer positioning
+  const interleavedProps: any = interleaved
     ? mapType === 'mapbox'
       ? {slot: 'middle'}
-      : {beforeId: 'watername_ocean'}
+      : mapType === 'maplibre'
+        ? {beforeId: 'watername_ocean'}
+        : {} // google-maps
     : {};
 
   return [
