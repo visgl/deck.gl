@@ -29,7 +29,11 @@ export function mount(
     layers: getLayers(interleaved)
   });
 
+  let cancelled = false;
+
   map.on('load', () => {
+    if (cancelled) return;
+
     // Set projection before adding overlay (critical for globe + interleaved mode)
     if (globe) {
       map.setProjection({type: 'globe'} as any);
@@ -39,6 +43,7 @@ export function mount(
   });
 
   return () => {
+    cancelled = true;
     map.remove();
   };
 }

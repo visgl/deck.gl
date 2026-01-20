@@ -24,6 +24,14 @@ type MapLibreComponentProps = {
 export default function MapLibreComponent({example, interleaved}: MapLibreComponentProps) {
   const {mapStyle, initialViewState, getLayers, globe} = example;
   const [overlayReady, setOverlayReady] = React.useState(!globe);
+  const isMountedRef = React.useRef(true);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   return (
     <div style={{width: '100%', height: '100%'}}>
@@ -32,7 +40,7 @@ export default function MapLibreComponent({example, interleaved}: MapLibreCompon
         mapStyle={mapStyle}
         initialViewState={initialViewState}
         onLoad={e => {
-          if (globe) {
+          if (globe && isMountedRef.current) {
             // Set projection before rendering overlay (critical for globe + interleaved mode)
             e.target.setProjection({type: 'globe'});
             setOverlayReady(true);
