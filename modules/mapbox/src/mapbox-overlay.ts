@@ -117,7 +117,7 @@ export default class MapboxOverlay implements IControl {
       ...this._props,
       parent: container,
       parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
-      views: this._props.views || getDefaultView(map),
+      views: this._getViews(map),
       viewState: getViewState(map)
     });
 
@@ -270,12 +270,26 @@ export default class MapboxOverlay implements IControl {
     }
   };
 
+  private _getViews(map: Map) {
+    if (!this._props.views) {
+      return getDefaultView(map);
+    }
+    // Check if custom views include a view with id 'mapbox'
+    const views = Array.isArray(this._props.views) ? this._props.views : [this._props.views];
+    const hasMapboxView = views.some((v: any) => v.id === 'mapbox');
+    if (hasMapboxView) {
+      return this._props.views;
+    }
+    // Add default 'mapbox' view to custom views for consistency with interleaved mode
+    return [getDefaultView(map), ...views];
+  }
+
   private _updateViewState = () => {
     const deck = this._deck;
     const map = this._map;
     if (deck && map) {
       deck.setProps({
-        views: this._props.views || getDefaultView(map),
+        views: this._getViews(map),
         viewState: getViewState(map)
       });
       // Redraw immediately if view state has changed
