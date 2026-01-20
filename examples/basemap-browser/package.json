@@ -1,0 +1,28 @@
+{
+  "name": "deckgl-examples-basemap-browser",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/google-maps": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "@deck.gl/mapbox": "^9.2.0",
+    "@vis.gl/react-google-maps": "^1.7.1",
+    "mapbox-gl": "^3.8.0",
+    "maplibre-gl": "^5.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-map-gl": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
+  }
+}
