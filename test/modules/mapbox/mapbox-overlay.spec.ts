@@ -460,7 +460,7 @@ test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
 
   t.ok(overlay._deck, 'Deck instance is created');
 
-  map.once('render', () => {
+  map.once('render', async () => {
     let views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
       : [overlay._deck.props.views];
@@ -477,6 +477,8 @@ test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
       height: '25%'
     });
     overlay.setProps({views: [customView]});
+
+    await sleep(100);
 
     views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
