@@ -44,7 +44,7 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
   viewport?: Viewport;
 
   constructor(props: InfoWidgetProps) {
-    super(props);
+    super(props, InfoWidget.defaultProps);
     this.setProps(this.props);
   }
 
