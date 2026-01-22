@@ -25,10 +25,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   map: MapWithDeck | null;
   props: MapboxLayerProps<LayerT>;
 
-  get deck(): Deck | null {
-    return this.map?.__deck ?? null;
-  }
-
   /* eslint-disable no-this-before-super */
   constructor(props: MapboxLayerProps<LayerT>) {
     if (!props.id) {
@@ -47,14 +43,12 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   onAdd(map: MapWithDeck, gl: WebGL2RenderingContext): void {
     this.map = map;
-    if (this.deck) {
-      addLayer(this.deck, this);
-    }
+    addLayer(map.__deck, this);
   }
 
   onRemove(): void {
-    if (this.deck) {
-      removeLayer(this.deck, this);
+    if (this.map) {
+      removeLayer(this.map.__deck, this);
     }
   }
 
@@ -64,6 +58,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   }
 
   render(gl, renderParameters) {
-    drawLayer(this.deck!, this.map!, this, renderParameters);
+    drawLayer(this.map!.__deck, this.map!, this, renderParameters);
   }
 }

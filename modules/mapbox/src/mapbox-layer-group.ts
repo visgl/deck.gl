@@ -25,10 +25,6 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
   beforeId?: string;
   map: MapWithDeck | null;
 
-  get deck(): Deck | null {
-    return this.map?.__deck ?? null;
-  }
-
   /* eslint-disable no-this-before-super */
   constructor(props: MapboxLayerGroupProps) {
     assert(props.id, 'id is required');
@@ -48,8 +44,8 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
   }
 
   render(gl, renderParameters) {
-    if (!this.deck || !this.map) return;
+    if (!this.map) return;
 
-    drawLayerGroup(this.deck, this.map, this, renderParameters);
+    drawLayerGroup(this.map.__deck, this.map, this, renderParameters);
   }
 }

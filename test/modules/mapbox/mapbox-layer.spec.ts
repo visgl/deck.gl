@@ -61,7 +61,7 @@ test('MapboxLayer#external Deck', t => {
 
     const layer = new MapboxLayer({id: 'scatterplot-layer-0', deck});
     map.addLayer(layer);
-    t.is(layer.deck, deck, 'Used external Deck instance');
+    t.is(map.__deck, deck, 'Used external Deck instance');
     // t.ok(deck.userData.mapboxVersion, 'Mapbox version is parsed');
     t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
     t.ok(
@@ -139,7 +139,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
 
     const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
     map.addLayer(layerDefaultView);
-    t.is(layerDefaultView.deck, deck, 'Used external Deck instance');
+    t.is(map.__deck, deck, 'Used external Deck instance');
     t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
 
     map.on('render', () => {
