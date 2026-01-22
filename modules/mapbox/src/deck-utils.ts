@@ -51,7 +51,6 @@ export function getDeckInstance({
       customRender?.('');
     }
   };
-  deckProps.parameters = {...getDefaultParameters(map, true), ...deckProps.parameters};
   deckProps.views ||= getDefaultView(map);
 
   // deck is using the WebGLContext created by mapbox,
