@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten, log} from '@deck.gl/core';
+import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
 import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
 import type MapboxLayer from './mapbox-layer';
@@ -36,14 +36,6 @@ export function getDeckInstance({
     return map.__deck;
   }
 
-  // @ts-ignore non-public map property
-  const gl: WebGL2RenderingContext = map.painter.context.gl;
-  if (gl instanceof WebGLRenderingContext) {
-    log.warn(
-      'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
-    )();
-  }
-
   // Only initialize certain props once per context
   const customRender = deck.props._customRender;
   const onLoad = deck.props.onLoad;
@@ -65,7 +57,6 @@ export function getDeckInstance({
   // deck is using the WebGLContext created by mapbox,
   // block deck from setting the canvas size, and use the map's viewState to drive deck.
   Object.assign(deckProps, {
-    gl,
     width: null,
     height: null,
     touchAction: 'unset',

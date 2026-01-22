@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, assert} from '@deck.gl/core';
+import {Deck, assert, log} from '@deck.gl/core';
 import {
   getViewState,
   getDefaultView,
@@ -136,10 +136,18 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _onAddInterleaved(map: Map): HTMLDivElement {
+    // @ts-ignore non-public map property
+    const gl: WebGL2RenderingContext = map.painter.context.gl;
+    if (gl instanceof WebGLRenderingContext) {
+      log.warn(
+        'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
+      )();
+    }
     this._deck = getDeckInstance({
       map,
       deck: new Deck({
         ...this._props,
+        gl,
         parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
       })
     });
