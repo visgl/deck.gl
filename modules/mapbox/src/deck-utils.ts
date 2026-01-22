@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
+import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten, log} from '@deck.gl/core';
 import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
 import type MapboxLayer from './mapbox-layer';
@@ -26,16 +26,22 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 // Create an interleaved deck instance.
 export function getDeckInstance({
   map,
-  gl,
   deck
 }: {
   map: Map & {__deck?: Deck<any> | null};
-  gl: WebGL2RenderingContext;
   deck: Deck<any>;
 }): Deck<any> {
   // Only create one deck instance per context
   if (map.__deck) {
     return map.__deck;
+  }
+
+  // @ts-ignore non-public map property
+  const gl: WebGL2RenderingContext = map.painter.context.gl;
+  if (gl instanceof WebGLRenderingContext) {
+    log.warn(
+      'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
+    )();
   }
 
   // Only initialize certain props once per context
@@ -56,25 +62,22 @@ export function getDeckInstance({
   deckProps.parameters = {...getDefaultParameters(map, true), ...deckProps.parameters};
   deckProps.views ||= getDefaultView(map);
 
-  if (deck.props.gl === gl) {
-    // deck is using the WebGLContext created by mapbox,
-    // block deck from setting the canvas size, and use the map's viewState to drive deck.
-    // Otherwise, we use deck's viewState to drive the map.
-    Object.assign(deckProps, {
-      gl,
-      width: null,
-      height: null,
-      touchAction: 'unset',
-      viewState: getViewState(map)
-    });
-    if (deck.isInitialized) {
+  // deck is using the WebGLContext created by mapbox,
+  // block deck from setting the canvas size, and use the map's viewState to drive deck.
+  Object.assign(deckProps, {
+    gl,
+    width: null,
+    height: null,
+    touchAction: 'unset',
+    viewState: getViewState(map)
+  });
+  if (deck.isInitialized) {
+    watchMapMove(deck, map);
+  } else {
+    deckProps.onLoad = () => {
+      onLoad?.();
       watchMapMove(deck, map);
-    } else {
-      deckProps.onLoad = () => {
-        onLoad?.();
-        watchMapMove(deck, map);
-      };
-    }
+    };
   }
 
   deck.setProps(deckProps);

@@ -8,7 +8,7 @@ import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {resolveLayers} from '@deck.gl/mapbox/resolve-layers';
 import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
-import {device, gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
 
@@ -160,7 +160,7 @@ test('MapboxOverlay#resolveLayers', async t => {
   await sleep(10);
 
   // Initialize deck on the map (simulates MapboxOverlay behavior)
-  getDeckInstance({map, gl, deck});
+  getDeckInstance({map, deck});
 
   let lastLayers;
   for (const testCase of TEST_CASES) {

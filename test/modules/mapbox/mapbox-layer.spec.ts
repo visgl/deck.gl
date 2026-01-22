@@ -56,8 +56,7 @@ test('MapboxLayer#external Deck', t => {
 
   map.on('load', () => {
     // Initialize deck on the map (simulates MapboxOverlay behavior)
-    // @ts-ignore non-public map property
-    getDeckInstance({map, gl: map.painter.context.gl, deck});
+    getDeckInstance({map, deck});
 
     map.addLayer(layer);
     t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
@@ -98,8 +97,6 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
   map.on('load', () => {
     const deck = new Deck({
       device,
-      // @ts-ignore non-public map property
-      gl: map.painter.context.gl,
       views: [new MapView({id: 'view-two'}), new MapView({id: 'mapbox'})],
       viewState: {
         longitude: 0,
@@ -131,8 +128,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
     });
 
     // Initialize deck on the map (simulates MapboxOverlay behavior)
-    // @ts-ignore non-public map property
-    getDeckInstance({map, gl: map.painter.context.gl, deck});
+    getDeckInstance({map, deck});
 
     const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
     map.addLayer(layerDefaultView);
@@ -172,8 +168,6 @@ test('MapboxLayer#external Deck custom views', t => {
   map.on('load', () => {
     const deck = new Deck({
       device,
-      // @ts-ignore non-public map property
-      gl: map.painter.context.gl,
       views: [new MapView({id: 'view-two'})],
       viewState: {
         longitude: 0,
@@ -193,8 +187,7 @@ test('MapboxLayer#external Deck custom views', t => {
     });
 
     // Initialize deck on the map (simulates MapboxOverlay behavior)
-    // @ts-ignore non-public map property
-    getDeckInstance({map, gl: map.painter.context.gl, deck});
+    getDeckInstance({map, deck});
 
     map.addLayer(new MapboxLayer({id: 'scatterplot', deck}));
     map.on('render', () => {

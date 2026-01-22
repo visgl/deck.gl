@@ -15,7 +15,6 @@ import {
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {DeckProps, LayersList} from '@deck.gl/core';
-import {log} from '@deck.gl/core';
 
 import {resolveLayers} from './resolve-layers';
 import {resolveLayerGroups} from './resolve-layer-groups';
@@ -137,19 +136,10 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _onAddInterleaved(map: Map): HTMLDivElement {
-    // @ts-ignore non-public map property
-    const gl = map.painter.context.gl;
-    if (gl instanceof WebGLRenderingContext) {
-      log.warn(
-        'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
-      )();
-    }
     this._deck = getDeckInstance({
       map,
-      gl,
       deck: new Deck({
         ...this._props,
-        gl,
         parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
       })
     });
