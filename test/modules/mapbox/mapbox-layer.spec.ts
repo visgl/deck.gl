@@ -26,40 +26,39 @@ class TestScatterplotLayer extends ScatterplotLayer {
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
 test('MapboxLayer#external Deck', t => {
+  const deck = new Deck({
+    device,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-layer-0',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0]
+      })
+    ],
+    parameters: {
+      depthTest: false
+    }
+  });
+
+  const layer = new MapboxLayer({id: 'scatterplot-layer-0', deck});
+
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 12
   });
 
   map.on('load', () => {
-    const deck = new Deck({
-      device,
-      // @ts-ignore non-public map property
-      gl: map.painter.context.gl,
-      viewState: {
-        longitude: 0,
-        latitude: 0,
-        zoom: 1
-      },
-      layers: [
-        new ScatterplotLayer({
-          id: 'scatterplot-layer-0',
-          data: [],
-          getPosition: d => d.position,
-          getRadius: 10,
-          getFillColor: [255, 0, 0]
-        })
-      ],
-      parameters: {
-        depthTest: false
-      }
-    });
-
     // Initialize deck on the map (simulates MapboxOverlay behavior)
     // @ts-ignore non-public map property
     getDeckInstance({map, gl: map.painter.context.gl, deck});
 
-    const layer = new MapboxLayer({id: 'scatterplot-layer-0', deck});
     map.addLayer(layer);
     t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
     t.ok(
@@ -137,7 +136,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
 
     const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
     map.addLayer(layerDefaultView);
-    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+    t.ok(objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS}), 'Parameters are set correctly');
 
     map.on('render', () => {
       t.deepEqual(
