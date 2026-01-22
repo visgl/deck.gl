@@ -136,7 +136,10 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
 
     const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
     map.addLayer(layerDefaultView);
-    t.ok(objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS}), 'Parameters are set correctly');
+    t.ok(
+      objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS}),
+      'Parameters are set correctly'
+    );
 
     map.on('render', () => {
       t.deepEqual(
