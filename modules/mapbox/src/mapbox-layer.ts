@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
+import {addLayer, removeLayer, drawLayer} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import type {Deck, Layer} from '@deck.gl/core';
 
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
   id: string;
   renderingMode?: '2d' | '3d';
-  deck?: Deck;
+  deck: Deck;
   /* Mapbox v3 Standard style */
   slot?: 'bottom' | 'middle' | 'top';
 };
@@ -41,10 +41,12 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: Map, gl: WebGL2RenderingContext): void {
+  onAdd(map: Map & {__deck?: Deck | null}, gl: WebGL2RenderingContext): void {
     this.map = map;
-    this.deck = getDeckInstance({map, gl, deck: this.props.deck});
-    addLayer(this.deck, this);
+    this.deck = map.__deck ?? null;
+    if (this.deck) {
+      addLayer(this.deck, this);
+    }
   }
 
   onRemove(): void {
@@ -56,10 +58,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   setProps(props: MapboxLayerProps<LayerT>) {
     // id cannot be changed
     Object.assign(this.props, props, {id: this.id});
-    // safe guard in case setProps is called before onAdd
-    if (this.deck) {
-      updateLayer(this.deck, this);
-    }
   }
 
   render(gl, renderParameters) {

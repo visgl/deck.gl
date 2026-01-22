@@ -14,7 +14,6 @@ import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 const MAPBOX_VIEW_ID = 'mapbox';
 
 type UserData = {
-  isExternal: boolean;
   currentViewport?: Viewport | null;
   mapboxLayers: Set<MapboxLayer<any>>;
   // mapboxVersion: {minor: number; major: number};
@@ -32,7 +31,7 @@ export function getDeckInstance({
 }: {
   map: Map & {__deck?: Deck<any> | null};
   gl: WebGL2RenderingContext;
-  deck?: Deck<any>;
+  deck: Deck<any>;
 }): Deck<any> {
   // Only create one deck instance per context
   if (map.__deck) {
@@ -40,11 +39,11 @@ export function getDeckInstance({
   }
 
   // Only initialize certain props once per context
-  const customRender = deck?.props._customRender;
-  const onLoad = deck?.props.onLoad;
+  const customRender = deck.props._customRender;
+  const onLoad = deck.props.onLoad;
 
   const deckProps = {
-    ...deck?.props,
+    ...deck.props,
     _customRender: () => {
       map.triggerRepaint();
       // customRender may be subscribed by DeckGL React component to update child props
@@ -57,11 +56,8 @@ export function getDeckInstance({
   deckProps.parameters = {...getDefaultParameters(map, true), ...deckProps.parameters};
   deckProps.views ||= getDefaultView(map);
 
-  let deckInstance: Deck;
-
-  if (!deck || deck.props.gl === gl) {
-    // If deck isn't defined (Internal MapboxLayer use case),
-    // or if deck is defined and is using the WebGLContext created by mapbox (MapboxOverlay and External MapboxLayer use case),
+  if (deck.props.gl === gl) {
+    // deck is using the WebGLContext created by mapbox,
     // block deck from setting the canvas size, and use the map's viewState to drive deck.
     // Otherwise, we use deck's viewState to drive the map.
     Object.assign(deckProps, {
@@ -71,35 +67,25 @@ export function getDeckInstance({
       touchAction: 'unset',
       viewState: getViewState(map)
     });
-    if (deck?.isInitialized) {
+    if (deck.isInitialized) {
       watchMapMove(deck, map);
     } else {
       deckProps.onLoad = () => {
         onLoad?.();
-        watchMapMove(deckInstance, map);
+        watchMapMove(deck, map);
       };
     }
   }
 
-  if (deck) {
-    deckInstance = deck;
-    deck.setProps(deckProps);
-    (deck.userData as UserData).isExternal = true;
-  } else {
-    deckInstance = new Deck(deckProps);
-    map.on('remove', () => {
-      removeDeckInstance(map);
-    });
-  }
+  deck.setProps(deckProps);
 
-  (deckInstance.userData as UserData).mapboxLayers = new Set();
-  // (deckInstance.userData as UserData).mapboxVersion = getMapboxVersion(map);
-  map.__deck = deckInstance;
+  (deck.userData as UserData).mapboxLayers = new Set();
+  map.__deck = deck;
   map.on('render', () => {
-    if (deckInstance.isInitialized) afterRender(deckInstance, map);
+    if (deck.isInitialized) afterRender(deck, map);
   });
 
-  return deckInstance;
+  return deck;
 }
 
 function watchMapMove(deck: Deck, map: Map & {__deck?: Deck | null}) {
@@ -143,16 +129,10 @@ export function getDefaultParameters(map: Map, interleaved: boolean): Parameters
 
 export function addLayer(deck: Deck, layer: MapboxLayer<any>): void {
   (deck.userData as UserData).mapboxLayers.add(layer);
-  updateLayers(deck);
 }
 
 export function removeLayer(deck: Deck, layer: MapboxLayer<any>): void {
   (deck.userData as UserData).mapboxLayers.delete(layer);
-  updateLayers(deck);
-}
-
-export function updateLayer(deck: Deck, layer: MapboxLayer<any>): void {
-  updateLayers(deck);
 }
 
 export function drawLayer(
@@ -371,33 +351,29 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
 }
 
 function afterRender(deck: Deck, map: Map): void {
-  const {mapboxLayers, isExternal} = deck.userData as UserData;
+  const {mapboxLayers} = deck.userData as UserData;
 
-  if (isExternal) {
-    // Draw non-Mapbox layers
-    const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
-    const hasNonMapboxLayers = deckLayers.some(
-      layer => layer && !mapboxLayerIds.includes(layer.id)
-    );
-    let viewports = deck.getViewports();
-    const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
-    const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
+  // Draw non-Mapbox layers
+  const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
+  const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
+  const hasNonMapboxLayers = deckLayers.some(layer => layer && !mapboxLayerIds.includes(layer.id));
+  let viewports = deck.getViewports();
+  const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
+  const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
 
-    if (hasNonMapboxLayers || hasNonMapboxViews) {
-      if (mapboxViewportIdx >= 0) {
-        viewports = viewports.slice();
-        viewports[mapboxViewportIdx] = getViewport(deck, map);
-      }
-
-      deck._drawLayers('mapbox-repaint', {
-        viewports,
-        layerFilter: params =>
-          (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-          (params.viewport.id !== MAPBOX_VIEW_ID || !mapboxLayerIds.includes(params.layer.id)),
-        clearCanvas: false
-      });
+  if (hasNonMapboxLayers || hasNonMapboxViews) {
+    if (mapboxViewportIdx >= 0) {
+      viewports = viewports.slice();
+      viewports[mapboxViewportIdx] = getViewport(deck, map);
     }
+
+    deck._drawLayers('mapbox-repaint', {
+      viewports,
+      layerFilter: params =>
+        (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+        (params.viewport.id !== MAPBOX_VIEW_ID || !mapboxLayerIds.includes(params.layer.id)),
+      clearCanvas: false
+    });
   }
 
   // End of render cycle, clear generated viewport
@@ -412,18 +388,4 @@ function onMapMove(deck: Deck, map: Map): void {
   // Clear any change flag triggered by setting viewState so that deck does not request
   // a second repaint
   deck.needsRedraw({clearRedrawFlags: true});
-}
-
-function updateLayers(deck: Deck): void {
-  if ((deck.userData as UserData).isExternal) {
-    return;
-  }
-
-  const layers: Layer[] = [];
-  (deck.userData as UserData).mapboxLayers.forEach(deckLayer => {
-    const LayerType = deckLayer.props.type;
-    const layer = new LayerType(deckLayer.props);
-    layers.push(layer);
-  });
-  deck.setProps({layers});
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getDeckInstance, drawLayerGroup} from './deck-utils';
+import {drawLayerGroup} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import {assert, type Deck} from '@deck.gl/core';
 
@@ -39,9 +39,9 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: Map, gl: WebGL2RenderingContext): void {
+  onAdd(map: Map & {__deck?: Deck | null}, gl: WebGL2RenderingContext): void {
     this.map = map;
-    this.deck = getDeckInstance({map, gl});
+    this.deck = map.__deck ?? null;
   }
 
   render(gl, renderParameters) {
