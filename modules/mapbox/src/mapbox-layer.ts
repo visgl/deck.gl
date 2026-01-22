@@ -64,8 +64,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   }
 
   render(gl, renderParameters) {
-    if (this.deck && this.map) {
-      drawLayer(this.deck, this.map, this, renderParameters);
-    }
+    drawLayer(this.deck!, this.map!, this, renderParameters);
   }
 }
