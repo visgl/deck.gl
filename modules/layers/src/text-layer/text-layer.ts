@@ -497,7 +497,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       sizeMinPixels,
       sizeMaxPixels,
       transitions,
-      updateTriggers
+      updateTriggers,
+      parameters
     } = this.props;
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
@@ -524,6 +525,9 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,
+
+            // Pass through parameters for GlobeView culling support
+            parameters,
 
             transitions: transitions && {
               getPosition: transitions.getPosition,
@@ -588,6 +592,9 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           sizeUnits,
           sizeMinPixels: sizeMinPixels * scale,
           sizeMaxPixels: sizeMaxPixels * scale,
+
+          // Pass through parameters for GlobeView culling support
+          parameters,
 
           transitions: transitions && {
             getPosition: transitions.getPosition,

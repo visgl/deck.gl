@@ -520,41 +520,41 @@ export default class IconClusterLayer extends CompositeLayer<IconClusterLayerPro
         })
       ),
 
-      // Cluster text labels - direct props to ensure cull:false is applied for GlobeView
-      new TextLayer({
-        id: `${this.props.id}-cluster-text`,
-        data: clusters,
-        pickable: false,
-        visible: this.props.visible,
-        getPosition: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) =>
-          d.geometry.coordinates as [number, number],
-        getText: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) =>
-          String(d.properties.point_count || 0),
-        getColor: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) => {
-          const baseColor = Array.isArray(clusterTextColor)
-            ? clusterTextColor
-            : [255, 255, 255, 255];
-          return [baseColor[0], baseColor[1], baseColor[2], (baseColor[3] || 255) * d.opacity] as [
-            number,
-            number,
-            number,
-            number
-          ];
-        },
-        getSize: clusterTextSize || 16,
-        getAngle: 0,
-        getTextAnchor: 'middle' as const,
-        getAlignmentBaseline: 'center' as const,
-        fontFamily: fontFamily || 'Monaco, monospace',
-        fontWeight: fontWeight || 'bold',
-        billboard: true,
-        sizeUnits: 'pixels' as const,
-        // GlobeView fix: MUST disable culling for text to render
-        parameters: {
-          depthTest: false,
-          cull: false
-        }
-      }),
+      // Cluster text labels
+      new TextLayer(
+        this.getSubLayerProps({
+          id: 'cluster-text',
+          data: clusters,
+          pickable: false,
+          getPosition: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) =>
+            d.geometry.coordinates as [number, number],
+          getText: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) =>
+            String(d.properties.point_count || 0),
+          getColor: (d: ClusterFeature<ClusterData> & {opacity: number; id: string}) => {
+            const baseColor = Array.isArray(clusterTextColor)
+              ? clusterTextColor
+              : [255, 255, 255, 255];
+            return [
+              baseColor[0],
+              baseColor[1],
+              baseColor[2],
+              (baseColor[3] || 255) * d.opacity
+            ] as [number, number, number, number];
+          },
+          getSize: clusterTextSize || 16,
+          getAngle: 0,
+          getTextAnchor: 'middle' as const,
+          getAlignmentBaseline: 'center' as const,
+          fontFamily: fontFamily || 'Monaco, monospace',
+          fontWeight: fontWeight || 'bold',
+          billboard: true,
+          sizeUnits: 'pixels' as const,
+          // GlobeView fix: disable face culling so text renders from all angles
+          parameters: {
+            cullMode: 'none'
+          }
+        })
+      ),
 
       // Individual points
       new ScatterplotLayer(
