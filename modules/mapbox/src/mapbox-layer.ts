@@ -11,7 +11,6 @@ type MapWithDeck = Map & {__deck: Deck};
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
   id: string;
   renderingMode?: '2d' | '3d';
-  deck: Deck;
   /* Mapbox v3 Standard style */
   slot?: 'bottom' | 'middle' | 'top';
 };

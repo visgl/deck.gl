@@ -47,7 +47,7 @@ test('MapboxLayer#external Deck', t => {
     }
   });
 
-  const layer = new MapboxLayer({id: 'scatterplot-layer-0', deck});
+  const layer = new MapboxLayer({id: 'scatterplot-layer-0'});
 
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
@@ -130,7 +130,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
     // Initialize deck on the map (simulates MapboxOverlay behavior)
     getDeckInstance({map, deck});
 
-    const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
+    const layerDefaultView = new MapboxLayer({id: 'scatterplot-map'});
     map.addLayer(layerDefaultView);
     t.ok(
       objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS}),
@@ -189,7 +189,7 @@ test('MapboxLayer#external Deck custom views', t => {
     // Initialize deck on the map (simulates MapboxOverlay behavior)
     getDeckInstance({map, deck});
 
-    map.addLayer(new MapboxLayer({id: 'scatterplot', deck}));
+    map.addLayer(new MapboxLayer({id: 'scatterplot'}));
     map.on('render', () => {
       t.deepEqual(
         drawLog,

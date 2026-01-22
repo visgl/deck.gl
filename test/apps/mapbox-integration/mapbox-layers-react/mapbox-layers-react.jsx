@@ -66,11 +66,10 @@ function App() {
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current.getMap();
-    const deck = deckRef.current.deck;
 
     map.addLayer(mapboxBuildingLayer);
-    map.addLayer(new MapboxLayer({id: 'deckgl-pois', deck}), getFirstTextLayerId(map.getStyle()));
-    map.addLayer(new MapboxLayer({id: 'deckgl-tour-route', deck}));
+    map.addLayer(new MapboxLayer({id: 'deckgl-pois'}), getFirstTextLayerId(map.getStyle()));
+    map.addLayer(new MapboxLayer({id: 'deckgl-tour-route'}));
   }, []);
 
   const layers = [
