@@ -26,6 +26,7 @@ class TestScatterplotLayer extends ScatterplotLayer {
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
 test('MapboxLayer#external Deck', t => {
+  // Create Deck with merged parameters like MapboxOverlay._onAddInterleaved does
   const deck = new Deck({
     device,
     viewState: {
@@ -42,9 +43,7 @@ test('MapboxLayer#external Deck', t => {
         getFillColor: [255, 0, 0]
       })
     ],
-    parameters: {
-      depthTest: false
-    }
+    parameters: {...DEFAULT_PARAMETERS, depthTest: false}
   });
 
   const layer = new MapboxLayer({id: 'scatterplot-layer-0'});
@@ -60,10 +59,6 @@ test('MapboxLayer#external Deck', t => {
 
     map.addLayer(layer);
     t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
-    t.ok(
-      objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
-      'Parameters are set correctly'
-    );
 
     map.fire('render');
     t.pass('Map render does not throw');
@@ -95,6 +90,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
   });
 
   map.on('load', () => {
+    // Create Deck with default parameters like MapboxOverlay._onAddInterleaved does
     const deck = new Deck({
       device,
       views: [new MapView({id: 'view-two'}), new MapView({id: 'mapbox'})],
@@ -121,6 +117,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
           onAfterRedraw: onRedrawLayer
         })
       ],
+      parameters: DEFAULT_PARAMETERS,
       layerFilter: ({viewport, layer}) => {
         if (viewport.id === 'mapbox') return layer.id === 'scatterplot-map';
         return layer.id === 'scatterplot-second-view';
@@ -132,10 +129,6 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
 
     const layerDefaultView = new MapboxLayer({id: 'scatterplot-map'});
     map.addLayer(layerDefaultView);
-    t.ok(
-      objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS}),
-      'Parameters are set correctly'
-    );
 
     map.on('render', () => {
       t.deepEqual(
