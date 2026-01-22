@@ -6,7 +6,7 @@ import {addLayer, removeLayer, drawLayer} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import type {Deck, Layer} from '@deck.gl/core';
 
-type MapWithDeck = Map & {__deck?: Deck | null};
+type MapWithDeck = Map & {__deck: Deck};
 
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
   id: string;

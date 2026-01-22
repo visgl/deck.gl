@@ -6,7 +6,7 @@ import {drawLayerGroup} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import {assert, type Deck} from '@deck.gl/core';
 
-type MapWithDeck = Map & {__deck?: Deck | null};
+type MapWithDeck = Map & {__deck: Deck};
 
 export type MapboxLayerGroupProps = {
   id: string;
