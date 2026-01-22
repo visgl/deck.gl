@@ -6,6 +6,8 @@ import {drawLayerGroup} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import {assert, type Deck} from '@deck.gl/core';
 
+type MapWithDeck = Map & {__deck?: Deck | null};
+
 export type MapboxLayerGroupProps = {
   id: string;
   renderingMode?: '2d' | '3d';
@@ -21,8 +23,11 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
   /* Mapbox v3 Standard style */
   slot?: 'bottom' | 'middle' | 'top';
   beforeId?: string;
-  map: Map | null;
-  deck: Deck | null;
+  map: MapWithDeck | null;
+
+  get deck(): Deck | null {
+    return this.map?.__deck ?? null;
+  }
 
   /* eslint-disable no-this-before-super */
   constructor(props: MapboxLayerGroupProps) {
@@ -34,14 +39,12 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
     this.slot = props.slot;
     this.beforeId = props.beforeId;
     this.map = null;
-    this.deck = null;
   }
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: Map & {__deck?: Deck | null}, gl: WebGL2RenderingContext): void {
+  onAdd(map: MapWithDeck, gl: WebGL2RenderingContext): void {
     this.map = map;
-    this.deck = map.__deck ?? null;
   }
 
   render(gl, renderParameters) {
