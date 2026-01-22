@@ -62,7 +62,7 @@
     "d3-scale": "^4.0.0",
     "earcut": "^2.2.4",
     "h3-js": "^4.1.0",
-    "moment-timezone": "^0.5.33",
+    "moment-timezone": "^0.6.0",
     "pbf": "^3.2.1",
     "quadbin": "^0.4.0"
   },
