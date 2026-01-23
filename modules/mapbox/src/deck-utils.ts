@@ -371,20 +371,15 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
 }
 
 function afterRender(deck: Deck, map: Map): void {
-  const {mapboxLayers, isExternal} = deck.userData as UserData;
+  const {isExternal} = deck.userData as UserData;
 
   if (isExternal) {
     // Draw non-Mapbox layers
-    const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
-    const hasNonMapboxLayers = deckLayers.some(
-      layer => layer && !mapboxLayerIds.includes(layer.id)
-    );
     let viewports = deck.getViewports();
     const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
     const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
 
-    if (hasNonMapboxLayers || hasNonMapboxViews) {
+    if (hasNonMapboxViews) {
       if (mapboxViewportIdx >= 0) {
         viewports = viewports.slice();
         viewports[mapboxViewportIdx] = getViewport(deck, map);
@@ -394,7 +389,7 @@ function afterRender(deck: Deck, map: Map): void {
         viewports,
         layerFilter: params =>
           (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-          (params.viewport.id !== MAPBOX_VIEW_ID || !mapboxLayerIds.includes(params.layer.id)),
+          params.viewport.id !== MAPBOX_VIEW_ID,
         clearCanvas: false
       });
     }
