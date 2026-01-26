@@ -33,7 +33,7 @@ jobs:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
@@ -54,7 +54,7 @@ jobs:
         run: (cd website && yarn build)
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@15de0f09300eea763baee31dff6c6184995c5f6a # 4.7.2
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # 4.8.0
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
           branch: gh-pages
