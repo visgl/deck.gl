@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>deck.gl Basemap Browser</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+      #controls {
+        width: 320px;
+        flex-shrink: 0;
+        background: #fff;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        overflow-y: auto;
+      }
+      #control-panel {
+        padding: 12px 24px;
+        font-size: 13px;
+        line-height: 2;
+        color: #6b6b76;
+        text-transform: uppercase;
+        outline: none;
+      }
+      #control-panel label {
+        display: inline-block;
+      }
+      #control-panel input[type="checkbox"] {
+        margin-left: 10px;
+      }
+      #control-panel select {
+        margin-left: 10px;
+        width: 100%;
+        max-width: 250px;
+      }
+      .section {
+        border-top: 1px solid #ddd;
+        padding-top: 10px;
+        margin-top: 10px;
+      }
+      .example-name {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+      }
+      h3 {
+        margin: 10px 0 5px;
+        color: #333;
+      }
+      #map {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls"></div>
+    <div id="map"></div>
+    <script type='module' src='./src/index.tsx'></script>
+  </body>
+</html>
