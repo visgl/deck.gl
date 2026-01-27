@@ -8,10 +8,14 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {_GlobeView as GlobeView, MapView, Widget} from '@deck.gl/core';
 import type {WidgetPlacement} from '@deck.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
 import {DEFAULT_PARAMETERS} from './fixtures';
+
+// Create an isolated device for overlaid mode tests to prevent GL context corruption
+const overlaidTestDevice = new WebGLDevice({createCanvasContext: {width: 1, height: 1}});
 
 // Simple test widget for testing MapboxOverlay widget support
 class TestWidget extends Widget<{placement?: WidgetPlacement; viewId?: string | null}> {
@@ -58,6 +62,7 @@ test('MapboxOverlay#overlaid', t => {
     zoom: 14
   });
   const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
     layers: [new ScatterplotLayer()]
   });
 
@@ -120,7 +125,9 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
   });
-  const overlay = new MapboxOverlay({});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice
+  });
 
   map.addControl(overlay);
 
@@ -510,6 +517,7 @@ test('MapboxOverlay#widgets - regular widgets render in deck container', t => {
 
   const widget = new TestWidget({id: 'regular-widget', placement: 'top-right'});
   const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
     layers: [new ScatterplotLayer()],
     widgets: [widget]
   });
@@ -533,6 +541,7 @@ test('MapboxOverlay#widgets - viewId:mapbox widgets wrapped as IControl', t => {
 
   const widget = new TestWidget({id: 'mapbox-widget', viewId: 'mapbox', placement: 'top-right'});
   const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
     layers: [new ScatterplotLayer()],
     widgets: [widget]
   });
@@ -566,6 +575,7 @@ test('MapboxOverlay#widgets - mixed widgets', t => {
   });
 
   const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
     layers: [new ScatterplotLayer()],
     widgets: [regularWidget, mapboxWidget1, mapboxWidget2]
   });
@@ -593,6 +603,7 @@ test('MapboxOverlay#widgets - setProps updates widget controls', t => {
 
   const widget1 = new TestWidget({id: 'widget1', viewId: 'mapbox', placement: 'top-right'});
   const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
     layers: [new ScatterplotLayer()],
     widgets: [widget1]
   });
