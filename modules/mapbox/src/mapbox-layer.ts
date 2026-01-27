@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {addLayer, removeLayer, drawLayer} from './deck-utils';
+import {drawLayer} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import type {Deck, Layer} from '@deck.gl/core';
 
@@ -40,15 +40,12 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: MapWithDeck, gl: WebGL2RenderingContext): void {
+  onAdd(map: MapWithDeck): void {
     this.map = map;
-    addLayer(map.__deck, this);
   }
 
   onRemove(): void {
-    if (this.map) {
-      removeLayer(this.map.__deck, this);
-    }
+    this.map = null;
   }
 
   setProps(props: MapboxLayerProps<LayerT>) {

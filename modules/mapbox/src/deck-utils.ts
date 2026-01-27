@@ -15,8 +15,6 @@ const MAPBOX_VIEW_ID = 'mapbox';
 
 type UserData = {
   currentViewport?: Viewport | null;
-  mapboxLayers: Set<MapboxLayer<any>>;
-  // mapboxVersion: {minor: number; major: number};
 };
 
 // Mercator constants
@@ -72,7 +70,6 @@ export function getDeckInstance({
 
   deck.setProps(deckProps);
 
-  (deck.userData as UserData).mapboxLayers = new Set();
   map.__deck = deck;
   map.on('render', () => {
     if (deck.isInitialized) afterRender(deck, map);
@@ -118,14 +115,6 @@ export function getDefaultParameters(map: Map, interleaved: boolean): Parameters
     result.cullMode = 'back';
   }
   return result;
-}
-
-export function addLayer(deck: Deck, layer: MapboxLayer<any>): void {
-  (deck.userData as UserData).mapboxLayers.add(layer);
-}
-
-export function removeLayer(deck: Deck, layer: MapboxLayer<any>): void {
-  (deck.userData as UserData).mapboxLayers.delete(layer);
 }
 
 export function drawLayer(
@@ -344,12 +333,9 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
 }
 
 function afterRender(deck: Deck, map: Map): void {
-  const {mapboxLayers} = deck.userData as UserData;
-
-  // Draw non-Mapbox layers
-  const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
+  // Draw non-Mapbox layers (layers that don't have a corresponding MapboxLayer on the map)
   const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
-  const hasNonMapboxLayers = deckLayers.some(layer => layer && !mapboxLayerIds.includes(layer.id));
+  const hasNonMapboxLayers = deckLayers.some(layer => layer && !map.getLayer(layer.id));
   let viewports = deck.getViewports();
   const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
   const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
@@ -364,7 +350,7 @@ function afterRender(deck: Deck, map: Map): void {
       viewports,
       layerFilter: params =>
         (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-        (params.viewport.id !== MAPBOX_VIEW_ID || !mapboxLayerIds.includes(params.layer.id)),
+        (params.viewport.id !== MAPBOX_VIEW_ID || !map.getLayer(params.layer.id)),
       clearCanvas: false
     });
   }
