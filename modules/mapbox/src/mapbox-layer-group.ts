@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getDeckInstance, drawLayerGroup} from './deck-utils';
+import {drawLayerGroup} from './deck-utils';
 import type {Map, CustomLayerInterface} from './types';
 import {assert, type Deck} from '@deck.gl/core';
+
+type MapWithDeck = Map & {__deck: Deck};
 
 export type MapboxLayerGroupProps = {
   id: string;
@@ -21,8 +23,7 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
   /* Mapbox v3 Standard style */
   slot?: 'bottom' | 'middle' | 'top';
   beforeId?: string;
-  map: Map | null;
-  deck: Deck | null;
+  map: MapWithDeck | null;
 
   /* eslint-disable no-this-before-super */
   constructor(props: MapboxLayerGroupProps) {
@@ -34,19 +35,17 @@ export default class MapboxLayerGroup implements CustomLayerInterface {
     this.slot = props.slot;
     this.beforeId = props.beforeId;
     this.map = null;
-    this.deck = null;
   }
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: Map, gl: WebGL2RenderingContext): void {
+  onAdd(map: MapWithDeck, gl: WebGL2RenderingContext): void {
     this.map = map;
-    this.deck = getDeckInstance({map, gl});
   }
 
   render(gl, renderParameters) {
-    if (!this.deck || !this.map) return;
+    if (!this.map) return;
 
-    drawLayerGroup(this.deck, this.map, this, renderParameters);
+    drawLayerGroup(this.map.__deck, this.map, this, renderParameters);
   }
 }
