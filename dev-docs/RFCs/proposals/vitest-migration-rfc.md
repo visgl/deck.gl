@@ -336,8 +336,39 @@ The hybrid approach serves as a **discovery mechanism**:
 
 1. Should we convert test file structure to use `describe`/`it` blocks, or keep flat `test()` calls?
 2. ~~Should browser tests run in CI by default, or remain opt-in?~~ **Resolved:** Browser tests are the source of truth and should run in CI by default.
-3. Timeline for deprecating tape support in `@deck.gl/test-utils`?
+3. ~~Timeline for deprecating tape support in `@deck.gl/test-utils`?~~ **Resolved:** See deprecation timeline below.
 4. After Phase 4 discovery: What percentage of tests fail in Node? This determines whether to keep hybrid approach or fall back to browser-only.
+
+## @deck.gl/test-utils Deprecation Timeline
+
+**Goal:** Allow external consumers time to migrate while moving the ecosystem forward.
+
+**Note:** `@deck.gl/test-utils` is published on npm with ~10k monthly downloads (~1% of core). While primarily intended for internal use, external consumers exist and deserve a migration path.
+
+| Phase | Version | Timeline | Changes |
+|-------|---------|----------|---------|
+| **Compatibility** | 9.3.x | Next minor release | Add vitest as peer dependency alongside `@probe.gl/test-utils`. Both tape and vitest patterns work. |
+| **Deprecation Warning** | 9.4.x | +1 minor release | Console warnings for tape-based patterns (`makeSpy`, `assert: t.ok`). Documentation updated with vitest examples. |
+| **Removal** | 10.0.0 | Next major release | Remove tape/probe.gl support. `vi.spyOn` replaces `makeSpy`. Callbacks use vitest `expect()`. |
+
+**Migration guide for external consumers:**
+
+```typescript
+// Before (tape)
+import {testLayer} from '@deck.gl/test-utils';
+import test from 'tape';
+
+testLayer({assert: test.ok, onError: test.fail});
+
+// After (vitest)
+import {testLayer} from '@deck.gl/test-utils';
+import {expect} from 'vitest';
+
+testLayer({
+  assert: (condition, message) => expect(condition, message).toBeTruthy(),
+  onError: (error) => { throw error; }
+});
+```
 
 ## References
 
