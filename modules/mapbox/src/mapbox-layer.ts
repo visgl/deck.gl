@@ -40,7 +40,7 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: MapWithDeck): void {
+  onAdd(map: MapWithDeck, gl: WebGL2RenderingContext): void {
     this.map = map;
   }
 
@@ -54,6 +54,8 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   }
 
   render(gl, renderParameters) {
-    drawLayer(this.map!.__deck, this.map!, this, renderParameters);
+    if (!this.map) return;
+
+    drawLayer(this.map.__deck, this.map, this, renderParameters);
   }
 }
