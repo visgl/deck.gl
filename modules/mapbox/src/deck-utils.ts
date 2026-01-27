@@ -123,6 +123,10 @@ export function drawLayer(
   layer: MapboxLayer<any>,
   renderParameters: any
 ): void {
+  if (!deck.isInitialized) {
+    return;
+  }
+
   let {currentViewport} = deck.userData as UserData;
   let clearStack: boolean = false;
   if (!currentViewport) {
@@ -131,10 +135,6 @@ export function drawLayer(
     currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
-  }
-
-  if (!deck.isInitialized) {
-    return;
   }
 
   deck._drawLayers('mapbox-repaint', {
@@ -153,6 +153,10 @@ export function drawLayerGroup(
   group: MapboxLayerGroup,
   renderParameters: any
 ): void {
+  if (!deck.isInitialized) {
+    return;
+  }
+
   let {currentViewport} = deck.userData as UserData;
   let clearStack: boolean = false;
   if (!currentViewport) {
@@ -161,10 +165,6 @@ export function drawLayerGroup(
     currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
-  }
-
-  if (!deck.isInitialized) {
-    return;
   }
 
   deck._drawLayers('mapbox-repaint', {
@@ -304,8 +304,7 @@ type MaplibreRenderParameters = {
 function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport {
   const viewState = getViewState(map);
   // View is always MapView or GlobeView in this context
-  const view = ((deck.isInitialized && deck.getView(MAPBOX_VIEW_ID)) ||
-    getDefaultView(map)) as MapView | GlobeView;
+  const view = (deck.getView(MAPBOX_VIEW_ID) || getDefaultView(map)) as MapView | GlobeView;
 
   if (renderParameters) {
     // Called from MapboxLayer.render
