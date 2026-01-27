@@ -850,7 +850,7 @@ You can now use ArcGIS basemaps with deck.gl. This new module lets apps render d
 
 The `MapView` now supports repeating worlds at low zoom levels. For backward compatibility, this feature is opt-in. Apps may turn it on by setting `views: new MapView({repeat: true})` on `Deck` or `DeckGL`.
 
-Repeating is always on when using [MapboxLayer](./api-reference/mapbox/mapbox-layer.md) and [GoogleMapsOverlay](./api-reference/google-maps/google-maps-overlay.md).
+Repeating is always on when using `MapboxLayer` and [GoogleMapsOverlay](./api-reference/google-maps/google-maps-overlay.md).
 
 As a result, `GoogleMapsOverlay` now supports all Google Maps zoom levels.
 

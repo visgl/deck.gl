@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, assert} from '@deck.gl/core';
+import {Deck, assert, log} from '@deck.gl/core';
 import {
   getViewState,
   getDefaultView,
@@ -15,7 +15,6 @@ import {
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {DeckProps, LayersList} from '@deck.gl/core';
-import {log} from '@deck.gl/core';
 
 import {resolveLayers} from './resolve-layers';
 import {resolveLayerGroups} from './resolve-layer-groups';
@@ -138,7 +137,7 @@ export default class MapboxOverlay implements IControl {
 
   private _onAddInterleaved(map: Map): HTMLDivElement {
     // @ts-ignore non-public map property
-    const gl = map.painter.context.gl;
+    const gl: WebGL2RenderingContext = map.painter.context.gl;
     if (gl instanceof WebGLRenderingContext) {
       log.warn(
         'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
@@ -146,7 +145,6 @@ export default class MapboxOverlay implements IControl {
     }
     this._deck = getDeckInstance({
       map,
-      gl,
       deck: new Deck({
         ...this._props,
         gl,
