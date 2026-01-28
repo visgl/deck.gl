@@ -489,7 +489,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const hasPickingBuffer = this.internalState!.hasPickingBuffer;
       const needsPickingBuffer =
         Number.isInteger(props.highlightedObjectIndex) ||
-        props.pickable ||
+        Boolean(props.pickable) ||
         props.extensions.some(extension => extension.getNeedsPickingBuffer.call(this, extension));
 
       // Only generate picking buffer if needed
