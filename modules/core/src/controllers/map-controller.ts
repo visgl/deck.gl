@@ -3,13 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core';
-import Controller, {ControllerProps} from './controller';
+import Controller, {ControllerProps, InteractionState} from './controller';
 import ViewState from './view-state';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 
 import LinearInterpolator from '../transitions/linear-interpolator';
 import type Viewport from '../viewports/viewport';
+import type {MjolnirGestureEvent} from 'mjolnir.js';
 
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
@@ -57,12 +58,16 @@ export type MapStateInternal = {
   startZoomLngLat?: [number, number];
   /* Pointer position when rotation started */
   startRotatePos?: [number, number];
+  /* The lng/lat/altitude point at the rotation pivot (where rotation started) */
+  startRotateLngLat?: [number, number, number];
   /** Bearing when current perspective rotate operation started */
   startBearing?: number;
   /** Pitch when current perspective rotate operation started */
   startPitch?: number;
   /** Zoom when current zoom operation started */
   startZoom?: number;
+  /** Picked altitude at rotation start for this interaction */
+  startRotateAltitude?: number;
 };
 
 /* Utils */
@@ -114,12 +119,16 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startZoomLngLat,
       /* Pointer position when rotation started */
       startRotatePos,
+      /* The lng/lat point at the rotation pivot (where rotation started) */
+      startRotateLngLat,
       /** Bearing when current perspective rotate operation started */
       startBearing,
       /** Pitch when current perspective rotate operation started */
       startPitch,
       /** Zoom when current zoom operation started */
       startZoom,
+      /** Picked altitude at rotation start for this interaction */
+      startRotateAltitude,
 
       /** Normalize viewport props to fit map height into viewport */
       normalize = true
@@ -150,9 +159,11 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         startPanLngLat,
         startZoomLngLat,
         startRotatePos,
+        startRotateLngLat,
         startBearing,
         startPitch,
-        startZoom
+        startZoom,
+        startRotateAltitude
       }
     );
 
@@ -201,12 +212,18 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
+   * @param {Number} altitude - optional altitude for rotation pivot
+   *   - undefined: rotate around viewport center (no pivot point)
+   *   - 0: rotate around pointer position at ground level
+   *   - other value: rotate around pointer position at specified altitude
    */
-  rotateStart({pos}: {pos: [number, number]}): MapState {
+  rotateStart({pos, altitude}: {pos: [number, number]; altitude?: number}): MapState {
     return this._getUpdatedState({
       startRotatePos: pos,
+      startRotateLngLat: altitude !== undefined ? this._unproject3D(pos, altitude) : undefined,
       startBearing: this.getViewportProps().bearing,
-      startPitch: this.getViewportProps().pitch
+      startPitch: this.getViewportProps().pitch,
+      startRotateAltitude: altitude
     });
   }
 
@@ -223,7 +240,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     deltaAngleX?: number;
     deltaAngleY?: number;
   }): MapState {
-    const {startRotatePos, startBearing, startPitch} = this.getState();
+    const {startRotatePos, startRotateLngLat, startBearing, startPitch} = this.getState();
 
     if (!startRotatePos || startBearing === undefined || startPitch === undefined) {
       return this;
@@ -237,6 +254,21 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         pitch: startPitch + deltaAngleY
       };
     }
+
+    // If we have a pivot point, adjust the camera position to keep the pivot point fixed
+    if (startRotateLngLat) {
+      const rotatedViewport = this.makeViewport({
+        ...this.getViewportProps(),
+        ...newRotation
+      });
+      // Use panByPosition3D if available (WebMercatorViewport), otherwise fall back to panByPosition
+      const panMethod = 'panByPosition3D' in rotatedViewport ? 'panByPosition3D' : 'panByPosition';
+      return this._getUpdatedState({
+        ...newRotation,
+        ...rotatedViewport[panMethod](startRotateLngLat, startRotatePos)
+      });
+    }
+
     return this._getUpdatedState(newRotation);
   }
 
@@ -246,8 +278,11 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    */
   rotateEnd(): MapState {
     return this._getUpdatedState({
+      startRotatePos: null,
+      startRotateLngLat: null,
       startBearing: null,
-      startPitch: null
+      startPitch: null,
+      startRotateAltitude: null
     });
   }
 
@@ -435,6 +470,26 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     return pos && viewport.unproject(pos);
   }
 
+  _unproject3D(
+    pos?: [number, number],
+    altitudeOverride?: number
+  ): [number, number, number] | undefined {
+    const viewport = this.makeViewport(this.getViewportProps());
+    const {position} = this.getViewportProps();
+    const {startRotateAltitude} = this.getState();
+
+    // Priority: 1) explicit parameter, 2) picked altitude for this interaction, 3) camera altitude
+    const targetZ =
+      altitudeOverride !== undefined
+        ? altitudeOverride
+        : startRotateAltitude !== undefined
+          ? startRotateAltitude
+          : position[2];
+
+    // @ts-ignore
+    return pos && viewport.unproject(pos, {targetZ});
+  }
+
   _getNewRotation(
     pos: [number, number],
     startPos: [number, number],
@@ -519,5 +574,70 @@ export default class MapController extends Controller<MapState> {
         })
       );
     }
+  }
+
+  /**
+   * Override updateViewport to inject rotation pivot position for visual feedback
+   */
+  protected updateViewport(
+    newControllerState: MapState,
+    extraProps: Record<string, any> | null = null,
+    interactionState: InteractionState = {}
+  ): void {
+    // Inject rotation pivot position during rotation for visual feedback
+    const state = newControllerState.getState();
+    if (interactionState.isDragging && state.startRotateLngLat) {
+      const pivotPos = state.startRotateLngLat;
+      interactionState = {
+        ...interactionState,
+        rotationPivotPosition: pivotPos
+      };
+    } else if (interactionState.isDragging === false) {
+      // Clear pivot when drag ends
+      interactionState = {...interactionState, rotationPivotPosition: undefined};
+    }
+
+    super.updateViewport(newControllerState, extraProps, interactionState);
+  }
+
+  /**
+   * Override _onPanStart to implement rotation pivot modes
+   */
+  protected _onPanStart(event: MjolnirGestureEvent): boolean {
+    const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos, event)) {
+      return false;
+    }
+    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton || false;
+    if (this.invertPan || this.dragMode === 'pan') {
+      // invertPan is replaced by props.dragMode, keeping for backward compatibility
+      alternateMode = !alternateMode;
+    }
+
+    // Determine rotation pivot altitude based on rotationPivot mode
+    let pickedAltitude: number | undefined;
+    if (!alternateMode && this.rotationPivot !== 'center') {
+      if (this.rotationPivot === '2d') {
+        // 2D mode: rotate around pointer position at ground level
+        pickedAltitude = 0;
+      } else if (this.rotationPivot === '3d') {
+        // 3D mode: pick the altitude at the interaction start point
+        if (this.pickPosition) {
+          const {x, y} = this.props;
+          const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
+          if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
+            pickedAltitude = pickResult.coordinate[2];
+          }
+        }
+      }
+    }
+
+    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
+      pos,
+      altitude: pickedAltitude
+    });
+    this._panMove = alternateMode;
+    this.updateViewport(newControllerState, {transitionDuration: 0}, {isDragging: true});
+    return true;
   }
 }
