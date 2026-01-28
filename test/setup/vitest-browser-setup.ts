@@ -9,6 +9,9 @@ import {expect} from 'vitest';
 
 // Add custom equality tester for typed arrays
 // This makes toEqual work like tape's deepEqual for typed arrays
+// TODO: Remove this custom equality tester once tests are updated to use explicit
+// typed array comparisons (e.g., expect(Array.from(typedArray)).toEqual([...]))
+// This is a temporary measure to maintain tape compatibility during migration.
 expect.addEqualityTesters([
   function typedArrayEquality(a: unknown, b: unknown): boolean | undefined {
     const isTypedArray = (val: unknown): val is ArrayBufferView =>
