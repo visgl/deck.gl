@@ -2,26 +2,24 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {equals} from '@math.gl/core';
 
-test('ViewManager#constructor', t => {
+test('ViewManager#constructor', () => {
   const viewManager = new ViewManager({
     views: [new MapView({id: 'map'})],
     viewState: {longitude: -122, latitude: 38, zoom: 12},
     width: 100,
     height: 100
   });
-  t.ok(viewManager, 'ViewManager is constructed');
+  expect(viewManager, 'ViewManager is constructed').toBeTruthy();
 
   viewManager.finalize();
-
-  t.end();
 });
 
-test('ViewManager#getView, getViewState, getViewport', t => {
+test('ViewManager#getView, getViewState, getViewport', () => {
   const mainView = new MapView({id: 'main'});
   const minimapView = new MapView({id: 'minimap', width: '10%', height: '10%', x: '5%', y: '5%'});
 
@@ -38,39 +36,37 @@ test('ViewManager#getView, getViewState, getViewport', t => {
     height: 100
   });
 
-  t.deepEqual(viewManager.getViews(), {main: mainView, minimap: minimapView}, 'returns view map');
+  expect(viewManager.getViews(), 'returns view map').toEqual({
+    main: mainView,
+    minimap: minimapView
+  });
 
-  t.is(viewManager.getView('main'), mainView, 'returns correct view');
-  t.is(viewManager.getView('minimap'), minimapView, 'returns correct view');
+  expect(viewManager.getView('main'), 'returns correct view').toBe(mainView);
+  expect(viewManager.getView('minimap'), 'returns correct view').toBe(minimapView);
 
-  t.is(viewManager.getViewState('main').zoom, 12, 'returns correct view state');
-  t.is(viewManager.getViewState('minimap').zoom, 8, 'returns correct view state');
+  expect(viewManager.getViewState('main').zoom, 'returns correct view state').toBe(12);
+  expect(viewManager.getViewState('minimap').zoom, 'returns correct view state').toBe(8);
 
-  t.deepEqual(
+  expect(
     viewManager.getViewports().map(v => v.id),
-    ['main', 'minimap'],
     'returns all viewports'
-  );
-  t.deepEqual(
+  ).toEqual(['main', 'minimap']);
+  expect(
     viewManager.getViewports({x: 10, y: 10}).map(v => v.id),
-    ['main', 'minimap'],
     'returns correct viewports'
-  );
-  t.deepEqual(
+  ).toEqual(['main', 'minimap']);
+  expect(
     viewManager.getViewports({x: 50, y: 50}).map(v => v.id),
-    ['main'],
     'returns correct viewports'
-  );
+  ).toEqual(['main']);
 
-  t.is(viewManager.getViewport('main').id, 'main', 'returns correct viewport');
-  t.is(viewManager.getViewport('minimap').id, 'minimap', 'returns correct viewport');
+  expect(viewManager.getViewport('main').id, 'returns correct viewport').toBe('main');
+  expect(viewManager.getViewport('minimap').id, 'returns correct viewport').toBe('minimap');
 
   viewManager.finalize();
-
-  t.end();
 });
 
-test('ViewManager#unproject', t => {
+test('ViewManager#unproject', () => {
   const mainView = new MapView({id: 'main'});
   const minimapView = new MapView({id: 'minimap', width: '10%', height: '10%', x: '5%', y: '5%'});
 
@@ -87,16 +83,14 @@ test('ViewManager#unproject', t => {
     height: 100
   });
 
-  t.ok(equals(viewManager.unproject([50, 50]), [-122, 38]), 'viewManager.unproject');
-  t.ok(equals(viewManager.unproject([10, 10]), [-122, 38]), 'viewManager.unproject');
+  expect(equals(viewManager.unproject([50, 50]), [-122, 38]), 'viewManager.unproject').toBeTruthy();
+  expect(equals(viewManager.unproject([10, 10]), [-122, 38]), 'viewManager.unproject').toBeTruthy();
 
   viewManager.finalize();
-
-  t.end();
 });
 
 /* eslint-disable max-statements */
-test('ViewManager#controllers', t => {
+test('ViewManager#controllers', () => {
   const mainView = new MapView({id: 'main', controller: true});
   const mainViewDisabled = new MapView({id: 'main', controller: false});
   const minimapView = new MapView({
@@ -129,46 +123,53 @@ test('ViewManager#controllers', t => {
     height: 100
   });
 
-  t.notOk(viewManager.controllers.main, 'main controller is disabled');
-  t.ok(viewManager.controllers.minimap, 'minimap controller is constructed');
+  expect(viewManager.controllers.main, 'main controller is disabled').toBeFalsy();
+  expect(viewManager.controllers.minimap, 'minimap controller is constructed').toBeTruthy();
 
   const viewport = viewManager.controllers.minimap.makeViewport(
     viewManager.controllers.minimap.props
   );
-  t.ok(viewport.viewProjectionMatrix.every(Number.isFinite), 'makeViewport returns valid viewport');
+  expect(
+    viewport.viewProjectionMatrix.every(Number.isFinite),
+    'makeViewport returns valid viewport'
+  ).toBeTruthy();
 
   // Enable main controller
   let oldControllers = viewManager.controllers;
   viewManager.setProps({views: [mainView, minimapView]});
-  t.ok(viewManager.controllers.main, 'main controller is constructed');
-  t.is(viewManager.controllers.minimap, oldControllers.minimap, 'minimap controller is persistent');
+  expect(viewManager.controllers.main, 'main controller is constructed').toBeTruthy();
+  expect(viewManager.controllers.minimap, 'minimap controller is persistent').toBe(
+    oldControllers.minimap
+  );
 
   // Update viewport dimensions
   oldControllers = viewManager.controllers;
   viewManager.setProps({width: 200, height: 100});
-  t.is(viewManager.controllers.main, oldControllers.main, 'main controller is persistent');
-  t.is(viewManager.controllers.minimap, oldControllers.minimap, 'minimap controller is persistent');
+  expect(viewManager.controllers.main, 'main controller is persistent').toBe(oldControllers.main);
+  expect(viewManager.controllers.minimap, 'minimap controller is persistent').toBe(
+    oldControllers.minimap
+  );
 
   // Disable minimap controller
   viewManager.setProps({views: [mainView, minimapViewDisabled]});
-  t.is(viewManager.controllers.main, oldControllers.main, 'main controller is persistent');
-  t.notOk(viewManager.controllers.minimap, 'minimap controller is removed');
+  expect(viewManager.controllers.main, 'main controller is persistent').toBe(oldControllers.main);
+  expect(viewManager.controllers.minimap, 'minimap controller is removed').toBeFalsy();
 
   // Enable minimap controller
   viewManager.setProps({views: [mainView, minimapView]});
-  t.not(viewManager.controllers.main, oldControllers.main, 'main controller is invalidated');
-  t.ok(viewManager.controllers.minimap, 'minimap controller is recreated');
+  expect(viewManager.controllers.main, 'main controller is invalidated').not.toBe(
+    oldControllers.main
+  );
+  expect(viewManager.controllers.minimap, 'minimap controller is recreated').toBeTruthy();
 
   viewManager.finalize();
-  t.notOk(
+  expect(
     viewManager.controllers.main || viewManager.controllers.minimap,
     'controllers are deleted'
-  );
-
-  t.end();
+  ).toBeFalsy();
 });
 
-test('ViewManager#update view props', t => {
+test('ViewManager#update view props', () => {
   let viewStateChangedEvent;
 
   const viewManager = new ViewManager({
@@ -190,10 +191,10 @@ test('ViewManager#update view props', t => {
     })
   );
 
-  t.ok(
+  expect(
     equals(viewStateChangedEvent.viewState.longitude, -122),
     'Map center is calculated correctly'
-  );
+  ).toBeTruthy();
 
   viewManager.setProps({
     views: [new MapView({id: 'main', controller: true, width: '100%'})]
@@ -206,17 +207,16 @@ test('ViewManager#update view props', t => {
     })
   );
 
-  t.ok(
+  expect(
     equals(viewStateChangedEvent.viewState.longitude, -122),
     'Map center is calculated correctly'
-  );
+  ).toBeTruthy();
 
   viewManager.finalize();
-  t.end();
 });
 
 /* eslint-disable max-statements */
-test('ViewManager#zero-size', t => {
+test('ViewManager#zero-size', () => {
   const mainView = new MapView({id: 'main', controller: true});
 
   const viewManager = new ViewManager({
@@ -230,15 +230,13 @@ test('ViewManager#zero-size', t => {
     height: 100
   });
 
-  t.ok(viewManager.controllers.main, 'main controller is created');
-  t.is(viewManager.getViewports().length, 1, 'viewport is created');
+  expect(viewManager.controllers.main, 'main controller is created').toBeTruthy();
+  expect(viewManager.getViewports().length, 'viewport is created').toBe(1);
 
   viewManager.setProps({width: 0, height: 0});
 
-  t.notOk(viewManager.controllers.main, 'no valid controllers');
-  t.is(viewManager.getViewports().length, 0, 'no valid viewports');
-
-  t.end();
+  expect(viewManager.controllers.main, 'no valid controllers').toBeFalsy();
+  expect(viewManager.getViewports().length, 'no valid viewports').toBe(0);
 });
 
 function mockControllerEvent(type, x, y, details) {

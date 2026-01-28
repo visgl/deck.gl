@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {MaskExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
 import {geojson} from 'deck.gl-test/data';
 
-test('MaskExtension', t => {
+test('MaskExtension', () => {
   const testCases = [
     {
       props: {
@@ -33,10 +33,10 @@ test('MaskExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].uniforms;
-        t.ok(uniforms.mask_enabled, 'mask_enabled in uniforms');
-        t.equal(uniforms.mask_inverted, false, 'mask_inverted defaults to false in uniforms');
-        t.ok(uniforms.mask_maskByInstance, 'mask_maskByInstance in uniforms');
-        t.ok(uniforms.mask_bounds.every(Number.isFinite), 'mask_bounds in uniforms');
+        expect(uniforms.mask_enabled, 'mask_enabled in uniforms').toBeTruthy();
+        expect(uniforms.mask_inverted, 'mask_inverted defaults to false in uniforms').toBe(false);
+        expect(uniforms.mask_maskByInstance, 'mask_maskByInstance in uniforms').toBeTruthy();
+        expect(uniforms.mask_bounds.every(Number.isFinite), 'mask_bounds in uniforms').toBeTruthy();
       }
     },
     {
@@ -45,7 +45,7 @@ test('MaskExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].uniforms;
-        t.ok(uniforms.mask_inverted, 'mask_inverted true in uniforms');
+        expect(uniforms.mask_inverted, 'mask_inverted true in uniforms').toBeTruthy();
       }
     },
     {
@@ -54,24 +54,21 @@ test('MaskExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].uniforms;
-        t.notOk(uniforms.mask_enabled, 'mask disabled for invalid maskId');
+        expect(uniforms.mask_enabled, 'mask disabled for invalid maskId').toBeFalsy();
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('MaskExtension#maskByInstance', t => {
+test('MaskExtension#maskByInstance', () => {
   const checkLayer = (layer, expectedMaskByInstance) => {
     const uniforms = layer.getModels()[0].uniforms;
-    t.is(
+    expect(
       uniforms.mask_maskByInstance,
-      expectedMaskByInstance,
       `${layer.constructor.layerName} maskByInstance prop: ${layer.props.maskByInstance} actual: ${expectedMaskByInstance}`
-    );
+    ).toBe(expectedMaskByInstance);
   };
 
   const testCases = [
@@ -116,7 +113,5 @@ test('MaskExtension#maskByInstance', t => {
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
 import {geojson} from 'deck.gl-test/data';
 
-test('TerrainExtension', t => {
+test('TerrainExtension', () => {
   const extractSubLayers = subLayers => {
     return {
       scatterplotLayer: subLayers.find(l => l.id.endsWith('points-circle')),
@@ -27,30 +27,31 @@ test('TerrainExtension', t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         const {scatterplotLayer, pathLayer, solidPolygonLayer} = extractSubLayers(subLayers);
-        t.is(
+        expect(
           scatterplotLayer.state.terrainDrawMode,
-          'offset',
           'ScatterplotLayer has correct fitting mode'
-        );
-        t.is(pathLayer.state.terrainDrawMode, 'drape', 'PathLayer has correct fitting mode');
-        t.is(
+        ).toBe('offset');
+        expect(pathLayer.state.terrainDrawMode, 'PathLayer has correct fitting mode').toBe('drape');
+        expect(
           solidPolygonLayer.state.terrainDrawMode,
-          'drape',
           'SolidPolygonLayer has correct fitting mode'
-        );
+        ).toBe('drape');
 
         const {layerManager} = layer.context;
-        t.ok(layerManager.needsRedraw({clearRedrawFlags: true}));
+        expect(layerManager.needsRedraw({clearRedrawFlags: true})).toBeTruthy();
 
-        t.notOk(
+        expect(
           scatterplotLayer.state.terrainCoverNeedsRedraw,
           'ScatterplotLayer does not draw to terrain cover'
-        );
-        t.ok(pathLayer.state.terrainCoverNeedsRedraw, 'PathLayer marked as needs redraw');
-        t.ok(
+        ).toBeFalsy();
+        expect(
+          pathLayer.state.terrainCoverNeedsRedraw,
+          'PathLayer marked as needs redraw'
+        ).toBeTruthy();
+        expect(
           solidPolygonLayer.state.terrainCoverNeedsRedraw,
           'SolidPolygonLayer marked as needs redraw'
-        );
+        ).toBeTruthy();
 
         pathLayer.state.terrainCoverNeedsRedraw = false;
         solidPolygonLayer.state.terrainCoverNeedsRedraw = false;
@@ -62,26 +63,27 @@ test('TerrainExtension', t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         const {scatterplotLayer, pathLayer, solidPolygonLayer} = extractSubLayers(subLayers);
-        t.is(
+        expect(
           scatterplotLayer.state.terrainDrawMode,
-          'offset',
           'ScatterplotLayer has correct fitting mode'
-        );
-        t.is(pathLayer.state.terrainDrawMode, 'drape', 'PathLayer has correct fitting mode');
-        t.is(
+        ).toBe('offset');
+        expect(pathLayer.state.terrainDrawMode, 'PathLayer has correct fitting mode').toBe('drape');
+        expect(
           solidPolygonLayer.state.terrainDrawMode,
-          'offset',
           'SolidPolygonLayer has correct fitting mode'
-        );
+        ).toBe('offset');
 
         const {layerManager} = layer.context;
-        t.ok(layerManager.needsRedraw({clearRedrawFlags: true}));
+        expect(layerManager.needsRedraw({clearRedrawFlags: true})).toBeTruthy();
 
-        t.notOk(pathLayer.state.terrainCoverNeedsRedraw, 'PathLayer does not need redraw');
-        t.notOk(
+        expect(
+          pathLayer.state.terrainCoverNeedsRedraw,
+          'PathLayer does not need redraw'
+        ).toBeFalsy();
+        expect(
           solidPolygonLayer.state.terrainCoverNeedsRedraw,
           'SolidPolygonLayer does not draw to terrain cover'
-        );
+        ).toBeFalsy();
       }
     },
     {
@@ -90,30 +92,31 @@ test('TerrainExtension', t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         const {scatterplotLayer, pathLayer, solidPolygonLayer} = extractSubLayers(subLayers);
-        t.is(
+        expect(
           scatterplotLayer.state.terrainDrawMode,
-          'drape',
           'ScatterplotLayer has correct fitting mode'
-        );
-        t.is(pathLayer.state.terrainDrawMode, 'drape', 'PathLayer has correct fitting mode');
-        t.is(
+        ).toBe('drape');
+        expect(pathLayer.state.terrainDrawMode, 'PathLayer has correct fitting mode').toBe('drape');
+        expect(
           solidPolygonLayer.state.terrainDrawMode,
-          'drape',
           'SolidPolygonLayer has correct fitting mode'
-        );
+        ).toBe('drape');
 
         const {layerManager} = layer.context;
-        t.ok(layerManager.needsRedraw({clearRedrawFlags: true}));
+        expect(layerManager.needsRedraw({clearRedrawFlags: true})).toBeTruthy();
 
-        t.ok(
+        expect(
           scatterplotLayer.state.terrainCoverNeedsRedraw,
           'ScatterplotLayer marked as needs redraw'
-        );
-        t.ok(pathLayer.state.terrainCoverNeedsRedraw, 'PathLayer marked as needs redraw');
-        t.ok(
+        ).toBeTruthy();
+        expect(
+          pathLayer.state.terrainCoverNeedsRedraw,
+          'PathLayer marked as needs redraw'
+        ).toBeTruthy();
+        expect(
           solidPolygonLayer.state.terrainCoverNeedsRedraw,
           'SolidPolygonLayer marked as needs redraw'
-        );
+        ).toBeTruthy();
 
         scatterplotLayer.state.terrainCoverNeedsRedraw = false;
         pathLayer.state.terrainCoverNeedsRedraw = false;
@@ -122,7 +125,5 @@ test('TerrainExtension', t => {
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

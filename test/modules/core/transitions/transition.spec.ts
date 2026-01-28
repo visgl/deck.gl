@@ -2,19 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import Transition from '@deck.gl/core/transitions/transition';
 import {Timeline} from '@luma.gl/engine';
 
-test('Transition#constructor', t => {
+test('Transition#constructor', () => {
   const transition = new Transition(new Timeline());
-  t.ok(transition, 'Transition is constructed');
-  t.ok(transition.settings, 'Transition settings is created');
-
-  t.end();
+  expect(transition, 'Transition is constructed').toBeTruthy();
+  expect(transition.settings, 'Transition settings is created').toBeTruthy();
 });
 
-test('Transition#start', t => {
+test('Transition#start', () => {
   let onStartCallCount = 0;
 
   const transition = new Transition(new Timeline());
@@ -24,19 +22,15 @@ test('Transition#start', t => {
     },
     customAttribute: 'custom value'
   });
-  t.ok(transition.inProgress, 'Transition is in progress');
-  t.is(
-    transition.settings.customAttribute,
-    'custom value',
-    'Transition has customAttribute in settings'
+  expect(transition.inProgress, 'Transition is in progress').toBeTruthy();
+  expect(transition.settings.customAttribute, 'Transition has customAttribute in settings').toBe(
+    'custom value'
   );
-  t.is(onStartCallCount, 1, 'onStart is called once');
-
-  t.end();
+  expect(onStartCallCount, 'onStart is called once').toBe(1);
 });
 
 /* eslint-disable max-statements */
-test('Transition#update', t => {
+test('Transition#update', () => {
   let onUpdateCallCount = 0;
   let onEndCallCount = 0;
   const timeline = new Timeline();
@@ -44,7 +38,7 @@ test('Transition#update', t => {
   const transition = new Transition(timeline);
 
   transition.update();
-  t.notOk(transition.inProgress, 'Transition is not in progress');
+  expect(transition.inProgress, 'Transition is not in progress').toBeFalsy();
 
   transition.start({
     onUpdate: () => {
@@ -56,34 +50,32 @@ test('Transition#update', t => {
     duration: 1,
     easing: time => time * time
   });
-  t.notOk(transition._handle, 'No timeline handle yet');
+  expect(transition._handle, 'No timeline handle yet').toBeFalsy();
 
-  t.ok(transition.update(), 'transition updated');
-  t.ok(transition._handle, 'Timeline handle is created');
-  t.ok(transition.inProgress, 'Transition is in progress');
-  t.is(transition.time, 0, 'time is correct');
+  expect(transition.update(), 'transition updated').toBeTruthy();
+  expect(transition._handle, 'Timeline handle is created').toBeTruthy();
+  expect(transition.inProgress, 'Transition is in progress').toBeTruthy();
+  expect(transition.time, 'time is correct').toBe(0);
 
   timeline.setTime(0.5);
-  t.ok(transition.update(), 'transition updated');
-  t.ok(transition.inProgress, 'Transition is in progress');
-  t.is(transition.time, 0.5, 'time is correct');
+  expect(transition.update(), 'transition updated').toBeTruthy();
+  expect(transition.inProgress, 'Transition is in progress').toBeTruthy();
+  expect(transition.time, 'time is correct').toBe(0.5);
 
   timeline.setTime(1.5);
-  t.ok(transition.update(), 'transition updated');
-  t.notOk(transition.inProgress, 'Transition has ended');
-  t.notOk(transition._handle, 'Timeline handle is cleared');
-  t.is(transition.time, 1, 'time is correct');
+  expect(transition.update(), 'transition updated').toBeTruthy();
+  expect(transition.inProgress, 'Transition has ended').toBeFalsy();
+  expect(transition._handle, 'Timeline handle is cleared').toBeFalsy();
+  expect(transition.time, 'time is correct').toBe(1);
 
   timeline.setTime(2);
-  t.notOk(transition.update(), 'transition is not updated');
+  expect(transition.update(), 'transition is not updated').toBeFalsy();
 
-  t.is(onUpdateCallCount, 3, 'onUpdate is called 3 times');
-  t.is(onEndCallCount, 1, 'onEnd is called once');
-
-  t.end();
+  expect(onUpdateCallCount, 'onUpdate is called 3 times').toBe(3);
+  expect(onEndCallCount, 'onEnd is called once').toBe(1);
 });
 
-test('Transition#interrupt', t => {
+test('Transition#interrupt', () => {
   let onInterruptCallCount = 0;
   const timeline = new Timeline();
 
@@ -97,14 +89,14 @@ test('Transition#interrupt', t => {
   transition.start(settings);
   transition.start(settings);
 
-  t.is(onInterruptCallCount, 1, 'starting another transition - onInterrupt is called');
+  expect(onInterruptCallCount, 'starting another transition - onInterrupt is called').toBe(1);
 
   timeline.setTime(0.5);
   transition.update();
   timeline.setTime(0.6);
   transition.update();
   transition.cancel();
-  t.is(onInterruptCallCount, 2, 'cancelling transition - onInterrupt is called');
+  expect(onInterruptCallCount, 'cancelling transition - onInterrupt is called').toBe(2);
 
   transition.start(settings);
   timeline.setTime(1);
@@ -112,7 +104,7 @@ test('Transition#interrupt', t => {
   timeline.setTime(2);
   transition.update();
   transition.cancel();
-  t.is(onInterruptCallCount, 2, 'cancelling after transition ends - onInterrupt is not called');
-
-  t.end();
+  expect(onInterruptCallCount, 'cancelling after transition ends - onInterrupt is not called').toBe(
+    2
+  );
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {
   getCode,
   getLines,
@@ -418,7 +418,7 @@ function getValueReader(cellWeights: number[], gridSize: number[]) {
   return (x: number, y: number) => cellWeights[y * gridSize[0] + x];
 }
 
-test('MarchingSquares#getCode', t => {
+test('MarchingSquares#getCode', () => {
   for (const testCase of GETCODE_TESTS) {
     const {cellWeights, threshold = 6, x = 0, y = 0, gridSize = [2, 2]} = testCase;
 
@@ -430,33 +430,28 @@ test('MarchingSquares#getCode', t => {
       xRange: [0, gridSize[0]],
       yRange: [0, gridSize[1]]
     });
-    t.equals(code, testCase.code, `Code: expected=${testCase.code}, actual=${code}`);
+    expect(code, `Code: expected=${testCase.code}, actual=${code}`).toBe(testCase.code);
     if (testCase.meanCode) {
       // if meanCode needed for this case
-      t.equals(
-        meanCode,
-        testCase.meanCode,
-        `meanCode: expected=${testCase.meanCode}, actual=${meanCode}`
+      expect(meanCode, `meanCode: expected=${testCase.meanCode}, actual=${meanCode}`).toBe(
+        testCase.meanCode
       );
     }
   }
-  t.end();
 });
 
-test('MarchingSquares#getLines', t => {
+test('MarchingSquares#getLines', () => {
   for (const testCase of GETLINES_TESTS) {
     const {x = 0, y = 0, code, meanCode} = testCase;
     const vertices = getLines({x, y, z: 0, code, meanCode});
-    t.deepEquals(vertices, testCase.vertices, 'Returns expected vertices');
+    expect(vertices, 'Returns expected vertices').toEqual(testCase.vertices);
   }
-  t.end();
 });
 
-test('MarchingSquares#getPolygons', t => {
+test('MarchingSquares#getPolygons', () => {
   for (const testCase of GETPOLYGONS_TESTS) {
     const {code, meanCode} = testCase;
     const vertices = getPolygons({x: 0, y: 0, z: 0, code, meanCode});
-    t.deepEquals(vertices, testCase.vertices, 'Returns expected vertices');
+    expect(vertices, 'Returns expected vertices').toEqual(testCase.vertices);
   }
-  t.end();
 });

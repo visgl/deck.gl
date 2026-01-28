@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GreatCircleLayer} from '@deck.gl/geo-layers';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-test('GreatCircleLayer', t => {
+test('GreatCircleLayer', () => {
   const testCases = generateLayerTests({
     Layer: GreatCircleLayer,
     sampleProps: {
@@ -16,11 +16,9 @@ test('GreatCircleLayer', t => {
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: GreatCircleLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GreatCircleLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

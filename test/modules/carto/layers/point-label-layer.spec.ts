@@ -2,56 +2,55 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils';
 import {PointLabelLayer} from '@deck.gl/carto';
 import * as FIXTURES from 'deck.gl-test/data';
 
-test('PointLabelLayer', t => {
+test('PointLabelLayer', () => {
   const testCases = [
     {
       props: {
         data: FIXTURES.geojson
       },
       onAfterUpdate: ({subLayers}) => {
-        t.equal(subLayers.length, 1, 'Single sublayer created');
+        expect(subLayers.length, 'Single sublayer created').toBe(1);
         const [textLayer] = subLayers;
-        t.equal(textLayer.constructor.layerName, 'EnhancedTextLayer', 'Correct subLayer created');
+        expect(textLayer.constructor.layerName, 'Correct subLayer created').toBe(
+          'EnhancedTextLayer'
+        );
 
         const [textBackgroundLayer, multiIconLayer] = subLayers[0].getSubLayers();
-        t.equal(
+        expect(
           textBackgroundLayer.constructor.layerName,
-          'EnhancedTextBackgroundLayer',
           'Correct background subLayer created'
-        );
-        t.equal(
-          multiIconLayer.constructor.layerName,
-          'MultiIconLayer',
-          'Correct icon subLayer created'
+        ).toBe('EnhancedTextBackgroundLayer');
+        expect(multiIconLayer.constructor.layerName, 'Correct icon subLayer created').toBe(
+          'MultiIconLayer'
         );
 
         const {vs} = textBackgroundLayer.getShaders();
-        t.ok(
+        expect(
           vs.includes('_padding = textBackground.padding + instancePixelOffsets.xyxy'),
           'text background layer shader patched'
-        );
+        ).toBeTruthy();
 
-        t.ok(
+        expect(
           !textLayer.filterSubLayer({layer: textBackgroundLayer, renderPass: 'draw'}),
           'background not drawn in draw pass'
-        );
-        t.ok(
+        ).toBeTruthy();
+        expect(
           textLayer.filterSubLayer({layer: multiIconLayer, renderPass: 'draw'}),
           'text drawn in draw pass'
-        );
-        t.ok(
+        ).toBeTruthy();
+        expect(
           textLayer.filterSubLayer({layer: textBackgroundLayer, renderPass: 'collision'}),
           'background drawn in collision pass'
-        );
-        t.ok(
+        ).toBeTruthy();
+        expect(
           !textLayer.filterSubLayer({layer: multiIconLayer, renderPass: 'collision'}),
           'text not drawn in collision pass'
-        );
+        ).toBeTruthy();
       }
     },
     {
@@ -60,12 +59,10 @@ test('PointLabelLayer', t => {
         getSecondaryText: 'SECONDARY'
       },
       onAfterUpdate: ({subLayers}) => {
-        t.equal(subLayers.length, 2, 'Two sublayers created');
+        expect(subLayers.length, 'Two sublayers created').toBe(2);
         for (const i of [0, 1]) {
-          t.equal(
-            subLayers[i].constructor.layerName,
-            'EnhancedTextLayer',
-            `Correct subLayer[${i}] created`
+          expect(subLayers[i].constructor.layerName, `Correct subLayer[${i}] created`).toBe(
+            'EnhancedTextLayer'
           );
         }
       }
@@ -80,18 +77,17 @@ test('PointLabelLayer', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         const [textLayer, secondaryTextLayer] = subLayers;
-        t.deepEqual(textLayer.props.getPixelOffset, [12.75, -13.75], 'correct pixel offset');
-        t.deepEqual(
-          secondaryTextLayer.props.getPixelOffset,
-          [12.75, -12.55],
-          'correct secondary pixel offset'
-        );
+        expect(textLayer.props.getPixelOffset, 'correct pixel offset').toEqual([12.75, -13.75]);
+        expect(secondaryTextLayer.props.getPixelOffset, 'correct secondary pixel offset').toEqual([
+          12.75, -12.55
+        ]);
 
         const [textBackgroundLayer] = textLayer.getSubLayers();
-        t.deepEqual(textBackgroundLayer.props.padding, [12, 3, 0, 0], 'correct background padding');
+        expect(textBackgroundLayer.props.padding, 'correct background padding').toEqual([
+          12, 3, 0, 0
+        ]);
       }
     }
   ];
-  testLayer({Layer: PointLabelLayer, testCases, onError: t.notOk});
-  t.end();
+  testLayer({Layer: PointLabelLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

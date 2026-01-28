@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 import {UNIT, Layer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -10,7 +10,7 @@ import * as FIXTURES from 'deck.gl-test/data';
 
 const SIZE = 1;
 
-test('ScatterplotLayer points radiusUnits prop', t => {
+test('ScatterplotLayer points radiusUnits prop', () => {
   const testCases = [
     {
       props: {
@@ -23,7 +23,7 @@ test('ScatterplotLayer points radiusUnits prop', t => {
 
         const scatterplotLayer = filteredLayers[0] as Layer;
         const uniforms = getLayerUniforms(scatterplotLayer);
-        t.is(uniforms.radiusUnits, UNIT.meters, 'radiusUnits "meters"');
+        expect(uniforms.radiusUnits, 'radiusUnits "meters"').toBe(UNIT.meters);
       }
     },
     {
@@ -37,7 +37,7 @@ test('ScatterplotLayer points radiusUnits prop', t => {
 
         const scatterplotLayer = filteredLayers[0] as Layer;
         const uniforms = getLayerUniforms(scatterplotLayer);
-        t.is(uniforms.radiusUnits, UNIT.pixels, 'radiusUnits "pixels"');
+        expect(uniforms.radiusUnits, 'radiusUnits "pixels"').toBe(UNIT.pixels);
       }
     },
     {
@@ -51,11 +51,10 @@ test('ScatterplotLayer points radiusUnits prop', t => {
 
         const scatterplotLayer = filteredLayers[0] as Layer;
         const uniforms = getLayerUniforms(scatterplotLayer);
-        t.is(uniforms.radiusUnits, UNIT.common, 'radiusUnits "common"');
+        expect(uniforms.radiusUnits, 'radiusUnits "common"').toBe(UNIT.common);
       }
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
-  t.end();
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {vectorTableSource} from '@carto/api-client';
 import {VectorTileLayer} from '@deck.gl/carto';
 import {geojsonToBinary} from '@loaders.gl/gis';
@@ -10,7 +10,7 @@ import {testPickingLayer} from '../../layers/test-picking-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {withMockFetchMapsV3} from '../mock-fetch';
 
-test(`VectorTileLayer#picking`, async t => {
+test(`VectorTileLayer#picking`, async () => {
   await withMockFetchMapsV3(async () => {
     await testPickingLayer({
       // CARTO binary tile coordinates are [lng, lat], not tile-relative like MVT.
@@ -26,19 +26,17 @@ test(`VectorTileLayer#picking`, async t => {
           pickedLayerId: 'mvt-0-0-1-points-circle',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('hover over polygon');
-            t.ok(info.object, 'info.object is populated');
-            t.ok(info.object.properties, 'info.object.properties is populated');
-            t.ok(info.object.geometry, 'info.object.geometry is populated');
-            t.deepEqual(
-              info.object.geometry.coordinates,
-              [-123, 45],
-              'picked coordinates are correct'
-            );
-            t.ok(
+            console.log('hover over polygon');
+            expect(info.object, 'info.object is populated').toBeTruthy();
+            expect(info.object.properties, 'info.object.properties is populated').toBeTruthy();
+            expect(info.object.geometry, 'info.object.geometry is populated').toBeTruthy();
+            expect(info.object.geometry.coordinates, 'picked coordinates are correct').toEqual([
+              -123, 45
+            ]);
+            expect(
               subLayers.every(l => l.props.highlightedObjectIndex === 0),
               'set sub layers highlightedObjectIndex'
-            );
+            ).toBeTruthy();
           }
         },
         {
@@ -46,22 +44,22 @@ test(`VectorTileLayer#picking`, async t => {
           pickedLayerId: '',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('pointer leave');
-            t.notOk(info.object, 'info.object is not populated');
-            t.ok(
+            console.log('pointer leave');
+            expect(info.object, 'info.object is not populated').toBeFalsy();
+            expect(
               subLayers.every(l => l.props.highlightedObjectIndex === -1),
               'cleared sub layers highlightedObjectIndex'
-            );
+            ).toBeTruthy();
           }
         }
       ]
     });
-  }).catch(t.fail);
-
-  t.end();
+  }).catch(e => {
+    throw e;
+  });
 });
 
-test(`VectorTileLayer#pickingMVT`, async t => {
+test(`VectorTileLayer#pickingMVT`, async () => {
   await withMockFetchMapsV3(async () => {
     await testPickingLayer({
       // MVT tile coordinates are tile-relative.
@@ -77,19 +75,18 @@ test(`VectorTileLayer#pickingMVT`, async t => {
           pickedLayerId: 'mvt-0-0-1-points-circle',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('hover over polygon');
-            t.ok(info.object, 'info.object is populated');
-            t.ok(info.object.properties, 'info.object.properties is populated');
-            t.ok(info.object.geometry, 'info.object.geometry is populated');
-            t.deepEqual(
+            console.log('hover over polygon');
+            expect(info.object, 'info.object is populated').toBeTruthy();
+            expect(info.object.properties, 'info.object.properties is populated').toBeTruthy();
+            expect(info.object.geometry, 'info.object.geometry is populated').toBeTruthy();
+            expect(
               info.object.geometry.coordinates.map(Math.round),
-              [-144, 67],
               'picked coordinates are correct'
-            );
-            t.ok(
+            ).toEqual([-144, 67]);
+            expect(
               subLayers.every(l => l.props.highlightedObjectIndex === 0),
               'set sub layers highlightedObjectIndex'
-            );
+            ).toBeTruthy();
           }
         },
         {
@@ -97,19 +94,19 @@ test(`VectorTileLayer#pickingMVT`, async t => {
           pickedLayerId: '',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('pointer leave');
-            t.notOk(info.object, 'info.object is not populated');
-            t.ok(
+            console.log('pointer leave');
+            expect(info.object, 'info.object is not populated').toBeFalsy();
+            expect(
               subLayers.every(l => l.props.highlightedObjectIndex === -1),
               'cleared sub layers highlightedObjectIndex'
-            );
+            ).toBeTruthy();
           }
         }
       ]
     });
-  }).catch(t.fail);
-
-  t.end();
+  }).catch(e => {
+    throw e;
+  });
 });
 
 function createTestVectorTileLayer(

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests, testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
@@ -15,56 +15,59 @@ const SAMPLE_PROPS = {
   getPosition: d => d.COORDINATES
 };
 
-test('GPUGridLayer', t => {
+test('GPUGridLayer', () => {
   const testCases = generateLayerTests({
     Layer: GPUGridLayer,
     sampleProps: SAMPLE_PROPS,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.weights, 'should update state.weights');
+      expect(layer.state.weights, 'should update state.weights').toBeTruthy();
     }
   });
 
-  testLayer({Layer: GPUGridLayer, testCases, onError: t.notOk});
-  t.end();
+  testLayer({Layer: GPUGridLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('GPUGridLayer#renderLayers', t => {
+test('GPUGridLayer#renderLayers', () => {
   makeSpy(GPUGridLayer.prototype, '_updateAggregation');
 
   const layer = new GPUGridLayer(SAMPLE_PROPS);
 
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
 
   // render sublayer
   const sublayer = layer.renderLayers();
-  testInitializeLayer({layer: sublayer, onError: t.notOk});
+  testInitializeLayer({layer: sublayer, onError: err => expect(err).toBeFalsy()});
 
-  t.ok(sublayer instanceof GPUGridCellLayer, 'Sublayer GPUGridCellLayer layer rendered');
+  expect(
+    sublayer instanceof GPUGridCellLayer,
+    'Sublayer GPUGridCellLayer layer rendered'
+  ).toBeTruthy();
 
-  t.ok(GPUGridLayer.prototype._updateAggregation.called, 'should call _updateAggregation');
+  expect(
+    GPUGridLayer.prototype._updateAggregation.called,
+    'should call _updateAggregation'
+  ).toBeTruthy();
   GPUGridLayer.prototype._updateAggregation.restore();
-
-  t.end();
 });
 
-test('GPUGridLayer#updates', t => {
+test('GPUGridLayer#updates', () => {
   testLayer({
     Layer: GPUGridLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
           const {weights, numCol, numRow, boundingBox} = layer.state;
 
-          t.ok(weights.color.aggregationBuffer, 'Data is aggregated');
-          t.ok(numCol && numRow, 'gridSize is calculated');
-          t.ok(
+          expect(weights.color.aggregationBuffer, 'Data is aggregated').toBeTruthy();
+          expect(numCol && numRow, 'gridSize is calculated').toBeTruthy();
+          expect(
             Number.isFinite(boundingBox.xMin) && Number.isFinite(boundingBox.xMax),
             'boundingBox is calculated'
-          );
+          ).toBeTruthy();
         }
       },
       {
@@ -73,7 +76,7 @@ test('GPUGridLayer#updates', t => {
         },
         spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.notOk(spies._updateAggregation.called, 'should not call _updateAggregation');
+          expect(spies._updateAggregation.called, 'should not call _updateAggregation').toBeFalsy();
 
           spies._updateAggregation.restore();
         }
@@ -84,7 +87,7 @@ test('GPUGridLayer#updates', t => {
         },
         spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+          expect(spies._updateAggregation.called, 'should call _updateAggregation').toBeTruthy();
 
           spies._updateAggregation.restore();
         }
@@ -95,13 +98,11 @@ test('GPUGridLayer#updates', t => {
         },
         spies: ['_updateAggregation'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
+          expect(spies._updateAggregation.called, 'should call _updateAggregation').toBeTruthy();
 
           spies._updateAggregation.restore();
         }
       }
     ]
   });
-
-  t.end();
 });

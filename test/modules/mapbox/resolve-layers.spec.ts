@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
@@ -12,7 +12,7 @@ import {device} from '@deck.gl/test-utils';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
 
-test('MapboxOverlay#resolveLayers', async t => {
+test('MapboxOverlay#resolveLayers', async () => {
   const MAP_STYLE = {
     layers: [
       {id: 'water'},
@@ -153,8 +153,8 @@ test('MapboxOverlay#resolveLayers', async t => {
     }
   });
 
-  t.doesNotThrow(() => resolveLayers(), 'All parameters missing');
-  t.doesNotThrow(() => resolveLayers(map, deck, 'Map is not done loading'));
+  expect(() => resolveLayers(), 'All parameters missing').not.toThrow();
+  expect(() => resolveLayers(map, deck, 'Map is not done loading')).not.toThrow();
 
   // Wait for style to load
   await sleep(10);
@@ -165,28 +165,25 @@ test('MapboxOverlay#resolveLayers', async t => {
   let lastLayers;
   for (const testCase of TEST_CASES) {
     resolveLayers(map, deck, lastLayers, testCase.layers);
-    t.deepEqual(map.style._order, testCase.expected, testCase.title);
+    expect(map.style._order, testCase.title).toEqual(testCase.expected);
     lastLayers = testCase.layers;
   }
 
   map.setStyle({...MAP_STYLE});
-  t.deepEqual(map.style._order, DEFAULT_LAYERS, 'Style is reset');
+  expect(map.style._order, 'Style is reset').toEqual(DEFAULT_LAYERS);
 
   // Wait for style to load
   await sleep(10);
 
   resolveLayers(map, deck, lastLayers, lastLayers);
-  t.deepEqual(
-    map.style._order,
-    TEST_CASES[TEST_CASES.length - 1].expected,
-    'Layers restored after style change'
+  expect(map.style._order, 'Layers restored after style change').toEqual(
+    TEST_CASES[TEST_CASES.length - 1].expected
   );
 
   resolveLayers(map, deck, lastLayers, undefined);
-  t.deepEqual(map.style._order, DEFAULT_LAYERS, 'All layers removed');
+  expect(map.style._order, 'All layers removed').toEqual(DEFAULT_LAYERS);
 
   deck.finalize();
-  t.end();
 });
 
 /* global setTimeout */

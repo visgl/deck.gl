@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {shallowEqualObjects} from '@deck.gl/json/utils/shallow-equal-objects';
 
 const TEST_CASES = [
@@ -38,11 +38,9 @@ const TEST_CASES = [
   }
 ];
 
-test('utils#shallowEqualObjects', t => {
+test('utils#shallowEqualObjects', () => {
   TEST_CASES.forEach(testCase => {
     const result = shallowEqualObjects(testCase.a, testCase.b);
-    t.is(result, testCase.output, `Should ${testCase.output ? '' : 'not '}be equal`);
+    expect(result, `Should ${testCase.output ? '' : 'not '}be equal`).toBe(testCase.output);
   });
-
-  t.end();
 });

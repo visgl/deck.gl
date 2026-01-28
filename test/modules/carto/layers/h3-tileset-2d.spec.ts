@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import H3Tileset2D from '@deck.gl/carto/layers/h3-tileset-2d';
 import {Viewport, WebMercatorViewport} from '@deck.gl/core';
 import {equals} from '@math.gl/core';
 
-test('H3Tileset2D', async t => {
+test('H3Tileset2D', async () => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,
@@ -21,19 +21,15 @@ test('H3Tileset2D', async t => {
     .getTileIndices({viewport})
     // Sort for reliable test output
     .sort((a, b) => parseInt(a.i, 16) - parseInt(b.i, 16));
-  t.deepEqual(
-    indices,
-    [
-      {i: '8274effffffffff'},
-      {i: '827547fffffffff'},
-      {i: '82754ffffffffff'},
-      {i: '82755ffffffffff'},
-      {i: '82756ffffffffff'},
-      {i: '82825ffffffffff'}
-    ],
-    'indices in viewport'
-  );
-  t.equal(tileset.getTileId({i: '82754ffffffffff'}), '82754ffffffffff', 'tile id');
+  expect(indices, 'indices in viewport').toEqual([
+    {i: '8274effffffffff'},
+    {i: '827547fffffffff'},
+    {i: '82754ffffffffff'},
+    {i: '82755ffffffffff'},
+    {i: '82756ffffffffff'},
+    {i: '82825ffffffffff'}
+  ]);
+  expect(tileset.getTileId({i: '82754ffffffffff'}), 'tile id').toBe('82754ffffffffff');
   const {bbox} = tileset.getTileMetadata({i: '82754ffffffffff'});
   const expectedBbox = {
     west: -1.0122479382442804,
@@ -41,20 +37,17 @@ test('H3Tileset2D', async t => {
     east: 2.113493964019933,
     north: 1.1284546356465657
   };
-  t.ok(
+  expect(
     Object.keys(bbox).every(name => equals(bbox[name], expectedBbox[name])),
     'tile metadata'
-  );
-  t.equal(tileset.getTileZoom({i: '82754ffffffffff'}), 2, 'tile zoom');
-  t.deepEqual(
-    tileset.getParentIndex({i: '82754ffffffffff'}),
-    {i: '81757ffffffffff'},
-    'tile parent'
-  );
-  t.end();
+  ).toBeTruthy();
+  expect(tileset.getTileZoom({i: '82754ffffffffff'}), 'tile zoom').toBe(2);
+  expect(tileset.getParentIndex({i: '82754ffffffffff'}), 'tile parent').toEqual({
+    i: '81757ffffffffff'
+  });
 });
 
-test('H3Tileset2D#tileSize', async t => {
+test('H3Tileset2D#tileSize', async () => {
   const tileset512 = new H3Tileset2D({tileSize: 512});
   const tileset1024 = new H3Tileset2D({tileSize: 1024});
   const tileset2048 = new H3Tileset2D({tileSize: 2048});
@@ -72,22 +65,20 @@ test('H3Tileset2D#tileSize', async t => {
   const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
   const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
 
-  t.equal(indices512.length, 42, 'indices.length @ 512px');
-  t.equal(indices1024.length, 8, 'indices.length @ 1024px');
-  t.equal(indices2048.length, 4, 'indices.length @ 2048px');
+  expect(indices512.length, 'indices.length @ 512px').toBe(42);
+  expect(indices1024.length, 'indices.length @ 1024px').toBe(8);
+  expect(indices2048.length, 'indices.length @ 2048px').toBe(4);
 
-  t.deepEqual(indices512[0], {i: '8475481ffffffff'}, 'indices[0] @ 512px');
-  t.deepEqual(indices1024[0], {i: '837548fffffffff'}, 'indices[0] @ 1024px');
-  t.deepEqual(indices2048[0], {i: '8274effffffffff'}, 'indices[0] @ 2048px');
+  expect(indices512[0], 'indices[0] @ 512px').toEqual({i: '8475481ffffffff'});
+  expect(indices1024[0], 'indices[0] @ 1024px').toEqual({i: '837548fffffffff'});
+  expect(indices2048[0], 'indices[0] @ 2048px').toEqual({i: '8274effffffffff'});
 
-  t.equal(tileset512.getTileZoom(indices512[0]), 4, 'zoom @ 512px');
-  t.equal(tileset1024.getTileZoom(indices1024[0]), 3, 'zoom @ 1024px');
-  t.equal(tileset2048.getTileZoom(indices2048[0]), 2, 'zoom @ 2048px');
-
-  t.end();
+  expect(tileset512.getTileZoom(indices512[0]), 'zoom @ 512px').toBe(4);
+  expect(tileset1024.getTileZoom(indices1024[0]), 'zoom @ 1024px').toBe(3);
+  expect(tileset2048.getTileZoom(indices2048[0]), 'zoom @ 2048px').toBe(2);
 });
 
-test('H3Tileset2D res0', async t => {
+test('H3Tileset2D res0', async () => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,
@@ -98,11 +89,10 @@ test('H3Tileset2D res0', async t => {
   });
 
   const indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 122, 'res0 indices in viewport');
-  t.end();
+  expect(indices.length, 'res0 indices in viewport').toBe(122);
 });
 
-test('H3Tileset2D large span', async t => {
+test('H3Tileset2D large span', async () => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,
@@ -113,11 +103,10 @@ test('H3Tileset2D large span', async t => {
   });
 
   const indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 122, 'large viewport span');
-  t.end();
+  expect(indices.length, 'large viewport span').toBe(122);
 });
 
-test('H3Tileset2D min zoom', async t => {
+test('H3Tileset2D min zoom', async () => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,
@@ -128,13 +117,12 @@ test('H3Tileset2D min zoom', async t => {
   });
 
   let indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 31, 'without min zoom');
+  expect(indices.length, 'without min zoom').toBe(31);
   indices = tileset.getTileIndices({viewport, minZoom: 1});
-  t.equal(indices.length, 0, 'min zoom added');
-  t.end();
+  expect(indices.length, 'min zoom added').toBe(0);
 });
 
-test('H3Tileset2D max zoom', async t => {
+test('H3Tileset2D max zoom', async () => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,
@@ -145,17 +133,15 @@ test('H3Tileset2D max zoom', async t => {
   });
 
   let indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 18, 'without max zoom');
+  expect(indices.length, 'without max zoom').toBe(18);
   indices = tileset.getTileIndices({viewport, maxZoom: 1});
-  t.equal(indices.length, 7, 'max zoom added');
-  t.end();
+  expect(indices.length, 'max zoom added').toBe(7);
 });
 
-test('H3Tileset2D default viewport', async t => {
+test('H3Tileset2D default viewport', async () => {
   const tileset = new H3Tileset2D({});
   // See layer-manager.ts
   const viewport = new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'});
   let indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 0, 'Empty initial viewport');
-  t.end();
+  expect(indices.length, 'Empty initial viewport').toBe(0);
 });

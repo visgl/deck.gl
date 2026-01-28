@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect, describe} from 'vitest';
 import {
   getColorAccessor,
   getSizeAccessor,
@@ -137,10 +137,9 @@ const COLOR_TESTS = [
 ];
 
 for (const {colorField, colorScale, colorRange, opacity, data, d, expected} of COLOR_TESTS) {
-  test(`getColorAccessor#${colorScale}`, t => {
+  test(`getColorAccessor#${colorScale}`, () => {
     const accessor = getColorAccessor(colorField, colorScale, {range: colorRange}, opacity, data);
-    t.deepEquals(accessor(d), expected, `getColorAccessor correctly returns ${expected}`);
-    t.end();
+    expect(accessor(d), `getColorAccessor correctly returns ${expected}`).toEqual(expected);
   });
 }
 
@@ -180,10 +179,9 @@ const SIZE_TESTS = [
 ];
 
 for (const {sizeField, sizeScale, sizeRange, data, d, expected} of SIZE_TESTS) {
-  test(`getSizeAccessor#${sizeScale}`, t => {
+  test(`getSizeAccessor#${sizeScale}`, () => {
     const accessor = getSizeAccessor(sizeField, sizeScale, undefined, sizeRange, data);
-    t.deepEquals(accessor(d), expected, `getSizeAccessor correctly returns ${expected}`);
-    t.end();
+    expect(accessor(d), `getSizeAccessor correctly returns ${expected}`).toEqual(expected);
   });
 }
 
@@ -211,10 +209,9 @@ const TEXT_TESTS = [
 ];
 
 for (const {textLabelField, data, expected} of TEXT_TESTS) {
-  test(`getTextAccessor#${textLabelField.type}`, t => {
+  test(`getTextAccessor#${textLabelField.type}`, () => {
     const accessor = getTextAccessor(textLabelField, [data]);
-    t.deepEquals(accessor(data), expected, `getTextAccessor correctly returns ${expected}`);
-    t.end();
+    expect(accessor(data), `getTextAccessor correctly returns ${expected}`).toEqual(expected);
   });
 }
 
@@ -243,18 +240,16 @@ const TEXT_PIXEL_OFFSET_TESTS = [
   }
 ];
 
-test('getHexagon', t => {
+test('getHexagon', () => {
   const accessor = getLayer('hexagonId', {columns: {hex_id: 'h3'}}).defaultProps.getHexagon;
   const data = {h3: 1234};
-  t.deepEquals(accessor(data), 1234, 'getHexagon correctly returns 1234');
-  t.end();
+  expect(accessor(data), 'getHexagon correctly returns 1234').toEqual(1234);
 });
 
-test('domainFromValues', t => {
-  t.deepEquals(_domainFromValues(['a', 'a', 'b', 'c', 'b'], 'ordinal'), ['a', 'b', 'c']);
-  t.deepEquals(_domainFromValues([1, 4, 2, 3, 1], 'quantile'), [1, 1, 2, 3, 4]);
-  t.deepEquals(_domainFromValues([1, 0, -3], 'log'), [-3, 1]);
-  t.deepEquals(_domainFromValues([1, 0, 3], 'log'), [0.00001, 3]);
-  t.deepEquals(_domainFromValues(['a', 'c', 'b', 'c', 'a'], 'point'), ['a', 'c', 'b']);
-  t.end();
+test('domainFromValues', () => {
+  expect(_domainFromValues(['a', 'a', 'b', 'c', 'b'], 'ordinal')).toEqual(['a', 'b', 'c']);
+  expect(_domainFromValues([1, 4, 2, 3, 1], 'quantile')).toEqual([1, 1, 2, 3, 4]);
+  expect(_domainFromValues([1, 0, -3], 'log')).toEqual([-3, 1]);
+  expect(_domainFromValues([1, 0, 3], 'log')).toEqual([0.00001, 3]);
+  expect(_domainFromValues(['a', 'c', 'b', 'c', 'a'], 'point')).toEqual(['a', 'c', 'b']);
 });

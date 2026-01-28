@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -25,7 +25,7 @@ class TestScatterplotLayer extends ScatterplotLayer {
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
-test('MapboxLayer#external Deck', t => {
+test('MapboxLayer#external Deck', () => {
   // Create Deck with merged parameters like MapboxOverlay._onAddInterleaved does
   const deck = new Deck({
     device,
@@ -58,27 +58,22 @@ test('MapboxLayer#external Deck', t => {
     getDeckInstance({map, deck});
 
     map.addLayer(layer);
-    t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
+    expect(deck.props.views.id === 'mapbox', 'mapbox view exists').toBeTruthy();
 
     map.fire('render');
-    t.pass('Map render does not throw');
 
     map.fire('remove');
-    t.ok(deck.layerManager, 'External Deck should not be finalized with map');
+    expect(deck.layerManager, 'External Deck should not be finalized with map').toBeTruthy();
 
     deck.finalize();
 
     map.fire('render');
-    t.pass('Map render does not throw');
 
     layer.render();
-    t.pass('Map render does not throw');
-
-    t.end();
   });
 });
 
-test('MapboxLayer#external Deck multiple views supplied', t => {
+test('MapboxLayer#external Deck multiple views supplied', () => {
   const drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {
     drawLog.push([viewport.id, layer.id]);
@@ -131,23 +126,17 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
     map.addLayer(layerDefaultView);
 
     map.on('render', () => {
-      t.deepEqual(
-        drawLog,
-        [
-          ['mapbox', 'scatterplot-map'],
-          ['view-two', 'scatterplot-second-view']
-        ],
-        'layers drawn into the correct views'
-      );
+      expect(drawLog, 'layers drawn into the correct views').toEqual([
+        ['mapbox', 'scatterplot-map'],
+        ['view-two', 'scatterplot-second-view']
+      ]);
 
       deck.finalize();
-
-      t.end();
     });
   });
 });
 
-test('MapboxLayer#external Deck custom views', t => {
+test('MapboxLayer#external Deck custom views', () => {
   const drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {
     drawLog.push([viewport.id, layer.id]);
@@ -184,18 +173,12 @@ test('MapboxLayer#external Deck custom views', t => {
 
     map.addLayer(new MapboxLayer({id: 'scatterplot'}));
     map.on('render', () => {
-      t.deepEqual(
-        drawLog,
-        [
-          ['mapbox', 'scatterplot'],
-          ['view-two', 'scatterplot']
-        ],
-        'layer is drawn to both views'
-      );
+      expect(drawLog, 'layer is drawn to both views').toEqual([
+        ['mapbox', 'scatterplot'],
+        ['view-two', 'scatterplot']
+      ]);
 
       deck.finalize();
-
-      t.end();
     });
   });
 });

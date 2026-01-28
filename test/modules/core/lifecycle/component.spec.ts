@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import Component from '@deck.gl/core/lifecycle/component';
 
 /* global fetch */
@@ -24,7 +24,6 @@ class TestComponent extends Component {
 
 TestComponent.defaultProps = defaultProps;
 
-test('Component#imports', t => {
-  t.ok(Component, 'Component import ok');
-  t.end();
+test('Component#imports', () => {
+  expect(Component, 'Component import ok').toBeTruthy();
 });

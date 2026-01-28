@@ -3,22 +3,21 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable */
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport, PolygonLayer} from 'deck.gl';
 import {_SunLight as SunLight} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';
 
-test('Sunlight#Constructor', t => {
+test('Sunlight#Constructor', () => {
   const sunLight = new SunLight({
     timestamp: new Date('2019-08-01 15:00:00 Z-7').getTime(),
     color: [255, 255, 255],
     intensity: 1.0
   });
-  t.ok(sunLight, 'Sun light is ok');
-  t.end();
+  expect(sunLight, 'Sun light is ok').toBeTruthy();
 });
 
-test('Sunlight#getProjectedLight', t => {
+test('Sunlight#getProjectedLight', () => {
   const testCases = [
     {
       title: 'Tropic of Cancer on Summer Solstice at noon',
@@ -112,9 +111,10 @@ test('Sunlight#getProjectedLight', t => {
     sunLight.timestamp = testCase.timestamp;
     layer.context.viewport = testCase.viewport;
     const projectedLight = sunLight.getProjectedLight({layer});
-    t.comment(projectedLight.direction.join(','));
-    t.ok(vec3.angle(projectedLight.direction, testCase.expected) < 0.05, testCase.title);
+    console.log(projectedLight.direction.join(','));
+    expect(
+      vec3.angle(projectedLight.direction, testCase.expected) < 0.05,
+      testCase.title
+    ).toBeTruthy();
   }
-
-  t.end();
 });

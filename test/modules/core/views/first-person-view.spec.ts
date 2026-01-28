@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {FirstPersonView} from '@deck.gl/core';
 
-test('FirstPersonView#makeViewport', t => {
+test('FirstPersonView#makeViewport', () => {
   const view = new FirstPersonView();
   const testCases = [
     {
@@ -28,8 +28,6 @@ test('FirstPersonView#makeViewport', t => {
       height: 100,
       viewState: testCase.viewState
     });
-    t.ok(viewport.pixelUnprojectionMatrix, testCase.title);
+    expect(viewport.pixelUnprojectionMatrix, testCase.title).toBeTruthy();
   }
-
-  t.end();
 });

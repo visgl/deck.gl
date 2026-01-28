@@ -4,7 +4,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {Deck} from '@deck.gl/core';
 import {
   ScatterplotLayer,
@@ -725,7 +725,7 @@ const TEST_CASES = [
   }
 ];
 
-test(`pickingTest`, async t => {
+test(`pickingTest`, async () => {
   const deck = new Deck(DECK_PROPS);
 
   for (const testCase of TEST_CASES) {
@@ -744,36 +744,31 @@ test(`pickingTest`, async t => {
         if (deck.device.info.gpu === 'apple') {
           count = count === 32 ? 33 : pickInfos.length;
         }
-        t.equal(
+        expect(
           count,
-          pickingCase.results.count,
           `${testCase.id}: ${pickingMethod} should find expected number of objects`
-        );
+        ).toBe(pickingCase.results.count);
 
         if (pickInfos.length > 1) {
-          t.equal(
+          expect(
             new Set(pickInfos.map(x => x.object ?? x.index)).size,
-            pickInfos.length,
             'Returned distinct picked objects'
-          );
+          ).toBe(pickInfos.length);
         }
 
         if (pickingCase.results.cellCounts) {
           const cellCounts = pickInfos.map(x => x.object.count);
-          t.deepEqual(
-            cellCounts,
-            pickingCase.results.cellCounts,
-            'Aggregation count for individual cells should match'
+          expect(cellCounts, 'Aggregation count for individual cells should match').toEqual(
+            pickingCase.results.cellCounts
           );
         }
       }
     }
   }
   deck.finalize();
-  t.end();
 });
 
-test('pickingTest#unproject3D', async t => {
+test('pickingTest#unproject3D', async () => {
   const deck = new Deck(DECK_PROPS);
 
   await updateDeckProps(deck, {
@@ -791,15 +786,14 @@ test('pickingTest#unproject3D', async t => {
   });
 
   let pickInfo = deck.pickObject({x: 250, y: 275, unproject3D: true});
-  t.is(pickInfo?.object, VIEW_STATE, 'object is picked');
-  t.comment(`pickInfo.coordinate: ${pickInfo?.coordinate}`);
-  t.ok(
+  expect(pickInfo?.object, 'object is picked').toBe(VIEW_STATE);
+  console.log(`pickInfo.coordinate: ${pickInfo?.coordinate}`);
+  expect(
     equals(pickInfo?.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 0.0001),
     'unprojects to 3D coordinate'
-  );
+  ).toBeTruthy();
 
   deck.finalize();
-  t.end();
 });
 
 function updateDeckProps(deck: Deck, props: DeckProps): Promise<void> {

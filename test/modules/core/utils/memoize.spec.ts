@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import memoize from '@deck.gl/core/utils/memoize';
 import {makeSpy} from '@probe.gl/test-utils';
 
@@ -43,20 +43,16 @@ const TEST = {
   ]
 };
 
-test('utils#memoize', t => {
+test('utils#memoize', () => {
   const spy = makeSpy(TEST, 'FUNC');
   const memoized = memoize(TEST.FUNC);
 
   TEST.CASES.forEach(testCase => {
     const result = memoized(testCase.parameters);
-    t.deepEquals(result, sampleCompute(testCase.parameters), 'returns correct result');
-    t.is(
-      spy.called,
-      testCase.shouldRecompute,
-      testCase.shouldRecompute ? 'should recompute' : 'should not recompute'
+    expect(result, 'returns correct result').toEqual(sampleCompute(testCase.parameters));
+    expect(spy.called, testCase.shouldRecompute ? 'should recompute' : 'should not recompute').toBe(
+      testCase.shouldRecompute
     );
     spy.reset();
   });
-
-  t.end();
 });

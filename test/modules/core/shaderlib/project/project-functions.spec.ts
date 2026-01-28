@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {
   COORDINATE_SYSTEM,
@@ -132,20 +132,18 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#projectPosition', t => {
+test('project#projectPosition', () => {
   config.EPSILON = 1e-7;
 
   TEST_CASES.forEach(testCase => {
     const result = projectPosition(testCase.position, testCase.projectProps);
-    t.comment(result);
-    t.comment(testCase.result);
-    t.ok(equals(result, testCase.result), testCase.title);
+    console.log(result);
+    console.log(testCase.result);
+    expect(equals(result, testCase.result), testCase.title).toBeTruthy();
   });
-
-  t.end();
 });
 
-test('project#projectPosition vs project_position', async t => {
+test('project#projectPosition vs project_position', async () => {
   config.EPSILON = 1e-5;
 
   const vs = `\
@@ -176,8 +174,6 @@ void main()
       shaderInputProps: {project: projectProps, test: testProps}
     });
 
-    t.is(verifyGPUResult(shaderResult, cpuResult), true, title);
+    expect(verifyGPUResult(shaderResult, cpuResult), title).toBe(true);
   }
-
-  t.end();
 });

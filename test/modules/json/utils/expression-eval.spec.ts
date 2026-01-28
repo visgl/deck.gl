@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {compile, compileAsync, addUnaryOp, addBinaryOp} from '@deck.gl/json/utils/expression-eval';
 
 const fixtures = [
@@ -131,16 +131,14 @@ addBinaryOp('#', (a: number, b: number) => a + b / 10);
 
 addBinaryOp('~', 1, (a: number, b: number) => a * b);
 
-test('sync', t => {
+test('sync', () => {
   fixtures.forEach(o => {
     const val = compile(o.expr)(context);
-    t.equal(val, o.expected, `${o.expr} (${val}) === ${o.expected}`);
+    expect(val, `${o.expr} (${val}) === ${o.expected}`).toBe(o.expected);
   });
-
-  t.end();
 });
 
-test('async', async t => {
+test('async', async () => {
   const asyncContext = context;
   (asyncContext as Record<string, unknown>).asyncFunc = async function (
     a: number | Promise<number>,
@@ -165,21 +163,19 @@ test('async', async t => {
 
   for (let o of asyncFixtures) {
     const val = await compileAsync(o.expr)(asyncContext);
-    t.equal(val, o.expected, `${o.expr} (${val}) === ${o.expected}`);
+    expect(val, `${o.expr} (${val}) === ${o.expected}`).toBe(o.expected);
   }
-  t.end();
 });
 
-test('errors', async t => {
+test('errors', async () => {
   const expectedMsg = /Access to member "\w+" disallowed/;
-  t.throws(() => compile(`o.__proto__`)({o: {}}), expectedMsg, '.__proto__');
-  t.throws(() => compile(`o.prototype`)({o: {}}), expectedMsg, '.prototype');
-  t.throws(() => compile(`o.constructor`)({o: {}}), expectedMsg, '.constructor');
-  t.throws(() => compile(`o['__proto__']`)({o: {}}), expectedMsg, '["__proto__"]');
-  t.throws(() => compile(`o['prototype']`)({o: {}}), expectedMsg, '["prototype"]');
-  t.throws(() => compile(`o['constructor']`)({o: {}}), expectedMsg, '["constructor"]');
-  t.throws(() => compile(`o[p]`)({o: {}, p: '__proto__'}), expectedMsg, '[~__proto__]');
-  t.throws(() => compile(`o[p]`)({o: {}, p: 'prototype'}), expectedMsg, '[~prototype]');
-  t.throws(() => compile(`o[p]`)({o: {}, p: 'constructor'}), expectedMsg, '[~constructor]');
-  t.end();
+  expect(() => compile(`o.__proto__`)({o: {}}), expectedMsg).toThrow();
+  expect(() => compile(`o.prototype`)({o: {}}), expectedMsg).toThrow();
+  expect(() => compile(`o.constructor`)({o: {}}), expectedMsg).toThrow();
+  expect(() => compile(`o['__proto__']`)({o: {}}), expectedMsg).toThrow();
+  expect(() => compile(`o['prototype']`)({o: {}}), expectedMsg).toThrow();
+  expect(() => compile(`o['constructor']`)({o: {}}), expectedMsg).toThrow();
+  expect(() => compile(`o[p]`)({o: {}, p: '__proto__'}), expectedMsg).toThrow();
+  expect(() => compile(`o[p]`)({o: {}, p: 'prototype'}), expectedMsg).toThrow();
+  expect(() => compile(`o[p]`)({o: {}, p: 'constructor'}), expectedMsg).toThrow();
 });

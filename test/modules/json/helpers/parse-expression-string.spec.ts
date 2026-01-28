@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import parseExpressionString from '@deck.gl/json/helpers/parse-expression-string';
 
 const row = Object.freeze({
@@ -106,34 +106,28 @@ const TEST_CASES = [
 
 const isAccessor = true;
 
-test('parseExpressionString', t => {
+test('parseExpressionString', () => {
   for (const testCase of TEST_CASES) {
     const isErrorCase = Boolean(testCase.errorRegex);
     if (isErrorCase) {
-      t.throws(
+      expect(
         () => parseExpressionString(testCase.expr, null, isAccessor),
-        testCase.errorRegex,
-        `throws on ${testCase.expr}`
-      );
+        testCase.errorRegex
+      ).toThrow();
       /* eslint-disable-next-line no-continue */
       continue;
     }
     const func = parseExpressionString(testCase.expr, null, isAccessor);
 
-    t.ok(func, `parseExpressionString converted ${testCase.expr}`);
-    t.deepEquals(
+    expect(func, `parseExpressionString converted ${testCase.expr}`).toBeTruthy();
+    expect(
       func(row),
-      testCase.expected,
       `parseExpressionString correctly evaluated ${testCase.expr} to ${testCase.expected}`
-    );
+    ).toEqual(testCase.expected);
   }
 
   const func = parseExpressionString('-', null, isAccessor);
-  t.deepEquals(
-    func('identity'),
-    'identity',
-    'parseExpressionString of - returns a cached identity function'
+  expect(func('identity'), 'parseExpressionString of - returns a cached identity function').toEqual(
+    'identity'
   );
-
-  t.end();
 });

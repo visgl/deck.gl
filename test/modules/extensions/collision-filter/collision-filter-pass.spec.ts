@@ -2,34 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import CollisionFilterPass from '@deck.gl/extensions/collision-filter/collision-filter-pass';
 import {device} from '@deck.gl/test-utils';
 
-test('CollisionFilterPass#getShaderModuleProps', t => {
+test('CollisionFilterPass#getShaderModuleProps', () => {
   const collisionFilterPass = new CollisionFilterPass(device);
   const shaderModuleProps = collisionFilterPass.getShaderModuleProps();
 
-  t.equal(
+  expect(
     shaderModuleProps.collision.drawToCollisionMap,
-    true,
     `CollisionFilterPass has drawToCollisionMap module parameter`
-  );
-  t.equal(
+  ).toBe(true);
+  expect(
     shaderModuleProps.picking.isActive,
-    1,
     `CollisionFilterPass has picking.isActive module parameter`
-  );
-  t.equal(
+  ).toBe(1);
+  expect(
     shaderModuleProps.picking.isAttribute,
-    false,
     `CollisionFilterPass has picking.isAttribute module parameter`
-  );
-  t.deepEqual(
-    shaderModuleProps.lighting,
-    {enabled: false},
-    `CollisionFilterPass disables lighting module`
-  );
-  t.end();
+  ).toBe(false);
+  expect(shaderModuleProps.lighting, `CollisionFilterPass disables lighting module`).toEqual({
+    enabled: false
+  });
 });

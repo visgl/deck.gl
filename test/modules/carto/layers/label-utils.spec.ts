@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {createPointsFromLines, createPointsFromPolygons} from '@deck.gl/carto/layers/label-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 
-test('createPointsFromLines', t => {
+test('createPointsFromLines', () => {
   const lines: BinaryFeatureCollection['lines'] = {
     type: 'LineString',
     positions: {
@@ -37,23 +37,23 @@ test('createPointsFromLines', t => {
 
   const points = createPointsFromLines(lines, 'custom_id');
 
-  t.ok(points, 'returns points object');
+  expect(points, 'returns points object').toBeTruthy();
   if (!points) {
-    t.fail('points should not be null');
-    return t.end();
+    throw new Error('points should not be null');
+    return;
   }
 
-  t.equal(points.type, 'Point', 'correct type');
-  t.deepEqual(Array.from(points.positions.value), [1, 1, 4, 4], 'correct midpoint positions');
-  t.equal(points.positions.size, 2, 'correct position size');
-  t.deepEqual(Array.from(points.featureIds.value), [0, 1], 'correct feature ids');
-  t.deepEqual(Array.from(points.globalFeatureIds.value), [100, 101], 'correct global feature ids');
-  t.deepEqual(points.properties, [{name: 'line1'}, {name: 'line2'}], 'correct properties');
-  t.deepEqual(
-    Array.from(points.numericProps.custom_id.value),
-    [1, 2],
-    'correct numeric properties'
-  );
+  expect(points.type, 'correct type').toBe('Point');
+  expect(Array.from(points.positions.value), 'correct midpoint positions').toEqual([1, 1, 4, 4]);
+  expect(points.positions.size, 'correct position size').toBe(2);
+  expect(Array.from(points.featureIds.value), 'correct feature ids').toEqual([0, 1]);
+  expect(Array.from(points.globalFeatureIds.value), 'correct global feature ids').toEqual([
+    100, 101
+  ]);
+  expect(points.properties, 'correct properties').toEqual([{name: 'line1'}, {name: 'line2'}]);
+  expect(Array.from(points.numericProps.custom_id.value), 'correct numeric properties').toEqual([
+    1, 2
+  ]);
 
   // Test with missing uniqueIdProperty
   const invalidLines: BinaryFeatureCollection['lines'] = {
@@ -79,28 +79,24 @@ test('createPointsFromLines', t => {
     fields: []
   };
   const invalidResult = createPointsFromLines(invalidLines, 'custom_id');
-  t.ok(invalidResult, 'returns points object for invalid input');
-  t.deepEqual(
+  expect(invalidResult, 'returns points object for invalid input').toBeTruthy();
+  expect(
     Array.from(invalidResult!.positions.value),
-    [0.5, 0.5],
     'correct midpoint position when falling back to index'
-  );
-  t.deepEqual(invalidResult!.properties, [{}], 'correct empty properties');
+  ).toEqual([0.5, 0.5]);
+  expect(invalidResult!.properties, 'correct empty properties').toEqual([{}]);
 
   // Test with non-existent uniqueIdProperty
   const noIdResult = createPointsFromLines(lines, 'non_existent_id');
-  t.ok(noIdResult, 'returns points object when uniqueIdProperty does not exist');
-  t.deepEqual(
+  expect(noIdResult, 'returns points object when uniqueIdProperty does not exist').toBeTruthy();
+  expect(
     Array.from(noIdResult!.positions.value),
-    [1, 1],
     'correct midpoint position for single line when with non-existent uniqueIdProperty'
-  );
-  t.deepEqual(noIdResult!.properties, [{name: 'line1'}], 'correct properties');
-
-  t.end();
+  ).toEqual([1, 1]);
+  expect(noIdResult!.properties, 'correct properties').toEqual([{name: 'line1'}]);
 });
 
-test('createPointsFromLines - line midpoint calculation', t => {
+test('createPointsFromLines - line midpoint calculation', () => {
   // Test two-point line
   const twoPointLine: BinaryFeatureCollection['lines'] = {
     type: 'LineString',
@@ -122,11 +118,10 @@ test('createPointsFromLines - line midpoint calculation', t => {
   };
 
   const twoPointResult = createPointsFromLines(twoPointLine, 'id');
-  t.deepEqual(
+  expect(
     Array.from(twoPointResult!.positions.value),
-    [1, 1],
     'correct midpoint for two-point line'
-  );
+  ).toEqual([1, 1]);
 
   // Test multi-point line
   const multiPointLine: BinaryFeatureCollection['lines'] = {
@@ -149,16 +144,13 @@ test('createPointsFromLines - line midpoint calculation', t => {
   };
 
   const multiPointResult = createPointsFromLines(multiPointLine, 'id');
-  t.deepEqual(
+  expect(
     Array.from(multiPointResult!.positions.value),
-    [2, 2],
     'correct midpoint for multi-point line'
-  );
-
-  t.end();
+  ).toEqual([2, 2]);
 });
 
-test('createPointsFromPolygons', t => {
+test('createPointsFromPolygons', () => {
   const polygons: Required<Required<BinaryFeatureCollection>['polygons']> = {
     type: 'Polygon',
     positions: {
@@ -204,19 +196,19 @@ test('createPointsFromPolygons', t => {
 
   const points = createPointsFromPolygons(polygons, tileBbox, {extruded: false});
 
-  t.ok(points, 'returns points object');
+  expect(points, 'returns points object').toBeTruthy();
   if (!points) {
-    t.fail('points should not be null');
-    return t.end();
+    throw new Error('points should not be null');
+    return;
   }
 
-  t.equal(points.type, 'Point', 'correct type');
-  t.deepEqual(Array.from(points.positions.value), [0.5, 0.5], 'correct centroid position');
-  t.equal(points.positions.size, 2, 'correct position size');
-  t.deepEqual(Array.from(points.featureIds.value), [0], 'correct feature ids');
-  t.deepEqual(Array.from(points.globalFeatureIds.value), [100], 'correct global feature ids');
-  t.deepEqual(points.properties, [{name: 'polygon1'}], 'correct properties');
-  t.deepEqual(Array.from(points.numericProps.area.value), [1], 'correct numeric properties');
+  expect(points.type, 'correct type').toBe('Point');
+  expect(Array.from(points.positions.value), 'correct centroid position').toEqual([0.5, 0.5]);
+  expect(points.positions.size, 'correct position size').toBe(2);
+  expect(Array.from(points.featureIds.value), 'correct feature ids').toEqual([0]);
+  expect(Array.from(points.globalFeatureIds.value), 'correct global feature ids').toEqual([100]);
+  expect(points.properties, 'correct properties').toEqual([{name: 'polygon1'}]);
+  expect(Array.from(points.numericProps.area.value), 'correct numeric properties').toEqual([1]);
 
   // Test with polygon outside tile bounds
   const outOfBoundsPolygons: Required<Required<BinaryFeatureCollection>['polygons']> = {
@@ -258,9 +250,9 @@ test('createPointsFromPolygons', t => {
   const outOfBoundsPoints = createPointsFromPolygons(outOfBoundsPolygons, tileBbox, {
     extruded: false
   });
-  t.ok(outOfBoundsPoints, 'returns points object for out of bounds polygon');
+  expect(outOfBoundsPoints, 'returns points object for out of bounds polygon').toBeTruthy();
   if (outOfBoundsPoints) {
-    t.equal(outOfBoundsPoints.positions.value.length, 0, 'no points for out of bounds polygon');
+    expect(outOfBoundsPoints.positions.value.length, 'no points for out of bounds polygon').toBe(0);
   }
 
   // Test with tiny polygon (below area threshold)
@@ -301,15 +293,13 @@ test('createPointsFromPolygons', t => {
   };
 
   const tinyPoints = createPointsFromPolygons(tinyPolygons, tileBbox, {extruded: false});
-  t.ok(tinyPoints, 'returns points object for tiny polygon');
+  expect(tinyPoints, 'returns points object for tiny polygon').toBeTruthy();
   if (tinyPoints) {
-    t.equal(tinyPoints.positions.value.length, 0, 'no points for tiny polygon');
+    expect(tinyPoints.positions.value.length, 'no points for tiny polygon').toBe(0);
   }
-
-  t.end();
 });
 
-test('createPointsFromPolygons - area and centroid calculation', t => {
+test('createPointsFromPolygons - area and centroid calculation', () => {
   // Test square polygon
   const square: Required<Required<BinaryFeatureCollection>['polygons']> = {
     type: 'Polygon',
@@ -339,7 +329,7 @@ test('createPointsFromPolygons - area and centroid calculation', t => {
   const tileBbox = {west: -1, south: -1, east: 3, north: 3};
   const result = createPointsFromPolygons(square, tileBbox, {extruded: false});
 
-  t.deepEqual(Array.from(result.positions.value), [1, 1], 'correct centroid for square');
+  expect(Array.from(result.positions.value), 'correct centroid for square').toEqual([1, 1]);
 
   // Test tiny polygon (should be filtered out due to area threshold)
   const tiny: Required<Required<BinaryFeatureCollection>['polygons']> = {
@@ -351,12 +341,10 @@ test('createPointsFromPolygons - area and centroid calculation', t => {
   };
 
   const tinyResult = createPointsFromPolygons(tiny, tileBbox, {extruded: false});
-  t.equal(tinyResult.positions.value.length, 0, 'tiny polygon filtered by area threshold');
-
-  t.end();
+  expect(tinyResult.positions.value.length, 'tiny polygon filtered by area threshold').toBe(0);
 });
 
-test('createPointsFromLines - property as unique ID', t => {
+test('createPointsFromLines - property as unique ID', () => {
   const lines: BinaryFeatureCollection['lines'] = {
     type: 'LineString',
     positions: {
@@ -385,32 +373,29 @@ test('createPointsFromLines - property as unique ID', t => {
 
   const points = createPointsFromLines(lines, 'group');
 
-  t.ok(points, 'returns points object');
+  expect(points, 'returns points object').toBeTruthy();
   if (!points) {
-    t.fail('points should not be null');
-    return t.end();
+    throw new Error('points should not be null');
+    return;
   }
 
-  t.equal(points.type, 'Point', 'correct type');
-  t.deepEqual(Array.from(points.positions.value), [1, 1], 'correct midpoint position');
-  t.equal(points.positions.size, 2, 'correct position size');
-  t.deepEqual(Array.from(points.featureIds.value), [0], 'correct feature ids');
-  t.deepEqual(Array.from(points.globalFeatureIds.value), [100], 'correct global feature ids');
-  t.deepEqual(points.properties, [{name: 'line1', group: 'A'}], 'correct properties');
+  expect(points.type, 'correct type').toBe('Point');
+  expect(Array.from(points.positions.value), 'correct midpoint position').toEqual([1, 1]);
+  expect(points.positions.size, 'correct position size').toBe(2);
+  expect(Array.from(points.featureIds.value), 'correct feature ids').toEqual([0]);
+  expect(Array.from(points.globalFeatureIds.value), 'correct global feature ids').toEqual([100]);
+  expect(points.properties, 'correct properties').toEqual([{name: 'line1', group: 'A'}]);
 
   // Test with non-existent property
   const noPropertyResult = createPointsFromLines(lines, 'non_existent_property');
-  t.ok(noPropertyResult, 'returns points object when property does not exist');
-  t.deepEqual(
+  expect(noPropertyResult, 'returns points object when property does not exist').toBeTruthy();
+  expect(
     Array.from(noPropertyResult!.positions.value),
-    [1, 1],
     'correct midpoint position when falling back to index'
-  );
-
-  t.end();
+  ).toEqual([1, 1]);
 });
 
-test('createPointsFromLines - fallback when uniqueIdProperty not found', t => {
+test('createPointsFromLines - fallback when uniqueIdProperty not found', () => {
   const lines: BinaryFeatureCollection['lines'] = {
     type: 'LineString',
     positions: {
@@ -436,23 +421,21 @@ test('createPointsFromLines - fallback when uniqueIdProperty not found', t => {
 
   const points = createPointsFromLines(lines, 'non_existent_property');
 
-  t.ok(points, 'returns points object');
+  expect(points, 'returns points object').toBeTruthy();
   if (!points) {
-    t.fail('points should not be null');
-    return t.end();
+    throw new Error('points should not be null');
+    return;
   }
 
-  t.equal(points.type, 'Point', 'correct type');
-  t.deepEqual(Array.from(points.positions.value), [1, 1], 'correct midpoint position');
-  t.equal(points.positions.size, 2, 'correct position size');
-  t.deepEqual(Array.from(points.featureIds.value), [0], 'correct feature ids');
-  t.deepEqual(Array.from(points.globalFeatureIds.value), [100], 'correct global feature ids');
-  t.deepEqual(points.properties, [{}], 'correct empty properties');
-
-  t.end();
+  expect(points.type, 'correct type').toBe('Point');
+  expect(Array.from(points.positions.value), 'correct midpoint position').toEqual([1, 1]);
+  expect(points.positions.size, 'correct position size').toBe(2);
+  expect(Array.from(points.featureIds.value), 'correct feature ids').toEqual([0]);
+  expect(Array.from(points.globalFeatureIds.value), 'correct global feature ids').toEqual([100]);
+  expect(points.properties, 'correct empty properties').toEqual([{}]);
 });
 
-test('createPointsFromLines - mixed uniqueIdProperty', t => {
+test('createPointsFromLines - mixed uniqueIdProperty', () => {
   const lines: BinaryFeatureCollection['lines'] = {
     type: 'LineString',
     positions: {
@@ -478,22 +461,21 @@ test('createPointsFromLines - mixed uniqueIdProperty', t => {
 
   const points = createPointsFromLines(lines, 'group');
 
-  t.ok(points, 'returns points object');
+  expect(points, 'returns points object').toBeTruthy();
   if (!points) {
-    t.fail('points should not be null');
-    return t.end();
+    throw new Error('points should not be null');
+    return;
   }
 
-  t.equal(points.type, 'Point', 'correct type');
-  t.deepEqual(Array.from(points.positions.value), [1, 1, 7, 7], 'correct midpoint positions');
-  t.equal(points.positions.size, 2, 'correct position size');
-  t.deepEqual(Array.from(points.featureIds.value), [0, 1], 'correct feature ids');
-  t.deepEqual(Array.from(points.globalFeatureIds.value), [100, 102], 'correct global feature ids');
-  t.deepEqual(
-    points.properties,
-    [{name: 'line1', group: 'A'}, {name: 'line3'}],
-    'correct properties'
-  );
-
-  t.end();
+  expect(points.type, 'correct type').toBe('Point');
+  expect(Array.from(points.positions.value), 'correct midpoint positions').toEqual([1, 1, 7, 7]);
+  expect(points.positions.size, 'correct position size').toBe(2);
+  expect(Array.from(points.featureIds.value), 'correct feature ids').toEqual([0, 1]);
+  expect(Array.from(points.globalFeatureIds.value), 'correct global feature ids').toEqual([
+    100, 102
+  ]);
+  expect(points.properties, 'correct properties').toEqual([
+    {name: 'line1', group: 'A'},
+    {name: 'line3'}
+  ]);
 });

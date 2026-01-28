@@ -2,25 +2,23 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect, describe} from 'vitest';
 import * as deckgl from 'deck.gl/../bundle';
 
-test('standalone#imports', t => {
-  t.ok(deckgl.VERSION, 'version is exported');
-  t.ok(deckgl.DeckGL, 'DeckGL class is exported');
-  t.ok(deckgl.WebMercatorViewport, 'WebMercatorViewport class is exported');
-  t.ok(deckgl.Layer, 'Layer class is exported');
-  t.ok(deckgl.ScatterplotLayer, 'ScatterplotLayer class is exported');
+test('standalone#imports', () => {
+  expect(deckgl.VERSION, 'version is exported').toBeTruthy();
+  expect(deckgl.DeckGL, 'DeckGL class is exported').toBeTruthy();
+  expect(deckgl.WebMercatorViewport, 'WebMercatorViewport class is exported').toBeTruthy();
+  expect(deckgl.Layer, 'Layer class is exported').toBeTruthy();
+  expect(deckgl.ScatterplotLayer, 'ScatterplotLayer class is exported').toBeTruthy();
 
-  t.ok(globalThis.deck, 'deck namespace is exported');
-  t.ok(globalThis.luma, 'luma namespace is exported');
-  t.ok(globalThis.luma.enforceWebGL2, 'enforceWebGL2 is exported');
-  t.ok(globalThis.loaders, 'loaders namespace is exported');
-
-  t.end();
+  expect(globalThis.deck, 'deck namespace is exported').toBeTruthy();
+  expect(globalThis.luma, 'luma namespace is exported').toBeTruthy();
+  expect(globalThis.luma.enforceWebGL2, 'enforceWebGL2 is exported').toBeTruthy();
+  expect(globalThis.loaders, 'loaders namespace is exported').toBeTruthy();
 });
 
-test('standalone#DeckGL', t => {
+test('standalone#DeckGL', () => {
   const deck = new deckgl.DeckGL({
     longitude: -122.45,
     latitude: 37.8,
@@ -31,16 +29,17 @@ test('standalone#DeckGL', t => {
       })
     ],
     onAfterRender: () => {
-      t.ok(Object.keys(deck.viewManager.controllers).length > 0, 'component has controller');
+      expect(
+        Object.keys(deck.viewManager.controllers).length > 0,
+        'component has controller'
+      ).toBeTruthy();
 
       deck.finalize();
 
-      t.notOk(deck.layerManager, 'component is finalized');
-      t.notOk(deck.viewManager, 'component is finalized');
-
-      t.end();
+      expect(deck.layerManager, 'component is finalized').toBeFalsy();
+      expect(deck.viewManager, 'component is finalized').toBeFalsy();
     }
   });
 
-  t.ok(deck, 'DeckGL constructor does not throw error');
+  expect(deck, 'DeckGL constructor does not throw error').toBeTruthy();
 });

@@ -1,5 +1,5 @@
 /* global document */
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {applyStyles, removeStyles} from '@deck.gl/core/utils/apply-styles';
 
 const APPLY_TEST_CASES = [
@@ -15,18 +15,16 @@ const APPLY_TEST_CASES = [
   }
 ];
 
-test('applyStyles', t => {
+test('applyStyles', () => {
   const container = document.body.appendChild(document.createElement('div'));
   for (const tc of APPLY_TEST_CASES) {
     const {argument, result} = tc;
     applyStyles(container, {[argument.property]: argument.value});
-    t.deepEqual(
+    expect(
       container.style.getPropertyValue(result.property),
-      result.value,
       `applyStyles ${tc.title} returned expected result`
-    );
+    ).toEqual(result.value);
   }
-  t.end();
 });
 
 const REMOVE_TEST_CASES = [
@@ -42,18 +40,16 @@ const REMOVE_TEST_CASES = [
   }
 ];
 
-test('removeStyles', t => {
+test('removeStyles', () => {
   const container = document.body.appendChild(document.createElement('div'));
   for (const tc of REMOVE_TEST_CASES) {
     const {argument, result} = tc;
     // setProperty expects kabab-case
     container.style.setProperty(result.property, argument.value);
     removeStyles(container, {[argument.property]: argument.value});
-    t.deepEqual(
+    expect(
       container.style.getPropertyValue(result.property),
-      result.value,
       `removeStyles ${tc.title} returned expected result`
-    );
+    ).toEqual(result.value);
   }
-  t.end();
 });

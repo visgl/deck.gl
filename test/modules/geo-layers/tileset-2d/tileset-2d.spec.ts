@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
@@ -24,7 +24,7 @@ const testViewport = new WebMercatorViewport(testViewState);
 
 const getTileData = () => Promise.resolve(null);
 
-test('Tileset2D#constructor', t => {
+test('Tileset2D#constructor', () => {
   const tileset = new Tileset2D({
     getTileData,
     minZoom: 11,
@@ -32,34 +32,30 @@ test('Tileset2D#constructor', t => {
     onTileLoad: () => {}
   });
 
-  t.equal(tileset._minZoom, 11, 'minZoom is set');
-  t.notOk(tileset._maxZoom, 'maxZoom is undefined');
+  expect(tileset._minZoom, 'minZoom is set').toBe(11);
+  expect(tileset._maxZoom, 'maxZoom is undefined').toBeFalsy();
 
   tileset.setOptions({maxZoom: 13});
-  t.is(tileset._maxZoom, 13, 'maxZoom is set');
-
-  t.end();
+  expect(tileset._maxZoom, 'maxZoom is set').toBe(13);
 });
 
-test('Tileset2D#update', t => {
+test('Tileset2D#update', () => {
   const tileset = new Tileset2D({
     getTileData,
     onTileLoad: () => {}
   });
   tileset.update(testViewport);
 
-  t.is(tileset._cache.size, 1, 'should update with expected tiles');
+  expect(tileset._cache.size, 'should update with expected tiles').toBe(1);
   const {x, y, z} = tileset.tiles[0].index;
 
-  t.equal(x, 1171);
-  t.equal(y, 1566);
-  t.equal(z, 12);
-  t.ok(tileset.tiles[0].bbox, 'tile has metadata');
-
-  t.end();
+  expect(x).toBe(1171);
+  expect(y).toBe(1566);
+  expect(z).toBe(12);
+  expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
-test('Tileset2D#updateOnModelMatrix', t => {
+test('Tileset2D#updateOnModelMatrix', () => {
   const tileset = new Tileset2D({
     getTileData,
     onTileLoad: () => {}
@@ -73,18 +69,19 @@ test('Tileset2D#updateOnModelMatrix', t => {
     }
   }) as Viewport;
   tileset.update(testOrthoraphicViewport, {modelMatrix: null});
-  t.is(tileset._cache.size, 4, 'null model matrix updates');
+  expect(tileset._cache.size, 'null model matrix updates').toBe(4);
 
   tileset.update(testOrthoraphicViewport, {modelMatrix: new Matrix4()});
-  t.is(tileset._cache.size, 4, 'identity model matrixs update with same number of tiles as null');
+  expect(
+    tileset._cache.size,
+    'identity model matrixs update with same number of tiles as null'
+  ).toBe(4);
 
   tileset.update(testOrthoraphicViewport, {modelMatrix: new Matrix4().rotateX(Math.PI / 4)});
-  t.is(tileset._cache.size, 6, 'rotation model matrix updates with new number of tiles');
-
-  t.end();
+  expect(tileset._cache.size, 'rotation model matrix updates with new number of tiles').toBe(6);
 });
 
-test('Tileset2D#finalize', async t => {
+test('Tileset2D#finalize', async () => {
   const tileDataPending = sleep(50);
   const tileset = new Tileset2D({
     getTileData: () => tileDataPending,
@@ -108,19 +105,16 @@ test('Tileset2D#finalize', async t => {
   const tile2 = tileset.selectedTiles![0];
 
   tileset.finalize();
-  t.notOk(tileset._cache.size, 'cache is purged');
+  expect(tileset._cache.size, 'cache is purged').toBeFalsy();
 
-  t.is(
+  expect(
     tile1._isCancelled,
-    false,
     'first tile should not have been loading and thus not been aborteed'
-  );
-  t.is(tile2._isCancelled, true, 'second tile should have been aborted');
-
-  t.end();
+  ).toBe(false);
+  expect(tile2._isCancelled, 'second tile should have been aborted').toBe(true);
 });
 
-test('Tileset2D#maxCacheSize', t => {
+test('Tileset2D#maxCacheSize', () => {
   const tileset = new Tileset2D({
     getTileData,
     maxCacheSize: 1,
@@ -129,8 +123,8 @@ test('Tileset2D#maxCacheSize', t => {
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);
-  t.equal(tileset._cache.size, 1, 'expected cache size');
-  t.ok(tileset._cache.get('1171-1566-12'), 'expected tile is in cache');
+  expect(tileset._cache.size, 'expected cache size').toBe(1);
+  expect(tileset._cache.get('1171-1566-12'), 'expected tile is in cache').toBeTruthy();
 
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
@@ -143,15 +137,13 @@ test('Tileset2D#maxCacheSize', t => {
       })
     )
   );
-  t.equal(tileset._cache.size, 2, 'cache is resized');
-  t.notOk(tileset._cache.get('1171-1566-12'), 'old tile is deleted from cache');
-  t.ok(tileset._cache.get('910-459-12'), 'expected tile is in cache');
-  t.ok(tileset._cache.get('909-459-12'), 'expected tile is in cache');
-
-  t.end();
+  expect(tileset._cache.size, 'cache is resized').toBe(2);
+  expect(tileset._cache.get('1171-1566-12'), 'old tile is deleted from cache').toBeFalsy();
+  expect(tileset._cache.get('910-459-12'), 'expected tile is in cache').toBeTruthy();
+  expect(tileset._cache.get('909-459-12'), 'expected tile is in cache').toBeTruthy();
 });
 
-test('Tileset2D#maxCacheByteSize', async t => {
+test('Tileset2D#maxCacheByteSize', async () => {
   const tileset = new Tileset2D({
     getTileData: () => Promise.resolve({byteLength: 100}),
     maxCacheByteSize: 150,
@@ -160,8 +152,8 @@ test('Tileset2D#maxCacheByteSize', async t => {
   });
   // load a viewport to fill the cache
   tileset.update(testViewport);
-  t.equal(tileset._cache.size, 1, 'expected cache size');
-  t.ok(tileset._cache.get('1171-1566-12'), 'expected tile is in cache');
+  expect(tileset._cache.size, 'expected cache size').toBe(1);
+  expect(tileset._cache.get('1171-1566-12'), 'expected tile is in cache').toBeTruthy();
 
   // Wait for the tile to load
   await sleep(100);
@@ -176,18 +168,16 @@ test('Tileset2D#maxCacheByteSize', async t => {
     )
   );
 
-  t.equal(tileset._cache.size, 2, 'new tile added to cache');
+  expect(tileset._cache.size, 'new tile added to cache').toBe(2);
 
   // Wait for the new tile to load
   await sleep(100);
 
-  t.equal(tileset._cache.size, 1, 'cache is resized after tile data is loaded');
-  t.ok(tileset._cache.get('910-459-12'), 'expected tile is in cache');
-
-  t.end();
+  expect(tileset._cache.size, 'cache is resized after tile data is loaded').toBe(1);
+  expect(tileset._cache.get('910-459-12'), 'expected tile is in cache').toBeTruthy();
 });
 
-test('Tileset2D#debounceTime', async t => {
+test('Tileset2D#debounceTime', async () => {
   const tileset = new Tileset2D({
     getTileData: () => sleep(2),
     maxRequests: 1000,
@@ -200,19 +190,17 @@ test('Tileset2D#debounceTime', async t => {
   await sleep(10);
 
   for (const tile of tileset.tiles) {
-    t.false(tile.isLoaded, `tile ${tile.id} pending`);
+    expect(tile.isLoaded, `tile ${tile.id} pending`).toBeFalsy();
   }
 
   await sleep(50);
 
   for (const tile of tileset.tiles) {
-    t.true(tile.isLoaded, `tile ${tile.id} loaded`);
+    expect(tile.isLoaded, `tile ${tile.id} loaded`).toBeTruthy();
   }
-
-  t.end();
 });
 
-test('Tileset2D#over-zoomed', t => {
+test('Tileset2D#over-zoomed', () => {
   const tileset = new Tileset2D({
     getTileData,
     minZoom: 11,
@@ -227,13 +215,11 @@ test('Tileset2D#over-zoomed', t => {
 
   tileset.update(zoomedInViewport);
   tileset.tiles.forEach(tile => {
-    t.equal(tile.zoom, 13);
+    expect(tile.zoom).toBe(13);
   });
-
-  t.end();
 });
 
-test('Tileset2D#under-zoomed', t => {
+test('Tileset2D#under-zoomed', () => {
   const tileset = new Tileset2D({
     getTileData,
     minZoom: 11,
@@ -243,11 +229,10 @@ test('Tileset2D#under-zoomed', t => {
   const zoomedOutViewport = new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 1}));
 
   tileset.update(zoomedOutViewport);
-  t.equal(tileset.tiles.length, 0);
-  t.end();
+  expect(tileset.tiles.length).toBe(0);
 });
 
-test('Tileset2D#under-zoomed-with-extent', t => {
+test('Tileset2D#under-zoomed-with-extent', () => {
   const tileset = new Tileset2D({
     getTileData,
     minZoom: 11,
@@ -259,11 +244,10 @@ test('Tileset2D#under-zoomed-with-extent', t => {
 
   tileset.update(zoomedOutViewport);
   const tileZoomLevels = tileset.tiles.map(tile => tile.zoom);
-  t.assert(tileZoomLevels[0] === 11);
-  t.end();
+  expect(tileZoomLevels[0] === 11).toBeTruthy();
 });
 
-test('Tileset2D#callbacks', async t => {
+test('Tileset2D#callbacks', async () => {
   let tileLoadCalled = 0;
 
   const tileset = new Tileset2D({
@@ -280,10 +264,10 @@ test('Tileset2D#callbacks', async t => {
   tileset.update(testViewport);
   await sleep(100);
 
-  t.is(tileLoadCalled, 2, 'tile is reloaded when reloadAll is called');
+  expect(tileLoadCalled, 'tile is reloaded when reloadAll is called').toBe(2);
 });
 
-test('Tileset2D#callbacks', async t => {
+test('Tileset2D#callbacks', async () => {
   let tileLoadCalled = 0;
   let tileErrorCalled = 0;
   let tileUnloadCalled = 0;
@@ -296,13 +280,13 @@ test('Tileset2D#callbacks', async t => {
     onTileUnload: () => tileUnloadCalled++
   });
   tileset.update(testViewport);
-  t.notOk(tileset.isLoaded, 'should be loading');
+  expect(tileset.isLoaded, 'should be loading').toBeFalsy();
 
   await sleep(100);
 
-  t.ok(tileset.isLoaded, 'tileset is loaded');
-  t.is(tileLoadCalled, 1, 'onTileLoad is called');
-  t.is(tileErrorCalled, 0, 'onTileError is not called');
+  expect(tileset.isLoaded, 'tileset is loaded').toBeTruthy();
+  expect(tileLoadCalled, 'onTileLoad is called').toBe(1);
+  expect(tileErrorCalled, 'onTileError is not called').toBe(0);
 
   tileLoadCalled = 0;
   tileErrorCalled = 0;
@@ -314,15 +298,15 @@ test('Tileset2D#callbacks', async t => {
   });
 
   errorTileset.update(testViewport);
-  t.notOk(errorTileset.isLoaded, 'should be loading');
+  expect(errorTileset.isLoaded, 'should be loading').toBeFalsy();
 
   await sleep(100);
 
-  t.ok(errorTileset.isLoaded, 'tileset is loaded');
-  t.is(tileLoadCalled, 0, 'onTileLoad is not called');
-  t.is(tileErrorCalled, 1, 'onTileError is called');
+  expect(errorTileset.isLoaded, 'tileset is loaded').toBeTruthy();
+  expect(tileLoadCalled, 'onTileLoad is not called').toBe(0);
+  expect(tileErrorCalled, 'onTileError is called').toBe(1);
 
-  t.is(tileUnloadCalled, 0, 'onTileUnload is not called');
+  expect(tileUnloadCalled, 'onTileUnload is not called').toBe(0);
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
     new WebMercatorViewport(
@@ -332,13 +316,11 @@ test('Tileset2D#callbacks', async t => {
       })
     )
   );
-  t.is(tileUnloadCalled, 1, 'onTileUnload is called');
-
-  t.end();
+  expect(tileUnloadCalled, 'onTileUnload is called').toBe(1);
 });
 
 /* eslint-disable max-statements, complexity, max-depth */
-test('Tileset2D#traversal', async t => {
+test('Tileset2D#traversal', async () => {
   const tileset = new Tileset2D({
     getTileData: () => sleep(10),
     onTileLoad: () => {},
@@ -423,8 +405,8 @@ test('Tileset2D#traversal', async t => {
   tileset._rebuildTree();
 
   // Sanity check
-  t.ok(tileset._getTile({x: 0, y: 0, z: 1}).isLoaded, '0-0-1 is loaded');
-  t.notOk(tileset._getTile({x: 0, y: 0, z: 0}).isLoaded, '0-0-0 is not loaded');
+  expect(tileset._getTile({x: 0, y: 0, z: 1}).isLoaded, '0-0-1 is loaded').toBeTruthy();
+  expect(tileset._getTile({x: 0, y: 0, z: 0}).isLoaded, '0-0-0 is not loaded').toBeFalsy();
 
   for (const testCase of TEST_CASES) {
     const selectedTiles = testCase.selectedTiles.map(id => tileMap.get(id));
@@ -435,17 +417,14 @@ test('Tileset2D#traversal', async t => {
       tileset.updateTileStates();
       const error = validateVisibility(strategy, selectedTiles, tileset._cache);
       if (error) {
-        t.fail(`${strategy}: ${error}`);
+        throw new Error(`${strategy}: ${error}`);
       } else {
-        t.pass(`${strategy}: correctly updated tile visibilities`);
       }
     }
   }
-
-  t.end();
 });
 
-test('Tileset2D#isTileVisible', async t => {
+test('Tileset2D#isTileVisible', async () => {
   const cullRect = {x: 50, y: 48, width: 100, height: 1};
 
   const testCases = [
@@ -528,7 +507,7 @@ test('Tileset2D#isTileVisible', async t => {
   });
 
   for (const testCase of testCases) {
-    t.comment(testCase.title);
+    console.log(testCase.title);
     viewport = testCase.viewport;
     options = {zRange: testCase.zRange};
 
@@ -537,18 +516,15 @@ test('Tileset2D#isTileVisible', async t => {
 
     for (const {id, cullRect, result} of testCase.checks) {
       const tile = tileset._cache.get(id);
-      t.is(
+      expect(
         tileset.isTileVisible(tile, cullRect),
-        result,
         `isTileVisible ${cullRect ? 'with cullRect ' : ''}returns correct value for ${id}`
-      );
+      ).toBe(result);
     }
   }
-
-  t.end();
 });
 
-test('Tileset2D#isTileVisibleWithModelMatrix', async t => {
+test('Tileset2D#isTileVisibleWithModelMatrix', async () => {
   const cullRect = {x: 0, y: 0, width: 256, height: 256};
   const identityMatrix = new Matrix4();
   const translationMatrix = new Matrix4().translate([512, 0, 0]);
@@ -617,7 +593,7 @@ test('Tileset2D#isTileVisibleWithModelMatrix', async t => {
   });
 
   for (const testCase of testCases) {
-    t.comment(testCase.title);
+    console.log(testCase.title);
     viewport = testCase.viewport;
     options = {modelMatrix: testCase.modelMatrix};
 
@@ -626,15 +602,12 @@ test('Tileset2D#isTileVisibleWithModelMatrix', async t => {
 
     for (const {id, cullRect, modelMatrix, result} of testCase.checks) {
       const tile = tileset._cache.get(id);
-      t.is(
+      expect(
         tileset.isTileVisible(tile, cullRect, modelMatrix),
-        result,
         `isTileVisible with modelMatrix ${cullRect ? 'with cullRect ' : ''}returns correct value for ${id}`
-      );
+      ).toBe(result);
     }
   }
-
-  t.end();
 });
 
 function validateVisibility(strategy, selectedTiles, tiles) {

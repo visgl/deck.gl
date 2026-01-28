@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {flatten, fillArray} from '@deck.gl/core/utils/flatten';
 
 const FLATTEN_TEST_CASES = [
@@ -47,19 +47,17 @@ const FILL_ARRAY_TEST_CASES = [
   }
 ];
 
-test('flatten', t => {
+test('flatten', () => {
   for (const tc of FLATTEN_TEST_CASES) {
-    t.comment(tc.title + JSON.stringify(tc.opts));
+    console.log(tc.title + JSON.stringify(tc.opts));
     const result = tc.opts ? flatten(tc.argument, tc.opts) : flatten(tc.argument);
-    t.deepEqual(result, tc.result, `flatten ${tc.title} returned expected result`);
+    expect(result, `flatten ${tc.title} returned expected result`).toEqual(tc.result);
   }
-  t.end();
 });
 
-test('fillArray', t => {
+test('fillArray', () => {
   for (const tc of FILL_ARRAY_TEST_CASES) {
     const result = fillArray(tc.arguments);
-    t.deepEqual(result, tc.result, `fillArray ${tc.title} returned expected result`);
+    expect(result, `fillArray ${tc.title} returned expected result`).toEqual(tc.result);
   }
-  t.end();
 });

@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line
 /* global document, window, global */
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {CompositeLayer} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -16,14 +16,13 @@ class DemoCompositeLayer extends CompositeLayer {
   }
 }
 
-test('jupyter-widget: dynamic-registration', t => {
-  t.test('null customLibrares', t0 => {
+test('jupyter-widget: dynamic-registration', () => {
+  t.describe('null customLibrares', () => {
     const returnValue = addCustomLibraries(null, () => {});
-    t0.ok(!returnValue, 'No custom libraries returns null');
-    t0.end();
+    expect(!returnValue, 'No custom libraries returns null').toBeTruthy();
   });
 
-  t.test('addCustomLibraries', t1 => {
+  t.describe('addCustomLibraries', () => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
 
@@ -31,10 +30,12 @@ test('jupyter-widget: dynamic-registration', t => {
       const props = jsonConverter.convert({
         layers: [{'@@type': 'DemoCompositeLayer', data: []}]
       });
-      t1.ok(props.layers[0] instanceof DemoCompositeLayer, 'Should add new class to the converter');
+      expect(
+        props.layers[0] instanceof DemoCompositeLayer,
+        'Should add new class to the converter'
+      ).toBeTruthy();
       // cleanup
       delete window[TEST_LIBRARY_NAME];
-      t1.end();
     };
 
     addCustomLibraries(

@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils';
 import {sleep} from './async-iterator-test-utils';
 
-test('Deck#constructor', t => {
+test('Deck#constructor', () => {
   const callbacks = {
     onWebGLInitialized: 0,
     onBeforeRender: 0,
@@ -35,50 +35,44 @@ test('Deck#constructor', t => {
     onResize: () => callbacks.onResize++,
 
     onAfterRender: () => {
-      t.is(callbacks.onWebGLInitialized, 1, 'onWebGLInitialized called');
-      t.is(callbacks.onLoad, 1, 'onLoad called');
-      t.is(callbacks.onResize, 1, 'onResize called');
-      t.is(callbacks.onBeforeRender, 1, 'first draw');
+      expect(callbacks.onWebGLInitialized, 'onWebGLInitialized called').toBe(1);
+      expect(callbacks.onLoad, 'onLoad called').toBe(1);
+      expect(callbacks.onResize, 'onResize called').toBe(1);
+      expect(callbacks.onBeforeRender, 'first draw').toBe(1);
 
       deck.finalize();
-      t.notOk(deck.layerManager, 'layerManager is finalized');
-      t.notOk(deck.viewManager, 'viewManager is finalized');
-      t.notOk(deck.deckRenderer, 'deckRenderer is finalized');
-      t.end();
+      expect(deck.layerManager, 'layerManager is finalized').toBeFalsy();
+      expect(deck.viewManager, 'viewManager is finalized').toBeFalsy();
+      expect(deck.deckRenderer, 'deckRenderer is finalized').toBeFalsy();
     },
 
     onLoad: () => {
       callbacks.onLoad++;
 
-      t.ok(deck.layerManager, 'layerManager initialized');
-      t.ok(deck.viewManager, 'viewManager initialized');
-      t.ok(deck.deckRenderer, 'deckRenderer initialized');
+      expect(deck.layerManager, 'layerManager initialized').toBeTruthy();
+      expect(deck.viewManager, 'viewManager initialized').toBeTruthy();
+      expect(deck.deckRenderer, 'deckRenderer initialized').toBeTruthy();
     }
   });
-
-  t.pass('Deck constructor did not throw');
 });
 
-test('Deck#abort', async t => {
+test('Deck#abort', async () => {
   const deck = new Deck({
     device,
     width: 1,
     height: 1,
     viewState: {longitude: 0, latitude: 0, zoom: 0},
     onError: err => {
-      t.notOk(err, 'Deck encounters error');
+      expect(err, 'Deck encounters error').toBeFalsy();
     }
   });
 
   deck.finalize();
 
   await sleep(50);
-
-  t.pass('Deck initialization aborted');
-  t.end();
 });
 
-test('Deck#no views', t => {
+test('Deck#no views', () => {
   const deck = new Deck({
     device,
     width: 1,
@@ -89,16 +83,13 @@ test('Deck#no views', t => {
     layers: [],
 
     onAfterRender: () => {
-      t.is(deck.deckRenderer.renderCount, 0, 'DeckRenderer did not render');
+      expect(deck.deckRenderer.renderCount, 'DeckRenderer did not render').toBe(0);
       deck.finalize();
-      t.end();
     }
   });
-
-  t.pass('Deck constructor did not throw');
 });
 
-test('Deck#rendering, picking, logging', t => {
+test('Deck#rendering, picking, logging', () => {
   // Test logging functionalities
   log.priority = 4;
 
@@ -123,23 +114,21 @@ test('Deck#rendering, picking, logging', t => {
 
     onAfterRender: () => {
       const info = deck.pickObject({x: 0, y: 0});
-      t.is(info && info.index, 1, 'Picked object');
+      expect(info && info.index, 'Picked object').toBe(1);
 
       let infos = deck.pickMultipleObjects({x: 0, y: 0});
-      t.is(infos.length, 2, 'Picked multiple objects');
+      expect(infos.length, 'Picked multiple objects').toBe(2);
 
       infos = deck.pickObjects({x: 0, y: 0, width: 1, height: 1});
-      t.is(infos.length, 1, 'Picked objects');
+      expect(infos.length, 'Picked objects').toBe(1);
 
       deck.finalize();
       log.priority = 0;
-
-      t.end();
     }
   });
 });
 
-test('Deck#auto view state', t => {
+test('Deck#auto view state', () => {
   let onViewStateChangeCalled = 0;
 
   const deck = new Deck({
@@ -174,44 +163,46 @@ test('Deck#auto view state', t => {
         viewId: 'default',
         viewState: {longitude: 0, latitude: 0, zoom: 11}
       });
-      t.is(onViewStateChangeCalled, 1, 'onViewStateChange is called');
-      t.is(deck.getViewports()[0].longitude, 0, 'default view state should not change');
+      expect(onViewStateChangeCalled, 'onViewStateChange is called').toBe(1);
+      expect(deck.getViewports()[0].longitude, 'default view state should not change').toBe(0);
 
       deck._onViewStateChange({
         viewId: 'map',
         viewState: {longitude: 1, latitude: 1, zoom: 11}
       });
-      t.is(onViewStateChangeCalled, 2, 'onViewStateChange is called');
-      t.is(deck.getViewports()[0].longitude, 0, 'default view state should not change');
-      t.is(deck.getViewports()[1].longitude, 1, 'map longitude is updated');
-      t.is(deck.getViewports()[1].zoom, 11, 'map zoom is updated');
-      t.is(deck.getViewports()[2].longitude, 1, 'minimap longitude is updated');
-      t.is(deck.getViewports()[2].zoom, 12, 'minimap zoom should not change');
+      expect(onViewStateChangeCalled, 'onViewStateChange is called').toBe(2);
+      expect(deck.getViewports()[0].longitude, 'default view state should not change').toBe(0);
+      expect(deck.getViewports()[1].longitude, 'map longitude is updated').toBe(1);
+      expect(deck.getViewports()[1].zoom, 'map zoom is updated').toBe(11);
+      expect(deck.getViewports()[2].longitude, 'minimap longitude is updated').toBe(1);
+      expect(deck.getViewports()[2].zoom, 'minimap zoom should not change').toBe(12);
 
       deck._onViewStateChange({
         viewId: 'minimap',
         viewState: {longitude: 2, latitude: 2, zoom: 12}
       });
-      t.is(onViewStateChangeCalled, 3, 'onViewStateChange is called');
-      t.is(deck.getViewports()[1].longitude, 1, 'map state should not change');
-      t.is(deck.getViewports()[2].longitude, 1, 'minimap state should not change');
+      expect(onViewStateChangeCalled, 'onViewStateChange is called').toBe(3);
+      expect(deck.getViewports()[1].longitude, 'map state should not change').toBe(1);
+      expect(deck.getViewports()[2].longitude, 'minimap state should not change').toBe(1);
 
       deck.setProps({viewState: {longitude: 3, latitude: 3, zoom: 12}});
       deck._onViewStateChange({
         viewId: 'map',
         viewState: {longitude: 1, latitude: 1, zoom: 11}
       });
-      t.is(deck.getViewports()[0].longitude, 3, 'external viewState should override internal');
-      t.is(deck.getViewports()[1].longitude, 3, 'external viewState should override internal');
+      expect(deck.getViewports()[0].longitude, 'external viewState should override internal').toBe(
+        3
+      );
+      expect(deck.getViewports()[1].longitude, 'external viewState should override internal').toBe(
+        3
+      );
 
       deck.finalize();
-
-      t.end();
     }
   });
 });
 
-test('Deck#resourceManager', async t => {
+test('Deck#resourceManager', async () => {
   const layer1 = new ScatterplotLayer({
     id: 'scatterplot-global-data',
     data: 'deck://pins',
@@ -256,33 +247,32 @@ test('Deck#resourceManager', async t => {
   await update();
   // @ts-expect-error Accessing private member
   const {resourceManager} = deck.layerManager;
-  t.is(layer1.getNumInstances(), 0, 'layer subscribes to global data resource');
-  t.ok(resourceManager.contains('cities.json'), 'data url is cached');
+  expect(layer1.getNumInstances(), 'layer subscribes to global data resource').toBe(0);
+  expect(resourceManager.contains('cities.json'), 'data url is cached').toBeTruthy();
 
   deck._addResources({
     pins: [{position: [1, 0, 0]}]
   });
   await update();
-  t.is(layer1.getNumInstances(), 1, 'layer subscribes to global data resource');
+  expect(layer1.getNumInstances(), 'layer subscribes to global data resource').toBe(1);
 
   deck._addResources({
     pins: [{position: [1, 0, 0]}, {position: [0, 2, 0]}]
   });
   await update();
-  t.is(layer1.getNumInstances(), 2, 'layer data is updated');
+  expect(layer1.getNumInstances(), 'layer data is updated').toBe(2);
 
   await update({layers: []});
   await sleep(300);
-  t.notOk(resourceManager.contains('cities.json'), 'cached data is purged');
+  expect(resourceManager.contains('cities.json'), 'cached data is purged').toBeFalsy();
 
   deck._removeResources(['pins']);
-  t.notOk(resourceManager.contains('pins'), 'data resource is removed');
+  expect(resourceManager.contains('pins'), 'data resource is removed').toBeFalsy();
 
   deck.finalize();
-  t.end();
 });
 
-test('Deck#props omitted are unchanged', async t => {
+test('Deck#props omitted are unchanged', async () => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',
     data: 'deck://pins',
@@ -308,18 +298,17 @@ test('Deck#props omitted are unchanged', async t => {
 
     onLoad: () => {
       const {widgets, layers} = deck.props;
-      t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets is set');
-      t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers is set');
+      expect(widgets && Array.isArray(widgets) && widgets.length, 'Widgets is set').toBe(1);
+      expect(layers && Array.isArray(layers) && layers.length, 'Layers is set').toBe(1);
 
       // Render deck a second time without changing widget or layer props.
       deck.setProps({
         onAfterRender: () => {
           const {widgets, layers} = deck.props;
-          t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets remain set');
-          t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers remain set');
+          expect(widgets && Array.isArray(widgets) && widgets.length, 'Widgets remain set').toBe(1);
+          expect(layers && Array.isArray(layers) && layers.length, 'Layers remain set').toBe(1);
 
           deck.finalize();
-          t.end();
         }
       });
     }

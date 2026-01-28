@@ -4,7 +4,7 @@
 
 // loaders.gl, MIT license
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
 import {load} from '@loaders.gl/core';
@@ -55,18 +55,17 @@ function delay(milliseconds) {
   });
 }
 
-test('ComponentState#imports', t => {
-  t.ok(ComponentState, 'ComponentState import ok');
-  t.end();
+test('ComponentState#imports', () => {
+  expect(ComponentState, 'ComponentState import ok').toBeTruthy();
 });
 
-test('ComponentState#finalize', async t => {
+test('ComponentState#finalize', async () => {
   const component = new TestComponent({});
   // @ts-expect-error
   component.internalState = new ComponentState(component);
   // @ts-expect-error
   const state = component.internalState;
-  t.is(state.component, component, 'state.component is present');
+  expect(state.component, 'state.component is present').toBe(component);
 
   const updateCallbackCalled = {};
   state.onAsyncPropUpdated = propName => {
@@ -81,124 +80,117 @@ test('ComponentState#finalize', async t => {
   });
   loadPromiseA.resolve([]);
   await delay(0);
-  t.ok(updateCallbackCalled['data'], 'onAsyncPropUpdated callback is called for data');
-  t.notOk(state.isAsyncPropLoading('A'), 'A is loaded');
+  expect(
+    updateCallbackCalled['data'],
+    'onAsyncPropUpdated callback is called for data'
+  ).toBeTruthy();
+  expect(state.isAsyncPropLoading('A'), 'A is loaded').toBeFalsy();
 
   state.finalize();
   loadPromiseB.resolve([]);
   await delay(0);
-  t.notOk(updateCallbackCalled['image'], 'onAsyncPropUpdated callback is not called for image');
+  expect(
+    updateCallbackCalled['image'],
+    'onAsyncPropUpdated callback is not called for image'
+  ).toBeFalsy();
 
-  t.notOk(state.component, 'state.component is dereferenced');
-
-  t.end();
+  expect(state.component, 'state.component is dereferenced').toBeFalsy();
 });
 
-test('ComponentState#synchronous async props', t => {
+test('ComponentState#synchronous async props', () => {
   const component = new Component();
   // @ts-expect-error
   component.internalState = new ComponentState(component);
   // @ts-expect-error
   const state = component.internalState;
-  t.ok(state, 'ComponentState construction ok');
+  expect(state, 'ComponentState construction ok').toBeTruthy();
 
-  t.equals(state.hasAsyncProp('data'), false, 'ComponentState.hasAsyncProp returned correct value');
-  state.setAsyncProps({data: []});
-  state.setAsyncProps({data: []});
-  t.equals(state.hasAsyncProp('data'), true, 'ComponentState.hasAsyncProp returned correct value');
-  t.deepEquals(
-    state.getAsyncProp('data'),
-    [],
-    'ComponentState.getAsyncProp returned correct value'
+  expect(state.hasAsyncProp('data'), 'ComponentState.hasAsyncProp returned correct value').toBe(
+    false
   );
-  t.end();
+  state.setAsyncProps({data: []});
+  state.setAsyncProps({data: []});
+  expect(state.hasAsyncProp('data'), 'ComponentState.hasAsyncProp returned correct value').toBe(
+    true
+  );
+  expect(state.getAsyncProp('data'), 'ComponentState.getAsyncProp returned correct value').toEqual(
+    []
+  );
 });
 
-test('ComponentState#asynchronous async props', async t => {
+test('ComponentState#asynchronous async props', async () => {
   const component = new Component();
   // @ts-expect-error
   component.internalState = new ComponentState(component);
   // @ts-expect-error
   const state = component.internalState;
-  t.ok(state, 'ComponentState construction ok');
+  expect(state, 'ComponentState construction ok').toBeTruthy();
 
   const loadPromise1 = makePromise();
   const loadPromise2 = makePromise();
   const loadPromise3 = makePromise();
 
-  t.equals(state.hasAsyncProp('data'), false, 'ComponentState.hasAsyncProp returned correct value');
-  state.setAsyncProps({data: loadPromise1});
-  t.equals(state.hasAsyncProp('data'), true, 'ComponentState.hasAsyncProp returned correct value');
-  state.setAsyncProps({data: loadPromise1});
-  t.equals(
-    state.isAsyncPropLoading('data'),
-    true,
-    'ComponentState.isAsyncPropLoading returned correct value'
+  expect(state.hasAsyncProp('data'), 'ComponentState.hasAsyncProp returned correct value').toBe(
+    false
   );
+  state.setAsyncProps({data: loadPromise1});
+  expect(state.hasAsyncProp('data'), 'ComponentState.hasAsyncProp returned correct value').toBe(
+    true
+  );
+  state.setAsyncProps({data: loadPromise1});
+  expect(
+    state.isAsyncPropLoading('data'),
+    'ComponentState.isAsyncPropLoading returned correct value'
+  ).toBe(true);
   loadPromise1.resolve([1]);
-  t.equals(
+  expect(
     state.isAsyncPropLoading('data'),
-    true,
     'ComponentState.isAsyncPropLoading returned correct value'
-  );
+  ).toBe(true);
 
   await delay(0);
 
-  t.equals(
+  expect(
     state.isAsyncPropLoading('data'),
-    false,
     'ComponentState.isAsyncPropLoading returned correct value'
-  );
-  t.deepEquals(
-    state.getAsyncProp('data'),
-    [1],
-    'ComponentState.getAsyncProp returned correct value'
-  );
+  ).toBe(false);
+  expect(state.getAsyncProp('data'), 'ComponentState.getAsyncProp returned correct value').toEqual([
+    1
+  ]);
   state.setAsyncProps({data: loadPromise2});
   state.setAsyncProps({data: loadPromise3});
   loadPromise3.resolve([3]);
-  t.equals(
+  expect(
     state.isAsyncPropLoading('data'),
-    true,
     'ComponentState.isAsyncPropLoading returned correct value'
-  );
-  t.deepEquals(
-    state.getAsyncProp('data'),
-    [1],
-    'ComponentState.getAsyncProp returned correct value'
-  );
+  ).toBe(true);
+  expect(state.getAsyncProp('data'), 'ComponentState.getAsyncProp returned correct value').toEqual([
+    1
+  ]);
 
   await delay(0);
 
-  t.equals(
+  expect(
     state.isAsyncPropLoading('data'),
-    false,
     'ComponentState.isAsyncPropLoading returned correct value'
-  );
-  t.deepEquals(
-    state.getAsyncProp('data'),
-    [3],
-    'ComponentState.getAsyncProp returned correct value'
-  );
+  ).toBe(false);
+  expect(state.getAsyncProp('data'), 'ComponentState.getAsyncProp returned correct value').toEqual([
+    3
+  ]);
   loadPromise2.resolve([2]);
 
   await delay(0);
 
-  t.equals(
+  expect(
     state.isAsyncPropLoading('data'),
-    false,
     'ComponentState.isAsyncPropLoading returned correct value'
-  );
-  t.deepEquals(
-    state.getAsyncProp('data'),
-    [3],
-    'ComponentState.getAsyncProp returned correct value'
-  );
-
-  t.end();
+  ).toBe(false);
+  expect(state.getAsyncProp('data'), 'ComponentState.getAsyncProp returned correct value').toEqual([
+    3
+  ]);
 });
 
-test('ComponentState#async props with transform', async t => {
+test('ComponentState#async props with transform', async () => {
   const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];
@@ -236,24 +228,24 @@ test('ComponentState#async props with transform', async t => {
 
   let image = component.props.image;
   let data = component.props.data;
-  t.deepEqual(data, [0, 1], 'Synchronous value for data should be transformed');
-  t.ok(image.handle, 'Synchronous value for image should be transformed');
+  expect(data, 'Synchronous value for data should be transformed').toEqual([0, 1]);
+  expect(image.handle, 'Synchronous value for image should be transformed').toBeTruthy();
 
   component = makeComponent({
     data: testData,
     dataTransform: d => d.slice(0, 2),
     image: testImage
   });
-  t.is(component.props.data, data, 'Unchanged data value is not transformed again');
-  t.is(component.props.image, image, 'Unchanged image value is not transformed again');
+  expect(component.props.data, 'Unchanged data value is not transformed again').toBe(data);
+  expect(component.props.image, 'Unchanged image value is not transformed again').toBe(image);
 
   component = makeComponent({
     data,
     dataTransform: d => d.slice(0, 2),
     image
   });
-  t.is(component.props.data, data, 'Unchanged data value is not transformed again');
-  t.is(component.props.image, image, 'Unchanged image value is not transformed again');
+  expect(component.props.data, 'Unchanged data value is not transformed again').toBe(data);
+  expect(component.props.image, 'Unchanged image value is not transformed again').toBe(image);
 
   // Async value for async prop
   const testDataAsync = Promise.resolve(testData);
@@ -266,12 +258,12 @@ test('ComponentState#async props with transform', async t => {
 
   await testDataAsync;
   data = component.props.data;
-  t.deepEqual(data, [0, 1], 'Async value for data should be transformed');
+  expect(data, 'Async value for data should be transformed').toEqual([0, 1]);
 
   await testImageAsync;
-  t.ok(image.destroyed, 'Last texture is deleted');
+  expect(image.destroyed, 'Last texture is deleted').toBeTruthy();
   image = component.props.image;
-  t.ok(image, 'Async value for image should be transformed');
+  expect(image, 'Async value for image should be transformed').toBeTruthy();
 
   const loadDataAsync = load('./test/data/bart-stations.csv', [CSVLoader]);
   component = makeComponent({
@@ -280,10 +272,10 @@ test('ComponentState#async props with transform', async t => {
   });
 
   await loadDataAsync;
-  t.is(component.props.image, image, 'Unchanged image value is not transformed again');
+  expect(component.props.image, 'Unchanged image value is not transformed again').toBe(image);
   data = component.props.data;
-  t.ok(Array.isArray(data), 'loaders.gl table object is properly transformed');
+  expect(Array.isArray(data), 'loaders.gl table object is properly transformed').toBeTruthy();
 
   state.finalize();
-  t.ok(image.destroyed, 'Texture is deleted on finalization');
+  expect(image.destroyed, 'Texture is deleted on finalization').toBeTruthy();
 });

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 
-test('CollisionFilterExtension', t => {
+test('CollisionFilterExtension', () => {
   const props = {
     id: 'collision-filter-extension-test',
     data: [],
@@ -27,10 +27,12 @@ test('CollisionFilterExtension', t => {
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
         const attributes = layer.getAttributeManager().getAttributes();
-        t.ok(uniforms.enabled, 'enabled in uniforms');
-        t.equal(uniforms.sort, false, 'sort in disabled when reading');
-        t.equal(uniforms.collision_texture, 'COLLISION_TEXTURE', 'collision_texture correctly set');
-        t.ok(attributes.collisionPriorities, 'collisionPriorities attribute added');
+        expect(uniforms.enabled, 'enabled in uniforms').toBeTruthy();
+        expect(uniforms.sort, 'sort in disabled when reading').toBe(false);
+        expect(uniforms.collision_texture, 'collision_texture correctly set').toBe(
+          'COLLISION_TEXTURE'
+        );
+        expect(attributes.collisionPriorities, 'collisionPriorities attribute added').toBeTruthy();
       }
     },
     {
@@ -39,12 +41,10 @@ test('CollisionFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.equal(uniforms.enabled, false, 'enabled is disabled');
-        t.equal(uniforms.sort, false, 'sort in disabled when reading');
-        t.equal(
-          uniforms.collision_texture,
-          'DUMMY_TEXTURE',
-          'collision_texture set to dummy texture'
+        expect(uniforms.enabled, 'enabled is disabled').toBe(false);
+        expect(uniforms.sort, 'sort in disabled when reading').toBe(false);
+        expect(uniforms.collision_texture, 'collision_texture set to dummy texture').toBe(
+          'DUMMY_TEXTURE'
         );
       }
     },
@@ -55,13 +55,12 @@ test('CollisionFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.ok(uniforms.enabled, 'enabled in uniforms');
-        t.equal(uniforms.sort, true, 'sort enabled when drawing');
-        t.equal(
+        expect(uniforms.enabled, 'enabled in uniforms').toBeTruthy();
+        expect(uniforms.sort, 'sort enabled when drawing').toBe(true);
+        expect(
           uniforms.collision_texture,
-          'DUMMY_TEXTURE',
           'collision_texture set to dummy texture when drawing'
-        );
+        ).toBe('DUMMY_TEXTURE');
       }
     },
     {
@@ -70,13 +69,11 @@ test('CollisionFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.ok(uniforms.enabled, 'enabled in uniforms');
-        t.ok(uniforms.sort, 'sort enabled when getCollisionPriority set');
+        expect(uniforms.enabled, 'enabled in uniforms').toBeTruthy();
+        expect(uniforms.sort, 'sort enabled when getCollisionPriority set').toBeTruthy();
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

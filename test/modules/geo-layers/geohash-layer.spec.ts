@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GeohashLayer} from '@deck.gl/geo-layers';
 import {getGeohashPolygon, getGeohashBounds} from '@deck.gl/geo-layers/geohash-layer/geohash-utils';
@@ -22,49 +22,41 @@ const TEST_DATA = [
   }
 ];
 
-test('GeohashLayer', t => {
+test('GeohashLayer', () => {
   const testCases = generateLayerTests({
     Layer: GeohashLayer,
     sampleProps: {
       data: TEST_DATA,
       getGeohash: d => d.geohash
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      t.ok(subLayer, 'subLayers rendered');
+      expect(subLayer, 'subLayers rendered').toBeTruthy();
 
       if (layer.props.data.length) {
-        t.equal(
-          subLayer.state.paths.length,
-          TEST_DATA.length,
-          'should update PolygonLayers state.paths'
+        expect(subLayer.state.paths.length, 'should update PolygonLayers state.paths').toBe(
+          TEST_DATA.length
         );
       }
     }
   });
 
-  testLayer({Layer: GeohashLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GeohashLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('GeohashLayer#getGeohashBounds', t => {
+test('GeohashLayer#getGeohashBounds', () => {
   for (const {geohash, expectedBounds} of TEST_DATA) {
     const bounds = getGeohashBounds(geohash);
-    t.deepEquals(bounds, expectedBounds, 'Geohash bounds calculated');
+    expect(bounds, 'Geohash bounds calculated').toEqual(expectedBounds);
   }
-
-  t.end();
 });
 
-test('GeohashLayer#getGeohashPolygon', t => {
+test('GeohashLayer#getGeohashPolygon', () => {
   for (const {geohash} of TEST_DATA) {
     const polygon = getGeohashPolygon(geohash);
-    t.ok(polygon instanceof Array, 'polygon is flat array');
-    t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Array, 'polygon is flat array').toBeTruthy();
+    expect(polygon.length / 2 - 1, 'polygon has 4 sides').toBe(4);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
   }
-
-  t.end();
 });

@@ -2,26 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import ShadowPass from '@deck.gl/core/passes/shadow-pass';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils';
 
-test('ShadowPass#constructor and delete', t => {
+test('ShadowPass#constructor and delete', () => {
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
 
-  t.ok(shadowPass, `ShadowPass is constructed`);
-  t.ok(shadowPass.fbo, `ShadowPass creates fbo`);
+  expect(shadowPass, `ShadowPass is constructed`).toBeTruthy();
+  expect(shadowPass.fbo, `ShadowPass creates fbo`).toBeTruthy();
 
   shadowPass.delete();
 
-  t.notOk(shadowPass.fbo, `ShadowPass deletes fbo`);
-  t.end();
+  expect(shadowPass.fbo, `ShadowPass deletes fbo`).toBeFalsy();
 });
 
-test('ShadowPass#render', t => {
+test('ShadowPass#render', () => {
   const viewport = new MapView().makeViewport({
     width: 100,
     height: 100,
@@ -50,13 +49,12 @@ test('ShadowPass#render', t => {
 
   // These will likely fail locally due to DPR (200, 200)
   const shadowMap = shadowPass.fbo.colorAttachments[0].texture;
-  t.equal(shadowMap.width, 100, `ShadowPass resize shadow map width`);
-  t.equal(shadowMap.height, 100, `ShadowPass resize shadow map height`);
+  expect(shadowMap.width, `ShadowPass resize shadow map width`).toBe(100);
+  expect(shadowMap.height, `ShadowPass resize shadow map height`).toBe(100);
   shadowPass.delete();
-  t.end();
 });
 
-test('ShadowPass#getShaderModuleProps', t => {
+test('ShadowPass#getShaderModuleProps', () => {
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
     getPolygon: f => f,
@@ -68,7 +66,6 @@ test('ShadowPass#getShaderModuleProps', t => {
     project: {}
   });
 
-  t.equal(shaderModuleProps.shadow.drawToShadowMap, true, `ShadowPass has module props`);
+  expect(shaderModuleProps.shadow.drawToShadowMap, `ShadowPass has module props`).toBe(true);
   shadowPass.delete();
-  t.end();
 });

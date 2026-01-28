@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager} from '@deck.gl/core';
@@ -27,15 +27,14 @@ function makeMockContext(device, layerManager) {
   };
 }
 
-test('LightingEffect#constructor', t => {
+test('LightingEffect#constructor', () => {
   const lightingEffect = new LightingEffect();
-  t.ok(lightingEffect, 'Lighting effect created');
-  t.ok(lightingEffect.ambientLight, 'Default ambient light created');
-  t.equal(lightingEffect.directionalLights.length, 2, 'Default directional lights created');
-  t.end();
+  expect(lightingEffect, 'Lighting effect created').toBeTruthy();
+  expect(lightingEffect.ambientLight, 'Default ambient light created').toBeTruthy();
+  expect(lightingEffect.directionalLights.length, 'Default directional lights created').toBe(2);
 });
 
-test('LightingEffect#getShaderModuleProps', t => {
+test('LightingEffect#getShaderModuleProps', () => {
   const cameraLight = new CameraLight();
   const pointLight = new PointLight();
   const lightingEffect = new LightingEffect({cameraLight, pointLight});
@@ -63,22 +62,21 @@ test('LightingEffect#getShaderModuleProps', t => {
   });
 
   const {lighting} = lightingEffect.getShaderModuleProps(layer);
-  t.is(lighting.pointLights.length, 2, 'Lights are exported');
-  t.ok(
+  expect(lighting.pointLights.length, 'Lights are exported').toBe(2);
+  expect(
     equals(lighting.pointLights[0].position, [0, 0, 0.018310546875]),
     'Camera light projection is ok'
-  );
-  t.deepEqual(lighting.pointLights[1].color, [255, 0, 0], 'point light color is ok');
+  ).toBeTruthy();
+  expect(lighting.pointLights[1].color, 'point light color is ok').toEqual([255, 0, 0]);
 
-  t.equal(lighting.ambientLight, undefined, 'Lighting effect getGLParameters is ok');
-  t.deepEqual(lighting.directionalLights, [], 'Lighting effect getGLParameters is ok');
+  expect(lighting.ambientLight, 'Lighting effect getGLParameters is ok').toBe(undefined);
+  expect(lighting.directionalLights, 'Lighting effect getGLParameters is ok').toEqual([]);
 
   lightingEffect.cleanup(effectContext);
   layerManager.finalize();
-  t.end();
 });
 
-test('LightingEffect#preRender, cleanup', t => {
+test('LightingEffect#preRender, cleanup', () => {
   const dirLight0 = new DirectionalLight({
     color: [255, 255, 255],
     intensity: 1.0,
@@ -116,12 +114,11 @@ test('LightingEffect#preRender, cleanup', t => {
     pixelRatio: 1
   });
 
-  t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect creates shadow passes');
-  t.ok(lightingEffect.dummyShadowMap, 'LightingEffect creates dummy shadow map');
+  expect(lightingEffect.shadowPasses.length, 'LightingEffect creates shadow passes').toBe(2);
+  expect(lightingEffect.dummyShadowMap, 'LightingEffect creates dummy shadow map').toBeTruthy();
 
   lightingEffect.cleanup(effectContext);
   layerManager.finalize();
-  t.equal(lightingEffect.shadowPasses.length, 0, 'LightingEffect creates shadow passes');
-  t.notOk(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map');
-  t.end();
+  expect(lightingEffect.shadowPasses.length, 'LightingEffect creates shadow passes').toBe(0);
+  expect(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map').toBeFalsy();
 });

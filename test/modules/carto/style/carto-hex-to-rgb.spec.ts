@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect, describe} from 'vitest';
 import {hexToRgb} from '@deck.gl/carto/style/palette';
 
 const OK_TEST_CASES = [
@@ -32,19 +32,18 @@ const ERROR_TEST_CASES = [
   }
 ];
 
-test('hexToRgb#tests', t => {
+test('hexToRgb#tests', () => {
   for (const tc of OK_TEST_CASES) {
     const func = hexToRgb(tc.argument);
-    t.deepEqual(func, tc.result, `${tc.title} returned expected result`);
+    expect(func, `${tc.title} returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
-test('hexToRgb#invalidData', t => {
+test('hexToRgb#invalidData', () => {
   for (const tc of ERROR_TEST_CASES) {
-    t.throws(() => hexToRgb(tc.argument), `throws on invalid hexadecimal color ${tc.argument}`);
+    expect(
+      () => hexToRgb(tc.argument),
+      `throws on invalid hexadecimal color ${tc.argument}`
+    ).toThrow();
   }
-
-  t.end();
 });

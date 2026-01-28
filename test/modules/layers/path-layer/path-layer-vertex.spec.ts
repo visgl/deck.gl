@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {device} from '@deck.gl/test-utils';
@@ -10,10 +10,9 @@ import {picking, project32} from '@deck.gl/core';
 import {Transform} from '@luma.gl/engine';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';
 
-test('path-layer-vertex#flipIfTrue', t => {
+test('path-layer-vertex#flipIfTrue', () => {
   if (!Transform.isSupported(device)) {
-    t.comment('Transform not supported skipping the test');
-    t.end();
+    console.log('Transform not supported skipping the test');
     return;
   }
 
@@ -41,6 +40,5 @@ out float result;
   });
   transform.run();
   const result = transform.getData({varyingName: 'result'});
-  t.deepEqual(result, expectedResult, 'flipIfTrue: should return correct value');
-  t.end();
+  expect(result, 'flipIfTrue: should return correct value').toEqual(expectedResult);
 });

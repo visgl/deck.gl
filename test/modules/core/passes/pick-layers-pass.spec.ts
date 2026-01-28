@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device, getLayerUniforms} from '@deck.gl/test-utils';
 
-test('PickLayersPass#drawPickingBuffer', t => {
+test('PickLayersPass#drawPickingBuffer', () => {
   const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
   // Resize it to current canvas size (this is a noop if size hasn't changed)
@@ -42,12 +42,9 @@ test('PickLayersPass#drawPickingBuffer', t => {
 
   const subLayers = layer.getSubLayers();
 
-  t.ok(`PickLayersPass rendered`);
-  t.equal(
+  expect(`PickLayersPass rendered`).toBeTruthy();
+  expect(
     getLayerUniforms(subLayers[0], 'lighting').enabled,
-    0,
     `PickLayersPass lighting disabled correctly`
-  );
-
-  t.end();
+  ).toBe(0);
 });

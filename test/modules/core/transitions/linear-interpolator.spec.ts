@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import LinearInterpolator from '@deck.gl/core/transitions/linear-interpolator';
 
 const TEST_CASES = [
@@ -52,32 +52,28 @@ const TEST_CASES = [
   }
 ];
 
-test('LinearInterpolator#constructor', t => {
+test('LinearInterpolator#constructor', () => {
   const interpolator = new LinearInterpolator(['width', 'height']);
-  t.ok(interpolator, 'constructor does not throw error');
-  t.deepEqual(interpolator._propsToCompare, ['width', 'height'], '_propsToCompare is set');
-  t.deepEqual(interpolator._propsToExtract, ['width', 'height'], '_propsToExtract is set');
-  t.deepEqual(interpolator._requiredProps, ['width', 'height'], '_requiredProps is set');
-
-  t.end();
+  expect(interpolator, 'constructor does not throw error').toBeTruthy();
+  expect(interpolator._propsToCompare, '_propsToCompare is set').toEqual(['width', 'height']);
+  expect(interpolator._propsToExtract, '_propsToExtract is set').toEqual(['width', 'height']);
+  expect(interpolator._requiredProps, '_requiredProps is set').toEqual(['width', 'height']);
 });
 
-test('LinearInterpolator#initializeProps', t => {
+test('LinearInterpolator#initializeProps', () => {
   TEST_CASES.forEach(testCase => {
     const interpolator = new LinearInterpolator(testCase.transitionProps);
     const getResult = () => interpolator.initializeProps(testCase.startProps, testCase.endProps);
 
     if (testCase.shouldThrow) {
-      t.throws(getResult, testCase.title);
+      expect(getResult, testCase.title).toThrow();
     } else {
-      t.deepEqual(getResult(), testCase.expect, testCase.title);
+      expect(getResult(), testCase.title).toEqual(testCase.expect);
     }
   });
-
-  t.end();
 });
 
-test('LinearInterpolator#interpolateProps', t => {
+test('LinearInterpolator#interpolateProps', () => {
   TEST_CASES.filter(testCase => testCase.transition).forEach(testCase => {
     const interpolator = new LinearInterpolator(testCase.transitionProps);
     Object.keys(testCase.transition).forEach(time => {
@@ -86,9 +82,7 @@ test('LinearInterpolator#interpolateProps', t => {
         testCase.expect.end,
         Number(time)
       );
-      t.deepEqual(propsInTransition, testCase.transition[time], time);
+      expect(propsInTransition, time).toEqual(testCase.transition[time]);
     });
   });
-
-  t.end();
 });

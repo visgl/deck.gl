@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrbitViewport, project} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
@@ -80,91 +80,84 @@ function getUniformsError(uniforms, formats) {
   return null;
 }
 
-test('project#getUniforms', t => {
+test('project#getUniforms', () => {
   let uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.map});
-  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(uniforms.center, [0, 0, 0, 0], 'Returned zero projection center');
+  expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
+  expect(uniforms.center, 'Returned zero projection center').toEqual([0, 0, 0, 0]);
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.map,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
-  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(uniforms.center, [0, 0, 0, 0], 'Returned zero projection center');
+  expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
+  expect(uniforms.center, 'Returned zero projection center').toEqual([0, 0, 0, 0]);
 
   uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
-  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.ok(
+  expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
+  expect(
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
-  );
-  t.ok(
+  ).toBeTruthy();
+  expect(
     Math.abs(uniforms.center[0]) < EPSILON && Math.abs(uniforms.center[1]) < EPSILON,
     'project center at center of clipspace'
-  );
-  t.deepEqual(
-    uniforms.coordinateOrigin,
-    [-122.42694091796875, 37.75153732299805, 0],
-    'Returned shader coordinate origin'
-  );
-  t.ok(
+  ).toBeTruthy();
+  expect(uniforms.coordinateOrigin, 'Returned shader coordinate origin').toEqual([
+    -122.42694091796875, 37.75153732299805, 0
+  ]);
+  expect(
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
-  );
+  ).toBeTruthy();
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: Object.freeze([-122.4, 37.7])
   });
-  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.ok(
+  expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
+  expect(
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
-  );
+  ).toBeTruthy();
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
-  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.ok(
+  expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
+  expect(
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
-  );
+  ).toBeTruthy();
   // CARTESIAN + WEB_MERCATOR_AUTO_OFFSET is rounded in the common space
-  t.ok(
+  expect(
     Math.abs(uniforms.center[0]) < EPSILON * 10 && Math.abs(uniforms.center[1]) < EPSILON * 10,
     'project center at center of clipspace'
-  );
-  t.ok(
+  ).toBeTruthy();
+  expect(
     uniforms.commonUnitsPerWorldUnit[0] === 1 && uniforms.commonUnitsPerWorldUnit[1] === 1,
     'Returned correct distanceScales'
-  );
+  ).toBeTruthy();
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.infoVis,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
-  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(
-    uniforms.coordinateOrigin,
-    [10.285714149475098, -3.1415927410125732, 0],
-    'Returned shader coordinate origin'
-  );
-  t.ok(
+  expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
+  expect(uniforms.coordinateOrigin, 'Returned shader coordinate origin').toEqual([
+    10.285714149475098, -3.1415927410125732, 0
+  ]);
+  expect(
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('project64#getUniforms', t => {
+test('project64#getUniforms', () => {
   const viewport = TEST_VIEWPORTS.map;
   const uniforms = project.getUniforms({viewport});
   const uniforms64 = project64.getUniforms({viewport}, uniforms);
 
-  t.notOk(getUniformsError(uniforms64, UNIFORMS_64), 'Uniforms validated');
-  t.end();
+  expect(getUniformsError(uniforms64, UNIFORMS_64), 'Uniforms validated').toBeFalsy();
 });

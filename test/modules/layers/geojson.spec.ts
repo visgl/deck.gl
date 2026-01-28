@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {
   getGeojsonFeatures,
   separateGeojsonFeatures,
@@ -351,26 +351,27 @@ function unwrapSourceFeatureIndex(feature) {
   return feature._index;
 }
 
-test('geojson#import', t => {
-  t.ok(typeof getGeojsonFeatures === 'function', 'getGeojsonFeatures imported OK');
-  t.ok(typeof separateGeojsonFeatures === 'function', 'separateGeojsonFeatures imported OK');
-  t.end();
+test('geojson#import', () => {
+  expect(typeof getGeojsonFeatures === 'function', 'getGeojsonFeatures imported OK').toBeTruthy();
+  expect(
+    typeof separateGeojsonFeatures === 'function',
+    'separateGeojsonFeatures imported OK'
+  ).toBeTruthy();
 });
 
-test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
+test('geojson#getGeojsonFeatures, separateGeojsonFeatures', () => {
   for (const tc of TEST_CASES) {
     if (tc.error) {
-      t.throws(
-        () => {
-          const featureArray = getGeojsonFeatures(tc.argument);
-          separateGeojsonFeatures(featureArray, wrapSourceFeature);
-        },
-        tc.error,
-        `separateGeojsonFeatures ${tc.title} throws error`
-      );
+      expect(() => {
+        const featureArray = getGeojsonFeatures(tc.argument);
+        separateGeojsonFeatures(featureArray, wrapSourceFeature);
+      }, tc.error).toThrow();
     } else {
       const featureArray = getGeojsonFeatures(tc.argument);
-      t.ok(Array.isArray(featureArray), `getGeojsonFeatures ${tc.title} returned array`);
+      expect(
+        Array.isArray(featureArray),
+        `getGeojsonFeatures ${tc.title} returned array`
+      ).toBeTruthy();
 
       const result = separateGeojsonFeatures(featureArray, wrapSourceFeature);
       const actual = {
@@ -391,14 +392,11 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
           unwrapSourceFeatureIndex(f)
         )
       };
-      t.deepEquals(
-        actual,
-        tc.expected,
-        `separateGeojsonFeatures ${tc.title} returned expected result`
+      expect(actual, `separateGeojsonFeatures ${tc.title} returned expected result`).toEqual(
+        tc.expected
       );
     }
   }
-  t.end();
 });
 
 const TEST_GEOMETRIES = [
@@ -448,14 +446,11 @@ const TEST_GEOMETRIES = [
   }
 ];
 
-test('validateGeometry', t => {
+test('validateGeometry', () => {
   for (const testCase of TEST_GEOMETRIES) {
-    t.is(
+    expect(
       Boolean(validateGeometry(testCase.argument.type, testCase.argument.coordinates)),
-      testCase.isValid,
       'validateGeometry returns correct result'
-    );
+    ).toBe(testCase.isValid);
   }
-
-  t.end();
 });

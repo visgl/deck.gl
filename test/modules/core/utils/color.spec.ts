@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import color from '@deck.gl/core/utils/color';
 const {parseColor, applyOpacity} = color;
 
@@ -29,26 +29,23 @@ const TEST_CASES = [
   }
 ];
 
-test('color#parseColor', t => {
+test('color#parseColor', () => {
   for (const tc of TEST_CASES) {
     const arg = tc.argument.slice();
     const result = parseColor(arg);
-    t.deepEqual(result, tc.result, `parseColor ${tc.title} returned expected result`);
+    expect(result, `parseColor ${tc.title} returned expected result`).toEqual(tc.result);
     const target = [];
     parseColor(arg, target);
-    t.deepEqual(target, tc.result, `parseColor ${tc.title} returned expected result`);
-    t.deepEqual(arg, tc.argument, `parseColor ${tc.title} did not mutate input`);
+    expect(target, `parseColor ${tc.title} returned expected result`).toEqual(tc.result);
+    expect(arg, `parseColor ${tc.title} did not mutate input`).toEqual(tc.argument);
   }
-  t.end();
 });
 
-test('color#applyOpacity', t => {
+test('color#applyOpacity', () => {
   const rgb = [255, 245, 235];
   let result = applyOpacity(rgb);
-  t.deepEqual(result, [255, 245, 235, 127], 'applyOpacity added default opacity');
+  expect(result, 'applyOpacity added default opacity').toEqual([255, 245, 235, 127]);
   result = applyOpacity(rgb, 255);
-  t.deepEqual(result, [255, 245, 235, 255], 'applyOpacity added opacity');
-  t.deepEqual(rgb, [255, 245, 235], 'applyOpacity did not mutate input');
-
-  t.end();
+  expect(result, 'applyOpacity added opacity').toEqual([255, 245, 235, 255]);
+  expect(rgb, 'applyOpacity did not mutate input').toEqual([255, 245, 235]);
 });

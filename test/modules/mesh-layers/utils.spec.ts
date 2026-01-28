@@ -2,31 +2,29 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
-test('shouldComposeModelMatrix', t => {
-  t.ok(
+test('shouldComposeModelMatrix', () => {
+  expect(
     shouldComposeModelMatrix({isGeospatial: false}, COORDINATE_SYSTEM.DEFAULT),
     'Should composeModelMatrix for cartesian.'
-  );
-  t.notOk(
+  ).toBeTruthy();
+  expect(
     shouldComposeModelMatrix({isGeospatial: true}, COORDINATE_SYSTEM.DEFAULT),
     'Should not composeModelMatrix for lnglat.'
-  );
-  t.ok(
+  ).toBeFalsy();
+  expect(
     shouldComposeModelMatrix({}, COORDINATE_SYSTEM.IDENTITY),
     'Should composeModelMatrix for identity.'
-  );
-  t.ok(
+  ).toBeTruthy();
+  expect(
     shouldComposeModelMatrix({}, COORDINATE_SYSTEM.METER_OFFSETS),
     'Should composeModelMatrix for meter_offsets.'
-  );
-  t.notOk(
+  ).toBeTruthy();
+  expect(
     shouldComposeModelMatrix({}, COORDINATE_SYSTEM.LNGLAT_OFFSETS),
     'Should not composeModelMatrix for lnglat_offsets.'
-  );
-
-  t.end();
+  ).toBeFalsy();
 });

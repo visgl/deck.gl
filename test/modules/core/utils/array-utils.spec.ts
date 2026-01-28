@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {padArray} from '@deck.gl/core/utils/array-utils';
 
 const PAD_ARRAY_TEST_CASES = [
@@ -82,10 +82,9 @@ const PAD_ARRAY_TEST_CASES = [
   }
 ];
 
-test('padArray#tests', t => {
+test('padArray#tests', () => {
   for (const tc of PAD_ARRAY_TEST_CASES) {
     const result = padArray(tc.arguments);
-    t.deepEqual(result, tc.result, `padArray ${tc.title} returned expected result`);
+    expect(result, `padArray ${tc.title} returned expected result`).toEqual(tc.result);
   }
-  t.end();
 });

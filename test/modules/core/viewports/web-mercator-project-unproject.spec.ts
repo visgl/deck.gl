@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {WebMercatorViewport} from 'deck.gl';
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {toLowPrecision} from '@deck.gl/test-utils';
 
 const viewportProps = {
@@ -67,30 +67,27 @@ const TEST_CASES = [
   }
 ];
 
-test('Viewport constructor', t => {
+test('Viewport constructor', () => {
   const viewport = new WebMercatorViewport(viewportProps);
 
-  t.ok(viewport, 'Viewport construction successful');
+  expect(viewport, 'Viewport construction successful').toBeTruthy();
 
   const viewState = {};
   Object.keys(viewportProps).forEach(key => {
     viewState[key] = viewport[key];
   });
 
-  t.deepEquals(viewState, viewportProps, 'Viewport props assigned');
-  t.end();
+  expect(viewState, 'Viewport props assigned').toEqual(viewportProps);
 });
 
-test('Viewport projection', t => {
+test('Viewport projection', () => {
   const viewport = new WebMercatorViewport(viewportProps);
 
   TEST_CASES.forEach(({title, func, input, expected}) => {
     const output = viewport[func](input);
-    t.deepEquals(
+    expect(
       output.map(x => toLowPrecision(x, 7)),
-      expected.map(x => toLowPrecision(x, 7)),
       `viewport.${func}(${title})`
-    );
+    ).toEqual(expected.map(x => toLowPrecision(x, 7)));
   });
-  t.end();
 });

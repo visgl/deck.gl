@@ -2,58 +2,58 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {TypedArrayManager} from '@deck.gl/core/utils/typed-array-manager';
 
-test('TypedArrayManager#allocate', t => {
+test('TypedArrayManager#allocate', () => {
   const typedArrayManager = new TypedArrayManager({overAlloc: 2});
 
   // Allocate an "empty" array
   let array = typedArrayManager.allocate(null, 0, {size: 2, type: Float32Array});
-  t.ok(array instanceof Float32Array, 'Allocated array has correct type');
-  t.is(array.length, 1, 'Allocated array has correct length');
+  expect(array instanceof Float32Array, 'Allocated array has correct type').toBeTruthy();
+  expect(array.length, 'Allocated array has correct length').toBe(1);
 
   // Create a new array with over allocation
   array = typedArrayManager.allocate(null, 1, {size: 2, type: Float32Array});
-  t.ok(array instanceof Float32Array, 'Allocated array has correct type');
-  t.is(array.length, 4, 'Allocated array has correct length');
+  expect(array instanceof Float32Array, 'Allocated array has correct type').toBeTruthy();
+  expect(array.length, 'Allocated array has correct length').toBe(4);
   array.fill(1);
 
   // Existing array is large enough
   let array2 = typedArrayManager.allocate(array, 2, {size: 2, type: Float32Array, copy: true});
-  t.is(array, array2, 'Did not allocate new array');
+  expect(array, 'Did not allocate new array').toBe(array2);
 
   // Existing array is not large enough, release the old one and allocate new array
   array2 = typedArrayManager.allocate(array, 3, {size: 2, type: Float32Array, copy: true});
-  t.is(array2.length, 12, 'Newly allocated array has correct length');
-  t.deepEqual(array2, [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 'Copied existing array');
+  expect(array2.length, 'Newly allocated array has correct length').toBe(12);
+  expect(array2, 'Copied existing array').toEqual([1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]);
 
   // Reuse a released array from pool
   array2 = typedArrayManager.allocate(null, 1, {size: 1, type: Uint16Array});
-  t.is(array2.length, 2, 'Allocated array has correct length');
-  t.is(array.buffer, array2.buffer, 'Reused released arraybuffer');
+  expect(array2.length, 'Allocated array has correct length').toBe(2);
+  expect(array.buffer, 'Reused released arraybuffer').toBe(array2.buffer);
 
   // Existing array's underlying buffer is large enough
   array2 = typedArrayManager.allocate(array2, 4, {size: 1, type: Uint16Array});
-  t.is(array2.length, 4, 'Allocated array has correct length');
-  t.is(array.buffer, array2.buffer, 'Reused existing arraybuffer');
+  expect(array2.length, 'Allocated array has correct length').toBe(4);
+  expect(array.buffer, 'Reused existing arraybuffer').toBe(array2.buffer);
 
   // Create a new array with over allocation.
   // Allocated array with over allocation should be smaller than over allocation cap.
   // 2 elements x 2 bytes x 2 default over alloc => 8
   array = typedArrayManager.allocate(null, 2, {size: 2, type: Float32Array, maxCount: 5});
-  t.is(array.length, 8, 'Allocated array has correct length, not affected by over alloc cap');
+  expect(array.length, 'Allocated array has correct length, not affected by over alloc cap').toBe(
+    8
+  );
 
   // Create a new array with over allocation.
   // Allocated array with over allocation is capped by over allocation cap.
   // 3 elements x 2 bytes x 2 default over alloc => 12; max count limits allocation to 10.
   array = typedArrayManager.allocate(null, 3, {size: 2, type: Float32Array, maxCount: 5});
-  t.is(array.length, 10, 'Allocated array has correct length, affected by over alloc cap');
-
-  t.end();
+  expect(array.length, 'Allocated array has correct length, affected by over alloc cap').toBe(10);
 });
 
-test('TypedArrayManager#initialize', t => {
+test('TypedArrayManager#initialize', () => {
   const typedArrayManager = new TypedArrayManager({overAlloc: 1, poolSize: 1});
 
   let array = typedArrayManager.allocate(null, 32, {size: 1, type: Uint8Array});
@@ -67,15 +67,13 @@ test('TypedArrayManager#initialize', t => {
     initialize: true
   });
 
-  t.ok(array.every(Number.isFinite), 'The array is initialized');
-
-  t.end();
+  expect(array.every(Number.isFinite), 'The array is initialized').toBeTruthy();
 });
 
-test('TypedArrayManager#release', t => {
+test('TypedArrayManager#release', () => {
   const typedArrayManager = new TypedArrayManager({overAlloc: 1, poolSize: 2});
 
-  t.doesNotThrow(() => typedArrayManager.release(null), 'Releasing null does not throw');
+  expect(() => typedArrayManager.release(null), 'Releasing null does not throw').not.toThrow();
 
   [1, 3, 2, 1]
     .map(count => typedArrayManager.allocate(null, count, {size: 3, type: Float32Array}))
@@ -83,20 +81,16 @@ test('TypedArrayManager#release', t => {
 
   const pool = typedArrayManager._pool;
 
-  t.is(pool.length, 2, 'Has correct pool size');
-  t.deepEqual(
+  expect(pool.length, 'Has correct pool size').toBe(2);
+  expect(
     pool.map(buffer => buffer.byteLength),
-    [24, 36],
     'Has correct buffers in pool'
-  );
+  ).toEqual([24, 36]);
 
   typedArrayManager.allocate(null, 8, {size: 4, type: Uint8ClampedArray});
-  t.is(pool.length, 1, 'Reused released arraybuffer');
-  t.deepEqual(
+  expect(pool.length, 'Reused released arraybuffer').toBe(1);
+  expect(
     pool.map(buffer => buffer.byteLength),
-    [24],
     'Has correct buffers in pool'
-  );
-
-  t.end();
+  ).toEqual([24]);
 });

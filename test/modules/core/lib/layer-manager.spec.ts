@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
 import {device} from '@deck.gl/test-utils';
 
@@ -29,35 +29,30 @@ const LAYERS = [
   new TestCompositeLayer({id: 'composite', stroked: true, filled: true})
 ];
 
-test('LayerManager#constructor', t => {
-  t.ok(LayerManager, 'LayerManager imported');
+test('LayerManager#constructor', () => {
+  expect(LayerManager, 'LayerManager imported').toBeTruthy();
 
   let layerManager = new LayerManager(device);
-  t.ok(layerManager, 'LayerManager created');
+  expect(layerManager, 'LayerManager created').toBeTruthy();
   layerManager.finalize();
-  t.pass('LayerManager finalized');
 
   layerManager = new LayerManager(null);
-  t.ok(layerManager, 'LayerManager created without GL context');
+  expect(layerManager, 'LayerManager created without GL context').toBeTruthy();
   layerManager.finalize();
-  t.pass('LayerManager finalized');
-
-  t.end();
 });
 
-test('LayerManager#getLayers', t => {
+test('LayerManager#getLayers', () => {
   const layerManager = new LayerManager(device);
   layerManager.setLayers(LAYERS);
   let layers = layerManager.getLayers();
-  t.equal(layers.length, 4, 'LayerManager.getLayers()');
+  expect(layers.length, 'LayerManager.getLayers()').toBe(4);
   layers = layerManager.getLayers({layerIds: ['composite']});
-  t.equal(layers.length, 3, 'LayerManager.getLayers()');
+  expect(layers.length, 'LayerManager.getLayers()').toBe(3);
   layers = layerManager.getLayers({layerIds: ['non-existent-id']});
-  t.equal(layers.length, 0, 'LayerManager.getLayers()');
-  t.end();
+  expect(layers.length, 'LayerManager.getLayers()').toBe(0);
 });
 
-test('LayerManager#setLayers', t => {
+test('LayerManager#setLayers', () => {
   const stats = {
     initializeCalled: 0,
     updateCalled: 0,
@@ -164,34 +159,33 @@ test('LayerManager#setLayers', t => {
   const layerManager = new LayerManager(device);
 
   TEST_CASES.forEach(testCase => {
-    t.comment(testCase.title);
+    console.log(testCase.title);
     const oldStats = Object.assign({}, stats);
     layerManager.setLayers(testCase.layers);
-    t.is(
+    expect(
       stats.initializeCalled - oldStats.initializeCalled,
-      testCase.initialize ? 1 : 0,
       `${testCase.initialize ? 'should' : 'shoudl not'} initialize layer`
-    );
-    t.is(
+    ).toBe(testCase.initialize ? 1 : 0);
+    expect(
       stats.updateCalled - oldStats.updateCalled,
-      testCase.update ? 1 : 0,
       `${testCase.update ? 'should' : 'shoudl not'} update layer`
-    );
+    ).toBe(testCase.update ? 1 : 0);
     if (testCase.update) {
-      t.is(Boolean(stats.dataChanged), testCase.dataChanged, 'set dataChanged flag correctly');
-      t.is(Boolean(stats.propsChanged), testCase.propsChanged, 'set propsChanged flag correctly');
+      expect(Boolean(stats.dataChanged), 'set dataChanged flag correctly').toBe(
+        testCase.dataChanged
+      );
+      expect(Boolean(stats.propsChanged), 'set propsChanged flag correctly').toBe(
+        testCase.propsChanged
+      );
     }
-    t.is(
+    expect(
       stats.finalizeCalled - oldStats.finalizeCalled,
-      testCase.finalize ? 1 : 0,
       `${testCase.finalize ? 'should' : 'shoudl not'} finalize layer`
-    );
+    ).toBe(testCase.finalize ? 1 : 0);
   });
-
-  t.end();
 });
 
-test('LayerManager#error handling', t => {
+test('LayerManager#error handling', () => {
   const errorArgs = [];
   const onError = (error, layer) => errorArgs.push({error, layer});
 
@@ -214,8 +208,8 @@ test('LayerManager#error handling', t => {
     new BadLayer({id: 'crash-on-update', throw: false})
   ]);
 
-  t.is(errorArgs.length, 1, 'onError is called');
-  t.is(errorArgs[0].layer.id, 'crash-on-init', 'onError is called with correct args');
+  expect(errorArgs.length, 'onError is called').toBe(1);
+  expect(errorArgs[0].layer.id, 'onError is called with correct args').toBe('crash-on-init');
 
   layerManager.setLayers([
     new ScatterplotLayer({id: 'scatterplot'}),
@@ -223,8 +217,6 @@ test('LayerManager#error handling', t => {
     new BadLayer({id: 'crash-on-update', throw: true})
   ]);
 
-  t.is(errorArgs.length, 2, 'onError is called');
-  t.is(errorArgs[1].layer.id, 'crash-on-update', 'onError is called with correct args');
-
-  t.end();
+  expect(errorArgs.length, 'onError is called').toBe(2);
+  expect(errorArgs[1].layer.id, 'onError is called with correct args').toBe('crash-on-update');
 });

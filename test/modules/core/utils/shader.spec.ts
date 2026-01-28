@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {project, phongMaterial} from '@deck.gl/core';
 import {mergeShaders} from '@deck.gl/core/utils/shader';
 
@@ -47,13 +47,11 @@ const TEST_CASES = [
   }
 ];
 
-test('mergeShaders', t => {
+test('mergeShaders', () => {
   let shaders = TEST_SHADERS;
 
   for (const testCase of TEST_CASES) {
     shaders = mergeShaders(shaders, testCase.input);
-    t.deepEqual(shaders, testCase.output, `${testCase.title} returned correct result`);
+    expect(shaders, `${testCase.title} returned correct result`).toEqual(testCase.output);
   }
-
-  t.end();
 });

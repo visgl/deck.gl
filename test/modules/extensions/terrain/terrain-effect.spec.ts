@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
@@ -16,7 +16,7 @@ import {device, getLayerUniforms} from '@deck.gl/test-utils';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
 
-test('TerrainEffect', async t => {
+test('TerrainEffect', async () => {
   const terrainEffect = new TerrainEffect();
 
   const terrainLayer = new TerrainLayer({
@@ -44,8 +44,8 @@ test('TerrainEffect', async t => {
     effects: [terrainEffect],
     layers: [terrainLayer]
   });
-  t.ok(terrainEffect.terrainPass, 'TerrainPass is created');
-  t.ok(terrainEffect.terrainPickingPass, 'terrainPickingPass is created');
+  expect(terrainEffect.terrainPass, 'TerrainPass is created').toBeTruthy();
+  expect(terrainEffect.terrainPickingPass, 'terrainPickingPass is created').toBeTruthy();
   const renderTerrainCover = makeSpy(terrainEffect.terrainPass, 'renderTerrainCover');
   const renderPickingTerrainCover = makeSpy(terrainEffect.terrainPickingPass, 'renderTerrainCover');
 
@@ -53,7 +53,7 @@ test('TerrainEffect', async t => {
   await lifecycle.update({
     layers: [terrainLayer, geoLayer]
   });
-  t.is(renderTerrainCover.callCount, 4, 'Rendered 4 terrain covers');
+  expect(renderTerrainCover.callCount, 'Rendered 4 terrain covers').toBe(4);
   renderTerrainCover.reset();
 
   // preRender#picking
@@ -63,7 +63,7 @@ test('TerrainEffect', async t => {
     deviceRect: {x: 200, y: 150, width: 1, height: 1},
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
-  t.is(renderPickingTerrainCover.callCount, 1, 'Rendered 1 terrain cover for picking');
+  expect(renderPickingTerrainCover.callCount, 'Rendered 1 terrain cover for picking').toBe(1);
   renderPickingTerrainCover.reset();
 
   // preRender#diffing
@@ -76,45 +76,44 @@ test('TerrainEffect', async t => {
       zoom: 10
     })
   });
-  t.is(renderTerrainCover.callCount, 0, 'Terrain covers do not require redraw');
+  expect(renderTerrainCover.callCount, 'Terrain covers do not require redraw').toBe(0);
   renderTerrainCover.reset();
 
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let model = meshLayer.state.model;
   let uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
-  t.is(model.bindings.terrain_map?.width, 1024, 'Terrain cover used as sampler');
+  expect(uniforms.mode, 'TERRAIN_MODE.USE_COVER').toBe(TERRAIN_MODE.USE_COVER);
+  expect(model.bindings.terrain_map?.width, 'Terrain cover used as sampler').toBe(1024);
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   model = scatterplotLayer.state.model;
   uniforms = getLayerUniforms(scatterplotLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
-  t.is(model.bindings.terrain_map?.id, 'height-map', 'Height map used as sampler');
+  expect(uniforms.mode, 'TERRAIN_MODE.USE_HEIGHT_MAP').toBe(TERRAIN_MODE.USE_HEIGHT_MAP);
+  expect(model.bindings.terrain_map?.id, 'Height map used as sampler').toBe('height-map');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   model = pathLayer.state.model;
   uniforms = getLayerUniforms(pathLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
-  t.is(model.bindings.terrain_map?.width, 1, 'Dummy height map used as sampler');
+  expect(uniforms.mode, 'TERRAIN_MODE.SKIP').toBe(TERRAIN_MODE.SKIP);
+  expect(model.bindings.terrain_map?.width, 'Dummy height map used as sampler').toBe(1);
 
   // preRender#diffing
   await lifecycle.update({
     layers: [terrainLayer]
   });
-  t.is(renderTerrainCover.callCount, 4, 'Terrain covers are redrawn');
+  expect(renderTerrainCover.callCount, 'Terrain covers are redrawn').toBe(4);
   renderTerrainCover.reset();
 
   model = meshLayer.state.model;
   uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.NONE, 'TERRAIN_MODE.NONE');
-  t.is(model.bindings.terrain_map?.width, 1, 'Terrain cover using empty texture');
+  expect(uniforms.mode, 'TERRAIN_MODE.NONE').toBe(TERRAIN_MODE.NONE);
+  expect(model.bindings.terrain_map?.width, 'Terrain cover using empty texture').toBe(1);
 
   lifecycle.finalize();
-  t.end();
 });
 
-test('TerrainEffect#without draw operation', async t => {
+test('TerrainEffect#without draw operation', async () => {
   const terrainEffect = new TerrainEffect();
 
   const terrainLayer = new TerrainLayer({
@@ -142,8 +141,8 @@ test('TerrainEffect#without draw operation', async t => {
     effects: [terrainEffect],
     layers: [terrainLayer]
   });
-  t.ok(terrainEffect.terrainPass, 'TerrainPass is created');
-  t.ok(terrainEffect.terrainPickingPass, 'terrainPickingPass is created');
+  expect(terrainEffect.terrainPass, 'TerrainPass is created').toBeTruthy();
+  expect(terrainEffect.terrainPickingPass, 'terrainPickingPass is created').toBeTruthy();
   const renderTerrainCover = makeSpy(terrainEffect.terrainPass, 'renderTerrainCover');
   const renderPickingTerrainCover = makeSpy(terrainEffect.terrainPickingPass, 'renderTerrainCover');
 
@@ -151,7 +150,7 @@ test('TerrainEffect#without draw operation', async t => {
   await lifecycle.update({
     layers: [terrainLayer, geoLayer]
   });
-  t.is(renderTerrainCover.callCount, 4, 'Rendered 4 terrain covers');
+  expect(renderTerrainCover.callCount, 'Rendered 4 terrain covers').toBe(4);
   renderTerrainCover.reset();
 
   // preRender#picking
@@ -161,7 +160,7 @@ test('TerrainEffect#without draw operation', async t => {
     deviceRect: {x: 200, y: 150, width: 1, height: 1},
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
-  t.is(renderPickingTerrainCover.callCount, 1, 'Rendered 1 terrain cover for picking');
+  expect(renderPickingTerrainCover.callCount, 'Rendered 1 terrain cover for picking').toBe(1);
   renderPickingTerrainCover.reset();
 
   // preRender#diffing
@@ -174,40 +173,39 @@ test('TerrainEffect#without draw operation', async t => {
       zoom: 10
     })
   });
-  t.is(renderTerrainCover.callCount, 0, 'Terrain covers do not require redraw');
+  expect(renderTerrainCover.callCount, 'Terrain covers do not require redraw').toBe(0);
   renderTerrainCover.reset();
 
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let model = meshLayer.state.model;
   let uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
-  t.is(model.bindings.terrain_map?.width, 1024, 'Terrain cover used as sampler');
+  expect(uniforms.mode, 'TERRAIN_MODE.USE_COVER_ONLY').toBe(TERRAIN_MODE.USE_COVER_ONLY);
+  expect(model.bindings.terrain_map?.width, 'Terrain cover used as sampler').toBe(1024);
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   model = scatterplotLayer.state.model;
   uniforms = getLayerUniforms(scatterplotLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
-  t.is(model.bindings.terrain_map?.id, 'height-map', 'Height map used as sampler');
+  expect(uniforms.mode, 'TERRAIN_MODE.USE_HEIGHT_MAP').toBe(TERRAIN_MODE.USE_HEIGHT_MAP);
+  expect(model.bindings.terrain_map?.id, 'Height map used as sampler').toBe('height-map');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   model = pathLayer.state.model;
   uniforms = getLayerUniforms(pathLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
-  t.is(model.bindings.terrain_map?.width, 1, 'Dummy height map used as sampler');
+  expect(uniforms.mode, 'TERRAIN_MODE.SKIP').toBe(TERRAIN_MODE.SKIP);
+  expect(model.bindings.terrain_map?.width, 'Dummy height map used as sampler').toBe(1);
 
   // preRender#diffing
   await lifecycle.update({
     layers: [terrainLayer]
   });
-  t.is(renderTerrainCover.callCount, 4, 'Terrain covers are redrawn');
+  expect(renderTerrainCover.callCount, 'Terrain covers are redrawn').toBe(4);
   renderTerrainCover.reset();
 
   model = meshLayer.state.model;
   uniforms = getLayerUniforms(meshLayer);
-  t.is(uniforms.mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
-  t.is(model.bindings.terrain_map?.width, 1, 'Terrain cover using empty texture');
+  expect(uniforms.mode, 'TERRAIN_MODE.SKIP').toBe(TERRAIN_MODE.SKIP);
+  expect(model.bindings.terrain_map?.width, 'Terrain cover using empty texture').toBe(1);
 
   lifecycle.finalize();
-  t.end();
 });

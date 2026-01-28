@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {trips} from 'deck.gl-test/data';
 
-test('TripsLayer', t => {
+test('TripsLayer', () => {
   const testCases = generateLayerTests({
     Layer: TripsLayer,
     sampleProps: {
@@ -15,11 +15,9 @@ test('TripsLayer', t => {
       getPath: d => d.map(p => p.begin_shape),
       getTimestamps: d => d.map(p => p.begin_time)
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: TripsLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: TripsLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

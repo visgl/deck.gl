@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {RasterTileLayer} from '@deck.gl/carto';
 import RasterLayer from '@deck.gl/carto/layers/raster-layer';
@@ -18,17 +18,20 @@ const TILE_INDEX = 5234261499580514303n;
 
 const BINARY_RASTER_TILE = new Uint8Array(binaryRasterTileData).buffer;
 
-test('RasterTileLayer', async t => {
+test('RasterTileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: RasterTileLayer,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({Layer: RasterTileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({
+    Layer: RasterTileLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('RasterTileLayer tilejson', async t => {
+test('RasterTileLayer tilejson', async () => {
   const testCases = [
     {
       Layer: RasterTileLayer,
@@ -37,23 +40,26 @@ test('RasterTileLayer tilejson', async t => {
         tile: {index: {q: TILE_INDEX}},
         getTileData: () => BINARY_RASTER_TILE
       },
-      assert: t.ok,
+      assert: (cond, msg) => expect(cond).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
-        t.equal(subLayers.length, 1, 'Rendered sublayers');
+        expect(subLayers.length, 'Rendered sublayers').toBe(1);
 
         const [spatialIndexTileLayer] = subLayers;
-        t.deepEqual(spatialIndexTileLayer.props.data, TILES, 'Extract tiles from tilejson');
-        t.equal(spatialIndexTileLayer.props.minZoom, 6, 'Extract minZoom from tilejson');
-        t.equal(spatialIndexTileLayer.props.maxZoom, 6, 'Extract maxZoom from tilejson');
+        expect(spatialIndexTileLayer.props.data, 'Extract tiles from tilejson').toEqual(TILES);
+        expect(spatialIndexTileLayer.props.minZoom, 'Extract minZoom from tilejson').toBe(6);
+        expect(spatialIndexTileLayer.props.maxZoom, 'Extract maxZoom from tilejson').toBe(6);
 
         const rasterLayer = spatialIndexTileLayer.renderSubLayers(spatialIndexTileLayer.props);
-        t.ok(rasterLayer, 'Rendered raster layer');
-        t.equal(rasterLayer.props.tileIndex, TILE_INDEX, 'Pass tileIndex to raster layer');
+        expect(rasterLayer, 'Rendered raster layer').toBeTruthy();
+        expect(rasterLayer.props.tileIndex, 'Pass tileIndex to raster layer').toBe(TILE_INDEX);
       }
     }
   ];
-  await testLayerAsync({Layer: RasterTileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({
+    Layer: RasterTileLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test.skip('RasterLayer', async t => {
@@ -70,24 +76,22 @@ test.skip('RasterLayer', async t => {
         },
         tileIndex: TILE_INDEX
       },
-      assert: t.ok,
+      assert: (cond, msg) => expect(cond).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
-        t.equal(subLayers.length, 1, 'Rendered sublayers');
+        expect(subLayers.length, 'Rendered sublayers').toBe(1);
         const [rasterColumnLayer] = subLayers;
-        t.deepEqual(
+        expect(
           rasterColumnLayer.props.offset,
-          [250.5, 319, 0.001953125],
           'Correct offset passed to raster column layer'
-        );
+        ).toEqual([250.5, 319, 0.001953125]);
 
         const feature = layer.getSubLayerAccessor(d => d)(undefined, {
           data: rasterColumnLayer.props.data,
           index: 0
         });
-        t.equal(feature.properties.band, 7, 'Band property correctly passed through');
+        expect(feature.properties.band, 'Band property correctly passed through').toBe(7);
       }
     }
   ];
-  await testLayerAsync({Layer: RasterLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({Layer: RasterLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

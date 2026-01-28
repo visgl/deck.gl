@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {getResolution, cellToChildren} from 'h3-js';
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {H3TileLayer} from '@deck.gl/carto';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -15,17 +15,16 @@ const TILEJSON = {
   tiles: TILES
 };
 
-test('H3TileLayer', async t => {
+test('H3TileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: H3TileLayer,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({Layer: H3TileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({Layer: H3TileLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('H3TileLayer tilejson', async t => {
+test('H3TileLayer tilejson', async () => {
   const testCases = [
     {
       Layer: H3TileLayer,
@@ -33,21 +32,20 @@ test('H3TileLayer tilejson', async t => {
         data: TILEJSON,
         getTileData: () => []
       },
-      assert: t.ok,
+      assert: (cond, msg) => expect(cond).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
         if (!layer.isLoaded) {
-          t.equal(subLayers.length, 1, 'Rendered sublayers');
-          t.deepEqual(subLayers[0].props.data, TILES, 'Extract tiles from tilejson');
-          t.deepEqual(subLayers[0].props.maxZoom, 10, 'Extract maxZoom from tilejson');
+          expect(subLayers.length, 'Rendered sublayers').toBe(1);
+          expect(subLayers[0].props.data, 'Extract tiles from tilejson').toEqual(TILES);
+          expect(subLayers[0].props.maxZoom, 'Extract maxZoom from tilejson').toEqual(10);
         }
       }
     }
   ];
-  await testLayerAsync({Layer: H3TileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({Layer: H3TileLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('H3TileLayer autoHighlight', async t => {
+test('H3TileLayer autoHighlight', async () => {
   await testPickingLayer({
     layer: new H3TileLayer({
       id: 'h3-tile',
@@ -74,10 +72,10 @@ test('H3TileLayer autoHighlight', async t => {
         pickedLayerId: 'h3-tile-layer-h3-tile-8075fffffffffff-hexagon-cell-hifi-fill',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over h3');
-          t.ok(info.object, 'info.object is populated');
-          t.equal(info.object.id, '81753ffffffffff', 'h3 is correct');
-          t.equal(info.object.value, 3, 'object value is correct');
+          console.log('hover over h3');
+          expect(info.object, 'info.object is populated').toBeTruthy();
+          expect(info.object.id, 'h3 is correct').toBe('81753ffffffffff');
+          expect(info.object.value, 'object value is correct').toBe(3);
         }
       },
       {
@@ -85,12 +83,10 @@ test('H3TileLayer autoHighlight', async t => {
         pickedLayerId: '',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('pointer leave');
-          t.notOk(info.object, 'info.object is not populated');
+          console.log('pointer leave');
+          expect(info.object, 'info.object is not populated').toBeFalsy();
         }
       }
     ]
   });
-
-  t.end();
 });

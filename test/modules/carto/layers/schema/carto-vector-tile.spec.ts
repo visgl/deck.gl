@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import CartoVectoTileLoader from '@deck.gl/carto/layers/schema/carto-vector-tile-loader';
 
@@ -12,25 +12,22 @@ import binaryNoTrianglesTileData from '../../data/binaryTilePolygonNoTri.json';
 const BINARY_VECTOR_TILE = new Uint8Array(binaryVectorTileData).buffer;
 const BINARY_VECTOR_TILE_NOTRI = new Uint8Array(binaryNoTrianglesTileData).buffer;
 
-test('Parse Carto Vector Tile', async t => {
+test('Parse Carto Vector Tile', async () => {
   const {polygons} = CartoVectoTileLoader.parseSync(BINARY_VECTOR_TILE);
-  t.equal(polygons.positions.value.length, 2 * 151, 'Positions correctly decoded');
-  t.equal(polygons.globalFeatureIds.value.length, 151, 'globalFeatureIds correctly decoded');
-  t.deepEqual(polygons.properties, [{DO_LABEL: 'Puerto Rico'}], 'Properties correctly decoded');
-  t.deepEqual(polygons.fields, [{id: 31}], 'Fields correctly decoded');
-  t.end();
+  expect(polygons.positions.value.length, 'Positions correctly decoded').toBe(2 * 151);
+  expect(polygons.globalFeatureIds.value.length, 'globalFeatureIds correctly decoded').toBe(151);
+  expect(polygons.properties, 'Properties correctly decoded').toEqual([{DO_LABEL: 'Puerto Rico'}]);
+  expect(polygons.fields, 'Fields correctly decoded').toEqual([{id: 31}]);
 });
 
-test('Carto Vector Tile triangulation', async t => {
+test('Carto Vector Tile triangulation', async () => {
   const {polygons} = CartoVectoTileLoader.parseSync(BINARY_VECTOR_TILE_NOTRI);
-  t.equal(polygons.positions.value.length, 2 * 52, 'Positions correctly decoded');
-  t.equal(polygons.globalFeatureIds.value.length, 52, 'globalFeatureIds correctly decoded');
-  t.equal(
+  expect(polygons.positions.value.length, 'Positions correctly decoded').toBe(2 * 52);
+  expect(polygons.globalFeatureIds.value.length, 'globalFeatureIds correctly decoded').toBe(52);
+  expect(
     polygons.numericProps.grossFloorAreaM2.value.length,
-    52,
     'Numeric Properties correctly decoded'
-  );
-  t.ok(polygons.triangles, 'triangles array added');
-  t.equal(polygons.triangles.value.length, 141, 'Polygons triangulated correctly');
-  t.end();
+  ).toBe(52);
+  expect(polygons.triangles, 'triangles array added').toBeTruthy();
+  expect(polygons.triangles.value.length, 'Polygons triangulated correctly').toBe(141);
 });

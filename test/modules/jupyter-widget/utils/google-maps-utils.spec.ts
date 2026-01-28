@@ -2,17 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {makeSpy} from '@probe.gl/test-utils';
 
 import {log} from '@deck.gl/core';
 import {createGoogleMapsDeckOverlay} from '@deck.gl/jupyter-widget/playground/utils/google-maps-utils';
 
-test('jupyter-widget: Google Maps base', t => {
+test('jupyter-widget: Google Maps base', () => {
   makeSpy(log, 'warn');
   const overlay = createGoogleMapsDeckOverlay({props: {}});
-  t.ok(log.warn.called, 'should produce a warning message if no Google Maps API key is provided');
-  t.ok(!overlay, 'Absent Google Maps API key creates null overlay');
+  expect(
+    log.warn.called,
+    'should produce a warning message if no Google Maps API key is provided'
+  ).toBeTruthy();
+  expect(!overlay, 'Absent Google Maps API key creates null overlay').toBeTruthy();
   log.warn.restore();
-  t.end();
 });

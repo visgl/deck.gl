@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import TransitionInterpolator from '@deck.gl/core/transitions/transition-interpolator';
 
 const TEST_CASES = [
@@ -81,38 +81,31 @@ const TEST_CASES = [
   }
 ];
 
-test('TransitionInterpolator#arePropsEqual', t => {
+test('TransitionInterpolator#arePropsEqual', () => {
   TEST_CASES.forEach(testCase => {
     const interpolator = new TransitionInterpolator(testCase.opts);
-    t.is(
-      interpolator.arePropsEqual(testCase.props, testCase.nextProps),
-      testCase.equals,
-      testCase.title
+    expect(interpolator.arePropsEqual(testCase.props, testCase.nextProps), testCase.title).toBe(
+      testCase.equals
     );
   });
-
-  t.end();
 });
 
-test('TransitionInterpolator#initializeProps', t => {
+test('TransitionInterpolator#initializeProps', () => {
   TEST_CASES.forEach(testCase => {
     if (!testCase.equals) {
       const interpolator = new TransitionInterpolator(testCase.opts);
 
       if (testCase.initializeProps) {
-        t.deepEquals(
+        expect(
           interpolator.initializeProps(testCase.props, testCase.nextProps),
-          testCase.initializeProps,
           testCase.title
-        );
+        ).toEqual(testCase.initializeProps);
       } else {
-        t.throws(
+        expect(
           () => interpolator.initializeProps(testCase.props, testCase.nextProps),
           testCase.title
-        );
+        ).toThrow();
       }
     }
   });
-
-  t.end();
 });

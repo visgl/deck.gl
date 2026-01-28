@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {TileReader} from '@deck.gl/carto/layers/schema/carto-raster-tile';
 import Pbf from 'pbf';
 
@@ -36,20 +36,18 @@ export const TEST_DATA = buffer.finish();
  *   repeated Band bands = 2;
  * }
  */
-test('TileReader', t => {
+test('TileReader', () => {
   const tile = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
-  t.equals(tile.blockSize, 256, 'Should read blockSize correctly');
-  t.equals(tile.bands.length, 1, 'Should have one band');
-  t.equals(tile.bands[0].name, 'band1', 'Band should have correct name');
-  t.deepEqual(tile.bands[0].data.value, COMPRESSED_BAND, 'Band should have compressed data');
+  expect(tile.blockSize, 'Should read blockSize correctly').toBe(256);
+  expect(tile.bands.length, 'Should have one band').toBe(1);
+  expect(tile.bands[0].name, 'Band should have correct name').toBe('band1');
+  expect(tile.bands[0].data.value, 'Band should have compressed data').toEqual(COMPRESSED_BAND);
 
   // Repeat with compressed data
   TileReader.compression = 'gzip';
   const tile2 = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
-  t.equals(tile.blockSize, 256, 'Should read blockSize correctly');
-  t.equals(tile.bands.length, 1, 'Should have one band');
-  t.equals(tile.bands[0].name, 'band1', 'Band should have correct name');
-  t.deepEqual(tile2.bands[0].data.value, BAND, 'Band should have decompressed data');
-
-  t.end();
+  expect(tile.blockSize, 'Should read blockSize correctly').toBe(256);
+  expect(tile.bands.length, 'Should have one band').toBe(1);
+  expect(tile.bands[0].name, 'Band should have correct name').toBe('band1');
+  expect(tile2.bands[0].data.value, 'Band should have decompressed data').toEqual(BAND);
 });

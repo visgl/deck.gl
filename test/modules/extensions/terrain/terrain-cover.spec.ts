@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {TerrainCover} from '@deck.gl/extensions/terrain/terrain-cover';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
@@ -12,7 +12,7 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {LifecycleTester} from '../utils';
 
-test('TerrainCover#viewport diffing#geo#not tiled', async t => {
+test('TerrainCover#viewport diffing#geo#not tiled', async () => {
   const lifecycle = new LifecycleTester();
   let viewport = new WebMercatorViewport({
     width: 400,
@@ -26,10 +26,10 @@ test('TerrainCover#viewport diffing#geo#not tiled', async t => {
   await lifecycle.update({viewport, layers: [targetLayer]});
 
   const tc = new TerrainCover(targetLayer);
-  t.notOk(tc.shouldUpdate({viewport}), 'Should not need update');
-  t.notOk(tc.bounds, 'Empty targetLayer does not have bounds');
-  t.notOk(tc.renderTexture, 'Render texture should be empty');
-  t.notOk(tc.pickingTexture, 'Picking texture should be empty');
+  expect(tc.shouldUpdate({viewport}), 'Should not need update').toBeFalsy();
+  expect(tc.bounds, 'Empty targetLayer does not have bounds').toBeFalsy();
+  expect(tc.renderTexture, 'Render texture should be empty').toBeFalsy();
+  expect(tc.pickingTexture, 'Picking texture should be empty').toBeFalsy();
 
   targetLayer = new ScatterplotLayer({
     data: [
@@ -40,10 +40,10 @@ test('TerrainCover#viewport diffing#geo#not tiled', async t => {
   });
   await lifecycle.update({viewport, layers: [targetLayer]});
 
-  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update');
-  t.deepEqual(tc.bounds, [128, 192, 256, 256], 'Cartesian bounds');
-  t.ok(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport');
-  t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should require update').toBeTruthy();
+  expect(tc.bounds, 'Cartesian bounds').toEqual([128, 192, 256, 256]);
+  expect(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport').toBeTruthy();
+  expect(tc.renderViewport.zoom, 'Render viewport zoom').toBe(1);
 
   viewport = new WebMercatorViewport({
     width: 400,
@@ -52,7 +52,7 @@ test('TerrainCover#viewport diffing#geo#not tiled', async t => {
     latitude: 0,
     zoom: 0.1
   });
-  t.notOk(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update').toBeFalsy();
 
   viewport = new WebMercatorViewport({
     width: 400,
@@ -61,8 +61,8 @@ test('TerrainCover#viewport diffing#geo#not tiled', async t => {
     latitude: 0,
     zoom: 5
   });
-  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update - zoom');
-  t.is(tc.renderViewport.zoom, 6, 'Render viewport zoom');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should require update - zoom').toBeTruthy();
+  expect(tc.renderViewport.zoom, 'Render viewport zoom').toBe(6);
 
   viewport = new WebMercatorViewport({
     width: 400,
@@ -71,14 +71,13 @@ test('TerrainCover#viewport diffing#geo#not tiled', async t => {
     latitude: 0,
     zoom: 5
   });
-  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update - bounds');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should require update - bounds').toBeTruthy();
 
   tc.delete();
   lifecycle.finalize();
-  t.end();
 });
 
-test('TerrainCover#viewport diffing#geo#tiled', async t => {
+test('TerrainCover#viewport diffing#geo#tiled', async () => {
   const lifecycle = new LifecycleTester();
   let viewport = new WebMercatorViewport({
     width: 400,
@@ -99,10 +98,10 @@ test('TerrainCover#viewport diffing#geo#tiled', async t => {
   await lifecycle.update({viewport, layers: [targetLayer]});
 
   const tc = new TerrainCover(targetLayer);
-  t.ok(tc.shouldUpdate({viewport}), 'Should require update');
-  t.deepEqual(tc.bounds, [128, 192, 256, 256], 'Cartesian bounds');
-  t.ok(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport');
-  t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');
+  expect(tc.shouldUpdate({viewport}), 'Should require update').toBeTruthy();
+  expect(tc.bounds, 'Cartesian bounds').toEqual([128, 192, 256, 256]);
+  expect(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport').toBeTruthy();
+  expect(tc.renderViewport.zoom, 'Render viewport zoom').toBe(1);
 
   viewport = new WebMercatorViewport({
     width: 400,
@@ -111,7 +110,7 @@ test('TerrainCover#viewport diffing#geo#tiled', async t => {
     latitude: 0,
     zoom: 5
   });
-  t.notOk(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update').toBeFalsy();
 
   viewport = new WebMercatorViewport({
     width: 400,
@@ -120,14 +119,13 @@ test('TerrainCover#viewport diffing#geo#tiled', async t => {
     latitude: 0,
     zoom: 5
   });
-  t.notOk(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update').toBeFalsy();
 
   tc.delete();
   lifecycle.finalize();
-  t.end();
 });
 
-test('TerrainCover#viewport diffing#non-geo', async t => {
+test('TerrainCover#viewport diffing#non-geo', async () => {
   const lifecycle = new LifecycleTester();
   const viewport = new OrthographicViewport({width: 400, height: 300, zoom: 0});
   const targetLayer = new ScatterplotLayer({
@@ -141,14 +139,13 @@ test('TerrainCover#viewport diffing#non-geo', async t => {
   await lifecycle.update({viewport, layers: [targetLayer]});
 
   const tc = new TerrainCover(targetLayer);
-  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update');
-  t.deepEqual(tc.bounds, [-90, -40, 0, 20], 'Common bounds');
-  t.ok(tc.renderViewport instanceof OrthographicViewport, 'Render viewport');
-  t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should require update').toBeTruthy();
+  expect(tc.bounds, 'Common bounds').toEqual([-90, -40, 0, 20]);
+  expect(tc.renderViewport instanceof OrthographicViewport, 'Render viewport').toBeTruthy();
+  expect(tc.renderViewport.zoom, 'Render viewport zoom').toBe(1);
 
   tc.delete();
   lifecycle.finalize();
-  t.end();
 });
 
 test.skip('TerrainCover#layers diffing#non-geo', async t => {
@@ -188,25 +185,27 @@ test.skip('TerrainCover#layers diffing#non-geo', async t => {
   let drapeLayers = lifecycle.layers.filter(
     l => !l.isComposite && l.state.terrainDrawMode === 'drape'
   );
-  t.ok(drapeLayers.length >= 5, 'Found drape layers');
-  t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
-  t.deepEqual(tc.layers, ['overlay-0-0-0-points-circle', 'scatterplot'], 'Correctly culled layers');
+  expect(drapeLayers.length >= 5, 'Found drape layers').toBeTruthy();
+  expect(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update').toBeTruthy();
+  expect(tc.layers, 'Correctly culled layers').toEqual([
+    'overlay-0-0-0-points-circle',
+    'scatterplot'
+  ]);
 
   viewport = new OrthographicViewport({width: 800, height: 600, zoom: 0, target: [-400, -300]});
   await lifecycle.update({viewport});
 
   drapeLayers = lifecycle.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
-  t.ok(drapeLayers.length >= 9, 'Found drape layers');
-  t.notOk(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should not need update');
+  expect(drapeLayers.length >= 9, 'Found drape layers').toBeTruthy();
+  expect(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should not need update').toBeFalsy();
 
   await lifecycle.update({layers: [terrainSource, overlay]});
   drapeLayers = lifecycle.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
-  t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
-  t.deepEqual(tc.layers, ['overlay-0-0-0-points-circle'], 'Correctly culled layers');
+  expect(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update').toBeTruthy();
+  expect(tc.layers, 'Correctly culled layers').toEqual(['overlay-0-0-0-points-circle']);
 
   tc.delete();
   lifecycle.finalize();
-  t.end();
 });
 
 test.skip('TerrainCover#layers diffing#geo', async t => {
@@ -253,16 +252,21 @@ test.skip('TerrainCover#layers diffing#geo', async t => {
   let drapeLayers = lifecycle.layers.filter(
     l => !l.isComposite && l.state.terrainDrawMode === 'drape'
   );
-  t.ok(drapeLayers.length >= 5, 'Found drape layers');
-  t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
-  t.deepEqual(tc.layers, ['overlay-0-1-2-points-circle', 'scatterplot'], 'Correctly culled layers');
+  expect(drapeLayers.length >= 5, 'Found drape layers').toBeTruthy();
+  expect(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update').toBeTruthy();
+  expect(tc.layers, 'Correctly culled layers').toEqual([
+    'overlay-0-1-2-points-circle',
+    'scatterplot'
+  ]);
 
   await lifecycle.update({layers: [terrainSource, scatterplotLayer, overlay]});
   drapeLayers = lifecycle.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
-  t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
-  t.deepEqual(tc.layers, ['scatterplot', 'overlay-0-1-2-points-circle'], 'Correctly culled layers');
+  expect(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update').toBeTruthy();
+  expect(tc.layers, 'Correctly culled layers').toEqual([
+    'scatterplot',
+    'overlay-0-1-2-points-circle'
+  ]);
 
   tc.delete();
   lifecycle.finalize();
-  t.end();
 });

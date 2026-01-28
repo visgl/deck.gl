@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import DeckPicker from '@deck.gl/core/lib/deck-picker';
@@ -36,22 +36,19 @@ const DEVICE_RECT_TEST_CASES = [
   }
 ];
 
-test('DeckPicker#getPickingRect', t => {
+test('DeckPicker#getPickingRect', () => {
   const deckPicker = new DeckPicker(device);
 
   for (const testCase of DEVICE_RECT_TEST_CASES) {
-    t.deepEqual(
+    expect(
       deckPicker._getPickingRect(testCase.input),
-      testCase.output,
       `${testCase.title}: returns correct result`
-    );
+    ).toEqual(testCase.output);
   }
-
-  t.end();
 });
 
 /* eslint-disable max-statements */
-test('DeckPicker#pick empty', t => {
+test('DeckPicker#pick empty', () => {
   const deckPicker = new DeckPicker(device);
   const view = new MapView();
   const viewport = view.makeViewport({
@@ -79,30 +76,28 @@ test('DeckPicker#pick empty', t => {
   layerManager.setLayers([layer]);
 
   let output = deckPicker.pickObject(opts);
-  t.deepEqual(output.result, [], 'No layer is picked');
-  t.ok(output.emptyInfo.x, 'emptyInfo.x is populated');
-  t.ok(output.emptyInfo.coordinate[0], 'emptyInfo.coordinate is populated');
+  expect(output.result, 'No layer is picked').toEqual([]);
+  expect(output.emptyInfo.x, 'emptyInfo.x is populated').toBeTruthy();
+  expect(output.emptyInfo.coordinate[0], 'emptyInfo.coordinate is populated').toBeTruthy();
 
   output = deckPicker.pickObjects(opts);
-  t.deepEqual(output, [], 'No layer is picked');
+  expect(output, 'No layer is picked').toEqual([]);
 
-  t.notOk(deckPicker.pickingFBO, 'pickingFBO is not generated');
+  expect(deckPicker.pickingFBO, 'pickingFBO is not generated').toBeFalsy();
 
   opts.layers = [layer];
   deckPicker.setProps({_pickable: false});
   output = deckPicker.pickObject(opts);
-  t.deepEqual(output.result, [], 'No layer is picked');
+  expect(output.result, 'No layer is picked').toEqual([]);
 
-  t.notOk(deckPicker.pickingFBO, 'pickingFBO is not generated');
+  expect(deckPicker.pickingFBO, 'pickingFBO is not generated').toBeFalsy();
 
   deckPicker.setProps({_pickable: true});
   output = deckPicker.pickObject(opts);
-  t.is(output.result[0].layer, layer, 'Layer is picked');
+  expect(output.result[0].layer, 'Layer is picked').toBe(layer);
 
-  t.ok(deckPicker.pickingFBO, 'pickingFBO is generated');
+  expect(deckPicker.pickingFBO, 'pickingFBO is generated').toBeTruthy();
 
   layerManager.finalize();
   deckPicker.finalize();
-
-  t.end();
 });

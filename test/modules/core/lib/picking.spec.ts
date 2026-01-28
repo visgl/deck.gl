@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {LayerManager, WebMercatorViewport, DeckRenderer} from '@deck.gl/core';
@@ -118,9 +118,9 @@ function validateUniforms(actual, expected) {
 }
 
 /* eslint-disable max-statements */
-test('processPickInfo', async t => {
+test('processPickInfo', async () => {
   const layerManager = new LayerManager(device, {viewport: parameters.viewports[0]});
-  layerManager.setProps({onError: t.notOk});
+  layerManager.setProps({onError: err => expect(err).toBeFalsy()});
   const deckRenderer = new DeckRenderer(device);
 
   layerManager.setLayers(parameters.layers);
@@ -377,46 +377,46 @@ test('processPickInfo', async t => {
     parameters.x = testCase.x;
     parameters.y = testCase.y;
     const infos = processPickInfo(parameters);
-    t.is(infos.size, testCase.size, 'returns expected infos');
+    expect(infos.size, 'returns expected infos').toBe(testCase.size);
 
     const info = infos.get(testCase.info.layer && testCase.info.layer.id);
 
     for (const key in testCase.info) {
       const expected = testCase.info[key];
       if (Number.isFinite(expected) || Array.isArray(expected)) {
-        t.ok(equals(info[key], expected), `info.${key}`);
+        expect(equals(info[key], expected), `info.${key}`).toBeTruthy();
       } else {
-        t.deepEqual(info[key], expected, `info.${key}`);
+        expect(info[key], `info.${key}`).toEqual(expected);
       }
     }
     for (const key in testCase.lastPickedInfo) {
-      t.deepEqual(lastPickedInfo[key], testCase.lastPickedInfo[key], `lastPickedInfo.${key}`);
+      expect(lastPickedInfo[key], `lastPickedInfo.${key}`).toEqual(testCase.lastPickedInfo[key]);
     }
     testLayerPickingUniforms = testLayer.getModels()[0].shaderInputs.getUniformValues().picking;
-    t.notOk(
+    expect(
       validateUniforms(testLayerPickingUniforms, testCase.testLayerPickingUniforms),
       'testLayerPickingUniforms'
-    );
+    ).toBeFalsy();
     if (testCase.currentLayerPickingUniforms) {
       currentLayerPickingUniforms = testCase.pickInfo.pickedLayer
         .getModels()[0]
         .shaderInputs.getUniformValues().picking;
-      t.notOk(
+      expect(
         validateUniforms(currentLayerPickingUniforms, testCase.currentLayerPickingUniforms),
         'currentLayerPickingUniforms'
-      );
+      ).toBeFalsy();
     }
 
     if (testCase.highlightedObjectIndex !== undefined) {
       const renderedLayer = info.layer.renderLayers()[0][0];
       const {highlightedObjectIndex} = renderedLayer.props;
-      t.deepEqual(highlightedObjectIndex, testCase.highlightedObjectIndex, 'highlightObjectIndex');
+      expect(highlightedObjectIndex, 'highlightObjectIndex').toEqual(
+        testCase.highlightedObjectIndex
+      );
     }
   }
 
   layerManager.finalize();
-
-  t.end();
 });
 
 function sleep(ms) {

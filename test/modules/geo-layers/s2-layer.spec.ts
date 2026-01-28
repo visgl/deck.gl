@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {S2Layer} from '@deck.gl/geo-layers';
 import {getS2QuadKey, getS2Polygon} from '@deck.gl/geo-layers/s2-layer/s2-utils';
@@ -11,34 +11,30 @@ import {s2cells as data} from 'deck.gl-test/data';
 import {S2} from 's2-geometry';
 import Long from 'long';
 
-test('S2Layer', t => {
+test('S2Layer', () => {
   const testCases = generateLayerTests({
     Layer: S2Layer,
     sampleProps: {
       data,
       getS2Token: d => d.token
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      t.ok(subLayer, 'subLayers rendered');
+      expect(subLayer, 'subLayers rendered').toBeTruthy();
 
       if (layer.props.data.length) {
-        t.equal(
-          subLayer.state.paths.length,
-          data.length,
-          'should update PolygonLayers state.paths'
+        expect(subLayer.state.paths.length, 'should update PolygonLayers state.paths').toBe(
+          data.length
         );
       }
     }
   });
 
-  testLayer({Layer: S2Layer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: S2Layer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('S2Layer#getS2QuadKey', t => {
+test('S2Layer#getS2QuadKey', () => {
   const TEST_COORDINATES = [
     {lat: 0, lng: 0},
     {lat: -122.45, lng: 37.78},
@@ -53,17 +49,15 @@ test('S2Layer#getS2QuadKey', t => {
       const id = Long.fromString(S2.keyToId(key), true);
       const token = id.toString(16).replace(/0+$/, '');
 
-      t.comment(`level ${level}, id: ${id.toString()}, token: ${token}`);
-      t.is(getS2QuadKey(key), key, 'Quad key to quad key');
-      t.is(getS2QuadKey(id), key, 'Id to quad key');
-      t.is(getS2QuadKey(token), key, 'Token to quad key');
+      console.log(`level ${level}, id: ${id.toString()}, token: ${token}`);
+      expect(getS2QuadKey(key), 'Quad key to quad key').toBe(key);
+      expect(getS2QuadKey(id), 'Id to quad key').toBe(key);
+      expect(getS2QuadKey(token), 'Token to quad key').toBe(key);
     }
   }
-
-  t.end();
 });
 
-test('S2Layer#getS2Polygon', t => {
+test('S2Layer#getS2Polygon', () => {
   const TEST_TOKENS = [
     '80858004', // face 4
     '1c', // face 0
@@ -80,9 +74,9 @@ test('S2Layer#getS2Polygon', t => {
 
   for (const token of TEST_TOKENS) {
     const polygon = getS2Polygon(token);
-    t.ok(polygon instanceof Float64Array, 'polygon is flat array');
-    t.is((polygon.length / 2 - 1) % 4, 0, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Float64Array, 'polygon is flat array').toBeTruthy();
+    expect((polygon.length / 2 - 1) % 4, 'polygon has 4 sides').toBe(0);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
 
     let minLng = 180;
     let maxLng = -180;
@@ -90,8 +84,6 @@ test('S2Layer#getS2Polygon', t => {
       minLng = Math.min(minLng, polygon[i]);
       maxLng = Math.max(maxLng, polygon[i]);
     }
-    t.ok(maxLng - minLng < 180, 'longitude is adjusted cross the antimeridian');
+    expect(maxLng - minLng < 180, 'longitude is adjusted cross the antimeridian').toBeTruthy();
   }
-
-  t.end();
 });

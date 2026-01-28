@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {Layer, LayerExtension} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
@@ -59,10 +59,19 @@ MockExtension.resetStats = () => {
   MockExtension.finalizeCalled = 0;
 };
 
-test('LayerExtension', t => {
-  const extension0 = new MockExtension({fp64: true, assert: t.ok});
-  const extension1 = new MockExtension({fp64: true, assert: t.ok});
-  const extension2 = new MockExtension({fp64: false, assert: t.ok});
+test('LayerExtension', () => {
+  const extension0 = new MockExtension({
+    fp64: true,
+    assert: (cond, msg) => expect(cond).toBeTruthy()
+  });
+  const extension1 = new MockExtension({
+    fp64: true,
+    assert: (cond, msg) => expect(cond).toBeTruthy()
+  });
+  const extension2 = new MockExtension({
+    fp64: false,
+    assert: (cond, msg) => expect(cond).toBeTruthy()
+  });
 
   MockExtension.resetStats();
 
@@ -77,12 +86,12 @@ test('LayerExtension', t => {
           extensions: [extension0]
         },
         onAfterUpdate: ({layer}) => {
-          t.is(MockExtension.initializeCalled, 1, 'initializeState called');
-          t.is(MockExtension.updateCalled, 1, 'updateState called');
-          t.is(MockExtension.finalizeCalled, 0, 'finalizeState called');
+          expect(MockExtension.initializeCalled, 'initializeState called').toBe(1);
+          expect(MockExtension.updateCalled, 'updateState called').toBe(1);
+          expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(0);
 
           const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-          t.ok(instancePickingColors.state.constant, 'picking buffer is disabled');
+          expect(instancePickingColors.state.constant, 'picking buffer is disabled').toBeTruthy();
         }
       },
       {
@@ -90,9 +99,9 @@ test('LayerExtension', t => {
           extensions: [extension1]
         },
         onAfterUpdate: ({layer}) => {
-          t.is(MockExtension.initializeCalled, 1, 'initializeState not called');
-          t.is(MockExtension.updateCalled, 1, 'updateState not called');
-          t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+          expect(MockExtension.initializeCalled, 'initializeState not called').toBe(1);
+          expect(MockExtension.updateCalled, 'updateState not called').toBe(1);
+          expect(MockExtension.finalizeCalled, 'finalizeState not called').toBe(0);
         }
       },
       {
@@ -100,12 +109,12 @@ test('LayerExtension', t => {
           ext_pickable: true
         },
         onAfterUpdate: ({layer}) => {
-          t.is(MockExtension.initializeCalled, 1, 'initializeState not called');
-          t.is(MockExtension.updateCalled, 2, 'updateState not called');
-          t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+          expect(MockExtension.initializeCalled, 'initializeState not called').toBe(1);
+          expect(MockExtension.updateCalled, 'updateState not called').toBe(2);
+          expect(MockExtension.finalizeCalled, 'finalizeState not called').toBe(0);
 
           const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-          t.notOk(instancePickingColors.state.constant, 'picking buffer is enabled');
+          expect(instancePickingColors.state.constant, 'picking buffer is enabled').toBeFalsy();
         }
       },
       {
@@ -113,22 +122,20 @@ test('LayerExtension', t => {
           extensions: [extension2]
         },
         onAfterUpdate: () => {
-          t.is(MockExtension.initializeCalled, 1, 'initializeState not called');
-          t.is(MockExtension.updateCalled, 3, 'updateState called');
-          t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+          expect(MockExtension.initializeCalled, 'initializeState not called').toBe(1);
+          expect(MockExtension.updateCalled, 'updateState called').toBe(3);
+          expect(MockExtension.finalizeCalled, 'finalizeState not called').toBe(0);
         }
       }
     ],
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
 
-  t.is(MockExtension.finalizeCalled, 1, 'finalizeState called');
-
-  t.end();
+  expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(1);
 });
 
-test('LayerExtension#CompositeLayer passthrough', t => {
-  const extension = new MockExtension({assert: t.ok});
+test('LayerExtension#CompositeLayer passthrough', () => {
+  const extension = new MockExtension({assert: (cond, msg) => expect(cond).toBeTruthy()});
 
   MockExtension.resetStats();
 
@@ -158,23 +165,21 @@ test('LayerExtension#CompositeLayer passthrough', t => {
           extensions: [extension]
         },
         onAfterUpdate: ({subLayer}) => {
-          t.is(
+          expect(
             MockExtension.initializeCalled,
-            2,
             'initializeState called by parent and sub layers'
-          );
-          t.is(MockExtension.updateCalled, 2, 'updateState called by parent and sub layers');
-          t.is(MockExtension.finalizeCalled, 0, 'finalizeState called');
+          ).toBe(2);
+          expect(MockExtension.updateCalled, 'updateState called by parent and sub layers').toBe(2);
+          expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(0);
 
-          t.is(subLayer.props.ext_enabled, true, 'ext_enabled prop is passed through');
-          t.is(
+          expect(subLayer.props.ext_enabled, 'ext_enabled prop is passed through').toBe(true);
+          expect(
             subLayer.props.updateTriggers.ext_getValue,
-            'v0',
             'ext_getValue updateTrigger is passed through'
-          );
+          ).toBe('v0');
 
           const {instanceValues} = subLayer.getAttributeManager().getAttributes();
-          t.deepEqual(instanceValues.value, [0], 'attribute is populated');
+          expect(instanceValues.value, 'attribute is populated').toEqual([0]);
         }
       },
       {
@@ -185,25 +190,22 @@ test('LayerExtension#CompositeLayer passthrough', t => {
           }
         },
         onAfterUpdate: ({subLayer}) => {
-          t.is(MockExtension.initializeCalled, 2, 'initializeState not called');
-          t.is(MockExtension.updateCalled, 4, 'updateState called by parent and sub layers');
-          t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+          expect(MockExtension.initializeCalled, 'initializeState not called').toBe(2);
+          expect(MockExtension.updateCalled, 'updateState called by parent and sub layers').toBe(4);
+          expect(MockExtension.finalizeCalled, 'finalizeState not called').toBe(0);
 
-          t.is(
+          expect(
             subLayer.props.updateTriggers.ext_getValue,
-            'v1',
             'ext_getValue updateTrigger is passed through'
-          );
+          ).toBe('v1');
 
           const {instanceValues} = subLayer.getAttributeManager().getAttributes();
-          t.deepEqual(instanceValues.value.slice(0, 2), [1, 2], 'attribute is populated');
+          expect(instanceValues.value.slice(0, 2), 'attribute is populated').toEqual([1, 2]);
         }
       }
     ],
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
 
-  t.is(MockExtension.finalizeCalled, 2, 'finalizeState called');
-
-  t.end();
+  expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(2);
 });

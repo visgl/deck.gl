@@ -4,7 +4,7 @@
 
 // deck.gl, MIT license
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import {Proj4Projection} from '@math.gl/proj4';
@@ -19,14 +19,13 @@ test.skip('WMSLayer', async t => {
       serviceType: 'wms',
       layers: ['OSM-WMS']
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({Layer: WMSLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({Layer: WMSLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('EPSG:4326 -> EPSG:3857', t => {
+test('EPSG:4326 -> EPSG:3857', () => {
   const projConverter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
 
   const testCases = [
@@ -41,10 +40,8 @@ test('EPSG:4326 -> EPSG:3857', t => {
   for (const coord of testCases) {
     const actual = WGS84ToPseudoMercator(coord);
     const expected = projConverter.project(coord);
-    // t.comment(actual);
-    // t.comment(expected);
-    t.ok(equals(actual, expected), 'matches proj4 output');
+    // console.log(actual);
+    // console.log(expected);
+    expect(equals(actual, expected), 'matches proj4 output').toBeTruthy();
   }
-
-  t.end();
 });

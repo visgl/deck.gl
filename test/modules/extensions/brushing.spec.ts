@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 
-test('BrushingExtension', t => {
+test('BrushingExtension', () => {
   const testCases = [
     {
       props: {
@@ -22,10 +22,10 @@ test('BrushingExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.ok(uniforms.radius, 'has correct uniforms');
-        t.is(uniforms.enabled, false, 'has correct uniforms');
-        t.is(uniforms.target, 0, 'has correct uniforms');
-        t.is(uniforms.mousePos[0], 0, 'has correct uniforms');
+        expect(uniforms.radius, 'has correct uniforms').toBeTruthy();
+        expect(uniforms.enabled, 'has correct uniforms').toBe(false);
+        expect(uniforms.target, 'has correct uniforms').toBe(0);
+        expect(uniforms.mousePos[0], 'has correct uniforms').toBe(0);
       }
     },
     {
@@ -40,15 +40,13 @@ test('BrushingExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.is(uniforms.radius, 5e6, 'has correct uniforms');
-        t.is(uniforms.enabled, true, 'has correct uniforms');
-        t.is(uniforms.target, 2, 'has correct uniforms');
-        t.not(uniforms.mousePos[0], 0, 'has correct uniforms');
+        expect(uniforms.radius, 'has correct uniforms').toBe(5e6);
+        expect(uniforms.enabled, 'has correct uniforms').toBe(true);
+        expect(uniforms.target, 'has correct uniforms').toBe(2);
+        expect(uniforms.mousePos[0], 'has correct uniforms').not.toBe(0);
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

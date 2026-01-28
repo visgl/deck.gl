@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {resolveLayerGroups} from '@deck.gl/mapbox/resolve-layer-groups';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
 
-test('MapboxOverlay#resolveLayerGroups - basic group creation', async t => {
+test('MapboxOverlay#resolveLayerGroups - basic group creation', async () => {
   const MAP_STYLE = {
     layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
   };
@@ -32,17 +32,15 @@ test('MapboxOverlay#resolveLayerGroups - basic group creation', async t => {
 
   const groupId = 'deck-layer-group-before:park';
 
-  t.ok(map.getLayer(groupId), 'Group layer exists');
-  t.notOk(map.getLayer('poi'), 'Individual layer poi not added to map');
-  t.notOk(map.getLayer('connection'), 'Individual layer connection not added to map');
+  expect(map.getLayer(groupId), 'Group layer exists').toBeTruthy();
+  expect(map.getLayer('poi'), 'Individual layer poi not added to map').toBeFalsy();
+  expect(map.getLayer('connection'), 'Individual layer connection not added to map').toBeFalsy();
 
   const expectedOrder = ['water', groupId, 'park', 'building'];
-  t.deepEqual(map.style._order, expectedOrder, 'Group is positioned before park');
-
-  t.end();
+  expect(map.style._order, 'Group is positioned before park').toEqual(expectedOrder);
 });
 
-test('MapboxOverlay#resolveLayerGroups - multiple groups', async t => {
+test('MapboxOverlay#resolveLayerGroups - multiple groups', async () => {
   const MAP_STYLE = {
     layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
   };
@@ -70,23 +68,21 @@ test('MapboxOverlay#resolveLayerGroups - multiple groups', async t => {
   const group3 = 'deck-layer-group-before:water';
   const group4 = 'deck-layer-group-last';
 
-  t.ok(map.getLayer(group1), 'Group 1 exists (before park:top)');
-  t.ok(map.getLayer(group2), 'Group 2 exists (slot top)');
-  t.ok(map.getLayer(group3), 'Group 3 exists (before water)');
-  t.ok(map.getLayer(group4), 'Group 4 exists (last)');
+  expect(map.getLayer(group1), 'Group 1 exists (before park:top)').toBeTruthy();
+  expect(map.getLayer(group2), 'Group 2 exists (slot top)').toBeTruthy();
+  expect(map.getLayer(group3), 'Group 3 exists (before water)').toBeTruthy();
+  expect(map.getLayer(group4), 'Group 4 exists (last)').toBeTruthy();
 
-  t.notOk(map.getLayer('poi1'), 'Individual layer poi1 not added');
-  t.notOk(map.getLayer('poi2'), 'Individual layer poi2 not added');
-  t.notOk(map.getLayer('arc1'), 'Individual layer arc1 not added');
-  t.notOk(map.getLayer('arc2'), 'Individual layer arc2 not added');
+  expect(map.getLayer('poi1'), 'Individual layer poi1 not added').toBeFalsy();
+  expect(map.getLayer('poi2'), 'Individual layer poi2 not added').toBeFalsy();
+  expect(map.getLayer('arc1'), 'Individual layer arc1 not added').toBeFalsy();
+  expect(map.getLayer('arc2'), 'Individual layer arc2 not added').toBeFalsy();
 
   const expectedOrder = [group3, 'water', group1, 'park', 'building', group2, group4];
-  t.deepEqual(map.style._order, expectedOrder, 'Groups are positioned correctly');
-
-  t.end();
+  expect(map.style._order, 'Groups are positioned correctly').toEqual(expectedOrder);
 });
 
-test('MapboxOverlay#resolveLayerGroups - group removal', async t => {
+test('MapboxOverlay#resolveLayerGroups - group removal', async () => {
   const MAP_STYLE = {
     layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
   };
@@ -108,14 +104,14 @@ test('MapboxOverlay#resolveLayerGroups - group removal', async t => {
   resolveLayerGroups(map, undefined, layers1);
 
   const parkGroup = 'deck-layer-group-before:park';
-  t.ok(map.getLayer(parkGroup), 'Park group exists after initial add');
+  expect(map.getLayer(parkGroup), 'Park group exists after initial add').toBeTruthy();
 
   // Remove all layers
   resolveLayerGroups(map, layers1, []);
-  t.notOk(map.getLayer(parkGroup), 'Park group removed when all layers removed');
+  expect(map.getLayer(parkGroup), 'Park group removed when all layers removed').toBeFalsy();
 
   const expectedOrderAfterRemoval = ['water', 'park', 'building'];
-  t.deepEqual(map.style._order, expectedOrderAfterRemoval, 'Map order restored to original');
+  expect(map.style._order, 'Map order restored to original').toEqual(expectedOrderAfterRemoval);
 
   // Add different group
   const layers2 = [new ArcLayer({id: 'arc1', beforeId: 'water'})];
@@ -123,16 +119,14 @@ test('MapboxOverlay#resolveLayerGroups - group removal', async t => {
   resolveLayerGroups(map, [], layers2);
 
   const waterGroup = 'deck-layer-group-before:water';
-  t.ok(map.getLayer(waterGroup), 'Water group exists');
-  t.notOk(map.getLayer(parkGroup), 'Park group still does not exist');
+  expect(map.getLayer(waterGroup), 'Water group exists').toBeTruthy();
+  expect(map.getLayer(parkGroup), 'Park group still does not exist').toBeFalsy();
 
   const expectedOrderFinal = [waterGroup, 'water', 'park', 'building'];
-  t.deepEqual(map.style._order, expectedOrderFinal, 'New group positioned correctly');
-
-  t.end();
+  expect(map.style._order, 'New group positioned correctly').toEqual(expectedOrderFinal);
 });
 
-test('MapboxOverlay#resolveLayerGroups - group reordering', async t => {
+test('MapboxOverlay#resolveLayerGroups - group reordering', async () => {
   const MAP_STYLE = {
     layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
   };
@@ -151,10 +145,10 @@ test('MapboxOverlay#resolveLayerGroups - group reordering', async t => {
   resolveLayerGroups(map, undefined, layers1);
 
   const buildingGroup = 'deck-layer-group-before:building';
-  t.ok(map.getLayer(buildingGroup), 'Building group exists');
+  expect(map.getLayer(buildingGroup), 'Building group exists').toBeTruthy();
 
   let expectedOrder = ['water', 'park', buildingGroup, 'building'];
-  t.deepEqual(map.style._order, expectedOrder, 'Group positioned before building');
+  expect(map.style._order, 'Group positioned before building').toEqual(expectedOrder);
 
   // Update to different beforeId
   const layers2 = [new ScatterplotLayer({id: 'poi', beforeId: 'park'})];
@@ -162,16 +156,14 @@ test('MapboxOverlay#resolveLayerGroups - group reordering', async t => {
   resolveLayerGroups(map, layers1, layers2);
 
   const parkGroup = 'deck-layer-group-before:park';
-  t.ok(map.getLayer(parkGroup), 'Park group exists after update');
-  t.notOk(map.getLayer(buildingGroup), 'Building group removed');
+  expect(map.getLayer(parkGroup), 'Park group exists after update').toBeTruthy();
+  expect(map.getLayer(buildingGroup), 'Building group removed').toBeFalsy();
 
   expectedOrder = ['water', parkGroup, 'park', 'building'];
-  t.deepEqual(map.style._order, expectedOrder, 'Group moved to before park');
-
-  t.end();
+  expect(map.style._order, 'Group moved to before park').toEqual(expectedOrder);
 });
 
-test('MapboxOverlay#resolveLayerGroups - slot-based grouping', async t => {
+test('MapboxOverlay#resolveLayerGroups - slot-based grouping', async () => {
   const MAP_STYLE = {
     layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
   };
@@ -201,9 +193,9 @@ test('MapboxOverlay#resolveLayerGroups - slot-based grouping', async t => {
   const middleGroupLayer = map.getLayer(middleGroup);
   const topGroupLayer = map.getLayer(topGroup);
 
-  t.ok(bottomGroupLayer, 'Bottom group exists');
-  t.ok(middleGroupLayer, 'Middle group exists');
-  t.ok(topGroupLayer, 'Top group exists');
+  expect(bottomGroupLayer, 'Bottom group exists').toBeTruthy();
+  expect(middleGroupLayer, 'Middle group exists').toBeTruthy();
+  expect(topGroupLayer, 'Top group exists').toBeTruthy();
 
   // Verify slot property is set correctly
   // @ts-ignore accessing implementation
@@ -213,14 +205,12 @@ test('MapboxOverlay#resolveLayerGroups - slot-based grouping', async t => {
   // @ts-ignore accessing implementation
   const topImpl = topGroupLayer.implementation || topGroupLayer;
 
-  t.equal(bottomImpl.slot, 'bottom', 'Bottom group has correct slot');
-  t.equal(middleImpl.slot, 'middle', 'Middle group has correct slot');
-  t.equal(topImpl.slot, 'top', 'Top group has correct slot');
-
-  t.end();
+  expect(bottomImpl.slot, 'Bottom group has correct slot').toBe('bottom');
+  expect(middleImpl.slot, 'Middle group has correct slot').toBe('middle');
+  expect(topImpl.slot, 'Top group has correct slot').toBe('top');
 });
 
-test('MapboxOverlay#resolveLayerGroups - style change handling', async t => {
+test('MapboxOverlay#resolveLayerGroups - style change handling', async () => {
   const MAP_STYLE = {
     layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
   };
@@ -244,17 +234,17 @@ test('MapboxOverlay#resolveLayerGroups - style change handling', async t => {
   const parkGroup = 'deck-layer-group-before:park';
   const buildingGroup = 'deck-layer-group-before:building';
 
-  t.ok(map.getLayer(parkGroup), 'Park group exists initially');
-  t.ok(map.getLayer(buildingGroup), 'Building group exists initially');
+  expect(map.getLayer(parkGroup), 'Park group exists initially').toBeTruthy();
+  expect(map.getLayer(buildingGroup), 'Building group exists initially').toBeTruthy();
 
   const expectedOrderInitial = ['water', parkGroup, 'park', buildingGroup, 'building'];
-  t.deepEqual(map.style._order, expectedOrderInitial, 'Groups positioned correctly initially');
+  expect(map.style._order, 'Groups positioned correctly initially').toEqual(expectedOrderInitial);
 
   // Trigger style change
   map.setStyle({...MAP_STYLE});
 
   const DEFAULT_LAYERS = ['water', 'park', 'building'];
-  t.deepEqual(map.style._order, DEFAULT_LAYERS, 'Style is reset');
+  expect(map.style._order, 'Style is reset').toEqual(DEFAULT_LAYERS);
 
   // Wait for style to load
   await sleep(10);
@@ -262,11 +252,9 @@ test('MapboxOverlay#resolveLayerGroups - style change handling', async t => {
   // Restore layers (simulate what happens in _handleStyleChange)
   resolveLayerGroups(map, layers, layers);
 
-  t.ok(map.getLayer(parkGroup), 'Park group restored after style change');
-  t.ok(map.getLayer(buildingGroup), 'Building group restored after style change');
-  t.deepEqual(map.style._order, expectedOrderInitial, 'Groups restored to correct positions');
-
-  t.end();
+  expect(map.getLayer(parkGroup), 'Park group restored after style change').toBeTruthy();
+  expect(map.getLayer(buildingGroup), 'Building group restored after style change').toBeTruthy();
+  expect(map.style._order, 'Groups restored to correct positions').toEqual(expectedOrderInitial);
 });
 
 /* global setTimeout */

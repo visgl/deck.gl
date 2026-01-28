@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import '@luma.gl/core';
 
 import DeckGL from 'deck.gl';
@@ -22,7 +22,7 @@ import * as mapbox from '@deck.gl/mapbox';
 import * as react from '@deck.gl/react';
 import * as testUtils from '@deck.gl/test-utils';
 
-test('Top-level imports', t0 => {
+describe('Top-level imports', () => {
   const hasEmptyExports = obj => {
     for (const key in obj) {
       if (obj[key] === undefined) {
@@ -32,59 +32,70 @@ test('Top-level imports', t0 => {
     return false;
   };
 
-  t0.test('import "deck.gl"', t => {
-    t.notOk(hasEmptyExports(deck), 'No empty top-level export in deck.gl');
-    t.notOk(hasEmptyExports(core), 'No empty top-level export in @deck.gl/core');
-    t.end();
+  test('import "deck.gl"', () => {
+    expect(hasEmptyExports(deck), 'No empty top-level export in deck.gl').toBeFalsy();
+    expect(hasEmptyExports(core), 'No empty top-level export in @deck.gl/core').toBeFalsy();
   });
 
-  t0.test('import layers', t => {
-    t.notOk(hasEmptyExports(layers), 'No empty top-level export in @deck.gl/layers');
-    t.notOk(
+  test('import layers', () => {
+    expect(hasEmptyExports(layers), 'No empty top-level export in @deck.gl/layers').toBeFalsy();
+    expect(
       hasEmptyExports(aggregationLayers),
       'No empty top-level export in @deck.gl/aggregation-layers'
-    );
-    t.notOk(hasEmptyExports(carto), 'No empty top-level export in @deck.gl/carto');
-    t.notOk(hasEmptyExports(geoLayers), 'No empty top-level export in @deck.gl/geo-layers');
-    t.notOk(hasEmptyExports(meshLayers), 'No empty top-level export in @deck.gl/mesh-layers');
-    t.end();
+    ).toBeFalsy();
+    expect(hasEmptyExports(carto), 'No empty top-level export in @deck.gl/carto').toBeFalsy();
+    expect(
+      hasEmptyExports(geoLayers),
+      'No empty top-level export in @deck.gl/geo-layers'
+    ).toBeFalsy();
+    expect(
+      hasEmptyExports(meshLayers),
+      'No empty top-level export in @deck.gl/mesh-layers'
+    ).toBeFalsy();
   });
 
-  t0.test('import utilities', t => {
-    t.notOk(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json');
-    t.notOk(hasEmptyExports(arcgis), 'No empty top-level export in @deck.gl/arcgis');
-    t.notOk(hasEmptyExports(googleMaps), 'No empty top-level export in @deck.gl/google-maps');
-    t.notOk(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox');
-    t.notOk(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react');
-    t.notOk(hasEmptyExports(testUtils), 'No empty top-level export in @deck.gl/test-utils');
-    t.end();
+  test('import utilities', () => {
+    expect(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json').toBeFalsy();
+    expect(hasEmptyExports(arcgis), 'No empty top-level export in @deck.gl/arcgis').toBeFalsy();
+    expect(
+      hasEmptyExports(googleMaps),
+      'No empty top-level export in @deck.gl/google-maps'
+    ).toBeFalsy();
+    expect(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox').toBeFalsy();
+    expect(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react').toBeFalsy();
+    expect(
+      hasEmptyExports(testUtils),
+      'No empty top-level export in @deck.gl/test-utils'
+    ).toBeFalsy();
   });
 
-  t0.test('selected imports', t => {
-    t.ok(deck.Layer, 'Layer symbol imported');
-    t.ok(deck.ScatterplotLayer, 'ScatterplotLayer symbol imported');
-    t.ok(deck.ScreenGridLayer, 'ScreenGridLayer symbol imported');
-    t.ok(deck.ArcLayer, 'ArcLayer symbol imported');
-    t.ok(deck.LineLayer, 'LineLayer symbol imported');
+  test('selected imports', () => {
+    expect(deck.Layer, 'Layer symbol imported').toBeTruthy();
+    expect(deck.ScatterplotLayer, 'ScatterplotLayer symbol imported').toBeTruthy();
+    expect(deck.ScreenGridLayer, 'ScreenGridLayer symbol imported').toBeTruthy();
+    expect(deck.ArcLayer, 'ArcLayer symbol imported').toBeTruthy();
+    expect(deck.LineLayer, 'LineLayer symbol imported').toBeTruthy();
 
-    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.LNGLAT), 'COORDINATE_SYSTEM.LNGLAT imported');
-    t.ok(
+    expect(
+      Number.isFinite(deck.COORDINATE_SYSTEM.LNGLAT),
+      'COORDINATE_SYSTEM.LNGLAT imported'
+    ).toBeTruthy();
+    expect(
       Number.isFinite(deck.COORDINATE_SYSTEM.METER_OFFSETS),
       'COORDINATE_SYSTEM.METERS imported'
-    );
-    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.CARTESIAN), 'COORDINATE_SYSTEM.CARTESIAN imported');
-    t.end();
+    ).toBeTruthy();
+    expect(
+      Number.isFinite(deck.COORDINATE_SYSTEM.CARTESIAN),
+      'COORDINATE_SYSTEM.CARTESIAN imported'
+    ).toBeTruthy();
   });
 
-  t0.test('deck.gl default import', t => {
-    t.ok(DeckGL, 'DeckGL symbol imported from /react');
-    t.end();
+  test('deck.gl default import', () => {
+    expect(DeckGL, 'DeckGL symbol imported from /react').toBeTruthy();
   });
-
-  t0.end();
 });
 
-test('deck.gl re-exports', t => {
+test('deck.gl re-exports', () => {
   const findMissingExports = (source, target) => {
     const missingExports = [];
     for (const key in source) {
@@ -96,20 +107,24 @@ test('deck.gl re-exports', t => {
     return missingExports.length ? missingExports : null;
   };
 
-  t.notOk(findMissingExports(core, deck), 'deck.gl re-exports everything from @deck.gl/core');
-  t.notOk(findMissingExports(layers, deck), 'deck.gl re-exports everything from @deck.gl/layers');
-  t.notOk(
+  expect(
+    findMissingExports(core, deck),
+    'deck.gl re-exports everything from @deck.gl/core'
+  ).toBeFalsy();
+  expect(
+    findMissingExports(layers, deck),
+    'deck.gl re-exports everything from @deck.gl/layers'
+  ).toBeFalsy();
+  expect(
     findMissingExports(aggregationLayers, deck),
     'deck.gl re-exports everything from @deck.gl/aggregation-layers'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     findMissingExports(geoLayers, deck),
     'deck.gl re-exports everything from @deck.gl/geo-layers'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     findMissingExports(meshLayers, deck),
     'deck.gl re-exports everything from @deck.gl/mesh-layers'
-  );
-
-  t.end();
+  ).toBeFalsy();
 });

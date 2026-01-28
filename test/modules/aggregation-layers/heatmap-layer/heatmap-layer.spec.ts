@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {MapView} from '@deck.gl/core';
@@ -41,29 +41,27 @@ const viewport4_zoomChange = new MapView().makeViewport({
   viewState: {longitude: 10, latitude: 0, zoom: 9.9}
 });
 
-test('HeatmapLayer', t => {
+test('HeatmapLayer', () => {
   const testCases = generateLayerTests({
     Layer: HeatmapLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
       getPosition
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.worldBounds, 'should update state.worldBounds');
+      expect(layer.state.worldBounds, 'should update state.worldBounds').toBeTruthy();
     }
   });
 
-  testLayer({Layer: HeatmapLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: HeatmapLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test.skip('HeatmapLayer#updates', t => {
   testLayer({
     Layer: HeatmapLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     viewport: viewport0,
     testCases: [
       {
@@ -75,10 +73,13 @@ test.skip('HeatmapLayer#updates', t => {
         onAfterUpdate({layer, subLayer}) {
           const {worldBounds, viewportCorners} = layer.state;
 
-          t.ok(subLayer instanceof TriangleLayer, 'Sublayer Triangle layer rendered');
+          expect(
+            subLayer instanceof TriangleLayer,
+            'Sublayer Triangle layer rendered'
+          ).toBeTruthy();
 
-          t.ok(worldBounds, 'should compute worldBounds');
-          t.ok(viewportCorners, 'should compute viewportCorners');
+          expect(worldBounds, 'should compute worldBounds').toBeTruthy();
+          expect(viewportCorners, 'should compute viewportCorners').toBeTruthy();
         }
       },
       {
@@ -87,13 +88,13 @@ test.skip('HeatmapLayer#updates', t => {
         },
         spies: ['_updateColorTexture', '_updateBounds'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(subLayers.length === 1, 'Sublayer rendered');
+          expect(subLayers.length === 1, 'Sublayer rendered').toBeTruthy();
 
-          t.ok(spies._updateColorTexture.called, 'should update color texture');
-          t.notOk(
+          expect(spies._updateColorTexture.called, 'should update color texture').toBeTruthy();
+          expect(
             spies._updateBounds.called,
             'viewport not changed, should not call _updateBounds'
-          );
+          ).toBeFalsy();
           spies._updateColorTexture.restore();
           spies._updateBounds.restore();
         }
@@ -108,14 +109,20 @@ test.skip('HeatmapLayer#updates', t => {
         ],
         onAfterUpdate({layer, subLayers, spies}) {
           const {zoom} = layer.state;
-          t.notOk(spies._updateColorTexture.called, 'should not update color texture');
-          t.ok(spies._updateBounds.called, 'viewport changed, should call _updateBounds');
-          t.ok(spies._updateWeightmap.called, 'boundsChanged changed, should _updateWeightmap');
-          t.ok(
+          expect(spies._updateColorTexture.called, 'should not update color texture').toBeFalsy();
+          expect(
+            spies._updateBounds.called,
+            'viewport changed, should call _updateBounds'
+          ).toBeTruthy();
+          expect(
+            spies._updateWeightmap.called,
+            'boundsChanged changed, should _updateWeightmap'
+          ).toBeTruthy();
+          expect(
             spies._updateTextureRenderingBounds.called,
             'vieport changed, should call _updateTextureRenderingBounds'
-          );
-          t.equal(zoom, viewport1.zoom, 'should update state.zoom');
+          ).toBeTruthy();
+          expect(zoom, 'should update state.zoom').toBe(viewport1.zoom);
           spies._updateColorTexture.restore();
           spies._updateBounds.restore();
           spies._updateWeightmap.restore();
@@ -126,15 +133,18 @@ test.skip('HeatmapLayer#updates', t => {
         viewport: viewport2_slightChange, // panned slightly, no zoom change
         spies: ['_updateBounds', '_updateWeightmap', '_updateTextureRenderingBounds'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._updateBounds.called, 'viewport changed slightly, should call _updateBounds');
-          t.notOk(
+          expect(
+            spies._updateBounds.called,
+            'viewport changed slightly, should call _updateBounds'
+          ).toBeTruthy();
+          expect(
             spies._updateWeightmap.called,
             'viewport changed slightly, should not call _updateWeightmap'
-          );
-          t.ok(
+          ).toBeFalsy();
+          expect(
             spies._updateTextureRenderingBounds.called,
             'viewport changed slightly, should call _updateTextureRenderingBounds'
-          );
+          ).toBeTruthy();
           spies._updateBounds.restore();
           spies._updateWeightmap.restore();
           spies._updateTextureRenderingBounds.restore();
@@ -144,11 +154,14 @@ test.skip('HeatmapLayer#updates', t => {
         viewport: viewport3_bigChange, // panned too far, no zoom change
         spies: ['_updateBounds', '_updateWeightmap'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._updateBounds.called, 'viewport panned too far, should call _updateBounds');
-          t.ok(
+          expect(
+            spies._updateBounds.called,
+            'viewport panned too far, should call _updateBounds'
+          ).toBeTruthy();
+          expect(
             spies._updateWeightmap.called,
             'viewport panned too far, should call _updateWeightmap'
-          );
+          ).toBeTruthy();
           spies._updateBounds.restore();
           spies._updateWeightmap.restore();
         }
@@ -158,17 +171,18 @@ test.skip('HeatmapLayer#updates', t => {
         spies: ['_updateBounds', '_debouncedUpdateWeightmap'],
         onAfterUpdate({layer, subLayers, spies}) {
           const {zoom} = layer.state;
-          t.ok(spies._updateBounds.called, 'viewport zoom changed, should call _updateBounds');
-          t.ok(
+          expect(
+            spies._updateBounds.called,
+            'viewport zoom changed, should call _updateBounds'
+          ).toBeTruthy();
+          expect(
             spies._debouncedUpdateWeightmap.called,
             'viewport zoom changed, should call _debouncedUpdateWeightmap'
-          );
+          ).toBeTruthy();
           spies._updateBounds.restore();
           spies._debouncedUpdateWeightmap.restore();
-          t.equal(
-            zoom,
-            viewport4_zoomChange.zoom,
-            'viewport zoom changed, should update state.zoom'
+          expect(zoom, 'viewport zoom changed, should update state.zoom').toBe(
+            viewport4_zoomChange.zoom
           );
         }
       },
@@ -179,17 +193,18 @@ test.skip('HeatmapLayer#updates', t => {
         viewport: viewport4_zoomChange, // keep the same viewport
         spies: ['_updateWeightmap'],
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(spies._updateWeightmap.called, 'should update weight map on uniform change');
+          expect(
+            spies._updateWeightmap.called,
+            'should update weight map on uniform change'
+          ).toBeTruthy();
           spies._updateWeightmap.restore();
         }
       }
     ]
   });
-
-  t.end();
 });
 
-test('HeatmapLayer#binaryData', t => {
+test('HeatmapLayer#binaryData', () => {
   const pointCount = 2;
   const positions = new Float32Array(pointCount * 2);
   const weights = new Float32Array(pointCount);
@@ -219,7 +234,7 @@ test('HeatmapLayer#binaryData', t => {
 
   testLayer({
     Layer: HeatmapLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     viewport: viewport0,
     testCases: [
       {
@@ -228,27 +243,28 @@ test('HeatmapLayer#binaryData', t => {
           radiusPixels: 30
         },
         onAfterUpdate({layer, subLayer}) {
-          t.ok(layer, 'HeatmapLayer should render with binary data');
-          t.ok(subLayer instanceof TriangleLayer, 'Should create TriangleLayer sublayer');
-          t.equal(
-            layer.getNumInstances(),
-            pointCount,
-            'Should correctly count binary data instances'
+          expect(layer, 'HeatmapLayer should render with binary data').toBeTruthy();
+          expect(
+            subLayer instanceof TriangleLayer,
+            'Should create TriangleLayer sublayer'
+          ).toBeTruthy();
+          expect(layer.getNumInstances(), 'Should correctly count binary data instances').toBe(
+            pointCount
           );
 
           // Verify weightsTransform was created properly
-          t.ok(layer.state.weightsTransform, 'Should have weightsTransform');
-          t.ok(layer.state.weightsTexture, 'Should have weightsTexture');
+          expect(layer.state.weightsTransform, 'Should have weightsTransform').toBeTruthy();
+          expect(layer.state.weightsTexture, 'Should have weightsTexture').toBeTruthy();
 
           const positionAttribute = layer.state.weightsTransform.model.bufferLayout.find(
             a => a.name === 'positions'
           ).attributes[0];
-          t.ok(positionAttribute, 'Should have position attribute');
-          t.equal(positionAttribute.format, 'float32x2', 'bufferLayout should match binary data');
+          expect(positionAttribute, 'Should have position attribute').toBeTruthy();
+          expect(positionAttribute.format, 'bufferLayout should match binary data').toBe(
+            'float32x2'
+          );
         }
       }
     ]
   });
-
-  t.end();
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 
 import CartoRasterTileLoader from '@deck.gl/carto/layers/schema/carto-raster-tile-loader';
 
@@ -12,20 +12,17 @@ import CartoRasterTileLoader from '@deck.gl/carto/layers/schema/carto-raster-til
 import binaryRasterTileData from '../data/binaryRasterTile.json';
 const BINARY_RASTER_TILE = new Uint8Array(binaryRasterTileData).buffer;
 
-test('Parse Carto Raster Tile', async t => {
+test('Parse Carto Raster Tile', async () => {
   const converted = CartoRasterTileLoader.parseSync(BINARY_RASTER_TILE, {
     cartoRasterTile: {metadata: {}}
   });
   const {numericProps} = converted.cells;
 
   const {band_1} = numericProps;
-  t.ok(band_1, 'band_1 found in data');
-  t.ok(band_1.value instanceof Uint8Array, 'band has correct type');
-  t.equal(band_1.value.length, 65536, 'band has correct length');
-  t.deepEqual(
-    band_1.value.slice(123, 127),
-    new Uint8Array([35, 36, 36, 36]),
-    'band correctly decoded'
+  expect(band_1, 'band_1 found in data').toBeTruthy();
+  expect(band_1.value instanceof Uint8Array, 'band has correct type').toBeTruthy();
+  expect(band_1.value.length, 'band has correct length').toBe(65536);
+  expect(band_1.value.slice(123, 127), 'band correctly decoded').toEqual(
+    new Uint8Array([35, 36, 36, 36])
   );
-  t.end();
 });

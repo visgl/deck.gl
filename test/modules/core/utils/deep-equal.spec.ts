@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {deepEqual} from '@deck.gl/core/utils/deep-equal';
 
 const obj = {longitude: -70, latitude: 40.7, zoom: 12};
@@ -128,11 +128,9 @@ const TEST_CASES = [
   }
 ];
 
-test('utils#deepEqual', t => {
+test('utils#deepEqual', () => {
   TEST_CASES.forEach(({a, b, depth, output}) => {
     const result = deepEqual(a, b, depth);
-    t.is(result, output, `should ${output ? '' : 'not '}be equal`);
+    expect(result, `should ${output ? '' : 'not '}be equal`).toBe(output);
   });
-
-  t.end();
 });

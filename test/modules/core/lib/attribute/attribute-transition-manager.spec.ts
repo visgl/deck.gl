@@ -5,7 +5,7 @@
 /* eslint-disable max-statements */
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import type {Buffer} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
 import {device} from '@deck.gl/test-utils';
@@ -40,22 +40,19 @@ const TEST_ATTRIBUTES = (function () {
   return {indices, instancePositions, instanceSizes};
 })();
 
-test('AttributeTransitionManager#constructor', t => {
+test('AttributeTransitionManager#constructor', () => {
   let manager = new AttributeTransitionManager(device, {id: 'attribute-transition'});
-  t.ok(manager, 'AttributeTransitionManager is constructed');
+  expect(manager, 'AttributeTransitionManager is constructed').toBeTruthy();
 
   manager.finalize();
-  t.pass('AttributeTransitionManager is finalized');
 
-  t.throws(
+  expect(
     () => new AttributeTransitionManager(null, {id: 'attribute-transition'}),
     'AttributeTransitionManager is constructed without device'
-  );
-
-  t.end();
+  ).toThrow();
 });
 
-test('AttributeTransitionManager#update', async t => {
+test('AttributeTransitionManager#update', async () => {
   const timeline = new Timeline();
   const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
   const attributes = Object.assign({}, TEST_ATTRIBUTES);
@@ -65,53 +62,60 @@ test('AttributeTransitionManager#update', async t => {
   attributes.instancePositions.setNeedsRedraw('initial');
 
   manager.update({attributes, transitions: {}, numInstances: 4});
-  t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
-  t.notOk(manager.hasAttribute('instanceSizes'), 'no transition for instanceSizes');
-  t.notOk(manager.hasAttribute('instancePositions'), 'no transition for instancePositions');
+  expect(manager.hasAttribute('indices'), 'no transition for indices').toBeFalsy();
+  expect(manager.hasAttribute('instanceSizes'), 'no transition for instanceSizes').toBeFalsy();
+  expect(
+    manager.hasAttribute('instancePositions'),
+    'no transition for instancePositions'
+  ).toBeFalsy();
 
   manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 0});
-  t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
-  t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
-  t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
+  expect(manager.hasAttribute('indices'), 'no transition for indices').toBeFalsy();
+  expect(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes').toBeTruthy();
+  expect(
+    manager.hasAttribute('instancePositions'),
+    'added transition for instancePositions'
+  ).toBeTruthy();
 
   // byteLength = max(numInstances, 1) * 4. Later reallocation may skip the padding.
   const sizeTransition = manager.transitions.instanceSizes;
-  t.is(sizeTransition.buffers[0].byteLength, 4, 'buffer has correct size');
+  expect(sizeTransition.buffers[0].byteLength, 'buffer has correct size').toBe(4);
 
   const positionTransform = manager.transitions.instancePositions.transform;
-  t.ok(positionTransform, 'transform is constructed for instancePositions');
+  expect(positionTransform, 'transform is constructed for instancePositions').toBeTruthy();
   delete attributes.instancePositions;
 
   manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
-  t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
-  t.notOk(manager.hasAttribute('instancePositions'), 'removed transition for instancePositions');
-  t.notOk(positionTransform._handle, 'instancePositions transform is deleted');
-  t.is(sizeTransition.buffers[0].byteLength, 4 * 4, 'buffer has correct size');
+  expect(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes').toBeTruthy();
+  expect(
+    manager.hasAttribute('instancePositions'),
+    'removed transition for instancePositions'
+  ).toBeFalsy();
+  expect(positionTransform._handle, 'instancePositions transform is deleted').toBeFalsy();
+  expect(sizeTransition.buffers[0].byteLength, 'buffer has correct size').toBe(4 * 4);
 
   attributes.instanceSizes.setData({value: new Float32Array(10).fill(1)});
   manager.update({attributes, transitions: {getSize: 1000}, numInstances: 10});
   manager.run();
   let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
   let actual = await readArray(transitioningBuffer);
-  t.deepEquals(actual, [0, 0, 0, 0, 1, 1, 1, 1, 1, 1], 'buffer is extended with new data');
-  t.is(transitioningBuffer.byteLength, 10 * 4, 'buffer has correct size');
+  expect(actual, 'buffer is extended with new data').toEqual([0, 0, 0, 0, 1, 1, 1, 1, 1, 1]);
+  expect(transitioningBuffer.byteLength, 'buffer has correct size').toBe(10 * 4);
 
   attributes.instanceSizes.setData({constant: true, value: [2]});
   manager.update({attributes, transitions: {getSize: 1000}, numInstances: 12});
   manager.run();
   transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
   actual = await readArray(transitioningBuffer);
-  t.deepEquals(actual, [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2], 'buffer is extended with new data');
-  t.is(transitioningBuffer.byteLength, 12 * 4, 'buffer has correct size');
+  expect(actual, 'buffer is extended with new data').toEqual([0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2]);
+  expect(transitioningBuffer.byteLength, 'buffer has correct size').toBe(12 * 4);
 
   manager.finalize();
-  t.notOk(transitioningBuffer._handle, 'transform buffer is deleted');
-  t.notOk(manager.transitions.instanceSizes, 'transition is deleted');
-
-  t.end();
+  expect(transitioningBuffer._handle, 'transform buffer is deleted').toBeFalsy();
+  expect(manager.transitions.instanceSizes, 'transition is deleted').toBeFalsy();
 });
 
-test('AttributeTransitionManager#transition', async t => {
+test('AttributeTransitionManager#transition', async () => {
   const timeline = new Timeline();
   const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
   const attributes = Object.assign({}, TEST_ATTRIBUTES);
@@ -140,46 +144,45 @@ test('AttributeTransitionManager#transition', async t => {
   timeline.setTime(0);
   manager.update({attributes, transitions, numInstances: 4});
   manager.run();
-  t.is(startCounter, 1, 'transition starts');
+  expect(startCounter, 'transition starts').toBe(1);
 
   timeline.setTime(500);
   attributes.instanceSizes.needsRedraw({clearChangedFlags: true});
   manager.update({attributes, transitions, numInstances: 4});
   manager.run();
-  t.is(startCounter, 1, 'no new transition is triggered');
+  expect(startCounter, 'no new transition is triggered').toBe(1);
 
   timeline.setTime(1000);
   attributes.instanceSizes.setData({value: new Float32Array(4).fill(3)});
   attributes.instanceSizes.setNeedsRedraw('update');
   manager.update({attributes, transitions, numInstances: 4});
   manager.run();
-  t.is(interruptCounter, 1, 'transition is interrupted');
-  t.is(startCounter, 2, 'new transition is triggered');
+  expect(interruptCounter, 'transition is interrupted').toBe(1);
+  expect(startCounter, 'new transition is triggered').toBe(2);
 
   timeline.setTime(1500);
   manager.run();
   let actual = await readArray(manager.getAttributes().instanceSizes.getBuffer());
-  t.deepEquals(actual.slice(0, 4), [2, 2, 2, 2], 'attribute in transition');
+  expect(actual.slice(0, 4), 'attribute in transition').toEqual([2, 2, 2, 2]);
 
   attributes.instanceSizes.setData({value: new Float32Array(4).fill(4)});
   attributes.instanceSizes.setNeedsRedraw('update');
 
   manager.update({attributes, transitions, numInstances: 4});
   manager.run();
-  t.is(interruptCounter, 2, 'transition is interrupted');
-  t.is(startCounter, 3, 'new transition is triggered');
+  expect(interruptCounter, 'transition is interrupted').toBe(2);
+  expect(startCounter, 'new transition is triggered').toBe(3);
 
   timeline.setTime(2000);
   manager.run();
   actual = await readArray(manager.getAttributes().instanceSizes.getBuffer());
-  t.deepEquals(actual.slice(0, 4), [3, 3, 3, 3], 'attribute in transition');
+  expect(actual.slice(0, 4), 'attribute in transition').toEqual([3, 3, 3, 3]);
 
   timeline.setTime(2500);
   manager.run();
-  t.is(endCounter, 1, 'transition ends');
+  expect(endCounter, 'transition ends').toBe(1);
 
   manager.finalize();
-  t.end();
 });
 
 async function readArray(buffer: Buffer): Promise<number[]> {

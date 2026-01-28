@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable no-unused-vars */
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {createElement, createRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {act} from 'react-dom/test-utils';
@@ -25,7 +25,7 @@ const TEST_VIEW_STATE = {
 /* global document */
 const getMockContext = () => (globalThis.__JSDOM__ ? gl : null);
 
-test('DeckGL#mount/unmount', t => {
+test('DeckGL#mount/unmount', () => {
   const ref = createRef();
   const container = document.createElement('div');
   document.body.append(container);
@@ -41,26 +41,27 @@ test('DeckGL#mount/unmount', t => {
         gl: getMockContext(),
         onLoad: () => {
           const {deck} = ref.current;
-          t.ok(deck, 'DeckGL is initialized');
+          expect(deck, 'DeckGL is initialized').toBeTruthy();
           const viewport = deck.getViewports()[0];
-          t.is(viewport && viewport.longitude, TEST_VIEW_STATE.longitude, 'View state is set');
+          expect(viewport && viewport.longitude, 'View state is set').toBe(
+            TEST_VIEW_STATE.longitude
+          );
 
           act(() => {
             root.render(null);
           });
 
-          t.notOk(deck.animationLoop, 'Deck is finalized');
+          expect(deck.animationLoop, 'Deck is finalized').toBeFalsy();
 
           container.remove();
-          t.end();
         }
       })
     );
   });
-  t.ok(ref.current, 'DeckGL overlay is rendered.');
+  expect(ref.current, 'DeckGL overlay is rendered.').toBeTruthy();
 });
 
-test('DeckGL#render', t => {
+test('DeckGL#render', () => {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
@@ -74,11 +75,10 @@ test('DeckGL#render', t => {
         gl: getMockContext(),
         onAfterRender: () => {
           const child = container.querySelector('.child');
-          t.ok(child, 'Child is rendered');
+          expect(child, 'Child is rendered').toBeTruthy();
 
           root.render(null);
           container.remove();
-          t.end();
         }
       },
       [createElement('div', {key: 0, className: 'child'}, 'Child')]
@@ -107,7 +107,7 @@ class TestWidget extends Widget<WidgetProps> {
 
 const WIDGETS = [new TestWidget({id: 'A'})];
 
-test('DeckGL#props omitted are reset', t => {
+test('DeckGL#props omitted are reset', () => {
   const ref = createRef();
   const container = document.createElement('div');
   document.body.append(container);
@@ -126,10 +126,10 @@ test('DeckGL#props omitted are reset', t => {
         widgets: WIDGETS,
         onLoad: () => {
           const {deck} = ref.current;
-          t.ok(deck, 'DeckGL is initialized');
+          expect(deck, 'DeckGL is initialized').toBeTruthy();
           const {widgets, layers} = deck.props;
-          t.is(widgets && Array.isArray(widgets) && widgets.length, 1, 'Widgets is set');
-          t.is(layers && Array.isArray(layers) && layers.length, 1, 'Layers is set');
+          expect(widgets && Array.isArray(widgets) && widgets.length, 'Widgets is set').toBe(1);
+          expect(layers && Array.isArray(layers) && layers.length, 'Layers is set').toBe(1);
 
           act(() => {
             // Render deck a second time without setting widget or layer props.
@@ -139,20 +139,17 @@ test('DeckGL#props omitted are reset', t => {
                 onAfterRender: () => {
                   const {deck} = ref.current;
                   const {widgets, layers} = deck.props;
-                  t.is(
+                  expect(
                     widgets && Array.isArray(widgets) && widgets.length,
-                    0,
                     'Widgets is reset to an empty array'
-                  );
-                  t.is(
+                  ).toBe(0);
+                  expect(
                     layers && Array.isArray(layers) && layers.length,
-                    0,
                     'Layers is reset to an empty array'
-                  );
+                  ).toBe(0);
 
                   root.render(null);
                   container.remove();
-                  t.end();
                 }
               })
             );
@@ -161,5 +158,5 @@ test('DeckGL#props omitted are reset', t => {
       })
     );
   });
-  t.ok(ref.current, 'DeckGL overlay is rendered.');
+  expect(ref.current, 'DeckGL overlay is rendered.').toBeTruthy();
 });
