@@ -18,7 +18,7 @@ test('GridLayer', () => {
   const testCases = generateLayerTests({
     Layer: GridLayer,
     sampleProps: SAMPLE_PROPS,
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
       expect(layer.state.aggregator, 'should have aggregator').toBeTruthy();

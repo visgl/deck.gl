@@ -265,8 +265,8 @@ function convertTapeToVitest(content, filePath = '') {
   // onError: t.notOk -> onError: (err) => expect(err).toBeFalsy()
   result = result.replace(/onError:\s*t\d*\.notOk/g, 'onError: (err) => expect(err).toBeFalsy()');
 
-  // assert: t.ok -> assert: (cond, msg) => expect(cond).toBeTruthy()
-  result = result.replace(/assert:\s*t\d*\.ok/g, 'assert: (cond, msg) => expect(cond).toBeTruthy()');
+  // assert: t.ok -> assert: (cond, msg) => expect(cond, msg).toBeTruthy()
+  result = result.replace(/assert:\s*t\d*\.ok/g, 'assert: (cond, msg) => expect(cond, msg).toBeTruthy()');
 
   // Step 8b: Convert sinon-style spy.called assertions to vitest toHaveBeenCalled()
   // expect(spy.called, 'message').toBeTruthy() -> expect(spy, 'message').toHaveBeenCalled()
