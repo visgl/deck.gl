@@ -20,12 +20,17 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
   }
   const widget = widgetRef.current;
 
+  // Register widget during render for immediate availability (needed for onLoad callbacks)
+  // The includes check prevents duplicates in StrictMode double-renders
+  if (widgets && !widgets.includes(widget)) {
+    widgets.push(widget);
+  }
+
   // Update props on every render
   widget.setProps(props);
 
   useEffect(() => {
-    // Register widget in effect (not during render) for proper StrictMode support
-    // Check if widget is already in array (handles StrictMode remount after cleanup)
+    // Re-register widget if cleanup removed it (handles StrictMode remount after cleanup)
     if (widgets && !widgets.includes(widget)) {
       widgets.push(widget);
     }
