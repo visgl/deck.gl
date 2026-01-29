@@ -129,18 +129,19 @@ function convertTapeToVitest(content, filePath = '') {
     (match, name, async) => `describe(${name}, ${async || ''}() => {`
   );
 
-  // Step 2b: Convert regular test function signatures
+  // Step 2b: Convert regular test function signatures (including test.skip and test.only)
   // test('name', t => { -> test('name', () => {
+  // test.skip('name', t => { -> test.skip('name', () => {
   // test('name', async t => { -> test('name', async () => {
   result = result.replace(
-    /test\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?t\s*=>\s*\{/g,
-    (match, name, async) => `test(${name}, ${async || ''}() => {`
+    /test(\.skip|\.only)?\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?t\s*=>\s*\{/g,
+    (match, modifier, name, async) => `test${modifier || ''}(${name}, ${async || ''}() => {`
   );
 
-  // Also handle function() style
+  // Also handle function() style (including test.skip and test.only)
   result = result.replace(
-    /test\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?function\s*\(\s*t\s*\)\s*\{/g,
-    (match, name, async) => `test(${name}, ${async || ''}() => {`
+    /test(\.skip|\.only)?\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?function\s*\(\s*t\s*\)\s*\{/g,
+    (match, modifier, name, async) => `test${modifier || ''}(${name}, ${async || ''}() => {`
   );
 
   // Step 3: Remove t.end() and t0.end(), t1.end() etc. calls

@@ -58,7 +58,7 @@ test('HeatmapLayer', () => {
   testLayer({Layer: HeatmapLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test.skip('HeatmapLayer#updates', t => {
+test.skip('HeatmapLayer#updates', () => {
   testLayer({
     Layer: HeatmapLayer,
     onError: err => expect(err).toBeFalsy(),

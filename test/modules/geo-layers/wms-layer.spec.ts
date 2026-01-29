@@ -11,7 +11,7 @@ import {Proj4Projection} from '@math.gl/proj4';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
 import {equals} from '@math.gl/core';
 
-test.skip('WMSLayer', async t => {
+test.skip('WMSLayer', async () => {
   const testCases = generateLayerTests({
     Layer: WMSLayer,
     sampleProps: {

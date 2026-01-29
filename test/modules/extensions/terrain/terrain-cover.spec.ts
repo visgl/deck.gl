@@ -148,7 +148,7 @@ test('TerrainCover#viewport diffing#non-geo', async () => {
   lifecycle.finalize();
 });
 
-test.skip('TerrainCover#layers diffing#non-geo', async t => {
+test.skip('TerrainCover#layers diffing#non-geo', async () => {
   const lifecycle = new LifecycleTester();
   const terrainSource = new TileLayer({
     id: 'terrain',
@@ -208,7 +208,7 @@ test.skip('TerrainCover#layers diffing#non-geo', async t => {
   lifecycle.finalize();
 });
 
-test.skip('TerrainCover#layers diffing#geo', async t => {
+test.skip('TerrainCover#layers diffing#geo', async () => {
   const lifecycle = new LifecycleTester();
   const terrainSource = new TileLayer({
     id: 'terrain',
