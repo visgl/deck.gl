@@ -59,9 +59,5 @@
     ">0.2% and supports async-functions",
     "not dead"
   ],
-  "volta": {
-    "node": "18.19.0",
-    "yarn": "1.22.19"
-  },
   "packageManager": "yarn@1.22.19"
 }
