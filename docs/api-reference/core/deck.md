@@ -611,6 +611,52 @@ Notes:
 
 * See the [canvas](#canvas) prop for more information.
 
+#### `getViews` {#getviews}
+
+Get all views currently rendered by this `Deck` instance.
+
+`deck.getViews()`
+
+Returns:
+
+* An array of [View](./view.md) instances.
+
+#### `getView` {#getview}
+
+Get a specific view by id.
+
+```js
+deck.getView(viewId)
+```
+
+Parameters:
+
+* `viewId` (string) - the id of the view to retrieve
+
+Returns:
+
+* A [View](./view.md) instance, or `undefined` if no view with the given id exists.
+
+#### `getViewports` {#getviewports}
+
+Get all viewports currently rendered by this `Deck` instance.
+
+```js
+deck.getViewports(rect)
+```
+
+Parameters:
+
+* `rect` (object, optional) - if provided, only returns viewports that contain the given rectangle. Has the following fields:
+  + `x` (number) - left of the bounding box in pixels
+  + `y` (number) - top of the bounding box in pixels
+  + `width` (number, optional) - width of the bounding box in pixels
+  + `height` (number, optional) - height of the bounding box in pixels
+
+Returns:
+
+* An array of [Viewport](./viewport.md) instances.
+
 #### `setProps` {#setprops}
 
 Updates (partial) properties.
