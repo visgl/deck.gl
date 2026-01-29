@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {expect} from 'vitest';
 import {Timeline} from '@luma.gl/engine';
 
 function makeEvents(events, opts = {}) {
@@ -207,7 +208,7 @@ const TEST_CASES = [
   }
 ];
 
-export default async function testController(t, ViewClass, defaultProps, blackList = []) {
+export default async function testController(ViewClass, defaultProps, blackList = []) {
   const timeline = new Timeline();
   const view = new ViewClass({controller: true});
 
@@ -247,11 +248,11 @@ export default async function testController(t, ViewClass, defaultProps, blackLi
     controller.setProps(controllerProps);
     await triggerEvents(controller, testCase, timeline);
 
-    t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
-    t.is(
-      affectedStates.size,
-      testCase.interactionStates,
-      `${testCase.title} interaction state updated`
+    expect(onViewStateChangeCalled, `${testCase.title} onViewStateChange`).toBe(
+      testCase.viewStateChanges
+    );
+    expect(affectedStates.size, `${testCase.title} interaction state updated`).toBe(
+      testCase.interactionStates
     );
   }
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   View,
   Viewport,
@@ -14,12 +14,11 @@ import {
 } from 'deck.gl';
 import {equals} from '@math.gl/core';
 
-test('View#imports', t => {
-  t.ok(View, 'View import ok');
-  t.end();
+test('View#imports', () => {
+  expect(View, 'View import ok').toBeTruthy();
 });
 
-test('View#clone', t => {
+test('View#clone', () => {
   const view = new MapView({
     id: 'test-view',
     latitude: 0,
@@ -27,22 +26,24 @@ test('View#clone', t => {
     zoom: 1
   });
   const identicalClone = view.clone({});
-  t.ok(identicalClone instanceof MapView, 'identical clone is an instance of MapView');
-  t.ok(identicalClone !== view, 'identical clone is a new instance');
-  t.ok(identicalClone.equals(view), 'identical clone.equals() is true');
+  expect(
+    identicalClone instanceof MapView,
+    'identical clone is an instance of MapView'
+  ).toBeTruthy();
+  expect(identicalClone !== view, 'identical clone is a new instance').toBeTruthy();
+  expect(identicalClone.equals(view), 'identical clone.equals() is true').toBeTruthy();
 
   const clone = view.clone({
     id: 'cloned-view',
     zoom: 5
   });
-  t.is(clone.id, 'cloned-view', 'modified clone id is overridden');
-  t.is(clone.props.zoom, 5, 'modified clone prop zoom is overridden');
-  t.is(clone.props.latitude, view.props.latitude, 'other props are preserved');
-  t.is(clone.props.longitude, view.props.longitude, 'other props are preserved');
-  t.end();
+  expect(clone.id, 'modified clone id is overridden').toBe('cloned-view');
+  expect(clone.props.zoom, 'modified clone prop zoom is overridden').toBe(5);
+  expect(clone.props.latitude, 'other props are preserved').toBe(view.props.latitude);
+  expect(clone.props.longitude, 'other props are preserved').toBe(view.props.longitude);
 });
 
-test('View#equals', t => {
+test('View#equals', () => {
   const mapView1 = new MapView({
     id: 'default-view',
     latitude: 0,
@@ -72,14 +73,12 @@ test('View#equals', t => {
     position: [0, 0]
   });
 
-  t.ok(mapView1.equals(mapView2), 'Identical view props');
-  t.notOk(mapView1.equals(mapView3), 'Different view props');
-  t.notOk(mapView1.equals(mapView4), 'Different type');
-
-  t.end();
+  expect(mapView1.equals(mapView2), 'Identical view props').toBeTruthy();
+  expect(mapView1.equals(mapView3), 'Different view props').toBeFalsy();
+  expect(mapView1.equals(mapView4), 'Different type').toBeFalsy();
 });
 
-test('MapView', t => {
+test('MapView', () => {
   const view = new MapView();
   const viewport = view.makeViewport({
     width: 100,
@@ -92,15 +91,16 @@ test('MapView', t => {
       height: 200
     }
   });
-  t.ok(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport');
-  t.is(viewport.id, view.id, 'Viewport has correct id');
-  t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
-  t.is(viewport.zoom, 12, 'Viewport has correct parameters');
-
-  t.end();
+  expect(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport').toBeTruthy();
+  expect(viewport.id, 'Viewport has correct id').toBe(view.id);
+  expect(
+    viewport.width === 100 && viewport.height === 100,
+    'Viewport has correct size'
+  ).toBeTruthy();
+  expect(viewport.zoom, 'Viewport has correct parameters').toBe(12);
 });
 
-test('FirstPersonView', t => {
+test('FirstPersonView', () => {
   const view = new FirstPersonView();
   const viewport = view.makeViewport({
     width: 100,
@@ -113,15 +113,16 @@ test('FirstPersonView', t => {
       height: 200
     }
   });
-  t.ok(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport');
-  t.is(viewport.id, view.id, 'Viewport has correct id');
-  t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
-  t.ok(viewport.zoom, 'Viewport zoom is populated');
-
-  t.end();
+  expect(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport').toBeTruthy();
+  expect(viewport.id, 'Viewport has correct id').toBe(view.id);
+  expect(
+    viewport.width === 100 && viewport.height === 100,
+    'Viewport has correct size'
+  ).toBeTruthy();
+  expect(viewport.zoom, 'Viewport zoom is populated').toBeTruthy();
 });
 
-test('GlobeView', t => {
+test('GlobeView', () => {
   const view = new GlobeView();
   const viewport = view.makeViewport({
     width: 100,
@@ -134,15 +135,16 @@ test('GlobeView', t => {
       height: 200
     }
   });
-  t.ok(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport');
-  t.is(viewport.id, view.id, 'Viewport has correct id');
-  t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
-  t.is(viewport.zoom, 12, 'Viewport has correct parameters');
-
-  t.end();
+  expect(viewport instanceof Viewport, 'Mapview.makeViewport returns valid viewport').toBeTruthy();
+  expect(viewport.id, 'Viewport has correct id').toBe(view.id);
+  expect(
+    viewport.width === 100 && viewport.height === 100,
+    'Viewport has correct size'
+  ).toBeTruthy();
+  expect(viewport.zoom, 'Viewport has correct parameters').toBe(12);
 });
 
-test('OrbitView', t => {
+test('OrbitView', () => {
   const view = new OrbitView({id: '3d-view'});
   const viewport = view.makeViewport({
     width: 100,
@@ -156,16 +158,20 @@ test('OrbitView', t => {
       height: 200
     }
   });
-  t.ok(viewport instanceof Viewport, 'OrbitView.makeViewport returns valid viewport');
-  t.is(viewport.id, view.id, 'Viewport has correct id');
-  t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
-  t.is(viewport.zoom, 1, 'Viewport has correct parameters');
-
-  t.end();
+  expect(
+    viewport instanceof Viewport,
+    'OrbitView.makeViewport returns valid viewport'
+  ).toBeTruthy();
+  expect(viewport.id, 'Viewport has correct id').toBe(view.id);
+  expect(
+    viewport.width === 100 && viewport.height === 100,
+    'Viewport has correct size'
+  ).toBeTruthy();
+  expect(viewport.zoom, 'Viewport has correct parameters').toBe(1);
 });
 
 // eslint-disable-next-line complexity
-test('OrbitView#project', t => {
+test('OrbitView#project', () => {
   let view = new OrbitView({id: '3d-view', orbitAxis: 'Z'});
   let viewport;
   let p;
@@ -182,7 +188,10 @@ test('OrbitView#project', t => {
     }
   });
   center = viewport.project([1, 2, 3]);
-  t.ok(equals(center[0], 50) && equals(center[1], 50), 'target is at viewport center');
+  expect(
+    equals(center[0], 50) && equals(center[1], 50),
+    'target is at viewport center'
+  ).toBeTruthy();
 
   viewport = view.makeViewport({
     width: 100,
@@ -196,11 +205,14 @@ test('OrbitView#project', t => {
   });
   center = viewport.project([0, 0, 0]);
   p = viewport.project([0, 0, 1]);
-  t.ok(equals(p[0], 50) && p[1] < 50 && equals(p[2], center[2]), 'z axis points up');
+  expect(equals(p[0], 50) && p[1] < 50 && equals(p[2], center[2]), 'z axis points up').toBeTruthy();
   p = viewport.project([0, 1, 0]);
-  t.ok(equals(p[0], 50) && equals(p[1], 50) && p[2] > center[2], 'y axis points away');
+  expect(
+    equals(p[0], 50) && equals(p[1], 50) && p[2] > center[2],
+    'y axis points away'
+  ).toBeTruthy();
   p = viewport.project([1, 0, 0]);
-  t.ok(p[0] > 50 && p[1] === 50 && p[2] === center[2], 'x axis points right');
+  expect(p[0] > 50 && p[1] === 50 && p[2] === center[2], 'x axis points right').toBeTruthy();
 
   view = new OrbitView({id: '3d-view', orbitAxis: 'Y'});
   viewport = view.makeViewport({
@@ -216,16 +228,20 @@ test('OrbitView#project', t => {
 
   center = viewport.project([0, 0, 0]);
   p = viewport.project([0, 0, 1]);
-  t.ok(equals(p[0], 50) && equals(p[1], 50) && p[2] < center[2], 'z axis points forward');
+  expect(
+    equals(p[0], 50) && equals(p[1], 50) && p[2] < center[2],
+    'z axis points forward'
+  ).toBeTruthy();
   p = viewport.project([0, 1, 0]);
-  t.ok(equals(p[0], 50) && p[1] < 50 && equals(p[2], center[2]), 'y axis points up');
+  expect(equals(p[0], 50) && p[1] < 50 && equals(p[2], center[2]), 'y axis points up').toBeTruthy();
   p = viewport.project([1, 0, 0]);
-  t.ok(p[0] > 50 && equals(p[1], 50) && equals(p[2], center[2]), 'x axis points right');
-
-  t.end();
+  expect(
+    p[0] > 50 && equals(p[1], 50) && equals(p[2], center[2]),
+    'x axis points right'
+  ).toBeTruthy();
 });
 
-test('OrthographicView', t => {
+test('OrthographicView', () => {
   const view = new OrthographicView({id: '2d-view'});
   let viewport = view.makeViewport({
     width: 100,
@@ -237,10 +253,16 @@ test('OrthographicView', t => {
       height: 200
     }
   });
-  t.ok(viewport instanceof Viewport, 'OrthographicView.makeViewport returns valid viewport');
-  t.is(viewport.id, view.id, 'Viewport has correct id');
-  t.ok(viewport.width === 100 && viewport.height === 100, 'Viewport has correct size');
-  t.is(viewport.zoom, 9, 'Viewport has correct parameters');
+  expect(
+    viewport instanceof Viewport,
+    'OrthographicView.makeViewport returns valid viewport'
+  ).toBeTruthy();
+  expect(viewport.id, 'Viewport has correct id').toBe(view.id);
+  expect(
+    viewport.width === 100 && viewport.height === 100,
+    'Viewport has correct size'
+  ).toBeTruthy();
+  expect(viewport.zoom, 'Viewport has correct parameters').toBe(9);
 
   viewport = view.makeViewport({
     width: 400,
@@ -251,14 +273,18 @@ test('OrthographicView', t => {
     }
   });
   const center = viewport.project([50, 100, 0]);
-  t.ok(equals(center[0], 200) && equals(center[1], 150), 'target is at viewport center');
+  expect(
+    equals(center[0], 200) && equals(center[1], 150),
+    'target is at viewport center'
+  ).toBeTruthy();
   const p = viewport.project([40, 90, 0]);
-  t.ok(equals(center[0] - p[0], 20) && equals(center[1] - p[1], 80), 'independent scales');
-
-  t.end();
+  expect(
+    equals(center[0] - p[0], 20) && equals(center[1] - p[1], 80),
+    'independent scales'
+  ).toBeTruthy();
 });
 
-test('OrthographicView#padding', t => {
+test('OrthographicView#padding', () => {
   const view = new OrthographicView({id: '2d-view', padding: {bottom: '50%', left: '100%'}});
   const viewport = view.makeViewport({
     width: 100,
@@ -269,7 +295,8 @@ test('OrthographicView#padding', t => {
     }
   });
   const center = viewport.project([0, 1]);
-  t.ok(equals(center, [viewport.width, viewport.height / 4]), 'viewport center is offset');
-
-  t.end();
+  expect(
+    equals(center, [viewport.width, viewport.height / 4]),
+    'viewport center is offset'
+  ).toBeTruthy();
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   getTileIndices,
   tileToBoundingBox,
@@ -315,7 +315,7 @@ function mergeBoundingBox(boundingBoxes) {
   return result;
 }
 
-test('getTileIndices', t => {
+test('getTileIndices', () => {
   for (const testCase of TEST_CASES) {
     const {
       viewport,
@@ -339,13 +339,11 @@ test('getTileIndices', t => {
       extent,
       zoomOffset
     });
-    t.deepEqual(getTileIds(result), testCase.output, testCase.title);
+    expect(getTileIds(result), testCase.title).toEqual(testCase.output);
   }
-
-  t.end();
 });
 
-test('tileToBoundingBox', t => {
+test('tileToBoundingBox', () => {
   for (const testCase of TEST_CASES) {
     if (testCase.output.length && !testCase.viewport.resolution) {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
@@ -360,19 +358,17 @@ test('tileToBoundingBox', t => {
         [result[2], result[3]]
       ].map(p => viewport.project(p));
 
-      t.ok(
+      expect(
         corners.every(
           p => p[0] <= 0 || p[0] >= viewport.width || p[1] <= 0 || p[1] >= viewport.height
         ),
         'corners are outside of the viewport'
-      );
+      ).toBeTruthy();
     }
   }
-
-  t.end();
 });
 
-test('tileToBoundingBox#Geospatial', t => {
+test('tileToBoundingBox#Geospatial', () => {
   const viewport = new WebMercatorViewport({
     width: 800,
     height: 400,
@@ -381,32 +377,22 @@ test('tileToBoundingBox#Geospatial', t => {
     zoom: 2.5
   });
 
-  t.deepEqual(
-    tileToBoundingBox(viewport, 0, 0, 0),
-    {
-      west: -180,
-      north: 85.0511287798066,
-      east: 180,
-      south: -85.0511287798066
-    },
-    '0, 0, 0 should match the results'
-  );
+  expect(tileToBoundingBox(viewport, 0, 0, 0), '0, 0, 0 should match the results').toEqual({
+    west: -180,
+    north: 85.0511287798066,
+    east: 180,
+    south: -85.0511287798066
+  });
 
-  t.deepEqual(
-    tileToBoundingBox(viewport, 8, 5, 4),
-    {
-      east: 22.5,
-      north: 55.77657301866769,
-      south: 40.97989806962013,
-      west: 0
-    },
-    '8,5,4 Should match the results.'
-  );
-
-  t.end();
+  expect(tileToBoundingBox(viewport, 8, 5, 4), '8,5,4 Should match the results.').toEqual({
+    east: 22.5,
+    north: 55.77657301866769,
+    south: 40.97989806962013,
+    west: 0
+  });
 });
 
-test('tileToBoundingBox#Infovis', t => {
+test('tileToBoundingBox#Infovis', () => {
   const viewport = new OrthographicView().makeViewport({
     width: 800,
     height: 400,
@@ -416,82 +402,88 @@ test('tileToBoundingBox#Infovis', t => {
     }
   });
 
-  t.deepEqual(
-    tileToBoundingBox(viewport, 0, 0, 0),
-    {left: 0, top: 0, right: 512, bottom: 512},
-    '0,0,0 Should match the results.'
-  );
+  expect(tileToBoundingBox(viewport, 0, 0, 0), '0,0,0 Should match the results.').toEqual({
+    left: 0,
+    top: 0,
+    right: 512,
+    bottom: 512
+  });
 
-  t.deepEqual(
-    tileToBoundingBox(viewport, 0, 0, 1),
-    {left: 0, top: 0, right: 256, bottom: 256},
-    '0,0,1 Should match the results.'
-  );
+  expect(tileToBoundingBox(viewport, 0, 0, 1), '0,0,1 Should match the results.').toEqual({
+    left: 0,
+    top: 0,
+    right: 256,
+    bottom: 256
+  });
 
-  t.deepEqual(
+  expect(
     tileToBoundingBox(viewport, 0, 0, 0, 256),
-    {left: 0, top: 0, right: 256, bottom: 256},
     '0,0,0 with custom tileSize Should match the results.'
-  );
+  ).toEqual({left: 0, top: 0, right: 256, bottom: 256});
 
-  t.deepEqual(
-    tileToBoundingBox(viewport, 4, -1, 2),
-    {left: 512, top: -128, right: 640, bottom: 0},
-    '4,-1,2 Should match the results.'
-  );
+  expect(tileToBoundingBox(viewport, 4, -1, 2), '4,-1,2 Should match the results.').toEqual({
+    left: 512,
+    top: -128,
+    right: 640,
+    bottom: 0
+  });
 
-  t.deepEqual(
-    tileToBoundingBox(viewport, 4, -1, 3),
-    {left: 256, top: -64, right: 320, bottom: 0},
-    '4,-1,3 Should match the results.'
-  );
+  expect(tileToBoundingBox(viewport, 4, -1, 3), '4,-1,3 Should match the results.').toEqual({
+    left: 256,
+    top: -64,
+    right: 320,
+    bottom: 0
+  });
 
-  t.deepEqual(
+  expect(
     tileToBoundingBox(viewport, 4, -1, 2, 256),
-    {left: 256, top: -64, right: 320, bottom: 0},
     '4,-1,2 with custom tileSize Should match the results.'
-  );
-
-  t.end();
+  ).toEqual({left: 256, top: -64, right: 320, bottom: 0});
 });
 
-test('urlType', t => {
-  t.ok(urlType.validate('https://server.com/{z}/{x}/{y}.png', urlType), 'string is validated');
-  t.ok(
+test('urlType', () => {
+  expect(
+    urlType.validate('https://server.com/{z}/{x}/{y}.png', urlType),
+    'string is validated'
+  ).toBeTruthy();
+  expect(
     urlType.validate(['https://server.com/{z}/{x}/{y}.png'], urlType),
     'array of string is validated'
-  );
-  t.notOk(urlType.validate(urlType.value, urlType), 'unspecified value is not valid');
-  t.ok(
+  ).toBeTruthy();
+  expect(urlType.validate(urlType.value, urlType), 'unspecified value is not valid').toBeFalsy();
+  expect(
     urlType.validate(urlType.value, {...urlType, optional: true}),
     'unspecified value is valid if optional:true'
-  );
-  t.notOk(urlType.validate(['https://server.com/{z}/{x}/{y}.png', null], urlType), 'is not valid');
+  ).toBeTruthy();
+  expect(
+    urlType.validate(['https://server.com/{z}/{x}/{y}.png', null], urlType),
+    'is not valid'
+  ).toBeFalsy();
 
-  t.ok(urlType.equal('', ''), 'should be equal');
-  t.ok(
+  expect(urlType.equal('', ''), 'should be equal').toBeTruthy();
+  expect(
     urlType.equal('https://server.com/{z}/{x}/{y}.png', 'https://server.com/{z}/{x}/{y}.png'),
     'should be equal'
-  );
-  t.ok(
+  ).toBeTruthy();
+  expect(
     urlType.equal(['https://server.com/{z}/{x}/{y}.png'], ['https://server.com/{z}/{x}/{y}.png']),
     'should be equal'
-  );
-  t.notOk(
+  ).toBeTruthy();
+  expect(
     urlType.equal('https://server.com/{z}/{x}/{y}.png', [
       'https://server.com/ep1/{z}/{x}/{y}.png',
       'https://server.com/ep2/{z}/{x}/{y}.png'
     ]),
     'should not be equal'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     urlType.equal(
       ['https://server.com/{z}/{x}/{y}.png'],
       ['https://server.com/ep1/{z}/{x}/{y}.png', 'https://server.com/ep2/{z}/{x}/{y}.png']
     ),
     'should not be equal'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     urlType.equal(
       [
         'https://anotherserver.com/ep1/{z}/{x}/{y}.png',
@@ -500,44 +492,36 @@ test('urlType', t => {
       ['https://server.com/ep1/{z}/{x}/{y}.png', 'https://server.com/ep2/{z}/{x}/{y}.png']
     ),
     'should not be equal'
-  );
-
-  t.end();
+  ).toBeFalsy();
 });
 
-test('getURLFromTemplate', t => {
+test('getURLFromTemplate', () => {
   const TEST_TEMPLATE = 'https://server.com/{z}/{x}/{y}.png';
   const TEST_TEMPLATE2 = 'https://server.com/{z}/{x}/{y}/{x}-{y}-{z}.png';
   const TEST_TEMPLATE_ARRAY = [
     'https://server.com/ep1/{x}/{y}.png',
     'https://server.com/ep2/{x}/{y}.png'
   ];
-  t.is(
+  expect(
     getURLFromTemplate(TEST_TEMPLATE, {index: {x: 1, y: 2, z: 0}}),
-    'https://server.com/0/1/2.png',
     'single string template'
-  );
-  t.is(
+  ).toBe('https://server.com/0/1/2.png');
+  expect(
     getURLFromTemplate(TEST_TEMPLATE2, {index: {x: 1, y: 2, z: 0}}),
-    'https://server.com/0/1/2/1-2-0.png',
     'single string template with multiple occurance'
-  );
-  t.is(
+  ).toBe('https://server.com/0/1/2/1-2-0.png');
+  expect(
     getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 1, y: 2, z: 0}, id: '1-2-0'}),
-    'https://server.com/ep2/1/2.png',
     'array of templates'
-  );
-  t.is(
+  ).toBe('https://server.com/ep2/1/2.png');
+  expect(
     getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 2, y: 2, z: 0}, id: '2-2-0'}),
-    'https://server.com/ep1/2/2.png',
     'array of templates'
-  );
-  t.is(
+  ).toBe('https://server.com/ep1/2/2.png');
+  expect(
     getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 17, y: 11, z: 5}, id: '17-11-5'}),
-    'https://server.com/ep2/17/11.png',
     'array of templates'
-  );
-  t.is(getURLFromTemplate(null, {index: {x: 1, y: 2, z: 0}}), null, 'invalid template');
-  t.is(getURLFromTemplate([], {index: {x: 1, y: 2, z: 0}}), null, 'empty array');
-  t.end();
+  ).toBe('https://server.com/ep2/17/11.png');
+  expect(getURLFromTemplate(null, {index: {x: 1, y: 2, z: 0}}), 'invalid template').toBe(null);
+  expect(getURLFromTemplate([], {index: {x: 1, y: 2, z: 0}}), 'empty array').toBe(null);
 });

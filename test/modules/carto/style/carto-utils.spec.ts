@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import {getAttrValue} from '@deck.gl/carto/style/utils';
 
 const DATA = {
@@ -16,19 +16,15 @@ const EXPECTED = 1;
 const OK_TEST_CASES = ['cartodb_id', row => row.properties.cartodb_id];
 const ERROR_TEST_CASES = [1, null, undefined];
 
-test('getAttrValue', t => {
+test('getAttrValue', () => {
   for (const tc of OK_TEST_CASES) {
     const func = getAttrValue(tc, DATA);
-    t.deepEquals(func, EXPECTED, `getAttrValue correctly returns ${EXPECTED}`);
+    expect(func, `getAttrValue correctly returns ${EXPECTED}`).toEqual(EXPECTED);
   }
-
-  t.end();
 });
 
-test('getAttrValue#invalidParams', t => {
+test('getAttrValue#invalidParams', () => {
   for (const tc of ERROR_TEST_CASES) {
-    t.throws(() => getAttrValue(tc, DATA), `throws on invalid type ${typeof tc}`);
+    expect(() => getAttrValue(tc, DATA), `throws on invalid type ${typeof tc}`).toThrow();
   }
-
-  t.end();
 });

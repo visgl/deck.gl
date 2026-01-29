@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {JupyterTransportModel} from '@deck.gl/jupyter-widget';
 import {createTestModel} from './mock-widget-base';
@@ -23,33 +23,30 @@ function getDeckModel(state) {
   }
 }
 
-test('jupyter-widget getters should be properly configured', t => {
-  t.equal(JupyterTransportModel.model_module, '@deck.gl/jupyter-widget');
-  t.equal(JupyterTransportModel.model_module_version, VERSION);
-  t.equal(JupyterTransportModel.view_module, '@deck.gl/jupyter-widget');
-  t.equal(JupyterTransportModel.view_module_version, VERSION);
-  t.equal(JupyterTransportModel.model_name, 'JupyterTransportModel');
-  t.equal(JupyterTransportModel.view_name, 'JupyterTransportView');
-  t.end();
+test('jupyter-widget getters should be properly configured', () => {
+  expect(JupyterTransportModel.model_module).toBe('@deck.gl/jupyter-widget');
+  expect(JupyterTransportModel.model_module_version).toBe(VERSION);
+  expect(JupyterTransportModel.view_module).toBe('@deck.gl/jupyter-widget');
+  expect(JupyterTransportModel.view_module_version).toBe(VERSION);
+  expect(JupyterTransportModel.model_name).toBe('JupyterTransportModel');
+  expect(JupyterTransportModel.view_name).toBe('JupyterTransportView');
 });
 
-test('jupyter-widget should be createable', t => {
+test('jupyter-widget should be createable', () => {
   const model = getDeckModel({});
   if (!model) {
     // Skip browser test
-    t.end();
     return;
   }
-  t.deepEquals(model.get('json_input'), null, 'json_input should be null');
-  t.deepEquals(model.get('data_buffer'), null, 'data buffer should be null');
-  t.equal(model.get('mapbox_key'), null, 'mapbox_key should be null');
-  t.equal(model.get('width'), '100%', 'default width should be specified');
-  t.equal(model.get('height'), 500, 'default height should be specified');
-  t.deepEquals(model.get('selected_data'), [], 'default selected data should be specified');
-  t.end();
+  expect(model.get('json_input'), 'json_input should be null').toEqual(null);
+  expect(model.get('data_buffer'), 'data buffer should be null').toEqual(null);
+  expect(model.get('mapbox_key'), 'mapbox_key should be null').toBe(null);
+  expect(model.get('width'), 'default width should be specified').toBe('100%');
+  expect(model.get('height'), 'default height should be specified').toBe(500);
+  expect(model.get('selected_data'), 'default selected data should be specified').toEqual([]);
 });
 
-test('jupyter-widget should be creatable with a value', t => {
+test('jupyter-widget should be creatable with a value', () => {
   const state = {
     mapbox_key: 'fake-key',
     json_input: '{mock_input: 1}'
@@ -57,12 +54,10 @@ test('jupyter-widget should be creatable with a value', t => {
   const model = getDeckModel(state);
   if (!model) {
     // Skip browser test
-    t.end();
     return;
   }
-  t.equal(model.get('json_input'), state.json_input, 'json_input should be pre-configured');
-  t.equal(model.get('mapbox_key'), state.mapbox_key, 'mapbox_key should be pre-configured');
-  t.equal(model.get('width'), '100%', 'width should be the default');
-  t.equal(model.get('height'), 500, 'height should be the default');
-  t.end();
+  expect(model.get('json_input'), 'json_input should be pre-configured').toBe(state.json_input);
+  expect(model.get('mapbox_key'), 'mapbox_key should be pre-configured').toBe(state.mapbox_key);
+  expect(model.get('width'), 'width should be the default').toBe('100%');
+  expect(model.get('height'), 'height should be the default').toBe(500);
 });

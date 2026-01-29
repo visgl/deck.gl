@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {vecNormalized} from '../../../utils/utils';
 import {Viewport} from 'deck.gl';
 import {Matrix4, Vector3} from '@math.gl/core';
@@ -55,16 +55,18 @@ const TEST_VIEWPORTS = [
   }
 ];
 
-test('Viewport#imports', t => {
-  t.ok(Viewport, 'Viewport import ok');
-  t.end();
+test('Viewport#imports', () => {
+  expect(Viewport, 'Viewport import ok').toBeTruthy();
 });
 
-test('Viewport#constructor', t => {
-  t.ok(new Viewport() instanceof Viewport, 'Created new Viewport with default args');
-  t.ok(new Viewport(TEST_VIEWPORTS[0]) instanceof Viewport, 'Created new Viewport with test args');
+test('Viewport#constructor', () => {
+  expect(new Viewport() instanceof Viewport, 'Created new Viewport with default args').toBeTruthy();
+  expect(
+    new Viewport(TEST_VIEWPORTS[0]) instanceof Viewport,
+    'Created new Viewport with test args'
+  ).toBeTruthy();
 
-  t.ok(
+  expect(
     new Viewport(
       Object.assign({}, TEST_VIEWPORTS[0], {
         width: 0,
@@ -72,48 +74,61 @@ test('Viewport#constructor', t => {
       })
     ) instanceof Viewport,
     'Viewport constructed successfully with 0 width and height'
-  );
-  t.end();
+  ).toBeTruthy();
 });
 
-test('Viewport#equals', t => {
+test('Viewport#equals', () => {
   const viewport1a = new Viewport(TEST_VIEWPORTS[0]);
   const viewport1b = new Viewport(TEST_VIEWPORTS[0]);
   const viewport2a = new Viewport(TEST_VIEWPORTS[1]);
   const viewport2b = new Viewport(TEST_VIEWPORTS[1]);
 
-  t.ok(viewport1a.equals(viewport1a), 'Viewport equality correct');
-  t.ok(viewport1a.equals(viewport1b), 'Viewport equality correct');
-  t.ok(viewport2a.equals(viewport2b), 'Viewport equality correct');
-  t.notOk(viewport1a.equals(viewport2a), 'Viewport equality correct');
-  t.end();
+  expect(viewport1a.equals(viewport1a), 'Viewport equality correct').toBeTruthy();
+  expect(viewport1a.equals(viewport1b), 'Viewport equality correct').toBeTruthy();
+  expect(viewport2a.equals(viewport2b), 'Viewport equality correct').toBeTruthy();
+  expect(viewport1a.equals(viewport2a), 'Viewport equality correct').toBeFalsy();
 });
 
-test('Viewport.getScales', t => {
+test('Viewport.getScales', () => {
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new Viewport(vc.mapState);
     const distanceScales = viewport.getDistanceScales();
-    t.ok(distanceScales.metersPerUnit && distanceScales.unitsPerMeter, 'distanceScales defined');
+    expect(
+      distanceScales.metersPerUnit && distanceScales.unitsPerMeter,
+      'distanceScales defined'
+    ).toBeTruthy();
   }
-  t.end();
 });
 
-test('Viewport.containsPixel', t => {
+test('Viewport.containsPixel', () => {
   const viewport = new Viewport({x: 0, y: 0, width: 10, height: 10});
 
-  t.ok(viewport.containsPixel({x: 5, y: 5}), 'pixel is inside');
-  t.ok(viewport.containsPixel({x: 0, y: 0}), 'pixel is inside');
-  t.notOk(viewport.containsPixel({x: 10, y: 10}), 'pixel is outside');
-  t.ok(viewport.containsPixel({x: -1, y: -1, width: 2, height: 2}), 'rectangle overlaps');
-  t.notOk(viewport.containsPixel({x: -3, y: -3, width: 2, height: 2}), 'rectangle is outside');
-  t.ok(viewport.containsPixel({x: 9, y: 0, width: 2, height: 2}), 'rectangle overlaps');
-  t.ok(viewport.containsPixel({x: 0, y: 9, width: 2, height: 2}), 'rectangle overlaps');
-  t.notOk(viewport.containsPixel({x: 11, y: 11, width: 2, height: 2}), 'rectangle is outside');
-
-  t.end();
+  expect(viewport.containsPixel({x: 5, y: 5}), 'pixel is inside').toBeTruthy();
+  expect(viewport.containsPixel({x: 0, y: 0}), 'pixel is inside').toBeTruthy();
+  expect(viewport.containsPixel({x: 10, y: 10}), 'pixel is outside').toBeFalsy();
+  expect(
+    viewport.containsPixel({x: -1, y: -1, width: 2, height: 2}),
+    'rectangle overlaps'
+  ).toBeTruthy();
+  expect(
+    viewport.containsPixel({x: -3, y: -3, width: 2, height: 2}),
+    'rectangle is outside'
+  ).toBeFalsy();
+  expect(
+    viewport.containsPixel({x: 9, y: 0, width: 2, height: 2}),
+    'rectangle overlaps'
+  ).toBeTruthy();
+  expect(
+    viewport.containsPixel({x: 0, y: 9, width: 2, height: 2}),
+    'rectangle overlaps'
+  ).toBeTruthy();
+  expect(
+    viewport.containsPixel({x: 11, y: 11, width: 2, height: 2}),
+    'rectangle is outside'
+  ).toBeFalsy();
 });
 
-test('Viewport.getFrustumPlanes', t => {
+test('Viewport.getFrustumPlanes', () => {
   const CULLING_TEST_CASES = [
     {
       pixels: [400, 300, 0],
@@ -163,31 +178,32 @@ test('Viewport.getFrustumPlanes', t => {
 
   // TODO - fix first person viewport
   for (const vc of TEST_VIEWPORTS.slice(0, 2)) {
-    t.comment(vc.id);
+    console.log(vc.id);
     const viewport = new Viewport(vc);
     const planes = viewport.getFrustumPlanes();
 
     for (const side in planes) {
       const plane = planes[side];
-      t.ok(Number.isFinite(plane.distance), 'distance is defined');
-      t.ok(vecNormalized(plane.normal), 'normal is defined');
+      expect(Number.isFinite(plane.distance), 'distance is defined').toBeTruthy();
+      expect(vecNormalized(plane.normal), 'normal is defined').toBeTruthy();
     }
 
-    t.is(viewport.getFrustumPlanes(), planes, 'frustum planes are cached');
+    expect(viewport.getFrustumPlanes(), 'frustum planes are cached').toBe(planes);
 
     for (const tc of CULLING_TEST_CASES) {
       const lngLat = viewport.unproject(tc.pixels);
       const commonPosition = viewport.projectPosition(lngLat);
       const culledDirs = getCulling(commonPosition, planes);
       if (tc.result) {
-        t.ok(culledDirs && culledDirs.includes(tc.result), `point culled (${tc.result})`);
+        expect(
+          culledDirs && culledDirs.includes(tc.result),
+          `point culled (${tc.result})`
+        ).toBeTruthy();
       } else {
-        t.is(culledDirs, null, 'point not culled');
+        expect(culledDirs, 'point not culled').toBe(null);
       }
     }
   }
-
-  t.end();
 });
 
 function getCulling(p, planes) {

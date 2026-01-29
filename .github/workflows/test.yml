@@ -35,10 +35,13 @@ jobs:
       - name: Build packages
         run: yarn build
 
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
       - name: Run tests
         run: |
           yarn lint
-          yarn test ci
+          yarn test-headless --coverage
 
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6

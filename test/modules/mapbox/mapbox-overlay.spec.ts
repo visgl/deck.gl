@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
@@ -29,7 +29,7 @@ class TestScatterplotLayer extends ScatterplotLayer {
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
-test('MapboxOverlay#overlaid', t => {
+test('MapboxOverlay#overlaid', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -41,9 +41,9 @@ test('MapboxOverlay#overlaid', t => {
   map.addControl(overlay);
 
   const deck = overlay._deck;
-  t.ok(deck, 'Deck instance is created');
+  expect(deck, 'Deck instance is created').toBeTruthy();
 
-  t.ok(
+  expect(
     objectEqual(deck.props.viewState, {
       longitude: -122.45,
       latitude: 37.78,
@@ -54,14 +54,14 @@ test('MapboxOverlay#overlaid', t => {
       repeat: true
     }),
     'View state is set correctly'
-  );
-  t.false('viewState' in overlay._props, 'Overlay viewState is not set');
+  ).toBeTruthy();
+  expect('viewState' in overlay._props, 'Overlay viewState is not set').toBeFalsy();
 
-  t.true(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly');
-  t.false('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set');
+  expect(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly').toBeTruthy();
+  expect('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set').toBeFalsy();
 
-  t.ok(objectEqual(deck.props.parameters, {}), 'Parameters are empty');
-  t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+  expect(objectEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
+  expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
   overlay.setProps({
     layers: [new ScatterplotLayer()]
@@ -71,7 +71,7 @@ test('MapboxOverlay#overlaid', t => {
   map.setZoom(4);
   map.triggerRepaint();
   map.once('render', () => {
-    t.ok(
+    expect(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
         latitude: 51.47,
@@ -82,17 +82,15 @@ test('MapboxOverlay#overlaid', t => {
         repeat: true
       }),
       'View state is updated'
-    );
+    ).toBeTruthy();
 
     map.removeControl(overlay);
 
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });
 
-test('MapboxOverlay#overlaidNoIntitalLayers', t => {
+test('MapboxOverlay#overlaidNoIntitalLayers', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -102,9 +100,9 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   map.addControl(overlay);
 
   const deck = overlay._deck;
-  t.ok(deck, 'Deck instance is created');
+  expect(deck, 'Deck instance is created').toBeTruthy();
 
-  t.ok(
+  expect(
     objectEqual(deck.props.viewState, {
       longitude: -122.45,
       latitude: 37.78,
@@ -115,16 +113,16 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
       repeat: true
     }),
     'View state is set correctly'
-  );
+  ).toBeTruthy();
 
-  t.true(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly');
-  t.false('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set');
+  expect(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly').toBeTruthy();
+  expect('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set').toBeFalsy();
 
-  t.is(deck.props.layers.length, 0, 'Layers are empty');
-  t.false('layers' in overlay._props, 'Overlay layers arent set');
+  expect(deck.props.layers.length, 'Layers are empty').toBe(0);
+  expect('layers' in overlay._props, 'Overlay layers arent set').toBeFalsy();
 
-  t.ok(objectEqual(deck.props.parameters, {}), 'Parameters are empty');
-  t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+  expect(objectEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
+  expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
   overlay.setProps({
     layers: [new ScatterplotLayer()]
@@ -134,7 +132,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   map.setZoom(4);
   map.triggerRepaint();
   map.once('render', () => {
-    t.ok(
+    expect(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
         latitude: 51.47,
@@ -145,20 +143,18 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
         repeat: true
       }),
       'View state is updated'
-    );
+    ).toBeTruthy();
 
-    t.ok(objectEqual(deck.props.parameters, {}), 'Parameters are empty');
-    t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+    expect(objectEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
+    expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
     map.removeControl(overlay);
 
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });
 
-test('MapboxOverlay#interleaved', t => {
+test('MapboxOverlay#interleaved', () => {
   let drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {
     drawLog.push(layer.id);
@@ -184,7 +180,7 @@ test('MapboxOverlay#interleaved', t => {
 
   map.addControl(overlay);
 
-  t.ok(overlay._deck, 'Deck instance is created');
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
 
   map.once('render', async () => {
     const VIEW_STATE = {
@@ -196,31 +192,34 @@ test('MapboxOverlay#interleaved', t => {
       padding: {left: 0, right: 0, top: 0, bottom: 0},
       repeat: true
     };
-    t.ok(objectEqual(overlay._deck.props.viewState, VIEW_STATE), 'View state is set correcly');
-    t.false('viewState' in overlay._props, 'Overlay viewState arent set');
+    expect(
+      objectEqual(overlay._deck.props.viewState, VIEW_STATE),
+      'View state is set correcly'
+    ).toBeTruthy();
+    expect('viewState' in overlay._props, 'Overlay viewState arent set').toBeFalsy();
 
-    t.ok(
+    expect(
       objectEqual(overlay._deck.props.parameters, {
         ...DEFAULT_PARAMETERS,
         depthWriteEnabled: false,
         cullMode: 'back'
       }),
       'Parameters are set correctly'
-    );
-    t.ok(
+    ).toBeTruthy();
+    expect(
       objectEqual(overlay._props.parameters, {
         depthWriteEnabled: false,
         cullMode: 'back'
       }),
       'Overlay parameters are intact'
-    );
+    ).toBeTruthy();
 
-    t.is(overlay._props.useDevicePixels, undefined, 'useDevicePixels is not forwarded');
+    expect(overlay._props.useDevicePixels, 'useDevicePixels is not forwarded').toBe(undefined);
 
     await sleep(100);
-    t.ok(map.getLayer('poi'), 'MapboxLayer is added');
-    t.ok(map.getLayer('poi2'), 'MapboxLayer is added');
-    t.deepEqual(drawLog, ['poi'], 'layers correctly filtered');
+    expect(map.getLayer('poi'), 'MapboxLayer is added').toBeTruthy();
+    expect(map.getLayer('poi2'), 'MapboxLayer is added').toBeTruthy();
+    expect(drawLog, 'layers correctly filtered').toEqual(['poi']);
     drawLog = [];
 
     overlay.setProps({
@@ -229,17 +228,16 @@ test('MapboxOverlay#interleaved', t => {
     });
 
     await sleep(100);
-    t.notOk(map.getLayer('poi'), 'MapboxLayer is removed');
-    t.ok(map.getLayer('cities'), 'MapboxLayer is added');
-    t.deepEqual(drawLog, ['cities'], 'layers correctly filtered');
+    expect(map.getLayer('poi'), 'MapboxLayer is removed').toBeFalsy();
+    expect(map.getLayer('cities'), 'MapboxLayer is added').toBeTruthy();
+    expect(drawLog, 'layers correctly filtered').toEqual(['cities']);
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });
 
-test('MapboxOverlay#interleaved#remove and add', t => {
+test('MapboxOverlay#interleaved#remove and add', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -256,20 +254,18 @@ test('MapboxOverlay#interleaved#remove and add', t => {
 
   map.addControl(overlay);
   let deck = overlay._deck;
-  t.ok(deck && deck.animationLoop, 'Deck instance is created');
+  expect(deck && deck.animationLoop, 'Deck instance is created').toBeTruthy();
   map.removeControl(overlay);
-  t.notOk(deck.animationLoop, 'Deck instance is finalized');
+  expect(deck.animationLoop, 'Deck instance is finalized').toBeFalsy();
 
   map.addControl(overlay);
   deck = overlay._deck;
-  t.ok(deck && deck.animationLoop, 'Deck instance is created');
+  expect(deck && deck.animationLoop, 'Deck instance is created').toBeTruthy();
   map.removeControl(overlay);
-  t.notOk(deck.animationLoop, 'Deck instance is finalized');
-
-  t.end();
+  expect(deck.animationLoop, 'Deck instance is finalized').toBeFalsy();
 });
 
-test('MapboxOverlay#interleavedNoInitialLayers', t => {
+test('MapboxOverlay#interleavedNoInitialLayers', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -281,19 +277,19 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
 
   map.addControl(overlay);
 
-  t.ok(overlay._deck, 'Deck instance is created');
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
 
   map.once('render', async () => {
-    t.is(overlay._deck.props.layers.length, 0, 'Layers are empty');
-    t.false('layers' in overlay._props, 'Overlay layers arent set');
+    expect(overlay._deck.props.layers.length, 'Layers are empty').toBe(0);
+    expect('layers' in overlay._props, 'Overlay layers arent set').toBeFalsy();
 
-    t.ok(
+    expect(
       objectEqual(overlay._deck.props.parameters, DEFAULT_PARAMETERS),
       'Parameters are set correctly'
-    );
-    t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+    ).toBeTruthy();
+    expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
-    t.is(overlay._props.useDevicePixels, undefined, 'useDevicePixels is not forwarded');
+    expect(overlay._props.useDevicePixels, 'useDevicePixels is not forwarded').toBe(undefined);
 
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})],
@@ -302,29 +298,28 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
       }
     });
     await sleep(100);
-    t.ok(map.getLayer('cities'), 'MapboxLayer is added');
+    expect(map.getLayer('cities'), 'MapboxLayer is added').toBeTruthy();
 
-    t.ok(
+    expect(
       objectEqual(overlay._deck.props.parameters, {
         ...DEFAULT_PARAMETERS,
         depthWriteEnabled: false
       }),
       'Parameters are updated correctly'
-    );
-    t.ok(
+    ).toBeTruthy();
+    expect(
       objectEqual(overlay._props.parameters, {
         depthWriteEnabled: false
       }),
       'Overlay parameters are updated correctly'
-    );
+    ).toBeTruthy();
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });
 
-test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
+test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -336,21 +331,26 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
 
   map.addControl(overlay);
 
-  t.ok(overlay._deck, 'Deck instance is created');
-  t.false('move' in map._listeners, 'No move listeners initially');
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  expect('move' in map._listeners, 'No move listeners initially').toBeFalsy();
 
   map.once('render', () => {
-    t.true(map._listeners['move'].length === 1, 'One move listener attached by overlay');
+    expect(
+      map._listeners['move'].length === 1,
+      'One move listener attached by overlay'
+    ).toBeTruthy();
 
     overlay.finalize();
-    t.true(map._listeners['move'].length === 1, 'Listener attached after finalized until it fires');
+    expect(
+      map._listeners['move'].length === 1,
+      'Listener attached after finalized until it fires'
+    ).toBeTruthy();
 
     map.setCenter({lng: 0, lat: 1});
-    t.true(map._listeners['move'].length === 0, 'Listener detached after it fired');
+    expect(map._listeners['move'].length === 0, 'Listener detached after it fired').toBeTruthy();
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });
 
@@ -361,7 +361,7 @@ const PROJECTION_TEST_CASES = [
 ];
 
 for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
-  test(`MapboxOverlay#${projection} projection view selection`, t => {
+  test(`MapboxOverlay#${projection} projection view selection`, () => {
     const map = new MockMapboxMap({
       center: {lng: -122.45, lat: 37.78},
       zoom: 14,
@@ -375,23 +375,22 @@ for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
 
     map.addControl(overlay);
 
-    t.ok(overlay._deck, 'Deck instance is created');
+    expect(overlay._deck, 'Deck instance is created').toBeTruthy();
 
     map.on('render', () => {
       const mapboxView = overlay._deck.props.views;
-      t.ok(
+      expect(
         mapboxView instanceof ExpectedView,
         `should use correct view when map has ${projection} projection`
-      );
+      ).toBeTruthy();
 
       map.removeControl(overlay);
-      t.notOk(overlay._deck, 'Deck instance is finalized');
-      t.end();
+      expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
     });
   });
 }
 
-test('MapboxOverlay#renderLayersInGroups - constructor', t => {
+test('MapboxOverlay#renderLayersInGroups - constructor', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14,
@@ -411,24 +410,23 @@ test('MapboxOverlay#renderLayersInGroups - constructor', t => {
 
   map.addControl(overlay);
 
-  t.ok(overlay._deck, 'Deck instance is created');
-  t.true(overlay._renderLayersInGroups, '_renderLayersInGroups option is set');
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  expect(overlay._renderLayersInGroups, '_renderLayersInGroups option is set').toBeTruthy();
 
   map.once('render', async () => {
     await sleep(100);
 
     const groupId = 'deck-layer-group-before:park';
-    t.ok(map.getLayer(groupId), 'Group layer exists');
-    t.notOk(map.getLayer('poi1'), 'Individual layer poi1 not added to map');
-    t.notOk(map.getLayer('poi2'), 'Individual layer poi2 not added to map');
+    expect(map.getLayer(groupId), 'Group layer exists').toBeTruthy();
+    expect(map.getLayer('poi1'), 'Individual layer poi1 not added to map').toBeFalsy();
+    expect(map.getLayer('poi2'), 'Individual layer poi2 not added to map').toBeFalsy();
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });
 
-test('MapboxOverlay#renderLayersInGroups - setProps', t => {
+test('MapboxOverlay#renderLayersInGroups - setProps', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14,
@@ -449,7 +447,7 @@ test('MapboxOverlay#renderLayersInGroups - setProps', t => {
     await sleep(100);
 
     const parkGroup = 'deck-layer-group-before:park';
-    t.ok(map.getLayer(parkGroup), 'Park group exists initially');
+    expect(map.getLayer(parkGroup), 'Park group exists initially').toBeTruthy();
 
     // Update to different beforeId
     overlay.setProps({
@@ -459,8 +457,8 @@ test('MapboxOverlay#renderLayersInGroups - setProps', t => {
     await sleep(100);
 
     const buildingGroup = 'deck-layer-group-before:building';
-    t.ok(map.getLayer(buildingGroup), 'Building group exists after setProps');
-    t.notOk(map.getLayer(parkGroup), 'Park group removed after setProps');
+    expect(map.getLayer(buildingGroup), 'Building group exists after setProps').toBeTruthy();
+    expect(map.getLayer(parkGroup), 'Park group removed after setProps').toBeFalsy();
 
     // Remove all layers
     overlay.setProps({
@@ -469,10 +467,9 @@ test('MapboxOverlay#renderLayersInGroups - setProps', t => {
 
     await sleep(100);
 
-    t.notOk(map.getLayer(buildingGroup), 'Building group removed when layers cleared');
+    expect(map.getLayer(buildingGroup), 'Building group removed when layers cleared').toBeFalsy();
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
 });

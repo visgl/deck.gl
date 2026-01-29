@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
   nextPowOfTwo,
@@ -12,18 +12,16 @@ import {
   getTextFromBuffer
 } from '@deck.gl/layers/text-layer/utils';
 
-test('TextLayer - utils#nextPowOfTwo', t => {
+test('TextLayer - utils#nextPowOfTwo', () => {
   const testCases = [0, 1, 2, 5];
 
   const results = testCases.map(number => nextPowOfTwo(number));
   const expected = [0, 1, 2, 8];
 
-  t.deepEqual(results, expected, 'Should match expectations.');
-
-  t.end();
+  expect(results, 'Should match expectations.').toEqual(expected);
 });
 
-test('TextLayer - utils#buildMapping', t => {
+test('TextLayer - utils#buildMapping', () => {
   const options = {
     characterSet: 'abcd',
     getFontWidth: char => char.charCodeAt(0) - 96,
@@ -34,9 +32,9 @@ test('TextLayer - utils#buildMapping', t => {
 
   const {mapping, xOffset, yOffset, canvasHeight} = buildMapping(options);
 
-  t.equal(xOffset, 15, 'xOffset should match.');
-  t.equal(yOffset, 8, 'yOffset should match.');
-  t.equal(canvasHeight, 16, 'canvasHeight should match.');
+  expect(xOffset, 'xOffset should match.').toBe(15);
+  expect(yOffset, 'yOffset should match.').toBe(8);
+  expect(canvasHeight, 'canvasHeight should match.').toBe(16);
 
   /*
     ------+---------+---------
@@ -56,12 +54,10 @@ test('TextLayer - utils#buildMapping', t => {
     d: {x: 9, y: 10, width: 4, height: 8, layoutWidth: 4, layoutHeight: 4}
   };
 
-  t.deepEqual(mapping, expected, 'mapping should match.');
-
-  t.end();
+  expect(mapping, 'mapping should match.').toEqual(expected);
 });
 
-test('TextLayer - utils#buildMapping with cache', t => {
+test('TextLayer - utils#buildMapping with cache', () => {
   const options = {
     characterSet: 'pq',
     getFontWidth: char => char.charCodeAt(0) - 111,
@@ -80,9 +76,9 @@ test('TextLayer - utils#buildMapping with cache', t => {
 
   const {mapping, xOffset, yOffset, canvasHeight} = buildMapping(options);
 
-  t.equal(xOffset, 11, 'xOffset should match.');
-  t.equal(yOffset, 16, 'yOffset should match.');
-  t.equal(canvasHeight, 32, 'canvasHeight should match.');
+  expect(xOffset, 'xOffset should match.').toBe(11);
+  expect(yOffset, 'yOffset should match.').toBe(16);
+  expect(canvasHeight, 'canvasHeight should match.').toBe(32);
 
   const expected = {
     a: {x: 2, y: 2, width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
@@ -93,12 +89,10 @@ test('TextLayer - utils#buildMapping with cache', t => {
     q: {x: 7, y: 18, width: 2, height: 8, layoutWidth: 2, layoutHeight: 4}
   };
 
-  t.deepEqual(mapping, expected, 'mapping should match.');
-
-  t.end();
+  expect(mapping, 'mapping should match.').toEqual(expected);
 });
 
-test('TextLayer - utils#transformParagraph - single line', t => {
+test('TextLayer - utils#transformParagraph - single line', () => {
   const text = 'ab';
   const lineHeight = 1.0;
 
@@ -116,12 +110,10 @@ test('TextLayer - utils#transformParagraph - single line', t => {
 
   const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
 
-  t.deepEqual(transformedData, expected);
-
-  t.end();
+  expect(transformedData).toEqual(expected);
 });
 
-test('TextLayer - utils#transformParagraph - multiple lines', t => {
+test('TextLayer - utils#transformParagraph - multiple lines', () => {
   const text = 'ab\nc';
   const lineHeight = 1.0;
 
@@ -139,12 +131,10 @@ test('TextLayer - utils#transformParagraph - multiple lines', t => {
   };
 
   const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
-  t.deepEqual(transformedData, expected);
-
-  t.end();
+  expect(transformedData).toEqual(expected);
 });
 
-test('TextLayer - utils#transformParagraph - unicode', t => {
+test('TextLayer - utils#transformParagraph - unicode', () => {
   const text = '\u{F0004}\n\u{F0005}';
   const lineHeight = 1.0;
 
@@ -162,12 +152,10 @@ test('TextLayer - utils#transformParagraph - unicode', t => {
 
   const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
 
-  t.deepEqual(transformedData, expected);
-
-  t.end();
+  expect(transformedData).toEqual(expected);
 });
 
-test('TextLayer - utils#transformParagraph - multiple lines with line height', t => {
+test('TextLayer - utils#transformParagraph - multiple lines with line height', () => {
   const text = 'ab\nc';
   const lineHeight = 1.5;
 
@@ -185,12 +173,10 @@ test('TextLayer - utils#transformParagraph - multiple lines with line height', t
   };
 
   const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
-  t.deepEqual(transformedData, expected);
-
-  t.end();
+  expect(transformedData).toEqual(expected);
 });
 
-test('TextLayer - utils#autoWrapping', t => {
+test('TextLayer - utils#autoWrapping', () => {
   const text = 'Amy: Hello, Ben.';
 
   const iconMapping = {
@@ -221,15 +207,15 @@ test('TextLayer - utils#autoWrapping', t => {
 
   let expected = getStartIndices(['Amy: ', 'Hello, ', 'Ben.']);
   let actual = autoWrapping(text, 'break-word', 15, iconMapping);
-  t.deepEqual(actual, expected, 'Should match break word.');
+  expect(actual, 'Should match break word.').toEqual(expected);
 
   expected = getStartIndices(['Amy:', ' ', 'Hell', 'o, ', 'Ben.']);
   actual = autoWrapping(text, 'break-word', 10, iconMapping);
-  t.deepEqual(actual, expected, 'Should break the word when it is longer than maxWidth.');
+  expect(actual, 'Should break the word when it is longer than maxWidth.').toEqual(expected);
 
   expected = getStartIndices(['Amy: H', 'ello, Be', 'n.']);
   actual = autoWrapping(text, 'break-all', 15, iconMapping);
-  t.deepEqual(actual, expected, 'Should match break all.');
+  expect(actual, 'Should match break all.').toEqual(expected);
 
   expected = getStartIndices([
     'A',
@@ -250,16 +236,12 @@ test('TextLayer - utils#autoWrapping', t => {
     '.'
   ]);
   actual = autoWrapping(text, 'break-word', 1, iconMapping);
-  t.deepEqual(
-    actual,
-    expected,
-    "Should break all when maxWidth is smaller than a single char's width."
+  expect(actual, "Should break all when maxWidth is smaller than a single char's width.").toEqual(
+    expected
   );
-
-  t.end();
 });
 
-test('TextLayer - utils#transformParagraph - autoWrapping', t => {
+test('TextLayer - utils#transformParagraph - autoWrapping', () => {
   const text = 'ab cd e';
   const lineHeight = 1.5;
 
@@ -280,25 +262,21 @@ test('TextLayer - utils#transformParagraph - autoWrapping', t => {
   };
 
   const transformedData = transformParagraph(text, lineHeight, 'break-word', 12, iconMapping);
-  t.deepEqual(transformedData, expected);
-
-  t.end();
+  expect(transformedData).toEqual(expected);
 });
 
-test('TextLayer - utils#getTextFromBuffer', t => {
+test('TextLayer - utils#getTextFromBuffer', () => {
   const value = new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33]);
 
   let result = getTextFromBuffer({value, length: 2, startIndices: [0, 6]});
-  t.deepEqual(result.texts, ['Hello ', 'world!'], 'binary converted to text strings');
-  t.is(result.characterCount, 12, 'returns correct character count');
+  expect(result.texts, 'binary converted to text strings').toEqual(['Hello ', 'world!']);
+  expect(result.characterCount, 'returns correct character count').toBe(12);
 
   result = getTextFromBuffer({value, length: 2, offset: 1, startIndices: [0, 6]});
-  t.deepEqual(result.texts, ['ello w', 'orld!'], 'binary converted to text strings');
-  t.is(result.characterCount, 11, 'returns correct character count');
+  expect(result.texts, 'binary converted to text strings').toEqual(['ello w', 'orld!']);
+  expect(result.characterCount, 'returns correct character count').toBe(11);
 
   result = getTextFromBuffer({value, length: 2, stride: 2, offset: 1, startIndices: [0, 3]});
-  t.deepEqual(result.texts, ['el ', 'ol!'], 'binary converted to text strings');
-  t.is(result.characterCount, 6, 'returns correct character count');
-
-  t.end();
+  expect(result.texts, 'binary converted to text strings').toEqual(['el ', 'ol!']);
+  expect(result.characterCount, 'returns correct character count').toBe(6);
 });

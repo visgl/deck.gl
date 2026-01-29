@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {binaryToSpatialjson} from '@deck.gl/carto/layers/schema/spatialjson-utils';
 import {spatialjsonToBinary} from './spatialjson-utils';
@@ -56,20 +56,17 @@ const TEST_CASES = [
   }
 ];
 
-test('Spatialjson to binary', async t => {
+test('Spatialjson to binary', async () => {
   for (const {name, spatial, expected} of TEST_CASES) {
     const converted = spatialjsonToBinary(spatial);
-    t.deepEqual(converted, expected, `Spatialjson is converted to binary: ${name}`);
-    t.deepEqual(
-      binaryToSpatialjson(converted),
-      spatial,
-      `Spatialjson is converted from binary: ${name}`
+    expect(converted, `Spatialjson is converted to binary: ${name}`).toEqual(expected);
+    expect(binaryToSpatialjson(converted), `Spatialjson is converted from binary: ${name}`).toEqual(
+      spatial
     );
   }
-  t.end();
 });
 
-test('Parse Carto Spatial Tile', async t => {
+test('Parse Carto Spatial Tile', async () => {
   const expected = [
     {
       id: 613044272586817535n,
@@ -86,6 +83,5 @@ test('Parse Carto Spatial Tile', async t => {
   ];
 
   const converted = CartoSpatialTileLoader.parseSync(BINARY_SPATIAL_TILE);
-  t.deepEqual(converted, expected, 'Test data correctly decoded');
-  t.end();
+  expect(converted, 'Test data correctly decoded').toEqual(expected);
 });

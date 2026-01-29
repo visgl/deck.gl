@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
   A5Layer,
@@ -18,19 +18,18 @@ import {
   GeohashLayer
 } from '@deck.gl/geo-layers';
 
-test('Top-level imports', t => {
-  t.ok(A5Layer, 'A5Layer symbol imported');
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(QuadkeyLayer, 'QuadkeyLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
-  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(WMSLayer, 'WMSLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
-  t.ok(TerrainLayer, 'TerrainLayer symbol imported');
-  t.ok(GeohashLayer, 'GeohashLayer symbol imported');
-  t.end();
+test('Top-level imports', () => {
+  expect(A5Layer, 'A5Layer symbol imported').toBeTruthy();
+  expect(GreatCircleLayer, 'GreatCircleLayer symbol imported').toBeTruthy();
+  expect(QuadkeyLayer, 'QuadkeyLayer symbol imported').toBeTruthy();
+  expect(S2Layer, 'S2Layer symbol imported').toBeTruthy();
+  expect(H3HexagonLayer, 'H3HexagonLayer symbol imported').toBeTruthy();
+  expect(H3ClusterLayer, 'H3ClusterLayer symbol imported').toBeTruthy();
+  expect(TileLayer, 'TileLayer symbol imported').toBeTruthy();
+  expect(WMSLayer, 'WMSLayer symbol imported').toBeTruthy();
+  expect(TripsLayer, 'TripsLayer symbol imported').toBeTruthy();
+  expect(TerrainLayer, 'TerrainLayer symbol imported').toBeTruthy();
+  expect(GeohashLayer, 'GeohashLayer symbol imported').toBeTruthy();
 });
 
 import './a5-layer.spec';

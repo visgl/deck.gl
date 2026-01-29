@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import PathTesselator from '@deck.gl/layers/path-layer/path-tesselator';
 
@@ -69,50 +69,45 @@ const TEST_CASES = [
   }
 ];
 
-test('PathTesselator#imports', t => {
-  t.ok(typeof PathTesselator === 'function', 'PathTesselator imported');
-  t.end();
+test('PathTesselator#imports', () => {
+  expect(typeof PathTesselator === 'function', 'PathTesselator imported').toBeTruthy();
 });
 
-test('PathTesselator#constructor', t => {
+test('PathTesselator#constructor', () => {
   TEST_DATA.forEach(testData => {
-    t.comment(`Path data: ${testData.title}`);
+    console.log(`Path data: ${testData.title}`);
     const tesselator = new PathTesselator(testData);
-    t.ok(tesselator instanceof PathTesselator, 'PathTesselator created');
-    t.is(tesselator.instanceCount, INSTANCE_COUNT, 'Coorectly counted instances');
+    expect(tesselator instanceof PathTesselator, 'PathTesselator created').toBeTruthy();
+    expect(tesselator.instanceCount, 'Coorectly counted instances').toBe(INSTANCE_COUNT);
   });
-
-  t.end();
 });
 
-test('PathTesselator#constructor', t => {
+test('PathTesselator#constructor', () => {
   TEST_DATA.forEach(testData => {
-    t.comment(`Path data: ${testData.title}`);
+    console.log(`Path data: ${testData.title}`);
 
     TEST_CASES.forEach(testCase => {
-      t.comment(`  ${testCase.title}`);
+      console.log(`  ${testCase.title}`);
       const tesselator = new PathTesselator(Object.assign({}, testData, testCase.params));
 
-      t.ok(ArrayBuffer.isView(tesselator.get('positions')), 'PathTesselator.get positions');
-      t.deepEquals(
-        tesselator.get('positions').slice(0, 9),
-        [1, 1, 0, 2, 2, 0, 3, 3, 0],
-        'positions are filled'
-      );
+      expect(
+        ArrayBuffer.isView(tesselator.get('positions')),
+        'PathTesselator.get positions'
+      ).toBeTruthy();
+      expect(tesselator.get('positions').slice(0, 9), 'positions are filled').toEqual([
+        1, 1, 0, 2, 2, 0, 3, 3, 0
+      ]);
 
-      t.deepEquals(
+      expect(
         tesselator.get('positions').slice(21, 30),
-        [2, 2, 0, 3, 3, 0, 1, 1, 0],
         'positions is handling loop correctly'
-      );
+      ).toEqual([2, 2, 0, 3, 3, 0, 1, 1, 0]);
     });
   });
-
-  t.end();
 });
 
 /* eslint-disable max-statements */
-test('PathTesselator#partial update', t => {
+test('PathTesselator#partial update', () => {
   const accessorCalled = new Set();
   const sampleData = [
     {
@@ -143,13 +138,11 @@ test('PathTesselator#partial update', t => {
   });
 
   let positions = tesselator.get('positions').slice(0, 21);
-  t.is(tesselator.instanceCount, 9, 'Initial instance count');
-  t.deepEquals(
-    positions.slice(0, 18),
-    [1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
-    'positions'
-  );
-  t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
+  expect(tesselator.instanceCount, 'Initial instance count').toBe(9);
+  expect(positions.slice(0, 18), 'positions').toEqual([
+    1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0
+  ]);
+  expect(Array.from(accessorCalled), 'Accessor called on all data').toEqual(['A', 'B']);
 
   sampleData[2] = {
     path: [
@@ -162,9 +155,8 @@ test('PathTesselator#partial update', t => {
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
   positions = tesselator.get('positions').slice(0, 36);
-  t.is(tesselator.instanceCount, 12, 'Updated instance count');
-  t.deepEquals(
-    positions,
+  expect(tesselator.instanceCount, 'Updated instance count').toBe(12);
+  expect(positions, 'positions').toEqual(
     // prettier-ignore
     [
       1, 1, 0,
@@ -179,10 +171,9 @@ test('PathTesselator#partial update', t => {
       4, 4, 0,
       5, 5, 0,
       6, 6, 0
-    ],
-    'positions'
+    ]
   );
-  t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
+  expect(Array.from(accessorCalled), 'Accessor called only on partial data').toEqual(['C']);
 
   sampleData[0] = {
     path: [
@@ -195,18 +186,14 @@ test('PathTesselator#partial update', t => {
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
   positions = tesselator.get('positions').slice(0, 27);
-  t.is(tesselator.instanceCount, 12, 'Updated instance count');
-  t.deepEquals(
-    positions,
-    [6, 6, 0, 5, 5, 0, 4, 4, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
-    'positions'
-  );
-  t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
-
-  t.end();
+  expect(tesselator.instanceCount, 'Updated instance count').toBe(12);
+  expect(positions, 'positions').toEqual([
+    6, 6, 0, 5, 5, 0, 4, 4, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0
+  ]);
+  expect(Array.from(accessorCalled), 'Accessor called only on partial data').toEqual(['A']);
 });
 
-test('PathTesselator#normalize', t => {
+test('PathTesselator#normalize', () => {
   const sampleData = [
     {path: [1, 1, 2, 2, 3, 3], id: 'A'},
     {path: [1, 1, 2, 2, 3, 3, 1, 1], id: 'B'}
@@ -219,25 +206,23 @@ test('PathTesselator#normalize', t => {
     positionFormat: 'XY'
   });
 
-  t.is(tesselator.instanceCount, 7, 'Updated instanceCount as open paths');
+  expect(tesselator.instanceCount, 'Updated instanceCount as open paths').toBe(7);
 
   tesselator.updateGeometry({
     loop: true,
     normalize: false
   });
 
-  t.is(tesselator.instanceCount, 11, 'Updated instanceCount as closed loops');
+  expect(tesselator.instanceCount, 'Updated instanceCount as closed loops').toBe(11);
 
   tesselator.updateGeometry({
     normalize: true
   });
 
-  t.is(tesselator.instanceCount, 9, 'Updated instanceCount with normalization');
-
-  t.end();
+  expect(tesselator.instanceCount, 'Updated instanceCount with normalization').toBe(9);
 });
 
-test('PathTesselator#geometryBuffer', t => {
+test('PathTesselator#geometryBuffer', () => {
   const sampleData = {
     length: 2,
     startIndices: [0, 2],
@@ -252,43 +237,35 @@ test('PathTesselator#geometryBuffer', t => {
     positionFormat: 'XY'
   });
 
-  t.is(tesselator.instanceCount, 8, 'Updated instanceCount from geometryBuffer');
-  t.deepEquals(
-    tesselator.get('positions').slice(0, 24),
-    [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
-    'positions are populated'
-  );
-  t.deepEquals(
-    tesselator.get('segmentTypes').slice(0, 8),
-    [3, 4, 4, 0, 0, 0, 4, 4],
-    'segmentTypes are populated'
-  );
+  expect(tesselator.instanceCount, 'Updated instanceCount from geometryBuffer').toBe(8);
+  expect(tesselator.get('positions').slice(0, 24), 'positions are populated').toEqual([
+    1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0
+  ]);
+  expect(tesselator.get('segmentTypes').slice(0, 8), 'segmentTypes are populated').toEqual([
+    3, 4, 4, 0, 0, 0, 4, 4
+  ]);
 
   tesselator.updateGeometry({
     normalize: false
   });
 
-  t.is(tesselator.instanceCount, 6, 'Updated instanceCount from geometryBuffer');
-  t.is(tesselator.vertexStarts, sampleData.startIndices, 'Used external startIndices');
-  t.notOk(tesselator.get('positions'), 'skipped packing positions');
-  t.deepEquals(
-    tesselator.get('segmentTypes').slice(0, 6),
-    [3, 4, 1, 0, 2, 4],
-    'segmentTypes are populated'
-  );
+  expect(tesselator.instanceCount, 'Updated instanceCount from geometryBuffer').toBe(6);
+  expect(tesselator.vertexStarts, 'Used external startIndices').toBe(sampleData.startIndices);
+  expect(tesselator.get('positions'), 'skipped packing positions').toBeFalsy();
+  expect(tesselator.get('segmentTypes').slice(0, 6), 'segmentTypes are populated').toEqual([
+    3, 4, 1, 0, 2, 4
+  ]);
 
-  t.throws(
+  expect(
     () =>
       tesselator.updateGeometry({
         data: {length: 2}
       }),
     'throws if missing startIndices'
-  );
-
-  t.end();
+  ).toThrow();
 });
 
-test('PathTesselator#normalizeGeometry', t => {
+test('PathTesselator#normalizeGeometry', () => {
   const sampleData = [
     [
       [150, 0],
@@ -300,7 +277,7 @@ test('PathTesselator#normalizeGeometry', t => {
     getGeometry: d => d
   });
 
-  t.is(tesselator.instanceCount, 2, 'Updated instanceCount from input');
+  expect(tesselator.instanceCount, 'Updated instanceCount from input').toBe(2);
 
   tesselator.updateGeometry({
     resolution: 30,
@@ -308,7 +285,7 @@ test('PathTesselator#normalizeGeometry', t => {
   });
 
   // subdivide into smaller segments
-  t.is(tesselator.instanceCount, 11, 'Updated instanceCount from input');
+  expect(tesselator.instanceCount, 'Updated instanceCount from input').toBe(11);
 
   tesselator.updateGeometry({
     resolution: null,
@@ -316,7 +293,5 @@ test('PathTesselator#normalizeGeometry', t => {
   });
 
   // split at 180th meridian
-  t.is(tesselator.instanceCount, 4, 'Updated instanceCount from input');
-
-  t.end();
+  expect(tesselator.instanceCount, 'Updated instanceCount from input').toBe(4);
 });

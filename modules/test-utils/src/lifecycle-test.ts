@@ -4,7 +4,7 @@
 
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
 
-import {makeSpy} from '@probe.gl/test-utils';
+import {vi, type MockInstance} from 'vitest';
 import {device} from './utils/setup-gl';
 
 import type {Layer, CompositeLayer, Viewport} from '@deck.gl/core';
@@ -128,8 +128,7 @@ export async function testInitializeLayerAsync(
   return null;
 }
 
-// TODO - export from probe.gl
-type Spy = ReturnType<typeof makeSpy>;
+type Spy = MockInstance;
 
 export type LayerClass<LayerT extends Layer> = {
   new (...args): LayerT;
@@ -205,7 +204,7 @@ export function testLayer<LayerT extends Layer>(opts: {
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
     // Remove spies
-    Object.keys(spyMap).forEach(k => spyMap[k].reset());
+    Object.keys(spyMap).forEach(k => spyMap[k].mockClear());
     layer = newLayer;
   }
 
@@ -258,7 +257,7 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
     }
 
     // Remove spies
-    Object.keys(spyMap).forEach(k => spyMap[k].reset());
+    Object.keys(spyMap).forEach(k => spyMap[k].mockClear());
     layer = newLayer;
   }
 
@@ -330,7 +329,7 @@ function injectSpies(layer: Layer, spies: string[]): Record<string, Spy> {
   const spyMap: Record<string, Spy> = {};
   if (spies) {
     for (const functionName of spies) {
-      spyMap[functionName] = makeSpy(Object.getPrototypeOf(layer), functionName);
+      spyMap[functionName] = vi.spyOn(Object.getPrototypeOf(layer), functionName);
     }
   }
   return spyMap;
