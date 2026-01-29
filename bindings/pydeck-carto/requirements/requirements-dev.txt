@@ -10,4 +10,4 @@ sphinx_rtd_theme==2.0.0
 tokenize-rt>=3.2.0
 twine==4.0.0
 typing-extensions>=4.0.0
-wheel==0.37.1
+wheel==0.38.1
