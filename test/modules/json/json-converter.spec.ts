@@ -69,9 +69,9 @@ test('JSONConverter#badConvert', () => {
   makeSpy(log, 'warn');
   jsonConverter.convert(badData);
   expect(
-    log.warn.called,
+    log.warn,
     'should produce a warning message if the layer type is invalid'
-  ).toBeTruthy();
+  ).toHaveBeenCalled();
   log.warn.restore();
 });
 

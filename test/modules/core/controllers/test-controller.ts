@@ -248,12 +248,8 @@ export default async function testController(ViewClass, defaultProps, blackList 
     controller.setProps(controllerProps);
     await triggerEvents(controller, testCase, timeline);
 
-    expect(onViewStateChangeCalled, `${testCase.title} onViewStateChange`).toBe(
-      testCase.viewStateChanges
-    );
-    expect(affectedStates.size, `${testCase.title} interaction state updated`).toBe(
-      testCase.interactionStates
-    );
+    expect(onViewStateChangeCalled, `${testCase.title} onViewStateChange`).toBe(testCase.viewStateChanges);
+    expect(affectedStates.size, `${testCase.title} interaction state updated`).toBe(testCase.interactionStates);
   }
 }
 

@@ -775,9 +775,9 @@ test('Attribute#setExternalBuffer', () => {
     'should successfully set external buffer if setting external buffer to the same object'
   ).toBeTruthy();
   expect(
-    spy.called,
+    spy,
     'Should not call update if setting external buffer to the same object'
-  ).toBeFalsy();
+  ).not.toHaveBeenCalled();
 
   expect(
     attribute.setExternalBuffer(value1),
@@ -798,9 +798,9 @@ test('Attribute#setExternalBuffer', () => {
     'should successfully set external buffer if setting external buffer to the same object'
   ).toBeTruthy();
   expect(
-    spy.called,
+    spy,
     'Should not call update if setting external buffer to the same object'
-  ).toBeFalsy();
+  ).not.toHaveBeenCalled();
 
   expect(
     attribute.setExternalBuffer({

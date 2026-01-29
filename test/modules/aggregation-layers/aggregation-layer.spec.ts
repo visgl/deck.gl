@@ -115,11 +115,11 @@ test('AggregationLayer#updateState', () => {
         },
         spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({spies, layer}) {
-          expect(spies.updateAttributes.called, 'should always call updateAttributes').toBeTruthy();
+          expect(spies.updateAttributes, 'should always call updateAttributes').toHaveBeenCalled();
           expect(
-            spies.updateShaders.called,
+            spies.updateShaders,
             'should not call updateShaders when extensions not changed'
-          ).toBeFalsy();
+          ).not.toHaveBeenCalled();
           expect(layer.state.aggregationDirty, 'Aggregation should not be dirty').toBeFalsy();
           expect(layer.state.anyAttributeChanged, 'Should change one attribute').toBeTruthy();
           expect(layer.state.aOneAttributeChanged, 'Should not update attribute').toBeFalsy();
@@ -144,9 +144,9 @@ test('AggregationLayer#updateState', () => {
         spies: ['updateShaders'],
         onAfterUpdate({spies, layer}) {
           expect(
-            spies.updateShaders.called,
+            spies.updateShaders,
             'should call updateShaders when extensions changed'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(
             layer.state.aggregationDirty,
             'Aggregation should be dirty when extensions changed'
@@ -160,9 +160,9 @@ test('AggregationLayer#updateState', () => {
         spies: ['updateState'],
         onAfterUpdate({spies, layer}) {
           expect(
-            spies.updateState.called,
+            spies.updateState,
             'should not call updateState nothing changed'
-          ).toBeFalsy();
+          ).not.toHaveBeenCalled();
         }
       },
       {

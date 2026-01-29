@@ -210,7 +210,7 @@ test('Layer#diffProps', () => {
     new SubLayer(LAYER_PROPS, {updateTriggers: {time: {version: 0}}}).props,
     layer.props
   );
-  expect(spy.called, 'updateTriggers fired').toBeTruthy();
+  expect(spy, 'updateTriggers fired').toHaveBeenCalled();
   spy.restore();
 
   layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});

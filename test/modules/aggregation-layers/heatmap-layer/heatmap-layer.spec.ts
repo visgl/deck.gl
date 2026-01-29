@@ -90,11 +90,11 @@ test.skip('HeatmapLayer#updates', t => {
         onAfterUpdate({layer, subLayers, spies}) {
           expect(subLayers.length === 1, 'Sublayer rendered').toBeTruthy();
 
-          expect(spies._updateColorTexture.called, 'should update color texture').toBeTruthy();
+          expect(spies._updateColorTexture, 'should update color texture').toHaveBeenCalled();
           expect(
-            spies._updateBounds.called,
+            spies._updateBounds,
             'viewport not changed, should not call _updateBounds'
-          ).toBeFalsy();
+          ).not.toHaveBeenCalled();
           spies._updateColorTexture.restore();
           spies._updateBounds.restore();
         }
@@ -109,19 +109,22 @@ test.skip('HeatmapLayer#updates', t => {
         ],
         onAfterUpdate({layer, subLayers, spies}) {
           const {zoom} = layer.state;
-          expect(spies._updateColorTexture.called, 'should not update color texture').toBeFalsy();
           expect(
-            spies._updateBounds.called,
+            spies._updateColorTexture,
+            'should not update color texture'
+          ).not.toHaveBeenCalled();
+          expect(
+            spies._updateBounds,
             'viewport changed, should call _updateBounds'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(
-            spies._updateWeightmap.called,
+            spies._updateWeightmap,
             'boundsChanged changed, should _updateWeightmap'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(
-            spies._updateTextureRenderingBounds.called,
+            spies._updateTextureRenderingBounds,
             'vieport changed, should call _updateTextureRenderingBounds'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(zoom, 'should update state.zoom').toBe(viewport1.zoom);
           spies._updateColorTexture.restore();
           spies._updateBounds.restore();
@@ -134,17 +137,17 @@ test.skip('HeatmapLayer#updates', t => {
         spies: ['_updateBounds', '_updateWeightmap', '_updateTextureRenderingBounds'],
         onAfterUpdate({layer, subLayers, spies}) {
           expect(
-            spies._updateBounds.called,
+            spies._updateBounds,
             'viewport changed slightly, should call _updateBounds'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(
-            spies._updateWeightmap.called,
+            spies._updateWeightmap,
             'viewport changed slightly, should not call _updateWeightmap'
-          ).toBeFalsy();
+          ).not.toHaveBeenCalled();
           expect(
-            spies._updateTextureRenderingBounds.called,
+            spies._updateTextureRenderingBounds,
             'viewport changed slightly, should call _updateTextureRenderingBounds'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           spies._updateBounds.restore();
           spies._updateWeightmap.restore();
           spies._updateTextureRenderingBounds.restore();
@@ -155,13 +158,13 @@ test.skip('HeatmapLayer#updates', t => {
         spies: ['_updateBounds', '_updateWeightmap'],
         onAfterUpdate({layer, subLayers, spies}) {
           expect(
-            spies._updateBounds.called,
+            spies._updateBounds,
             'viewport panned too far, should call _updateBounds'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(
-            spies._updateWeightmap.called,
+            spies._updateWeightmap,
             'viewport panned too far, should call _updateWeightmap'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           spies._updateBounds.restore();
           spies._updateWeightmap.restore();
         }
@@ -172,13 +175,13 @@ test.skip('HeatmapLayer#updates', t => {
         onAfterUpdate({layer, subLayers, spies}) {
           const {zoom} = layer.state;
           expect(
-            spies._updateBounds.called,
+            spies._updateBounds,
             'viewport zoom changed, should call _updateBounds'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           expect(
-            spies._debouncedUpdateWeightmap.called,
+            spies._debouncedUpdateWeightmap,
             'viewport zoom changed, should call _debouncedUpdateWeightmap'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           spies._updateBounds.restore();
           spies._debouncedUpdateWeightmap.restore();
           expect(zoom, 'viewport zoom changed, should update state.zoom').toBe(
@@ -194,9 +197,9 @@ test.skip('HeatmapLayer#updates', t => {
         spies: ['_updateWeightmap'],
         onAfterUpdate({layer, subLayers, spies}) {
           expect(
-            spies._updateWeightmap.called,
+            spies._updateWeightmap,
             'should update weight map on uniform change'
-          ).toBeTruthy();
+          ).toHaveBeenCalled();
           spies._updateWeightmap.restore();
         }
       }

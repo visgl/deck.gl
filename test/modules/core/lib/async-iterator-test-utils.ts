@@ -22,13 +22,8 @@ export function testAsyncData(data) {
         expect(props.data.length > oldProps.data.length, 'data has changed').toBeTruthy();
       }
       if (Array.isArray(changeFlags.dataChanged)) {
-        expect(changeFlags.dataChanged[0].startRow, 'data diff starts from last position').toBe(
-          oldProps.data.length
-        );
-        expect(
-          changeFlags.dataChanged[changeFlags.dataChanged.length - 1].endRow,
-          'data diff covers rest of range'
-        ).toBe(props.data.length);
+        expect(changeFlags.dataChanged[0].startRow, 'data diff starts from last position').toBe(oldProps.data.length);
+        expect(changeFlags.dataChanged[changeFlags.dataChanged.length - 1].endRow, 'data diff covers rest of range').toBe(props.data.length);
       }
     }
   }

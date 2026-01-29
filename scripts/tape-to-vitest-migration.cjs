@@ -262,6 +262,26 @@ function convertTapeToVitest(content, filePath = '') {
   // assert: t.ok -> assert: (cond, msg) => expect(cond).toBeTruthy()
   result = result.replace(/assert:\s*t\d*\.ok/g, 'assert: (cond, msg) => expect(cond).toBeTruthy()');
 
+  // Step 8b: Convert sinon-style spy.called assertions to vitest toHaveBeenCalled()
+  // expect(spy.called, 'message').toBeTruthy() -> expect(spy, 'message').toHaveBeenCalled()
+  // expect(spy.called, 'message').toBeFalsy() -> expect(spy, 'message').not.toHaveBeenCalled()
+  result = result.replace(
+    /expect\(([^,)]+)\.called,\s*([^)]+)\)\.toBeTruthy\(\)/g,
+    'expect($1, $2).toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\(([^,)]+)\.called\)\.toBeTruthy\(\)/g,
+    'expect($1).toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\(([^,)]+)\.called,\s*([^)]+)\)\.toBeFalsy\(\)/g,
+    'expect($1, $2).not.toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\(([^,)]+)\.called\)\.toBeFalsy\(\)/g,
+    'expect($1).not.toHaveBeenCalled()'
+  );
+
   // Step 9: Handle utility files that export functions taking t as parameter
   // Convert: export function testFoo(t, ...) to export function testFoo(...)
   // These helper functions need the t parameter removed

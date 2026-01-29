@@ -12,9 +12,9 @@ test('jupyter-widget: Google Maps base', () => {
   makeSpy(log, 'warn');
   const overlay = createGoogleMapsDeckOverlay({props: {}});
   expect(
-    log.warn.called,
+    log.warn,
     'should produce a warning message if no Google Maps API key is provided'
-  ).toBeTruthy();
+  ).toHaveBeenCalled();
   expect(!overlay, 'Absent Google Maps API key creates null overlay').toBeTruthy();
   log.warn.restore();
 });
