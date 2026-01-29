@@ -373,11 +373,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       const userOnResize = this.props.deviceProps?.onResize;
 
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
+        ...this.props.deviceProps,
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
         _cachePipelines: true,
-        ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
           // Manually sync drawing buffer dimensions (canvas is externally managed)
           // TODO(v9.3): Use canvasContext.setDrawingBufferSize(width, height) when upgrading to luma 9.3+
@@ -863,9 +863,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
     const deviceProps = {
       adapters: [],
+      ...props.deviceProps,
       _cacheShaders: true,
-      _cachePipelines: true,
-      ...props.deviceProps
+      _cachePipelines: true
     };
     if (!deviceProps.adapters.includes(webgl2Adapter)) {
       deviceProps.adapters.push(webgl2Adapter);
