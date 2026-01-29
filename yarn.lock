@@ -2436,10 +2436,10 @@
   dependencies:
     "@vaadin/vaadin-development-mode-detector" "^2.0.0"
 
-"@vis.gl/dev-tools@1.0.0-alpha.21":
-  version "1.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@vis.gl/dev-tools/-/dev-tools-1.0.0-alpha.21.tgz#95e5214a0aa7f7b391a18f30d20a25263027d810"
-  integrity sha512-JWcBQj52jNoM6/0umeAEuwJ9F4BwVfh40phkob20iUvleT1TcM3cJFd9GnRu7jvB7u4rmoDMQOXsC7awnqmFeA==
+"@vis.gl/dev-tools@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@vis.gl/dev-tools/-/dev-tools-1.0.1.tgz#72d43ec5d75d10ee54ed679a52db6edb73019622"
+  integrity sha512-ENI973W2KMTxDdCfLGSMdVSjQczbi1ju350iwFpeBdeDjWDgqOjzYD5SIcNWhzGlgKTY7r55H1h7M1vpiyisSA==
   dependencies:
     "@esbuild-plugins/node-globals-polyfill" "^0.2.0"
     "@esbuild-plugins/node-modules-polyfill" "^0.2.0"
@@ -2471,10 +2471,10 @@
     typescript-eslint "^7.7.0"
     vite "^4.5.0"
 
-"@vis.gl/ts-plugins@1.0.0-alpha.21":
-  version "1.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@vis.gl/ts-plugins/-/ts-plugins-1.0.0-alpha.21.tgz#91992a4cdf242ee0a92594e7cc2d51c82d837d8d"
-  integrity sha512-OgpfeiGj48mxSU3bJBoYFO81D4bfWw/lu4fgLVL8aNhTE5OSvHBsoxjPZfDTdSm0nz0iEnVul9MOVrg29+KVqA==
+"@vis.gl/ts-plugins@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@vis.gl/ts-plugins/-/ts-plugins-1.0.1.tgz#7ba0c1ec653fe3137409f59861741f7d9fe13a78"
+  integrity sha512-jYDWlMrhazn1j2+AG1L3SdgrAmPeeOXpv2eTzf1XXEO8LIrs7+UFUVkwgecrDTOFkyNlstU3GP70x07arv+Elg==
   dependencies:
     "@luma.gl/constants" "^9.0.0"
     minimatch "^3.0.0"
@@ -6341,9 +6341,9 @@ lodash.merge@^4.6.2:
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
 lodash@^4.17.10, lodash@^4.17.21, lodash@^4.17.4:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+  version "4.17.23"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.23.tgz#f113b0378386103be4f6893388c73d0bde7f2c5a"
+  integrity sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==
 
 log-driver@^1.2.7:
   version "1.2.7"
@@ -6628,9 +6628,9 @@ mimic-fn@^2.1.0:
   integrity sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
 
 min-document@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/min-document/-/min-document-2.19.0.tgz#7bd282e3f5842ed295bb748cdd9f1ffa2c824685"
-  integrity sha512-9Wy1B3m3f66bPPmU5hdA4DR4PB2OfDU/+GS3yAB7IQozE3tqXaVv2zOjgla7MEGSRv95+ILmOuvhLkOK6wJtCQ==
+  version "2.19.2"
+  resolved "https://registry.yarnpkg.com/min-document/-/min-document-2.19.2.tgz#f95db44639eaae3ac8ea85ae6809ae85ff7e3b81"
+  integrity sha512-8S5I8db/uZN8r9HSLFVWPdJCvYOejMcEC82VIzNUc6Zkklf/d1gg2psfE79/vyhWOj4+J8MtwmoOz3TmvaGu5A==
   dependencies:
     dom-walk "^0.1.0"
 
@@ -6796,10 +6796,10 @@ modify-values@^1.0.1:
   resolved "https://registry.yarnpkg.com/modify-values/-/modify-values-1.0.1.tgz#b3939fa605546474e3e3e3c63d64bd43b4ee6022"
   integrity sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==
 
-moment-timezone@^0.5.33:
-  version "0.5.45"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.45.tgz#cb685acd56bac10e69d93c536366eb65aa6bcf5c"
-  integrity sha512-HIWmqA86KcmCAhnMAN0wuDOARV/525R2+lOLotuGFzn4HO+FH+/645z2wx0Dt3iDv6/p61SIvKnDstISainhLQ==
+moment-timezone@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.6.0.tgz#c5a6519171f31a64739ea75d33f5c136c08ff608"
+  integrity sha512-ldA5lRNm3iJCWZcBCab4pnNL3HSZYXVb/3TYr75/1WCTWYuTqYUb5f/S384pncYjJ88lbO8Z4uPDvmoluHJc8Q==
   dependencies:
     moment "^2.29.4"
 
