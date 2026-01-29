@@ -2436,10 +2436,10 @@
   dependencies:
     "@vaadin/vaadin-development-mode-detector" "^2.0.0"
 
-"@vis.gl/dev-tools@1.0.0-alpha.21":
-  version "1.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@vis.gl/dev-tools/-/dev-tools-1.0.0-alpha.21.tgz#95e5214a0aa7f7b391a18f30d20a25263027d810"
-  integrity sha512-JWcBQj52jNoM6/0umeAEuwJ9F4BwVfh40phkob20iUvleT1TcM3cJFd9GnRu7jvB7u4rmoDMQOXsC7awnqmFeA==
+"@vis.gl/dev-tools@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@vis.gl/dev-tools/-/dev-tools-1.0.1.tgz#72d43ec5d75d10ee54ed679a52db6edb73019622"
+  integrity sha512-ENI973W2KMTxDdCfLGSMdVSjQczbi1ju350iwFpeBdeDjWDgqOjzYD5SIcNWhzGlgKTY7r55H1h7M1vpiyisSA==
   dependencies:
     "@esbuild-plugins/node-globals-polyfill" "^0.2.0"
     "@esbuild-plugins/node-modules-polyfill" "^0.2.0"
