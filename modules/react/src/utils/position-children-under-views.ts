@@ -41,11 +41,7 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
         onViewStateChange: null as any
       };
       return [
-        createElement(
-          ContextProvider,
-          {key: 'minimal-context', value: minimalContext},
-          ...children
-        )
+        createElement(ContextProvider, {key: 'minimal-context', value: minimalContext}, ...children)
       ];
     }
     return [];
