@@ -4,7 +4,7 @@
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import maplibregl from 'maplibre-gl';
-import type {Layer} from '@deck.gl/core';
+import type {Layer, View} from '@deck.gl/core';
 
 // eslint-disable-next-line max-params
 export function mount(
@@ -14,7 +14,10 @@ export function mount(
   mapStyle: string,
   interleaved: boolean,
   globe?: boolean,
-  batched?: boolean
+  batched?: boolean,
+  multiView?: boolean,
+  views?: View[],
+  layerFilter?: (args: {layer: Layer; viewport: any}) => boolean
 ): () => void {
   const map = new maplibregl.Map({
     container,
@@ -25,11 +28,20 @@ export function mount(
     pitch: initialViewState.pitch || 0
   });
 
-  const deckOverlay = new MapboxOverlay({
+  const overlayConfig: any = {
     interleaved,
     _renderLayersInGroups: batched,
     layers: getLayers(interleaved)
-  });
+  };
+
+  if (multiView && views) {
+    overlayConfig.views = views;
+  }
+  if (multiView && layerFilter) {
+    overlayConfig.layerFilter = layerFilter;
+  }
+
+  const deckOverlay = new MapboxOverlay(overlayConfig);
 
   let cancelled = false;
 

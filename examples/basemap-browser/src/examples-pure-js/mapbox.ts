@@ -4,15 +4,19 @@
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import mapboxgl from 'mapbox-gl';
-import type {Layer} from '@deck.gl/core';
+import type {Layer, View} from '@deck.gl/core';
 
+// eslint-disable-next-line max-params
 export function mount(
   container: HTMLElement,
   getLayers: (interleaved?: boolean) => Layer[],
   initialViewState: any,
   mapStyle: string,
   interleaved: boolean,
-  batched: boolean
+  batched: boolean,
+  multiView?: boolean,
+  views?: View[],
+  layerFilter?: (args: {layer: Layer; viewport: any}) => boolean
 ): () => void {
   // eslint-disable-next-line no-process-env
   const mapboxToken = process.env.MapboxAccessToken;
@@ -38,11 +42,20 @@ export function mount(
     pitch: initialViewState.pitch || 0
   });
 
-  const deckOverlay = new MapboxOverlay({
+  const overlayConfig: any = {
     interleaved,
     _renderLayersInGroups: batched,
     layers: getLayers(interleaved)
-  });
+  };
+
+  if (multiView && views) {
+    overlayConfig.views = views;
+  }
+  if (multiView && layerFilter) {
+    overlayConfig.layerFilter = layerFilter;
+  }
+
+  const deckOverlay = new MapboxOverlay(overlayConfig);
 
   map.addControl(deckOverlay as any);
   map.addControl(new mapboxgl.NavigationControl());
