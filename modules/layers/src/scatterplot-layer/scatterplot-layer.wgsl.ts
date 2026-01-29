@@ -3,15 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 export default /* wgsl */ `\
-// TODO(ibgreen): Hack for Layer uniforms (move to new "color" module?)
-
-struct LayerUniforms {
-  opacity: f32,
-};
-
-var<private> layer: LayerUniforms = LayerUniforms(1.0);
-// @group(0) @binding(1) var<uniform> layer: LayerUniforms;
-
 // Main shaders
 
 struct ScatterplotUniforms {
@@ -149,9 +140,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   }
 
   // Apply opacity to instance color, or return instance picking color
-  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
+  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * color.opacity);
   // DECKGL_FILTER_COLOR(varyings.vFillColor, geometry);
-  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * layer.opacity);
+  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * color.opacity);
   // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
 
   return varyings;
@@ -170,7 +161,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   );
 
   if (inCircle == 0.0) {
-    // discard;
+    discard;
   }
 
   var fragColor: vec4<f32>;
@@ -186,18 +177,21 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
       fragColor = mix(varyings.vFillColor, varyings.vLineColor, isLine);
     } else {
       if (isLine == 0.0) {
-        // discard;
+        discard;
       }
       fragColor = vec4<f32>(varyings.vLineColor.rgb, varyings.vLineColor.a * isLine);
     }
   } else if (scatterplot.filled == 0) {
-    // discard;
+    discard;
   } else {
     fragColor = varyings.vFillColor;
   }
 
   fragColor.a *= inCircle;
   // DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  // Apply premultiplied alpha as required by transparent canvas
+  fragColor = deckgl_premultiplied_alpha(fragColor);
 
   return fragColor;
   // return vec4<f32>(0, 0, 1, 1);

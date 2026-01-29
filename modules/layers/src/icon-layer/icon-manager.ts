@@ -296,7 +296,7 @@ export function getDiffIcons(
 export default class IconManager {
   device: Device;
 
-  private onUpdate: () => void;
+  private onUpdate: (didFrameChange: boolean) => void;
   private onError: (context: LoadIconErrorContext) => void;
   private _loadOptions: any = null;
   private _texture: Texture | null = null;
@@ -326,7 +326,7 @@ export default class IconManager {
       onError = noop
     }: {
       /** Callback when the texture updates */
-      onUpdate: () => void;
+      onUpdate: (didFrameChange: boolean) => void;
       /** Callback when an error is encountered */
       onError: (context: LoadIconErrorContext) => void;
     }
@@ -435,12 +435,11 @@ export default class IconManager {
         );
       }
 
-      this.onUpdate();
+      this.onUpdate(true);
 
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
-      this._texture?.generateMipmapsWebGL();
     }
   }
 
@@ -462,7 +461,7 @@ export default class IconManager {
           const id = getIconId(icon);
 
           const iconDef = this._mapping[id];
-          const {x, y, width: maxWidth, height: maxHeight} = iconDef;
+          const {x: initialX, y: initialY, width: maxWidth, height: maxHeight} = iconDef;
 
           const {image, width, height} = resizeImage(
             ctx,
@@ -471,20 +470,25 @@ export default class IconManager {
             maxHeight
           );
 
+          const x = initialX + (maxWidth - width) / 2;
+          const y = initialY + (maxHeight - height) / 2;
+
           this._texture?.copyExternalImage({
             image,
-            x: x + (maxWidth - width) / 2,
-            y: y + (maxHeight - height) / 2,
+            x,
+            y,
             width,
             height
           });
+          iconDef.x = x;
+          iconDef.y = y;
           iconDef.width = width;
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
           this._texture?.generateMipmapsWebGL();
 
-          this.onUpdate();
+          this.onUpdate(width !== maxWidth || height !== maxHeight);
         })
         .catch(error => {
           this.onError({

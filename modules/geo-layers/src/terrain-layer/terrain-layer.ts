@@ -135,9 +135,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     if (elevationDataChanged) {
       const {elevationData} = props;
       const isTiled =
-        elevationData &&
-        (Array.isArray(elevationData) ||
-          (elevationData.includes('{x}') && elevationData.includes('{y}')));
+        elevationData && (Array.isArray(elevationData) || isTileSetURL(elevationData));
       this.setState({isTiled});
     }
 
@@ -355,3 +353,6 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     );
   }
 }
+
+const isTileSetURL = (url: string): boolean =>
+  url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));

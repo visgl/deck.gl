@@ -8,6 +8,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
 import type {WidgetManager, WidgetPlacement} from './widget-manager';
+import type {ViewOrViews} from './view-manager';
 import {deepEqual} from '../utils/deep-equal';
 import {applyStyles, removeStyles} from '../utils/apply-styles';
 
@@ -17,12 +18,23 @@ export type WidgetProps = {
   style?: Partial<CSSStyleDeclaration>;
   /** Additional CSS class. */
   className?: string;
+  /**
+   * The container that this widget is being attached to. Default to `viewId`.
+   * If set to `'root'`, the widget is placed relative to the whole deck.gl canvas.
+   * If set to a valid view id, the widget is placed relative to that view.
+   * If set to a HTMLElement, `placement` is ignored and the widget is appended into the given element.
+   */
+  _container?: string | HTMLDivElement | null;
 };
 
-export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
+export abstract class Widget<
+  PropsT extends WidgetProps = WidgetProps,
+  ViewsT extends ViewOrViews = null
+> {
   static defaultProps: Required<WidgetProps> = {
     id: 'widget',
     style: {},
+    _container: null,
     className: ''
   };
 
@@ -31,7 +43,7 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
   /** Widget props, with defaults applied */
   props: Required<PropsT>;
   /**
-   * The view id that this widget is being attached to. Default `null`.
+   * The view id that this widget controls. Default `null`.
    * If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
    */
   viewId?: string | null = null;
@@ -43,11 +55,15 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
 
   // Populated by core when mounted
   widgetManager?: WidgetManager;
-  deck?: Deck<any>;
+  deck?: Deck<ViewsT>;
   rootElement?: HTMLDivElement | null;
 
-  constructor(props: PropsT, defaultProps: Required<PropsT>) {
-    this.props = {...defaultProps, ...props};
+  constructor(props: PropsT) {
+    this.props = {
+      // @ts-expect-error `defaultProps` may not exist on constructor
+      ...(this.constructor.defaultProps as Required<PropsT>),
+      ...props
+    };
     // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
     this.id = this.props.id;
   }
@@ -82,16 +98,14 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
     }
   }
 
-  // WIDGET LIFECYCLE
-
   // @note empty method calls have an overhead in V8 but it is very low, ~1ns
 
   /**
-   * Called to create the root DOM element for this widget
+   * Common utility to create the root DOM element for this widget
    * Configures the top-level styles and adds basic class names for theming
-   * @returns an optional UI element that should be appended to the Deck container
+   * @returns an UI element that should be appended to the Deck container
    */
-  onCreateRootElement(): HTMLDivElement {
+  protected onCreateRootElement(): HTMLDivElement {
     const CLASS_NAMES = [
       // Add class names for theming
       'deck-widget',
@@ -108,16 +122,25 @@ export abstract class Widget<PropsT extends WidgetProps = WidgetProps> {
     return element;
   }
 
+  // WIDGET LIFECYCLE
+
   /** Called to render HTML into the root element */
   abstract onRenderHTML(rootElement: HTMLElement): void;
 
-  /** Called after the widget is added to a Deck instance and the DOM rootElement has been created */
+  /** Internal API called by Deck when the widget is first added to a Deck instance */
+  _onAdd(params: {deck: Deck<any>; viewId: string | null}): HTMLDivElement {
+    return this.onAdd(params) ?? this.onCreateRootElement();
+  }
+
+  /** Overridable by subclass - called when the widget is first added to a Deck instance
+   * @returns an optional UI element that should be appended to the Deck container
+   */
   onAdd(params: {
     /** The Deck instance that the widget is attached to */
     deck: Deck<any>;
     /** The id of the view that the widget is attached to */
     viewId: string | null;
-  }) {}
+  }): HTMLDivElement | void {}
 
   /** Called when the widget is removed */
   onRemove(): void {}

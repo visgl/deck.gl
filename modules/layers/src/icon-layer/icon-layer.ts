@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
+import {Layer, color, project32, picking, log, UNIT} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
+import {shaderWGSL as source} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 
 import type {
@@ -25,6 +26,7 @@ import type {
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
+import {Parameters} from '@luma.gl/core';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -43,6 +45,10 @@ type _IconLayerProps<DataT> = {
    * @default 'pixels'
    */
   sizeUnits?: Unit;
+  /**
+   * The dimension to scale the image
+   */
+  sizeBasis?: 'height' | 'width';
   /**
    * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
    */
@@ -105,6 +111,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeScale: {type: 'number', value: 1, min: 0},
   billboard: true,
   sizeUnits: 'pixels',
+  sizeBasis: 'height',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
@@ -134,7 +141,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, iconUniforms]});
+    return super.getShaders({vs, fs, source, modules: [project32, color, picking, iconUniforms]});
   }
 
   initializeState() {
@@ -161,24 +168,25 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         accessor: 'getSize',
         defaultValue: 1
       },
-      instanceOffsets: {
-        size: 2,
+      instanceIconDefs: {
+        size: 7,
         accessor: 'getIcon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceOffset
-      },
-      instanceIconFrames: {
-        size: 4,
-        accessor: 'getIcon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceIconFrame
-      },
-      instanceColorModes: {
-        size: 1,
-        type: 'uint8',
-        accessor: 'getIcon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceColorMode
+        transform: this.getInstanceIconDef,
+        shaderAttributes: {
+          instanceOffsets: {
+            size: 2,
+            elementOffset: 0
+          },
+          instanceIconFrames: {
+            size: 4,
+            elementOffset: 2
+          },
+          instanceColorModes: {
+            size: 1,
+            elementOffset: 6
+          }
+        }
       },
       instanceColors: {
         size: this.props.colorFormat.length,
@@ -257,9 +265,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}): void {
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
+    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} =
+      this.props;
     const {iconManager} = this.state;
-
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
       const model = this.state.model!;
@@ -268,6 +276,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
+        sizeBasis: sizeBasis === 'height' ? 1.0 : 0.0,
         sizeMinPixels,
         sizeMaxPixels,
         billboard,
@@ -280,6 +289,13 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -299,12 +315,18 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         }
       }),
-      isInstanced: true
+      isInstanced: true,
+      parameters
     });
   }
 
-  private _onUpdate(): void {
-    this.setNeedsRedraw();
+  private _onUpdate(didFrameChange: boolean): void {
+    if (didFrameChange) {
+      this.getAttributeManager()?.invalidate('getIcon');
+      this.setNeedsUpdate();
+    } else {
+      this.setNeedsRedraw();
+    }
   }
 
   private _onError(evt: LoadIconErrorContext): void {
@@ -316,23 +338,17 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
-  protected getInstanceOffset(icon: string): number[] {
+  protected getInstanceIconDef(icon: string): number[] {
     const {
+      x,
+      y,
       width,
       height,
+      mask,
       anchorX = width / 2,
       anchorY = height / 2
     } = this.state.iconManager.getIconMapping(icon);
-    return [width / 2 - anchorX, height / 2 - anchorY];
-  }
 
-  protected getInstanceColorMode(icon: string): number {
-    const mapping = this.state.iconManager.getIconMapping(icon);
-    return mapping.mask ? 1 : 0;
-  }
-
-  protected getInstanceIconFrame(icon: string): number[] {
-    const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
-    return [x, y, width, height];
+    return [width / 2 - anchorX, height / 2 - anchorY, x, y, width, height, mask ? 1 : 0];
   }
 }

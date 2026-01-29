@@ -67,9 +67,12 @@ export type GlobeViewportOptions = {
 };
 
 export default class GlobeViewport extends Viewport {
-  longitude!: number;
-  latitude!: number;
-  resolution!: number;
+  static displayName = 'GlobeViewport';
+
+  longitude: number;
+  latitude: number;
+  fovy: number;
+  resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
@@ -96,8 +99,7 @@ export default class GlobeViewport extends Viewport {
     // Exagerate distance by latitude to match the Web Mercator distortion
     // The goal is that globe and web mercator projection results converge at high zoom
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
-    const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
-    const scale = Math.pow(2, zoom) * scaleAdjust;
+    const scale = Math.pow(2, zoom - zoomAdjust(latitude));
     const nearZ = opts.nearZ ?? nearZMultiplier;
     const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
 
@@ -129,6 +131,7 @@ export default class GlobeViewport extends Viewport {
     this.scale = scale;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.fovy = fovy;
     this.resolution = resolution;
   }
 
@@ -228,13 +231,34 @@ export default class GlobeViewport extends Viewport {
     return xyz as [number, number];
   }
 
-  panByPosition(coords: number[], pixel: number[]): GlobeViewportOptions {
-    const fromPosition = this.unproject(pixel);
-    return {
-      longitude: coords[0] - fromPosition[0] + this.longitude,
-      latitude: coords[1] - fromPosition[1] + this.latitude
-    };
+  /**
+   * Pan the globe using delta-based movement
+   * @param coords - the geographic coordinates where the pan started
+   * @param pixel - the current screen position
+   * @param startPixel - the screen position where the pan started
+   * @returns updated viewport options with new longitude/latitude
+   */
+  panByPosition(
+    [startLng, startLat, startZoom]: number[],
+    pixel: number[],
+    startPixel: number[]
+  ): GlobeViewportOptions {
+    // Scale rotation speed inversely with zoom, to approximate constant panning speed
+    const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
+    const rotationSpeed = 0.25 / scale;
+
+    const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
+    let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
+    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+    const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
+    out.zoom += zoomAdjust(out.latitude);
+    return out;
   }
+}
+
+export function zoomAdjust(latitude: number): number {
+  const scaleAdjust = Math.PI * Math.cos((latitude * Math.PI) / 180);
+  return Math.log2(scaleAdjust);
 }
 
 function transformVector(matrix: number[], vector: number[]): number[] {

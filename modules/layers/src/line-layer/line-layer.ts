@@ -5,6 +5,7 @@
 import {
   Layer,
   project32,
+  color,
   picking,
   UNIT,
   LayerProps,
@@ -114,7 +115,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, source, modules: [project32, picking, lineUniforms]});
+    return super.getShaders({vs, fs, source, modules: [project32, color, picking, lineUniforms]});
   }
 
   // This layer has its own wrapLongitude logic

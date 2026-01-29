@@ -9,12 +9,12 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^4.2.0",
-    "@loaders.gl/core": "^4.2.0",
-    "@loaders.gl/csv": "^4.2.0",
-    "@loaders.gl/draco": "^4.2.0",
-    "@loaders.gl/gltf": "^4.2.0",
-    "@luma.gl/constants": "^9.2.0-alpha.5",
+    "@loaders.gl/3d-tiles": "^4.3.4",
+    "@loaders.gl/core": "^4.3.4",
+    "@loaders.gl/csv": "^4.3.4",
+    "@loaders.gl/draco": "^4.3.4",
+    "@loaders.gl/gltf": "^4.3.4",
+    "@luma.gl/constants": "^9.2.6",
     "deck.gl": "^9.0.0",
     "maplibre-gl": "^5.0.0",
     "monaco-editor": "^0.39.0",

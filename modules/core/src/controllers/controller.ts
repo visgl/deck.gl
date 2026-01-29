@@ -533,15 +533,25 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       scale = 1 / scale;
     }
 
+    const transitionProps = smooth
+      ? {...this._getTransitionProps({around: pos}), transitionDuration: 250}
+      : NO_TRANSITION_PROPS;
+
     const newControllerState = this.controllerState.zoom({pos, scale});
     this.updateViewport(
       newControllerState,
-      {...this._getTransitionProps({around: pos}), transitionDuration: smooth ? 250 : 1},
+      transitionProps,
       {
         isZooming: true,
         isPanning: true
       }
     );
+
+    // When there's no transition (duration = 0), immediately reset interaction state
+    // since _onTransitionEnd callback won't fire
+    if (!smooth) {
+      this._setInteractionState({isZooming: false, isPanning: false});
+    }
     return true;
   }
 

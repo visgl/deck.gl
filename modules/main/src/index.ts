@@ -44,6 +44,7 @@ export {
   Attribute,
   AttributeManager,
   // Shader modules
+  color,
   picking,
   project,
   project32,

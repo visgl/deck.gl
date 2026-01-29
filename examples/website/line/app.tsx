@@ -9,6 +9,7 @@ import {DeckGL} from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL = {
@@ -56,12 +57,14 @@ export default function App({
   airports = DATA_URL.AIRPORTS,
   flightPaths = DATA_URL.FLIGHT_PATHS,
   lineWidth = 3,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device
 }: {
   airports?: string | Airport[];
   flightPaths?: string | FlightPath[];
   lineWidth?: number;
   mapStyle?: string;
+  device?: Device;
 }) {
   const layers = [
     new ScatterplotLayer<Airport>({
@@ -99,6 +102,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

@@ -3,7 +3,7 @@
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
   "type": "module",
-  "version": "9.2.0-alpha.2",
+  "version": "9.2.0-beta.4",
   "publishConfig": {
     "access": "public"
   },
@@ -38,16 +38,17 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/gltf": "^4.2.0",
-    "@luma.gl/gltf": "^9.2.0-alpha.5",
-    "@luma.gl/shadertools": "^9.2.0-alpha.5"
+    "@loaders.gl/gltf": "^4.3.4",
+    "@loaders.gl/schema": "^4.3.4",
+    "@luma.gl/gltf": "^9.2.6",
+    "@luma.gl/shadertools": "^9.2.6"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.1.0",
-    "@luma.gl/core": "^9.2.0-alpha.5",
-    "@luma.gl/engine": "^9.2.0-alpha.5",
-    "@luma.gl/gltf": "^9.2.0-alpha.5",
-    "@luma.gl/shadertools": "^9.2.0-alpha.5"
+    "@deck.gl/core": "~9.2.0",
+    "@luma.gl/core": "~9.2.6",
+    "@luma.gl/engine": "~9.2.6",
+    "@luma.gl/gltf": "~9.2.6",
+    "@luma.gl/shadertools": "~9.2.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
