@@ -138,6 +138,15 @@ function convertTapeToVitest(content, filePath = '') {
     (match, modifier, name, async) => `test${modifier || ''}(${name}, ${async || ''}() => {`
   );
 
+  // Step 2c: Convert expression body arrow functions (no curly braces)
+  // test('name', t => expr) -> test('name', () => expr)
+  // test('name', async t => expr) -> test('name', async () => expr)
+  // This handles cases like: test('name', async t => withMockFetch(...))
+  result = result.replace(
+    /test(\.skip|\.only)?\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?t\s*=>\s*(?!\{)/g,
+    (match, modifier, name, async) => `test${modifier || ''}(${name}, ${async || ''}() => `
+  );
+
   // Also handle function() style (including test.skip and test.only)
   result = result.replace(
     /test(\.skip|\.only)?\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?function\s*\(\s*t\s*\)\s*\{/g,

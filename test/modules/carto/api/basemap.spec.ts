@@ -47,7 +47,7 @@ async function responseFunc(url: string) {
     };
   }
 }
-test('fetchBasemapProps#carto - no filters', async t =>
+test('fetchBasemapProps#carto - no filters', async () =>
   withMockFetchMapsV3(async calls => {
     expect(calls.length, '0 initial calls').toBe(0);
 
@@ -67,7 +67,7 @@ test('fetchBasemapProps#carto - no filters', async t =>
     });
   }, responseFunc));
 
-test('fetchBasemapProps#carto - with filters', async t =>
+test('fetchBasemapProps#carto - with filters', async () =>
   withMockFetchMapsV3(async calls => {
     const visibleLayerGroups = {label: false, road: true, border: true, water: true};
     const r = await fetchBasemapProps({
@@ -91,7 +91,7 @@ test('fetchBasemapProps#carto - with filters', async t =>
     expect(r2.visibleLayerGroups, 'visibleLayerGroups are passed').toEqual(visibleLayerGroups);
   }, responseFunc));
 
-test('fetchBasemapProps#custom', async t =>
+test('fetchBasemapProps#custom', async () =>
   withMockFetchMapsV3(async calls => {
     const r = await fetchBasemapProps({
       config: {
@@ -122,7 +122,7 @@ test('fetchBasemapProps#custom', async t =>
     });
   }, responseFunc));
 
-test('fetchBasemapProps#google', async t =>
+test('fetchBasemapProps#google', async () =>
   withMockFetchMapsV3(async calls => {
     const r = await fetchBasemapProps({
       config: {
@@ -150,7 +150,7 @@ test('fetchBasemapProps#google', async t =>
     });
   }, responseFunc));
 
-test('fetchBasemapProps#carto - error handling', async t =>
+test('fetchBasemapProps#carto - error handling', async () =>
   withMockFetchMapsV3(async calls => {
     const expectedError = await fetchBasemapProps({
       config: {
