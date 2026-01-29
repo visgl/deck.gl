@@ -16,12 +16,53 @@ type CanvasSize = {
 };
 
 type ControlPanelProps = {
-  onExampleChange: (example: BasemapExample, interleaved: boolean) => void;
+  onExampleChange: (
+    example: BasemapExample,
+    interleaved: boolean,
+    batched: boolean,
+    globe: boolean,
+    multiView: boolean
+  ) => void;
 };
 
+// Helper to get URL search params
+function getUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    example: params.get('example') || 'MapLibre Pure JS',
+    interleaved: params.get('interleaved') !== 'false',
+    batched: params.get('batched') !== 'false',
+    globe: params.get('globe') === 'true',
+    multiView: params.get('multiView') === 'true'
+  };
+}
+
+// Helper to set URL search params
+function setUrlParams(
+  example: string,
+  interleaved: boolean,
+  batched: boolean,
+  globe: boolean,
+  multiView: boolean
+) {
+  const params = new URLSearchParams();
+  params.set('example', example);
+  params.set('interleaved', String(interleaved));
+  params.set('batched', String(batched));
+  params.set('globe', String(globe));
+  params.set('multiView', String(multiView));
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, '', newUrl);
+}
+
+// eslint-disable-next-line complexity
 export default function ControlPanel({onExampleChange}: ControlPanelProps) {
-  const [selectedExample, setSelectedExample] = useState('MapLibre Pure JS');
-  const [interleaved, setInterleaved] = useState(true);
+  const urlParams = getUrlParams();
+  const [selectedExample, setSelectedExample] = useState(urlParams.example);
+  const [interleaved, setInterleaved] = useState(urlParams.interleaved);
+  const [batched, setBatched] = useState(urlParams.batched);
+  const [globe, setGlobe] = useState(urlParams.globe);
+  const [multiView, setMultiView] = useState(urlParams.multiView);
   const [currentDPR, setCurrentDPR] = useState(window.devicePixelRatio);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({width: 0, height: 0});
 
@@ -66,13 +107,14 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
     };
   }, [currentDPR, updateCanvasInfo]);
 
-  // Handle example or interleaved changes
+  // Handle example or interleaved or batched or globe or multiView changes
   useEffect(() => {
     const example = getCurrentExample();
     if (example) {
-      onExampleChange(example, interleaved);
+      onExampleChange(example, interleaved, batched, globe, multiView);
+      setUrlParams(selectedExample, interleaved, batched, globe, multiView);
     }
-  }, [selectedExample, interleaved, getCurrentExample, onExampleChange]);
+  }, [selectedExample, interleaved, batched, globe, multiView, getCurrentExample, onExampleChange]);
 
   const example = getCurrentExample();
 
@@ -106,6 +148,33 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
         </label>
       </div>
 
+      {interleaved && (example?.mapType === 'mapbox' || example?.mapType === 'maplibre') && (
+        <div className="section">
+          <label>
+            <input type="checkbox" checked={batched} onChange={() => setBatched(!batched)} />
+            Batched Rendering
+          </label>
+        </div>
+      )}
+
+      {example?.mapType === 'maplibre' && (
+        <div className="section">
+          <label>
+            <input type="checkbox" checked={globe} onChange={() => setGlobe(!globe)} />
+            Globe Projection
+          </label>
+        </div>
+      )}
+
+      {(example?.mapType === 'mapbox' || example?.mapType === 'maplibre') && (
+        <div className="section">
+          <label>
+            <input type="checkbox" checked={multiView} onChange={() => setMultiView(!multiView)} />
+            Multi-View
+          </label>
+        </div>
+      )}
+
       <div className="section">
         <h3>Current State</h3>
         <div>
@@ -117,6 +186,21 @@ export default function ControlPanel({onExampleChange}: ControlPanelProps) {
         <div>
           <b>Interleaved:</b> {interleaved ? 'true' : 'false'}
         </div>
+        {interleaved && (example?.mapType === 'mapbox' || example?.mapType === 'maplibre') && (
+          <div>
+            <b>Batched:</b> {batched ? 'true' : 'false'}
+          </div>
+        )}
+        {example?.mapType === 'maplibre' && (
+          <div>
+            <b>Globe:</b> {globe ? 'true' : 'false'}
+          </div>
+        )}
+        {(example?.mapType === 'mapbox' || example?.mapType === 'maplibre') && (
+          <div>
+            <b>Multi-View:</b> {multiView ? 'true' : 'false'}
+          </div>
+        )}
         <div>
           <b>Device Pixel Ratio:</b> {currentDPR.toFixed(2)}
         </div>

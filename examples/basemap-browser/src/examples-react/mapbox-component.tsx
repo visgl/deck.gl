@@ -6,7 +6,6 @@ import React from 'react';
 import {Map as MapboxMap, useControl as useMapboxControl} from 'react-map-gl/mapbox';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import type {BasemapExample} from '../types';
-import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -14,7 +13,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 // eslint-disable-next-line no-process-env
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 
-function MapboxDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
+function MapboxDeckOverlay(props: any) {
   const overlay = useMapboxControl(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
@@ -23,20 +22,51 @@ function MapboxDeckOverlay(props: MapboxOverlayProps & {interleaved: boolean}) {
 type MapboxComponentProps = {
   example: BasemapExample;
   interleaved: boolean;
+  batched: boolean;
+  globe: boolean;
+  multiView: boolean;
 };
 
-export default function MapboxComponent({example, interleaved}: MapboxComponentProps) {
-  const {mapStyle, initialViewState, getLayers} = example;
+export default function MapboxComponent({
+  example,
+  interleaved,
+  batched,
+  multiView
+}: MapboxComponentProps) {
+  const {mapStyle, initialViewState, getLayers, views, layerFilter} = example;
+
+  // For multi-view examples, extract the mapbox view state for the base map
+  const mapInitialViewState =
+    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
+      ? initialViewState.mapbox
+      : initialViewState;
 
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapboxMap
-        key={`mapbox-${interleaved}`}
+        key={`mapbox-${interleaved}-${batched}`}
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
-        initialViewState={initialViewState}
+        initialViewState={mapInitialViewState}
       >
-        <MapboxDeckOverlay layers={getLayers(interleaved)} interleaved={interleaved} />
+        {multiView && views ? (
+          <MapboxDeckOverlay
+            layers={getLayers(interleaved)}
+            interleaved={interleaved}
+            batched={batched}
+            _renderLayersInGroups={batched}
+            views={views as any}
+            layerFilter={layerFilter as any}
+            initialViewState={initialViewState as any}
+          />
+        ) : (
+          <MapboxDeckOverlay
+            layers={getLayers(interleaved)}
+            interleaved={interleaved}
+            batched={batched}
+            _renderLayersInGroups={batched}
+          />
+        )}
       </MapboxMap>
     </div>
   );

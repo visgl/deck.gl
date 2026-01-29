@@ -20,7 +20,13 @@ let currentMapCleanup: (() => void) | null = null;
 let currentMapRoot: Root | null = null;
 
 // Load an example into the map div
-function loadExample(example: BasemapExample, interleaved: boolean) {
+function loadExample(
+  example: BasemapExample,
+  interleaved: boolean,
+  batched: boolean,
+  globe: boolean,
+  multiView: boolean
+) {
   // Defer cleanup to avoid synchronous unmount during React render
   setTimeout(() => {
     // Clean up previous
@@ -37,11 +43,17 @@ function loadExample(example: BasemapExample, interleaved: boolean) {
     mapDiv.innerHTML = '';
 
     // Mount new example
-    mountExample(example, interleaved);
+    mountExample(example, interleaved, batched, globe, multiView);
   }, 0);
 }
 
-function mountExample(example: BasemapExample, interleaved: boolean) {
+function mountExample(
+  example: BasemapExample,
+  interleaved: boolean,
+  batched: boolean,
+  globe: boolean,
+  multiView: boolean
+) {
   // Mount new example
   if (example.framework === 'pure-js') {
     // Pure JS mounts directly, no React involved
@@ -60,7 +72,11 @@ function mountExample(example: BasemapExample, interleaved: boolean) {
           example.getLayers,
           example.initialViewState,
           example.mapStyle!,
-          interleaved
+          interleaved,
+          batched,
+          multiView,
+          example.views,
+          example.layerFilter
         );
         break;
       case 'maplibre':
@@ -70,7 +86,11 @@ function mountExample(example: BasemapExample, interleaved: boolean) {
           example.initialViewState,
           example.mapStyle!,
           interleaved,
-          example.globe
+          globe,
+          batched,
+          multiView,
+          example.views,
+          example.layerFilter
         );
         break;
       default:
@@ -81,7 +101,15 @@ function mountExample(example: BasemapExample, interleaved: boolean) {
     // React mounts to separate root
     currentMapRoot = createRoot(mapDiv);
     const Component = reactExamples.getComponent(example.mapType);
-    currentMapRoot.render(<Component example={example} interleaved={interleaved} />);
+    currentMapRoot.render(
+      <Component
+        example={example}
+        interleaved={interleaved}
+        batched={batched}
+        globe={globe}
+        multiView={multiView}
+      />
+    );
   }
 }
 
