@@ -84,6 +84,7 @@ export default class MapboxOverlay implements IControl {
     if (this._deck && this._map) {
       this._deck.setProps({
         ...this._props,
+        views: this._getViews(this._map),
         parameters: {
           ...getDefaultParameters(this._map, this._interleaved),
           ...this._props.parameters
@@ -116,7 +117,7 @@ export default class MapboxOverlay implements IControl {
       ...this._props,
       parent: container,
       parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
-      views: this._props.views || getDefaultView(map),
+      views: this._getViews(map),
       viewState: getViewState(map)
     });
 
@@ -147,6 +148,7 @@ export default class MapboxOverlay implements IControl {
       map,
       deck: new Deck({
         ...this._props,
+        views: this._getViews(map),
         gl,
         parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
       })
@@ -253,8 +255,9 @@ export default class MapboxOverlay implements IControl {
 
     // getProjection() returns undefined before style is loaded
     const projection = getProjection(this._map);
-    if (projection && !this._props.views) {
-      this._deck?.setProps({views: getDefaultView(this._map)});
+    if (projection) {
+      // Update views to match new projection (MapView vs GlobeView)
+      this._deck?.setProps({views: this._getViews(this._map)});
     }
   };
 
@@ -268,12 +271,26 @@ export default class MapboxOverlay implements IControl {
     }
   };
 
+  private _getViews(map: Map) {
+    if (!this._props.views) {
+      return getDefaultView(map);
+    }
+    // Check if custom views include a view with id 'mapbox'
+    const views = Array.isArray(this._props.views) ? this._props.views : [this._props.views];
+    const hasMapboxView = views.some((v: any) => v.id === 'mapbox');
+    if (hasMapboxView) {
+      return this._props.views;
+    }
+    // Add default 'mapbox' view to custom views for consistency with interleaved mode
+    return [getDefaultView(map), ...views];
+  }
+
   private _updateViewState = () => {
     const deck = this._deck;
     const map = this._map;
     if (deck && map) {
       deck.setProps({
-        views: this._props.views || getDefaultView(map),
+        views: this._getViews(map),
         viewState: getViewState(map)
       });
       // Redraw immediately if view state has changed
