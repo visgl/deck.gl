@@ -28,7 +28,9 @@ test('CoordinatesGeocoder.geocode - Handles DMS format correctly', async () => {
 
   for (const {input, expected} of cases) {
     const result = await CoordinatesGeocoder.geocode(input);
-    expect(result, `geocode(${input})`).toEqual(expected);
+    // Use toBeCloseTo for floating point comparisons
+    expect(result?.latitude, `geocode(${input}) latitude`).toBeCloseTo(expected.latitude, 10);
+    expect(result?.longitude, `geocode(${input}) longitude`).toBeCloseTo(expected.longitude, 10);
   }
 });
 

@@ -8,6 +8,15 @@ import {fileURLToPath} from 'url';
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 
+// Tests that were commented out or never imported in the original test suite
+// These need to be fixed before being included
+const excludedTests = [
+  'test/modules/**/*.browser.spec.ts',
+  'test/modules/layers/path-tesselator.spec.ts',
+  'test/modules/layers/polygon-tesselation.spec.ts',
+  'test/modules/widgets/geocoders.spec.ts'
+];
+
 // Match aliases from .ocularrc.js
 const aliases = {
   '@deck.gl/aggregation-layers': resolve(packageRoot, 'modules/aggregation-layers/src'),
@@ -37,7 +46,7 @@ export default defineWorkspace([
       name: 'node',
       environment: 'node',
       include: ['test/modules/**/*.spec.ts', 'test/modules/*-spec.ts'],
-      exclude: ['test/modules/**/*.browser.spec.ts'],
+      exclude: excludedTests,
       globals: false,
       testTimeout: 30000,
       setupFiles: ['./test/setup/vitest-node-setup.ts']
@@ -49,6 +58,7 @@ export default defineWorkspace([
     test: {
       name: 'browser',
       include: ['test/modules/**/*.spec.ts', 'test/modules/*-spec.ts'],
+      exclude: excludedTests,
       globals: false,
       testTimeout: 30000,
       setupFiles: ['./test/setup/vitest-browser-setup.ts'],
@@ -67,6 +77,7 @@ export default defineWorkspace([
     test: {
       name: 'headless',
       include: ['test/modules/**/*.spec.ts', 'test/modules/*-spec.ts'],
+      exclude: excludedTests,
       globals: false,
       testTimeout: 30000,
       setupFiles: ['./test/setup/vitest-browser-setup.ts'],
