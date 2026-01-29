@@ -76,6 +76,12 @@ export default defineWorkspace([
         provider: 'playwright',
         headless: true,
         screenshotFailures: false
+      },
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'lcov'],
+        include: ['modules/*/src/**/*.ts'],
+        exclude: ['modules/test-utils/**', '**/node_modules/**']
       }
     }
   }
