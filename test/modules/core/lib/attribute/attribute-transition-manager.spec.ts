@@ -45,6 +45,7 @@ test('AttributeTransitionManager#constructor', () => {
   expect(manager, 'AttributeTransitionManager is constructed').toBeTruthy();
 
   manager.finalize();
+  console.log('AttributeTransitionManager is finalized');
 
   expect(
     () => new AttributeTransitionManager(null, {id: 'attribute-transition'}),

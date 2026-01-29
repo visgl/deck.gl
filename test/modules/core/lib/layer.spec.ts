@@ -158,6 +158,7 @@ test('Layer#getNumInstances', () => {
 test('Layer#validateProps', () => {
   let layer = new SubLayer(LAYER_PROPS);
   layer.validateProps();
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: 1});
   expect(() => layer.validateProps(), /sizeScale/).toThrow();
@@ -170,15 +171,18 @@ test('Layer#validateProps', () => {
 
   layer = new SubLayer(LAYER_PROPS, {getColor: [255, 0, 0]});
   layer.validateProps();
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {getColor: d => d.color});
   layer.validateProps();
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {getColor: 3});
   expect(() => layer.validateProps(), /getColor/).toThrow();
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: null});
   layer.validateProps();
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: [1, 10]});
   expect(() => layer.validateProps(), /sizeScale/).toThrow();

@@ -122,7 +122,9 @@ test('GridLayer#non-iterable data', () => {
           getColorWeight: 1,
           getElevationWeight: 1
         },
-        onAfterUpdate: ({subLayer}) => {}
+        onAfterUpdate: ({subLayer}) => {
+          console.log('Layer updated with constant get*Weight accessors');
+        }
       },
       {
         title: 'Non-iterable data with accessors',
@@ -146,7 +148,9 @@ test('GridLayer#non-iterable data', () => {
             getElevationWeight: 1
           }
         },
-        onAfterUpdate: ({subLayer}) => {}
+        onAfterUpdate: ({subLayer}) => {
+          console.log('Layer updated with get*Weight accessors and non-iterable data');
+        }
       },
       {
         title: 'Non-iterable data with custom aggregation',
@@ -164,7 +168,9 @@ test('GridLayer#non-iterable data', () => {
             getElevationValue: 1
           }
         },
-        onAfterUpdate: ({subLayer}) => {}
+        onAfterUpdate: ({subLayer}) => {
+          console.log('Layer updated with get*Value accessors and non-iterable data');
+        }
       }
     ]
   });

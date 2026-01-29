@@ -149,11 +149,9 @@ function convertTapeToVitest(content, filePath = '') {
   // Step 4: Convert t.comment() to console.log()
   result = result.replace(/t\d*\.comment\s*\(([^)]+)\)/g, 'console.log($1)');
 
-  // Step 5: Convert t.pass() - just remove them (using balanced parentheses)
-  // First, handle arrow functions where t.pass is the entire body: () => t.pass(...) -> () => {}
-  result = removeTapePassInArrowFunctions(result);
-  // Then remove standalone t.pass() statements
-  result = removeTapePass(result);
+  // Step 5: Convert t.pass() to console.log() to preserve the message
+  // t.pass('message') -> console.log('message')
+  result = convertTapePassToLog(result);
 
   // Step 6: Convert t.fail() to throw (inline use)
   // Handle arrow functions with t.fail as body: () => t.fail(...) -> () => { throw new Error(...) }
@@ -576,10 +574,10 @@ function splitArgs(argsStr) {
 }
 
 /**
- * Remove t.pass() calls with balanced parentheses handling
+ * Convert t.pass() to console.log() with balanced parentheses handling
  * Handles template literals like: t.pass(`point (${d.p}) bin ${result}`)
  */
-function removeTapePass(content) {
+function convertTapePassToLog(content) {
   const methodPattern = /t\d*\.pass\s*\(/g;
   let result = content;
   let match;
@@ -601,62 +599,11 @@ function removeTapePass(content) {
     const closeParenIdx = findMatchingParen(content, openParenIdx);
     if (closeParenIdx === -1) continue;
 
-    // Find start of statement (look for leading whitespace/newline)
-    let statementStart = startIdx;
-    while (statementStart > 0 && (content[statementStart - 1] === ' ' || content[statementStart - 1] === '\t')) {
-      statementStart--;
-    }
+    // Extract the message argument
+    const message = content.substring(openParenIdx + 1, closeParenIdx).trim();
 
-    // Find end of statement (include semicolon and trailing whitespace)
-    let statementEnd = closeParenIdx + 1;
-    while (statementEnd < content.length && (content[statementEnd] === ' ' || content[statementEnd] === '\t')) {
-      statementEnd++;
-    }
-    if (content[statementEnd] === ';') {
-      statementEnd++;
-    }
-    // Skip trailing newline
-    if (content[statementEnd] === '\n') {
-      statementEnd++;
-    }
-
-    // Remove the entire statement
-    result = result.substring(0, statementStart) + result.substring(statementEnd);
-  }
-
-  return result;
-}
-
-/**
- * Remove t.pass() in arrow function expressions
- * Handles: () => t.pass(...) -> () => {}
- * Uses balanced parentheses to handle template literals
- */
-function removeTapePassInArrowFunctions(content) {
-  const methodPattern = /=>\s*t\d*\.pass\s*\(/g;
-  let result = content;
-  let match;
-
-  // Find all occurrences and process them from end to start (to preserve indices)
-  const matches = [];
-  while ((match = methodPattern.exec(content)) !== null) {
-    matches.push(match.index);
-  }
-
-  // Process from end to start
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const arrowIdx = matches[i];
-    // Find the opening paren of t.pass(
-    const openParenIdx = content.indexOf('(', arrowIdx + 2);
-
-    if (openParenIdx === -1) continue;
-
-    // Find matching closing paren
-    const closeParenIdx = findMatchingParen(content, openParenIdx);
-    if (closeParenIdx === -1) continue;
-
-    // Replace => t.pass(...) with => {}
-    result = result.substring(0, arrowIdx) + '=> {}' + result.substring(closeParenIdx + 1);
+    // Replace t.pass(...) with console.log(...)
+    result = result.substring(0, startIdx) + `console.log(${message})` + result.substring(closeParenIdx + 1);
   }
 
   return result;

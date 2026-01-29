@@ -35,10 +35,12 @@ test('LayerManager#constructor', () => {
   let layerManager = new LayerManager(device);
   expect(layerManager, 'LayerManager created').toBeTruthy();
   layerManager.finalize();
+  console.log('LayerManager finalized');
 
   layerManager = new LayerManager(null);
   expect(layerManager, 'LayerManager created without GL context').toBeTruthy();
   layerManager.finalize();
+  console.log('LayerManager finalized');
 });
 
 test('LayerManager#getLayers', () => {

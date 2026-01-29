@@ -65,6 +65,7 @@ test('pointToHexbin CPU vs GPU', () => {
     const result = new Float32Array(outputBuffer.readSyncWebGL().buffer);
     // tape does not consider -0 == 0
     if (equals(result, expected)) {
+      console.log(`point (${d.p}) bin ${result}`);
     } else {
       throw new Error(`point (${d.p}) bin ${result}, expecting ${expected}`);
     }

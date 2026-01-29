@@ -61,6 +61,7 @@ test('MapboxLayer#external Deck', () => {
     expect(deck.props.views.id === 'mapbox', 'mapbox view exists').toBeTruthy();
 
     map.fire('render');
+    console.log('Map render does not throw');
 
     map.fire('remove');
     expect(deck.layerManager, 'External Deck should not be finalized with map').toBeTruthy();
@@ -68,8 +69,10 @@ test('MapboxLayer#external Deck', () => {
     deck.finalize();
 
     map.fire('render');
+    console.log('Map render does not throw');
 
     layer.render();
+    console.log('Map render does not throw');
   });
 });
 

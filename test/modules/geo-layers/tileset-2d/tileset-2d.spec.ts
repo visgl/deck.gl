@@ -419,6 +419,7 @@ test('Tileset2D#traversal', async () => {
       if (error) {
         throw new Error(`${strategy}: ${error}`);
       } else {
+        console.log(`${strategy}: correctly updated tile visibilities`);
       }
     }
   }

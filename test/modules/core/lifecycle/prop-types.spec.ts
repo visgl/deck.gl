@@ -90,6 +90,7 @@ test('parsePropTypes#tests', () => {
     if (invalidMessage) {
       throw new Error(`parsePropTypes ${tc.title}: ${invalidMessage}`);
     } else {
+      console.log(`parsePropTypes ${tc.title} returned expected prop types`);
     }
     expect(defaultProps, `parsePropTypes ${tc.title} returned expected default props`).toEqual(
       tc.defaultProps

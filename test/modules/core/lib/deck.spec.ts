@@ -54,6 +54,8 @@ test('Deck#constructor', () => {
       expect(deck.deckRenderer, 'deckRenderer initialized').toBeTruthy();
     }
   });
+
+  console.log('Deck constructor did not throw');
 });
 
 test('Deck#abort', async () => {
@@ -70,6 +72,8 @@ test('Deck#abort', async () => {
   deck.finalize();
 
   await sleep(50);
+
+  console.log('Deck initialization aborted');
 });
 
 test('Deck#no views', () => {
@@ -87,6 +91,8 @@ test('Deck#no views', () => {
       deck.finalize();
     }
   });
+
+  console.log('Deck constructor did not throw');
 });
 
 test('Deck#rendering, picking, logging', () => {

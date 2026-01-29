@@ -154,7 +154,8 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       ],
       _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
     }),
-    onError: () => {}
+    onError: () =>
+      console.log('Layer should throw if _imageCoordinateSystem is used with quad bounds')
   });
 });
 
