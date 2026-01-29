@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {TerrainCover} from '@deck.gl/extensions/terrain/terrain-cover';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 

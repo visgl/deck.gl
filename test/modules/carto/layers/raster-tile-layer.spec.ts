@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {RasterTileLayer} from '@deck.gl/carto';
 import RasterLayer from '@deck.gl/carto/layers/raster-layer';

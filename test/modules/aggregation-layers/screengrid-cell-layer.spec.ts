@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {device, getLayerUniforms} from '@deck.gl/test-utils';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 

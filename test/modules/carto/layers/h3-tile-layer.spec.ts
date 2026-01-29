@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {getResolution, cellToChildren} from 'h3-js';
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {H3TileLayer} from '@deck.gl/carto';
 import {WebMercatorViewport} from '@deck.gl/core';

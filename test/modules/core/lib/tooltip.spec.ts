@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';

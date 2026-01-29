@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable no-unused-vars */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import React, {createElement, Fragment} from 'react';
 
 import {View, MapView, FirstPersonView, ScatterplotLayer, LineLayer} from 'deck.gl';

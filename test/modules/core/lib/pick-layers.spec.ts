@@ -4,7 +4,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {Deck} from '@deck.gl/core';
 import {
   ScatterplotLayer,

@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {_CoordinatesGeocoder as CoordinatesGeocoder} from '@deck.gl/widgets';
 
 test('CoordinatesGeocoder.geocode - Parses decimal coordinates correctly', async () => {

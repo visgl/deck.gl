@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable no-unused-vars */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {createElement, createRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {act} from 'react-dom/test-utils';

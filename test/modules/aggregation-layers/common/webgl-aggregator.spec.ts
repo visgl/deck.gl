@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {Attribute} from '@deck.gl/core';
 import {WebGLAggregator} from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils';

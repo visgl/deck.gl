@@ -4,7 +4,7 @@
 
 // deck.gl, MIT license
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import {Proj4Projection} from '@math.gl/proj4';

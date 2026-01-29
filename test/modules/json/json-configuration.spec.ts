@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 
 import {JSONConfiguration} from '@deck.gl/json';
 import configuration from './json-configuration-for-deck';

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import CartoVectorTileLoader from '@deck.gl/carto/layers/schema/carto-vector-tile-loader';
 import type {LoaderWithParser} from '@loaders.gl/loader-utils';
 

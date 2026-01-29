@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import AggregationLayer from '@deck.gl/aggregation-layers/heatmap-layer/aggregation-layer';
 import {Layer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';

@@ -4,7 +4,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils';
 
 function update(attribute, {data}) {

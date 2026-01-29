@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {BASEMAP, _MapLibreBasemap as MapLibreBasemap} from '@deck.gl/carto';
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
 import {fetchBasemapProps} from '@deck.gl/carto';

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import React, {createElement} from 'react';
 import positionChildrenUnderViews from '@deck.gl/react/utils/position-children-under-views';
 import {DeckGlContext} from '@deck.gl/react/utils/deckgl-context';

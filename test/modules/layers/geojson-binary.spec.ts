@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {calculatePickingColors} from '@deck.gl/layers/geojson-layer/geojson-binary';
 import {Layer} from '@deck.gl/core';

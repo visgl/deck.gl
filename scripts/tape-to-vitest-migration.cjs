@@ -77,6 +77,13 @@ for (const file of files) {
       // console.log(vitestContent.substring(0, 500) + '...');
     } else {
       fs.writeFileSync(file, vitestContent);
+      // Run prettier to fix formatting
+      try {
+        execSync(`npx prettier --write "${file}"`, {encoding: 'utf8', stdio: 'pipe'});
+      } catch (e) {
+        // Prettier may not be available or may fail, that's ok
+        console.log(`  Note: prettier formatting skipped for ${relativePath}`);
+      }
       console.log(`Converted: ${relativePath}`);
     }
     totalConverted++;
@@ -99,13 +106,13 @@ function convertTapeToVitest(content, filePath = '') {
   let result = content;
   const isUtilFile = !filePath.endsWith('.spec.ts');
 
-  // Step 1: Convert imports
+  // Step 1: Convert imports - use a placeholder for now, we'll determine actual imports later
   // import test from 'tape-promise/tape' -> import {test, expect, describe} from 'vitest'
   // import test from 'tape-catch' -> import {test, expect, describe} from 'vitest'
   // import test from 'tape' -> import {test, expect, describe} from 'vitest'
   result = result.replace(
     /import\s+test\s+from\s+['"]tape(?:-promise\/tape|-catch)?['"]\s*;?/g,
-    "import {test, expect, describe} from 'vitest';"
+    "__VITEST_IMPORT_PLACEHOLDER__"
   );
 
   // For utility files that use t. assertions but don't import tape,
@@ -325,7 +332,7 @@ function convertTapeToVitest(content, filePath = '') {
   result = result.replace(/\n{3,}/g, '\n\n');
 
   // Step 13: Add expect import for utility files if needed
-  if (needsExpectImport && !result.includes("from 'vitest'")) {
+  if (needsExpectImport && !result.includes("from 'vitest'") && !result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
     // Find the first import statement and insert before it
     const firstImportMatch = result.match(/^import\s+/m);
     if (firstImportMatch) {
@@ -347,6 +354,19 @@ function convertTapeToVitest(content, filePath = '') {
       lines.splice(insertLineIdx, 0, "import {expect} from 'vitest';", '');
       result = lines.join('\n');
     }
+  }
+
+  // Step 14: Replace import placeholder with actual imports based on usage
+  if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
+    const imports = ['test', 'expect'];
+    // Check if describe is actually used in the converted content
+    if (/\bdescribe\s*\(/.test(result)) {
+      imports.push('describe');
+    }
+    result = result.replace(
+      '__VITEST_IMPORT_PLACEHOLDER__',
+      `import {${imports.join(', ')}} from 'vitest';`
+    );
   }
 
   return result;

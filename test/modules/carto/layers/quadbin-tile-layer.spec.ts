@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {QuadbinTileLayer} from '@deck.gl/carto';
 import {renderSubLayers} from '@deck.gl/carto/layers/quadbin-tile-layer';

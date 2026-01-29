@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {parsePosition, getPosition} from '@deck.gl/core/utils/positions';
 
 const PARSE_TEST_CASES = [

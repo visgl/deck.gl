@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
 import {device} from '@deck.gl/test-utils';
 

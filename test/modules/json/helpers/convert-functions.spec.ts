@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import convertFunctions from '@deck.gl/json/helpers/convert-functions';
 
 const TEST_CASES = [

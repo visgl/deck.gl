@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {WebMercatorViewport} from 'deck.gl';
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {toLowPrecision} from '@deck.gl/test-utils';
 
 const viewportProps = {

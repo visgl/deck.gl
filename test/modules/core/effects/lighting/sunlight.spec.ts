@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport, PolygonLayer} from 'deck.gl';
 import {_SunLight as SunLight} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';

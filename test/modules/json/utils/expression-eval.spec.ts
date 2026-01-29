@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {compile, compileAsync, addUnaryOp, addBinaryOp} from '@deck.gl/json/utils/expression-eval';
 
 const fixtures = [

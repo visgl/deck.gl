@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {project, phongMaterial} from '@deck.gl/core';
 import {mergeShaders} from '@deck.gl/core/utils/shader';
 

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable max-statements */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {Timeline} from '@luma.gl/engine';
 import UniformTransitionManager from '@deck.gl/core/lib/uniform-transition-manager';
 

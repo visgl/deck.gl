@@ -4,7 +4,7 @@
 
 // loaders.gl, MIT license
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
 import {load} from '@loaders.gl/core';

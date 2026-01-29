@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {makeSpy} from '@probe.gl/test-utils';
 
 import {log} from '@deck.gl/core';

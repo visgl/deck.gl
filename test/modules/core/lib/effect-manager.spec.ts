@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import EffectManager from '@deck.gl/core/lib/effect-manager';
 import type {Effect, EffectContext} from '@deck.gl/core';
 

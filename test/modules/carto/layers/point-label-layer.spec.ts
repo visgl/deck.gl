@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils';
 import {PointLabelLayer} from '@deck.gl/carto';
 import * as FIXTURES from 'deck.gl-test/data';

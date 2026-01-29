@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import FlyToInterpolator from '@deck.gl/core/transitions/fly-to-interpolator';
 import {toLowPrecision} from '@deck.gl/test-utils';
 

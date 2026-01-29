@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global setTimeout */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils';
 import ResourceManager from '@deck.gl/core/lib/resource/resource-manager';
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {flatten, fillArray} from '@deck.gl/core/utils/flatten';
 
 const FLATTEN_TEST_CASES = [

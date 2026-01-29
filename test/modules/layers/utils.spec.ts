@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {replaceInRange} from '@deck.gl/layers/utils';
 
 const TEST_DATA = ['A0', 'A1', 'A2', 'B0', 'B1', 'C0', 'D0', 'D1', 'D2', 'D3'];

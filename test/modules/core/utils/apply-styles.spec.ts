@@ -1,5 +1,5 @@
 /* global document */
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {applyStyles, removeStyles} from '@deck.gl/core/utils/apply-styles';
 
 const APPLY_TEST_CASES = [

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 

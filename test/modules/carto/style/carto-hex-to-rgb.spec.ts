@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {hexToRgb} from '@deck.gl/carto/style/palette';
 
 const OK_TEST_CASES = [

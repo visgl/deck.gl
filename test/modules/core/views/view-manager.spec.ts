@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {OrbitController, OrbitView, MapController, MapView, Viewport} from 'deck.gl';
 

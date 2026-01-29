@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {Attribute, BinaryAttribute, _deepEqual} from '@deck.gl/core';
 import {CPUAggregator} from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils';

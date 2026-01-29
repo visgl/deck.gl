@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {createPointsFromLines, createPointsFromPolygons} from '@deck.gl/carto/layers/label-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 

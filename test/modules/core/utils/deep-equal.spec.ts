@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import {deepEqual} from '@deck.gl/core/utils/deep-equal';
 
 const obj = {longitude: -70, latitude: 40.7, zoom: 12};

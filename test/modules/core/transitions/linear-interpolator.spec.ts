@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, describe} from 'vitest';
+import {test, expect} from 'vitest';
 import LinearInterpolator from '@deck.gl/core/transitions/linear-interpolator';
 
 const TEST_CASES = [
