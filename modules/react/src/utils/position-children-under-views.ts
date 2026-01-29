@@ -9,7 +9,7 @@ import {inheritsFrom} from './inherits-from';
 import evaluateChildren, {isComponent} from './evaluate-children';
 
 import type {ViewOrViews} from '../deckgl';
-import type {Deck, Viewport} from '@deck.gl/core';
+import type {Deck, Viewport, Widget} from '@deck.gl/core';
 import {DeckGlContext, type DeckGLContextValue} from './deckgl-context';
 
 // Iterate over views and reposition children associated with views
@@ -17,16 +17,33 @@ import {DeckGlContext, type DeckGLContextValue} from './deckgl-context';
 export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
   children,
   deck,
-  ContextProvider = DeckGlContext.Provider
+  ContextProvider = DeckGlContext.Provider,
+  widgets
 }: {
   children: React.ReactNode[];
   deck?: Deck<ViewsT>;
   ContextProvider?: React.Context<DeckGLContextValue>['Provider'];
+  widgets: Widget[];
 }): React.ReactNode[] {
   // @ts-expect-error accessing protected property
   const {viewManager} = deck || {};
 
   if (!viewManager || !viewManager.views.length) {
+    // Render children with minimal context so widget components can register
+    // This allows widgets to be pushed before deck is fully initialized
+    if (children.length > 0) {
+      const minimalContext: DeckGLContextValue = {
+        widgets,
+        deck,
+        viewport: null as any,
+        container: null as any,
+        eventManager: null as any,
+        onViewStateChange: null as any
+      };
+      return [
+        createElement(ContextProvider, {key: 'minimal-context', value: minimalContext}, ...children)
+      ];
+    }
     return [];
   }
 
@@ -106,7 +123,7 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
         // @ts-expect-error accessing protected method
         deck._onViewStateChange(params);
       },
-      widgets: []
+      widgets
     };
     const providerKey = `view-${viewId}-context`;
     return createElement(ContextProvider, {key: providerKey, value: contextValue}, viewElement);
