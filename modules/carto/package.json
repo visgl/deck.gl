@@ -43,12 +43,12 @@
   },
   "dependencies": {
     "@carto/api-client": "^0.5.19",
-    "@loaders.gl/compression": "^4.2.0",
-    "@loaders.gl/gis": "^4.2.0",
-    "@loaders.gl/loader-utils": "^4.2.0",
-    "@loaders.gl/mvt": "^4.2.0",
-    "@loaders.gl/schema": "^4.2.0",
-    "@loaders.gl/tiles": "^4.2.0",
+    "@loaders.gl/compression": "^4.3.4",
+    "@loaders.gl/gis": "^4.3.4",
+    "@loaders.gl/loader-utils": "^4.3.4",
+    "@loaders.gl/mvt": "^4.3.4",
+    "@loaders.gl/schema": "^4.3.4",
+    "@loaders.gl/tiles": "^4.3.4",
     "@luma.gl/core": "^9.2.6",
     "@luma.gl/shadertools": "^9.2.6",
     "@math.gl/web-mercator": "^4.1.0",
@@ -72,7 +72,7 @@
     "@deck.gl/extensions": "~9.2.0",
     "@deck.gl/geo-layers": "~9.2.0",
     "@deck.gl/layers": "~9.2.0",
-    "@loaders.gl/core": "^4.2.0",
+    "@loaders.gl/core": "^4.3.4",
     "@luma.gl/core": "~9.2.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
