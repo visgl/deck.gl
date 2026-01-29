@@ -6,13 +6,10 @@ import React from 'react';
 import {Map as MapLibreMap, useControl as useMapLibreControl} from 'react-map-gl/maplibre';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import type {BasemapExample} from '../types';
-import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-function MapLibreDeckOverlay(
-  props: MapboxOverlayProps & {interleaved: boolean; batched: boolean; initialViewState?: any}
-) {
+function MapLibreDeckOverlay(props: any) {
   const overlay = useMapLibreControl(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
@@ -22,10 +19,18 @@ type MapLibreComponentProps = {
   example: BasemapExample;
   interleaved: boolean;
   batched: boolean;
+  globe: boolean;
+  multiView: boolean;
 };
 
-export default function MapLibreComponent({example, interleaved, batched}: MapLibreComponentProps) {
-  const {mapStyle, initialViewState, getLayers, globe, views, layerFilter} = example;
+export default function MapLibreComponent({
+  example,
+  interleaved,
+  batched,
+  globe,
+  multiView
+}: MapLibreComponentProps) {
+  const {mapStyle, initialViewState, getLayers, views, layerFilter} = example;
   const [overlayReady, setOverlayReady] = React.useState(!globe);
   const isMountedRef = React.useRef(true);
 
@@ -56,17 +61,25 @@ export default function MapLibreComponent({example, interleaved, batched}: MapLi
           }
         }}
       >
-        {overlayReady && (
-          <MapLibreDeckOverlay
-            layers={getLayers(interleaved)}
-            interleaved={interleaved}
-            batched={batched}
-            _renderLayersInGroups={batched}
-            {...(views && {views})}
-            {...(layerFilter && {layerFilter})}
-            {...(views && {initialViewState})}
-          />
-        )}
+        {overlayReady &&
+          (multiView && views ? (
+            <MapLibreDeckOverlay
+              layers={getLayers(interleaved)}
+              interleaved={interleaved}
+              batched={batched}
+              _renderLayersInGroups={batched}
+              views={views as any}
+              layerFilter={layerFilter as any}
+              initialViewState={initialViewState as any}
+            />
+          ) : (
+            <MapLibreDeckOverlay
+              layers={getLayers(interleaved)}
+              interleaved={interleaved}
+              batched={batched}
+              _renderLayersInGroups={batched}
+            />
+          ))}
       </MapLibreMap>
     </div>
   );
