@@ -193,29 +193,54 @@ export default class MapboxOverlay implements IControl {
    * Process widgets and wrap those with viewId: 'mapbox' as IControls.
    * This enables deck widgets to be positioned in Mapbox's control container
    * alongside native map controls, preventing overlap.
+   *
+   * Matches widgets by id (like WidgetManager) to handle new instances with same id.
+   * Only recreates controls when placement changes to avoid orphaning the widget's
+   * rootElement when the container is removed from the DOM.
    */
   private _processWidgets(widgets: Widget[] | undefined): void {
     const map = this._map;
     if (!map) return;
 
-    // Remove old widget controls
+    const mapboxWidgets = widgets?.filter(w => w.viewId === 'mapbox') ?? [];
+
+    // Build a map of existing controls by widget id
+    const existingControlsById = new Map<string, DeckWidgetControl>();
     for (const control of this._widgetControls) {
-      map.removeControl(control);
+      existingControlsById.set(control.widget.id, control);
     }
-    this._widgetControls = [];
 
-    if (!widgets) return;
+    const newControls: DeckWidgetControl[] = [];
 
-    // Wrap widgets with viewId: 'mapbox' as IControls
-    for (const widget of widgets) {
-      if (widget.viewId === 'mapbox') {
+    for (const widget of mapboxWidgets) {
+      const existingControl = existingControlsById.get(widget.id);
+
+      if (existingControl && existingControl.widget.placement === widget.placement) {
+        // Same id and placement - reuse existing control to preserve container
+        // Set _container on the new widget instance so WidgetManager uses it
+        widget.props._container = existingControl.widget.props._container;
+        newControls.push(existingControl);
+        existingControlsById.delete(widget.id);
+      } else {
+        // New widget or placement changed - need a new control
+        if (existingControl) {
+          // Placement changed - remove old control first
+          map.removeControl(existingControl);
+          existingControlsById.delete(widget.id);
+        }
         const control = new DeckWidgetControl(widget);
         // Add to map - this calls onAdd() synchronously, setting _container
-        // Use control.getDefaultPosition() which handles 'fill' -> 'top-left' conversion
         map.addControl(control, control.getDefaultPosition());
-        this._widgetControls.push(control);
+        newControls.push(control);
       }
     }
+
+    // Remove controls for widgets that are no longer present
+    for (const control of existingControlsById.values()) {
+      map.removeControl(control);
+    }
+
+    this._widgetControls = newControls;
   }
 
   /** Called when the control is removed from a map */

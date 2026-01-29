@@ -629,6 +629,71 @@ test('MapboxOverlay#widgets - setProps updates widget controls', t => {
   t.end();
 });
 
+test('MapboxOverlay#widgets - setProps preserves container for same widget instance', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget = new TestWidget({id: 'widget1', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget]
+  });
+
+  map.addControl(overlay);
+  t.is(overlay._widgetControls.length, 1, 'Widget control created');
+  const originalContainer = widget.props._container;
+  t.ok(originalContainer, 'Widget _container is set');
+  const originalControl = overlay._widgetControls[0];
+
+  // Call setProps with the same widget instance
+  overlay.setProps({
+    widgets: [widget]
+  });
+
+  t.is(overlay._widgetControls.length, 1, 'Still one widget control');
+  t.is(overlay._widgetControls[0], originalControl, 'Same control instance preserved');
+  t.is(widget.props._container, originalContainer, 'Container preserved - not recreated');
+
+  map.removeControl(overlay);
+  t.end();
+});
+
+test('MapboxOverlay#widgets - setProps preserves container for new widget instance with same id', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget1 = new TestWidget({id: 'my-widget', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget1]
+  });
+
+  map.addControl(overlay);
+  t.is(overlay._widgetControls.length, 1, 'Widget control created');
+  const originalContainer = widget1.props._container;
+  t.ok(originalContainer, 'Widget _container is set');
+  const originalControl = overlay._widgetControls[0];
+
+  // Call setProps with a NEW widget instance but same id and placement (React pattern)
+  const widget2 = new TestWidget({id: 'my-widget', viewId: 'mapbox', placement: 'top-right'});
+  overlay.setProps({
+    widgets: [widget2]
+  });
+
+  t.is(overlay._widgetControls.length, 1, 'Still one widget control');
+  t.is(overlay._widgetControls[0], originalControl, 'Same control instance preserved');
+  t.is(widget2.props._container, originalContainer, 'New widget gets existing container');
+
+  map.removeControl(overlay);
+  t.end();
+});
+
 test('MapboxOverlay#widgets - interleaved mode', t => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
