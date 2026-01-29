@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {useContext, useMemo, useEffect} from 'react';
+import {useContext, useRef, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
 import {log, Widget, type WidgetProps, _deepEqual as deepEqual} from '@deck.gl/core';
 
@@ -12,9 +12,28 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
 ): WidgetT {
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
+
+  // Use ref for stable widget instance across StrictMode double-renders
+  const widgetRef = useRef<WidgetT | null>(null);
+  if (!widgetRef.current) {
+    widgetRef.current = new WidgetClass(props);
+  }
+  const widget = widgetRef.current;
+
+  // Update props on every render
+  widget.setProps(props);
+
   useEffect(() => {
-    // warn if the user supplied a pure-js widget, since it will be ignored
-    // NOTE: This effect runs once per widget. Context widgets and deck widget props are synced after first effect runs.
+    // Register widget in effect (not during render) for proper StrictMode support
+    // Check if widget is already in array (handles StrictMode remount after cleanup)
+    if (widgets && !widgets.includes(widget)) {
+      widgets.push(widget);
+    }
+
+    // Sync widgets to deck
+    deck?.setProps({widgets: widgets ? [...widgets] : []});
+
+    // Warn if the user supplied a pure-js widget, since it will be ignored
     const internalWidgets = deck?.props.widgets;
     if (widgets?.length && internalWidgets?.length && !deepEqual(internalWidgets, widgets, 1)) {
       log.warn('"widgets" prop will be ignored because React widgets are in use.')();
@@ -25,19 +44,10 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
       const index = widgets?.indexOf(widget);
       if (typeof index === 'number' && index !== -1) {
         widgets?.splice(index, 1);
-        deck?.setProps({widgets});
+        deck?.setProps({widgets: widgets ? [...widgets] : []});
       }
     };
-  }, []);
-  const widget = useMemo(() => new WidgetClass(props), [WidgetClass]);
-
-  // Hook rebuilds widgets on every render: [] then [FirstWidget] then [FirstWidget, SecondWidget]
-  widgets?.push(widget);
-  widget.setProps(props);
-
-  useEffect(() => {
-    deck?.setProps({widgets});
-  }, [widgets]);
+  }, [widgets, deck, widget]);
 
   return widget;
 }
