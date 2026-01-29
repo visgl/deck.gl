@@ -29,6 +29,25 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
   const {viewManager} = deck || {};
 
   if (!viewManager || !viewManager.views.length) {
+    // Render children with minimal context so widget components can register
+    // This allows widgets to be pushed before deck is fully initialized
+    if (children.length > 0) {
+      const minimalContext: DeckGLContextValue = {
+        widgets,
+        deck,
+        viewport: null as any,
+        container: null as any,
+        eventManager: null as any,
+        onViewStateChange: null as any
+      };
+      return [
+        createElement(
+          ContextProvider,
+          {key: 'minimal-context', value: minimalContext},
+          ...children
+        )
+      ];
+    }
     return [];
   }
 
