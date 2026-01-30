@@ -140,7 +140,7 @@ test('H3HexagonLayer', () => {
   const testCases = generateLayerTests({
     Layer: H3HexagonLayer,
     sampleProps: SAMPLE_PROPS,
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
       expect(subLayer.props.stroked, 'stroked prop is forwarded').toBe(layer.props.stroked);
@@ -323,7 +323,7 @@ test('H3ClusterLayer', () => {
       getHexagons: d => d.hexagons
       // getElevation: d => d.size
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer}) => {
       expect(

@@ -62,15 +62,15 @@ MockExtension.resetStats = () => {
 test('LayerExtension', () => {
   const extension0 = new MockExtension({
     fp64: true,
-    assert: (cond, msg) => expect(cond).toBeTruthy()
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy()
   });
   const extension1 = new MockExtension({
     fp64: true,
-    assert: (cond, msg) => expect(cond).toBeTruthy()
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy()
   });
   const extension2 = new MockExtension({
     fp64: false,
-    assert: (cond, msg) => expect(cond).toBeTruthy()
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy()
   });
 
   MockExtension.resetStats();
@@ -135,7 +135,7 @@ test('LayerExtension', () => {
 });
 
 test('LayerExtension#CompositeLayer passthrough', () => {
-  const extension = new MockExtension({assert: (cond, msg) => expect(cond).toBeTruthy()});
+  const extension = new MockExtension({assert: (cond, msg) => expect(cond, msg).toBeTruthy()});
 
   MockExtension.resetStats();
 
