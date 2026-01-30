@@ -11,7 +11,6 @@ const packageRoot = dirname(fileURLToPath(import.meta.url));
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
 const excludedTests = [
-  'test/modules/**/*.browser.spec.ts',
   'test/modules/layers/path-tesselator.spec.ts',
   'test/modules/layers/polygon-tesselation.spec.ts',
   'test/modules/widgets/geocoders.spec.ts'
@@ -38,46 +37,37 @@ const aliases = {
   'deck.gl-test': resolve(packageRoot, 'test')
 };
 
+// Shared coverage configuration
+const coverageConfig = {
+  provider: 'v8' as const,
+  reporter: ['text', 'lcov'],
+  include: ['modules/*/src/**/*.ts'],
+  exclude: ['modules/test-utils/**', '**/node_modules/**']
+};
+
 export default defineWorkspace([
-  // Node project - fast feedback, pure unit tests
+  // Node project - simple smoke tests (*.node.spec.ts only)
+  // Used by test-fast for quick validation
   {
     resolve: {alias: aliases},
     test: {
       name: 'node',
       environment: 'node',
-      include: ['test/modules/**/*.spec.ts', 'test/modules/*-spec.ts'],
-      exclude: excludedTests,
+      include: ['test/modules/**/*.node.spec.ts'],
       globals: false,
       testTimeout: 30000,
       setupFiles: ['./test/setup/vitest-node-setup.ts']
     }
   },
-  // Browser project - comprehensive, ALL tests in real browser
-  {
-    resolve: {alias: aliases},
-    test: {
-      name: 'browser',
-      include: ['test/modules/**/*.spec.ts', 'test/modules/*-spec.ts'],
-      exclude: excludedTests,
-      globals: false,
-      testTimeout: 30000,
-      setupFiles: ['./test/setup/vitest-browser-setup.ts'],
-      browser: {
-        enabled: true,
-        name: 'chromium',
-        provider: 'playwright',
-        headless: false,
-        screenshotFailures: false
-      }
-    }
-  },
-  // Headless project - CI, ALL tests in headless browser
+
+  // Headless project - unit tests in headless browser
+  // Used by test-headless and test-ci
   {
     resolve: {alias: aliases},
     test: {
       name: 'headless',
-      include: ['test/modules/**/*.spec.ts', 'test/modules/*-spec.ts'],
-      exclude: excludedTests,
+      include: ['test/modules/**/*.spec.ts'],
+      exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
       globals: false,
       testTimeout: 30000,
       setupFiles: ['./test/setup/vitest-browser-setup.ts'],
@@ -88,11 +78,27 @@ export default defineWorkspace([
         headless: true,
         screenshotFailures: false
       },
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'lcov'],
-        include: ['modules/*/src/**/*.ts'],
-        exclude: ['modules/test-utils/**', '**/node_modules/**']
+      coverage: coverageConfig
+    }
+  },
+
+  // Browser project - full test suite in headed browser for local development
+  // Used by test-browser
+  {
+    resolve: {alias: aliases},
+    test: {
+      name: 'browser',
+      include: ['test/modules/**/*.spec.ts'],
+      exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+      globals: false,
+      testTimeout: 30000,
+      setupFiles: ['./test/setup/vitest-browser-setup.ts'],
+      browser: {
+        enabled: true,
+        name: 'chromium',
+        provider: 'playwright',
+        headless: false,
+        screenshotFailures: false
       }
     }
   }

@@ -38,10 +38,13 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
+      - name: Install Puppeteer browsers
+        run: npx puppeteer browsers install chrome
+
       - name: Run tests
         run: |
           yarn lint
-          yarn test-headless --coverage
+          yarn test-ci
 
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6

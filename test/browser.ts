@@ -29,6 +29,7 @@ enableDOMLogging({
   })
 });
 
-import './modules';
+// Module tests are now run via vitest (yarn test-headless)
+// import './modules';
 import './render';
 import './interaction';
