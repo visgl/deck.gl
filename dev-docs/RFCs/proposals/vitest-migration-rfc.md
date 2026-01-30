@@ -327,6 +327,39 @@ The hybrid approach serves as a **discovery mechanism**:
 - `test/render/index.js` → `test/render/index.spec.ts`
 - `test/interaction/index.js` → `test/interaction/index.spec.ts`
 
+**Outcome:**
+
+**Custom vitest browser commands created** in `test/setup/browser-commands.ts`:
+- `captureAndDiffScreen` - Takes screenshots via Playwright, compares with golden images using sharp + pixelmatch
+- `emulateInput` - Emulates mouse/keyboard events via Playwright's Frame API
+- `isHeadless` - Returns browser headless mode status
+
+**Test runners migrated:**
+- `SnapshotTestRunner` now uses `commands.captureAndDiffScreen()` instead of `window.browserTestDriver_captureAndDiffScreen()`
+- `InteractionTestRunner` now uses `commands.emulateInput()` instead of `window.browserTestDriver_emulateInput()`
+- `TestRunner` base class updated to remove probe.gl dependencies
+
+**New test entry points created:**
+- `test/render/index.spec.ts` - Vitest version of render tests
+- `test/interaction/index.spec.ts` - Vitest version of interaction tests
+- `test/interaction/map-controller.spec.ts` - MapController tests using `expect()`
+- `test/interaction/picking.spec.ts` - Picking tests using `expect()`
+
+**Interaction tests passing** - All 10 MapController tests and 1 Picking test pass.
+
+**Render tests need additional work:**
+- "Unimplemented type: 4" errors from PNG processing in vitest browser workers
+- Temporarily excluded from vitest workspace until resolved
+- May require regenerating golden images or fixing client-side dependencies
+
+**Type declarations added:**
+- `test/setup/vitest-browser-commands.d.ts` - Extends `@vitest/browser/context` BrowserCommands interface
+
+**Dependencies added:**
+- `pixelmatch` - Image comparison
+- `pngjs` - PNG parsing (not used directly, but required by some deps)
+- `sharp` - Robust image processing (handles various PNG color types)
+
 ### Phase 6: Cleanup
 - Remove `tap-spec`, `tape-catch` dependencies
 - Remove test entry points from `.ocularrc.js`

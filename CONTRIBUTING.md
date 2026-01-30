@@ -18,6 +18,30 @@ yarn bootstrap
 yarn test
 ```
 
+## Running Tests
+
+deck.gl uses [Vitest](https://vitest.dev/) with browser mode for testing. Tests are organized into three projects:
+
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `yarn test` | Full test suite (node + headless browser + render tests) | CI validation |
+| `yarn test-fast` | Lint + node smoke tests only | Pre-commit hook (fast) |
+| `yarn test-headless` | Browser unit tests in headless Chromium | Quick browser test validation |
+| `yarn test-browser` | Browser tests in headed Chromium + render tests | Local debugging with visible browser |
+| `yarn test-ci` | Full suite with coverage | CI pipeline |
+
+### Test Projects
+
+- **node**: Fast smoke tests (`*.node.spec.ts`) - ~15 tests, runs in Node.js
+- **headless**: Full unit tests (~618 tests) - runs in headless Chromium via Playwright
+- **browser**: Same as headless but with visible browser window - useful for debugging but resource-intensive
+
+### Notes
+
+- The `test-browser` command runs in headed mode which consumes more resources. If tests timeout or fail to collect, use `test-headless` instead.
+- Pre-commit hooks run `test-fast` for quick validation. Full test suite runs in CI.
+- Render and interaction tests use golden image comparison and require the Playwright browser to be installed (`npx playwright install chromium`).
+
 See [additional instructions](#troubleshooting) for Windows, Linux and Apple M1.
 
 Run the website:
