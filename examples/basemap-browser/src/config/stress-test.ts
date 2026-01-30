@@ -5,6 +5,7 @@
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {Layer} from '@deck.gl/core';
 import type {StressTest, Basemap} from '../types';
+import {getInterleavedProps} from './interleaved';
 
 // Cache generated data to avoid regenerating on every render
 const dataCache = new Map<StressTest, Float32Array>();
@@ -89,15 +90,6 @@ export function buildStressTestLayer(
   const data = generateStressTestData(stressTest);
   const count = getPointCount(stressTest);
 
-  // Interleaved positioning props
-  const interleavedProps: Record<string, any> = interleaved
-    ? basemap === 'mapbox'
-      ? {slot: 'middle'}
-      : basemap === 'maplibre'
-        ? {beforeId: 'watername_ocean'}
-        : {}
-    : {};
-
   return new ScatterplotLayer({
     id: 'stress-test',
     // Use binary data format for maximum performance
@@ -112,13 +104,6 @@ export function buildStressTestLayer(
     radiusUnits: 'meters',
     radiusMinPixels: 1,
     opacity: 0.6,
-    ...interleavedProps
+    ...getInterleavedProps(basemap, interleaved)
   });
-}
-
-/**
- * Clear the data cache (useful for testing or memory management).
- */
-export function clearStressTestCache(): void {
-  dataCache.clear();
 }

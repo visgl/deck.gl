@@ -8,4 +8,5 @@ export {buildLayers} from './layers';
 export {buildViews, getMultiViewLayerFilter} from './views';
 export {getMapStyle} from './styles';
 export {getInitialViewState, DEFAULT_DIMENSIONS} from './dimensions';
-export {buildStressTestLayer, clearStressTestCache} from './stress-test';
+export {buildStressTestLayer} from './stress-test';
+export {getInterleavedProps} from './interleaved';

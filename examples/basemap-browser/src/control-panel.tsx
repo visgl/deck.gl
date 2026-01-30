@@ -356,35 +356,8 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
   );
 }
 
-// Warnings overlay component - renders into #map via portal
+// Warnings overlay component - renders as fixed position overlay
 function WarningsOverlay({warnings}: {warnings: Config['validation']['warnings']}) {
-  const [container, setContainer] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const mapDiv = document.getElementById('map');
-    if (mapDiv) {
-      // Create or find the warnings container
-      let warningsDiv = mapDiv.querySelector('.warnings-overlay') as HTMLElement;
-      if (!warningsDiv) {
-        warningsDiv = document.createElement('div');
-        warningsDiv.className = 'warnings-overlay';
-        warningsDiv.style.cssText = `
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          right: 10px;
-          z-index: 1000;
-          pointer-events: none;
-        `;
-        mapDiv.appendChild(warningsDiv);
-      }
-      setContainer(warningsDiv);
-    }
-  }, []);
-
-  if (!container) return null;
-
-  // Use ReactDOM.createPortal equivalent - render directly
   return (
     <div
       style={{

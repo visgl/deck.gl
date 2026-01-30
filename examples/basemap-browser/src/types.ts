@@ -85,8 +85,3 @@ export type Config = {
   // Validation results
   validation: ValidationResult;
 };
-
-// ===== Legacy Types (for migration) =====
-
-/** @deprecated Use Basemap instead */
-export type MapType = Basemap;

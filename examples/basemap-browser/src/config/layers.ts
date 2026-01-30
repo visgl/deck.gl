@@ -8,6 +8,7 @@ import {BitmapLayer} from '@deck.gl/layers';
 import type {Layer} from '@deck.gl/core';
 import type {Basemap, StressTest} from '../types';
 import {buildStressTestLayer} from './stress-test';
+import {getInterleavedProps} from './interleaved';
 
 // Data URLs
 const AIR_PORTS =
@@ -21,27 +22,6 @@ type LayerBuildOptions = {
   multiView: boolean;
   stressTest: StressTest;
 };
-
-/**
- * Get interleaved layer positioning props based on basemap.
- */
-function getInterleavedProps(basemap: Basemap, interleaved: boolean): Record<string, any> {
-  if (!interleaved) {
-    return {};
-  }
-
-  switch (basemap) {
-    case 'mapbox':
-      return {slot: 'middle'};
-    case 'maplibre':
-      return {beforeId: 'watername_ocean'};
-    case 'google-maps':
-      // Google Maps doesn't support slot/beforeId
-      return {};
-    default:
-      return {};
-  }
-}
 
 /**
  * Build all layers based on current dimensions.
