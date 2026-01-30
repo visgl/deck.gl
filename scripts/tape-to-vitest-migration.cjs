@@ -393,6 +393,13 @@ function convertTapeToVitest(content, filePath = '') {
     result = result.replace(/makeSpy\s*\(/g, 'vi.spyOn(');
   }
 
+  // Step 14b: Convert spy method calls from probe.gl to vitest (applies to all files)
+  // These may come from makeSpy or from @deck.gl/test-utils's testLayer spies
+  // spy.restore() -> spy.mockRestore()
+  // spy.reset() -> spy.mockReset()
+  result = result.replace(/\.restore\s*\(\s*\)/g, '.mockRestore()');
+  result = result.replace(/\.reset\s*\(\s*\)/g, '.mockReset()');
+
   // Step 15: Replace import placeholder with actual imports based on usage
   if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
     const imports = ['test', 'expect'];

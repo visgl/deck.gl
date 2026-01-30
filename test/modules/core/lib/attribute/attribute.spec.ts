@@ -791,7 +791,7 @@ test('Attribute#setExternalBuffer', () => {
   ).toBeTruthy();
   expect(attribute.getAccessor().type, 'attribute type is set correctly').toBe('uint8');
 
-  spy.reset();
+  spy.mockReset();
   expect(
     attribute.setExternalBuffer(value2),
     'should successfully set external buffer if setting external buffer to the same object'
@@ -931,7 +931,7 @@ test('Attribute#setBinaryValue', () => {
   expect(spy.callCount, 'setData is called only once on the same data').toBe(1);
   expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
-  spy.reset();
+  spy.mockReset();
   attribute.delete();
 
   attribute = new Attribute(device, {

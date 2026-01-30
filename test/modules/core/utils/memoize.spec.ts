@@ -52,6 +52,6 @@ test('utils#memoize', () => {
     expect(spy.called, testCase.shouldRecompute ? 'should recompute' : 'should not recompute').toBe(
       testCase.shouldRecompute
     );
-    spy.reset();
+    spy.mockReset();
   });
 });

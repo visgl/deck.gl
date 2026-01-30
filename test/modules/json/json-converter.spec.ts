@@ -71,7 +71,7 @@ test('JSONConverter#badConvert', () => {
     log.warn,
     'should produce a warning message if the layer type is invalid'
   ).toHaveBeenCalled();
-  log.warn.restore();
+  log.warn.mockRestore();
 });
 
 test('JSONConverter#handleTypeAsKey', () => {

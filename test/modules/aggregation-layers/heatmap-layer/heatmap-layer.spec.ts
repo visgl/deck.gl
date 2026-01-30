@@ -95,8 +95,8 @@ test.skip('HeatmapLayer#updates', () => {
             spies._updateBounds,
             'viewport not changed, should not call _updateBounds'
           ).not.toHaveBeenCalled();
-          spies._updateColorTexture.restore();
-          spies._updateBounds.restore();
+          spies._updateColorTexture.mockRestore();
+          spies._updateBounds.mockRestore();
         }
       },
       {
@@ -126,10 +126,10 @@ test.skip('HeatmapLayer#updates', () => {
             'vieport changed, should call _updateTextureRenderingBounds'
           ).toHaveBeenCalled();
           expect(zoom, 'should update state.zoom').toBe(viewport1.zoom);
-          spies._updateColorTexture.restore();
-          spies._updateBounds.restore();
-          spies._updateWeightmap.restore();
-          spies._updateTextureRenderingBounds.restore();
+          spies._updateColorTexture.mockRestore();
+          spies._updateBounds.mockRestore();
+          spies._updateWeightmap.mockRestore();
+          spies._updateTextureRenderingBounds.mockRestore();
         }
       },
       {
@@ -148,9 +148,9 @@ test.skip('HeatmapLayer#updates', () => {
             spies._updateTextureRenderingBounds,
             'viewport changed slightly, should call _updateTextureRenderingBounds'
           ).toHaveBeenCalled();
-          spies._updateBounds.restore();
-          spies._updateWeightmap.restore();
-          spies._updateTextureRenderingBounds.restore();
+          spies._updateBounds.mockRestore();
+          spies._updateWeightmap.mockRestore();
+          spies._updateTextureRenderingBounds.mockRestore();
         }
       },
       {
@@ -165,8 +165,8 @@ test.skip('HeatmapLayer#updates', () => {
             spies._updateWeightmap,
             'viewport panned too far, should call _updateWeightmap'
           ).toHaveBeenCalled();
-          spies._updateBounds.restore();
-          spies._updateWeightmap.restore();
+          spies._updateBounds.mockRestore();
+          spies._updateWeightmap.mockRestore();
         }
       },
       {
@@ -182,8 +182,8 @@ test.skip('HeatmapLayer#updates', () => {
             spies._debouncedUpdateWeightmap,
             'viewport zoom changed, should call _debouncedUpdateWeightmap'
           ).toHaveBeenCalled();
-          spies._updateBounds.restore();
-          spies._debouncedUpdateWeightmap.restore();
+          spies._updateBounds.mockRestore();
+          spies._debouncedUpdateWeightmap.mockRestore();
           expect(zoom, 'viewport zoom changed, should update state.zoom').toBe(
             viewport4_zoomChange.zoom
           );
@@ -200,7 +200,7 @@ test.skip('HeatmapLayer#updates', () => {
             spies._updateWeightmap,
             'should update weight map on uniform change'
           ).toHaveBeenCalled();
-          spies._updateWeightmap.restore();
+          spies._updateWeightmap.mockRestore();
         }
       }
     ]

@@ -214,7 +214,7 @@ test('Layer#diffProps', () => {
     layer.props
   );
   expect(spy, 'updateTriggers fired').toHaveBeenCalled();
-  spy.restore();
+  spy.mockRestore();
 
   layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});

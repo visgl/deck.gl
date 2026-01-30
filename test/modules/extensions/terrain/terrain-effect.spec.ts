@@ -56,7 +56,7 @@ test('TerrainEffect', async () => {
     layers: [terrainLayer, geoLayer]
   });
   expect(renderTerrainCover.callCount, 'Rendered 4 terrain covers').toBe(4);
-  renderTerrainCover.reset();
+  renderTerrainCover.mockReset();
 
   // preRender#picking
   lifecycle.render({
@@ -66,7 +66,7 @@ test('TerrainEffect', async () => {
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
   expect(renderPickingTerrainCover.callCount, 'Rendered 1 terrain cover for picking').toBe(1);
-  renderPickingTerrainCover.reset();
+  renderPickingTerrainCover.mockReset();
 
   // preRender#diffing
   await lifecycle.update({
@@ -79,7 +79,7 @@ test('TerrainEffect', async () => {
     })
   });
   expect(renderTerrainCover.callCount, 'Terrain covers do not require redraw').toBe(0);
-  renderTerrainCover.reset();
+  renderTerrainCover.mockReset();
 
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
@@ -105,7 +105,7 @@ test('TerrainEffect', async () => {
     layers: [terrainLayer]
   });
   expect(renderTerrainCover.callCount, 'Terrain covers are redrawn').toBe(4);
-  renderTerrainCover.reset();
+  renderTerrainCover.mockReset();
 
   model = meshLayer.state.model;
   uniforms = getLayerUniforms(meshLayer);
@@ -156,7 +156,7 @@ test('TerrainEffect#without draw operation', async () => {
     layers: [terrainLayer, geoLayer]
   });
   expect(renderTerrainCover.callCount, 'Rendered 4 terrain covers').toBe(4);
-  renderTerrainCover.reset();
+  renderTerrainCover.mockReset();
 
   // preRender#picking
   lifecycle.render({
@@ -166,7 +166,7 @@ test('TerrainEffect#without draw operation', async () => {
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
   expect(renderPickingTerrainCover.callCount, 'Rendered 1 terrain cover for picking').toBe(1);
-  renderPickingTerrainCover.reset();
+  renderPickingTerrainCover.mockReset();
 
   // preRender#diffing
   await lifecycle.update({
@@ -179,7 +179,7 @@ test('TerrainEffect#without draw operation', async () => {
     })
   });
   expect(renderTerrainCover.callCount, 'Terrain covers do not require redraw').toBe(0);
-  renderTerrainCover.reset();
+  renderTerrainCover.mockReset();
 
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
@@ -205,7 +205,7 @@ test('TerrainEffect#without draw operation', async () => {
     layers: [terrainLayer]
   });
   expect(renderTerrainCover.callCount, 'Terrain covers are redrawn').toBe(4);
-  renderTerrainCover.reset();
+  renderTerrainCover.mockReset();
 
   model = meshLayer.state.model;
   uniforms = getLayerUniforms(meshLayer);

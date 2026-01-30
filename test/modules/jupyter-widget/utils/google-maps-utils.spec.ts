@@ -15,5 +15,5 @@ test('jupyter-widget: Google Maps base', () => {
     'should produce a warning message if no Google Maps API key is provided'
   ).toHaveBeenCalled();
   expect(!overlay, 'Absent Google Maps API key creates null overlay').toBeTruthy();
-  log.warn.restore();
+  log.warn.mockRestore();
 });
