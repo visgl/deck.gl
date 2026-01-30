@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import memoize from '@deck.gl/core/utils/memoize';
 
 const sampleCompute = ({vector, object, number}) => {
@@ -43,17 +43,22 @@ const TEST = {
 };
 
 test('utils#memoize', () => {
-  const spy = vi.spyOn(TEST, 'FUNC');
-  const memoized = memoize(TEST.FUNC);
+  // Create a wrapper function to track calls (vi.spyOn has issues in browser mode)
+  let wasCalled = false;
+  const trackedCompute = (args: Parameters<typeof sampleCompute>[0]) => {
+    wasCalled = true;
+    return sampleCompute(args);
+  };
+  const memoized = memoize(trackedCompute);
 
   TEST.CASES.forEach(testCase => {
+    wasCalled = false;
     const result = memoized(testCase.parameters);
     expect(result, 'returns correct result').toEqual(sampleCompute(testCase.parameters));
     if (testCase.shouldRecompute) {
-      expect(spy, 'should recompute').toHaveBeenCalled();
+      expect(wasCalled, 'should recompute').toBe(true);
     } else {
-      expect(spy, 'should not recompute').not.toHaveBeenCalled();
+      expect(wasCalled, 'should not recompute').toBe(false);
     }
-    spy.mockReset();
   });
 });

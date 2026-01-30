@@ -413,6 +413,45 @@ function convertTapeToVitest(content, filePath = '') {
   result = result.replace(/\.restore\s*\(\s*\)/g, '.mockRestore()');
   result = result.replace(/\.reset\s*\(\s*\)/g, '.mockReset()');
 
+  // Step 14c: Convert spy.called patterns to toHaveBeenCalled matchers
+  // expect(spy.called).toBeTruthy() -> expect(spy).toHaveBeenCalled()
+  // expect(spy.called).toBeFalsy() -> expect(spy).not.toHaveBeenCalled()
+  // expect(spy.called).toBe(true) -> expect(spy).toHaveBeenCalled()
+  // expect(spy.called).toBe(false) -> expect(spy).not.toHaveBeenCalled()
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*\)\s*\.toBeTruthy\s*\(\s*\)/g,
+    'expect($1).toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*\)\s*\.toBeFalsy\s*\(\s*\)/g,
+    'expect($1).not.toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*\)\s*\.toBe\s*\(\s*true\s*\)/g,
+    'expect($1).toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*\)\s*\.toBe\s*\(\s*false\s*\)/g,
+    'expect($1).not.toHaveBeenCalled()'
+  );
+  // Also handle with message argument: expect(spy.called, 'msg').toBe(true)
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*,\s*(['"`][^'"`]*['"`])\s*\)\s*\.toBeTruthy\s*\(\s*\)/g,
+    'expect($1, $2).toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*,\s*(['"`][^'"`]*['"`])\s*\)\s*\.toBeFalsy\s*\(\s*\)/g,
+    'expect($1, $2).not.toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*,\s*(['"`][^'"`]*['"`])\s*\)\s*\.toBe\s*\(\s*true\s*\)/g,
+    'expect($1, $2).toHaveBeenCalled()'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.called\s*,\s*(['"`][^'"`]*['"`])\s*\)\s*\.toBe\s*\(\s*false\s*\)/g,
+    'expect($1, $2).not.toHaveBeenCalled()'
+  );
+
   // Step 15: Replace import placeholder with actual imports based on usage
   if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
     const imports = ['test', 'expect'];
