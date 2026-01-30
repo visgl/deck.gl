@@ -75,60 +75,51 @@ This preserves the previous design philosophy where browser tests are comprehens
 **File naming convention:**
 | Pattern | Description |
 |---------|-------------|
-| `*.spec.ts` | Default - runs in both environments |
-| `*.browser.spec.ts` | Browser-only (WebGL, real DOM, etc.) |
+| `*.node.spec.ts` | Node-only smoke tests (fast, no WebGL) |
+| `*.spec.ts` | Browser tests (WebGL, real DOM, etc.) |
 
 **Vitest workspace configuration:**
 ```typescript
-// vitest.config.ts
-export default defineConfig({
-  test: {
-    projects: [
-      {
-        test: {
-          name: 'node',
-          environment: 'node',
-          include: ['test/modules/**/*.spec.ts'],
-          exclude: ['test/modules/**/*.browser.spec.ts'],
-          setupFiles: ['./test/setup/vitest-node-setup.ts']
-        }
-      },
-      {
-        test: {
-          name: 'browser',
-          include: ['test/modules/**/*.spec.ts'],  // ALL tests
-          browser: {
-            enabled: true,
-            provider: playwright(),
-            instances: [{browser: 'chromium'}]
-          }
-        }
-      },
-      {
-        test: {
-          name: 'headless',
-          include: ['test/modules/**/*.spec.ts'],  // ALL tests
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright(),
-            instances: [{browser: 'chromium'}]
-          }
-        }
+// vitest.workspace.ts
+export default defineWorkspace([
+  // Node project - simple smoke tests (*.node.spec.ts only)
+  {
+    test: {
+      name: 'node',
+      environment: 'node',
+      include: ['test/modules/**/*.node.spec.ts'],
+      setupFiles: ['./test/setup/vitest-node-setup.ts']
+    }
+  },
+  // Headless project - unit tests in headless browser (CI)
+  {
+    test: {
+      name: 'headless',
+      include: ['test/modules/**/*.spec.ts'],
+      exclude: ['test/modules/**/*.node.spec.ts'],
+      browser: {
+        enabled: true,
+        name: 'chromium',
+        provider: 'playwright',
+        headless: true
       }
-    ]
+    }
+  },
+  // Browser project - full suite in headed browser (local dev)
+  {
+    test: {
+      name: 'browser',
+      include: ['test/modules/**/*.spec.ts'],
+      exclude: ['test/modules/**/*.node.spec.ts'],
+      browser: {
+        enabled: true,
+        name: 'chromium',
+        provider: 'playwright',
+        headless: false
+      }
+    }
   }
-});
-```
-
-**CLI commands:**
-```json
-{
-  "test": "vitest run",
-  "test-node": "vitest run --project node",
-  "test-browser": "vitest run --project browser",
-  "test-headless": "vitest run --project headless"
-}
+]);
 ```
 
 ### Why Playwright Instead of Puppeteer?
@@ -175,21 +166,54 @@ test('color#parseColor', () => {
 | `t.throws(fn)` | `expect(fn).toThrow()` |
 | `t.end()` | (not needed) |
 
-### CLI Compatibility
+### CLI Commands
 
-Commands remain the same:
+#### Command Mapping (Old → New)
+
+| Old Command | New Command | Notes |
+|-------------|-------------|-------|
+| `yarn test` | `yarn test` | Now runs node + headless + render |
+| `yarn test-fast` | `yarn test-fast` | Same: lint + node smoke test |
+| `yarn cover` | `yarn test-headless --coverage` | Redundant script removed |
+| `yarn test ci` | `yarn test-ci` | Explicit CI command |
+| (none) | `yarn test-headless` | New: browser unit tests only |
+| (none) | `yarn test-render` | New: render/interaction tests only |
+| (none) | `yarn test-browser` | New: headed browser + render |
+
+#### Command Matrix
+
+| Command | Lint | Node | Headless | Coverage | Render |
+|---------|------|------|----------|----------|--------|
+| `test` | | ✓ | ✓ | | ✓ |
+| `test-fast` | ✓ | ✓ | | | |
+| `test-headless` | | | ✓ | | |
+| `test-render` | | | | | ✓ |
+| `test-ci` | | ✓ | ✓ | ✓ | ✓ |
+| `test-browser` | | | ✓ (headed) | | ✓ |
+
+**Note:** Coverage can be added to any vitest command with `--coverage`.
+
+#### Scripts
 
 ```json
 {
   "scripts": {
-    "test": "vitest run",
-    "test-fast": "ocular-lint && vitest run",
-    "cover": "vitest run --coverage"
+    "test": "vitest run --project node --project headless && npm run test-render",
+    "test-fast": "ocular-lint && vitest run --project node",
+    "test-headless": "vitest run --project headless",
+    "test-render": "ocular-test browser-headless",
+    "test-ci": "vitest run --project node --project headless --coverage && npm run test-render",
+    "test-browser": "vitest run --project browser && npm run test-render"
   }
 }
 ```
 
-`yarn test ci` continues to work - vitest auto-detects CI environments.
+#### File Naming Convention
+
+| Pattern | Environment | Use Case |
+|---------|-------------|----------|
+| `*.node.spec.ts` | Node only | Fast smoke tests (imports, basic logic) |
+| `*.spec.ts` | Browser (headless/headed) | Full test suite with WebGL, DOM |
 
 ### @deck.gl/test-utils Updates
 
@@ -249,6 +273,19 @@ The hybrid approach serves as a **discovery mechanism**:
 **Decision point after discovery:**
 - **Few failures (~10-20%)** → Keep hybrid, rename failures to `.browser.spec.ts`
 - **Many failures (~50%+)** → Fall back to browser-only approach
+
+**Outcome:** Nearly all tests (~95%+) require browser environment due to WebGL/luma.gl dependencies. We adopted a simplified approach:
+- **Node project**: Only runs `*.node.spec.ts` files (smoke tests)
+- **Browser projects**: Run all other `*.spec.ts` files
+
+**Node smoke tests (2 files):**
+- `imports.node.spec.ts` - Verifies module exports
+- `core-layers.node.spec.ts` - Basic layer instantiation
+
+**Excluded tests (need fixes before inclusion):**
+- `path-tesselator.spec.ts` - Was commented out in original suite
+- `polygon-tesselation.spec.ts` - Was commented out in original suite
+- `geocoders.spec.ts` - Never imported in original suite
 
 ### Phase 5: Migrate Snapshot & Interaction Tests
 
