@@ -16,10 +16,17 @@ const excludedTests = [
   'test/modules/layers/path-tesselator.spec.ts',
   'test/modules/layers/polygon-tesselation.spec.ts',
   'test/modules/widgets/geocoders.spec.ts',
+  // Mask tests were commented out on master (luma.gl v9 uniforms API change)
+  'test/modules/extensions/mask/mask.spec.ts',
+  'test/modules/extensions/mask/mask-pass.spec.ts',
   // Render/interaction tests - not yet converted to vitest format
   'test/render/**/*.spec.ts',
   'test/interaction/map-controller.spec.ts',
-  'test/interaction/picking.spec.ts'
+  'test/interaction/picking.spec.ts',
+  // Commented out on master - Transform not exported from @luma.gl/engine
+  'test/modules/layers/path-layer/path-layer-vertex.spec.ts',
+  // Commented out on master - collision-filter extension test
+  'test/modules/extensions/collision-filter/collision-filter.spec.ts'
 ];
 
 // Match aliases from .ocularrc.js
