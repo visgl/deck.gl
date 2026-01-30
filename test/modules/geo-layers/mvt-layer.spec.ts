@@ -520,7 +520,12 @@ test('MVTLayer#triangulation', async () => {
   const testCases = [{props, onAfterUpdate}];
 
   // Run as separate test runs otherwise data is cached
-  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayerAsync({
+    Layer: MVTLayer,
+    viewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
   testCases[0].props.binary = false;
   await testLayerAsync({
     Layer: MVTLayer,

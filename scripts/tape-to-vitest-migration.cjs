@@ -481,6 +481,14 @@ function convertTapeToVitest(content, filePath = '') {
     'expect($1, $2).toHaveBeenCalledTimes($3)'
   );
 
+  // Step 14e: Ensure testLayerAsync calls have await
+  // testLayerAsync returns a Promise and must be awaited
+  // Match testLayerAsync( that is NOT preceded by 'await '
+  result = result.replace(
+    /(?<!await\s)testLayerAsync\s*\(/g,
+    'await testLayerAsync('
+  );
+
   // Step 15: Replace import placeholder with actual imports based on usage
   if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
     const imports = ['test', 'expect'];
