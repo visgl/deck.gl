@@ -4,9 +4,19 @@
 
 import type {Layer, View} from '@deck.gl/core';
 
-export type MapType = 'google-maps' | 'mapbox' | 'maplibre';
+// ===== Base Types =====
+
+export type Basemap = 'deck-only' | 'google-maps' | 'mapbox' | 'maplibre';
 
 export type Framework = 'pure-js' | 'react';
+
+export type StressTest =
+  | 'none'
+  | 'points-10k'
+  | 'points-100k'
+  | 'points-1m'
+  | 'points-5m'
+  | 'points-10m';
 
 export type InitialViewState = {
   latitude: number;
@@ -16,23 +26,67 @@ export type InitialViewState = {
   pitch?: number;
 };
 
-export type BasemapExample = {
-  name: string;
-  mapType: MapType;
+export type MultiViewState = {
+  [viewId: string]: InitialViewState | {target: number[]; zoom: number};
+};
+
+// ===== Dimension Types =====
+
+export type Dimensions = {
+  basemap: Basemap;
   framework: Framework;
-  mapStyle?: string;
-  initialViewState: InitialViewState | Record<string, any>; // Can be per-view with view IDs as keys
-  getLayers: (interleaved?: boolean) => Layer[];
-  globe?: boolean;
-  multiView?: boolean;
+  interleaved: boolean;
+  batched: boolean;
+  globe: boolean;
+  multiView: boolean;
+  stressTest: StressTest;
+};
+
+// ===== Validation Types =====
+
+export type ValidationWarning = {
+  dimension: keyof Dimensions;
+  message: string;
+  severity: 'warning' | 'info';
+};
+
+export type ValidationResult = {
+  warnings: ValidationWarning[];
+};
+
+// ===== Callbacks =====
+
+export type ViewStateChangeCallback = (viewState: InitialViewState) => void;
+
+// ===== Configuration Output =====
+
+export type Config = {
+  // Core dimensions
+  basemap: Basemap;
+  framework: Framework;
+  interleaved: boolean;
+  batched: boolean;
+  globe: boolean;
+  multiView: boolean;
+  stressTest: StressTest;
+
+  // Computed configuration
+  mapStyle: string;
+  initialViewState: InitialViewState | MultiViewState;
+  layers: Layer[];
+
+  // Multi-view specific (only present when multiView: true)
   views?: View[];
   layerFilter?: (args: {layer: Layer; viewport: any}) => boolean;
+
+  // Callbacks
+  onViewStateChange?: ViewStateChangeCallback;
+
+  // Validation results
+  validation: ValidationResult;
 };
 
-export type ExampleCategory = {
-  [key: string]: BasemapExample;
-};
+// ===== Legacy Types (for migration) =====
 
-export type ExampleCategories = {
-  [category: string]: ExampleCategory;
-};
+/** @deprecated Use Basemap instead */
+export type MapType = Basemap;

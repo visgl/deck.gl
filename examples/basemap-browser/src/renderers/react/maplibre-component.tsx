@@ -5,7 +5,7 @@
 import React from 'react';
 import {Map as MapLibreMap, useControl as useMapLibreControl} from 'react-map-gl/maplibre';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import type {BasemapExample} from '../types';
+import type {Config, InitialViewState} from '../../types';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -16,21 +16,23 @@ function MapLibreDeckOverlay(props: any) {
 }
 
 type MapLibreComponentProps = {
-  example: BasemapExample;
-  interleaved: boolean;
-  batched: boolean;
-  globe: boolean;
-  multiView: boolean;
+  config: Config;
 };
 
-export default function MapLibreComponent({
-  example,
-  interleaved,
-  batched,
-  globe,
-  multiView
-}: MapLibreComponentProps) {
-  const {mapStyle, initialViewState, getLayers, views, layerFilter} = example;
+export default function MapLibreComponent({config}: MapLibreComponentProps) {
+  const {
+    mapStyle,
+    initialViewState,
+    layers,
+    interleaved,
+    batched,
+    globe,
+    multiView,
+    views,
+    layerFilter,
+    onViewStateChange
+  } = config;
+
   const [overlayReady, setOverlayReady] = React.useState(!globe);
   const isMountedRef = React.useRef(true);
 
@@ -41,16 +43,16 @@ export default function MapLibreComponent({
     };
   }, []);
 
-  // For multi-view examples, extract the mapbox view state for the base map
+  // For multi-view, extract the mapbox view state for the base map
   const mapInitialViewState =
     initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
-      ? initialViewState.mapbox
-      : initialViewState;
+      ? (initialViewState.mapbox as InitialViewState)
+      : (initialViewState as InitialViewState);
 
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapLibreMap
-        key={`maplibre-${interleaved}-${batched}-${globe || false}`}
+        key={`maplibre-${interleaved}-${batched}-${globe}-${multiView}`}
         mapStyle={mapStyle}
         initialViewState={mapInitialViewState}
         onLoad={e => {
@@ -60,26 +62,26 @@ export default function MapLibreComponent({
             setOverlayReady(true);
           }
         }}
+        onMove={e => {
+          onViewStateChange?.({
+            latitude: e.viewState.latitude,
+            longitude: e.viewState.longitude,
+            zoom: e.viewState.zoom,
+            bearing: e.viewState.bearing,
+            pitch: e.viewState.pitch
+          });
+        }}
       >
-        {overlayReady &&
-          (multiView && views ? (
-            <MapLibreDeckOverlay
-              layers={getLayers(interleaved)}
-              interleaved={interleaved}
-              batched={batched}
-              _renderLayersInGroups={batched}
-              views={views as any}
-              layerFilter={layerFilter as any}
-              initialViewState={initialViewState as any}
-            />
-          ) : (
-            <MapLibreDeckOverlay
-              layers={getLayers(interleaved)}
-              interleaved={interleaved}
-              batched={batched}
-              _renderLayersInGroups={batched}
-            />
-          ))}
+        {overlayReady && (
+          <MapLibreDeckOverlay
+            layers={layers}
+            interleaved={interleaved}
+            _renderLayersInGroups={batched}
+            views={multiView ? views : undefined}
+            layerFilter={multiView ? layerFilter : undefined}
+            initialViewState={multiView ? initialViewState : undefined}
+          />
+        )}
       </MapLibreMap>
     </div>
   );

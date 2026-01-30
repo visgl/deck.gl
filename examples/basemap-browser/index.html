@@ -8,57 +8,125 @@
         box-sizing: border-box;
       }
       body {
-        font-family: Helvetica, Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         margin: 0;
         overflow: hidden;
         display: flex;
         height: 100vh;
         width: 100vw;
+        font-size: 13px;
+        color: #374151;
       }
       #controls {
-        width: 320px;
+        width: 260px;
         flex-shrink: 0;
-        background: #fff;
-        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        background: #f9fafb;
+        border-right: 1px solid #e5e7eb;
         overflow-y: auto;
       }
       #control-panel {
-        padding: 12px 24px;
-        font-size: 13px;
-        line-height: 2;
-        color: #6b6b76;
+        padding: 12px 16px;
+        line-height: 1.4;
+      }
+      #control-panel > h3:first-of-type {
+        margin: 0 0 8px 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #111827;
+        letter-spacing: -0.01em;
+      }
+      #control-panel h3 {
+        margin: 12px 0 6px 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6b7280;
         text-transform: uppercase;
-        outline: none;
+        letter-spacing: 0.05em;
+      }
+      #control-panel h4 {
+        margin: 0 0 4px 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
       #control-panel label {
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 13px;
       }
       #control-panel input[type="checkbox"] {
-        margin-left: 10px;
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        cursor: pointer;
+        accent-color: #3b82f6;
       }
       #control-panel select {
-        margin-left: 10px;
         width: 100%;
-        max-width: 250px;
+        padding: 6px 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        background: #fff;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+      }
+      #control-panel select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
       }
       .section {
-        border-top: 1px solid #ddd;
-        padding-top: 10px;
-        margin-top: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
       }
-      .example-name {
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 5px;
+      .section:last-child {
+        border-bottom: none;
       }
-      h3 {
-        margin: 10px 0 5px;
-        color: #333;
+      .label {
+        font-size: 11px;
+        font-weight: 500;
+        color: #6b7280;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .fps-meter {
+        text-align: center;
+        padding: 12px 0 !important;
+        background: #fff;
+        margin: 0 -16px;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        border-bottom: 1px solid #e5e7eb;
       }
       #map {
         flex: 1;
         position: relative;
         overflow: hidden;
+      }
+      /* Debug info styling */
+      #control-panel .section div {
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      #control-panel .section div b {
+        font-weight: 500;
+        color: #6b7280;
+      }
+      /* Testing instructions */
+      #control-panel .section p {
+        margin: 0 0 6px 0;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #6b7280;
+      }
+      #control-panel .section p b {
+        color: #374151;
       }
     </style>
   </head>

@@ -1,0 +1,64 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import React, {useMemo, useCallback} from 'react';
+import DeckGL from '@deck.gl/react';
+import {_GlobeView as GlobeView} from '@deck.gl/core';
+import type {Config, InitialViewState} from '../../types';
+
+type DeckOnlyComponentProps = {
+  config: Config;
+};
+
+export default function DeckOnlyComponent({config}: DeckOnlyComponentProps) {
+  const {initialViewState, layers, multiView, views, layerFilter, globe, onViewStateChange} =
+    config;
+
+  const handleViewStateChange = useCallback(
+    ({viewState: vs}: {viewState: any}) => {
+      onViewStateChange?.({
+        latitude: vs.latitude,
+        longitude: vs.longitude,
+        zoom: vs.zoom,
+        bearing: vs.bearing,
+        pitch: vs.pitch
+      });
+    },
+    [onViewStateChange]
+  );
+
+  // For multi-view, use the mapbox view state as the main view
+  const viewState =
+    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
+      ? (initialViewState.mapbox as InitialViewState)
+      : (initialViewState as InitialViewState);
+
+  // Compute effective views based on globe and multiView settings
+  const effectiveViews = useMemo(() => {
+    if (globe) {
+      const globeView = new GlobeView({id: 'globe'});
+      if (multiView && views) {
+        // Combine GlobeView with other views
+        return [globeView, ...views];
+      }
+      return globeView;
+    }
+    return multiView ? views : undefined;
+  }, [globe, multiView, views]);
+
+  return (
+    <div style={{width: '100%', height: '100%', position: 'relative', background: '#1a1a2e'}}>
+      <DeckGL
+        width="100%"
+        height="100%"
+        initialViewState={multiView ? initialViewState : viewState}
+        controller={true}
+        layers={layers}
+        views={effectiveViews}
+        layerFilter={multiView ? layerFilter : undefined}
+        onViewStateChange={handleViewStateChange}
+      />
+    </div>
+  );
+}

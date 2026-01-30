@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
-import type {Layer} from '@deck.gl/core';
+import type {Config, InitialViewState} from '../../types';
 
 // Track if we're loading the API
 let loadingPromise: Promise<any> | null = null;
@@ -45,12 +45,10 @@ function loadGoogleMapsAPI(apiKey: string): Promise<any> {
   return loadingPromise;
 }
 
-export function mount(
-  container: HTMLElement,
-  getLayers: (interleaved?: boolean) => Layer[],
-  initialViewState: any,
-  interleaved: boolean
-): () => void {
+export function mount(container: HTMLElement, config: Config): () => void {
+  const {initialViewState, layers, interleaved, onViewStateChange} = config;
+  const viewState = initialViewState as InitialViewState;
+
   // eslint-disable-next-line no-process-env
   const apiKey = process.env.GoogleMapsAPIKey;
   // eslint-disable-next-line no-process-env
@@ -75,19 +73,34 @@ export function mount(
       if (cancelled) return;
 
       const map = new googlemaps.Map(container, {
-        center: {lat: initialViewState.latitude, lng: initialViewState.longitude},
-        zoom: initialViewState.zoom,
-        heading: initialViewState.bearing || 0,
-        tilt: initialViewState.pitch || 0,
+        center: {lat: viewState.latitude, lng: viewState.longitude},
+        zoom: viewState.zoom,
+        heading: viewState.bearing || 0,
+        tilt: viewState.pitch || 0,
         mapId
       });
 
       overlay = new GoogleMapsOverlay({
         interleaved,
-        layers: getLayers(interleaved)
+        layers
       });
 
       overlay.setMap(map);
+
+      if (onViewStateChange) {
+        map.addListener('bounds_changed', () => {
+          const center = map.getCenter();
+          if (center) {
+            onViewStateChange({
+              latitude: center.lat(),
+              longitude: center.lng(),
+              zoom: map.getZoom() || 0,
+              bearing: map.getHeading() || 0,
+              pitch: map.getTilt() || 0
+            });
+          }
+        });
+      }
     })
     .catch((error: Error) => {
       if (cancelled) return;
