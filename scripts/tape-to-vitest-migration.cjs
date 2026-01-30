@@ -25,6 +25,16 @@ const filePattern = args.find(a => !a.startsWith('--'));
 
 const testDir = path.join(__dirname, '..', 'test');
 
+// Files with manual fixes that should NOT be overwritten by the migration script.
+// These files have been manually edited after initial conversion and contain fixes
+// that cannot be expressed as general migration rules.
+const MANUAL_FIX_FILES = [
+  // Uses manual call tracking instead of vi.spyOn (browser mode call-through issues)
+  'test/modules/core/utils/memoize.spec.ts',
+  // Uses toBeCloseTo for floating point DMS coordinate comparisons
+  'test/modules/widgets/geocoders.spec.ts'
+];
+
 // Get list of test files to process - include both .spec.ts and utility .ts files
 let files;
 if (filePattern) {
@@ -45,6 +55,13 @@ let totalErrors = 0;
 
 for (const file of files) {
   const relativePath = path.relative(path.join(__dirname, '..'), file);
+
+  // Skip files with manual fixes that shouldn't be overwritten
+  if (MANUAL_FIX_FILES.includes(relativePath)) {
+    console.log(`  Skipping ${relativePath} (has manual fixes)`);
+    totalSkipped++;
+    continue;
+  }
 
   try {
     // Get the original tape content from master
