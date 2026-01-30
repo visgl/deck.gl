@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
-import type {Config, InitialViewState} from '../../types';
+import type {Config} from '../../types';
+import {getBaseMapViewState} from '../../config';
 
 export function mount(container: HTMLElement, config: Config): () => void {
   const {initialViewState, layers, multiView, views, layerFilter, globe, onViewStateChange} =
@@ -15,10 +16,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
   container.appendChild(wrapper);
 
   // For multi-view, use the mapbox view state as the main view
-  const viewState =
-    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
-      ? (initialViewState.mapbox as InitialViewState)
-      : (initialViewState as InitialViewState);
+  const viewState = getBaseMapViewState(initialViewState);
 
   const deckConfig: any = {
     parent: wrapper,

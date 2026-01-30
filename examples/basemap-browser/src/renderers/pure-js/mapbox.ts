@@ -4,7 +4,8 @@
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import mapboxgl from 'mapbox-gl';
-import type {Config, InitialViewState} from '../../types';
+import type {Config} from '../../types';
+import {getBaseMapViewState} from '../../config';
 
 export function mount(container: HTMLElement, config: Config): () => void {
   const {
@@ -35,10 +36,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
   (mapboxgl as any).accessToken = mapboxToken;
 
   // For multi-view, extract the mapbox view state for the base map
-  const mapInitialViewState =
-    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
-      ? (initialViewState.mapbox as InitialViewState)
-      : (initialViewState as InitialViewState);
+  const mapInitialViewState = getBaseMapViewState(initialViewState);
 
   const map = new mapboxgl.Map({
     container,

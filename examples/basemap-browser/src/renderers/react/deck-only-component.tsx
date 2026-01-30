@@ -5,7 +5,8 @@
 import React, {useMemo, useCallback} from 'react';
 import DeckGL from '@deck.gl/react';
 import {_GlobeView as GlobeView} from '@deck.gl/core';
-import type {Config, InitialViewState} from '../../types';
+import type {Config} from '../../types';
+import {getBaseMapViewState} from '../../config';
 
 type DeckOnlyComponentProps = {
   config: Config;
@@ -29,10 +30,7 @@ export default function DeckOnlyComponent({config}: DeckOnlyComponentProps) {
   );
 
   // For multi-view, use the mapbox view state as the main view
-  const viewState =
-    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
-      ? (initialViewState.mapbox as InitialViewState)
-      : (initialViewState as InitialViewState);
+  const viewState = getBaseMapViewState(initialViewState);
 
   // Compute effective views based on globe and multiView settings
   const effectiveViews = useMemo(() => {

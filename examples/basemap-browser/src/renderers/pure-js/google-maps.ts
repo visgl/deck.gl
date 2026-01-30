@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
-import type {Config, InitialViewState} from '../../types';
+import type {Config} from '../../types';
+import {getBaseMapViewState} from '../../config';
 
 // Track if we're loading the API
 let loadingPromise: Promise<any> | null = null;
@@ -47,7 +48,7 @@ function loadGoogleMapsAPI(apiKey: string): Promise<any> {
 
 export function mount(container: HTMLElement, config: Config): () => void {
   const {initialViewState, layers, interleaved, onViewStateChange} = config;
-  const viewState = initialViewState as InitialViewState;
+  const viewState = getBaseMapViewState(initialViewState);
 
   // eslint-disable-next-line no-process-env
   const apiKey = process.env.GoogleMapsAPIKey;
@@ -65,6 +66,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
   }
 
   let overlay: GoogleMapsOverlay | null = null;
+  let boundsChangedListener: google.maps.MapsEventListener | null = null;
   let cancelled = false;
 
   // Load the API and create the map
@@ -88,7 +90,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
       overlay.setMap(map);
 
       if (onViewStateChange) {
-        map.addListener('bounds_changed', () => {
+        boundsChangedListener = map.addListener('bounds_changed', () => {
           const center = map.getCenter();
           if (center) {
             onViewStateChange({
@@ -115,6 +117,10 @@ export function mount(container: HTMLElement, config: Config): () => void {
 
   return () => {
     cancelled = true;
+    if (boundsChangedListener) {
+      google.maps.event.removeListener(boundsChangedListener);
+      boundsChangedListener = null;
+    }
     if (overlay) {
       overlay.finalize();
       overlay = null;

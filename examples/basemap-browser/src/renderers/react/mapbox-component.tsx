@@ -5,7 +5,8 @@
 import React from 'react';
 import {Map as MapboxMap, useControl as useMapboxControl} from 'react-map-gl/mapbox';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import type {Config, InitialViewState} from '../../types';
+import type {Config} from '../../types';
+import {getBaseMapViewState} from '../../config';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -37,10 +38,7 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
   } = config;
 
   // For multi-view, extract the mapbox view state for the base map
-  const mapInitialViewState =
-    initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
-      ? (initialViewState.mapbox as InitialViewState)
-      : (initialViewState as InitialViewState);
+  const mapInitialViewState = getBaseMapViewState(initialViewState);
 
   return (
     <div style={{width: '100%', height: '100%'}}>

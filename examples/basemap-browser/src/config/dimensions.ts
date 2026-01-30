@@ -117,3 +117,16 @@ export function getInitialViewState(
   }
   return DEFAULT_VIEW_STATE;
 }
+
+/**
+ * Extract base map view state from multi-view or single-view state.
+ * In multi-view mode, the 'mapbox' key contains the main map view state.
+ */
+export function getBaseMapViewState(
+  initialViewState: InitialViewState | MultiViewState
+): InitialViewState {
+  if (initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState) {
+    return initialViewState.mapbox as InitialViewState;
+  }
+  return initialViewState as InitialViewState;
+}
