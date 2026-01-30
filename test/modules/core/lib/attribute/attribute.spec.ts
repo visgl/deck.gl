@@ -923,12 +923,12 @@ test('Attribute#setBinaryValue', () => {
 
   const spy = vi.spyOn(attribute, 'setData');
   expect(attribute.setBinaryValue(value), 'should use external binary value').toBeTruthy();
-  expect(spy.callCount, 'setData is called').toBe(1);
+  expect(spy, 'setData is called').toHaveBeenCalledTimes(1);
   expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
   attribute.setNeedsUpdate();
   expect(attribute.setBinaryValue(value), 'should use external binary value').toBeTruthy();
-  expect(spy.callCount, 'setData is called only once on the same data').toBe(1);
+  expect(spy, 'setData is called only once on the same data').toHaveBeenCalledTimes(1);
   expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
   spy.mockReset();

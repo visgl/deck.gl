@@ -177,34 +177,34 @@ test('CollisionFilterEffect#render', () => {
   const spy = vi.spyOn(collisionFilterPass, 'render');
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
-  expect(spy.callCount, 'Should not render if nothing changes').toBe(0);
+  expect(spy, 'Should not render if nothing changes').toHaveBeenCalledTimes(0);
 
   preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'add one layer');
-  expect(spy.callCount, 'Should render when layer added').toBe(1);
+  expect(spy, 'Should render when layer added').toHaveBeenCalledTimes(1);
 
   preRenderWithLayers([TEST_LAYER], 'remove one layer');
-  expect(spy.callCount, 'Should render when layer removed').toBe(2);
+  expect(spy, 'Should render when layer removed').toHaveBeenCalledTimes(2);
 
   preRenderWithLayers([TEST_LAYER], 'change viewport', {viewports: [testViewport2]});
-  expect(spy.callCount, 'Should render when viewport changes').toBe(3);
+  expect(spy, 'Should render when viewport changes').toHaveBeenCalledTimes(3);
 
   TEST_LAYER._isLoadedOverride = false;
   preRenderWithLayers([TEST_LAYER], 'isLoaded changed', {viewports: [testViewport2]});
-  expect(spy.callCount, 'Should render when isLoaded changes').toBe(4);
+  expect(spy, 'Should render when isLoaded changes').toHaveBeenCalledTimes(4);
 
   preRenderWithLayers([TEST_LAYER], 'mask effect rendered', {
     viewports: [testViewport2],
     effects: [new MaskEffect()],
     preRenderStats: {'mask-effect': {didRender: true}}
   });
-  expect(spy.callCount, 'Should render when mask effect renders').toBe(5);
+  expect(spy, 'Should render when mask effect renders').toHaveBeenCalledTimes(5);
 
   preRenderWithLayers([TEST_LAYER], 'mask effect not rendered', {
     viewports: [testViewport2],
     effects: [new MaskEffect()],
     preRenderStats: {'mask-effect': {didRender: false}}
   });
-  expect(spy.callCount, 'Should not render when mask effect does not render').toBe(5);
+  expect(spy, 'Should not render when mask effect does not render').toHaveBeenCalledTimes(5);
 
   collisionFilterEffect.cleanup();
   layerManager.finalize();

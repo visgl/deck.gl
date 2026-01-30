@@ -469,6 +469,18 @@ function convertTapeToVitest(content, filePath = '') {
     'expect($1, $2).not.toHaveBeenCalled()'
   );
 
+  // Step 14d: Convert spy.callCount patterns to toHaveBeenCalledTimes matchers
+  // expect(spy.callCount).toBe(n) -> expect(spy).toHaveBeenCalledTimes(n)
+  // expect(spy.callCount, 'msg').toBe(n) -> expect(spy, 'msg').toHaveBeenCalledTimes(n)
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.callCount\s*\)\s*\.toBe\s*\(\s*(\d+)\s*\)/g,
+    'expect($1).toHaveBeenCalledTimes($2)'
+  );
+  result = result.replace(
+    /expect\s*\(\s*(\w+)\.callCount\s*,\s*(['"`][^'"`]*['"`])\s*\)\s*\.toBe\s*\(\s*(\d+)\s*\)/g,
+    'expect($1, $2).toHaveBeenCalledTimes($3)'
+  );
+
   // Step 15: Replace import placeholder with actual imports based on usage
   if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
     const imports = ['test', 'expect'];
