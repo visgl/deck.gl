@@ -42,11 +42,25 @@ Styles for light mode theme.
 
 Styles for dark mode theme.
 
-#### `initialTheme` (`'auto' | 'light' | 'dark'`) {#initialtheme}
+#### `initialThemeMode` (`'auto' | 'light' | 'dark'`) {#initialthememode}
 
 * Default: `'auto'`
 
-Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
+Set the initial theme for uncontrolled usage. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
+
+#### `themeMode` (`'light' | 'dark'`, optional) {#thememode}
+
+Controlled theme mode. When provided, the widget is in controlled mode and this prop determines the current theme. Use with `onThemeModeChange` to handle user interactions.
+
+#### `onThemeModeChange` (Function, optional) {#onthememodechange}
+
+```ts
+(newMode: 'light' | 'dark') => void
+```
+
+* Default: `() => {}`
+
+Callback when the user clicks the theme toggle button.
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 

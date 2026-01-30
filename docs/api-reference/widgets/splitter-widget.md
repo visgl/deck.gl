@@ -67,7 +67,11 @@ Orientation of the splitter line. Use `vertical` for side-by-side comparison or 
 
 * Default: `0.5`
 
-Initial split ratio (between 0 and 1) for the first view.
+Initial split ratio (between 0 and 1) for the first view for uncontrolled usage.
+
+#### `split` (number, optional) {#split}
+
+Controlled split position (0 to 1). When provided, the widget is in controlled mode and this prop determines the splitter position. Use with `onChange` to handle user interactions.
 
 #### `onChange` (Function, optional) {#onchange}
 

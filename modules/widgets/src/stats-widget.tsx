@@ -46,6 +46,15 @@ export type StatsWidgetProps = WidgetProps & {
   formatters?: Record<string, string | ((stat: Stat) => string)>;
   /** Whether to reset particular stats after each update. */
   resetOnUpdate?: Record<string, boolean>;
+  /**
+   * Controlled collapsed state. When provided, the widget is in controlled mode.
+   */
+  collapsed?: boolean;
+  /**
+   * Callback when the collapsed state changes (user clicks header).
+   * In controlled mode, use this to update the collapsed prop.
+   */
+  onCollapsedChange?: (collapsed: boolean) => void;
 };
 
 /** Displays probe.gl stats in a floating pop-up. */
@@ -60,7 +69,9 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     framesPerUpdate: 1,
     formatters: {},
     resetOnUpdate: {},
-    id: 'stats'
+    id: 'stats',
+    collapsed: undefined!,
+    onCollapsedChange: () => {}
   };
 
   className = 'deck-widget-stats';
@@ -69,8 +80,17 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   private _counter = 0;
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
-  collapsed: boolean = true;
+  private _collapsed: boolean = true;
   _stats: Stats;
+
+  /**
+   * Returns the current collapsed state.
+   * In controlled mode, returns the collapsed prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getCollapsed(): boolean {
+    return this.props.collapsed ?? this._collapsed;
+  }
 
   constructor(props: StatsWidgetProps = {}) {
     super(props);
@@ -95,6 +115,11 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
       this._resetOnUpdate = {...props.resetOnUpdate};
     }
     super.setProps(props);
+
+    // Handle controlled mode - update HTML when controlled prop changes
+    if (props.collapsed !== undefined) {
+      this.updateHTML();
+    }
   }
 
   onAdd(): void {
@@ -104,11 +129,11 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
   onRenderHTML(rootElement: HTMLElement): void {
     const stats = this._stats;
-    const collapsed = this.collapsed;
+    const isCollapsed = this.getCollapsed();
     const title = this.props.title || stats?.id || 'Stats';
     const items: JSX.Element[] = [];
 
-    if (!collapsed && stats) {
+    if (!isCollapsed && stats) {
       stats.forEach(stat => {
         const lines = this._getLines(stat);
         if (this._resetOnUpdate && this._resetOnUpdate[stat.name]) {
@@ -131,9 +156,9 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
           style={{cursor: 'pointer', pointerEvents: 'auto'}}
           onClick={this._toggleCollapsed}
         >
-          {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
+          {isCollapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
         </div>
-        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
+        {!isCollapsed && <div className="deck-widget-stats-content">{items}</div>}
       </div>,
       rootElement
     );
@@ -167,8 +192,17 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   }
 
   protected _toggleCollapsed = (): void => {
-    this.collapsed = !this.collapsed;
-    this.updateHTML();
+    const nextCollapsed = !this.getCollapsed();
+
+    // Always call callback if provided
+    this.props.onCollapsedChange?.(nextCollapsed);
+
+    // Only update internal state if uncontrolled
+    if (this.props.collapsed === undefined) {
+      this._collapsed = nextCollapsed;
+      this.updateHTML();
+    }
+    // In controlled mode, parent will update collapsed prop which triggers updateHTML via setProps
   };
 
   protected _getLines(stat: Stat): string[] {

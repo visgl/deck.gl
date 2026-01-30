@@ -15,12 +15,27 @@ export type TimelineWidgetProps = WidgetProps & {
   timeRange?: [number, number];
   /** Slider step. */
   step?: number;
-  /** Initial slider value. */
+  /** Initial slider value for uncontrolled usage. */
   initialTime?: number;
-  /** Callback when value changes. */
+  /**
+   * Controlled time value. When provided, the widget is in controlled mode
+   * for the time slider.
+   */
+  time?: number;
+  /** Callback when time value changes (via slider or playback). */
   onTimeChange?: (value: number) => void;
   /** Play interval in milliseconds. */
   playInterval?: number;
+  /**
+   * Controlled playing state. When provided, the widget is in controlled mode
+   * for play/pause.
+   */
+  playing?: boolean;
+  /**
+   * Callback when play/pause button is clicked.
+   * In controlled mode, use this to update the playing prop.
+   */
+  onPlayingChange?: (playing: boolean) => void;
 };
 
 export class TimelineWidget extends Widget<TimelineWidgetProps> {
@@ -28,9 +43,27 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   className = 'deck-widget-timeline';
   placement: WidgetPlacement = 'bottom-left';
 
-  private playing = false;
+  private _playing = false;
   private timerId: number | null = null;
   currentTime: number;
+
+  /**
+   * Returns the current time value.
+   * In controlled mode, returns the time prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getTime(): number {
+    return this.props.time ?? this.currentTime;
+  }
+
+  /**
+   * Returns the current playing state.
+   * In controlled mode, returns the playing prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getPlaying(): boolean {
+    return this.props.playing ?? this._playing;
+  }
 
   static defaultProps: Required<TimelineWidgetProps> = {
     ...Widget.defaultProps,
@@ -40,8 +73,11 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
     timeRange: [0, 100],
     step: 1,
     initialTime: undefined!,
+    time: undefined!,
     onTimeChange: () => {},
-    playInterval: 1000
+    playInterval: 1000,
+    playing: undefined!,
+    onPlayingChange: () => {}
   };
 
   constructor(props: TimelineWidgetProps = {}) {
@@ -51,13 +87,30 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   setProps(props: Partial<TimelineWidgetProps>): void {
+    const {time: prevTime, playing: prevPlaying} = this.props;
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
+
+    // Handle controlled mode - update HTML when controlled props change
+    if (
+      (props.time !== undefined && props.time !== prevTime) ||
+      (props.playing !== undefined && props.playing !== prevPlaying)
+    ) {
+      // Handle controlled playing state changes
+      if (props.playing !== undefined && props.playing !== prevPlaying) {
+        if (props.playing && !this._playing) {
+          this._startTimer();
+        } else if (!props.playing && this._playing) {
+          this._stopTimer();
+        }
+      }
+      this.updateHTML();
+    }
   }
 
   onAdd(): void {
-    this.playing = false;
+    this._playing = false;
     this.timerId = null;
   }
 
@@ -66,10 +119,12 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
+    const isPlaying = this.getPlaying();
+    const currentTime = this.getTime();
     render(
       <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'auto'}}>
-        <IconButton label={this.playing ? 'Pause' : 'Play'} onClick={this.handlePlayPause}>
-          <div className="text">{this.playing ? '⏸' : '▶'}</div>
+        <IconButton label={isPlaying ? 'Pause' : 'Play'} onClick={this.handlePlayPause}>
+          <div className="text">{isPlaying ? '⏸' : '▶'}</div>
         </IconButton>
         <input
           type="range"
@@ -77,7 +132,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
           min={this.props.timeRange[0]}
           max={this.props.timeRange[1]}
           step={this.props.step}
-          value={this.currentTime}
+          value={currentTime}
           onInput={this.handleSliderChange}
         />
       </div>,
@@ -86,46 +141,85 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   private handlePlayPause = (): void => {
-    if (this.playing) {
-      this.stop();
-    } else {
-      this.start();
+    const isPlaying = this.getPlaying();
+    const nextPlaying = !isPlaying;
+
+    // Always call callback if provided
+    this.props.onPlayingChange?.(nextPlaying);
+
+    // Only update internal state if uncontrolled
+    if (this.props.playing === undefined) {
+      if (nextPlaying) {
+        this.start();
+      } else {
+        this.stop();
+      }
     }
+    // In controlled mode, parent will update playing prop which triggers start/stop via setProps
   };
 
   private handleSliderChange = (e: Event): void => {
     const input = e.target as HTMLInputElement;
     const val = Number(input.value);
-    this.currentTime = val;
+
+    // Always call callback
     this.props.onTimeChange(val);
-    this.updateHTML();
+
+    // Only update internal state if uncontrolled
+    if (this.props.time === undefined) {
+      this.currentTime = val;
+      this.updateHTML();
+    }
+    // In controlled mode, parent will update time prop which triggers updateHTML via setProps
   };
 
   private start(): void {
-    this.playing = true;
+    this._playing = true;
+    this._startTimer();
     this.updateHTML();
-    this.tick();
   }
 
   private stop(): void {
-    this.playing = false;
+    this._playing = false;
+    this._stopTimer();
+    this.updateHTML();
+  }
+
+  /** Start the playback timer (used internally) */
+  private _startTimer(): void {
+    this._playing = true;
+    this.tick();
+  }
+
+  /** Stop the playback timer (used internally) */
+  private _stopTimer(): void {
+    this._playing = false;
     if (this.timerId !== null) {
       window.clearTimeout(this.timerId);
       this.timerId = null;
     }
-    this.updateHTML();
   }
 
   private tick = (): void => {
     const [min, max] = this.props.timeRange;
-    let next = this.currentTime + this.props.step;
+    const currentTime = this.getTime();
+    let next = currentTime + this.props.step;
     if (next > max) {
       next = min;
     }
-    this.currentTime = next;
+
+    // Always call callback
     this.props.onTimeChange(next);
+
+    // Only update internal state if uncontrolled
+    if (this.props.time === undefined) {
+      this.currentTime = next;
+    }
+
     this.updateHTML();
-    if (this.playing) {
+
+    // Continue if still playing
+    if (this.getPlaying()) {
       this.timerId = window.setTimeout(this.tick, this.props.playInterval);
     }
   };

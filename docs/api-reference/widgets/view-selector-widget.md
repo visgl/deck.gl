@@ -34,7 +34,8 @@ const deck = new Deck({
 
 The `ViewSelectorWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `initialViewMode` (ViewMode, default `'single'`) - Initial view mode selection
+- `initialViewMode` (ViewMode, default `'single'`) - Initial view mode selection for uncontrolled usage
+- `viewMode` (ViewMode, optional) - Controlled view mode. When provided, the widget is in controlled mode and this prop determines the selected view mode. Use with `onViewModeChange` to handle user interactions.
 - `onViewModeChange` (function, optional) - Callback invoked when view mode changes. Receives the new `ViewMode`.
 - `label` (string, default `'Split View'`) - Tooltip label for the widget
 

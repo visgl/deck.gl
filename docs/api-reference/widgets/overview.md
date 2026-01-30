@@ -178,6 +178,41 @@ Remarks:
 * Widget UI with dynamic positioning, such as an `InfoWidget`, may not expose the `placement` prop as they control positioning internally.
 * For more information about using multiple deck.gl views, see the [Using Multiple Views](../../developer-guide/views.md#using-multiple-views) guide.
 
+## Controlled vs Uncontrolled Mode
+
+Many deck.gl widgets support both controlled and uncontrolled modes, similar to React form components.
+
+### Uncontrolled Mode (Default)
+
+By default, widgets manage their own internal state. You can optionally provide an initial value and receive callbacks when the state changes:
+
+```ts
+new ThemeWidget({
+  initialThemeMode: 'light',
+  onThemeModeChange: (mode) => console.log('Theme changed:', mode)
+})
+```
+
+### Controlled Mode
+
+When you provide a state prop (e.g., `themeMode`, `fullscreen`, `time`), the widget enters controlled mode. In this mode, the widget's state is driven entirely by the prop value, and you must update it via callbacks:
+
+```ts
+let themeMode = 'light';
+
+new ThemeWidget({
+  themeMode,
+  onThemeModeChange: (mode) => {
+    themeMode = mode;
+    deck.setProps({widgets: [new ThemeWidget({themeMode, onThemeModeChange: ...})]});
+  }
+})
+```
+
+### Reading Widget State
+
+Widgets with internal state expose getter methods (e.g., `getThemeMode()`, `getFullscreen()`) that return the current state regardless of whether the widget is controlled or uncontrolled.
+
 ## Writing new Widgets
 
 A widget should inherit the `Widget` class. 

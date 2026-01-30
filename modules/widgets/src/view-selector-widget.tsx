@@ -17,8 +17,13 @@ export type ViewSelectorWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip label */
   label?: string;
-  /** The initial view mode. Defaults to 'single'. */
+  /** The initial view mode for uncontrolled usage. Defaults to 'single'. */
   initialViewMode?: ViewMode;
+  /**
+   * Controlled view mode. When provided, the widget is in controlled mode
+   * and this prop determines the selected view mode.
+   */
+  viewMode?: ViewMode;
   /** Callback invoked when the view mode changes */
   onViewModeChange?: (mode: ViewMode) => void;
 };
@@ -39,26 +44,42 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
     viewId: null,
     label: 'Split View',
     initialViewMode: 'single',
+    viewMode: undefined!,
     onViewModeChange: () => {}
   };
 
   className = 'deck-widget-view-selector';
   placement: WidgetPlacement = 'top-left';
-  viewMode: ViewMode;
+  _viewMode: ViewMode;
 
   constructor(props: ViewSelectorWidgetProps = {}) {
     super(props);
-    this.viewMode = this.props.initialViewMode;
+    this._viewMode = this.props.initialViewMode;
     this.setProps(this.props);
+  }
+
+  /**
+   * Returns the current view mode.
+   * In controlled mode, returns the viewMode prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getViewMode(): ViewMode {
+    return this.props.viewMode ?? this._viewMode;
   }
 
   setProps(props: Partial<ViewSelectorWidgetProps>) {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
+
+    // Handle controlled mode - update HTML when controlled prop changes
+    if (props.viewMode !== undefined) {
+      this.updateHTML();
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement) {
+    const currentMode = this.getViewMode();
     render(
       <IconMenu<ViewMode>
         className="deck-widget-view-selector"
@@ -66,7 +87,7 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
           ...item,
           icon: item.icon()
         }))}
-        initialItem={this.props.initialViewMode}
+        initialItem={currentMode}
         onItemSelected={this.handleSelectMode}
       />,
       rootElement
@@ -74,9 +95,15 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
   }
 
   handleSelectMode = (viewMode: ViewMode) => {
-    this.viewMode = viewMode;
-    this.updateHTML();
+    // Always call callback
     this.props.onViewModeChange(viewMode);
+
+    // Only update internal state if uncontrolled
+    if (this.props.viewMode === undefined) {
+      this._viewMode = viewMode;
+      this.updateHTML();
+    }
+    // In controlled mode, parent will update viewMode prop which triggers updateHTML via setProps
   };
 }
 
