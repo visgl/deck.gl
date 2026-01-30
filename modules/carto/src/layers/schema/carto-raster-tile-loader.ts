@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
 import type {RasterMetadata} from '@carto/api-client';
 
 import {TileReader} from './carto-raster-tile';
@@ -39,7 +39,7 @@ const CartoRasterTileLoader: LoaderWithParser = {
     parseCartoRasterTile(arrayBuffer, options),
   parseSync: parseCartoRasterTile,
   worker: true,
-  options: DEFAULT_OPTIONS
+  options: DEFAULT_OPTIONS as StrictLoaderOptions
 };
 
 export type Raster = {
