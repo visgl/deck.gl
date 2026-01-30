@@ -49,9 +49,11 @@ test('utils#memoize', () => {
   TEST.CASES.forEach(testCase => {
     const result = memoized(testCase.parameters);
     expect(result, 'returns correct result').toEqual(sampleCompute(testCase.parameters));
-    expect(spy.called, testCase.shouldRecompute ? 'should recompute' : 'should not recompute').toBe(
-      testCase.shouldRecompute
-    );
+    if (testCase.shouldRecompute) {
+      expect(spy, 'should recompute').toHaveBeenCalled();
+    } else {
+      expect(spy, 'should not recompute').not.toHaveBeenCalled();
+    }
     spy.mockReset();
   });
 });
