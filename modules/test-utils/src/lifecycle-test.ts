@@ -203,8 +203,8 @@ export function testLayer<LayerT extends Layer>(opts: {
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
-    // Remove spies
-    Object.keys(spyMap).forEach(k => spyMap[k].mockClear());
+    // Remove spies - use mockRestore to fully remove spy from prototype
+    Object.keys(spyMap).forEach(k => spyMap[k].mockRestore());
     layer = newLayer;
   }
 
@@ -256,8 +256,8 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
       runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
 
-    // Remove spies
-    Object.keys(spyMap).forEach(k => spyMap[k].mockClear());
+    // Remove spies - use mockRestore to fully remove spy from prototype
+    Object.keys(spyMap).forEach(k => spyMap[k].mockRestore());
     layer = newLayer;
   }
 
