@@ -55,7 +55,7 @@ test('TerrainEffect', async () => {
   await lifecycle.update({
     layers: [terrainLayer, geoLayer]
   });
-  expect(renderTerrainCover.callCount, 'Rendered 4 terrain covers').toBe(4);
+  expect(renderTerrainCover, 'Rendered 4 terrain covers').toHaveBeenCalledTimes(4);
   renderTerrainCover.mockReset();
 
   // preRender#picking
@@ -65,7 +65,9 @@ test('TerrainEffect', async () => {
     deviceRect: {x: 200, y: 150, width: 1, height: 1},
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
-  expect(renderPickingTerrainCover.callCount, 'Rendered 1 terrain cover for picking').toBe(1);
+  expect(renderPickingTerrainCover, 'Rendered 1 terrain cover for picking').toHaveBeenCalledTimes(
+    1
+  );
   renderPickingTerrainCover.mockReset();
 
   // preRender#diffing
@@ -78,7 +80,7 @@ test('TerrainEffect', async () => {
       zoom: 10
     })
   });
-  expect(renderTerrainCover.callCount, 'Terrain covers do not require redraw').toBe(0);
+  expect(renderTerrainCover, 'Terrain covers do not require redraw').toHaveBeenCalledTimes(0);
   renderTerrainCover.mockReset();
 
   // moduleUniforms
@@ -104,7 +106,7 @@ test('TerrainEffect', async () => {
   await lifecycle.update({
     layers: [terrainLayer]
   });
-  expect(renderTerrainCover.callCount, 'Terrain covers are redrawn').toBe(4);
+  expect(renderTerrainCover, 'Terrain covers are redrawn').toHaveBeenCalledTimes(4);
   renderTerrainCover.mockReset();
 
   model = meshLayer.state.model;
@@ -155,7 +157,7 @@ test('TerrainEffect#without draw operation', async () => {
   await lifecycle.update({
     layers: [terrainLayer, geoLayer]
   });
-  expect(renderTerrainCover.callCount, 'Rendered 4 terrain covers').toBe(4);
+  expect(renderTerrainCover, 'Rendered 4 terrain covers').toHaveBeenCalledTimes(4);
   renderTerrainCover.mockReset();
 
   // preRender#picking
@@ -165,7 +167,9 @@ test('TerrainEffect#without draw operation', async () => {
     deviceRect: {x: 200, y: 150, width: 1, height: 1},
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
-  expect(renderPickingTerrainCover.callCount, 'Rendered 1 terrain cover for picking').toBe(1);
+  expect(renderPickingTerrainCover, 'Rendered 1 terrain cover for picking').toHaveBeenCalledTimes(
+    1
+  );
   renderPickingTerrainCover.mockReset();
 
   // preRender#diffing
@@ -178,7 +182,7 @@ test('TerrainEffect#without draw operation', async () => {
       zoom: 10
     })
   });
-  expect(renderTerrainCover.callCount, 'Terrain covers do not require redraw').toBe(0);
+  expect(renderTerrainCover, 'Terrain covers do not require redraw').toHaveBeenCalledTimes(0);
   renderTerrainCover.mockReset();
 
   // moduleUniforms
@@ -204,7 +208,7 @@ test('TerrainEffect#without draw operation', async () => {
   await lifecycle.update({
     layers: [terrainLayer]
   });
-  expect(renderTerrainCover.callCount, 'Terrain covers are redrawn').toBe(4);
+  expect(renderTerrainCover, 'Terrain covers are redrawn').toHaveBeenCalledTimes(4);
   renderTerrainCover.mockReset();
 
   model = meshLayer.state.model;

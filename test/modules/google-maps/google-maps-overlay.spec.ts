@@ -212,10 +212,10 @@ function drawPickTest(renderingType) {
     /*
     const pointerMoveSpy = vi.spyOn(overlay._deck, '_onPointerMove');
     map.emit({type: 'mousemove', pixel: [0, 0]});
-    expect(pointerMoveSpy.callCount, 'pointer move event is handled').toBe(1);
+    expect(pointerMoveSpy, 'pointer move event is handled').toHaveBeenCalledTimes(1);
 
     map.emit({type: 'mouseout', pixel: [0, 0]});
-    expect(pointerMoveSpy.callCount, 'pointer leave event is handled').toBe(2);
+    expect(pointerMoveSpy, 'pointer leave event is handled').toHaveBeenCalledTimes(2);
     pointerMoveSpy.mockReset();
     */
 
