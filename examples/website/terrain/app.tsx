@@ -51,10 +51,24 @@ export default function App({
     elevationData: TERRAIN_IMAGE,
     texture,
     wireframe,
-    color: [255, 255, 255]
+    color: [255, 255, 255],
+    pickable: '3d'
   });
 
-  return <DeckGL initialViewState={initialViewState} controller={true} layers={[layer]} />;
+  return (
+    <DeckGL
+      initialViewState={initialViewState}
+      controller={true}
+      layers={[layer]}
+      getTooltip={info => {
+        if (info.picked && info.coordinate && info.coordinate.length === 3) {
+          const elevation = info.coordinate[2];
+          return `Elevation: ${elevation.toFixed(0)} m`;
+        }
+        return null;
+      }}
+    />
+  );
 }
 
 export function renderToDOM(container: HTMLDivElement) {

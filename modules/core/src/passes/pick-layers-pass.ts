@@ -137,13 +137,17 @@ export default class PickLayersPass extends LayersPass {
     };
     const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState || operation.includes('terrain')) {
+    if (!this._colorEncoderState) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
+      // Encode pickable layers that include 'draw' operation (including 'terrain+draw')
       Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
       // TODO: blendColor no longer part of luma.gl API
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+    } else if (operation.includes('terrain')) {
+      // Pure terrain layers (without 'draw') don't need picking colors
+      pickParameters.blend = false;
     }
 
     return pickParameters;

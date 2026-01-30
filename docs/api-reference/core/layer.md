@@ -142,11 +142,15 @@ If this callback is supplied and returns `true`, the error is marked as handled 
 
 Layers can be interacted with using these properties.
 
-#### `pickable` (boolean, optional) {#pickable}
+#### `pickable` (boolean | '3d', optional) {#pickable}
 
 * Default: `false`
 
 Whether the layer responds to mouse pointer picking events.
+
+When set to `true`, the layer can be picked and the picking info will contain 2D coordinates (assuming z=0).
+
+When set to `'3d'`, the layer can be picked with depth picking enabled. The `coordinate` field in the [picking info object](../../developer-guide/interactivity.md#the-pickinginfo-object) will be a 3D point, unprojected onto the actual picked geometry. This is useful for getting accurate 3D coordinates in layers with elevation or 3D models, but comes with a performance overhead.
 
 #### `onHover` (Function, optional) {#onhover}
 
