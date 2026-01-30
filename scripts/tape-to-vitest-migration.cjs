@@ -121,6 +121,38 @@ function convertTapeToVitest(content, filePath = '') {
     (content.includes('t.ok') || content.includes('t.equal') || content.includes('t.is') ||
      content.includes('t.notOk') || content.includes('t.deepEqual') || content.includes('t.same'));
 
+  // Check if content has nested t.test() calls BEFORE converting (for Step 2a)
+  const hasNestedTTest = /\bt\.test\s*\(/.test(content);
+
+  // Step 1b: Convert t.test(), t0.test(), t1.test() etc. to test() BEFORE other conversions
+  // This must happen first so that Step 2's regex doesn't match "t.test" as "test"
+  // t.test('name', () => { -> test('name', () => {
+  // t.test('name', t0 => { -> test('name', () => {
+  result = result.replace(
+    /t\d*\.test\s*\(\s*'([^']*)'\s*,\s*(async\s+)?\(\s*\)\s*=>\s*\{/g,
+    (match, name, async) => `test('${name}', ${async || ''}() => {`
+  );
+  result = result.replace(
+    /t\d*\.test\s*\(\s*"([^"]*)"\s*,\s*(async\s+)?\(\s*\)\s*=>\s*\{/g,
+    (match, name, async) => `test("${name}", ${async || ''}() => {`
+  );
+  result = result.replace(
+    /t\d*\.test\s*\(\s*`([^`]*)`\s*,\s*(async\s+)?\(\s*\)\s*=>\s*\{/g,
+    (match, name, async) => `test(\`${name}\`, ${async || ''}() => {`
+  );
+  result = result.replace(
+    /t\d*\.test\s*\(\s*'([^']*)'\s*,\s*(async\s+)?(\w+)\s*=>\s*\{/g,
+    (match, name, async, param) => `test('${name}', ${async || ''}() => {`
+  );
+  result = result.replace(
+    /t\d*\.test\s*\(\s*"([^"]*)"\s*,\s*(async\s+)?(\w+)\s*=>\s*\{/g,
+    (match, name, async, param) => `test("${name}", ${async || ''}() => {`
+  );
+  result = result.replace(
+    /t\d*\.test\s*\(\s*`([^`]*)`\s*,\s*(async\s+)?(\w+)\s*=>\s*\{/g,
+    (match, name, async, param) => `test(\`${name}\`, ${async || ''}() => {`
+  );
+
   // Step 2: Convert test function signatures with nested test parameter (t0, t1, etc.)
   // These are parent tests that contain nested t0.test() calls
   // Convert to describe() blocks: test('name', t0 => { -> describe('name', () => {
@@ -128,6 +160,16 @@ function convertTapeToVitest(content, filePath = '') {
     /test\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?t\d+\s*=>\s*\{/g,
     (match, name, async) => `describe(${name}, ${async || ''}() => {`
   );
+
+  // Step 2a: Convert tests with t parameter that contain t.test() to describe()
+  // This handles: test('name', t => { ... t.test('nested', ...) ... })
+  // Use the hasNestedTTest flag captured BEFORE Step 1b converted t.test() to test()
+  if (hasNestedTTest) {
+    result = result.replace(
+      /test\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*(async\s+)?t\s*=>\s*\{/g,
+      (match, name, async) => `describe(${name}, ${async || ''}() => {`
+    );
+  }
 
   // Step 2b: Convert regular test function signatures (including test.skip and test.only)
   // test('name', t => { -> test('name', () => {
@@ -176,36 +218,7 @@ function convertTapeToVitest(content, filePath = '') {
   // Step 6c: Remove t.plan() - Vitest doesn't need this
   result = result.replace(/\s*t\d*\.plan\s*\([^)]*\)\s*;?\s*/g, '\n');
 
-  // Step 6d: Convert t0.test(), t1.test() etc. nested tests to regular test() calls
-  // t0.test('name', () => { -> test('name', () => {
-  // t0.test('name', t => { -> test('name', () => {
-  // Handle different quote types separately to allow other quotes inside the string
-  result = result.replace(
-    /t\d+\.test\s*\(\s*'([^']*)'\s*,\s*(async\s+)?\(\s*\)\s*=>\s*\{/g,
-    (match, name, async) => `test('${name}', ${async || ''}() => {`
-  );
-  result = result.replace(
-    /t\d+\.test\s*\(\s*"([^"]*)"\s*,\s*(async\s+)?\(\s*\)\s*=>\s*\{/g,
-    (match, name, async) => `test("${name}", ${async || ''}() => {`
-  );
-  result = result.replace(
-    /t\d+\.test\s*\(\s*`([^`]*)`\s*,\s*(async\s+)?\(\s*\)\s*=>\s*\{/g,
-    (match, name, async) => `test(\`${name}\`, ${async || ''}() => {`
-  );
-
-  // Also handle with parameter: t0.test('name', t => { -> test('name', () => {
-  result = result.replace(
-    /t\d+\.test\s*\(\s*'([^']*)'\s*,\s*(async\s+)?(\w+)\s*=>\s*\{/g,
-    (match, name, async, param) => `test('${name}', ${async || ''}() => {`
-  );
-  result = result.replace(
-    /t\d+\.test\s*\(\s*"([^"]*)"\s*,\s*(async\s+)?(\w+)\s*=>\s*\{/g,
-    (match, name, async, param) => `test("${name}", ${async || ''}() => {`
-  );
-  result = result.replace(
-    /t\d+\.test\s*\(\s*`([^`]*)`\s*,\s*(async\s+)?(\w+)\s*=>\s*\{/g,
-    (match, name, async, param) => `test(\`${name}\`, ${async || ''}() => {`
-  );
+  // Step 6d: (Moved to Step 1b - t.test() conversion now happens early)
 
   // Step 6e: Convert t.assert() and t0.assert() -> expect().toBeTruthy()
   result = convertTapeAssertion(result, 't.assert', 'toBeTruthy()');
