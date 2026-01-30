@@ -604,9 +604,6 @@ function convertTapeAssertion(content, tapeMethod, vitestMethod) {
     const closeParenIdx = findMatchingParen(content, openParenIdx);
     if (closeParenIdx === -1) continue;
 
-    // Extract the full call
-    const fullCall = content.substring(startIdx, closeParenIdx + 1);
-
     // Extract arguments (content inside parens)
     const argsStr = content.substring(openParenIdx + 1, closeParenIdx).trim();
 
