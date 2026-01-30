@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
+import Stats from 'stats.js';
 import type {Dimensions, Config, Basemap, Framework, StressTest, InitialViewState} from './types';
 import {buildConfig, DEFAULT_DIMENSIONS} from './config';
 
@@ -93,18 +94,19 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
 
   const [currentDPR, setCurrentDPR] = useState(window.devicePixelRatio);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({width: 0, height: 0});
-  const [fps, setFps] = useState(0);
   const [viewState, setViewState] = useState<InitialViewState | null>(null);
-  const frameTimesRef = useRef<number[]>([]);
-  const lastFrameTimeRef = useRef(performance.now());
+  const statsRef = useRef<Stats | null>(null);
 
   // View state change handler
   const handleViewStateChange = useCallback((vs: InitialViewState) => {
     setViewState(vs);
   }, []);
 
-  // Build config from dimensions with callback
-  const config = buildConfig(dimensions, handleViewStateChange);
+  // Memoize config to prevent recreation on every render
+  const config = useMemo(
+    () => buildConfig(dimensions, handleViewStateChange),
+    [dimensions, handleViewStateChange]
+  );
 
   // Update a single dimension
   const updateDimension = useCallback(
@@ -118,9 +120,9 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
   useEffect(() => {
     onConfigChange(config);
     setUrlFromDimensions(dimensions);
-  }, [dimensions, config, onConfigChange]);
+  }, [dimensions, onConfigChange]);
 
-  // Canvas info and FPS polling
+  // Canvas info polling
   const updateCanvasInfo = useCallback(() => {
     const canvas = document.querySelector('canvas');
     if (canvas) {
@@ -136,33 +138,34 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
     }
   }, []);
 
-  // FPS calculation using requestAnimationFrame
+  // Initialize stats.js
   useEffect(() => {
+    const stats = new Stats();
+    stats.showPanel(0); // 0: fps, 1: ms, 2: mb
+    // Use fixed positioning to avoid being cleared when map reloads
+    stats.dom.style.position = 'fixed';
+    stats.dom.style.top = '0px';
+    stats.dom.style.left = '260px'; // After control panel
+    stats.dom.style.zIndex = '1000';
+    statsRef.current = stats;
+
+    document.body.appendChild(stats.dom);
+
+    // Animation loop for stats
     let animationId: number;
-
-    const measureFps = () => {
-      const now = performance.now();
-      const delta = now - lastFrameTimeRef.current;
-      lastFrameTimeRef.current = now;
-
-      // Keep last 60 frame times for averaging
-      frameTimesRef.current.push(delta);
-      if (frameTimesRef.current.length > 60) {
-        frameTimesRef.current.shift();
-      }
-
-      // Calculate average FPS
-      if (frameTimesRef.current.length > 0) {
-        const avgFrameTime =
-          frameTimesRef.current.reduce((a, b) => a + b, 0) / frameTimesRef.current.length;
-        setFps(Math.round(1000 / avgFrameTime));
-      }
-
-      animationId = requestAnimationFrame(measureFps);
+    const animate = () => {
+      stats.begin();
+      stats.end();
+      animationId = requestAnimationFrame(animate);
     };
+    animationId = requestAnimationFrame(animate);
 
-    animationId = requestAnimationFrame(measureFps);
-    return () => cancelAnimationFrame(animationId);
+    return () => {
+      cancelAnimationFrame(animationId);
+      if (stats.dom.parentNode) {
+        stats.dom.parentNode.removeChild(stats.dom);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -186,19 +189,6 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
 
       <div id="control-panel">
         <h3>Basemap Browser</h3>
-
-        {/* FPS Meter */}
-        <div className="section fps-meter">
-          <span
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: fps >= 50 ? '#4caf50' : fps >= 30 ? '#ff9800' : '#f44336'
-            }}
-          >
-            {fps} FPS
-          </span>
-        </div>
 
         {/* Basemap Selection */}
         <div className="section">

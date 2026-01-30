@@ -52,9 +52,9 @@ export function getMultiViewLayerFilter({layer, viewport}: {layer: Layer; viewpo
     return viewportId === 'ortho';
   }
 
-  // Main visualization layers (airports, arcs, stress-test) should appear
-  // in the main map view - exclude from ortho and minimap
-  if (layer.id === 'airports' || layer.id === 'arcs' || layer.id === 'stress-test') {
+  // Main visualization layers should appear in the main map view - exclude from ortho and minimap
+  const mainLayers = ['airports', 'arcs', 'stress-test', 'city-icons', 'city-labels'];
+  if (mainLayers.includes(layer.id)) {
     return viewportId !== 'ortho' && viewportId !== 'minimap';
   }
 

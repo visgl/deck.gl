@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {GeoJsonLayer, ArcLayer, TextLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ArcLayer, TextLayer, IconLayer} from '@deck.gl/layers';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
+
+// Icon atlas for markers
+const ICON_ATLAS =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png';
+const ICON_MAPPING = {
+  marker: {x: 0, y: 0, width: 128, height: 128, anchorY: 128, mask: true}
+};
 import type {Layer} from '@deck.gl/core';
 import type {Basemap, StressTest} from '../types';
 import {buildStressTestLayer} from './stress-test';
@@ -35,6 +42,15 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
   // Arc layer needs cullMode: 'none' for globe projection
   const arcParameters = globe ? {cullMode: 'none' as const} : undefined;
 
+  // Sample city data for IconLayer and TextLayer
+  const cities = [
+    {name: 'London', coordinates: [-0.1276, 51.5074]},
+    {name: 'Paris', coordinates: [2.3522, 48.8566]},
+    {name: 'Berlin', coordinates: [13.405, 52.52]},
+    {name: 'Madrid', coordinates: [-3.7038, 40.4168]},
+    {name: 'Rome', coordinates: [12.4964, 41.9028]}
+  ];
+
   // Base visualization layers
   const baseLayers: Layer[] = [
     new GeoJsonLayer({
@@ -59,6 +75,34 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
       getTargetColor: [200, 0, 80],
       getWidth: 1,
       parameters: arcParameters,
+      ...interleavedProps
+    }),
+    new IconLayer({
+      id: 'city-icons',
+      data: cities,
+      iconAtlas: ICON_ATLAS,
+      iconMapping: ICON_MAPPING,
+      getIcon: () => 'marker',
+      getPosition: (d: any) => d.coordinates,
+      getSize: 40,
+      getColor: [0, 140, 255],
+      pickable: true,
+      ...interleavedProps
+    }),
+    new TextLayer({
+      id: 'city-labels',
+      data: cities,
+      getPosition: (d: any) => d.coordinates,
+      getText: (d: any) => d.name,
+      getSize: 16,
+      getColor: [255, 255, 255],
+      getAngle: 0,
+      getTextAnchor: 'middle',
+      getAlignmentBaseline: 'top',
+      getPixelOffset: [0, 20],
+      background: true,
+      getBackgroundColor: [0, 0, 0, 180],
+      backgroundPadding: [4, 2],
       ...interleavedProps
     })
   ];
