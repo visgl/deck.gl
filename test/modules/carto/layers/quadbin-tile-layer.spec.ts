@@ -47,7 +47,7 @@ function quadkeyToTile(quadkey) {
 test('QuadbinTileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: QuadbinTileLayer,
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
   await testLayerAsync({
@@ -65,7 +65,7 @@ test('QuadbinTileLayer tilejson', async () => {
         data: TILEJSON,
         getTileData: () => []
       },
-      assert: (cond, msg) => expect(cond).toBeTruthy(),
+      assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
         if (!layer.isLoaded) {
           expect(subLayers.length, 'Rendered sublayers').toBe(1);

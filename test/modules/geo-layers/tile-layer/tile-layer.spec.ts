@@ -14,7 +14,7 @@ const DUMMY_DATA =
 test('TileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
   await testLayerAsync({Layer: TileLayer, testCases, onError: err => expect(err).toBeFalsy()});

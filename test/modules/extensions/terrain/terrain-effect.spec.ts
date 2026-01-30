@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
@@ -11,7 +11,6 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
-import {makeSpy} from '@probe.gl/test-utils';
 import {device, getLayerUniforms} from '@deck.gl/test-utils';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
@@ -46,8 +45,11 @@ test('TerrainEffect', async () => {
   });
   expect(terrainEffect.terrainPass, 'TerrainPass is created').toBeTruthy();
   expect(terrainEffect.terrainPickingPass, 'terrainPickingPass is created').toBeTruthy();
-  const renderTerrainCover = makeSpy(terrainEffect.terrainPass, 'renderTerrainCover');
-  const renderPickingTerrainCover = makeSpy(terrainEffect.terrainPickingPass, 'renderTerrainCover');
+  const renderTerrainCover = vi.spyOn(terrainEffect.terrainPass, 'renderTerrainCover');
+  const renderPickingTerrainCover = vi.spyOn(
+    terrainEffect.terrainPickingPass,
+    'renderTerrainCover'
+  );
 
   // preRender
   await lifecycle.update({
@@ -143,8 +145,11 @@ test('TerrainEffect#without draw operation', async () => {
   });
   expect(terrainEffect.terrainPass, 'TerrainPass is created').toBeTruthy();
   expect(terrainEffect.terrainPickingPass, 'terrainPickingPass is created').toBeTruthy();
-  const renderTerrainCover = makeSpy(terrainEffect.terrainPass, 'renderTerrainCover');
-  const renderPickingTerrainCover = makeSpy(terrainEffect.terrainPickingPass, 'renderTerrainCover');
+  const renderTerrainCover = vi.spyOn(terrainEffect.terrainPass, 'renderTerrainCover');
+  const renderPickingTerrainCover = vi.spyOn(
+    terrainEffect.terrainPickingPass,
+    'renderTerrainCover'
+  );
 
   // preRender
   await lifecycle.update({

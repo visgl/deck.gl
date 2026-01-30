@@ -21,7 +21,7 @@ const BINARY_RASTER_TILE = new Uint8Array(binaryRasterTileData).buffer;
 test('RasterTileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: RasterTileLayer,
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
   await testLayerAsync({
@@ -40,7 +40,7 @@ test('RasterTileLayer tilejson', async () => {
         tile: {index: {q: TILE_INDEX}},
         getTileData: () => BINARY_RASTER_TILE
       },
-      assert: (cond, msg) => expect(cond).toBeTruthy(),
+      assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
         expect(subLayers.length, 'Rendered sublayers').toBe(1);
 
@@ -76,7 +76,7 @@ test.skip('RasterLayer', async () => {
         },
         tileIndex: TILE_INDEX
       },
-      assert: (cond, msg) => expect(cond).toBeTruthy(),
+      assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
         expect(subLayers.length, 'Rendered sublayers').toBe(1);
         const [rasterColumnLayer] = subLayers;

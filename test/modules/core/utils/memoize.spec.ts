@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import memoize from '@deck.gl/core/utils/memoize';
-import {makeSpy} from '@probe.gl/test-utils';
 
 const sampleCompute = ({vector, object, number}) => {
   return `${vector.join(',')}:${object.name}:number`;
@@ -44,7 +43,7 @@ const TEST = {
 };
 
 test('utils#memoize', () => {
-  const spy = makeSpy(TEST, 'FUNC');
+  const spy = vi.spyOn(TEST, 'FUNC');
   const memoized = memoize(TEST.FUNC);
 
   TEST.CASES.forEach(testCase => {

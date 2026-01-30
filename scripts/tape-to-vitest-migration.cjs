@@ -364,16 +364,61 @@ function convertTapeToVitest(content, filePath = '') {
     }
   }
 
-  // Step 14: Replace import placeholder with actual imports based on usage
+  // Step 14: Convert makeSpy from @probe.gl/test-utils to vi.spyOn from vitest
+  // import {makeSpy} from '@probe.gl/test-utils'; -> (removed, vi added to vitest import)
+  // makeSpy(obj, 'method') -> vi.spyOn(obj, 'method')
+  const hasMakeSpy = result.includes("from '@probe.gl/test-utils'") && result.includes('makeSpy');
+  if (hasMakeSpy) {
+    // Remove makeSpy import from @probe.gl/test-utils
+    // Handle: import {makeSpy} from '@probe.gl/test-utils';
+    result = result.replace(
+      /import\s*\{\s*makeSpy\s*\}\s*from\s*['"]@probe\.gl\/test-utils['"]\s*;?\n?/g,
+      ''
+    );
+    // Handle: import {makeSpy, otherThing} from '@probe.gl/test-utils';
+    result = result.replace(
+      /import\s*\{([^}]*),\s*makeSpy\s*,([^}]*)\}\s*from\s*['"]@probe\.gl\/test-utils['"]/g,
+      "import {$1,$2} from '@probe.gl/test-utils'"
+    );
+    result = result.replace(
+      /import\s*\{([^}]*),\s*makeSpy\s*\}\s*from\s*['"]@probe\.gl\/test-utils['"]/g,
+      "import {$1} from '@probe.gl/test-utils'"
+    );
+    result = result.replace(
+      /import\s*\{\s*makeSpy\s*,([^}]*)\}\s*from\s*['"]@probe\.gl\/test-utils['"]/g,
+      "import {$1} from '@probe.gl/test-utils'"
+    );
+
+    // Convert makeSpy calls to vi.spyOn
+    result = result.replace(/makeSpy\s*\(/g, 'vi.spyOn(');
+  }
+
+  // Step 15: Replace import placeholder with actual imports based on usage
   if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
     const imports = ['test', 'expect'];
     // Check if describe is actually used in the converted content
     if (/\bdescribe\s*\(/.test(result)) {
       imports.push('describe');
     }
+    // Check if vi.spyOn is used (from makeSpy conversion)
+    if (/\bvi\.spyOn\s*\(/.test(result)) {
+      imports.push('vi');
+    }
     result = result.replace(
       '__VITEST_IMPORT_PLACEHOLDER__',
       `import {${imports.join(', ')}} from 'vitest';`
+    );
+  } else if (hasMakeSpy) {
+    // No placeholder but we need to add vi to existing vitest import
+    result = result.replace(
+      /import\s*\{([^}]*)\}\s*from\s*['"]vitest['"]/,
+      (match, imports) => {
+        const importList = imports.split(',').map(s => s.trim());
+        if (!importList.includes('vi')) {
+          importList.push('vi');
+        }
+        return `import {${importList.join(', ')}} from 'vitest'`;
+      }
     );
   }
 

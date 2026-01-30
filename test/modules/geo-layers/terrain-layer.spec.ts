@@ -16,7 +16,7 @@ test('TerrainLayer', async () => {
       texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
       loaders: [TerrainLoader]
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer.props.elevationData) {
@@ -33,7 +33,7 @@ test('TerrainLayer', async () => {
       bounds: [-180, 85, 0, 0],
       loaders: [TerrainLoader]
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer.props.elevationData) {

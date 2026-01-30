@@ -4,9 +4,8 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
-import {test, expect, describe} from 'vitest';
+import {test, expect, describe, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils';
-import {makeSpy} from '@probe.gl/test-utils';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import {Buffer} from '@luma.gl/core';
@@ -769,7 +768,7 @@ test('Attribute#setExternalBuffer', () => {
   expect(attribute.getBuffer(), 'external buffer is set').toBe(buffer);
   expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
-  const spy = makeSpy(attribute, 'setData');
+  const spy = vi.spyOn(attribute, 'setData');
   expect(
     attribute.setExternalBuffer(buffer),
     'should successfully set external buffer if setting external buffer to the same object'
@@ -922,7 +921,7 @@ test('Attribute#setBinaryValue', () => {
   ).toBeFalsy();
   expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
-  const spy = makeSpy(attribute, 'setData');
+  const spy = vi.spyOn(attribute, 'setData');
   expect(attribute.setBinaryValue(value), 'should use external binary value').toBeTruthy();
   expect(spy.callCount, 'setData is called').toBe(1);
   expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();

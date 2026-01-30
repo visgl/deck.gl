@@ -48,7 +48,7 @@ test('HeatmapLayer', () => {
       data: FIXTURES.points.slice(0, 3),
       getPosition
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
       expect(layer.state.worldBounds, 'should update state.worldBounds').toBeTruthy();

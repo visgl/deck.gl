@@ -3,11 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable max-statements */
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {makeSpy} from '@probe.gl/test-utils';
 import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
@@ -211,7 +210,7 @@ function drawPickTest(renderingType) {
     // Removed as part of https://github.com/visgl/deck.gl/pull/7723
     // TODO: reintroduce when the mock context has `deck.isInitialized` (required for event forwarding)
     /*
-    const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
+    const pointerMoveSpy = vi.spyOn(overlay._deck, '_onPointerMove');
     map.emit({type: 'mousemove', pixel: [0, 0]});
     expect(pointerMoveSpy.callCount, 'pointer move event is handled').toBe(1);
 

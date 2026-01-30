@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
-import {makeSpy} from '@probe.gl/test-utils';
+import {test, expect, vi} from 'vitest';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core/lib/constants';
 import {MapController} from '@deck.gl/core';
@@ -66,7 +65,7 @@ test('JSONConverter#badConvert', () => {
   expect(jsonConverter, 'JSONConverter created').toBeTruthy();
   const badData = JSON.parse(JSON.stringify(JSON_DATA));
   badData.layers[0]['@@type'] = 'InvalidLayer';
-  makeSpy(log, 'warn');
+  vi.spyOn(log, 'warn');
   jsonConverter.convert(badData);
   expect(
     log.warn,

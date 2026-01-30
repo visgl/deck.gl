@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   Layer,
   LayerExtension,
@@ -13,7 +13,6 @@ import {
   picking
 } from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
-import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
 
@@ -209,7 +208,7 @@ test('Layer#diffProps', () => {
   layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 100}}).props, layer.props);
   expect(layer.getChangeFlags().propsOrDataChanged, 'props changed').toBeTruthy();
 
-  const spy = makeSpy(AttributeManager.prototype, 'invalidate');
+  const spy = vi.spyOn(AttributeManager.prototype, 'invalidate');
   layer._diffProps(
     new SubLayer(LAYER_PROPS, {updateTriggers: {time: {version: 0}}}).props,
     layer.props

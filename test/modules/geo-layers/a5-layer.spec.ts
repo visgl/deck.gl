@@ -25,7 +25,7 @@ test('A5Layer', () => {
       data,
       getPentagon: d => d
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
       expect(subLayer, 'subLayers rendered').toBeTruthy();

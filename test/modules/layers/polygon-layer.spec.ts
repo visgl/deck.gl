@@ -18,7 +18,7 @@ test('PolygonLayer', () => {
       getPolygon: f => f,
       getFillColor: (f, {index}) => [index, 0, 0]
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
       if (layer.props.data && layer.props.data.length) {

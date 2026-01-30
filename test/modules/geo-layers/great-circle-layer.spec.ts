@@ -16,7 +16,7 @@ test('GreatCircleLayer', () => {
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 

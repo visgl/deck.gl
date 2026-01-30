@@ -68,7 +68,7 @@ test('QuadkeyLayer', () => {
       data: TEST_DATA,
       getQuadkey: d => d.quadkey
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
       expect(subLayer, 'subLayers rendered').toBeTruthy();

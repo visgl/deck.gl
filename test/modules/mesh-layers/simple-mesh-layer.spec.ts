@@ -26,7 +26,7 @@ test('SimpleMeshLayer#tests', () => {
         nvertical: 1
       })
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer.props.mesh) {

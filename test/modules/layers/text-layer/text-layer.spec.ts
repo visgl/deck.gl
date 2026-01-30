@@ -17,7 +17,7 @@ test('TextLayer', () => {
       getText: d => d.ADDRESS,
       getPosition: d => d.COORDINATES
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();
@@ -253,7 +253,7 @@ test('TextLayer - fontAtlasCacheLimit', () => {
       getText: d => d.ADDRESS,
       getPosition: d => d.COORDINATES
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();

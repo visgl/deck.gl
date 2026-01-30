@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
-import {makeSpy} from '@probe.gl/test-utils';
+import {test, expect, vi} from 'vitest';
 
 import {log} from '@deck.gl/core';
 import {createGoogleMapsDeckOverlay} from '@deck.gl/jupyter-widget/playground/utils/google-maps-utils';
 
 test('jupyter-widget: Google Maps base', () => {
-  makeSpy(log, 'warn');
+  vi.spyOn(log, 'warn');
   const overlay = createGoogleMapsDeckOverlay({props: {}});
   expect(
     log.warn,

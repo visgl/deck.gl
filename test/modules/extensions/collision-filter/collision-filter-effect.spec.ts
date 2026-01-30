@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {MapView, LayerManager} from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -11,7 +11,6 @@ import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import CollisionFilterEffect from '@deck.gl/extensions/collision-filter/collision-filter-effect';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils';
-import {makeSpy} from '@probe.gl/test-utils';
 
 const testViewport = new MapView().makeViewport({
   width: 100,
@@ -175,7 +174,7 @@ test('CollisionFilterEffect#render', () => {
   preRenderWithLayers([TEST_LAYER], 'Initial render');
   const collisionFilterPass = collisionFilterEffect.collisionFilterPass;
   expect(collisionFilterPass, 'CollisionFilterPass is created').toBeTruthy();
-  const spy = makeSpy(collisionFilterPass, 'render');
+  const spy = vi.spyOn(collisionFilterPass, 'render');
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
   expect(spy.callCount, 'Should not render if nothing changes').toBe(0);

@@ -25,7 +25,7 @@ test('GeoJsonLayer#tests', () => {
       },
       getIcon: () => 'marker'
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       expect(layer.state.features, 'should update features').toBeTruthy();

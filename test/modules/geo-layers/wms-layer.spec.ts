@@ -19,7 +19,7 @@ test.skip('WMSLayer', async () => {
       serviceType: 'wms',
       layers: ['OSM-WMS']
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
   await testLayerAsync({Layer: WMSLayer, testCases, onError: err => expect(err).toBeFalsy()});

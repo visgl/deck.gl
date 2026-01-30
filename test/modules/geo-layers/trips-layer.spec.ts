@@ -15,7 +15,7 @@ test('TripsLayer', () => {
       getPath: d => d.map(p => p.begin_shape),
       getTimestamps: d => d.map(p => p.begin_time)
     },
-    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 

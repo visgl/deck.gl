@@ -16,13 +16,13 @@ class DemoCompositeLayer extends CompositeLayer {
   }
 }
 
-test('jupyter-widget: dynamic-registration', () => {
-  t.describe('null customLibrares', () => {
+describe('jupyter-widget: dynamic-registration', () => {
+  test('null customLibrares', () => {
     const returnValue = addCustomLibraries(null, () => {});
     expect(!returnValue, 'No custom libraries returns null').toBeTruthy();
   });
 
-  t.describe('addCustomLibraries', () => {
+  test('addCustomLibraries', () => {
     const TEST_LIBRARY_NAME = 'DemoLibrary';
     window[TEST_LIBRARY_NAME] = {DemoCompositeLayer};
 

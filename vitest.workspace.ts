@@ -5,15 +5,21 @@
 import {defineWorkspace} from 'vitest/config';
 import {dirname, resolve} from 'path';
 import {fileURLToPath} from 'url';
+import {browserCommands} from './test/setup/browser-commands';
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
 const excludedTests = [
+  'test/modules/carto/index.spec.ts',
   'test/modules/layers/path-tesselator.spec.ts',
   'test/modules/layers/polygon-tesselation.spec.ts',
-  'test/modules/widgets/geocoders.spec.ts'
+  'test/modules/widgets/geocoders.spec.ts',
+  // Render/interaction tests - not yet converted to vitest format
+  'test/render/**/*.spec.ts',
+  'test/interaction/map-controller.spec.ts',
+  'test/interaction/picking.spec.ts'
 ];
 
 // Match aliases from .ocularrc.js
@@ -66,7 +72,11 @@ export default defineWorkspace([
     resolve: {alias: aliases},
     test: {
       name: 'headless',
-      include: ['test/modules/**/*.spec.ts'],
+      include: [
+        'test/modules/**/*.spec.ts',
+        'test/render/**/*.spec.ts',
+        'test/interaction/**/*.spec.ts'
+      ],
       exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
       globals: false,
       testTimeout: 30000,
@@ -76,7 +86,8 @@ export default defineWorkspace([
         name: 'chromium',
         provider: 'playwright',
         headless: true,
-        screenshotFailures: false
+        screenshotFailures: false,
+        commands: browserCommands
       },
       coverage: coverageConfig
     }
@@ -88,7 +99,11 @@ export default defineWorkspace([
     resolve: {alias: aliases},
     test: {
       name: 'browser',
-      include: ['test/modules/**/*.spec.ts'],
+      include: [
+        'test/modules/**/*.spec.ts',
+        'test/render/**/*.spec.ts',
+        'test/interaction/**/*.spec.ts'
+      ],
       exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
       globals: false,
       testTimeout: 30000,
@@ -98,7 +113,8 @@ export default defineWorkspace([
         name: 'chromium',
         provider: 'playwright',
         headless: false,
-        screenshotFailures: false
+        screenshotFailures: false,
+        commands: browserCommands
       }
     }
   }
