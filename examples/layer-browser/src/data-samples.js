@@ -5,23 +5,23 @@
 import {Vector3} from '@math.gl/core';
 
 /* load data samples for display */
-import allPoints from '../data/sf.bike.parking.json' assert {type: 'json'};
+import allPoints from '../data/sf.bike.parking.json' with {type: 'json'};
 import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
-import meterTrajectorySmall from '../data/meter-trajectory-small.json' assert {type: 'json'};
-import choropleths from '../data/sf.zip.geo.json' assert {type: 'json'};
-import geojson from '../data/sample.geo.json' assert {type: 'json'};
-import geojsonHole from '../data/hole.geo.json' assert {type: 'json'};
-import geojsonLarge from '../data/canada.geo.json' assert {type: 'json'};
-import hexagons from '../data/hexagons.json' assert {type: 'json'};
-import routes from '../data/sfmta.routes.json' assert {type: 'json'};
-import trips from '../data/trips.json' assert {type: 'json'};
-import SFTrips from '../data/sf.trips.json' assert {type: 'json'};
-import iconAtlas from '../data/icon-atlas.json' assert {type: 'json'};
-import quadkeys from '../data/sf.quadkeys.json' assert {type: 'json'};
-import s2cells from '../data/sf.s2cells.json' assert {type: 'json'};
-import pentagons from '../data/sf.bike.parking.a5.json' assert {type: 'json'};
-import geohashes from '../data/sf.geohashes.json' assert {type: 'json'};
+import meterTrajectorySmall from '../data/meter-trajectory-small.json' with {type: 'json'};
+import choropleths from '../data/sf.zip.geo.json' with {type: 'json'};
+import geojson from '../data/sample.geo.json' with {type: 'json'};
+import geojsonHole from '../data/hole.geo.json' with {type: 'json'};
+import geojsonLarge from '../data/canada.geo.json' with {type: 'json'};
+import hexagons from '../data/hexagons.json' with {type: 'json'};
+import routes from '../data/sfmta.routes.json' with {type: 'json'};
+import trips from '../data/trips.json' with {type: 'json'};
+import SFTrips from '../data/sf.trips.json' with {type: 'json'};
+import iconAtlas from '../data/icon-atlas.json' with {type: 'json'};
+import quadkeys from '../data/sf.quadkeys.json' with {type: 'json'};
+import s2cells from '../data/sf.s2cells.json' with {type: 'json'};
+import pentagons from '../data/sf.bike.parking.a5.json' with {type: 'json'};
+import geohashes from '../data/sf.geohashes.json' with {type: 'json'};
 
 export {
   choropleths,
