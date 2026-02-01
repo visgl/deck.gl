@@ -32,6 +32,8 @@ type _TextBackgroundLayerProps<DataT> = {
 
   borderRadius?: number | [number, number, number, number];
   padding?: [number, number] | [number, number, number, number];
+  /** If true, use two-pass rendering for correct depth testing with transparency */
+  depthTest?: boolean;
 
   getPosition?: Accessor<DataT, Position>;
   getSize?: Accessor<DataT, number>;
@@ -55,6 +57,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
 
   borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
+  depthTest: false,
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getSize: {type: 'accessor', value: 1},
@@ -143,7 +146,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth} =
+    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, depthTest} =
       this.props;
     let {padding, borderRadius} = this.props;
 
@@ -167,7 +170,27 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeMaxPixels
     };
     model.shaderInputs.setProps({textBackground: textBackgroundProps});
-    model.draw(this.context.renderPass);
+
+    if (depthTest) {
+      // Two-pass rendering for correct depth testing with transparency:
+      // Pass 1: Write to depth buffer only (no color output)
+      model.setParameters({
+        depthWriteEnabled: true,
+        depthCompare: 'less-equal',
+        colorMask: 0x0
+      });
+      model.draw(this.context.renderPass);
+
+      // Pass 2: Write color with blending (no depth write)
+      model.setParameters({
+        depthWriteEnabled: false,
+        depthCompare: 'less-equal',
+        colorMask: 0xf
+      });
+      model.draw(this.context.renderPass);
+    } else {
+      model.draw(this.context.renderPass);
+    }
   }
 
   protected _getModel(): Model {

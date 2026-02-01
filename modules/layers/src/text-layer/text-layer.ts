@@ -101,6 +101,13 @@ type _TextLayerProps<DataT> = {
    */
   backgroundPadding?: [number, number] | [number, number, number, number];
   /**
+   * If `true`, use two-pass rendering for backgrounds to enable proper depth testing
+   * while maintaining transparency blending. This has a performance cost but ensures
+   * correct occlusion when text labels overlap in 3D space.
+   * @default false
+   */
+  backgroundDepthTest?: boolean;
+  /**
    * Specifies a list of characters to include in the font. If set to 'auto', will be automatically generated from the data set.
    * @default (ASCII characters 32-128)
    */
@@ -202,6 +209,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
+  backgroundDepthTest: false,
 
   characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
   fontFamily: DEFAULT_FONT_SETTINGS.fontFamily,
@@ -487,6 +495,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getBorderWidth,
       backgroundBorderRadius,
       backgroundPadding,
+      backgroundDepthTest,
       background,
       billboard,
       fontSettings,
@@ -513,6 +522,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getLineWidth: getBorderWidth,
             borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
+            depthTest: backgroundDepthTest,
 
             // props shared with characters layer
             getPosition,
