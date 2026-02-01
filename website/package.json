@@ -16,11 +16,11 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
-    "@loaders.gl/core": "^4.2.0",
-    "@loaders.gl/i3s": "^4.2.0",
-    "@loaders.gl/las": "^4.2.0",
-    "@loaders.gl/obj": "^4.2.0",
-    "@loaders.gl/ply": "^4.2.0",
+    "@loaders.gl/core": "^4.3.4",
+    "@loaders.gl/i3s": "^4.3.4",
+    "@loaders.gl/las": "^4.3.4",
+    "@loaders.gl/obj": "^4.3.4",
+    "@loaders.gl/ply": "^4.3.4",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -59,9 +59,5 @@
     ">0.2% and supports async-functions",
     "not dead"
   ],
-  "volta": {
-    "node": "18.19.0",
-    "yarn": "1.22.19"
-  },
   "packageManager": "yarn@1.22.19"
 }
