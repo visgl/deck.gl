@@ -6,6 +6,7 @@ import React, {useEffect, useMemo} from 'react';
 import {APIProvider, Map as GoogleMap, useMap} from '@vis.gl/react-google-maps';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import type {Config, InitialViewState} from '../../types';
+import {getBaseMapViewState} from '../../config';
 
 // Google Maps DeckGL Overlay
 function GoogleMapsDeckOverlay({
@@ -62,7 +63,7 @@ export default function GoogleMapsComponent({config}: GoogleMapsComponentProps) 
   const mapId = process.env.GoogleMapsMapId || 'DEMO_MAP_ID';
 
   const {initialViewState, layers, interleaved, onViewStateChange} = config;
-  const viewState = initialViewState as InitialViewState;
+  const viewState = getBaseMapViewState(initialViewState);
 
   return (
     <div style={{width: '100%', height: '100%'}}>

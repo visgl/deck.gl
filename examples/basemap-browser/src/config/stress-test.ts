@@ -7,9 +7,6 @@ import type {Layer} from '@deck.gl/core';
 import type {StressTest, Basemap} from '../types';
 import {getInterleavedProps} from './interleaved';
 
-// Cache generated data to avoid regenerating on every render
-const dataCache = new Map<StressTest, Float32Array>();
-
 /**
  * Get point count for a stress test level.
  */
@@ -32,22 +29,10 @@ function getPointCount(stressTest: StressTest): number {
 
 /**
  * Generate random point data for stress testing.
- * Data is cached to avoid regeneration on re-renders.
  *
  * Format: Float32Array with [lng, lat, radius, r, g, b] per point
  */
-function generateStressTestData(stressTest: StressTest): Float32Array {
-  if (dataCache.has(stressTest)) {
-    return dataCache.get(stressTest)!;
-  }
-
-  const count = getPointCount(stressTest);
-  if (count === 0) {
-    const empty = new Float32Array(0);
-    dataCache.set(stressTest, empty);
-    return empty;
-  }
-
+function generateStressTestData(count: number): Float32Array {
   // 6 values per point: lng, lat, radius, r, g, b
   const data = new Float32Array(count * 6);
 
@@ -71,7 +56,6 @@ function generateStressTestData(stressTest: StressTest): Float32Array {
     data[offset + 5] = Math.floor(Math.random() * 256); // b
   }
 
-  dataCache.set(stressTest, data);
   return data;
 }
 
@@ -87,8 +71,8 @@ export function buildStressTestLayer(
     return null;
   }
 
-  const data = generateStressTestData(stressTest);
   const count = getPointCount(stressTest);
+  const data = generateStressTestData(count);
 
   return new ScatterplotLayer({
     id: 'stress-test',
