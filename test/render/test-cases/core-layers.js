@@ -13,7 +13,7 @@ import {
   LineLayer
 } from '@deck.gl/layers';
 
-import {Fp64Extension} from '@deck.gl/extensions';
+import {Fp64Extension, StrokeStyleExtension} from '@deck.gl/extensions';
 import * as dataSamples from 'deck.gl-test/data';
 
 // prettier-ignore
@@ -171,6 +171,63 @@ export default [
       )
     ],
     goldenImage: './test/render/golden-images/scatterplot-smoothedge.png'
+  },
+  {
+    name: 'scatterplot-dash',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-dash',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        getFillColor: [255, 200, 0, 128],
+        getLineColor: [0, 100, 200],
+        getRadius: d => d.SPACES,
+        getDashArray: [3, 2],
+        stroked: true,
+        filled: true,
+        radiusScale: 30,
+        radiusMinPixels: 10,
+        radiusMaxPixels: 50,
+        lineWidthMinPixels: 4,
+        extensions: [new StrokeStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/scatterplot-dash.png'
+  },
+  {
+    name: 'scatterplot-dash-stroked-only',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-dash-stroked-only',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        getLineColor: [200, 50, 100],
+        getRadius: d => d.SPACES,
+        getDashArray: [2, 1],
+        stroked: true,
+        filled: false,
+        radiusScale: 30,
+        radiusMinPixels: 10,
+        radiusMaxPixels: 50,
+        lineWidthMinPixels: 3,
+        extensions: [new StrokeStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/scatterplot-dash-stroked-only.png'
   },
   {
     name: 'line-lnglat',

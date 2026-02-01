@@ -21,7 +21,7 @@ void main(void) {
 
   float distToCenter = length(unitPosition) * outerRadiusPixels;
   float inCircle = scatterplot.antialiasing ?
-    smoothedge(distToCenter, outerRadiusPixels) : 
+    smoothedge(distToCenter, outerRadiusPixels) :
     step(distToCenter, outerRadiusPixels);
 
   if (inCircle == 0.0) {
@@ -29,7 +29,7 @@ void main(void) {
   }
 
   if (scatterplot.stroked > 0.5) {
-    float isLine = scatterplot.antialiasing ? 
+    float isLine = scatterplot.antialiasing ?
       smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter) :
       step(innerUnitRadius * outerRadiusPixels, distToCenter);
 
