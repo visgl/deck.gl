@@ -5,6 +5,7 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
+import type {Parameters} from '@luma.gl/core';
 
 import {TextBackgroundProps, textBackgroundUniforms} from './text-background-layer-uniforms';
 import vs from './text-background-layer-vertex.glsl';
@@ -172,6 +173,12 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   protected _getModel(): Model {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 0, 1, 1, 1];
+    // Disable depth writes so that semi-transparent backgrounds don't hide content behind them.
+    // This allows proper color blending when text labels with backgrounds overlap.
+    const parameters: Parameters = {
+      depthWriteEnabled: false,
+      depthCompare: 'less-equal'
+    };
 
     return new Model(this.context.device, {
       ...this.getShaders(),
@@ -184,7 +191,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
           positions: {size: 2, value: new Float32Array(positions)}
         }
       }),
-      isInstanced: true
+      isInstanced: true,
+      parameters
     });
   }
 }
