@@ -78,6 +78,9 @@ fn vertexMain(inp: Attributes) -> Varyings {
   pixelOffset = pixelOffset + inp.instancePixelOffset;
   pixelOffset.y = pixelOffset.y * -1.0;
 
+  // Calculate common position for globe occlusion check
+  let commonPosition = project_position_vec3_f64(inp.instancePositions, inp.instancePositions64Low);
+
   if (icon.billboard != 0) {
     var pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0)); // TODO, &geometry.position);
     // DECKGL_FILTER_GL_POSITION(pos, geometry);
@@ -93,6 +96,12 @@ fn vertexMain(inp: Attributes) -> Varyings {
     var pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, offset_common); // TODO, &geometry.position);
     // DECKGL_FILTER_GL_POSITION(pos, geometry);
     outp.position = pos;
+  }
+
+  // Hide icons/text that are occluded by the globe (on the back side)
+  if (project_globe_is_occluded(commonPosition)) {
+    // Move to clip space position that will be clipped
+    outp.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
   }
 
   let uvMix = (inp.positions.xy + vec2<f32>(1.0, 1.0)) * 0.5;

@@ -66,8 +66,14 @@ void main(void) {
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     DECKGL_FILTER_SIZE(offset_common, geometry);
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position); 
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  }
+
+  // Hide icons/text that are occluded by the globe (on the back side)
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    // Move to clip space position that will be clipped
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
 
   vTextureCoords = mix(

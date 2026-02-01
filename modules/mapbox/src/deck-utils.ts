@@ -111,9 +111,10 @@ export function getDefaultParameters(map: Map, interleaved: boolean): Parameters
         blendAlphaOperation: 'add'
       }
     : {};
-  if (getProjection(map) === 'globe') {
-    result.cullMode = 'back';
-  }
+  // Note: Globe occlusion (hiding geometry on the back of the globe) is handled
+  // in the shader via project_globe_get_occlusion() rather than GPU back-face culling.
+  // Back-face culling doesn't work correctly for billboard geometry (IconLayer, TextLayer)
+  // which always faces the camera.
   return result;
 }
 
