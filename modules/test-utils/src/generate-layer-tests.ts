@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+// TODO: Refactor to use vitest's test.each() so each test case becomes a separate
+// vitest test. This would allow vitest to show individual test case names in output
+// instead of running all cases inside a single test() block. Currently test case
+// titles are only visible via console.log() in onBeforeUpdate callbacks.
+
 import {_count as count, Layer} from '@deck.gl/core';
 
 import type {DefaultProps} from '@deck.gl/core';

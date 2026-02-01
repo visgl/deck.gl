@@ -29,7 +29,7 @@
     "test-fast": "ocular-lint && vitest run --project node",
     "test-headless": "vitest run --project headless",
     "test-render": "ocular-test browser-headless",
-    "test-ci": "vitest run --project node --project headless --coverage && npm run test-render",
+    "test-ci": "vitest run --project node --project headless --reporter=tap --coverage && npm run test-render",
     "test-browser": "vitest run --project browser && npm run test-render",
     "test-website": "cd website && yarn && yarn test-build && cd ..",
     "metrics": "ocular-metrics",
