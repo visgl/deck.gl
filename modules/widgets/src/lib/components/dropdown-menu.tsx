@@ -36,57 +36,14 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
   };
 
   return (
-    <div
-      className="dropdown-container"
-      ref={dropdownRef}
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-        ...props.style
-      }}
-    >
-      <button
-        className="deck-widget-dropdown-button"
-        onClick={toggleDropdown}
-        style={{
-          width: '30px',
-          height: '30px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          padding: 0
-        }}
-      >
+    <div className="deck-widget-dropdown-container" ref={dropdownRef} style={props.style}>
+      <button className="deck-widget-dropdown-button" onClick={toggleDropdown}>
         ▼
       </button>
       {isOpen && (
-        <ul
-          className="deck-widget-dropdown-menu"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: '100%',
-            borderRadius: '4px',
-            listStyle: 'none',
-            padding: '4px 0',
-            margin: 0,
-            zIndex: 1000,
-            minWidth: '200px'
-          }}
-        >
+        <ul className="deck-widget-dropdown-menu">
           {props.menuItems.map(item => (
-            <li
-              className="deck-widget-dropdown-item"
-              key={item}
-              onClick={() => handleSelect(item)}
-              style={{
-                padding: '4px 8px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
-            >
+            <li className="deck-widget-dropdown-item" key={item} onClick={() => handleSelect(item)}>
               {item}
             </li>
           ))}

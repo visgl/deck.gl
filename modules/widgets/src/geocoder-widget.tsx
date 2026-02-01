@@ -87,15 +87,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       ? [CURRENT_LOCATION, ...this.geocodeHistory.addressHistory]
       : [...this.geocodeHistory.addressHistory];
     render(
-      <div
-        className="deck-widget-geocoder"
-        style={{
-          pointerEvents: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap' // Allows wrapping on smaller screens
-        }}
-      >
+      <div className="deck-widget-geocoder">
         <input
           className="deck-widget-geocoder-input"
           type="text"
@@ -104,25 +96,10 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
           // @ts-expect-error event type
           onInput={e => this.setInput(e.target?.value || '')}
           onKeyPress={this.handleKeyPress}
-          style={{
-            flex: '1 1 auto',
-            minWidth: '200px',
-            margin: 0,
-            padding: '8px',
-            boxSizing: 'border-box'
-          }}
         />
-        <DropdownMenu
-          menuItems={menuItems}
-          onSelect={this.handleSelect}
-          style={{
-            margin: 2,
-            padding: '4px 2px',
-            boxSizing: 'border-box'
-          }}
-        />
+        <DropdownMenu menuItems={menuItems} onSelect={this.handleSelect} />
         {this.geocodeHistory.errorText && (
-          <div className="error">{this.geocodeHistory.errorText}</div>
+          <div className="deck-widget-geocoder-error">{this.geocodeHistory.errorText}</div>
         )}
       </div>,
       rootElement
