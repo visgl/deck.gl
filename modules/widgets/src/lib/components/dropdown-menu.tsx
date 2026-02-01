@@ -46,6 +46,7 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
       }}
     >
       <button
+        className="deck-widget-dropdown-button"
         onClick={toggleDropdown}
         style={{
           width: '30px',
@@ -53,9 +54,7 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: '1px solid #ccc',
           borderRadius: '4px',
-          background: '#fff',
           cursor: 'pointer',
           padding: 0
         }}
@@ -64,12 +63,11 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
       </button>
       {isOpen && (
         <ul
+          className="deck-widget-dropdown-menu"
           style={{
             position: 'absolute',
             top: '100%',
             right: '100%',
-            background: '#fff',
-            border: '1px solid #ccc',
             borderRadius: '4px',
             listStyle: 'none',
             padding: '4px 0',
@@ -80,6 +78,7 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
         >
           {props.menuItems.map(item => (
             <li
+              className="deck-widget-dropdown-item"
               key={item}
               onClick={() => handleSelect(item)}
               style={{

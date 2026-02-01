@@ -97,6 +97,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
         }}
       >
         <input
+          className="deck-widget-geocoder-input"
           type="text"
           placeholder={this.geocoder.placeholderLocation ?? 'Enter address or location'}
           value={this.geocodeHistory.addressText}
