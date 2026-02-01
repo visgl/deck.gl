@@ -39,9 +39,6 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
 
   const interleavedProps = getInterleavedProps(basemap, interleaved);
 
-  // Arc layer needs cullMode: 'none' for globe projection
-  const arcParameters = globe ? {cullMode: 'none' as const} : undefined;
-
   // Sample city data for IconLayer and TextLayer
   const cities = [
     {name: 'London', coordinates: [-0.1276, 51.5074]},
@@ -74,7 +71,6 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
       getSourceColor: [0, 128, 200],
       getTargetColor: [200, 0, 80],
       getWidth: 1,
-      parameters: arcParameters,
       ...interleavedProps
     }),
     new IconLayer({
@@ -150,9 +146,7 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
       getAlignmentBaseline: 'center',
       background: true,
       getBackgroundColor: [0, 0, 0, 200],
-      backgroundPadding: [6, 3],
-      // Disable culling for globe projection
-      parameters: {cullMode: 'none'}
+      backgroundPadding: [6, 3]
     })
   ];
 }
