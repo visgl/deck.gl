@@ -157,8 +157,9 @@ export type LayerProps = {
   visible?: boolean;
   /**
    * If the layer can be picked on pointer events. Default false.
+   * Set to '3d' to enable depth picking for 3D coordinates.
    */
-  pickable?: boolean;
+  pickable?: boolean | '3d';
   /**
    * Opacity of the layer, between 0 and 1. Default 1.
    */
