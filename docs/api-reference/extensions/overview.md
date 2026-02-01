@@ -16,6 +16,7 @@ This module contains the following extensions:
 - [Fp64Extension](./fp64-extension.md)
 - [MaskExtension](./mask-extension.md)
 - [PathStyleExtension](./path-style-extension.md)
+- [StrokeStyleExtension](./stroke-style-extension.md)
 - [TerrainExtension](./terrain-extension.md)
 
 For instructions on authoring your own layer extensions, visit [developer guide](../../developer-guide/custom-layers/layer-extensions.md).
