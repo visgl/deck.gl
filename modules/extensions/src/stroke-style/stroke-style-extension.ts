@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {LayerExtension} from '@deck.gl/core';
-import {dashShaders} from './shaders.glsl';
+import {scatterplotDashShaders, textBackgroundDashShaders} from './shaders.glsl';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
@@ -17,9 +17,11 @@ type StrokeStyleProps = {
   dashGapPickable: boolean;
 };
 
+type SupportedLayerType = 'scatterplot' | 'textBackground' | null;
+
 export type StrokeStyleExtensionProps<DataT = any> = {
   /**
-   * Accessor for the dash array to draw each circle stroke with: `[dashSize, gapSize]` relative to the stroke width.
+   * Accessor for the dash array to draw each stroke with: `[dashSize, gapSize]` relative to the stroke width.
    * Requires the `dash` option to be on.
    * @default [0, 0]
    */
@@ -33,13 +35,19 @@ export type StrokeStyleExtensionProps<DataT = any> = {
 
 export type StrokeStyleExtensionOptions = {
   /**
-   * Add capability to render dashed strokes on circle outlines.
+   * Add capability to render dashed strokes.
    * @default true
    */
   dash?: boolean;
 };
 
-/** Adds dash rendering capability to ScatterplotLayer circle strokes. */
+/**
+ * Adds dash rendering capability to stroked layers.
+ *
+ * Supported layers:
+ * - ScatterplotLayer: Dashed circle strokes (angle-based calculation)
+ * - TextBackgroundLayer: Dashed rectangle strokes (perimeter-based calculation)
+ */
 export default class StrokeStyleExtension extends LayerExtension<StrokeStyleExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'StrokeStyleExtension';
@@ -48,24 +56,42 @@ export default class StrokeStyleExtension extends LayerExtension<StrokeStyleExte
     super({dash});
   }
 
+  /**
+   * Detect which layer type this is to use the appropriate shader injections
+   */
+  private getLayerType(layer: Layer<StrokeStyleExtensionProps>): SupportedLayerType {
+    const layerName = layer.constructor.name;
+
+    // ScatterplotLayer detection
+    if (layerName === 'ScatterplotLayer' || 'radiusScale' in layer.props) {
+      return 'scatterplot';
+    }
+
+    // TextBackgroundLayer detection
+    if (layerName === 'TextBackgroundLayer' || 'getBoundingRect' in layer.props) {
+      return 'textBackground';
+    }
+
+    return null;
+  }
+
   isEnabled(layer: Layer<StrokeStyleExtensionProps>): boolean {
-    // Check if this is a ScatterplotLayer by looking for its characteristic state/props
-    // ScatterplotLayer has specific uniforms in its shader
-    return layer.constructor.name === 'ScatterplotLayer' || 'radiusScale' in layer.props;
+    return this.getLayerType(layer) !== null;
   }
 
   getShaders(this: Layer<StrokeStyleExtensionProps>, extension: this): any {
-    if (!extension.isEnabled(this)) {
+    const layerType = extension.getLayerType(this);
+    if (!layerType || !extension.opts.dash) {
       return null;
     }
 
-    if (!extension.opts.dash) {
-      return null;
-    }
+    // Select the appropriate shader injections based on layer type
+    const shaderInjections =
+      layerType === 'scatterplot' ? scatterplotDashShaders : textBackgroundDashShaders;
 
     const strokeStyle: ShaderModule<StrokeStyleProps> = {
       name: 'strokeStyle',
-      inject: dashShaders.inject,
+      inject: shaderInjections.inject,
       uniformTypes: {
         dashGapPickable: 'i32'
       }
