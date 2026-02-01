@@ -31,6 +31,7 @@ function getPointCount(stressTest: StressTest): number {
  * Generate random point data for stress testing.
  *
  * Format: Float32Array with [lng, lat, radius, r, g, b] per point
+ * Colors are normalized 0-1 for Float32 binary attributes.
  */
 function generateStressTestData(count: number): Float32Array {
   // 6 values per point: lng, lat, radius, r, g, b
@@ -50,10 +51,10 @@ function generateStressTestData(count: number): Float32Array {
     data[offset + 1] = latMin + Math.random() * (latMax - latMin); // lat
     // Radius (50-500 meters)
     data[offset + 2] = 50 + Math.random() * 450;
-    // Color (random RGB)
-    data[offset + 3] = Math.floor(Math.random() * 256); // r
-    data[offset + 4] = Math.floor(Math.random() * 256); // g
-    data[offset + 5] = Math.floor(Math.random() * 256); // b
+    // Color (random RGB, normalized 0-1 for Float32 attributes)
+    data[offset + 3] = Math.random(); // r
+    data[offset + 4] = Math.random(); // g
+    data[offset + 5] = Math.random(); // b
   }
 
   return data;
