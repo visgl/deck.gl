@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import Stats from 'stats.js';
 import type {Dimensions, Config, Basemap, Framework, StressTest, InitialViewState} from './types';
 import {buildConfig, DEFAULT_DIMENSIONS} from './config';
@@ -95,7 +95,6 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
   const [currentDPR, setCurrentDPR] = useState(window.devicePixelRatio);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({width: 0, height: 0});
   const [viewState, setViewState] = useState<InitialViewState | null>(null);
-  const statsRef = useRef<Stats | null>(null);
 
   // View state change handler
   const handleViewStateChange = useCallback((vs: InitialViewState) => {
@@ -147,7 +146,6 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
     stats.dom.style.top = '0px';
     stats.dom.style.left = '260px'; // After control panel
     stats.dom.style.zIndex = '1000';
-    statsRef.current = stats;
 
     document.body.appendChild(stats.dom);
 
