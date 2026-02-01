@@ -266,10 +266,17 @@
 /* Geocoder styles */
 .deck-widget .deck-widget-geocoder {
   pointer-events: auto;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .deck-widget .deck-widget-geocoder-input {
+  flex: 1 1 auto;
+  min-width: 200px;
+  margin: 0;
+  padding: 8px;
+  box-sizing: border-box;
   background: var(--button-background, #fff);
   color: var(--button-text, rgb(24, 24, 26));
   border: 1px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
@@ -280,11 +287,31 @@
   color: var(--button-icon-idle, rgba(97, 97, 102, 1));
 }
 
+.deck-widget .deck-widget-geocoder-error {
+  width: 100%;
+  padding: 4px 8px;
+  color: rgb(220, 53, 69);
+  font-size: 0.875em;
+}
+
 /* Dropdown menu styles */
+.deck-widget .deck-widget-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
 .deck-widget .deck-widget-dropdown-button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
   background: var(--button-background, #fff);
   color: var(--button-icon-idle, rgba(97, 97, 102, 1));
   border: 1px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
 }
 
 .deck-widget .deck-widget-dropdown-button:hover {
@@ -292,12 +319,24 @@
 }
 
 .deck-widget .deck-widget-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 100%;
+  min-width: 200px;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  z-index: 1000;
   background: var(--button-background, #fff);
   border: 1px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
 }
 
 .deck-widget .deck-widget-dropdown-item {
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
   color: var(--button-text, rgb(24, 24, 26));
 }
 
