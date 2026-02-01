@@ -67,6 +67,13 @@ type _IconLayerProps<DataT> = {
    * @default 0.05
    */
   alphaCutoff?: number;
+  /**
+   * If `true`, use two-pass rendering for correct depth testing with transparency.
+   * This fixes issues where semi-transparent icons incorrectly occlude each other.
+   * Has a performance cost (2x draw calls).
+   * @default false
+   */
+  depthPrepass?: boolean;
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -115,6 +122,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
+  depthPrepass: false,
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getIcon: {type: 'accessor', value: (x: any) => x.icon},
@@ -265,8 +273,16 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}): void {
-    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} =
-      this.props;
+    const {
+      sizeScale,
+      sizeBasis,
+      sizeMinPixels,
+      sizeMaxPixels,
+      sizeUnits,
+      billboard,
+      alphaCutoff,
+      depthPrepass
+    } = this.props;
     const {iconManager} = this.state;
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
@@ -284,18 +300,37 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       };
 
       model.shaderInputs.setProps({icon: iconProps});
-      model.draw(this.context.renderPass);
+
+      if (depthPrepass) {
+        // Two-pass rendering for correct depth testing with transparency:
+        // Pass 1: Write to depth buffer only (no color output)
+        model.setParameters({
+          depthWriteEnabled: true,
+          depthCompare: 'less-equal',
+          colorMask: 0x0
+        });
+        model.draw(this.context.renderPass);
+
+        // Pass 2: Write color with blending (no depth write)
+        model.setParameters({
+          depthWriteEnabled: false,
+          depthCompare: 'less-equal',
+          colorMask: 0xf
+        });
+        model.draw(this.context.renderPass);
+      } else {
+        model.draw(this.context.renderPass);
+      }
     }
   }
 
   protected _getModel(): Model {
-    const parameters =
-      this.context.device.type === 'webgpu'
-        ? ({
-            depthWriteEnabled: true,
-            depthCompare: 'less-equal'
-          } satisfies Parameters)
-        : undefined;
+    // Disable depth writes so that semi-transparent icons don't hide content behind them.
+    // This allows proper color blending when icons overlap.
+    const parameters: Parameters = {
+      depthWriteEnabled: false,
+      depthCompare: 'less-equal'
+    };
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];

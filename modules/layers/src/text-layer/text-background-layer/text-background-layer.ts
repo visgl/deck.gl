@@ -33,7 +33,7 @@ type _TextBackgroundLayerProps<DataT> = {
   borderRadius?: number | [number, number, number, number];
   padding?: [number, number] | [number, number, number, number];
   /** If true, use two-pass rendering for correct depth testing with transparency */
-  depthTest?: boolean;
+  depthPrepass?: boolean;
 
   getPosition?: Accessor<DataT, Position>;
   getSize?: Accessor<DataT, number>;
@@ -57,7 +57,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
 
   borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
-  depthTest: false,
+  depthPrepass: false,
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getSize: {type: 'accessor', value: 1},
@@ -146,7 +146,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, depthTest} =
+    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, depthPrepass} =
       this.props;
     let {padding, borderRadius} = this.props;
 
@@ -171,7 +171,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     };
     model.shaderInputs.setProps({textBackground: textBackgroundProps});
 
-    if (depthTest) {
+    if (depthPrepass) {
       // Two-pass rendering for correct depth testing with transparency:
       // Pass 1: Write to depth buffer only (no color output)
       model.setParameters({

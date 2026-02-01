@@ -5,6 +5,7 @@
 import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {gouraudMaterial} from '@luma.gl/shadertools';
+import type {Parameters} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -87,6 +88,13 @@ type _SolidPolygonLayerProps<DataT> = {
    * @see https://deck.gl/docs/developer-guide/using-lighting
    */
   material?: Material;
+  /**
+   * If `true`, use two-pass rendering for correct depth testing with transparency.
+   * This fixes issues where semi-transparent polygons incorrectly occlude each other.
+   * Has a performance cost (2x draw calls).
+   * @default false
+   */
+  depthPrepass?: boolean;
 };
 
 /** Render filled and/or extruded polygons. */
@@ -109,7 +117,8 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  material: true
+  material: true,
+  depthPrepass: false
 };
 
 const ATTRIBUTE_TRANSITION = {
@@ -282,7 +291,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   draw({uniforms}) {
-    const {extruded, filled, wireframe, elevationScale} = this.props;
+    const {extruded, filled, wireframe, elevationScale, depthPrepass} = this.props;
     const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
     const renderUniforms: SolidPolygonProps = {
@@ -298,16 +307,57 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       wireframeModel.draw(this.context.renderPass);
     }
 
-    if (sideModel && filled) {
-      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
-      sideModel.draw(this.context.renderPass);
-    }
+    if (depthPrepass) {
+      // Two-pass rendering for correct depth testing with transparency:
+      // Pass 1: Write to depth buffer only (no color output) for all filled models
+      const depthOnlyParams: Parameters = {
+        depthWriteEnabled: true,
+        depthCompare: 'less-equal',
+        colorMask: 0x0
+      };
 
-    if (topModel && filled) {
-      topModel.setVertexCount(polygonTesselator.vertexCount);
-      topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
-      topModel.draw(this.context.renderPass);
+      if (sideModel && filled) {
+        sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+        sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+        sideModel.setParameters(depthOnlyParams);
+        sideModel.draw(this.context.renderPass);
+      }
+
+      if (topModel && filled) {
+        topModel.setVertexCount(polygonTesselator.vertexCount);
+        topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+        topModel.setParameters(depthOnlyParams);
+        topModel.draw(this.context.renderPass);
+      }
+
+      // Pass 2: Write color with blending (no depth write)
+      const colorOnlyParams: Parameters = {
+        depthWriteEnabled: false,
+        depthCompare: 'less-equal',
+        colorMask: 0xf
+      };
+
+      if (sideModel && filled) {
+        sideModel.setParameters(colorOnlyParams);
+        sideModel.draw(this.context.renderPass);
+      }
+
+      if (topModel && filled) {
+        topModel.setParameters(colorOnlyParams);
+        topModel.draw(this.context.renderPass);
+      }
+    } else {
+      if (sideModel && filled) {
+        sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+        sideModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+        sideModel.draw(this.context.renderPass);
+      }
+
+      if (topModel && filled) {
+        topModel.setVertexCount(polygonTesselator.vertexCount);
+        topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
+        topModel.draw(this.context.renderPass);
+      }
     }
   }
 
@@ -378,6 +428,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     let sideModel;
     let wireframeModel;
 
+    // Disable depth writes so that semi-transparent polygons don't hide content behind them.
+    // This allows proper color blending when polygons overlap.
+    const fillParameters: Parameters = {
+      depthWriteEnabled: false,
+      depthCompare: 'less-equal'
+    };
+
     if (filled) {
       const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
@@ -389,6 +446,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         topology: 'triangle-list',
         bufferLayout,
         isIndexed: true,
+        parameters: fillParameters,
         userData: {
           excludeAttributes: {instanceVertexValid: true}
         }
@@ -412,6 +470,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           }
         }),
         isInstanced: true,
+        parameters: fillParameters,
         userData: {
           excludeAttributes: {indices: true}
         }

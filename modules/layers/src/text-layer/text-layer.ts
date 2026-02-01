@@ -106,7 +106,7 @@ type _TextLayerProps<DataT> = {
    * correct occlusion when text labels overlap in 3D space.
    * @default false
    */
-  backgroundDepthTest?: boolean;
+  backgroundDepthPrepass?: boolean;
   /**
    * Specifies a list of characters to include in the font. If set to 'auto', will be automatically generated from the data set.
    * @default (ASCII characters 32-128)
@@ -209,7 +209,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
-  backgroundDepthTest: false,
+  backgroundDepthPrepass: false,
 
   characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
   fontFamily: DEFAULT_FONT_SETTINGS.fontFamily,
@@ -495,7 +495,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getBorderWidth,
       backgroundBorderRadius,
       backgroundPadding,
-      backgroundDepthTest,
+      backgroundDepthPrepass,
       background,
       billboard,
       fontSettings,
@@ -522,7 +522,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getLineWidth: getBorderWidth,
             borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
-            depthTest: backgroundDepthTest,
+            depthPrepass: backgroundDepthPrepass,
 
             // props shared with characters layer
             getPosition,
