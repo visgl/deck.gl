@@ -4,7 +4,7 @@
 
 import React, {useMemo, useCallback} from 'react';
 import DeckGL from '@deck.gl/react';
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
 
@@ -18,13 +18,16 @@ export default function DeckOnlyComponent({config}: DeckOnlyComponentProps) {
 
   const handleViewStateChange = useCallback(
     ({viewState: vs}: {viewState: any}) => {
-      onViewStateChange?.({
-        latitude: vs.latitude,
-        longitude: vs.longitude,
-        zoom: vs.zoom,
-        bearing: vs.bearing,
-        pitch: vs.pitch
-      });
+      // Only report view state if it has lat/lng (skip ortho view state changes)
+      if (vs.latitude !== undefined && vs.longitude !== undefined) {
+        onViewStateChange?.({
+          latitude: vs.latitude,
+          longitude: vs.longitude,
+          zoom: vs.zoom,
+          bearing: vs.bearing,
+          pitch: vs.pitch
+        });
+      }
     },
     [onViewStateChange]
   );
@@ -42,7 +45,13 @@ export default function DeckOnlyComponent({config}: DeckOnlyComponentProps) {
       }
       return globeView;
     }
-    return multiView ? views : undefined;
+    if (multiView && views) {
+      // For deck-only multi-view, add a main MapView since there's no basemap
+      // Use 'mapbox' as ID to match the view state key in MultiViewState
+      const mainView = new MapView({id: 'mapbox', controller: true});
+      return [mainView, ...views];
+    }
+    return undefined;
   }, [globe, multiView, views]);
 
   return (

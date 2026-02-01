@@ -29,12 +29,12 @@ const DEFAULT_VIEW_STATE: InitialViewState = {
 };
 
 /**
- * Default view state for globe mode (no pitch for better globe view).
+ * Default view state for globe mode (zoom 0 to show full globe).
  */
 const GLOBE_VIEW_STATE: InitialViewState = {
   latitude: 51.47,
   longitude: 0.45,
-  zoom: 4,
+  zoom: 0,
   bearing: 0,
   pitch: 0
 };
@@ -74,13 +74,13 @@ const GLOBE_MULTI_VIEW_STATE: MultiViewState = {
   globe: {
     latitude: 51.47,
     longitude: 0.45,
-    zoom: 4
+    zoom: 0
   },
   // Also provide mapbox key for basemap renderers with globe projection
   mapbox: {
     latitude: 51.47,
     longitude: 0.45,
-    zoom: 4,
+    zoom: 0,
     bearing: 0,
     pitch: 0
   },

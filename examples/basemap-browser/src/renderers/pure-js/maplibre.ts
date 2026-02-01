@@ -59,9 +59,19 @@ export function mount(container: HTMLElement, config: Config): () => void {
     // Set projection before adding overlay (critical for globe + interleaved mode)
     if (globe) {
       map.setProjection({type: 'globe'} as any);
+      // Re-apply center/zoom after projection change (setProjection resets to 0,0)
+      map.setCenter([mapInitialViewState.longitude, mapInitialViewState.latitude]);
+      map.setZoom(mapInitialViewState.zoom);
+      // Wait for projection to be fully applied before adding overlay
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        map.addControl(deckOverlay as any);
+        map.addControl(new maplibregl.NavigationControl());
+      });
+    } else {
+      map.addControl(deckOverlay as any);
+      map.addControl(new maplibregl.NavigationControl());
     }
-    map.addControl(deckOverlay as any);
-    map.addControl(new maplibregl.NavigationControl());
   });
 
   if (onViewStateChange) {

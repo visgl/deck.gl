@@ -43,6 +43,15 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
     };
   }, []);
 
+  // Reset overlayReady when globe changes (belt and suspenders with key remount)
+  React.useEffect(() => {
+    if (globe) {
+      setOverlayReady(false);
+    } else {
+      setOverlayReady(true);
+    }
+  }, [globe]);
+
   // For multi-view, extract the mapbox view state for the base map
   const mapInitialViewState =
     initialViewState && typeof initialViewState === 'object' && 'mapbox' in initialViewState
@@ -59,7 +68,15 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
           if (globe && isMountedRef.current) {
             // Set projection before rendering overlay (critical for globe + interleaved mode)
             e.target.setProjection({type: 'globe'});
-            setOverlayReady(true);
+            // Re-apply center/zoom after projection change (setProjection resets to 0,0)
+            e.target.setCenter([mapInitialViewState.longitude, mapInitialViewState.latitude]);
+            e.target.setZoom(mapInitialViewState.zoom);
+            // Wait for projection to be fully applied before rendering overlay
+            requestAnimationFrame(() => {
+              if (isMountedRef.current) {
+                setOverlayReady(true);
+              }
+            });
           }
         }}
         onMove={e => {

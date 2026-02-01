@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
 
@@ -38,7 +38,10 @@ export function mount(container: HTMLElement, config: Config): () => void {
       deckConfig.views = globeView;
     }
   } else if (multiView && views) {
-    deckConfig.views = views;
+    // For deck-only multi-view, add a main MapView since there's no basemap
+    // Use 'mapbox' as ID to match the view state key in MultiViewState
+    const mainView = new MapView({id: 'mapbox', controller: true});
+    deckConfig.views = [mainView, ...views];
     deckConfig.initialViewState = initialViewState;
   }
 
@@ -48,13 +51,16 @@ export function mount(container: HTMLElement, config: Config): () => void {
 
   if (onViewStateChange) {
     deckConfig.onViewStateChange = ({viewState: vs}: {viewState: any}) => {
-      onViewStateChange({
-        latitude: vs.latitude,
-        longitude: vs.longitude,
-        zoom: vs.zoom,
-        bearing: vs.bearing,
-        pitch: vs.pitch
-      });
+      // Only report view state if it has lat/lng (skip ortho view state changes)
+      if (vs.latitude !== undefined && vs.longitude !== undefined) {
+        onViewStateChange({
+          latitude: vs.latitude,
+          longitude: vs.longitude,
+          zoom: vs.zoom,
+          bearing: vs.bearing,
+          pitch: vs.pitch
+        });
+      }
     };
   }
 
