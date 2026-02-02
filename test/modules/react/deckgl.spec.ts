@@ -22,9 +22,10 @@ const TEST_VIEW_STATE = {
   pitch: 45
 };
 
-// If testing under node, provide a headless context
+// Reuse shared WebGL context from test-utils to avoid context exhaustion
+// gl is already set up by test-utils for both Node (headless) and browser
 /* global document */
-const getMockContext = () => (globalThis.__JSDOM__ ? gl : null);
+const getTestContext = () => gl;
 
 test('DeckGL#mount/unmount', t => {
   const ref = createRef();
@@ -39,7 +40,7 @@ test('DeckGL#mount/unmount', t => {
         ref,
         width: 100,
         height: 100,
-        gl: getMockContext(),
+        gl: getTestContext(),
         onLoad: () => {
           const {deck} = ref.current;
           t.ok(deck, 'DeckGL is initialized');
@@ -72,7 +73,7 @@ test('DeckGL#render', t => {
         viewState: TEST_VIEW_STATE,
         width: 100,
         height: 100,
-        gl: getMockContext(),
+        gl: getTestContext(),
         onAfterRender: () => {
           const child = container.querySelector('.child');
           t.ok(child, 'Child is rendered');
@@ -122,7 +123,7 @@ test('DeckGL#props omitted are reset', t => {
         ref,
         width: 100,
         height: 100,
-        gl: getMockContext(),
+        gl: getTestContext(),
         layers: LAYERS,
         widgets: WIDGETS,
         onLoad: () => {
@@ -202,7 +203,7 @@ test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
             ref,
             width: 100,
             height: 100,
-            gl: getMockContext(),
+            gl: getTestContext(),
             // Use onAfterRender instead of onLoad because React widget children
             // can only render after deck exists, and onLoad fires before that.
             // Widget children need multiple render cycles to be positioned and registered:
@@ -236,9 +237,8 @@ test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
               t.ok(deck, 'DeckGL is initialized');
               t.is(widgets?.length, 1, 'Only one widget instance remains after StrictMode remount');
 
-              act(() => {
-                root.render(null);
-              });
+              // Clean up - don't wrap in act() to avoid nested act() errors
+              root.render(null);
               container.remove();
               t.end();
             }
