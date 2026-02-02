@@ -294,3 +294,76 @@
   background-color: var(--button-background, #fff);
   color: var(--button-text, rgb(24, 24, 26));
 }
+
+/* Overview Map Widget styles */
+.deck-widget-overview-map-toggle {
+  width: var(--button-size, 28px);
+  height: var(--button-size, 28px);
+  background: var(--button-background, #fff);
+  border: var(--button-inner-stroke, unset);
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--button-icon-idle, #616166);
+  pointer-events: auto;
+}
+
+.deck-widget-overview-map-toggle:hover {
+  color: var(--button-icon-hover, rgb(24, 24, 26));
+}
+
+.deck-widget-overview-map-container {
+  position: relative;
+  max-width: var(--overview-map-max-size, 150px);
+  max-height: var(--overview-map-max-size, 150px);
+  background: var(--button-background, rgba(0, 0, 0, 0.8));
+  border: 2px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.deck-widget-overview-map-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding: 0;
+}
+
+.deck-widget-overview-map-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.deck-widget-overview-map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  display: block;
+}
+
+.deck-widget-overview-map-viewport-box {
+  position: absolute;
+  border: 2px solid var(--overview-map-viewport-color, #00aaff);
+  background: var(--overview-map-viewport-background, rgba(0, 170, 255, 0.2));
+  pointer-events: none;
+  box-sizing: border-box;
+}

@@ -30,6 +30,7 @@ export {ThemeWidget as _ThemeWidget} from './theme-widget';
 export {LoadingWidget as _LoadingWidget} from './loading-widget';
 export {FpsWidget as _FpsWidget} from './fps-widget';
 export {StatsWidget as _StatsWidget} from './stats-widget';
+export {OverviewMapWidget as _OverviewMapWidget} from './overview-map-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
 export type {CompassWidgetProps} from './compass-widget';
@@ -48,6 +49,7 @@ export type {SplitterWidgetProps} from './splitter-widget';
 export type {TimelineWidgetProps} from './timeline-widget';
 export type {ViewSelectorWidgetProps} from './view-selector-widget';
 export type {GimbalWidgetProps} from './gimbal-widget';
+export type {OverviewMapWidgetProps} from './overview-map-widget';
 
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';

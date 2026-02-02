@@ -21,3 +21,6 @@ import './json';
 import './jupyter-widget';
 import './react';
 import './main/bundle';
+
+// Widgets
+import './widgets';
