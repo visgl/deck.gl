@@ -360,6 +360,7 @@ The hybrid approach serves as a **discovery mechanism**:
 - `pngjs` - PNG parsing (not used directly, but required by some deps)
 - `sharp` - Robust image processing (handles various PNG color types)
 
+
 ### Phase 6: Cleanup
 - Remove `tap-spec`, `tape-catch` dependencies
 - Remove test entry points from `.ocularrc.js`
