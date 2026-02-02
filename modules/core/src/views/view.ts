@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import Viewport from '../viewports/viewport';
-import {parsePosition, getPosition, Position} from '../utils/positions';
+import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
@@ -63,15 +63,15 @@ export default abstract class View<
   abstract getViewportType(viewState: ViewState): ConstructorOf<Viewport>;
   protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
-  private _x: Position;
-  private _y: Position;
-  private _width: Position;
-  private _height: Position;
+  private _x: LayoutExpression;
+  private _y: LayoutExpression;
+  private _width: LayoutExpression;
+  private _height: LayoutExpression;
   private _padding: {
-    left: Position;
-    right: Position;
-    top: Position;
-    bottom: Position;
+    left: LayoutExpression;
+    right: LayoutExpression;
+    top: LayoutExpression;
+    bottom: LayoutExpression;
   } | null;
 
   readonly props: ViewProps;
