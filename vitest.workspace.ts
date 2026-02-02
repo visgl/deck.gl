@@ -69,6 +69,27 @@ const coverageConfig = {
   exclude: ['modules/test-utils/**', '**/node_modules/**']
 };
 
+// Pre-bundle dependencies to avoid Vite reloading during tests
+// This prevents flaky tests caused by runtime dependency discovery
+const optimizeDepsConfig = {
+  include: [
+    // Preact JSX runtime discovered at runtime
+    'preact/jsx-dev-runtime',
+    'preact/jsx-runtime',
+    // Vitest browser dependencies
+    '@vitest/browser/context',
+    // luma.gl WebGL dependencies
+    '@luma.gl/core',
+    '@luma.gl/engine',
+    '@luma.gl/webgl',
+    '@luma.gl/shadertools',
+    // loaders.gl dependencies
+    '@loaders.gl/polyfills',
+    '@loaders.gl/core',
+    '@loaders.gl/images'
+  ]
+};
+
 export default defineWorkspace([
   // Node project - simple smoke tests (*.node.spec.ts only)
   // Used by test-fast for quick validation
@@ -88,6 +109,7 @@ export default defineWorkspace([
   // Used by test-headless and test-ci
   {
     resolve: {alias: aliases},
+    optimizeDeps: optimizeDepsConfig,
     test: {
       name: 'headless',
       include: [
@@ -115,6 +137,7 @@ export default defineWorkspace([
   // Used by test-browser
   {
     resolve: {alias: aliases},
+    optimizeDeps: optimizeDepsConfig,
     test: {
       name: 'browser',
       include: [
