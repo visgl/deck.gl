@@ -186,7 +186,7 @@ test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
-  let onLoadCalled = false;
+  let onAfterRenderCalled = false;
 
   act(() => {
     root.render(
@@ -201,11 +201,13 @@ test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
             width: 100,
             height: 100,
             gl: getMockContext(),
-            onLoad: () => {
-              if (onLoadCalled) {
+            // Use onAfterRender instead of onLoad because React widget children
+            // can only render after deck exists, and onLoad fires before that
+            onAfterRender: () => {
+              if (onAfterRenderCalled) {
                 return;
               }
-              onLoadCalled = true;
+              onAfterRenderCalled = true;
 
               const deck = ref.current?.deck;
               t.ok(deck, 'DeckGL is initialized');

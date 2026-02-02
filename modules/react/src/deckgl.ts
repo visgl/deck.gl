@@ -194,9 +194,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     thisRef.deck = createDeckInstance(thisRef, DeckClass, {
       ...deckProps,
       parent: containerRef.current,
-      canvas: canvasRef.current,
-      // Use current widgets array (may have been populated by React widget children during render)
-      widgets: [...widgetsRef.current]
+      canvas: canvasRef.current
     });
 
     return () => thisRef.deck?.finalize();
