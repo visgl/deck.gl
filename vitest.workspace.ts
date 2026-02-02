@@ -19,8 +19,7 @@ const excludedTests = [
   // Mask tests were commented out on master (luma.gl v9 uniforms API change)
   'test/modules/extensions/mask/mask.spec.ts',
   'test/modules/extensions/mask/mask-pass.spec.ts',
-  // Render/interaction tests - not yet converted to vitest format
-  'test/render/**/*.spec.ts',
+  // Interaction test case definitions (not test files - imported by index.spec.ts)
   'test/interaction/map-controller.spec.ts',
   'test/interaction/picking.spec.ts',
   // Commented out on master - Transform not exported from @luma.gl/engine

@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+// TODO: Convert to test.each() to make this a proper vitest test file
+// instead of a test case definition that's imported by index.spec.ts.
+// This would allow running these tests directly without exclusion.
+
 import {expect} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

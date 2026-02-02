@@ -217,17 +217,90 @@ test('color#parseColor', () => {
 
 ### @deck.gl/test-utils Updates
 
-The `@deck.gl/test-utils` module uses `makeSpy` from `@probe.gl/test-utils`. This will be replaced with vitest's built-in `vi.spyOn`:
+The `@deck.gl/test-utils` module uses `makeSpy` from `@probe.gl/test-utils`. This is replaced with vitest's built-in `vi.spyOn`, with **backward compatibility** for existing tape/probe.gl users.
+
+#### Dual-API Implementation
+
+The module dynamically detects which spy framework is available at module load time:
 
 ```typescript
-// Before
-import {makeSpy} from '@probe.gl/test-utils';
-const spy = makeSpy(Object.getPrototypeOf(layer), 'updateState');
+// Spy abstraction - supports both vitest (preferred) and probe.gl (deprecated)
+type Spy = {
+  mockRestore?: () => void; // vitest
+  restore?: () => void; // probe.gl
+  mock?: {calls: any[][]}; // vitest
+  calls?: any[][]; // probe.gl
+};
 
-// After
-import {vi} from 'vitest';
-const spy = vi.spyOn(Object.getPrototypeOf(layer), 'updateState');
+let _vi: any;
+let _makeSpy: any;
+
+// Environment variable to force probe.gl path (for testing backward compatibility)
+const forceProbeGl = process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1';
+
+// Try vitest first (preferred), unless forced to use probe.gl
+if (!forceProbeGl) {
+  try {
+    const vitest = await import('vitest');
+    _vi = vitest.vi;
+  } catch {}
+}
+
+if (!_vi) {
+  try {
+    const probegl = await import('@probe.gl/test-utils');
+    _makeSpy = probegl.makeSpy;
+    if (!forceProbeGl) {
+      console.warn(
+        '[@deck.gl/test-utils] @probe.gl/test-utils is deprecated for spying. ' +
+        'Install vitest ^2.1.0 as a peer dependency.'
+      );
+    }
+  } catch {}
+}
+
+function createSpy(obj: object, method: string): Spy {
+  if (_vi) return _vi.spyOn(obj, method);
+  if (_makeSpy) return _makeSpy(obj, method);
+  throw new Error('Install vitest or @probe.gl/test-utils as peer dependency');
+}
 ```
+
+#### Peer Dependencies
+
+Both frameworks are optional peer dependencies:
+```json
+"peerDependencies": {
+  "@probe.gl/test-utils": "^4.1.0",
+  "vitest": "^2.1.0"
+},
+"peerDependenciesMeta": {
+  "@probe.gl/test-utils": { "optional": true },
+  "vitest": { "optional": true }
+}
+```
+
+#### User Experience Matrix
+
+| User Type | Experience |
+|-----------|------------|
+| **Vitest users** | Works out of the box, no warnings |
+| **Tape/probe.gl users** | Works with deprecation warning in console |
+| **Neither installed** | Clear error message with instructions |
+
+#### Tape Backward Compatibility Testing
+
+A smoke test verifies the probe.gl fallback path in CI:
+
+```bash
+# Forces probe.gl path via environment variable
+DECK_TEST_UTILS_USE_PROBE_GL=1 ocular-test tape-compat
+```
+
+This runs `test/smoke/tape-compat.ts` which tests:
+1. `@probe.gl/test-utils` can be imported
+2. `makeSpy` creates working spies
+3. Environment variable is correctly detected
 
 ## Implementation Plan
 
@@ -249,8 +322,11 @@ yarn add -D @vitest/browser @vitest/browser-playwright playwright
 **1.4 Add npm scripts** for each environment
 
 ### Phase 2: Update @deck.gl/test-utils
-- Replace `makeSpy` with `vi.spyOn`
-- Add vitest as peer dependency
+- Implement dual-API spy abstraction (vitest preferred, probe.gl as fallback)
+- Add both vitest and @probe.gl/test-utils as optional peer dependencies
+- Add deprecation warning for probe.gl path
+- Create tape backward compatibility smoke test (`test/smoke/tape-compat.ts`)
+- Add `DECK_TEST_UTILS_USE_PROBE_GL` environment variable for testing fallback path
 
 ### Phase 3: Migrate Test Files (~185 files)
 - Convert tape imports to vitest
@@ -363,8 +439,63 @@ The hybrid approach serves as a **discovery mechanism**:
 
 ### Phase 6: Cleanup
 - Remove `tap-spec`, `tape-catch` dependencies
-- Remove test entry points from `.ocularrc.js`
-- Delete `test/node.ts`, `test/browser.ts`, `.nycrc`
+- Remove `test` and `test-browser` entry points from `.ocularrc.js` (now using vitest)
+- Keep `tape-compat`, `bench`, `bench-browser`, and `size` entries in `.ocularrc.js`
+- Add `yarn test-tape-compat` to GitHub CI workflow
+- Delete `test/browser.ts`, `.nycrc`
+- Keep `test/node.ts` (used by vitest node setup)
+
+### Phase 7: Migrate Benchmarks and Size Tests (Future)
+
+**Remaining ocular-test entry points** that still need migration:
+
+```javascript
+// .ocularrc.js
+entry: {
+  'tape-compat': 'test/smoke/tape-compat.ts',  // Keep for backward compat testing
+  bench: 'test/bench/index.js',                 // TODO: Migrate to vitest bench
+  'bench-browser': 'test/bench/browser.html',   // TODO: Migrate to vitest bench
+  size: 'test/size/import-nothing.js'           // TODO: Migrate to vitest
+}
+```
+
+**7.1 Benchmark Migration:**
+
+Vitest has built-in benchmark support via `vitest bench`:
+
+```typescript
+// Before (probe.gl/bench)
+import {Bench} from '@probe.gl/bench';
+const bench = new Bench()
+  .add('parseColor', () => parseColor([127, 128, 129]));
+bench.run();
+
+// After (vitest bench)
+import {bench, describe} from 'vitest';
+
+describe('color', () => {
+  bench('parseColor', () => {
+    parseColor([127, 128, 129]);
+  });
+});
+```
+
+**Commands:**
+```json
+{
+  "bench": "vitest bench",
+  "bench-browser": "vitest bench --browser"
+}
+```
+
+**7.2 Size Test Migration:**
+
+Size tests verify bundle sizes don't regress. Options:
+1. Use `vitest` with custom reporter that measures bundle size
+2. Keep as separate script using `esbuild --analyze`
+3. Integrate with `size-limit` package
+
+**Note:** This phase is lower priority as benchmarks and size tests are run manually, not in CI.
 
 ## Scope
 

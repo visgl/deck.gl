@@ -3,13 +3,78 @@
 // Copyright (c) vis.gl contributors
 
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
-
-import {vi, type MockInstance} from 'vitest';
 import {device} from './utils/setup-gl';
 
 import type {Layer, CompositeLayer, Viewport} from '@deck.gl/core';
 import type {Timeline} from '@luma.gl/engine';
 import type {StatsManager} from '@luma.gl/core';
+
+// Spy abstraction - supports both vitest (preferred) and probe.gl (deprecated)
+// This allows @deck.gl/test-utils to work with either framework
+type Spy = {
+  mockRestore?: () => void; // vitest
+  restore?: () => void; // probe.gl
+  mock?: {calls: any[][]}; // vitest
+  calls?: any[][]; // probe.gl
+};
+
+let _vi: any;
+let _makeSpy: any;
+
+// Environment variable to force probe.gl path (for testing backward compatibility)
+const forceProbeGl =
+  typeof process !== 'undefined' && process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1'; // eslint-disable-line no-process-env
+
+// Detect spy framework at module load time (top-level await)
+// Try vitest first (preferred), unless forced to use probe.gl
+if (!forceProbeGl) {
+  try {
+    const vitest = await import('vitest');
+    _vi = vitest.vi;
+  } catch {
+    // vitest not available
+  }
+}
+
+if (!_vi) {
+  // Fall back to probe.gl (deprecated)
+  try {
+    const probegl = await import('@probe.gl/test-utils');
+    _makeSpy = probegl.makeSpy;
+    if (!forceProbeGl) {
+      // Only warn if not explicitly testing probe.gl compatibility
+      console.warn(
+        '[@deck.gl/test-utils] @probe.gl/test-utils is deprecated for spying. ' +
+          'Install vitest ^2.1.0 as a peer dependency. ' +
+          'See https://deck.gl/docs/developer-guide/testing'
+      );
+    }
+  } catch {
+    // Neither available - error will be thrown when createSpy is called
+  }
+}
+
+function createSpy(obj: object, method: string): Spy {
+  if (_vi) {
+    return _vi.spyOn(obj, method);
+  }
+  if (_makeSpy) {
+    return _makeSpy(obj, method);
+  }
+  throw new Error(
+    '@deck.gl/test-utils requires either vitest or @probe.gl/test-utils as a peer dependency. ' +
+      'Install one of: npm install -D vitest (recommended) or npm install -D @probe.gl/test-utils'
+  );
+}
+
+function restoreSpy(spy: Spy): void {
+  // vitest uses mockRestore(), probe.gl uses restore()
+  if (spy.mockRestore) {
+    spy.mockRestore();
+  } else if (spy.restore) {
+    spy.restore();
+  }
+}
 
 const testViewport = new MapView({}).makeViewport({
   width: 100,
@@ -128,8 +193,6 @@ export async function testInitializeLayerAsync(
   return null;
 }
 
-type Spy = MockInstance;
-
 export type LayerClass<LayerT extends Layer> = {
   new (...args): LayerT;
   layerName: string;
@@ -203,8 +266,8 @@ export function testLayer<LayerT extends Layer>(opts: {
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
-    // Remove spies - use mockRestore to fully remove spy from prototype
-    Object.keys(spyMap).forEach(k => spyMap[k].mockRestore());
+    // Remove spies - restoreSpy handles both vitest and probe.gl
+    Object.keys(spyMap).forEach(k => restoreSpy(spyMap[k]));
     layer = newLayer;
   }
 
@@ -256,8 +319,8 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
       runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
 
-    // Remove spies - use mockRestore to fully remove spy from prototype
-    Object.keys(spyMap).forEach(k => spyMap[k].mockRestore());
+    // Remove spies - restoreSpy handles both vitest and probe.gl
+    Object.keys(spyMap).forEach(k => restoreSpy(spyMap[k]));
     layer = newLayer;
   }
 
@@ -329,7 +392,7 @@ function injectSpies(layer: Layer, spies: string[]): Record<string, Spy> {
   const spyMap: Record<string, Spy> = {};
   if (spies) {
     for (const functionName of spies) {
-      spyMap[functionName] = vi.spyOn(Object.getPrototypeOf(layer), functionName);
+      spyMap[functionName] = createSpy(Object.getPrototypeOf(layer), functionName);
     }
   }
   return spyMap;
