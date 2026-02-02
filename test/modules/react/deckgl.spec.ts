@@ -186,7 +186,9 @@ test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
-  let onAfterRenderCalled = false;
+  let testCompleted = false;
+  let renderCount = 0;
+  const MAX_RENDERS = 100; // Safety limit to prevent infinite loop
 
   act(() => {
     root.render(
@@ -202,16 +204,36 @@ test('useWidget#StrictMode cleanup removes duplicate widgets', t => {
             height: 100,
             gl: getMockContext(),
             // Use onAfterRender instead of onLoad because React widget children
-            // can only render after deck exists, and onLoad fires before that
+            // can only render after deck exists, and onLoad fires before that.
+            // Widget children need multiple render cycles to be positioned and registered:
+            // 1. First render: deck doesn't exist yet, children can't be positioned
+            // 2. useEffect creates deck
+            // 3. deck triggers forceUpdate, React re-renders
+            // 4. Children are now positioned and widget component can render
+            // 5. useWidget registers the widget and syncs to deck
             onAfterRender: () => {
-              if (onAfterRenderCalled) {
+              if (testCompleted) {
                 return;
               }
-              onAfterRenderCalled = true;
 
+              renderCount++;
               const deck = ref.current?.deck;
-              t.ok(deck, 'DeckGL is initialized');
               const widgets = deck?.props.widgets;
+
+              // Wait for widget to render - children can only render after deck exists
+              // and React needs additional render cycles to position them
+              if (!deck || !widgets?.length) {
+                if (renderCount >= MAX_RENDERS) {
+                  t.fail('Widget did not render after maximum render attempts');
+                  act(() => root.render(null));
+                  container.remove();
+                  t.end();
+                }
+                return;
+              }
+
+              testCompleted = true;
+              t.ok(deck, 'DeckGL is initialized');
               t.is(widgets?.length, 1, 'Only one widget instance remains after StrictMode remount');
 
               act(() => {
