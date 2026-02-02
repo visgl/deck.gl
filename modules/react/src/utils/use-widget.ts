@@ -13,16 +13,28 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
 
-  // Use ref for stable widget instance across StrictMode double-renders
+  // In StrictMode, React unmounts and remounts components to detect side effects.
+  // This destroys refs between mount cycles, so we can't rely on widgetRef persisting.
+  // Instead, find existing widgets by ID to handle StrictMode's double-mount.
   const widgetRef = useRef<WidgetT | null>(null);
+
   if (!widgetRef.current) {
-    widgetRef.current = new WidgetClass(props);
+    // Check if a widget with this ID already exists (from StrictMode's first mount)
+    const existingWidget = widgets?.find(w => w.id === props.id) as WidgetT | undefined;
+    if (existingWidget) {
+      // Reuse the existing widget instance
+      widgetRef.current = existingWidget;
+    } else {
+      // Create a new widget
+      widgetRef.current = new WidgetClass(props);
+    }
   }
   const widget = widgetRef.current;
 
   // Register widget during render for immediate availability (needed for onLoad callbacks)
-  // The includes check prevents duplicates in StrictMode double-renders
-  if (widgets && !widgets.includes(widget)) {
+  // Check by ID to prevent duplicates in StrictMode where refs are recreated
+  const existingInArray = widgets?.find(w => w.id === widget.id);
+  if (widgets && !existingInArray) {
     widgets.push(widget);
   }
 
