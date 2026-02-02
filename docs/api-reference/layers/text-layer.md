@@ -273,6 +273,8 @@ Available options are `break-all` and `break-word`. A valid `maxWidth` has to be
 
 A unitless number that will be multiplied with the current text size to set the width limit of a string. If specified, when the text is longer than the width limit, it will be wrapped into multiple lines using the strategy of `wordBreak`.
 
+Use the `getMaxWidth` accessor to supply this value per object.
+
 For example, `maxWidth: 10.0` used with `getSize: 12` is roughly the equivalent of `max-width: 120px` in CSS.
 
 #### `outlineWidth` (number, optional) {#outlinewidth}
@@ -311,6 +313,12 @@ The font size of each text label, in units specified by `sizeUnits` (default pix
 
 * If a number is provided, it is used as the size for all objects.
 * If a function is provided, it is called on each object to retrieve its size.
+
+#### `getMaxWidth` ([Accessor<number>](../../developer-guide/using-layers.md#accessors), optional) {#getmaxwidth}
+
+* Default: `-1`
+
+Method called to retrieve the width limit of each text label. The value uses the same unit as `maxWidth`. A negative value disables the limit for the object.
 
 
 #### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}

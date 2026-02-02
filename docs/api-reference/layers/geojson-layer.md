@@ -448,6 +448,7 @@ The following props are forwarded to a `TextLayer` if `pointType` is `'text'`.
 | `textFontWeight` | `'normal'` | [fontWeight](./text-layer.md#fontweight) |
 | `textLineHeight` | `1` | [lineHeight](./text-layer.md#lineheight) |
 | `textMaxWidth` | `-1` | [maxWidth](./text-layer.md#maxwidth) |
+| `getTextMaxWidth` | `-1` | [getMaxWidth](./text-layer.md#getmaxwidth) |
 | `textWordBreak` | `'break-word'` | [wordBreak](./text-layer.md#wordbreak) |
 | `textBackground` | `false` | [background](./text-layer.md#background) |
 | `textBackgroundPadding` | `[0, 0]` | [backgroundPadding](./text-layer.md#backgroundpadding) |
