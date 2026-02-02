@@ -35,14 +35,15 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
       widgets.push(widget);
     }
 
-    // Sync widgets to deck
-    deck?.setProps({widgets: widgets ? [...widgets] : []});
-
     // Warn if the user supplied a pure-js widget, since it will be ignored
+    // Check BEFORE setProps so we can compare the user's widgets with our React widgets
     const internalWidgets = deck?.props.widgets;
     if (widgets?.length && internalWidgets?.length && !deepEqual(internalWidgets, widgets, 1)) {
       log.warn('"widgets" prop will be ignored because React widgets are in use.')();
     }
+
+    // Sync widgets to deck
+    deck?.setProps({widgets: widgets ? [...widgets] : []});
 
     return () => {
       // Remove widget from context when it is unmounted
