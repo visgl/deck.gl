@@ -41,10 +41,17 @@ jobs:
       - name: Install Puppeteer browsers
         run: npx puppeteer browsers install chrome
 
-      - name: Run tests
-        run: |
-          yarn lint
-          yarn test-ci
+      - name: Lint
+        run: yarn lint
+
+      - name: Run Node tests
+        run: vitest run --project node --reporter=tap
+
+      - name: Run Headless browser tests
+        run: vitest run --project headless --reporter=tap --coverage
+
+      - name: Run Render/Interaction tests
+        run: yarn test-render
 
       - name: Run tape backward compatibility smoke test
         run: yarn test-tape-compat
