@@ -7,12 +7,6 @@ import Controller, {ControllerProps} from './controller';
 import {OrbitState} from './orbit-controller';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
-import type {MjolnirGestureEvent} from 'mjolnir.js';
-
-const NO_TRANSITION_PROPS = {
-  transitionDuration: 0
-} as const;
-
 class OrthographicState extends OrbitState {
   zoomAxis: 'X' | 'Y' | 'all';
 
@@ -59,6 +53,67 @@ class OrthographicState extends OrbitState {
     // So if zoom is a number (legacy use case), new zoom still has to be a number
     return clamp(startZoom + deltaZoom, minZoom, maxZoom);
   }
+
+  rotateStart({pos}: {pos: [number, number]}): OrthographicState {
+    const {width, height, rotationOrbit = 0} = this.getViewportProps();
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const startAngle = Math.atan2(centerY - pos[1], pos[0] - centerX);
+
+    return this._getUpdatedState({
+      startRotatePos: pos,
+      startRotationOrbit: rotationOrbit,
+      startRotationX: startAngle
+    }) as OrthographicState;
+  }
+
+  rotate({
+    pos,
+    deltaAngleX = 0
+  }: {
+    pos?: [number, number];
+    deltaAngleX?: number;
+    deltaAngleY?: number;
+  }): OrthographicState {
+    const {startRotatePos, startRotationOrbit, startRotationX} = this.getState();
+    const {width, height, rotationOrbit = 0} = this.getViewportProps();
+
+    if (!startRotatePos || startRotationOrbit === undefined || startRotationX === undefined) {
+      return this;
+    }
+
+    let newRotationOrbit: number;
+
+    if (pos) {
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const currentAngle = Math.atan2(centerY - pos[1], pos[0] - centerX);
+      let deltaAngle = currentAngle - startRotationX;
+
+      if (deltaAngle > Math.PI) {
+        deltaAngle -= 2 * Math.PI;
+      } else if (deltaAngle < -Math.PI) {
+        deltaAngle += 2 * Math.PI;
+      }
+
+      const sensitivity = 1.5;
+      newRotationOrbit = startRotationOrbit - (deltaAngle * 180 * sensitivity) / Math.PI;
+    } else {
+      newRotationOrbit = rotationOrbit + deltaAngleX;
+    }
+
+    return this._getUpdatedState({
+      rotationOrbit: newRotationOrbit
+    }) as OrthographicState;
+  }
+
+  rotateEnd(): OrthographicState {
+    return this._getUpdatedState({
+      startRotatePos: null,
+      startRotationOrbit: null,
+      startRotationX: null
+    }) as OrthographicState;
+  }
 }
 
 export default class OrthographicController extends Controller<OrbitState> {
@@ -74,11 +129,7 @@ export default class OrthographicController extends Controller<OrbitState> {
   };
   dragMode: 'pan' | 'rotate' = 'pan';
 
-  private _lastAngle: number | undefined = undefined;
-  private _rotationCenter: [number, number] | undefined = undefined;
-  private _isRotating = false;
   private _contextMenuHandler: ((e: Event) => void) | null = null;
-  private _targetRotation: number | null = null;
 
   setProps(props: ControllerProps) {
     super.setProps(props);
@@ -89,122 +140,17 @@ export default class OrthographicController extends Controller<OrbitState> {
           e.preventDefault();
         }
       };
-      // @ts-expect-error accessing eventManager element
+      // @ts-ignore accessing eventManager element
       this.eventManager?.element?.addEventListener('contextmenu', this._contextMenuHandler);
     }
   }
 
   finalize() {
     if (this._contextMenuHandler) {
-      // @ts-expect-error accessing eventManager element
+      // @ts-ignore accessing eventManager element
       this.eventManager?.element?.removeEventListener('contextmenu', this._contextMenuHandler);
       this._contextMenuHandler = null;
     }
     super.finalize();
-  }
-
-  protected _onPanStart(event: MjolnirGestureEvent): boolean {
-    const {srcEvent} = event;
-    if (srcEvent && (srcEvent.metaKey || srcEvent.ctrlKey)) {
-      srcEvent.preventDefault();
-      this._isRotating = true;
-      const {width, height} = this.controllerState.getViewportProps();
-      this._rotationCenter = [width / 2, height / 2];
-      this._lastAngle = undefined;
-      return true;
-    }
-    this._isRotating = false;
-    return super._onPanStart(event);
-  }
-
-  protected _onPan(event: MjolnirGestureEvent): boolean {
-    if (this._isRotating) {
-      return this._handleRotate(event);
-    }
-    return super._onPan(event);
-  }
-
-  protected _onPanEnd(event: MjolnirGestureEvent): boolean {
-    if (this._isRotating) {
-      this._lastAngle = undefined;
-      this._rotationCenter = undefined;
-      this._isRotating = false;
-
-      const newControllerState = this.controllerState._getUpdatedState({});
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isRotating: false
-      });
-      return true;
-    }
-    return super._onPanEnd(event);
-  }
-
-  private _handleRotate(event: MjolnirGestureEvent): boolean {
-    const pos = this.getCenter(event);
-
-    if (!this._rotationCenter) {
-      return false;
-    }
-
-    const centerX = this._rotationCenter[0];
-    const centerY = this._rotationCenter[1];
-
-    const theta = Math.atan2(centerY - pos[1], pos[0] - centerX);
-
-    if (this._lastAngle !== undefined) {
-      const delta = theta - this._lastAngle;
-      const currentRotation = this.controllerState.getViewportProps().rotationOrbit ?? 0;
-      const sensitivity = 1.5;
-      const newRotation = currentRotation - (delta * 180 * sensitivity) / Math.PI;
-
-      this._targetRotation = newRotation;
-
-      const newControllerState = this.controllerState._getUpdatedState({
-        rotationOrbit: newRotation
-      });
-
-      this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-        isDragging: true,
-        isRotating: true
-      });
-    }
-
-    this._lastAngle = theta;
-    return true;
-  }
-
-  /** Rotate the view by a delta angle in degrees */
-  rotate(deltaAngle: number): void {
-    const currentRotation = this._targetRotation ?? this.getRotation();
-    this.setRotation(currentRotation + deltaAngle, false);
-  }
-
-  /** Rotate left by specified degrees (default: 15) */
-  rotateLeft(speed: number = 15): void {
-    this.rotate(-speed);
-  }
-
-  /** Rotate right by specified degrees (default: 15) */
-  rotateRight(speed: number = 15): void {
-    this.rotate(speed);
-  }
-
-  /** Set the rotation to a specific angle in degrees */
-  setRotation(angle: number, animate: boolean = true): void {
-    this._targetRotation = angle;
-
-    const newControllerState = this.controllerState._getUpdatedState({
-      rotationOrbit: angle
-    });
-
-    this.updateViewport(newControllerState, animate ? this.transition : NO_TRANSITION_PROPS, {
-      isRotating: true
-    });
-  }
-
-  /** Get current rotation angle in degrees */
-  getRotation(): number {
-    return this.controllerState.getViewportProps().rotationOrbit ?? 0;
   }
 }
