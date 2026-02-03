@@ -601,6 +601,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this.viewManager.views;
   }
 
+  /** Get a view by id */
+  getView(viewId: string): View | undefined {
+    assert(this.viewManager);
+    return this.viewManager.getView(viewId);
+  }
+
   /** Get a list of viewports that are currently rendered.
    * @param rect If provided, only returns viewports within the given bounding box.
    */
