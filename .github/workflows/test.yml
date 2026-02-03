@@ -45,10 +45,10 @@ jobs:
         run: yarn lint
 
       - name: Run Node tests
-        run: vitest run --project node --reporter=tap
+        run: npx vitest run --project node --reporter=tap
 
       - name: Run Headless browser tests
-        run: vitest run --project headless --reporter=tap --coverage
+        run: npx vitest run --project headless --reporter=tap --coverage
 
       - name: Run Render/Interaction tests
         run: yarn test-render
