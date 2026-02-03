@@ -331,12 +331,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     x: number;
     y: number;
     radius: number;
+    unproject3D?: boolean;
   } = {
     mode: 'hover',
     x: -1,
     y: -1,
     radius: 0,
-    event: null
+    event: null,
+    unproject3D: false
   };
 
   /**
@@ -597,6 +599,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   getViews(): View[] {
     assert(this.viewManager);
     return this.viewManager.views;
+  }
+
+  /** Get a view by id */
+  getView(viewId: string): View | undefined {
+    assert(this.viewManager);
+    return this.viewManager.getView(viewId);
   }
 
   /** Get a list of viewports that are currently rendered.
@@ -972,6 +980,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
+      // Check if any layer has pickable: '3d' to enable depth picking for hover
+      const layers = this.layerManager?.getLayers() || [];
+      const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+      _pickRequest.unproject3D = has3DPickableLayers;
+
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
       this.cursorState.isHovering = result.length > 0;
@@ -1240,17 +1253,33 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
 
-    // Reuse last picked object
+    let info: PickingInfo;
+
+    // For click events, check if any layer has pickable: '3d' to determine if we need depth picking
     const layers = this.layerManager.getLayers();
-    const info = this.deckPicker!.getLastPickedObject(
-      {
+    const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+
+    if (event.type === 'click' && has3DPickableLayers) {
+      // Perform a fresh pick to get depth info for 3D coordinates
+      const pickResult = this._pick('pickObject', 'pickObject Time', {
         x: pos.x,
         y: pos.y,
-        layers,
-        viewports: this.getViewports(pos)
-      },
-      this._lastPointerDownInfo
-    ) as PickingInfo;
+        radius: this.props.pickingRadius,
+        unproject3D: true
+      });
+      info = pickResult.result[0] || pickResult.emptyInfo;
+    } else {
+      // Reuse last picked object for other events
+      info = this.deckPicker!.getLastPickedObject(
+        {
+          x: pos.x,
+          y: pos.y,
+          layers,
+          viewports: this.getViewports(pos)
+        },
+        this._lastPointerDownInfo
+      ) as PickingInfo;
+    }
 
     const {layer} = info;
     const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
