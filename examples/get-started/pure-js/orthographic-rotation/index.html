@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl OrthographicView Rotation Example</title>
+  <style>
+    body {margin: 0; width: 100vw; height: 100vh; overflow: hidden; background: #1a1a2e;}
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      font-size: 14px;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 4px;
+      z-index: 1;
+    }
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      z-index: 1;
+    }
+    #controls button {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background: #4a4a6a;
+      color: white;
+    }
+    #controls button:hover {
+      background: #6a6a8a;
+    }
+    #angle-display {
+      color: white;
+      font-family: monospace;
+      font-size: 14px;
+      min-width: 80px;
+      text-align: center;
+    }
+    #angle-input {
+      width: 60px;
+      padding: 6px;
+      border-radius: 4px;
+      border: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <b>OrthographicView Rotation</b><br>
+    Drag: Pan<br>
+    Ctrl/Cmd + Drag: Rotate<br>
+    Scroll: Zoom
+  </div>
+  <div id="controls">
+    <button id="rotate-left">← Rotate Left</button>
+    <button id="reset">Reset (0°)</button>
+    <button id="rotate-right">Rotate Right →</button>
+    <span id="angle-display">0°</span>
+    <input type="number" id="angle-input" placeholder="angle" />
+    <button id="set-angle">Set</button>
+  </div>
+</body>
+<script type="module" src="app.js"></script>
+</html>
