@@ -965,7 +965,7 @@ function App() {
 
 While the default events handle most of the use cases, sometimes applications need more control over when and how picking is performed.
 
-The picking engine is exposed through the [`Deck.pickObject`](../api-reference/core/deck.md#pickobject) and [`Deck.pickObjects`](../api-reference/core/deck.md#pickobjects) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `PickingInfo` objects as described above.
+The picking engine is exposed through the [`Deck.pickObjectAsync`](../api-reference/core/deck.md#pickobjectasync) and [`Deck.pickObjectsAsync`](../api-reference/core/deck.md#pickobjectsasync) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `PickingInfo` objects as described above.
 
 
 <Tabs groupId="language">
@@ -976,9 +976,9 @@ import {Deck} from '@deck.gl/core';
 
 const deckInstance = new Deck({
   // ...
-  onClick: ({x, y}) => {
+  onClick: async ({x, y}) => {
     // Query up to 5 overlapping objects under the pointer
-    const pickInfos = deckInstance.pickMultipleObjects({x, y, radius: 1, depth: 5});
+    const pickInfos = await deckInstance.pickMultipleObjectsAsync({x, y, radius: 1, depth: 5});
     console.log(pickInfo);
   }
 });
@@ -992,9 +992,9 @@ import {Deck, PickingInfo} from '@deck.gl/core';
 
 const deckInstance = new Deck({
   // ...
-  onClick: ({x, y}: PickingInfo) => {
+  onClick: async ({x, y}: PickingInfo) => {
     // Query up to 5 overlapping objects under the pointer
-    const pickInfos: PickingInfo[] = deckInstance.pickMultipleObjects({x, y, radius: 1, depth: 5});
+    const pickInfos: PickingInfo[] = await deckInstance.pickMultipleObjectsAsync({x, y, radius: 1, depth: 5});
     console.log(pickInfo);
   }
 });
@@ -1011,13 +1011,13 @@ import {PickingInfo} from '@deck.gl/core';
 function App() {
   const deckRef = useRef<DeckGL>();
 
-  const onClick = useCallback((evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const onClick = useCallback(async (evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // Get mouse position relative to the containing div
     const containerRect = evt.currentTarget.getBoundingClientRect();
     const x = evt.clientX - containerRect.left;
     const y = evt.clientY = containerRect.top;
     // Query up to 5 overlapping objects under the pointer
-    const pickInfos: PickingInfo[] = deckRef.current?.pickMultipleObjects({x, y, radius: 1, depth: 5});
+    const pickInfos: PickingInfo[] = await deckRef.current?.pickMultipleObjectsAsync({x, y, radius: 1, depth: 5});
     console.log(pickInfo);
   }, [])
 
@@ -1031,7 +1031,7 @@ function App() {
 </Tabs>
 
 
-Also note that by directly calling `pickObject`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
+Also note that by directly calling `pickObjectAsync`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
 
 ### Under The Hood
 

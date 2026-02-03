@@ -113,7 +113,7 @@ export default class DeckPicker {
   /**
    * Pick the closest info at given coordinate
    * @returns picking info
-   * @deprecated WebGL only - use pickObjectAsync instead
+   * @note WebGL only - use pickObjectAsync instead
    */
   pickObject(opts: PickByPointOptions & PickOperationContext) {
     return this._pickClosestObject(opts);
@@ -122,7 +122,7 @@ export default class DeckPicker {
   /**
    * Get all unique infos within a bounding box
    * @returns all unique infos within a bounding box
-   * @deprecated WebGL only - use pickObjectAsync instead
+   * @note WebGL only - use pickObjectAsync instead
    */
   pickObjects(opts: PickByRectOptions & PickOperationContext) {
     return this._pickVisibleObjects(opts);
