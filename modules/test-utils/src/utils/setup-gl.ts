@@ -8,18 +8,24 @@
 
 import {luma, type Device} from '@luma.gl/core';
 import {webgl2Adapter, WebGLDevice} from '@luma.gl/webgl';
+import {NullDevice} from '@luma.gl/test-utils';
 
-// Create test device without debugWebGL to avoid verbose logging
-// Note: debug: true implicitly enables debugWebGL in luma.gl
-const webglDevice = (await luma.createDevice({
-  id: 'deck-test-device',
-  type: 'webgl',
-  adapters: [webgl2Adapter],
-  createCanvasContext: {width: 1, height: 1}
-})) as WebGLDevice;
-
-const device: Device = webglDevice;
-const gl: WebGL2RenderingContext = webglDevice.gl;
+// Use an async IIFE to handle the try/catch properly with top-level await
+const {device, gl}: {device: Device; gl: WebGL2RenderingContext | number} = await (async () => {
+  try {
+    // Browser: create custom device with specific params (no verbose logging)
+    const webglDevice = (await luma.createDevice({
+      id: 'deck-test-device',
+      type: 'webgl',
+      adapters: [webgl2Adapter],
+      createCanvasContext: {width: 1, height: 1}
+    })) as WebGLDevice;
+    return {device: webglDevice as Device, gl: webglDevice.gl};
+  } catch {
+    // Node: fall back to NullDevice
+    return {device: new NullDevice({}) as Device, gl: 1 as number};
+  }
+})();
 
 globalThis.glContext = globalThis.glContext || gl;
 

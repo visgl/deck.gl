@@ -30,20 +30,28 @@ function shouldForceProbeGl(): boolean {
   return typeof process !== 'undefined' && process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1';
 }
 
+// Check if we're running inside vitest by looking for vitest-specific globals
+// This avoids the error "Vitest failed to access its internal state" when
+// importing vitest outside of a vitest test context
+function isRunningInVitest(): boolean {
+  // Vitest sets __vitest_index__ on globalThis when running
+  return typeof (globalThis as any).__vitest_index__ !== 'undefined';
+}
+
 async function initSpyFramework(): Promise<void> {
   if (_spyFrameworkInitialized) return;
   _spyFrameworkInitialized = true;
 
   const forceProbeGl = shouldForceProbeGl();
 
-  // Try vitest first (preferred), unless forced to use probe.gl
-  if (!forceProbeGl) {
+  // Try vitest first (preferred), but only if running inside vitest context
+  if (!forceProbeGl && isRunningInVitest()) {
     try {
       const vitest = await import('vitest');
       _vi = vitest.vi;
       return;
     } catch {
-      // vitest not available
+      // vitest not available or failed to load
     }
   }
 
@@ -51,9 +59,11 @@ async function initSpyFramework(): Promise<void> {
   try {
     const probegl = await import('@probe.gl/test-utils');
     _makeSpy = probegl.makeSpy;
-    if (!forceProbeGl) {
+    if (!forceProbeGl && !isRunningInVitest()) {
       // Only warn if not explicitly testing probe.gl compatibility
-      console.warn( // eslint-disable-line no-console
+      // and not running in vitest (where vitest should be used)
+      console.warn(
+        // eslint-disable-line no-console
         '[@deck.gl/test-utils] @probe.gl/test-utils is deprecated for spying. ' +
           'Install vitest ^2.1.0 as a peer dependency. ' +
           'See https://deck.gl/docs/developer-guide/testing'

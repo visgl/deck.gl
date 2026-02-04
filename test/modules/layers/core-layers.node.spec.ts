@@ -29,7 +29,7 @@ const GRID = [
   {position: [37.1, 122.8]}
 ];
 
-test('ScreenGridLayer', () => {
+test('ScreenGridLayer', async () => {
   const testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {
@@ -42,10 +42,10 @@ test('ScreenGridLayer', () => {
     onAfterUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: ScreenGridLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayer({Layer: ScreenGridLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('ScatterplotLayer', () => {
+test('ScatterplotLayer', async () => {
   const testCases = generateLayerTests({
     Layer: ScatterplotLayer,
     sampleProps: {
@@ -61,10 +61,10 @@ test('ScatterplotLayer', () => {
     }
   });
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('ArcLayer', () => {
+test('ArcLayer', async () => {
   const testCases = generateLayerTests({
     Layer: ArcLayer,
     sampleProps: {
@@ -76,7 +76,7 @@ test('ArcLayer', () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: ArcLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayer({Layer: ArcLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('PointCloudLayer', () => {
