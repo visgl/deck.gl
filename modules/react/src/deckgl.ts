@@ -224,12 +224,18 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // Use setTimeout(0) to escape React's commit phase and act() scope, allowing
   // the callback to safely trigger state updates or nested act() calls in tests.
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     if (onLoadPending && !onLoadCalledRef.current) {
       onLoadCalledRef.current = true;
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         onLoadRef.current?.();
       }, 0);
     }
+    return () => {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [onLoadPending]);
 
   useIsomorphicLayoutEffect(() => {
