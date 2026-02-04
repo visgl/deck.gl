@@ -89,15 +89,10 @@ function ControlPanel({
           borderRadius: 4
         }}
       >
-        <button
-          onClick={() => setUseStrictMode(!useStrictMode)}
-          style={{fontWeight: 'bold'}}
-        >
+        <button onClick={() => setUseStrictMode(!useStrictMode)} style={{fontWeight: 'bold'}}>
           StrictMode: {useStrictMode ? 'ON' : 'OFF'}
         </button>
-        <div style={{fontSize: 11, marginTop: 4, color: '#666'}}>
-          Toggling forces remount
-        </div>
+        <div style={{fontSize: 11, marginTop: 4, color: '#666'}}>Toggling forces remount</div>
       </div>
 
       {/* Widget Mode Toggle */}
@@ -136,9 +131,7 @@ function ControlPanel({
           />
           ZoomWidget {useWidgetsProp && '(prop mode)'}
         </label>
-        <div style={{fontSize: 11, color: '#666'}}>
-          FullscreenWidget always shown
-        </div>
+        <div style={{fontSize: 11, color: '#666'}}>FullscreenWidget always shown</div>
       </div>
 
       {/* Status */}

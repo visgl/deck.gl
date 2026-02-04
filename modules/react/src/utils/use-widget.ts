@@ -6,8 +6,22 @@ import {useContext, useRef, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
 import {log, Widget, type WidgetProps} from '@deck.gl/core';
 
-// Track pending removals by widget ID so they can be cancelled on remount
-const pendingRemovals = new Map<string, ReturnType<typeof setTimeout>>();
+// Track pending removals per DeckGL instance (keyed by widgets array) so they can be cancelled on remount.
+// Using WeakMap ensures cleanup when the DeckGL instance is garbage collected, and scoping by widgets array
+// prevents cross-deck interference when multiple DeckGL instances use widgets with the same ID.
+const pendingRemovalsByDeck = new WeakMap<Widget[], Map<string, ReturnType<typeof setTimeout>>>();
+
+function getPendingRemovals(
+  widgets: Widget[] | undefined
+): Map<string, ReturnType<typeof setTimeout>> | undefined {
+  if (!widgets) return undefined;
+  let map = pendingRemovalsByDeck.get(widgets);
+  if (!map) {
+    map = new Map();
+    pendingRemovalsByDeck.set(widgets, map);
+  }
+  return map;
+}
 
 export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetProps>(
   WidgetClass: {new (props_: WidgetPropsT): WidgetT} & {defaultProps?: {id?: string}},
@@ -40,10 +54,11 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
   const widget = widgetRef.current;
 
   // Cancel any pending removal for this widget (handles StrictMode remount)
-  const pendingRemoval = pendingRemovals.get(widget.id);
+  const pendingRemovals = getPendingRemovals(widgets);
+  const pendingRemoval = pendingRemovals?.get(widget.id);
   if (pendingRemoval) {
     clearTimeout(pendingRemoval);
-    pendingRemovals.delete(widget.id);
+    pendingRemovals?.delete(widget.id);
   }
 
   // Register widget during render for immediate availability (needed for onLoad callbacks)
@@ -60,10 +75,11 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
     // Cancel any pending removal for this widget (handles StrictMode effect remount).
     // This must be in useEffect because StrictMode re-runs effects without re-rendering,
     // so the render-phase cancellation won't run between cleanup and effect re-run.
-    const pendingRemovalInEffect = pendingRemovals.get(widget.id);
+    const pendingRemovalsInEffect = getPendingRemovals(widgets);
+    const pendingRemovalInEffect = pendingRemovalsInEffect?.get(widget.id);
     if (pendingRemovalInEffect) {
       clearTimeout(pendingRemovalInEffect);
-      pendingRemovals.delete(widget.id);
+      pendingRemovalsInEffect?.delete(widget.id);
     }
 
     // Re-register widget if cleanup removed it (handles StrictMode remount after cleanup)
@@ -89,15 +105,16 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
       // If we remove immediately, the remounted component can't find the widget.
       // By deferring, we give the remount a chance to cancel the removal.
       const id = widget.id;
+      const pendingRemovalsCleanup = getPendingRemovals(widgets);
       const timeoutId = setTimeout(() => {
-        pendingRemovals.delete(id);
+        pendingRemovalsCleanup?.delete(id);
         const index = widgets?.findIndex(w => w.id === id);
         if (typeof index === 'number' && index !== -1) {
           widgets?.splice(index, 1);
           deck?.setProps({widgets: widgets ? [...widgets] : []});
         }
       }, 0);
-      pendingRemovals.set(id, timeoutId);
+      pendingRemovalsCleanup?.set(id, timeoutId);
     };
   }, [widgets, deck, widget]);
 
