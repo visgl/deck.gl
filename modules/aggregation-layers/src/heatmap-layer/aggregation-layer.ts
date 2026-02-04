@@ -159,7 +159,8 @@ export default abstract class AggregationLayer<
   _getAttributeManager() {
     return new AttributeManager(this.context.device, {
       id: this.props.id,
-      stats: this.context.stats
+      stats: this.context.stats,
+      memory: this.props.memory
     });
   }
 }

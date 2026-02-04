@@ -538,6 +538,32 @@ Layers may also include specialized loaders for their own use case, such as imag
 Find usage examples in the [data loading guide](../../developer-guide/loading-data.md).
 
 
+#### `memory` ('default' | 'gpu-only', optional) {#memory}
+
+- Default: `'default'`
+
+Controls how deck.gl stores generated attribute data in memory.
+
+- `'default'` retains CPU-side typed arrays alongside GPU buffers. This is the current behavior and enables CPU features such as bounds queries, attribute transitions, and partial updates using cached values.
+- `'gpu-only'` uploads generated attributes to GPU buffers and then releases CPU copies. This minimizes CPU memory usage and pooling, but disables features that depend on CPU-side attribute values (e.g. `layer.getBounds()`, attribute transitions, CPU validations) and forces partial updates to regenerate whole attributes or perform GPU-side copies.
+
+Use `'gpu-only'` when you are feeding data through GPU-heavy pipelines and do not rely on CPU-side attribute inspection. For example:
+
+```js
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+const layer = new ScatterplotLayer({
+  id: 'points',
+  data,
+  memory: 'gpu-only',
+  getPosition: d => d.position,
+  getFillColor: [0, 128, 255]
+});
+```
+
+deck.gl will emit runtime warnings when a CPU-dependent feature is unavailable in this mode.
+
+
 #### `fetch` (Function, optional) {#fetch}
 
 Called to fetch and parse content from URLs.

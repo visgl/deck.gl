@@ -120,7 +120,8 @@ export type {
   Position,
   Color,
   TextureSource,
-  Material
+  Material,
+  MemoryUsage
 } from './types/layer-props';
 export type {DrawLayerParameters, FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';

@@ -2,6 +2,10 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.3 (upcoming)
+
+- Layers now accept a `memory: 'gpu-only'` prop to keep generated attributes on the GPU, reducing CPU memory at the cost of CPU-bound features such as bounds queries and attribute transitions.
+
 ## deck.gl v9.2
 
 Target release date: September, 2025
