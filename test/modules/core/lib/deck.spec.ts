@@ -278,6 +278,64 @@ test('Deck#resourceManager', async () => {
   deck.finalize();
 });
 
+test('Deck#getView with single view', () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    views: new MapView({id: 'map'}),
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    onLoad: () => {
+      const mapView = deck.getView('map');
+      expect(mapView, 'getView returns a view for valid id').toBeTruthy();
+      expect(mapView?.id, 'getView returns the correct view').toBe('map');
+
+      const unknownView = deck.getView('unknown');
+      expect(unknownView, 'getView returns undefined for unknown id').toBeFalsy();
+
+      deck.finalize();
+    }
+  });
+});
+
+test('Deck#getView with multiple views', () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    views: [new MapView({id: 'map'}), new MapView({id: 'minimap'})],
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    onLoad: () => {
+      const mapView = deck.getView('map');
+      expect(mapView, 'getView returns a view for valid id').toBeTruthy();
+      expect(mapView?.id, 'getView returns the correct view').toBe('map');
+
+      const minimapView = deck.getView('minimap');
+      expect(minimapView, 'getView returns a view for second valid id').toBeTruthy();
+      expect(minimapView?.id, 'getView returns the correct view').toBe('minimap');
+
+      const unknownView = deck.getView('unknown');
+      expect(unknownView, 'getView returns undefined for unknown id').toBeFalsy();
+
+      deck.finalize();
+    }
+  });
+});
+
 test('Deck#props omitted are unchanged', async () => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',
