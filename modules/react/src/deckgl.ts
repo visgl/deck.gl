@@ -124,6 +124,9 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   const canvasRef = useRef(null);
   // Stable widgets array for React widget components (survives StrictMode remounts)
   const widgetsRef = useRef<Widget[]>([]);
+  // Track deferred onLoad - use state to trigger re-render when deck initializes
+  const [onLoadPending, setOnLoadPending] = useState(false);
+  const onLoadCalledRef = useRef(false);
 
   // extract any deck.gl layers masquerading as react elements from props.children
   const jsxProps = useMemo(
@@ -158,6 +161,14 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     }
   };
 
+  // Defer onLoad until after React widget children have had a chance to register.
+  // Deck's onLoad fires during initialization, before React children render.
+  // By using state to track pending status, we trigger a re-render when deck initializes,
+  // then call onLoad in useEffect after children have rendered and registered widgets.
+  const handleOnLoad: DeckProps<ViewsT>['onLoad'] = () => {
+    setOnLoadPending(true);
+  };
+
   // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
@@ -174,7 +185,10 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       layers: jsxProps.layers,
       views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
+      onInteractionStateChange: handleInteractionStateChange,
+      // Always provide onLoad handler - Deck expects it to be a function.
+      // The deferred effect will only call the user's callback if they provided one.
+      onLoad: handleOnLoad
     };
 
     // The defaultValue for _customRender is null, which would overwrite the definition
@@ -199,6 +213,24 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
 
     return () => thisRef.deck?.finalize();
   }, []);
+
+  // Stable reference to onLoad callback for use in deferred effect
+  const onLoadRef = useRef(props.onLoad);
+  onLoadRef.current = props.onLoad;
+
+  // Call deferred onLoad after React widget children have registered.
+  // React guarantees parent effects run after children effects, so by this point
+  // any widgets using useWidget will have synced to deck.
+  // Use setTimeout(0) to escape React's commit phase and act() scope, allowing
+  // the callback to safely trigger state updates or nested act() calls in tests.
+  useEffect(() => {
+    if (onLoadPending && !onLoadCalledRef.current) {
+      onLoadCalledRef.current = true;
+      setTimeout(() => {
+        onLoadRef.current?.();
+      }, 0);
+    }
+  }, [onLoadPending]);
 
   useIsomorphicLayoutEffect(() => {
     // render has just been called. The children are positioned based on the current view state.
