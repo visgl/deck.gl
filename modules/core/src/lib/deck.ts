@@ -375,6 +375,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       const userOnResize = this.props.deviceProps?.onResize;
 
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
+        // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
+        // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
+        _cacheShaders: true,
+        _cachePipelines: true,
         ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
           // Manually sync drawing buffer dimensions (canvas is externally managed)
