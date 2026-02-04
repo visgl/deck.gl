@@ -68,7 +68,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   geocoder: Geocoder = CoordinatesGeocoder;
 
   constructor(props: GeocoderWidgetProps = {}) {
-    super(props);
+    super(props, GeocoderWidget.defaultProps);
     this.setProps(this.props);
   }
 
