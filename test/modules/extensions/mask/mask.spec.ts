@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {MaskExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
@@ -59,7 +59,12 @@ test('MaskExtension', () => {
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ScatterplotLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('MaskExtension#maskByInstance', () => {
@@ -113,5 +118,10 @@ test('MaskExtension#maskByInstance', () => {
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: GeoJsonLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

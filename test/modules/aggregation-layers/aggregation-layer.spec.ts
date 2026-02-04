@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import AggregationLayer from '@deck.gl/aggregation-layers/heatmap-layer/aggregation-layer';
 import {Layer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -78,6 +78,7 @@ test('AggregationLayer#constructor', () => {
 
 test('AggregationLayer#updateState', () => {
   testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TestAggregationLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [

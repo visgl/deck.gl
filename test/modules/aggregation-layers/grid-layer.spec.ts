@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -25,7 +25,12 @@ test('GridLayer', () => {
     }
   });
 
-  testLayer({Layer: GridLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: GridLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('GridLayer#getAggregatorType', () => {
@@ -34,6 +39,7 @@ test('GridLayer#getAggregatorType', () => {
     return;
   }
   testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: GridLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -107,6 +113,7 @@ test('GridLayer#non-iterable data', () => {
   } as const;
 
   testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: GridLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [

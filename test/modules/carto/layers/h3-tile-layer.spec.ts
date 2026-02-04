@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {getResolution, cellToChildren} from 'h3-js';
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {H3TileLayer} from '@deck.gl/carto';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -21,7 +21,12 @@ test('H3TileLayer', async () => {
     assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({Layer: H3TileLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: H3TileLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('H3TileLayer tilejson', async () => {
@@ -42,7 +47,12 @@ test('H3TileLayer tilejson', async () => {
       }
     }
   ];
-  await testLayerAsync({Layer: H3TileLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: H3TileLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('H3TileLayer autoHighlight', async () => {

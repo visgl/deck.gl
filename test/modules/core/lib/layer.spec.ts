@@ -450,7 +450,13 @@ test('Layer#uniformTransitions', () => {
     }
   ];
 
-  testLayer({Layer: TestLayer, timeline, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TestLayer,
+    timeline,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('Layer#calculateInstancePickingColors', () => {
@@ -532,13 +538,19 @@ test('Layer#calculateInstancePickingColors', () => {
     }
   ];
 
-  testLayer({Layer: SubLayer2, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: SubLayer2,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('Layer#isLoaded', async () => {
   let updateCount = 0;
 
   await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: SubLayer,
     testCases: [
       {
@@ -599,6 +611,7 @@ test('Layer#updateModules', async () => {
   const HALF_BYTE = 128 / 255;
 
   await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: LayerWithModel,
     testCases: [
       {

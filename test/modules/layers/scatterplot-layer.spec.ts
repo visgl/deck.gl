@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 import {UNIT, Layer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -56,5 +56,10 @@ test('ScatterplotLayer points radiusUnits prop', () => {
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: GeoJsonLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

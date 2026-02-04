@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {Fp64Extension} from '@deck.gl/extensions';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -33,5 +33,10 @@ test('Fp64Extension', () => {
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ScatterplotLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

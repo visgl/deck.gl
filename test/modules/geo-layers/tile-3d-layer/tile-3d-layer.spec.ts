@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {LayerTestCase, testLayerAsync} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
@@ -38,6 +38,7 @@ test('Tile3DLayer', async () => {
   ];
 
   await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: Tile3DLayer,
     viewport: new WebMercatorViewport({
       width: 400,

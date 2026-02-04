@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {QuadbinTileLayer} from '@deck.gl/carto';
 import {renderSubLayers} from '@deck.gl/carto/layers/quadbin-tile-layer';
@@ -51,6 +51,7 @@ test('QuadbinTileLayer', async () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
   await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: QuadbinTileLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -76,6 +77,7 @@ test('QuadbinTileLayer tilejson', async () => {
     }
   ];
   await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: QuadbinTileLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()

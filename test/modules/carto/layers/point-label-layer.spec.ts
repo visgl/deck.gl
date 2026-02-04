@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils';
 import {PointLabelLayer} from '@deck.gl/carto';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -89,5 +89,10 @@ test('PointLabelLayer', () => {
       }
     }
   ];
-  testLayer({Layer: PointLabelLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: PointLabelLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

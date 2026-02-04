@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -32,12 +32,18 @@ test('ContourLayer', () => {
     }
   });
 
-  testLayer({Layer: ContourLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ContourLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('ContourLayer#updates', async () => {
   let prevState: ContourLayer['state'];
   await testLayerAsync({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ContourLayer,
     testCases: [
       {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import QuadbinLayer from '@deck.gl/carto/layers/quadbin-layer';
 import {
@@ -70,7 +70,12 @@ test('QuadbinLayer', () => {
     }
   });
 
-  testLayer({Layer: QuadbinLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: QuadbinLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('QuadbinLayer#quadbinToOffset', () => {

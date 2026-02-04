@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {A5Layer} from '@deck.gl/geo-layers';
 
@@ -38,5 +38,10 @@ test('A5Layer', () => {
     }
   });
 
-  testLayer({Layer: A5Layer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: A5Layer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

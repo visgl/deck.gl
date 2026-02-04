@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
 import {UNIT} from '@deck.gl/core';
 
@@ -57,5 +57,10 @@ test('PointCloudLayer#loaders.gl support', () => {
     }
   ];
 
-  testLayer({Layer: PointCloudLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: PointCloudLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

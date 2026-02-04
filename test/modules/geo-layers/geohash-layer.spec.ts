@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GeohashLayer} from '@deck.gl/geo-layers';
 import {getGeohashPolygon, getGeohashBounds} from '@deck.gl/geo-layers/geohash-layer/geohash-utils';
@@ -42,7 +42,12 @@ test('GeohashLayer', () => {
     }
   });
 
-  testLayer({Layer: GeohashLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: GeohashLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('GeohashLayer#getGeohashBounds', () => {

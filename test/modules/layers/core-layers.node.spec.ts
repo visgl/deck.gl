@@ -42,7 +42,12 @@ test('ScreenGridLayer', async () => {
     onAfterUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  await testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: ScreenGridLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ScreenGridLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('ScatterplotLayer', async () => {
@@ -61,7 +66,12 @@ test('ScatterplotLayer', async () => {
     }
   });
 
-  await testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ScatterplotLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('ArcLayer', async () => {
@@ -76,7 +86,12 @@ test('ArcLayer', async () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  await testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: ArcLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  await testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ArcLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('PointCloudLayer', () => {
@@ -95,7 +110,12 @@ test('PointCloudLayer', () => {
     }
   });
 
-  testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: PointCloudLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: PointCloudLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('LineLayer', () => {
@@ -110,7 +130,12 @@ test('LineLayer', () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: LineLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: LineLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('ColumnLayer', () => {
@@ -127,7 +152,12 @@ test('ColumnLayer', () => {
     }
   });
 
-  testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: ColumnLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: ColumnLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('GridCellLayer', () => {
@@ -141,7 +171,12 @@ test('GridCellLayer', () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: GridCellLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: GridCellLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('IconLayer', () => {
@@ -165,7 +200,12 @@ test('IconLayer', () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: IconLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: IconLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('PathLayer', () => {
@@ -186,7 +226,12 @@ test('PathLayer', () => {
     }
   });
 
-  testLayer({createSpy: (obj, method) => vi.spyOn(obj, method), Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: PathLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 /* TextLayer tests don't work under Node due to fontAtlas needing canvas

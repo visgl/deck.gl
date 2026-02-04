@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -16,6 +16,7 @@ test('BitmapLayer#constructor', () => {
   const positions = new Float32Array([2, 4, 0, 2, 8, 0, 16, 8, 0, 16, 4, 0]);
 
   testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: BitmapLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -64,6 +65,7 @@ test('BitmapLayer#constructor', () => {
 
 test('BitmapLayer#imageCoordinateSystem', () => {
   testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: BitmapLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -104,6 +106,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
   });
 
   testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: BitmapLayer,
     onError: err => expect(err).toBeFalsy(),
     viewport: new GlobeViewport({width: 800, height: 600, latitude: 0, longitude: 0, zoom: 1}),

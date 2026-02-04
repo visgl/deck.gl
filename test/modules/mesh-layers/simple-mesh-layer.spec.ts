@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {SimpleMeshLayer} from 'deck.gl';
@@ -36,5 +36,10 @@ test('SimpleMeshLayer#tests', () => {
     runDefaultAsserts: false
   });
 
-  testLayer({Layer: SimpleMeshLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: SimpleMeshLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

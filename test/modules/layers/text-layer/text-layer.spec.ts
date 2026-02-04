@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -23,7 +23,12 @@ test('TextLayer', () => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();
     }
   });
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - sdf', () => {
@@ -51,7 +56,12 @@ test('TextLayer - sdf', () => {
       }
     }
   ];
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - MultiIconLayer sublayer positions', () => {
@@ -143,7 +153,12 @@ test('TextLayer - MultiIconLayer sublayer positions', () => {
     }
   ];
 
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - special texts', () => {
@@ -166,7 +181,12 @@ test('TextLayer - special texts', () => {
     }
   ];
 
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - binary', () => {
@@ -208,7 +228,12 @@ test('TextLayer - binary', () => {
     }
   ];
 
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - binary unicode characters', () => {
@@ -239,7 +264,12 @@ test('TextLayer - binary unicode characters', () => {
     }
   ];
 
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - fontAtlasCacheLimit', () => {
@@ -259,5 +289,10 @@ test('TextLayer - fontAtlasCacheLimit', () => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();
     }
   });
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+  testLayer({
+    createSpy: (obj, method) => vi.spyOn(obj, method),
+    Layer: TextLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
