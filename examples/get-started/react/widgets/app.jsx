@@ -2,13 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL, GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {FullscreenWidget, ZoomWidget, CompassWidget} from '@deck.gl/react';
+import {DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+/* global window */
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -27,8 +32,6 @@ const INITIAL_VIEW_STATE = {
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 function Root() {
-  const [, setViewState] = useState(INITIAL_VIEW_STATE);
-
   const onClick = info => {
     if (info.object) {
       // eslint-disable-next-line
@@ -36,58 +39,45 @@ function Root() {
     }
   };
 
-  const layers = [
-    new GeoJsonLayer({
-      id: 'base-map',
-      data: COUNTRIES,
-      stroked: true,
-      filled: true,
-      lineWidthMinPixels: 2,
-      opacity: 0.4,
-      getLineColor: [60, 60, 60],
-      getFillColor: [200, 200, 200]
-    }),
-    new GeoJsonLayer({
-      id: 'airports',
-      data: AIR_PORTS,
-      filled: true,
-      pointRadiusMinPixels: 2,
-      pointRadiusScale: 2000,
-      getPointRadius: f => 11 - f.properties.scalerank,
-      getFillColor: [200, 0, 80, 180],
-      pickable: true,
-      autoHighlight: true,
-      onClick
-    }),
-    new ArcLayer({
-      id: 'arcs',
-      data: AIR_PORTS,
-      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-      getSourcePosition: f => [-0.4531566, 51.4709959], // London
-      getTargetPosition: f => f.geometry.coordinates,
-      getSourceColor: [0, 128, 200],
-      getTargetColor: [200, 0, 80],
-      getWidth: 1
-    })
-  ];
-
   return (
-    <React.StrictMode>
-      <DeckGL
-        style={{position: 'absolute', top: '0', left: '0'}}
-        width="100%"
-        height="100%"
-        layers={layers}
-        controller
-        initialViewState={INITIAL_VIEW_STATE}
-        onViewStateChange={e => setViewState(e.viewState)}
-      >
-        <Map mapStyle={MAP_STYLE} />
-        <FullscreenWidget />
-        <ZoomWidget />
-        <CompassWidget />
-      </DeckGL>
-    </React.StrictMode>
+    <DeckGL controller={true} initialViewState={INITIAL_VIEW_STATE}>
+      <Map mapStyle={MAP_STYLE} />
+      <GeoJsonLayer
+        id="base-map"
+        data={COUNTRIES}
+        stroked={true}
+        filled={true}
+        lineWidthMinPixels={2}
+        opacity={0.4}
+        getLineColor={[60, 60, 60]}
+        getFillColor={[200, 200, 200]}
+      />
+      <GeoJsonLayer
+        id="airports"
+        data={AIR_PORTS}
+        filled={true}
+        pointRadiusMinPixels={2}
+        pointRadiusScale={2000}
+        getPointRadius={f => 11 - f.properties.scalerank}
+        getFillColor={[200, 0, 80, 180]}
+        pickable={true}
+        autoHighlight={true}
+        onClick={onClick}
+      />
+      <ArcLayer
+        id="arcs"
+        data={AIR_PORTS}
+        dataTransform={d => d.features.filter(f => f.properties.scalerank < 4)}
+        getSourcePosition={f => [-0.4531566, 51.4709959]}
+        getTargetPosition={f => f.geometry.coordinates}
+        getSourceColor={[0, 128, 200]}
+        getTargetColor={[200, 0, 80]}
+        getWidth={1}
+      />
+      <FullscreenWidget style={widgetTheme} />
+      <ZoomWidget style={widgetTheme} />
+      <CompassWidget style={widgetTheme} />
+    </DeckGL>
   );
 }
 
