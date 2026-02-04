@@ -11,15 +11,7 @@ import type {IControl, ControlPosition, Map} from './types';
  * This enables deck widgets to be positioned alongside native map controls
  * in the same DOM container, preventing overlap issues.
  *
- * Used internally by MapboxOverlay for widgets with `viewId: 'mapbox'`.
- * Can also be used directly for more control over widget positioning.
- *
- * @example
- * ```typescript
- * const zoomWidget = new ZoomWidget({placement: 'top-right'});
- * const control = new DeckWidgetControl(zoomWidget);
- * map.addControl(control, 'top-right');
- * ```
+ * @internal Used by MapboxOverlay for widgets with `viewId: 'mapbox'`.
  */
 export class DeckWidgetControl implements IControl {
   private _widget: Widget;
