@@ -217,90 +217,94 @@ test('color#parseColor', () => {
 
 ### @deck.gl/test-utils Updates
 
-The `@deck.gl/test-utils` module uses `makeSpy` from `@probe.gl/test-utils`. This is replaced with vitest's built-in `vi.spyOn`, with **backward compatibility** for existing tape/probe.gl users.
+The `@deck.gl/test-utils` module uses spies for testing layer lifecycle methods. To make test-utils **framework-agnostic** and avoid module loading issues (vitest imports hanging in Node), we use an **Injectable Spy API**.
 
-#### Dual-API Implementation
+#### Injectable Spy API
 
-The module dynamically detects which spy framework is available at module load time:
+Users pass their own `createSpy` function instead of test-utils importing test frameworks directly:
 
 ```typescript
-// Spy abstraction - supports both vitest (preferred) and probe.gl (deprecated)
-type Spy = {
-  mockRestore?: () => void; // vitest
-  restore?: () => void; // probe.gl
-  mock?: {calls: any[][]}; // vitest
-  calls?: any[][]; // probe.gl
-};
+// vitest user
+import {testLayer} from '@deck.gl/test-utils';
+import {vi} from 'vitest';
 
-let _vi: any;
-let _makeSpy: any;
+await testLayer({
+  createSpy: (obj, method) => vi.spyOn(obj, method),
+  Layer: ScatterplotLayer,
+  testCases: [...]
+});
 
-// Environment variable to force probe.gl path (for testing backward compatibility)
-const forceProbeGl = process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1';
+// tape/probe.gl user
+import {testLayer} from '@deck.gl/test-utils';
+import {makeSpy} from '@probe.gl/test-utils';
 
-// Try vitest first (preferred), unless forced to use probe.gl
-if (!forceProbeGl) {
+await testLayer({
+  createSpy: makeSpy,
+  Layer: ScatterplotLayer,
+  testCases: [...]
+});
+```
+
+#### Why Injectable?
+
+Importing `vitest` outside of a vitest test context causes "Vitest failed to access its internal state" errors and hangs. By making `createSpy` injectable, test-utils has **zero test framework dependencies** and works in any environment.
+
+#### Backward Compatibility
+
+For existing tape users who don't pass `createSpy`, test-utils lazily imports `@probe.gl/test-utils` with a deprecation warning:
+
+```typescript
+// Internal fallback (only used if createSpy not provided)
+async function getDefaultSpyFactory() {
   try {
-    const vitest = await import('vitest');
-    _vi = vitest.vi;
-  } catch {}
-}
-
-if (!_vi) {
-  try {
-    const probegl = await import('@probe.gl/test-utils');
-    _makeSpy = probegl.makeSpy;
-    if (!forceProbeGl) {
-      console.warn(
-        '[@deck.gl/test-utils] @probe.gl/test-utils is deprecated for spying. ' +
-        'Install vitest ^2.1.0 as a peer dependency.'
-      );
-    }
-  } catch {}
-}
-
-function createSpy(obj: object, method: string): Spy {
-  if (_vi) return _vi.spyOn(obj, method);
-  if (_makeSpy) return _makeSpy(obj, method);
-  throw new Error('Install vitest or @probe.gl/test-utils as peer dependency');
+    const {makeSpy} = await import('@probe.gl/test-utils');
+    console.warn(
+      '[@deck.gl/test-utils] Implicit @probe.gl/test-utils usage is deprecated. ' +
+      'Pass createSpy option explicitly.'
+    );
+    return makeSpy;
+  } catch {
+    throw new Error('createSpy option required.');
+  }
 }
 ```
 
 #### Peer Dependencies
 
-Both frameworks are optional peer dependencies:
+Only `@probe.gl/test-utils` remains as an optional peer dependency (for backward compat):
+
 ```json
 "peerDependencies": {
-  "@probe.gl/test-utils": "^4.1.0",
-  "vitest": "^2.1.0"
+  "@probe.gl/test-utils": "^4.1.0"
 },
 "peerDependenciesMeta": {
-  "@probe.gl/test-utils": { "optional": true },
-  "vitest": { "optional": true }
+  "@probe.gl/test-utils": { "optional": true }
 }
 ```
 
 #### User Experience Matrix
 
-| User Type | Experience |
-|-----------|------------|
-| **Vitest users** | Works out of the box, no warnings |
-| **Tape/probe.gl users** | Works with deprecation warning in console |
-| **Neither installed** | Clear error message with instructions |
+| User | createSpy provided? | Result |
+|------|---------------------|--------|
+| Vitest user | Yes (`vi.spyOn`) | Works, no warnings |
+| Tape user (new) | Yes (`makeSpy`) | Works, no warnings |
+| Tape user (existing) | No | Works with deprecation warning |
+| Neither installed | No | Clear error message |
+
+#### Deprecation Timeline
+
+| Version | Behavior |
+|---------|----------|
+| 9.3.x | `createSpy` optional, defaults to probe.gl with warning |
+| 10.0.0 | `createSpy` required, remove probe.gl fallback |
 
 #### Tape Backward Compatibility Testing
 
 A smoke test verifies the probe.gl fallback path in CI:
 
 ```bash
-# Forces probe.gl path via environment variable
-DECK_TEST_UTILS_USE_PROBE_GL=1 ocular-test tape-compat
+DECK_TEST_UTILS_USE_PROBE_GL=1 yarn test-tape-compat
 ```
-
-This runs `test/smoke/tape-compat.ts` which tests:
-1. `@probe.gl/test-utils` can be imported
-2. `makeSpy` creates working spies
-3. Environment variable is correctly detected
 
 ## Implementation Plan
 

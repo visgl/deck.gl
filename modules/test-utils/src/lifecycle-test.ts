@@ -9,8 +9,8 @@ import type {Layer, CompositeLayer, Viewport} from '@deck.gl/core';
 import type {Timeline} from '@luma.gl/engine';
 import type {StatsManager} from '@luma.gl/core';
 
-// Spy abstraction - supports both vitest (preferred) and probe.gl (deprecated)
-// This allows @deck.gl/test-utils to work with either framework
+// Spy abstraction - supports both vitest and probe.gl spy implementations
+// Users pass their own createSpy function to avoid test framework dependencies
 type Spy = {
   mockRestore?: () => void; // vitest
   restore?: () => void; // probe.gl
@@ -18,75 +18,35 @@ type Spy = {
   calls?: any[][]; // probe.gl
 };
 
-// Lazy-loaded spy framework - only initialized when createSpy is first called
-// This avoids hanging on module load when vitest isn't ready
-let _vi: any;
-let _makeSpy: any;
-let _spyFrameworkInitialized = false;
+// User-provided spy factory type
+export type SpyFactory = (obj: object, method: string) => Spy;
 
-// Environment variable to force probe.gl path (for testing backward compatibility)
-function shouldForceProbeGl(): boolean {
-  // eslint-disable-next-line no-process-env
-  return typeof process !== 'undefined' && process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1';
-}
+// Lazy-loaded default spy factory for backward compatibility
+// Only imports @probe.gl/test-utils when createSpy is not provided
+let _defaultSpyFactory: SpyFactory | null = null;
 
-// Check if we're running inside vitest by looking for vitest-specific globals
-// This avoids the error "Vitest failed to access its internal state" when
-// importing vitest outside of a vitest test context
-function isRunningInVitest(): boolean {
-  // Vitest sets __vitest_index__ on globalThis when running
-  return typeof (globalThis as any).__vitest_index__ !== 'undefined';
-}
-
-async function initSpyFramework(): Promise<void> {
-  if (_spyFrameworkInitialized) return;
-  _spyFrameworkInitialized = true;
-
-  const forceProbeGl = shouldForceProbeGl();
-
-  // Try vitest first (preferred), but only if running inside vitest context
-  if (!forceProbeGl && isRunningInVitest()) {
-    try {
-      const vitest = await import('vitest');
-      _vi = vitest.vi;
-      return;
-    } catch {
-      // vitest not available or failed to load
-    }
+async function getDefaultSpyFactory(): Promise<SpyFactory> {
+  if (_defaultSpyFactory) {
+    return _defaultSpyFactory;
   }
 
-  // Fall back to probe.gl (deprecated)
   try {
     const probegl = await import('@probe.gl/test-utils');
-    _makeSpy = probegl.makeSpy;
-    if (!forceProbeGl && !isRunningInVitest()) {
-      // Only warn if not explicitly testing probe.gl compatibility
-      // and not running in vitest (where vitest should be used)
-      console.warn(
-        // eslint-disable-line no-console
-        '[@deck.gl/test-utils] @probe.gl/test-utils is deprecated for spying. ' +
-          'Install vitest ^2.1.0 as a peer dependency. ' +
-          'See https://deck.gl/docs/developer-guide/testing'
-      );
-    }
+    _defaultSpyFactory = probegl.makeSpy;
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[@deck.gl/test-utils] Implicit @probe.gl/test-utils usage is deprecated. ' +
+        'Pass createSpy option: createSpy: (obj, method) => vi.spyOn(obj, method) for vitest, ' +
+        'or createSpy: makeSpy for probe.gl. See https://deck.gl/docs/developer-guide/testing'
+    );
+    return _defaultSpyFactory;
   } catch {
-    // Neither available - error will be thrown when createSpy is called
+    throw new Error(
+      '@deck.gl/test-utils: createSpy option is required. ' +
+        'Pass createSpy: (obj, method) => vi.spyOn(obj, method) for vitest, ' +
+        'or createSpy: makeSpy for @probe.gl/test-utils.'
+    );
   }
-}
-
-async function createSpy(obj: object, method: string): Promise<Spy> {
-  await initSpyFramework();
-
-  if (_vi) {
-    return _vi.spyOn(obj, method);
-  }
-  if (_makeSpy) {
-    return _makeSpy(obj, method);
-  }
-  throw new Error(
-    '@deck.gl/test-utils requires either vitest or @probe.gl/test-utils as a peer dependency. ' +
-      'Install one of: npm install -D vitest (recommended) or npm install -D @probe.gl/test-utils'
-  );
 }
 
 function restoreSpy(spy: Spy): void {
@@ -271,10 +231,16 @@ export async function testLayer<LayerT extends Layer>(opts: {
    * List of layer method names to watch
    */
   spies?: string[];
+  /**
+   * Spy factory function. Pass vi.spyOn for vitest or makeSpy for probe.gl.
+   * @example createSpy: (obj, method) => vi.spyOn(obj, method)
+   */
+  createSpy?: SpyFactory;
   /** Callback if any error is thrown */
   onError?: (error: Error, title: string) => void;
 }): Promise<void> {
   const {Layer, testCases = [], spies = [], onError = defaultOnError} = opts;
+  const spyFactory = opts.createSpy || (await getDefaultSpyFactory());
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
@@ -284,7 +250,13 @@ export async function testLayer<LayerT extends Layer>(opts: {
     // Save old state before update
     const oldState = {...layer.state};
 
-    const {layer: newLayer, spyMap} = await runLayerTestUpdate(testCase, resources, layer, spies);
+    const {layer: newLayer, spyMap} = runLayerTestUpdate(
+      testCase,
+      resources,
+      layer,
+      spies,
+      spyFactory
+    );
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
@@ -319,10 +291,16 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
    * List of layer method names to watch
    */
   spies?: string[];
+  /**
+   * Spy factory function. Pass vi.spyOn for vitest or makeSpy for probe.gl.
+   * @example createSpy: (obj, method) => vi.spyOn(obj, method)
+   */
+  createSpy?: SpyFactory;
   /** Callback if any error is thrown */
   onError?: (error: Error, title: string) => void;
 }): Promise<void> {
   const {Layer, testCases = [], spies = [], onError = defaultOnError} = opts;
+  const spyFactory = opts.createSpy || (await getDefaultSpyFactory());
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
@@ -332,7 +310,13 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
     // Save old state before update
     const oldState = {...layer.state};
 
-    const {layer: newLayer, spyMap} = await runLayerTestUpdate(testCase, resources, layer, spies);
+    const {layer: newLayer, spyMap} = runLayerTestUpdate(
+      testCase,
+      resources,
+      layer,
+      spies,
+      spyFactory
+    );
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
@@ -410,11 +394,11 @@ function getResourceCounts(): Record<string, number> {
   };
 }
 
-async function injectSpies(layer: Layer, spies: string[]): Promise<Record<string, Spy>> {
+function injectSpies(layer: Layer, spies: string[], spyFactory: SpyFactory): Record<string, Spy> {
   const spyMap: Record<string, Spy> = {};
   if (spies) {
     for (const functionName of spies) {
-      spyMap[functionName] = await createSpy(Object.getPrototypeOf(layer), functionName);
+      spyMap[functionName] = spyFactory(Object.getPrototypeOf(layer), functionName);
     }
   }
   return spyMap;
@@ -446,15 +430,16 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
   }
 }
 
-async function runLayerTestUpdate<LayerT extends Layer>(
+function runLayerTestUpdate<LayerT extends Layer>(
   testCase: LayerTestCase<LayerT>,
   {layerManager, deckRenderer}: TestResources,
   layer: LayerT,
-  spies: string[]
-): Promise<{
+  spies: string[],
+  spyFactory: SpyFactory
+): {
   layer: LayerT;
   spyMap: Record<string, Spy>;
-}> {
+} {
   const {props, updateProps, onBeforeUpdate, viewport = layerManager.context.viewport} = testCase;
 
   if (onBeforeUpdate) {
@@ -471,7 +456,7 @@ async function runLayerTestUpdate<LayerT extends Layer>(
 
   // Create a map of spies that the test case can inspect
   spies = testCase.spies || spies;
-  const spyMap = await injectSpies(layer, spies);
+  const spyMap = injectSpies(layer, spies, spyFactory);
   const drawLayers = () => {
     deckRenderer.renderLayers({
       pass: 'test',
