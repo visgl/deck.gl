@@ -81,7 +81,6 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
   private _collapsed: boolean = true;
-  _stats: Stats;
 
   /**
    * Returns the current collapsed state.
@@ -96,14 +95,12 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
-    this._stats = this.props.stats;
     this.setProps(props);
   }
 
   setProps(props: Partial<StatsWidgetProps>): void {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
-    this._stats = this._getStats();
     if (props.formatters) {
       for (const name in props.formatters) {
         const f = props.formatters[name];
@@ -123,19 +120,18 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   }
 
   onAdd(): void {
-    this._stats = this._getStats();
     this.updateHTML();
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const stats = this._stats;
+    const stats = this._getStats();
     const isCollapsed = this.getCollapsed();
-    const title = this.props.title || stats?.id || 'Stats';
+    const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
     const items: JSX.Element[] = [];
 
     if (!isCollapsed && stats) {
       stats.forEach(stat => {
-        const lines = this._getLines(stat);
+        const lines = this._getLines(stat).split('\n');
         if (this._resetOnUpdate && this._resetOnUpdate[stat.name]) {
           stat.reset();
         }
@@ -167,23 +163,23 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   onRedraw(): void {
     const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
     if (this._counter++ % framesPerUpdate === 0) {
-      this._stats = this._getStats();
       this.updateHTML();
     }
   }
 
-  protected _getStats(): Stats {
+  protected _getStats(): Stats | [key: string, value: number][] {
     switch (this.props.type) {
       case 'deck':
-        // @ts-expect-error stats is protected
-        return this.deck?.stats;
+        // @ts-expect-error metrics is protected
+        const metrics = this.deck?.metrics ?? {};
+        return Object.entries(metrics);
       case 'luma':
         return Array.from(luma.stats.stats.values())[0];
       case 'device':
         // @ts-expect-error is protected
         const device = this.deck?.device;
         const stats = device?.statsManager.stats.values();
-        return stats ? Array.from(stats)[0] : undefined;
+        return stats ? Array.from(stats)[0] : [];
       case 'custom':
         return this.props.stats;
       default:
@@ -205,9 +201,19 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     // In controlled mode, parent will update collapsed prop which triggers updateHTML via setProps
   };
 
-  protected _getLines(stat: Stat): string[] {
-    const formatter =
-      this._formatters[stat.name] || this._formatters[stat.type || ''] || DEFAULT_COUNT_FORMATTER;
-    return formatter(stat).split('\n');
+  protected _getLines(stat: Stat | [key: string, value: number]): string {
+    if ('count' in stat) {
+      const formatter =
+        this._formatters[stat.name] || this._formatters[stat.type || ''] || DEFAULT_COUNT_FORMATTER;
+      return formatter(stat);
+    }
+    const [key, value] = stat;
+    const formattedValue = key.endsWith('Memory')
+      ? formatMemory(value)
+      : key.includes('Time')
+        ? formatTime(value)
+        : `${value.toFixed(2)}`;
+
+    return `${key}: ${formattedValue}`;
   }
 }
