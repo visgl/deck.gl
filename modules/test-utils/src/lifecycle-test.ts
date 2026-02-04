@@ -18,32 +18,42 @@ type Spy = {
   calls?: any[][]; // probe.gl
 };
 
+// Lazy-loaded spy framework - only initialized when createSpy is first called
+// This avoids hanging on module load when vitest isn't ready
 let _vi: any;
 let _makeSpy: any;
+let _spyFrameworkInitialized = false;
 
 // Environment variable to force probe.gl path (for testing backward compatibility)
-const forceProbeGl =
-  typeof process !== 'undefined' && process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1'; // eslint-disable-line no-process-env
-
-// Detect spy framework at module load time (top-level await)
-// Try vitest first (preferred), unless forced to use probe.gl
-if (!forceProbeGl) {
-  try {
-    const vitest = await import('vitest');
-    _vi = vitest.vi;
-  } catch {
-    // vitest not available
-  }
+function shouldForceProbeGl(): boolean {
+  // eslint-disable-next-line no-process-env
+  return typeof process !== 'undefined' && process.env?.DECK_TEST_UTILS_USE_PROBE_GL === '1';
 }
 
-if (!_vi) {
+async function initSpyFramework(): Promise<void> {
+  if (_spyFrameworkInitialized) return;
+  _spyFrameworkInitialized = true;
+
+  const forceProbeGl = shouldForceProbeGl();
+
+  // Try vitest first (preferred), unless forced to use probe.gl
+  if (!forceProbeGl) {
+    try {
+      const vitest = await import('vitest');
+      _vi = vitest.vi;
+      return;
+    } catch {
+      // vitest not available
+    }
+  }
+
   // Fall back to probe.gl (deprecated)
   try {
     const probegl = await import('@probe.gl/test-utils');
     _makeSpy = probegl.makeSpy;
     if (!forceProbeGl) {
       // Only warn if not explicitly testing probe.gl compatibility
-      console.warn(
+      console.warn( // eslint-disable-line no-console
         '[@deck.gl/test-utils] @probe.gl/test-utils is deprecated for spying. ' +
           'Install vitest ^2.1.0 as a peer dependency. ' +
           'See https://deck.gl/docs/developer-guide/testing'
@@ -54,7 +64,9 @@ if (!_vi) {
   }
 }
 
-function createSpy(obj: object, method: string): Spy {
+async function createSpy(obj: object, method: string): Promise<Spy> {
+  await initSpyFramework();
+
   if (_vi) {
     return _vi.spyOn(obj, method);
   }
@@ -233,7 +245,7 @@ type TestResources = {
  * Initialize and updates a layer over a sequence of scenarios (test cases).
  * Use `testLayerAsync` if the layer's update flow contains async operations.
  */
-export function testLayer<LayerT extends Layer>(opts: {
+export async function testLayer<LayerT extends Layer>(opts: {
   /** The layer class to test against */
   Layer: LayerClass<LayerT>;
   /** The initial viewport
@@ -251,7 +263,7 @@ export function testLayer<LayerT extends Layer>(opts: {
   spies?: string[];
   /** Callback if any error is thrown */
   onError?: (error: Error, title: string) => void;
-}): void {
+}): Promise<void> {
   const {Layer, testCases = [], spies = [], onError = defaultOnError} = opts;
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
@@ -262,7 +274,7 @@ export function testLayer<LayerT extends Layer>(opts: {
     // Save old state before update
     const oldState = {...layer.state};
 
-    const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
+    const {layer: newLayer, spyMap} = await runLayerTestUpdate(testCase, resources, layer, spies);
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
@@ -310,7 +322,7 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
     // Save old state before update
     const oldState = {...layer.state};
 
-    const {layer: newLayer, spyMap} = runLayerTestUpdate(testCase, resources, layer, spies);
+    const {layer: newLayer, spyMap} = await runLayerTestUpdate(testCase, resources, layer, spies);
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
@@ -388,11 +400,11 @@ function getResourceCounts(): Record<string, number> {
   };
 }
 
-function injectSpies(layer: Layer, spies: string[]): Record<string, Spy> {
+async function injectSpies(layer: Layer, spies: string[]): Promise<Record<string, Spy>> {
   const spyMap: Record<string, Spy> = {};
   if (spies) {
     for (const functionName of spies) {
-      spyMap[functionName] = createSpy(Object.getPrototypeOf(layer), functionName);
+      spyMap[functionName] = await createSpy(Object.getPrototypeOf(layer), functionName);
     }
   }
   return spyMap;
@@ -424,15 +436,15 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
   }
 }
 
-function runLayerTestUpdate<LayerT extends Layer>(
+async function runLayerTestUpdate<LayerT extends Layer>(
   testCase: LayerTestCase<LayerT>,
   {layerManager, deckRenderer}: TestResources,
   layer: LayerT,
   spies: string[]
-): {
+): Promise<{
   layer: LayerT;
   spyMap: Record<string, Spy>;
-} {
+}> {
   const {props, updateProps, onBeforeUpdate, viewport = layerManager.context.viewport} = testCase;
 
   if (onBeforeUpdate) {
@@ -449,7 +461,7 @@ function runLayerTestUpdate<LayerT extends Layer>(
 
   // Create a map of spies that the test case can inspect
   spies = testCase.spies || spies;
-  const spyMap = injectSpies(layer, spies);
+  const spyMap = await injectSpies(layer, spies);
   const drawLayers = () => {
     deckRenderer.renderLayers({
       pass: 'test',

@@ -20,7 +20,8 @@ import * as arcgis from '@deck.gl/arcgis';
 import * as googleMaps from '@deck.gl/google-maps';
 import * as mapbox from '@deck.gl/mapbox';
 import * as react from '@deck.gl/react';
-import * as testUtils from '@deck.gl/test-utils';
+// Note: @deck.gl/test-utils requires WebGL and cannot be imported in Node
+// import * as testUtils from '@deck.gl/test-utils';
 
 describe('Top-level imports', () => {
   const hasEmptyExports = obj => {
@@ -63,10 +64,7 @@ describe('Top-level imports', () => {
     ).toBeFalsy();
     expect(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox').toBeFalsy();
     expect(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react').toBeFalsy();
-    expect(
-      hasEmptyExports(testUtils),
-      'No empty top-level export in @deck.gl/test-utils'
-    ).toBeFalsy();
+    // Note: @deck.gl/test-utils requires WebGL and cannot be imported in Node
   });
 
   test('selected imports', () => {
