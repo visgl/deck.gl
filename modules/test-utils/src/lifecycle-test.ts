@@ -10,7 +10,6 @@ import type {Timeline} from '@luma.gl/engine';
 import type {StatsManager} from '@luma.gl/core';
 
 // Spy abstraction - supports both vitest and probe.gl spy implementations
-// Users pass their own createSpy function to avoid test framework dependencies
 type Spy = {
   mockRestore?: () => void; // vitest
   restore?: () => void; // probe.gl
@@ -18,39 +17,9 @@ type Spy = {
   calls?: any[][]; // probe.gl
 };
 
-// User-provided spy factory type
 export type SpyFactory = (obj: object, method: string) => Spy;
 
-// Lazy-loaded default spy factory for backward compatibility
-// Only imports @probe.gl/test-utils when createSpy is not provided
-let _defaultSpyFactory: SpyFactory | null = null;
-
-async function getDefaultSpyFactory(): Promise<SpyFactory> {
-  if (_defaultSpyFactory) {
-    return _defaultSpyFactory;
-  }
-
-  try {
-    const probegl = await import('@probe.gl/test-utils');
-    _defaultSpyFactory = probegl.makeSpy;
-    // eslint-disable-next-line no-console
-    console.warn(
-      '[@deck.gl/test-utils] Implicit @probe.gl/test-utils usage is deprecated. ' +
-        'Pass createSpy option: createSpy: (obj, method) => vi.spyOn(obj, method) for vitest, ' +
-        'or createSpy: makeSpy for probe.gl. See https://deck.gl/docs/developer-guide/testing'
-    );
-    return _defaultSpyFactory;
-  } catch {
-    throw new Error(
-      '@deck.gl/test-utils: createSpy option is required. ' +
-        'Pass createSpy: (obj, method) => vi.spyOn(obj, method) for vitest, ' +
-        'or createSpy: makeSpy for @probe.gl/test-utils.'
-    );
-  }
-}
-
 function restoreSpy(spy: Spy): void {
-  // vitest uses mockRestore(), probe.gl uses restore()
   if (spy.mockRestore) {
     spy.mockRestore();
   } else if (spy.restore) {
@@ -71,13 +40,8 @@ function defaultOnError(error: unknown, title: string): void {
 }
 
 type InitializeLayerTestOptions = {
-  /** The layer instance to test */
   layer: Layer;
-  /** The initial viewport
-   * @default WebMercatorViewport
-   */
   viewport?: Viewport;
-  /** Callback if any error is thrown */
   onError?: (error: unknown, title: string) => void;
 };
 
@@ -90,86 +54,41 @@ function initializeLayerManager({
   layerManager.setProps({
     onError: error => onError(error, `initializing ${layer.id}`)
   });
-
   layerManager.setLayers([layer]);
   return layerManager;
 }
 
-/** Test that initializing a layer does not throw.
- * Use `testInitializeLayerAsync` if the layer's initialization flow contains async operations.
- */
-export function testInitializeLayer(
-  opts: InitializeLayerTestOptions & {
-    /** Automatically finalize the layer and release all resources after the test */
-    finalize?: true;
-  }
-): null;
-export function testInitializeLayer(
-  opts: InitializeLayerTestOptions & {
-    /** Automatically finalize the layer and release all resources after the test */
-    finalize: false;
-  }
-): {
-  /** Finalize the layer and release all resources */
+export function testInitializeLayer(opts: InitializeLayerTestOptions & {finalize?: true}): null;
+export function testInitializeLayer(opts: InitializeLayerTestOptions & {finalize: false}): {
   finalize: () => void;
 };
-
 export function testInitializeLayer(
-  opts: InitializeLayerTestOptions & {
-    /** Automatically finalize the layer and release all resources after the test */
-    finalize?: boolean;
-  }
-): {
-  /** Finalize the layer and release all resources */
-  finalize: () => void;
-} | null {
+  opts: InitializeLayerTestOptions & {finalize?: boolean}
+): {finalize: () => void} | null {
   const layerManager = initializeLayerManager(opts);
   if (opts.finalize === false) {
-    return {
-      finalize: () => layerManager.finalize()
-    };
+    return {finalize: () => layerManager.finalize()};
   }
   layerManager.finalize();
   return null;
 }
 
-/** Test that initializing a layer does not throw.
- * Resolves when the layer's isLoaded flag becomes true.
- */
 export function testInitializeLayerAsync(
-  opts: InitializeLayerTestOptions & {
-    /** Automatically finalize the layer and release all resources after the test */
-    finalize?: true;
-  }
+  opts: InitializeLayerTestOptions & {finalize?: true}
 ): Promise<null>;
 export function testInitializeLayerAsync(
-  opts: InitializeLayerTestOptions & {
-    /** Automatically finalize the layer and release all resources after the test */
-    finalize: false;
-  }
-): Promise<{
-  /** Finalize the layer and release all resources */
-  finalize: () => void;
-}>;
-
+  opts: InitializeLayerTestOptions & {finalize: false}
+): Promise<{finalize: () => void}>;
 export async function testInitializeLayerAsync(
-  opts: InitializeLayerTestOptions & {
-    /** Automatically finalize the layer and release all resources after the test */
-    finalize?: boolean;
-  }
-): Promise<{
-  /** Finalize the layer and release all resources */
-  finalize: () => void;
-} | null> {
+  opts: InitializeLayerTestOptions & {finalize?: boolean}
+): Promise<{finalize: () => void} | null> {
   const layerManager = initializeLayerManager(opts);
   const deckRenderer = new DeckRenderer(device);
   while (!opts.layer.isLoaded) {
     await update({layerManager, deckRenderer, oldResourceCounts: {}});
   }
   if (opts.finalize === false) {
-    return {
-      finalize: () => layerManager.finalize()
-    };
+    return {finalize: () => layerManager.finalize()};
   }
   layerManager.finalize();
   return null;
@@ -184,17 +103,10 @@ export type LayerClass<LayerT extends Layer> = {
 export type LayerTestCase<LayerT extends Layer> = {
   title: string;
   viewport?: Viewport;
-  /** Reset the props of the test layer instance */
   props?: Partial<LayerT['props']>;
-  /** Update the given props of the test layer instance */
   updateProps?: Partial<LayerT['props']>;
-  /** List of layer method names to watch */
   spies?: string[];
-
-  /** Called before layer updates */
   onBeforeUpdate?: (params: {layer: Layer; testCase: LayerTestCase<LayerT>}) => void;
-
-  /** Called after layer is updated */
   onAfterUpdate?: (params: {
     testCase: LayerTestCase<LayerT>;
     layer: LayerT;
@@ -211,56 +123,36 @@ type TestResources = {
   oldResourceCounts: Record<string, number>;
 };
 
+export type TestLayerOptions<LayerT extends Layer> = {
+  Layer: LayerClass<LayerT>;
+  viewport?: Viewport;
+  timeline?: Timeline;
+  testCases?: LayerTestCase<LayerT>[];
+  spies?: string[];
+  createSpy: SpyFactory;
+  onError?: (error: Error, title: string) => void;
+};
+
 /**
  * Initialize and updates a layer over a sequence of scenarios (test cases).
  * Use `testLayerAsync` if the layer's update flow contains async operations.
  */
-export async function testLayer<LayerT extends Layer>(opts: {
-  /** The layer class to test against */
-  Layer: LayerClass<LayerT>;
-  /** The initial viewport
-   * @default WebMercatorViewport
-   */
-  viewport?: Viewport;
-  /**
-   * If provided, used to controls time progression. Useful for testing transitions and animations.
-   */
-  timeline?: Timeline;
-  testCases?: LayerTestCase<LayerT>[];
-  /**
-   * List of layer method names to watch
-   */
-  spies?: string[];
-  /**
-   * Spy factory function. Pass vi.spyOn for vitest or makeSpy for probe.gl.
-   * @example createSpy: (obj, method) => vi.spyOn(obj, method)
-   */
-  createSpy?: SpyFactory;
-  /** Callback if any error is thrown */
-  onError?: (error: Error, title: string) => void;
-}): Promise<void> {
-  const {Layer, testCases = [], spies = [], onError = defaultOnError} = opts;
-  const spyFactory = opts.createSpy || (await getDefaultSpyFactory());
+export function testLayer<LayerT extends Layer>(opts: TestLayerOptions<LayerT>): void {
+  const {Layer, testCases = [], spies = [], onError = defaultOnError, createSpy} = opts;
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
   let layer = new Layer();
-  // Run successive update tests
   for (const testCase of testCases) {
-    // Save old state before update
     const oldState = {...layer.state};
-
     const {layer: newLayer, spyMap} = runLayerTestUpdate(
       testCase,
       resources,
       layer,
       spies,
-      spyFactory
+      createSpy
     );
-
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
-
-    // Remove spies - restoreSpy handles both vitest and probe.gl
     Object.keys(spyMap).forEach(k => restoreSpy(spyMap[k]));
     layer = newLayer;
   }
@@ -275,49 +167,23 @@ export async function testLayer<LayerT extends Layer>(opts: {
  * Initialize and updates a layer over a sequence of scenarios (test cases).
  * Each test case is awaited until the layer's isLoaded flag is true.
  */
-export async function testLayerAsync<LayerT extends Layer>(opts: {
-  /** The layer class to test against */
-  Layer: LayerClass<LayerT>;
-  /** The initial viewport
-   * @default WebMercatorViewport
-   */
-  viewport?: Viewport;
-  /**
-   * If provided, used to controls time progression. Useful for testing transitions and animations.
-   */
-  timeline?: Timeline;
-  testCases?: LayerTestCase<LayerT>[];
-  /**
-   * List of layer method names to watch
-   */
-  spies?: string[];
-  /**
-   * Spy factory function. Pass vi.spyOn for vitest or makeSpy for probe.gl.
-   * @example createSpy: (obj, method) => vi.spyOn(obj, method)
-   */
-  createSpy?: SpyFactory;
-  /** Callback if any error is thrown */
-  onError?: (error: Error, title: string) => void;
-}): Promise<void> {
-  const {Layer, testCases = [], spies = [], onError = defaultOnError} = opts;
-  const spyFactory = opts.createSpy || (await getDefaultSpyFactory());
+export async function testLayerAsync<LayerT extends Layer>(
+  opts: TestLayerOptions<LayerT>
+): Promise<void> {
+  const {Layer, testCases = [], spies = [], onError = defaultOnError, createSpy} = opts;
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
   let layer = new Layer();
-  // Run successive update tests
   for (const testCase of testCases) {
-    // Save old state before update
     const oldState = {...layer.state};
-
     const {layer: newLayer, spyMap} = runLayerTestUpdate(
       testCase,
       resources,
       layer,
       spies,
-      spyFactory
+      createSpy
     );
-
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
     while (!newLayer.isLoaded) {
@@ -325,7 +191,6 @@ export async function testLayerAsync<LayerT extends Layer>(opts: {
       runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
 
-    // Remove spies - restoreSpy handles both vitest and probe.gl
     Object.keys(spyMap).forEach(k => restoreSpy(spyMap[k]));
     layer = newLayer;
   }
@@ -349,7 +214,6 @@ function setupLayerTests(
   }
 ): TestResources {
   const oldResourceCounts = getResourceCounts();
-
   const layerManager = new LayerManager(device, {viewport, timeline});
   const deckRenderer = new DeckRenderer(device);
 
@@ -374,7 +238,6 @@ function cleanupAfterLayerTests({
   deckRenderer.finalize();
 
   const resourceCounts = getResourceCounts();
-
   for (const resourceName in resourceCounts) {
     if (resourceCounts[resourceName] !== oldResourceCounts[resourceName]) {
       return new Error(
@@ -386,7 +249,6 @@ function cleanupAfterLayerTests({
 }
 
 function getResourceCounts(): Record<string, number> {
-  /* global luma */
   const resourceStats = (luma.stats as StatsManager).get('Resource Counts');
   return {
     Texture2D: resourceStats.get('Texture2Ds Active').count,
@@ -410,15 +272,11 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
   oldState: any,
   spyMap: Record<string, Spy>
 ) {
-  // assert on updated layer
   if (testCase.onAfterUpdate) {
-    // layer manager should handle match subLayer and tranfer state and props
-    // here we assume subLayer matches copy over the new props from a new subLayer
     const subLayers = newLayer.isComposite
       ? (newLayer as Layer as CompositeLayer).getSubLayers()
       : [];
     const subLayer = subLayers.length ? subLayers[0] : null;
-
     testCase.onAfterUpdate({
       testCase,
       layer: newLayer,
@@ -436,10 +294,7 @@ function runLayerTestUpdate<LayerT extends Layer>(
   layer: LayerT,
   spies: string[],
   spyFactory: SpyFactory
-): {
-  layer: LayerT;
-  spyMap: Record<string, Spy>;
-} {
+): {layer: LayerT; spyMap: Record<string, Spy>} {
   const {props, updateProps, onBeforeUpdate, viewport = layerManager.context.viewport} = testCase;
 
   if (onBeforeUpdate) {
@@ -447,14 +302,11 @@ function runLayerTestUpdate<LayerT extends Layer>(
   }
 
   if (props) {
-    // Test case can reset the props on every iteration
     layer = new (layer.constructor as LayerClass<LayerT>)(props);
   } else if (updateProps) {
-    // Test case can override with new props on every iteration
     layer = layer.clone(updateProps);
   }
 
-  // Create a map of spies that the test case can inspect
   spies = testCase.spies || spies;
   const spyMap = injectSpies(layer, spies, spyFactory);
   const drawLayers = () => {
@@ -471,7 +323,6 @@ function runLayerTestUpdate<LayerT extends Layer>(
   layerManager.setLayers([layer]);
   drawLayers();
 
-  // clear update flags set by viewport change, if any
   if (layerManager.needsUpdate()) {
     layerManager.updateLayers();
     drawLayers();
@@ -480,13 +331,11 @@ function runLayerTestUpdate<LayerT extends Layer>(
   return {layer, spyMap};
 }
 
-/* global setTimeout */
 function update({layerManager, deckRenderer}: TestResources): Promise<void> {
   return new Promise(resolve => {
     const onAnimationFrame = () => {
       if (layerManager.needsUpdate()) {
         layerManager.updateLayers();
-
         deckRenderer.renderLayers({
           pass: 'test',
           views: {},
@@ -498,10 +347,8 @@ function update({layerManager, deckRenderer}: TestResources): Promise<void> {
         resolve();
         return;
       }
-
       setTimeout(onAnimationFrame, 50);
     };
-
     onAnimationFrame();
   });
 }

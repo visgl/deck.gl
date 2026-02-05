@@ -2,23 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+// Vitest-specific entry point that doesn't import @probe.gl/test-utils
+// Use: import { testLayer } from '@deck.gl/test-utils/vitest'
+
 export {getLayerUniforms} from './utils/layer';
 export {toLowPrecision} from './utils/precision';
 export {gl, device} from './utils/setup-gl';
 
-// Utilities for update tests (lifecycle tests)
-// Uses ./tape which wraps ./lifecycle-test with @probe.gl/test-utils default
-export {testLayer, testLayerAsync, testInitializeLayer, testInitializeLayerAsync} from './tape';
+export {
+  testLayer,
+  testLayerAsync,
+  testInitializeLayer,
+  testInitializeLayerAsync
+} from './lifecycle-test';
 export {generateLayerTests} from './generate-layer-tests';
 
-// Basic utility for rendering multiple scenes (could go into "deck.gl/core")
 export {TestRunner} from './test-runner';
-
-// A utility that renders a list of scenes and compares against golden images
 export {SnapshotTestRunner} from './snapshot-test-runner';
-// A utility that emulates input events
 export {InteractionTestRunner} from './interaction-test-runner';
 
-export type {LayerTestCase} from './tape';
+export type {LayerTestCase, SpyFactory} from './lifecycle-test';
 export type {SnapshotTestCase} from './snapshot-test-runner';
 export type {InteractionTestCase} from './interaction-test-runner';

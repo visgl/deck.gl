@@ -61,6 +61,13 @@ const aliases = {
   'deck.gl-test': resolve(packageRoot, 'test')
 };
 
+// Browser aliases - use vitest entry point for @deck.gl/test-utils to avoid @probe.gl/test-utils
+// which has Node.js dependencies that don't work in browser environments
+const browserAliases = {
+  ...aliases,
+  '@deck.gl/test-utils': resolve(packageRoot, 'modules/test-utils/src/vitest.ts')
+};
+
 // Shared coverage configuration
 const coverageConfig = {
   provider: 'v8' as const,
@@ -83,6 +90,7 @@ const optimizeDepsConfig = {
     '@luma.gl/engine',
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
+    '@luma.gl/effects',
     // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
@@ -128,15 +136,14 @@ export default defineWorkspace([
   // Headless project - unit tests in headless browser
   // Used by test-headless and test-ci
   {
-    resolve: {alias: aliases},
+    resolve: {alias: browserAliases},
     optimizeDeps: optimizeDepsConfig,
     assetsInclude: assetsIncludeConfig,
     server: serverConfig,
     test: {
       name: 'headless',
       include: [
-        'test/modules/**/*.spec.ts',
-        'test/interaction/**/*.spec.ts'
+        'test/modules/**/*.spec.ts'
       ],
       exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
       globals: false,
@@ -157,7 +164,7 @@ export default defineWorkspace([
   // Browser project - full test suite in headed browser for local development
   // Used by test-browser
   {
-    resolve: {alias: aliases},
+    resolve: {alias: browserAliases},
     optimizeDeps: optimizeDepsConfig,
     assetsInclude: assetsIncludeConfig,
     server: serverConfig,
@@ -183,16 +190,16 @@ export default defineWorkspace([
     }
   },
 
-  // Render project - visual regression tests (separate from headless for easier debugging)
+  // Render project - visual regression and interaction tests (separate from headless for easier debugging)
   // Used by test-render
   {
-    resolve: {alias: aliases},
+    resolve: {alias: browserAliases},
     optimizeDeps: optimizeDepsConfig,
     assetsInclude: assetsIncludeConfig,
     server: serverConfig,
     test: {
       name: 'render',
-      include: ['test/render/**/*.spec.ts'],
+      include: ['test/render/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
       globals: false,
       testTimeout: 300000, // Render tests need longer timeout
       setupFiles: ['./test/setup/vitest-browser-setup.ts'],

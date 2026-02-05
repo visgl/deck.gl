@@ -25,6 +25,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./vitest": {
+      "types": "./dist/vitest.d.ts",
+      "import": "./dist/vitest.js",
+      "require": "./dist/vitest.cjs"
     }
   },
   "files": [
