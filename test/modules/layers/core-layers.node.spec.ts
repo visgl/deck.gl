@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 
 import {
   ScatterplotLayer,
@@ -20,7 +20,7 @@ import {
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 
 const GRID = [
   {position: [37, 122]},
@@ -43,7 +43,6 @@ test('ScreenGridLayer', async () => {
   });
 
   await testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ScreenGridLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -67,7 +66,6 @@ test('ScatterplotLayer', async () => {
   });
 
   await testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ScatterplotLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -87,7 +85,6 @@ test('ArcLayer', async () => {
   });
 
   await testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ArcLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -111,7 +108,6 @@ test('PointCloudLayer', () => {
   });
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: PointCloudLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -131,7 +127,6 @@ test('LineLayer', () => {
   });
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: LineLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -153,7 +148,6 @@ test('ColumnLayer', () => {
   });
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ColumnLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -172,7 +166,6 @@ test('GridCellLayer', () => {
   });
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: GridCellLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -201,7 +194,6 @@ test('IconLayer', () => {
   });
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: IconLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -227,7 +219,6 @@ test('PathLayer', () => {
   });
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: PathLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
