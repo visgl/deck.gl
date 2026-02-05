@@ -90,6 +90,26 @@ const optimizeDepsConfig = {
   ]
 };
 
+// Server configuration for serving test data files with correct MIME types
+// Without this, binary files like .mvt may be served incorrectly
+const serverConfig = {
+  fs: {
+    // Allow serving files from test/data directory
+    allow: [packageRoot]
+  }
+};
+
+// Include binary file extensions as static assets
+// This ensures Vite serves them with correct MIME types
+const assetsIncludeConfig = [
+  '**/*.mvt', // Mapbox Vector Tiles
+  '**/*.pbf', // Protocol Buffers
+  '**/*.glb', // glTF Binary
+  '**/*.gltf', // glTF
+  '**/*.bin', // Binary data
+  '**/*.terrain' // Terrain files
+];
+
 export default defineWorkspace([
   // Node project - simple smoke tests (*.node.spec.ts only)
   // Used by test-fast for quick validation
@@ -110,11 +130,12 @@ export default defineWorkspace([
   {
     resolve: {alias: aliases},
     optimizeDeps: optimizeDepsConfig,
+    assetsInclude: assetsIncludeConfig,
+    server: serverConfig,
     test: {
       name: 'headless',
       include: [
         'test/modules/**/*.spec.ts',
-        'test/render/**/*.spec.ts',
         'test/interaction/**/*.spec.ts'
       ],
       exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
@@ -138,6 +159,8 @@ export default defineWorkspace([
   {
     resolve: {alias: aliases},
     optimizeDeps: optimizeDepsConfig,
+    assetsInclude: assetsIncludeConfig,
+    server: serverConfig,
     test: {
       name: 'browser',
       include: [
@@ -154,6 +177,30 @@ export default defineWorkspace([
         name: 'chromium',
         provider: 'playwright',
         headless: false,
+        screenshotFailures: false,
+        commands: browserCommands
+      }
+    }
+  },
+
+  // Render project - visual regression tests (separate from headless for easier debugging)
+  // Used by test-render
+  {
+    resolve: {alias: aliases},
+    optimizeDeps: optimizeDepsConfig,
+    assetsInclude: assetsIncludeConfig,
+    server: serverConfig,
+    test: {
+      name: 'render',
+      include: ['test/render/**/*.spec.ts'],
+      globals: false,
+      testTimeout: 300000, // Render tests need longer timeout
+      setupFiles: ['./test/setup/vitest-browser-setup.ts'],
+      browser: {
+        enabled: true,
+        name: 'chromium',
+        provider: 'playwright',
+        headless: true,
         screenshotFailures: false,
         commands: browserCommands
       }
