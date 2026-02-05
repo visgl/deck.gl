@@ -202,7 +202,7 @@ export default class MapboxOverlay implements IControl {
     const map = this._map;
     if (!map) return;
 
-    const mapboxWidgets = widgets?.filter(w => w.viewId === 'mapbox') ?? [];
+    const mapboxWidgets = widgets?.filter(w => w && w.viewId === 'mapbox') ?? [];
 
     // Build a map of existing controls by widget id
     const existingControlsById = new Map<string, DeckWidgetControl>();
