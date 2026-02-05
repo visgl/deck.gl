@@ -284,10 +284,16 @@ export function getTileIndices({
   modelMatrixInverse?: Matrix4;
   zoomOffset?: number;
 }) {
+  // This round/ceil operation ensures that tiles are rendered in the same way as Google Maps, Map Libre, etc.
+  // eg. at viewport.zoom = 9.5, you should fetch tiles at z = 10, not z = 9.
   let z = viewport.isGeospatial
-    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
-    : Math.ceil(viewport.zoom) + zoomOffset;
-  if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
+    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize) + zoomOffset)
+    : Math.ceil(viewport.zoom + zoomOffset);
+
+  // This check doesn't round/ceil and doesn't use the offset. This ensures that tiles are not rendered if the
+  // viewport.zoom is less than minZoom. eg. at viewport.zoom = 9.5 with minZoom = 10 we should not fetch tiles
+  // at z = 10 until viewport.zoom is 10 or greater.
+  if (typeof minZoom === 'number' && Number.isFinite(minZoom) && viewport.zoom < minZoom) {
     if (!extent) {
       return [];
     }
