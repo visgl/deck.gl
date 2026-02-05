@@ -41,7 +41,10 @@ const excludedTests = [
 ];
 
 // Match aliases from .ocularrc.js
+// Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
+  // Explicit vitest entry point (must come before @deck.gl/test-utils)
+  '@deck.gl/test-utils/vitest': resolve(packageRoot, 'modules/test-utils/src/vitest.ts'),
   '@deck.gl/aggregation-layers': resolve(packageRoot, 'modules/aggregation-layers/src'),
   '@deck.gl/arcgis': resolve(packageRoot, 'modules/arcgis/src'),
   '@deck.gl/carto': resolve(packageRoot, 'modules/carto/src'),
@@ -61,8 +64,8 @@ const aliases = {
   'deck.gl-test': resolve(packageRoot, 'test')
 };
 
-// Browser aliases - use vitest entry point for @deck.gl/test-utils to avoid @probe.gl/test-utils
-// which has Node.js dependencies that don't work in browser environments
+// Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
+// until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly
 const browserAliases = {
   ...aliases,
   '@deck.gl/test-utils': resolve(packageRoot, 'modules/test-utils/src/vitest.ts')

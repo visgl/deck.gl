@@ -489,26 +489,19 @@ function convertTapeToVitest(content, filePath = '') {
     'await testLayerAsync('
   );
 
-  // Step 16: Add createSpy option to testLayer and testLayerAsync calls
-  // This makes test files work with the Injectable Spy API
-  // testLayer({ Layer: ... }) -> testLayer({ createSpy: (obj, method) => vi.spyOn(obj, method), Layer: ... })
-  const hasTestLayerCalls = /\b(testLayer|testLayerAsync)\s*\(\s*\{/.test(result);
-  if (hasTestLayerCalls) {
-    // Add createSpy after opening brace, before Layer: (multiline format)
+  // Step 16: Update @deck.gl/test-utils imports to use /vitest entry for testLayer
+  // The vitest entry provides vi.spyOn as the default spy factory
+  const hasTestLayerImport = /from\s+['"]@deck\.gl\/test-utils['"]/.test(result) &&
+    /\b(testLayer|testLayerAsync)\b/.test(result);
+  if (hasTestLayerImport) {
     result = result.replace(
-      /\b(testLayer|testLayerAsync)\s*\(\s*\{\s*\n(\s*)Layer:/g,
-      '$1({\n$2createSpy: (obj, method) => vi.spyOn(obj, method),\n$2Layer:'
-    );
-
-    // Handle single-line format: testLayer({ Layer: ... })
-    result = result.replace(
-      /\b(testLayer|testLayerAsync)\s*\(\s*\{\s*Layer:/g,
-      '$1({ createSpy: (obj, method) => vi.spyOn(obj, method), Layer:'
+      /from\s+['"]@deck\.gl\/test-utils['"]/g,
+      "from '@deck.gl/test-utils/vitest'"
     );
   }
 
   // Step 15: Replace import placeholder with actual imports based on usage
-  // Check if vi.spyOn is used (from makeSpy conversion or createSpy injection)
+  // Check if vi.spyOn is used (from makeSpy conversion)
   const needsVi = /\bvi\.spyOn\s*\(/.test(result);
 
   if (result.includes('__VITEST_IMPORT_PLACEHOLDER__')) {
@@ -517,7 +510,7 @@ function convertTapeToVitest(content, filePath = '') {
     if (/\bdescribe\s*\(/.test(result)) {
       imports.push('describe');
     }
-    // Check if vi.spyOn is used (from makeSpy conversion or createSpy injection)
+    // Check if vi.spyOn is used (from makeSpy conversion)
     if (needsVi) {
       imports.push('vi');
     }
