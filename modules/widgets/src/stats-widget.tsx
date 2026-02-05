@@ -112,11 +112,6 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
       this._resetOnUpdate = {...props.resetOnUpdate};
     }
     super.setProps(props);
-
-    // Handle controlled mode - update HTML when controlled prop changes
-    if (props.collapsed !== undefined) {
-      this.updateHTML();
-    }
   }
 
   onAdd(): void {

@@ -71,11 +71,6 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
-
-    // Handle controlled mode - update HTML when controlled prop changes
-    if (props.viewMode !== undefined) {
-      this.updateHTML();
-    }
   }
 
   onRenderHTML(rootElement: HTMLElement) {
@@ -87,7 +82,7 @@ export class ViewSelectorWidget extends Widget<ViewSelectorWidgetProps> {
           ...item,
           icon: item.icon()
         }))}
-        initialItem={currentMode}
+        selectedItem={currentMode}
         onItemSelected={this.handleSelectMode}
       />,
       rootElement

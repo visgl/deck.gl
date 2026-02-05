@@ -85,11 +85,6 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
-
-    // Handle controlled mode - update HTML when controlled prop changes
-    if (props.fullscreen !== undefined) {
-      this.updateHTML();
-    }
   }
 
   getContainer() {

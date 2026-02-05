@@ -92,20 +92,13 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
 
-    // Handle controlled mode - update HTML when controlled props change
-    if (
-      (props.time !== undefined && props.time !== prevTime) ||
-      (props.playing !== undefined && props.playing !== prevPlaying)
-    ) {
-      // Handle controlled playing state changes
-      if (props.playing !== undefined && props.playing !== prevPlaying) {
-        if (props.playing && !this._playing) {
-          this._startTimer();
-        } else if (!props.playing && this._playing) {
-          this._stopTimer();
-        }
+    // Handle controlled playing state changes
+    if (props.playing !== undefined && props.playing !== prevPlaying) {
+      if (props.playing && !this._playing) {
+        this._startTimer();
+      } else if (!props.playing && this._playing) {
+        this._stopTimer();
       }
-      this.updateHTML();
     }
   }
 
@@ -174,13 +167,11 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   };
 
   private start(): void {
-    this._playing = true;
     this._startTimer();
     this.updateHTML();
   }
 
   private stop(): void {
-    this._playing = false;
     this._stopTimer();
     this.updateHTML();
   }
