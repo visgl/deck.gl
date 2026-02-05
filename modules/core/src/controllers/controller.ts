@@ -65,6 +65,13 @@ export type ControllerOptions = {
   dragMode?: 'pan' | 'rotate';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
+  /**
+   * Rotation pivot behavior:
+   * - 'center': Rotate around viewport center (default)
+   * - '2d': Rotate around pointer position at ground level (z=0)
+   * - '3d': Rotate around 3D picked point (requires pickPosition callback)
+   */
+  rotationPivot?: 'center' | '2d' | '3d';
 };
 
 export type ControllerProps = {
@@ -92,6 +99,8 @@ export type InteractionState = {
   isRotating?: boolean;
   /** If the view is being zoomed, either from user input or transition */
   isZooming?: boolean;
+  /** World coordinate [lng, lat, altitude] of rotation pivot point when rotating */
+  rotationPivotPosition?: [number, number, number];
 }
 
 /** Parameters passed to the onViewStateChange callback */
@@ -119,7 +128,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected eventManager: EventManager;
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
-  protected makeViewport: (opts: Record<string, any>) => Viewport
+  protected makeViewport: (opts: Record<string, any>) => Viewport;
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -128,11 +138,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   };
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
-  private _panMove: boolean = false;
+  protected _panMove: boolean = false;
 
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
   protected inertia: number = 0;
+  protected rotationPivot: 'center' | '2d' | '3d' = 'center';
   protected scrollZoom: boolean | {speed?: number; smooth?: boolean} = true;
   protected dragPan: boolean = true;
   protected dragRotate: boolean = true;
@@ -154,6 +165,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
     onStateChange: (state: InteractionState) => void;
+    pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
@@ -168,6 +180,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onViewStateChange = opts.onViewStateChange || (() => {});
     this.onStateChange = opts.onStateChange || (() => {});
     this.makeViewport = opts.makeViewport;
+    this.pickPosition = opts.pickPosition;
   }
 
   set events(customEvents) {
@@ -288,6 +301,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
+    if (props.rotationPivot) {
+      this.rotationPivot = props.rotationPivot;
+    }
     this.props = props;
 
     if (!('transitionInterpolator' in props)) {
@@ -396,6 +412,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       // invertPan is replaced by props.dragMode, keeping for backward compatibility
       alternateMode = !alternateMode;
     }
+
     const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
       pos
     });
