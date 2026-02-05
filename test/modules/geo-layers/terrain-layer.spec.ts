@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
@@ -24,12 +24,7 @@ test('TerrainLayer', async () => {
       }
     }
   });
-  await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TerrainLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  await testLayerAsync({Layer: TerrainLayer, testCases, onError: err => expect(err).toBeFalsy()});
 
   const testCasesNonTiled = generateLayerTests({
     Layer: TerrainLayer,
@@ -47,7 +42,6 @@ test('TerrainLayer', async () => {
     }
   });
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TerrainLayer,
     testCases: testCasesNonTiled,
     onError: err => expect(err).toBeFalsy()

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {trips} from 'deck.gl-test/data';
 
@@ -19,10 +19,5 @@ test('TripsLayer', () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TripsLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TripsLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

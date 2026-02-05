@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 import {PolygonLayer} from 'deck.gl';
 
@@ -33,10 +33,5 @@ test('PolygonLayer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: PolygonLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

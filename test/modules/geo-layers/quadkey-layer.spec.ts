@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {QuadkeyLayer} from '@deck.gl/geo-layers';
 import {
   quadkeyToWorldBounds,
@@ -81,12 +81,7 @@ test('QuadkeyLayer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: QuadkeyLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: QuadkeyLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('QuadkeyLayer#quadkeyToWorldBounds', () => {

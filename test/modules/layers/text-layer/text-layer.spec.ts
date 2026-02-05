@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 test('TextLayer', () => {
   const testCases = generateLayerTests({
@@ -23,12 +23,7 @@ test('TextLayer', () => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();
     }
   });
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TextLayer - sdf', () => {
@@ -56,12 +51,7 @@ test('TextLayer - sdf', () => {
       }
     }
   ];
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TextLayer - MultiIconLayer sublayer positions', () => {
@@ -153,12 +143,7 @@ test('TextLayer - MultiIconLayer sublayer positions', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TextLayer - special texts', () => {
@@ -181,12 +166,7 @@ test('TextLayer - special texts', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TextLayer - binary', () => {
@@ -228,12 +208,7 @@ test('TextLayer - binary', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TextLayer - binary unicode characters', () => {
@@ -264,12 +239,7 @@ test('TextLayer - binary unicode characters', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TextLayer - fontAtlasCacheLimit', () => {
@@ -289,10 +259,5 @@ test('TextLayer - fontAtlasCacheLimit', () => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();
     }
   });
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TextLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

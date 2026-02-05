@@ -3,18 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import {test, expect, vi} from 'vitest';
-import {device, getLayerUniforms} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 let cellSize;
 
 test('ScreenGridCellLayer#constructor', () => {
   const SAMPLE_BUFFER = device.createBuffer({});
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ScreenGridCellLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [

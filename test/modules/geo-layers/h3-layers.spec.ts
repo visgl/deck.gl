@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
 import {_count as count, WebMercatorViewport} from '@deck.gl/core';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-utils';
 import data from 'deck.gl-test/data/h3-sf.json';
@@ -153,17 +153,11 @@ test('H3HexagonLayer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: H3HexagonLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: H3HexagonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('H3HexagonLayer#_shouldUseHighPrecision', () => {
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: H3HexagonLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -214,7 +208,6 @@ test('H3HexagonLayer#viewportUpdate', () => {
   let vertices = null;
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: H3HexagonLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -261,7 +254,6 @@ test('H3HexagonLayer#viewportUpdate', () => {
 
 test('H3HexagonLayer#mergeTriggers', () => {
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: H3HexagonLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -341,12 +333,7 @@ test('H3ClusterLayer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: H3ClusterLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: H3ClusterLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 /** Verify that accessors are properly wrapped to access the source object */
@@ -354,7 +341,6 @@ test('H3ClusterLayer#accessor', () => {
   const elevations = [];
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: H3ClusterLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [

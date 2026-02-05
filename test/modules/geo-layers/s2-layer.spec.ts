@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {S2Layer} from '@deck.gl/geo-layers';
 import {getS2QuadKey, getS2Polygon} from '@deck.gl/geo-layers/s2-layer/s2-utils';
 import {s2cells as data} from 'deck.gl-test/data';
@@ -31,12 +31,7 @@ test('S2Layer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: S2Layer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: S2Layer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('S2Layer#getS2QuadKey', () => {

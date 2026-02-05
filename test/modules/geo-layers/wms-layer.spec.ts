@@ -4,8 +4,8 @@
 
 // deck.gl, MIT license
 
-import {test, expect, vi} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import {Proj4Projection} from '@math.gl/proj4';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
@@ -22,12 +22,7 @@ test.skip('WMSLayer', async () => {
     assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: WMSLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  await testLayerAsync({Layer: WMSLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('EPSG:4326 -> EPSG:3857', () => {

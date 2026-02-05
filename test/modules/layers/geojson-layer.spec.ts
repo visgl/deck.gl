@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
@@ -207,12 +207,7 @@ test('GeoJsonLayer#tests', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: GeoJsonLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('GeoJsonLayer#picking', async () => {

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import {Layer, LayerExtension} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 
 class MockExtension extends LayerExtension {
   getShaders() {
@@ -76,7 +76,6 @@ test('LayerExtension', () => {
   MockExtension.resetStats();
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: ScatterplotLayer,
     testCases: [
       {
@@ -141,7 +140,6 @@ test('LayerExtension#CompositeLayer passthrough', () => {
   MockExtension.resetStats();
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: GeoJsonLayer,
     testCases: [
       {

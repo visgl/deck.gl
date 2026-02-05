@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {GridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -25,12 +25,7 @@ test('GridLayer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: GridLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: GridLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('GridLayer#getAggregatorType', () => {
@@ -39,7 +34,6 @@ test('GridLayer#getAggregatorType', () => {
     return;
   }
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: GridLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [
@@ -113,7 +107,6 @@ test('GridLayer#non-iterable data', () => {
   } as const;
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: GridLayer,
     onError: err => expect(err).toBeFalsy(),
     testCases: [

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {RasterTileLayer} from '@deck.gl/carto';
 import RasterLayer from '@deck.gl/carto/layers/raster-layer';
 import binaryRasterTileData from '../data/binaryRasterTile.json'; // tile 487624ffffffffff
@@ -25,7 +25,6 @@ test('RasterTileLayer', async () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: RasterTileLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -57,7 +56,6 @@ test('RasterTileLayer tilejson', async () => {
     }
   ];
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: RasterTileLayer,
     testCases,
     onError: err => expect(err).toBeFalsy()
@@ -95,10 +93,5 @@ test.skip('RasterLayer', async () => {
       }
     }
   ];
-  await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: RasterLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  await testLayerAsync({Layer: RasterLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

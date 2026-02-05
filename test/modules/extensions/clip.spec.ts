@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import {ClipExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 
 import {geojson} from 'deck.gl-test/data';
 
@@ -59,10 +59,5 @@ test('ClipExtension#clipByInstance', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: GeoJsonLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

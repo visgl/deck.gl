@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
@@ -14,7 +14,7 @@ import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport} from '@deck.gl/core';
-import {testLayerAsync} from '@deck.gl/test-utils';
+import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
 
@@ -221,12 +221,7 @@ test('ClipExtension', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: GeoJsonLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('MVTLayer#transformCoordsToWGS84', () => {
@@ -298,12 +293,7 @@ test('MVTLayer#autoHighlight', async () => {
     }
   ];
 
-  await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TestMVTLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  await testLayerAsync({Layer: TestMVTLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 for (const binary of [true, false]) {
@@ -424,7 +414,6 @@ test('MVTLayer#TileJSON', async () => {
     }
   ];
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TestMVTLayer,
     viewport: testViewport,
     testCases,
@@ -486,7 +475,6 @@ test('MVTLayer#dataInWGS84', async () => {
   ];
 
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TestMVTLayer,
     viewport,
     testCases,
@@ -533,7 +521,6 @@ test('MVTLayer#triangulation', async () => {
 
   // Run as separate test runs otherwise data is cached
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: MVTLayer,
     viewport,
     testCases,
@@ -541,7 +528,6 @@ test('MVTLayer#triangulation', async () => {
   });
   testCases[0].props.binary = false;
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: MVTLayer,
     viewport,
     testCases,
@@ -598,7 +584,6 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
     ];
 
     await testLayerAsync({
-      createSpy: (obj, method) => vi.spyOn(obj, method),
       Layer: MVTLayer,
       viewport,
       testCases,
@@ -753,10 +738,5 @@ test('MVTLayer#GeoJsonLayer.defaultProps', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TestMVTLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TestMVTLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

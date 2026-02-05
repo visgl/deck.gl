@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {MapView} from '@deck.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
@@ -55,17 +55,11 @@ test('HeatmapLayer', () => {
     }
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: HeatmapLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: HeatmapLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test.skip('HeatmapLayer#updates', () => {
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: HeatmapLayer,
     onError: err => expect(err).toBeFalsy(),
     viewport: viewport0,
@@ -242,7 +236,6 @@ test('HeatmapLayer#binaryData', () => {
   };
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: HeatmapLayer,
     onError: err => expect(err).toBeFalsy(),
     viewport: viewport0,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import {
   LayerManager,
   CompositeLayer,
@@ -10,7 +10,7 @@ import {
   COORDINATE_SYSTEM,
   WebMercatorViewport
 } from '@deck.gl/core';
-import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -253,12 +253,7 @@ test('CompositeLayer#getSubLayerProps(accessor)', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TestWrapperLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TestWrapperLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', () => {
@@ -377,10 +372,5 @@ test('CompositeLayer#onViewportChange', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: CompLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: CompLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

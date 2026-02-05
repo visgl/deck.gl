@@ -12,7 +12,7 @@ import {
   OrbitView,
   picking
 } from '@deck.gl/core';
-import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
+import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
 
@@ -450,13 +450,7 @@ test('Layer#uniformTransitions', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TestLayer,
-    timeline,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: TestLayer, timeline, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('Layer#calculateInstancePickingColors', () => {
@@ -538,19 +532,13 @@ test('Layer#calculateInstancePickingColors', () => {
     }
   ];
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: SubLayer2,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: SubLayer2, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('Layer#isLoaded', async () => {
   let updateCount = 0;
 
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: SubLayer,
     testCases: [
       {
@@ -611,7 +599,6 @@ test('Layer#updateModules', async () => {
   const HALF_BYTE = 128 / 255;
 
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: LayerWithModel,
     testCases: [
       {

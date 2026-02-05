@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils';
+import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 const DUMMY_DATA =
@@ -17,12 +17,7 @@ test('TileLayer', async () => {
     assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: TileLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  await testLayerAsync({Layer: TileLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 test('TileLayer', async () => {
@@ -164,7 +159,6 @@ test('TileLayer', async () => {
     }
   ];
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TileLayer,
     viewport: testViewport1,
     testCases,
@@ -207,7 +201,6 @@ test('TileLayer#MapView:repeat', async () => {
   ];
 
   await testLayerAsync({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TileLayer,
     viewport: testViewport,
     testCases,
@@ -253,7 +246,6 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async () => {
   ];
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TileLayer,
     viewport: testViewport,
     testCases,
@@ -297,7 +289,6 @@ test('TileLayer#AbortRequestsOnNewLayer', async () => {
   ];
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TileLayer,
     viewport: testViewport,
     testCases,
@@ -325,7 +316,6 @@ test('TileLayer#debounceTime', async () => {
   ];
 
   testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
     Layer: TileLayer,
     viewport: testViewport,
     testCases,

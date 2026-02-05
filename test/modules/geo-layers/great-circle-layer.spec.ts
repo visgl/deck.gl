@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {GreatCircleLayer} from '@deck.gl/geo-layers';
 
 import * as FIXTURES from 'deck.gl-test/data';
@@ -20,10 +20,5 @@ test('GreatCircleLayer', () => {
     onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({
-    createSpy: (obj, method) => vi.spyOn(obj, method),
-    Layer: GreatCircleLayer,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
+  testLayer({Layer: GreatCircleLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
