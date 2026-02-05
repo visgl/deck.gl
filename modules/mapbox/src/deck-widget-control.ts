@@ -67,4 +67,12 @@ export class DeckWidgetControl implements IControl {
   get widget(): Widget {
     return this._widget;
   }
+
+  /**
+   * Updates the wrapped widget reference.
+   * Used when reusing this control for a new widget instance with the same id.
+   */
+  setWidget(widget: Widget): void {
+    this._widget = widget;
+  }
 }

@@ -219,6 +219,8 @@ export default class MapboxOverlay implements IControl {
         // Same id and placement - reuse existing control to preserve container
         // Set _container on the new widget instance so WidgetManager uses it
         widget.props._container = existingControl.widget.props._container;
+        // Update the control's widget reference to the new instance
+        existingControl.setWidget(widget);
         newControls.push(existingControl);
         existingControlsById.delete(widget.id);
       } else {
