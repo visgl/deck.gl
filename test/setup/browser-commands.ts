@@ -159,74 +159,152 @@ export const captureAndDiffScreen: BrowserCommand<[options: DiffOptions]> = asyn
 /**
  * Emulates user input events.
  * Replaces browserTestDriver_emulateInput from @probe.gl/test-utils
+ *
+ * Vitest browser tests run in an iframe. Mouse coordinates must be adjusted
+ * to account for the iframe's position within the parent page.
  */
 export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, event) => {
   const frame = await ctx.frame();
+  const page = frame.page();
+
+  // Get iframe bounding box to adjust coordinates
+  // The frame is inside an iframe element on the parent page
+  const frameElement = await frame.frameElement();
+  const boundingBox = await frameElement.boundingBox();
+  const offsetX = boundingBox?.x ?? 0;
+  const offsetY = boundingBox?.y ?? 0;
+
+  // Helper to adjust coordinates for iframe offset
+  const adjustX = (x: number) => x + offsetX;
+  const adjustY = (y: number) => y + offsetY;
 
   switch (event.type) {
     case 'click': {
-      const options: any = {};
+      // Use explicit keyboard down/up for modifiers instead of options.modifiers
+      // This ensures the modifier is held during the entire click sequence
       if (event.shiftKey) {
-        options.modifiers = ['Shift'];
+        await page.keyboard.down('Shift');
       }
-      await frame.mouse.click(event.x, event.y, options);
+      await page.mouse.click(adjustX(event.x), adjustY(event.y));
+      if (event.shiftKey) {
+        await page.keyboard.up('Shift');
+      }
       break;
     }
 
     case 'drag': {
       const {startX, startY, endX, endY, steps = 5, shiftKey} = event;
 
-      if (shiftKey) {
-        await frame.keyboard.down('Shift');
-      }
+      // Use DOM pointer events for drag - deck.gl's mjolnir.js uses pointer events
+      await frame.evaluate(
+        ({startX, startY, endX, endY, steps, shiftKey}) => {
+          const canvas = document.querySelector('canvas');
+          if (!canvas) return;
 
-      await frame.mouse.move(startX, startY);
-      await frame.mouse.down();
+          const dispatchPointerEvent = (type: string, x: number, y: number) => {
+            canvas.dispatchEvent(
+              new PointerEvent(type, {
+                clientX: x,
+                clientY: y,
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                pointerType: 'mouse',
+                isPrimary: true,
+                button: 0,
+                buttons: type === 'pointerup' ? 0 : 1,
+                shiftKey
+              })
+            );
+          };
 
-      // Move in steps
-      for (let i = 1; i <= steps; i++) {
-        const x = startX + ((endX - startX) * i) / steps;
-        const y = startY + ((endY - startY) * i) / steps;
-        await frame.mouse.move(x, y);
-      }
+          // Start drag
+          dispatchPointerEvent('pointerdown', startX, startY);
 
-      await frame.mouse.up();
+          // Move in steps
+          for (let i = 1; i <= steps; i++) {
+            const x = startX + ((endX - startX) * i) / steps;
+            const y = startY + ((endY - startY) * i) / steps;
+            dispatchPointerEvent('pointermove', x, y);
+          }
 
-      if (shiftKey) {
-        await frame.keyboard.up('Shift');
-      }
+          // End drag
+          dispatchPointerEvent('pointerup', endX, endY);
+        },
+        {startX, startY, endX, endY, steps, shiftKey: shiftKey || false}
+      );
       break;
     }
 
     case 'mousemove': {
-      await frame.mouse.move(event.x, event.y);
+      // Use DOM pointer events for mousemove - deck.gl's mjolnir.js uses pointer events
+      await frame.evaluate(
+        ({x, y}) => {
+          const canvas = document.querySelector('canvas');
+          if (!canvas) return;
+
+          // Get canvas position to calculate offset coordinates
+          const rect = canvas.getBoundingClientRect();
+          const offsetX = x - rect.left;
+          const offsetY = y - rect.top;
+
+          // Create pointer event with all coordinate properties
+          const createPointerEvent = (type: string, bubbles = true) => {
+            return new PointerEvent(type, {
+              clientX: x,
+              clientY: y,
+              screenX: x,
+              screenY: y,
+              pageX: x,
+              pageY: y,
+              offsetX,
+              offsetY,
+              bubbles,
+              cancelable: true,
+              pointerId: 1,
+              pointerType: 'mouse',
+              isPrimary: true,
+              button: 0,
+              buttons: 0,
+              view: window
+            } as PointerEventInit);
+          };
+
+          // Dispatch pointerenter first to ensure deck.gl recognizes the pointer
+          canvas.dispatchEvent(createPointerEvent('pointerenter', false));
+          canvas.dispatchEvent(createPointerEvent('pointermove', true));
+        },
+        {x: event.x, y: event.y}
+      );
       break;
     }
 
     case 'keypress': {
       const {key, shiftKey} = event;
 
-      // Map key names to Playwright key names
-      const keyMap: Record<string, string> = {
-        ArrowLeft: 'ArrowLeft',
-        ArrowRight: 'ArrowRight',
-        ArrowUp: 'ArrowUp',
-        ArrowDown: 'ArrowDown',
-        Minus: 'Minus',
-        Equal: 'Equal'
-      };
+      // Focus the canvas and dispatch keyboard events
+      // deck.gl's EventManager requires focus on the container to process keyboard events
+      await frame.evaluate(
+        ({key, shiftKey}) => {
+          const canvas = document.querySelector('canvas');
+          if (canvas) {
+            // Ensure canvas is focusable and focused
+            if (!canvas.hasAttribute('tabindex')) {
+              canvas.setAttribute('tabindex', '0');
+            }
+            canvas.focus();
 
-      const playwrightKey = keyMap[key] || key;
-
-      if (shiftKey) {
-        await frame.keyboard.down('Shift');
-      }
-
-      await frame.keyboard.press(playwrightKey);
-
-      if (shiftKey) {
-        await frame.keyboard.up('Shift');
-      }
+            // Dispatch both keydown and keyup to simulate a full keypress
+            canvas.dispatchEvent(
+              new KeyboardEvent('keydown', {key, shiftKey, bubbles: true, cancelable: true})
+            );
+            canvas.dispatchEvent(
+              new KeyboardEvent('keyup', {key, shiftKey, bubbles: true, cancelable: true})
+            );
+          }
+        },
+        {key, shiftKey}
+      );
       break;
     }
 
