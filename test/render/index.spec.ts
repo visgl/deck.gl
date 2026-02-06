@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, beforeAll, afterAll} from 'vitest';
+import {test, expect, beforeAll, afterAll, afterEach} from 'vitest';
 import {commands} from '@vitest/browser/context';
 import {Deck, MapView} from '@deck.gl/core';
 import TEST_CASES from './test-cases';
@@ -14,31 +14,23 @@ import {WIDTH, HEIGHT, OS} from './constants';
 let deck: Deck | null = null;
 let container: HTMLDivElement | null = null;
 
-beforeAll(async () => {
+beforeAll(() => {
   // Hide scrollbars to prevent them from appearing in screenshots
   document.body.style.cssText = 'margin: 0; padding: 0; overflow: hidden;';
 
   // Create a container div with explicit size
-  // This is needed because vitest browser mode may not size elements properly
   container = document.createElement('div');
   container.id = 'deck-container';
   container.style.cssText = `position: absolute; left: 0; top: 0; width: ${WIDTH}px; height: ${HEIGHT}px;`;
   document.body.appendChild(container);
+});
 
-  deck = new Deck({
-    id: 'render-test-deck',
-    container,
-    width: WIDTH,
-    height: HEIGHT,
-    views: [new MapView({})],
-    useDevicePixels: false,
-    debug: true
-  });
-
-  // Wait for deck to initialize
-  await new Promise<void>(resolve => {
-    deck!.setProps({onLoad: resolve});
-  });
+afterEach(() => {
+  // Finalize deck after each test to ensure clean state
+  if (deck) {
+    deck.finalize();
+    deck = null;
+  }
 });
 
 afterAll(() => {
@@ -52,8 +44,8 @@ afterAll(() => {
   }
 });
 
-// Default onAfterRender check - matches the old SnapshotTestRunner behavior
-// This is called after every render frame until layers are loaded
+// Default render completion check - matches the old SnapshotTestRunner behavior
+// Called after each render until layers are loaded and no more updates needed
 function defaultOnAfterRender({
   deck: d,
   layers,
@@ -72,40 +64,7 @@ function defaultOnAfterRender({
   }
 }
 
-// Wait for rendering to complete by hooking into Deck's onAfterRender callback
-// This matches how the old SnapshotTestRunner worked - checking after each render frame
-async function waitForRenderComplete(
-  onAfterRenderCheck: (params: {deck: Deck; layers: any[]; done: () => void}) => void,
-  timeout = 10000
-): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      // Clean up the callback before rejecting
-      deck!.setProps({onAfterRender: undefined});
-      reject(new Error('Timeout waiting for render to complete'));
-    }, timeout);
-
-    deck!.setProps({
-      onAfterRender: () => {
-        // @ts-expect-error Accessing protected layerManager
-        const layers = deck!.layerManager?.getLayers() || [];
-        onAfterRenderCheck({
-          deck: deck!,
-          layers,
-          done: () => {
-            clearTimeout(timeoutId);
-            // Clean up the callback
-            deck!.setProps({onAfterRender: undefined});
-            resolve();
-          }
-        });
-      }
-    });
-  });
-}
-
 // Helper to get canvas bounding box for screenshot region
-// Matches getBoundingBoxInPage from @deck.gl/test-utils
 function getCanvasRegion() {
   const canvas = deck?.getCanvas();
   if (!canvas) {
@@ -133,30 +92,58 @@ test.each(TEST_CASES)('$name', async testCase => {
     onAfterRender
   } = testCase;
 
-  // Set up the test case
-  // Some tests use custom views (OrthographicView, OrbitView, etc.)
-  // Some tests override useDevicePixels (e.g., scatterplot-smoothedge)
-  // Some tests use effects (e.g., lighting, shadows)
-  deck!.setProps({
-    views: views || new MapView({}),
-    viewState,
-    layers,
-    effects: effects || [],
-    useDevicePixels: useDevicePixels ?? false
-  });
+  // Create a new Deck instance for each test (like the old SnapshotTestRunner)
+  // This ensures Deck enters a fresh render loop and properly handles async loading
+  await new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Timeout waiting for render to complete'));
+    }, 10000);
 
-  // Call onBeforeRender if provided
-  if (onBeforeRender) {
-    onBeforeRender({
-      deck: deck!,
-      // @ts-expect-error Accessing protected layerManager
-      layers: deck!.layerManager.getLayers()
+    const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
+
+    deck = new Deck({
+      id: 'render-test-deck',
+      container: container!,
+      width: WIDTH,
+      height: HEIGHT,
+      views: views || new MapView({}),
+      viewState,
+      layers,
+      effects: effects || [],
+      useDevicePixels: useDevicePixels ?? false,
+      debug: true,
+
+      onLoad: () => {
+        // Call onBeforeRender if provided
+        if (onBeforeRender) {
+          onBeforeRender({
+            deck: deck!,
+            // @ts-expect-error Accessing protected layerManager
+            layers: deck!.layerManager?.getLayers() || []
+          });
+        }
+      },
+
+      onAfterRender: () => {
+        // @ts-expect-error Accessing protected layerManager
+        const currentLayers = deck!.layerManager?.getLayers() || [];
+
+        // Skip if no layers yet (Deck still initializing)
+        if (currentLayers.length === 0) {
+          return;
+        }
+
+        onAfterRenderCheck({
+          deck: deck!,
+          layers: currentLayers,
+          done: () => {
+            clearTimeout(timeoutId);
+            resolve();
+          }
+        });
+      }
     });
-  }
-
-  // Wait for rendering to complete using Deck's onAfterRender callback
-  // This fires after each render frame, matching the old SnapshotTestRunner behavior
-  await waitForRenderComplete(onAfterRender || defaultOnAfterRender);
+  });
 
   // Capture and diff screenshot
   const region = getCanvasRegion();
@@ -184,7 +171,6 @@ test.each(TEST_CASES)('$name', async testCase => {
       ...diffOptions,
       goldenImage: platformGoldenImage
     });
-    // Only use platform result if it succeeded, otherwise report original failure
     if (platformResult.success) {
       finalResult = platformResult;
     }
