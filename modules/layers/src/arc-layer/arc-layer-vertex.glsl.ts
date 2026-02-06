@@ -224,6 +224,12 @@ void main(void) {
     arc.widthMinPixels, arc.widthMaxPixels
   );
 
+  // Hide arc segments that are occluded by the globe (on the back side)
+  // Set width to 0 instead of clipping to avoid artifacts at segment boundaries
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    widthPixels = 0.0;
+  }
+
   // extrude
   vec3 offset = vec3(
     getExtrusionOffset((next.xy - curr.xy) * indexDir, segmentSide, widthPixels),
@@ -231,12 +237,6 @@ void main(void) {
   DECKGL_FILTER_SIZE(offset, geometry);
   DECKGL_FILTER_GL_POSITION(curr, geometry);
   gl_Position = curr + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
-
-  // Hide arc segments that are occluded by the globe (on the back side)
-  if (project_globe_is_occluded(geometry.position.xyz)) {
-    // Move to clip space position that will be clipped
-    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
-  }
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
   vColor = vec4(color.rgb, color.a * layer.opacity);

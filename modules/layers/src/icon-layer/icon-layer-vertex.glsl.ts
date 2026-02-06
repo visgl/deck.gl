@@ -57,6 +57,9 @@ void main(void) {
   pixelOffset += instancePixelOffset;
   pixelOffset.y *= -1.0;
 
+  // Calculate common position for globe occlusion check (anchor position without offset)
+  vec3 commonPosition = project_position(instancePositions, instancePositions64Low);
+
   if (icon.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
@@ -71,7 +74,8 @@ void main(void) {
   }
 
   // Hide icons/text that are occluded by the globe (on the back side)
-  if (project_globe_is_occluded(geometry.position.xyz)) {
+  // Use anchor position (without pixel offset) for consistent occlusion behavior
+  if (project_globe_is_occluded(commonPosition)) {
     // Move to clip space position that will be clipped
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
