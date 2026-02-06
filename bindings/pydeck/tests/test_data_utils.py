@@ -49,6 +49,35 @@ def test_is_pandas_df():
     assert is_pandas_df(pd.DataFrame())
 
 
+def test_is_pandas_df_negative_cases():
+    """Test that is_pandas_df correctly rejects non-DataFrame objects"""
+    assert not is_pandas_df(None)
+    assert not is_pandas_df([1, 2, 3])
+    assert not is_pandas_df({"a": 1})
+    assert not is_pandas_df("string")
+    assert not is_pandas_df(42)
+
+    # Test object with some but not all DataFrame methods
+    class FakeDataFrame:
+        def to_records(self):
+            pass
+
+    assert not is_pandas_df(FakeDataFrame())
+
+
+def test_is_pandas_df_duck_typing():
+    """Test that is_pandas_df works with DataFrame duck-typing"""
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    assert is_pandas_df(df)
+
+    # Verify the methods we rely on exist and are callable
+    assert hasattr(df, "to_records")
+    assert hasattr(df, "to_dict")
+    assert hasattr(df, "columns")
+    assert callable(df.to_records)
+    assert callable(df.to_dict)
+
+
 def test_compute_view():
     actual = compute_view(POINTS, 0.95, ViewState)
     actual_pandas = compute_view(pd.DataFrame(POINTS), 0.95, ViewState)
