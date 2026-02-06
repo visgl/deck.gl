@@ -27,6 +27,7 @@ type LayerBuildOptions = {
   interleaved: boolean;
   globe: boolean;
   multiView: boolean;
+  billboard: boolean;
   stressTest: StressTest;
 };
 
@@ -35,7 +36,7 @@ type LayerBuildOptions = {
  * Single source of truth for layer configuration.
  */
 export function buildLayers(options: LayerBuildOptions): Layer[] {
-  const {basemap, interleaved, globe, multiView, stressTest} = options;
+  const {basemap, interleaved, multiView, billboard, stressTest} = options;
 
   const interleavedProps = getInterleavedProps(basemap, interleaved);
 
@@ -82,6 +83,7 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
       getPosition: (d: any) => d.coordinates,
       getSize: 40,
       getColor: [0, 140, 255],
+      billboard,
       pickable: true,
       ...interleavedProps
     }),
@@ -96,6 +98,7 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'top',
       getPixelOffset: [0, 20],
+      billboard,
       background: true,
       getBackgroundColor: [0, 0, 0, 180],
       backgroundPadding: [4, 2],

@@ -14,6 +14,7 @@ export const DEFAULT_DIMENSIONS: Dimensions = {
   batched: true,
   globe: false,
   multiView: false,
+  billboard: true,
   stressTest: 'none'
 };
 
