@@ -54,7 +54,7 @@ test('CollisionFilterEffect#constructor', t => {
   );
   t.deepEqual(
     collisionFilterEffect.channels,
-    [],
+    {},
     'Collision filter effect created with no channels'
   );
   collisionFilterEffect.cleanup();
