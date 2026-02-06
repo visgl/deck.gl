@@ -134,9 +134,21 @@ test('StrokeStyleExtension#layer type detection', t => {
     props: {someOtherProp: true}
   };
 
-  t.is(extension.isEnabled(scatterplotLayer as any), true, 'isEnabled returns true for ScatterplotLayer');
-  t.is(extension.isEnabled(textBackgroundLayer as any), true, 'isEnabled returns true for TextBackgroundLayer');
-  t.is(extension.isEnabled(unsupportedLayer as any), false, 'isEnabled returns false for unsupported layers');
+  t.is(
+    extension.isEnabled(scatterplotLayer as any),
+    true,
+    'isEnabled returns true for ScatterplotLayer'
+  );
+  t.is(
+    extension.isEnabled(textBackgroundLayer as any),
+    true,
+    'isEnabled returns true for TextBackgroundLayer'
+  );
+  t.is(
+    extension.isEnabled(unsupportedLayer as any),
+    false,
+    'isEnabled returns false for unsupported layers'
+  );
 
   t.end();
 });

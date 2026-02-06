@@ -268,4 +268,3 @@ if (strokeStyle_inDashGap) {
 `
   }
 };
-
