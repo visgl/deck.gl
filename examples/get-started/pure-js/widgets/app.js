@@ -79,6 +79,6 @@ new Deck({
     new ZoomWidget({style: widgetTheme}),
     new CompassWidget({style: widgetTheme}),
     new FullscreenWidget({style: widgetTheme}),
-    new GeocoderWidget({style: widgetTheme})
+    new GeocoderWidget({style: widgetTheme, _geolocation: true})
   ]
 });

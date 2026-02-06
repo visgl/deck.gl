@@ -304,10 +304,20 @@
 }
 
 .deck-widget .deck-widget-geocoder-error {
-  width: 100%;
-  padding: 4px 8px;
-  color: rgb(220, 53, 69);
-  font-size: 0.875em;
+  position: absolute;
+  top: calc(100% + var(--menu-gap, 4px));
+  left: 1px;
+  right: 1px;
+  padding: 6px 10px;
+  background: var(--button-background, #fff);
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  border: var(--button-inner-stroke, unset);
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  color: rgb(220, 80, 80);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  text-align: center;
 }
 
 /* When dropdown is not present, input should have full rounded corners */
