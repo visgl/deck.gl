@@ -52,6 +52,7 @@ export const captureAndDiffScreen: BrowserCommand<[options: DiffOptions]> = asyn
   options
 ): Promise<DiffResult> => {
   const frame = await ctx.frame();
+  const page = frame.page();
 
   // Resolve golden image path relative to project root
   const goldenPath = path.resolve(ctx.project.config.root, options.goldenImage);
@@ -67,13 +68,28 @@ export const captureAndDiffScreen: BrowserCommand<[options: DiffOptions]> = asyn
     };
   }
 
-  // Take screenshot
-  const screenshotOptions: any = {};
+  // Get iframe bounding box to adjust screenshot region
+  const frameElement = await frame.frameElement();
+  const boundingBox = await frameElement.boundingBox();
+  const offsetX = boundingBox?.x ?? 0;
+  const offsetY = boundingBox?.y ?? 0;
+
+  // Take screenshot with clip region adjusted for iframe offset
+  // omitBackground: true preserves transparency (matches probe.gl behavior)
+  const screenshotOptions: any = {
+    type: 'png',
+    omitBackground: true
+  };
   if (options.region) {
-    screenshotOptions.clip = options.region;
+    screenshotOptions.clip = {
+      x: options.region.x + offsetX,
+      y: options.region.y + offsetY,
+      width: options.region.width,
+      height: options.region.height
+    };
   }
 
-  const screenshotBuffer = await frame.screenshot(screenshotOptions);
+  const screenshotBuffer = await page.screenshot(screenshotOptions);
 
   // Load and normalize both images using sharp (converts to raw RGBA)
   const goldenSharp = sharp(goldenPath);

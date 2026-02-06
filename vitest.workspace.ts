@@ -210,7 +210,9 @@ export default defineWorkspace([
         provider: 'playwright',
         headless: true,
         screenshotFailures: false,
-        commands: browserCommands
+        commands: browserCommands,
+        // Render tests need a viewport large enough for the canvas (800x450)
+        viewport: {width: 1024, height: 768}
       }
     }
   }
