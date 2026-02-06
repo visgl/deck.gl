@@ -35,59 +35,20 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
     setIsOpen(false);
   };
 
+  // Don't render anything if there are no menu items
+  if (props.menuItems.length === 0) {
+    return null;
+  }
+
   return (
-    <div
-      className="dropdown-container"
-      ref={dropdownRef}
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-        ...props.style
-      }}
-    >
-      <button
-        onClick={toggleDropdown}
-        style={{
-          width: '30px',
-          height: '30px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          background: '#fff',
-          cursor: 'pointer',
-          padding: 0
-        }}
-      >
-        ▼
+    <div className="deck-widget-dropdown-container" ref={dropdownRef} style={props.style}>
+      <button className="deck-widget-dropdown-button" onClick={toggleDropdown}>
+        <span className={`deck-widget-dropdown-icon ${isOpen ? 'open' : ''}`} />
       </button>
       {isOpen && (
-        <ul
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: '100%',
-            background: '#fff',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            listStyle: 'none',
-            padding: '4px 0',
-            margin: 0,
-            zIndex: 1000,
-            minWidth: '200px'
-          }}
-        >
+        <ul className="deck-widget-dropdown-menu">
           {props.menuItems.map(item => (
-            <li
-              key={item}
-              onClick={() => handleSelect(item)}
-              style={{
-                padding: '4px 8px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
-            >
+            <li className="deck-widget-dropdown-item" key={item} onClick={() => handleSelect(item)}>
               {item}
             </li>
           ))}
