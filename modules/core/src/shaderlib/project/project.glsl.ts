@@ -277,4 +277,22 @@ float project_pixel_size(float pixels) {
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project.scale;
 }
+
+//
+// Globe occlusion - check if a position is on the back of the globe (occluded from view).
+// Returns true if occluded, false if visible.
+//
+bool project_globe_is_occluded(vec3 commonPosition) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    // In globe projection, positions are on a sphere centered at origin.
+    // A point is visible if it faces the camera.
+    // The surface normal at any point is the normalized position vector.
+    // The point is visible if dot(normal, viewDirection) > 0
+    vec3 normal = normalize(commonPosition);
+    vec3 viewDir = normalize(project.cameraPosition - commonPosition);
+    float visibility = dot(normal, viewDir);
+    return visibility <= 0.0;
+  }
+  return false;
+}
 `;

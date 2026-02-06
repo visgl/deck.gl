@@ -224,6 +224,12 @@ void main(void) {
     arc.widthMinPixels, arc.widthMaxPixels
   );
 
+  // Hide arc segments that are occluded by the globe (on the back side)
+  // Set width to 0 instead of clipping to avoid artifacts at segment boundaries
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    widthPixels = 0.0;
+  }
+
   // extrude
   vec3 offset = vec3(
     getExtrusionOffset((next.xy - curr.xy) * indexDir, segmentSide, widthPixels),
