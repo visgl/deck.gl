@@ -51,9 +51,7 @@ function createMVTLayer(id, {highlight = false, binary = false, holes = false} =
         lineWidthMinPixels: 1,
         binary,
         loadOptions: {
-          mvt: {
-            workerUrl: null
-          }
+          worker: false
         }
       })
     ],

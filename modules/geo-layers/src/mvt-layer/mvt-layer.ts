@@ -233,8 +233,7 @@ export default class MVTLayer<
         tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
-        // Set worker to null to skip web workers
-        // workerUrl: null
+        // To skip web workers, set loadOptions.worker to false instead
       },
       gis: binary ? {format: 'binary'} : {}
     };
