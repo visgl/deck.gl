@@ -37,6 +37,8 @@ The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
 - `framesPerUpdate` (number, default `1`) - Number of frames to wait between updates
 - `formatters` (object, default `{}`) - Custom formatters for stat values
 - `resetOnUpdate` (object, default `{}`) - Whether to reset particular stats after each update
+- `collapsed` (boolean, optional) - Controlled collapsed state. When provided, the widget is in controlled mode.
+- `onCollapsedChange` (function, optional) - Callback when the collapsed state changes (user clicks header).
 
 ### Built-in Formatters
 

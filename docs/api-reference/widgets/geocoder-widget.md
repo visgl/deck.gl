@@ -64,6 +64,19 @@ In addition to addresses / coordinates, one position of obvious interest is the 
 
 If `props._geolocation` **Current position** from the drop-down uses `navigator.geolocation` to center the map. The option is hidden if the browser does not provide the Geolocation API or the user denies access.
 
+#### `onGeocode` (Function, optional) {#ongeocode}
+
+```ts
+(params: {viewId: string; coordinates: {longitude: number; latitude: number; zoom?: number}}) => void
+```
+
+* Default: `() => {}`
+
+Callback when a location is geocoded and the view will navigate to it.
+
+- `viewId`: The view being updated
+- `coordinates`: The geocoded coordinates (longitude, latitude, and optionally zoom)
+
 ## Source
 
 [modules/widgets/src/geocoder-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/geocoder-widget.tsx)

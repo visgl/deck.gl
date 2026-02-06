@@ -9,7 +9,10 @@ export type IconMenuProps<KeyType = string> = {
   icon?: JSX.Element;
   label?: string;
   menuItems: {value: KeyType; icon: JSX.Element; label: string}[];
-  initialItem: KeyType;
+  /** Initial item for uncontrolled mode */
+  initialItem?: KeyType;
+  /** Controlled selected item - when provided, overrides internal state */
+  selectedItem?: KeyType;
   onItemSelected: (item: KeyType) => void;
 };
 
@@ -32,10 +35,18 @@ export function IconMenu<KeyType extends string>(props: IconMenuProps<KeyType>) 
     };
   }, [containerRef]);
 
-  const [selectedItem, setSelectedItem] = useState<KeyType>(props.initialItem);
+  const [internalSelectedItem, setInternalSelectedItem] = useState<KeyType>(
+    props.selectedItem ?? props.initialItem!
+  );
+
+  // Use controlled value if provided, otherwise use internal state
+  const selectedItem = props.selectedItem ?? internalSelectedItem;
 
   const handleSelectItem = (item: KeyType) => {
-    setSelectedItem(item);
+    // Only update internal state if uncontrolled
+    if (props.selectedItem === undefined) {
+      setInternalSelectedItem(item);
+    }
     setMenuOpen(false);
     props.onItemSelected(item);
   };

@@ -32,6 +32,16 @@ The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 Tooltip message displayed while hovering a mouse over the widget.
 
+#### `onLoadingChange` (Function, optional) {#onloadingchange}
+
+```ts
+(loading: boolean) => void
+```
+
+* Default: `() => {}`
+
+Callback when the loading state changes. Called when layers transition between loading and loaded states.
+
 ## Source
 
 [modules/widgets/src/loading-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/loading-widget.tsx)

@@ -24,6 +24,17 @@ export type FullscreenWidgetProps = WidgetProps & {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements
    */
   container?: HTMLElement;
+  /**
+   * Controlled fullscreen state. When provided, the widget is in controlled mode.
+   * Note: The actual fullscreen state is managed by the browser. This prop controls
+   * the widget's visual state and determines whether clicking triggers enter or exit.
+   */
+  fullscreen?: boolean;
+  /**
+   * Callback when fullscreen state changes (via user click or browser fullscreen events).
+   * In controlled mode, use this to update the fullscreen prop.
+   */
+  onFullscreenChange?: (fullscreen: boolean) => void;
 };
 
 export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
@@ -34,7 +45,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     viewId: null,
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
-    container: undefined!
+    container: undefined!,
+    fullscreen: undefined!,
+    onFullscreenChange: () => {}
   };
 
   className = 'deck-widget-fullscreen';
@@ -55,13 +68,14 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
+    const isFullscreen = this.getFullscreen();
     render(
       <IconButton
         onClick={() => {
           this.handleClick().catch(err => log.error(err)());
         }}
-        label={this.fullscreen ? this.props.exitLabel : this.props.enterLabel}
-        className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
+        label={isFullscreen ? this.props.exitLabel : this.props.enterLabel}
+        className={isFullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />,
       rootElement
     );
@@ -77,22 +91,37 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     return this.props.container || this.deck?.getCanvas()?.parentElement;
   }
 
+  /**
+   * Returns the current fullscreen state.
+   * In controlled mode, returns the fullscreen prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getFullscreen(): boolean {
+    return this.props.fullscreen ?? this.fullscreen;
+  }
+
   onFullscreenChange() {
-    const prevFullscreen = this.fullscreen;
     const fullscreen = document.fullscreenElement === this.getContainer();
-    if (prevFullscreen !== fullscreen) {
-      this.fullscreen = !this.fullscreen;
+
+    // Always call callback if provided
+    this.props.onFullscreenChange?.(fullscreen);
+
+    // Only update internal state if uncontrolled
+    if (this.props.fullscreen === undefined) {
+      this.fullscreen = fullscreen;
     }
+
     this.updateHTML();
   }
 
   async handleClick() {
-    if (this.fullscreen) {
+    const isFullscreen = this.getFullscreen();
+    if (isFullscreen) {
       await this.exitFullscreen();
     } else {
       await this.requestFullscreen();
     }
-    this.updateHTML();
+    // Note: updateHTML is called by onFullscreenChange event handler
   }
 
   async requestFullscreen() {

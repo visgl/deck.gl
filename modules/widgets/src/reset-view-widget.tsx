@@ -21,6 +21,15 @@ export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProp
   initialViewState?: ViewStateMap<ViewsT>;
   /** View to interact with. Required when using multiple views. */
   viewId?: string | null;
+  /**
+   * Callback when the reset view button is clicked.
+   */
+  onReset?: (params: {
+    /** The view being reset */
+    viewId: string;
+    /** The view state being reset to */
+    viewState: Record<string, unknown>;
+  }) => void;
 };
 
 /**
@@ -36,7 +45,8 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
     placement: 'top-left',
     label: 'Reset View',
     initialViewState: undefined!,
-    viewId: null
+    viewId: null,
+    onReset: () => {}
   };
 
   className = 'deck-widget-reset-view';
@@ -77,6 +87,10 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
       // transitionDuration: this.props.transitionDuration,
       // transitionInterpolator: new FlyToInterpolator()
     };
+
+    // Call callback
+    this.props.onReset?.({viewId, viewState: nextViewState as Record<string, unknown>});
+
     // @ts-ignore Using private method temporary until there's a public one
     this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
   }
