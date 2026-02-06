@@ -18,8 +18,10 @@ export {ScaleWidget as _ScaleWidget} from './widgets/scale-widget';
 export {ScreenshotWidget as _ScreenshotWidget} from './widgets/screenshot-widget';
 export {SplitterWidget as _SplitterWidget} from './widgets/splitter-widget';
 export {ThemeWidget as _ThemeWidget} from './widgets/theme-widget';
+export {OverviewMapWidget as _OverviewMapWidget} from './widgets/overview-map-widget';
 export {useWidget} from './utils/use-widget';
 export type {ContextMenuWidgetProps} from '@deck.gl/widgets';
+export type {OverviewMapWidgetProps} from '@deck.gl/widgets';
 
 // Types
 export type {DeckGLContextValue} from './utils/deckgl-context';
