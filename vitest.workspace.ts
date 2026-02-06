@@ -143,7 +143,8 @@ export default defineWorkspace([
     test: {
       name: 'headless',
       include: [
-        'test/modules/**/*.spec.ts'
+        'test/modules/**/*.spec.ts',
+        'test/interaction/**/*.spec.ts'
       ],
       exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
       globals: false,
