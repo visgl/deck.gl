@@ -11,10 +11,11 @@ import {
   getDefaultParameters,
   getProjection
 } from './deck-utils';
+import {DeckWidgetControl} from './deck-widget-control';
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {DeckProps, LayersList} from '@deck.gl/core';
+import type {DeckProps, LayersList, Widget} from '@deck.gl/core';
 
 import {resolveLayers} from './resolve-layers';
 import {resolveLayerGroups} from './resolve-layer-groups';
@@ -55,6 +56,8 @@ export default class MapboxOverlay implements IControl {
   private _interleaved: boolean;
   private _renderLayersInGroups: boolean;
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
+  /** IControl wrappers for widgets with viewId: 'mapbox' */
+  private _widgetControls: DeckWidgetControl[] = [];
 
   constructor(props: MapboxOverlayProps) {
     const {interleaved = false} = props;
@@ -77,6 +80,12 @@ export default class MapboxOverlay implements IControl {
   setProps(props: MapboxOverlayProps): void {
     if (this._interleaved && props.layers) {
       this._resolveLayers(this._map, this._deck, this._props.layers, props.layers);
+    }
+
+    // Process widgets with viewId: 'mapbox' before updating props
+    // This must happen before deck.setProps so _container is set
+    if (props.widgets !== undefined) {
+      this._processWidgets(props.widgets);
     }
 
     Object.assign(this._props, this.filterProps(props));
@@ -112,6 +121,10 @@ export default class MapboxOverlay implements IControl {
     });
     this._container = container;
 
+    // Process widgets with viewId: 'mapbox' BEFORE creating Deck
+    // so _container is set when WidgetManager initializes
+    this._processWidgets(this._props.widgets);
+
     this._deck = new Deck<any>({
       ...this._props,
       parent: container,
@@ -143,6 +156,11 @@ export default class MapboxOverlay implements IControl {
         'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
       )();
     }
+
+    // Process widgets with viewId: 'mapbox' BEFORE creating Deck
+    // so _container is set when WidgetManager initializes
+    this._processWidgets(this._props.widgets);
+
     this._deck = getDeckInstance({
       map,
       deck: new Deck({
@@ -171,11 +189,73 @@ export default class MapboxOverlay implements IControl {
     }
   }
 
+  /**
+   * Process widgets and wrap those with viewId: 'mapbox' as IControls.
+   * This enables deck widgets to be positioned in Mapbox's control container
+   * alongside native map controls, preventing overlap.
+   *
+   * Matches widgets by id (like WidgetManager) to handle new instances with same id.
+   * Only recreates controls when placement changes to avoid orphaning the widget's
+   * rootElement when the container is removed from the DOM.
+   */
+  private _processWidgets(widgets: Widget[] | undefined): void {
+    const map = this._map;
+    if (!map) return;
+
+    const mapboxWidgets = widgets?.filter(w => w && w.viewId === 'mapbox') ?? [];
+
+    // Build a map of existing controls by widget id
+    const existingControlsById = new Map<string, DeckWidgetControl>();
+    for (const control of this._widgetControls) {
+      existingControlsById.set(control.widget.id, control);
+    }
+
+    const newControls: DeckWidgetControl[] = [];
+
+    for (const widget of mapboxWidgets) {
+      const existingControl = existingControlsById.get(widget.id);
+
+      if (existingControl && existingControl.widget.placement === widget.placement) {
+        // Same id and placement - reuse existing control to preserve container
+        // Set _container on the new widget instance so WidgetManager uses it
+        widget.props._container = existingControl.widget.props._container;
+        // Update the control's widget reference to the new instance
+        existingControl.setWidget(widget);
+        newControls.push(existingControl);
+        existingControlsById.delete(widget.id);
+      } else {
+        // New widget or placement changed - need a new control
+        if (existingControl) {
+          // Placement changed - remove old control first
+          map.removeControl(existingControl);
+          existingControlsById.delete(widget.id);
+        }
+        const control = new DeckWidgetControl(widget);
+        // Add to map - this calls onAdd() synchronously, setting _container
+        map.addControl(control, control.getDefaultPosition());
+        newControls.push(control);
+      }
+    }
+
+    // Remove controls for widgets that are no longer present
+    for (const control of existingControlsById.values()) {
+      map.removeControl(control);
+    }
+
+    this._widgetControls = newControls;
+  }
+
   /** Called when the control is removed from a map */
   onRemove(): void {
     const map = this._map;
 
     if (map) {
+      // Remove widget controls
+      for (const control of this._widgetControls) {
+        map.removeControl(control);
+      }
+      this._widgetControls = [];
+
       if (this._interleaved) {
         this._onRemoveInterleaved(map);
       } else {

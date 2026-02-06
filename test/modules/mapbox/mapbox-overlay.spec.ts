@@ -6,11 +6,38 @@ import test from 'tape-promise/tape';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {_GlobeView as GlobeView, MapView, Widget} from '@deck.gl/core';
+import type {WidgetPlacement} from '@deck.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
 import {DEFAULT_PARAMETERS} from './fixtures';
+
+// Create an isolated device for overlaid mode tests to prevent GL context corruption
+const overlaidTestDevice = new WebGLDevice({createCanvasContext: {width: 1, height: 1}});
+
+// Simple test widget for testing MapboxOverlay widget support
+class TestWidget extends Widget<{placement?: WidgetPlacement; viewId?: string | null}> {
+  static defaultProps = {
+    ...Widget.defaultProps,
+    id: 'test-widget',
+    placement: 'top-left' as WidgetPlacement
+  };
+
+  placement: WidgetPlacement = 'top-left';
+  className = 'deck-test-widget';
+
+  constructor(props: {id?: string; placement?: WidgetPlacement; viewId?: string | null} = {}) {
+    super(props);
+    this.viewId = props.viewId ?? null;
+    this.placement = props.placement ?? 'top-left';
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {
+    rootElement.textContent = this.id;
+  }
+}
 
 function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => {
@@ -35,6 +62,7 @@ test('MapboxOverlay#overlaid', t => {
     zoom: 14
   });
   const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
     layers: [new ScatterplotLayer()]
   });
 
@@ -97,7 +125,9 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
   });
-  const overlay = new MapboxOverlay({});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice
+  });
 
   map.addControl(overlay);
 
@@ -475,4 +505,215 @@ test('MapboxOverlay#renderLayersInGroups - setProps', t => {
     t.notOk(overlay._deck, 'Deck instance is finalized');
     t.end();
   });
+});
+
+// Widget support tests
+
+test('MapboxOverlay#widgets - regular widgets render in deck container', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget = new TestWidget({id: 'regular-widget', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+  t.is(overlay._widgetControls.length, 0, 'No widget controls for regular widgets');
+  t.ok(overlay._deck.props.widgets.includes(widget), 'Widget is passed to Deck');
+
+  map.removeControl(overlay);
+  t.notOk(overlay._deck, 'Deck instance is finalized');
+  t.end();
+});
+
+test('MapboxOverlay#widgets - viewId:mapbox widgets wrapped as IControl', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget = new TestWidget({id: 'mapbox-widget', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+  t.is(overlay._widgetControls.length, 1, 'Widget control is created');
+  t.ok(map.hasControl(overlay._widgetControls[0]), 'Widget control is added to map');
+  t.ok(widget.props._container, 'Widget _container is set');
+  t.ok(overlay._deck.props.widgets.includes(widget), 'Widget is still passed to Deck for events');
+
+  map.removeControl(overlay);
+  t.is(overlay._widgetControls.length, 0, 'Widget controls are cleaned up');
+  t.notOk(overlay._deck, 'Deck instance is finalized');
+  t.end();
+});
+
+test('MapboxOverlay#widgets - mixed widgets', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const regularWidget = new TestWidget({id: 'regular', placement: 'top-left'});
+  const mapboxWidget1 = new TestWidget({id: 'mapbox1', viewId: 'mapbox', placement: 'top-right'});
+  const mapboxWidget2 = new TestWidget({
+    id: 'mapbox2',
+    viewId: 'mapbox',
+    placement: 'bottom-right'
+  });
+
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [regularWidget, mapboxWidget1, mapboxWidget2]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+  t.is(overlay._widgetControls.length, 2, 'Two widget controls for mapbox widgets');
+  t.notOk(regularWidget.props._container, 'Regular widget _container is not set');
+  t.ok(mapboxWidget1.props._container, 'Mapbox widget1 _container is set');
+  t.ok(mapboxWidget2.props._container, 'Mapbox widget2 _container is set');
+
+  // All widgets passed to Deck
+  t.is(overlay._deck.props.widgets.length, 3, 'All widgets passed to Deck');
+
+  map.removeControl(overlay);
+  t.end();
+});
+
+test('MapboxOverlay#widgets - setProps updates widget controls', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget1 = new TestWidget({id: 'widget1', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget1]
+  });
+
+  map.addControl(overlay);
+  t.is(overlay._widgetControls.length, 1, 'Initial widget control created');
+
+  const widget2 = new TestWidget({id: 'widget2', viewId: 'mapbox', placement: 'bottom-left'});
+  overlay.setProps({
+    widgets: [widget2]
+  });
+
+  t.is(overlay._widgetControls.length, 1, 'Widget control count updated');
+  t.ok(widget2.props._container, 'New widget _container is set');
+
+  // Clear all widgets
+  overlay.setProps({
+    widgets: []
+  });
+  t.is(overlay._widgetControls.length, 0, 'Widget controls cleared');
+
+  map.removeControl(overlay);
+  t.end();
+});
+
+test('MapboxOverlay#widgets - setProps preserves container for same widget instance', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget = new TestWidget({id: 'widget1', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget]
+  });
+
+  map.addControl(overlay);
+  t.is(overlay._widgetControls.length, 1, 'Widget control created');
+  const originalContainer = widget.props._container;
+  t.ok(originalContainer, 'Widget _container is set');
+  const originalControl = overlay._widgetControls[0];
+
+  // Call setProps with the same widget instance
+  overlay.setProps({
+    widgets: [widget]
+  });
+
+  t.is(overlay._widgetControls.length, 1, 'Still one widget control');
+  t.is(overlay._widgetControls[0], originalControl, 'Same control instance preserved');
+  t.is(widget.props._container, originalContainer, 'Container preserved - not recreated');
+
+  map.removeControl(overlay);
+  t.end();
+});
+
+test('MapboxOverlay#widgets - setProps preserves container for new widget instance with same id', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget1 = new TestWidget({id: 'my-widget', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget1]
+  });
+
+  map.addControl(overlay);
+  t.is(overlay._widgetControls.length, 1, 'Widget control created');
+  const originalContainer = widget1.props._container;
+  t.ok(originalContainer, 'Widget _container is set');
+  const originalControl = overlay._widgetControls[0];
+
+  // Call setProps with a NEW widget instance but same id and placement (React pattern)
+  const widget2 = new TestWidget({id: 'my-widget', viewId: 'mapbox', placement: 'top-right'});
+  overlay.setProps({
+    widgets: [widget2]
+  });
+
+  t.is(overlay._widgetControls.length, 1, 'Still one widget control');
+  t.is(overlay._widgetControls[0], originalControl, 'Same control instance preserved');
+  t.is(widget2.props._container, originalContainer, 'New widget gets existing container');
+
+  map.removeControl(overlay);
+  t.end();
+});
+
+test('MapboxOverlay#widgets - interleaved mode', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget = new TestWidget({id: 'mapbox-widget', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+  t.is(overlay._widgetControls.length, 1, 'Widget control is created in interleaved mode');
+  t.ok(widget.props._container, 'Widget _container is set');
+
+  map.removeControl(overlay);
+  t.is(overlay._widgetControls.length, 0, 'Widget controls are cleaned up');
+  t.end();
 });
