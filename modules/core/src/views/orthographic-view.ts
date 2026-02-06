@@ -16,6 +16,8 @@ export type OrthographicViewState = {
   minZoom?: number;
   /** The max zoom level of the viewport. Default `Infinity`. */
   maxZoom?: number;
+  /** Rotation angle around the Z axis, in degrees. Default `0`. */
+  rotationOrbit?: number;
 } & CommonViewState;
 
 export type OrthographicViewProps = {
