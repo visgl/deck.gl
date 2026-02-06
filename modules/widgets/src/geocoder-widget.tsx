@@ -136,6 +136,8 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       this.addressText,
       this.props.apiKey
     );
+    // Re-render to show updated history or error
+    this.updateHTML();
     if (coordinates) {
       this.setViewState(coordinates);
     }

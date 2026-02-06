@@ -35,10 +35,15 @@ export const DropdownMenu = (props: DropdownMenuProps) => {
     setIsOpen(false);
   };
 
+  // Don't render anything if there are no menu items
+  if (props.menuItems.length === 0) {
+    return null;
+  }
+
   return (
     <div className="deck-widget-dropdown-container" ref={dropdownRef} style={props.style}>
       <button className="deck-widget-dropdown-button" onClick={toggleDropdown}>
-        ▼
+        <span className={`deck-widget-dropdown-icon ${isOpen ? 'open' : ''}`} />
       </button>
       {isOpen && (
         <ul className="deck-widget-dropdown-menu">
