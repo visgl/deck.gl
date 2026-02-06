@@ -2,42 +2,121 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {useContext, useMemo, useEffect} from 'react';
+import {useContext, useRef, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
-import {log, Widget, type WidgetProps, _deepEqual as deepEqual} from '@deck.gl/core';
+import {log, Widget, type WidgetProps} from '@deck.gl/core';
+
+// Track pending removals per DeckGL instance (keyed by widgets array) so they can be cancelled on remount.
+// Using WeakMap ensures cleanup when the DeckGL instance is garbage collected, and scoping by widgets array
+// prevents cross-deck interference when multiple DeckGL instances use widgets with the same ID.
+const pendingRemovalsByDeck = new WeakMap<Widget[], Map<string, ReturnType<typeof setTimeout>>>();
+
+function getPendingRemovals(
+  widgets: Widget[] | undefined
+): Map<string, ReturnType<typeof setTimeout>> | undefined {
+  if (!widgets) return undefined;
+  let map = pendingRemovalsByDeck.get(widgets);
+  if (!map) {
+    map = new Map();
+    pendingRemovalsByDeck.set(widgets, map);
+  }
+  return map;
+}
 
 export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetProps>(
-  WidgetClass: {new (props_: WidgetPropsT): WidgetT},
+  WidgetClass: {new (props_: WidgetPropsT): WidgetT} & {defaultProps?: {id?: string}},
   props: WidgetPropsT
 ): WidgetT {
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
-  useEffect(() => {
-    // warn if the user supplied a pure-js widget, since it will be ignored
-    // NOTE: This effect runs once per widget. Context widgets and deck widget props are synced after first effect runs.
-    const internalWidgets = deck?.props.widgets;
-    if (widgets?.length && internalWidgets?.length && !deepEqual(internalWidgets, widgets, 1)) {
-      log.warn('"widgets" prop will be ignored because React widgets are in use.')();
+
+  // In StrictMode, React unmounts and remounts components to detect side effects.
+  // This destroys refs between mount cycles, so we can't rely on widgetRef persisting.
+  // Instead, find existing widgets by ID to handle StrictMode's double-mount.
+  const widgetRef = useRef<WidgetT | null>(null);
+
+  // Determine the widget ID: use props.id if provided, otherwise fall back to the class default
+  const widgetId = props.id ?? WidgetClass.defaultProps?.id;
+
+  if (!widgetRef.current) {
+    // Check if a widget with this ID already exists (from StrictMode's first mount)
+    const existingWidget = widgetId
+      ? (widgets?.find(w => w.id === widgetId) as WidgetT | undefined)
+      : undefined;
+    if (existingWidget) {
+      // Reuse the existing widget instance
+      widgetRef.current = existingWidget;
+    } else {
+      // Create a new widget
+      widgetRef.current = new WidgetClass(props);
     }
+  }
+  const widget = widgetRef.current;
 
-    return () => {
-      // Remove widget from context when it is unmounted
-      const index = widgets?.indexOf(widget);
-      if (index && index !== -1) {
-        widgets?.splice(index, 1);
-        deck?.setProps({widgets});
-      }
-    };
-  }, []);
-  const widget = useMemo(() => new WidgetClass(props), [WidgetClass]);
+  // Cancel any pending removal for this widget (handles StrictMode remount)
+  const pendingRemovals = getPendingRemovals(widgets);
+  const pendingRemoval = pendingRemovals?.get(widget.id);
+  if (pendingRemoval) {
+    clearTimeout(pendingRemoval);
+    pendingRemovals?.delete(widget.id);
+  }
 
-  // Hook rebuilds widgets on every render: [] then [FirstWidget] then [FirstWidget, SecondWidget]
-  widgets?.push(widget);
+  // Register widget during render for immediate availability (needed for onLoad callbacks)
+  // Check by ID to prevent duplicates in StrictMode where refs are recreated
+  const existingInArray = widgets?.find(w => w.id === widget.id);
+  if (widgets && !existingInArray) {
+    widgets.push(widget);
+  }
+
+  // Update props on every render
   widget.setProps(props);
 
   useEffect(() => {
-    deck?.setProps({widgets});
-  }, [widgets]);
+    // Cancel any pending removal for this widget (handles StrictMode effect remount).
+    // This must be in useEffect because StrictMode re-runs effects without re-rendering,
+    // so the render-phase cancellation won't run between cleanup and effect re-run.
+    const pendingRemovalsInEffect = getPendingRemovals(widgets);
+    const pendingRemovalInEffect = pendingRemovalsInEffect?.get(widget.id);
+    if (pendingRemovalInEffect) {
+      clearTimeout(pendingRemovalInEffect);
+      pendingRemovalsInEffect?.delete(widget.id);
+    }
+
+    // Re-register widget if cleanup removed it (handles StrictMode remount after cleanup)
+    if (widgets && !widgets.includes(widget)) {
+      widgets.push(widget);
+    }
+
+    // Warn if the user supplied a pure-js widget via the widgets prop, since it will be ignored.
+    // Only warn if there are widgets in deck.props.widgets that aren't in our managed array.
+    // This avoids false positives from normal React sync timing differences.
+    const internalWidgets = deck?.props.widgets;
+    const hasUserSuppliedWidgets = internalWidgets?.some(w => !widgets?.includes(w));
+    if (widgets?.length && hasUserSuppliedWidgets) {
+      log.warn('"widgets" prop will be ignored because React widgets are in use.')();
+    }
+
+    // Sync widgets to deck
+    deck?.setProps({widgets: widgets ? [...widgets] : []});
+
+    return () => {
+      // Defer widget removal to allow StrictMode remount to cancel it.
+      // In StrictMode, React unmounts and remounts effects to detect side effects.
+      // If we remove immediately, the remounted component can't find the widget.
+      // By deferring, we give the remount a chance to cancel the removal.
+      const id = widget.id;
+      const pendingRemovalsCleanup = getPendingRemovals(widgets);
+      const timeoutId = setTimeout(() => {
+        pendingRemovalsCleanup?.delete(id);
+        const index = widgets?.findIndex(w => w.id === id);
+        if (typeof index === 'number' && index !== -1) {
+          widgets?.splice(index, 1);
+          deck?.setProps({widgets: widgets ? [...widgets] : []});
+        }
+      }, 0);
+      pendingRemovalsCleanup?.set(id, timeoutId);
+    };
+  }, [widgets, deck, widget]);
 
   return widget;
 }
