@@ -266,21 +266,37 @@
 /* Geocoder styles */
 .deck-widget .deck-widget-geocoder {
   pointer-events: auto;
+  position: relative;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  background: var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  padding: 1px;
+  gap: 1px;
 }
 
 .deck-widget .deck-widget-geocoder-input {
   flex: 1 1 auto;
   min-width: 200px;
+  height: calc(var(--button-size, 28px) - 2px);
   margin: 0;
-  padding: 8px;
+  padding: 0 8px;
   box-sizing: border-box;
   background: var(--button-background, #fff);
+  backdrop-filter: var(--button-backdrop-filter, unset);
   color: var(--button-text, rgb(24, 24, 26));
-  border: 1px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
-  border-radius: var(--button-corner-radius, 8px);
+  border: var(--button-inner-stroke, unset);
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+}
+
+.deck-widget .deck-widget-geocoder-input:focus {
+  outline: none;
 }
 
 .deck-widget .deck-widget-geocoder-input::placeholder {
@@ -294,49 +310,78 @@
   font-size: 0.875em;
 }
 
+/* When dropdown is not present, input should have full rounded corners */
+.deck-widget .deck-widget-geocoder-input:last-child {
+  border-top-right-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-bottom-right-radius: calc(var(--button-corner-radius, 8px) - 1px);
+}
+
 /* Dropdown menu styles */
 .deck-widget .deck-widget-dropdown-container {
-  position: relative;
+  position: static;
   display: inline-block;
 }
 
 .deck-widget .deck-widget-dropdown-button {
-  width: 30px;
-  height: 30px;
+  width: calc(var(--button-size, 28px) - 2px);
+  height: calc(var(--button-size, 28px) - 2px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   cursor: pointer;
   background: var(--button-background, #fff);
-  color: var(--button-icon-idle, rgba(97, 97, 102, 1));
-  border: 1px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
-  border-radius: var(--button-corner-radius, 8px);
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  border: var(--button-inner-stroke, unset);
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  outline: none;
 }
 
-.deck-widget .deck-widget-dropdown-button:hover {
-  color: var(--button-icon-hover, rgba(24, 24, 26, 1));
+.deck-widget .deck-widget-dropdown-icon {
+  width: 12px;
+  height: 12px;
+  background-color: var(--button-icon-idle, rgba(97, 97, 102, 1));
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  transition: transform 0.2s ease;
+}
+
+.deck-widget .deck-widget-dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.deck-widget .deck-widget-dropdown-button:hover .deck-widget-dropdown-icon {
+  background-color: var(--button-icon-hover, rgba(24, 24, 26, 1));
 }
 
 .deck-widget .deck-widget-dropdown-menu {
   position: absolute;
-  top: 100%;
-  right: 100%;
-  min-width: 200px;
+  top: calc(100% + var(--menu-gap, 4px));
+  left: 1px;
+  right: 1px;
   margin: 0;
   padding: 4px 0;
   list-style: none;
   z-index: 1000;
   background: var(--button-background, #fff);
-  border: 1px solid var(--button-stroke, rgba(255, 255, 255, 0.3));
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  border: var(--button-inner-stroke, unset);
   border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
 }
 
 .deck-widget .deck-widget-dropdown-item {
-  padding: 4px 8px;
+  padding: 8px 12px;
   cursor: pointer;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--button-text, rgb(24, 24, 26));
 }
 
