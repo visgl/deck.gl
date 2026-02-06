@@ -39,6 +39,7 @@ export type Dimensions = {
   batched: boolean;
   globe: boolean;
   multiView: boolean;
+  billboard: boolean;
   stressTest: StressTest;
 };
 
@@ -68,6 +69,7 @@ export type Config = {
   batched: boolean;
   globe: boolean;
   multiView: boolean;
+  billboard: boolean;
   stressTest: StressTest;
 
   // Computed configuration
