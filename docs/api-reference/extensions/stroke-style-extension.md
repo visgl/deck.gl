@@ -4,7 +4,7 @@
 The `StrokeStyleExtension` adds the capability to render dashed strokes on layers that use SDF-based stroke rendering. It supports:
 
 - [ScatterplotLayer](../layers/scatterplot-layer.md) - dashed circle strokes
-- [TextBackgroundLayer](../layers/text-background-layer.md) - dashed rectangle strokes (including rounded corners)
+- TextBackgroundLayer (used internally by [TextLayer](../layers/text-layer.md)) - dashed rectangle strokes (including rounded corners)
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
