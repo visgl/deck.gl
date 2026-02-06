@@ -15,6 +15,9 @@ let deck: Deck | null = null;
 let container: HTMLDivElement | null = null;
 
 beforeAll(async () => {
+  // Hide scrollbars to prevent them from appearing in screenshots
+  document.body.style.cssText = 'margin: 0; padding: 0; overflow: hidden;';
+
   // Create a container div with explicit size
   // This is needed because vitest browser mode may not size elements properly
   container = document.createElement('div');
@@ -49,27 +52,56 @@ afterAll(() => {
   }
 });
 
-// Helper to wait for all layers to load
-async function waitForLayersToLoad(timeout = 10000): Promise<void> {
-  const startTime = Date.now();
+// Default onAfterRender check - matches the old SnapshotTestRunner behavior
+// This is called after every render frame until layers are loaded
+function defaultOnAfterRender({
+  deck: d,
+  layers,
+  done
+}: {
+  deck: Deck;
+  layers: any[];
+  done: () => void;
+}) {
+  // @ts-expect-error Accessing protected layerManager
+  const needsUpdate = d.layerManager?.needsUpdate();
+  const allLoaded = layers.every((layer: any) => layer.isLoaded);
 
-  while (Date.now() - startTime < timeout) {
-    // @ts-expect-error Accessing protected layerManager
-    const needsUpdate = deck?.layerManager?.needsUpdate();
-    // @ts-expect-error Accessing protected layerManager
-    const layers = deck?.layerManager?.getLayers() || [];
-    const allLoaded = layers.every((layer: any) => layer.isLoaded);
-
-    if (!needsUpdate && allLoaded) {
-      // Wait one more frame to ensure rendering is complete
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      return;
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 50));
+  if (!needsUpdate && allLoaded) {
+    done();
   }
+}
 
-  throw new Error('Timeout waiting for layers to load');
+// Wait for rendering to complete by hooking into Deck's onAfterRender callback
+// This matches how the old SnapshotTestRunner worked - checking after each render frame
+async function waitForRenderComplete(
+  onAfterRenderCheck: (params: {deck: Deck; layers: any[]; done: () => void}) => void,
+  timeout = 10000
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      // Clean up the callback before rejecting
+      deck!.setProps({onAfterRender: undefined});
+      reject(new Error('Timeout waiting for render to complete'));
+    }, timeout);
+
+    deck!.setProps({
+      onAfterRender: () => {
+        // @ts-expect-error Accessing protected layerManager
+        const layers = deck!.layerManager?.getLayers() || [];
+        onAfterRenderCheck({
+          deck: deck!,
+          layers,
+          done: () => {
+            clearTimeout(timeoutId);
+            // Clean up the callback
+            deck!.setProps({onAfterRender: undefined});
+            resolve();
+          }
+        });
+      }
+    });
+  });
 }
 
 // Helper to get canvas bounding box for screenshot region
@@ -106,21 +138,9 @@ test.each(TEST_CASES)('$name', async testCase => {
     });
   }
 
-  // Wait for layers to load
-  if (onAfterRender) {
-    // Test case has custom completion logic
-    await new Promise<void>(resolve => {
-      onAfterRender({
-        deck: deck!,
-        // @ts-expect-error Accessing protected layerManager
-        layers: deck!.layerManager.getLayers(),
-        done: resolve
-      });
-    });
-  } else {
-    // Default: wait for all layers to load
-    await waitForLayersToLoad();
-  }
+  // Wait for rendering to complete using Deck's onAfterRender callback
+  // This fires after each render frame, matching the old SnapshotTestRunner behavior
+  await waitForRenderComplete(onAfterRender || defaultOnAfterRender);
 
   // Capture and diff screenshot
   const region = getCanvasRegion();

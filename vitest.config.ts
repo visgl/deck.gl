@@ -8,6 +8,6 @@ import {defineConfig} from 'vitest/config';
 // Project-specific settings are in vitest.workspace.ts
 export default defineConfig({
   test: {
-    reporters: ['basic']
+    reporters: ['tap']
   }
 });
