@@ -6,6 +6,7 @@ export {default as BrushingExtension} from './brushing/brushing-extension';
 export {default as DataFilterExtension} from './data-filter/data-filter-extension';
 export {default as Fp64Extension} from './fp64/fp64-extension';
 export {default as PathStyleExtension} from './path-style/path-style-extension';
+export {default as StrokeStyleExtension} from './stroke-style/stroke-style-extension';
 export {default as FillStyleExtension} from './fill-style/fill-style-extension';
 export {default as ClipExtension} from './clip/clip-extension';
 export {default as CollisionFilterExtension} from './collision-filter/collision-filter-extension';
@@ -25,6 +26,10 @@ export type {
   PathStyleExtensionProps,
   PathStyleExtensionOptions
 } from './path-style/path-style-extension';
+export type {
+  StrokeStyleExtensionProps,
+  StrokeStyleExtensionOptions
+} from './stroke-style/stroke-style-extension';
 export type {
   FillStyleExtensionProps,
   FillStyleExtensionOptions
