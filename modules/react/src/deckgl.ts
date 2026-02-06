@@ -186,7 +186,6 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
       onInteractionStateChange: handleInteractionStateChange,
-      // Always provide onLoad handler - Deck expects it to be a function.
       // The deferred effect will only call the user's callback if they provided one.
       onLoad: handleOnLoad
     };
