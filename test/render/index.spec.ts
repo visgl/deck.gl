@@ -121,12 +121,28 @@ function getCanvasRegion() {
 }
 
 test.each(TEST_CASES)('$name', async testCase => {
-  const {name, viewState, layers, goldenImage, onBeforeRender, onAfterRender} = testCase;
+  const {
+    name,
+    views,
+    viewState,
+    layers,
+    effects,
+    goldenImage,
+    useDevicePixels,
+    onBeforeRender,
+    onAfterRender
+  } = testCase;
 
   // Set up the test case
+  // Some tests use custom views (OrthographicView, OrbitView, etc.)
+  // Some tests override useDevicePixels (e.g., scatterplot-smoothedge)
+  // Some tests use effects (e.g., lighting, shadows)
   deck!.setProps({
+    views: views || new MapView({}),
     viewState,
-    layers
+    layers,
+    effects: effects || [],
+    useDevicePixels: useDevicePixels ?? false
   });
 
   // Call onBeforeRender if provided
