@@ -304,11 +304,10 @@ fn project_pixel_size_vec2(pixels: vec2<f32>) -> vec2<f32> {
 }
 
 //
-// Globe occlusion - returns a value indicating whether a position is occluded by the globe.
-// Returns 0.0 if the position is visible, 1.0 if fully occluded.
-// Can be used to discard fragments or fade out geometry on the back of the globe.
+// Globe occlusion - check if a position is on the back of the globe (occluded from view).
+// Returns true if occluded, false if visible.
 //
-fn project_globe_get_occlusion(commonPosition: vec3<f32>) -> f32 {
+fn project_globe_is_occluded(commonPosition: vec3<f32>) -> bool {
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     // In globe projection, positions are on a sphere centered at origin.
     // A point is visible if it faces the camera.
@@ -317,14 +316,8 @@ fn project_globe_get_occlusion(commonPosition: vec3<f32>) -> f32 {
     let normal = normalize(commonPosition);
     let viewDir = normalize(project.cameraPosition - commonPosition);
     let visibility = dot(normal, viewDir);
-    // Return 0.0 if visible (visibility > 0), 1.0 if occluded (visibility <= 0)
-    return select(1.0, 0.0, visibility > 0.0);
+    return visibility <= 0.0;
   }
-  return 0.0;
-}
-
-// Helper function to check if position is on the back of the globe
-fn project_globe_is_occluded(commonPosition: vec3<f32>) -> bool {
-  return project_globe_get_occlusion(commonPosition) > 0.5;
+  return false;
 }
 `;
