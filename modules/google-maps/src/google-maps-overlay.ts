@@ -53,7 +53,6 @@ export default class GoogleMapsOverlay {
   private _map: google.maps.Map | null = null;
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
-  private _animationFrameId: number | null = null;
 
   constructor(props: GoogleMapsOverlayProps) {
     this.setProps({...defaultProps, ...props});
@@ -167,22 +166,6 @@ export default class GoogleMapsOverlay {
   _onAdd() {
     // @ts-ignore (TS2345) map is defined at this stage
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
-
-    // On vector maps, OverlayView.draw() is not called during animations
-    // We need to manually sync using requestAnimationFrame
-    if (this._map && this._overlay instanceof google.maps.OverlayView) {
-      const renderingType = this._map.getRenderingType();
-      const {VECTOR} = google.maps.RenderingType;
-      if (renderingType === VECTOR) {
-        const rafLoop = () => {
-          if (this._overlay instanceof google.maps.OverlayView && this._deck) {
-            this._onDrawRaster();
-          }
-          this._animationFrameId = requestAnimationFrame(rafLoop);
-        };
-        this._animationFrameId = requestAnimationFrame(rafLoop);
-      }
-    }
   }
 
   _onContextRestored({gl}) {
@@ -227,11 +210,6 @@ export default class GoogleMapsOverlay {
 
   _onRemove() {
     this._deck?.setProps({layerFilter: HIDE_ALL_LAYERS});
-    // Clean up animation frame loop
-    if (this._animationFrameId !== null) {
-      cancelAnimationFrame(this._animationFrameId);
-      this._animationFrameId = null;
-    }
   }
 
   _onDrawRaster() {
