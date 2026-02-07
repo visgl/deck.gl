@@ -10,12 +10,6 @@ import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
 
-// Google Maps 3D projection parameters
-// These values match Google Maps' internal perspective projection matrix
-const GOOGLE_MAPS_FOV_Y = 25; // Field of view in degrees
-const GOOGLE_MAPS_NEAR_PLANE = 0.75; // Near clipping plane
-const GOOGLE_MAPS_FAR_PLANE = 300000000000000; // Far clipping plane
-
 type UserData = {
   _googleMap: google.maps.Map;
   _eventListeners: Record<string, google.maps.MapsEventListener | null>;
@@ -260,11 +254,12 @@ function getPerspectiveViewState(
 ) {
   const aspect = height ? width / height : 1;
 
+  // Google Maps 3D projection parameters matching their internal perspective projection matrix
   const projectionMatrix = new Matrix4().perspective({
-    fovy: (GOOGLE_MAPS_FOV_Y * Math.PI) / 180,
+    fovy: (25 * Math.PI) / 180, // 25 degrees field of view
     aspect,
-    near: GOOGLE_MAPS_NEAR_PLANE,
-    far: GOOGLE_MAPS_FAR_PLANE
+    near: 0.75,
+    far: 300000000000000
   });
   const focalDistance = 0.5 * projectionMatrix[5];
 
