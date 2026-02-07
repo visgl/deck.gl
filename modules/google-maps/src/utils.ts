@@ -157,31 +157,12 @@ export function getViewPropsFromOverlay(
     const bearing = map.getHeading() || 0;
     const pitch = map.getTilt();
 
-    const aspect = height ? width / height : 1;
-
-    const projectionMatrix = new Matrix4().perspective({
-      fovy: (GOOGLE_MAPS_FOV_Y * Math.PI) / 180,
-      aspect,
-      near: GOOGLE_MAPS_NEAR_PLANE,
-      far: GOOGLE_MAPS_FAR_PLANE
-    });
-    const focalDistance = 0.5 * projectionMatrix[5];
-
     return {
       width,
       height,
       left,
       top,
-      viewState: {
-        altitude: focalDistance,
-        bearing,
-        latitude,
-        longitude,
-        pitch,
-        projectionMatrix,
-        repeat: true,
-        zoom: zoom - 1
-      }
+      viewState: getPerspectiveViewState(width, height, latitude, longitude, zoom, bearing, pitch)
     };
   }
 
@@ -268,6 +249,37 @@ export function getViewPropsFromOverlay(
 
 /* eslint-enable max-statements */
 
+function getPerspectiveViewState(
+  width: number,
+  height: number,
+  latitude: number,
+  longitude: number,
+  zoom: number,
+  bearing: number,
+  pitch: number
+) {
+  const aspect = height ? width / height : 1;
+
+  const projectionMatrix = new Matrix4().perspective({
+    fovy: (GOOGLE_MAPS_FOV_Y * Math.PI) / 180,
+    aspect,
+    near: GOOGLE_MAPS_NEAR_PLANE,
+    far: GOOGLE_MAPS_FAR_PLANE
+  });
+  const focalDistance = 0.5 * projectionMatrix[5];
+
+  return {
+    altitude: focalDistance,
+    bearing,
+    latitude,
+    longitude,
+    pitch,
+    projectionMatrix,
+    repeat: true,
+    zoom: zoom - 1
+  };
+}
+
 /**
  * Get the current view state
  * @param map (google.maps.Map) - The parent Map instance
@@ -280,29 +292,18 @@ export function getViewPropsFromCoordinateTransformer(
   const {width, height} = getMapSize(map);
   const {center, heading: bearing, tilt: pitch, zoom} = transformer.getCameraParams();
 
-  const aspect = height ? width / height : 1;
-
-  const projectionMatrix = new Matrix4().perspective({
-    fovy: (GOOGLE_MAPS_FOV_Y * Math.PI) / 180,
-    aspect,
-    near: GOOGLE_MAPS_NEAR_PLANE,
-    far: GOOGLE_MAPS_FAR_PLANE
-  });
-  const focalDistance = 0.5 * projectionMatrix[5];
-
   return {
     width,
     height,
-    viewState: {
-      altitude: focalDistance,
+    viewState: getPerspectiveViewState(
+      width,
+      height,
+      center.lat(),
+      center.lng(),
+      zoom,
       bearing,
-      latitude: center.lat(),
-      longitude: center.lng(),
-      pitch,
-      projectionMatrix,
-      repeat: true,
-      zoom: zoom - 1
-    }
+      pitch
+    )
   };
 }
 
