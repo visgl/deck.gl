@@ -35,16 +35,30 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Run tests
-        run: |
-          yarn lint
-          yarn test ci
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-  
+      - name: Lint
+        run: yarn lint
+
+      - name: Run Node tests
+        run: npx vitest run --project node --reporter=tap
+
+      - name: Run Headless browser tests
+        run: npx vitest run --project headless --reporter=tap
+
+      - name: Run Render/Interaction tests
+        run: yarn test-render
+
+      - name: Run tape backward compatibility smoke test
+        run: yarn test-tape-compat
+
+      # TODO: Re-enable coverage once all tests run in a single vitest invocation
+      # - name: Coveralls
+      #   uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+
   test-website:
     runs-on: ubuntu-22.04
     permissions:

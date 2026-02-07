@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
 import {_count as count, WebMercatorViewport} from '@deck.gl/core';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-utils';
 import data from 'deck.gl-test/data/h3-sf.json';
@@ -15,7 +15,7 @@ const SAMPLE_PROPS = {
   getHexagon: d => d.hexagons[0]
 };
 
-test('H3Utils#scalePolygon', t => {
+test('H3Utils#scalePolygon', () => {
   const TEST_CASES = [
     {
       coverage: 0,
@@ -52,16 +52,17 @@ test('H3Utils#scalePolygon', t => {
   for (const testCase of TEST_CASES) {
     const vertices = cellToBoundary(HEXID, true);
     scalePolygon(HEXID, vertices, testCase.coverage);
-    t.deepEqual(vertices[0], vertices[vertices.length - 1], 'first and last vertices should match');
-    t.ok(
+    expect(vertices[0], 'first and last vertices should match').toEqual(
+      vertices[vertices.length - 1]
+    );
+    expect(
       testCase.verify(vertices, HEXID),
       `vertices should match for coverage: ${testCase.coverage}`
-    );
+    ).toBeTruthy();
   }
-  t.end();
 });
 
-test('H3Utils#normalizeLongitudes', t => {
+test('H3Utils#normalizeLongitudes', () => {
   const TEST_CASES = [
     {
       vertices: [
@@ -122,47 +123,43 @@ test('H3Utils#normalizeLongitudes', t => {
     vertices = vertices || cellToBoundary(hexId, true);
     normalizeLongitudes(vertices, refLng);
     if (expected) {
-      t.deepEqual(
+      expect(
         vertices,
-        expected,
         `Vertices should get normailized for ${refLng ? refLng : 'first vertex'}`
-      );
+      ).toEqual(expected);
     }
     refLng = refLng || vertices[0][0];
-    t.ok(
+    expect(
       !vertices.find(vertex => refLng - vertex[0] > 180 || refLng - vertex[0] < -180),
       `vertices should get normaized for ${refLng}`
-    );
+    ).toBeTruthy();
   }
-  t.end();
 });
 
-test('H3HexagonLayer', t => {
+test('H3HexagonLayer', () => {
   const testCases = generateLayerTests({
     Layer: H3HexagonLayer,
     sampleProps: SAMPLE_PROPS,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      t.is(subLayer.props.stroked, layer.props.stroked, 'stroked prop is forwarded');
+      expect(subLayer.props.stroked, 'stroked prop is forwarded').toBe(layer.props.stroked);
 
       if (layer._shouldUseHighPrecision()) {
-        t.ok(subLayer.constructor.layerName, 'PolygonLayer', 'renders polygon layer');
+        expect(subLayer.constructor.layerName, 'PolygonLayer').toBeTruthy();
       } else {
-        t.ok(subLayer.constructor.layerName, 'ColumnLayer', 'renders column layer');
+        expect(subLayer.constructor.layerName, 'ColumnLayer').toBeTruthy();
       }
     }
   });
 
-  testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: H3HexagonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('H3HexagonLayer#_shouldUseHighPrecision', t => {
+test('H3HexagonLayer#_shouldUseHighPrecision', () => {
   testLayer({
     Layer: H3HexagonLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         props: {
@@ -170,12 +167,11 @@ test('H3HexagonLayer#_shouldUseHighPrecision', t => {
           getHexagon: d => d
         },
         onAfterUpdate({layer, subLayer}) {
-          t.equal(
+          expect(
             layer._shouldUseHighPrecision(),
-            false,
             'Instanced rendering with standard hexagons'
-          );
-          t.ok(subLayer.constructor.layerName, 'ColumnLayer', 'renders column layer');
+          ).toBe(false);
+          expect(subLayer.constructor.layerName, 'ColumnLayer').toBeTruthy();
         }
       },
       {
@@ -184,12 +180,11 @@ test('H3HexagonLayer#_shouldUseHighPrecision', t => {
           getHexagon: d => d
         },
         onAfterUpdate({layer, subLayer}) {
-          t.equal(
+          expect(
             layer._shouldUseHighPrecision(),
-            true,
             'Polygon rendering when input contains a pentagon'
-          );
-          t.ok(subLayer.constructor.layerName, 'PolygonLayer', 'renders polygon layer');
+          ).toBe(true);
+          expect(subLayer.constructor.layerName, 'PolygonLayer').toBeTruthy();
         }
       },
       {
@@ -198,53 +193,50 @@ test('H3HexagonLayer#_shouldUseHighPrecision', t => {
           getHexagon: d => d
         },
         onAfterUpdate({layer, subLayer}) {
-          t.equal(
+          expect(
             layer._shouldUseHighPrecision(),
-            true,
             'Polygon rendering when input contains multiple resolutions'
-          );
-          t.ok(subLayer.constructor.layerName, 'PolygonLayer', 'renders polygon layer');
+          ).toBe(true);
+          expect(subLayer.constructor.layerName, 'PolygonLayer').toBeTruthy();
         }
       }
     ]
   });
-
-  t.end();
 });
 
-test('H3HexagonLayer#viewportUpdate', t => {
+test('H3HexagonLayer#viewportUpdate', () => {
   let vertices = null;
 
   testLayer({
     Layer: H3HexagonLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
           vertices = layer.state.vertices;
-          t.ok(vertices, 'vertices are generated');
+          expect(vertices, 'vertices are generated').toBeTruthy();
         }
       },
       {
         // viewport does not move
         viewport: new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 10}),
         onAfterUpdate({layer}) {
-          t.is(vertices, layer.state.vertices, 'vertices are not changed');
+          expect(vertices, 'vertices are not changed').toBe(layer.state.vertices);
         }
       },
       {
         // viewport moves a small distance
         viewport: new WebMercatorViewport({longitude: 0.001, latitude: 0.001, zoom: 10}),
         onAfterUpdate({layer}) {
-          t.is(vertices, layer.state.vertices, 'vertices are not changed');
+          expect(vertices, 'vertices are not changed').toBe(layer.state.vertices);
         }
       },
       {
         // far viewport jump, gridDistance throws
         viewport: new WebMercatorViewport({longitude: -100, latitude: 65, zoom: 10}),
         onAfterUpdate({layer}) {
-          t.not(vertices, layer.state.vertices, 'vertices are updated');
+          expect(vertices, 'vertices are updated').not.toBe(layer.state.vertices);
           vertices = layer.state.vertices;
         }
       },
@@ -252,29 +244,26 @@ test('H3HexagonLayer#viewportUpdate', t => {
         // viewport moves far enough
         viewport: new WebMercatorViewport({longitude: -102, latitude: 60, zoom: 10}),
         onAfterUpdate({layer}) {
-          t.not(vertices, layer.state.vertices, 'vertices are updated');
+          expect(vertices, 'vertices are updated').not.toBe(layer.state.vertices);
           vertices = layer.state.vertices;
         }
       }
     ]
   });
-
-  t.end();
 });
 
-test('H3HexagonLayer#mergeTriggers', t => {
+test('H3HexagonLayer#mergeTriggers', () => {
   testLayer({
     Layer: H3HexagonLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         props: Object.assign({}, SAMPLE_PROPS, {highPrecision: true}),
         onAfterUpdate({layer}) {
-          t.equal(
+          expect(
             layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
-            1,
             'With no other triggers, should use coverage as trigger'
-          );
+          ).toBe(1);
         }
       },
       {
@@ -282,11 +271,10 @@ test('H3HexagonLayer#mergeTriggers', t => {
           coverage: 0
         },
         onAfterUpdate({layer}) {
-          t.equal(
+          expect(
             layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
-            0,
             'SubLayer update trigger should be updated to new coverage value'
-          );
+          ).toBe(0);
         }
       },
       {
@@ -294,11 +282,10 @@ test('H3HexagonLayer#mergeTriggers', t => {
           updateTriggers: {getHexagon: 0}
         },
         onAfterUpdate({layer}) {
-          t.deepEqual(
+          expect(
             layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
-            {getHexagon: 0, coverage: 0},
             'SubLayer update trigger should be merged correctly'
-          );
+          ).toEqual({getHexagon: 0, coverage: 0});
         }
       },
       {
@@ -306,11 +293,10 @@ test('H3HexagonLayer#mergeTriggers', t => {
           updateTriggers: {getHexagon: ['A', 1]}
         },
         onAfterUpdate({layer}) {
-          t.deepEqual(
+          expect(
             layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
-            {0: 'A', 1: 1, coverage: 0},
             'SubLayer update trigger should be merged correctly with Array'
-          );
+          ).toEqual({0: 'A', 1: 1, coverage: 0});
         }
       },
       {
@@ -319,19 +305,17 @@ test('H3HexagonLayer#mergeTriggers', t => {
           updateTriggers: {getHexagon: {a: 'abc'}}
         },
         onAfterUpdate({layer}) {
-          t.deepEqual(
+          expect(
             layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
-            {a: 'abc', coverage: 0.75},
             'SubLayer update trigger should be merged correctly with Object'
-          );
+          ).toEqual({a: 'abc', coverage: 0.75});
         }
       }
     ]
   });
-  t.end();
 });
 
-test('H3ClusterLayer', t => {
+test('H3ClusterLayer', () => {
   const testCases = generateLayerTests({
     Layer: H3ClusterLayer,
     sampleProps: {
@@ -339,25 +323,26 @@ test('H3ClusterLayer', t => {
       getHexagons: d => d.hexagons
       // getElevation: d => d.size
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.ok(layer.state.polygons.length >= count(layer.props.data), 'polygons are generated');
+      expect(
+        layer.state.polygons.length >= count(layer.props.data),
+        'polygons are generated'
+      ).toBeTruthy();
     }
   });
 
-  testLayer({Layer: H3ClusterLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: H3ClusterLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 /** Verify that accessors are properly wrapped to access the source object */
-test('H3ClusterLayer#accessor', t => {
+test('H3ClusterLayer#accessor', () => {
   const elevations = [];
 
   testLayer({
     Layer: H3ClusterLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         props: {
@@ -370,11 +355,9 @@ test('H3ClusterLayer#accessor', t => {
           }
         },
         onAfterUpdate: () => {
-          t.ok(elevations.every(Number.isFinite), 'Elevations populated');
+          expect(elevations.every(Number.isFinite), 'Elevations populated').toBeTruthy();
         }
       }
     ]
   });
-
-  t.end();
 });

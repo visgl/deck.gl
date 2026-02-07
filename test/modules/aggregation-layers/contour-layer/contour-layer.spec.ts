@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, testLayerAsync, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, testLayerAsync, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ContourLayer, ContourLayerProps} from '@deck.gl/aggregation-layers';
@@ -18,26 +18,24 @@ const CONTOURS: ContourLayerProps['contours'] = [
   {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
 ];
 
-test('ContourLayer', t => {
+test('ContourLayer', () => {
   const testCases = generateLayerTests({
     Layer: ContourLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
       getPosition
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.aggregator, 'should create aggregator');
+      expect(layer.state.aggregator, 'should create aggregator').toBeTruthy();
     }
   });
 
-  testLayer({Layer: ContourLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ContourLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('ContourLayer#updates', async t => {
+test('ContourLayer#updates', async () => {
   let prevState: ContourLayer['state'];
   await testLayerAsync({
     Layer: ContourLayer,
@@ -51,10 +49,13 @@ test('ContourLayer#updates', async t => {
           cellSize: 200,
           getPosition
         },
-        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onBeforeUpdate: ({testCase}) => console.log(testCase.title),
         onAfterUpdate: ({layer, subLayers}) => {
-          t.ok(subLayers[0] instanceof PathLayer, 'Sublayer Line layer rendered');
-          t.ok(subLayers[1] instanceof SolidPolygonLayer, 'Sublayer SolidPolygon layer rendered');
+          expect(subLayers[0] instanceof PathLayer, 'Sublayer Line layer rendered').toBeTruthy();
+          expect(
+            subLayers[1] instanceof SolidPolygonLayer,
+            'Sublayer SolidPolygon layer rendered'
+          ).toBeTruthy();
           prevState = {...layer.state};
         }
       },
@@ -63,17 +64,13 @@ test('ContourLayer#updates', async t => {
         updateProps: {
           zOffset: 0.1
         },
-        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onBeforeUpdate: ({testCase}) => console.log(testCase.title),
         onAfterUpdate: ({layer}) => {
-          t.is(
-            prevState.aggregatedValueReader,
-            (layer as ContourLayer).state.aggregatedValueReader,
-            'aggregation not updated'
+          expect(prevState.aggregatedValueReader, 'aggregation not updated').toBe(
+            (layer as ContourLayer).state.aggregatedValueReader
           );
-          t.is(
-            prevState.contourData,
-            (layer as ContourLayer).state.contourData,
-            'contour data not updated'
+          expect(prevState.contourData, 'contour data not updated').toBe(
+            (layer as ContourLayer).state.contourData
           );
         }
       },
@@ -82,17 +79,13 @@ test('ContourLayer#updates', async t => {
         updateProps: {
           cellSize: 300
         },
-        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onBeforeUpdate: ({testCase}) => console.log(testCase.title),
         onAfterUpdate: ({layer}) => {
-          t.not(
-            prevState.aggregatedValueReader,
-            (layer as ContourLayer).state.aggregatedValueReader,
-            'aggregation is updated'
+          expect(prevState.aggregatedValueReader, 'aggregation is updated').not.toBe(
+            (layer as ContourLayer).state.aggregatedValueReader
           );
-          t.not(
-            prevState.contourData,
-            (layer as ContourLayer).state.contourData,
-            'contour data is recalculated'
+          expect(prevState.contourData, 'contour data is recalculated').not.toBe(
+            (layer as ContourLayer).state.contourData
           );
           prevState = {...layer.state};
         }
@@ -102,20 +95,16 @@ test('ContourLayer#updates', async t => {
         updateProps: {
           contours: CONTOURS.slice(0, 1)
         },
-        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onBeforeUpdate: ({testCase}) => console.log(testCase.title),
         onAfterUpdate: ({layer, subLayers}) => {
-          t.is(
-            prevState.aggregatedValueReader,
-            (layer as ContourLayer).state.aggregatedValueReader,
-            'aggregation not updated'
+          expect(prevState.aggregatedValueReader, 'aggregation not updated').toBe(
+            (layer as ContourLayer).state.aggregatedValueReader
           );
-          t.not(
-            prevState.contourData,
-            (layer as ContourLayer).state.contourData,
-            'contour data is recalculated'
+          expect(prevState.contourData, 'contour data is recalculated').not.toBe(
+            (layer as ContourLayer).state.contourData
           );
-          t.ok(subLayers[0] instanceof PathLayer, 'Sublayer Line layer rendered');
-          t.is(subLayers.length, 1, 'Sublayer SolidPolygon layer not rendered');
+          expect(subLayers[0] instanceof PathLayer, 'Sublayer Line layer rendered').toBeTruthy();
+          expect(subLayers.length, 'Sublayer SolidPolygon layer not rendered').toBe(1);
           prevState = {...layer.state};
         }
       },
@@ -124,20 +113,19 @@ test('ContourLayer#updates', async t => {
         updateProps: {
           contours: CONTOURS.slice(2, 3)
         },
-        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onBeforeUpdate: ({testCase}) => console.log(testCase.title),
         onAfterUpdate: ({layer, subLayers}) => {
-          t.is(
-            prevState.aggregatedValueReader,
-            (layer as ContourLayer).state.aggregatedValueReader,
-            'aggregation not updated'
+          expect(prevState.aggregatedValueReader, 'aggregation not updated').toBe(
+            (layer as ContourLayer).state.aggregatedValueReader
           );
-          t.not(
-            prevState.contourData,
-            (layer as ContourLayer).state.contourData,
-            'contour data is recalculated'
+          expect(prevState.contourData, 'contour data is recalculated').not.toBe(
+            (layer as ContourLayer).state.contourData
           );
-          t.is(subLayers.length, 1, 'Sublayer Line layer not rendered');
-          t.ok(subLayers[0] instanceof SolidPolygonLayer, 'Sublayer SolidPolygon layer rendered');
+          expect(subLayers.length, 'Sublayer Line layer not rendered').toBe(1);
+          expect(
+            subLayers[0] instanceof SolidPolygonLayer,
+            'Sublayer SolidPolygon layer rendered'
+          ).toBeTruthy();
           prevState = {...layer.state};
         }
       },
@@ -146,29 +134,21 @@ test('ContourLayer#updates', async t => {
         updateProps: {
           gpuAggregation: false
         },
-        onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+        onBeforeUpdate: ({testCase}) => console.log(testCase.title),
         onAfterUpdate: ({layer}) => {
-          t.not(
-            prevState.aggregator,
-            (layer as ContourLayer).state.aggregator,
-            'aggregator changed'
+          expect(prevState.aggregator, 'aggregator changed').not.toBe(
+            (layer as ContourLayer).state.aggregator
           );
-          t.not(
-            prevState.aggregatedValueReader,
-            (layer as ContourLayer).state.aggregatedValueReader,
-            'aggregation is updated'
+          expect(prevState.aggregatedValueReader, 'aggregation is updated').not.toBe(
+            (layer as ContourLayer).state.aggregatedValueReader
           );
-          t.not(
-            prevState.contourData,
-            (layer as ContourLayer).state.contourData,
-            'contour data is recalculated'
+          expect(prevState.contourData, 'contour data is recalculated').not.toBe(
+            (layer as ContourLayer).state.contourData
           );
           prevState = {...layer.state};
         }
       }
     ],
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
-
-  t.end();
 });

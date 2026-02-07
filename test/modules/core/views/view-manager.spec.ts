@@ -2,24 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {OrbitController, OrbitView, MapController, MapView, Viewport} from 'deck.gl';
 
 const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 
-test('ViewManager#imports', t => {
-  t.ok(ViewManager, 'ViewManager import ok');
-  t.end();
+test('ViewManager#imports', () => {
+  expect(ViewManager, 'ViewManager import ok').toBeTruthy();
 });
 
-test('ViewManager#constructor', t => {
+test('ViewManager#constructor', () => {
   const viewManager = new ViewManager({});
-  t.ok(viewManager, 'Viewport created');
-  t.end();
+  expect(viewManager, 'Viewport created').toBeTruthy();
 });
 
-test('ViewManager#getViewports', t => {
+test('ViewManager#getViewports', () => {
   const viewManager = new ViewManager({});
   viewManager.setProps({
     views: [new MapView({height: '50%'}), new MapView({height: '50%', y: '50%'})],
@@ -29,41 +27,39 @@ test('ViewManager#getViewports', t => {
   });
 
   let viewports = viewManager.getViewports();
-  t.equals(viewports.length, 2, 'Correct number of viewports returned');
-  t.ok(viewports[0] instanceof Viewport, 'Viewport 0 of corrrect type');
-  t.ok(viewports[1] instanceof Viewport, 'Viewport 1 of corrrect type');
+  expect(viewports.length, 'Correct number of viewports returned').toBe(2);
+  expect(viewports[0] instanceof Viewport, 'Viewport 0 of corrrect type').toBeTruthy();
+  expect(viewports[1] instanceof Viewport, 'Viewport 1 of corrrect type').toBeTruthy();
 
-  t.equals(viewports[0].height, 50, 'viewport dimensions correct');
-  t.equals(viewports[0].y, 0, 'viewport dimensions correct');
-  t.equals(viewports[1].height, 50, 'viewport dimensions correct');
-  t.equals(viewports[1].y, 50, 'viewport dimensions correct');
+  expect(viewports[0].height, 'viewport dimensions correct').toBe(50);
+  expect(viewports[0].y, 'viewport dimensions correct').toBe(0);
+  expect(viewports[1].height, 'viewport dimensions correct').toBe(50);
+  expect(viewports[1].y, 'viewport dimensions correct').toBe(50);
 
   viewports = viewManager.getViewports({x: 40, y: 40});
-  t.is(viewports.length, 1, 'Correct number of viewports returned');
-  t.is(viewports[0].y, 0, 'Correct viewport returned');
+  expect(viewports.length, 'Correct number of viewports returned').toBe(1);
+  expect(viewports[0].y, 'Correct viewport returned').toBe(0);
 
   viewports = viewManager.getViewports({x: 40, y: 40, width: 20, height: 20});
-  t.is(viewports.length, 2, 'Correct number of viewports returned');
+  expect(viewports.length, 'Correct number of viewports returned').toBe(2);
 
   viewports = viewManager.getViewports({x: -1, y: -1});
-  t.is(viewports.length, 0, 'Correct number of viewports returned');
-
-  t.end();
+  expect(viewports.length, 'Correct number of viewports returned').toBe(0);
 });
 
-test('ViewManager#needsRedraw', t => {
+test('ViewManager#needsRedraw', () => {
   const viewManager = new ViewManager({});
 
   viewManager.getViewports();
 
   let redrawReason = viewManager.needsRedraw();
-  t.equals(typeof redrawReason, 'string', 'Viewport needs redrawing');
+  expect(typeof redrawReason, 'Viewport needs redrawing').toBe('string');
 
   redrawReason = viewManager.needsRedraw({clearRedrawFlags: true});
-  t.equals(typeof redrawReason, 'string', 'Viewport still needs redrawing');
+  expect(typeof redrawReason, 'Viewport still needs redrawing').toBe('string');
 
   redrawReason = viewManager.needsRedraw();
-  t.equals(redrawReason, false, 'Viewport redraw flag cleared');
+  expect(redrawReason, 'Viewport redraw flag cleared').toBe(false);
 
   viewManager.setProps({
     views: [new MapView()],
@@ -75,12 +71,10 @@ test('ViewManager#needsRedraw', t => {
   viewManager.getViewports();
 
   redrawReason = viewManager.needsRedraw({clearRedrawFlags: true});
-  t.equals(typeof redrawReason, 'string', 'Viewport needs redrawing again');
-
-  t.end();
+  expect(typeof redrawReason, 'Viewport needs redrawing again').toBe('string');
 });
 
-test('ViewManager#updateController', t => {
+test('ViewManager#updateController', () => {
   const viewManager = new ViewManager({});
 
   const mapView = new MapView({id: 'test', height: '100%', controller: MapController});
@@ -92,7 +86,7 @@ test('ViewManager#updateController', t => {
   });
 
   const mapController = viewManager.controllers['test'];
-  t.equals(mapController.constructor, MapController, 'Correct controller type');
+  expect(mapController.constructor, 'Correct controller type').toBe(MapController);
 
   // Replace the MapView with a new OrbitView, given the same id.
   const orbitView = new OrbitView({id: 'test', height: '100%', controller: OrbitController});
@@ -105,7 +99,5 @@ test('ViewManager#updateController', t => {
 
   // Verify that the new view has the correct controller.
   const orbitController = viewManager.controllers['test'];
-  t.equals(orbitController.constructor, OrbitController, 'Correct controller type');
-
-  t.end();
+  expect(orbitController.constructor, 'Correct controller type').toBe(OrbitController);
 });

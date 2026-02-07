@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
 import shadow from '@deck.gl/core/shaderlib/shadow/shadow';
@@ -123,7 +123,7 @@ function insideClipSpace(xyz) {
   );
 }
 
-test('shadow#getUniforms', t => {
+test('shadow#getUniforms', () => {
   // LNG_LAT mode
   let viewport = TEST_VIEWPORT1;
 
@@ -138,20 +138,17 @@ test('shadow#getUniforms', t => {
     dummyShadowMaps: [true]
   });
 
-  t.equal(uniforms.lightCount, 1, `Shadow light count is correct!`);
-  t.deepEqual(
-    uniforms.projectCenter0,
-    [0, 0, 0, 0],
-    `Shadow projection center in LNG_LAT mode is correct!`
-  );
+  expect(uniforms.lightCount, `Shadow light count is correct!`).toBe(1);
+  expect(uniforms.projectCenter0, `Shadow projection center in LNG_LAT mode is correct!`).toEqual([
+    0, 0, 0, 0
+  ]);
 
   for (const value of TEST_CASE1) {
     const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
-    t.equal(
+    expect(
       insideClipSpace(result),
-      value.result,
       `Shadow viewProjection matrix in LNG_LAT mode is correct!`
-    );
+    ).toBe(value.result);
   }
 
   // LNGLAT_AUTO_OFFSET mode
@@ -167,15 +164,14 @@ test('shadow#getUniforms', t => {
   for (const value of TEST_CASE2) {
     const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
     const center = uniforms.projectCenter0;
-    t.equal(
+    expect(
       insideClipSpace([
         (result[0] + center[0]) / center[3],
         (result[1] + center[1]) / center[3],
         (result[2] + center[2]) / center[3]
       ]),
-      value.result,
       `Shadow viewProjection matrix in LNGLAT_AUTO_OFFSET mode is correct!`
-    );
+    ).toBe(value.result);
   }
 
   // Non-Geospatial Identity Mode
@@ -193,11 +189,9 @@ test('shadow#getUniforms', t => {
 
   for (const value of TEST_CASE3) {
     const result = uniforms.viewProjectionMatrix0.transform(value.xyz);
-    t.equal(
+    expect(
       insideClipSpace(result),
-      value.result,
       `Shadow viewProjection matrix in Identity mode is correct!`
-    );
+    ).toBe(value.result);
   }
-  t.end();
 });

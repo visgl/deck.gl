@@ -2,26 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils';
+import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 const DUMMY_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
 
-test('TileLayer', async t => {
+test('TileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({Layer: TileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({Layer: TileLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('TileLayer', async t => {
+test('TileLayer', async () => {
   let getTileDataCalled = 0;
   const getTileData = () => {
     getTileDataCalled++;
@@ -60,14 +59,14 @@ test('TileLayer', async t => {
         data: DUMMY_DATA
       },
       onBeforeUpdate: () => {
-        t.comment('Default getTileData');
+        console.log('Default getTileData');
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (!layer.isLoaded) {
-          t.ok(subLayers.length < 2);
+          expect(subLayers.length < 2).toBeTruthy();
         } else {
-          t.is(subLayers.length, 2, 'Rendered sublayers');
-          t.ok(layer.isLoaded, 'Layer is loaded');
+          expect(subLayers.length, 'Rendered sublayers').toBe(2);
+          expect(layer.isLoaded, 'Layer is loaded').toBeTruthy();
         }
       }
     },
@@ -78,19 +77,19 @@ test('TileLayer', async t => {
         renderSubLayers
       },
       onBeforeUpdate: () => {
-        t.comment('Custom getTileData');
+        console.log('Custom getTileData');
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (!layer.isLoaded) {
-          t.is(subLayers.length, 2, 'Cached layers are used while loading');
+          expect(subLayers.length, 'Cached layers are used while loading').toBe(2);
         } else {
-          t.is(subLayers.length, 2, 'Rendered sublayers');
-          t.is(getTileDataCalled, 2, 'Fetched tile data');
-          t.ok(layer.isLoaded, 'Layer is loaded');
-          t.ok(
+          expect(subLayers.length, 'Rendered sublayers').toBe(2);
+          expect(getTileDataCalled, 'Fetched tile data').toBe(2);
+          expect(layer.isLoaded, 'Layer is loaded').toBeTruthy();
+          expect(
             subLayers.every(l => layer.filterSubLayer({layer: l})),
             'Sublayers at z=2 are visible'
-          );
+          ).toBeTruthy();
         }
       }
     },
@@ -99,14 +98,14 @@ test('TileLayer', async t => {
       viewport: testViewport2,
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.is(subLayers.length, 4, 'Rendered new sublayers');
-          t.is(getTileDataCalled, 4, 'Fetched tile data');
-          t.ok(
+          expect(subLayers.length, 'Rendered new sublayers').toBe(4);
+          expect(getTileDataCalled, 'Fetched tile data').toBe(4);
+          expect(
             subLayers
               .filter(l => l.props.tile.z === 3)
               .every(l => layer.filterSubLayer({layer: l})),
             'Sublayers at z=3 are visible'
-          );
+          ).toBeTruthy();
         }
       }
     },
@@ -115,14 +114,14 @@ test('TileLayer', async t => {
       viewport: testViewport1,
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.is(subLayers.length, 4, 'Rendered cached sublayers');
-          t.is(getTileDataCalled, 4, 'Used cached data');
-          t.ok(
+          expect(subLayers.length, 'Rendered cached sublayers').toBe(4);
+          expect(getTileDataCalled, 'Used cached data').toBe(4);
+          expect(
             subLayers
               .filter(l => l.props.tile.z === 3)
               .every(l => !layer.filterSubLayer({layer: l})),
             'Sublayers at z=3 are hidden'
-          );
+          ).toBeTruthy();
         }
       }
     },
@@ -132,7 +131,7 @@ test('TileLayer', async t => {
         renderSubLayers: renderNestedSubLayers
       },
       onAfterUpdate: ({subLayers}) => {
-        t.is(subLayers.length, 4, 'Should rendered cached sublayers without prop change');
+        expect(subLayers.length, 'Should rendered cached sublayers without prop change').toBe(4);
       }
     },
     {
@@ -141,7 +140,7 @@ test('TileLayer', async t => {
         minWidthPixels: 1
       },
       onAfterUpdate: ({subLayers}) => {
-        t.is(subLayers.length, 8, 'Invalidated cached sublayers with prop change');
+        expect(subLayers.length, 'Invalidated cached sublayers with prop change').toBe(8);
       }
     },
     {
@@ -153,17 +152,21 @@ test('TileLayer', async t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.is(getTileDataCalled, 6, 'Refetched tile data');
-          t.is(subLayers.length, 8, 'Cached content is used to render sub layers');
+          expect(getTileDataCalled, 'Refetched tile data').toBe(6);
+          expect(subLayers.length, 'Cached content is used to render sub layers').toBe(8);
         }
       }
     }
   ];
-  await testLayerAsync({Layer: TileLayer, viewport: testViewport1, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport1,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('TileLayer#MapView:repeat', async t => {
+test('TileLayer#MapView:repeat', async () => {
   const renderSubLayers = props => {
     return new ScatterplotLayer(props);
   };
@@ -177,7 +180,7 @@ test('TileLayer#MapView:repeat', async t => {
     repeat: true
   });
 
-  t.is(testViewport.subViewports!.length, 3, 'Viewport has more than one sub viewports');
+  expect(testViewport.subViewports!.length, 'Viewport has more than one sub viewports').toBe(3);
 
   const testCases = [
     {
@@ -188,22 +191,24 @@ test('TileLayer#MapView:repeat', async t => {
       },
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.is(
+          expect(
             subLayers.filter(l => layer.filterSubLayer({layer: l})).length,
-            4,
             'Should contain 4 visible tiles'
-          );
+          ).toBe(4);
         }
       }
     }
   ];
 
-  await testLayerAsync({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
+test('TileLayer#AbortRequestsOnUpdateTrigger', async () => {
   const testViewport = new WebMercatorViewport({
     width: 1200,
     height: 400,
@@ -232,21 +237,23 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
         }
       },
       onAfterUpdate: () => {
-        t.is(
+        expect(
           tileset._tiles.map(tile => tile._isCancelled).length,
-          4,
           'all tiles from discarded tileset should be cancelled'
-        );
+        ).toBe(4);
       }
     }
   ];
 
-  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('TileLayer#AbortRequestsOnNewLayer', async t => {
+test('TileLayer#AbortRequestsOnNewLayer', async () => {
   const testViewport = new WebMercatorViewport({
     width: 1200,
     height: 400,
@@ -273,42 +280,49 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
         id: 'new-layer'
       },
       onAfterUpdate: () => {
-        t.is(
+        expect(
           tiles.filter(tile => tile._isCancelled).length,
-          4,
           'all tiles from discarded layer should be cancelled'
-        );
+        ).toBe(4);
       }
     }
   ];
 
-  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('TileLayer#debounceTime', async t => {
+test('TileLayer#debounceTime', async () => {
   const testViewport = new WebMercatorViewport({width: 1200, height: 400, zoom: 8});
   const testCases = [
     {
       title: 'debounceTime = 0',
       props: {debounceTime: 0, getTileData: () => sleep(10)},
       onAfterUpdate: ({layer}) => {
-        t.is(layer.state.tileset.opts.debounceTime, 0, 'assigns tileset#debounceTime = 0');
+        expect(layer.state.tileset.opts.debounceTime, 'assigns tileset#debounceTime = 0').toBe(0);
       }
     },
     {
       title: 'debounceTime = 25',
       props: {debounceTime: 25, getTileData: () => sleep(10)},
       onAfterUpdate: ({layer}) => {
-        t.is(layer.state.tileset.opts.debounceTime, 25, 'assigns tileset#debounceTime = 25');
+        expect(layer.state.tileset.opts.debounceTime, 'assigns tileset#debounceTime = 25').toBe(25);
       }
     }
   ];
 
-  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.fail});
-
-  t.end();
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => {
+      throw err;
+    }
+  });
 });
 
 function sleep(ms) {

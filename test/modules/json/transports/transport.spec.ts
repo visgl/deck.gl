@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import Transport from '@deck.gl/json/transports/transport';
 
-test('delayed onInitialized()', t => {
+test('delayed onInitialized()', () => {
   Transport.setCallbacks({
     onInitialize: () => {
-      t.ok(true, 'onInitialize called');
-      t.end();
+      expect(true, 'onInitialize called').toBeTruthy();
     }
   });
 

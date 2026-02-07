@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import {deserializeMatrix} from '@deck.gl/jupyter-widget/lib/utils/deserialize-matrix';
 import {jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
 import {processDataBuffer} from '@deck.gl/jupyter-widget/playground/playground';
@@ -37,8 +37,8 @@ const EXPECTED_CONVERSION = {
   }
 };
 
-test('jupyter-widget: binary-transport', t0 => {
-  t0.test('deserializeMatrix', t => {
+describe('jupyter-widget: binary-transport', () => {
+  test('deserializeMatrix', () => {
     const TEST_TABLE = [
       {input: null, expected: null, msg: 'Null arr should produce null output'},
       {
@@ -49,13 +49,10 @@ test('jupyter-widget: binary-transport', t0 => {
     ];
 
     for (const testCase of TEST_TABLE) {
-      t.deepEquals(
-        deserializeMatrix(testCase.input),
-        testCase.expected,
-        `deserializeMatrix: ${testCase.msg}`
+      expect(deserializeMatrix(testCase.input), `deserializeMatrix: ${testCase.msg}`).toEqual(
+        testCase.expected
       );
     }
-    t.end();
   });
 
   // Test deck.gl JSON configuration
@@ -71,17 +68,15 @@ test('jupyter-widget: binary-transport', t0 => {
     ]
   };
 
-  t0.test('processDataBuffer', t => {
+  test('processDataBuffer', () => {
     const newDeckProps = processDataBuffer({
       binary: EXPECTED_CONVERSION,
       convertedJson: jsonConverter.convert(DEMO_JSON_PROPS)
     });
 
-    t.deepEquals(
+    expect(
       newDeckProps.layers[0].props.data,
-      EXPECTED_CONVERSION['layer-id'],
       'should convert buffer input and props to new layers'
-    );
-    t.end();
+    ).toEqual(EXPECTED_CONVERSION['layer-id']);
   });
 });

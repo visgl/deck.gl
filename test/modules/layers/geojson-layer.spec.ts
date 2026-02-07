@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
@@ -12,7 +12,7 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testPickingLayer} from './test-picking-layer';
 
-test('GeoJsonLayer#tests', t => {
+test('GeoJsonLayer#tests', () => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
@@ -25,33 +25,31 @@ test('GeoJsonLayer#tests', t => {
       },
       getIcon: () => 'marker'
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
-      t.ok(layer.state.features, 'should update features');
+      expect(layer.state.features, 'should update features').toBeTruthy();
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
-      t.is(
-        subLayers.length,
-        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 6 : 5,
-        'correct number of sublayers'
+      expect(subLayers.length, 'correct number of sublayers').toBe(
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 6 : 5
       );
     }
   });
 
   testCases.push({
     title: 'GeoJsonLayer#highlightedObjectIndex',
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
-      t.ok(
+      expect(
         subLayers.every(l => Number.isFinite(l.props.highlightedObjectIndex)),
         "sublayers' highlightedObjectIndex prop is populated"
-      );
+      ).toBeTruthy();
       // check prop forwarding
       for (const l of subLayers) {
-        t.ok(
+        expect(
           Object.keys(l.props).every(key => key.startsWith('_') || l.props[key] !== undefined),
           'sublayer props are defined'
-        );
+        ).toBeTruthy();
       }
     },
     updateProps: {
@@ -62,23 +60,19 @@ test('GeoJsonLayer#tests', t => {
   // Add partial update test case
   testCases.push({
     title: 'GeoJsonLayer#partial update',
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       const {featuresDiff} = layer.state;
-      t.deepEquals(
-        featuresDiff,
-        {
-          polygonFeatures: [{startRow: 0, endRow: 3}],
-          polygonOutlineFeatures: [{startRow: 0, endRow: 3}],
-          lineFeatures: [{startRow: 0, endRow: 0}],
-          pointFeatures: [{startRow: 0, endRow: 0}]
-        },
-        'created diff for subLayers'
-      );
-      t.ok(
+      expect(featuresDiff, 'created diff for subLayers').toEqual({
+        polygonFeatures: [{startRow: 0, endRow: 3}],
+        polygonOutlineFeatures: [{startRow: 0, endRow: 3}],
+        lineFeatures: [{startRow: 0, endRow: 0}],
+        pointFeatures: [{startRow: 0, endRow: 0}]
+      });
+      expect(
         subLayers.every(l => l.props._dataDiff),
         "sublayers' dataDiff prop is populated"
-      );
+      ).toBeTruthy();
     },
     updateProps: {
       data: Object.assign({}, FIXTURES.choropleths),
@@ -93,21 +87,19 @@ test('GeoJsonLayer#tests', t => {
 
   testCases.push({
     title: 'GeoJsonLayer#binary',
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
-      t.ok(
+      expect(
         layer.state.layerProps.points.data.featureIds &&
           layer.state.layerProps.lines.data.featureIds &&
           layer.state.layerProps.polygons.data.featureIds &&
           layer.state.layerProps.polygonsOutline.data.featureIds,
         'should receive data in binary mode'
-      );
-      t.ok(layer.state.binary, 'detects binary data');
+      ).toBeTruthy();
+      expect(layer.state.binary, 'detects binary data').toBeTruthy();
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
-      t.is(
-        subLayers.length,
-        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
-        'correct number of sublayers'
+      expect(subLayers.length, 'correct number of sublayers').toBe(
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3
       );
     },
     props: {
@@ -149,28 +141,28 @@ test('GeoJsonLayer#tests', t => {
 
   testCases.push({
     title: 'GeoJsonLayer#binaryAttributes',
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({subLayers}) => {
       // Polygons-fill
-      t.ok(
+      expect(
         subLayers[0].props.data.attributes.getColor,
         'polygon-fill subLayer should receive passed binary attribute'
-      );
+      ).toBeTruthy();
       // Polygons-stroke
-      t.ok(
+      expect(
         subLayers[1].props.data.attributes.getColor,
         'polygon-stroke subLayer should receive passed binary attribute'
-      );
+      ).toBeTruthy();
       // Lines
-      t.ok(
+      expect(
         subLayers[2].props.data.attributes.getWidth,
         'linestrings subLayer should receive passed binary attribute'
-      );
+      ).toBeTruthy();
       // Points
-      t.ok(
+      expect(
         subLayers[3].props.data.attributes.getRadius,
         'points subLayer should receive passed binary attribute'
-      );
+      ).toBeTruthy();
     },
     props: {
       // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
@@ -196,17 +188,17 @@ test('GeoJsonLayer#tests', t => {
 
   testCases.push({
     title: 'GeoJsonLayer#DataFilterExtensionWithBinaryAttributes',
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({subLayers, subLayer}) => {
-      t.ok(
+      expect(
         subLayers.every(_subLayer => _subLayer.props.data.attributes.getFilterValue),
         'every subLayer should receive getFilterValue binary attribute'
-      );
+      ).toBeTruthy();
       const uniforms = getLayerUniforms(subLayer, 'dataFilter');
-      t.is(uniforms.min, 1, 'has correct uniforms');
-      t.is(uniforms.max, 1, 'has correct uniforms');
-      t.is(uniforms.useSoftMargin, false, 'has correct uniforms');
-      t.is(uniforms.enabled, true, 'has correct uniforms');
+      expect(uniforms.min, 'has correct uniforms').toBe(1);
+      expect(uniforms.max, 'has correct uniforms').toBe(1);
+      expect(uniforms.useSoftMargin, 'has correct uniforms').toBe(false);
+      expect(uniforms.enabled, 'has correct uniforms').toBe(true);
     },
     updateProps: {
       data: binaryDataWithGetFilterValue,
@@ -215,12 +207,10 @@ test('GeoJsonLayer#tests', t => {
     }
   });
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('GeoJsonLayer#picking', async t => {
+test('GeoJsonLayer#picking', async () => {
   await testPickingLayer({
     layer: new GeoJsonLayer({
       id: 'geojson',
@@ -234,24 +224,22 @@ test('GeoJsonLayer#picking', async t => {
         pickedLayerId: 'geojson-points-circle',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over point feature');
+          console.log('hover over point feature');
 
-          t.ok(info.object.properties, 'info.object populated');
-          t.is(info.object.geometry.type, 'Point', 'info.object populated');
+          expect(info.object.properties, 'info.object populated').toBeTruthy();
+          expect(info.object.geometry.type, 'info.object populated').toBe('Point');
 
           for (const subLayer of subLayers) {
             const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
-            t.is(
+            expect(
               uniforms.picking.isHighlightActive,
-              subLayer.id === 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
-            );
+            ).toBe(subLayer.id === 'geojson-points-circle');
             if (uniforms.picking.isHighlightActive) {
-              t.deepEqual(
+              expect(
                 uniforms.picking.highlightedObjectColor,
-                [1, 0, 0],
                 'highlighted index is set correctly'
-              );
+              ).toEqual([1, 0, 0]);
             }
           }
         }
@@ -261,24 +249,22 @@ test('GeoJsonLayer#picking', async t => {
         pickedLayerId: 'geojson-points-circle',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over point feature');
+          console.log('hover over point feature');
 
-          t.ok(info.object.properties, 'info.object populated');
-          t.is(info.object.geometry.type, 'Point', 'info.object populated');
+          expect(info.object.properties, 'info.object populated').toBeTruthy();
+          expect(info.object.geometry.type, 'info.object populated').toBe('Point');
 
           for (const subLayer of subLayers) {
             const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
-            t.is(
+            expect(
               uniforms.picking.isHighlightActive,
-              subLayer.id === 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
-            );
+            ).toBe(subLayer.id === 'geojson-points-circle');
             if (uniforms.picking.isHighlightActive) {
-              t.deepEqual(
+              expect(
                 uniforms.picking.highlightedObjectColor,
-                [2, 0, 0],
                 'highlighted index is set correctly'
-              );
+              ).toEqual([2, 0, 0]);
             }
           }
         }
@@ -288,24 +274,22 @@ test('GeoJsonLayer#picking', async t => {
         pickedLayerId: 'geojson-polygons-fill',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over polygon feature');
+          console.log('hover over polygon feature');
 
-          t.ok(info.object.properties, 'info.object populated');
-          t.is(info.object.geometry.type, 'Polygon', 'info.object populated');
+          expect(info.object.properties, 'info.object populated').toBeTruthy();
+          expect(info.object.geometry.type, 'info.object populated').toBe('Polygon');
 
           for (const subLayer of subLayers) {
             const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
-            t.is(
+            expect(
               uniforms.picking.isHighlightActive,
-              subLayer.id !== 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
-            );
+            ).toBe(subLayer.id !== 'geojson-points-circle');
             if (uniforms.picking.isHighlightActive) {
-              t.deepEqual(
+              expect(
                 uniforms.picking.highlightedObjectColor,
-                [6, 0, 0],
                 'highlighted index is set correctly'
-              );
+              ).toEqual([6, 0, 0]);
             }
           }
         }
@@ -315,22 +299,19 @@ test('GeoJsonLayer#picking', async t => {
         pickedLayerId: null,
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('pointer leave');
+          console.log('pointer leave');
 
-          t.notOk(info.object, 'info.object is null');
+          expect(info.object, 'info.object is null').toBeFalsy();
 
           for (const subLayer of subLayers) {
             const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
-            t.is(
+            expect(
               uniforms.picking.isHighlightActive,
-              false,
               `auto highlight is set for ${subLayer.id}`
-            );
+            ).toBe(false);
           }
         }
       }
     ]
   });
-
-  t.end();
 });

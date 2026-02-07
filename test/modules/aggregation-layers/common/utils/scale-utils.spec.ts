@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   AttributeWithScale,
   applyScaleQuantile,
   applyScaleOrdinal
 } from '@deck.gl/aggregation-layers/common/utils/scale-utils';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const QUANTILE_SCALE_TEST_CASES = [
   {
@@ -196,48 +196,40 @@ const ATTRIBUTE_TEST_CASES = [
   }
 ];
 
-test('scale-utils#quantileScale', t => {
+test('scale-utils#quantileScale', () => {
   for (const tc of QUANTILE_SCALE_TEST_CASES) {
     const output = applyScaleQuantile(new Float32Array(tc.values), tc.rangeSize);
-    t.deepEqual(
+    expect(
       output.attribute.value,
-      tc.results,
       `applyScaleQuantile ${tc.title} returned expected value`
-    );
+    ).toEqual(tc.results);
   }
-  t.end();
 });
 
-test('scale-utils#ordinalScale', t => {
+test('scale-utils#ordinalScale', () => {
   for (const tc of ORDINAL_SCALE_TEST_CASES) {
     const output = applyScaleOrdinal(new Float32Array(tc.values));
-    t.deepEqual(
-      output.attribute.value,
-      tc.results,
-      `applyScaleOrdinal ${tc.title} returned expected value`
+    expect(output.attribute.value, `applyScaleOrdinal ${tc.title} returned expected value`).toEqual(
+      tc.results
     );
   }
-  t.end();
 });
 
-test('AttributeWithScale#CPU#update', t => {
+test('AttributeWithScale#CPU#update', () => {
   for (const {title, input, length, testCases} of ATTRIBUTE_TEST_CASES) {
     const a = new AttributeWithScale(input, length);
     for (const testCase of testCases) {
       a.update(testCase.props);
       for (const key in testCase.expected) {
-        t.deepEqual(
-          a[key],
-          testCase.expected[key],
-          `${title} ${testCase.props.scaleType} returns expected ${key}`
+        expect(a[key], `${title} ${testCase.props.scaleType} returns expected ${key}`).toEqual(
+          testCase.expected[key]
         );
       }
     }
   }
-  t.end();
 });
 
-test('AttributeWithScale#GPU#update', t => {
+test('AttributeWithScale#GPU#update', () => {
   for (const {title, input, length, testCases} of ATTRIBUTE_TEST_CASES) {
     // Simulate a binary attribute with only GPU buffer
     const gpuInput = {
@@ -250,13 +242,10 @@ test('AttributeWithScale#GPU#update', t => {
     for (const testCase of testCases) {
       a.update(testCase.props);
       for (const key in testCase.expected) {
-        t.deepEqual(
-          a[key],
-          testCase.expected[key],
-          `${title} ${testCase.props.scaleType} returns expected ${key}`
+        expect(a[key], `${title} ${testCase.props.scaleType} returns expected ${key}`).toEqual(
+          testCase.expected[key]
         );
       }
     }
   }
-  t.end();
 });

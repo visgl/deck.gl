@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect, vi} from 'vitest';
 import {MapView, LayerManager} from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -10,8 +10,7 @@ import {CollisionFilterExtension} from '@deck.gl/extensions';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import CollisionFilterEffect from '@deck.gl/extensions/collision-filter/collision-filter-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
-import {makeSpy} from '@probe.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const testViewport = new MapView().makeViewport({
   width: 100,
@@ -43,25 +42,25 @@ const PRERENDEROPTIONS = {
   viewports: [testViewport]
 };
 
-test('CollisionFilterEffect#constructor', t => {
+test('CollisionFilterEffect#constructor', () => {
   const collisionFilterEffect = new CollisionFilterEffect();
-  t.ok(collisionFilterEffect, 'Collision filter effect created');
-  t.ok(collisionFilterEffect.useInPicking, 'Collision filter effect enabled for picking render');
-  t.deepEqual(
+  expect(collisionFilterEffect, 'Collision filter effect created').toBeTruthy();
+  expect(
+    collisionFilterEffect.useInPicking,
+    'Collision filter effect enabled for picking render'
+  ).toBeTruthy();
+  expect(
     collisionFilterEffect.collisionFBOs,
-    {},
     'Collision filter effect created with no passes'
-  );
-  t.deepEqual(
+  ).toEqual({});
+  expect(
     collisionFilterEffect.channels,
-    {},
     'Collision filter effect created with no channels'
-  );
+  ).toEqual({});
   collisionFilterEffect.cleanup();
-  t.end();
 });
 
-test('CollisionFilterEffect#cleanup', t => {
+test('CollisionFilterEffect#cleanup', () => {
   const collisionFilterEffect = new CollisionFilterEffect();
 
   const layerManager = new LayerManager(device, {viewport: testViewport});
@@ -75,24 +74,26 @@ test('CollisionFilterEffect#cleanup', t => {
     ...PRERENDEROPTIONS
   });
 
-  t.ok(collisionFilterEffect.collisionFilterPass, 'CollisionFilterPass is created');
-  t.ok(collisionFilterEffect.collisionFBOs['COLLISION_GROUP'], 'Collision FBO is created');
-  t.ok(collisionFilterEffect.dummyCollisionMap, 'Dummy collision map is created');
-  t.ok(collisionFilterEffect.channels['COLLISION_GROUP'], 'Channel is created');
-  t.equal(collisionFilterEffect.lastViewport, testViewport, 'Last viewport is saved');
+  expect(collisionFilterEffect.collisionFilterPass, 'CollisionFilterPass is created').toBeTruthy();
+  expect(
+    collisionFilterEffect.collisionFBOs['COLLISION_GROUP'],
+    'Collision FBO is created'
+  ).toBeTruthy();
+  expect(collisionFilterEffect.dummyCollisionMap, 'Dummy collision map is created').toBeTruthy();
+  expect(collisionFilterEffect.channels['COLLISION_GROUP'], 'Channel is created').toBeTruthy();
+  expect(collisionFilterEffect.lastViewport, 'Last viewport is saved').toBe(testViewport);
 
   collisionFilterEffect.cleanup();
 
-  t.deepEqual(collisionFilterEffect.collisionFBOs, {}, 'Collision FBOs is removed');
-  t.notOk(collisionFilterEffect.dummyCollisionMap, 'Dummy collision map is deleted');
-  t.deepEqual(collisionFilterEffect.channels, {}, 'Channels are removed');
-  t.notOk(collisionFilterEffect.lastViewport, 'Last viewport is deleted');
+  expect(collisionFilterEffect.collisionFBOs, 'Collision FBOs is removed').toEqual({});
+  expect(collisionFilterEffect.dummyCollisionMap, 'Dummy collision map is deleted').toBeFalsy();
+  expect(collisionFilterEffect.channels, 'Channels are removed').toEqual({});
+  expect(collisionFilterEffect.lastViewport, 'Last viewport is deleted').toBeFalsy();
 
   layerManager.finalize();
-  t.end();
 });
 
-test('CollisionFilterEffect#update', t => {
+test('CollisionFilterEffect#update', () => {
   const collisionFilterEffect = new CollisionFilterEffect();
   collisionFilterEffect.setup({device});
 
@@ -105,7 +106,7 @@ test('CollisionFilterEffect#update', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
 
   const preRenderWithLayers = (layers, description) => {
-    t.comment(description);
+    console.log(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
@@ -118,40 +119,39 @@ test('CollisionFilterEffect#update', t => {
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
   let parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER).collision;
-  t.ok(parameters.collisionFBO, 'collision map is in parameters');
-  t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
+  expect(parameters.collisionFBO, 'collision map is in parameters').toBeTruthy();
+  expect(parameters.dummyCollisionMap, 'dummy collision map is in parameters').toBeTruthy();
 
   preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'Add second collision layer');
   parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER).collision;
-  t.ok(parameters.collisionFBO, 'collision map is in parameters');
-  t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
+  expect(parameters.collisionFBO, 'collision map is in parameters').toBeTruthy();
+  expect(parameters.dummyCollisionMap, 'dummy collision map is in parameters').toBeTruthy();
   parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_2).collision;
-  t.ok(parameters.collisionFBO, 'collision map is in parameters');
-  t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
+  expect(parameters.collisionFBO, 'collision map is in parameters').toBeTruthy();
+  expect(parameters.dummyCollisionMap, 'dummy collision map is in parameters').toBeTruthy();
 
   preRenderWithLayers([TEST_LAYER_2], 'Remove first layer');
   parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_2).collision;
-  t.ok(parameters.collisionFBO, 'collision map is in parameters');
-  t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
+  expect(parameters.collisionFBO, 'collision map is in parameters').toBeTruthy();
+  expect(parameters.dummyCollisionMap, 'dummy collision map is in parameters').toBeTruthy();
 
   preRenderWithLayers(
     [TEST_LAYER_2, TEST_LAYER_DIFFERENT_GROUP],
     'Add layer with different collision group'
   );
   parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_2).collision;
-  t.ok(parameters.collisionFBO, 'collision map is in parameters');
-  t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
+  expect(parameters.collisionFBO, 'collision map is in parameters').toBeTruthy();
+  expect(parameters.dummyCollisionMap, 'dummy collision map is in parameters').toBeTruthy();
   parameters = collisionFilterEffect.getShaderModuleProps(TEST_LAYER_DIFFERENT_GROUP).collision;
-  t.ok(parameters.collisionFBO, 'collision map is in parameters');
-  t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
+  expect(parameters.collisionFBO, 'collision map is in parameters').toBeTruthy();
+  expect(parameters.dummyCollisionMap, 'dummy collision map is in parameters').toBeTruthy();
 
   collisionFilterEffect.cleanup();
   layerManager.finalize();
-  t.end();
 });
 
 // Render test using makeSpy to check CollisionFilterPass.render is called including with didRender from Mask
-test('CollisionFilterEffect#render', t => {
+test('CollisionFilterEffect#render', () => {
   const collisionFilterEffect = new CollisionFilterEffect();
   collisionFilterEffect.setup({device});
 
@@ -159,7 +159,7 @@ test('CollisionFilterEffect#render', t => {
   const TEST_LAYER_2 = TEST_LAYER.clone({id: 'test-layer-2'});
 
   const preRenderWithLayers = (layers, description, opts) => {
-    t.comment(description);
+    console.log(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
@@ -173,40 +173,39 @@ test('CollisionFilterEffect#render', t => {
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
   const collisionFilterPass = collisionFilterEffect.collisionFilterPass;
-  t.ok(collisionFilterPass, 'CollisionFilterPass is created');
-  const spy = makeSpy(collisionFilterPass, 'render');
+  expect(collisionFilterPass, 'CollisionFilterPass is created').toBeTruthy();
+  const spy = vi.spyOn(collisionFilterPass, 'render');
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
-  t.equal(spy.callCount, 0, 'Should not render if nothing changes');
+  expect(spy, 'Should not render if nothing changes').toHaveBeenCalledTimes(0);
 
   preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'add one layer');
-  t.equal(spy.callCount, 1, 'Should render when layer added');
+  expect(spy, 'Should render when layer added').toHaveBeenCalledTimes(1);
 
   preRenderWithLayers([TEST_LAYER], 'remove one layer');
-  t.equal(spy.callCount, 2, 'Should render when layer removed');
+  expect(spy, 'Should render when layer removed').toHaveBeenCalledTimes(2);
 
   preRenderWithLayers([TEST_LAYER], 'change viewport', {viewports: [testViewport2]});
-  t.equal(spy.callCount, 3, 'Should render when viewport changes');
+  expect(spy, 'Should render when viewport changes').toHaveBeenCalledTimes(3);
 
   TEST_LAYER._isLoadedOverride = false;
   preRenderWithLayers([TEST_LAYER], 'isLoaded changed', {viewports: [testViewport2]});
-  t.equal(spy.callCount, 4, 'Should render when isLoaded changes');
+  expect(spy, 'Should render when isLoaded changes').toHaveBeenCalledTimes(4);
 
   preRenderWithLayers([TEST_LAYER], 'mask effect rendered', {
     viewports: [testViewport2],
     effects: [new MaskEffect()],
     preRenderStats: {'mask-effect': {didRender: true}}
   });
-  t.equal(spy.callCount, 5, 'Should render when mask effect renders');
+  expect(spy, 'Should render when mask effect renders').toHaveBeenCalledTimes(5);
 
   preRenderWithLayers([TEST_LAYER], 'mask effect not rendered', {
     viewports: [testViewport2],
     effects: [new MaskEffect()],
     preRenderStats: {'mask-effect': {didRender: false}}
   });
-  t.equal(spy.callCount, 5, 'Should not render when mask effect does not render');
+  expect(spy, 'Should not render when mask effect does not render').toHaveBeenCalledTimes(5);
 
   collisionFilterEffect.cleanup();
   layerManager.finalize();
-  t.end();
 });

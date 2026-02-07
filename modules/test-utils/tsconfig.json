@@ -5,7 +5,9 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "module": "es2022",
+    "target": "es2022"
   },
   "references": [
     {"path": "../core"}

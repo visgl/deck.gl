@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   getBounds,
   boundsContain,
@@ -11,7 +11,7 @@ import {
   packVertices
 } from '@deck.gl/aggregation-layers/heatmap-layer/heatmap-layer-utils';
 
-test('HeatmapLayerUtils#getBounds', t => {
+test('HeatmapLayerUtils#getBounds', () => {
   const TESTS = [
     {
       input: [
@@ -27,13 +27,11 @@ test('HeatmapLayerUtils#getBounds', t => {
     }
   ];
   for (const testCase of TESTS) {
-    t.deepEqual(getBounds(testCase.input), testCase.output, 'returns expected result');
+    expect(getBounds(testCase.input), 'returns expected result').toEqual(testCase.output);
   }
-
-  t.end();
 });
 
-test('HeatmapLayerUtils#boundsContain', t => {
+test('HeatmapLayerUtils#boundsContain', () => {
   const TESTS = [
     {
       name: 'all corners inside',
@@ -75,12 +73,11 @@ test('HeatmapLayerUtils#boundsContain', t => {
 
   TESTS.forEach(tc => {
     const actual = boundsContain(tc.currentBounds, tc.targetBounds);
-    t.deepEqual(actual, tc.expected, `should return correct value when ${tc.name}`);
+    expect(actual, `should return correct value when ${tc.name}`).toEqual(tc.expected);
   });
-  t.end();
 });
 
-test('HeatmapLayerUtils#packVertices', t => {
+test('HeatmapLayerUtils#packVertices', () => {
   const TESTS = [
     {
       name: '2D',
@@ -106,16 +103,14 @@ test('HeatmapLayerUtils#packVertices', t => {
 
   for (const tc of TESTS) {
     const actual = packVertices(tc.points, tc.dimensions);
-    t.deepEqual(
+    expect(
       actual.slice(0, tc.expected.length),
-      tc.expected,
       `should return correct vertices for ${tc.name}`
-    );
+    ).toEqual(tc.expected);
   }
-  t.end();
 });
 
-test('HeatmapLayerUtils#getTextureCoordinates', t => {
+test('HeatmapLayerUtils#getTextureCoordinates', () => {
   const TESTS = [
     {
       bounds: [0, 0, 100, 100],
@@ -131,12 +126,11 @@ test('HeatmapLayerUtils#getTextureCoordinates', t => {
 
   for (const tc of TESTS) {
     const actual = getTextureCoordinates(tc.point, tc.bounds);
-    t.deepEqual(actual, tc.expected, 'should return correct coordinates');
+    expect(actual, 'should return correct coordinates').toEqual(tc.expected);
   }
-  t.end();
 });
 
-test('HeatmapLayerUtils#scaleToAspectRatio', t => {
+test('HeatmapLayerUtils#scaleToAspectRatio', () => {
   const TESTS = [
     {
       title: 'fit width',
@@ -163,7 +157,6 @@ test('HeatmapLayerUtils#scaleToAspectRatio', t => {
 
   for (const tc of TESTS) {
     const actual = scaleToAspectRatio(tc.boundingBox, tc.width, tc.height);
-    t.deepEqual(actual, tc.expected, `${tc.title}: returns correct bounds`);
+    expect(actual, `${tc.title}: returns correct bounds`).toEqual(tc.expected);
   }
-  t.end();
 });

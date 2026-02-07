@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect, vi} from 'vitest';
 import {
   Layer,
   LayerExtension,
@@ -12,8 +12,7 @@ import {
   OrbitView,
   picking
 } from '@deck.gl/core';
-import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
-import {makeSpy} from '@probe.gl/test-utils';
+import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
 
@@ -99,256 +98,247 @@ Extension.defaultProps = {
   getExtValue: {type: 'accessor', value: 1}
 };
 
-test('Layer#constructor', t => {
+test('Layer#constructor', () => {
   for (const tc of LAYER_CONSTRUCT_TEST_CASES) {
     const layer = Array.isArray(tc.props) ? new Layer(...tc.props) : new Layer(tc.props);
-    t.ok(layer, `Layer created ${tc.title}`);
+    expect(layer, `Layer created ${tc.title}`).toBeTruthy();
     const props = Array.isArray(tc.props) ? tc.props[0] : tc.props;
     const expectedId = props.id || tc.id;
-    t.equal(layer.id, expectedId, 'Layer id set correctly');
-    t.ok(layer.props, 'Layer props not null');
+    expect(layer.id, 'Layer id set correctly').toBe(expectedId);
+    expect(layer.props, 'Layer props not null').toBeTruthy();
   }
-  t.end();
 });
 
-test('Layer#clone', t => {
+test('Layer#clone', () => {
   const layer = new SubLayer({id: 'test-layer', data: [0, 1]});
   const newLayer = layer.clone({pickable: true});
 
-  t.is(newLayer.constructor.name, 'SubLayer', 'cloned layer has correct type');
-  t.is(newLayer.props.id, 'test-layer', 'cloned layer has correct id');
-  t.deepEquals(newLayer.props.data, [0, 1], 'cloned layer has correct data');
-
-  t.end();
+  expect(newLayer.constructor.name, 'cloned layer has correct type').toBe('SubLayer');
+  expect(newLayer.props.id, 'cloned layer has correct id').toBe('test-layer');
+  expect(newLayer.props.data, 'cloned layer has correct data').toEqual([0, 1]);
 });
 
-test('Layer#constructor(multi prop objects)', t => {
+test('Layer#constructor(multi prop objects)', () => {
   for (const tc of LAYER_CONSTRUCT_MULTIPROP_TEST_CASES) {
     const layer = new Layer(...tc.props);
-    t.ok(layer, `Layer created ${tc.title}`);
+    expect(layer, `Layer created ${tc.title}`).toBeTruthy();
     const props = Object.assign({}, ...tc.props);
     const expectedId = props.id || tc.id;
-    t.equal(layer.id, expectedId, 'Layer id set correctly');
-    t.ok(layer.props, 'Layer props not null');
+    expect(layer.id, 'Layer id set correctly').toBe(expectedId);
+    expect(layer.props, 'Layer props not null').toBeTruthy();
   }
-  t.end();
 });
 
-test('SubLayer#constructor', t => {
+test('SubLayer#constructor', () => {
   const layer = new SubLayer(LAYER_PROPS);
-  t.ok(layer, 'SubLayer created');
+  expect(layer, 'SubLayer created').toBeTruthy();
   const defaultProps = SubLayer._mergedDefaultProps;
-  t.equal(layer.props.onHover, defaultProps.onHover, 'Layer defaultProps found');
-  t.equal(layer.props.getColor, defaultProps.getColor, 'SubLayer defaultProps found');
-  t.end();
+  expect(layer.props.onHover, 'Layer defaultProps found').toBe(defaultProps.onHover);
+  expect(layer.props.getColor, 'SubLayer defaultProps found').toBe(defaultProps.getColor);
 });
 
-test('SubLayer2#constructor (no defaultProps)', t => {
+test('SubLayer2#constructor (no defaultProps)', () => {
   const layer = new SubLayer2(LAYER_PROPS);
-  t.ok(layer, 'SubLayer2 created');
-  t.end();
+  expect(layer, 'SubLayer2 created').toBeTruthy();
 });
 
-test('SubLayer3#constructor (no layerName, no defaultProps)', t => {
+test('SubLayer3#constructor (no layerName, no defaultProps)', () => {
   const layer = new SubLayer3(LAYER_PROPS);
-  t.ok(layer, 'SubLayer3 created');
-  t.end();
+  expect(layer, 'SubLayer3 created').toBeTruthy();
 });
 
-test('Layer#getNumInstances', t => {
+test('Layer#getNumInstances', () => {
   for (const dataVariant of dataVariants) {
     const layer = new Layer(LAYER_PROPS, {data: dataVariant.data});
-    t.equal(layer.getNumInstances(), dataVariant.size);
+    expect(layer.getNumInstances()).toBe(dataVariant.size);
   }
-  t.end();
 });
 
-test('Layer#validateProps', t => {
+test('Layer#validateProps', () => {
   let layer = new SubLayer(LAYER_PROPS);
   layer.validateProps();
-  t.pass('Layer props are valid');
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: 1});
-  t.throws(() => layer.validateProps(), /sizeScale/, 'throws on invalid function prop');
+  expect(() => layer.validateProps(), 'throws on invalid function prop').toThrow(/sizeScale/);
 
   layer = new SubLayer(LAYER_PROPS, {opacity: 'transparent'});
-  t.throws(() => layer.validateProps(), /opacity/, 'throws on invalid numberic prop');
+  expect(() => layer.validateProps(), 'throws on invalid numberic prop').toThrow(/opacity/);
 
   layer = new SubLayer(LAYER_PROPS, {opacity: 2});
-  t.throws(() => layer.validateProps(), /opacity/, 'throws on numberic prop out of range');
+  expect(() => layer.validateProps(), 'throws on numberic prop out of range').toThrow(/opacity/);
 
   layer = new SubLayer(LAYER_PROPS, {getColor: [255, 0, 0]});
   layer.validateProps();
-  t.pass('Layer props are valid');
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {getColor: d => d.color});
   layer.validateProps();
-  t.pass('Layer props are valid');
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {getColor: 3});
-  t.throws(() => layer.validateProps(), /getColor/, 'throws on invalid accessor prop');
+  expect(() => layer.validateProps(), 'throws on invalid accessor prop').toThrow(/getColor/);
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: null});
   layer.validateProps();
-  t.pass('Layer props are valid');
+  console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: [1, 10]});
-  t.throws(() => layer.validateProps(), /sizeScale/, 'throws on invalid function prop');
-
-  t.end();
+  expect(() => layer.validateProps(), 'throws on invalid function prop').toThrow(/sizeScale/);
 });
 
 // eslint-disable-next-line max-statements
-test('Layer#diffProps', t => {
+test('Layer#diffProps', () => {
   let layer = new SubLayer(LAYER_PROPS);
-  t.doesNotThrow(() => testInitializeLayer({layer, onError: t.notOk}), 'Layer initialized OK');
+  expect(
+    () => testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()}),
+    'Layer initialized OK'
+  ).not.toThrow();
 
   layer._diffProps(new SubLayer(LAYER_PROPS).props, layer.props);
-  t.false(layer.getChangeFlags().somethingChanged, 'same props');
+  expect(layer.getChangeFlags().somethingChanged, 'same props').toBeFalsy();
 
   layer._diffProps(new SubLayer(LAYER_PROPS, {data: dataVariants[0]}).props, layer.props);
-  t.true(layer.getChangeFlags().dataChanged, 'data changed');
+  expect(layer.getChangeFlags().dataChanged, 'data changed').toBeTruthy();
 
   layer._diffProps(new SubLayer(LAYER_PROPS, {size: 0}).props, layer.props);
-  t.true(layer.getChangeFlags().propsChanged, 'props changed');
+  expect(layer.getChangeFlags().propsChanged, 'props changed').toBeTruthy();
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
   layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 100}}).props, layer.props);
-  t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
+  expect(layer.getChangeFlags().propsOrDataChanged, 'props changed').toBeTruthy();
 
-  const spy = makeSpy(AttributeManager.prototype, 'invalidate');
+  const spy = vi.spyOn(AttributeManager.prototype, 'invalidate');
   layer._diffProps(
     new SubLayer(LAYER_PROPS, {updateTriggers: {time: {version: 0}}}).props,
     layer.props
   );
-  t.ok(spy.called, 'updateTriggers fired');
-  spy.restore();
+  expect(spy, 'updateTriggers fired').toHaveBeenCalled();
+  spy.mockRestore();
 
   layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}}).props, layer.props);
-  t.false(layer.getChangeFlags().updateTriggersChanged, 'updateTriggers not fired');
+  expect(layer.getChangeFlags().updateTriggersChanged, 'updateTriggers not fired').toBeFalsy();
 
   layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 1}}).props, layer.props);
-  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+  expect(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired').toBeTruthy();
 
   layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: null}}).props, layer.props);
-  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+  expect(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired').toBeTruthy();
 
   layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer._diffProps(
     new SubLayer(LAYER_PROPS, {updateTriggers: {time: undefined}}).props,
     layer.props
   );
-  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
-
-  t.end();
+  expect(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired').toBeTruthy();
 });
 
-test('Layer#diffProps#extensions', t => {
+test('Layer#diffProps#extensions', () => {
   let layer = new SubLayer(LAYER_PROPS);
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
 
   layer._diffProps(
     new SubLayer(LAYER_PROPS, {getExtValue: _ => 1, extensions: [new Extension()]}).props,
     layer.props
   );
-  t.true(layer.getChangeFlags().extensionsChanged, 'extensionsChanged');
+  expect(layer.getChangeFlags().extensionsChanged, 'extensionsChanged').toBeTruthy();
   layer.finalizeState();
 
   layer = new SubLayer(LAYER_PROPS, {getExtValue: _ => 1, extensions: [new Extension()]});
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
 
   layer._diffProps(
     new SubLayer(LAYER_PROPS, {randomProp: _ => 2, extensions: [new Extension()]}).props,
     layer.props
   );
-  t.true(layer.getChangeFlags().propsChanged, 'undefined prop changed');
+  expect(layer.getChangeFlags().propsChanged, 'undefined prop changed').toBeTruthy();
   layer._clearChangeFlags();
 
   layer._diffProps(
     new SubLayer(LAYER_PROPS, {getExtValue: _ => 2, extensions: [new Extension()]}).props,
     layer.props
   );
-  t.false(layer.getChangeFlags().somethingChanged, 'extension accessor change ignored');
+  expect(layer.getChangeFlags().somethingChanged, 'extension accessor change ignored').toBeFalsy();
 
   layer.finalizeState();
-
-  t.end();
 });
 
-test('Layer#use64bitPositions', t => {
+test('Layer#use64bitPositions', () => {
   let layer = new SubLayer({});
-  t.true(layer.use64bitPositions(), 'returns true for default settings');
+  expect(layer.use64bitPositions(), 'returns true for default settings').toBeTruthy();
 
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
-  t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT');
+  expect(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT').toBeTruthy();
 
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.CARTESIAN});
-  t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.CARTESIAN');
+  expect(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.CARTESIAN').toBeTruthy();
 
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS});
-  t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.METER_OFFSETS');
-
-  t.end();
+  expect(
+    layer.use64bitPositions(),
+    'returns false for COORDINATE_SYSTEM.METER_OFFSETS'
+  ).toBeFalsy();
 });
 
-test('Layer#project', t => {
+test('Layer#project', () => {
   let layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
-  t.ok(equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]), 'returns correct value');
+  expect(
+    equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]),
+    'returns correct value'
+  ).toBeTruthy();
 
   layer = new SubLayer({
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: [0.01, 0.01]
   });
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
-  t.ok(
+  expect(
     equals(
       layer.project([100, 100, 100]),
       [215.9196278025254, 134.08037212692722, 0.9981698636873962]
     ),
     'returns correct value'
-  );
+  ).toBeTruthy();
 
   layer = new SubLayer({
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
     modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
   });
-  testInitializeLayer({layer, onError: t.notOk});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer.context.viewport = new OrbitView().makeViewport({
     width: 400,
     height: 300,
     viewState: {zoom: 0, rotationOrbit: 30}
   });
 
-  t.ok(
+  expect(
     equals(
       layer.project([100, 100, 100]),
       [77.35308047269142, 60.21622351419864, 0.8327158213685135]
     ),
     'returns correct value'
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('Layer#Async Iterable Data', async t => {
+test('Layer#Async Iterable Data', async () => {
   async function getData() {
     await sleep(50);
     return [0, 1, 2, 3, 4, 5, 6, 7];
@@ -364,16 +354,14 @@ test('Layer#Async Iterable Data', async t => {
     yield [6, 7];
   }
 
-  let data = await testAsyncData(t, getData());
-  t.deepEquals(data, [0, 1, 2, 3, 4, 5, 6, 7], 'data is fully loaded');
+  let data = await testAsyncData(getData());
+  expect(data, 'data is fully loaded').toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
 
-  data = await testAsyncData(t, getDataIterator());
-  t.deepEquals(data, [0, 1, 2, 3, 4, 5, 6, 7], 'data is fully loaded');
-
-  t.end();
+  data = await testAsyncData(getDataIterator());
+  expect(data, 'data is fully loaded').toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
 });
 
-test('Layer#uniformTransitions', t => {
+test('Layer#uniformTransitions', () => {
   const drawCalls: {opacity: number; modelMatrix: number[]}[] = [];
   const timeline = new Timeline();
 
@@ -405,11 +393,10 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(0),
       onAfterUpdate: () =>
-        t.deepEquals(
-          drawCalls.pop(),
-          {opacity: 0, modelMatrix: identityMat4},
-          'layer drawn with opacity'
-        )
+        expect(drawCalls.pop(), 'layer drawn with opacity').toEqual({
+          opacity: 0,
+          modelMatrix: identityMat4
+        })
     },
     {
       updateProps: {
@@ -418,11 +405,10 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(100),
       onAfterUpdate: () =>
-        t.deepEquals(
-          drawCalls.pop(),
-          {opacity: 1, modelMatrix: scale3Mat4},
-          'layer drawn with opacity'
-        )
+        expect(drawCalls.pop(), 'layer drawn with opacity').toEqual({
+          opacity: 1,
+          modelMatrix: scale3Mat4
+        })
     },
     {
       updateProps: {
@@ -435,11 +421,10 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(200),
       onAfterUpdate: () =>
-        t.deepEquals(
-          drawCalls.pop(),
-          {opacity: 1, modelMatrix: scale3Mat4},
-          'layer drawn with opacity in transition'
-        )
+        expect(drawCalls.pop(), 'layer drawn with opacity in transition').toEqual({
+          opacity: 1,
+          modelMatrix: scale3Mat4
+        })
     },
     {
       updateProps: {
@@ -447,11 +432,10 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(300),
       onAfterUpdate: () =>
-        t.deepEquals(
-          drawCalls.pop(),
-          {opacity: 0.5, modelMatrix: scale2Mat4},
-          'layer drawn with opacity in transition'
-        )
+        expect(drawCalls.pop(), 'layer drawn with opacity in transition').toEqual({
+          opacity: 0.5,
+          modelMatrix: scale2Mat4
+        })
     },
     {
       updateProps: {
@@ -459,20 +443,17 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(400),
       onAfterUpdate: () =>
-        t.deepEquals(
-          drawCalls.pop(),
-          {opacity: 0, modelMatrix: identityMat4},
-          'layer drawn with opacity in transition'
-        )
+        expect(drawCalls.pop(), 'layer drawn with opacity in transition').toEqual({
+          opacity: 0,
+          modelMatrix: identityMat4
+        })
     }
   ];
 
-  testLayer({Layer: TestLayer, timeline, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: TestLayer, timeline, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('Layer#calculateInstancePickingColors', t => {
+test('Layer#calculateInstancePickingColors', () => {
   const testCases = [
     {
       props: {
@@ -480,12 +461,13 @@ test('Layer#calculateInstancePickingColors', t => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        t.ok(instancePickingColors.state.constant, 'instancePickingColors is set to constant');
-        t.deepEquals(
-          instancePickingColors.value,
-          [0, 0, 0, 0],
+        expect(
+          instancePickingColors.state.constant,
           'instancePickingColors is set to constant'
-        );
+        ).toBeTruthy();
+        expect(instancePickingColors.value, 'instancePickingColors is set to constant').toEqual([
+          0, 0, 0, 0
+        ]);
       }
     },
     {
@@ -494,12 +476,14 @@ test('Layer#calculateInstancePickingColors', t => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        t.notOk(instancePickingColors.state.constant, 'instancePickingColors is enabled');
-        t.deepEquals(
+        expect(
+          instancePickingColors.state.constant,
+          'instancePickingColors is enabled'
+        ).toBeFalsy();
+        expect(
           instancePickingColors.value.subarray(0, 8),
-          [1, 0, 0, 0, 2, 0, 0, 0],
           'instancePickingColors is populated'
-        );
+        ).toEqual([1, 0, 0, 0, 2, 0, 0, 0]);
       }
     },
     {
@@ -510,11 +494,10 @@ test('Layer#calculateInstancePickingColors', t => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        t.deepEquals(
+        expect(
           instancePickingColors.value.subarray(0, 12),
-          [1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0],
           'instancePickingColors is populated'
-        );
+        ).toEqual([1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0]);
       }
     },
     {
@@ -527,11 +510,10 @@ test('Layer#calculateInstancePickingColors', t => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        t.deepEquals(
+        expect(
           instancePickingColors.value.subarray(0, 12),
-          [1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0],
           'instancePickingColors is populated'
-        );
+        ).toEqual([1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0]);
       }
     },
     {
@@ -542,21 +524,18 @@ test('Layer#calculateInstancePickingColors', t => {
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
         const {length} = instancePickingColors.value;
-        t.deepEquals(
+        expect(
           length,
-          (2 ** 24 + 100) * 4,
           `no over allocation for instancePickingColors buffer after 2**24 elements`
-        );
+        ).toEqual((2 ** 24 + 100) * 4);
       }
     }
   ];
 
-  testLayer({Layer: SubLayer2, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: SubLayer2, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('Layer#isLoaded', async t => {
+test('Layer#isLoaded', async () => {
   let updateCount = 0;
 
   await testLayerAsync({
@@ -570,21 +549,19 @@ test('Layer#isLoaded', async t => {
         onAfterUpdate: ({layer}) => {
           updateCount++;
           if (updateCount === 1) {
-            t.is(layer.isLoaded, false, 'first update: layer is not loaded');
+            expect(layer.isLoaded, 'first update: layer is not loaded').toBe(false);
           }
           if (updateCount === 2) {
-            t.is(layer.isLoaded, true, 'second update: layer is loaded');
+            expect(layer.isLoaded, 'second update: layer is loaded').toBe(true);
           }
         }
       }
     ],
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
-
-  t.end();
 });
 
-test('Layer#updateModules', async t => {
+test('Layer#updateModules', async () => {
   class LayerWithModel extends Layer {
     initializeState() {}
 
@@ -634,16 +611,14 @@ test('Layer#updateModules', async t => {
 
         onAfterUpdate: ({layer}) => {
           let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.deepEqual(
+          expect(
             modelUniforms.picking.highlightColor,
-            [0, 0, HALF_BYTE, HALF_BYTE],
             'model highlightColor uniform is populated'
-          );
-          t.is(
+          ).toEqual([0, 0, HALF_BYTE, HALF_BYTE]);
+          expect(
             modelUniforms.picking.isHighlightActive,
-            false,
             'model selectedColor uniform is disabled'
-          );
+          ).toBe(false);
 
           // Simulate mouse hover
           layer.updateAutoHighlight({
@@ -652,11 +627,10 @@ test('Layer#updateModules', async t => {
           });
 
           modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            false,
             'model selectedColor uniform is disabled (autoHighlight: false)'
-          );
+          ).toBe(false);
         }
       },
       {
@@ -669,21 +643,18 @@ test('Layer#updateModules', async t => {
 
         onAfterUpdate: ({layer}) => {
           let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.deepEqual(
+          expect(
             modelUniforms.picking.highlightColor,
-            [1, 0, 0, HALF_BYTE],
             'model highlightColor uniform is populated'
-          );
-          t.is(
+          ).toEqual([1, 0, 0, HALF_BYTE]);
+          expect(
             modelUniforms.picking.isHighlightActive,
-            true,
             'model selectedColor uniform is enabled'
-          );
-          t.deepEqual(
+          ).toBe(true);
+          expect(
             modelUniforms.picking.highlightedObjectColor,
-            [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
-          );
+          ).toEqual([2, 0, 0]);
 
           // Simulate mouse hover
           layer.updateAutoHighlight({
@@ -692,16 +663,14 @@ test('Layer#updateModules', async t => {
           });
 
           modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            true,
             'model selectedColor uniform is enabled'
-          );
-          t.deepEqual(
+          ).toBe(true);
+          expect(
             modelUniforms.picking.highlightedObjectColor,
-            [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
-          );
+          ).toEqual([2, 0, 0]);
         }
       },
       {
@@ -714,16 +683,14 @@ test('Layer#updateModules', async t => {
 
         onAfterUpdate: ({layer}) => {
           let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            true,
             'model selectedColor uniform is enabled'
-          );
-          t.deepEqual(
+          ).toBe(true);
+          expect(
             modelUniforms.picking.highlightedObjectColor,
-            [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
-          );
+          ).toEqual([2, 0, 0]);
 
           // Simulate mouse hover
           layer.updateAutoHighlight({
@@ -732,16 +699,14 @@ test('Layer#updateModules', async t => {
           });
 
           modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            true,
             'model selectedColor uniform is enabled'
-          );
-          t.deepEqual(
+          ).toBe(true);
+          expect(
             modelUniforms.picking.highlightedObjectColor,
-            [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
-          );
+          ).toEqual([2, 0, 0]);
         }
       },
       {
@@ -754,11 +719,10 @@ test('Layer#updateModules', async t => {
 
         onAfterUpdate: ({layer}) => {
           let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            false,
             'model selectedColor uniform is unset (highlightedObjectIndex changed)'
-          );
+          ).toBe(false);
 
           // Simulate mouse hover
           layer.updateAutoHighlight({
@@ -767,16 +731,14 @@ test('Layer#updateModules', async t => {
           });
 
           modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            true,
             'model selectedColor uniform is enabled'
-          );
-          t.deepEqual(
+          ).toBe(true);
+          expect(
             modelUniforms.picking.highlightedObjectColor,
-            [3, 0, 0],
             'model selectedColor uniform is set from hovered object index'
-          );
+          ).toEqual([3, 0, 0]);
         }
       },
       {
@@ -788,16 +750,14 @@ test('Layer#updateModules', async t => {
 
         onAfterUpdate: ({layer}) => {
           const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.is(
+          expect(
             modelUniforms.picking.isHighlightActive,
-            true,
             'model selectedColor uniform is enabled'
-          );
-          t.deepEqual(
+          ).toBe(true);
+          expect(
             modelUniforms.picking.highlightedObjectColor,
-            [3, 0, 0],
             'model selectedColor uniform is set from hovered object index'
-          );
+          ).toEqual([3, 0, 0]);
         }
       },
       {
@@ -809,21 +769,17 @@ test('Layer#updateModules', async t => {
 
         onAfterUpdate: ({layer}) => {
           const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          t.deepEqual(
+          expect(
             modelUniforms.picking.highlightColor,
-            [1, 0, 0, HALF_BYTE],
             'model highlightColor uniform is populated'
-          );
-          t.is(
+          ).toEqual([1, 0, 0, HALF_BYTE]);
+          expect(
             modelUniforms.picking.isHighlightActive,
-            false,
             'model selectedColor uniform is disabled (model reset)'
-          );
+          ).toBe(false);
         }
       }
     ],
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
-
-  t.end();
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {parsePosition, getPosition} from '@deck.gl/core/utils/positions';
 
 const PARSE_TEST_CASES = [
@@ -43,26 +43,23 @@ const GET_TEST_CASES = [
   }
 ];
 
-test('positions#import', t => {
-  t.ok(parsePosition, 'parsePosition imported OK');
-  t.ok(getPosition, 'getPosition imported OK');
-  t.end();
+test('positions#import', () => {
+  expect(parsePosition, 'parsePosition imported OK').toBeTruthy();
+  expect(getPosition, 'getPosition imported OK').toBeTruthy();
 });
 
-test('parsePosition#tests', t => {
+test('parsePosition#tests', () => {
   for (const tc of PARSE_TEST_CASES) {
     const result = parsePosition(tc.value);
     result.position = result.position.toPrecision(5);
     tc.result.position = tc.result.position.toPrecision(5);
-    t.deepEqual(result, tc.result, `parsePosition ${tc.title} returned expected type`);
+    expect(result, `parsePosition ${tc.title} returned expected type`).toEqual(tc.result);
   }
-  t.end();
 });
 
-test('getPosition#tests', t => {
+test('getPosition#tests', () => {
   for (const tc of GET_TEST_CASES) {
     const result = getPosition(tc.position, tc.extent);
-    t.deepEqual(result, tc.result, `getPosition ${tc.title} returned expected type`);
+    expect(result, `getPosition ${tc.title} returned expected type`).toEqual(tc.result);
   }
-  t.end();
 });

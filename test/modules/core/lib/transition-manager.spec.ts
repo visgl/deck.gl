@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/engine';
@@ -128,17 +128,16 @@ const TEST_CASES = [
   }
 ];
 
-test('TransitionManager#constructor', t => {
+test('TransitionManager#constructor', () => {
   const transitionManager = new TransitionManager({
     getControllerState: props => new MapState(props)
   });
-  t.ok(transitionManager, 'TransitionManager constructor does not throw errors');
-  t.ok(transitionManager.onViewStateChange, 'TransitionManager has callback');
-  t.ok(transitionManager.transition, 'TransitionManager has transition');
-  t.end();
+  expect(transitionManager, 'TransitionManager constructor does not throw errors').toBeTruthy();
+  expect(transitionManager.onViewStateChange, 'TransitionManager has callback').toBeTruthy();
+  expect(transitionManager.transition, 'TransitionManager has transition').toBeTruthy();
 });
 
-test('TransitionManager#processViewStateChange', t => {
+test('TransitionManager#processViewStateChange', () => {
   const timeline = new Timeline();
 
   TEST_CASES.forEach(testCase => {
@@ -149,14 +148,14 @@ test('TransitionManager#processViewStateChange', t => {
     transitionManager.processViewStateChange(testCase.initialProps);
 
     testCase.input.forEach((props, i) => {
-      t.is(transitionManager.processViewStateChange(props), testCase.expect[i], testCase.title);
+      expect(transitionManager.processViewStateChange(props), testCase.title).toBe(
+        testCase.expect[i]
+      );
     });
   });
-
-  t.end();
 });
 
-test('TransitionManager#callbacks', t => {
+test('TransitionManager#callbacks', () => {
   const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-7;
   const timeline = new Timeline();
@@ -179,10 +178,10 @@ test('TransitionManager#callbacks', t => {
     onTransitionInterrupt: () => interruptCount++,
     onTransitionEnd: () => {
       config.EPSILON = 1e-7;
-      t.ok(
+      expect(
         transitionInterpolator.arePropsEqual(viewport, transitionProps),
         'viewport matches end props'
-      );
+      ).toBeTruthy();
       config.EPSILON = oldEpsilon;
       endCount++;
     }
@@ -193,7 +192,10 @@ test('TransitionManager#callbacks', t => {
     getControllerState: props => new MapState(props),
     onViewStateChange: ({viewState}) => {
       const newViewport = viewState;
-      t.ok(!transitionInterpolator.arePropsEqual(viewport, newViewport), 'viewport has changed');
+      expect(
+        !transitionInterpolator.arePropsEqual(viewport, newViewport),
+        'viewport has changed'
+      ).toBeTruthy();
       viewport = newViewport;
       // update props in transition, should not trigger interruption
       transitionManager.processViewStateChange(Object.assign({}, transitionProps, viewport));
@@ -216,16 +218,15 @@ test('TransitionManager#callbacks', t => {
   timeline.setTime(800);
   transitionManager.updateTransition();
 
-  t.is(startCount, 3, 'onTransitionStart() called twice');
-  t.is(interruptCount, 2, 'onTransitionInterrupt() called once');
-  t.is(endCount, 1, 'onTransitionEnd() called once');
-  t.is(updateCount, 5, 'onViewStateChange() called');
+  expect(startCount, 'onTransitionStart() called twice').toBe(3);
+  expect(interruptCount, 'onTransitionInterrupt() called once').toBe(2);
+  expect(endCount, 'onTransitionEnd() called once').toBe(1);
+  expect(updateCount, 'onViewStateChange() called').toBe(5);
 
   config.EPSILON = oldEpsilon;
-  t.end();
 });
 
-test('TransitionManager#auto#duration', t => {
+test('TransitionManager#auto#duration', () => {
   const timeline = new Timeline();
   const initialProps = {
     width: 100,
@@ -252,11 +253,10 @@ test('TransitionManager#auto#duration', t => {
     transitionInterpolator: new FlyToInterpolator({speed: 50}),
     transitionDuration: 'auto'
   });
-  t.ok(
+  expect(
     transitionManager.transition.inProgress && transitionManager.transition.settings.duration > 0,
     'should set duration when using "auto" mode' +
       ' ' +
       transitionManager.transition.settings.duration
-  );
-  t.end();
+  ).toBeTruthy();
 });

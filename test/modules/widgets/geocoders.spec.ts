@@ -1,7 +1,7 @@
-import test from 'tape';
+import {test, expect} from 'vitest';
 import {_CoordinatesGeocoder as CoordinatesGeocoder} from '@deck.gl/widgets';
 
-test('CoordinatesGeocoder.geocode - Parses decimal coordinates correctly', async t => {
+test('CoordinatesGeocoder.geocode - Parses decimal coordinates correctly', async () => {
   const cases = [
     {input: '34.0522, -118.2437', expected: {latitude: 34.0522, longitude: -118.2437}},
     {input: '-118.2437, 34.0522', expected: {longitude: -118.2437, latitude: 34.0522}},
@@ -10,13 +10,11 @@ test('CoordinatesGeocoder.geocode - Parses decimal coordinates correctly', async
 
   for (const {input, expected} of cases) {
     const result = await CoordinatesGeocoder.geocode(input);
-    t.deepEqual(result, expected, `geocode(${input})`);
+    expect(result, `geocode(${input})`).toEqual(expected);
   }
-
-  t.end();
 });
 
-test('CoordinatesGeocoder.geocode - Handles DMS format correctly', async t => {
+test('CoordinatesGeocoder.geocode - Handles DMS format correctly', async () => {
   const cases = [
     {
       input: '37°48\'00\"N, 122°25\'42\"W',
@@ -30,13 +28,13 @@ test('CoordinatesGeocoder.geocode - Handles DMS format correctly', async t => {
 
   for (const {input, expected} of cases) {
     const result = await CoordinatesGeocoder.geocode(input);
-    t.deepEqual(result, expected, `geocode(${input})`);
+    // Use toBeCloseTo for floating point comparisons
+    expect(result?.latitude, `geocode(${input}) latitude`).toBeCloseTo(expected.latitude, 10);
+    expect(result?.longitude, `geocode(${input}) longitude`).toBeCloseTo(expected.longitude, 10);
   }
-
-  t.end();
 });
 
-test('CoordinatesGeocoder.geocode - Returns null for invalid inputs', async t => {
+test('CoordinatesGeocoder.geocode - Returns null for invalid inputs', async () => {
   const cases = [
     {input: 'not a coordinate', expected: null},
     {input: '1000, 1000', expected: null}, // Invalid values
@@ -45,13 +43,11 @@ test('CoordinatesGeocoder.geocode - Returns null for invalid inputs', async t =>
 
   for (const {input, expected} of cases) {
     const result = await CoordinatesGeocoder.geocode(input);
-    t.equal(result, expected, `geocode(${input}) should be null`);
+    expect(result, `geocode(${input}) should be null`).toBe(expected);
   }
-
-  t.end();
 });
 
-test('CoordinatesGeocoder.geocode - Parses mixed formats and boundary conditions', async t => {
+test('CoordinatesGeocoder.geocode - Parses mixed formats and boundary conditions', async () => {
   const cases = [
     {input: '85°, -180°', expected: {latitude: 85, longitude: -180}},
     {input: '85°0\'0\"N 180°0\'0\"E', expected: {latitude: 85, longitude: 180}},
@@ -60,8 +56,6 @@ test('CoordinatesGeocoder.geocode - Parses mixed formats and boundary conditions
 
   for (const {input, expected} of cases) {
     const result = await CoordinatesGeocoder.geocode(input);
-    t.deepEqual(result, expected, `geocode(${input})`);
+    expect(result, `geocode(${input})`).toEqual(expected);
   }
-
-  t.end();
 });

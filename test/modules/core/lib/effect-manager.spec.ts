@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import EffectManager from '@deck.gl/core/lib/effect-manager';
 import type {Effect, EffectContext} from '@deck.gl/core';
 
@@ -34,89 +34,83 @@ class TestEffectWithUpdate extends TestEffect {
   }
 }
 
-test('EffectManager#constructor', t => {
+test('EffectManager#constructor', () => {
   const effectManager = new EffectManager();
-  t.ok(effectManager, 'Effect Manager created');
-  t.end();
+  expect(effectManager, 'Effect Manager created').toBeTruthy();
 });
 
-test('EffectManager#set and get effects', t => {
+test('EffectManager#set and get effects', () => {
   const effectManager = new EffectManager();
   const effect1 = new TestEffectWithUpdate({id: 'effect1'});
   const effect2 = new TestEffectWithUpdate({id: 'effect2'});
   effectManager.setProps({effects: [effect1, effect2]});
-  t.equal(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects changed');
+  expect(effectManager.needsRedraw({clearRedrawFlags: true})).toBe('effects changed');
   let effects = effectManager.getEffects();
   // 2 user effects + default lighting
-  t.equal(effects.length, 3, 'Effect set and get successfully');
-  t.ok(effect1.resources, 'Effect.setup() is called');
-  t.ok(effect2.resources, 'Effect.setup() is called');
+  expect(effects.length, 'Effect set and get successfully').toBe(3);
+  expect(effect1.resources, 'Effect.setup() is called').toBeTruthy();
+  expect(effect2.resources, 'Effect.setup() is called').toBeTruthy();
 
   effectManager.setProps({effects: [effect1]});
-  t.equal(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects changed');
+  expect(effectManager.needsRedraw({clearRedrawFlags: true})).toBe('effects changed');
   effects = effectManager.getEffects();
   // 1 user effect + default lighting
-  t.equal(effects.length, 2, 'Effect set and get successfully');
-  t.notOk(effect2.resources, 'Effect.cleanup() is called');
+  expect(effects.length, 'Effect set and get successfully').toBe(2);
+  expect(effect2.resources, 'Effect.cleanup() is called').toBeFalsy();
 
   effectManager.setProps({effects: [effect1]});
-  t.notOk(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects not changed');
+  expect(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects not changed').toBeFalsy();
 
   const defaultTestEffect = new TestEffect();
   effectManager.addDefaultEffect(defaultTestEffect);
-  t.ok(defaultTestEffect.resources, 'Effect.setup() is called');
-  t.equal(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects changed');
+  expect(defaultTestEffect.resources, 'Effect.setup() is called').toBeTruthy();
+  expect(effectManager.needsRedraw({clearRedrawFlags: true})).toBe('effects changed');
   effects = effectManager.getEffects();
   // 1 user effect + default lighting + testEffect1
-  t.is(effects.length, 3, 'Added new default effect');
-
-  t.end();
+  expect(effects.length, 'Added new default effect').toBe(3);
 });
 
-test('EffectManager#update effects', t => {
+test('EffectManager#update effects', () => {
   const effectManager = new EffectManager();
   effectManager.setProps({effects: [new TestEffectWithUpdate({gain: 0.5})]});
   let effect = effectManager.getEffects()[0];
-  t.equal(effect.props.gain, 0.5, 'Effect prop as expected');
+  expect(effect.props.gain, 'Effect prop as expected').toBe(0.5);
   const resources = (effect as TestEffectWithUpdate).resources;
-  t.ok(resources, 'Effect resources are created');
+  expect(resources, 'Effect resources are created').toBeTruthy();
 
   effectManager.setProps({effects: [new TestEffectWithUpdate({gain: 1})]});
   effect = effectManager.getEffects()[0];
-  t.equal(effect.props.gain, 1, 'Effect prop as expected');
-  t.is(effect.resources, resources, 'Resources did not get regenerated (props update)');
+  expect(effect.props.gain, 'Effect prop as expected').toBe(1);
+  expect(effect.resources, 'Resources did not get regenerated (props update)').toBe(resources);
 
   effectManager.setProps({effects: [new TestEffectWithUpdate({id: 'alt-effect', gain: 0})]});
-  t.notOk(effect.resources, 'Old effect is cleaned up');
+  expect(effect.resources, 'Old effect is cleaned up').toBeFalsy();
   effect = effectManager.getEffects()[0];
-  t.equal(effect.props.gain, 0, 'Effect prop as expected');
-  t.not(effect.resources, resources, 'Resources are regenerated (new effect)');
-
-  t.end();
+  expect(effect.props.gain, 'Effect prop as expected').toBe(0);
+  expect(effect.resources, 'Resources are regenerated (new effect)').not.toBe(resources);
 });
 
-test('EffectManager#update effects', t => {
+test('EffectManager#update effects', () => {
   const effectManager = new EffectManager();
   effectManager.setProps({effects: [new TestEffect({gain: 0.5})]});
   let effect = effectManager.getEffects()[0];
-  t.equal(effect.props.gain, 0.5, 'Effect prop as expected');
+  expect(effect.props.gain, 'Effect prop as expected').toBe(0.5);
   const resources = (effect as TestEffect).resources;
-  t.ok(resources, 'Effect resources are created');
+  expect(resources, 'Effect resources are created').toBeTruthy();
 
   effectManager.setProps({effects: [new TestEffect({gain: 1})]});
   effect = effectManager.getEffects()[0];
-  t.equal(effect.props.gain, 1, 'Effect prop as expected');
-  t.not(effect.resources, resources, 'Resources are regenerated (props update not implemented)');
-
-  t.end();
+  expect(effect.props.gain, 'Effect prop as expected').toBe(1);
+  expect(effect.resources, 'Resources are regenerated (props update not implemented)').not.toBe(
+    resources
+  );
 });
 
-test('EffectManager#finalize', t => {
+test('EffectManager#finalize', () => {
   const effect = new TestEffectWithUpdate();
   const effectManager = new EffectManager();
   effectManager.setProps({effects: [effect]});
   effectManager.finalize();
 
-  t.notOk(effect.resources, 'Effect manager is finalized');
-  t.end();
+  expect(effect.resources, 'Effect manager is finalized').toBeFalsy();
 });

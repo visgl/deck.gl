@@ -4,8 +4,8 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import test from 'tape-promise/tape';
-import {device} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {device} from '@deck.gl/test-utils/vitest';
 
 function update(attribute, {data}) {
   const {value, size} = attribute;
@@ -18,52 +18,45 @@ function update(attribute, {data}) {
   }
 }
 
-test('AttributeManager imports', t => {
-  t.equals(typeof AttributeManager, 'function', 'AttributeManager import successful');
-  t.end();
+test('AttributeManager imports', () => {
+  expect(typeof AttributeManager, 'AttributeManager import successful').toBe('function');
 });
 
-test('AttributeManager constructor', t => {
+test('AttributeManager constructor', () => {
   const attributeManager = new AttributeManager(device);
 
-  t.ok(attributeManager, 'AttributeManager construction successful');
-  t.end();
+  expect(attributeManager, 'AttributeManager construction successful').toBeTruthy();
 });
 
-test('AttributeManager.add', t => {
+test('AttributeManager.add', () => {
   const attributeManager = new AttributeManager(device);
 
   // Now autodeduced from shader declarations
-  // t.throws(
-  //   () => attributeManager.add({positions: {update}}),
-  //   'AttributeManager.add - throws on missing attribute size'
-  // );
+  // expect(//   () => attributeManager.add({positions: {update}}), //   'AttributeManager.add - throws on missing attribute size'
+  //).toThrow();
 
-  t.throws(
+  expect(
     () => attributeManager.add({positions: {size: 2}}),
     'AttributeManager.add - throws on missing attribute update'
-  );
+  ).toThrow();
 
   attributeManager.add({positions: {size: 2, accessor: 'getPosition', update}});
-  t.ok(
+  expect(
     attributeManager.getAttributes()['positions'],
     'AttributeManager.add - add attribute successful'
-  );
-  t.deepEquals(
+  ).toBeTruthy();
+  expect(
     attributeManager.updateTriggers,
-    {positions: ['positions'], getPosition: ['positions']},
     'AttributeManager.add - build update triggers mapping'
-  );
+  ).toEqual({positions: ['positions'], getPosition: ['positions']});
   attributeManager.addInstanced({instancePositions: {size: 2, accessor: 'getPosition', update}});
-  t.equals(
+  expect(
     attributeManager.getAttributes()['instancePositions'].settings.stepMode,
-    'instance',
     'AttributeManager.addInstanced creates attribute with stepMode:instance'
-  );
-  t.end();
+  ).toBe('instance');
 });
 
-test('AttributeManager.update', t => {
+test('AttributeManager.update', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
 
@@ -76,8 +69,8 @@ test('AttributeManager.update', t => {
   });
 
   attribute = attributeManager.getAttributes()['positions'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
-  t.equals(attribute.value[1], 1, 'attribute value is correct');
+  expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
+  expect(attribute.value[1], 'attribute value is correct').toBe(1);
 
   // Second update without invalidation, should not update
   attribute.value[1] = 2;
@@ -88,8 +81,8 @@ test('AttributeManager.update', t => {
   });
 
   attribute = attributeManager.getAttributes()['positions'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
-  t.equals(attribute.value[1], 2, 'Second update, attribute value was not changed');
+  expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
+  expect(attribute.value[1], 'Second update, attribute value was not changed').toBe(2);
 
   // Third update, with invalidation, should update
   attributeManager.invalidateAll();
@@ -99,13 +92,11 @@ test('AttributeManager.update', t => {
   });
 
   attribute = attributeManager.getAttributes()['positions'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
-  t.equals(attribute.value[1], 1, 'Third update, attribute value was updated');
-
-  t.end();
+  expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
+  expect(attribute.value[1], 'Third update, attribute value was updated').toBe(1);
 });
 
-test('AttributeManager.update - 0 numInstances', t => {
+test('AttributeManager.update - 0 numInstances', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
 
@@ -116,12 +107,10 @@ test('AttributeManager.update - 0 numInstances', t => {
   });
 
   const attribute = attributeManager.getAttributes()['positions'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
-
-  t.end();
+  expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
 });
 
-test('AttributeManager.update - constant attribute', t => {
+test('AttributeManager.update - constant attribute', () => {
   const attributeManager = new AttributeManager(device);
   let updateCalled = 0;
   attributeManager.add({
@@ -155,9 +144,9 @@ test('AttributeManager.update - constant attribute', t => {
     data: [1, 2]
   });
 
-  t.is(updateCalled, 0, 'should not call updater for constant attribute');
-  t.is(attribute.state.allocatedValue, null, 'should not allocate for constant attribute');
-  t.ok(attribute.state.constant, 'constant value is set');
+  expect(updateCalled, 'should not call updater for constant attribute').toBe(0);
+  expect(attribute.state.allocatedValue, 'should not allocate for constant attribute').toBe(null);
+  expect(attribute.state.constant, 'constant value is set').toBeTruthy();
 
   attribute.constant = false;
   attributeManager.invalidate('colors');
@@ -169,10 +158,10 @@ test('AttributeManager.update - constant attribute', t => {
     data: [1, 2]
   });
 
-  t.is(updateCalled, 1, 'updater is called');
-  t.ok(attribute.state.allocatedValue, 'should allocate new value array');
-  t.deepEqual(attribute.value, [0.5, 0.75, 0.125], 'correct attribute value');
-  t.ok(attribute.state.constant, 'constant value is set');
+  expect(updateCalled, 'updater is called').toBe(1);
+  expect(attribute.state.allocatedValue, 'should allocate new value array').toBeTruthy();
+  expect(attribute.value, 'correct attribute value').toEqual([0.5, 0.75, 0.125]);
+  expect(attribute.state.constant, 'constant value is set').toBeTruthy();
 
   attributeManager.invalidate('colors');
 
@@ -183,17 +172,17 @@ test('AttributeManager.update - constant attribute', t => {
     data: [1, 2]
   });
 
-  t.is(updateCalled, 2, 'updater is called');
-  t.deepEqual(attribute.value.slice(0, 6), [1, 1, 1, 2, 2, 2], 'correct attribute value');
-  t.notOk(attribute.state.constant, 'no longer a constant');
-
-  t.end();
+  expect(updateCalled, 'updater is called').toBe(2);
+  expect(attribute.value.slice(0, 6), 'correct attribute value').toEqual([1, 1, 1, 2, 2, 2]);
+  expect(attribute.state.constant, 'no longer a constant').toBeFalsy();
 });
 
-test('AttributeManager.update - external virtual buffers', t => {
+test('AttributeManager.update - external virtual buffers', () => {
   const attributeManager = new AttributeManager(device);
 
-  const dummyUpdate = () => t.fail('updater should not be called when external buffer is present');
+  const dummyUpdate = () => {
+    throw new Error('updater should not be called when external buffer is present');
+  };
 
   attributeManager.add({
     positions: {size: 2, update: dummyUpdate},
@@ -210,9 +199,9 @@ test('AttributeManager.update - external virtual buffers', t => {
   });
 
   let attribute = attributeManager.getAttributes()['positions'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'positions attribute has typed array');
+  expect(ArrayBuffer.isView(attribute.value), 'positions attribute has typed array').toBeTruthy();
   attribute = attributeManager.getAttributes()['colors'];
-  t.ok(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array');
+  expect(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array').toBeTruthy();
 
   attributeManager.update({
     numInstances: 1,
@@ -222,10 +211,8 @@ test('AttributeManager.update - external virtual buffers', t => {
     }
   });
 
-  t.is(
-    attribute.getBufferLayout().attributes[0].format,
-    'float32x3',
-    'colors is set to correct format'
+  expect(attribute.getBufferLayout().attributes[0].format, 'colors is set to correct format').toBe(
+    'float32x3'
   );
 
   attributeManager.update({
@@ -235,20 +222,17 @@ test('AttributeManager.update - external virtual buffers', t => {
       colors: new Uint32Array([0, 0, 0])
     }
   });
-  t.is(
-    attribute.getBufferLayout().attributes[0].format,
-    'uint32x3',
-    'colors is set to correct format'
+  expect(attribute.getBufferLayout().attributes[0].format, 'colors is set to correct format').toBe(
+    'uint32x3'
   );
-
-  t.end();
 });
 
-test('AttributeManager.update - external logical buffers', t => {
+test('AttributeManager.update - external logical buffers', () => {
   const attributeManager = new AttributeManager(device);
 
-  const dummyAccessor = () =>
-    t.fail('accessor should not be called when external buffer is present');
+  const dummyAccessor = () => {
+    throw new Error('accessor should not be called when external buffer is present');
+  };
 
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
@@ -273,27 +257,26 @@ test('AttributeManager.update - external logical buffers', t => {
   });
 
   let attribute = attributeManager.getAttributes()['positions'];
-  t.deepEqual(attribute.value, [1, 1, 2, 2], 'positions attribute has value');
+  expect(attribute.value, 'positions attribute has value').toEqual([1, 1, 2, 2]);
 
-  t.is(attribute.getVertexOffset(0), 0, 'getVertexOffset returns correct result');
-  t.is(attribute.getVertexOffset(1), 2, 'getVertexOffset returns correct result');
-  t.is(attribute.getVertexOffset(2), 4, 'getVertexOffset returns correct result');
+  expect(attribute.getVertexOffset(0), 'getVertexOffset returns correct result').toBe(0);
+  expect(attribute.getVertexOffset(1), 'getVertexOffset returns correct result').toBe(2);
+  expect(attribute.getVertexOffset(2), 'getVertexOffset returns correct result').toBe(4);
 
   attribute = attributeManager.getAttributes()['colors'];
-  t.deepEqual(attribute.value, [255, 0, 0, 0, 255, 0], 'colors attribute has value');
-  t.is(attribute.getAccessor().size, 3, 'colors attribute has correct size');
+  expect(attribute.value, 'colors attribute has value').toEqual([255, 0, 0, 0, 255, 0]);
+  expect(attribute.getAccessor().size, 'colors attribute has correct size').toBe(3);
 
   attribute = attributeManager.getAttributes()['types'];
-  t.deepEqual(attribute.value.slice(0, 2), [0, 3], 'types attribute has value');
-
-  t.end();
+  expect(attribute.value.slice(0, 2), 'types attribute has value').toEqual([0, 3]);
 });
 
-test('AttributeManager.update - external logical buffers - variable width', t => {
+test('AttributeManager.update - external logical buffers - variable width', () => {
   const attributeManager = new AttributeManager(device);
 
-  const dummyAccessor = () =>
-    t.fail('accessor should not be called when external buffer is present');
+  const dummyAccessor = () => {
+    throw new Error('accessor should not be called when external buffer is present');
+  };
 
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
@@ -319,23 +302,19 @@ test('AttributeManager.update - external logical buffers - variable width', t =>
   });
 
   let attribute = attributeManager.getAttributes()['positions'];
-  t.deepEqual(attribute.value.slice(0, 6), [1, 1, 1, 1, 2, 2], 'positions attribute has value');
+  expect(attribute.value.slice(0, 6), 'positions attribute has value').toEqual([1, 1, 1, 1, 2, 2]);
 
-  t.is(attribute.getVertexOffset(0), 0, 'getVertexOffset returns correct result');
-  t.is(attribute.getVertexOffset(1), 4, 'getVertexOffset returns correct result');
-  t.is(attribute.getVertexOffset(2), 6, 'getVertexOffset returns correct result');
+  expect(attribute.getVertexOffset(0), 'getVertexOffset returns correct result').toBe(0);
+  expect(attribute.getVertexOffset(1), 'getVertexOffset returns correct result').toBe(4);
+  expect(attribute.getVertexOffset(2), 'getVertexOffset returns correct result').toBe(6);
 
   attribute = attributeManager.getAttributes()['colors'];
-  t.deepEqual(
-    attribute.value.slice(0, 12),
-    [255, 0, 0, 255, 255, 0, 0, 255, 0, 255, 0, 255],
-    'colors attribute has value'
-  );
-
-  t.end();
+  expect(attribute.value.slice(0, 12), 'colors attribute has value').toEqual([
+    255, 0, 0, 255, 255, 0, 0, 255, 0, 255, 0, 255
+  ]);
 });
 
-test('AttributeManager.invalidate', t => {
+test('AttributeManager.invalidate', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
   attributeManager.add({colors: {size: 2, accessor: 'getColor', update}});
@@ -345,18 +324,19 @@ test('AttributeManager.invalidate', t => {
   });
 
   attributeManager.invalidate('positions');
-  t.ok(attributeManager.getAttributes()['positions'].needsUpdate, 'invalidated attribute by name');
+  expect(
+    attributeManager.getAttributes()['positions'].needsUpdate,
+    'invalidated attribute by name'
+  ).toBeTruthy();
 
   attributeManager.invalidate('getColor');
-  t.ok(
+  expect(
     attributeManager.getAttributes()['colors'].needsUpdate,
     'invalidated attribute by accessor name'
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('AttributeManager.getBufferLayouts', t => {
+test('AttributeManager.getBufferLayouts', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({
     // indexed attribute
@@ -369,76 +349,68 @@ test('AttributeManager.getBufferLayouts', t => {
     positions: {size: 3, type: 'float64', fp64: true, stepMode: 'dynamic', accessor: 'getPosition'}
   });
 
-  t.deepEqual(
-    attributeManager.getBufferLayouts(),
-    [
-      {
-        name: 'indices',
-        byteStride: 4,
-        attributes: [
-          {
-            attribute: 'indices',
-            format: 'uint32',
-            byteOffset: 0
-          }
-        ],
-        stepMode: 'vertex'
-      },
-      {
-        name: 'colors',
-        byteStride: 4,
-        attributes: [
-          {
-            attribute: 'colors',
-            format: 'unorm8x4',
-            byteOffset: 0
-          }
-        ],
-        stepMode: 'vertex'
-      },
-      {
-        name: 'instanceColors',
-        byteStride: 4,
-        attributes: [
-          {
-            attribute: 'instanceColors',
-            format: 'unorm8x4',
-            byteOffset: 0
-          }
-        ],
-        stepMode: 'instance'
-      },
-      {
-        name: 'positions',
-        byteStride: 24,
-        attributes: [
-          {
-            attribute: 'positions',
-            format: 'float32x3',
-            byteOffset: 0
-          },
-          {
-            attribute: 'positions64Low',
-            format: 'float32x3',
-            byteOffset: 12
-          }
-        ],
-        stepMode: 'instance'
-      }
-    ],
-    'getBufferLayouts()'
-  );
+  expect(attributeManager.getBufferLayouts(), 'getBufferLayouts()').toEqual([
+    {
+      name: 'indices',
+      byteStride: 4,
+      attributes: [
+        {
+          attribute: 'indices',
+          format: 'uint32',
+          byteOffset: 0
+        }
+      ],
+      stepMode: 'vertex'
+    },
+    {
+      name: 'colors',
+      byteStride: 4,
+      attributes: [
+        {
+          attribute: 'colors',
+          format: 'unorm8x4',
+          byteOffset: 0
+        }
+      ],
+      stepMode: 'vertex'
+    },
+    {
+      name: 'instanceColors',
+      byteStride: 4,
+      attributes: [
+        {
+          attribute: 'instanceColors',
+          format: 'unorm8x4',
+          byteOffset: 0
+        }
+      ],
+      stepMode: 'instance'
+    },
+    {
+      name: 'positions',
+      byteStride: 24,
+      attributes: [
+        {
+          attribute: 'positions',
+          format: 'float32x3',
+          byteOffset: 0
+        },
+        {
+          attribute: 'positions64Low',
+          format: 'float32x3',
+          byteOffset: 12
+        }
+      ],
+      stepMode: 'instance'
+    }
+  ]);
 
-  t.is(
+  expect(
     attributeManager.getBufferLayouts({isInstanced: false})[3].stepMode,
-    'vertex',
     'dynamic attribute.stepMode in nonInstancedModel'
-  );
-  t.is(
+  ).toBe('vertex');
+  expect(
     attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
-    'instance',
     'dynamic attribute.stepMode in instancedModel'
-  );
-
-  t.end();
+  ).toBe('instance');
 });

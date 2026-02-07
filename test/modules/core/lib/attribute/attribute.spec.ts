@@ -4,54 +4,47 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
-import test from 'tape-promise/tape';
-import {device} from '@deck.gl/test-utils';
-import {makeSpy} from '@probe.gl/test-utils';
+import {test, expect, describe, vi} from 'vitest';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import {Buffer} from '@luma.gl/core';
 
-test('Attribute#imports', t => {
-  t.equals(typeof Attribute, 'function', 'Attribute import successful');
-  t.end();
+test('Attribute#imports', () => {
+  expect(typeof Attribute, 'Attribute import successful').toBe('function');
 });
 
-test('Attribute#constructor', t => {
+test('Attribute#constructor', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
 
-  t.ok(attribute, 'Attribute construction successful');
-  t.ok(attribute.allocate, 'Attribute.allocate function available');
-  t.ok(attribute.updateBuffer, 'Attribute.update function available');
+  expect(attribute, 'Attribute construction successful').toBeTruthy();
+  expect(attribute.allocate, 'Attribute.allocate function available').toBeTruthy();
+  expect(attribute.updateBuffer, 'Attribute.update function available').toBeTruthy();
 
-  t.throws(() => new Attribute(device, {size: 1}), 'Attribute missing update option');
-
-  t.end();
+  expect(() => new Attribute(device, {size: 1}), 'Attribute missing update option').toThrow();
 });
 
-test('Attribute#delete', t => {
+test('Attribute#delete', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
   attribute.setData(new Float32Array(4));
 
-  t.ok(attribute._buffer, 'Attribute created Buffer object');
+  expect(attribute._buffer, 'Attribute created Buffer object').toBeTruthy();
 
   attribute.delete();
-  t.notOk(attribute._buffer, 'Attribute deleted Buffer object');
-
-  t.end();
+  expect(attribute._buffer, 'Attribute deleted Buffer object').toBeFalsy();
 });
 
-test('Attribute#getUpdateTriggers', t => {
+test('Attribute#getUpdateTriggers', () => {
   const update = () => {};
 
   let attribute = new Attribute(device, {id: 'indices', isIndexed: true, size: 1, update});
-  t.deepEqual(attribute.getUpdateTriggers(), ['indices'], 'returns correct update triggers');
+  expect(attribute.getUpdateTriggers(), 'returns correct update triggers').toEqual(['indices']);
 
   attribute = new Attribute(device, {id: 'instanceSizes', size: 1, accessor: 'getSize', update});
-  t.deepEqual(
-    attribute.getUpdateTriggers(),
-    ['instanceSizes', 'getSize'],
-    'returns correct update triggers'
-  );
+  expect(attribute.getUpdateTriggers(), 'returns correct update triggers').toEqual([
+    'instanceSizes',
+    'getSize'
+  ]);
 
   attribute = new Attribute(device, {
     id: 'instancePositions',
@@ -59,16 +52,14 @@ test('Attribute#getUpdateTriggers', t => {
     accessor: ['getPosition', 'getElevation'],
     update
   });
-  t.deepEqual(
-    attribute.getUpdateTriggers(),
-    ['instancePositions', 'getPosition', 'getElevation'],
-    'returns correct update triggers'
-  );
-
-  t.end();
+  expect(attribute.getUpdateTriggers(), 'returns correct update triggers').toEqual([
+    'instancePositions',
+    'getPosition',
+    'getElevation'
+  ]);
 });
 
-test('Attribute#allocate', t => {
+test('Attribute#allocate', () => {
   const attributeNoAlloc = new Attribute(device, {
     id: 'positions',
     size: 3,
@@ -87,37 +78,39 @@ test('Attribute#allocate', t => {
 
   const externalValue = new Float32Array(20).fill(1);
 
-  t.notOk(attributeNoAlloc.allocate(2), 'Should not allocate if noAlloc is set');
+  expect(attributeNoAlloc.allocate(2), 'Should not allocate if noAlloc is set').toBeFalsy();
 
-  t.ok(attribute.allocate(2), 'allocate successful');
+  expect(attribute.allocate(2), 'allocate successful').toBeTruthy();
   const allocatedValue = attribute.value;
-  t.ok(allocatedValue.length >= 4, 'allocated value is large enough');
+  expect(allocatedValue.length >= 4, 'allocated value is large enough').toBeTruthy();
 
-  t.ok(attribute.allocate(4), 'allocate successful');
-  t.is(attribute.value, allocatedValue, 'reused the same typed array');
+  expect(attribute.allocate(4), 'allocate successful').toBeTruthy();
+  expect(attribute.value, 'reused the same typed array').toBe(allocatedValue);
 
   attribute.setExternalBuffer(externalValue);
-  t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if external buffer is used');
+  expect(
+    attributeNoAlloc.allocate(4),
+    'Should not allocate if external buffer is used'
+  ).toBeFalsy();
 
   attribute.setExternalBuffer(null);
-  t.ok(attribute.allocate(4), 'allocate successful');
-  t.is(attribute.value, allocatedValue, 'reused the same typed array');
+  expect(attribute.allocate(4), 'allocate successful').toBeTruthy();
+  expect(attribute.value, 'reused the same typed array').toBe(allocatedValue);
 
   attribute.setConstantValue(this, [1, 1]);
-  t.deepEquals(attribute.value, [1, 1], 'value overwritten by external constant');
+  expect(attribute.value, 'value overwritten by external constant').toEqual([1, 1]);
 
   attribute.setConstantValue(this, undefined);
-  t.ok(attribute.allocate(4), 'allocate successful');
-  t.is(attribute.value, allocatedValue, 'reused the same typed array');
+  expect(attribute.allocate(4), 'allocate successful').toBeTruthy();
+  expect(attribute.value, 'reused the same typed array').toBe(allocatedValue);
 
-  t.ok(attribute.allocate(8), 'allocate successful');
-  t.not(attribute.value, allocatedValue, 'created new typed array');
+  expect(attribute.allocate(8), 'allocate successful').toBeTruthy();
+  expect(attribute.value, 'created new typed array').not.toBe(allocatedValue);
 
   attribute.delete();
-  t.end();
 });
 
-test('Attribute#setConstantValue', t => {
+test('Attribute#setConstantValue', () => {
   let attribute = new Attribute(device, {
     id: 'positions',
     size: 3,
@@ -133,19 +126,31 @@ test('Attribute#setConstantValue', t => {
     }
   });
   // clear redraw flag
-  t.ok(attribute.getValue().positions instanceof Buffer, 'attribute is using packed buffer');
+  expect(
+    attribute.getValue().positions instanceof Buffer,
+    'attribute is using packed buffer'
+  ).toBeTruthy();
   attribute.needsRedraw({clearChangedFlags: true});
 
   attribute.setConstantValue(this, [0, 0, 0]);
-  t.deepEqual(attribute.getValue().positions, [0, 0, 0], 'attribute set to constant value');
-  t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
+  expect(attribute.getValue().positions, 'attribute set to constant value').toEqual([0, 0, 0]);
+  expect(
+    attribute.needsRedraw({clearChangedFlags: true}),
+    'attribute marked needs redraw'
+  ).toBeTruthy();
 
   attribute.setConstantValue(this, [0, 0, 0]);
-  t.notOk(attribute.needsRedraw({clearChangedFlags: true}), 'attribute should not need redraw');
+  expect(
+    attribute.needsRedraw({clearChangedFlags: true}),
+    'attribute should not need redraw'
+  ).toBeFalsy();
 
   attribute.setConstantValue(this, [0, 0, 1]);
-  t.deepEqual(attribute.getValue().positions, [0, 0, 1], 'attribute set to constant value');
-  t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
+  expect(attribute.getValue().positions, 'attribute set to constant value').toEqual([0, 0, 1]);
+  expect(
+    attribute.needsRedraw({clearChangedFlags: true}),
+    'attribute marked needs redraw'
+  ).toBeTruthy();
 
   attribute.delete();
 
@@ -157,12 +162,10 @@ test('Attribute#setConstantValue', t => {
   });
 
   attribute.setConstantValue(this, [255, 255, 0]);
-  t.deepEqual(attribute.getValue().colors, [1, 1, 0], 'constant value is normalized');
-
-  t.end();
+  expect(attribute.getValue().colors, 'constant value is normalized').toEqual([1, 1, 0]);
 });
 
-test('Attribute#allocate - partial', async t => {
+test('Attribute#allocate - partial', async () => {
   let positions = new Attribute(device, {
     id: 'positions',
     update: attr => {
@@ -183,13 +186,15 @@ test('Attribute#allocate - partial', async t => {
   value[1] = 90;
   // make sure buffer is created
   positions.updateBuffer({});
-  t.deepEqual((await readDataFromBuffer()).slice(0, 2), [180, 90], 'value uploaded to buffer');
+  expect((await readDataFromBuffer()).slice(0, 2), 'value uploaded to buffer').toEqual([180, 90]);
 
   positions.setNeedsUpdate('test', {startRow: 1, endRow: 2});
   positions.allocate(value.length / 2 + 1); // array might be overallocated
-  t.notEqual(positions.value, value, 'a new value array is allocated');
-  t.deepEqual(positions.value.slice(0, 2), [180, 90], 'old value is copied to new array');
-  t.deepEqual((await readDataFromBuffer()).slice(0, 2), [180, 90], 'old value is copied to buffer');
+  expect(positions.value, 'a new value array is allocated').not.toBe(value);
+  expect(positions.value.slice(0, 2), 'old value is copied to new array').toEqual([180, 90]);
+  expect((await readDataFromBuffer()).slice(0, 2), 'old value is copied to buffer').toEqual([
+    180, 90
+  ]);
 
   positions.delete();
 
@@ -208,27 +213,22 @@ test('Attribute#allocate - partial', async t => {
   value = positions.value;
   // make sure buffer is created
   positions.updateBuffer({});
-  t.deepEqual(
-    (await readDataFromBuffer()).slice(0, 4),
-    [179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675],
-    'value uploaded to buffer'
-  );
+  expect((await readDataFromBuffer()).slice(0, 4), 'value uploaded to buffer').toEqual([
+    179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675
+  ]);
 
   positions.setNeedsUpdate('test', {startRow: 1, endRow: 2});
   positions.allocate(value.length / 2 + 1); // array might be overallocated
-  t.notEqual(positions.value, value, 'a new value array is allocated');
-  t.deepEqual(positions.value.slice(0, 2), [179.9, 89.9], 'old value is copied to new array');
-  t.deepEqual(
-    (await readDataFromBuffer()).slice(0, 4),
-    [179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675],
-    'old value is copied to buffer'
-  );
+  expect(positions.value, 'a new value array is allocated').not.toBe(value);
+  expect(positions.value.slice(0, 2), 'old value is copied to new array').toEqual([179.9, 89.9]);
+  expect((await readDataFromBuffer()).slice(0, 4), 'old value is copied to buffer').toEqual([
+    179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675
+  ]);
 
   positions.delete();
-  t.end();
 });
 
-test('Attribute#shaderAttributes', t => {
+test('Attribute#shaderAttributes', () => {
   const update = () => {};
 
   const buffer1 = device.createBuffer({byteLength: 10});
@@ -247,27 +247,24 @@ test('Attribute#shaderAttributes', t => {
   attribute.setData({buffer: buffer1});
 
   const bufferLayout = attribute.getBufferLayout();
-  t.is(bufferLayout.byteStride, 12, 'Buffer layout has correct stride');
+  expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(12);
   let attributeLayout = bufferLayout.attributes[0];
-  t.is(attributeLayout.format, 'float32x3', 'Attribute position has correct format');
-  t.is(attributeLayout.byteOffset, 0, 'Attribute position has correct offset');
+  expect(attributeLayout.format, 'Attribute position has correct format').toBe('float32x3');
+  expect(attributeLayout.byteOffset, 'Attribute position has correct offset').toBe(0);
   attributeLayout = bufferLayout.attributes[1];
-  t.is(attributeLayout.format, 'float32x3', 'Attribute nextPositions has correct format');
-  t.is(attributeLayout.byteOffset, 12, 'Attribute nextPositions has correct offset');
+  expect(attributeLayout.format, 'Attribute nextPositions has correct format').toBe('float32x3');
+  expect(attributeLayout.byteOffset, 'Attribute nextPositions has correct offset').toBe(12);
 
-  t.deepEquals(
-    attribute.getValue(),
-    {positions: buffer1, nextPositions: buffer1},
-    'Attribute has buffer'
-  );
+  expect(attribute.getValue(), 'Attribute has buffer').toEqual({
+    positions: buffer1,
+    nextPositions: buffer1
+  });
 
   buffer1.delete();
   attribute.delete();
-
-  t.end();
 });
 
-test('Attribute#updateBuffer', t => {
+test('Attribute#updateBuffer', () => {
   const TEST_PROPS = {
     data: [
       {id: 'A', value: 10, color: [255, 0, 0]},
@@ -405,20 +402,17 @@ test('Attribute#updateBuffer', t => {
 
       const result = testCase[param.title];
 
-      t.deepEqual(
+      expect(
         attribute.value.slice(0, result.length),
-        result,
         `${testCase.title} updates attribute buffer`
-      );
+      ).toEqual(result);
 
       attribute.delete();
     }
   }
-
-  t.end();
 });
 
-test('Attribute#updateBuffer _checkAttributeArray', t => {
+test('Attribute#updateBuffer _checkAttributeArray', () => {
   // the _checkAttributeArray() is a cheap validation performed after update
   // This test verifies that we only validate the first entry appropriately based
   // on attribute size, rather than the length of the 'value' which could have come from
@@ -446,11 +440,10 @@ test('Attribute#updateBuffer _checkAttributeArray', t => {
       numInstances: 1
     });
 
-    t.deepEqual(
+    expect(
       attribute.value.slice(0, result.length),
-      result,
       `Attribute with size ${size} passed _checkAttributeArray after update`
-    );
+    ).toEqual(result);
 
     attribute.delete();
   }
@@ -470,15 +463,13 @@ test('Attribute#updateBuffer _checkAttributeArray', t => {
 
     attribute.setNeedsUpdate(true);
     attribute.allocate(1);
-    t.throws(() => attribute.updateBuffer({numInstances: 1}));
+    expect(() => attribute.updateBuffer({numInstances: 1})).toThrow();
 
     attribute.delete();
   }
-
-  t.end();
 });
 
-test('Attribute#updateBuffer#noAlloc', t => {
+test('Attribute#updateBuffer#noAlloc', () => {
   let value;
   const attribute = new Attribute(device, {
     id: 'values',
@@ -495,24 +486,25 @@ test('Attribute#updateBuffer#noAlloc', t => {
   value = new Float32Array([1, 1]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
-  t.is(attribute.buffer.byteLength, 32, `overallocated buffer for ${value.byteLength} bytes`);
+  expect(attribute.buffer.byteLength, `overallocated buffer for ${value.byteLength} bytes`).toBe(
+    32
+  );
 
   value = new Float32Array([1, 2]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
-  t.is(attribute.buffer.byteLength, 32, `buffer is big enough ${value.byteLength} bytes`);
+  expect(attribute.buffer.byteLength, `buffer is big enough ${value.byteLength} bytes`).toBe(32);
 
   // 4 vertices + 1 vertexOffset => 5 vertices * 2 floats => 40 bytes
   value = new Float32Array([1, 1, 2, 2, 3, 3, 4, 4]);
   attribute.setNeedsUpdate(true);
   attribute.updateBuffer({data: value});
-  t.is(attribute.buffer.byteLength, 56, `re-allocated buffer for ${value.byteLength} bytes`);
+  expect(attribute.buffer.byteLength, `re-allocated buffer for ${value.byteLength} bytes`).toBe(56);
 
   attribute.delete();
-  t.end();
 });
 
-test('Attribute#standard accessor - variable width', t => {
+test('Attribute#standard accessor - variable width', () => {
   const TEST_PROPS = {
     data: [
       {id: 'Empty', value: [], color: [0, 255, 0]},
@@ -579,13 +571,11 @@ test('Attribute#standard accessor - variable width', t => {
       props: TEST_PROPS
     });
 
-    t.deepEqual(attribute.value.slice(0, result.length), result, 'attribute buffer is updated');
+    expect(attribute.value.slice(0, result.length), 'attribute buffer is updated').toEqual(result);
   }
-
-  t.end();
 });
 
-test('Attribute#updateBuffer - partial', t => {
+test('Attribute#updateBuffer - partial', () => {
   let accessorCalled = 0;
 
   const TEST_PROPS = {
@@ -743,19 +733,17 @@ test('Attribute#updateBuffer - partial', t => {
       props: TEST_PROPS
     });
 
-    t.deepEqual(
+    expect(
       attribute.value.slice(0, testCase.value.length),
-      testCase.value,
       `${testCase.title} yields correct result`
-    );
+    ).toEqual(testCase.value);
   }
 
   ATTRIBUTE_1.delete();
   ATTRIBUTE_2.delete();
-  t.end();
 });
 
-test('Attribute#setExternalBuffer', t => {
+test('Attribute#setExternalBuffer', () => {
   const attribute = new Attribute(device, {
     id: 'test-attribute',
     type: 'float32',
@@ -767,52 +755,67 @@ test('Attribute#setExternalBuffer', t => {
   const value2 = new Uint8Array(4);
 
   attribute.setNeedsUpdate();
-  t.notOk(
+  expect(
     attribute.setExternalBuffer(null),
     'should do nothing if setting external buffer to null'
-  );
-  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+  ).toBeFalsy();
+  expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
-  t.ok(attribute.setExternalBuffer(buffer), 'should set external buffer to Buffer object');
-  t.is(attribute.getBuffer(), buffer, 'external buffer is set');
-  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+  expect(
+    attribute.setExternalBuffer(buffer),
+    'should set external buffer to Buffer object'
+  ).toBeTruthy();
+  expect(attribute.getBuffer(), 'external buffer is set').toBe(buffer);
+  expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
-  const spy = makeSpy(attribute, 'setData');
-  t.ok(
+  const spy = vi.spyOn(attribute, 'setData');
+  expect(
     attribute.setExternalBuffer(buffer),
     'should successfully set external buffer if setting external buffer to the same object'
-  );
-  t.notOk(spy.called, 'Should not call update if setting external buffer to the same object');
+  ).toBeTruthy();
+  expect(
+    spy,
+    'Should not call update if setting external buffer to the same object'
+  ).not.toHaveBeenCalled();
 
-  t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
-  t.is(attribute.value, value1, 'external value is set');
-  t.is(attribute.getAccessor().type, 'float32', 'attribute type is set correctly');
+  expect(
+    attribute.setExternalBuffer(value1),
+    'should set external buffer to typed array'
+  ).toBeTruthy();
+  expect(attribute.value, 'external value is set').toBe(value1);
+  expect(attribute.getAccessor().type, 'attribute type is set correctly').toBe('float32');
 
-  t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
-  t.is(attribute.getAccessor().type, 'uint8', 'attribute type is set correctly');
+  expect(
+    attribute.setExternalBuffer(value2),
+    'should set external buffer to typed array'
+  ).toBeTruthy();
+  expect(attribute.getAccessor().type, 'attribute type is set correctly').toBe('uint8');
 
-  spy.reset();
-  t.ok(
+  spy.mockClear();
+  expect(
     attribute.setExternalBuffer(value2),
     'should successfully set external buffer if setting external buffer to the same object'
-  );
-  t.notOk(spy.called, 'Should not call update if setting external buffer to the same object');
+  ).toBeTruthy();
+  expect(
+    spy,
+    'Should not call update if setting external buffer to the same object'
+  ).not.toHaveBeenCalled();
 
-  t.ok(
+  expect(
     attribute.setExternalBuffer({
       offset: 4,
       stride: 8,
       value: value1
     }),
     'should set external buffer to attribute descriptor'
-  );
+  ).toBeTruthy();
   let attributeAccessor = attribute.getAccessor();
-  t.is(attributeAccessor.offset, 4, 'attribute accessor is updated');
-  t.is(attributeAccessor.stride, 8, 'attribute accessor is updated');
-  t.is(attribute.value, value1, 'external value is set');
-  t.is(attributeAccessor.type, 'float32', 'attribute type is set correctly');
+  expect(attributeAccessor.offset, 'attribute accessor is updated').toBe(4);
+  expect(attributeAccessor.stride, 'attribute accessor is updated').toBe(8);
+  expect(attribute.value, 'external value is set').toBe(value1);
+  expect(attributeAccessor.type, 'attribute type is set correctly').toBe('float32');
 
-  t.ok(
+  expect(
     attribute.setExternalBuffer({
       offset: 4,
       stride: 8,
@@ -820,17 +823,15 @@ test('Attribute#setExternalBuffer', t => {
       type: 'uint8'
     }),
     'should set external buffer to attribute descriptor'
-  );
+  ).toBeTruthy();
   attributeAccessor = attribute.getAccessor();
-  t.is(attributeAccessor.type, 'uint8', 'attribute type is set correctly');
+  expect(attributeAccessor.type, 'attribute type is set correctly').toBe('uint8');
 
   buffer.delete();
   attribute.delete();
-
-  t.end();
 });
 
-test('Attribute#setExternalBuffer#shaderAttributes', t => {
+test('Attribute#setExternalBuffer#shaderAttributes', () => {
   const attribute = new Attribute(device, {
     id: 'test-attribute-with-shader-attributes',
     type: 'unorm8',
@@ -857,47 +858,54 @@ test('Attribute#setExternalBuffer#shaderAttributes', t => {
 
   attribute.setExternalBuffer(value8);
   let bufferLayout = attribute.getBufferLayout();
-  t.is(bufferLayout.byteStride, 4, 'Buffer layout has correct stride');
-  t.is(bufferLayout.attributes[1].format, 'unorm8', 'Attribute a has correct format');
-  t.is(bufferLayout.attributes[1].byteOffset, 1, 'Attribute a has correct offset');
+  expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(4);
+  expect(bufferLayout.attributes[1].format, 'Attribute a has correct format').toBe('unorm8');
+  expect(bufferLayout.attributes[1].byteOffset, 'Attribute a has correct offset').toBe(1);
 
   attribute.setExternalBuffer({value: value8, stride: 8, offset: 2});
   bufferLayout = attribute.getBufferLayout();
-  t.is(bufferLayout.byteStride, 8, 'Buffer layout has correct stride');
-  t.is(bufferLayout.attributes[1].format, 'unorm8', 'Attribute a has correct format');
-  t.is(bufferLayout.attributes[1].byteOffset, 3, 'Attribute a has correct offset');
+  expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(8);
+  expect(bufferLayout.attributes[1].format, 'Attribute a has correct format').toBe('unorm8');
+  expect(bufferLayout.attributes[1].byteOffset, 'Attribute a has correct offset').toBe(3);
 
   attribute.setExternalBuffer({value: value32, offset: 2});
   bufferLayout = attribute.getBufferLayout();
-  t.is(bufferLayout.byteStride, 16, 'Buffer layout has correct stride');
-  t.is(bufferLayout.attributes[1].format, 'float32', 'Attribute a has correct format');
-  t.is(bufferLayout.attributes[1].byteOffset, 6, 'Attribute a has correct offset');
+  expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(16);
+  expect(bufferLayout.attributes[1].format, 'Attribute a has correct format').toBe('float32');
+  expect(bufferLayout.attributes[1].byteOffset, 'Attribute a has correct offset').toBe(6);
 
   attribute2.setExternalBuffer(value32);
   bufferLayout = attribute2.getBufferLayout();
-  t.is(bufferLayout.byteStride, 16, 'Buffer layout has correct stride');
-  t.is(bufferLayout.attributes[2].format, 'float32x4', 'Attribute a has correct format');
-  t.is(bufferLayout.attributes[2].byteOffset, 0, 'Attribute a has correct offset');
-  t.is(bufferLayout.attributes[3].format, 'float32x4', 'Attribute a64Low has correct format');
-  t.is(bufferLayout.attributes[3].byteOffset, 16, 'Attribute a64Low has correct offset');
-  t.deepEqual(attribute2.getValue().a64Low, [0, 0, 0, 0], 'shaderAttribute low part is constant');
+  expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(16);
+  expect(bufferLayout.attributes[2].format, 'Attribute a has correct format').toBe('float32x4');
+  expect(bufferLayout.attributes[2].byteOffset, 'Attribute a has correct offset').toBe(0);
+  expect(bufferLayout.attributes[3].format, 'Attribute a64Low has correct format').toBe(
+    'float32x4'
+  );
+  expect(bufferLayout.attributes[3].byteOffset, 'Attribute a64Low has correct offset').toBe(16);
+  expect(attribute2.getValue().a64Low, 'shaderAttribute low part is constant').toEqual([
+    0, 0, 0, 0
+  ]);
 
   attribute2.setExternalBuffer({value: value64, stride: 48, offset: 8});
   bufferLayout = attribute2.getBufferLayout();
-  t.is(bufferLayout.byteStride, 48, 'Buffer layout has correct stride');
-  t.is(bufferLayout.attributes[2].format, 'float32x4', 'Attribute a has correct format');
-  t.is(bufferLayout.attributes[2].byteOffset, 8, 'Attribute a has correct offset');
-  t.is(bufferLayout.attributes[3].format, 'float32x4', 'Attribute a64Low has correct format');
-  t.is(bufferLayout.attributes[3].byteOffset, 24, 'Attribute a64Low has correct offset');
-  t.ok(attribute2.getValue().a64Low instanceof Buffer, 'shaderAttribute low part is buffer');
+  expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(48);
+  expect(bufferLayout.attributes[2].format, 'Attribute a has correct format').toBe('float32x4');
+  expect(bufferLayout.attributes[2].byteOffset, 'Attribute a has correct offset').toBe(8);
+  expect(bufferLayout.attributes[3].format, 'Attribute a64Low has correct format').toBe(
+    'float32x4'
+  );
+  expect(bufferLayout.attributes[3].byteOffset, 'Attribute a64Low has correct offset').toBe(24);
+  expect(
+    attribute2.getValue().a64Low instanceof Buffer,
+    'shaderAttribute low part is buffer'
+  ).toBeTruthy();
 
   attribute.delete();
   attribute2.delete();
-
-  t.end();
 });
 
-test('Attribute#setBinaryValue', t => {
+test('Attribute#setBinaryValue', () => {
   let attribute = new Attribute(device, {
     id: 'test-attribute',
     type: 'float32',
@@ -907,20 +915,23 @@ test('Attribute#setBinaryValue', t => {
   let value = new Float32Array(12);
 
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setBinaryValue(null), 'should do nothing if setting external buffer to null');
-  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+  expect(
+    attribute.setBinaryValue(null),
+    'should do nothing if setting external buffer to null'
+  ).toBeFalsy();
+  expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
-  const spy = makeSpy(attribute, 'setData');
-  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
-  t.is(spy.callCount, 1, 'setData is called');
-  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+  const spy = vi.spyOn(attribute, 'setData');
+  expect(attribute.setBinaryValue(value), 'should use external binary value').toBeTruthy();
+  expect(spy, 'setData is called').toHaveBeenCalledTimes(1);
+  expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
   attribute.setNeedsUpdate();
-  t.ok(attribute.setBinaryValue(value), 'should use external binary value');
-  t.is(spy.callCount, 1, 'setData is called only once on the same data');
-  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+  expect(attribute.setBinaryValue(value), 'should use external binary value').toBeTruthy();
+  expect(spy, 'setData is called only once on the same data').toHaveBeenCalledTimes(1);
+  expect(attribute.needsUpdate(), 'attribute is updated').toBeFalsy();
 
-  spy.reset();
+  spy.mockClear();
   attribute.delete();
 
   attribute = new Attribute(device, {
@@ -931,8 +942,8 @@ test('Attribute#setBinaryValue', t => {
     update: () => {}
   });
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setBinaryValue(value), 'should do nothing if noAlloc');
-  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+  expect(attribute.setBinaryValue(value), 'should do nothing if noAlloc').toBeFalsy();
+  expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
   attribute = new Attribute(device, {
     id: 'test-attribute-with-transform',
@@ -945,51 +956,52 @@ test('Attribute#setBinaryValue', t => {
   value = {value: new Uint8Array(12), size: 3};
 
   attribute.setNeedsUpdate();
-  t.notOk(attribute.setBinaryValue(value), 'should require update');
-  t.ok(attribute.state.binaryAccessor, 'binaryAccessor is assigned');
-  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+  expect(attribute.setBinaryValue(value), 'should require update').toBeFalsy();
+  expect(attribute.state.binaryAccessor, 'binaryAccessor is assigned').toBeTruthy();
+  expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
-  t.throws(
+  expect(
     () => attribute.setBinaryValue([0, 1, 2, 3]),
     'should throw if external value is invalid'
-  );
+  ).toThrow();
 
   attribute.delete();
-  t.end();
 });
 
-test('Attribute#doublePrecision', t0 => {
-  const validateShaderAttributes = (t, attribute, is64Bit) => {
+describe('Attribute#doublePrecision', () => {
+  const validateShaderAttributes = (attribute, is64Bit) => {
     const bufferLayout = attribute.getBufferLayout();
-    t.deepEqual(
+    expect(
       bufferLayout.attributes.map(a => a.attribute),
-      ['positions', 'positions64Low'],
       'buffer layout generated'
-    );
+    ).toEqual(['positions', 'positions64Low']);
 
     if (is64Bit) {
-      t.is(bufferLayout.byteStride, 24, 'Buffer layout has correct stride');
-      t.is(bufferLayout.attributes[0].byteOffset, 0, 'Attribute positions has correct offset');
-      t.is(
+      expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(24);
+      expect(bufferLayout.attributes[0].byteOffset, 'Attribute positions has correct offset').toBe(
+        0
+      );
+      expect(
         bufferLayout.attributes[1].byteOffset,
-        12,
         'Attribute positions64Low has correct offset'
+      ).toBe(12);
+
+      const values = attribute.getValue();
+      expect(values.positions, 'positions value is buffer').toBe(attribute.getBuffer());
+      expect(values.positions64Low, 'positions64Low value is buffer').toBe(attribute.getBuffer());
+    } else {
+      expect(bufferLayout.byteStride, 'Buffer layout has correct stride').toBe(12);
+      expect(bufferLayout.attributes[0].byteOffset, 'Attribute positions has correct offset').toBe(
+        0
       );
 
       const values = attribute.getValue();
-      t.is(values.positions, attribute.getBuffer(), 'positions value is buffer');
-      t.is(values.positions64Low, attribute.getBuffer(), 'positions64Low value is buffer');
-    } else {
-      t.is(bufferLayout.byteStride, 12, 'Buffer layout has correct stride');
-      t.is(bufferLayout.attributes[0].byteOffset, 0, 'Attribute positions has correct offset');
-
-      const values = attribute.getValue();
-      t.is(values.positions, attribute.getBuffer(), 'positions value is buffer');
-      t.deepEqual(values.positions64Low, [0, 0, 0], 'positions64Low value is buffer');
+      expect(values.positions, 'positions value is buffer').toBe(attribute.getBuffer());
+      expect(values.positions64Low, 'positions64Low value is buffer').toEqual([0, 0, 0]);
     }
   };
 
-  t0.test('Attribute#doublePrecision#fp64:true', t => {
+  test('Attribute#doublePrecision#fp64:true', () => {
     const attribute = new Attribute(device, {
       id: 'positions',
       type: 'float64',
@@ -1005,28 +1017,27 @@ test('Attribute#doublePrecision', t0 => {
         getPosition: d => [d, 1, 2]
       }
     });
-    t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-    t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
-    validateShaderAttributes(t, attribute, true);
+    expect(attribute.value instanceof Float64Array, 'Attribute is Float64Array').toBeTruthy();
+    expect(attribute.value.slice(0, 6), 'Attribute value is populated').toEqual([0, 1, 2, 1, 1, 2]);
+    validateShaderAttributes(attribute, true);
 
     attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
-    t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
-    validateShaderAttributes(t, attribute, false);
+    expect(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array').toBeTruthy();
+    validateShaderAttributes(attribute, false);
 
-    t.throws(
+    expect(
       () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
       'should throw on invalid buffer'
-    );
+    ).toThrow();
 
     attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
-    t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-    validateShaderAttributes(t, attribute, true);
+    expect(attribute.value instanceof Float64Array, 'Attribute is Float64Array').toBeTruthy();
+    validateShaderAttributes(attribute, true);
 
     attribute.delete();
-    t.end();
   });
 
-  t0.test('Attribute#doublePrecision#fp64:false', t => {
+  test('Attribute#doublePrecision#fp64:false', () => {
     const attribute = new Attribute(device, {
       id: 'positions',
       type: 'float64',
@@ -1043,36 +1054,33 @@ test('Attribute#doublePrecision', t0 => {
         getPosition: d => [d, 1, 2]
       }
     });
-    t.ok(attribute.value instanceof Float32Array, 'Attribute is Float32Array');
-    t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
-    validateShaderAttributes(t, attribute, false);
+    expect(attribute.value instanceof Float32Array, 'Attribute is Float32Array').toBeTruthy();
+    expect(attribute.value.slice(0, 6), 'Attribute value is populated').toEqual([0, 1, 2, 1, 1, 2]);
+    validateShaderAttributes(attribute, false);
 
     attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
-    t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
-    validateShaderAttributes(t, attribute, false);
+    expect(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array').toBeTruthy();
+    validateShaderAttributes(attribute, false);
 
-    t.throws(
+    expect(
       () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
       'should throw on invalid buffer'
-    );
+    ).toThrow();
 
     attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
-    t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-    validateShaderAttributes(t, attribute, true);
+    expect(attribute.value instanceof Float64Array, 'Attribute is Float64Array').toBeTruthy();
+    validateShaderAttributes(attribute, true);
 
     const buffer = device.createBuffer({byteLength: 12});
     attribute.setExternalBuffer(buffer);
-    validateShaderAttributes(t, attribute, false);
+    validateShaderAttributes(attribute, false);
 
     buffer.delete();
     attribute.delete();
-    t.end();
   });
-
-  t0.end();
 });
 
-test('Attribute#updateBuffer', t => {
+test('Attribute#updateBuffer', () => {
   const attribute = new Attribute(device, {
     id: 'positions',
     type: 'float64',
@@ -1081,7 +1089,7 @@ test('Attribute#updateBuffer', t => {
     accessor: 'getPosition'
   });
 
-  t.is(attribute.getBounds(), null, 'Empty attribute does not have bounds');
+  expect(attribute.getBounds(), 'Empty attribute does not have bounds').toBe(null);
 
   attribute.numInstances = 3;
   attribute.allocate(3);
@@ -1094,15 +1102,11 @@ test('Attribute#updateBuffer', t => {
   });
 
   let bounds = attribute.getBounds();
-  t.deepEqual(
-    bounds,
-    [
-      [0, 1, -1],
-      [2, 1, -1]
-    ],
-    'Calculated attribute bounds'
-  );
-  t.is(bounds, attribute.getBounds(), 'bounds is cached');
+  expect(bounds, 'Calculated attribute bounds').toEqual([
+    [0, 1, -1],
+    [2, 1, -1]
+  ]);
+  expect(bounds, 'bounds is cached').toBe(attribute.getBounds());
 
   attribute.setNeedsUpdate();
   attribute.numInstances = 2;
@@ -1116,31 +1120,21 @@ test('Attribute#updateBuffer', t => {
   });
 
   bounds = attribute.getBounds();
-  t.deepEqual(
-    bounds,
-    [
-      [0, 1, 2],
-      [1, 1, 2]
-    ],
-    'Calculated attribute bounds'
-  );
-  t.is(bounds, attribute.getBounds(), 'bounds is cached');
+  expect(bounds, 'Calculated attribute bounds').toEqual([
+    [0, 1, 2],
+    [1, 1, 2]
+  ]);
+  expect(bounds, 'bounds is cached').toBe(attribute.getBounds());
 
   attribute.setNeedsUpdate();
   attribute.setConstantValue(this, [-1, 0, 1]);
 
   bounds = attribute.getBounds();
-  t.deepEqual(
-    bounds,
-    [
-      [-1, 0, 1],
-      [-1, 0, 1]
-    ],
-    'Calculated attribute bounds'
-  );
-  t.is(bounds, attribute.getBounds(), 'bounds is cached');
+  expect(bounds, 'Calculated attribute bounds').toEqual([
+    [-1, 0, 1],
+    [-1, 0, 1]
+  ]);
+  expect(bounds, 'bounds is cached').toBe(attribute.getBounds());
 
   attribute.delete();
-
-  t.end();
 });

@@ -7,12 +7,8 @@ export {toLowPrecision} from './utils/precision';
 export {gl, device} from './utils/setup-gl';
 
 // Utilities for update tests (lifecycle tests)
-export {
-  testLayer,
-  testLayerAsync,
-  testInitializeLayer,
-  testInitializeLayerAsync
-} from './lifecycle-test';
+// Uses ./tape which wraps ./lifecycle-test with @probe.gl/test-utils default
+export {testLayer, testLayerAsync, testInitializeLayer, testInitializeLayerAsync} from './tape';
 export {generateLayerTests} from './generate-layer-tests';
 
 // Basic utility for rendering multiple scenes (could go into "deck.gl/core")
@@ -23,6 +19,6 @@ export {SnapshotTestRunner} from './snapshot-test-runner';
 // A utility that emulates input events
 export {InteractionTestRunner} from './interaction-test-runner';
 
-export type {LayerTestCase} from './lifecycle-test';
+export type {LayerTestCase} from './tape';
 export type {SnapshotTestCase} from './snapshot-test-runner';
 export type {InteractionTestCase} from './interaction-test-runner';

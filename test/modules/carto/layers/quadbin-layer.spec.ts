@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import QuadbinLayer from '@deck.gl/carto/layers/quadbin-layer';
 import {
   quadbinToOffset,
@@ -50,58 +50,48 @@ const TEST_DATA = [
   }
 ];
 
-test('QuadbinLayer', t => {
+test('QuadbinLayer', () => {
   const testCases = generateLayerTests({
     Layer: QuadbinLayer,
     sampleProps: {
       data: TEST_DATA,
       getQuadbin: d => d.quadbin
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      t.ok(subLayer, 'subLayers rendered');
+      expect(subLayer, 'subLayers rendered').toBeTruthy();
 
       if (layer.props.data.length) {
-        t.equal(
-          subLayer.state.paths.length,
-          TEST_DATA.length,
-          'should update PolygonLayers state.paths'
+        expect(subLayer.state.paths.length, 'should update PolygonLayers state.paths').toBe(
+          TEST_DATA.length
         );
       }
     }
   });
 
-  testLayer({Layer: QuadbinLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: QuadbinLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('QuadbinLayer#quadbinToOffset', t => {
+test('QuadbinLayer#quadbinToOffset', () => {
   for (const {quadbin, expectedOffset} of TEST_DATA) {
     const offset = quadbinToOffset(quadbin);
-    t.deepEquals(offset, expectedOffset, 'Quadbin offset calculated');
+    expect(offset, 'Quadbin offset calculated').toEqual(expectedOffset);
   }
-
-  t.end();
 });
 
-test('QuadbinLayer#quadbinToWorldBounds', t => {
+test('QuadbinLayer#quadbinToWorldBounds', () => {
   for (const {quadbin, coverage, expectedBounds} of TEST_DATA) {
     const bounds = quadbinToWorldBounds(quadbin, coverage);
-    t.deepEquals(bounds, expectedBounds, 'Quadbin bounds calculated');
+    expect(bounds, 'Quadbin bounds calculated').toEqual(expectedBounds);
   }
-
-  t.end();
 });
 
-test('QuadbinLayer#getQuadbinPolygon', t => {
+test('QuadbinLayer#getQuadbinPolygon', () => {
   for (const {quadbin} of TEST_DATA) {
     const polygon = getQuadbinPolygon(quadbin);
-    t.ok(polygon instanceof Array, 'polygon is flat array');
-    t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Array, 'polygon is flat array').toBeTruthy();
+    expect(polygon.length / 2 - 1, 'polygon has 4 sides').toBe(4);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
   }
-
-  t.end();
 });

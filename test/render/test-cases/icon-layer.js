@@ -6,7 +6,7 @@
 import {IconLayer} from '@deck.gl/layers';
 import {points, iconAtlas as iconMapping} from 'deck.gl-test/data';
 
-const ICON_ATLAS = './test/data/icon-atlas.png';
+const ICON_ATLAS = '/test/data/icon-atlas.png';
 
 export default [
   {
@@ -59,7 +59,7 @@ export default [
           {position: [-122.4269, 37.7495], icon: 'square'},
           {position: [-122.4269, 37.7485], icon: 'short'}
         ],
-        iconAtlas: './test/data/icons.png',
+        iconAtlas: '/test/data/icons.png',
         iconMapping: {
           tall: {x: 0, y: 0, width: 40, height: 80, anchorY: 40},
           wide: {x: 40, y: 0, width: 80, height: 40, anchorY: 20},
@@ -163,11 +163,11 @@ export default [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return Object.assign({}, iconMapping.marker, {
-              url: './test/data/icon-marker.png'
+              url: '/test/data/icon-marker.png'
             });
           }
           return Object.assign({}, iconMapping['marker-warning'], {
-            url: './test/data/icon-warning.png'
+            url: '/test/data/icon-warning.png'
           });
         }
       })
@@ -200,7 +200,7 @@ export default [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return Object.assign({}, iconMapping.marker, {
-              url: './test/data/icon-marker.png',
+              url: '/test/data/icon-marker.png',
               id: 'marker-large',
               width: 256,
               height: 256
@@ -208,7 +208,7 @@ export default [
           }
           return Object.assign({}, iconMapping['marker-warning'], {
             id: 'warning-large',
-            url: './test/data/icon-warning.png',
+            url: '/test/data/icon-warning.png',
             width: 1024,
             height: 1024
           });

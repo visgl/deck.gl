@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {createProps} from '@deck.gl/core/lifecycle/create-props';
 import {compareProps} from '@deck.gl/core/lifecycle/props';
 import {PROP_TYPES_SYMBOL} from '@deck.gl/core/lifecycle/constants';
@@ -171,36 +171,34 @@ const TEST_CASES = [
   }
 ];
 
-test('compareProps#import', t => {
-  t.ok(compareProps, 'compareProps imported OK');
-  t.end();
+test('compareProps#import', () => {
+  expect(compareProps, 'compareProps imported OK').toBeTruthy();
 });
 
-test('compareProps#tests', t => {
+test('compareProps#tests', () => {
   for (const tc of TEST_CASES) {
     const result = compareProps({
       oldProps: tc.object1,
       newProps: tc.object2,
       propTypes: tc.propTypes
     });
-    t.ok(
+    expect(
       result === false || typeof result === 'string',
       `compareProps ${tc.title} returned expected type`
-    );
+    ).toBeTruthy();
     if (typeof result === 'string') {
       // Hack to make tape show the return value string from compareProps on failure
       const expectedResult = tc.result === SAME ? null : result;
-      t.equal(result, expectedResult, `compareProps ${tc.title} returned expected result`);
+      expect(result, `compareProps ${tc.title} returned expected result`).toBe(expectedResult);
     } else if (result === false) {
-      t.equal(SAME, tc.result, `compareProps ${tc.title} returned expected result`);
+      expect(SAME, `compareProps ${tc.title} returned expected result`).toBe(tc.result);
     } else {
-      t.fail(`compareProps ${tc.title} returned illegal value`);
+      throw new Error(`compareProps ${tc.title} returned illegal value`);
     }
   }
-  t.end();
 });
 
-test('createProps', t => {
+test('createProps', () => {
   class A {}
   A.componentName = 'A';
   A.defaultProps = {
@@ -230,22 +228,22 @@ test('createProps', t => {
 
   let mergedProps = createProps(new B(), [{data: [0, 1]}]);
 
-  t.equal(mergedProps.a, 1, 'base class props merged');
-  t.equal(mergedProps.b, 2, 'sub class props merged');
-  t.deepEqual(mergedProps.data, [0, 1], 'user props merged');
-  t.equal(mergedProps.c, 0, 'default prop value used');
-  t.ok(mergedProps[PROP_TYPES_SYMBOL].a, 'prop types defined');
+  expect(mergedProps.a, 'base class props merged').toBe(1);
+  expect(mergedProps.b, 'sub class props merged').toBe(2);
+  expect(mergedProps.data, 'user props merged').toEqual([0, 1]);
+  expect(mergedProps.c, 'default prop value used').toBe(0);
+  expect(mergedProps[PROP_TYPES_SYMBOL].a, 'prop types defined').toBeTruthy();
 
   mergedProps = createProps(new B(), [{c0: 4}]);
-  t.equal(mergedProps.c, 4, 'user props merged');
+  expect(mergedProps.c, 'user props merged').toBe(4);
 
   mergedProps = createProps(new B(), [
     {
       extensions: [new ExtA()]
     }
   ]);
-  t.equal(mergedProps.extEnabled, true, 'extension default props merged');
-  t.ok(mergedProps[PROP_TYPES_SYMBOL].extEnabled, 'prop types defined');
+  expect(mergedProps.extEnabled, 'extension default props merged').toBe(true);
+  expect(mergedProps[PROP_TYPES_SYMBOL].extEnabled, 'prop types defined').toBeTruthy();
 
   mergedProps = createProps(new B(), [
     {
@@ -253,13 +251,11 @@ test('createProps', t => {
       extensions: [new ExtB()]
     }
   ]);
-  t.equal(mergedProps.extValue, 1, 'extension default props merged');
-  t.equal(mergedProps.extEnabled, true, 'base extension default props merged');
-  t.deepEqual(mergedProps.extRange, [1, 100], 'user props merged');
-  t.ok(mergedProps[PROP_TYPES_SYMBOL].extValue, 'prop types defined');
+  expect(mergedProps.extValue, 'extension default props merged').toBe(1);
+  expect(mergedProps.extEnabled, 'base extension default props merged').toBe(true);
+  expect(mergedProps.extRange, 'user props merged').toEqual([1, 100]);
+  expect(mergedProps[PROP_TYPES_SYMBOL].extValue, 'prop types defined').toBeTruthy();
 
   mergedProps = createProps(new B(), [{}]);
-  t.notOk(mergedProps.extEnabled, 'default props without extensions not affected');
-
-  t.end();
+  expect(mergedProps.extEnabled, 'default props without extensions not affected').toBeFalsy();
 });

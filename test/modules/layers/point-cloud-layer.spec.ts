@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {UNIT} from '@deck.gl/core';
 
 import {PointCloudLayer} from '@deck.gl/layers';
 
-test('PointCloudLayer#loaders.gl support', t => {
+test('PointCloudLayer#loaders.gl support', () => {
   const testCases = [
     {
       props: {
         data: null
       },
       onAfterUpdate: ({layer}) => {
-        t.is(layer.getNumInstances(), 0, 'returns correct instance count');
+        expect(layer.getNumInstances(), 'returns correct instance count').toBe(0);
       }
     },
     {
@@ -30,12 +30,11 @@ test('PointCloudLayer#loaders.gl support', t => {
         }
       },
       onAfterUpdate: ({layer}) => {
-        t.is(layer.getNumInstances(), 10, 'returns correct instance count');
-        t.is(
+        expect(layer.getNumInstances(), 'returns correct instance count').toBe(10);
+        expect(
           layer.getAttributeManager().getAttributes().instancePositions.value,
-          layer.props.data.attributes.POSITION.value,
           'used external attribute'
-        );
+        ).toBe(layer.props.data.attributes.POSITION.value);
       }
     },
     {
@@ -44,7 +43,7 @@ test('PointCloudLayer#loaders.gl support', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.ok(uniforms.sizeUnits, UNIT.meters, 'sizeUnits uniform "meters"');
+        expect(uniforms.sizeUnits, UNIT.meters).toBeTruthy();
       }
     },
     {
@@ -53,12 +52,10 @@ test('PointCloudLayer#loaders.gl support', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.is(uniforms.sizeUnits, UNIT.pixels, 'sizeUnits uniform "pixels"');
+        expect(uniforms.sizeUnits, 'sizeUnits uniform "pixels"').toBe(UNIT.pixels);
       }
     }
   ];
 
-  testLayer({Layer: PointCloudLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: PointCloudLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

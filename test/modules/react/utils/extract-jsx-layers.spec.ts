@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable no-unused-vars */
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import React, {createElement, Fragment} from 'react';
 
 import {View, MapView, FirstPersonView, ScatterplotLayer, LineLayer} from 'deck.gl';
@@ -240,14 +240,18 @@ function deepCompareDeckObjects(a, b) {
   return true;
 }
 
-test('React#extractJSXLayers', t => {
+test('React#extractJSXLayers', () => {
   for (const testCase of TEST_CASES) {
-    t.comment(testCase.title);
+    console.log(testCase.title);
     const result = extractJSXLayers(testCase.input);
-    t.deepEqual(result.children, testCase.output.children, 'extracts React children');
-    t.ok(deepCompareDeckObjects(result.views, testCase.output.views), 'extracts views');
-    t.ok(deepCompareDeckObjects(result.layers, testCase.output.layers), 'extracts layers');
+    expect(result.children, 'extracts React children').toEqual(testCase.output.children);
+    expect(
+      deepCompareDeckObjects(result.views, testCase.output.views),
+      'extracts views'
+    ).toBeTruthy();
+    expect(
+      deepCompareDeckObjects(result.layers, testCase.output.layers),
+      'extracts layers'
+    ).toBeTruthy();
   }
-
-  t.end();
 });

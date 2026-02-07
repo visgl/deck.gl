@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 import {SimpleMeshLayer} from 'deck.gl';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-test('SimpleMeshLayer#tests', t => {
+test('SimpleMeshLayer#tests', () => {
   const testCases = generateLayerTests({
     Layer: SimpleMeshLayer,
     sampleProps: {
@@ -26,17 +26,15 @@ test('SimpleMeshLayer#tests', t => {
         nvertical: 1
       })
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer.props.mesh) {
-        t.ok(layer.getModels().length > 0, 'Layer should have models');
+        expect(layer.getModels().length > 0, 'Layer should have models').toBeTruthy();
       }
     },
     runDefaultAsserts: false
   });
 
-  testLayer({Layer: SimpleMeshLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: SimpleMeshLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

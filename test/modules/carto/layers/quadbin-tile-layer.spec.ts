@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {QuadbinTileLayer} from '@deck.gl/carto';
 import {renderSubLayers} from '@deck.gl/carto/layers/quadbin-tile-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -44,17 +44,20 @@ function quadkeyToTile(quadkey) {
   return tile;
 }
 
-test('QuadbinTileLayer', async t => {
+test('QuadbinTileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: QuadbinTileLayer,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
-  await testLayerAsync({Layer: QuadbinTileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({
+    Layer: QuadbinTileLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('QuadbinTileLayer tilejson', async t => {
+test('QuadbinTileLayer tilejson', async () => {
   const testCases = [
     {
       Layer: QuadbinTileLayer,
@@ -62,23 +65,26 @@ test('QuadbinTileLayer tilejson', async t => {
         data: TILEJSON,
         getTileData: () => []
       },
-      assert: t.ok,
+      assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
       onAfterUpdate({layer, subLayers}) {
         if (!layer.isLoaded) {
-          t.equal(subLayers.length, 1, 'Rendered sublayers');
-          t.deepEqual(subLayers[0].props.data, TILES, 'Extract tiles from tilejson');
-          t.deepEqual(subLayers[0].props.maxZoom, 10, 'Extract maxZoom from tilejson');
+          expect(subLayers.length, 'Rendered sublayers').toBe(1);
+          expect(subLayers[0].props.data, 'Extract tiles from tilejson').toEqual(TILES);
+          expect(subLayers[0].props.maxZoom, 'Extract maxZoom from tilejson').toEqual(10);
         }
       }
     }
   ];
-  await testLayerAsync({Layer: QuadbinTileLayer, testCases, onError: t.notOk});
-  t.end();
+  await testLayerAsync({
+    Layer: QuadbinTileLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 // JSON data format has ids in BigInt natively, while JSON uses hex
 [true, false].map(isBigInt => {
-  test(`QuadbinTileLayer autoHighlight BigInt:${isBigInt}`, async t => {
+  test(`QuadbinTileLayer autoHighlight BigInt:${isBigInt}`, async () => {
     await testPickingLayer({
       layer: new QuadbinTileLayer({
         id: 'quadbin-tile',
@@ -107,14 +113,12 @@ test('QuadbinTileLayer tilejson', async t => {
           pickedLayerId: 'quadbin-tile-layer-quadbin-tile-481bffffffffffff-cell-fill',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('hover over quadbin');
-            t.ok(info.object, 'info.object is populated');
-            t.equal(
-              info.object.id,
-              isBigInt ? 5200531669706080255n : '482bffffffffffff',
-              'quadbin is correct'
+            console.log('hover over quadbin');
+            expect(info.object, 'info.object is populated').toBeTruthy();
+            expect(info.object.id, 'quadbin is correct').toBe(
+              isBigInt ? 5200531669706080255n : '482bffffffffffff'
             );
-            t.equal(info.object.value, 3, 'object value is correct');
+            expect(info.object.value, 'object value is correct').toBe(3);
           }
         },
         {
@@ -122,37 +126,30 @@ test('QuadbinTileLayer tilejson', async t => {
           pickedLayerId: '',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('pointer leave');
-            t.notOk(info.object, 'info.object is not populated');
+            console.log('pointer leave');
+            expect(info.object, 'info.object is not populated').toBeFalsy();
           }
         }
       ]
     });
-
-    t.end();
   });
 });
 
-test('QuadbinTileLayer.renderSubLayers', async t => {
+test('QuadbinTileLayer.renderSubLayers', async () => {
   let layer = renderSubLayers({});
-  t.equal(layer, null, 'No sublayers with null data');
+  expect(layer, 'No sublayers with null data').toBe(null);
 
   let data = [{id: 5200531669706080255n}];
   layer = renderSubLayers({data});
-  t.ok(layer, 'Sublayer rendered with BigInt data');
-  t.equal(
-    layer.props.getQuadbin(data[0]),
-    5200531669706080255n,
-    'BigInt value returned in accessor'
+  expect(layer, 'Sublayer rendered with BigInt data').toBeTruthy();
+  expect(layer.props.getQuadbin(data[0]), 'BigInt value returned in accessor').toBe(
+    5200531669706080255n
   );
 
   data = [{id: '482bffffffffffff'}];
   layer = renderSubLayers({data});
-  t.ok(layer, 'Sublayer rendered with hexidecimal data');
-  t.equal(
-    layer.props.getQuadbin(data[0]),
-    5200531669706080255n,
-    'converted BigInt value returned in accessor'
+  expect(layer, 'Sublayer rendered with hexidecimal data').toBeTruthy();
+  expect(layer.props.getQuadbin(data[0]), 'converted BigInt value returned in accessor').toBe(
+    5200531669706080255n
   );
-  t.end();
 });

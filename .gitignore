@@ -4,6 +4,7 @@ dist/
 node_modules/
 coverage/
 test/**/*-failed.png
+test/**/__screenshots__/
 .nyc_output/
 .reify-cache/
 

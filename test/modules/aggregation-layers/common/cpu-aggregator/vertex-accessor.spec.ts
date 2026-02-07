@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Attribute} from '@deck.gl/core';
 import {
   VertexAccessor,
   evaluateVertexAccessor
 } from '@deck.gl/aggregation-layers/common/aggregator/cpu-aggregator/vertex-accessor';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
-test('evaluateVertexAccessor#sources', t => {
+test('evaluateVertexAccessor#sources', () => {
   const attributes = {
     size: new Attribute(device, {
       id: 'size',
@@ -32,8 +32,8 @@ test('evaluateVertexAccessor#sources', t => {
     {
       sources: ['size'],
       getValue: data => {
-        t.ok(data.size, 'size is present in data');
-        t.notOk(data.position, 'position is not present in data');
+        expect(data.size, 'size is present in data').toBeTruthy();
+        expect(data.position, 'position is not present in data').toBeFalsy();
       }
     },
     attributes,
@@ -45,8 +45,8 @@ test('evaluateVertexAccessor#sources', t => {
     {
       sources: ['size', 'position'],
       getValue: data => {
-        t.ok(data.size, 'size is present in data');
-        t.ok(data.position, 'position is present in data');
+        expect(data.size, 'size is present in data').toBeTruthy();
+        expect(data.position, 'position is present in data').toBeTruthy();
       }
     },
     attributes,
@@ -54,7 +54,7 @@ test('evaluateVertexAccessor#sources', t => {
   );
   getter(0);
 
-  t.throws(
+  expect(
     () =>
       evaluateVertexAccessor(
         {
@@ -65,14 +65,13 @@ test('evaluateVertexAccessor#sources', t => {
         {}
       ),
     'should throw on missing attribute'
-  );
+  ).toThrow();
 
   attributes.size.delete();
   attributes.position.delete();
-  t.end();
 });
 
-test('evaluateVertexAccessor#size=1', t => {
+test('evaluateVertexAccessor#size=1', () => {
   const attributes = {
     size: new Attribute(device, {
       id: 'size',
@@ -87,21 +86,20 @@ test('evaluateVertexAccessor#size=1', t => {
 
   attributes.size.setData({value: new Float32Array([6, 7, 8, 9])});
   let getter = evaluateVertexAccessor(accessor, attributes, {});
-  t.is(getter(1), 7, 'Basic attribute');
+  expect(getter(1), 'Basic attribute').toBe(7);
 
   attributes.size.setData({value: new Float32Array([6, 7, 8, 9]), stride: 8, offset: 4});
   getter = evaluateVertexAccessor(accessor, attributes, {});
-  t.is(getter(1), 9, 'With stride and offset');
+  expect(getter(1), 'With stride and offset').toBe(9);
 
   attributes.size.setData({value: new Float32Array([6]), constant: true});
   getter = evaluateVertexAccessor(accessor, attributes, {});
-  t.is(getter(1), 6, 'From constant');
+  expect(getter(1), 'From constant').toBe(6);
 
   attributes.size.delete();
-  t.end();
 });
 
-test('evaluateVertexAccessor#size=3', t => {
+test('evaluateVertexAccessor#size=3', () => {
   const attributes = {
     position: new Attribute(device, {
       id: 'position',
@@ -118,17 +116,16 @@ test('evaluateVertexAccessor#size=3', t => {
   // prettier-ignore
   attributes.position.setData({value: new Float64Array([0, 0, 0.5, 1, 0, 0.75, 1, 1, 0.25, 0, 1, 0.45])});
   let getter = evaluateVertexAccessor(accessor, attributes, {});
-  t.deepEqual(getter(1), [1, 0, 0.75], 'Basic attribute');
+  expect(getter(1), 'Basic attribute').toEqual([1, 0, 0.75]);
 
   // prettier-ignore
   attributes.position.setData({value: new Float64Array([0, 0, 0.5, 1, 0, 0.75, 1, 1, 0.25, 0, 1, 0.45]), stride: 48, offset: 8});
   getter = evaluateVertexAccessor(accessor, attributes, {});
-  t.deepEqual(getter(1), [1, 0.25, 0], 'With stride and offset');
+  expect(getter(1), 'With stride and offset').toEqual([1, 0.25, 0]);
 
   attributes.position.setData({value: new Float32Array([0, 1, 0.5]), constant: true});
   getter = evaluateVertexAccessor(accessor, attributes, {});
-  t.deepEqual(getter(1), [0, 1, 0.5], 'With stride and offset');
+  expect(getter(1), 'With stride and offset').toEqual([0, 1, 0.5]);
 
   attributes.position.delete();
-  t.end();
 });

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import memoize from '@deck.gl/core/utils/memoize';
-import {makeSpy} from '@probe.gl/test-utils';
 
 const sampleCompute = ({vector, object, number}) => {
   return `${vector.join(',')}:${object.name}:number`;
@@ -43,20 +42,23 @@ const TEST = {
   ]
 };
 
-test('utils#memoize', t => {
-  const spy = makeSpy(TEST, 'FUNC');
-  const memoized = memoize(TEST.FUNC);
+test('utils#memoize', () => {
+  // Create a wrapper function to track calls (vi.spyOn has issues in browser mode)
+  let wasCalled = false;
+  const trackedCompute = (args: Parameters<typeof sampleCompute>[0]) => {
+    wasCalled = true;
+    return sampleCompute(args);
+  };
+  const memoized = memoize(trackedCompute);
 
   TEST.CASES.forEach(testCase => {
+    wasCalled = false;
     const result = memoized(testCase.parameters);
-    t.deepEquals(result, sampleCompute(testCase.parameters), 'returns correct result');
-    t.is(
-      spy.called,
-      testCase.shouldRecompute,
-      testCase.shouldRecompute ? 'should recompute' : 'should not recompute'
-    );
-    spy.reset();
+    expect(result, 'returns correct result').toEqual(sampleCompute(testCase.parameters));
+    if (testCase.shouldRecompute) {
+      expect(wasCalled, 'should recompute').toBe(true);
+    } else {
+      expect(wasCalled, 'should not recompute').toBe(false);
+    }
   });
-
-  t.end();
 });

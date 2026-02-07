@@ -105,8 +105,8 @@ export default [
         getFillColor: [60, 180, 240],
 
         fillPatternMask: true,
-        fillPatternAtlas: './test/data/pattern.png',
-        fillPatternMapping: './test/data/pattern.json',
+        fillPatternAtlas: '/test/data/pattern.png',
+        fillPatternMapping: '/test/data/pattern.json',
         getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
         getFillPatternScale: 5,
         getFillPatternOffset: [0, 0],
@@ -132,8 +132,8 @@ export default [
         stroked: true,
 
         fillPatternMask: false,
-        fillPatternAtlas: './test/data/pattern.png',
-        fillPatternMapping: './test/data/pattern.json',
+        fillPatternAtlas: '/test/data/pattern.png',
+        fillPatternMapping: '/test/data/pattern.json',
         getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
         getFillPatternScale: 5,
         getFillPatternOffset: [0, 0],

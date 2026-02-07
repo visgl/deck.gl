@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {device} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {device} from '@deck.gl/test-utils/vitest';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 
 const fs = `\
@@ -21,14 +21,13 @@ const testModule = {
   passes: [{sampler: true}]
 };
 
-test('PostProcessEffect#constructor', t => {
+test('PostProcessEffect#constructor', () => {
   const effect = new PostProcessEffect(testModule);
 
-  t.ok(effect, 'post-processing effect created');
-  t.end();
+  expect(effect, 'post-processing effect created').toBeTruthy();
 });
 
-test('PostProcessEffect#postRender', t => {
+test('PostProcessEffect#postRender', () => {
   const effect = new PostProcessEffect(testModule);
   effect.setup({device});
   effect.preRender();
@@ -36,10 +35,10 @@ test('PostProcessEffect#postRender', t => {
   const outputBuffer = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
   const buffer1 = effect.postRender({inputBuffer, swapBuffer: outputBuffer});
-  t.ok(effect.passes, 'post-processing pass created');
+  expect(effect.passes, 'post-processing pass created').toBeTruthy();
 
-  t.ok(buffer1, 'post-processing effect rendered without throwing');
-  t.is(buffer1, outputBuffer, 'post-processing effect buffer swapped');
+  expect(buffer1, 'post-processing effect rendered without throwing').toBeTruthy();
+  expect(buffer1, 'post-processing effect buffer swapped').toBe(outputBuffer);
 
   const testFbo = device.createFramebuffer({
     colorAttachments: [device.createTexture({width: 1, height: 1})]
@@ -49,13 +48,12 @@ test('PostProcessEffect#postRender', t => {
     swapBuffer: outputBuffer,
     target: testFbo
   });
-  t.ok(buffer2, 'post-processing effect rendered without throwing');
-  t.is(buffer2, testFbo, 'post-processing effect rendered to target');
+  expect(buffer2, 'post-processing effect rendered without throwing').toBeTruthy();
+  expect(buffer2, 'post-processing effect rendered to target').toBe(testFbo);
 
   effect.cleanup();
   inputBuffer.destroy();
   outputBuffer.destroy();
   testFbo.colorAttachments[0].destroy();
   testFbo.destroy();
-  t.end();
 });

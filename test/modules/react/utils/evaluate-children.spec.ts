@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import evaluateChildren from '@deck.gl/react/utils/evaluate-children';
 import React, {createElement} from 'react';
 
@@ -46,22 +46,21 @@ const TEST_CASES = [
   }
 ];
 
-test('evaluateChildren', t => {
+test('evaluateChildren', () => {
   for (const testCase of TEST_CASES) {
     const result = evaluateChildren(testCase.input, TEST_CHILD_PROPS);
 
-    t.is(
+    expect(
       React.Children.count(result),
-      testCase.count,
       `${testCase.title} returns ${testCase.count} child(ren)`
-    );
+    ).toBe(testCase.count);
 
     React.Children.forEach(result, child => {
       for (const propName in testCase.expected) {
-        t.is(child.props[propName], testCase.expected[propName], `${testCase.title}: ${propName}`);
+        expect(child.props[propName], `${testCase.title}: ${propName}`).toBe(
+          testCase.expected[propName]
+        );
       }
     });
   }
-
-  t.end();
 });

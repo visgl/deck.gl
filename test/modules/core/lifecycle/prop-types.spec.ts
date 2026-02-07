@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {parsePropTypes} from '@deck.gl/core/lifecycle/prop-types';
 
-test('parsePropTypes#import', t => {
-  t.ok(parsePropTypes, 'parsePropTypes imported OK');
-  t.end();
+test('parsePropTypes#import', () => {
+  expect(parsePropTypes, 'parsePropTypes imported OK').toBeTruthy();
 });
 
-test('parsePropTypes#tests', t => {
+test('parsePropTypes#tests', () => {
   const ARRAY = [1, 2, 3];
   const TYPED_ARRAY = new Float32Array(3);
   const OBJECT = {a: 1, b: 2};
@@ -89,17 +88,14 @@ test('parsePropTypes#tests', t => {
     const {propTypes, defaultProps} = parsePropTypes(tc.props);
     const invalidMessage = validatePropType(propTypes, tc.propTypes);
     if (invalidMessage) {
-      t.fail(`parsePropTypes ${tc.title}: ${invalidMessage}`);
+      throw new Error(`parsePropTypes ${tc.title}: ${invalidMessage}`);
     } else {
-      t.pass(`parsePropTypes ${tc.title} returned expected prop types`);
+      console.log(`parsePropTypes ${tc.title} returned expected prop types`);
     }
-    t.deepEqual(
-      defaultProps,
-      tc.defaultProps,
-      `parsePropTypes ${tc.title} returned expected default props`
+    expect(defaultProps, `parsePropTypes ${tc.title} returned expected default props`).toEqual(
+      tc.defaultProps
     );
   }
-  t.end();
 });
 
 function validate(value, propType) {
@@ -116,24 +112,28 @@ function compare(value1, value2, propType) {
   return value1 === value2;
 }
 
-test('propType#number', t => {
+test('propType#number', () => {
   const {propTypes} = parsePropTypes({
     numberDefault: {type: 'number', value: 0},
     numberWithLowerBound: {type: 'number', value: 1, min: 0},
     numberWithBounds: {type: 'number', value: 1, min: 0, max: 1}
   });
 
-  t.ok(validate(-1, propTypes.numberDefault), 'validates number');
-  t.notOk(validate('A', propTypes.numberDefault), 'validates number');
-  t.ok(validate(2, propTypes.numberWithLowerBound), 'validates number with lower bound');
-  t.notOk(validate(-1, propTypes.numberWithLowerBound), 'validates number with lower bound');
-  t.ok(validate(0.5, propTypes.numberWithBounds), 'validates number with bounds');
-  t.notOk(validate(2, propTypes.numberWithBounds), 'validates number with bounds');
-
-  t.end();
+  expect(validate(-1, propTypes.numberDefault), 'validates number').toBeTruthy();
+  expect(validate('A', propTypes.numberDefault), 'validates number').toBeFalsy();
+  expect(
+    validate(2, propTypes.numberWithLowerBound),
+    'validates number with lower bound'
+  ).toBeTruthy();
+  expect(
+    validate(-1, propTypes.numberWithLowerBound),
+    'validates number with lower bound'
+  ).toBeFalsy();
+  expect(validate(0.5, propTypes.numberWithBounds), 'validates number with bounds').toBeTruthy();
+  expect(validate(2, propTypes.numberWithBounds), 'validates number with bounds').toBeFalsy();
 });
 
-test('propType#object', t => {
+test('propType#object', () => {
   const {propTypes} = parsePropTypes({
     objectDefault: {},
     objectIgnored: {type: 'object', value: {}, ignore: true},
@@ -142,17 +142,21 @@ test('propType#object', t => {
   });
 
   const OBJECT = {a: 1};
-  t.ok(compare(OBJECT, OBJECT, propTypes.objectDefault), 'default compare');
-  t.notOk(compare(OBJECT, {...OBJECT}, propTypes.objectDefault), 'default compare');
-  t.ok(compare(OBJECT, {}, propTypes.objectIgnored), 'ignored');
-  t.ok(compare(OBJECT, {...OBJECT}, propTypes.objectCompare), 'deep compare');
-  t.notOk(compare({OBJECT}, {OBJECT: {...OBJECT}}, propTypes.objectCompare), 'deep compare');
-  t.ok(compare({OBJECT}, {OBJECT: {...OBJECT}}, propTypes.objectCompare2), 'deep compare depth 2');
-
-  t.end();
+  expect(compare(OBJECT, OBJECT, propTypes.objectDefault), 'default compare').toBeTruthy();
+  expect(compare(OBJECT, {...OBJECT}, propTypes.objectDefault), 'default compare').toBeFalsy();
+  expect(compare(OBJECT, {}, propTypes.objectIgnored), 'ignored').toBeTruthy();
+  expect(compare(OBJECT, {...OBJECT}, propTypes.objectCompare), 'deep compare').toBeTruthy();
+  expect(
+    compare({OBJECT}, {OBJECT: {...OBJECT}}, propTypes.objectCompare),
+    'deep compare'
+  ).toBeFalsy();
+  expect(
+    compare({OBJECT}, {OBJECT: {...OBJECT}}, propTypes.objectCompare2),
+    'deep compare depth 2'
+  ).toBeTruthy();
 });
 
-test('propType#array', t => {
+test('propType#array', () => {
   const {propTypes} = parsePropTypes({
     arrayDefault: {type: 'array', value: []},
     arrayOptional: {type: 'array', value: null, optional: true},
@@ -163,22 +167,23 @@ test('propType#array', t => {
 
   const ARRAY = [1];
 
-  t.ok(validate(ARRAY, propTypes.arrayDefault), 'default validate');
-  t.notOk(validate(null, propTypes.arrayDefault), 'default validate');
-  t.notOk(validate({}, propTypes.arrayDefault), 'default validate');
-  t.ok(validate(null, propTypes.arrayOptional), 'optional validate');
-  t.notOk(validate({}, propTypes.arrayOptional), 'optional validate');
+  expect(validate(ARRAY, propTypes.arrayDefault), 'default validate').toBeTruthy();
+  expect(validate(null, propTypes.arrayDefault), 'default validate').toBeFalsy();
+  expect(validate({}, propTypes.arrayDefault), 'default validate').toBeFalsy();
+  expect(validate(null, propTypes.arrayOptional), 'optional validate').toBeTruthy();
+  expect(validate({}, propTypes.arrayOptional), 'optional validate').toBeFalsy();
 
-  t.ok(compare(ARRAY, ARRAY, propTypes.arrayDefault), 'default compare');
-  t.notOk(compare(ARRAY, [...ARRAY], propTypes.arrayDefault), 'default compare');
-  t.ok(compare(ARRAY, [...ARRAY], propTypes.arrayCompare), 'deep compare');
-  t.notOk(compare([ARRAY], [[...ARRAY]], propTypes.arrayCompare), 'deep compare');
-  t.ok(compare([ARRAY], [[...ARRAY]], propTypes.arrayCompare2), 'deep compare depth 2');
-
-  t.end();
+  expect(compare(ARRAY, ARRAY, propTypes.arrayDefault), 'default compare').toBeTruthy();
+  expect(compare(ARRAY, [...ARRAY], propTypes.arrayDefault), 'default compare').toBeFalsy();
+  expect(compare(ARRAY, [...ARRAY], propTypes.arrayCompare), 'deep compare').toBeTruthy();
+  expect(compare([ARRAY], [[...ARRAY]], propTypes.arrayCompare), 'deep compare').toBeFalsy();
+  expect(
+    compare([ARRAY], [[...ARRAY]], propTypes.arrayCompare2),
+    'deep compare depth 2'
+  ).toBeTruthy();
 });
 
-test('propType#function', t => {
+test('propType#function', () => {
   const {propTypes} = parsePropTypes({
     functionDefault: {type: 'function', value: () => {}},
     functionOptional: {type: 'function', value: null, optional: true},
@@ -187,61 +192,60 @@ test('propType#function', t => {
 
   const FUNCTION = () => true;
 
-  t.ok(validate(FUNCTION, propTypes.functionDefault), 'default validate');
-  t.notOk(validate(null, propTypes.functionDefault), 'default validate');
-  t.notOk(validate({}, propTypes.functionDefault), 'default validate');
-  t.ok(validate(null, propTypes.functionOptional), 'optional validate');
-  t.notOk(validate({}, propTypes.functionOptional), 'optional validate');
+  expect(validate(FUNCTION, propTypes.functionDefault), 'default validate').toBeTruthy();
+  expect(validate(null, propTypes.functionDefault), 'default validate').toBeFalsy();
+  expect(validate({}, propTypes.functionDefault), 'default validate').toBeFalsy();
+  expect(validate(null, propTypes.functionOptional), 'optional validate').toBeTruthy();
+  expect(validate({}, propTypes.functionOptional), 'optional validate').toBeFalsy();
 
-  t.ok(
+  expect(
     compare(FUNCTION, () => {}, propTypes.functionDefault),
     'default compare'
-  );
-  t.ok(compare(FUNCTION, FUNCTION, propTypes.functionNotIgnored), 'do compare');
-  t.notOk(
+  ).toBeTruthy();
+  expect(compare(FUNCTION, FUNCTION, propTypes.functionNotIgnored), 'do compare').toBeTruthy();
+  expect(
     compare(FUNCTION, () => {}, propTypes.functionNotIgnored),
     'do compare'
-  );
-
-  t.end();
+  ).toBeFalsy();
 });
 
-test('propType#accessor', t => {
+test('propType#accessor', () => {
   const {propTypes} = parsePropTypes({
     accessorArray: {type: 'accessor', value: [0, 0, 0, 255]},
     accessorNumber: {type: 'accessor', value: 1},
     accessorFunc: {type: 'accessor', value: d => d.size}
   });
 
-  t.ok(
+  expect(
     validate(d => d.color, propTypes.accessorArray),
     'validate array accessor'
-  );
-  t.ok(validate([0, 0, 0], propTypes.accessorArray), 'validate array accessor');
-  t.notOk(validate(0, propTypes.accessorArray), 'validate array accessor');
+  ).toBeTruthy();
+  expect(validate([0, 0, 0], propTypes.accessorArray), 'validate array accessor').toBeTruthy();
+  expect(validate(0, propTypes.accessorArray), 'validate array accessor').toBeFalsy();
 
-  t.ok(
+  expect(
     validate(d => d.elevation, propTypes.accessorNumber),
     'validate number accessor'
-  );
-  t.ok(validate(1000, propTypes.accessorNumber), 'validate number accessor');
-  t.notOk(validate({}, propTypes.accessorNumber), 'validate number accessor');
+  ).toBeTruthy();
+  expect(validate(1000, propTypes.accessorNumber), 'validate number accessor').toBeTruthy();
+  expect(validate({}, propTypes.accessorNumber), 'validate number accessor').toBeFalsy();
 
-  t.ok(
+  expect(
     validate(d => d.scale, propTypes.accessorFunc),
     'validate func accessor'
-  );
-  t.notOk(validate(0, propTypes.accessorFunc), 'validate func accessor');
+  ).toBeTruthy();
+  expect(validate(0, propTypes.accessorFunc), 'validate func accessor').toBeFalsy();
 
-  t.ok(
+  expect(
     compare(
       d => d.color,
       d => d.color,
       propTypes.accessorArray
     ),
     'compare array accessor'
-  );
-  t.ok(compare([0, 0, 0], [0, 0, 0], propTypes.accessorArray), 'compare array accessor');
-
-  t.end();
+  ).toBeTruthy();
+  expect(
+    compare([0, 0, 0], [0, 0, 0], propTypes.accessorArray),
+    'compare array accessor'
+  ).toBeTruthy();
 });

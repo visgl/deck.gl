@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
@@ -14,7 +14,7 @@ import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport} from '@deck.gl/core';
-import {testLayerAsync} from '@deck.gl/test-utils';
+import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
 
@@ -194,7 +194,7 @@ const TRANSFORM_COORDS_DATA = [
   }
 ];
 
-test('ClipExtension', t => {
+test('ClipExtension', () => {
   const testCases = [
     {
       props: {
@@ -209,21 +209,22 @@ test('ClipExtension', t => {
         for (const layer of subLayers) {
           const uniforms = getLayerUniforms(layer);
           if (layer.id.includes('-points-')) {
-            t.ok(uniforms.bounds && uniforms.bounds[0] === 0, 'has bounds uniform');
+            expect(uniforms.bounds && uniforms.bounds[0] === 0, 'has bounds uniform').toBeTruthy();
           } else {
-            t.ok(uniforms.bounds && uniforms.bounds[0] === 256, 'has bounds uniform');
+            expect(
+              uniforms.bounds && uniforms.bounds[0] === 256,
+              'has bounds uniform'
+            ).toBeTruthy();
           }
         }
       }
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('MVTLayer#transformCoordsToWGS84', t => {
+test('MVTLayer#transformCoordsToWGS84', () => {
   const viewport = new WebMercatorViewport({
     latitude: 0,
     longitude: 0,
@@ -234,13 +235,13 @@ test('MVTLayer#transformCoordsToWGS84', t => {
 
   for (const tc of TRANSFORM_COORDS_DATA) {
     const func = transform(tc.geom, bbox, viewport);
-    t.deepEqual(func, tc.result, `transform ${tc.geom.type} returned expected WGS84 coordinates`);
+    expect(func, `transform ${tc.geom.type} returned expected WGS84 coordinates`).toEqual(
+      tc.result
+    );
   }
-
-  t.end();
 });
 
-test('MVTLayer#autoHighlight', async t => {
+test('MVTLayer#autoHighlight', async () => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return this.state.binary ? geoJSONBinaryData : geoJSONData;
@@ -251,9 +252,9 @@ test('MVTLayer#autoHighlight', async t => {
 
   const onAfterUpdate = ({subLayers}) => {
     for (const layer of subLayers) {
-      t.ok(layer.props.pickable, 'MVT Sublayer is pickable');
-      t.ok(!layer.props.autoHighlight, 'AutoHighlight should be disabled');
-      t.equal(layer.props.highlightedObjectIndex, 0, 'Feature highlighted has index 0');
+      expect(layer.props.pickable, 'MVT Sublayer is pickable').toBeTruthy();
+      expect(!layer.props.autoHighlight, 'AutoHighlight should be disabled').toBeTruthy();
+      expect(layer.props.highlightedObjectIndex, 'Feature highlighted has index 0').toBe(0);
     }
   };
 
@@ -292,13 +293,11 @@ test('MVTLayer#autoHighlight', async t => {
     }
   ];
 
-  await testLayerAsync({Layer: TestMVTLayer, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayerAsync({Layer: TestMVTLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
 for (const binary of [true, false]) {
-  test(`MVTLayer#picking binary:${binary}`, async t => {
+  test(`MVTLayer#picking binary:${binary}`, async () => {
     class TestMVTLayer extends MVTLayer {
       getTileData() {
         return this.state.binary ? geoJSONBinaryData : geoJSONData;
@@ -326,14 +325,14 @@ for (const binary of [true, false]) {
           pickedLayerId: 'mvt-0-0-1-polygons-fill',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('hover over polygon');
-            t.ok(info.object, 'info.object is populated');
-            t.ok(info.object.properties, 'info.object.properties is populated');
-            t.ok(info.object.geometry, 'info.object.geometry is populated');
-            t.ok(
+            console.log('hover over polygon');
+            expect(info.object, 'info.object is populated').toBeTruthy();
+            expect(info.object.properties, 'info.object.properties is populated').toBeTruthy();
+            expect(info.object.geometry, 'info.object.geometry is populated').toBeTruthy();
+            expect(
               subLayers.every(l => l.props.highlightedObjectIndex === 0),
               'set sub layers highlightedObjectIndex'
-            );
+            ).toBeTruthy();
           }
         },
         {
@@ -341,22 +340,20 @@ for (const binary of [true, false]) {
           pickedLayerId: '',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            t.comment('pointer leave');
-            t.notOk(info.object, 'info.object is not populated');
-            t.ok(
+            console.log('pointer leave');
+            expect(info.object, 'info.object is not populated').toBeFalsy();
+            expect(
               subLayers.every(l => l.props.highlightedObjectIndex === -1),
               'cleared sub layers highlightedObjectIndex'
-            );
+            ).toBeTruthy();
           }
         }
       ]
     });
-
-    t.end();
   });
 }
 
-test('MVTLayer#TileJSON', async t => {
+test('MVTLayer#TileJSON', async () => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return [];
@@ -393,10 +390,10 @@ test('MVTLayer#TileJSON', async t => {
 
   const onAfterUpdate = ({layer, subLayers}) => {
     if (layer.isLoaded) {
-      t.is(subLayers.length, 2, 'Rendered sublayers');
-      t.is(layer.state.data.length, 3, 'Data is loaded');
-      t.is(layer.state.tileset.minZoom, tileJSON.minZoom, 'Min zoom layer is correct');
-      t.is(layer.state.tileset.minZoom, tileJSON.maxZoom, 'Max zoom layer is correct');
+      expect(subLayers.length, 'Rendered sublayers').toBe(2);
+      expect(layer.state.data.length, 'Data is loaded').toBe(3);
+      expect(layer.state.tileset.minZoom, 'Min zoom layer is correct').toBe(tileJSON.minZoom);
+      expect(layer.state.tileset.minZoom, 'Max zoom layer is correct').toBe(tileJSON.maxZoom);
     }
   };
 
@@ -416,14 +413,17 @@ test('MVTLayer#TileJSON', async t => {
       onAfterUpdate
     }
   ];
-  await testLayerAsync({Layer: TestMVTLayer, viewport: testViewport, testCases, onError: t.notOk});
-  t.end();
-
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
   // restore fetcch
   globalThis.fetch = fetch;
 });
 
-test('MVTLayer#dataInWGS84', async t => {
+test('MVTLayer#dataInWGS84', async () => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return this.state.binary ? geoJSONBinaryData : geoJSONData;
@@ -444,17 +444,15 @@ test('MVTLayer#dataInWGS84', async t => {
 
       const contentWGS84 = tile.dataInWGS84;
 
-      t.deepEqual(
-        contentWGS84[0].geometry.coordinates,
-        geoJSONDataWGS84[0].geometry.coordinates,
-        'should transform to WGS84'
+      expect(contentWGS84[0].geometry.coordinates, 'should transform to WGS84').toEqual(
+        geoJSONDataWGS84[0].geometry.coordinates
       );
-      t.isNot(tile._contentWGS84, undefined, 'should set cache for further requests');
-      t.is(tile.dataInWGS84, contentWGS84, 'should use the cache');
+      expect(tile._contentWGS84, 'should set cache for further requests').not.toBe(undefined);
+      expect(tile.dataInWGS84, 'should use the cache').toBe(contentWGS84);
 
       tile.content = null;
       tile._contentWGS84 = null;
-      t.is(tile.dataInWGS84, null, 'should return null if content is null');
+      expect(tile.dataInWGS84, 'should return null if content is null').toBe(null);
     }
   };
 
@@ -476,12 +474,15 @@ test('MVTLayer#dataInWGS84', async t => {
     // }
   ];
 
-  await testLayerAsync({Layer: TestMVTLayer, viewport, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('MVTLayer#triangulation', async t => {
+test('MVTLayer#triangulation', async () => {
   const viewport = new WebMercatorViewport({
     longitude: -100,
     latitude: 40,
@@ -498,11 +499,11 @@ test('MVTLayer#triangulation', async t => {
     const data = geoJsonLayer.props.data;
     if (layer.state.binary) {
       // Triangulated binary data should be passed
-      t.ok(data.polygons.triangles, 'should triangulate');
+      expect(data.polygons.triangles, 'should triangulate').toBeTruthy();
     } else {
       // GeoJSON should be passed (3 Features)
-      t.ok(!data.polygons, 'should not triangulate');
-      t.equals(data.length, 3, 'should pass GeoJson');
+      expect(!data.polygons, 'should not triangulate').toBeTruthy();
+      expect(data.length, 'should pass GeoJson').toBe(3);
     }
   };
 
@@ -519,15 +520,23 @@ test('MVTLayer#triangulation', async t => {
   const testCases = [{props, onAfterUpdate}];
 
   // Run as separate test runs otherwise data is cached
-  testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
+  await testLayerAsync({
+    Layer: MVTLayer,
+    viewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
   testCases[0].props.binary = false;
-  await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayerAsync({
+    Layer: MVTLayer,
+    viewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
-  test(`MVTLayer#data.length ${tileset}`, async t => {
+  test(`MVTLayer#data.length ${tileset}`, async () => {
     const viewport = new WebMercatorViewport({
       longitude: -100,
       latitude: 40,
@@ -554,7 +563,7 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
       }
 
       if (requests === 2) {
-        t.equals(geoJsonDataLength, binaryDataLength, 'should have equal length');
+        expect(geoJsonDataLength, 'should have equal length').toBe(binaryDataLength);
       }
     };
 
@@ -574,12 +583,16 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
       {props: {binary: true, data: url2, ...props}, onAfterUpdate}
     ];
 
-    await testLayerAsync({Layer: MVTLayer, viewport, testCases, onError: t.notOk});
-    t.end();
+    await testLayerAsync({
+      Layer: MVTLayer,
+      viewport,
+      testCases,
+      onError: err => expect(err).toBeFalsy()
+    });
   });
 }
 
-test('findIndexBinary', t => {
+test('findIndexBinary', () => {
   const testData = geojsonToBinary([
     {
       // For testing id collision
@@ -663,24 +676,24 @@ test('findIndexBinary', t => {
   testData.lines.fields = [{id: 2}];
   testData.points.fields = [{id: 1}, {id: 3}, {id: 4}];
 
-  t.is(findIndexBinary(testData, '', 3), 3, 'Find by default id');
-  t.is(findIndexBinary(testData, '', 1), 0, 'Find by default id');
-  t.is(findIndexBinary(testData, '', 1, 'water'), 1, 'Find by default id with layer name');
-  t.is(findIndexBinary(testData, 'numericalId', 200), 2, 'Find by numerical id');
-  t.is(findIndexBinary(testData, 'numericalId', 300), 0, 'Find by numerical id');
-  t.is(
+  expect(findIndexBinary(testData, '', 3), 'Find by default id').toBe(3);
+  expect(findIndexBinary(testData, '', 1), 'Find by default id').toBe(0);
+  expect(findIndexBinary(testData, '', 1, 'water'), 'Find by default id with layer name').toBe(1);
+  expect(findIndexBinary(testData, 'numericalId', 200), 'Find by numerical id').toBe(2);
+  expect(findIndexBinary(testData, 'numericalId', 300), 'Find by numerical id').toBe(0);
+  expect(
     findIndexBinary(testData, 'numericalId', 300, 'poi'),
-    3,
     'Find by numerical id with layer name'
-  );
-  t.is(findIndexBinary(testData, 'stringId', 'A'), 1, 'Find by string id');
-  t.is(findIndexBinary(testData, 'stringId', 'B'), 0, 'Find by string id');
-  t.is(findIndexBinary(testData, 'stringId', 'B', 'road'), 2, 'Find by string id with layer name');
-
-  t.end();
+  ).toBe(3);
+  expect(findIndexBinary(testData, 'stringId', 'A'), 'Find by string id').toBe(1);
+  expect(findIndexBinary(testData, 'stringId', 'B'), 'Find by string id').toBe(0);
+  expect(
+    findIndexBinary(testData, 'stringId', 'B', 'road'),
+    'Find by string id with layer name'
+  ).toBe(2);
 });
 
-test('MVTLayer#GeoJsonLayer.defaultProps', t => {
+test('MVTLayer#GeoJsonLayer.defaultProps', () => {
   let didDraw = false;
   class TestMVTLayer extends MVTLayer {
     initializeState() {}
@@ -702,7 +715,7 @@ test('MVTLayer#GeoJsonLayer.defaultProps', t => {
       },
       onBeforeUpdate,
       onAfterUpdate: ({layer, subLayers}) => {
-        t.ok(didDraw, 'should draw layer');
+        expect(didDraw, 'should draw layer').toBeTruthy();
       }
     },
     {
@@ -711,7 +724,7 @@ test('MVTLayer#GeoJsonLayer.defaultProps', t => {
       },
       onBeforeUpdate,
       onAfterUpdate: ({layer, subLayers}) => {
-        t.notOk(didDraw, 'should not update after shallow TileLayer accessor update');
+        expect(didDraw, 'should not update after shallow TileLayer accessor update').toBeFalsy();
       }
     },
     {
@@ -720,12 +733,10 @@ test('MVTLayer#GeoJsonLayer.defaultProps', t => {
       },
       onBeforeUpdate,
       onAfterUpdate: ({layer, subLayers}) => {
-        t.notOk(didDraw, 'should not update after shallow GeoJsonLayer accessor update');
+        expect(didDraw, 'should not update after shallow GeoJsonLayer accessor update').toBeFalsy();
       }
     }
   ];
 
-  testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: TestMVTLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

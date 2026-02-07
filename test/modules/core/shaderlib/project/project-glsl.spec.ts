@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
   COORDINATE_SYSTEM,
@@ -324,11 +324,11 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#vs', async t => {
+test('project#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
   for (const testCase of TEST_CASES) {
-    t.comment(testCase.title);
+    console.log(testCase.title);
 
     for (const {name, vs, testProps, output, precision = 1e-7} of testCase.tests) {
       config.EPSILON = precision;
@@ -343,15 +343,14 @@ test('project#vs', async t => {
         }
       });
 
-      t.is(verifyGPUResult(actual, output), true, name);
+      expect(verifyGPUResult(actual, output), name).toBe(true);
     }
   }
 
   config.EPSILON = oldEpsilon;
-  t.end();
 });
 
-test('project#vs#project_get_orientation_matrix', async t => {
+test('project#vs#project_get_orientation_matrix', async () => {
   const vs = `\
 #version 300 es
 
@@ -393,20 +392,24 @@ void main() {
     const up = matrix.transformAsVector([0, 0, 1]);
 
     const transformedUp = await runTransform(up, [0, 0, 1]);
-    t.comment(`actual=${transformedUp}`);
-    t.comment(`expected=${up}`);
-    t.ok(equals(transformedUp, up, 1e-7), 'Transformed up as expected');
+    console.log(`actual=${transformedUp}`);
+    console.log(`expected=${up}`);
+    expect(equals(transformedUp, up, 1e-7), 'Transformed up as expected').toBeTruthy();
 
     const transformedA = await runTransform(up, vectorA);
-    t.ok(equals(transformedA.length, vectorA.length, 1e-7), 'Vector length is preserved');
+    expect(
+      equals(transformedA.length, vectorA.length, 1e-7),
+      'Vector length is preserved'
+    ).toBeTruthy();
     const transformedB = await runTransform(up, vectorB);
-    t.ok(equals(transformedB.length, vectorB.length, 1e-7), 'Vector length is preserved');
+    expect(
+      equals(transformedB.length, vectorB.length, 1e-7),
+      'Vector length is preserved'
+    ).toBeTruthy();
 
-    t.ok(
+    expect(
       equals(transformedA.normalize().dot(transformedB.normalize()), angleAB, 1e-7),
       'Angle between vectors is preserved'
-    );
+    ).toBeTruthy();
   }
-
-  t.end();
 });

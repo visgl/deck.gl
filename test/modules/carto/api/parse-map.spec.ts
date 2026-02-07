@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3TileLayer, QuadbinTileLayer, VectorTileLayer, HeatmapTileLayer} from '@deck.gl/carto';
@@ -109,39 +109,34 @@ const DATASETS = [
   }
 ];
 
-test('parseMap#invalid version', t => {
+test('parseMap#invalid version', () => {
   const json = {
     ...METADATA,
     keplerMapConfig: {...EMPTY_KEPLER_MAP_CONFIG, version: 'invalid'}
   };
-  t.throws(
-    () => parseMap(json),
-    /Only support Kepler v1/,
-    'Throws on invalid Kepler schema version'
+  expect(() => parseMap(json), 'Throws on invalid Kepler schema version').toThrow(
+    /Only support Kepler v1/
   );
-  t.end();
 });
 
-test('parseMap#metadata', t => {
+test('parseMap#metadata', () => {
   const json = {
     ...METADATA,
     keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG
   };
   const {layers, initialViewState, mapStyle, ...metadata} = parseMap(json);
-  t.deepEquals(metadata, METADATA, 'Metadata is passed through');
-  t.deepEquals(initialViewState, 'INITIAL_VIEW_STATE', 'Map state is passed through');
-  t.deepEquals(mapStyle, 'MAP_STYLE', 'Map style is passed through');
-  t.end();
+  expect(metadata, 'Metadata is passed through').toEqual(METADATA);
+  expect(initialViewState, 'Map state is passed through').toEqual('INITIAL_VIEW_STATE');
+  expect(mapStyle, 'Map style is passed through').toEqual('MAP_STYLE');
 });
 
-test(`parseMap#visState empty`, async t => {
+test(`parseMap#visState empty`, async () => {
   const keplerMapConfig = {version: 'v1', config: {visState: {layers: []}}};
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
-  t.deepEquals(map.layers, [], 'layers empty');
-  t.end();
+  expect(map.layers, 'layers empty').toEqual([]);
 });
 
-test(`parseMap#visState point`, async t => {
+test(`parseMap#visState point`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -221,24 +216,22 @@ test(`parseMap#visState point`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`GeoJsonLayer({id: 'ab2417x'})`],
     'layer names'
-  );
+  ).toEqual([`GeoJsonLayer({id: 'ab2417x'})`]);
 
   const layer = map.layers[0] as GeoJsonLayer;
-  t.equal(layer.props.id, 'ab2417x', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.pointType, 'circle', 'pointType');
-  t.deepEquals(layer.props.getFillColor, [18, 147, 154, 172], 'pointType');
-  t.equal(layer.props.lineMiterLimit, 2, 'lineMiterLimit');
-  t.equal((layer.props as any).cartoLabel, 'Stores', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('ab2417x');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.pointType, 'pointType').toBe('circle');
+  expect(layer.props.getFillColor, 'pointType').toEqual([18, 147, 154, 172]);
+  expect(layer.props.lineMiterLimit, 'lineMiterLimit').toBe(2);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Stores');
 });
 
-test(`parseMap#visState point + labels`, async t => {
+test(`parseMap#visState point + labels`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -337,24 +330,22 @@ test(`parseMap#visState point + labels`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`GeoJsonLayer({id: 'vlu4f7d'})`],
     'layer names'
-  );
+  ).toEqual([`GeoJsonLayer({id: 'vlu4f7d'})`]);
 
   const layer = map.layers[0] as GeoJsonLayer;
-  t.equal(layer.props.id, 'vlu4f7d', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.pointType, 'circle+text', 'pointType');
-  t.deepEquals(layer.props.getFillColor, [18, 147, 154, 172], 'pointType');
-  t.equal(layer.props.lineMiterLimit, 2, 'lineMiterLimit');
-  t.equal((layer.props as any).cartoLabel, 'Stores', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('vlu4f7d');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.pointType, 'pointType').toBe('circle+text');
+  expect(layer.props.getFillColor, 'pointType').toEqual([18, 147, 154, 172]);
+  expect(layer.props.lineMiterLimit, 'lineMiterLimit').toBe(2);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Stores');
 });
 
-test(`parseMap#visState point + label + single marker`, async t => {
+test(`parseMap#visState point + label + single marker`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -446,24 +437,22 @@ test(`parseMap#visState point + label + single marker`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`GeoJsonLayer({id: 'tyxi12'})`],
     'layer names'
-  );
+  ).toEqual([`GeoJsonLayer({id: 'tyxi12'})`]);
 
   const layer = map.layers[0] as GeoJsonLayer;
-  t.equal(layer.props.id, 'tyxi12', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.pointType, 'icon+text', 'pointType');
-  t.deepEquals(layer.props.getIconColor, [18, 147, 154], 'pointType');
-  t.equal(layer.props.lineMiterLimit, 2, 'lineMiterLimit');
-  t.equal((layer.props as any).cartoLabel, 'Stores', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('tyxi12');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.pointType, 'pointType').toBe('icon+text');
+  expect(layer.props.getIconColor, 'pointType').toEqual([18, 147, 154]);
+  expect(layer.props.lineMiterLimit, 'lineMiterLimit').toBe(2);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Stores');
 });
 
-test(`parseMap#visState point + multi markers`, async t => {
+test(`parseMap#visState point + multi markers`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -554,23 +543,21 @@ test(`parseMap#visState point + multi markers`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`GeoJsonLayer({id: 'baksj12'})`],
     'layer names'
-  );
+  ).toEqual([`GeoJsonLayer({id: 'baksj12'})`]);
 
   const layer = map.layers[0] as GeoJsonLayer;
-  t.equal(layer.props.id, 'baksj12', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.pointType, 'icon', 'pointType');
-  t.deepEquals(layer.props.getIconColor, [18, 147, 154], 'pointType');
-  t.equal((layer.props as any).cartoLabel, 'Stores', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('baksj12');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.pointType, 'pointType').toBe('icon');
+  expect(layer.props.getIconColor, 'pointType').toEqual([18, 147, 154]);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Stores');
 });
 
-test(`parseMap#visState tileset point and line`, async t => {
+test(`parseMap#visState tileset point and line`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -789,40 +776,37 @@ test(`parseMap#visState tileset point and line`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [
-      `GeoJsonLayer({id: 'iim6w8'})`,
-      `GeoJsonLayer({id: 'w04u776'})`,
-      `VectorTileLayer({id: '87swuny'})`
-    ],
     'layer names'
-  );
+  ).toEqual([
+    `GeoJsonLayer({id: 'iim6w8'})`,
+    `GeoJsonLayer({id: 'w04u776'})`,
+    `VectorTileLayer({id: '87swuny'})`
+  ]);
 
   const circleLayer = map.layers[0] as GeoJsonLayer;
-  t.equal(circleLayer.props.id, 'iim6w8', 'circleLayer - id');
-  t.equal(circleLayer.props.pointType, 'circle', 'circleLayer - pointType');
-  t.equal(circleLayer.props.filled, true, 'circleLayer - filled');
-  t.equal(circleLayer.props.stroked, false, 'circleLayer - stroked');
-  t.equal((circleLayer.props as any).cartoLabel, 'Layer 3', 'circleLayer - cartoLabel');
+  expect(circleLayer.props.id, 'circleLayer - id').toBe('iim6w8');
+  expect(circleLayer.props.pointType, 'circleLayer - pointType').toBe('circle');
+  expect(circleLayer.props.filled, 'circleLayer - filled').toBe(true);
+  expect(circleLayer.props.stroked, 'circleLayer - stroked').toBe(false);
+  expect((circleLayer.props as any).cartoLabel, 'circleLayer - cartoLabel').toBe('Layer 3');
 
   const boundaryLayer = map.layers[1] as GeoJsonLayer;
-  t.equal(boundaryLayer.props.id, 'w04u776', 'boundaryLayer - id');
-  t.equal(boundaryLayer.props.filled, false, 'boundaryLayer - filled');
-  t.equal(boundaryLayer.props.stroked, true, 'boundaryLayer - stroked');
-  t.equal((boundaryLayer.props as any).cartoLabel, 'boundary', 'boundaryLayer - cartoLabel');
+  expect(boundaryLayer.props.id, 'boundaryLayer - id').toBe('w04u776');
+  expect(boundaryLayer.props.filled, 'boundaryLayer - filled').toBe(false);
+  expect(boundaryLayer.props.stroked, 'boundaryLayer - stroked').toBe(true);
+  expect((boundaryLayer.props as any).cartoLabel, 'boundaryLayer - cartoLabel').toBe('boundary');
 
   const mvtLayer = map.layers[2] as VectorTileLayer;
-  t.equal(mvtLayer.props.id, '87swuny', 'mvtLayer - id');
-  t.equal(mvtLayer.props.uniqueIdProperty, 'geoid', 'mvtLayer - uniqueIdProperty');
-  t.equal(mvtLayer.props.filled, true, 'mvtLayer - filled');
-  t.equal(mvtLayer.props.stroked, true, 'mvtLayer - stroked');
-  t.equal((mvtLayer.props as any).cartoLabel, 'transmission lines', 'mvtLayer - cartoLabel');
-
-  t.end();
+  expect(mvtLayer.props.id, 'mvtLayer - id').toBe('87swuny');
+  expect(mvtLayer.props.uniqueIdProperty, 'mvtLayer - uniqueIdProperty').toBe('geoid');
+  expect(mvtLayer.props.filled, 'mvtLayer - filled').toBe(true);
+  expect(mvtLayer.props.stroked, 'mvtLayer - stroked').toBe(true);
+  expect((mvtLayer.props as any).cartoLabel, 'mvtLayer - cartoLabel').toBe('transmission lines');
 });
 
-test(`parseMap#visState hexagon`, async t => {
+test(`parseMap#visState hexagon`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -907,24 +891,22 @@ test(`parseMap#visState hexagon`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`H3HexagonLayer({id: 'jc4657'})`],
     'layer names'
-  );
+  ).toEqual([`H3HexagonLayer({id: 'jc4657'})`]);
 
   const layer = map.layers[0] as H3HexagonLayer;
-  t.equal(layer.props.id, 'jc4657', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.stroked, false, 'stroked');
-  t.equal(layer.props.extruded, true, 'extruded');
-  t.equal(layer.props.elevationScale, 70.1, 'elevationScale');
-  t.equal((layer.props as any).cartoLabel, 'Population', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('jc4657');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.stroked, 'stroked').toBe(false);
+  expect(layer.props.extruded, 'extruded').toBe(true);
+  expect(layer.props.elevationScale, 'elevationScale').toBe(70.1);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Population');
 });
 
-test(`parseMap#visState Polygon tileset`, async t => {
+test(`parseMap#visState Polygon tileset`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1022,26 +1004,24 @@ test(`parseMap#visState Polygon tileset`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`VectorTileLayer({id: '3btkipv'})`],
     'layer names'
-  );
+  ).toEqual([`VectorTileLayer({id: '3btkipv'})`]);
 
   const layer = map.layers[0] as VectorTileLayer;
-  t.equal(layer.props.id, '3btkipv', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.filled, true, 'filled');
-  t.equal(layer.props.stroked, false, 'stroked');
-  t.equal(layer.props.extruded, false, 'extruded');
-  t.equal(layer.props.uniqueIdProperty, 'geoid', 'elevationScale');
-  t.deepEqual(layer.props.getLineColor, [221, 178, 124, 230], 'getLineColor');
-  t.equal((layer.props as any).cartoLabel, 'Layer 1', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('3btkipv');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.filled, 'filled').toBe(true);
+  expect(layer.props.stroked, 'stroked').toBe(false);
+  expect(layer.props.extruded, 'extruded').toBe(false);
+  expect(layer.props.uniqueIdProperty, 'elevationScale').toBe('geoid');
+  expect(layer.props.getLineColor, 'getLineColor').toEqual([221, 178, 124, 230]);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Layer 1');
 });
 
-test(`parseMap#visState Polygon tileset geojson format`, async t => {
+test(`parseMap#visState Polygon tileset geojson format`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1139,26 +1119,24 @@ test(`parseMap#visState Polygon tileset geojson format`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`VectorTileLayer({id: 'kajdi11'})`],
     'layer names'
-  );
+  ).toEqual([`VectorTileLayer({id: 'kajdi11'})`]);
 
   const layer = map.layers[0] as VectorTileLayer;
-  t.equal(layer.props.id, 'kajdi11', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.filled, true, 'filled');
-  t.equal(layer.props.stroked, false, 'stroked');
-  t.equal(layer.props.extruded, false, 'extruded');
-  t.equal(layer.props.uniqueIdProperty, 'geoid', 'elevationScale');
-  t.deepEqual(layer.props.getLineColor, [221, 178, 124, 230], 'getLineColor');
-  t.equal((layer.props as any).cartoLabel, 'Layer 1', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('kajdi11');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.filled, 'filled').toBe(true);
+  expect(layer.props.stroked, 'stroked').toBe(false);
+  expect(layer.props.extruded, 'extruded').toBe(false);
+  expect(layer.props.uniqueIdProperty, 'elevationScale').toBe('geoid');
+  expect(layer.props.getLineColor, 'getLineColor').toEqual([221, 178, 124, 230]);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Layer 1');
 });
 
-test(`parseMap#visState Polygon tileset binary format`, async t => {
+test(`parseMap#visState Polygon tileset binary format`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1256,27 +1234,25 @@ test(`parseMap#visState Polygon tileset binary format`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`VectorTileLayer({id: '91kajsh'})`],
     'layer names'
-  );
+  ).toEqual([`VectorTileLayer({id: '91kajsh'})`]);
 
   const layer = map.layers[0] as VectorTileLayer;
-  t.equal(layer.props.id, '91kajsh', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.filled, true, 'filled');
-  t.equal(layer.props.stroked, false, 'stroked');
-  t.equal(layer.props.extruded, false, 'extruded');
-  t.equal(layer.props.pointType, 'circle', 'pointType');
-  t.equal(layer.props.uniqueIdProperty, 'geoid', 'elevationScale');
-  t.deepEqual(layer.props.getLineColor, [221, 178, 124, 230], 'getLineColor');
-  t.equal((layer.props as any).cartoLabel, 'Layer 1', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('91kajsh');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.filled, 'filled').toBe(true);
+  expect(layer.props.stroked, 'stroked').toBe(false);
+  expect(layer.props.extruded, 'extruded').toBe(false);
+  expect(layer.props.pointType, 'pointType').toBe('circle');
+  expect(layer.props.uniqueIdProperty, 'elevationScale').toBe('geoid');
+  expect(layer.props.getLineColor, 'getLineColor').toEqual([221, 178, 124, 230]);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Layer 1');
 });
 
-test(`parseMap#visState Grid layer`, async t => {
+test(`parseMap#visState Grid layer`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1386,41 +1362,35 @@ test(`parseMap#visState Grid layer`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`GridLayer({id: 'ij06t3e'})`],
     'layer names'
-  );
+  ).toEqual([`GridLayer({id: 'ij06t3e'})`]);
 
   const layer = map.layers[0] as GridLayer;
-  t.equal(layer.props.id, 'ij06t3e', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.elevationScale, 5, 'elevationScale');
-  t.equal(layer.props.colorAggregation, 'SUM', 'colorAggregation');
-  t.deepEqual(
-    layer.props.colorRange,
-    [
-      [90, 24, 70, 255],
-      [144, 12, 63, 255],
-      [199, 0, 57, 255],
-      [227, 97, 28, 255],
-      [241, 146, 14, 255],
-      [255, 195, 0, 255]
-    ],
-    'colorRange'
-  );
-  t.equal(layer.props.coverage, 1, 'coverage');
-  t.equal(layer.props.elevationLowerPercentile, 0, 'elevationLowerPercentile');
-  t.equal(layer.props.elevationUpperPercentile, 100, 'elevationUpperPercentile');
-  t.equal(layer.props.cellSize, 500, 'cellSize');
-  t.equal(layer.props.colorScaleType, 'quantile', 'colorScaleType');
-  t.equal(layer.props.extruded, false, 'extruded');
-  t.equal((layer.props as any).cartoLabel, 'Layer 1', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('ij06t3e');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.elevationScale, 'elevationScale').toBe(5);
+  expect(layer.props.colorAggregation, 'colorAggregation').toBe('SUM');
+  expect(layer.props.colorRange, 'colorRange').toEqual([
+    [90, 24, 70, 255],
+    [144, 12, 63, 255],
+    [199, 0, 57, 255],
+    [227, 97, 28, 255],
+    [241, 146, 14, 255],
+    [255, 195, 0, 255]
+  ]);
+  expect(layer.props.coverage, 'coverage').toBe(1);
+  expect(layer.props.elevationLowerPercentile, 'elevationLowerPercentile').toBe(0);
+  expect(layer.props.elevationUpperPercentile, 'elevationUpperPercentile').toBe(100);
+  expect(layer.props.cellSize, 'cellSize').toBe(500);
+  expect(layer.props.colorScaleType, 'colorScaleType').toBe('quantile');
+  expect(layer.props.extruded, 'extruded').toBe(false);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Layer 1');
 });
 
-test(`parseMap#visState Hex Bin Layer`, async t => {
+test(`parseMap#visState Hex Bin Layer`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1531,43 +1501,37 @@ test(`parseMap#visState Hex Bin Layer`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`HexagonLayer({id: 'ja1357'})`],
     'layer names'
-  );
+  ).toEqual([`HexagonLayer({id: 'ja1357'})`]);
 
   const layer = map.layers[0] as HexagonLayer<unknown>;
-  t.equal(layer.props.id, 'ja1357', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.elevationScale, 5, 'elevationScale');
-  t.equal(layer.props.colorAggregation, 'SUM', 'colorAggregation');
-  t.deepEqual(
-    layer.props.colorRange,
-    [
-      [255, 255, 204, 255],
-      [217, 240, 163, 255],
-      [173, 221, 142, 255],
-      [120, 198, 121, 255],
-      [49, 163, 84, 255],
-      [0, 104, 55, 255]
-    ],
-    'colorRange'
-  );
-  t.equal(layer.props.coverage, 1, 'coverage');
-  t.equal(layer.props.lowerPercentile, 0, 'elevationLowerPercentile');
-  t.equal(layer.props.upperPercentile, 100, 'elevationUpperPercentile');
-  t.equal(layer.props.elevationLowerPercentile, 0, 'elevationLowerPercentile');
-  t.equal(layer.props.elevationUpperPercentile, 100, 'elevationUpperPercentile');
-  t.equal(layer.props.radius, 300, 'cellSize');
-  t.equal(layer.props.colorScaleType, 'quantile', 'colorScaleType');
-  t.equal(layer.props.extruded, false, 'extruded');
-  t.equal((layer.props as any).cartoLabel, 'Layer 1', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('ja1357');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.elevationScale, 'elevationScale').toBe(5);
+  expect(layer.props.colorAggregation, 'colorAggregation').toBe('SUM');
+  expect(layer.props.colorRange, 'colorRange').toEqual([
+    [255, 255, 204, 255],
+    [217, 240, 163, 255],
+    [173, 221, 142, 255],
+    [120, 198, 121, 255],
+    [49, 163, 84, 255],
+    [0, 104, 55, 255]
+  ]);
+  expect(layer.props.coverage, 'coverage').toBe(1);
+  expect(layer.props.lowerPercentile, 'elevationLowerPercentile').toBe(0);
+  expect(layer.props.upperPercentile, 'elevationUpperPercentile').toBe(100);
+  expect(layer.props.elevationLowerPercentile, 'elevationLowerPercentile').toBe(0);
+  expect(layer.props.elevationUpperPercentile, 'elevationUpperPercentile').toBe(100);
+  expect(layer.props.radius, 'cellSize').toBe(300);
+  expect(layer.props.colorScaleType, 'colorScaleType').toBe('quantile');
+  expect(layer.props.extruded, 'extruded').toBe(false);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Layer 1');
 });
 
-test(`parseMap#visState Heatmap Layer`, async t => {
+test(`parseMap#visState Heatmap Layer`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1679,35 +1643,29 @@ test(`parseMap#visState Heatmap Layer`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`HeatmapLayer({id: 'fcpl61l'})`],
     'layer names'
-  );
+  ).toEqual([`HeatmapLayer({id: 'fcpl61l'})`]);
 
   const layer = map.layers[0] as HeatmapLayer<unknown>;
-  t.equal(layer.props.id, 'fcpl61l', 'id');
-  t.equal(layer.props.pickable, true, 'pickable');
-  t.equal(layer.props.visible, true, 'visible');
-  t.equal(layer.props.intensity, 1, 'intensity');
-  t.equal(layer.props.radiusPixels, 21.7, 'radiusPixels');
-  t.deepEqual(
-    layer.props.colorRange,
-    [
-      [254, 240, 217, 255],
-      [253, 212, 158, 255],
-      [253, 187, 132, 255],
-      [252, 141, 89, 255],
-      [227, 74, 51, 255],
-      [179, 0, 0, 255]
-    ],
-    'colorRange'
-  );
-  t.equal((layer.props as any).cartoLabel, 'Layer 1', 'cartoLabel');
-  t.end();
+  expect(layer.props.id, 'id').toBe('fcpl61l');
+  expect(layer.props.pickable, 'pickable').toBe(true);
+  expect(layer.props.visible, 'visible').toBe(true);
+  expect(layer.props.intensity, 'intensity').toBe(1);
+  expect(layer.props.radiusPixels, 'radiusPixels').toBe(21.7);
+  expect(layer.props.colorRange, 'colorRange').toEqual([
+    [254, 240, 217, 255],
+    [253, 212, 158, 255],
+    [253, 187, 132, 255],
+    [252, 141, 89, 255],
+    [227, 74, 51, 255],
+    [179, 0, 0, 255]
+  ]);
+  expect((layer.props as any).cartoLabel, 'cartoLabel').toBe('Layer 1');
 });
 
-test(`parseMap#visState tilesets spatial index`, async t => {
+test(`parseMap#visState tilesets spatial index`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -1875,32 +1833,32 @@ test(`parseMap#visState tilesets spatial index`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`H3TileLayer({id: 'y64lw8'})`, `QuadbinTileLayer({id: 'a6bbdbj'})`],
     'layer names'
-  );
+  ).toEqual([`H3TileLayer({id: 'y64lw8'})`, `QuadbinTileLayer({id: 'a6bbdbj'})`]);
 
   const h3Layer = map.layers[0] as H3TileLayer;
-  t.equal(h3Layer.props.id, 'y64lw8', 'h3lLayer - id');
-  t.equal(h3Layer.props.pickable, true, 'h3lLayer - pickable');
-  t.equal(h3Layer.props.visible, true, 'h3lLayer - visible');
-  t.equal(h3Layer.props.filled, true, 'h3lLayer - filled');
-  t.equal(h3Layer.props.stroked, false, 'h3lLayer - stroked');
-  t.equal((h3Layer.props as any).cartoLabel, 'Layer 1', 'h3lLayer - cartoLabel');
+  expect(h3Layer.props.id, 'h3lLayer - id').toBe('y64lw8');
+  expect(h3Layer.props.pickable, 'h3lLayer - pickable').toBe(true);
+  expect(h3Layer.props.visible, 'h3lLayer - visible').toBe(true);
+  expect(h3Layer.props.filled, 'h3lLayer - filled').toBe(true);
+  expect(h3Layer.props.stroked, 'h3lLayer - stroked').toBe(false);
+  expect((h3Layer.props as any).cartoLabel, 'h3lLayer - cartoLabel').toBe('Layer 1');
 
   const quadbinLayer = map.layers[1] as QuadbinTileLayer;
-  t.equal(quadbinLayer.props.id, 'a6bbdbj', 'quadbinLayer - id');
-  t.equal(quadbinLayer.props.pickable, true, 'quadbinLayer - pickable');
-  t.equal(quadbinLayer.props.visible, true, 'quadbinLayer - visible');
-  t.equal(quadbinLayer.props.filled, true, 'quadbinLayer - filled');
-  t.equal(quadbinLayer.props.stroked, false, 'quadbinLayer - stroked');
-  t.deepEqual(quadbinLayer.props.getFillColor, [246, 209, 138, 230], 'quadbinLayer - getFillColor');
-  t.equal((quadbinLayer.props as any).cartoLabel, 'Layer 2', 'quadbinLayer - cartoLabel');
-  t.end();
+  expect(quadbinLayer.props.id, 'quadbinLayer - id').toBe('a6bbdbj');
+  expect(quadbinLayer.props.pickable, 'quadbinLayer - pickable').toBe(true);
+  expect(quadbinLayer.props.visible, 'quadbinLayer - visible').toBe(true);
+  expect(quadbinLayer.props.filled, 'quadbinLayer - filled').toBe(true);
+  expect(quadbinLayer.props.stroked, 'quadbinLayer - stroked').toBe(false);
+  expect(quadbinLayer.props.getFillColor, 'quadbinLayer - getFillColor').toEqual([
+    246, 209, 138, 230
+  ]);
+  expect((quadbinLayer.props as any).cartoLabel, 'quadbinLayer - cartoLabel').toBe('Layer 2');
 });
 
-test(`parseMap#visState HeatmapTileLayer`, async t => {
+test(`parseMap#visState HeatmapTileLayer`, async () => {
   const keplerMapConfig = {
     version: 'v1',
     config: {
@@ -2004,37 +1962,33 @@ test(`parseMap#visState HeatmapTileLayer`, async t => {
 
   const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
 
-  t.deepEquals(
+  expect(
     map.layers.map(l => l.toString()),
-    [`HeatmapTileLayer({id: 'a6bbdbj'})`],
     'layer names'
-  );
+  ).toEqual([`HeatmapTileLayer({id: 'a6bbdbj'})`]);
 
   const heatmapTileLayer = map.layers[0] as HeatmapTileLayer;
-  t.equal(heatmapTileLayer.props.id, 'a6bbdbj', 'heatmapTileLayer - id');
-  t.equal(heatmapTileLayer.props.pickable, true, 'heatmapTileLayer - pickable');
-  t.equal(heatmapTileLayer.props.visible, true, 'heatmapTileLayer - visible');
-  t.equal(heatmapTileLayer.props.filled, true, 'heatmapTileLayer - filled');
-  t.equal(heatmapTileLayer.props.stroked, false, 'heatmapTileLayer - stroked');
-  t.equal(heatmapTileLayer.props.radiusPixels, 17.3, 'heatmapTileLayer - radiusPixels');
-  t.deepEqual(
-    heatmapTileLayer.props.colorRange,
-    [
-      [255, 0, 0, 255],
-      [0, 255, 0, 255],
-      [0, 0, 255, 255],
-      [252, 141, 89, 255],
-      [227, 74, 51, 255],
-      [179, 0, 0, 255]
-    ],
-    'heatmapTileLayer - colorRange'
+  expect(heatmapTileLayer.props.id, 'heatmapTileLayer - id').toBe('a6bbdbj');
+  expect(heatmapTileLayer.props.pickable, 'heatmapTileLayer - pickable').toBe(true);
+  expect(heatmapTileLayer.props.visible, 'heatmapTileLayer - visible').toBe(true);
+  expect(heatmapTileLayer.props.filled, 'heatmapTileLayer - filled').toBe(true);
+  expect(heatmapTileLayer.props.stroked, 'heatmapTileLayer - stroked').toBe(false);
+  expect(heatmapTileLayer.props.radiusPixels, 'heatmapTileLayer - radiusPixels').toBe(17.3);
+  expect(heatmapTileLayer.props.colorRange, 'heatmapTileLayer - colorRange').toEqual([
+    [255, 0, 0, 255],
+    [0, 255, 0, 255],
+    [0, 0, 255, 255],
+    [252, 141, 89, 255],
+    [227, 74, 51, 255],
+    [179, 0, 0, 255]
+  ]);
+  expect(typeof heatmapTileLayer.props.getWeight, 'heatmapTileLayer - getWeight').toBe('function');
+  expect((heatmapTileLayer.props as any).cartoLabel, 'heatmapTileLayer - cartoLabel').toBe(
+    'Layer 2'
   );
-  t.equal(typeof heatmapTileLayer.props.getWeight, 'function', 'heatmapTileLayer - getWeight');
-  t.equal((heatmapTileLayer.props as any).cartoLabel, 'Layer 2', 'heatmapTileLayer - cartoLabel');
-  t.end();
 });
 
-test('parseMap#unsupported layer type', t => {
+test('parseMap#unsupported layer type', () => {
   const json = {
     ...METADATA,
     datasets: DATASETS,
@@ -2093,8 +2047,7 @@ test('parseMap#unsupported layer type', t => {
     }
   };
   const {layers} = parseMap(json);
-  t.deepEquals(layers, [undefined]);
-  t.end();
+  expect(layers).toEqual([undefined]);
 });
 
 // TODO test for no matching dataId

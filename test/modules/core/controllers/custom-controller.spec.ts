@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Controller} from '@deck.gl/core';
 import ViewState from '@deck.gl/core/controllers/view-state';
 
@@ -32,7 +32,7 @@ class TestController extends Controller {
   }
 }
 
-test('Custom Controller', t => {
+test('Custom Controller', () => {
   const eventManager = new MockEventManager();
 
   const controller = new TestController({
@@ -42,9 +42,7 @@ test('Custom Controller', t => {
     scrollZoom: false
   });
 
-  t.ok(controller, 'controller constructor does not throw');
-  t.ok(eventManager.has('press'), 'custom event is registered');
-  t.ok(!eventManager.has('wheel'), 'custom event should not override default ones');
-
-  t.end();
+  expect(controller, 'controller constructor does not throw').toBeTruthy();
+  expect(eventManager.has('press'), 'custom event is registered').toBeTruthy();
+  expect(!eventManager.has('wheel'), 'custom event should not override default ones').toBeTruthy();
 });

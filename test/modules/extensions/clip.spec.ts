@@ -2,20 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {ClipExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 
 import {geojson} from 'deck.gl-test/data';
 
-test('ClipExtension#clipByInstance', t => {
+test('ClipExtension#clipByInstance', () => {
   const checkLayer = (layer, expectedClipByInstance) => {
-    t.is(
+    expect(
       layer.state.clipByInstance,
-      expectedClipByInstance,
       `${layer.constructor.layerName} clipByInstance prop: ${layer.props.clipByInstance} actual: ${expectedClipByInstance}`
-    );
+    ).toBe(expectedClipByInstance);
   };
 
   const testCases = [
@@ -60,7 +59,5 @@ test('ClipExtension#clipByInstance', t => {
     }
   ];
 
-  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

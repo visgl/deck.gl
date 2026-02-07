@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {MapController, OrbitController, FirstPersonController} from '@deck.gl/core';
 
-test('MapViewState', t => {
+test('MapViewState', () => {
   const MapViewState = new MapController({
     longitude: 0,
     latitude: 0,
@@ -22,10 +22,10 @@ test('MapViewState', t => {
   });
   const viewportProps = viewState.getViewportProps();
 
-  t.is(viewportProps.pitch, 0, 'added default pitch');
-  t.is(viewportProps.longitude, 178, 'props are normalized');
-  t.not(viewportProps.latitude, 36, 'props are normalized');
-  t.not(viewportProps.zoom, 0, 'props are normalized');
+  expect(viewportProps.pitch, 'added default pitch').toBe(0);
+  expect(viewportProps.longitude, 'props are normalized').toBe(178);
+  expect(viewportProps.latitude, 'props are normalized').not.toBe(36);
+  expect(viewportProps.zoom, 'props are normalized').not.toBe(0);
 
   const viewState2 = new MapViewState({
     width: 800,
@@ -38,7 +38,7 @@ test('MapViewState', t => {
   });
   const viewportProps2 = viewState2.getViewportProps();
 
-  t.is(viewportProps2.zoom, 0, 'props are not normalized');
+  expect(viewportProps2.zoom, 'props are not normalized').toBe(0);
 
   const viewState3 = new MapViewState({
     width: 800,
@@ -50,18 +50,16 @@ test('MapViewState', t => {
   });
 
   const transitionViewportProps = viewState3.shortestPathFrom(viewState);
-  t.is(transitionViewportProps.longitude, 200, 'found shortest path for longitude');
-  t.is(transitionViewportProps.bearing, 330, 'found shortest path for bearing');
+  expect(transitionViewportProps.longitude, 'found shortest path for longitude').toBe(200);
+  expect(transitionViewportProps.bearing, 'found shortest path for bearing').toBe(330);
 
-  t.throws(
+  expect(
     () => new MapViewState({width: 400, height: 300}),
     'should throw if missing geospatial props'
-  );
-
-  t.end();
+  ).toThrow();
 });
 
-test('OrbitViewState', t => {
+test('OrbitViewState', () => {
   const OrbitViewState = new OrbitController({}).ControllerState;
 
   const viewState = new OrbitViewState({
@@ -76,9 +74,9 @@ test('OrbitViewState', t => {
   });
   const viewportProps = viewState.getViewportProps();
 
-  t.deepEqual(viewportProps.target, [0, 0, 0], 'added default target');
-  t.is(viewportProps.rotationX, 45, 'props are normalized');
-  t.is(viewportProps.rotationOrbit, -160, 'props are normalized');
+  expect(viewportProps.target, 'added default target').toEqual([0, 0, 0]);
+  expect(viewportProps.rotationX, 'props are normalized').toBe(45);
+  expect(viewportProps.rotationOrbit, 'props are normalized').toBe(-160);
 
   const viewState2 = new OrbitViewState({
     width: 800,
@@ -90,12 +88,10 @@ test('OrbitViewState', t => {
   });
 
   const transitionViewportProps = viewState2.shortestPathFrom(viewState);
-  t.is(transitionViewportProps.rotationOrbit, -240, 'found shortest path for rotationOrbit');
-
-  t.end();
+  expect(transitionViewportProps.rotationOrbit, 'found shortest path for rotationOrbit').toBe(-240);
 });
 
-test('FirstPersonViewState', t => {
+test('FirstPersonViewState', () => {
   const FirstPersonViewState = new FirstPersonController({}).ControllerState;
 
   const viewState = new FirstPersonViewState({
@@ -110,9 +106,9 @@ test('FirstPersonViewState', t => {
   });
   const viewportProps = viewState.getViewportProps();
 
-  t.deepEqual(viewportProps.position, [0, 0, 0], 'added default position');
-  t.is(viewportProps.pitch, 45, 'props are normalized');
-  t.is(viewportProps.bearing, -160, 'props are normalized');
+  expect(viewportProps.position, 'added default position').toEqual([0, 0, 0]);
+  expect(viewportProps.pitch, 'props are normalized').toBe(45);
+  expect(viewportProps.bearing, 'props are normalized').toBe(-160);
 
   const viewState2 = new FirstPersonViewState({
     width: 800,
@@ -124,8 +120,6 @@ test('FirstPersonViewState', t => {
   });
 
   const transitionViewportProps = viewState2.shortestPathFrom(viewState);
-  t.is(transitionViewportProps.longitude, 200, 'found shortest path for longitude');
-  t.is(transitionViewportProps.bearing, -240, 'found shortest path for rotationOrbit');
-
-  t.end();
+  expect(transitionViewportProps.longitude, 'found shortest path for longitude').toBe(200);
+  expect(transitionViewportProps.bearing, 'found shortest path for rotationOrbit').toBe(-240);
 });
