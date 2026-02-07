@@ -135,10 +135,16 @@ export function getViewPropsFromOverlay(
 
   // For tilted maps, use perspective projection similar to WebGLOverlayView
   if (usePerspective) {
-    const center = map.getCenter();
-    if (!center) {
+    const projection = overlay.getProjection();
+    if (!projection) {
       return {width, height, left: 0, top: 0};
     }
+
+    // Calculate center from projection to get current position during animations
+    // (map.getCenter() returns final destination, not current animated position)
+    const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+    const latitude = centerLngLat[1];
+    const longitude = centerLngLat[0];
 
     const zoom = map.getZoom() as number;
     const bearing = map.getHeading() || 0;
@@ -160,8 +166,8 @@ export function getViewPropsFromOverlay(
       viewState: {
         altitude: focalDistance,
         bearing,
-        latitude: center.lat(),
-        longitude: center.lng(),
+        latitude,
+        longitude,
         pitch,
         projectionMatrix,
         repeat: true,

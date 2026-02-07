@@ -53,7 +53,7 @@ export default class GoogleMapsOverlay {
   private _map: google.maps.Map | null = null;
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
-  private _tiltListener: google.maps.MapsEventListener | null = null;
+  private _animationFrameId: number | null = null;
 
   constructor(props: GoogleMapsOverlayProps) {
     this.setProps({...defaultProps, ...props});
@@ -168,17 +168,19 @@ export default class GoogleMapsOverlay {
     // @ts-ignore (TS2345) map is defined at this stage
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
 
-    // For OverlayView on vector maps, listen to tilt changes to trigger redraws
+    // On vector maps, OverlayView.draw() is not called during animations
+    // We need to manually sync using requestAnimationFrame
     if (this._map && this._overlay instanceof google.maps.OverlayView) {
       const renderingType = this._map.getRenderingType();
       const {VECTOR} = google.maps.RenderingType;
       if (renderingType === VECTOR) {
-        this._tiltListener = this._map.addListener('tilt_changed', () => {
-          if (this._overlay instanceof google.maps.OverlayView) {
-            // Manually trigger draw since OverlayView.draw() may not be called on tilt changes
+        const rafLoop = () => {
+          if (this._overlay instanceof google.maps.OverlayView && this._deck) {
             this._onDrawRaster();
           }
-        });
+          this._animationFrameId = requestAnimationFrame(rafLoop);
+        };
+        this._animationFrameId = requestAnimationFrame(rafLoop);
       }
     }
   }
@@ -225,10 +227,10 @@ export default class GoogleMapsOverlay {
 
   _onRemove() {
     this._deck?.setProps({layerFilter: HIDE_ALL_LAYERS});
-    // Clean up tilt listener
-    if (this._tiltListener) {
-      this._tiltListener.remove();
-      this._tiltListener = null;
+    // Clean up animation frame loop
+    if (this._animationFrameId !== null) {
+      cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
     }
   }
 
@@ -237,19 +239,19 @@ export default class GoogleMapsOverlay {
       return;
     }
     const deck = this._deck;
-
-    // When tilt is present on a vector map, we need to use perspective projection
-    // to match Google Maps' 3D rendering
-    const tilt = this._map.getTilt();
-    const renderingType = this._map.getRenderingType();
-    const {VECTOR} = google.maps.RenderingType;
-    const usesPerspective = renderingType === VECTOR && tilt > 0;
-
     const canvas = deck.getCanvas();
     const parent = canvas?.parentElement || deck.props.parent;
 
+    const renderingType = this._map.getRenderingType();
+    const {VECTOR} = google.maps.RenderingType;
+
+    // On vector maps, use perspective projection when there's rotation or tilt
+    // This matches WebGLOverlayView behavior and ensures smooth animations
+    const tilt = this._map.getTilt();
+    const heading = this._map.getHeading() || 0;
+    const usesPerspective = renderingType === VECTOR && (tilt > 0 || heading !== 0);
+
     if (usesPerspective) {
-      // Use perspective projection (similar to WebGLOverlayView path)
       const viewProps = getViewPropsFromOverlay(
         this._map,
         this._overlay as google.maps.OverlayView,
@@ -268,7 +270,7 @@ export default class GoogleMapsOverlay {
         ...viewProps
       });
     } else {
-      // Use standard 2D projection
+      // Use standard 2D projection for flat maps
       const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
         this._map,
         this._overlay as google.maps.OverlayView,
