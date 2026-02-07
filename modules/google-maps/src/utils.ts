@@ -51,7 +51,8 @@ export function createDeckInstance(
 
   const newDeck = new Deck({
     ...props,
-    useDevicePixels: props.interleaved ? true : props.useDevicePixels,
+    // Default to true for high-DPI displays, but allow user override
+    useDevicePixels: props.useDevicePixels ?? true,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     views: new MapView({repeat: true}),
