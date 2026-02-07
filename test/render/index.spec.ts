@@ -79,7 +79,16 @@ function getCanvasRegion() {
   };
 }
 
-test.each(TEST_CASES)('$name', async testCase => {
+// Filter out skipped tests and use test.skip for them
+const activeTests = TEST_CASES.filter((tc: any) => !tc.skip);
+const skippedTests = TEST_CASES.filter((tc: any) => tc.skip);
+
+// Register skipped tests so they show up in output
+skippedTests.forEach((tc: any) => {
+  test.skip(tc.name, () => {});
+});
+
+test.each(activeTests)('$name', async testCase => {
   const {
     name,
     views,
@@ -89,7 +98,8 @@ test.each(TEST_CASES)('$name', async testCase => {
     goldenImage,
     useDevicePixels,
     onBeforeRender,
-    onAfterRender
+    onAfterRender,
+    imageDiffOptions
   } = testCase;
 
   // Create a new Deck instance for each test (like the old SnapshotTestRunner)
@@ -150,7 +160,7 @@ test.each(TEST_CASES)('$name', async testCase => {
   const diffOptions = {
     goldenImage,
     region,
-    threshold: 0.99,
+    threshold: imageDiffOptions?.threshold ?? 0.99,
     tolerance: 0.1,
     includeEmpty: false,
     platform: OS,
