@@ -10,6 +10,12 @@ import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
 
+// Google Maps 3D projection parameters
+// These values match Google Maps' internal perspective projection matrix
+const GOOGLE_MAPS_FOV_Y = 25; // Field of view in degrees
+const GOOGLE_MAPS_NEAR_PLANE = 0.75; // Near clipping plane
+const GOOGLE_MAPS_FAR_PLANE = 300000000000000; // Far clipping plane
+
 type UserData = {
   _googleMap: google.maps.Map;
   _eventListeners: Record<string, google.maps.MapsEventListener | null>;
@@ -85,7 +91,9 @@ function getContainer(
   if ('getPanes' in overlay) {
     overlay.getPanes()?.overlayLayer.appendChild(container);
   } else {
-    overlay.getMap()?.getDiv().appendChild(container);
+    const gmContainer = overlay.getMap()?.getDiv();
+    const gmElement = gmContainer?.getElementsByClassName('gm-style')[0];
+    gmElement?.appendChild(container);
   }
   return container;
 }
@@ -113,10 +121,56 @@ export function destroyDeckInstance(deck: Deck) {
  * Get the current view state
  * @param map (google.maps.Map) - The parent Map instance
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
+ * @param usePerspective (boolean) - Whether to use perspective projection (for tilted maps)
  */
 // eslint-disable-next-line complexity
-export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.maps.OverlayView) {
-  const {width, height} = getMapSize(map);
+export function getViewPropsFromOverlay(
+  map: google.maps.Map,
+  overlay: google.maps.OverlayView,
+  usePerspective = false,
+  useDevicePixels = false
+) {
+  // Get map size - don't scale by device pixels for OverlayView
+  const {width, height} = getMapSize(map, useDevicePixels);
+
+  // For tilted maps, use perspective projection similar to WebGLOverlayView
+  if (usePerspective) {
+    const center = map.getCenter();
+    if (!center) {
+      return {width, height, left: 0, top: 0};
+    }
+
+    const zoom = map.getZoom() as number;
+    const bearing = map.getHeading() || 0;
+    const pitch = map.getTilt();
+
+    const aspect = height ? width / height : 1;
+
+    const projectionMatrix = new Matrix4().perspective({
+      fovy: (GOOGLE_MAPS_FOV_Y * Math.PI) / 180,
+      aspect,
+      near: GOOGLE_MAPS_NEAR_PLANE,
+      far: GOOGLE_MAPS_FAR_PLANE
+    });
+    const focalDistance = 0.5 * projectionMatrix[5];
+
+    return {
+      width,
+      height,
+      viewState: {
+        altitude: focalDistance,
+        bearing,
+        latitude: center.lat(),
+        longitude: center.lng(),
+        pitch,
+        projectionMatrix,
+        repeat: true,
+        zoom: zoom - 1
+      }
+    };
+  }
+
+  // Original 2D projection for non-tilted maps
 
   // Canvas position relative to draggable map's container depends on
   // overlayView's projection, not the map's. Have to use the center of the
@@ -220,20 +274,13 @@ export function getViewPropsFromCoordinateTransformer(
   const {width, height} = getMapSize(map);
   const {center, heading: bearing, tilt: pitch, zoom} = transformer.getCameraParams();
 
-  // Match Google projection matrix
-  const fovy = 25;
   const aspect = height ? width / height : 1;
 
-  // Match depth range (crucial for correct z-sorting)
-  const near = 0.75;
-  const far = 300000000000000;
-  // const far = Infinity;
-
   const projectionMatrix = new Matrix4().perspective({
-    fovy: (fovy * Math.PI) / 180,
+    fovy: (GOOGLE_MAPS_FOV_Y * Math.PI) / 180,
     aspect,
-    near,
-    far
+    near: GOOGLE_MAPS_NEAR_PLANE,
+    far: GOOGLE_MAPS_FAR_PLANE
   });
   const focalDistance = 0.5 * projectionMatrix[5];
 

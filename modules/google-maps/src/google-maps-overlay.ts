@@ -53,6 +53,7 @@ export default class GoogleMapsOverlay {
   private _map: google.maps.Map | null = null;
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
+  private _tiltListener: google.maps.MapsEventListener | null = null;
 
   constructor(props: GoogleMapsOverlayProps) {
     this.setProps({...defaultProps, ...props});
@@ -136,8 +137,10 @@ export default class GoogleMapsOverlay {
       return;
     }
 
+    // For non-interleaved mode on vector maps, use OverlayView for proper z-index layering
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
-    const OverlayView = isVectorMap ? google.maps.WebGLOverlayView : google.maps.OverlayView;
+    const useWebGLOverlay = isVectorMap && interleaved;
+    const OverlayView = useWebGLOverlay ? google.maps.WebGLOverlayView : google.maps.OverlayView;
     const overlay = new OverlayView();
 
     if (overlay instanceof google.maps.WebGLOverlayView) {
@@ -164,6 +167,20 @@ export default class GoogleMapsOverlay {
   _onAdd() {
     // @ts-ignore (TS2345) map is defined at this stage
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
+
+    // For OverlayView on vector maps, listen to tilt changes to trigger redraws
+    if (this._map && this._overlay instanceof google.maps.OverlayView) {
+      const renderingType = this._map.getRenderingType();
+      const {VECTOR} = google.maps.RenderingType;
+      if (renderingType === VECTOR) {
+        this._tiltListener = this._map.addListener('tilt_changed', () => {
+          if (this._overlay instanceof google.maps.OverlayView) {
+            // Manually trigger draw since OverlayView.draw() may not be called on tilt changes
+            this._onDrawRaster();
+          }
+        });
+      }
+    }
   }
 
   _onContextRestored({gl}) {
@@ -208,6 +225,11 @@ export default class GoogleMapsOverlay {
 
   _onRemove() {
     this._deck?.setProps({layerFilter: HIDE_ALL_LAYERS});
+    // Clean up tilt listener
+    if (this._tiltListener) {
+      this._tiltListener.remove();
+      this._tiltListener = null;
+    }
   }
 
   _onDrawRaster() {
@@ -216,26 +238,58 @@ export default class GoogleMapsOverlay {
     }
     const deck = this._deck;
 
-    const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
-      this._map,
-      this._overlay as google.maps.OverlayView
-    );
+    // When tilt is present on a vector map, we need to use perspective projection
+    // to match Google Maps' 3D rendering
+    const tilt = this._map.getTilt();
+    const renderingType = this._map.getRenderingType();
+    const {VECTOR} = google.maps.RenderingType;
+    const usesPerspective = renderingType === VECTOR && tilt > 0;
 
     const canvas = deck.getCanvas();
     const parent = canvas?.parentElement || deck.props.parent;
-    if (parent) {
-      const parentStyle = parent.style;
-      parentStyle.left = `${left}px`;
-      parentStyle.top = `${top}px`;
+
+    if (usesPerspective) {
+      // Use perspective projection (similar to WebGLOverlayView path)
+      const viewProps = getViewPropsFromOverlay(
+        this._map,
+        this._overlay as google.maps.OverlayView,
+        true // usePerspective
+      );
+
+      // Size the container but keep Google Maps' overlay positioning
+      // The overlayLayer pane uses a centered coordinate system, so we don't override left/top
+      if (parent) {
+        const parentStyle = parent.style;
+        parentStyle.width = `${viewProps.width}px`;
+        parentStyle.height = `${viewProps.height}px`;
+      }
+
+      deck.setProps({
+        ...viewProps
+      });
+    } else {
+      // Use standard 2D projection
+      const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
+        this._map,
+        this._overlay as google.maps.OverlayView,
+        false // usePerspective
+      );
+
+      if (parent) {
+        const parentStyle = parent.style;
+        parentStyle.left = `${left}px`;
+        parentStyle.top = `${top}px`;
+      }
+
+      const altitude = 10000;
+      deck.setProps({
+        width,
+        height,
+        // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
+        viewState: {altitude, ...rest} as MapViewState
+      });
     }
 
-    const altitude = 10000;
-    deck.setProps({
-      width,
-      height,
-      // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
-      viewState: {altitude, ...rest} as MapViewState
-    });
     // Deck is initialized
     deck.redraw();
   }
