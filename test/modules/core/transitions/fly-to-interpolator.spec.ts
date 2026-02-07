@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import FlyToInterpolator from '@deck.gl/core/transitions/fly-to-interpolator';
-import {toLowPrecision} from '@deck.gl/test-utils';
+import {toLowPrecision} from '@deck.gl/test-utils/vitest';
 
 const START_PROPS = {
   width: 800,

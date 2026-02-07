@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import DeckPicker from '@deck.gl/core/lib/deck-picker';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const DEVICE_RECT_TEST_CASES = [
   {

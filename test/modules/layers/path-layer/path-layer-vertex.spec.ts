@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {picking, project32} from '@deck.gl/core';
 import {Transform} from '@luma.gl/engine';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';

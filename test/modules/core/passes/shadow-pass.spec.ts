@@ -7,7 +7,7 @@ import {test, expect} from 'vitest';
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import ShadowPass from '@deck.gl/core/passes/shadow-pass';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 test('ShadowPass#constructor and delete', () => {
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});

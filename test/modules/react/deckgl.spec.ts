@@ -11,7 +11,7 @@ import {act} from 'react-dom/test-utils';
 import {DeckGL, Layer, Widget} from 'deck.gl';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
-import {gl} from '@deck.gl/test-utils';
+import {gl} from '@deck.gl/test-utils/vitest';
 
 const TEST_VIEW_STATE = {
   latitude: 37.7515,

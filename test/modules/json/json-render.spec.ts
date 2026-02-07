@@ -7,7 +7,7 @@ import {Deck} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import configuration from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
-import {gl} from '@deck.gl/test-utils';
+import {gl} from '@deck.gl/test-utils/vitest';
 
 test('JSONConverter#render', () => {
   const jsonConverter = new JSONConverter({configuration});

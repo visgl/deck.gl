@@ -4,7 +4,7 @@
 
 import {WebMercatorViewport} from 'deck.gl';
 import {test, expect} from 'vitest';
-import {toLowPrecision} from '@deck.gl/test-utils';
+import {toLowPrecision} from '@deck.gl/test-utils/vitest';
 
 const viewportProps = {
   latitude: 37.75,

@@ -4,7 +4,7 @@
 
 /* global setTimeout */
 import {test, expect} from 'vitest';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import Resource from '@deck.gl/core/lib/resource/resource';
 
 function mockLoadData(value, delay) {

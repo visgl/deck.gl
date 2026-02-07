@@ -6,7 +6,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {test, expect} from 'vitest';
 import {Attribute} from '@deck.gl/core';
 import {WebGLAggregator} from '@deck.gl/aggregation-layers';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import {IncomeSurvey} from './data-sample';
 import {getResourceCounts, binaryAttributeToArray} from './test-utils';

@@ -8,7 +8,7 @@ import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import MapboxLayer from '@deck.gl/mapbox/mapbox-layer';
 import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
 import MockMapboxMap from './mapbox-gl-mock/map';

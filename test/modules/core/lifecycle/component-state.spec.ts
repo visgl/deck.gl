@@ -6,7 +6,7 @@
 
 import {test, expect} from 'vitest';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 

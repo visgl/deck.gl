@@ -11,7 +11,7 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
-import {device, getLayerUniforms} from '@deck.gl/test-utils';
+import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
 

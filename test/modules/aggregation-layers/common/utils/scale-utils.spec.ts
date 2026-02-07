@@ -8,7 +8,7 @@ import {
   applyScaleQuantile,
   applyScaleOrdinal
 } from '@deck.gl/aggregation-layers/common/utils/scale-utils';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const QUANTILE_SCALE_TEST_CASES = [
   {

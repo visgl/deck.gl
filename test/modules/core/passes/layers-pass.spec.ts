@@ -7,7 +7,7 @@ import {test, expect} from 'vitest';
 import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {getGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 

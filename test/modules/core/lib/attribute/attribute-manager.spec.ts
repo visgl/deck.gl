@@ -5,7 +5,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {test, expect} from 'vitest';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 function update(attribute, {data}) {
   const {value, size} = attribute;

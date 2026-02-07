@@ -7,7 +7,7 @@ import {test, expect} from 'vitest';
 import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const SAMPLE_DATA = [
   {polygon: [], name: 'empty array'},

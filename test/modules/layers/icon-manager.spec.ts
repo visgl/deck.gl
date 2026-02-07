@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import IconManager, {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const DATA = [
   {

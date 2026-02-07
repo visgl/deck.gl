@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {Attribute, BinaryAttribute, _deepEqual} from '@deck.gl/core';
 import {CPUAggregator} from '@deck.gl/aggregation-layers';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import {IncomeSurvey} from '../data-sample';
 import {binaryAttributeToArray} from '../test-utils';

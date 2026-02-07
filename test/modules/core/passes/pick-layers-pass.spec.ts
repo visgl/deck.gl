@@ -7,7 +7,7 @@ import {test, expect} from 'vitest';
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device, getLayerUniforms} from '@deck.gl/test-utils';
+import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 
 test('PickLayersPass#drawPickingBuffer', () => {
   const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});

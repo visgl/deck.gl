@@ -8,7 +8,7 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const testViewport = new MapView().makeViewport({
   width: 100,

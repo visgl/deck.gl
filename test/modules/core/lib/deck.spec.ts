@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {sleep} from './async-iterator-test-utils';
 
 test('Deck#constructor', () => {

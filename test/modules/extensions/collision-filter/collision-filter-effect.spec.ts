@@ -10,7 +10,7 @@ import {CollisionFilterExtension} from '@deck.gl/extensions';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import CollisionFilterEffect from '@deck.gl/extensions/collision-filter/collision-filter-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const testViewport = new MapView().makeViewport({
   width: 100,

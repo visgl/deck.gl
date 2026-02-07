@@ -5,7 +5,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
 import {test, expect, describe, vi} from 'vitest';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import {Buffer} from '@luma.gl/core';

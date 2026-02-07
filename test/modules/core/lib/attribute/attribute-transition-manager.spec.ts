@@ -8,7 +8,7 @@ import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import {test, expect} from 'vitest';
 import type {Buffer} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const TEST_ATTRIBUTES = (function () {
   const indices = new Attribute(device, {

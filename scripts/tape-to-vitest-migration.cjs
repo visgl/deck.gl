@@ -489,11 +489,11 @@ function convertTapeToVitest(content, filePath = '') {
     'await testLayerAsync('
   );
 
-  // Step 16: Update @deck.gl/test-utils imports to use /vitest entry for testLayer
-  // The vitest entry provides vi.spyOn as the default spy factory
-  const hasTestLayerImport = /from\s+['"]@deck\.gl\/test-utils['"]/.test(result) &&
-    /\b(testLayer|testLayerAsync)\b/.test(result);
-  if (hasTestLayerImport) {
+  // Step 16: Update @deck.gl/test-utils imports to use /vitest entry
+  // The vitest entry re-exports all utilities (device, gl, toLowPrecision, etc.)
+  // and provides vi.spyOn as the default spy factory for testLayer/testLayerAsync
+  const hasTestUtilsImport = /from\s+['"]@deck\.gl\/test-utils['"]/.test(result);
+  if (hasTestUtilsImport) {
     result = result.replace(
       /from\s+['"]@deck\.gl\/test-utils['"]/g,
       "from '@deck.gl/test-utils/vitest'"

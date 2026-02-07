@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import {Layer, LayerManager, Viewport} from '@deck.gl/core';
 import MaskPass from '@deck.gl/extensions/mask/mask-pass';

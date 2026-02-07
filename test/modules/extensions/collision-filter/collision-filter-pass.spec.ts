@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 
 import CollisionFilterPass from '@deck.gl/extensions/collision-filter/collision-filter-pass';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 test('CollisionFilterPass#getShaderModuleProps', () => {
   const collisionFilterPass = new CollisionFilterPass(device);

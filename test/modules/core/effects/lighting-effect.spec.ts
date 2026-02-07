@@ -9,7 +9,7 @@ import {MapView, LayerManager} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {equals} from '@math.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const testViewport = new MapView().makeViewport({
   width: 100,

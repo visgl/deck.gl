@@ -8,7 +8,7 @@ import {
   VertexAccessor,
   evaluateVertexAccessor
 } from '@deck.gl/aggregation-layers/common/aggregator/cpu-aggregator/vertex-accessor';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 test('evaluateVertexAccessor#sources', () => {
   const attributes = {

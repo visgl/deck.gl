@@ -5,7 +5,7 @@
 /* eslint-disable func-style, no-console, max-len */
 import {test, expect} from 'vitest';
 import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 class TestLayer extends Layer {
   initializeState() {}
