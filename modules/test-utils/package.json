@@ -48,9 +48,6 @@
     "vitest": "^2.1.0"
   },
   "peerDependenciesMeta": {
-    "@probe.gl/test-utils": {
-      "optional": true
-    },
     "vitest": {
       "optional": true
     }
