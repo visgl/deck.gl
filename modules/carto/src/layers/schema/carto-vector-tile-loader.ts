@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import earcut from 'earcut';
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection, BinaryPolygonFeature, TypedArray} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
@@ -37,7 +37,7 @@ const CartoVectorTileLoader: LoaderWithParser = {
     parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
   worker: true,
-  options: DEFAULT_OPTIONS
+  options: DEFAULT_OPTIONS as StrictLoaderOptions
 };
 
 function triangulatePolygon(
