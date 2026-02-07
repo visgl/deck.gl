@@ -426,9 +426,9 @@ function convertTapeToVitest(content, filePath = '') {
   // Step 14b: Convert spy method calls from probe.gl to vitest (applies to all files)
   // These may come from makeSpy or from @deck.gl/test-utils's testLayer spies
   // spy.restore() -> spy.mockRestore()
-  // spy.reset() -> spy.mockReset()
+  // spy.reset() -> spy.mockClear() (probe.gl reset only clears call tracking, mockReset also removes implementation)
   result = result.replace(/\.restore\s*\(\s*\)/g, '.mockRestore()');
-  result = result.replace(/\.reset\s*\(\s*\)/g, '.mockReset()');
+  result = result.replace(/\.reset\s*\(\s*\)/g, '.mockClear()');
 
   // Step 14c: Convert spy.called patterns to toHaveBeenCalled matchers
   // expect(spy.called).toBeTruthy() -> expect(spy).toHaveBeenCalled()

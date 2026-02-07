@@ -216,7 +216,7 @@ function drawPickTest(renderingType) {
 
     map.emit({type: 'mouseout', pixel: [0, 0]});
     expect(pointerMoveSpy, 'pointer leave event is handled').toHaveBeenCalledTimes(2);
-    pointerMoveSpy.mockReset();
+    pointerMoveSpy.mockClear();
     */
 
     overlay.finalize();
