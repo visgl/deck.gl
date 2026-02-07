@@ -160,13 +160,13 @@ test('Layer#validateProps', () => {
   console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: 1});
-  expect(() => layer.validateProps(), /sizeScale/).toThrow();
+  expect(() => layer.validateProps(), 'throws on invalid function prop').toThrow(/sizeScale/);
 
   layer = new SubLayer(LAYER_PROPS, {opacity: 'transparent'});
-  expect(() => layer.validateProps(), /opacity/).toThrow();
+  expect(() => layer.validateProps(), 'throws on invalid numberic prop').toThrow(/opacity/);
 
   layer = new SubLayer(LAYER_PROPS, {opacity: 2});
-  expect(() => layer.validateProps(), /opacity/).toThrow();
+  expect(() => layer.validateProps(), 'throws on numberic prop out of range').toThrow(/opacity/);
 
   layer = new SubLayer(LAYER_PROPS, {getColor: [255, 0, 0]});
   layer.validateProps();
@@ -177,14 +177,14 @@ test('Layer#validateProps', () => {
   console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {getColor: 3});
-  expect(() => layer.validateProps(), /getColor/).toThrow();
+  expect(() => layer.validateProps(), 'throws on invalid accessor prop').toThrow(/getColor/);
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: null});
   layer.validateProps();
   console.log('Layer props are valid');
 
   layer = new SubLayer(LAYER_PROPS, {sizeScale: [1, 10]});
-  expect(() => layer.validateProps(), /sizeScale/).toThrow();
+  expect(() => layer.validateProps(), 'throws on invalid function prop').toThrow(/sizeScale/);
 });
 
 // eslint-disable-next-line max-statements

@@ -114,7 +114,9 @@ test('parseMap#invalid version', () => {
     ...METADATA,
     keplerMapConfig: {...EMPTY_KEPLER_MAP_CONFIG, version: 'invalid'}
   };
-  expect(() => parseMap(json), /Only support Kepler v1/).toThrow();
+  expect(() => parseMap(json), 'Throws on invalid Kepler schema version').toThrow(
+    /Only support Kepler v1/
+  );
 });
 
 test('parseMap#metadata', () => {

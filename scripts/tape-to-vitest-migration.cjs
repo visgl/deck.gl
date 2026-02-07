@@ -290,10 +290,11 @@ function convertTapeToVitest(content, filePath = '') {
     (match, value) => `expect(${value.trim()}).toBeFalsy()`
   );
 
-  // t.throws(fn, 'message') -> expect(fn).toThrow()
-  result = convertTapeAssertion(result, 't.throws', 'toThrow()');
-  result = convertTapeAssertion(result, 't0.throws', 'toThrow()');
-  result = convertTapeAssertion(result, 't1.throws', 'toThrow()');
+  // t.throws(fn, expectedError, 'message') -> expect(fn).toThrow(expectedError)
+  // Note: expectedError can be a regex like /pattern/ or an Error class
+  result = convertThrowsAssertion(result, 't.throws');
+  result = convertThrowsAssertion(result, 't0.throws');
+  result = convertThrowsAssertion(result, 't1.throws');
 
   // t.doesNotThrow(fn) -> expect(fn).not.toThrow()
   result = convertTapeAssertion(result, 't.doesNotThrow', 'not.toThrow()');
@@ -593,6 +594,85 @@ function convertTwoArgAssertion(content, tapeMethod, vitestMethod) {
 
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Convert t.throws assertions with special handling for regex matchers
+ * t.throws(fn, /regex/, 'message') -> expect(fn, 'message').toThrow(/regex/)
+ * t.throws(fn, /regex/) -> expect(fn).toThrow(/regex/)
+ * t.throws(fn, 'message') -> expect(fn, 'message').toThrow()
+ * t.throws(fn) -> expect(fn).toThrow()
+ */
+function convertThrowsAssertion(content, tapeMethod) {
+  const methodPattern = new RegExp(escapeRegex(tapeMethod) + '\\s*\\(', 'g');
+  let result = content;
+  let match;
+
+  // Find all occurrences and process them from end to start (to preserve indices)
+  const matches = [];
+  while ((match = methodPattern.exec(content)) !== null) {
+    matches.push(match.index);
+  }
+
+  // Process from end to start
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const startIdx = matches[i];
+    const openParenIdx = content.indexOf('(', startIdx);
+
+    if (openParenIdx === -1) continue;
+
+    // Find matching closing paren
+    const closeParenIdx = findMatchingParen(content, openParenIdx);
+    if (closeParenIdx === -1) continue;
+
+    // Extract arguments (content inside parens)
+    const argsStr = content.substring(openParenIdx + 1, closeParenIdx).trim();
+
+    // Parse arguments - split by comma, but respect nested structures
+    const args = splitArgs(argsStr);
+
+    if (args.length === 0) continue;
+
+    // First arg is the function to test
+    const testFn = args[0].trim();
+
+    // Check if second arg is a regex pattern (error matcher) or a string message
+    let errorMatcher = null;
+    let message = null;
+
+    if (args.length >= 2) {
+      const secondArg = args[1].trim();
+      // Check if it's a regex (starts with /)
+      if (secondArg.startsWith('/')) {
+        errorMatcher = secondArg;
+        // Third arg would be the message
+        if (args.length >= 3) {
+          message = args[2].trim();
+        }
+      } else {
+        // Second arg is the message (no regex)
+        message = secondArg;
+      }
+    }
+
+    // Build replacement
+    // vitest syntax: expect(fn, 'message').toThrow(/regex/)
+    let replacement;
+    if (message && errorMatcher) {
+      replacement = `expect(${testFn}, ${message}).toThrow(${errorMatcher})`;
+    } else if (errorMatcher) {
+      replacement = `expect(${testFn}).toThrow(${errorMatcher})`;
+    } else if (message) {
+      replacement = `expect(${testFn}, ${message}).toThrow()`;
+    } else {
+      replacement = `expect(${testFn}).toThrow()`;
+    }
+
+    // Replace in result
+    result = result.substring(0, startIdx) + replacement + result.substring(closeParenIdx + 1);
+  }
+
+  return result;
 }
 
 /**
