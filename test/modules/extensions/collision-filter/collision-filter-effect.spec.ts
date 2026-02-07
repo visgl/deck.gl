@@ -56,7 +56,7 @@ test('CollisionFilterEffect#constructor', () => {
   expect(
     collisionFilterEffect.channels,
     'Collision filter effect created with no channels'
-  ).toEqual([]);
+  ).toEqual({});
   collisionFilterEffect.cleanup();
 });
 
