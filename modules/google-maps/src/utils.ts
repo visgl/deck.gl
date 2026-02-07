@@ -127,11 +127,9 @@ export function destroyDeckInstance(deck: Deck) {
 export function getViewPropsFromOverlay(
   map: google.maps.Map,
   overlay: google.maps.OverlayView,
-  usePerspective = false,
-  useDevicePixels = false
+  usePerspective = false
 ) {
-  // Get map size - don't scale by device pixels for OverlayView
-  const {width, height} = getMapSize(map, useDevicePixels);
+  const {width, height} = getMapSize(map);
 
   const projection = overlay.getProjection();
   if (!projection) {
