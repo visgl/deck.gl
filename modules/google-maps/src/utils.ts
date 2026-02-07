@@ -133,19 +133,19 @@ export function getViewPropsFromOverlay(
   // Get map size - don't scale by device pixels for OverlayView
   const {width, height} = getMapSize(map, useDevicePixels);
 
+  const projection = overlay.getProjection();
+  if (!projection) {
+    return {width, height, left: 0, top: 0};
+  }
+
+  // Calculate center from projection to get current position during animations
+  // (map.getCenter() returns final destination, not current animated position)
+  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+  const latitude = centerLngLat[1];
+  const longitude = centerLngLat[0];
+
   // For tilted maps, use perspective projection similar to WebGLOverlayView
   if (usePerspective) {
-    const projection = overlay.getProjection();
-    if (!projection) {
-      return {width, height, left: 0, top: 0};
-    }
-
-    // Calculate center from projection to get current position during animations
-    // (map.getCenter() returns final destination, not current animated position)
-    const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
-    const latitude = centerLngLat[1];
-    const longitude = centerLngLat[0];
-
     // Calculate container offset for positioning
     const centerH = new google.maps.LatLng(0, longitude);
     const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
@@ -186,12 +186,7 @@ export function getViewPropsFromOverlay(
     };
   }
 
-  // Original 2D projection for non-tilted maps
-
-  // Canvas position relative to draggable map's container depends on
-  // overlayView's projection, not the map's. Have to use the center of the
-  // map for this, not the top left, for the same reason as above.
-  const projection = overlay.getProjection();
+  // Original 2D projection for raster maps
 
   const bounds = map.getBounds();
   if (!bounds) {
@@ -206,8 +201,7 @@ export function getViewPropsFromOverlay(
   // google maps places overlays in a container anchored at the map center.
   // the container CSS is manipulated during dragging.
   // We need to update left/top of the deck canvas to match the base map.
-  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
-  const centerH = new google.maps.LatLng(0, centerLngLat[0]);
+  const centerH = new google.maps.LatLng(0, longitude);
   const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
   const centerDivPx = projection.fromLatLngToDivPixel(centerH);
 
@@ -220,14 +214,11 @@ export function getViewPropsFromOverlay(
   const topLngLat = pixelToLngLat(projection, width / 2, 0);
   const bottomLngLat = pixelToLngLat(projection, width / 2, height);
 
-  // Compute fractional center.
-  let latitude = centerLngLat[1];
-  const longitude = centerLngLat[0];
-
   // Adjust vertical offset - limit latitude
-  if (Math.abs(latitude) > MAX_LATITUDE) {
-    latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
-    const center = new google.maps.LatLng(latitude, longitude);
+  let adjustedLatitude = latitude;
+  if (Math.abs(adjustedLatitude) > MAX_LATITUDE) {
+    adjustedLatitude = adjustedLatitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
+    const center = new google.maps.LatLng(adjustedLatitude, longitude);
     const centerPx = projection.fromLatLngToContainerPixel(center);
     // @ts-ignore (TS2531) Object is possibly 'null'
     topOffset += centerPx.y - height / 2;
@@ -271,7 +262,7 @@ export function getViewPropsFromOverlay(
     zoom,
     bearing,
     pitch: map.getTilt(),
-    latitude,
+    latitude: adjustedLatitude,
     longitude
   };
 }

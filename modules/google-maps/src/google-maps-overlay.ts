@@ -143,15 +143,10 @@ export default class GoogleMapsOverlay {
     const overlay = new OverlayView();
 
     if (overlay instanceof google.maps.WebGLOverlayView) {
-      if (interleaved) {
-        overlay.onAdd = noop;
-        overlay.onContextRestored = this._onContextRestored.bind(this);
-        overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
-      } else {
-        overlay.onAdd = this._onAdd.bind(this);
-        overlay.onContextRestored = noop;
-        overlay.onDraw = this._onDrawVectorOverlay.bind(this);
-      }
+      // WebGLOverlayView is only used for interleaved mode
+      overlay.onAdd = noop;
+      overlay.onContextRestored = this._onContextRestored.bind(this);
+      overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
       overlay.onContextLost = this._onContextLost.bind(this);
     } else {
       overlay.onAdd = this._onAdd.bind(this);
