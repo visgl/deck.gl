@@ -146,6 +146,14 @@ export function getViewPropsFromOverlay(
     const latitude = centerLngLat[1];
     const longitude = centerLngLat[0];
 
+    // Calculate container offset for positioning
+    const centerH = new google.maps.LatLng(0, longitude);
+    const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
+    const centerDivPx = projection.fromLatLngToDivPixel(centerH);
+
+    const left = centerDivPx && centerContainerPx ? Math.round(centerDivPx.x - centerContainerPx.x) : 0;
+    const top = centerDivPx && centerContainerPx ? Math.round(centerDivPx.y - centerContainerPx.y) : 0;
+
     const zoom = map.getZoom() as number;
     const bearing = map.getHeading() || 0;
     const pitch = map.getTilt();
@@ -163,6 +171,8 @@ export function getViewPropsFromOverlay(
     return {
       width,
       height,
+      left,
+      top,
       viewState: {
         altitude: focalDistance,
         bearing,

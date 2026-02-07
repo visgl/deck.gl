@@ -310,52 +310,27 @@ export default class GoogleMapsOverlay {
     const canvas = deck.getCanvas();
     const parent = canvas?.parentElement || deck.props.parent;
 
-    // On vector maps, use perspective projection when there's rotation or tilt
-    // This matches WebGLOverlayView behavior and ensures smooth animations
-    const tilt = this._map.getTilt();
-    const heading = this._map.getHeading() || 0;
-    const usesPerspective = tilt > 0 || heading !== 0;
+    // Use perspective projection to match WebGLOverlayView behavior
+    const {width, height, left, top, viewState} = getViewPropsFromOverlay(
+      this._map,
+      this._overlay as google.maps.OverlayView,
+      true // usePerspective
+    );
 
-    if (usesPerspective) {
-      const viewProps = getViewPropsFromOverlay(
-        this._map,
-        this._overlay as google.maps.OverlayView,
-        true // usePerspective
-      );
-
-      // Size the container but keep Google Maps' overlay positioning
-      // The overlayLayer pane uses a centered coordinate system, so we don't override left/top
-      if (parent) {
-        const parentStyle = parent.style;
-        parentStyle.width = `${viewProps.width}px`;
-        parentStyle.height = `${viewProps.height}px`;
-      }
-
-      deck.setProps({
-        ...viewProps
-      });
-    } else {
-      // Use standard 2D projection for flat maps
-      const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
-        this._map,
-        this._overlay as google.maps.OverlayView,
-        false // usePerspective
-      );
-
-      if (parent) {
-        const parentStyle = parent.style;
-        parentStyle.left = `${left}px`;
-        parentStyle.top = `${top}px`;
-      }
-
-      const altitude = 10000;
-      deck.setProps({
-        width,
-        height,
-        // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
-        viewState: {altitude, ...rest} as MapViewState
-      });
+    // Position and size the container
+    if (parent) {
+      const parentStyle = parent.style;
+      parentStyle.left = `${left}px`;
+      parentStyle.top = `${top}px`;
+      parentStyle.width = `${width}px`;
+      parentStyle.height = `${height}px`;
     }
+
+    deck.setProps({
+      width,
+      height,
+      viewState
+    });
 
     deck.redraw();
   }
