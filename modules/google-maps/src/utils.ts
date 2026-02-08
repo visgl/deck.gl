@@ -45,7 +45,8 @@ export function createDeckInstance(
 
   const newDeck = new Deck({
     ...props,
-    useDevicePixels: props.interleaved ? true : props.useDevicePixels,
+    // Default to true for high-DPI displays, but allow user override
+    useDevicePixels: props.useDevicePixels ?? true,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     views: new MapView({repeat: true}),
@@ -80,12 +81,18 @@ function getContainer(
   container.style.position = 'absolute';
   Object.assign(container.style, style);
 
-  // The DOM structure has a different structure depending on whether
-  // the Google map is rendered as vector or raster
-  if ('getPanes' in overlay) {
+  // Check if there's a pre-created positioning container (for non-interleaved vector maps)
+  const gmContainer = overlay.getMap()?.getDiv();
+  const positioningContainer = gmContainer?.querySelector('#deck-gl-google-maps-container');
+
+  if (positioningContainer) {
+    // Use the positioning container that Google Maps placed correctly
+    positioningContainer.appendChild(container);
+  } else if ('getPanes' in overlay) {
+    // OverlayView - append to overlayLayer
     overlay.getPanes()?.overlayLayer.appendChild(container);
   } else {
-    const gmContainer = overlay.getMap()?.getDiv();
+    // WebGLOverlayView - append inside gm-style element
     const gmElement = gmContainer?.getElementsByClassName('gm-style')[0];
     gmElement?.appendChild(container);
   }

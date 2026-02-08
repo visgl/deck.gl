@@ -53,6 +53,7 @@ export default class GoogleMapsOverlay {
   private _map: google.maps.Map | null = null;
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
+  private _positioningOverlay: google.maps.OverlayView | null = null;
 
   constructor(props: GoogleMapsOverlayProps) {
     this.setProps({...defaultProps, ...props});
@@ -72,6 +73,7 @@ export default class GoogleMapsOverlay {
         (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
       }
       this._overlay?.setMap(null);
+      this._positioningOverlay?.setMap(null);
       this._map = null;
     }
     if (map) {
@@ -137,33 +139,89 @@ export default class GoogleMapsOverlay {
     }
 
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
-    const OverlayView = isVectorMap ? google.maps.WebGLOverlayView : google.maps.OverlayView;
-    const overlay = new OverlayView();
 
-    if (overlay instanceof google.maps.WebGLOverlayView) {
-      if (interleaved) {
-        overlay.onAdd = noop;
-        overlay.onContextRestored = this._onContextRestored.bind(this);
-        overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
-      } else {
-        overlay.onAdd = this._onAdd.bind(this);
-        overlay.onContextRestored = noop;
-        overlay.onDraw = this._onDrawVectorOverlay.bind(this);
-      }
+    if (isVectorMap && !interleaved) {
+      // For non-interleaved vector maps, use BOTH overlays:
+      // 1. OverlayView for DOM positioning (correct z-index)
+      // 2. WebGLOverlayView for camera data (smooth animations)
+
+      // Create positioning overlay
+      const positioningOverlay = new google.maps.OverlayView();
+      positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this);
+      positioningOverlay.draw = this._updateContainerSize.bind(this);
+      positioningOverlay.onRemove = this._onRemove.bind(this);
+      this._positioningOverlay = positioningOverlay;
+      this._positioningOverlay.setMap(map);
+
+      // Create WebGL overlay ONLY for camera data (don't touch GL context)
+      const overlay = new google.maps.WebGLOverlayView();
+      overlay.onAdd = noop;
+      overlay.onContextRestored = noop; // Don't manage GL context
+      overlay.onDraw = this._onDrawVectorNonInterleaved.bind(this);
+      overlay.onContextLost = noop; // Don't manage GL context
+      this._overlay = overlay;
+      this._overlay.setMap(map);
+    } else if (isVectorMap && interleaved) {
+      // Interleaved mode - WebGLOverlayView only
+      const overlay = new google.maps.WebGLOverlayView();
+      overlay.onAdd = noop;
+      overlay.onContextRestored = this._onContextRestored.bind(this);
+      overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
       overlay.onContextLost = this._onContextLost.bind(this);
+      overlay.onRemove = this._onRemove.bind(this);
+      this._overlay = overlay;
+      this._overlay.setMap(map);
     } else {
+      // Raster maps - OverlayView only
+      const overlay = new google.maps.OverlayView();
       overlay.onAdd = this._onAdd.bind(this);
       overlay.draw = this._onDrawRaster.bind(this);
+      overlay.onRemove = this._onRemove.bind(this);
+      this._overlay = overlay;
+      this._overlay.setMap(map);
     }
-    overlay.onRemove = this._onRemove.bind(this);
-
-    this._overlay = overlay;
-    this._overlay.setMap(map);
   }
 
   _onAdd() {
     // @ts-ignore (TS2345) map is defined at this stage
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
+  }
+
+  _onAddVectorOverlay() {
+    // For non-interleaved vector maps, create a positioning container
+    // that Google Maps will place correctly in the DOM with proper z-index
+    const overlay = this._positioningOverlay as google.maps.OverlayView;
+    const panes = overlay.getPanes();
+    if (panes) {
+      const container = document.createElement('div');
+      container.id = 'deck-gl-google-maps-container';
+      container.style.position = 'absolute';
+      panes.overlayLayer.appendChild(container);
+    }
+
+    // @ts-ignore (TS2345) map is defined at this stage
+    // Pass the positioning overlay for deck canvas creation (not WebGL overlay)
+    this._deck = createDeckInstance(this._map, overlay, this._deck, this.props);
+  }
+
+  _updateContainerSize() {
+    // Update positioning container size and position to match map
+    if (!this._map) return;
+
+    const container = this._map.getDiv().querySelector('#deck-gl-google-maps-container') as HTMLElement;
+    if (container) {
+      const mapDiv = this._map.getDiv();
+      const firstChild = mapDiv.firstChild as HTMLElement;
+      if (firstChild) {
+        const width = firstChild.offsetWidth;
+        const height = firstChild.offsetHeight;
+        container.style.width = `${width}px`;
+        container.style.height = `${height}px`;
+        // Position at top-left (overlayLayer uses centered coords, so offset by half)
+        container.style.left = `${-width / 2}px`;
+        container.style.top = `${-height / 2}px`;
+      }
+    }
   }
 
   _onContextRestored({gl}) {
@@ -240,7 +298,21 @@ export default class GoogleMapsOverlay {
     deck.redraw();
   }
 
-  // Vector code path
+  // Vector non-interleaved: Use transformer for camera, render to own canvas
+  _onDrawVectorNonInterleaved({transformer}) {
+    if (!this._deck || !this._map) {
+      return;
+    }
+
+    const deck = this._deck;
+
+    deck.setProps({
+      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
+    });
+    deck.redraw();
+  }
+
+  // Vector interleaved: Share GL context with Google Maps
   _onDrawVectorInterleaved({gl, transformer}) {
     if (!this._deck || !this._map) {
       return;
