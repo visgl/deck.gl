@@ -9,6 +9,7 @@ import {
   createDeckInstance,
   destroyDeckInstance,
   getViewPropsFromOverlay,
+  getViewPropsFromOverlayPerspective,
   getViewPropsFromCoordinateTransformer
 } from './utils';
 import {Deck} from '@deck.gl/core';
@@ -224,8 +225,7 @@ export default class GoogleMapsOverlay {
     // Use standard 2D projection for raster maps
     const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
       this._map,
-      this._overlay as google.maps.OverlayView,
-      false // usePerspective
+      this._overlay as google.maps.OverlayView
     );
 
     if (parent) {
@@ -306,10 +306,9 @@ export default class GoogleMapsOverlay {
     const parent = canvas?.parentElement || deck.props.parent;
 
     // Use perspective projection to match WebGLOverlayView behavior
-    const {width, height, left, top, viewState} = getViewPropsFromOverlay(
+    const {width, height, left, top, viewState} = getViewPropsFromOverlayPerspective(
       this._map,
-      this._overlay as google.maps.OverlayView,
-      true // usePerspective
+      this._overlay as google.maps.OverlayView
     );
 
     // Position and size the container

@@ -113,16 +113,13 @@ export function destroyDeckInstance(deck: Deck) {
 
 /* eslint-disable max-statements */
 /**
- * Get the current view state
+ * Get the current view state for vector maps using perspective projection
  * @param map (google.maps.Map) - The parent Map instance
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
- * @param usePerspective (boolean) - Whether to use perspective projection (for tilted maps)
  */
-// eslint-disable-next-line complexity
-export function getViewPropsFromOverlay(
+export function getViewPropsFromOverlayPerspective(
   map: google.maps.Map,
-  overlay: google.maps.OverlayView,
-  usePerspective = false
+  overlay: google.maps.OverlayView
 ) {
   const {width, height} = getMapSize(map);
 
@@ -137,30 +134,44 @@ export function getViewPropsFromOverlay(
   const latitude = centerLngLat[1];
   const longitude = centerLngLat[0];
 
-  // For tilted maps, use perspective projection similar to WebGLOverlayView
-  if (usePerspective) {
-    // Calculate container offset for positioning
-    const centerH = new google.maps.LatLng(0, longitude);
-    const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
-    const centerDivPx = projection.fromLatLngToDivPixel(centerH);
+  // Calculate container offset for positioning
+  const centerH = new google.maps.LatLng(0, longitude);
+  const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
+  const centerDivPx = projection.fromLatLngToDivPixel(centerH);
 
-    const left = centerDivPx && centerContainerPx ? Math.round(centerDivPx.x - centerContainerPx.x) : 0;
-    const top = centerDivPx && centerContainerPx ? Math.round(centerDivPx.y - centerContainerPx.y) : 0;
+  const left = centerDivPx && centerContainerPx ? Math.round(centerDivPx.x - centerContainerPx.x) : 0;
+  const top = centerDivPx && centerContainerPx ? Math.round(centerDivPx.y - centerContainerPx.y) : 0;
 
-    const zoom = map.getZoom() as number;
-    const bearing = map.getHeading() || 0;
-    const pitch = map.getTilt();
+  const zoom = map.getZoom() as number;
+  const bearing = map.getHeading() || 0;
+  const pitch = map.getTilt();
 
-    return {
-      width,
-      height,
-      left,
-      top,
-      viewState: getPerspectiveViewState(width, height, latitude, longitude, zoom, bearing, pitch)
-    };
-  }
+  return {
+    width,
+    height,
+    left,
+    top,
+    viewState: getPerspectiveViewState(width, height, latitude, longitude, zoom, bearing, pitch)
+  };
+}
 
-  // Original 2D projection for raster maps
+/* eslint-disable max-statements */
+/**
+ * Get the current view state for raster maps
+ * @param map (google.maps.Map) - The parent Map instance
+ * @param overlay (google.maps.OverlayView) - A maps Overlay instance
+ */
+// eslint-disable-next-line complexity
+export function getViewPropsFromOverlay(
+  map: google.maps.Map,
+  overlay: google.maps.OverlayView
+) {
+  const {width, height} = getMapSize(map);
+
+  // Canvas position relative to draggable map's container depends on
+  // overlayView's projection, not the map's. Have to use the center of the
+  // map for this, not the top left, for the same reason as above.
+  const projection = overlay.getProjection();
 
   const bounds = map.getBounds();
   if (!bounds) {
