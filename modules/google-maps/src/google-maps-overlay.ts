@@ -9,7 +9,6 @@ import {
   createDeckInstance,
   destroyDeckInstance,
   getViewPropsFromOverlay,
-  getViewPropsFromOverlayPerspective,
   getViewPropsFromCoordinateTransformer
 } from './utils';
 import {Deck} from '@deck.gl/core';
@@ -137,27 +136,24 @@ export default class GoogleMapsOverlay {
       return;
     }
 
-    // For non-interleaved mode on vector maps, use OverlayView for proper z-index layering
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
-    const useWebGLOverlay = isVectorMap && interleaved;
-    const OverlayView = useWebGLOverlay ? google.maps.WebGLOverlayView : google.maps.OverlayView;
+    const OverlayView = isVectorMap ? google.maps.WebGLOverlayView : google.maps.OverlayView;
     const overlay = new OverlayView();
 
     if (overlay instanceof google.maps.WebGLOverlayView) {
-      // WebGLOverlayView is only used for interleaved mode
-      overlay.onAdd = noop;
-      overlay.onContextRestored = this._onContextRestored.bind(this);
-      overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
+      if (interleaved) {
+        overlay.onAdd = noop;
+        overlay.onContextRestored = this._onContextRestored.bind(this);
+        overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
+      } else {
+        overlay.onAdd = this._onAdd.bind(this);
+        overlay.onContextRestored = noop;
+        overlay.onDraw = this._onDrawVectorOverlay.bind(this);
+      }
       overlay.onContextLost = this._onContextLost.bind(this);
     } else {
       overlay.onAdd = this._onAdd.bind(this);
-      // For vector maps with OverlayView, use dedicated vector draw method
-      // For raster maps, use the raster draw method
-      if (renderingType === VECTOR) {
-        overlay.draw = this._onDrawVectorOverlay.bind(this);
-      } else {
-        overlay.draw = this._onDrawRaster.bind(this);
-      }
+      overlay.draw = this._onDrawRaster.bind(this);
     }
     overlay.onRemove = this._onRemove.bind(this);
 
@@ -219,15 +215,14 @@ export default class GoogleMapsOverlay {
       return;
     }
     const deck = this._deck;
-    const canvas = deck.getCanvas();
-    const parent = canvas?.parentElement || deck.props.parent;
 
-    // Use standard 2D projection for raster maps
     const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
       this._map,
       this._overlay as google.maps.OverlayView
     );
 
+    const canvas = deck.getCanvas();
+    const parent = canvas?.parentElement || deck.props.parent;
     if (parent) {
       const parentStyle = parent.style;
       parentStyle.left = `${left}px`;
@@ -241,7 +236,6 @@ export default class GoogleMapsOverlay {
       // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
       viewState: {altitude, ...rest} as MapViewState
     });
-
     // Deck is initialized
     deck.redraw();
   }
@@ -296,36 +290,16 @@ export default class GoogleMapsOverlay {
     }
   }
 
-  _onDrawVectorOverlay() {
+  _onDrawVectorOverlay({transformer}) {
     if (!this._deck || !this._map) {
       return;
     }
 
     const deck = this._deck;
-    const canvas = deck.getCanvas();
-    const parent = canvas?.parentElement || deck.props.parent;
-
-    // Use perspective projection to match WebGLOverlayView behavior
-    const {width, height, left, top, viewState} = getViewPropsFromOverlayPerspective(
-      this._map,
-      this._overlay as google.maps.OverlayView
-    );
-
-    // Position and size the container
-    if (parent) {
-      const parentStyle = parent.style;
-      parentStyle.left = `${left}px`;
-      parentStyle.top = `${top}px`;
-      parentStyle.width = `${width}px`;
-      parentStyle.height = `${height}px`;
-    }
 
     deck.setProps({
-      width,
-      height,
-      viewState
+      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
     });
-
     deck.redraw();
   }
 }

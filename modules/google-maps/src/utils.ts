@@ -45,8 +45,7 @@ export function createDeckInstance(
 
   const newDeck = new Deck({
     ...props,
-    // Default to true for high-DPI displays, but allow user override
-    useDevicePixels: props.useDevicePixels ?? true,
+    useDevicePixels: props.interleaved ? true : props.useDevicePixels,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     views: new MapView({repeat: true}),
@@ -86,7 +85,9 @@ function getContainer(
   if ('getPanes' in overlay) {
     overlay.getPanes()?.overlayLayer.appendChild(container);
   } else {
-    overlay.getMap()?.getDiv().appendChild(container);
+    const gmContainer = overlay.getMap()?.getDiv();
+    const gmElement = gmContainer?.getElementsByClassName('gm-style')[0];
+    gmElement?.appendChild(container);
   }
   return container;
 }
@@ -111,59 +112,12 @@ export function destroyDeckInstance(deck: Deck) {
 
 /* eslint-disable max-statements */
 /**
- * Get the current view state for vector maps using perspective projection
- * @param map (google.maps.Map) - The parent Map instance
- * @param overlay (google.maps.OverlayView) - A maps Overlay instance
- */
-export function getViewPropsFromOverlayPerspective(
-  map: google.maps.Map,
-  overlay: google.maps.OverlayView
-) {
-  const {width, height} = getMapSize(map);
-
-  const projection = overlay.getProjection();
-  if (!projection) {
-    return {width, height, left: 0, top: 0};
-  }
-
-  // Calculate center from projection to get current position during animations
-  // (map.getCenter() returns final destination, not current animated position)
-  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
-  const latitude = centerLngLat[1];
-  const longitude = centerLngLat[0];
-
-  // Calculate container offset for positioning
-  const centerH = new google.maps.LatLng(0, longitude);
-  const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
-  const centerDivPx = projection.fromLatLngToDivPixel(centerH);
-
-  const left = centerDivPx && centerContainerPx ? Math.round(centerDivPx.x - centerContainerPx.x) : 0;
-  const top = centerDivPx && centerContainerPx ? Math.round(centerDivPx.y - centerContainerPx.y) : 0;
-
-  const zoom = map.getZoom() as number;
-  const bearing = map.getHeading() || 0;
-  const pitch = map.getTilt();
-
-  return {
-    width,
-    height,
-    left,
-    top,
-    viewState: getPerspectiveViewState(width, height, latitude, longitude, zoom, bearing, pitch)
-  };
-}
-
-/* eslint-disable max-statements */
-/**
- * Get the current view state for raster maps
+ * Get the current view state
  * @param map (google.maps.Map) - The parent Map instance
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  */
 // eslint-disable-next-line complexity
-export function getViewPropsFromOverlay(
-  map: google.maps.Map,
-  overlay: google.maps.OverlayView
-) {
+export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.maps.OverlayView) {
   const {width, height} = getMapSize(map);
 
   // Canvas position relative to draggable map's container depends on
@@ -184,7 +138,8 @@ export function getViewPropsFromOverlay(
   // google maps places overlays in a container anchored at the map center.
   // the container CSS is manipulated during dragging.
   // We need to update left/top of the deck canvas to match the base map.
-  const centerH = new google.maps.LatLng(0, longitude);
+  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+  const centerH = new google.maps.LatLng(0, centerLngLat[0]);
   const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
   const centerDivPx = projection.fromLatLngToDivPixel(centerH);
 
@@ -197,11 +152,14 @@ export function getViewPropsFromOverlay(
   const topLngLat = pixelToLngLat(projection, width / 2, 0);
   const bottomLngLat = pixelToLngLat(projection, width / 2, height);
 
+  // Compute fractional center.
+  let latitude = centerLngLat[1];
+  const longitude = centerLngLat[0];
+
   // Adjust vertical offset - limit latitude
-  let adjustedLatitude = latitude;
-  if (Math.abs(adjustedLatitude) > MAX_LATITUDE) {
-    adjustedLatitude = adjustedLatitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
-    const center = new google.maps.LatLng(adjustedLatitude, longitude);
+  if (Math.abs(latitude) > MAX_LATITUDE) {
+    latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
+    const center = new google.maps.LatLng(latitude, longitude);
     const centerPx = projection.fromLatLngToContainerPixel(center);
     // @ts-ignore (TS2531) Object is possibly 'null'
     topOffset += centerPx.y - height / 2;
@@ -245,44 +203,12 @@ export function getViewPropsFromOverlay(
     zoom,
     bearing,
     pitch: map.getTilt(),
-    latitude: adjustedLatitude,
+    latitude,
     longitude
   };
 }
 
 /* eslint-enable max-statements */
-
-function getPerspectiveViewState(
-  width: number,
-  height: number,
-  latitude: number,
-  longitude: number,
-  zoom: number,
-  bearing: number,
-  pitch: number
-) {
-  const aspect = height ? width / height : 1;
-
-  // Google Maps 3D projection parameters matching their internal perspective projection matrix
-  const projectionMatrix = new Matrix4().perspective({
-    fovy: (25 * Math.PI) / 180, // 25 degrees field of view
-    aspect,
-    near: 0.75,
-    far: 300000000000000
-  });
-  const focalDistance = 0.5 * projectionMatrix[5];
-
-  return {
-    altitude: focalDistance,
-    bearing,
-    latitude,
-    longitude,
-    pitch,
-    projectionMatrix,
-    repeat: true,
-    zoom: zoom - 1
-  };
-}
 
 /**
  * Get the current view state
@@ -296,18 +222,36 @@ export function getViewPropsFromCoordinateTransformer(
   const {width, height} = getMapSize(map);
   const {center, heading: bearing, tilt: pitch, zoom} = transformer.getCameraParams();
 
+  // Match Google projection matrix
+  const fovy = 25;
+  const aspect = height ? width / height : 1;
+
+  // Match depth range (crucial for correct z-sorting)
+  const near = 0.75;
+  const far = 300000000000000;
+  // const far = Infinity;
+
+  const projectionMatrix = new Matrix4().perspective({
+    fovy: (fovy * Math.PI) / 180,
+    aspect,
+    near,
+    far
+  });
+  const focalDistance = 0.5 * projectionMatrix[5];
+
   return {
     width,
     height,
-    viewState: getPerspectiveViewState(
-      width,
-      height,
-      center.lat(),
-      center.lng(),
-      zoom,
+    viewState: {
+      altitude: focalDistance,
       bearing,
-      pitch
-    )
+      latitude: center.lat(),
+      longitude: center.lng(),
+      pitch,
+      projectionMatrix,
+      repeat: true,
+      zoom: zoom - 1
+    }
   };
 }
 
