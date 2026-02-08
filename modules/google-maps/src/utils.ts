@@ -6,6 +6,7 @@
 import {Deck, MapView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
+import {POSITIONING_CONTAINER_ID} from './google-maps-overlay';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -83,17 +84,15 @@ function getContainer(
 
   const googleMapsContainer = (overlay.getMap() as google.maps.Map).getDiv();
 
-  // Check if there's a pre-created positioning container (for non-interleaved vector maps)
-  const positioningContainer = googleMapsContainer.querySelector('#deck-gl-google-maps-container');
+  // Check if there's a pre-created positioning container (for vector maps)
+  const positioningContainer = googleMapsContainer.querySelector(`#${POSITIONING_CONTAINER_ID}`);
 
   if (positioningContainer) {
-    // Non-interleaved vector: Use positioning container with correct z-index
+    // Vector maps (both interleaved and non-interleaved): Use positioning container
     positioningContainer.appendChild(container);
   } else if ('getPanes' in overlay) {
-    // OverlayView (raster): Append to overlayLayer pane
+    // Raster maps: Append to overlayLayer pane
     overlay.getPanes()?.overlayLayer.appendChild(container);
-  } else {
-    googleMapsContainer.appendChild(container);
   }
   return container;
 }
