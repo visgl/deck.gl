@@ -86,9 +86,7 @@ function getContainer(
   if ('getPanes' in overlay) {
     overlay.getPanes()?.overlayLayer.appendChild(container);
   } else {
-    const gmContainer = overlay.getMap()?.getDiv();
-    const gmElement = gmContainer?.getElementsByClassName('gm-style')[0];
-    gmElement?.appendChild(container);
+    overlay.getMap()?.getDiv().appendChild(container);
   }
   return container;
 }
