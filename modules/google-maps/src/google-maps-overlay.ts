@@ -141,45 +141,59 @@ export default class GoogleMapsOverlay {
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
 
     if (isVectorMap && !interleaved) {
-      // For non-interleaved vector maps, use BOTH overlays:
-      // 1. OverlayView for DOM positioning (correct z-index)
-      // 2. WebGLOverlayView for camera data (smooth animations)
-
-      // Create positioning overlay
-      const positioningOverlay = new google.maps.OverlayView();
-      positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this);
-      positioningOverlay.draw = this._updateContainerSize.bind(this);
-      positioningOverlay.onRemove = this._onRemove.bind(this);
-      this._positioningOverlay = positioningOverlay;
-      this._positioningOverlay.setMap(map);
-
-      // Create WebGL overlay ONLY for camera data (don't touch GL context)
-      const overlay = new google.maps.WebGLOverlayView();
-      overlay.onAdd = noop;
-      overlay.onContextRestored = noop; // Don't manage GL context
-      overlay.onDraw = this._onDrawVectorNonInterleaved.bind(this);
-      overlay.onContextLost = noop; // Don't manage GL context
-      this._overlay = overlay;
-      this._overlay.setMap(map);
+      this._createDualOverlayForNonInterleaved(map);
     } else if (isVectorMap && interleaved) {
-      // Interleaved mode - WebGLOverlayView only
-      const overlay = new google.maps.WebGLOverlayView();
-      overlay.onAdd = noop;
-      overlay.onContextRestored = this._onContextRestored.bind(this);
-      overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
-      overlay.onContextLost = this._onContextLost.bind(this);
-      overlay.onRemove = this._onRemove.bind(this);
-      this._overlay = overlay;
-      this._overlay.setMap(map);
+      this._createWebGLOverlayForInterleaved(map);
     } else {
-      // Raster maps - OverlayView only
-      const overlay = new google.maps.OverlayView();
-      overlay.onAdd = this._onAdd.bind(this);
-      overlay.draw = this._onDrawRaster.bind(this);
-      overlay.onRemove = this._onRemove.bind(this);
-      this._overlay = overlay;
-      this._overlay.setMap(map);
+      this._createOverlayViewForRaster(map);
     }
+  }
+
+  /**
+   * Create dual overlays for non-interleaved vector maps.
+   * Uses OverlayView for DOM positioning (correct z-index) and
+   * WebGLOverlayView for camera data (smooth animations).
+   */
+  _createDualOverlayForNonInterleaved(map: google.maps.Map) {
+
+    // Create positioning overlay
+    const positioningOverlay = new google.maps.OverlayView();
+    positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this);
+    positioningOverlay.draw = this._updateContainerSize.bind(this);
+    positioningOverlay.onRemove = this._onRemove.bind(this);
+    this._positioningOverlay = positioningOverlay;
+    this._positioningOverlay.setMap(map);
+
+    // Create WebGL overlay ONLY for camera data (don't touch GL context)
+    const overlay = new google.maps.WebGLOverlayView();
+    overlay.onAdd = noop;
+    overlay.onContextRestored = noop;
+    overlay.onDraw = this._onDrawVectorNonInterleaved.bind(this);
+    overlay.onContextLost = noop;
+    this._overlay = overlay;
+    this._overlay.setMap(map);
+  }
+
+  _createWebGLOverlayForInterleaved(map: google.maps.Map) {
+    // Interleaved mode - share GL context with Google Maps
+    const overlay = new google.maps.WebGLOverlayView();
+    overlay.onAdd = noop;
+    overlay.onContextRestored = this._onContextRestored.bind(this);
+    overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
+    overlay.onContextLost = this._onContextLost.bind(this);
+    overlay.onRemove = this._onRemove.bind(this);
+    this._overlay = overlay;
+    this._overlay.setMap(map);
+  }
+
+  _createOverlayViewForRaster(map: google.maps.Map) {
+    // Raster maps use standard OverlayView
+    const overlay = new google.maps.OverlayView();
+    overlay.onAdd = this._onAdd.bind(this);
+    overlay.draw = this._onDrawRaster.bind(this);
+    overlay.onRemove = this._onRemove.bind(this);
+    this._overlay = overlay;
+    this._overlay.setMap(map);
   }
 
   _onAdd() {
@@ -209,19 +223,19 @@ export default class GoogleMapsOverlay {
     if (!this._map) return;
 
     const container = this._map.getDiv().querySelector('#deck-gl-google-maps-container') as HTMLElement;
-    if (container) {
-      const mapDiv = this._map.getDiv();
-      const firstChild = mapDiv.firstChild as HTMLElement;
-      if (firstChild) {
-        const width = firstChild.offsetWidth;
-        const height = firstChild.offsetHeight;
-        container.style.width = `${width}px`;
-        container.style.height = `${height}px`;
-        // Position at top-left (overlayLayer uses centered coords, so offset by half)
-        container.style.left = `${-width / 2}px`;
-        container.style.top = `${-height / 2}px`;
-      }
-    }
+    if (!container) return;
+
+    const mapContainer = this._map.getDiv().firstChild as HTMLElement;
+    if (!mapContainer) return;
+
+    const width = mapContainer.offsetWidth;
+    const height = mapContainer.offsetHeight;
+
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+    // Position at top-left (overlayLayer uses centered coords, so offset by half)
+    container.style.left = `${-width / 2}px`;
+    container.style.top = `${-height / 2}px`;
   }
 
   _onContextRestored({gl}) {
@@ -360,18 +374,5 @@ export default class GoogleMapsOverlay {
         });
       }
     }
-  }
-
-  _onDrawVectorOverlay({transformer}) {
-    if (!this._deck || !this._map) {
-      return;
-    }
-
-    const deck = this._deck;
-
-    deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
-    });
-    deck.redraw();
   }
 }
