@@ -81,10 +81,10 @@ function getContainer(
   container.style.position = 'absolute';
   Object.assign(container.style, style);
 
-  const gmContainer = overlay.getMap()?.getDiv();
+  const googleMapsContainer = (overlay.getMap() as google.maps.Map).getDiv();
 
   // Check if there's a pre-created positioning container (for non-interleaved vector maps)
-  const positioningContainer = gmContainer?.querySelector('#deck-gl-google-maps-container');
+  const positioningContainer = googleMapsContainer.querySelector('#deck-gl-google-maps-container');
 
   if (positioningContainer) {
     // Non-interleaved vector: Use positioning container with correct z-index
@@ -93,9 +93,7 @@ function getContainer(
     // OverlayView (raster): Append to overlayLayer pane
     overlay.getPanes()?.overlayLayer.appendChild(container);
   } else {
-    // WebGLOverlayView (interleaved): Append inside gm-style for proper layering
-    const gmElement = gmContainer?.getElementsByClassName('gm-style')[0];
-    gmElement?.appendChild(container);
+    googleMapsContainer.appendChild(container);
   }
   return container;
 }
