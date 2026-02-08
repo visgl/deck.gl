@@ -167,9 +167,7 @@ export default class GoogleMapsOverlay {
     const overlay = new google.maps.WebGLOverlayView();
     overlay.onAdd = noop;
     overlay.onContextRestored = interleaved ? this._onContextRestored.bind(this) : noop;
-    overlay.onDraw = interleaved
-      ? this._onDrawVectorInterleaved.bind(this)
-      : this._onDrawVectorNonInterleaved.bind(this);
+    overlay.onDraw = this._onDrawVector.bind(this);
     overlay.onContextLost = interleaved ? this._onContextLost.bind(this) : noop;
     overlay.onRemove = interleaved ? this._onRemove.bind(this) : noop;
     this._overlay = overlay;
@@ -302,37 +300,21 @@ export default class GoogleMapsOverlay {
     deck.redraw();
   }
 
-  // Vector non-interleaved: Use transformer for camera, render to own canvas
-  _onDrawVectorNonInterleaved({transformer}) {
-    if (!this._deck || !this._map) {
+  _onDrawVector({gl, transformer}) {
+    if (!this._deck || !this._map || !this._deck.isInitialized) {
       return;
     }
 
     const deck = this._deck;
-
-    deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
-    });
-    deck.redraw();
-  }
-
-  // Vector interleaved: Share GL context with Google Maps
-  _onDrawVectorInterleaved({gl, transformer}) {
-    if (!this._deck || !this._map) {
-      return;
-    }
-
-    const deck = this._deck;
+    const {interleaved} = this.props;
 
     deck.setProps({
       ...getViewPropsFromCoordinateTransformer(this._map, transformer),
-
       // Using external gl context - do not set css size
-      width: null,
-      height: null
+      ...(interleaved && {width: null, height: null})
     });
 
-    if (deck.isInitialized) {
+    if (interleaved) {
       // @ts-expect-error
       const device: Device = deck.device;
 
@@ -363,6 +345,8 @@ export default class GoogleMapsOverlay {
           });
         });
       }
+    } else {
+      deck.redraw();
     }
   }
 }
