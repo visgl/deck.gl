@@ -142,9 +142,9 @@ export default class GoogleMapsOverlay {
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
 
     if (isVectorMap) {
-      this._createVectorOverlay(map, interleaved);
+      this._createOverlayVector(map, interleaved);
     } else {
-      this._createOverlayViewForRaster(map);
+      this._createOverlayRaster(map);
     }
   }
 
@@ -154,7 +154,7 @@ export default class GoogleMapsOverlay {
    * WebGLOverlayView for camera data (smooth animations).
    * In interleaved mode, WebGLOverlayView also provides the shared GL context.
    */
-  _createVectorOverlay(map: google.maps.Map, interleaved: boolean) {
+  _createOverlayVector(map: google.maps.Map, interleaved: boolean) {
     // Create positioning overlay for proper DOM placement
     const positioningOverlay = new google.maps.OverlayView();
     positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this);
@@ -176,7 +176,7 @@ export default class GoogleMapsOverlay {
     this._overlay.setMap(map);
   }
 
-  _createOverlayViewForRaster(map: google.maps.Map) {
+  _createOverlayRaster(map: google.maps.Map) {
     // Raster maps use standard OverlayView
     const overlay = new google.maps.OverlayView();
     overlay.onAdd = this._onAdd.bind(this);
