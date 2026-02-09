@@ -25,7 +25,6 @@ loader.importLibrary('maps').then(googlemaps => {
   });
 
   const overlay = new DeckOverlay({
-    interleaved: false,
     layers: [
       new GeoJsonLayer({
         id: 'airports',
