@@ -11,6 +11,7 @@ This module contains the following extensions:
 - [BrushingExtension](./brushing-extension.md)
 - [ClipExtension](./clip-extension.md)
 - [CollisionFilterExtension](./collision-filter-extension.md)
+- [ColumnShapeExtension](./column-shape-extension.md)
 - [DataFilterExtension](./data-filter-extension.md)
 - [FillStyleExtension](./fill-style-extension.md)
 - [Fp64Extension](./fp64-extension.md)

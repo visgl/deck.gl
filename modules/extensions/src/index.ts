@@ -11,6 +11,7 @@ export {default as ClipExtension} from './clip/clip-extension';
 export {default as CollisionFilterExtension} from './collision-filter/collision-filter-extension';
 export {default as MaskExtension} from './mask/mask-extension';
 export {default as _TerrainExtension} from './terrain/terrain-extension';
+export {default as ColumnShapeExtension} from './column-shape/column-shape-extension';
 
 // Shader module
 export {default as project64} from './fp64/project64';
@@ -34,3 +35,7 @@ export type {CollisionFilterExtensionProps} from './collision-filter/collision-f
 export type {MaskExtensionProps} from './mask/mask-extension';
 export type {TerrainExtensionProps} from './terrain/terrain-extension';
 export type {TerrainModuleProps} from './terrain/shader-module';
+export type {
+  ColumnShapeExtensionProps,
+  BevelProp
+} from './column-shape/column-shape-extension';

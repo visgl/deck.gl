@@ -6,6 +6,7 @@ import './brushing.spec';
 import './data-filter.spec';
 import './collision-filter';
 import './clip.spec';
+import './column-shape.spec';
 import './fp64.spec';
 import './path.spec';
 import './fill-style.spec';
