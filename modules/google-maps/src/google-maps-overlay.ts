@@ -132,7 +132,6 @@ export default class GoogleMapsOverlay {
 
   /* Private API */
   _createOverlay(map: google.maps.Map) {
-    const {interleaved} = this.props;
     const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
     const renderingType = map.getRenderingType();
     if (renderingType === UNINITIALIZED) {
@@ -140,9 +139,8 @@ export default class GoogleMapsOverlay {
     }
 
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
-
     if (isVectorMap) {
-      this._createOverlayVector(map, interleaved);
+      this._createOverlayVector(map);
     } else {
       this._createOverlayRaster(map);
     }
@@ -154,7 +152,8 @@ export default class GoogleMapsOverlay {
    * WebGLOverlayView for camera data (smooth animations).
    * In interleaved mode, WebGLOverlayView also provides the shared GL context.
    */
-  _createOverlayVector(map: google.maps.Map, interleaved: boolean) {
+  _createOverlayVector(map: google.maps.Map) {
+    const interleaved = this.props.interleaved ?? defaultProps.interleaved;
     // Create positioning overlay for proper DOM placement
     const positioningOverlay = new google.maps.OverlayView();
     positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this);
@@ -210,7 +209,9 @@ export default class GoogleMapsOverlay {
     // Update positioning container size and position to match map
     if (!this._map) return;
 
-    const container = this._map.getDiv().querySelector(`#${POSITIONING_CONTAINER_ID}`) as HTMLElement;
+    const container = this._map
+      .getDiv()
+      .querySelector(`#${POSITIONING_CONTAINER_ID}`) as HTMLElement;
     if (!container) return;
 
     const mapContainer = this._map.getDiv().firstChild as HTMLElement;
