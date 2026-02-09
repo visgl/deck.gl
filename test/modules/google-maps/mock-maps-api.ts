@@ -208,11 +208,13 @@ export class OverlayView {
   }
 
   getPanes() {
+    // For proper testing, overlayLayer should be part of the map's div
+    if (!this.map) return null;
     return {
       floatPane: this._container,
       mapPane: this._container,
       markerLayer: this._container,
-      overlayLayer: this._container
+      overlayLayer: this.map._mapDiv
     };
   }
 }
