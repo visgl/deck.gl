@@ -302,7 +302,7 @@ export default class GoogleMapsOverlay {
   }
 
   _onDrawVector({gl, transformer}) {
-    if (!this._deck || !this._map || !this._deck.isInitialized) {
+    if (!this._deck || !this._map) {
       return;
     }
 
@@ -315,7 +315,7 @@ export default class GoogleMapsOverlay {
       ...(interleaved && {width: null, height: null})
     });
 
-    if (interleaved) {
+    if (interleaved && deck.isInitialized) {
       // @ts-expect-error
       const device: Device = deck.device;
 
@@ -346,7 +346,7 @@ export default class GoogleMapsOverlay {
           });
         });
       }
-    } else {
+    } else if (!interleaved) {
       deck.redraw();
     }
   }
