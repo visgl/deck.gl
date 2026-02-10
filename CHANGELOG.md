@@ -19,6 +19,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.7] - Feb 17 2026
+
+- fix(HeatmapLayer): Correct blending in interleaved mode (#9993)
+- fix(pydeck): Support pandas 3.x compatibility without breaking pandas 2.x (#9988)
+- fix(core): Enable shader/pipeline caching for attached WebGL devices (#9971)
+- fix(widgets): StatsWidget (#9984)
+- feat(core): Add Deck#getView() method (#9948)
+- feat(core): Add pickable: '3d' option to all Layers (#9937)
+- chore(deps): bump dependencies from multiple Dependabot PRs (#9956)
+- Bump to loaders.gl@4.3 (#9965)
+- chore(mapbox): Remove internal deck mode from `MapboxLayer` (#9955)
+- fix(mapbox): In interleaved, batched mode don't render layers twice (#9944)
+
 #### deck.gl [v9.2.6] - Jan 16 2026
 
 - fix(IconManager) Fix icon frame x/y for auto packed icons (#9928)
