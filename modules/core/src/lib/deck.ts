@@ -508,7 +508,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
-    if (props.useDevicePixels !== undefined && this.device?.canvasContext) {
+    if (props.useDevicePixels !== undefined && this.device?.canvasContext?.setProps) {
       this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
     }
 
