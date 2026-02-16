@@ -50,6 +50,17 @@ jobs:
       - name: Run Render/Interaction tests
         run: yarn test-render
 
+      - name: Upload render test failure images
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: render-test-failures
+          path: |
+            test/render/golden-images/*-fail.png
+            test/render/golden-images/*-diff.png
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Run tape backward compatibility smoke test
         run: yarn test-tape-compat
 
