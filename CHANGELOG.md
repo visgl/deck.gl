@@ -19,7 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
-#### deck.gl [v9.2.7] - Feb 17 2026
+#### deck.gl [v9.2.8] - Feb 17 2026
+
+- feat(core): Add layout expressions for view positions (#9842)
+
+#### deck.gl [v9.2.7] - Feb 10 2026
 
 - fix(HeatmapLayer): Correct blending in interleaved mode (#9993)
 - fix(pydeck): Support pandas 3.x compatibility without breaking pandas 2.x (#9988)
