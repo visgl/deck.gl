@@ -16,7 +16,7 @@ function arcgisFOVToDeckAltitude(fov: number, aspectRatio: number): number {
   return D / 2 / Math.tan(halfFOV);
 }
 
-export default function createDeckRenderer(DeckProps, externalRenderers) {
+export default function createDeckRenderer(DeckProps, RenderNode) {
   class DeckRenderer {
     view: SceneView;
     deck: any;
@@ -54,7 +54,7 @@ export default function createDeckRenderer(DeckProps, externalRenderers) {
     }
 
     redraw() {
-      externalRenderers.requestRender(this.view);
+      RenderNode.requestRender(this.view);
     }
 
     render() {
