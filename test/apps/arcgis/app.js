@@ -30,9 +30,9 @@ loadArcGISModules([
   'esri/Map',
   'esri/views/MapView',
   'esri/views/SceneView',
-  'esri/views/3d/externalRenderers'
+  'esri/views/3d/webgl/RenderNode'
 ]).then(({DeckLayer, DeckRenderer, modules}) => {
-  const [ArcGISMap, MapView, SceneView, externalRenderers] = modules;
+  const [ArcGISMap, MapView, SceneView, RenderNode] = modules;
 
   const layer = new DeckLayer({});
 
@@ -72,7 +72,7 @@ loadArcGISModules([
 
   const renderer = new DeckRenderer(sceneView, {});
 
-  externalRenderers.add(sceneView, renderer);
+  sceneView.map.add(renderer);
 
   /* global setInterval */
   setInterval(() => {

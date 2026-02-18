@@ -6,9 +6,9 @@ import {loadArcGISModules} from '@deck.gl/arcgis';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {I3SLoader} from '@loaders.gl/i3s';
 
-loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/externalRenderers']).then(
+loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/webgl/RenderNode']).then(
   ({DeckLayer, DeckRenderer, modules}) => {
-    const [ArcGISMap, SceneView, externalRenderers] = modules;
+    const [ArcGISMap, SceneView, RenderNode] = modules;
 
     const sceneView = new SceneView({
       container: 'viewDiv',
@@ -42,6 +42,6 @@ loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/externalRe
       ]
     });
 
-    externalRenderers.add(sceneView, renderer);
+    sceneView.map.add(renderer);
   }
 );
