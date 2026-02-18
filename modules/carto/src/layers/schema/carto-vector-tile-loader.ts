@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import earcut from 'earcut';
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {StrictLoaderOptions} from '@loaders.gl/loader-utils';
+import {LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection, BinaryPolygonFeature, TypedArray} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
@@ -13,13 +14,13 @@ import {getWorkerUrl} from '../../utils';
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
 const id = 'cartoVectorTile';
 
-type CartoVectorTileLoaderOptions = LoaderOptions & {
+type CartoVectorTileStrictLoaderOptions = StrictLoaderOptions & {
   cartoVectorTile?: {
     workerUrl: string;
   };
 };
 
-const DEFAULT_OPTIONS: CartoVectorTileLoaderOptions = {
+const DEFAULT_OPTIONS: CartoVectorTileStrictLoaderOptions = {
   cartoVectorTile: {
     workerUrl: getWorkerUrl(id, VERSION)
   }
@@ -33,7 +34,7 @@ const CartoVectorTileLoader: LoaderWithParser = {
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-vector-tile'],
   category: 'geometry',
-  parse: async (arrayBuffer, options?: CartoVectorTileLoaderOptions) =>
+  parse: async (arrayBuffer, options?: CartoVectorTileStrictLoaderOptions) =>
     parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
   worker: true,
@@ -91,7 +92,7 @@ function triangulate(polygons: BinaryPolygonFeature) {
 
 function parseCartoVectorTile(
   arrayBuffer: ArrayBuffer,
-  options?: CartoVectorTileLoaderOptions
+  options?: CartoVectorTileStrictLoaderOptions
 ): BinaryFeatureCollection | null {
   if (!arrayBuffer) return null;
   const tile = parsePbf(arrayBuffer, TileReader);

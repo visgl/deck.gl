@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {StrictLoaderOptions} from '@loaders.gl/loader-utils';
+import {LoaderWithParser} from '@loaders.gl/loader-utils';
 
 import {Tile, TileReader} from './carto-spatial-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -12,14 +13,14 @@ import {IndexScheme, binaryToSpatialjson, SpatialJson} from './spatialjson-utils
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
 const id = 'cartoSpatialTile';
 
-type CartoSpatialTileLoaderOptions = LoaderOptions & {
+type CartoSpatialTileStrictLoaderOptions = StrictLoaderOptions & {
   cartoSpatialTile?: {
     scheme: IndexScheme;
     workerUrl: string;
   };
 };
 
-const DEFAULT_OPTIONS: CartoSpatialTileLoaderOptions = {
+const DEFAULT_OPTIONS: CartoSpatialTileStrictLoaderOptions = {
   cartoSpatialTile: {
     scheme: 'quadbin',
     workerUrl: getWorkerUrl(id, VERSION)
@@ -34,7 +35,7 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-spatial-tile'],
   category: 'geometry',
-  parse: async (arrayBuffer, options?: CartoSpatialTileLoaderOptions) =>
+  parse: async (arrayBuffer, options?: CartoSpatialTileStrictLoaderOptions) =>
     parseCartoSpatialTile(arrayBuffer, options),
   parseSync: parseCartoSpatialTile,
   worker: true,
@@ -43,7 +44,7 @@ const CartoSpatialTileLoader: LoaderWithParser = {
 
 function parseCartoSpatialTile(
   arrayBuffer: ArrayBuffer,
-  options?: CartoSpatialTileLoaderOptions
+  options?: CartoSpatialTileStrictLoaderOptions
 ): SpatialJson | null {
   if (!arrayBuffer) return null;
   const tile: Tile = parsePbf(arrayBuffer, TileReader);

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {StrictLoaderOptions} from '@loaders.gl/loader-utils';
+import {LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {RasterMetadata} from '@carto/api-client';
 
 import {TileReader} from './carto-raster-tile';
@@ -13,14 +14,14 @@ import {NumericProps, Properties} from './spatialjson-utils';
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
 const id = 'cartoRasterTile';
 
-type CartoRasterTileLoaderOptions = LoaderOptions & {
+type CartoRasterTileStrictLoaderOptions = StrictLoaderOptions & {
   cartoRasterTile?: {
     metadata: RasterMetadata | null;
     workerUrl: string;
   };
 };
 
-const DEFAULT_OPTIONS: CartoRasterTileLoaderOptions = {
+const DEFAULT_OPTIONS: CartoRasterTileStrictLoaderOptions = {
   cartoRasterTile: {
     metadata: null,
     workerUrl: getWorkerUrl(id, VERSION)
@@ -35,7 +36,7 @@ const CartoRasterTileLoader: LoaderWithParser = {
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-raster-tile'],
   category: 'geometry',
-  parse: async (arrayBuffer, options?: CartoRasterTileLoaderOptions) =>
+  parse: async (arrayBuffer, options?: CartoRasterTileStrictLoaderOptions) =>
     parseCartoRasterTile(arrayBuffer, options),
   parseSync: parseCartoRasterTile,
   worker: true,
@@ -53,7 +54,7 @@ export type Raster = {
 
 function parseCartoRasterTile(
   arrayBuffer: ArrayBuffer,
-  options?: CartoRasterTileLoaderOptions
+  options?: CartoRasterTileStrictLoaderOptions
 ): Raster | null {
   const metadata = options?.cartoRasterTile?.metadata;
   if (!arrayBuffer || !metadata) return null;

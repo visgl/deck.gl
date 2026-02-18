@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {StrictLoaderOptions} from '@loaders.gl/loader-utils';
+import {LoaderWithParser} from '@loaders.gl/loader-utils';
 
 import {Tile, TileReader} from './carto-properties-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -11,13 +12,13 @@ import {getWorkerUrl} from '../../utils';
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
 const id = 'cartoPropertiesTile';
 
-type CartoPropertiesTileLoaderOptions = LoaderOptions & {
+type CartoPropertiesTileStrictLoaderOptions = StrictLoaderOptions & {
   cartoPropertiesTile?: {
     workerUrl: string;
   };
 };
 
-const DEFAULT_OPTIONS: CartoPropertiesTileLoaderOptions = {
+const DEFAULT_OPTIONS: CartoPropertiesTileStrictLoaderOptions = {
   cartoPropertiesTile: {
     workerUrl: getWorkerUrl(id, VERSION)
   }
@@ -37,7 +38,7 @@ const CartoPropertiesTileLoader: LoaderWithParser = {
   options: DEFAULT_OPTIONS
 };
 
-function parseCartoPropertiesTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions): Tile | null {
+function parseCartoPropertiesTile(arrayBuffer: ArrayBuffer, options?: StrictLoaderOptions): Tile | null {
   if (!arrayBuffer) return null;
   return parsePbf(arrayBuffer, TileReader);
 }
