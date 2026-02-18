@@ -184,6 +184,22 @@ export function render(
     deck.redraw('arcgis');
 
     // We overlay the texture on top of the map using the full-screen quad.
+    const {gl} = device;
+
+    // drawBuffers is per-FBO state not tracked by luma's state cache;
+    // restore it for the screen FBO after rendering to the offscreen FBO.
+    if (screenFbo) {
+      gl.bindFramebuffer(GL.FRAMEBUFFER, screenFbo);
+      gl.drawBuffers([GL.COLOR_ATTACHMENT0]);
+    } else {
+      gl.drawBuffers([GL.BACK]);
+    }
+
+    // The model sets blend factors but not blend:true, so
+    // setDeviceParameters won't enable blending on its own.
+    gl.enable(GL.BLEND);
+    gl.blendFuncSeparate(GL.ONE, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
+    gl.blendEquationSeparate(GL.FUNC_ADD, GL.FUNC_ADD);
 
     const textureToScreenPass = device.beginRenderPass({
       framebuffer: screenFbo,
