@@ -21,17 +21,18 @@ import {
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
-import type {ImageServiceType} from '@loaders.gl/wms';
-import {ImageSource, createImageSource} from '@loaders.gl/wms';
+import {ImageSource, WMSSource, _ArcGISImageServerSource} from '@loaders.gl/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
 /** All props supported by the TileLayer */
 export type WMSLayerProps = CompositeLayerProps & _WMSLayerProps;
 
+type ImageSourceType = 'wms' | 'arcgis-image-server' | 'template';
+
 /** Props added by the TileLayer */
 type _WMSLayerProps = {
   data: string | ImageSource;
-  serviceType?: ImageServiceType | 'auto';
+  serviceType?: ImageSourceType | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
   onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
@@ -166,11 +167,20 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     }
 
     if (typeof props.data === 'string') {
-      return createImageSource({
-        url: props.data,
-        loadOptions: props.loadOptions,
-        type: props.serviceType
-      });
+      const url = props.data;
+      const type = props.serviceType ?? 'auto';
+      const sourceOptions = {core: {loadOptions: props.loadOptions}};
+
+      if (type === 'wms' || (type === 'auto' && WMSSource.testURL(url))) {
+        return WMSSource.createDataSource(url, sourceOptions);
+      }
+      if (
+        type === 'arcgis-image-server' ||
+        (type === 'auto' && _ArcGISImageServerSource.testURL(url))
+      ) {
+        return _ArcGISImageServerSource.createDataSource(url, sourceOptions);
+      }
+      throw new Error('Not a valid image source type');
     }
 
     throw new Error('invalid image source in props.data');
