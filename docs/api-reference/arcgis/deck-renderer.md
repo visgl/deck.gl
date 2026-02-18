@@ -1,6 +1,6 @@
 # DeckRenderer
 
-This class is an experimental implementation of the ArcGIS [ExternalRenderer](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-externalRenderers.html#ExternalRenderer) interface and can be added to 3D views of maps created with the ArcGIS
+This class is an experimental implementation of the ArcGIS [RenderNode](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) interface and can be added to 3D views of maps created with the ArcGIS
 API for JavaScript.
 
 
@@ -11,7 +11,6 @@ import {DeckRenderer} from '@deck.gl/arcgis';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import ArcGISMap from '@arcgis/core/Map';
 import SceneView from '@arcgis/core/views/SceneView';
-import * as externalRenderers from '@arcgis/core/views/3d/externalRenderers';
 
 const sceneView = new SceneView({
   container: 'viewDiv',
@@ -39,7 +38,7 @@ const renderer = new DeckRenderer(sceneView, {
   ]
 });
 
-externalRenderers.add(sceneView, renderer);
+sceneView.map.add(renderer);
 ```
 
 
