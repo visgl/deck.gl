@@ -34,7 +34,7 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
   loading = true;
 
   constructor(props: LoadingWidgetProps = {}) {
-    super(props);
+    super(props, LoadingWidget.defaultProps);
     this.setProps(this.props);
   }
 
