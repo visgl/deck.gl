@@ -55,7 +55,7 @@ const TEXTURE_PROPS: TextureProps = {
     addressModeV: 'clamp-to-edge'
   }
 };
-const DEFAULT_COLOR_DOMAIN = [0, 0];
+const DEFAULT_COLOR_DOMAIN = [0, 0] as const;
 const AGGREGATION_MODE = {
   SUM: 0,
   MEAN: 1
@@ -126,7 +126,7 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default null
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Defines the type of aggregation operation
@@ -174,7 +174,7 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    colorDomain?: number[];
+    colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
@@ -594,7 +594,10 @@ export default class HeatmapLayer<
       const metersPerPixel =
         (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
         textureSize;
-      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+      this.state.colorDomain = [
+        colorDomain[0] * metersPerPixel * weightsScale,
+        colorDomain[1] * metersPerPixel * weightsScale
+      ];
     } else {
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }

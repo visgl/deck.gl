@@ -16,7 +16,7 @@ uniform triangleUniforms {
 
 export type TriangleProps = {
   aggregationMode: number;
-  colorDomain: [number, number];
+  colorDomain: Readonly<[number, number]>;
   intensity: number;
   threshold: number;
   colorTexture: Texture;
