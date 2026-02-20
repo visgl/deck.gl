@@ -26,7 +26,7 @@ import {columnUniforms, ColumnProps} from './column-layer-uniforms';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<ColumnLayerProps> = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -91,7 +91,7 @@ type _ColumnLayerProps<DataT> = {
    * Disk offset from the position, relative to the radius.
    * @default [0,0]
    */
-  offset?: [number, number];
+  offset?: Readonly<[number, number]>;
 
   /**
    * Radius multiplier, between 0 - 1

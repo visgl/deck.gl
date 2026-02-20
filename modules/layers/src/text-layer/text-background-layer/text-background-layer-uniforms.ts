@@ -22,8 +22,8 @@ export type TextBackgroundProps = {
   sizeScale: number;
   sizeMinPixels: number;
   sizeMaxPixels: number;
-  borderRadius: [number, number, number, number];
-  padding: [number, number, number, number];
+  borderRadius: Readonly<[number, number, number, number]>;
+  padding: Readonly<[number, number, number, number]>;
   sizeUnits: number;
   stroked: boolean;
 };
