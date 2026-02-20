@@ -6,7 +6,7 @@
 import {Deck, MapView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import {POSITIONING_CONTAINER_ID} from './google-maps-overlay';
+export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;

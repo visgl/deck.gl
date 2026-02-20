@@ -9,15 +9,14 @@ import {
   createDeckInstance,
   destroyDeckInstance,
   getViewPropsFromOverlay,
-  getViewPropsFromCoordinateTransformer
+  getViewPropsFromCoordinateTransformer,
+  POSITIONING_CONTAINER_ID
 } from './utils';
 import {Deck} from '@deck.gl/core';
 
 import type {DeckProps, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
-
 const HIDE_ALL_LAYERS = () => false;
-export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
 const GL_STATE: GLParameters = {
   depthMask: true,
   depthTest: true,
