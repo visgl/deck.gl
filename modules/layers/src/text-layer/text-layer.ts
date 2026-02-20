@@ -40,7 +40,7 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 } as const;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
 
@@ -92,14 +92,14 @@ type _TextLayerProps<DataT> = {
    * If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
    * @default 0
    */
-  backgroundBorderRadius?: number | [number, number, number, number];
+  backgroundBorderRadius?: number | Readonly<[number, number, number, number]>;
   /**
    * The padding of the background..
    * If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
    * If an array of 4 is supplied, it is interpreted as `[padding_left, padding_top, padding_right, padding_bottom]` in pixels.
    * @default [0, 0, 0, 0]
    */
-  backgroundPadding?: [number, number] | [number, number, number, number];
+  backgroundPadding?: Readonly<[number, number]> | Readonly<[number, number, number, number]>;
   /**
    * Specifies a list of characters to include in the font. If set to 'auto', will be automatically generated from the data set.
    * @default (ASCII characters 32-128)
@@ -180,7 +180,7 @@ type _TextLayerProps<DataT> = {
    * Label offset from the anchor position, [x, y] in pixels
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, [number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * @deprecated Use `background` and `getBackgroundColor` instead
    */
