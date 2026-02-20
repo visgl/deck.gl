@@ -26,7 +26,7 @@ export type PathStyleExtensionProps<DataT = any> = {
    * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
    * Requires the `dash` option to be on.
    */
-  getDashArray?: Accessor<DataT, [number, number]>;
+  getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * Accessor for the offset to draw each path with, relative to the width of the path.
    * Negative offset is to the left hand side, and positive offset is to the right hand side.

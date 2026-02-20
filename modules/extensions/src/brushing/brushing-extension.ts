@@ -20,7 +20,7 @@ export type BrushingExtensionProps<DataT = any> = {
    * Called to retrieve an arbitrary position for each object that it will be filtered by.
    * Only effective if `brushingTarget` is set to `custom`.
    */
-  getBrushingTarget?: Accessor<DataT, [number, number]>;
+  getBrushingTarget?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * Enable/disable brushing. If brushing is disabled, all objects are rendered.
    * @default true
