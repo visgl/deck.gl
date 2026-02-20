@@ -139,6 +139,52 @@ test('Deck#rendering, picking, logging', t => {
   });
 });
 
+test('Deck#async picking', async t => {
+  let rendered = false;
+
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    layers: [
+      new ScatterplotLayer({
+        data: [{position: [0, 0]}, {position: [0, 0]}],
+        radiusMinPixels: 100,
+        pickable: true
+      })
+    ],
+
+    onAfterRender: () => {
+      rendered = true;
+    }
+  });
+
+  // Wait for initial render
+  await new Promise<void>(resolve => {
+    deck.setProps({onAfterRender: resolve});
+  });
+  t.ok(rendered, 'Deck rendered');
+
+  const info = await deck.pickObjectAsync({x: 0, y: 0});
+  t.is(info && info.index, 1, 'Async picked object');
+
+  const multiInfos = await deck.pickMultipleObjectsAsync({x: 0, y: 0});
+  t.is(multiInfos.length, 2, 'Async picked multiple objects');
+
+  const rectInfos = await deck.pickObjectsAsync({x: 0, y: 0, width: 1, height: 1});
+  t.is(rectInfos.length, 1, 'Async picked objects');
+
+  deck.finalize();
+  t.end();
+});
+
 test('Deck#auto view state', t => {
   let onViewStateChangeCalled = 0;
 

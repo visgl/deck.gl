@@ -255,7 +255,7 @@ export default class DeckPicker {
       let pickInfo: PickedPixel;
 
       if (deviceRect) {
-        const pickedResult = this._drawAndSample({
+        const pickedResult = await this._drawAndSampleAsync({
           layers: pickableLayers,
           views,
           viewports,
@@ -282,7 +282,7 @@ export default class DeckPicker {
 
       let z;
       if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
-        const {pickedColors: pickedColors2} = this._drawAndSample(
+        const {pickedColors: pickedColors2} = await this._drawAndSampleAsync(
           {
             layers: [pickInfo.pickedLayer],
             views,
@@ -561,7 +561,7 @@ export default class DeckPicker {
       height: deviceTop - deviceBottom
     };
 
-    const pickedResult = this._drawAndSample({
+    const pickedResult = await this._drawAndSampleAsync({
       layers: pickableLayers,
       views,
       viewports,
