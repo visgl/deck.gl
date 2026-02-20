@@ -9,12 +9,12 @@ import {DeckGL} from '@deck.gl/react';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
-import {LASWorkerLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/las';
 import type {OrbitViewState} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
 
 // TODO - export from loaders?
-type LASMesh = (typeof LASWorkerLoader)['dataType'];
+type LASMesh = (typeof LASLoader)['dataType'];
 
 // Data source: kaarta.com
 const LAZ_SAMPLE =
@@ -89,12 +89,15 @@ export default function App({
       id: 'laz-point-cloud-layer',
       data: LAZ_SAMPLE,
       onDataLoad,
+      loadOptions: {
+        core: {worker: false} // TODO remove once loaders published
+      },
       getNormal: [0, 1, 0],
       getColor: [255, 255, 255],
       opacity: 0.5,
       pointSize: 0.5,
       // Additional format support can be added here
-      loaders: [LASWorkerLoader],
+      loaders: [LASLoader],
       // TODO (kaapp) currently webgpu requirement to ensure instanceColors are supplied
       pickable: true
     })
