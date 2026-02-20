@@ -1,0 +1,76 @@
+name: pr-preview
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+      - unlabeled
+      - synchronize
+      - reopened
+      - closed
+
+concurrency: pr-preview-${{ github.event.pull_request.number }}
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    if: |
+      github.event.action == 'closed' ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'preview') ||
+      contains(github.event.pull_request.labels.*.name, 'preview')
+
+    steps:
+      - name: Checkout
+        if: >-
+          github.event.action != 'closed' &&
+          !(github.event.action == 'unlabeled' && github.event.label.name == 'preview')
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/head
+
+      - name: Setup Node.js
+        if: >-
+          github.event.action != 'closed' &&
+          !(github.event.action == 'unlabeled' && github.event.label.name == 'preview')
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        if: >-
+          github.event.action != 'closed' &&
+          !(github.event.action == 'unlabeled' && github.event.label.name == 'preview')
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        if: >-
+          github.event.action != 'closed' &&
+          !(github.event.action == 'unlabeled' && github.event.label.name == 'preview')
+        run: |
+          yarn bootstrap
+          (cd website && yarn)
+
+      - name: Build website
+        if: >-
+          github.event.action != 'closed' &&
+          !(github.event.action == 'unlabeled' && github.event.label.name == 'preview')
+        env:
+          MapboxAccessToken: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+          GoogleMapsAPIKey: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GoogleMapsMapId: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
+        run: (cd website && yarn build)
+
+      - name: Deploy / Remove preview
+        uses: rossjrw/pr-preview-action@ffa7509e91a3ec8dfc2e5536c4d5c1acdf7a6de9 # v1.8.1
+        with:
+          source-dir: website/build
+          preview-branch: gh-pages
+          token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
+          action: >-
+            ${{ (github.event.action == 'closed' || (github.event.action == 'unlabeled' && github.event.label.name == 'preview')) && 'remove' || 'deploy' }}
