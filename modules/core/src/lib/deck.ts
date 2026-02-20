@@ -1055,41 +1055,44 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Actually run picking */
   private _pickAndCallback() {
-    if (this.device?.type === 'webgpu') {
-      return;
-    }
-
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
-      // Perform picking
-      const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      this.cursorState.isHovering = result.length > 0;
-
-      // There are 4 possible scenarios:
-      // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
-      // result is [outInfo] (moved outside of a pickable layer)
-      // result is [pickedInfo] (moved into or over a pickable layer)
-      // result is [] (nothing is or was picked)
-      //
-      // `layer.props.onHover` should be called on all affected layers (out/over)
-      // `deck.props.onHover` should be called with the picked info if any, or empty info otherwise
-      // `deck.props.getTooltip` should be called with the picked info if any, or empty info otherwise
-
-      // Execute callbacks
-      let pickedInfo = emptyInfo;
-      let handled = false;
-      for (const info of result) {
-        pickedInfo = info;
-        handled = info.layer?.onHover(info, _pickRequest.event) || handled;
-      }
-      if (!handled) {
-        this.props.onHover?.(pickedInfo, _pickRequest.event);
-        this.widgetManager!.onHover(pickedInfo, _pickRequest.event);
-      }
-
-      // Clear pending pickRequest
+      const event = _pickRequest.event;
+      // Clear pending pickRequest before async operation to prevent duplicate processing on subsequent frames
       _pickRequest.event = null;
+
+      // Take a snapshot of pick position in case it changes during async operation
+      const {x, y, radius, mode} = _pickRequest;
+
+      // Perform async picking
+      void this._pickAsync('pickObjectAsync', 'pickObject Time', {x, y, radius, mode})
+        .then(({result, emptyInfo}) => {
+          this.cursorState.isHovering = result.length > 0;
+
+          // There are 4 possible scenarios:
+          // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
+          // result is [outInfo] (moved outside of a pickable layer)
+          // result is [pickedInfo] (moved into or over a pickable layer)
+          // result is [] (nothing is or was picked)
+          //
+          // `layer.props.onHover` should be called on all affected layers (out/over)
+          // `deck.props.onHover` should be called with the picked info if any, or empty info otherwise
+          // `deck.props.getTooltip` should be called with the picked info if any, or empty info otherwise
+
+          // Execute callbacks
+          let pickedInfo = emptyInfo;
+          let handled = false;
+          for (const info of result) {
+            pickedInfo = info;
+            handled = info.layer?.onHover(info, event) || handled;
+          }
+          if (!handled) {
+            this.props.onHover?.(pickedInfo, event);
+            this.widgetManager!.onHover(pickedInfo, event);
+          }
+        })
+        .catch(error => this.props.onError?.(error));
     }
   }
 
@@ -1282,10 +1285,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.layerManager!.updateLayers();
 
     // Perform picking request if any
-    // TODO(ibgreen): Picking not yet supported on WebGPU
-    if (this.device?.type !== 'webgpu') {
-      this._pickAndCallback();
-    }
+    this._pickAndCallback();
 
     // Redraw if necessary
     this.redraw();
