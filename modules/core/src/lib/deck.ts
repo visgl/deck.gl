@@ -110,10 +110,10 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   parent?: HTMLDivElement | null;
 
   /** The canvas to render into.
-   * Can be either a HTMLCanvasElement or the element id.
+   * Can be either a HTMLCanvasElement, an OffscreenCanvas, or the element id.
    * Will be auto-created if not supplied.
    */
-  canvas?: HTMLCanvasElement | string | null;
+  canvas?: HTMLCanvasElement | OffscreenCanvas | string | null;
 
   /** Use an existing luma.gl GPU device. @note If not supplied, a new device will be created using props.deviceProps */
   device?: Device | null;
@@ -287,7 +287,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   protected device: Device | null = null;
 
-  protected canvas: HTMLCanvasElement | null = null;
+  protected canvas: HTMLCanvasElement | OffscreenCanvas | null = null;
   protected viewManager: ViewManager<View[]> | null = null;
   protected layerManager: LayerManager | null = null;
   protected effectManager: EffectManager | null = null;
@@ -440,7 +440,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.widgetManager?.finalize();
     this.widgetManager = null;
 
-    if (!this.props.canvas && !this.props.device && !this.props.gl && this.canvas) {
+    if (!this.props.canvas && !this.props.device && !this.props.gl && this.canvas instanceof HTMLCanvasElement) {
       // remove internally created canvas
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
@@ -492,7 +492,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         // remove old canvas if new one being used and de-register events
         // TODO (ck): We might not own this canvas depending it's source, so removing it from the
         // DOM here might be a bit unexpected but it should be ok for most users.
-        this.canvas?.remove();
+        if (this.canvas instanceof HTMLCanvasElement) {
+          this.canvas.remove();
+        }
         this.eventManager?.destroy();
 
         // ensure we will re-attach ourselves after createDevice callbacks
@@ -620,7 +622,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /** Get the current canvas element. */
-  getCanvas(): HTMLCanvasElement | null {
+  getCanvas(): HTMLCanvasElement | OffscreenCanvas | null {
     return this.canvas;
   }
 
@@ -760,7 +762,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /** Resolve props.canvas to element */
-  private _createCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement {
+  private _createCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement | OffscreenCanvas {
     let canvas = props.canvas;
 
     // TODO EventManager should accept element id
@@ -785,14 +787,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       parent.appendChild(canvas);
     }
 
-    Object.assign(canvas.style, props.style);
+    if ('style' in canvas) {
+      Object.assign(canvas.style, props.style);
+    }
 
     return canvas;
   }
 
   /** Updates canvas width and/or height, if provided as props */
   private _setCanvasSize(props: Required<DeckProps<ViewsT>>): void {
-    if (!this.canvas) {
+    if (!this.canvas || !('style' in this.canvas)) {
       return;
     }
 
@@ -817,8 +821,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
     // Fallback to width/height when clientWidth/clientHeight are undefined (OffscreenCanvas).
-    const newWidth = canvas.clientWidth ?? canvas.width;
-    const newHeight = canvas.clientHeight ?? canvas.height;
+    const newWidth = (canvas instanceof HTMLCanvasElement ? canvas.clientWidth : undefined) ?? canvas.width;
+    const newHeight = (canvas instanceof HTMLCanvasElement ? canvas.clientHeight : undefined) ?? canvas.height;
     if (newWidth !== this.width || newHeight !== this.height) {
       // @ts-expect-error private assign to read-only property
       this.width = newWidth;
@@ -1021,7 +1025,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   private _updateCursor(): void {
-    const container = this.props.parent || this.canvas;
+    const container = this.props.parent || (this.canvas instanceof HTMLCanvasElement ? this.canvas : null);
     if (container) {
       container.style.cursor = this.props.getCursor(this.cursorState);
     }
@@ -1037,10 +1041,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+      this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement | OffscreenCanvas;
 
       // external canvas may not be in DOM
-      if (!this.canvas.isConnected && this.props.parent) {
+      if (this.canvas instanceof HTMLCanvasElement && !this.canvas.isConnected && this.props.parent) {
         this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
       }
       // TODO v9
@@ -1072,26 +1076,29 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(this.props.parent || this.canvas, {
-      touchAction: this.props.touchAction,
-      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
-        // Resolve recognizer settings
-        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
-          RECOGNIZERS[eventName];
-        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
-        const options = {...defaultOptions, ...optionsOverride, event: eventName};
-        return {
-          recognizer: new RecognizerConstructor(options),
-          recognizeWith,
-          requestFailure
-        };
-      }),
-      events: {
-        pointerdown: this._onPointerDown,
-        pointermove: this._onPointerMove,
-        pointerleave: this._onPointerMove
+    this.eventManager = new EventManager(
+      this.props.parent || (this.canvas instanceof HTMLCanvasElement ? this.canvas : null),
+      {
+        touchAction: this.props.touchAction,
+        recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+          // Resolve recognizer settings
+          const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
+            RECOGNIZERS[eventName];
+          const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
+          const options = {...defaultOptions, ...optionsOverride, event: eventName};
+          return {
+            recognizer: new RecognizerConstructor(options),
+            recognizeWith,
+            requestFailure
+          };
+        }),
+        events: {
+          pointerdown: this._onPointerDown,
+          pointermove: this._onPointerMove,
+          pointerleave: this._onPointerMove
+        }
       }
-    });
+    );
     for (const eventType in EVENT_HANDLERS) {
       this.eventManager.on(eventType, this._onEvent);
     }
@@ -1130,7 +1137,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.widgetManager = new WidgetManager({
       deck: this,
-      parentElement: this.canvas?.parentElement
+      parentElement: this.canvas instanceof HTMLCanvasElement ? this.canvas.parentElement : undefined
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
