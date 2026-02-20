@@ -16,12 +16,12 @@ uniform gridUniforms {
 `;
 
 export type GridProps = {
-  colorDomain: [number, number, number, number];
+  colorDomain: Readonly<[number, number, number, number]>;
   colorRange: Texture;
-  elevationDomain: [number, number, number, number];
-  elevationRange: [number, number];
-  originCommon: [number, number];
-  sizeCommon: [number, number];
+  elevationDomain: Readonly<[number, number, number, number]>;
+  elevationRange: Readonly<[number, number]>;
+  originCommon: Readonly<[number, number]>;
+  sizeCommon: Readonly<[number, number]>;
 };
 
 export const gridUniforms = {

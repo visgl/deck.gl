@@ -56,11 +56,11 @@ export default class PathTesselator extends Tesselator<
   }
 
   /* Implement base Tesselator interface */
-  protected normalizeGeometry(path: PathGeometry): number[][] | PathGeometry {
+  protected normalizeGeometry(path: PathGeometry): NormalizedPathGeometry {
     if (this.normalize) {
       return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
     }
-    return path;
+    return path as NormalizedPathGeometry;
   }
 
   /* Implement base Tesselator interface */
