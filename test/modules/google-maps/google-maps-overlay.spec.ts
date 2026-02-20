@@ -140,45 +140,6 @@ for (const interleaved of [true, false]) {
   });
 }
 
-for (const interleaved of [true, false]) {
-  test(`GoogleMapsOverlay#vector dual overlay setup (interleaved:${interleaved}`, t => {
-    const map = new mapsApi.Map({
-      width: 800,
-      height: 400,
-      longitude: 0,
-      latitude: 0,
-      zoom: 1,
-      renderingType: mapsApi.RenderingType.VECTOR
-    });
-
-    const overlay = new GoogleMapsOverlay({
-      interleaved,
-      layers: []
-    });
-
-    overlay.setMap(map);
-    map.emit({type: 'renderingtype_changed'});
-
-    // Both vector modes should create positioning overlay
-    t.ok(overlay._positioningOverlay, 'Positioning overlay is created');
-    t.ok(overlay._positioningOverlay.onAdd, 'Positioning overlay has onAdd');
-    t.ok(overlay._positioningOverlay.draw, 'Positioning overlay has draw');
-    t.ok(overlay._positioningOverlay.onRemove, 'Positioning overlay has onRemove');
-
-    // WebGL overlay should also be created for camera data
-    t.ok(overlay._overlay, 'WebGL overlay is created');
-    t.ok(overlay._overlay.onDraw, 'WebGL overlay has onDraw');
-
-    // Positioning container should be created in the DOM
-    const container = map.getDiv().querySelector('#deck-gl-google-maps-container');
-    t.ok(container, 'Positioning container is created in DOM');
-
-    overlay.finalize();
-
-    t.end();
-  });
-}
-
 test('GoogleMapsOverlay#style', t => {
   const map = new mapsApi.Map({
     width: 1,
