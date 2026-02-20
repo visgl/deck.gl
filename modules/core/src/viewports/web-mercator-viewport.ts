@@ -14,6 +14,7 @@ import {
   getProjectionParameters,
   altitudeToFovy,
   fovyToAltitude,
+  getMeterZoom,
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
@@ -323,4 +324,62 @@ export default class WebMercatorViewport extends Viewport {
     const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
   }
+}
+
+/**
+ * Returns the zoom level that will position the camera at the given elevation above the ground.
+ * Can be used to create a WebMercatorViewport from a camera at a known physical elevation (e.g. for 3D tileset traversal).
+ *
+ * @param options
+ * @param options.elevation - Physical camera elevation in meters above the ground
+ * @param options.latitude - Latitude of the viewport center in degrees
+ * @param options.height - Height of the viewport in pixels
+ * @param options.pitch - Tilt of the camera in degrees. Default `0`
+ * @param options.fovy - Camera field of view in degrees. If provided, overrides `altitude`
+ * @param options.altitude - Camera altitude relative to the viewport height. Default `1.5`
+ * @returns Zoom level for use in WebMercatorViewport
+ */
+export function getZoomFromElevation(options: {
+  elevation: number;
+  latitude: number;
+  height: number;
+  pitch?: number;
+  fovy?: number;
+  altitude?: number;
+}): number {
+  const {elevation, latitude, height, pitch = 0, fovy, altitude = 1.5} = options;
+  const altitudeRatio = fovy ? fovyToAltitude(fovy) : altitude;
+  return (
+    getMeterZoom({latitude}) +
+    Math.log2((altitudeRatio * Math.cos(pitch * (Math.PI / 180)) * height) / elevation)
+  );
+}
+
+/**
+ * Returns the camera elevation in meters for the given zoom level.
+ * This is the inverse of `getZoomFromElevation`.
+ *
+ * @param options
+ * @param options.zoom - Zoom level
+ * @param options.latitude - Latitude of the viewport center in degrees
+ * @param options.height - Height of the viewport in pixels
+ * @param options.pitch - Tilt of the camera in degrees. Default `0`
+ * @param options.fovy - Camera field of view in degrees. If provided, overrides `altitude`
+ * @param options.altitude - Camera altitude relative to the viewport height. Default `1.5`
+ * @returns Camera elevation in meters above the ground
+ */
+export function getElevationFromZoom(options: {
+  zoom: number;
+  latitude: number;
+  height: number;
+  pitch?: number;
+  fovy?: number;
+  altitude?: number;
+}): number {
+  const {zoom, latitude, height, pitch = 0, fovy, altitude = 1.5} = options;
+  const altitudeRatio = fovy ? fovyToAltitude(fovy) : altitude;
+  return (
+    (altitudeRatio * Math.cos(pitch * (Math.PI / 180)) * height) /
+    Math.pow(2, zoom - getMeterZoom({latitude}))
+  );
 }

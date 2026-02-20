@@ -33,6 +33,9 @@ export {
   OrbitViewport,
   OrthographicViewport,
   FirstPersonViewport,
+  // Viewport utilities
+  getZoomFromElevation,
+  getElevationFromZoom,
   // Controllers
   Controller,
   MapController,

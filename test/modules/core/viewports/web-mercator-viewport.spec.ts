@@ -4,7 +4,7 @@
 
 import test from 'tape-promise/tape';
 import {equals, config, Vector3} from '@math.gl/core';
-import {WebMercatorViewport} from 'deck.gl';
+import {WebMercatorViewport, getZoomFromElevation, getElevationFromZoom} from 'deck.gl';
 import {Matrix4} from '@math.gl/core';
 
 // Adjust sensitivity of math.gl's equals
@@ -301,6 +301,52 @@ test('WebMercatorViewport#constructor#fovy', t => {
   t.ok(equals(viewport.fovy, 36.87), 'fovy is calculated from altitude');
 
   config.EPSILON = oldEpsilon;
+  t.end();
+});
+
+test('getZoomFromElevation and getElevationFromZoom', t => {
+  const testCases = [
+    {latitude: 0, height: 600, altitude: 1.5, elevation: 1000},
+    {latitude: 45, height: 600, altitude: 1.5, elevation: 5000},
+    {latitude: 60, height: 800, altitude: 2.0, elevation: 500},
+    {latitude: 37.8, height: 600, altitude: 1.5, elevation: 10000, pitch: 30},
+    {latitude: 37.8, height: 600, fovy: 50, elevation: 2000}
+  ];
+
+  for (const tc of testCases) {
+    const zoom = getZoomFromElevation(tc);
+    t.ok(Number.isFinite(zoom), `getZoomFromElevation returns a number for ${JSON.stringify(tc)}`);
+
+    const roundtrippedElevation = getElevationFromZoom({...tc, zoom});
+    t.ok(
+      Math.abs(roundtrippedElevation - tc.elevation) < 1e-6,
+      `getElevationFromZoom is the inverse of getZoomFromElevation for ${JSON.stringify(tc)}`
+    );
+  }
+
+  // Verify the zoom produces the correct camera height in the viewport
+  const latitude = 37.8;
+  const height = 600;
+  const altitude = 1.5;
+  const desiredElevation = 5000;
+  const zoom = getZoomFromElevation({elevation: desiredElevation, latitude, height, altitude});
+  const viewport = new WebMercatorViewport({
+    latitude,
+    longitude: -122,
+    zoom,
+    height,
+    width: 800,
+    altitude
+  });
+  const cameraZ = viewport.cameraPosition[2];
+  // cameraPosition[2] is in common space; convert to meters
+  const distanceScales = viewport.getDistanceScales();
+  const cameraElevationMeters = cameraZ / distanceScales.unitsPerMeter[2];
+  t.ok(
+    Math.abs(cameraElevationMeters - desiredElevation) / desiredElevation < 0.01,
+    'camera elevation matches desired elevation (within 1%)'
+  );
+
   t.end();
 });
 
