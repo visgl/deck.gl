@@ -24,6 +24,12 @@ export type DeckWidgetTheme = {
   '--icon-compass-south-color'?: string;
   // menu
   '--menu-gap'?: string;
+  '--menu-background'?: string;
+  '--menu-backdrop-filter'?: string;
+  '--menu-border'?: string;
+  '--menu-shadow'?: string;
+  '--menu-text'?: string;
+  '--menu-item-hover'?: string;
 };
 
 export const LightTheme = {
@@ -40,7 +46,13 @@ export const LightTheme = {
   '--button-text': 'rgb(24, 24, 26, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
   '--icon-compass-south-color': 'rgb(204, 204, 204)',
-  '--menu-gap': '4px'
+  '--menu-gap': '4px',
+  '--menu-background': '#fff',
+  '--menu-backdrop-filter': 'unset',
+  '--menu-border': 'unset',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
+  '--menu-text': 'rgb(24, 24, 26, 1)',
+  '--menu-item-hover': 'rgba(0, 0, 0, 0.08)'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const DarkTheme = {
@@ -57,7 +69,13 @@ export const DarkTheme = {
   '--button-text': 'rgb(215, 214, 229, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
   '--icon-compass-south-color': 'rgb(200, 199, 209)',
-  '--menu-gap': '4px'
+  '--menu-gap': '4px',
+  '--menu-background': 'rgba(18, 18, 20, 1)',
+  '--menu-backdrop-filter': 'unset',
+  '--menu-border': 'unset',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
+  '--menu-text': 'rgb(215, 214, 229, 1)',
+  '--menu-item-hover': 'rgba(255, 255, 255, 0.1)'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const LightGlassTheme = {
@@ -75,7 +93,13 @@ export const LightGlassTheme = {
   '--button-text': 'rgb(24, 24, 26, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
   '--icon-compass-south-color': 'rgb(204, 204, 204)',
-  '--menu-gap': '4px'
+  '--menu-gap': '4px',
+  '--menu-background': 'rgba(255, 255, 255, 0.6)',
+  '--menu-backdrop-filter': 'blur(4px)',
+  '--menu-border': '1px solid rgba(255, 255, 255, 0.6)',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
+  '--menu-text': 'rgb(24, 24, 26, 1)',
+  '--menu-item-hover': 'rgba(0, 0, 0, 0.08)'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const DarkGlassTheme = {
@@ -93,5 +117,11 @@ export const DarkGlassTheme = {
   '--button-text': 'rgb(215, 214, 229, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
   '--icon-compass-south-color': 'rgb(200, 199, 209)',
-  '--menu-gap': '4px'
+  '--menu-gap': '4px',
+  '--menu-background': 'rgba(18, 18, 20, 0.75)',
+  '--menu-backdrop-filter': 'blur(4px)',
+  '--menu-border': '1px solid rgba(18, 18, 20, 0.75)',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
+  '--menu-text': 'rgb(215, 214, 229, 1)',
+  '--menu-item-hover': 'rgba(255, 255, 255, 0.1)'
 } as const satisfies Required<DeckWidgetTheme>;
