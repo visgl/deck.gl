@@ -4,9 +4,9 @@
 
 import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';
-import {dashShaders, offsetShaders} from './shaders.glsl';
+import {dashShaders, Defines, offsetShaders} from './shaders.glsl';
 
-import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+import type {Accessor, Layer, LayerContext, UpdateParameters} from '@deck.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
@@ -87,8 +87,12 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
 
     // Merge shader injection
     let result = {} as {inject: Record<string, string>};
+    const defines: Defines = {};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
+      if (extension.opts.highPrecisionDash) {
+        defines.HIGH_PRECISION_DASH = true;
+      }
     }
     if (extension.opts.offset) {
       result = mergeShaders(result, offsetShaders);
@@ -104,7 +108,8 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       }
     };
     return {
-      modules: [pathStyle]
+      modules: [pathStyle],
+      defines
     };
   }
 
@@ -118,19 +123,15 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     if (extension.opts.dash) {
       attributeManager.addInstanced({
         instanceDashArrays: {size: 2, accessor: 'getDashArray'},
-        instanceDashOffsets: extension.opts.highPrecisionDash
+        ...(extension.opts.highPrecisionDash
           ? {
-              size: 1,
-              accessor: 'getPath',
-              transform: extension.getDashOffsets.bind(this)
-            }
-          : {
-              size: 1,
-              update: attribute => {
-                attribute.constant = true;
-                attribute.value = [0];
+              instanceDashOffsets: {
+                size: 1,
+                accessor: 'getPath',
+                transform: extension.getDashOffsets.bind(this)
               }
             }
+          : {})
       });
     }
     if (extension.opts.offset) {
