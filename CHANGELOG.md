@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.9] - Feb 20 2026
+
+- chore: bump probe.gl (#10025)
+- fix(widgets): GeocoderWidget dark theme colors (#9899) (#9974)
+- feat(extensions): PathStyleExtension save 1 instance vertex when highPrecisionDash is not used (#10008)
+- feat(layers): Stricter layer prop types (#10024)
+
 #### deck.gl [v9.2.8] - Feb 17 2026
 
 - feat(core): Add layout expressions for view positions (#9842)
