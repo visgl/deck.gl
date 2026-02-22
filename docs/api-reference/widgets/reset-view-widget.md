@@ -36,7 +36,13 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 * Default: `deck.props.initialViewState`
 
-The initial view state to reset the view to.
+The initial view state to reset the view to. Defaults to `deck.props.initialViewState` if not provided.
+
+Note: Not used if `onResetView` is provided.
+
+#### `onResetView` (Callback, optional)
+
+Application can supply this callback to take control of the view reset operation.
 
 ## Styles
 
