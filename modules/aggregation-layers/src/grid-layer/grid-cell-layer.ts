@@ -13,15 +13,15 @@ import type {ScaleType} from '../common/types';
 
 /** Proprties added by GridCellLayer. */
 type GridCellLayerProps = {
-  cellSizeCommon: [number, number];
-  cellOriginCommon: [number, number];
-  colorDomain: [number, number];
-  colorCutoff: [number, number] | null;
+  cellSizeCommon: Readonly<[number, number]>;
+  cellOriginCommon: Readonly<[number, number]>;
+  colorDomain: Readonly<[number, number]>;
+  colorCutoff: Readonly<[number, number]> | null;
   colorRange: Color[];
   colorScaleType: ScaleType;
-  elevationDomain: [number, number];
-  elevationCutoff: [number, number] | null;
-  elevationRange: [number, number];
+  elevationDomain: Readonly<[number, number]>;
+  elevationCutoff: Readonly<[number, number]> | null;
+  elevationRange: Readonly<[number, number]>;
 };
 
 export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
