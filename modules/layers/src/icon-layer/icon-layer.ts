@@ -91,7 +91,7 @@ type _IconLayerProps<DataT> = {
    * Icon offsest accessor, in pixels.
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, [number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
@@ -103,7 +103,7 @@ type _IconLayerProps<DataT> = {
 
 export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<IconLayerProps> = {
   iconAtlas: {type: 'image', value: null, async: true},

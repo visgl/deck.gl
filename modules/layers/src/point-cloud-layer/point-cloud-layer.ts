@@ -28,8 +28,8 @@ import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
 import source from './point-cloud-layer.wgsl';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
-const DEFAULT_NORMAL: [number, number, number] = [0, 0, 1];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+const DEFAULT_NORMAL = [0, 0, 1] as const;
 
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
@@ -107,7 +107,7 @@ type _PointCloudLayerProps<DataT> = {
    * The normal of each object, in `[nx, ny, nz]`.
    * @default [0, 0, 1]
    */
-  getNormal?: Accessor<DataT, [number, number, number]>;
+  getNormal?: Accessor<DataT, Readonly<[number, number, number]>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`

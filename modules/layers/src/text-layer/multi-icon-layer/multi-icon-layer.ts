@@ -75,7 +75,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
     const {props, oldProps, changeFlags} = params;
-    let {outlineColor} = props;
+    const {outlineColor} = props;
 
     if (
       changeFlags.updateTriggersChanged &&
@@ -85,11 +85,15 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       this.getAttributeManager()!.invalidate('instanceIconDefs');
     }
     if (outlineColor !== oldProps.outlineColor) {
-      outlineColor = outlineColor.map(x => x / 255) as Color;
-      outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
+      const normalizedOutlineColor = [
+        outlineColor[0] / 255,
+        outlineColor[1] / 255,
+        outlineColor[2] / 255,
+        (outlineColor[3] ?? 255) / 255
+      ];
 
       this.setState({
-        outlineColor
+        outlineColor: normalizedOutlineColor
       });
     }
     if (!props.sdf && props.outlineWidth) {

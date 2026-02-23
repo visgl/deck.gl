@@ -25,7 +25,7 @@ import {shaderWGSL as source} from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<LineLayerProps> = {
   getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},

@@ -93,7 +93,10 @@ const deck = new Deck({
   controller: true,
   layers: getLayers(),
   widgets: [
-    new _GeocoderWidget(),
+    new _GeocoderWidget({
+      geocoder: 'coordinates',
+      _geolocation: true
+    }),
     new ZoomWidget(),
     new CompassWidget(),
     new FullscreenWidget(),
