@@ -126,6 +126,18 @@ for (const interleaved of [true, false]) {
     t.ok(overlay._overlay.onDraw, 'onDraw lifecycle function is registered');
     t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
 
+    // Dual overlay setup: positioning overlay + WebGL overlay
+    t.ok(overlay._positioningOverlay, 'Positioning overlay is created');
+    t.ok(overlay._positioningOverlay.onAdd, 'Positioning overlay has onAdd');
+    t.ok(overlay._positioningOverlay.draw, 'Positioning overlay has draw');
+    t.ok(overlay._positioningOverlay.onRemove, 'Positioning overlay has onRemove');
+    t.ok(overlay._overlay, 'WebGL overlay is created');
+    t.ok(overlay._overlay.onDraw, 'WebGL overlay has onDraw');
+
+    // Positioning container should be created in the DOM
+    const container = map.getDiv().querySelector('#deck-gl-google-maps-container');
+    t.ok(container, 'Positioning container is created in DOM');
+
     t.notOk(overlay._overlay._draws, 'Map not yet drawn');
     overlay.setMap(null);
     if (interleaved) {
