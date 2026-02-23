@@ -261,7 +261,11 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
 
     const eventRoot = createElement(
       'div',
-      {key: 'deck-events-root', className: 'deck-events-root'},
+      {
+        key: 'deck-events-root',
+        className: 'deck-events-root',
+        style: {width, height}
+      },
       [canvas, childrenUnderViews]
     );
 
