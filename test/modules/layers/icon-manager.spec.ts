@@ -251,16 +251,30 @@ test('IconManager#resize', t => {
   const testImage =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAACXBIWXMAAD2EAAA9hAHVrK90AAAAjElEQVQYlXWPMQrCQBBFn7NJI9oobraz1kqv4zk9h4iCEDsLq4gBR4LgGi3WNRhxmj88Zv6f6Sz5LuEPSNMWsLYFnHs3SRBjMY8I+iPoCpMKCiUBHUwFGFPvNKwcynkPuK40ml5ygFyblAzvyZoUcec1M7etAbMAhrfN3R+FKk6UJ+C5Nx+PcFKQn29fOzIjztSX8AwAAAAASUVORK5CYII=';
   let updateCount = 0;
+
+  const icons = [
+    {id: 'no-resize', width: 16, height: 16},
+    {id: 'down-size', width: 12, height: 12},
+    {id: 'preserve-aspect-ratio-landscape', width: 32, height: 24},
+    {id: 'preserve-aspect-ratio-portrait', width: 12, height: 16}
+  ];
+
+  const assertIconFrame = (id, expected) => {
+    const mapping = iconManager.getIconMapping({id});
+    t.is(mapping.x, expected.x, `${id} x`);
+    t.is(mapping.y, expected.y, `${id} y`);
+    t.is(mapping.width, expected.width, `${id} width`);
+    t.is(mapping.height, expected.height, `${id} height`);
+  };
+
   const onUpdate = () => {
     updateCount++;
-    if (updateCount > 3) {
-      t.is(iconManager.getIconMapping({id: 'no-resize'}).width, 16, 'no-resize');
-      t.is(iconManager.getIconMapping({id: 'down-size'}).width, 12, 'down-size');
-      t.is(
-        iconManager.getIconMapping({id: 'preserve-aspect-ratio'}).width,
-        24,
-        'preserve-aspect-ratio'
-      );
+    if (updateCount > icons.length) {
+      assertIconFrame('no-resize', {x: 0, y: 0, width: 16, height: 16});
+      assertIconFrame('down-size', {x: 20, y: 0, width: 12, height: 12});
+      assertIconFrame('preserve-aspect-ratio-landscape', {x: 40, y: 0, width: 24, height: 24});
+      assertIconFrame('preserve-aspect-ratio-portrait', {x: 72, y: 2, width: 12, height: 12});
+
       t.end();
     }
   };
@@ -275,15 +289,8 @@ test('IconManager#resize', t => {
   iconManager.setProps({
     autoPacking: true
   });
-  iconManager.packIcons(
-    [
-      {id: 'no-resize', width: 16, height: 16},
-      {id: 'down-size', width: 12, height: 12},
-      {id: 'preserve-aspect-ratio', width: 32, height: 24}
-    ],
-    d => ({
-      ...d,
-      url: testImage
-    })
-  );
+  iconManager.packIcons(icons, d => ({
+    ...d,
+    url: testImage
+  }));
 });

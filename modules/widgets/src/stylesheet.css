@@ -24,7 +24,7 @@
 .deck-widget-button-group {
   width: calc(var(--button-size, 28px) - 2);
   height: calc((var(--button-size, 28px) * 2) - 1);
-  
+
   flex-direction: row;
   padding: 1px;
   gap: 1px;
@@ -65,7 +65,6 @@
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-
 
 .deck-widget-button-group.horizontal > *:not(:last-child),
 .deck-widget-button-group.horizontal > *:not(:last-child) > button {
@@ -192,14 +191,14 @@
 .deck-widget.deck-widget-reset-view button.deck-widget-reset-focus .deck-widget-icon {
   mask-image: var(
     --icon-camera,
-      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
   );
   -webkit-mask-image: var(
     --icon-camera,
-      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
   );
 }
- 
+
 /* Timeline widget styles */
 .deck-widget.deck-widget-timeline {
   display: flex;
@@ -248,7 +247,7 @@
 
 .deck-widget.deck-widget-loading button.deck-widget-spinner .deck-widget-icon {
   mask-image: var(
-    --loading-icon, 
+    --loading-icon,
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>')
   );
   -webkit-mask-image: var(
@@ -267,7 +266,151 @@
 /* Geocoder styles */
 .deck-widget .deck-widget-geocoder {
   pointer-events: auto;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  padding: 1px;
+  gap: 1px;
+}
+
+.deck-widget .deck-widget-geocoder-input {
+  flex: 1 1 auto;
+  min-width: 200px;
+  height: calc(var(--button-size, 28px) - 2px);
+  margin: 0;
+  padding: 0 8px;
+  box-sizing: border-box;
+  background: var(--button-background, #fff);
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  color: var(--button-text, rgb(24, 24, 26));
+  border: var(--button-inner-stroke, unset);
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+}
+
+.deck-widget .deck-widget-geocoder-input:focus {
+  outline: none;
+}
+
+.deck-widget .deck-widget-geocoder-input::placeholder {
+  color: var(--button-icon-idle, rgba(97, 97, 102, 1));
+}
+
+.deck-widget .deck-widget-geocoder-error {
+  position: absolute;
+  top: calc(100% + var(--menu-gap, 4px));
+  left: 1px;
+  right: 1px;
+  padding: 6px 10px;
+  background: var(--button-background, #fff);
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  border: var(--button-inner-stroke, unset);
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  color: rgb(220, 80, 80);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* When dropdown is not present, input should have full rounded corners */
+.deck-widget .deck-widget-geocoder-input:last-child {
+  border-top-right-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-bottom-right-radius: calc(var(--button-corner-radius, 8px) - 1px);
+}
+
+/* Dropdown menu styles */
+.deck-widget .deck-widget-dropdown-container {
+  position: static;
+  display: inline-block;
+}
+
+.deck-widget .deck-widget-dropdown-button {
+  width: calc(var(--button-size, 28px) - 2px);
+  height: calc(var(--button-size, 28px) - 2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   cursor: pointer;
+  background: var(--button-background, #fff);
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  border: var(--button-inner-stroke, unset);
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  outline: none;
+}
+
+.deck-widget .deck-widget-dropdown-icon {
+  width: 12px;
+  height: 12px;
+  background-color: var(--button-icon-idle, rgba(97, 97, 102, 1));
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  transition: transform 0.2s ease;
+}
+
+.deck-widget .deck-widget-dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.deck-widget .deck-widget-dropdown-button:hover .deck-widget-dropdown-icon {
+  background-color: var(--button-icon-hover, rgba(24, 24, 26, 1));
+}
+
+.deck-widget .deck-widget-dropdown-menu {
+  position: absolute;
+  top: calc(100% + var(--menu-gap, 4px));
+  left: 1px;
+  right: 1px;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  z-index: 1000;
+  background: var(--menu-background, #fff);
+  backdrop-filter: var(--menu-backdrop-filter, unset);
+  border: var(--menu-border, unset);
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+}
+
+.deck-widget .deck-widget-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--menu-text, rgb(24, 24, 26));
+}
+
+.deck-widget .deck-widget-dropdown-item:hover {
+  background: var(--menu-item-hover, rgba(128, 128, 128, 0.15));
+}
+
+.deck-widget .deck-widget-dropdown-item-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: text-bottom;
+  background-color: var(--menu-text, rgb(24, 24, 26));
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
 }
 
 /* Stats styles */
@@ -281,16 +424,11 @@
   line-height: 1.6;
   font-family:
     'SF Mono',
-    /* macOS */
-    'Menlo',
-    /* macOS */
-    'Consolas',
-    /* Windows */
-    'DejaVu Sans Mono',
-    /* Linux */
-    'Liberation Mono',
-    /* Linux */
-    monospace;
+    /* macOS */ 'Menlo',
+    /* macOS */ 'Consolas',
+    /* Windows */ 'DejaVu Sans Mono',
+    /* Linux */ 'Liberation Mono',
+    /* Linux */ monospace;
   background-color: var(--button-background, #fff);
   color: var(--button-text, rgb(24, 24, 26));
 }

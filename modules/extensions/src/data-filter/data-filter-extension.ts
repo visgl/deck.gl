@@ -52,13 +52,13 @@ export type DataFilterExtensionProps<DataT = any> = {
    * If an object's filtered value is within the bounds, the object will be rendered; otherwise it will be hidden.
    * @default [-1, 1]
    */
-  filterRange?: [number, number] | [number, number][];
+  filterRange?: Readonly<[number, number]> | Readonly<[number, number]>[];
   /**
    * If specified, objects will be faded in/out instead of abruptly shown/hidden.
    * When the filtered value is outside of the bounds defined by `filterSoftRange` but still within the bounds defined by `filterRange`, the object will be rendered as "faded."
    * @default null
    */
-  filterSoftRange?: [number, number] | [number, number][] | null;
+  filterSoftRange?: Readonly<[number, number]> | Readonly<[number, number]>[] | null;
   /**
    * When an object is "faded", manipulate its size so that it appears smaller or thinner. Only works if `filterSoftRange` is specified.
    * @default true

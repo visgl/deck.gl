@@ -33,6 +33,7 @@ A [View](../api-reference/core/view.md) instance defines the following informati
 
 * A unique `id`.
 * The position and extent of the view on the canvas: `x`, `y`, `width`, and `height`.
+  These properties (and padding) accept CSS-style expressions that combine numbers, percentages, `px` units, parentheses, and `calc()` addition/subtraction so you can mix relative and absolute measurements like `calc(50% - 10px)`.
 * Certain camera parameters specifying how your data should be projected into this view, e.g. field of view, near/far planes, perspective vs. orthographic, etc.
 * The [controller](../api-reference/core/controller.md) to be used for this view. A controller listens to pointer events and touch gestures, and translates user input into changes in the view state. If enabled, the camera becomes interactive.
 

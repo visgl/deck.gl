@@ -138,6 +138,12 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--menu-gap` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `4px` |
+| `--menu-background` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#fff` |
+| `--menu-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
+| `--menu-border` | [Border](https://developer.mozilla.org/en-US/docs/Web/CSS/border) | `unset` |
+| `--menu-shadow` | [Box Shadow](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow) | `0px 0px 8px 0px rgba(0, 0, 0, 0.25)` |
+| `--menu-text` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgb(24, 24, 26)` |
+| `--menu-item-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(0, 0, 0, 0.08)` |
 
 ### Icon
 

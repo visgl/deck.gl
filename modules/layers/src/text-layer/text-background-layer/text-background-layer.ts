@@ -29,14 +29,14 @@ type _TextBackgroundLayerProps<DataT> = {
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
 
-  borderRadius?: number | [number, number, number, number];
-  padding?: [number, number] | [number, number, number, number];
+  borderRadius?: number | Readonly<[number, number, number, number]>;
+  padding?: Readonly<[number, number]> | Readonly<[number, number, number, number]>;
 
   getPosition?: Accessor<DataT, Position>;
   getSize?: Accessor<DataT, number>;
   getAngle?: Accessor<DataT, number>;
-  getPixelOffset?: Accessor<DataT, [number, number]>;
-  getBoundingRect?: Accessor<DataT, [number, number, number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  getBoundingRect?: Accessor<DataT, Readonly<[number, number, number, number]>>;
   getFillColor?: Accessor<DataT, Color>;
   getLineColor?: Accessor<DataT, Color>;
   getLineWidth?: Accessor<DataT, number>;
@@ -151,14 +151,19 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     }
 
     if (!Array.isArray(borderRadius)) {
-      borderRadius = [borderRadius, borderRadius, borderRadius, borderRadius];
+      borderRadius = [
+        borderRadius as number,
+        borderRadius as number,
+        borderRadius as number,
+        borderRadius as number
+      ];
     }
 
     const model = this.state.model!;
     const textBackgroundProps: TextBackgroundProps = {
       billboard,
       stroked: Boolean(getLineWidth),
-      borderRadius,
+      borderRadius: borderRadius as [number, number, number, number],
       padding: padding as [number, number, number, number],
       sizeUnits: UNIT[sizeUnits],
       sizeScale,

@@ -6,7 +6,7 @@ import {Widget} from '@deck.gl/core';
 import type {WidgetPlacement, Viewport, WidgetProps} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
-import {DropdownMenu} from './lib/components/dropdown-menu';
+import {DropdownMenu, type MenuItem} from './lib/components/dropdown-menu';
 import {type Geocoder} from './lib/geocode/geocoder';
 import {GeocoderHistory} from './lib/geocode/geocoder-history';
 import {
@@ -21,6 +21,15 @@ import {
 type ViewState = Record<string, unknown>;
 
 const CURRENT_LOCATION = 'current';
+
+// Location pin icon (from Google Material Symbols)
+const LOCATION_ICON = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'%3E%3Cpath d='M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Z'/%3E%3C/svg%3E`;
+
+const CURRENT_LOCATION_ITEM: MenuItem = {
+  label: 'Current location',
+  value: CURRENT_LOCATION,
+  icon: LOCATION_ICON
+};
 
 /** Properties for the GeocoderWidget */
 export type GeocoderWidgetProps = WidgetProps & {
@@ -66,6 +75,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   geocodeHistory = new GeocoderHistory({});
   addressText: string = '';
   geocoder: Geocoder = CoordinatesGeocoder;
+  isGettingLocation: boolean = false;
 
   constructor(props: GeocoderWidgetProps = {}) {
     super(props);
@@ -83,45 +93,27 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const menuItems = this.props._geolocation
-      ? [CURRENT_LOCATION, ...this.geocodeHistory.addressHistory]
+    const menuItems: MenuItem[] = this.props._geolocation
+      ? [CURRENT_LOCATION_ITEM, ...this.geocodeHistory.addressHistory]
       : [...this.geocodeHistory.addressHistory];
     render(
-      <div
-        className="deck-widget-geocoder"
-        style={{
-          pointerEvents: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap' // Allows wrapping on smaller screens
-        }}
-      >
+      <div className="deck-widget-geocoder">
         <input
+          className="deck-widget-geocoder-input"
           type="text"
-          placeholder={this.geocoder.placeholderLocation ?? 'Enter address or location'}
+          placeholder={
+            this.isGettingLocation
+              ? 'Finding your location...'
+              : (this.geocoder.placeholderLocation ?? 'Enter address or location')
+          }
           value={this.geocodeHistory.addressText}
           // @ts-expect-error event type
           onInput={e => this.setInput(e.target?.value || '')}
           onKeyPress={this.handleKeyPress}
-          style={{
-            flex: '1 1 auto',
-            minWidth: '200px',
-            margin: 0,
-            padding: '8px',
-            boxSizing: 'border-box'
-          }}
         />
-        <DropdownMenu
-          menuItems={menuItems}
-          onSelect={this.handleSelect}
-          style={{
-            margin: 2,
-            padding: '4px 2px',
-            boxSizing: 'border-box'
-          }}
-        />
+        <DropdownMenu menuItems={menuItems} onSelect={this.handleSelect} />
         {this.geocodeHistory.errorText && (
-          <div className="error">{this.geocodeHistory.errorText}</div>
+          <div className="deck-widget-geocoder-error">{this.geocodeHistory.errorText}</div>
         )}
       </div>,
       rootElement
@@ -138,9 +130,15 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
     }
   };
 
-  handleSelect = (address: string) => {
-    this.setInput(address);
-    this.handleSubmit();
+  handleSelect = (value: string) => {
+    if (value === CURRENT_LOCATION) {
+      // Don't put "current" in the text field, just trigger geolocation
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this.getCurrentLocation();
+    } else {
+      this.setInput(value);
+      this.handleSubmit();
+    }
   };
 
   /** Sync wrapper for async geocode() */
@@ -149,15 +147,39 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
     this.geocode(this.addressText);
   };
 
+  /** Get current location via browser geolocation API */
+  getCurrentLocation = async () => {
+    this.isGettingLocation = true;
+    if (this.rootElement) {
+      this.updateHTML();
+    }
+
+    try {
+      const coordinates = await CurrentLocationGeocoder.geocode();
+      if (coordinates) {
+        this.setViewState(coordinates);
+      }
+    } catch (error) {
+      this.geocodeHistory.errorText = error instanceof Error ? error.message : 'Location error';
+    } finally {
+      this.isGettingLocation = false;
+      if (this.rootElement) {
+        this.updateHTML();
+      }
+    }
+  };
+
   /** Perform geocoding */
   geocode: (address: string) => Promise<void> = async address => {
-    const useGeolocation = this.props._geolocation && address === CURRENT_LOCATION;
-    const geocoder = useGeolocation ? CurrentLocationGeocoder : this.geocoder;
     const coordinates = await this.geocodeHistory.geocode(
-      geocoder,
+      this.geocoder,
       this.addressText,
       this.props.apiKey
     );
+    // Re-render to show updated history or error (guard against torn-down widget)
+    if (this.rootElement) {
+      this.updateHTML();
+    }
     if (coordinates) {
       this.setViewState(coordinates);
     }
