@@ -1073,7 +1073,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.animationLoop.attachTimeline(timeline);
 
     const eventRoot =
-      this.props.parent?.querySelector<HTMLDivElement>('.event-manager-root') || this.canvas;
+      this.props.parent?.querySelector<HTMLDivElement>('.deck-events-root') || this.canvas;
     this.eventManager = new EventManager(eventRoot, {
       touchAction: this.props.touchAction,
       recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
@@ -1130,9 +1130,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.deckPicker = new DeckPicker(this.device);
 
-    const parent = this.props.parent || document.body;
     const widgetParent =
-      parent.querySelector<HTMLDivElement>('.deck-widgets-container') || this.canvas?.parentElement;
+      this.props.parent?.querySelector<HTMLDivElement>('.deck-widgets-root') ||
+      this.canvas?.parentElement;
 
     this.widgetManager = new WidgetManager({
       deck: this,
