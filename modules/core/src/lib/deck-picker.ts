@@ -280,13 +280,11 @@ export default class DeckPicker {
         };
       }
 
-      const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
-
       let z;
-      if (depthLayers.length > 0) {
+      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
         const {pickedColors: pickedColors2} = this._drawAndSample(
           {
-            layers: depthLayers,
+            layers: [pickInfo.pickedLayer],
             views,
             viewports,
             onViewportActive,
@@ -445,13 +443,11 @@ export default class DeckPicker {
         };
       }
 
-      const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
-
       let z;
-      if (depthLayers.length > 0) {
+      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
         const {pickedColors: pickedColors2} = this._drawAndSample(
           {
-            layers: depthLayers,
+            layers: [pickInfo.pickedLayer],
             views,
             viewports,
             onViewportActive,
@@ -930,21 +926,6 @@ export default class DeckPicker {
     });
 
     return {pickedColors, decodePickingColor};
-  }
-
-  /** Returns the layers to use for the depth (pickZ) pass.
-   * Falls back to terrain layers when no specific layer was picked,
-   * or when the picked layer is draped (flat geometry without meaningful z). */
-  _getDepthLayers(pickInfo: PickedPixel, pickableLayers: Layer[], unproject3D?: boolean): Layer[] {
-    if (!unproject3D || !this.depthFBO) {
-      return [];
-    }
-    const hasPickedLayer = Boolean(pickInfo.pickedLayer);
-    const isDraped = Boolean(pickInfo.pickedLayer?.state?.terrainDrawMode === 'drape');
-    if (hasPickedLayer && !isDraped) {
-      return [pickInfo.pickedLayer!];
-    }
-    return pickableLayers.filter(l => l.props.operation.includes('terrain'));
   }
 
   /**
