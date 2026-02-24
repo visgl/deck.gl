@@ -157,8 +157,6 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           mode = opts.isPicking ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
         } else {
-          // No cover FBO available (e.g. tile too small or viewport edge case).
-          // In picking, let the layer render its own picking colors (mode stays NONE).
           sampler = dummyHeightMap!;
         }
       }

@@ -142,12 +142,9 @@ export default class PickLayersPass extends LayersPass {
     } else if (pickable && operation.includes('draw')) {
       // Encode pickable layers that include 'draw' operation (including 'terrain+draw')
       Object.assign(pickParameters, PICKING_BLENDING);
+      pickParameters.blend = true;
       // TODO: blendColor no longer part of luma.gl API
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
-      // For terrain+draw layers, the terrain shader enters USE_COVER_ONLY mode and outputs
-      // the cover pixel. The cover pixel's alpha is normalized to 0 or 1 in the shader,
-      // so blending here applies the correct layer index encoding via blendColor.
-      pickParameters.blend = true;
     } else if (operation.includes('terrain')) {
       // Pure terrain layers (without 'draw') don't need picking colors
       pickParameters.blend = false;
