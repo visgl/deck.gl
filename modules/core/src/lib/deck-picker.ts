@@ -939,8 +939,10 @@ export default class DeckPicker {
     if (!unproject3D || !this.depthFBO) {
       return [];
     }
-    if (pickInfo.pickedLayer && pickInfo.pickedLayer.state?.terrainDrawMode !== 'drape') {
-      return [pickInfo.pickedLayer];
+    const hasPickedLayer = Boolean(pickInfo.pickedLayer);
+    const isDraped = Boolean(pickInfo.pickedLayer?.state?.terrainDrawMode === 'drape');
+    if (hasPickedLayer && !isDraped) {
+      return [pickInfo.pickedLayer!];
     }
     return pickableLayers.filter(l => l.props.operation.includes('terrain'));
   }
