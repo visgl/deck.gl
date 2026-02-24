@@ -683,10 +683,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * @private
    */
   private _pickPositionForController(x: number, y: number): {coordinate?: number[]} | null {
-    const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', {x, y, radius: 0, unproject3D: true});
-    // Use emptyInfo as fallback - it contains the 3D coordinate from the depth pass
-    // even when no specific layer was picked (e.g. terrain tiles without cover FBOs)
-    return result[0] || emptyInfo;
+    return this.pickObject({x, y, radius: 0, unproject3D: true});
   }
 
   /** Experimental
