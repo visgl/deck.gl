@@ -27,8 +27,7 @@ const INITIAL_VIEW_STATE = {
   longitude: -74.006,
   zoom: 12,
   bearing: 0,
-  pitch: 60,
-  position: [0, 0, 0] // Keep camera at ground level
+  pitch: 60
 };
 
 // Track rotation pivot for visual feedback
@@ -54,20 +53,29 @@ const deck = new Deck({
     }
   },
   getTooltip: info => {
-    //if (info.object?.properties) {
-    //  const {GEONAME, BOROUGH} = info.object.properties;
-    //  return {
-    //    html: `<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
-    //      <b>${GEONAME}</b><br/>${BOROUGH}
-    //    </div>`,
-    //    style: {padding: '0'}
-    //  };
-    //}
-    if (info.picked && info.coordinate && info.coordinate.length === 3) {
-      const altitude = info.coordinate[2];
+    if (info.object?.properties) {
+      const {GEONAME, BOROUGH} = info.object.properties;
       return {
         html: `<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
-          Altitude: ${altitude.toFixed(1)} m
+          <b>${GEONAME}</b><br/>${BOROUGH}
+        </div>`,
+        style: {padding: '0'}
+      };
+    }
+    if (info.coordinate && info.coordinate.length === 3) {
+      const altitude = info.coordinate[2];
+      const picked = info.picked;
+      return {
+        html: `<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+          Altitude: ${altitude.toFixed(1)} m${picked ? '' : ' MISS'}
+        </div>`,
+        style: {padding: '0'}
+      };
+    }
+    if (info.coordinate && info.coordinate.length === 2) {
+      return {
+        html: `<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+         ${info.coordinate.map(c => c.toFixed(4))}
         </div>`,
         style: {padding: '0'}
       };
