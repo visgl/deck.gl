@@ -19,6 +19,7 @@ export {ViewSelectorWidget as _ViewSelectorWidget} from './view-selector-widget'
 
 // Information widgets
 export {InfoWidget as _InfoWidget} from './info-widget';
+export {PopupWidget} from './popup-widget';
 export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
 
 // Control widgets
