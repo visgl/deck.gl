@@ -108,7 +108,9 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
   vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
   if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-    color = pixel;
+    // Use cover pixel RGB (picking color). Normalize alpha to 0 or 1 so that the main
+    // picking pass can re-encode the layer index via blendColor without double-encoding.
+    color = vec4(pixel.rgb, step(0.5 / 255.0, pixel.a));
   } else {
     // pixel is premultiplied
     color = pixel + color * (1.0 - pixel.a);
