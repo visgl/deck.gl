@@ -36,15 +36,22 @@ const INITIAL_VIEW_STATE = {
 const BUILDING_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d-tiles/buildings.geojson';
 
-function getTooltip({object}) {
-  return (
-    object && {
+function getTooltip({object, coordinate}) {
+  if (object?.properties) {
+    return {
       html: `\
     <div><b>Distance to nearest tree</b></div>
     <div>${object.properties.distance_to_nearest_tree}</div>
     `
-    }
-  );
+    };
+  }
+  console.log(object); // why is this coming through as undefined???
+  if (coordinate && coordinate.length === 3) {
+    return {
+      html: `<div>${coordinate[2].toFixed(1)} m.a.s.l.</div>`
+    };
+  }
+  return null;
 }
 
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
@@ -54,6 +61,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
     new Tile3DLayer({
       id: 'google-3d-tiles',
       data: TILESET_URL,
+      pickable: '3d',
       onTilesetLoad: tileset3d => {
         tileset3d.options.onTraversalComplete = selectedTiles => {
           const uniqueCredits = new Set();
