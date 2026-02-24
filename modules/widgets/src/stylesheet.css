@@ -432,3 +432,8 @@
   background-color: var(--button-background, #fff);
   color: var(--button-text, rgb(24, 24, 26));
 }
+
+/* Popup styles */
+.deck-widget.deck-widget-popover {
+  margin: 0 !important;
+}

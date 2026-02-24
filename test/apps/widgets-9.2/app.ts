@@ -89,6 +89,7 @@ function getLayers(filterRange = [2, 9]) {
 }
 
 const deck = new Deck({
+  parent: document.getElementById('app'),
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: getLayers(),
@@ -120,8 +121,8 @@ const deck = new Deck({
         );
       }
     }),
-    new _InfoWidget({mode: 'hover', getTooltip}),
-    new _InfoWidget({mode: 'click', getTooltip}),
+    new _InfoWidget({mode: 'hover', getTooltip, arrow: 10, offset: 10}),
+    new _InfoWidget({mode: 'click', getTooltip, arrow: 10, offset: 10}),
     new _TimelineWidget({
       placement: 'bottom-left',
       timeRange: [2, 9],
@@ -162,6 +163,6 @@ ${info.object.properties.featureclass} (${info.object.properties.location})
   return {
     position: info.object.geometry.coordinates,
     text,
-    style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+    style: {minWidth: '200px'}
   };
 }
