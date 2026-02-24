@@ -108,14 +108,19 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
   vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
   if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-    // Use cover pixel RGB (picking color). Normalize alpha to 0 or 1 so that the main
-    // picking pass can re-encode the layer index via blendColor without double-encoding.
-    color = vec4(pixel.rgb, step(0.5 / 255.0, pixel.a));
+    if (pixel.a > 0.0) {
+      // Cover has content - use it. Alpha=1.0 so the main picking pass
+      // can encode the layer index via blendColor.
+      color = vec4(pixel.rgb, 1.0);
+      return;
+    }
+    // Cover has no content at this pixel (e.g. viewport edge, zoom level).
+    // Fall through so the picking module renders the layer's own picking colors.
   } else {
     // pixel is premultiplied
     color = pixel + color * (1.0 - pixel.a);
+    return;
   }
-  return;
 }
     `
   },
@@ -152,14 +157,12 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
         sampler = fbo?.colorAttachments[0].texture;
-        if (opts.isPicking) {
-          // Never render the layer itself in picking pass
-          mode = TERRAIN_MODE.SKIP;
-        }
         if (sampler) {
-          mode = mode === TERRAIN_MODE.SKIP ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
+          mode = opts.isPicking ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
         } else {
+          // No cover FBO available (e.g. tile too small or viewport edge case).
+          // In picking, let the layer render its own picking colors (mode stays NONE).
           sampler = dummyHeightMap!;
         }
       }
