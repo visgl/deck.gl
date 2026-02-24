@@ -28,8 +28,6 @@ export type PopupWidgetProps = WidgetProps & {
   defaultIsOpen?: boolean;
   /** Anchor of the popup in world coordinates, e.g. [longitude, latitude]. */
   position: number[];
-  /** CSS style overrides of the popup */
-  style?: Partial<CSSStyleDeclaration>;
   /** Position popup relative to the anchor.
    * @default 'right'
    */
@@ -52,7 +50,7 @@ export type PopupWidgetProps = WidgetProps & {
    */
   closeOnClickOutside?: boolean;
   /** Callback when popup is opened/closed */
-  onOpenChanged?: (isOpen: boolean) => void;
+  onOpenChange?: (isOpen: boolean) => void;
 };
 
 export class PopupWidget extends Widget<PopupWidgetProps> {
@@ -69,7 +67,7 @@ export class PopupWidget extends Widget<PopupWidgetProps> {
     arrow: 10,
     closeButton: true,
     closeOnClickOutside: false,
-    onOpenChanged: () => {}
+    onOpenChange: () => {}
   };
 
   className = 'deck-widget-popup';
@@ -106,6 +104,7 @@ export class PopupWidget extends Widget<PopupWidgetProps> {
   protected _setIsOpen(isOpen: boolean) {
     if (this.isOpen === isOpen) return;
     this.isOpen = isOpen;
+    this.props.onOpenChange?.(isOpen);
     this.updateHTML();
   }
 
