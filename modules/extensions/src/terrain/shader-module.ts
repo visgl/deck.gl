@@ -107,20 +107,16 @@ if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
 if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
   vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-    if (pixel.a > 0.0) {
-      // Cover has content - use it. Alpha=1.0 so the main picking pass
-      // can encode the layer index via blendColor.
-      color = vec4(pixel.rgb, 1.0);
-      return;
-    }
-    // Cover has no content at this pixel (e.g. viewport edge, zoom level).
-    // Fall through so the picking module renders the layer's own picking colors.
-  } else {
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY && pixel.a > 0.0) {
+    // Cover has content - use it. Alpha=1.0 so the main picking pass
+    // can encode the layer index via blendColor.
+    color = vec4(pixel.rgb, 1.0);
+  } else if (terrain.mode == TERRAIN_MODE_USE_COVER) {
     // pixel is premultiplied
     color = pixel + color * (1.0 - pixel.a);
-    return;
   }
+  // USE_COVER_ONLY with no cover content: color already holds the layer's own picking color.
+  return;
 }
     `
   },
