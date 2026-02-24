@@ -96,7 +96,6 @@ export class TerrainEffect implements Effect {
       terrain: {
         project: otherShaderModuleProps.project,
         isPicking: this.isPicking,
-        pickable: Boolean(layer.props.pickable),
         heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
         heightMapBounds: this.heightMap?.bounds,
         dummyHeightMap: this.dummyHeightMap!,

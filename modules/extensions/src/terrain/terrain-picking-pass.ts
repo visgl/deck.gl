@@ -81,7 +81,10 @@ export class TerrainPickingPass extends PickLayersPass {
       parameters = super.getLayerParameters(layer, layerIndex, viewport);
       parameters.blend = true;
     }
-    return {...parameters, depthCompare: 'always'};
+    // Cover rendering must use 'constant' blend factor to correctly encode layer indices
+    // in the alpha channel. The main picking pass uses 'one' for terrain+draw layers to
+    // pass through the cover alpha, but the cover itself needs proper encoding.
+    return {...parameters, depthCompare: 'always', blendAlphaSrcFactor: 'constant'};
   }
 
   getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {

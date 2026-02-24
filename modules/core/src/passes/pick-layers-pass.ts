@@ -145,6 +145,12 @@ export default class PickLayersPass extends LayersPass {
       pickParameters.blend = true;
       // TODO: blendColor no longer part of luma.gl API
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      if (operation.includes('terrain')) {
+        // For terrain+draw layers, the terrain shader outputs the cover FBO pixel which
+        // already has correctly encoded alpha from the cover encoder (same layer ordering).
+        // Use srcFactor 'one' to pass through the cover alpha without double-encoding.
+        pickParameters.blendAlphaSrcFactor = 'one';
+      }
     } else if (operation.includes('terrain')) {
       // Pure terrain layers (without 'draw') don't need picking colors
       pickParameters.blend = false;

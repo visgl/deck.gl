@@ -15,7 +15,6 @@ import type {TerrainCover} from './terrain-cover';
 export type TerrainModuleProps = {
   project: ProjectProps;
   isPicking: boolean;
-  pickable?: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture;
@@ -28,7 +27,6 @@ export type TerrainModuleProps = {
 type TerrainModuleUniforms = {
   mode: number;
   bounds: [number, number, number, number];
-  pickable: number;
 };
 
 type TerrainModuleBindings = {
@@ -61,7 +59,6 @@ const uniformBlock =
 uniform terrainUniforms {
   float mode;
   vec4 bounds;
-  float pickable;
 } terrain;
 
 uniform sampler2D terrain_map;
@@ -110,17 +107,12 @@ if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
 if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
   vec2 texCoords = (commonPos.xy - terrain.bounds.xy) / terrain.bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY && pixel.a > 0.0) {
-    // Cover has content. When the terrain layer is pickable, normalize alpha to 1.0
-    // so the main picking pass can encode the layer index via blendColor.
-    // When not pickable (blend=false), pass through the cover alpha which already
-    // encodes the correct layer index from the cover encoder.
-    color = vec4(pixel.rgb, mix(pixel.a, 1.0, terrain.pickable));
-  } else if (terrain.mode == TERRAIN_MODE_USE_COVER) {
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
+    color = pixel;
+  } else {
     // pixel is premultiplied
     color = pixel + color * (1.0 - pixel.a);
   }
-  // USE_COVER_ONLY with no cover content: color already holds the layer's own picking color.
   return;
 }
     `
@@ -158,8 +150,12 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
         sampler = fbo?.colorAttachments[0].texture;
+        if (opts.isPicking) {
+          // Never render the layer itself in picking pass
+          mode = TERRAIN_MODE.SKIP;
+        }
         if (sampler) {
-          mode = opts.isPicking ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
+          mode = mode === TERRAIN_MODE.SKIP ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
         } else {
           sampler = dummyHeightMap!;
@@ -169,7 +165,6 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
       /* eslint-disable camelcase */
       return {
         mode,
-        pickable: opts.pickable ? 1 : 0,
         terrain_map: sampler,
         // Convert bounds to the common space, as [minX, minY, width, height]
         bounds: bounds
@@ -186,7 +181,6 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
   },
   uniformTypes: {
     mode: 'f32',
-    bounds: 'vec4<f32>',
-    pickable: 'f32'
+    bounds: 'vec4<f32>'
   }
 } as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
