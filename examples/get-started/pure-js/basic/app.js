@@ -4,22 +4,23 @@
 
 import {Deck} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const TILESET_URL = 'https://tile.googleapis.com/v1/3dtiles/root.json';
-const AIRPLANE_MODEL_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 
-// NYC area airports
-const AIRPORTS = [
-  {name: 'JFK', coordinates: [-73.7781, 40.6413]},
-  {name: 'LaGuardia', coordinates: [-73.874, 40.7769]},
-  {name: 'Newark', coordinates: [-74.1745, 40.6895]},
-  {name: 'Teterboro', coordinates: [-74.0608, 40.8501]},
-  {name: 'Westchester County', coordinates: [-73.7076, 41.067]}
-];
+const NY_DISTRICTS_DATA =
+  'https://raw.githubusercontent.com/nycehs/NYC_geography/master/CD.geo.json';
+
+// Colors for the 5 boroughs
+const BOROUGH_COLORS = {
+  Manhattan: [255, 100, 100, 160],
+  Bronx: [100, 255, 100, 160],
+  Brooklyn: [100, 100, 255, 160],
+  Queens: [255, 200, 50, 160],
+  'Staten Island': [200, 100, 255, 160]
+};
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.7128,
@@ -53,59 +54,27 @@ const deck = new Deck({
     }
   },
   getTooltip: info => {
+    //if (info.object?.properties) {
+    //  const {GEONAME, BOROUGH} = info.object.properties;
+    //  return {
+    //    html: `<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+    //      <b>${GEONAME}</b><br/>${BOROUGH}
+    //    </div>`,
+    //    style: {padding: '0'}
+    //  };
+    //}
     if (info.picked && info.coordinate && info.coordinate.length === 3) {
       const altitude = info.coordinate[2];
       return {
         html: `<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
           Altitude: ${altitude.toFixed(1)} m
         </div>`,
-        style: {
-          padding: '0'
-        }
+        style: {padding: '0'}
       };
     }
     return null;
   },
-  layers: [
-    new Tile3DLayer({
-      id: 'google-3d-tiles',
-      data: TILESET_URL,
-      pickable: '3d',
-      onTilesetLoad: tileset3d => {
-        tileset3d.options.onTraversalComplete = selectedTiles => {
-          return selectedTiles;
-          const uniqueCredits = new Set();
-          selectedTiles.forEach(tile => {
-            const {copyright} = tile.content.gltf.asset;
-            copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
-          });
-          const creditsText = [...uniqueCredits].join('; ');
-          // Display credits in console
-          return selectedTiles;
-        };
-      },
-      loadOptions: {
-        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
-      },
-      operation: 'terrain+draw'
-    }),
-    new ScenegraphLayer({
-      id: 'airports',
-      data: AIRPORTS,
-      pickable: true,
-      scenegraph: AIRPLANE_MODEL_URL,
-      sizeScale: 10,
-      sizeMinPixels: 2,
-      sizeMaxPixels: 50,
-      _animations: {
-        '*': {speed: 1}
-      },
-      getPosition: d => [...d.coordinates, 2000],
-      getOrientation: d => [0, 0, 90], // pitch, yaw, roll
-      getScale: [1, 1, 1],
-      _lighting: 'pbr'
-    })
-  ]
+  layers: []
 });
 
 // Export for debugging
@@ -129,10 +98,10 @@ tilesToggle.style.marginRight = '10px';
 tilesToggle.style.padding = '5px 10px';
 tilesToggle.style.cursor = 'pointer';
 
-const airportsToggle = document.createElement('button');
-airportsToggle.textContent = 'Hide Planes';
-airportsToggle.style.padding = '5px 10px';
-airportsToggle.style.cursor = 'pointer';
+const districtsToggle = document.createElement('button');
+districtsToggle.textContent = 'Hide Districts';
+districtsToggle.style.padding = '5px 10px';
+districtsToggle.style.cursor = 'pointer';
 
 // Add rotation pivot mode selector
 const pivotLabel = document.createElement('div');
@@ -178,13 +147,13 @@ pivotOptions.style.gap = '5px';
 });
 
 controls.appendChild(tilesToggle);
-controls.appendChild(airportsToggle);
+controls.appendChild(districtsToggle);
 controls.appendChild(pivotLabel);
 controls.appendChild(pivotOptions);
 document.body.appendChild(controls);
 
 let tilesVisible = true;
-let airportsVisible = true;
+let districtsVisible = true;
 
 tilesToggle.onclick = () => {
   tilesVisible = !tilesVisible;
@@ -192,9 +161,9 @@ tilesToggle.onclick = () => {
   updateLayers();
 };
 
-airportsToggle.onclick = () => {
-  airportsVisible = !airportsVisible;
-  airportsToggle.textContent = airportsVisible ? 'Hide Planes' : 'Show Planes';
+districtsToggle.onclick = () => {
+  districtsVisible = !districtsVisible;
+  districtsToggle.textContent = districtsVisible ? 'Hide Districts' : 'Show Districts';
   updateLayers();
 };
 
@@ -215,22 +184,18 @@ function updateLayers() {
       },
       operation: 'terrain+draw'
     }),
-    new ScenegraphLayer({
-      id: 'airports',
-      data: AIRPORTS,
+    new GeoJsonLayer({
+      id: 'ny-districts',
+      data: NY_DISTRICTS_DATA,
+      visible: districtsVisible,
+      extensions: [new TerrainExtension()],
+      stroked: true,
+      filled: true,
+      getFillColor: ({properties}) => BOROUGH_COLORS[properties.BOROUGH] || [200, 200, 200, 160],
+      getLineColor: [255, 255, 255, 200],
+      getLineWidth: 50,
       pickable: true,
-      visible: airportsVisible,
-      scenegraph: AIRPLANE_MODEL_URL,
-      sizeScale: 10,
-      sizeMinPixels: 2,
-      sizeMaxPixels: 50,
-      _animations: {
-        '*': {speed: 1}
-      },
-      getPosition: d => [...d.coordinates, 2000],
-      getOrientation: d => [0, 0, 90], // pitch, yaw, roll
-      getScale: [1, 1, 1],
-      _lighting: 'pbr'
+      opacity: 0.6
     })
   ];
 
@@ -256,3 +221,5 @@ function updateLayers() {
 
   deck.setProps({layers});
 }
+
+updateLayers();
