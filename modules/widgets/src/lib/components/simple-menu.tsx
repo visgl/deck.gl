@@ -4,17 +4,20 @@ const MENU_STYLE: JSX.CSSProperties = {
   position: 'absolute',
   top: '100%',
   left: 0,
+  minWidth: '160px',
   background: 'white',
   border: '1px solid #ccc',
   borderRadius: '4px',
   marginTop: 'var(--menu-gap, 4px)',
+  whiteSpace: 'nowrap',
+  boxShadow: '2px 2px 8px rgba(0,0,0,0.15)',
   zIndex: 100
 };
 
 const MENU_ITEM_STYLE: JSX.CSSProperties = {
   background: 'white',
   border: 'none',
-  padding: '4px',
+  padding: '6px',
   cursor: 'pointer',
   pointerEvents: 'auto'
 };
