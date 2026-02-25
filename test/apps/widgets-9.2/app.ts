@@ -120,7 +120,7 @@ const deck = new Deck({
           ]
         );
       },
-      onMenuItemSelected: console.log,
+      onMenuItemSelected: console.log
     }),
     new _InfoWidget({mode: 'hover', getTooltip, arrow: 10, offset: 10}),
     new PopupWidget({
