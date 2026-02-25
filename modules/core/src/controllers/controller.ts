@@ -122,7 +122,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
   protected makeViewport: (opts: Record<string, any>) => Viewport;
-  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -172,7 +171,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onViewStateChange = opts.onViewStateChange || (() => {});
     this.onStateChange = opts.onStateChange || (() => {});
     this.makeViewport = opts.makeViewport;
-    this.pickPosition = opts.pickPosition;
   }
 
   set events(customEvents) {

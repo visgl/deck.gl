@@ -542,6 +542,16 @@ export default class MapController extends Controller<MapState> {
    */
   protected rotationPivot: 'center' | '2d' | '3d' = 'center';
 
+  /**
+   * Internal callback to access deck picking engine. Populated by ViewManager
+   */
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+
+  constructor(opts: ConstructorParameters<typeof Controller>[0]) {
+    super(opts);
+    this.pickPosition = opts.pickPosition;
+  }
+
   setProps(props: ControllerProps & MapStateProps & {rotationPivot?: 'center' | '2d' | '3d'}) {
     if ('rotationPivot' in props) {
       this.rotationPivot = props.rotationPivot || 'center';
