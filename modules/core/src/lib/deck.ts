@@ -381,6 +381,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         _cachePipelines: true,
         ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
+          // Sync drawing buffer dimensions with externally-managed canvas
+          const {width, height} = canvasContext.canvas;
+          canvasContext.setDrawingBufferSize(width, height);
+
           this._needsRedraw = 'Canvas resized';
           userOnResize?.(canvasContext, info);
         }
