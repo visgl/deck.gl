@@ -416,33 +416,44 @@
 
 /* Stats styles */
 .deck-widget-stats-container {
-  border-radius: var(--button-corner-radius, 4px);
+  border-radius: var(--button-corner-radius, 8px);
   display: inline-flex;
   flex-direction: column;
-  padding: 4px;
   font-size: 0.7rem;
   /* Approximately 14px */
   line-height: 1.6;
-  font-family:
-    'SF Mono',
-    /* macOS */ 'Menlo',
-    /* macOS */ 'Consolas',
-    /* Windows */ 'DejaVu Sans Mono',
-    /* Linux */ 'Liberation Mono',
-    /* Linux */ monospace;
-  background-color: var(--button-background, #fff);
-  color: var(--button-text, rgb(24, 24, 26));
+  font-family: monospace;
+  background-color: var(--menu-background, #fff);
+  color: var(--menu-text, rgb(24, 24, 26));
+  box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+}
+.deck-widget-stats-header {
+  color: var(--button-icon-idle, rgba(97, 97, 102, 1));
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.deck-widget-stats-header:hover {
+  color: var(--button-icon-hover, rgb(24, 24, 26));
+}
+.deck-widget-stats-header .deck-widget-dropdown-button {
+  background: none;
+  border: none;
+}
+.deck-widget-stats-content {
+  padding: 4px 8px 8px;
 }
 
 /* Popup styles */
 .deck-widget.deck-widget-popover {
   margin: 0 !important;
-  box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
 }
 .deck-widget-popup-content {
   border-radius: var(--button-corner-radius, 8px);
   background: var(--menu-background, #fff);
   color: var(--menu-text, rgb(24, 24, 26));
+  box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
   padding: 10px;
 }
 .deck-widget-popup-content .deck-widget-popup-controls {
