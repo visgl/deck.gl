@@ -67,10 +67,7 @@ export default class LayersPass extends Pass {
 
   render(options: LayersPassRenderOptions): any {
     const canvasContext = this.device.canvasContext!;
-    // Flush any deferred drawing buffer resize before rendering (luma.gl 9.3+)
-    if (!options.target) {
-      canvasContext.getCurrentFramebuffer();
-    }
+    const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
@@ -89,7 +86,7 @@ export default class LayersPass extends Pass {
     }
 
     const renderPass = this.device.beginRenderPass({
-      framebuffer: options.target,
+      framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,
       clearDepth,
