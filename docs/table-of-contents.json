@@ -325,6 +325,7 @@
           "api-reference/widgets/gimbal-widget",
           "api-reference/widgets/info-widget",
           "api-reference/widgets/loading-widget",
+          "api-reference/widgets/popup-widget",
           "api-reference/widgets/reset-view-widget",
           "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
