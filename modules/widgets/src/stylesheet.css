@@ -370,7 +370,6 @@
 }
 
 .deck-widget .deck-widget-dropdown-menu {
-  position: absolute;
   top: calc(100% + var(--menu-gap, 4px));
   left: 1px;
   right: 1px;
@@ -389,14 +388,16 @@
 
 .deck-widget .deck-widget-dropdown-item {
   padding: 8px 12px;
-  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
+  cursor: default;
+  user-select: none;
   text-overflow: ellipsis;
   color: var(--menu-text, rgb(24, 24, 26));
 }
 
-.deck-widget .deck-widget-dropdown-item:hover {
+.deck-widget .deck-widget-dropdown-item:not(.disabled):hover {
+  cursor: pointer;
   background: var(--menu-item-hover, rgba(128, 128, 128, 0.15));
 }
 

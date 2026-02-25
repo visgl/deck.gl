@@ -62,9 +62,10 @@ export {
 } from './lib/components/grouped-icon-button';
 export {
   DropdownMenu as _DropdownMenu,
-  type DropdownMenuProps
+  type DropdownMenuProps,
+  SimpleMenu as _SimpleMenu,
+  type SimpleMenuProps
 } from './lib/components/dropdown-menu';
-export {SimpleMenu as _SimpleMenu, type SimpleMenuProps} from './lib/components/simple-menu';
 export {IconMenu as _IconMenu, type IconMenuProps} from './lib/components/icon-menu';
 
 // Experimental geocoders. May be removed, use at your own risk!

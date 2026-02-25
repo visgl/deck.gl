@@ -111,16 +111,16 @@ const deck = new Deck({
     new _ContextMenuWidget({
       getMenuItems: (info: PickingInfo) => {
         const name = info.layer?.id === 'airports' && info.object?.properties.name;
-        console.log('Context menu:', name);
         return (
           name && [
-            {key: 'airport', label: `${name}`},
-            {key: 'open', label: 'Open in new tab'},
-            {key: 'favorite', label: 'Set as favorite'},
-            {key: 'filter', label: 'Exclude from filter'}
+            {label: `Airport: ${name}`},
+            {value: 'open', label: 'Open in new tab'},
+            {value: 'favorite', label: 'Set as favorite'},
+            {value: 'filter', label: 'Exclude from filter'}
           ]
         );
-      }
+      },
+      onMenuItemSelected: console.log,
     }),
     new _InfoWidget({mode: 'hover', getTooltip, arrow: 10, offset: 10}),
     new PopupWidget({
