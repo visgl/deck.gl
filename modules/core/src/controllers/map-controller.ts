@@ -534,7 +534,18 @@ export default class MapController extends Controller<MapState> {
 
   dragMode: 'pan' | 'rotate' = 'pan';
 
-  setProps(props: ControllerProps & MapStateProps) {
+  /**
+   * Rotation pivot behavior:
+   * - 'center': Rotate around viewport center (default)
+   * - '2d': Rotate around pointer position at ground level (z=0)
+   * - '3d': Rotate around 3D picked point (requires pickPosition callback)
+   */
+  protected rotationPivot: 'center' | '2d' | '3d' = 'center';
+
+  setProps(props: ControllerProps & MapStateProps & {rotationPivot?: 'center' | '2d' | '3d'}) {
+    if ('rotationPivot' in props) {
+      this.rotationPivot = props.rotationPivot || 'center';
+    }
     props.position = props.position || [0, 0, 0];
     const oldProps = this.props;
 
@@ -553,9 +564,6 @@ export default class MapController extends Controller<MapState> {
     }
   }
 
-  /**
-   * Override updateViewport to inject rotation pivot position for visual feedback
-   */
   protected updateViewport(
     newControllerState: MapState,
     extraProps: Record<string, any> | null = null,
@@ -564,10 +572,9 @@ export default class MapController extends Controller<MapState> {
     // Inject rotation pivot position during rotation for visual feedback
     const state = newControllerState.getState();
     if (interactionState.isDragging && state.startRotateLngLat) {
-      const pivotPos = state.startRotateLngLat;
       interactionState = {
         ...interactionState,
-        rotationPivotPosition: pivotPos
+        rotationPivotPosition: state.startRotateLngLat
       };
     } else if (interactionState.isDragging === false) {
       // Clear pivot when drag ends
