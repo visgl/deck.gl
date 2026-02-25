@@ -29,6 +29,9 @@
   padding: 1px;
   gap: 1px;
 }
+.deck-widget-button-group > .deck-widget-button {
+  display: contents;
+}
 
 .deck-widget-button-group.vertical {
   display: inline-flex;
