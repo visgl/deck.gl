@@ -74,8 +74,21 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   handleZoom(viewport: Viewport, nextZoom: number) {
     const viewId = this.viewId || viewport?.id || 'default-view';
+
+    // Respect minZoom/maxZoom constraints from the view state
+    const viewState = this.getViewState(viewId);
+    if (viewState) {
+      const {minZoom, maxZoom} = viewState as any;
+      if (Number.isFinite(minZoom)) {
+        nextZoom = Math.max(minZoom, nextZoom);
+      }
+      if (Number.isFinite(maxZoom)) {
+        nextZoom = Math.min(maxZoom, nextZoom);
+      }
+    }
+
     const nextViewState: Record<string, unknown> = {
-      ...viewport,
+      ...viewState,
       zoom: nextZoom
     };
     if (this.props.transitionDuration > 0) {
@@ -100,11 +113,5 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     for (const viewport of Object.values(this.viewports)) {
       this.handleZoom(viewport, viewport.zoom - 1);
     }
-  }
-
-  /** @todo - move to deck or widget manager */
-  private setViewState(viewId: string, viewState: Record<string, unknown>): void {
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
   }
 }

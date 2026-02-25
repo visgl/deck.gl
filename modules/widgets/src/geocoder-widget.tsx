@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget} from '@deck.gl/core';
-import type {WidgetPlacement, Viewport, WidgetProps} from '@deck.gl/core';
+import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
 import {DropdownMenu, type MenuItem} from './lib/components/dropdown-menu';
@@ -157,7 +157,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
     try {
       const coordinates = await CurrentLocationGeocoder.geocode();
       if (coordinates) {
-        this.setViewState(coordinates);
+        this.flyTo(coordinates);
       }
     } catch (error) {
       this.geocodeHistory.errorText = error instanceof Error ? error.message : 'Location error';
@@ -181,16 +181,15 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       this.updateHTML();
     }
     if (coordinates) {
-      this.setViewState(coordinates);
+      this.flyTo(coordinates);
     }
   };
 
-  // TODO - MOVE TO WIDGETIMPL?
-  setViewState(viewState: ViewState) {
+  flyTo(viewState: ViewState) {
     const viewId = this.props.viewId || (viewState?.id as string) || 'default-view';
-    const viewport = this.viewports[viewId] || {};
+    const currentViewState = this.getViewState(viewId);
     const nextViewState: ViewState = {
-      ...viewport,
+      ...currentViewState,
       ...viewState
     };
     if (this.props.transitionDuration > 0) {
@@ -199,15 +198,8 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
         'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
     }
 
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+    this.setViewState(viewId, nextViewState);
   }
-
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-  }
-
-  viewports: Record<string, Viewport> = {};
 }
 
 function getGeocoder(props: {geocoder?: string; customGeocoder?: Geocoder}): Geocoder {
