@@ -10,7 +10,7 @@
 import {MODULE_VERSION, MODULE_NAME} from './version';
 // TODO - this should be placed in a separate module `@deck.gl/playground`
 import {createDeck, updateDeck} from './playground/create-deck';
-import {initPlayground} from './playground';
+import {initPlayground} from './playground/playground';
 import jupyterTransport from './lib/jupyter-transport';
 import JupyterTransportModel from './lib/jupyter-transport-model';
 import JupyterTransportView from './lib/jupyter-transport-view';
