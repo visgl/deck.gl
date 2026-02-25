@@ -1,7 +1,7 @@
 
 # PopupWidget
 
-<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.3" />
 
 This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
 
@@ -100,6 +100,16 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 
 * Default: `10`
 
+## Styles
+
+Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+
+| Name            | Type                     | Default                                         |
+| --------------- | ------------------------ | ----------------------------------------------- |
+| `--icon-close` | [SVG Data Url][data_url] | [Material Symbol Close][close_icon_url] |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[close_icon_url]: https://fonts.google.com/icons?selected=Material+Symbols+Outlined:close:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=picture&icon.size=24&icon.color=%23000000
 
 ## Source
 
