@@ -381,14 +381,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         _cachePipelines: true,
         ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
-          // Manually sync drawing buffer dimensions (canvas is externally managed)
-          // TODO(v9.3): Use canvasContext.setDrawingBufferSize(width, height) when upgrading to luma 9.3+
-          const {width, height} = canvasContext.canvas;
-          // @ts-ignore - accessing public properties to sync state
-          canvasContext.drawingBufferWidth = width;
-          // @ts-ignore
-          canvasContext.drawingBufferHeight = height;
-
           this._needsRedraw = 'Canvas resized';
           userOnResize?.(canvasContext, info);
         }
