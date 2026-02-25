@@ -7,9 +7,6 @@ import {luma} from '@luma.gl/core';
 import {render} from 'preact';
 import type {Stats, Stat} from '@probe.gl/stats';
 
-const RIGHT_ARROW = '\u25b6';
-const DOWN_ARROW = '\u2b07';
-
 const DEFAULT_COUNT_FORMATTER = (stat: Stat): string => `${stat.name}: ${stat.count}`;
 
 function formatTime(time: number): string {
@@ -36,6 +33,10 @@ export type StatsWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Type of stats to display. */
   type?: 'deck' | 'luma' | 'device' | 'custom';
+  /** Expand the stats UI by default.
+   * @default false
+   */
+  defaultIsExpanded?: boolean;
   /** Stats object to visualize. */
   stats?: Stats;
   /** Title shown in the header of the pop-up. Defaults to stats.id. */
@@ -55,6 +56,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     type: 'deck',
     placement: 'top-left',
     viewId: null,
+    defaultIsExpanded: false,
     stats: undefined!,
     title: 'Stats',
     framesPerUpdate: 1,
@@ -75,6 +77,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
+    this.collapsed = !props.defaultIsExpanded;
     this.setProps(props);
   }
 
@@ -127,7 +130,10 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
           style={{cursor: 'pointer', pointerEvents: 'auto'}}
           onClick={this._toggleCollapsed}
         >
-          {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
+          <b>{title}</b>
+          <button className="deck-widget-dropdown-button">
+            <span className={`deck-widget-dropdown-icon ${collapsed ? '' : 'open'}`} />
+          </button>
         </div>
         {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
       </div>,
