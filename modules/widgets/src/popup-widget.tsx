@@ -141,10 +141,17 @@ export class PopupWidget extends Widget<PopupWidgetProps> {
               className={`deck-widget-popup-content ${this.props.className}`}
               style={style as JSX.CSSProperties}
             >
-              <IconButton
-                className="deck-widget-popup-close-button"
-                onClick={() => this._setIsOpen(false)}
-              />
+              {this.props.closeButton && (
+                <div
+                  className="deck-widget-popup-controls"
+                  style={{width: '100%', display: 'flex', justifyContent: 'end'}}
+                >
+                  <IconButton
+                    className="deck-widget-popup-close-button"
+                    onClick={() => this._setIsOpen(false)}
+                  />
+                </div>
+              )}
               <UserContent {...(typeof content === 'string' ? {text: content} : content)} />
             </div>
           </Popover>

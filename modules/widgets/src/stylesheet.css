@@ -442,14 +442,14 @@
 .deck-widget-popup-content {
   border-radius: var(--button-corner-radius, 8px);
   background: var(--menu-background, #fff);
+  color: var(--menu-text, rgb(24, 24, 26));
   padding: 10px;
 }
-.deck-widget-popup-content > .deck-widget-button {
+.deck-widget-popup-content .deck-widget-popup-controls {
   --button-size: 20px;
+}
+.deck-widget-popup-content .deck-widget-popup-controls .deck-widget-button {
   box-shadow: none;
-  width: 100%;
-  display: flex;
-  justify-content: end;
 }
 .deck-widget-popup-content button.deck-widget-popup-close-button .deck-widget-icon {
   mask-image: var(
