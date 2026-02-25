@@ -295,7 +295,6 @@ export default class WebMercatorViewport extends Viewport {
     const targetZ = coords[2] || 0;
 
     // Where does this pixel currently point to at the target altitude?
-    // @ts-ignore
     const fromLngLat = this.unproject(pixel, {targetZ});
 
     // What's the difference between where we want (coords) and where we are (fromLngLat)?

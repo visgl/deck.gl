@@ -129,7 +129,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
   protected makeViewport: (opts: Record<string, any>) => Viewport;
-  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -138,7 +138,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   };
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
-  protected _panMove: boolean = false;
+  private _panMove: boolean = false;
 
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
@@ -301,8 +301,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
-    if (props.rotationPivot) {
-      this.rotationPivot = props.rotationPivot;
+    if ('rotationPivot' in props) {
+      this.rotationPivot = props.rotationPivot || 'center';
     }
     this.props = props;
 
@@ -413,12 +413,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       alternateMode = !alternateMode;
     }
 
-    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos
-    });
+    const newControllerState = alternateMode
+      ? this.controllerState.panStart({pos})
+      : this.controllerState.rotateStart(this._getRotateStartParams(pos));
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
+  }
+
+  /** Returns parameters for rotateStart. Override to add extra params (e.g. altitude). */
+  protected _getRotateStartParams(pos: [number, number]): {pos: [number, number]} {
+    return {pos};
   }
 
   // Default handler for the `panmove` and `panend` event.
