@@ -91,9 +91,7 @@ export class TerrainEffect implements Effect {
     otherShaderModuleProps: Record<string, any>
   ): {terrain: TerrainModuleProps} {
     const {terrainDrawMode} = layer.state;
-    const terrainCover = this.isDrapingEnabled
-      ? (this.terrainCovers.get(layer.id) ?? null)
-      : null;
+    const terrainCover = this.isDrapingEnabled ? (this.terrainCovers.get(layer.id) ?? null) : null;
 
     // Communicate cover FBO availability to getLayerParameters for blend factor selection
     if (this.isPicking && layer.props.operation.includes('terrain')) {
