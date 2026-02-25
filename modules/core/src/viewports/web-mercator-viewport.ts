@@ -290,23 +290,9 @@ export default class WebMercatorViewport extends Viewport {
    * This version handles the z-component (altitude) properly for cameras positioned above ground
    */
   panByPosition3D(coords: number[], pixel: number[]): WebMercatorViewportOptions {
-    // coords is [lng, lat, altitude] - we want to keep this at pixel position
-    // Use the altitude from coords for unprojection
     const targetZ = coords[2] || 0;
-
-    // Where does this pixel currently point to at the target altitude?
-    // @ts-ignore
-    const fromLngLat = this.unproject(pixel, {targetZ});
-
-    // What's the difference between where we want (coords) and where we are (fromLngLat)?
-    const deltaLng = coords[0] - fromLngLat[0];
-    const deltaLat = coords[1] - fromLngLat[1];
-
-    // Adjust the viewport center by this delta
-    return {
-      longitude: this.longitude + deltaLng,
-      latitude: this.latitude + deltaLat
-    };
+    const deltaLngLat = vec2.sub([], coords, this.unproject(pixel, {targetZ}));
+    return {longitude: this.longitude + deltaLngLat[0], latitude: this.latitude + deltaLngLat[1]};
   }
 
   getBounds(options: {z?: number} = {}): [number, number, number, number] {

@@ -65,13 +65,6 @@ export type ControllerOptions = {
   dragMode?: 'pan' | 'rotate';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
-  /**
-   * Rotation pivot behavior:
-   * - 'center': Rotate around viewport center (default)
-   * - '2d': Rotate around pointer position at ground level (z=0)
-   * - '3d': Rotate around 3D picked point (requires pickPosition callback)
-   */
-  rotationPivot?: 'center' | '2d' | '3d';
 };
 
 export type ControllerProps = {
@@ -129,7 +122,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
   protected makeViewport: (opts: Record<string, any>) => Viewport;
-  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -138,12 +130,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   };
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
-  protected _panMove: boolean = false;
+  private _panMove: boolean = false;
 
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
   protected inertia: number = 0;
-  protected rotationPivot: 'center' | '2d' | '3d' = 'center';
   protected scrollZoom: boolean | {speed?: number; smooth?: boolean} = true;
   protected dragPan: boolean = true;
   protected dragRotate: boolean = true;
@@ -180,7 +171,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onViewStateChange = opts.onViewStateChange || (() => {});
     this.onStateChange = opts.onStateChange || (() => {});
     this.makeViewport = opts.makeViewport;
-    this.pickPosition = opts.pickPosition;
   }
 
   set events(customEvents) {
@@ -301,9 +291,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
-    if (props.rotationPivot) {
-      this.rotationPivot = props.rotationPivot;
-    }
     this.props = props;
 
     if (!('transitionInterpolator' in props)) {
@@ -413,12 +400,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       alternateMode = !alternateMode;
     }
 
-    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos
-    });
+    const newControllerState = alternateMode
+      ? this.controllerState.panStart({pos})
+      : this.controllerState.rotateStart(this._getRotateStartParams(pos));
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
+  }
+
+  /** Returns parameters for rotateStart. Override to add extra params (e.g. altitude). */
+  protected _getRotateStartParams(pos: [number, number]): {pos: [number, number]} {
+    return {pos};
   }
 
   // Default handler for the `panmove` and `panend` event.
