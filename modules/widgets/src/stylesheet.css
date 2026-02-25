@@ -437,6 +437,12 @@
 /* Popup styles */
 .deck-widget.deck-widget-popover {
   margin: 0 !important;
+  box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+}
+.deck-widget-popup-content {
+  border-radius: var(--button-corner-radius, 8px);
+  background: var(--menu-background, #fff);
+  padding: 10px;
 }
 .deck-widget-popup-content > .deck-widget-button {
   --button-size: 20px;

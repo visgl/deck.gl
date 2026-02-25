@@ -98,12 +98,9 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
 
     const style = {
       pointerEvents: 'auto',
-      background: 'white',
-      boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.15)',
       position: 'static',
       ...this.props.style
     };
-    const background = style.backgroundColor || style.background || 'white';
 
     const ui = (
       <Popover
@@ -111,7 +108,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
         y={pickInfo.y}
         placement={this.props.placement}
         arrow={this.props.arrow}
-        arrowColor={background}
+        arrowColor="var(--menu-background, #fff)"
         offset={this.props.offset}
       >
         <SimpleMenu

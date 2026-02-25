@@ -131,7 +131,6 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
     };
     // Project the clicked geographic coordinate to canvas (x, y)
     const [x, y] = this.viewport.project(this.tooltip.position);
-    const background = style.backgroundColor || style.background || 'white';
 
     // Render the popup container with a content box and a placeholder for the arrow.
     // The container is positioned absolutely (initially at 0,0) and will be repositioned after measuring.
@@ -141,17 +140,12 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
         y={y}
         placement={this.props.placement}
         arrow={this.props.arrow}
-        arrowColor={background}
+        arrowColor="var(--menu-background, #fff)"
         offset={this.props.offset}
       >
         <UserContent
           className={`deck-widget-popup-content ${this.tooltip.className} ${this.props.className}`}
-          style={{
-            background,
-            padding: '10px',
-            boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.15)',
-            ...(style as JSX.CSSProperties)
-          }}
+          style={style as JSX.CSSProperties}
           html={this.tooltip.html}
           text={this.tooltip.text}
           element={this.tooltip.element}
