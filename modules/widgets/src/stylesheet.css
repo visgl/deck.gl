@@ -370,7 +370,6 @@
 }
 
 .deck-widget .deck-widget-dropdown-menu {
-  position: absolute;
   top: calc(100% + var(--menu-gap, 4px));
   left: 1px;
   right: 1px;
@@ -389,14 +388,16 @@
 
 .deck-widget .deck-widget-dropdown-item {
   padding: 8px 12px;
-  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
+  cursor: default;
+  user-select: none;
   text-overflow: ellipsis;
   color: var(--menu-text, rgb(24, 24, 26));
 }
 
-.deck-widget .deck-widget-dropdown-item:hover {
+.deck-widget .deck-widget-dropdown-item:not(.disabled):hover {
+  cursor: pointer;
   background: var(--menu-item-hover, rgba(128, 128, 128, 0.15));
 }
 
@@ -431,4 +432,32 @@
     /* Linux */ monospace;
   background-color: var(--button-background, #fff);
   color: var(--button-text, rgb(24, 24, 26));
+}
+
+/* Popup styles */
+.deck-widget.deck-widget-popover {
+  margin: 0 !important;
+  box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+}
+.deck-widget-popup-content {
+  border-radius: var(--button-corner-radius, 8px);
+  background: var(--menu-background, #fff);
+  padding: 10px;
+}
+.deck-widget-popup-content > .deck-widget-button {
+  --button-size: 20px;
+  box-shadow: none;
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+.deck-widget-popup-content button.deck-widget-popup-close-button .deck-widget-icon {
+  mask-image: var(
+    --icon-close,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -120 120 120" fill="black"><path d="m32-25-7-7 28-28-28-28 7-7 28 28 28-28 7 7-28 28 28 28-7 7-28-28-28 28Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-close,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -120 120 120" fill="black"><path d="m32-25-7-7 28-28-28-28 7-7 28 28 28-28 7 7-28 28 28 28-7 7-28-28-28 28Z"/></svg>')
+  );
 }
