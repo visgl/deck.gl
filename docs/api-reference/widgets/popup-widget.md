@@ -27,7 +27,7 @@ new Deck({
 
 ## Types
 
-### `PopupWidgetProps` {#infowidgetprops}
+### `PopupWidgetProps` {#popupwidgetprops}
 
 The `PopupWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
@@ -35,7 +35,7 @@ The `PopupWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
 
 Anchor of the popup in world coordinates, e.g. [longitude, latitude].
 
-#### content (object) {content}
+#### content (object) {#content}
 
 Content to display in the popup. The object may contain the following fields:
 
