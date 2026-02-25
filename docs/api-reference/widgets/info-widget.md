@@ -1,20 +1,15 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_InfoWidget} from '@deck.gl/widgets';
 
 # InfoWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {InfoWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<InfoWidgetDemo />
+
 This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
 
 ## Usage
-
-<WidgetPreview cls={_InfoWidget} props={{
-  visible: true,
-  position: [0, 0],
-  text: "Info",
-  style: {width: 50, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
-}}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';

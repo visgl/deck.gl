@@ -1,7 +1,10 @@
-
 # PopupWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.3" />
+
+import {PopupWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<PopupWidgetDemo />
 
 This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
 

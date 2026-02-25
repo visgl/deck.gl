@@ -1,15 +1,15 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ResetViewWidget} from '@deck.gl/widgets';
-
 # ResetViewWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ResetViewWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<ResetViewWidgetDemo />
 
 This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
 
 ## Usage
 
-<WidgetPreview cls={ResetViewWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';

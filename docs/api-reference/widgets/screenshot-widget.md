@@ -1,9 +1,10 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ScreenshotWidget} from '@deck.gl/widgets';
-
 # ScreenshotWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ScreenshotWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<ScreenshotWidgetDemo />
 
 This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
 
@@ -13,8 +14,6 @@ It is possible to use `props.onCapture` to integrate with more advanced screen c
 :::
 
 ## Usage
-
-<WidgetPreview cls={ScreenshotWidget}/>
 
 ```ts
 import {ScreenshotWidget} from '@deck.gl/widgets';

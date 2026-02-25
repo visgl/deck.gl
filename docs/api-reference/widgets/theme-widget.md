@@ -1,10 +1,10 @@
-import BrowserOnly from '@docusaurus/BrowserOnly';
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_ThemeWidget} from '@deck.gl/widgets';
-
 # ThemeWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ThemeWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<ThemeWidgetDemo />
 
 This widget changes the theme of deck.gl between light mode and dark mode. Click the widget to toggle the theme.
 
@@ -14,8 +14,6 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 :::
 
 ## Usage
-
-<BrowserOnly>{() => <WidgetPreview cls={_ThemeWidget}/>}</BrowserOnly>
 
 ```ts
 import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';

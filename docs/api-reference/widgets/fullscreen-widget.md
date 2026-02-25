@@ -1,19 +1,19 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {FullscreenWidget} from '@deck.gl/widgets';
-
 # FullscreenWidget
 
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
+import {FullscreenWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<FullscreenWidgetDemo />
 
 This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
 
 ## Usage
 
-<WidgetPreview cls={FullscreenWidget}/>
-
 ```ts
 import {Deck} from '@deck.gl/core';
 import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [new FullscreenWidget()]

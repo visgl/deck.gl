@@ -1,19 +1,20 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {CompassWidget} from '@deck.gl/widgets';
-
 # CompassWidget
 
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
+
+import {CompassWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<CompassWidgetDemo />
 
 This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports Map and Globe view.
 
 ## Usage
 
-<WidgetPreview cls={CompassWidget}/>
-
 ```ts
 import {Deck} from '@deck.gl/core';
 import {CompassWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [new CompassWidget()]

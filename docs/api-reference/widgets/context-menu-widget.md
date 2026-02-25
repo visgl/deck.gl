@@ -1,11 +1,14 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
-
 # ContextMenuWidget (Experimental)
+
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ContextMenuWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<ContextMenuWidgetDemo />
 
 Displays a context menu on right-click events with customizable menu items based on picked objects.
 
-<WidgetPreview cls={ContextMenuWidget}/>
+## Usage
 
 ```ts
 import {Deck} from '@deck.gl/core';

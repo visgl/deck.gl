@@ -1,15 +1,14 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
-
 # StatsWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {StatsWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<StatsWidgetDemo />
+
 Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget. When collapsed, it shows the current FPS in a compact button UI.
 
 ## Usage
-
-<WidgetPreview cls={StatsWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';

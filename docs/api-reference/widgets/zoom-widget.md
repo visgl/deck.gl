@@ -1,15 +1,14 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ZoomWidget} from '@deck.gl/widgets';
-
 # ZoomWidget
 
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
+import {ZoomWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<ZoomWidgetDemo />
+
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
 
 ## Usage
-
-<WidgetPreview cls={ZoomWidget} props={{orientation: 'horizontal'}}/>
 
 ```ts
 import {ZoomWidget} from '@deck.gl/widgets';
