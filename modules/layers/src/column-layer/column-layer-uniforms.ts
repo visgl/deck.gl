@@ -26,7 +26,7 @@ uniform columnUniforms {
 export type ColumnProps = {
   radius: number;
   angle: number;
-  offset: [number, number];
+  offset: Readonly<[number, number]>;
   extruded: boolean;
   stroked: boolean;
   isStroke: boolean;

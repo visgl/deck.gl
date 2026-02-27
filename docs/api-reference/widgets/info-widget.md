@@ -23,10 +23,10 @@ import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
 new Deck({
   widgets: [
     new InfoWidget({
-      visible: true,
-      position: [0.45, 51.47],
-      text: "Info",
-      style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+      getTooltip: (info) => ({
+        text: 'Info'
+      }),
+      style: {width: '200px', boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
     })
   ]
 });
@@ -38,24 +38,6 @@ new Deck({
 
 The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### position ([number, number]) {#position}
-
-* Default: `[0, 0]`
-
-Position at which to place popup (e.g. [longitude, latitude]).
-
-#### text (string, optional) {#text}
-
-* Default: `''`
-
-Text to display within widget.
-
-#### visible (boolean, optional) {#visible}
-
-* Default: `false`
-
-Whether the widget is visible.
-
 #### mode (string, optional) {#mode}
 
 * Default: `'hover'`
@@ -63,7 +45,6 @@ Whether the widget is visible.
 Determines the interaction mode of the widget:
 * `'click'`: The widget is triggered by a user click.
 * `'hover'`: The widget is triggered when the user hovers over an element.
-* `'static'`: The widget remains visible at a fixed position.
 
 #### minOffset (number, optional) {#minoffset}
 
@@ -71,25 +52,43 @@ Determines the interaction mode of the widget:
 
 Minimum offset (in pixels) to keep the popup away from the canvas edges.
 
-#### getTooltip (Function, optional) {#gettooltip}
+#### getTooltip (Function) {#gettooltip}
 
 ```ts
-(info: PickingInfo, widget: InfoWidget) => InfoWidgetProps | null
+(info: PickingInfo, widget: InfoWidget) => TooltipContent | null
 ```
 
-* Default: `undefined`
+Function to generate the popup contents from the selected element. The returned object may contain the following fields:
 
-Function to generate the popup contents from the selected element.
+* `position` (`number[]`) - Anchor of the popup in world coordinates, e.g. [longitude, latitude]. If not supplied, default to the mouse position where the popup was triggered.
+* `text` (`string`) - Text content to display in the popup
+* `html` (`string`) - HTML content to display in the popup. If supplied, `text` is ignored.
+* `element` (`HTMLElement`) - HTML element to attach to the popup
+* `className` (`string`) - additional class name to add to the popup
+* `style` - CSS style overrides
 
-#### onClick (Function, optional) {#onclick}
+#### placement (string, optional) {#placement}
 
-```ts
-(widget: InfoWidget, info: PickingInfo) => boolean
-```
+Position content relative to the anchor.
+One of `bottom` | `left` | `right` | `top` | `bottom-start` | `bottom-end` | `left-start` | `left-end` | `right-start` | `right-end` | `top-start` | `top-end`
 
-* Default: `undefined`
+* Default: `'right'`
 
-Callback triggered when the widget is clicked.
+#### offset (number) {#offset}
+
+Pixel offset from the anchor
+
+* Default: `10`
+
+#### arrow (false | number | [number, number]) {#arrow}
+
+Show an arrow pointing at the anchor. Value can be one of the following:
+
+* `false` - do not display an arrow
+* `number` - pixel size of the arrow
+* `[width: number, height: number]` - pixel size of the arrow
+
+* Default: `10`
 
 ## Source
 

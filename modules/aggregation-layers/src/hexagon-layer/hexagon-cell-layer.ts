@@ -12,14 +12,14 @@ import type {ScaleType} from '../common/types';
 
 /** Proprties added by HexagonCellLayer. */
 export type _HexagonCellLayerProps = {
-  hexOriginCommon: [number, number];
-  colorDomain: [number, number];
-  colorCutoff: [number, number] | null;
+  hexOriginCommon: Readonly<[number, number]>;
+  colorDomain: Readonly<[number, number]>;
+  colorCutoff: Readonly<[number, number]> | null;
   colorRange: Color[];
   colorScaleType: ScaleType;
-  elevationDomain: [number, number];
-  elevationCutoff: [number, number] | null;
-  elevationRange: [number, number];
+  elevationDomain: Readonly<[number, number]>;
+  elevationCutoff: Readonly<[number, number]> | null;
+  elevationRange: Readonly<[number, number]>;
 };
 
 export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<

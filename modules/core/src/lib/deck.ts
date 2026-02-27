@@ -508,7 +508,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
-    if (props.useDevicePixels !== undefined && this.device?.canvasContext) {
+    if (props.useDevicePixels !== undefined && this.device?.canvasContext?.setProps) {
       this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
     }
 
@@ -676,6 +676,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     maxObjects?: number | null;
   }): PickingInfo[] {
     return this._pick('pickObjects', 'pickObjects Time', opts);
+  }
+
+  /**
+   * Internal method used by controllers to pick 3D position at a screen coordinate
+   * @private
+   */
+  private _pickPositionForController(x: number, y: number): {coordinate?: number[]} | null {
+    const pickResult = this.pickObject({x, y, radius: 0, unproject3D: true});
+    return pickResult;
   }
 
   /** Experimental
@@ -1072,7 +1081,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(this.props.parent || this.canvas, {
+    const eventRoot =
+      this.props.parent?.querySelector<HTMLDivElement>('.deck-events-root') || this.canvas;
+    this.eventManager = new EventManager(eventRoot, {
       touchAction: this.props.touchAction,
       recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
         // Resolve recognizer settings
@@ -1101,6 +1112,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
+      pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,
@@ -1128,9 +1140,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.deckPicker = new DeckPicker(this.device);
 
+    const widgetParent =
+      this.props.parent?.querySelector<HTMLDivElement>('.deck-widgets-root') ||
+      this.canvas?.parentElement;
+
     this.widgetManager = new WidgetManager({
       deck: this,
-      parentElement: this.canvas?.parentElement
+      parentElement: widgetParent
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
