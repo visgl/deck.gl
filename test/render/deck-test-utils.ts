@@ -88,6 +88,21 @@ export function defaultOnAfterRender({
 }
 
 /**
+ * Creates a Deck instance for reuse across multiple tests.
+ * Use with updateDeckForTest() for tests that need the animation loop to keep running.
+ */
+export function createDeck(container: HTMLDivElement): Deck {
+  return new Deck({
+    id: 'render-test-deck',
+    container,
+    width: WIDTH,
+    height: HEIGHT,
+    useDevicePixels: false,
+    debug: true
+  });
+}
+
+/**
  * Helper to get canvas bounding box for screenshot region
  */
 function getCanvasRegion(deck: Deck | null) {
@@ -214,4 +229,118 @@ export async function runRenderTest(
     finalResult.success,
     `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}`
   ).toBe(true);
+}
+
+/**
+ * Captures and diffs a screenshot against a golden image.
+ * Extracted for reuse between runRenderTest and updateDeckForTest.
+ */
+async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext): Promise<void> {
+  const {name, goldenImage, imageDiffOptions} = testCase;
+
+  const region = getCanvasRegion(ctx.deck);
+  const diffOptions = {
+    goldenImage,
+    region,
+    threshold: imageDiffOptions?.threshold ?? 0.99,
+    tolerance: 0.1,
+    includeEmpty: false,
+    platform: OS,
+    saveOnFail: true,
+    createDiffImage: true
+  };
+
+  const result = await commands.captureAndDiffScreen(diffOptions);
+
+  // If failed, try platform-specific golden image
+  let finalResult = result;
+  if (!result.success) {
+    const platformGoldenImage = goldenImage.replace(
+      'golden-images/',
+      `golden-images/platform-overrides/${OS.toLowerCase()}/`
+    );
+    const platformResult = await commands.captureAndDiffScreen({
+      ...diffOptions,
+      goldenImage: platformGoldenImage
+    });
+    if (platformResult.success) {
+      finalResult = platformResult;
+    }
+  }
+
+  expect(
+    finalResult.success,
+    `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}`
+  ).toBe(true);
+}
+
+/**
+ * Updates an existing Deck instance for a test case using setProps().
+ * Use this instead of runRenderTest when tests need the animation loop to keep running
+ * between onAfterRender callbacks (e.g., for timeline/transition tests).
+ *
+ * The Deck instance must be created beforehand with createDeck().
+ */
+export async function updateDeckForTest(
+  testCase: TestCase,
+  ctx: DeckTestContext,
+  timeout = 60000
+): Promise<void> {
+  const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
+    testCase;
+
+  if (!ctx.deck) {
+    throw new Error('Deck instance not found. Call createDeck() in beforeAll first.');
+  }
+
+  // Use setProps on existing deck - keeps the animation loop running
+  await new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Timeout waiting for render to complete'));
+    }, timeout);
+
+    const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
+
+    ctx.deck!.setProps({
+      views: views || new MapView({}),
+      viewState,
+      layers,
+      effects: effects || [],
+      useDevicePixels: useDevicePixels ?? false,
+
+      // onBeforeRender is called before each render frame - used for timeline setup
+      // Always provide a function to clear any previous callback
+      onBeforeRender: () => {
+        if (onBeforeRender) {
+          onBeforeRender({
+            deck: ctx.deck!,
+            // @ts-expect-error Accessing protected layerManager
+            layers: ctx.deck!.layerManager?.getLayers() || []
+          });
+        }
+      },
+
+      onAfterRender: () => {
+        // @ts-expect-error Accessing protected layerManager
+        const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
+
+        // Skip if no layers yet (Deck still initializing)
+        if (currentLayers.length === 0) {
+          return;
+        }
+
+        onAfterRenderCheck({
+          deck: ctx.deck!,
+          layers: currentLayers,
+          done: () => {
+            clearTimeout(timeoutId);
+            resolve();
+          }
+        });
+      }
+    });
+  });
+
+  // Capture and diff screenshot
+  await captureAndDiffScreenshot(testCase, ctx);
 }

@@ -2,12 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
+// This spec uses a shared Deck instance across tests to keep the animation loop running.
+// This is required for timeline/transition tests where timeline.setTime() needs to
+// trigger re-renders between onAfterRender callbacks.
+
+import {test, beforeAll, afterAll} from 'vitest';
 import {
   createContainer,
+  createDeck,
   removeContainer,
   finalizeDeck,
-  runRenderTest,
+  updateDeckForTest,
   DeckTestContext,
   TestCase
 } from '../deck-test-utils';
@@ -20,11 +25,10 @@ const ctx: DeckTestContext = {
 
 beforeAll(() => {
   ctx.container = createContainer();
+  ctx.deck = createDeck(ctx.container);
 });
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
+// Note: No afterEach finalizeDeck - we keep the deck running between tests
 
 afterAll(() => {
   finalizeDeck(ctx);
@@ -40,5 +44,5 @@ skippedTests.forEach(tc => {
 });
 
 test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+  await updateDeckForTest(testCase, ctx);
 });
