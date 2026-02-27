@@ -1,6 +1,3 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_TimelineWidget} from '@deck.gl/widgets';
-
 # TimelineWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
@@ -8,8 +5,6 @@ import {_TimelineWidget} from '@deck.gl/widgets';
 This widget provides a time slider with play/pause controls. Configure a time range, step interval, and play speed to animate data over time.
 
 ## Usage
-
-<WidgetPreview cls={_TimelineWidget}/>
 
 ```ts
 import {Deck} from '@deck.gl/core';

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
   ScreenshotWidget,
@@ -15,11 +15,15 @@ import {
   _InfoWidget as InfoWidget,
   _LoadingWidget as LoadingWidget,
   _StatsWidget as StatsWidget,
+  _ScaleWidget as ScaleWidget,
+  _TimelineWidget as TimelineWidget,
+  _SplitterWidget as SplitterWidget,
+  _ViewSelectorWidget as ViewSelectorWidget,
   DarkTheme, LightTheme, DarkGlassTheme, LightGlassTheme
 } from '@deck.gl/widgets';
-import { MapView, OrthographicView, OrbitView } from '@deck.gl/core';
+import { MapView, OrthographicView, OrbitView, OrthographicViewport } from '@deck.gl/core';
 import { DeckGL } from '@deck.gl/react';
-import { ScatterplotLayer, GeoJsonLayer, IconLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, GeoJsonLayer, IconLayer, BitmapLayer } from '@deck.gl/layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { useColorMode } from '@docusaurus/theme-common';
@@ -131,7 +135,7 @@ function generateMatrix(nCol, nRow) {
     };
   });
 }
-function getMVTLayer() {
+function getMVTLayer(overrideProps = {}) {
   return new MVTLayer({
     data: [
       'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
@@ -166,7 +170,7 @@ function getMVTLayer() {
       }
     },
     lineWidthMinPixels: 1,
-    pickable: true,
+    ...overrideProps
   });
 }
 
@@ -174,7 +178,7 @@ export function FullscreenWidgetDemo() {
   return <GeoDemoBase map widgets={[new FullscreenWidget()]} />
 }
 export function ScreenshotWidgetDemo() {
-  return <GeoDemoBase widgets={[new ScreenshotWidget()]} />
+  return <GeoDemoBase layers={[getMVTLayer()]} widgets={[new ScreenshotWidget()]} />
 }
 export function ZoomWidgetDemo() {
   return <GeoDemoBase map widgets={[new ZoomWidget()]} />
@@ -350,23 +354,118 @@ export function LoadingWidgetDemo() {
   return <GeoDemoBase layers={[getMVTLayer()]} widgets={[new LoadingWidget()]} />
 }
 export function StatsWidgetDemo() {
-  return <GeoDemoBase layers={[getMVTLayer()]} widgets={[new StatsWidget({
+  return <GeoDemoBase layers={[getMVTLayer({pickable: true})]} widgets={[new StatsWidget({
     defaultIsExpanded: true
   })]} />
 }
 export function ThemeWidgetDemo() {
   return <NonGeoDemoBase views={new OrthographicView()} widgets={[
+    new ThemeWidget(),
     new FullscreenWidget(),
     new ZoomWidget(),
-    new ResetViewWidget({
-      initialViewState: {
-        target: [0, 0, 0],
-        zoom: 0,
-      }
-    }),
-    new ThemeWidget(),
   ]} />
 }
+export function ScaleWidgetDemo() {
+  return <GeoDemoBase map mapLabels widgets={[new ScaleWidget({placement: 'top-left'})]} />
+}
+export function SplitterWidgetDemo() {
+  const { colorMode } = useColorMode();
+  const [splitRatio, setSplitRatio] = useState(0.5);
+  const [viewState, setViewState] = useState({
+    target: [0, 0, 0],
+    zoom: 1
+  });
+  const deckRef = useRef();
+
+  const layers = useMemo(() => {
+    return [
+      new BitmapLayer({
+        id: '9_0_0',
+        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/9/0_0.jpeg?raw=true`,
+        bounds: [-204, -396, 396, 204],
+      }),
+      new BitmapLayer({
+        id: '11_1_1',
+        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/1_1.jpeg?raw=true`,
+        bounds: [0, -200, 200, 0],
+      }),
+      new BitmapLayer({
+        id: '11_0_1',
+        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/0_1.jpeg?raw=true`,
+        bounds: [-200, -200, 0, 0],
+      }),
+      new BitmapLayer({
+        id: '11_1_0',
+        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/1_0.jpeg?raw=true`,
+        bounds: [0, 0, 200, 200],
+      }),
+      new BitmapLayer({
+        id: '11_0_0',
+        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/0_0.jpeg?raw=true`,
+        bounds: [-200, 0, 0, 200],
+      }),
+    ]
+  }, []);
+
+  const layerFilter = useCallback(({layer, viewport}) => {
+    if (layer.id.startsWith('11_')) return viewport.id === 'right';
+    return viewport.id === 'left';
+  }, []);
+
+  const views = useMemo(() => {
+    return [
+      new OrthographicView({
+        id: 'left',
+        flipY: false,
+        x: 0,
+        width: `${splitRatio * 100}%`,
+        padding: {left: `100%`},
+      }),
+      new OrthographicView({
+        id: 'right',
+        flipY: false,
+        x: `${splitRatio * 100}%`,
+        width: `${(1 - splitRatio) * 100}%`,
+        padding: {right: `100%`},
+      }),
+    ]
+  }, [splitRatio]);
+
+  const onSplitChange = useCallback((newSplit) => {
+    setSplitRatio(newSplit);
+    const deck = deckRef.current?.deck;
+    if (deck) {
+      const x = deck.width * newSplit;
+      const y = deck.height / 2;
+      const p = deck.getViewports()[0].unproject([x, y]);
+      setViewState(vs => ({...vs, target: p}));
+    }
+  }, []);
+
+  return (
+    <div style={DEMO_CONTAINER_STYLE}>
+      <DeckGL ref={deckRef}
+        views={views}
+        viewState={viewState}
+        onViewStateChange={({viewState: newViewState}) => setViewState(newViewState)}
+        style={colorMode === 'dark' ? DarkGlassTheme : LightGlassTheme}
+        widgets={[
+          new SplitterWidget({
+            viewId1: 'left-map',
+            viewId2: 'right-map',
+            initialSplit: 0.5,
+            orientation: 'vertical',
+            onChange: onSplitChange
+          })
+        ]}
+        layers={layers}
+        layerFilter={layerFilter}
+      />
+    </div>
+  )
+}
+
+
 function useAnimatedCamera(viewState, getNextViewState) {
   const [vs, setVs] = useState(viewState);
 

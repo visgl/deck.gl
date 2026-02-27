@@ -2,10 +2,13 @@
 
 <img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
+import {SplitterWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<SplitterWidgetDemo />
+
 This widget lets the user to resize multiple views (e.g., two map or globe views) across the deck.gl canvas, by draggable splitter handles between them. This widget will overwrite the `views` prop passed to Deck.
 
 ## Usage
-
 
 ```ts
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
