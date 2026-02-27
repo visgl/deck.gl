@@ -1,8 +1,7 @@
 import type {JSX} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
-import {IconButton} from './icon-button';
 import {ButtonGroup} from './button-group';
-import {GroupedIconButton} from './grouped-icon-button';
+import {IconButton} from './icon-button';
 
 export type IconMenuProps<KeyType = string> = {
   className: string;
@@ -55,13 +54,13 @@ export function IconMenu<KeyType extends string>(props: IconMenuProps<KeyType>) 
         <div className="deck-widget-icon-menu">
           <ButtonGroup orientation="vertical">
             {props.menuItems.map(item => (
-              <GroupedIconButton
+              <IconButton
                 key={item.value}
                 label={item.label}
                 onClick={() => handleSelectItem(item.value)}
               >
                 {item.icon}
-              </GroupedIconButton>
+              </IconButton>
             ))}
           </ButtonGroup>
         </div>

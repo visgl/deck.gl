@@ -44,7 +44,7 @@
     "@deck.gl/core": "~9.2.0",
     "@luma.gl/core": "~9.2.6",
     "@luma.gl/engine": "~9.2.6",
-    "@probe.gl/test-utils": "^4.1.0",
+    "@probe.gl/test-utils": "^4.1.1",
     "vitest": "^2.1.0"
   },
   "peerDependenciesMeta": {

@@ -49,7 +49,7 @@
     "@luma.gl/effects": "^9.2.6",
     "@luma.gl/webgpu": "^9.2.6",
     "@math.gl/proj4": "^4.1.0",
-    "@probe.gl/bench": "^4.1.0",
+    "@probe.gl/bench": "^4.1.1",
     "@types/pngjs": "^6.0.5",
     "@vis.gl/dev-tools": "1.0.1",
     "@vis.gl/ts-plugins": "1.0.1",
@@ -74,7 +74,7 @@
     "bindings-precommit-tests"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "packageManager": "yarn@1.22.19"
 }

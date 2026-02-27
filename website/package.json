@@ -59,5 +59,8 @@
     ">0.2% and supports async-functions",
     "not dead"
   ],
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@1.22.19",
+  "engines": {
+    "node": ">=20"
+  }
 }

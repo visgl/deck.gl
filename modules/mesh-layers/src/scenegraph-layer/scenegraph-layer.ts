@@ -29,7 +29,7 @@ import {
 
 type GLTFInstantiatorOptions = Parameters<typeof createScenegraphsFromGLTF>[2];
 
-const DEFAULT_COLOR: [number, number, number, number] = [255, 255, 255, 255];
+const DEFAULT_COLOR = [255, 255, 255, 255] as const;
 
 export type ScenegraphLayerProps<DataT = unknown> = _ScenegraphLayerProps<DataT> & LayerProps;
 
@@ -90,17 +90,17 @@ type _ScenegraphLayerProps<DataT> = {
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, [number, number, number]>;
+  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, [number, number, number]>;
+  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, [number, number, number]>;
+  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */

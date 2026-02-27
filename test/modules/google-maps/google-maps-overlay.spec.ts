@@ -123,6 +123,18 @@ for (const interleaved of [true, false]) {
     expect(overlay._overlay.onDraw, 'onDraw lifecycle function is registered').toBeTruthy();
     expect(overlay._overlay.onRemove, 'onRemove lifecycle function is registered').toBeTruthy();
 
+    // Dual overlay setup: positioning overlay + WebGL overlay
+    expect(overlay._positioningOverlay, 'Positioning overlay is created').toBeTruthy();
+    expect(overlay._positioningOverlay.onAdd, 'Positioning overlay has onAdd').toBeTruthy();
+    expect(overlay._positioningOverlay.draw, 'Positioning overlay has draw').toBeTruthy();
+    expect(overlay._positioningOverlay.onRemove, 'Positioning overlay has onRemove').toBeTruthy();
+    expect(overlay._overlay, 'WebGL overlay is created').toBeTruthy();
+    expect(overlay._overlay.onDraw, 'WebGL overlay has onDraw').toBeTruthy();
+
+    // Positioning container should be created in the DOM
+    const container = map.getDiv().querySelector('#deck-gl-google-maps-container');
+    expect(container, 'Positioning container is created in DOM').toBeTruthy();
+
     expect(overlay._overlay._draws, 'Map not yet drawn').toBeFalsy();
     overlay.setMap(null);
     if (interleaved) {

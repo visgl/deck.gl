@@ -74,7 +74,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   getContainer() {
-    return this.props.container || this.deck?.getCanvas()?.parentElement;
+    return this.props.container || this.deck?.props.parent || this.deck?.getCanvas()?.parentElement;
   }
 
   onFullscreenChange() {
