@@ -149,6 +149,11 @@ export default defineConfig({
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
+          // Disable isolation and file parallelism to avoid:
+          // 1. Re-initializing WebGL/luma.gl for each test file (1090s -> 2s import time)
+          // 2. WebGL context contention when running many tests in parallel
+          isolate: false,
+          fileParallelism: false,
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
@@ -180,6 +185,8 @@ export default defineConfig({
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
+          isolate: false,
+          fileParallelism: false,
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
@@ -207,6 +214,8 @@ export default defineConfig({
           include: ['test/render/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
           globals: false,
           testTimeout: 300000, // Render tests need longer timeout
+          isolate: false,
+          fileParallelism: false,
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
