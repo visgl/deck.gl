@@ -2,61 +2,84 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, beforeAll, afterAll, afterEach} from 'vitest';
+import {expect} from 'vitest';
 import {commands} from '@vitest/browser/context';
 import {Deck, MapView} from '@deck.gl/core';
-import TEST_CASES from './test-cases';
 import {WIDTH, HEIGHT, OS} from './constants';
 
-// TODO: Migrate jupyter-widget.js to vitest (currently disabled due to luma.gl v9 canvas sizing issues)
-// import './jupyter-widget';
+export interface TestCase {
+  name: string;
+  skip?: boolean;
+  views?: any;
+  viewState: any;
+  layers: any[];
+  effects?: any[];
+  useDevicePixels?: boolean | number;
+  onBeforeRender?: (params: {deck: Deck; layers: any[]}) => void;
+  onAfterRender?: (params: {deck: Deck; layers: any[]; done: () => void}) => void;
+  goldenImage: string;
+  imageDiffOptions?: {
+    threshold?: number;
+    tolerance?: number;
+  };
+}
 
-let deck: Deck | null = null;
-let container: HTMLDivElement | null = null;
+export interface DeckTestContext {
+  deck: Deck | null;
+  container: HTMLDivElement | null;
+}
 
-beforeAll(() => {
+/**
+ * Creates the container element for Deck tests.
+ * Call this in beforeAll.
+ */
+export function createContainer(): HTMLDivElement {
   // Hide scrollbars to prevent them from appearing in screenshots
   document.body.style.cssText = 'margin: 0; padding: 0; overflow: hidden;';
 
-  // Create a container div with explicit size
-  container = document.createElement('div');
+  const container = document.createElement('div');
   container.id = 'deck-container';
   container.style.cssText = `position: absolute; left: 0; top: 0; width: ${WIDTH}px; height: ${HEIGHT}px;`;
   document.body.appendChild(container);
-});
+  return container;
+}
 
-afterEach(() => {
-  // Finalize deck after each test to ensure clean state
-  if (deck) {
-    deck.finalize();
-    deck = null;
-  }
-});
-
-afterAll(() => {
-  if (deck) {
-    deck.finalize();
-    deck = null;
-  }
+/**
+ * Removes the container element.
+ * Call this in afterAll.
+ */
+export function removeContainer(container: HTMLDivElement | null): void {
   if (container) {
     container.remove();
-    container = null;
   }
-});
+}
 
-// Default render completion check - matches the old SnapshotTestRunner behavior
-// Called after each render until layers are loaded and no more updates needed
-function defaultOnAfterRender({
-  deck: d,
+/**
+ * Finalizes the deck instance.
+ * Call this in afterEach.
+ */
+export function finalizeDeck(ctx: DeckTestContext): void {
+  if (ctx.deck) {
+    ctx.deck.finalize();
+    ctx.deck = null;
+  }
+}
+
+/**
+ * Default render completion check - matches the old SnapshotTestRunner behavior.
+ * Called after each render until layers are loaded and no more updates needed.
+ */
+export function defaultOnAfterRender({
+  deck,
   layers,
   done
 }: {
   deck: Deck;
   layers: any[];
   done: () => void;
-}) {
+}): void {
   // @ts-expect-error Accessing protected layerManager
-  const needsUpdate = d.layerManager?.needsUpdate();
+  const needsUpdate = deck.layerManager?.needsUpdate();
   const allLoaded = layers.every((layer: any) => layer.isLoaded);
 
   if (!needsUpdate && allLoaded) {
@@ -64,8 +87,10 @@ function defaultOnAfterRender({
   }
 }
 
-// Helper to get canvas bounding box for screenshot region
-function getCanvasRegion() {
+/**
+ * Helper to get canvas bounding box for screenshot region
+ */
+function getCanvasRegion(deck: Deck | null) {
   const canvas = deck?.getCanvas();
   if (!canvas) {
     return {x: 0, y: 0, width: WIDTH, height: HEIGHT};
@@ -79,16 +104,15 @@ function getCanvasRegion() {
   };
 }
 
-// Filter out skipped tests and use test.skip for them
-const activeTests = TEST_CASES.filter((tc: any) => !tc.skip);
-const skippedTests = TEST_CASES.filter((tc: any) => tc.skip);
-
-// Register skipped tests so they show up in output
-skippedTests.forEach((tc: any) => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
+/**
+ * Runs a single render test case.
+ * Creates a Deck instance, waits for render completion, captures and diffs screenshot.
+ */
+export async function runRenderTest(
+  testCase: TestCase,
+  ctx: DeckTestContext,
+  timeout = 60000
+): Promise<void> {
   const {
     name,
     views,
@@ -107,13 +131,13 @@ test.each(activeTests)('$name', async testCase => {
   await new Promise<void>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       reject(new Error('Timeout waiting for render to complete'));
-    }, 10000);
+    }, timeout);
 
     const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
 
-    deck = new Deck({
+    ctx.deck = new Deck({
       id: 'render-test-deck',
-      container: container!,
+      container: ctx.container!,
       width: WIDTH,
       height: HEIGHT,
       views: views || new MapView({}),
@@ -127,16 +151,16 @@ test.each(activeTests)('$name', async testCase => {
         // Call onBeforeRender if provided
         if (onBeforeRender) {
           onBeforeRender({
-            deck: deck!,
+            deck: ctx.deck!,
             // @ts-expect-error Accessing protected layerManager
-            layers: deck!.layerManager?.getLayers() || []
+            layers: ctx.deck!.layerManager?.getLayers() || []
           });
         }
       },
 
       onAfterRender: () => {
         // @ts-expect-error Accessing protected layerManager
-        const currentLayers = deck!.layerManager?.getLayers() || [];
+        const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
 
         // Skip if no layers yet (Deck still initializing)
         if (currentLayers.length === 0) {
@@ -144,7 +168,7 @@ test.each(activeTests)('$name', async testCase => {
         }
 
         onAfterRenderCheck({
-          deck: deck!,
+          deck: ctx.deck!,
           layers: currentLayers,
           done: () => {
             clearTimeout(timeoutId);
@@ -156,7 +180,7 @@ test.each(activeTests)('$name', async testCase => {
   });
 
   // Capture and diff screenshot
-  const region = getCanvasRegion();
+  const region = getCanvasRegion(ctx.deck);
   const diffOptions = {
     goldenImage,
     region,
@@ -190,4 +214,4 @@ test.each(activeTests)('$name', async testCase => {
     finalResult.success,
     `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}`
   ).toBe(true);
-});
+}
