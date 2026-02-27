@@ -66,7 +66,7 @@ _global.__BROWSER_TEST__ = true;
 // Bridge probe.gl window globals to vitest browser commands
 // This allows @deck.gl/test-utils (which uses window.browserTestDriver_*)
 // to work with vitest's Playwright-based browser commands
-import {commands} from '@vitest/browser/context';
+import {commands} from 'vitest/browser';
 
 (window as any).browserTestDriver_isHeadless = true;
 

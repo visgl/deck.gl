@@ -54,8 +54,8 @@
     "@types/pngjs": "^6.0.5",
     "@vis.gl/dev-tools": "1.0.2",
     "@vis.gl/ts-plugins": "1.0.2",
-    "@vitest/browser": "^2.1.9",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^20.0.0",
     "pixelmatch": "^7.1.0",
     "playwright": "^1.58.0",
@@ -64,7 +64,7 @@
     "puppeteer": "^24.26.1",
     "s2-geometry": "^1.2.10",
     "sharp": "^0.34.5",
-    "vitest": "^2.1.9"
+    "vitest": "^4.0.18"
   },
   "resolutions": {
     "wgsl_reflect": "^1.2.0"

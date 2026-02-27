@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, beforeAll, afterAll} from 'vitest';
-import {commands} from '@vitest/browser/context';
+import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
 
 // Test utilities

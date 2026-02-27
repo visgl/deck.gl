@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect} from 'vitest';
-import {commands} from '@vitest/browser/context';
+import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
 import {WIDTH, HEIGHT, OS} from './constants';
 

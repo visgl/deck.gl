@@ -4,7 +4,7 @@
 
 /**
  * Type declarations for custom vitest browser commands.
- * These extend the @vitest/browser BrowserCommands interface.
+ * These extend the vitest/browser BrowserCommands interface.
  */
 
 interface DeckScreenshotDiffOptions {
@@ -33,7 +33,7 @@ interface DeckEmulatedInputEvent {
   [key: string]: any;
 }
 
-declare module '@vitest/browser/context' {
+declare module 'vitest/browser' {
   interface BrowserCommands {
     captureAndDiffScreen: (options: DeckScreenshotDiffOptions) => Promise<DeckScreenshotDiffResult>;
     emulateInput: (event: DeckEmulatedInputEvent) => Promise<void>;
