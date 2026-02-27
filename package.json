@@ -18,6 +18,7 @@
     "modules/*"
   ],
   "scripts": {
+    "postinstall": "npx playwright install chromium",
     "bootstrap": "yarn && ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "npm run clean && ocular-build && lerna run build",
