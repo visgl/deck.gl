@@ -208,6 +208,18 @@ export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, eve
       break;
     }
 
+    case 'dblclick': {
+      // Double-click for zoom in/out operations
+      if (event.shiftKey) {
+        await page.keyboard.down('Shift');
+      }
+      await page.mouse.dblclick(adjustX(event.x), adjustY(event.y));
+      if (event.shiftKey) {
+        await page.keyboard.up('Shift');
+      }
+      break;
+    }
+
     case 'drag': {
       const {startX, startY, endX, endY, steps = 5, shiftKey} = event;
 

@@ -125,9 +125,7 @@ test('MapController dblclick zoom in', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
-  await emulateEvent({type: 'click', x: 200, y: 100});
-  await emulateEvent({wait: 50});
-  await emulateEvent({type: 'click', x: 200, y: 100});
+  await emulateEvent({type: 'dblclick', x: 200, y: 100});
   await emulateEvent({wait: 300});
 
   const newViewport = getViewport();
@@ -138,9 +136,7 @@ test('MapController shift-dblclick zoom out', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
-  await emulateEvent({type: 'click', x: 200, y: 100, shiftKey: true});
-  await emulateEvent({wait: 50});
-  await emulateEvent({type: 'click', x: 200, y: 100, shiftKey: true});
+  await emulateEvent({type: 'dblclick', x: 200, y: 100, shiftKey: true});
   await emulateEvent({wait: 300});
 
   const newViewport = getViewport();
