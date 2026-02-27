@@ -65,9 +65,17 @@ const SCATTERPLOT_DATA = [
 
 // Sample data for TextBackgroundLayer - rectangles at different positions
 const TEXT_BG_DATA = [
+  // Large rounded rectangle - prominent example
+  {
+    position: [-122.395, 37.77],
+    bounds: [-120, -50, 120, 50],
+    borderRadius: 25,
+    dashArray: [4, 2],
+    lineColor: [0, 100, 200]
+  },
   // Sharp corners
   {
-    position: [-122.41, 37.77],
+    position: [-122.41, 37.76],
     bounds: [-60, -20, 60, 20],
     borderRadius: 0,
     dashArray: [4, 2],
@@ -75,42 +83,19 @@ const TEXT_BG_DATA = [
   },
   // Rounded corners
   {
-    position: [-122.4, 37.77],
+    position: [-122.4, 37.76],
     bounds: [-50, -25, 50, 25],
-    borderRadius: 8,
+    borderRadius: 12,
     dashArray: [3, 2],
-    lineColor: [0, 100, 200]
-  },
-  // Very rounded corners
-  {
-    position: [-122.39, 37.77],
-    bounds: [-40, -20, 40, 20],
-    borderRadius: 15,
-    dashArray: [5, 3],
     lineColor: [200, 0, 100]
   },
   // Solid stroke for comparison
   {
-    position: [-122.38, 37.77],
+    position: [-122.39, 37.76],
     bounds: [-40, -20, 40, 20],
     borderRadius: 8,
     dashArray: [0, 0],
     lineColor: [100, 100, 100]
-  },
-  // Different aspect ratios
-  {
-    position: [-122.41, 37.76],
-    bounds: [-80, -15, 80, 15],
-    borderRadius: 10,
-    dashArray: [6, 2],
-    lineColor: [50, 100, 50]
-  },
-  {
-    position: [-122.39, 37.76],
-    bounds: [-30, -40, 30, 40],
-    borderRadius: 12,
-    dashArray: [3, 1],
-    lineColor: [100, 50, 150]
   }
 ];
 

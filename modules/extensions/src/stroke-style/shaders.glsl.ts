@@ -20,15 +20,14 @@ uniform strokeStyleUniforms {
 } strokeStyle;
 
 in vec2 vDashArray;
-bool strokeStyle_inDashGap = false;
 
 #ifndef PI
 #define PI 3.141592653589793
 #endif
 `,
 
-    // Calculate if we're in a dash gap based on the angle around the circle
-    // This runs at the start of main() to set strokeStyle_inDashGap
+    // Calculate if we're in a dash gap and discard if so
+    // This runs at the start of main() after geometry.uv is set
     'fs:#main-start': `
 {
   float strokeStyle_solidLength = vDashArray.x;
@@ -52,25 +51,13 @@ bool strokeStyle_inDashGap = false;
       float strokeStyle_positionAlongStroke = (strokeStyle_angle / (2.0 * PI)) * strokeStyle_circumference / strokeStyle_strokeWidth;
       // Determine if in gap
       float strokeStyle_unitOffset = mod(strokeStyle_positionAlongStroke, strokeStyle_unitLength);
-      strokeStyle_inDashGap = strokeStyle_unitOffset > strokeStyle_solidLength;
+      if (strokeStyle_unitOffset > strokeStyle_solidLength) {
+        // In dash gap - discard unless picking gaps
+        if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
+          discard;
+        }
+      }
     }
-  }
-}
-`,
-
-    // Modify the final color based on dash gap status
-    'fs:DECKGL_FILTER_COLOR': `
-if (strokeStyle_inDashGap) {
-  if (scatterplot.filled > 0.5) {
-    // Show fill color through the gap
-    float strokeStyle_distToCenter = length(unitPosition) * outerRadiusPixels;
-    float strokeStyle_inCircle = scatterplot.antialiasing ?
-      smoothedge(strokeStyle_distToCenter, outerRadiusPixels) :
-      step(strokeStyle_distToCenter, outerRadiusPixels);
-    color = vFillColor;
-    color.a *= strokeStyle_inCircle;
-  } else if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
-    discard;
   }
 }
 `
@@ -95,7 +82,6 @@ uniform strokeStyleUniforms {
 } strokeStyle;
 
 in vec2 vDashArray;
-bool strokeStyle_inDashGap = false;
 
 #ifndef PI
 #define PI 3.141592653589793
@@ -103,80 +89,95 @@ bool strokeStyle_inDashGap = false;
 
 // Calculate position along rounded rectangle perimeter (0 to perimeter length)
 // Accounts for corner arcs when borderRadius > 0
-// Starting from bottom-left corner, going clockwise
-float strokeStyle_getPerimeterPosition(vec2 uv, vec2 dims, vec4 radii, float lineWidth) {
+// Starting from bottom-left corner, going clockwise (up the left edge first)
+float strokeStyle_getPerimeterPosition(vec2 fragUV, vec2 dims, vec4 radii, float lineWidth) {
   float width = dims.x;
   float height = dims.y;
 
   // Get effective border radius for each corner (clamped to max possible)
   float maxRadius = min(width, height) * 0.5;
-  float rBottomLeft = min(radii.w, maxRadius);
-  float rTopLeft = min(radii.z, maxRadius);
-  float rTopRight = min(radii.x, maxRadius);
-  float rBottomRight = min(radii.y, maxRadius);
+  float rBL = min(radii.w, maxRadius);
+  float rTL = min(radii.z, maxRadius);
+  float rTR = min(radii.x, maxRadius);
+  float rBR = min(radii.y, maxRadius);
 
   // Pixel position from bottom-left corner
-  vec2 pixelPos = uv * dims;
+  vec2 p = fragUV * dims;
 
-  // Calculate perimeter components
-  float leftEdge = height - rBottomLeft - rTopLeft;
-  float topEdge = width - rTopLeft - rTopRight;
-  float rightEdge = height - rTopRight - rBottomRight;
-  float bottomEdge = width - rBottomRight - rBottomLeft;
+  // Calculate perimeter segment lengths
+  float leftLen = height - rBL - rTL;
+  float topLen = width - rTL - rTR;
+  float rightLen = height - rTR - rBR;
+  float bottomLen = width - rBR - rBL;
 
-  float arcBottomLeft = PI * 0.5 * rBottomLeft;
-  float arcTopLeft = PI * 0.5 * rTopLeft;
-  float arcTopRight = PI * 0.5 * rTopRight;
-  float arcBottomRight = PI * 0.5 * rBottomRight;
+  float arcBL = PI * 0.5 * rBL;
+  float arcTL = PI * 0.5 * rTL;
+  float arcTR = PI * 0.5 * rTR;
+  float arcBR = PI * 0.5 * rBR;
 
   float pos = 0.0;
 
-  // Check which region we're in and calculate position
-  // Going clockwise from bottom of left edge
+  // Use distance-based edge detection (fixes non-square rectangle issue)
+  float distLeft = p.x;
+  float distRight = width - p.x;
+  float distBottom = p.y;
+  float distTop = height - p.y;
+  float minDist = min(min(distLeft, distRight), min(distBottom, distTop));
 
-  // Bottom-left corner region
-  if (pixelPos.x < rBottomLeft && pixelPos.y < rBottomLeft) {
-    vec2 cornerCenter = vec2(rBottomLeft, rBottomLeft);
-    vec2 toPixel = pixelPos - cornerCenter;
-    float angle = atan(toPixel.x, -toPixel.y); // 0 at bottom, PI/2 at left
-    pos = (PI * 0.5 - angle) / (PI * 0.5) * arcBottomLeft;
+  // Check corner regions first, then edges
+  // Bottom-left corner
+  if (p.x < rBL && p.y < rBL) {
+    vec2 c = vec2(rBL, rBL);
+    vec2 d = p - c;
+    // Angle: 0 at bottom of arc, PI/2 at left of arc
+    // d points from center toward pixel
+    // At bottom: d = (0, -r), want angle = 0
+    // At left: d = (-r, 0), want angle = PI/2
+    float angle = atan(-d.x, -d.y);
+    pos = angle / (PI * 0.5) * arcBL;
+  }
+  // Top-left corner
+  else if (p.x < rTL && p.y > height - rTL) {
+    vec2 c = vec2(rTL, height - rTL);
+    vec2 d = p - c;
+    // At left: d = (-r, 0), want angle = 0
+    // At top: d = (0, r), want angle = PI/2
+    float angle = atan(d.y, -d.x);
+    pos = arcBL + leftLen + angle / (PI * 0.5) * arcTL;
+  }
+  // Top-right corner
+  else if (p.x > width - rTR && p.y > height - rTR) {
+    vec2 c = vec2(width - rTR, height - rTR);
+    vec2 d = p - c;
+    // At top: d = (0, r), want angle = 0
+    // At right: d = (r, 0), want angle = PI/2
+    float angle = atan(d.x, d.y);
+    pos = arcBL + leftLen + arcTL + topLen + angle / (PI * 0.5) * arcTR;
+  }
+  // Bottom-right corner
+  else if (p.x > width - rBR && p.y < rBR) {
+    vec2 c = vec2(width - rBR, rBR);
+    vec2 d = p - c;
+    // At right: d = (r, 0), want angle = 0
+    // At bottom: d = (0, -r), want angle = PI/2
+    float angle = atan(-d.y, d.x);
+    pos = arcBL + leftLen + arcTL + topLen + arcTR + rightLen + angle / (PI * 0.5) * arcBR;
   }
   // Left edge
-  else if (pixelPos.x <= min(pixelPos.y, height - pixelPos.y) && pixelPos.y >= rBottomLeft && pixelPos.y <= height - rTopLeft) {
-    pos = arcBottomLeft + (pixelPos.y - rBottomLeft);
-  }
-  // Top-left corner region
-  else if (pixelPos.x < rTopLeft && pixelPos.y > height - rTopLeft) {
-    vec2 cornerCenter = vec2(rTopLeft, height - rTopLeft);
-    vec2 toPixel = pixelPos - cornerCenter;
-    float angle = atan(-toPixel.y, -toPixel.x); // 0 at left, PI/2 at top
-    pos = arcBottomLeft + leftEdge + angle / (PI * 0.5) * arcTopLeft;
+  else if (minDist == distLeft) {
+    pos = arcBL + clamp(p.y - rBL, 0.0, leftLen);
   }
   // Top edge
-  else if (pixelPos.y >= max(pixelPos.x, width - pixelPos.x) && pixelPos.x >= rTopLeft && pixelPos.x <= width - rTopRight) {
-    pos = arcBottomLeft + leftEdge + arcTopLeft + (pixelPos.x - rTopLeft);
-  }
-  // Top-right corner region
-  else if (pixelPos.x > width - rTopRight && pixelPos.y > height - rTopRight) {
-    vec2 cornerCenter = vec2(width - rTopRight, height - rTopRight);
-    vec2 toPixel = pixelPos - cornerCenter;
-    float angle = atan(toPixel.x, toPixel.y); // 0 at top, PI/2 at right
-    pos = arcBottomLeft + leftEdge + arcTopLeft + topEdge + angle / (PI * 0.5) * arcTopRight;
+  else if (minDist == distTop) {
+    pos = arcBL + leftLen + arcTL + clamp(p.x - rTL, 0.0, topLen);
   }
   // Right edge
-  else if (pixelPos.x >= max(pixelPos.y, height - pixelPos.y) && pixelPos.y >= rBottomRight && pixelPos.y <= height - rTopRight) {
-    pos = arcBottomLeft + leftEdge + arcTopLeft + topEdge + arcTopRight + (height - rTopRight - pixelPos.y);
-  }
-  // Bottom-right corner region
-  else if (pixelPos.x > width - rBottomRight && pixelPos.y < rBottomRight) {
-    vec2 cornerCenter = vec2(width - rBottomRight, rBottomRight);
-    vec2 toPixel = pixelPos - cornerCenter;
-    float angle = atan(-toPixel.y, toPixel.x); // 0 at right, PI/2 at bottom
-    pos = arcBottomLeft + leftEdge + arcTopLeft + topEdge + arcTopRight + rightEdge + angle / (PI * 0.5) * arcBottomRight;
+  else if (minDist == distRight) {
+    pos = arcBL + leftLen + arcTL + topLen + arcTR + clamp(height - rTR - p.y, 0.0, rightLen);
   }
   // Bottom edge
   else {
-    pos = arcBottomLeft + leftEdge + arcTopLeft + topEdge + arcTopRight + rightEdge + arcBottomRight + (width - rBottomRight - pixelPos.x);
+    pos = arcBL + leftLen + arcTL + topLen + arcTR + rightLen + arcBR + clamp(width - rBR - p.x, 0.0, bottomLen);
   }
 
   // Convert to stroke-width units
@@ -215,7 +216,7 @@ float strokeStyle_getRectPerimeterPosition(vec2 uv, vec2 dims, float lineWidth) 
 }
 `,
 
-    // Calculate if we're in a dash gap based on perimeter position
+    // Calculate if we're in a dash gap and discard if so
     'fs:#main-start': `
 {
   float strokeStyle_solidLength = vDashArray.x;
@@ -244,25 +245,13 @@ float strokeStyle_getRectPerimeterPosition(vec2 uv, vec2 dims, float lineWidth) 
       }
       // Determine if in gap
       float strokeStyle_unitOffset = mod(strokeStyle_positionAlongStroke, strokeStyle_unitLength);
-      strokeStyle_inDashGap = strokeStyle_unitOffset > strokeStyle_solidLength;
+      if (strokeStyle_unitOffset > strokeStyle_solidLength) {
+        // In dash gap - discard unless picking gaps
+        if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
+          discard;
+        }
+      }
     }
-  }
-}
-`,
-
-    // Modify the final color based on dash gap status
-    'fs:DECKGL_FILTER_COLOR': `
-if (strokeStyle_inDashGap) {
-  // Show fill color through the gap
-  color = vFillColor;
-  // Re-apply shape alpha for rounded corners
-  if (textBackground.borderRadius != vec4(0.0)) {
-    float distToEdge = round_rect(uv, dimensions, textBackground.borderRadius);
-    float shapeAlpha = smoothedge(-distToEdge, 0.0);
-    color.a *= shapeAlpha;
-  }
-  if (!(strokeStyle.dashGapPickable && bool(picking.isActive)) && color.a < 0.001) {
-    discard;
   }
 }
 `
