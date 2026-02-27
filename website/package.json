@@ -25,7 +25,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@monaco-editor/react": "^4.4.6",
-    "@turf/turf": "^6.5.0",
+    "@turf/turf": "^7.3.0",
     "@vis.gl/react-maplibre": "^1.0.0-alpha.5",
     "d3-color": "^3.1.0",
     "d3-hierarchy": "^2.0.0",
@@ -45,6 +45,7 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@babel/cli": "^7.28.6",
     "@docusaurus/core": "^3.6.3",
     "@docusaurus/plugin-content-docs": "^3.6.3",
     "@docusaurus/preset-classic": "^3.6.3",
