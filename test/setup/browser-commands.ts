@@ -196,24 +196,52 @@ export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, eve
 
   switch (event.type) {
     case 'click': {
-      // Use explicit keyboard down/up for modifiers instead of options.modifiers
-      // This ensures the modifier is held during the entire click sequence
+      // Use Playwright's built-in modifiers option for reliable modifier key handling
+      const modifiers: ('Alt' | 'Control' | 'Meta' | 'Shift')[] = [];
       if (event.shiftKey) {
-        await page.keyboard.down('Shift');
+        modifiers.push('Shift');
       }
-      await page.mouse.click(adjustX(event.x), adjustY(event.y));
-      if (event.shiftKey) {
-        await page.keyboard.up('Shift');
+      if (event.ctrlKey) {
+        modifiers.push('Control');
       }
+      if (event.altKey) {
+        modifiers.push('Alt');
+      }
+      if (event.metaKey) {
+        modifiers.push('Meta');
+      }
+      await page.mouse.click(adjustX(event.x), adjustY(event.y), {modifiers});
       break;
     }
 
     case 'dblclick': {
       // Double-click for zoom in/out operations
+      // Playwright's dblclick with modifiers doesn't properly pass shiftKey to the srcEvent
+      // Use keyboard.down/up around dblclick to ensure modifier state
       if (event.shiftKey) {
         await page.keyboard.down('Shift');
       }
+      if (event.ctrlKey) {
+        await page.keyboard.down('Control');
+      }
+      if (event.altKey) {
+        await page.keyboard.down('Alt');
+      }
+      if (event.metaKey) {
+        await page.keyboard.down('Meta');
+      }
+
       await page.mouse.dblclick(adjustX(event.x), adjustY(event.y));
+
+      if (event.metaKey) {
+        await page.keyboard.up('Meta');
+      }
+      if (event.altKey) {
+        await page.keyboard.up('Alt');
+      }
+      if (event.ctrlKey) {
+        await page.keyboard.up('Control');
+      }
       if (event.shiftKey) {
         await page.keyboard.up('Shift');
       }
