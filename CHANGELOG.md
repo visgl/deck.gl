@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.10] - Feb 27 2026
+
+- fix(core): OrbitController keyboard navigation with padding (#10039)
+- fix(ColumnLayer): radiusUnits pixels (#10035)
+- fix(jupyter-widget): bundle error (#10032)
+- fix(google-maps): Robust DOM positioning when interleaved: false (#9992)
+
 #### deck.gl [v9.2.9] - Feb 20 2026
 
 - chore: bump probe.gl (#10025)
