@@ -82,7 +82,7 @@ test('OrthographicController#2d zoom', async () => {
   );
 });
 
-test('OrthographicController keyboard navigation with padding', () => {
+test('OrthographicController keyboard navigation with padding', async () => {
   const controller = createTestController({
     view: new OrthographicView({
       controller: {
