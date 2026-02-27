@@ -48,6 +48,15 @@ export type GeocoderWidgetProps = WidgetProps & {
   apiKey?: string;
   /** Whether to use geolocation @note Experimental*/
   _geolocation?: boolean;
+  /**
+   * Callback when a location is geocoded and the view will navigate to it.
+   */
+  onGeocode?: (params: {
+    /** The view being updated */
+    viewId: string;
+    /** The geocoded coordinates */
+    coordinates: {longitude: number; latitude: number; zoom?: number};
+  }) => void;
 };
 
 /**
@@ -66,7 +75,8 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
     geocoder: 'coordinates',
     customGeocoder: CoordinatesGeocoder,
     apiKey: '',
-    _geolocation: false
+    _geolocation: false,
+    onGeocode: () => {}
   };
 
   className = 'deck-widget-geocoder';
@@ -193,6 +203,19 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       ...viewport,
       ...viewState
     };
+
+    // Call callback with geocoded coordinates
+    if ('longitude' in viewState && 'latitude' in viewState) {
+      this.props.onGeocode?.({
+        viewId,
+        coordinates: {
+          longitude: viewState.longitude as number,
+          latitude: viewState.latitude as number,
+          zoom: viewState.zoom as number | undefined
+        }
+      });
+    }
+
     if (this.props.transitionDuration > 0) {
       nextViewState.transitionDuration = this.props.transitionDuration;
       nextViewState.transitionInterpolator =

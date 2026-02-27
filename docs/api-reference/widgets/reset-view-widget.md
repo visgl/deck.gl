@@ -38,6 +38,19 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 The initial view state to reset the view to.
 
+#### `onReset` (Function, optional) {#onreset}
+
+```ts
+(params: {viewId: string; viewState: Record<string, unknown>}) => void
+```
+
+* Default: `() => {}`
+
+Callback when the reset view button is clicked.
+
+- `viewId`: The view being reset
+- `viewState`: The view state being reset to
+
 ## Styles
 
 Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).

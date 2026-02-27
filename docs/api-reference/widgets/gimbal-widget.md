@@ -44,6 +44,20 @@ Width of gimbal lines.
 
 View state transition duration in milliseconds.
 
+#### `onGimbalReset` (Function, optional) {#ongimbalreset}
+
+```ts
+(params: {viewId: string; rotationOrbit: number; rotationX: number}) => void
+```
+
+* Default: `() => {}`
+
+Callback when the gimbal reset button is clicked. Called for each viewport that will be reset.
+
+- `viewId`: The view being reset
+- `rotationOrbit`: The new rotationOrbit value (0)
+- `rotationX`: The new rotationX value (0)
+
 ## Styles
 
 | Name | Default |

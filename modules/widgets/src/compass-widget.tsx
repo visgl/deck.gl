@@ -15,6 +15,18 @@ export type CompassWidgetProps = WidgetProps & {
   label?: string;
   /** Bearing and pitch reset transition duration in ms. */
   transitionDuration?: number;
+  /**
+   * Callback when the compass reset button is clicked.
+   * Called for each viewport that will be reset.
+   */
+  onCompassReset?: (params: {
+    /** The view being reset */
+    viewId: string;
+    /** The new bearing value (0) */
+    bearing: number;
+    /** The new pitch value (0 if bearing was already 0) */
+    pitch: number;
+  }) => void;
 };
 
 export class CompassWidget extends Widget<CompassWidgetProps> {
@@ -24,7 +36,8 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
     placement: 'top-left',
     viewId: null,
     label: 'Reset Compass',
-    transitionDuration: 200
+    transitionDuration: 200,
+    onCompassReset: () => {}
   };
 
   className = 'deck-widget-compass';
@@ -98,10 +111,17 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   handleCompassReset(viewport: Viewport) {
     const viewId = this.viewId || viewport.id || 'default-view';
     if (viewport instanceof WebMercatorViewport) {
+      const resetPitch = this.getRotation(viewport)[0] === 0;
+      const nextBearing = 0;
+      const nextPitch = resetPitch ? 0 : viewport.pitch;
+
+      // Call callback
+      this.props.onCompassReset?.({viewId, bearing: nextBearing, pitch: nextPitch});
+
       const nextViewState = {
         ...viewport,
-        bearing: 0,
-        ...(this.getRotation(viewport)[0] === 0 ? {pitch: 0} : {}),
+        bearing: nextBearing,
+        ...(resetPitch ? {pitch: nextPitch} : {}),
         transitionDuration: this.props.transitionDuration,
         transitionInterpolator: new FlyToInterpolator()
       };

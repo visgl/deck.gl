@@ -38,6 +38,20 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 Bearing and pitch reset transition duration in milliseconds.
 
+#### `onCompassReset` (Function, optional) {#oncompassreset}
+
+```ts
+(params: {viewId: string; bearing: number; pitch: number}) => void
+```
+
+* Default: `() => {}`
+
+Callback when the compass reset button is clicked. Called for each viewport that will be reset.
+
+- `viewId`: The view being reset
+- `bearing`: The new bearing value (0)
+- `pitch`: The new pitch value (0 if bearing was already 0)
+
 ## Styles
 
 Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).

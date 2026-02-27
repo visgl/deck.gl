@@ -15,6 +15,11 @@ export type LoadingWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message when loading */
   label?: string;
+  /**
+   * Callback when the loading state changes.
+   * Called when layers transition between loading and loaded states.
+   */
+  onLoadingChange?: (loading: boolean) => void;
 };
 
 /**
@@ -26,7 +31,8 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
     id: 'loading',
     placement: 'top-left',
     viewId: null,
-    label: 'Loading layer data'
+    label: 'Loading layer data',
+    onLoadingChange: () => {}
   };
 
   className = 'deck-widget-loading';
@@ -62,6 +68,10 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
     const loading = layers.some(layer => !layer.isLoaded);
     if (loading !== this.loading) {
       this.loading = loading;
+
+      // Call callback when loading state changes
+      this.props.onLoadingChange?.(loading);
+
       this.updateHTML();
     }
   }

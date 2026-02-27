@@ -16,6 +16,11 @@ export type SplitterWidgetProps = WidgetProps & {
   orientation?: 'vertical' | 'horizontal';
   /** The initial split percentage (0 to 1) for the first view, default 0.5 */
   initialSplit?: number;
+  /**
+   * Controlled split position (0 to 1). When provided, the widget is in controlled mode
+   * and this prop determines the splitter position.
+   */
+  split?: number;
   /** Callback invoked when the splitter is dragged with the new split value */
   onChange?: (newSplit: number) => void;
   /** Callback invoked when dragging starts */
@@ -37,6 +42,7 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
     viewId2: '',
     orientation: 'vertical',
     initialSplit: 0.5,
+    split: undefined!,
     onChange: () => {},
     onDragStart: () => {},
     onDragEnd: () => {}
@@ -67,6 +73,7 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
       <Splitter
         orientation={this.props.orientation}
         initialSplit={this.props.initialSplit}
+        split={this.props.split}
         onChange={this.props.onChange}
         onDragStart={this.props.onDragStart}
         onDragEnd={this.props.onDragEnd}
@@ -84,19 +91,24 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
 function Splitter({
   orientation,
   initialSplit,
+  split: controlledSplit,
   onChange,
   onDragStart,
   onDragEnd
 }: {
   orientation: 'vertical' | 'horizontal';
   initialSplit: number;
+  split?: number;
   onChange?: (newSplit: number) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
 }) {
-  const [split, setSplit] = useState(initialSplit);
+  const [internalSplit, setInternalSplit] = useState(initialSplit);
   const dragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Use controlled value if provided, otherwise internal state
+  const split = controlledSplit ?? internalSplit;
 
   const handleDragStart = (event: MouseEvent) => {
     dragging.current = true;
@@ -117,8 +129,14 @@ function Splitter({
     }
     // Clamp newSplit between 5% and 95%
     newSplit = Math.min(Math.max(newSplit, 0.05), 0.95);
-    setSplit(newSplit);
+
+    // Always call callback
     onChange?.(newSplit);
+
+    // Only update internal state if uncontrolled
+    if (controlledSplit === undefined) {
+      setInternalSplit(newSplit);
+    }
   };
 
   const handleDragEnd = (event: MouseEvent) => {

@@ -48,6 +48,20 @@ Tooltip message displayed while hovering a mouse over the zoom out button.
 
 Zoom transition duration in milliseconds.
 
+#### `onZoom` (Function, optional) {#onzoom}
+
+```ts
+(params: {viewId: string; delta: number; zoom: number}) => void
+```
+
+* Default: `() => {}`
+
+Callback when zoom buttons are clicked. Called for each viewport that will be zoomed.
+
+- `viewId`: The view being zoomed
+- `delta`: Zoom direction (+1 for zoom in, -1 for zoom out)
+- `zoom`: The new zoom level
+
 ## Styles
 
 Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).

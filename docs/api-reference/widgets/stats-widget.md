@@ -67,6 +67,14 @@ Custom formatters for stat values.
 
 Whether to reset particular stats after each update.
 
+#### collapsed (boolean, optional)
+
+Controlled collapsed state. When provided, the widget is in controlled mode and `defaultIsExpanded` is ignored.
+
+#### onCollapsedChange (function, optional)
+
+Callback when the collapsed state changes (user clicks header). In controlled mode, use this to update the `collapsed` prop.
+
 ### Built-in Formatters
 
 - `'count'` - Display raw count value

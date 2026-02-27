@@ -21,6 +21,18 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomOutLabel?: string;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
+  /**
+   * Callback when zoom buttons are clicked.
+   * Called for each viewport that will be zoomed.
+   */
+  onZoom?: (params: {
+    /** The view being zoomed */
+    viewId: string;
+    /** Zoom direction: +1 for zoom in, -1 for zoom out */
+    delta: number;
+    /** The new zoom level */
+    zoom: number;
+  }) => void;
 };
 
 export class ZoomWidget extends Widget<ZoomWidgetProps> {
@@ -32,7 +44,8 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
-    viewId: null
+    viewId: null,
+    onZoom: () => {}
   };
 
   className = 'deck-widget-zoom';
@@ -72,8 +85,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     this.viewports[viewport.id] = viewport;
   }
 
-  handleZoom(viewport: Viewport, nextZoom: number) {
+  handleZoom(viewport: Viewport, delta: number) {
     const viewId = this.viewId || viewport?.id || 'default-view';
+    const nextZoom = viewport.zoom + delta;
+
+    // Call callback
+    this.props.onZoom?.({viewId, delta, zoom: nextZoom});
+
     const nextViewState: Record<string, unknown> = {
       ...viewport,
       zoom: nextZoom
@@ -92,13 +110,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   handleZoomIn() {
     for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom + 1);
+      this.handleZoom(viewport, 1);
     }
   }
 
   handleZoomOut() {
     for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom - 1);
+      this.handleZoom(viewport, -1);
     }
   }
 

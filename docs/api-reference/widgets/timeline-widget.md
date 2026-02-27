@@ -46,7 +46,11 @@ Increment step for the slider and play animation.
 
 * Default: `timeRange[0]`
 
-Starting value of the slider.
+Starting value of the slider for uncontrolled usage.
+
+#### `time` (number, optional) {#time}
+
+Controlled time value. When provided, the widget is in controlled mode for the time slider. Use with `onTimeChange` to handle user interactions.
 
 #### `onTimeChange` (Function, optional) {#ontimechange}
 
@@ -63,6 +67,20 @@ Callback invoked when the time value changes (drag or play).
 * Default: `1000`
 
 Interval in milliseconds between automatic time increments when playing.
+
+#### `playing` (boolean, optional) {#playing}
+
+Controlled playing state. When provided, the widget is in controlled mode for play/pause. Use with `onPlayingChange` to handle user interactions.
+
+#### `onPlayingChange` (Function, optional) {#onplayingchange}
+
+```ts
+(playing: boolean) => void
+```
+
+* Default: `() => {}`
+
+Callback when play/pause button is clicked.
 
 ## Source
 
