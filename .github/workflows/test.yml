@@ -42,10 +42,10 @@ jobs:
         run: yarn lint
 
       - name: Run Node tests
-        run: npx vitest run --project node --reporter=tap
+        run: npx vitest run --project node --silent
 
       - name: Run Headless browser tests
-        run: npx vitest run --project headless --reporter=tap
+        run: npx vitest run --project headless --silent
 
       - name: Run Render/Interaction tests
         run: yarn test-render

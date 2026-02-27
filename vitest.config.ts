@@ -4,10 +4,10 @@
 
 import {defineConfig} from 'vitest/config';
 
-// Root config for shared settings like reporters
+// Root config for shared settings
 // Project-specific settings are in vitest.workspace.ts
 export default defineConfig({
   test: {
-    reporters: ['tap']
+    // Use default reporter for clean output with --silent flag
   }
 });
