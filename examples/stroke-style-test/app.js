@@ -14,9 +14,18 @@ const INITIAL_VIEW_STATE = {
   pitch: 0
 };
 
+// Fill-only circle for size comparison (no stroke)
+const FILL_ONLY_DATA = [
+  {
+    position: [-122.42, 37.79],
+    radius: 300,
+    fillColor: [255, 200, 0, 180]
+  }
+];
+
 // Sample data for ScatterplotLayer - circles at different positions
 const SCATTERPLOT_DATA = [
-  // Dashed stroke, filled
+  // Dashed stroke, filled - same radius as fill-only for comparison
   {
     position: [-122.41, 37.79],
     radius: 300,
@@ -103,6 +112,19 @@ new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
+    // Fill-only circle for size comparison
+    new ScatterplotLayer({
+      id: 'scatterplot-fill-only',
+      data: FILL_ONLY_DATA,
+      getPosition: d => d.position,
+      getRadius: d => d.radius,
+      getFillColor: d => d.fillColor,
+      stroked: false,
+      filled: true,
+      pickable: true,
+      autoHighlight: true
+    }),
+
     // ScatterplotLayer with dashed strokes
     new ScatterplotLayer({
       id: 'scatterplot-dashed',

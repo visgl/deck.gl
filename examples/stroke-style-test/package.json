@@ -4,7 +4,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "vite",
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs",
     "build": "vite build"
   },
   "dependencies": {

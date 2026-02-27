@@ -24,10 +24,14 @@ in vec2 vDashArray;
 #ifndef PI
 #define PI 3.141592653589793
 #endif
+
+// Flag to track if current fragment is in a dash gap (for filled circles)
+bool strokeStyle_inDashGap = false;
 `,
 
-    // Calculate if we're in a dash gap and discard if so
-    // This runs at the start of main() after geometry.uv is set
+    // Calculate if we're in a dash gap
+    // For unfilled circles: discard in gaps
+    // For filled circles: set flag to override color at end of main
     'fs:#main-start': `
 {
   float strokeStyle_solidLength = vDashArray.x;
@@ -52,13 +56,31 @@ in vec2 vDashArray;
       // Determine if in gap
       float strokeStyle_unitOffset = mod(strokeStyle_positionAlongStroke, strokeStyle_unitLength);
       if (strokeStyle_unitOffset > strokeStyle_solidLength) {
-        // In dash gap - discard unless picking gaps
-        if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
-          discard;
+        // In dash gap
+        if (scatterplot.filled > 0.5) {
+          // Filled circle - mark for fill color override at end of main
+          strokeStyle_inDashGap = true;
+        } else {
+          // Unfilled circle - discard unless picking gaps
+          if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
+            discard;
+          }
         }
       }
     }
   }
+}
+`,
+
+    // Override stroke color with fill color in dash gaps for filled circles
+    'fs:#main-end': `
+if (strokeStyle_inDashGap) {
+  // In dash gap of filled circle - show fill color instead of stroke
+  // Preserve the antialiasing factor (inCircle) that was applied to alpha
+  float strokeStyle_alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
+  fragColor = vec4(vFillColor.rgb, vFillColor.a * strokeStyle_alphaFactor);
+  // Re-apply highlight since we're after DECKGL_FILTER_COLOR
+  fragColor = picking_filterHighlightColor(fragColor);
 }
 `
   }
