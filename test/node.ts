@@ -13,7 +13,7 @@ const _global: any = globalThis;
 
 /** global setTimeout, clearTimeout */
 _global.window = dom.window;
-_global.navigator = dom.window.navigator;
+Object.defineProperty(_global, 'navigator', {value: dom.window.navigator, writable: true, configurable: true});
 _global.document = dom.window.document;
 _global.Element = dom.window.Element;
 _global.__JSDOM__ = true;
