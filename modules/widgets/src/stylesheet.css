@@ -1,5 +1,6 @@
 .deck-widget {
   margin: var(--widget-margin, 12px);
+  box-sizing: border-box;
 }
 
 /* Common button container styles */
@@ -200,28 +201,6 @@
     --icon-camera,
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-320v-100q0-25 17.5-42.5T540-480h100v60H540v100h-60Zm60 240q-25 0-42.5-17.5T480-140v-100h60v100h100v60H540Zm280-240v-100H720v-60h100q25 0 42.5 17.5T880-420v100h-60ZM720-80v-60h100v-100h60v100q0 25-17.5 42.5T820-80H720Zm111-480h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z"/></svg>')
   );
-}
-
-/* Timeline widget styles */
-.deck-widget.deck-widget-timeline {
-  display: flex;
-  align-items: center;
-  pointer-events: 'auto';
-}
-
-.deck-widget.deck-widget-timeline .timeline-slider {
-  margin: 0 8px;
-  flex: 1;
-  pointer-events: 'auto';
-  cursor: pointer;
-}
-
-.deck-widget.deck-widget-timeline .text {
-  color: var(--button-icon-idle, rgb(97, 97, 102));
-}
-
-.deck-widget.deck-widget-timeline .text:hover {
-  color: var(--button-icon-hover, rgb(24, 24, 26));
 }
 
 /* FPS widget styles */
@@ -474,4 +453,165 @@
     --icon-close,
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -120 120 120" fill="black"><path d="m32-25-7-7 28-28-28-28 7-7 28 28 28-28 7 7-28 28 28 28-7 7-28-28-28 28Z"/></svg>')
   );
+}
+
+/** Range input */
+.deck-widget-range {
+  position: absolute;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  touch-action: none;
+  box-sizing: border-box;
+  margin: 0;
+}
+.deck-widget-range__track {
+  position: relative;
+  cursor: pointer;
+  flex: 1;
+  background: var(--track-color, #88888888);
+  border-radius: calc(var(--track-size, 16px) / 2);
+}
+.deck-widget-range__decorations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.deck-widget-range__decoration {
+  position: absolute;
+}
+.deck-widget-range__decoration:active {
+  background-color: gold !important;
+}
+.deck-widget-range__thumb {
+  position: absolute;
+  background: var(--thumb-color, #888);
+  border-radius: calc(var(--track-size, 16px) / 2);
+}
+.deck-widget-range__button {
+  cursor: pointer;
+  opacity: 0.4;
+  background-color: transparent;
+  width: var(--button-size, 20px);
+  height: var(--button-size, 20px);
+  background-size: cover;
+  border: none;
+  padding: 0;
+}
+.deck-widget-range__button:hover {
+  opacity: 1;
+}
+.deck-widget-range:not(.deck-widget-range--disabled) .deck-widget-range__button:disabled {
+  pointer-events: none;
+  opacity: 0.1;
+}
+.deck-widget-range--disabled {
+  display: none;
+}
+.deck-widget-range--vertical {
+  flex-direction: column;
+  height: 100%;
+  top: 0;
+}
+.deck-widget-range--horizontal {
+  flex-direction: row;
+  width: 100%;
+  left: 0;
+}
+.deck-widget-range--vertical .deck-widget-range__track {
+  width: var(--track-size, 16px);
+  height: 100%;
+  min-height: calc(var(--track-size, 16px) * 3);
+}
+.deck-widget-range--vertical .deck-widget-range__thumb {
+  width: 60%;
+  left: 20%;
+  cursor: ns-resize;
+}
+.deck-widget-range--vertical .deck-widget-range__button--start .deck-widget-icon {
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z"/></svg>');
+}
+.deck-widget-range--vertical .deck-widget-range__button--end .deck-widget-icon {
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>');
+}
+.deck-widget-range--horizontal .deck-widget-range__track {
+  height: var(--track-size, 16px);
+  width: 100%;
+  min-width: calc(var(--track-size, 16px) * 3);
+}
+.deck-widget-range--horizontal .deck-widget-range__thumb {
+  height: 60%;
+  top: 20%;
+  cursor: ew-resize;
+}
+.deck-widget-range--horizontal .deck-widget-range__button--start .deck-widget-icon {
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></svg>');
+}
+.deck-widget-range--horizontal .deck-widget-range__button--end .deck-widget-icon {
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>');
+}
+
+/** Scrollbar */
+.deck-widget-scrollbar {
+  --button-size: var(--scrollbar-button-size, 24px);
+  --track-size: var(--scrollbar-track-size, 16px);
+  --track-color: var(--scrollbar-track-color, var(--menu-background, rgba(0, 0, 0, 0.08)));
+  --thumb-color: var(--scrollbar-thumb-color, var(--button-background, rgba(0, 0, 0, 0.4)));
+}
+.deck-widget-scrollbar .deck-widget-range--vertical {
+  top: var(--button-size);
+  height: calc(100% - var(--button-size) * 2);
+}
+.deck-widget-scrollbar[data-placement$=-left] .deck-widget-range--vertical {
+  left: 0;
+}
+.deck-widget-scrollbar[data-placement$=-right] .deck-widget-range--vertical {
+  right: 0;
+}
+.deck-widget-scrollbar .deck-widget-range--horizontal {
+  left: var(--button-size);
+  width: calc(100% - var(--button-size) * 2);
+}
+.deck-widget-scrollbar[data-placement^=top-] .deck-widget-range--horizontal {
+  top: 0;
+}
+.deck-widget-scrollbar[data-placement^=bottom-] .deck-widget-range--horizontal {
+  bottom: 0;
+}
+
+/** Timeline widget */
+.deck-widget-timeline {
+  position: absolute;
+  margin: 0;
+  padding: var(--widget-margin, 12px);
+  display: flex;
+  width: 100%;
+  gap: var(--widget-margin, 12px);
+  align-items: center;
+  pointer-events: all;
+
+  --track-size: var(--scrollbar-track-size, 16px);
+  --track-color: var(--scrollbar-track-color, var(--menu-background, rgba(0, 0, 0, 0.08)));
+  --thumb-color: var(--scrollbar-thumb-color, var(--button-background, rgba(0, 0, 0, 0.4)));
+}
+.deck-widget-timeline[data-placement^=top-] {
+  top: 0;
+}
+.deck-widget-timeline[data-placement^=bottom-] {
+  bottom: 0;
+}
+.deck-widget-timeline-label {
+  position: relative;
+  pointer-events: none;
+  width: fit-content;
+  transform: translate(-50%, -100%);
+  font-size: 13px;
+  border-radius: var(--button-corner-radius, 8px);
+  background: var(--menu-background, #fff);
+  color: var(--menu-text, rgb(24, 24, 26));
+  font-family: monospace;
+  padding: 4px;
 }
