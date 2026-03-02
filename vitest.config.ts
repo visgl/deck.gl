@@ -4,6 +4,13 @@
 
 import {defineConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
+
+// Playwright provider with viewport configured for render tests
+const renderPlaywright = playwright({
+  contextOptions: {
+    viewport: {width: 1024, height: 768}
+  }
+});
 import {dirname, resolve} from 'path';
 import {fileURLToPath} from 'url';
 import {browserCommands} from './test/setup/browser-commands';
@@ -190,13 +197,11 @@ export default defineConfig({
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
-            provider: playwright(),
+            provider: renderPlaywright,
             instances: [{browser: 'chromium'}],
             headless: false,
             screenshotFailures: false,
-            commands: browserCommands,
-            // Render tests need a viewport large enough for the canvas (800x450)
-            viewport: {width: 1024, height: 768}
+            commands: browserCommands
           }
         }
       },
@@ -219,13 +224,14 @@ export default defineConfig({
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
-            provider: playwright(),
-            instances: [{browser: 'chromium'}],
+            provider: renderPlaywright,
+            instances: [{
+              browser: 'chromium',
+              viewport: {width: 1024, height: 768}
+            }],
             headless: true,
             screenshotFailures: false,
-            commands: browserCommands,
-            // Render tests need a viewport large enough for the canvas (800x450)
-            viewport: {width: 1024, height: 768}
+            commands: browserCommands
           }
         }
       }
