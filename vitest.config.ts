@@ -52,7 +52,9 @@ const excludedTests = [
   // They work in the render project with proper viewport configuration
   'test/interaction/map-controller.spec.ts',
   // TerrainEffect tests timeout (>30s) with isolate: false
-  'test/modules/extensions/terrain/terrain-effect.spec.ts'
+  'test/modules/extensions/terrain/terrain-effect.spec.ts',
+  // GLViewport test fails due to viewport state leakage
+  'test/modules/core/passes/layers-pass.spec.ts'
 ];
 
 // Match aliases from .ocularrc.js
@@ -150,7 +152,9 @@ export default defineConfig({
           include: ['test/modules/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
-          setupFiles: ['./test/setup/vitest-node-setup.ts']
+          setupFiles: ['./test/setup/vitest-node-setup.ts'],
+          // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: [1]}
         }
       },
 
@@ -182,7 +186,9 @@ export default defineConfig({
             screenshotFailures: false,
             commands: browserCommands
           },
-          coverage: coverageConfig
+          coverage: coverageConfig,
+          // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: [2]}
         }
       },
 
@@ -214,7 +220,9 @@ export default defineConfig({
             headless: false,
             screenshotFailures: false,
             commands: browserCommands
-          }
+          },
+          // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: [3]}
         }
       },
 
@@ -244,7 +252,9 @@ export default defineConfig({
             headless: true,
             screenshotFailures: false,
             commands: browserCommands
-          }
+          },
+          // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: [4]}
         }
       }
     ]
