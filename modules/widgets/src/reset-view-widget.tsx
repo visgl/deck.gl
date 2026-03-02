@@ -17,10 +17,12 @@ export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProp
   placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
-  /** The initial view state to reset the view to. Defaults to deck.props.initialViewState */
-  initialViewState?: ViewStateMap<ViewsT>;
   /** View to interact with. Required when using multiple views. */
   viewId?: string | null;
+  /** The initial view state to reset the view to. Defaults to deck.props.initialViewState */
+  initialViewState?: ViewStateMap<ViewsT>;
+  /** Callback to manually reset the view state */
+  onResetView?: () => void;
 };
 
 /**
@@ -36,7 +38,8 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
     placement: 'top-left',
     label: 'Reset View',
     initialViewState: undefined!,
-    viewId: null
+    viewId: null,
+    onResetView: undefined!
   };
 
   className = 'deck-widget-reset-view';
@@ -46,6 +49,19 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
     super(props);
     this.setProps(this.props);
   }
+
+  // Operations
+
+  resetView() {
+    if (this.props.onResetView) {
+      this.props.onResetView();
+      return;
+    }
+    const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
+    this.setViewState(initialViewState);
+  }
+
+  // Lifecycle
 
   setProps(props: Partial<ResetViewWidgetProps<ViewsT>>) {
     this.placement = props.placement ?? this.placement;
@@ -58,15 +74,10 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
       <IconButton
         className="deck-widget-reset-focus"
         label={this.props.label}
-        onClick={this.handleClick.bind(this)}
+        onClick={this.resetView.bind(this)}
       />,
       rootElement
     );
-  }
-
-  handleClick() {
-    const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
-    this.setViewState(initialViewState);
   }
 
   setViewState(viewState?: ViewStateMap<ViewsT>) {
