@@ -57,10 +57,6 @@ export type {DeckWidgetTheme} from './themes';
 export {ButtonGroup as _ButtonGroup, type ButtonGroupProps} from './lib/components/button-group';
 export {IconButton as _IconButton, type IconButtonProps} from './lib/components/icon-button';
 export {
-  GroupedIconButton as _GroupedIconButton,
-  type GroupedIconButtonProps
-} from './lib/components/grouped-icon-button';
-export {
   DropdownMenu as _DropdownMenu,
   type DropdownMenuProps,
   SimpleMenu as _SimpleMenu,

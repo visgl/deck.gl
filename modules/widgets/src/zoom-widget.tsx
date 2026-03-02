@@ -6,7 +6,7 @@ import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import type {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
-import {GroupedIconButton} from './lib/components/grouped-icon-button';
+import {IconButton} from './lib/components/icon-button';
 
 export type ZoomWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -53,12 +53,12 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     const ui = (
       <ButtonGroup orientation={this.props.orientation}>
-        <GroupedIconButton
+        <IconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
           className="deck-widget-zoom-in"
         />
-        <GroupedIconButton
+        <IconButton
           onClick={() => this.handleZoomOut()}
           label={this.props.zoomOutLabel}
           className="deck-widget-zoom-out"

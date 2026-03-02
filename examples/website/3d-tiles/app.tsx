@@ -56,7 +56,7 @@ export default function App({
     id: 'tile-3d-layer',
     pointSize: 2,
     data: TILESET_URL,
-    loader: CesiumIonLoader,
+    loaders: [CesiumIonLoader],
     loadOptions: {'cesium-ion': {accessToken: ION_TOKEN}},
     onTilesetLoad
   });

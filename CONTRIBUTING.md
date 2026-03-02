@@ -9,7 +9,7 @@ PRs and bug reports are welcome, and we are actively looking for new maintainers
 
 The **master** branch is the active development branch.
 
-Building deck.gl locally from the source requires node.js `>=18`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
+Building deck.gl locally from the source requires node.js `>=20`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
 We use [yarn](https://yarnpkg.com/en/docs/install) to manage the dependencies of deck.gl. The project's automated builds use Node [corepack](https://github.com/nodejs/corepack) to manage the yarn version. For local development, you can use [nvm](https://github.com/nvm-sh/nvm) or any other Node version manager of your choice - a `.nvmrc` configuration file is provided.
 
 ```bash

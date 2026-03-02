@@ -92,6 +92,8 @@ export type InteractionState = {
   isRotating?: boolean;
   /** If the view is being zoomed, either from user input or transition */
   isZooming?: boolean;
+  /** World coordinate [lng, lat, altitude] of rotation pivot point when rotating */
+  rotationPivotPosition?: [number, number, number];
 }
 
 /** Parameters passed to the onViewStateChange callback */
@@ -119,7 +121,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected eventManager: EventManager;
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
-  protected makeViewport: (opts: Record<string, any>) => Viewport
+  protected makeViewport: (opts: Record<string, any>) => Viewport;
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -154,6 +156,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
     onStateChange: (state: InteractionState) => void;
+    pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
@@ -396,12 +399,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       // invertPan is replaced by props.dragMode, keeping for backward compatibility
       alternateMode = !alternateMode;
     }
-    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos
-    });
+
+    const newControllerState = alternateMode
+      ? this.controllerState.panStart({pos})
+      : this.controllerState.rotateStart(this._getRotateStartParams(pos));
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
+  }
+
+  /** Returns parameters for rotateStart. Override to add extra params (e.g. altitude). */
+  protected _getRotateStartParams(pos: [number, number]): {pos: [number, number]} {
+    return {pos};
   }
 
   // Default handler for the `panmove` and `panend` event.

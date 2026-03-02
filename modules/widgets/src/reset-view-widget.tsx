@@ -66,10 +66,20 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
 
   handleClick() {
     const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
-    const viewId = (this.props.viewId || 'default-view') as unknown as string;
-    const nextViewState = {
-      ...(viewId !== 'default-view' ? initialViewState?.[viewId] : initialViewState)
-    };
-    this.setViewState(viewId, nextViewState);
+    this.setViewState(initialViewState);
+  }
+
+  setViewState(viewState?: ViewStateMap<ViewsT>) {
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const nextViewState = {
+        ...(viewState?.[viewId] ?? viewState)
+        // only works for geospatial?
+        // transitionDuration: this.props.transitionDuration,
+        // transitionInterpolator: new FlyToInterpolator()
+      };
+      // @ts-ignore Using private method temporary until there's a public one
+      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+    }
   }
 }
