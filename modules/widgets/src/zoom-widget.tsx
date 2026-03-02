@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import type {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import type {WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
 import {IconButton} from './lib/components/icon-button';
@@ -37,7 +37,6 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
-  viewports: {[id: string]: Viewport} = {};
 
   constructor(props: ZoomWidgetProps = {}) {
     super(props);
@@ -68,13 +67,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     render(ui, rootElement);
   }
 
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-  }
-
-  handleZoom(viewport: Viewport, nextZoom: number) {
-    const viewId = this.viewId || viewport?.id || 'default-view';
-
+  handleZoom(viewId: string, nextZoom: number) {
     // Respect minZoom/maxZoom constraints from the view state
     const viewState = this.getViewState(viewId);
     if (viewState) {
@@ -104,14 +97,18 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   }
 
   handleZoomIn() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom + 1);
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const viewState = this.getViewState(viewId);
+      this.handleZoom(viewId, (viewState.zoom as number) + 1);
     }
   }
 
   handleZoomOut() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom - 1);
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const viewState = this.getViewState(viewId);
+      this.handleZoom(viewId, (viewState.zoom as number) - 1);
     }
   }
 }

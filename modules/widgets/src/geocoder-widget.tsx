@@ -186,19 +186,20 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   };
 
   flyTo(viewState: ViewState) {
-    const viewId = this.props.viewId || (viewState?.id as string) || 'default-view';
-    const currentViewState = this.getViewState(viewId);
-    const nextViewState: ViewState = {
-      ...currentViewState,
-      ...viewState
-    };
-    if (this.props.transitionDuration > 0) {
-      nextViewState.transitionDuration = this.props.transitionDuration;
-      nextViewState.transitionInterpolator =
-        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const currentViewState = this.getViewState(viewId);
+      const nextViewState: ViewState = {
+        ...currentViewState,
+        ...viewState
+      };
+      if (this.props.transitionDuration > 0) {
+        nextViewState.transitionDuration = this.props.transitionDuration;
+        nextViewState.transitionInterpolator =
+          'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+      }
+      this.setViewState(viewId, nextViewState);
     }
-
-    this.setViewState(viewId, nextViewState);
   }
 }
 
