@@ -115,8 +115,22 @@ export default function transform(
     });
 
   // ============================================================================
-  // Step 1: Convert tape imports to vitest
+  // Step 1: Save header comments from first node, then remove tape imports
   // ============================================================================
+  let savedHeaderComments: any[] = [];
+
+  // Save header comments from the very first node in the program
+  const program = root.get().node.program;
+  if (program.body.length > 0) {
+    const firstNode = program.body[0];
+    if (firstNode.comments && firstNode.comments.length > 0) {
+      savedHeaderComments = firstNode.comments.filter((c: any) => c.leading);
+      // Remove header comments from the first node
+      firstNode.comments = firstNode.comments.filter((c: any) => !c.leading);
+    }
+  }
+
+  // Remove tape imports
   root
     .find(j.ImportDeclaration)
     .filter(path => {
@@ -128,7 +142,6 @@ export default function transform(
       );
     })
     .forEach(path => {
-      // Replace with vitest import (we'll finalize imports at the end)
       j(path).remove();
     });
 
@@ -223,21 +236,30 @@ export default function transform(
     });
 
   // ============================================================================
-  // Step 4: Convert t.end() and t.plan() - remove them
+  // Step 4: Convert t.end() and t.plan() - remove them (both as statements and return statements)
   // ============================================================================
+  // Helper to check if a call is t.end() or t.plan()
+  const isEndOrPlanCall = (expr: any) => {
+    return (
+      j.CallExpression.check(expr) &&
+      j.MemberExpression.check(expr.callee) &&
+      j.Identifier.check(expr.callee.object) &&
+      tapeTestParams.has(expr.callee.object.name) &&
+      j.Identifier.check(expr.callee.property) &&
+      (expr.callee.property.name === 'end' || expr.callee.property.name === 'plan')
+    );
+  };
+
+  // Remove t.end() and t.plan() as expression statements
   root
     .find(j.ExpressionStatement)
-    .filter(path => {
-      const expr = path.node.expression;
-      return (
-        j.CallExpression.check(expr) &&
-        j.MemberExpression.check(expr.callee) &&
-        j.Identifier.check(expr.callee.object) &&
-        tapeTestParams.has(expr.callee.object.name) &&
-        j.Identifier.check(expr.callee.property) &&
-        (expr.callee.property.name === 'end' || expr.callee.property.name === 'plan')
-      );
-    })
+    .filter(path => isEndOrPlanCall(path.node.expression))
+    .remove();
+
+  // Remove return t.end() statements
+  root
+    .find(j.ReturnStatement)
+    .filter(path => path.node.argument && isEndOrPlanCall(path.node.argument))
     .remove();
 
   // ============================================================================
@@ -413,7 +435,9 @@ export default function transform(
     });
 
   // ============================================================================
-  // Step 9: Convert t.throws(fn, msg) -> expect(fn, msg).toThrow()
+  // Step 9: Convert t.throws(fn, expected?, msg?) -> expect(fn, msg).toThrow(expected?)
+  // tape signature: t.throws(fn, expected?, msg?)
+  // where expected can be RegExp, constructor, or validation object
   // ============================================================================
   root
     .find(j.CallExpression)
@@ -430,13 +454,57 @@ export default function transform(
     .forEach(path => {
       const args = path.node.arguments;
       const fn = args[0];
-      const message = args.length > 1 ? args[args.length - 1] : undefined;
+
+      // Parse args: t.throws(fn), t.throws(fn, msg), t.throws(fn, expected, msg)
+      let expected: any = undefined;
+      let message: any = undefined;
+
+      // Helper to check if an argument looks like a message (not an expected error)
+      const looksLikeMessage = (arg: any): boolean => {
+        // String literal -> message
+        if (j.Literal.check(arg) && typeof arg.value === 'string') return true;
+        // Template literal -> message
+        if (j.TemplateLiteral.check(arg)) return true;
+        // RegExp literal -> expected error, not message
+        if (j.Literal.check(arg) && arg.regex) return false;
+        // MemberExpression like testCase.title, testCase.message, etc. -> likely message
+        if (j.MemberExpression.check(arg) && j.Identifier.check(arg.property)) {
+          const propName = arg.property.name.toLowerCase();
+          if (['title', 'message', 'msg', 'description', 'name'].includes(propName)) {
+            return true;
+          }
+        }
+        // Identifier like 'title', 'message', 'msg' -> likely message
+        if (j.Identifier.check(arg)) {
+          const name = arg.name.toLowerCase();
+          if (['title', 'message', 'msg', 'description'].includes(name)) {
+            return true;
+          }
+        }
+        // Everything else (RegExp, constructors, etc.) -> expected error
+        return false;
+      };
+
+      if (args.length === 2) {
+        // Could be t.throws(fn, msg) or t.throws(fn, expected)
+        const secondArg = args[1];
+        if (looksLikeMessage(secondArg)) {
+          message = secondArg;
+        } else {
+          expected = secondArg;
+        }
+      } else if (args.length >= 3) {
+        // t.throws(fn, expected, msg)
+        expected = args[1];
+        message = args[2];
+      }
 
       const expectArgs = message ? [fn, message] : [fn];
       const expectCall = j.callExpression(j.identifier('expect'), expectArgs);
+      const toThrowArgs = expected ? [expected] : [];
       const toThrowCall = j.callExpression(
         j.memberExpression(expectCall, j.identifier('toThrow')),
-        []
+        toThrowArgs
       );
 
       j(path).replaceWith(toThrowCall);
@@ -488,17 +556,18 @@ export default function transform(
       const throwStatement = j.throwStatement(
         j.newExpression(j.identifier('Error'), [message])
       );
-      // Replace the call expression with a throw - need to handle ExpressionStatement
+
       const parent = path.parent;
       if (j.ExpressionStatement.check(parent.node)) {
+        // Direct statement: t.fail(msg); -> throw new Error(msg);
         j(parent).replaceWith(throwStatement);
+      } else if (j.ArrowFunctionExpression.check(parent.node) && parent.node.body === path.node) {
+        // Arrow function body: () => t.fail(msg) -> () => { throw new Error(msg) }
+        parent.node.body = j.blockStatement([throwStatement]);
       } else {
-        // If it's not a statement, wrap in an IIFE that throws
+        // Other contexts: wrap in an IIFE
         const iife = j.callExpression(
-          j.arrowFunctionExpression(
-            [],
-            j.blockStatement([throwStatement])
-          ),
+          j.arrowFunctionExpression([], j.blockStatement([throwStatement])),
           []
         );
         j(path).replaceWith(iife);
@@ -887,7 +956,7 @@ export default function transform(
     });
 
   // ============================================================================
-  // Step 20: Add vitest import at the top
+  // Step 20: Add vitest import at the top, preserving leading comments (header)
   // ============================================================================
   if (needsVi) {
     neededImports.add('vi');
@@ -896,6 +965,11 @@ export default function transform(
     Array.from(neededImports).map(name => j.importSpecifier(j.identifier(name))),
     j.literal('vitest')
   );
+
+  // Attach saved header comments from the removed tape import
+  if (savedHeaderComments.length > 0) {
+    vitestImport.comments = savedHeaderComments;
+  }
 
   // Find first import or add at the top
   const firstImport = root.find(j.ImportDeclaration).at(0);
