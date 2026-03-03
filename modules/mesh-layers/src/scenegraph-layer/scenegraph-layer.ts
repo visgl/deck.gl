@@ -106,6 +106,12 @@ type _ScenegraphLayerProps<DataT> = {
    */
   getTransformMatrix?: Accessor<DataT, number[]>;
   /**
+   * Called after the layer has rendered for the first time.
+   * Used by Tile3DLayer to signal that a tile's sublayer is visible,
+   * allowing parent tiles to be safely deselected during transitions.
+   */
+  onFirstDraw?: () => void;
+  /**
    * Multiplier to scale each geometry by.
    * @default 1
    */
@@ -134,6 +140,7 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   getAnimator: scenegraph => scenegraph && scenegraph.animator,
   _animations: null,
 
+  onFirstDraw: {type: 'function', value: () => {}},
   sizeScale: {type: 'number', value: 1, min: 0},
   sizeMinPixels: {type: 'number', min: 0, value: 0},
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
@@ -169,6 +176,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     scenegraph: GroupNode;
     animator: GLTFAnimator;
     models: Model[];
+    firstDrawSignaled: boolean;
   };
 
   getShaders() {
@@ -248,9 +256,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects)
-        .then(() => {
-          this.setNeedsRedraw();
-        })
+        .then(() => this.setNeedsRedraw())
         .catch(ex => {
           this.raiseError(ex, 'loading glTF');
         });
@@ -272,7 +278,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       });
 
-      this.setState({scenegraph, animator, models});
+      this.setState({scenegraph, animator, models, firstDrawSignaled: false});
       this.getAttributeManager()!.invalidateAll();
     } else if (scenegraph !== null) {
       log.warn('invalid scenegraph:', scenegraph)();
@@ -378,5 +384,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         model.draw(renderPass);
       }
     });
+
+    if (!this.state.firstDrawSignaled) {
+      this.state.firstDrawSignaled = true;
+      this.props.onFirstDraw?.();
+    }
   }
 }
