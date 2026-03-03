@@ -112,8 +112,8 @@ test('parseExpressionString', () => {
     if (isErrorCase) {
       expect(
         () => parseExpressionString(testCase.expr, null, isAccessor),
-        testCase.errorRegex
-      ).toThrow();
+        `throws on ${testCase.expr}`
+      ).toThrow(testCase.errorRegex);
       /* eslint-disable-next-line no-continue */
       continue;
     }

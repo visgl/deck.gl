@@ -365,7 +365,7 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', () => {
       expect(() => {
         const featureArray = getGeojsonFeatures(tc.argument);
         separateGeojsonFeatures(featureArray, wrapSourceFeature);
-      }, tc.error).toThrow();
+      }, `separateGeojsonFeatures ${tc.title} throws error`).toThrow(tc.error);
     } else {
       const featureArray = getGeojsonFeatures(tc.argument);
       expect(

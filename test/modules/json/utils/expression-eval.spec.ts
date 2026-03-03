@@ -169,13 +169,13 @@ test('async', async () => {
 
 test('errors', async () => {
   const expectedMsg = /Access to member "\w+" disallowed/;
-  expect(() => compile(`o.__proto__`)({o: {}}), expectedMsg).toThrow();
-  expect(() => compile(`o.prototype`)({o: {}}), expectedMsg).toThrow();
-  expect(() => compile(`o.constructor`)({o: {}}), expectedMsg).toThrow();
-  expect(() => compile(`o['__proto__']`)({o: {}}), expectedMsg).toThrow();
-  expect(() => compile(`o['prototype']`)({o: {}}), expectedMsg).toThrow();
-  expect(() => compile(`o['constructor']`)({o: {}}), expectedMsg).toThrow();
-  expect(() => compile(`o[p]`)({o: {}, p: '__proto__'}), expectedMsg).toThrow();
-  expect(() => compile(`o[p]`)({o: {}, p: 'prototype'}), expectedMsg).toThrow();
-  expect(() => compile(`o[p]`)({o: {}, p: 'constructor'}), expectedMsg).toThrow();
+  expect(() => compile(`o.__proto__`)({o: {}}), '.__proto__').toThrow(expectedMsg);
+  expect(() => compile(`o.prototype`)({o: {}}), '.prototype').toThrow(expectedMsg);
+  expect(() => compile(`o.constructor`)({o: {}}), '.constructor').toThrow(expectedMsg);
+  expect(() => compile(`o['__proto__']`)({o: {}}), '["__proto__"]').toThrow(expectedMsg);
+  expect(() => compile(`o['prototype']`)({o: {}}), '["prototype"]').toThrow(expectedMsg);
+  expect(() => compile(`o['constructor']`)({o: {}}), '["constructor"]').toThrow(expectedMsg);
+  expect(() => compile(`o[p]`)({o: {}, p: '__proto__'}), '[~__proto__]').toThrow(expectedMsg);
+  expect(() => compile(`o[p]`)({o: {}, p: 'prototype'}), '[~prototype]').toThrow(expectedMsg);
+  expect(() => compile(`o[p]`)({o: {}, p: 'constructor'}), '[~constructor]').toThrow(expectedMsg);
 });
