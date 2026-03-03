@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import type {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import type {WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
 import {IconButton} from './lib/components/icon-button';
@@ -37,7 +37,6 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
-  viewports: {[id: string]: Viewport} = {};
 
   constructor(props: ZoomWidgetProps = {}) {
     super(props);
@@ -68,14 +67,21 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     render(ui, rootElement);
   }
 
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-  }
+  handleZoom(viewId: string, nextZoom: number) {
+    // Respect minZoom/maxZoom constraints from the view state
+    const viewState = this.getViewState(viewId);
+    if (viewState) {
+      const {minZoom, maxZoom} = viewState as any;
+      if (Number.isFinite(minZoom)) {
+        nextZoom = Math.max(minZoom, nextZoom);
+      }
+      if (Number.isFinite(maxZoom)) {
+        nextZoom = Math.min(maxZoom, nextZoom);
+      }
+    }
 
-  handleZoom(viewport: Viewport, nextZoom: number) {
-    const viewId = this.viewId || viewport?.id || 'default-view';
     const nextViewState: Record<string, unknown> = {
-      ...viewport,
+      ...viewState,
       zoom: nextZoom
     };
     if (this.props.transitionDuration > 0) {
@@ -91,20 +97,18 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   }
 
   handleZoomIn() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom + 1);
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const viewState = this.getViewState(viewId);
+      this.handleZoom(viewId, (viewState.zoom as number) + 1);
     }
   }
 
   handleZoomOut() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom - 1);
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const viewState = this.getViewState(viewId);
+      this.handleZoom(viewId, (viewState.zoom as number) - 1);
     }
-  }
-
-  /** @todo - move to deck or widget manager */
-  private setViewState(viewId: string, viewState: Record<string, unknown>): void {
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
   }
 }
