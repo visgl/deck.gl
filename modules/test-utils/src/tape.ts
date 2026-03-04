@@ -13,10 +13,16 @@ import {
   testInitializeLayerAsync
 } from './lifecycle-test';
 import type {Layer} from '@deck.gl/core';
-import type {LayerClass, LayerTestCase, SpyFactory, TestLayerOptions} from './lifecycle-test';
+import type {
+  LayerClass,
+  LayerTestCase,
+  ResetSpy,
+  SpyFactory,
+  TestLayerOptions
+} from './lifecycle-test';
 
 export {testInitializeLayer, testInitializeLayerAsync};
-export type {LayerClass, LayerTestCase, SpyFactory};
+export type {LayerClass, LayerTestCase, ResetSpy, SpyFactory};
 
 let _hasWarnedDeprecation = false;
 
@@ -33,15 +39,22 @@ function getDefaultSpyFactory(): SpyFactory {
   return makeSpy;
 }
 
+/** Default reset for probe.gl spies - clears call tracking but keeps spy active */
+const defaultResetSpy: ResetSpy = spy => (spy as ReturnType<typeof makeSpy>).reset();
+
 /**
  * Initialize and updates a layer over a sequence of scenarios (test cases).
  * Use `testLayerAsync` if the layer's update flow contains async operations.
  */
 export function testLayer<LayerT extends Layer>(
-  opts: Omit<TestLayerOptions<LayerT>, 'createSpy'> & {createSpy?: SpyFactory}
+  opts: Omit<TestLayerOptions<LayerT>, 'createSpy' | 'resetSpy'> & {
+    createSpy?: SpyFactory;
+    resetSpy?: ResetSpy;
+  }
 ): void {
   const createSpy = opts.createSpy || getDefaultSpyFactory();
-  testLayerCore({...opts, createSpy});
+  const resetSpy = opts.resetSpy || defaultResetSpy;
+  testLayerCore({...opts, createSpy, resetSpy});
 }
 
 /**
@@ -49,8 +62,12 @@ export function testLayer<LayerT extends Layer>(
  * Each test case is awaited until the layer's isLoaded flag is true.
  */
 export async function testLayerAsync<LayerT extends Layer>(
-  opts: Omit<TestLayerOptions<LayerT>, 'createSpy'> & {createSpy?: SpyFactory}
+  opts: Omit<TestLayerOptions<LayerT>, 'createSpy' | 'resetSpy'> & {
+    createSpy?: SpyFactory;
+    resetSpy?: ResetSpy;
+  }
 ): Promise<void> {
   const createSpy = opts.createSpy || getDefaultSpyFactory();
-  await testLayerAsyncCore({...opts, createSpy});
+  const resetSpy = opts.resetSpy || defaultResetSpy;
+  await testLayerAsyncCore({...opts, createSpy, resetSpy});
 }

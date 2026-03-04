@@ -19,6 +19,6 @@ export {SnapshotTestRunner} from './snapshot-test-runner';
 // A utility that emulates input events
 export {InteractionTestRunner} from './interaction-test-runner';
 
-export type {LayerTestCase, SpyFactory} from './tape';
+export type {LayerTestCase, ResetSpy, SpyFactory} from './tape';
 export type {SnapshotTestCase} from './snapshot-test-runner';
 export type {InteractionTestCase} from './interaction-test-runner';

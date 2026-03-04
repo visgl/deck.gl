@@ -144,14 +144,8 @@ export type Spy = {
 /** Factory function to create a spy on an object method */
 export type SpyFactory = (obj: object, method: string) => Spy;
 
-/** Restore a spy to its original implementation */
-function restoreSpy(spy: Spy): void {
-  if (spy.mockRestore) {
-    spy.mockRestore();
-  } else if (spy.restore) {
-    spy.restore();
-  }
-}
+/** Function to reset/cleanup a spy after each test case */
+export type ResetSpy = (spy: Spy) => void;
 
 export type LayerClass<LayerT extends Layer> = {
   new (...args): LayerT;
@@ -209,6 +203,8 @@ export type TestLayerOptions<LayerT extends Layer> = {
   onError?: (error: Error, title: string) => void;
   /** Factory function to create spies */
   createSpy: SpyFactory;
+  /** Function to reset/cleanup a spy after each test case */
+  resetSpy: ResetSpy;
 };
 
 /**
@@ -216,7 +212,7 @@ export type TestLayerOptions<LayerT extends Layer> = {
  * Use `testLayerAsync` if the layer's update flow contains async operations.
  */
 export function testLayer<LayerT extends Layer>(opts: TestLayerOptions<LayerT>): void {
-  const {Layer, testCases = [], spies = [], onError = defaultOnError, createSpy} = opts;
+  const {Layer, testCases = [], spies = [], onError = defaultOnError, createSpy, resetSpy} = opts;
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
@@ -236,8 +232,8 @@ export function testLayer<LayerT extends Layer>(opts: TestLayerOptions<LayerT>):
 
     runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
-    // Remove spies
-    Object.keys(spyMap).forEach(k => restoreSpy(spyMap[k]));
+    // Reset spies between test cases
+    Object.keys(spyMap).forEach(k => resetSpy(spyMap[k]));
     layer = newLayer;
   }
 
@@ -254,7 +250,7 @@ export function testLayer<LayerT extends Layer>(opts: TestLayerOptions<LayerT>):
 export async function testLayerAsync<LayerT extends Layer>(
   opts: TestLayerOptions<LayerT>
 ): Promise<void> {
-  const {Layer, testCases = [], spies = [], onError = defaultOnError, createSpy} = opts;
+  const {Layer, testCases = [], spies = [], onError = defaultOnError, createSpy, resetSpy} = opts;
 
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
@@ -279,8 +275,8 @@ export async function testLayerAsync<LayerT extends Layer>(
       runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
 
-    // Remove spies
-    Object.keys(spyMap).forEach(k => restoreSpy(spyMap[k]));
+    // Reset spies between test cases
+    Object.keys(spyMap).forEach(k => resetSpy(spyMap[k]));
     layer = newLayer;
   }
 
