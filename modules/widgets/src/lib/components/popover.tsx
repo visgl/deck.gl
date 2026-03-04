@@ -3,13 +3,13 @@
 // Copyright (c) vis.gl contributors
 import type {JSX, ComponentChildren} from 'preact';
 import {useRef, useEffect, useMemo} from 'preact/hooks';
-import {createPortal} from 'preact/compat';
 import {
   computePosition,
   flip,
   shift,
   offset,
   arrow,
+  autoUpdate,
   type Placement,
   type ComputePositionConfig
 } from '@floating-ui/dom';
@@ -53,8 +53,9 @@ export const Popover = ({
   const anchorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
+  const updaterRef = useRef<() => void>();
 
-  const updatePosition = () => {
+  updaterRef.current = () => {
     if (!anchorRef.current || !contentRef.current) return;
 
     const arrowWidth = Array.isArray(arrowSize) ? arrowSize[0] : arrowSize || 0;
@@ -87,36 +88,38 @@ export const Popover = ({
   };
 
   useMemo(() => {
-    updatePosition();
-  }, [x, y, placement, arrowSize, pixelOffset, children]);
+    updaterRef.current?.();
+  }, [placement, arrowSize, pixelOffset]);
 
   useEffect(() => {
     // initial mount
-    updatePosition();
     if (contentRef.current) {
       contentRef.current.style.visibility = 'visible';
     }
+    const cleanup = autoUpdate(anchorRef.current!, contentRef.current!, () =>
+      updaterRef.current?.()
+    );
+    return () => {
+      cleanup();
+    };
   }, []);
 
   return (
     <div style={{position: 'absolute', left: x, top: y}} ref={anchorRef}>
-      {createPortal(
-        <div
-          className="deck-widget deck-widget-popover"
-          style={{position: 'fixed', visibility: 'hidden', pointerEvents: 'none'}}
-          ref={contentRef}
-        >
-          {Boolean(arrowSize) && (
-            <div
-              className="deck-widget-popover-arrow"
-              style={{position: 'absolute'}}
-              ref={arrowRef}
-            />
-          )}
-          {children}
-        </div>,
-        document.body
-      )}
+      <div
+        className="deck-widget deck-widget-popover"
+        style={{position: 'fixed', visibility: 'hidden', pointerEvents: 'none'}}
+        ref={contentRef}
+      >
+        {Boolean(arrowSize) && (
+          <div
+            className="deck-widget-popover-arrow"
+            style={{position: 'absolute'}}
+            ref={arrowRef}
+          />
+        )}
+        {children}
+      </div>
     </div>
   );
 };
