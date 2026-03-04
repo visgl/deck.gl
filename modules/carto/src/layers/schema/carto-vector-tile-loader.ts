@@ -19,11 +19,11 @@ type CartoVectorTileLoaderOptions = LoaderOptions & {
   };
 };
 
-const DEFAULT_OPTIONS: CartoVectorTileLoaderOptions = {
+const DEFAULT_OPTIONS = {
   cartoVectorTile: {
     workerUrl: getWorkerUrl(id, VERSION)
   }
-};
+} as const satisfies CartoVectorTileLoaderOptions;
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',
@@ -37,7 +37,7 @@ const CartoVectorTileLoader: LoaderWithParser = {
     parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
   worker: true,
-  options: DEFAULT_OPTIONS as StrictLoaderOptions
+  options: DEFAULT_OPTIONS
 };
 
 function triangulatePolygon(
