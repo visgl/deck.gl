@@ -30,6 +30,7 @@
     "test": "ocular-test",
     "test-fast": "ocular-lint && ocular-test node",
     "test-tape-compat": "ocular-test tape-compat",
+    "test-vitest-smoke": "vitest run --project scripts --silent",
     "test-headless": "vitest run --project headless --silent",
     "test-render": "vitest run --project render --silent",
     "test-browser": "vitest run --project browser --silent",
