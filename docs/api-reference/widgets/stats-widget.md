@@ -31,12 +31,41 @@ const deck = new Deck({
 
 The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `type` (string, default `'deck'`) - Type of stats to display: `'deck'`, `'luma'`, `'device'`, or `'custom'`
-- `stats` (Stats, optional) - Custom stats object when using `type: 'custom'`
-- `title` (string, default `'Stats'`) - Title shown in the widget header
-- `framesPerUpdate` (number, default `1`) - Number of frames to wait between updates
-- `formatters` (object, default `{}`) - Custom formatters for stat values
-- `resetOnUpdate` (object, default `{}`) - Whether to reset particular stats after each update
+#### type (string, optional)
+
+Type of stats to display. One of `'deck'`, `'luma'`, `'device'`, or `'custom'`.
+
+* Default: `'deck'`
+
+#### stats (Stats, optional)
+
+A [Stats](https://visgl.github.io/probe.gl/docs/modules/stats) instance to display when using `type: 'custom'`.
+
+#### title (string, optional)
+
+Title shown in the widget header.
+
+* Default: `'Stats'`
+
+#### defaultIsExpanded (boolean, optional)
+
+If `true`, the UI is expanded at start.
+
+* Default: `false`
+
+#### framesPerUpdate (number, optional)
+
+Number of frames to wait between refresh.
+
+* Default: `1`
+
+#### formatters (object, optional)
+
+Custom formatters for stat values.
+
+#### resetOnUpdate (object, optional)
+
+Whether to reset particular stats after each update.
 
 ### Built-in Formatters
 

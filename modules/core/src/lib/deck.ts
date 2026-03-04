@@ -678,6 +678,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this._pick('pickObjects', 'pickObjects Time', opts);
   }
 
+  /**
+   * Internal method used by controllers to pick 3D position at a screen coordinate
+   * @private
+   */
+  private _pickPositionForController(x: number, y: number): {coordinate?: number[]} | null {
+    const pickResult = this.pickObject({x, y, radius: 0, unproject3D: true});
+    return pickResult;
+  }
+
   /** Experimental
    * Add a global resource for sharing among layers
    */
@@ -1103,6 +1112,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
+      pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,

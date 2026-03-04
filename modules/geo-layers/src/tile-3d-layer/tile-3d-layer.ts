@@ -180,12 +180,12 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     // TODO: deprecate `loader` in v9.0
     // @ts-ignore
-    const loaders = this.props.loader || this.props.loaders;
+    const loaders = this.props.loaders?.length ? this.props.loaders : this.props.loader;
     const loader = Array.isArray(loaders) ? loaders[0] : loaders;
 
     const options = {loadOptions: {...loadOptions}};
     let actualTilesetUrl = tilesetUrl;
-    if (loader.preload) {
+    if ('preload' in loader && typeof loader.preload === 'function') {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
       if (preloadOptions.url) {
         actualTilesetUrl = preloadOptions.url;

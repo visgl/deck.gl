@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget} from '@deck.gl/core';
-import type {WidgetPlacement, Viewport, WidgetProps} from '@deck.gl/core';
+import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
 import {render} from 'preact';
 import {DropdownMenu, type MenuItem} from './lib/components/dropdown-menu';
@@ -157,7 +157,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
     try {
       const coordinates = await CurrentLocationGeocoder.geocode();
       if (coordinates) {
-        this.setViewState(coordinates);
+        this.flyTo(coordinates);
       }
     } catch (error) {
       this.geocodeHistory.errorText = error instanceof Error ? error.message : 'Location error';
@@ -181,33 +181,26 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
       this.updateHTML();
     }
     if (coordinates) {
-      this.setViewState(coordinates);
+      this.flyTo(coordinates);
     }
   };
 
-  // TODO - MOVE TO WIDGETIMPL?
-  setViewState(viewState: ViewState) {
-    const viewId = this.props.viewId || (viewState?.id as string) || 'default-view';
-    const viewport = this.viewports[viewId] || {};
-    const nextViewState: ViewState = {
-      ...viewport,
-      ...viewState
-    };
-    if (this.props.transitionDuration > 0) {
-      nextViewState.transitionDuration = this.props.transitionDuration;
-      nextViewState.transitionInterpolator =
-        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+  flyTo(viewState: ViewState) {
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const currentViewState = this.getViewState(viewId);
+      const nextViewState: ViewState = {
+        ...currentViewState,
+        ...viewState
+      };
+      if (this.props.transitionDuration > 0) {
+        nextViewState.transitionDuration = this.props.transitionDuration;
+        nextViewState.transitionInterpolator =
+          'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+      }
+      this.setViewState(viewId, nextViewState);
     }
-
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
   }
-
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-  }
-
-  viewports: Record<string, Viewport> = {};
 }
 
 function getGeocoder(props: {geocoder?: string; customGeocoder?: Geocoder}): Geocoder {

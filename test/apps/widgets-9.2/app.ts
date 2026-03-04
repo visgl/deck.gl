@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, PickingInfo} from '@deck.gl/core';
+import {Deck, MapView, PickingInfo} from '@deck.gl/core';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
@@ -91,6 +91,7 @@ function getLayers(filterRange = [2, 9]) {
 
 const deck = new Deck({
   parent: document.getElementById('app'),
+  views: new MapView({repeat: true}),
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: getLayers(),
