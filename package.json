@@ -28,6 +28,8 @@
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
     "test-fast": "ocular-lint && ocular-test node",
+    "test-tape-compat": "ocular-test tape-compat",
+    "test-vitest-smoke": "vitest run test/smoke/vitest-entry.spec.ts",
     "test-website": "cd website && yarn && yarn test-build && cd ..",
     "metrics": "ocular-metrics",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
@@ -53,7 +55,8 @@
     "puppeteer": "^24.26.1",
     "s2-geometry": "^1.2.10",
     "tap-spec": "^5.0.0",
-    "tape-catch": "^1.0.6"
+    "tape-catch": "^1.0.6",
+    "vitest": "^4.0.18"
   },
   "resolutions": {
     "wgsl_reflect": "^1.2.0",
