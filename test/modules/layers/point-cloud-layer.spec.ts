@@ -43,7 +43,7 @@ test('PointCloudLayer#loaders.gl support', () => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        expect(uniforms.sizeUnits, UNIT.meters).toBeTruthy();
+        expect(uniforms.sizeUnits, 'sizeUnits uniform "meters"').toBe(UNIT.meters);
       }
     },
     {

@@ -146,9 +146,9 @@ test('H3HexagonLayer', () => {
       expect(subLayer.props.stroked, 'stroked prop is forwarded').toBe(layer.props.stroked);
 
       if (layer._shouldUseHighPrecision()) {
-        expect(subLayer.constructor.layerName, 'PolygonLayer').toBeTruthy();
+        expect(subLayer.constructor.layerName, 'renders polygon layer').toBe('PolygonLayer');
       } else {
-        expect(subLayer.constructor.layerName, 'ColumnLayer').toBeTruthy();
+        expect(subLayer.constructor.layerName, 'renders column layer').toBe('ColumnLayer');
       }
     }
   });
@@ -171,7 +171,7 @@ test('H3HexagonLayer#_shouldUseHighPrecision', () => {
             layer._shouldUseHighPrecision(),
             'Instanced rendering with standard hexagons'
           ).toBe(false);
-          expect(subLayer.constructor.layerName, 'ColumnLayer').toBeTruthy();
+          expect(subLayer.constructor.layerName, 'renders column layer').toBe('ColumnLayer');
         }
       },
       {
@@ -184,7 +184,7 @@ test('H3HexagonLayer#_shouldUseHighPrecision', () => {
             layer._shouldUseHighPrecision(),
             'Polygon rendering when input contains a pentagon'
           ).toBe(true);
-          expect(subLayer.constructor.layerName, 'PolygonLayer').toBeTruthy();
+          expect(subLayer.constructor.layerName, 'renders polygon layer').toBe('PolygonLayer');
         }
       },
       {
@@ -197,7 +197,7 @@ test('H3HexagonLayer#_shouldUseHighPrecision', () => {
             layer._shouldUseHighPrecision(),
             'Polygon rendering when input contains multiple resolutions'
           ).toBe(true);
-          expect(subLayer.constructor.layerName, 'PolygonLayer').toBeTruthy();
+          expect(subLayer.constructor.layerName, 'renders polygon layer').toBe('PolygonLayer');
         }
       }
     ]

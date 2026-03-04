@@ -40,7 +40,6 @@ test('createPointsFromLines', () => {
   expect(points, 'returns points object').toBeTruthy();
   if (!points) {
     throw new Error('points should not be null');
-    return;
   }
 
   expect(points.type, 'correct type').toBe('Point');
@@ -199,7 +198,6 @@ test('createPointsFromPolygons', () => {
   expect(points, 'returns points object').toBeTruthy();
   if (!points) {
     throw new Error('points should not be null');
-    return;
   }
 
   expect(points.type, 'correct type').toBe('Point');
@@ -376,7 +374,6 @@ test('createPointsFromLines - property as unique ID', () => {
   expect(points, 'returns points object').toBeTruthy();
   if (!points) {
     throw new Error('points should not be null');
-    return;
   }
 
   expect(points.type, 'correct type').toBe('Point');
@@ -424,7 +421,6 @@ test('createPointsFromLines - fallback when uniqueIdProperty not found', () => {
   expect(points, 'returns points object').toBeTruthy();
   if (!points) {
     throw new Error('points should not be null');
-    return;
   }
 
   expect(points.type, 'correct type').toBe('Point');
@@ -464,7 +460,6 @@ test('createPointsFromLines - mixed uniqueIdProperty', () => {
   expect(points, 'returns points object').toBeTruthy();
   if (!points) {
     throw new Error('points should not be null');
-    return;
   }
 
   expect(points.type, 'correct type').toBe('Point');

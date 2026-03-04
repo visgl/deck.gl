@@ -158,6 +158,21 @@ export default defineConfig({
         }
       },
 
+      // Scripts project - codemod and build tool tests
+      // Used by test-scripts
+      {
+        extends: true,
+        test: {
+          name: 'scripts',
+          environment: 'node',
+          include: ['scripts/**/*.spec.ts'],
+          globals: false,
+          testTimeout: 30000,
+          // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: [0]}
+        }
+      },
+
       // Headless project - unit tests in headless browser
       // Used by test-headless and test-ci
       {

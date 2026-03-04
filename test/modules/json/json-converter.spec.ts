@@ -79,7 +79,7 @@ test('JSONConverter#handleTypeAsKey', () => {
   expect(jsonConverter, 'JSONConverter created').toBeTruthy();
   const complexData = JSON.parse(JSON.stringify(COMPLEX_JSON));
   const deckProps = jsonConverter.convert(complexData);
-  expect(deckProps.layers.length, 4).toBeTruthy();
+  expect(deckProps.layers.length, 'should have four layers').toBe(4);
   expect(
     deckProps.layers[0].id === 'ScatterplotLayer',
     'should have a ScatterplotLayer at index 0'

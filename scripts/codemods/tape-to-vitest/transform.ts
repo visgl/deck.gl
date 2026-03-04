@@ -264,6 +264,8 @@ export default function transform(
 
   // ============================================================================
   // Step 5: Convert t.ok/t.true/t.assert(value, msg) -> expect(value, msg).toBeTruthy()
+  // Special case: t.ok(value, expected, msg) with 3 args is a bug in original test
+  // that should have been t.equal - convert to expect(value, msg).toBe(expected)
   // ============================================================================
   const truthyMethods = ['ok', 'true', 'assert'];
   root
@@ -281,6 +283,24 @@ export default function transform(
     .forEach(path => {
       const args = path.node.arguments;
       const value = args[0];
+
+      // Check for 3-argument pattern: t.ok(value, expected, message)
+      // This is a bug in the original test - should have been t.equal
+      // Convert to expect(value, message).toBe(expected)
+      if (args.length >= 3) {
+        const expected = args[1];
+        const message = args[2];
+        const expectArgs = message ? [value, message] : [value];
+        const expectCall = j.callExpression(j.identifier('expect'), expectArgs);
+        const toBeCall = j.callExpression(
+          j.memberExpression(expectCall, j.identifier('toBe')),
+          [expected]
+        );
+        j(path).replaceWith(toBeCall);
+        return;
+      }
+
+      // Normal 1 or 2 argument case: t.ok(value) or t.ok(value, message)
       const message = args[1];
 
       // Build expect(value, msg).toBeTruthy()
