@@ -39,8 +39,8 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@loaders.gl/csv": "^4.4.0-alpha.14",
-    "@loaders.gl/polyfills": "^4.4.0-alpha.14",
+    "@loaders.gl/csv": "^4.4.0-alpha.15",
+    "@loaders.gl/polyfills": "^4.4.0-alpha.15",
     "@luma.gl/core": "^9.2.6",
     "@luma.gl/effects": "^9.2.6",
     "@luma.gl/webgpu": "^9.2.6",
@@ -57,7 +57,7 @@
   },
   "resolutions": {
     "wgsl_reflect": "^1.2.0",
-    "@loaders.gl/core": "4.4.0-alpha.14"
+    "@loaders.gl/core": "4.4.0-alpha.15"
   },
   "pre-commit": [
     "test-fast",
