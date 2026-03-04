@@ -166,8 +166,10 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
     if (typeof props.data === 'string') {
       return new WMSImageSource(props.data, {
-        ...props.loadOptions
-      });
+         core: {
+           loadOptions: ...props.loadOptions
+         }
+       });
     }
 
     throw new Error('invalid image source in props.data');
