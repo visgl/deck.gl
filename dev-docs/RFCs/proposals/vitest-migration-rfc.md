@@ -271,16 +271,19 @@ async function getDefaultSpyFactory() {
 
 #### Peer Dependencies
 
-Only `@probe.gl/test-utils` remains as an optional peer dependency (for backward compat):
+`@probe.gl/test-utils` is a **required** peer dependency because the default entry point (`@deck.gl/test-utils`) has a static import from `tape.ts`. Only `vitest` is optional (for the `./vitest` sub-entry):
 
 ```json
 "peerDependencies": {
-  "@probe.gl/test-utils": "^4.1.0"
+  "@probe.gl/test-utils": "^4.1.1",
+  "vitest": "^4.0.18"
 },
 "peerDependenciesMeta": {
-  "@probe.gl/test-utils": { "optional": true }
+  "vitest": { "optional": true }
 }
 ```
+
+**Note:** Users who only use `@deck.gl/test-utils/vitest` don't technically need `@probe.gl/test-utils`, but it remains required for backward compatibility with existing 9.x users.
 
 #### User Experience Matrix
 
