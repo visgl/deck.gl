@@ -18,7 +18,7 @@ test('tape-compat: testInitializeLayer works', t => {
   t.end();
 });
 
-test('tape-compat: testLayer works with explicit createSpy', t => {
+test('tape-compat: testLayer works with explicit createSpy and resetSpy', t => {
   testLayer({
     Layer: ScatterplotLayer,
     testCases: [
@@ -28,6 +28,7 @@ test('tape-compat: testLayer works with explicit createSpy', t => {
       }
     ],
     createSpy: makeSpy,
+    resetSpy: spy => (spy as ReturnType<typeof makeSpy>).reset(),
     onError: e => t.fail(e.message)
   });
   t.pass('testLayer completed');
