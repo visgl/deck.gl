@@ -192,9 +192,12 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }
 
       if (preloadOptions.headers) {
-        options.loadOptions['core.fetch'] = {
-          ...options.loadOptions['core.fetch'],
-          headers: preloadOptions.headers
+        options.loadOptions.core = {
+          ...options.loadOptions.core,
+          fetch: {
+            ...options.loadOptions.core?.fetch,
+            headers: preloadOptions.headers
+          }
         };
       }
       Object.assign(options, preloadOptions);
