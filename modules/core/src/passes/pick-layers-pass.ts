@@ -70,7 +70,8 @@ export default class PickLayersPass extends LayersPass {
     effects,
     pass = 'picking',
     pickZ,
-    shaderModuleProps
+    shaderModuleProps,
+    clearColor
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
@@ -96,7 +97,7 @@ export default class PickLayersPass extends LayersPass {
       pass,
       isPicking: true,
       shaderModuleProps,
-      clearColor: [0, 0, 0, 0],
+      clearColor: clearColor ?? [0, 0, 0, 0],
       colorMask: 0xf,
       scissorRect
     });
@@ -145,6 +146,13 @@ export default class PickLayersPass extends LayersPass {
       pickParameters.blend = true;
       // TODO: blendColor no longer part of luma.gl API
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      if (operation.includes('terrain') && layer.state?._hasPickingCover) {
+        // For terrain+draw layers with a valid cover FBO, the terrain shader outputs the
+        // cover FBO pixel which already has correctly encoded alpha from the cover encoder.
+        // Use srcFactor 'one' to pass through the cover alpha without double-encoding.
+        // Without a cover FBO, keep 'constant' so the layer's own picking colors encode correctly.
+        pickParameters.blendAlphaSrcFactor = 'one';
+      }
     } else if (operation.includes('terrain')) {
       // Pure terrain layers (without 'draw') don't need picking colors
       pickParameters.blend = false;
