@@ -91,6 +91,12 @@ export class TerrainEffect implements Effect {
     otherShaderModuleProps: Record<string, any>
   ): {terrain: TerrainModuleProps} {
     const {terrainDrawMode} = layer.state;
+    const terrainCover = this.isDrapingEnabled ? (this.terrainCovers.get(layer.id) ?? null) : null;
+
+    // Communicate cover FBO availability to getLayerParameters for blend factor selection
+    if (this.isPicking && layer.props.operation.includes('terrain')) {
+      layer.state._hasPickingCover = Boolean(terrainCover?.getPickingFramebuffer());
+    }
 
     return {
       terrain: {
@@ -99,7 +105,7 @@ export class TerrainEffect implements Effect {
         heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
         heightMapBounds: this.heightMap?.bounds,
         dummyHeightMap: this.dummyHeightMap!,
-        terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
+        terrainCover,
         useTerrainHeightMap: terrainDrawMode === 'offset',
         terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
       }
