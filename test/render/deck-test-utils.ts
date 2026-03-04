@@ -128,18 +128,8 @@ export async function runRenderTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
-  const {
-    name,
-    views,
-    viewState,
-    layers,
-    effects,
-    goldenImage,
-    useDevicePixels,
-    onBeforeRender,
-    onAfterRender,
-    imageDiffOptions
-  } = testCase;
+  const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
+    testCase;
 
   // Create a new Deck instance for each test (like the old SnapshotTestRunner)
   // This ensures Deck enters a fresh render loop and properly handles async loading
@@ -195,45 +185,12 @@ export async function runRenderTest(
   });
 
   // Capture and diff screenshot
-  const region = getCanvasRegion(ctx.deck);
-  const diffOptions = {
-    goldenImage,
-    region,
-    threshold: imageDiffOptions?.threshold ?? 0.99,
-    tolerance: 0.1,
-    includeEmpty: false,
-    platform: OS,
-    saveOnFail: true,
-    createDiffImage: true
-  };
-
-  const result = await commands.captureAndDiffScreen(diffOptions);
-
-  // If failed, try platform-specific golden image
-  let finalResult = result;
-  if (!result.success) {
-    const platformGoldenImage = goldenImage.replace(
-      'golden-images/',
-      `golden-images/platform-overrides/${OS.toLowerCase()}/`
-    );
-    const platformResult = await commands.captureAndDiffScreen({
-      ...diffOptions,
-      goldenImage: platformGoldenImage
-    });
-    if (platformResult.success) {
-      finalResult = platformResult;
-    }
-  }
-
-  expect(
-    finalResult.success,
-    `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}`
-  ).toBe(true);
+  await captureAndDiffScreenshot(testCase, ctx);
 }
 
 /**
  * Captures and diffs a screenshot against a golden image.
- * Extracted for reuse between runRenderTest and updateDeckForTest.
+ * Used by both runRenderTest and updateDeckForTest.
  */
 async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext): Promise<void> {
   const {name, goldenImage, imageDiffOptions} = testCase;
