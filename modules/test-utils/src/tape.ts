@@ -24,11 +24,12 @@ import type {
 export {testInitializeLayer, testInitializeLayerAsync};
 export type {LayerClass, LayerTestCase, ResetSpy, SpyFactory};
 
-let _hasWarnedDeprecation = false;
+let _hasWarnedCreateSpy = false;
+let _hasWarnedResetSpy = false;
 
 function getDefaultSpyFactory(): SpyFactory {
-  if (!_hasWarnedDeprecation) {
-    _hasWarnedDeprecation = true;
+  if (!_hasWarnedCreateSpy) {
+    _hasWarnedCreateSpy = true;
     // eslint-disable-next-line no-console
     console.warn(
       '[@deck.gl/test-utils] Implicit @probe.gl/test-utils usage is deprecated. ' +
@@ -40,7 +41,18 @@ function getDefaultSpyFactory(): SpyFactory {
 }
 
 /** Default reset for probe.gl spies - clears call tracking but keeps spy active */
-const defaultResetSpy: ResetSpy = spy => (spy as ReturnType<typeof makeSpy>).reset();
+function getDefaultResetSpy(): ResetSpy {
+  if (!_hasWarnedResetSpy) {
+    _hasWarnedResetSpy = true;
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[@deck.gl/test-utils] Implicit spy reset is deprecated. ' +
+        'Pass resetSpy option: resetSpy: (spy) => spy.mockRestore() for vitest, ' +
+        'or resetSpy: (spy) => spy.reset() for probe.gl.'
+    );
+  }
+  return spy => (spy as ReturnType<typeof makeSpy>).reset();
+}
 
 /**
  * Initialize and updates a layer over a sequence of scenarios (test cases).
@@ -53,7 +65,7 @@ export function testLayer<LayerT extends Layer>(
   }
 ): void {
   const createSpy = opts.createSpy || getDefaultSpyFactory();
-  const resetSpy = opts.resetSpy || defaultResetSpy;
+  const resetSpy = opts.resetSpy || getDefaultResetSpy();
   testLayerCore({...opts, createSpy, resetSpy});
 }
 
@@ -68,6 +80,6 @@ export async function testLayerAsync<LayerT extends Layer>(
   }
 ): Promise<void> {
   const createSpy = opts.createSpy || getDefaultSpyFactory();
-  const resetSpy = opts.resetSpy || defaultResetSpy;
+  const resetSpy = opts.resetSpy || getDefaultResetSpy();
   await testLayerAsyncCore({...opts, createSpy, resetSpy});
 }
