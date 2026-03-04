@@ -48,7 +48,6 @@ These tests are completely excluded from the vitest test run via the `excludedTe
 | `test/modules/core/lib/layer-extension.spec.ts` | Needs investigation |
 | `test/modules/core/lib/pick-layers.spec.ts` | Needs investigation |
 | `test/modules/geo-layers/terrain-layer.spec.ts` | Timeout issues |
-| `test/modules/geo-layers/mvt-layer.spec.ts` | Timeout issues |
 | `test/modules/carto/layers/h3-tile-layer.spec.ts` | H3TileLayer autoHighlight test times out (>30s) |
 | `test/modules/extensions/terrain/terrain-effect.spec.ts` | TerrainEffect tests timeout (>30s) with isolate: false |
 
@@ -105,7 +104,13 @@ Render tests use `test.skip(tc.name, () => {})` for test cases with `tc.skip: tr
 
 | File | Behavior |
 |------|----------|
-| `test/render/test-cases/*.spec.ts` (28 files) | Tests run normally; `test.skip` is for test cases with `skip: true` in data files |
+| `test/render/test-cases/*.spec.ts` (29 files) | Tests run normally; `test.skip` is for test cases with `skip: true` in data files |
+
+**Actually skipped render test cases (2):**
+| File | Test Case | Reason |
+|------|-----------|--------|
+| `terrain-layer.js` | `terrain-extension-drape` | TerrainExtension layers don't complete loading |
+| `terrain-layer.js` | `terrain-extension-offset` | TerrainExtension layers don't complete loading |
 
 ### Render Project Test Results (Headless Mode)
 
@@ -350,9 +355,9 @@ throw new Error('points should not be null');
 
 | Category | Count |
 |----------|-------|
-| Excluded from CI (vitest.config.ts) | 18 files |
+| Excluded from CI (vitest.config.ts) | 17 files |
 | Skipped tests (test.skip in code) | 7 interaction + 5 module |
-| Render project skipped (tc.skip) | 9 tests |
+| Render project skipped (tc.skip) | 2 tests + 7 interaction |
 | Render project failed | 3 tests (2 interaction, 1 golden image) |
 | Manual fix files | 2 |
 | Codemod cosmetic differences | 5 patterns |
