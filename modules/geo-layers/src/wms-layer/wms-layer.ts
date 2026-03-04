@@ -171,7 +171,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
           type: props.serviceType,
           loadOptions: props.loadOptions
         }
-      });
+      }) as ImageSource;
     }
 
     throw new Error('invalid image source in props.data');
