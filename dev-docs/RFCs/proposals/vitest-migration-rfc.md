@@ -531,6 +531,79 @@ Size tests verify bundle sizes don't regress. Options:
 | Puppeteer → Playwright migration breaks snapshot comparison | Vitest requires Playwright; will need to regenerate golden images if pixel differences occur |
 | CI takes longer (running tests twice) | Node tests are fast; browser failures are the blocking check |
 
+## Known Issues and Technical Debt
+
+### luma.gl Async Shader Error Reporting (WebGL Program Cleanup)
+
+**Problem:** Vitest caught 18 unhandled promise rejections during test runs:
+
+```
+TypeError: Failed to execute 'getProgramInfoLog' on 'WebGL2RenderingContext':
+parameter 1 is not of type 'WebGLProgram'.
+```
+
+**Root Cause:** luma.gl compiles shaders asynchronously using `KHR_parallel_shader_compile`. When shader compilation has errors, the error reporting code runs asynchronously:
+
+```javascript
+// In @luma.gl/webgl webgl-render-pipeline.js
+const linkErrorLog = this.device.gl.getProgramInfoLog(this.handle);
+this.device.reportError(new Error(`${errorType}: ${linkErrorLog}`), this)();
+```
+
+When test cleanup (`layerManager.finalize()`) destroys WebGL resources before this async error reporting completes, `this.handle` becomes invalid, causing `getProgramInfoLog` to throw.
+
+**Why Tape Didn't Report This:** The tape/probe.gl test runner didn't catch unhandled promise rejections as aggressively as vitest does. The underlying race condition existed but was silently ignored.
+
+**Current Fix:** Added `cleanupAfterLayerTestsAsync()` which yields to the event loop before destroying resources:
+
+```typescript
+async function cleanupAfterLayerTestsAsync(resources: TestResources): Promise<Error | null> {
+  layerManager.setLayers([]);
+
+  // Wait for pending async operations (luma.gl shader error handling)
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  layerManager.finalize();
+  deckRenderer.finalize();
+  // ...
+}
+```
+
+This is used by `testLayerAsync`. With vitest's `isolate: false` configuration, async tests sprinkled throughout the suite provide "sync points" that flush pending promises from preceding synchronous tests.
+
+**Limitation:** This fix is somewhat fragile because it relies on:
+1. `isolate: false` - All tests run sequentially in the same browser context
+2. Async tests scattered throughout the suite providing natural delays
+3. Test execution order remaining stable
+
+If someone enables `isolate: true` or changes test ordering significantly, the unhandled rejections may reappear.
+
+**Follow-up Task:** Make `testLayer` async to properly await cleanup:
+
+| Approach | Effort | Impact |
+|----------|--------|--------|
+| Current (async cleanup in `testLayerAsync` only) | Done | Works but relies on test ordering |
+| Make `testLayer` return `Promise<void>` | ~39 files | Robust, explicit cleanup |
+
+The robust fix requires:
+1. Change `testLayer` to use `cleanupAfterLayerTestsAsync`
+2. Update all 39 test files to use `async` test functions and `await testLayer()`
+
+Example migration:
+```typescript
+// Before
+test('PolygonLayer', () => {
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+// After
+test('PolygonLayer', async () => {
+  await testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+```
+
+This is a mechanical change suitable for a follow-up PR.
+
 ## Alternatives Considered
 
 ### Keep ocular-test, only replace tape assertions

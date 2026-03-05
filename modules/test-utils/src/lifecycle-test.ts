@@ -280,7 +280,8 @@ export async function testLayerAsync<LayerT extends Layer>(
     layer = newLayer;
   }
 
-  const error = cleanupAfterLayerTests(resources);
+  // Use async cleanup to allow pending luma.gl async operations to complete
+  const error = await cleanupAfterLayerTestsAsync(resources);
   if (error) {
     onError(error, `${Layer.layerName} should delete all resources`);
   }
@@ -320,6 +321,39 @@ function cleanupAfterLayerTests({
   oldResourceCounts
 }: TestResources): Error | null {
   layerManager.setLayers([]);
+  layerManager.finalize();
+  deckRenderer.finalize();
+
+  const resourceCounts = getResourceCounts();
+
+  for (const resourceName in resourceCounts) {
+    if (resourceCounts[resourceName] !== oldResourceCounts[resourceName]) {
+      return new Error(
+        `${resourceCounts[resourceName] - oldResourceCounts[resourceName]} ${resourceName}s`
+      );
+    }
+  }
+  return null;
+}
+
+/**
+ * Async cleanup that waits for pending async operations before finalizing resources.
+ * This prevents unhandled rejections from luma.gl's async shader error reporting
+ * which may try to access destroyed WebGL resources if cleanup happens too early.
+ */
+async function cleanupAfterLayerTestsAsync({
+  layerManager,
+  deckRenderer,
+  oldResourceCounts
+}: TestResources): Promise<Error | null> {
+  layerManager.setLayers([]);
+
+  // Wait for any pending async operations (e.g., luma.gl's deferred shader compilation
+  // error handling) to complete before destroying resources. This prevents
+  // "getProgramInfoLog" errors when async error reporting tries to access
+  // already-destroyed WebGL programs.
+  await new Promise(resolve => setTimeout(resolve, 0));
+
   layerManager.finalize();
   deckRenderer.finalize();
 
