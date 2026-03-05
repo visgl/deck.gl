@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.2
 
+#### deck.gl [v9.2.11] - Mar 5 2026
+
+- chore: Pin to luma 9.2 & loaders 4.3 (#10062)
+
 #### deck.gl [v9.2.10] - Feb 27 2026
 
 - fix(core): OrbitController keyboard navigation with padding (#10039)
