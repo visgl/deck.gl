@@ -35,6 +35,7 @@ const excludedTests = [
   'test/modules/core/lib/attribute/attribute.spec.ts',
   // Needs investigation: timeout, spy count mismatch, async timing issues
   'test/modules/geo-layers/tile-3d-layer/tile-3d-layer.spec.ts',
+  // layer-extension: updateState called twice when swapping extensions (expected: 1) - needs investigation
   'test/modules/core/lib/layer-extension.spec.ts',
   'test/modules/core/lib/pick-layers.spec.ts',
   'test/modules/geo-layers/terrain-layer.spec.ts',
@@ -44,8 +45,6 @@ const excludedTests = [
   // These tests pass individually but fail when run in the full suite
   'test/modules/aggregation-layers/hexbin.spec.ts',
   'test/modules/core/lib/deck-picker.spec.ts',
-  'test/modules/carto/layers/schema/carto-raster-tile-loader.spec.ts',
-  'test/modules/carto/layers/schema/carto-raster-tile.spec.ts',
   'test/modules/core/controllers/controllers.spec.ts',
   // Interaction tests are timing-sensitive and fail in CI headless mode
   // They work in the render project with proper viewport configuration

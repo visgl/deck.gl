@@ -37,17 +37,23 @@ export const TEST_DATA = buffer.finish();
  * }
  */
 test('TileReader', () => {
+  // Ensure clean state at start of test (isolate: false can leak state)
+  TileReader.compression = null;
+
   const tile = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
   expect(tile.blockSize, 'Should read blockSize correctly').toBe(256);
   expect(tile.bands.length, 'Should have one band').toBe(1);
   expect(tile.bands[0].name, 'Band should have correct name').toBe('band1');
   expect(tile.bands[0].data.value, 'Band should have compressed data').toEqual(COMPRESSED_BAND);
 
-  // Repeat with compressed data
+  // Repeat with compression enabled
   TileReader.compression = 'gzip';
   const tile2 = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
-  expect(tile.blockSize, 'Should read blockSize correctly').toBe(256);
-  expect(tile.bands.length, 'Should have one band').toBe(1);
-  expect(tile.bands[0].name, 'Band should have correct name').toBe('band1');
+  expect(tile2.blockSize, 'Should read blockSize correctly').toBe(256);
+  expect(tile2.bands.length, 'Should have one band').toBe(1);
+  expect(tile2.bands[0].name, 'Band should have correct name').toBe('band1');
   expect(tile2.bands[0].data.value, 'Band should have decompressed data').toEqual(BAND);
+
+  // Reset state to avoid leaking to other tests
+  TileReader.compression = null;
 });
