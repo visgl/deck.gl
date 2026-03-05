@@ -3,11 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 /**
- * Type declarations for custom vitest browser commands.
- * These extend the vitest/browser BrowserCommands interface.
+ * Type declarations for custom Vitest browser commands.
+ * These augment the @vitest/browser/context module so TypeScript
+ * knows about our custom commands when importing `commands`.
  */
 
-interface DeckScreenshotDiffOptions {
+// Types matching browser-commands.ts
+interface DiffOptions {
   goldenImage: string;
   region?: {x: number; y: number; width: number; height: number};
   saveOnFail?: boolean;
@@ -20,7 +22,7 @@ interface DeckScreenshotDiffOptions {
   platform?: string;
 }
 
-interface DeckScreenshotDiffResult {
+interface DiffResult {
   headless: boolean;
   match: number;
   matchPercentage: string;
@@ -28,17 +30,42 @@ interface DeckScreenshotDiffResult {
   error: string | null;
 }
 
-interface DeckEmulatedInputEvent {
-  type: string;
-  [key: string]: any;
+interface InputEvent {
+  type: 'click' | 'dblclick' | 'drag' | 'mousemove' | 'keypress';
+  x?: number;
+  y?: number;
+  startX?: number;
+  startY?: number;
+  endX?: number;
+  endY?: number;
+  steps?: number;
+  key?: string;
+  shiftKey?: boolean;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  metaKey?: boolean;
 }
 
-declare module 'vitest/browser' {
+declare module '@vitest/browser/context' {
   interface BrowserCommands {
-    captureAndDiffScreen: (options: DeckScreenshotDiffOptions) => Promise<DeckScreenshotDiffResult>;
-    emulateInput: (event: DeckEmulatedInputEvent) => Promise<void>;
-    isHeadless: () => Promise<boolean>;
-  }
+    /**
+     * Captures a screenshot and compares it with a golden image.
+     * Replaces browserTestDriver_captureAndDiffScreen from @probe.gl/test-utils
+     */
+    captureAndDiffScreen(options: DiffOptions): Promise<DiffResult>;
 
-  export const commands: BrowserCommands;
+    /**
+     * Emulates user input events for interaction testing.
+     * Replaces browserTestDriver_emulateInput from @probe.gl/test-utils
+     */
+    emulateInput(event: InputEvent): Promise<void>;
+
+    /**
+     * Returns whether running in headless mode.
+     * Replaces browserTestDriver_isHeadless from @probe.gl/test-utils
+     */
+    isHeadless(): Promise<boolean>;
+  }
 }
+
+export {};

@@ -47,7 +47,7 @@ export class InteractionTestRunner extends TestRunner<InteractionTestCase, {}> {
     });
 
     for (const event of testCase.events) {
-      if ('wait' in event) {
+      if (event.wait) {
         await sleep(event.wait);
       } else {
         await window.browserTestDriver_emulateInput(event);
