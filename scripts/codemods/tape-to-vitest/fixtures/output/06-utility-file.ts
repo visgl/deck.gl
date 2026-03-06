@@ -5,7 +5,7 @@
 /* global setTimeout */
 import {expect} from 'vitest';
 import {Deck, Layer} from '@deck.gl/core';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 export function sleep(milliseconds) {
   return new Promise(resolve => {
