@@ -100,3 +100,15 @@ A `ScrollbarDecoration` object
   Receives the following parameters:
   + `event` (MouseEvent)
   Return `true` to mark the event as handled, and prevent the default behavior.
+
+
+## Styles
+
+Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+
+| Name     | Type      | Default      |
+| -------- | --------- | ------------ |
+| `--scrollbar-button-size` | string | `24px`      |
+| `--scrollbar-track-size` | string | `16px`      |
+| `--scrollbar-track-color` | color | `rgba(0, 0, 0, 0.08)`     |
+| `--scrollbar-thumb-color` | color | `rgba(0, 0, 0, 0.4)`      |
