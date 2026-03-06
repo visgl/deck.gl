@@ -11,11 +11,10 @@ const renderPlaywright = playwright({
     viewport: {width: 1024, height: 768}
   }
 });
-import {dirname, resolve} from 'path';
-import {fileURLToPath} from 'url';
+import {resolve} from 'path';
 import {browserCommands} from './test/setup/browser-commands';
 
-const packageRoot = dirname(fileURLToPath(import.meta.url));
+const rootDir = import.meta.dirname;
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
@@ -59,31 +58,31 @@ const excludedTests = [
 // Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
   // Explicit vitest entry point (must come before @deck.gl/test-utils)
-  '@deck.gl/test-utils/vitest': resolve(packageRoot, 'modules/test-utils/src/vitest.ts'),
-  '@deck.gl/aggregation-layers': resolve(packageRoot, 'modules/aggregation-layers/src'),
-  '@deck.gl/arcgis': resolve(packageRoot, 'modules/arcgis/src'),
-  '@deck.gl/carto': resolve(packageRoot, 'modules/carto/src'),
-  '@deck.gl/core': resolve(packageRoot, 'modules/core/src'),
-  '@deck.gl/extensions': resolve(packageRoot, 'modules/extensions/src'),
-  '@deck.gl/geo-layers': resolve(packageRoot, 'modules/geo-layers/src'),
-  '@deck.gl/google-maps': resolve(packageRoot, 'modules/google-maps/src'),
-  '@deck.gl/json': resolve(packageRoot, 'modules/json/src'),
-  '@deck.gl/jupyter-widget': resolve(packageRoot, 'modules/jupyter-widget/src'),
-  '@deck.gl/layers': resolve(packageRoot, 'modules/layers/src'),
-  '@deck.gl/mapbox': resolve(packageRoot, 'modules/mapbox/src'),
-  '@deck.gl/mesh-layers': resolve(packageRoot, 'modules/mesh-layers/src'),
-  '@deck.gl/react': resolve(packageRoot, 'modules/react/src'),
-  '@deck.gl/test-utils': resolve(packageRoot, 'modules/test-utils/src'),
-  '@deck.gl/widgets': resolve(packageRoot, 'modules/widgets/src'),
-  'deck.gl': resolve(packageRoot, 'modules/main/src'),
-  'deck.gl-test': resolve(packageRoot, 'test')
+  '@deck.gl/test-utils/vitest': resolve(rootDir, 'modules/test-utils/src/vitest.ts'),
+  '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
+  '@deck.gl/arcgis': resolve(rootDir, 'modules/arcgis/src'),
+  '@deck.gl/carto': resolve(rootDir, 'modules/carto/src'),
+  '@deck.gl/core': resolve(rootDir, 'modules/core/src'),
+  '@deck.gl/extensions': resolve(rootDir, 'modules/extensions/src'),
+  '@deck.gl/geo-layers': resolve(rootDir, 'modules/geo-layers/src'),
+  '@deck.gl/google-maps': resolve(rootDir, 'modules/google-maps/src'),
+  '@deck.gl/json': resolve(rootDir, 'modules/json/src'),
+  '@deck.gl/jupyter-widget': resolve(rootDir, 'modules/jupyter-widget/src'),
+  '@deck.gl/layers': resolve(rootDir, 'modules/layers/src'),
+  '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
+  '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
+  '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
+  '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),
+  '@deck.gl/widgets': resolve(rootDir, 'modules/widgets/src'),
+  'deck.gl': resolve(rootDir, 'modules/main/src'),
+  'deck.gl-test': resolve(rootDir, 'test')
 };
 
 // Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
 // until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly
 const browserAliases = {
   ...aliases,
-  '@deck.gl/test-utils': resolve(packageRoot, 'modules/test-utils/src/vitest.ts')
+  '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src/vitest.ts')
 };
 
 // Shared coverage configuration
@@ -121,7 +120,7 @@ const optimizeDepsConfig = {
 const serverConfig = {
   fs: {
     // Allow serving files from test/data directory
-    allow: [packageRoot]
+    allow: [rootDir]
   }
 };
 
