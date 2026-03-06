@@ -58,12 +58,6 @@ Pixels scrolled when clicked on the track.
 
 * Default: 100% of the viewport size
 
-#### thumbMinSize (number, optional)
-
-Minimum pixel size of the thumb button.
-
-* Default: `24`
-
 #### startButtonAriaLabel (string, optional)
 
 Label of the step button at the start.
@@ -110,6 +104,7 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 | -------- | --------- | ------------ |
 | `--range-step-button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `24px`      |
 | `--range-track-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `16px`      |
+| `--range-thumb-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `10px`      |
 | `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
 | `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
 | `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |

@@ -17,7 +17,6 @@ export type RangeInputProps = {
   value: [start: number, end: number];
   orientation: 'horizontal' | 'vertical';
   pageSize?: number;
-  thumbMinSize?: number;
   /** Show step buttons at ends */
   stepButtons?: boolean;
   startButtonAriaLabel?: string;
@@ -33,11 +32,10 @@ export type RangeInputProps = {
 type DragState = {
   pointerId: number;
   startCoord: number;
-  startValue: number;
-  trackSpan: number;
-  rangeSize: number;
+  startRatio: number;
   min: number;
   max: number;
+  maxStart: number;
 };
 
 const wheelListenerOptions: AddEventListenerOptions = {passive: false};
@@ -52,12 +50,15 @@ const clamp = (value: number, min: number, max: number) => {
   return value;
 };
 
-const getTrackLength = (track: HTMLDivElement | null, vertical: boolean) => {
-  if (!track) {
-    return 0;
+const getTrackDimension = (track: HTMLDivElement | null, vertical: boolean) => {
+  if (!track || !track.firstElementChild) {
+    return [0, 0];
   }
-  const rect = track.getBoundingClientRect();
-  return vertical ? rect.height : rect.width;
+  const rect = track.firstElementChild.getBoundingClientRect();
+  if (vertical) {
+    return [rect.top, rect.height];
+  }
+  return vertical ? [rect.top, rect.height] : [rect.left, rect.width];
 };
 
 const getEffectiveStep = (step: number, range: number) => {
@@ -83,7 +84,6 @@ export function RangeInput(props: RangeInputProps) {
     value,
     orientation,
     pageSize,
-    thumbMinSize,
     stepButtons = false,
     startButtonAriaLabel,
     endButtonAriaLabel,
@@ -110,19 +110,18 @@ export function RangeInput(props: RangeInputProps) {
     }
 
     if (range <= rangeSize) {
-      return {thumbLength: trackLength, thumbOffset: 0};
+      return {thumbLength: 1, thumbOffset: 0};
     }
 
-    const idealLength = (rangeSize / range) * trackLength;
-    const nextThumbLength = Math.max(thumbMinSize ?? 0, idealLength);
-    const travel = Math.max(0, trackLength - nextThumbLength);
+    const nextThumbLength = rangeSize / range;
+    const travel = Math.max(0, 1 - nextThumbLength);
     const ratio = maxStart <= 0 ? 0 : clamp((clampedStart - min) / maxStart, 0, 1);
 
     return {
-      thumbLength: Math.max(0, Math.min(nextThumbLength, trackLength)),
+      thumbLength: Math.max(0, Math.min(nextThumbLength, 1)),
       thumbOffset: travel * ratio
     };
-  }, [trackLength, range, rangeSize, thumbMinSize, maxStart, clampedStart, min]);
+  }, [trackLength, range, rangeSize, maxStart, clampedStart, min]);
 
   const emitRange = useCallback(
     (nextStart: number) => {
@@ -169,43 +168,38 @@ export function RangeInput(props: RangeInputProps) {
       event.preventDefault();
       event.stopPropagation();
 
-      const trackRect = track.getBoundingClientRect();
-      const coordinate = vertical ? event.clientY - trackRect.top : event.clientX - trackRect.left;
-      const span = Math.max(1, trackLength - thumbLength);
-      const thumbCenter = thumbLength / 2;
+      const [trackStart] = getTrackDimension(track, vertical);
+      const coordinate = vertical ? event.clientY - trackStart : event.clientX - trackStart;
+      const span = Math.max(1, 1 - thumbLength) * trackLength;
+      const thumbCenter = (thumbLength / 2) * trackLength;
       const ratio = span <= 0 ? 0 : clamp((coordinate - thumbCenter) / span, 0, 1);
       emitRange(min + ratio * maxStart);
     },
     [vertical, trackLength, thumbLength, emitRange, min, maxStart]
   );
 
-  const handleThumbPointerDown = useCallback(
-    (event: PointerEvent) => {
-      if (event.button !== 0) {
-        return;
-      }
-      const track = trackRef.current;
-      if (!track) {
-        return;
-      }
+  const handleThumbPointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) {
+      return;
+    }
+    const track = trackRef.current;
+    if (!track) {
+      return;
+    }
 
-      const span = Math.max(1, trackLength - thumbLength);
-      dragStateRef.current = {
-        pointerId: event.pointerId,
-        startCoord: vertical ? event.clientY : event.clientX,
-        startValue: clampedStart,
-        trackSpan: span,
-        rangeSize,
-        min,
-        max
-      };
+    dragStateRef.current = {
+      pointerId: event.pointerId,
+      startCoord: vertical ? event.clientY : event.clientX,
+      startRatio: thumbOffset,
+      min,
+      max,
+      maxStart
+    };
 
-      (event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId);
-      event.preventDefault();
-      event.stopPropagation();
-    },
-    [vertical, trackLength, thumbLength, clampedStart, rangeSize, min, max]
-  );
+    (event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId);
+    event.preventDefault();
+    event.stopPropagation();
+  };
 
   const handleThumbPointerMove = useCallback(
     (event: PointerEvent) => {
@@ -214,15 +208,13 @@ export function RangeInput(props: RangeInputProps) {
         return;
       }
 
+      const [trackStart, trackLength] = getTrackDimension(trackRef.current, vertical);
       const coordinate = vertical ? event.clientY : event.clientX;
       const delta = coordinate - state.startCoord;
-      const ratio = state.trackSpan === 0 ? 0 : delta / state.trackSpan;
-      const maxDragStart = Math.max(0, state.max - state.min - state.rangeSize);
-      const nextStart = clamp(
-        state.startValue + ratio * maxDragStart,
-        state.min,
-        state.min + maxDragStart
-      );
+
+      const ratio = state.startRatio + delta / trackLength;
+
+      const nextStart = clamp(ratio * (state.max - state.min), 0, state.maxStart) + state.min;
       emitRange(nextStart);
       event.preventDefault();
     },
@@ -311,8 +303,8 @@ export function RangeInput(props: RangeInputProps) {
   );
 
   useLayoutEffect(() => {
-    setTrackLength(getTrackLength(trackRef.current, vertical));
-  }, [vertical, thumbLength]);
+    setTrackLength(getTrackDimension(trackRef.current, vertical)[1]);
+  }, [vertical]);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
@@ -321,7 +313,7 @@ export function RangeInput(props: RangeInputProps) {
     }
 
     const update = () => {
-      setTrackLength(getTrackLength(track, vertical));
+      setTrackLength(getTrackDimension(track, vertical)[1]);
     };
 
     update();
@@ -415,8 +407,8 @@ export function RangeInput(props: RangeInputProps) {
           ref={thumbRef}
           style={
             vertical
-              ? {height: `${thumbLength}px`, top: `${thumbOffset}px`}
-              : {width: `${thumbLength}px`, left: `${thumbOffset}px`}
+              ? {height: `${thumbLength * 100}%`, top: `${thumbOffset * 100}%`}
+              : {width: `${thumbLength * 100}%`, left: `${thumbOffset * 100}%`}
           }
           onPointerDown={handleThumbPointerDown}
           onPointerMove={handleThumbPointerMove}

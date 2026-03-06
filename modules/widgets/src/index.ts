@@ -50,7 +50,7 @@ export type {SplitterWidgetProps} from './splitter-widget';
 export type {TimelineWidgetProps} from './timeline-widget';
 export type {ViewSelectorWidgetProps} from './view-selector-widget';
 export type {GimbalWidgetProps} from './gimbal-widget';
-export type {ScrollbarWidgetProps, ScrollbarDecoration} from './scrollbar-widget';
+export type {ContentBounds, ScrollbarWidgetProps, ScrollbarDecoration} from './scrollbar-widget';
 
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';
@@ -65,6 +65,11 @@ export {
   type SimpleMenuProps
 } from './lib/components/dropdown-menu';
 export {IconMenu as _IconMenu, type IconMenuProps} from './lib/components/icon-menu';
+export {
+  RangeInput as _RangeInput,
+  type RangeInputProps,
+  type RangeInputDecoration
+} from './lib/components/range-input';
 
 // Experimental geocoders. May be removed, use at your own risk!
 export {type Geocoder} from './lib/geocode/geocoder';

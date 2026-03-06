@@ -497,10 +497,6 @@
 }
 .deck-widget-range__decorations {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
 }
 .deck-widget-range__decoration {
   position: absolute;
@@ -509,9 +505,12 @@
   background-color: var(--range-decoration-active-color, gold) !important;
 }
 .deck-widget-range__thumb {
-  position: absolute;
+  position: relative;
+  box-sizing: content-box;
+  padding: calc(var(--range-thumb-size, 10px) / 2);
+  border-radius: calc(var(--range-thumb-size, 10px) / 2);
+  margin: calc(var(--range-thumb-size, 10px) * -0.5);
   background: var(--range-thumb-color, #444);
-  border-radius: calc(var(--range-track-size, 16px) / 2);
 }
 .deck-widget-range__button {
   cursor: pointer;
@@ -545,13 +544,21 @@
 }
 .deck-widget-range--vertical .deck-widget-range__track {
   width: var(--range-track-size, 16px);
+  padding-top: calc(var(--range-track-size, 16px) / 2);
+  padding-bottom: calc(var(--range-track-size, 16px) / 2);
   height: 100%;
   min-height: calc(var(--range-track-size, 16px) * 3);
 }
 .deck-widget-range--vertical .deck-widget-range__thumb {
-  width: 60%;
-  left: 20%;
+  width: 0;
+  left: 50%;
   cursor: ns-resize;
+}
+.deck-widget-range--vertical .deck-widget-range__decorations {
+  top: calc(var(--range-track-size, 16px) / 2);
+  bottom: calc(var(--range-track-size, 16px) / 2);
+  left: 0;
+  right: 0;
 }
 .deck-widget-range--vertical .deck-widget-range__button--start .deck-widget-icon {
   mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z"/></svg>');
@@ -561,13 +568,21 @@
 }
 .deck-widget-range--horizontal .deck-widget-range__track {
   height: var(--range-track-size, 16px);
+  padding-left: calc(var(--range-track-size, 16px) / 2);
+  padding-right: calc(var(--range-track-size, 16px) / 2);
   width: 100%;
   min-width: calc(var(--range-track-size, 16px) * 3);
 }
 .deck-widget-range--horizontal .deck-widget-range__thumb {
-  height: 60%;
-  top: 20%;
+  height: 0;
+  top: 50%;
   cursor: ew-resize;
+}
+.deck-widget-range--horizontal .deck-widget-range__decorations {
+  left: calc(var(--range-track-size, 16px) / 2);
+  right: calc(var(--range-track-size, 16px) / 2);
+  top: 0;
+  bottom: 0;
 }
 .deck-widget-range--horizontal .deck-widget-range__button--start .deck-widget-icon {
   mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></svg>');

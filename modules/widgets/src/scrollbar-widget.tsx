@@ -45,10 +45,6 @@ export type ScrollbarWidgetProps = WidgetProps & {
    * @default 100% of the viewport size
    */
   pageSize?: number | null;
-  /* Minimum size of the thumb button.
-   * @default 24
-   */
-  thumbMinSize?: number;
   /** Label of the step button at the start.
    * @default 'Scroll left' | 'Scroll up'
    */
@@ -78,7 +74,6 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
     orientation: 'vertical',
     stepSize: null,
     pageSize: null,
-    thumbMinSize: 24,
     startButtonAriaLabel: '',
     endButtonAriaLabel: '',
     captureWheel: false,
@@ -134,7 +129,6 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
         pageSize={this.getEffectivePage()}
         value={[clampedOffset, clampedOffset + this.viewportSize]}
         orientation={this.props.orientation}
-        thumbMinSize={this.props.thumbMinSize}
         stepButtons
         startButtonAriaLabel={startLabel}
         endButtonAriaLabel={endLabel}

@@ -33,6 +33,7 @@ export type DeckWidgetTheme = {
   // scrollbar
   '--range-step-button-size'?: string;
   '--range-track-size'?: string;
+  '--range-thumb-size'?: string;
   '--range-track-color'?: string;
   '--range-thumb-color'?: string;
   '--range-decoration-active-color'?: string;
@@ -61,6 +62,7 @@ export const LightTheme = {
   '--menu-item-hover': 'rgba(0, 0, 0, 0.08)',
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
   '--range-track-color': '#b9b9c0',
   '--range-thumb-color': '#7b7b7e',
   '--range-decoration-active-color': '#f8dd50'
@@ -89,6 +91,7 @@ export const DarkTheme = {
   '--menu-item-hover': 'rgba(255, 255, 255, 0.1)',
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
   '--range-track-color': '#2c2c30',
   '--range-thumb-color': '#8c8b92',
   '--range-decoration-active-color': '#dd7d2c'
@@ -118,6 +121,7 @@ export const LightGlassTheme = {
   '--menu-item-hover': 'rgba(0, 0, 0, 0.08)',
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
   '--range-track-color': 'rgba(24, 24, 26, 0.1)',
   '--range-thumb-color': 'rgba(24, 24, 26, 0.5)',
   '--range-decoration-active-color': 'rgba(255, 215, 0, 0.6)'
@@ -147,6 +151,7 @@ export const DarkGlassTheme = {
   '--menu-item-hover': 'rgba(255, 255, 255, 0.1)',
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
   '--range-track-color': 'rgba(215, 214, 229, 0.1)',
   '--range-thumb-color': 'rgba(215, 214, 229, 0.5)',
   '--range-decoration-active-color': 'rgba(255, 145, 0, 0.6)'
