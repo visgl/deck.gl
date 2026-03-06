@@ -15,6 +15,9 @@ import {
   ZoomWidget,
   FullscreenWidget,
   ResetViewWidget,
+  ScrollbarWidget,
+  _TimelineWidget as TimelineWidget,
+  _ThemeWidget as ThemeWidget,
   _FpsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
@@ -47,24 +50,15 @@ const INITIAL_VIEW_STATE = {
   'ortho-view': INITIAL_ORTHO_VIEW_STATE
 };
 
-const ORTHOGRAPHIC_POINTS = [
-  {position: [-40, -20, 0], color: [255, 99, 71]},
-  {position: [-10, 30, 0], color: [65, 105, 225]},
-  {position: [25, -5, 0], color: [60, 179, 113]},
-  {position: [40, 35, 0], color: [238, 130, 238]}
-];
-
 new Deck({
   views: [
-    new OrbitView({id: 'orbit-view', x: 0, width: '50%'}),
-    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%'})
+    new OrbitView({id: 'orbit-view', x: 0, width: '50%', controller: true}),
+    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%', controller: true})
   ],
   initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
   layers: [
     new ScatterplotLayer({
       id: 'scatter',
-      viewId: 'orbit-view',
       data: generateData(500),
       getPosition: d => d.position,
       getFillColor: d => d.color,
@@ -72,16 +66,6 @@ new Deck({
       pickable: true,
       autoHighlight: true,
       billboard: true
-    }),
-    new ScatterplotLayer({
-      id: 'ortho-scatter',
-      viewId: 'ortho-view',
-      data: ORTHOGRAPHIC_POINTS,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      getRadius: 8,
-      pickable: true,
-      autoHighlight: true
     })
   ],
   widgets: [
@@ -89,6 +73,36 @@ new Deck({
     new GimbalWidget(),
     new FullscreenWidget(),
     new ResetViewWidget(),
-    new _FpsWidget()
+    new _FpsWidget(),
+    new ThemeWidget(),
+    new TimelineWidget({
+      viewId: 'orbit-view'
+      // autoPlay: true
+    }),
+    new ScrollbarWidget({
+      viewId: 'ortho-view',
+      contentBounds: [
+        [-50, -50, -50],
+        [50, 50, 50]
+      ],
+      // decorations: [
+      //   {
+      //     contentBounds: [[10, 10, 0], [20, 20, 50]],
+      //     color: 'yellow',
+      //     title: 'test'
+      //   }
+      // ],
+      placement: 'bottom-right',
+      orientation: 'vertical'
+    }),
+    new ScrollbarWidget({
+      viewId: 'ortho-view',
+      contentBounds: [
+        [-50, -50, -50],
+        [50, 50, 50]
+      ],
+      placement: 'bottom-right',
+      orientation: 'horizontal'
+    })
   ]
 });

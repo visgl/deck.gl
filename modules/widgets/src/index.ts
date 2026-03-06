@@ -21,6 +21,7 @@ export {ViewSelectorWidget as _ViewSelectorWidget} from './view-selector-widget'
 export {InfoWidget as _InfoWidget} from './info-widget';
 export {PopupWidget} from './popup-widget';
 export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
+export {ScrollbarWidget} from './scrollbar-widget';
 
 // Control widgets
 export {TimelineWidget as _TimelineWidget} from './timeline-widget';
@@ -49,6 +50,7 @@ export type {SplitterWidgetProps} from './splitter-widget';
 export type {TimelineWidgetProps} from './timeline-widget';
 export type {ViewSelectorWidgetProps} from './view-selector-widget';
 export type {GimbalWidgetProps} from './gimbal-widget';
+export type {ScrollbarWidgetProps, ScrollbarDecoration} from './scrollbar-widget';
 
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';
