@@ -203,6 +203,28 @@
   );
 }
 
+/* Timeline widget styles */
+.deck-widget.deck-widget-timeline {
+  display: flex;
+  align-items: center;
+  pointer-events: 'auto';
+}
+
+.deck-widget.deck-widget-timeline .timeline-slider {
+  margin: 0 8px;
+  flex: 1;
+  pointer-events: 'auto';
+  cursor: pointer;
+}
+
+.deck-widget.deck-widget-timeline .text {
+  color: var(--button-icon-idle, rgb(97, 97, 102));
+}
+
+.deck-widget.deck-widget-timeline .text:hover {
+  color: var(--button-icon-hover, rgb(24, 24, 26));
+}
+
 /* FPS widget styles */
 
 .deck-widget.deck-widget-fps button {
@@ -484,7 +506,7 @@
   position: absolute;
 }
 .deck-widget-range__decoration:active {
-  background-color: gold !important;
+  background-color: var(--scrollbar-decoration-active-color, gold) !important;
 }
 .deck-widget-range__thumb {
   position: absolute;

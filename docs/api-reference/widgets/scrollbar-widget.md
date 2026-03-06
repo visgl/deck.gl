@@ -112,3 +112,4 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 | `--scrollbar-track-size` | string | `16px`      |
 | `--scrollbar-track-color` | color | `rgba(0, 0, 0, 0.08)`     |
 | `--scrollbar-thumb-color` | color | `rgba(0, 0, 0, 0.4)`      |
+| `--scrollbar-decoration-active-color` | color | `gold`  |
