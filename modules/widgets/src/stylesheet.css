@@ -205,24 +205,37 @@
 
 /* Timeline widget styles */
 .deck-widget.deck-widget-timeline {
+  position: absolute;
+  margin: 0;
+  padding: var(--widget-margin, 12px);
   display: flex;
+  width: 100%;
+  gap: var(--widget-margin, 12px);
   align-items: center;
-  pointer-events: 'auto';
+  pointer-events: all;
 }
-
-.deck-widget.deck-widget-timeline .timeline-slider {
-  margin: 0 8px;
-  flex: 1;
-  pointer-events: 'auto';
-  cursor: pointer;
+.deck-widget-timeline .deck-widget-timeline-slider {
+  position: relative;
+  flex-grow: 1;
+  height: var(--range-track-size, 16px);
 }
-
-.deck-widget.deck-widget-timeline .text {
-  color: var(--button-icon-idle, rgb(97, 97, 102));
+.deck-widget-timeline[data-placement^=top-] {
+  top: 0;
 }
-
-.deck-widget.deck-widget-timeline .text:hover {
-  color: var(--button-icon-hover, rgb(24, 24, 26));
+.deck-widget-timeline[data-placement^=bottom-] {
+  bottom: 0;
+}
+.deck-widget-timeline-label {
+  position: relative;
+  pointer-events: none;
+  width: fit-content;
+  transform: translate(-50%, -100%);
+  font-size: 13px;
+  border-radius: var(--button-corner-radius, 8px);
+  background: var(--menu-background, #fff);
+  color: var(--menu-text, rgb(24, 24, 26));
+  font-family: monospace;
+  padding: 4px;
 }
 
 /* FPS widget styles */
