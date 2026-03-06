@@ -108,3 +108,8 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 | `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
 | `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
 | `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |
+
+
+## Source
+
+[modules/widgets/src/scrollbar-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/scrollbar-widget.tsx)

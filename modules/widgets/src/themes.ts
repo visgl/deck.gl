@@ -63,8 +63,8 @@ export const LightTheme = {
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
   '--range-thumb-size': '10px',
-  '--range-track-color': '#b9b9c0',
-  '--range-thumb-color': '#7b7b7e',
+  '--range-track-color': '#d8d8e5',
+  '--range-thumb-color': '#616166',
   '--range-decoration-active-color': '#f8dd50'
 } as const satisfies Required<DeckWidgetTheme>;
 
@@ -93,7 +93,7 @@ export const DarkTheme = {
   '--range-track-size': '16px',
   '--range-thumb-size': '10px',
   '--range-track-color': '#2c2c30',
-  '--range-thumb-color': '#8c8b92',
+  '--range-thumb-color': '#9e9da8',
   '--range-decoration-active-color': '#dd7d2c'
 } as const satisfies Required<DeckWidgetTheme>;
 
@@ -122,8 +122,8 @@ export const LightGlassTheme = {
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
   '--range-thumb-size': '10px',
-  '--range-track-color': 'rgba(24, 24, 26, 0.1)',
-  '--range-thumb-color': 'rgba(24, 24, 26, 0.5)',
+  '--range-track-color': 'rgba(215, 214, 229, 0.3)',
+  '--range-thumb-color': 'rgba(97, 97, 102, 1)',
   '--range-decoration-active-color': 'rgba(255, 215, 0, 0.6)'
 } as const satisfies Required<DeckWidgetTheme>;
 
@@ -152,7 +152,7 @@ export const DarkGlassTheme = {
   '--range-step-button-size': '24px',
   '--range-track-size': '16px',
   '--range-thumb-size': '10px',
-  '--range-track-color': 'rgba(215, 214, 229, 0.1)',
-  '--range-thumb-color': 'rgba(215, 214, 229, 0.5)',
+  '--range-track-color': 'rgba(24, 24, 26, 0.3)',
+  '--range-thumb-color': 'rgba(158, 157, 168, 1)',
   '--range-decoration-active-color': 'rgba(255, 145, 0, 0.6)'
 } as const satisfies Required<DeckWidgetTheme>;

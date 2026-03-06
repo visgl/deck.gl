@@ -18,6 +18,8 @@ import {
   ScrollbarWidget,
   _TimelineWidget as TimelineWidget,
   _ThemeWidget as ThemeWidget,
+  DarkTheme,
+  LightTheme,
   _FpsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
@@ -74,9 +76,17 @@ new Deck({
     new FullscreenWidget(),
     new ResetViewWidget(),
     new _FpsWidget(),
-    new ThemeWidget(),
+    new ThemeWidget({
+      // darkModeTheme: DarkTheme,
+      // lightModeTheme: LightTheme,
+    }),
     new TimelineWidget({
-      viewId: 'orbit-view'
+      viewId: 'orbit-view',
+      timeRange: [0, 600],
+      formatLabel: (t: number) =>
+        `${Math.floor(t / 60)
+          .toString()
+          .padStart(2, '0')}: ${(t % 60).toFixed(0).padStart(2, '0')}`
       // autoPlay: true
     }),
     new ScrollbarWidget({

@@ -17,15 +17,27 @@ export type TimelineWidgetProps = WidgetProps & {
   timeline?: Timeline | null;
   /** Slider timeRange [min, max]. */
   timeRange?: [number, number];
-  /** Slider step. */
+  /** Slider step.
+   * @default 1
+   */
   step?: number;
-  /** Initial slider value. */
+  /** Initial slider value.
+   * @default `timeRange[0]`
+   */
   initialTime?: number;
   /** Callback when value changes. */
   onTimeChange?: (value: number) => void;
-  /** Start playing automatically */
+  /** Start playing automatically
+   * @default false
+   */
   autoPlay?: boolean;
-  /** Play interval in milliseconds. */
+  /** Start from the beginning whentime reaches the end
+   * @default false
+   */
+  loop?: boolean;
+  /** Play interval in milliseconds.
+   * @default 1000
+   */
   playInterval?: number;
   /** Callback to get label from time value */
   formatLabel?: (value: number) => string;
@@ -51,6 +63,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
     initialTime: undefined!,
     onTimeChange: () => {},
     autoPlay: false,
+    loop: false,
     playInterval: 1000,
     formatLabel: String
   };
@@ -58,6 +71,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   constructor(props: TimelineWidgetProps = {}) {
     super(props);
     this.currentTime = this.props.initialTime ?? this.props.timeRange[0];
+    this.props.timeline?.setTime(this.currentTime);
     this.setProps(this.props);
   }
 
@@ -83,29 +97,39 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
     rootElement.dataset.placement = this.props.placement;
 
     render(
-      <>
-        <IconButton label={this.playing ? 'Pause' : 'Play'} onClick={this.handlePlayPause}>
-          <div className="text">{this.playing ? '⏸' : '▶'}</div>
-        </IconButton>
-        <div className="deck-widget-timeline-slider">
-          <RangeInput
-            min={timeRange[0]}
-            max={timeRange[1]}
-            orientation="horizontal"
-            step={step}
-            value={[currentTime, currentTime]}
-            onChange={this.handleTimeChange}
-            decorations={[
-              {
-                position: [currentTime, currentTime + step],
-                element: (
-                  <div className="deck-widget-timeline-label">{formatLabel(currentTime)}</div>
-                )
-              }
-            ]}
+      <div className="deck-widget-button-group">
+        {this.playing ? (
+          <IconButton
+            label="Pause"
+            className="deck-widget-timeline-pause"
+            onClick={this.handlePlayPause}
           />
-        </div>
-      </>,
+        ) : (
+          <IconButton
+            label="Play"
+            className="deck-widget-timeline-play"
+            onClick={this.handlePlayPause}
+          />
+        )}
+        <RangeInput
+          min={timeRange[0]}
+          max={timeRange[1]}
+          orientation="horizontal"
+          step={step}
+          value={[currentTime, currentTime]}
+          onChange={this.handleTimeChange}
+          decorations={[
+            {
+              position: [currentTime, currentTime + step],
+              element: (
+                <div className="deck-widget-timeline-label deck-widget-timeline-label--current">
+                  {formatLabel(currentTime)}
+                </div>
+              )
+            }
+          ]}
+        />
+      </div>,
       rootElement
     );
   }
@@ -120,9 +144,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
 
   private handleTimeChange = ([value]: [number, number]): void => {
     this.currentTime = value;
-    if (this.props.timeline) {
-      this.props.timeline.setTime(value);
-    }
+    this.props.timeline?.setTime(value);
     this.props.onTimeChange(value);
     this.updateHTML();
   };
@@ -143,16 +165,31 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   private tick = (): void => {
-    const [min, max] = this.props.timeRange;
-    let next = this.currentTime + this.props.step;
-    if (next > max) {
-      next = min;
+    const {
+      timeRange: [min, max],
+      step,
+      loop
+    } = this.props;
+    if (step > 0) {
+      let next = Math.floor(this.currentTime / step) * step + step;
+      if (next > max) {
+        if (this.currentTime < max) {
+          next = max;
+        } else if (loop) {
+          next = min;
+        } else {
+          next = max;
+          this.playing = false;
+        }
+      }
+      this.currentTime = next;
+      this.props.onTimeChange(next);
+      this.updateHTML();
     }
-    this.currentTime = next;
-    this.props.onTimeChange(next);
-    this.updateHTML();
     if (this.playing) {
       this.timerId = window.setTimeout(this.tick, this.props.playInterval);
+    } else {
+      this.timerId = null;
     }
   };
 }
