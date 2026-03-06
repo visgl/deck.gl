@@ -51,29 +51,38 @@ const excludedTests: string[] = [
 ];
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
+// This prevents flaky tests caused by runtime dependency discovery
 const optimizeDepsConfig = {
   include: [
+    // Preact JSX runtime discovered at runtime
     'preact/jsx-dev-runtime',
     'preact/jsx-runtime',
+    // Vitest browser dependencies
+    'vitest/browser',
+    // luma.gl WebGL dependencies
     '@luma.gl/core',
     '@luma.gl/engine',
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',
+    // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images'
   ]
 };
 
-// Server configuration for serving test data files
+// Server configuration for serving test data files with correct MIME types
+// Without this, binary files like .mvt may be served incorrectly
 const serverConfig = {
   fs: {
+    // Allow serving files from test/data directory
     allow: [rootDir]
   }
 };
 
 // Include binary file extensions as static assets
+// This ensures Vite serves them with correct MIME types
 const assetsIncludeConfig = [
   '**/*.mvt',
   '**/*.pbf',
@@ -153,6 +162,9 @@ export default defineConfig({
       },
 
       // Browser project - full test suite in headed browser for local development
+      // Used by test-browser
+      // TODO: Add render tests back once viewport is configured in instances
+      // See: dev-docs/RFCs/proposals/vitest-migration-rfc.md#browser-project-render-test-exclusion
       {
         extends: true,
         resolve: {alias: browserAliases},
@@ -163,7 +175,6 @@ export default defineConfig({
           name: 'browser',
           include: [
             'test/modules/**/*.spec.ts',
-            'test/render/**/*.spec.ts',
             'test/interaction/**/*.spec.ts'
           ],
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
