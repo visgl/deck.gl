@@ -218,16 +218,6 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
     return this.deck?.props.parent || this.deck?.getCanvas()?.parentElement || this.rootElement;
   }
 
-  private getViewState(viewId: string) {
-    // @ts-expect-error protected
-    const viewManager = this.deck?.viewManager;
-    if (!viewManager) {
-      throw new Error('wigdet must be added to a deck instance');
-    }
-    const viewState = (viewId && viewManager.getViewState(viewId)) || viewManager.viewState;
-    return viewState;
-  }
-
   private getMaxScroll(): number {
     return Math.max(0, this.contentSize - this.viewportSize);
   }
