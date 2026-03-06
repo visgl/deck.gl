@@ -207,6 +207,8 @@ export default defineConfig({
 
       // Browser project - full test suite in headed browser for local development
       // Used by test-browser
+      // TODO: Add render tests back once viewport is configured in instances
+      // See: dev-docs/RFCs/proposals/vitest-migration-rfc.md#browser-project-render-test-exclusion
       {
         extends: true,
         resolve: {alias: browserAliases},
@@ -217,7 +219,6 @@ export default defineConfig({
           name: 'browser',
           include: [
             'test/modules/**/*.spec.ts',
-            'test/render/**/*.spec.ts',
             'test/interaction/**/*.spec.ts'
           ],
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],

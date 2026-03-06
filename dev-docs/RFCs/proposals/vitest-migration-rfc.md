@@ -651,6 +651,30 @@ The following tests were fixed and re-enabled:
 | `carto/layers/schema/carto-raster-tile.spec.ts` | `TileReader.compression` global state leakage | Reset state at start/end of test |
 | `carto/layers/schema/carto-raster-tile-loader.spec.ts` | Dependency on above test | Fixed by above |
 
+#### Browser Project Render Test Exclusion
+
+The `browser` project (headed mode for local development) currently excludes `test/render/**/*.spec.ts`. This was necessary because:
+
+1. **Viewport mismatch:** The browser project doesn't configure a fixed viewport in its instances, causing golden image comparisons to fail (97-98% match vs 99% threshold)
+2. **Headed vs headless:** Render tests are sensitive to exact pixel output; headed browser windows may have OS-level rendering differences
+
+**Current workaround:** Render tests only run in the dedicated `render` project which has:
+- `headless: true`
+- Fixed viewport `{width: 1024, height: 768}` in instances
+
+**Future fix:** Add viewport configuration to the browser project to enable local headed render test debugging:
+```typescript
+// In browser project config
+browser: {
+  instances: [{
+    browser: 'chromium',
+    viewport: {width: 1024, height: 768}  // Match render project
+  }]
+}
+```
+
+This would allow developers to run render tests in headed mode for visual debugging.
+
 #### Key Patterns Identified
 
 1. **GPU/WebGL State Leakage (5 tests):** Tests using GPU compute (hexbin, deck-picker, terrain-effect) suffer from WebGL context state persisting across tests when `isolate: false`. This is a trade-off for performance.
