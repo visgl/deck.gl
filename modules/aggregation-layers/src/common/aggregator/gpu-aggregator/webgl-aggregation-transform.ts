@@ -146,7 +146,9 @@ flat out vec2 values;
 flat out vec3 values;
 #endif
 
-const float NAN = intBitsToFloat(-1);
+// Sentinel value to indicate an empty bin instead of NaN,
+// which can cause issues with compilation in some drivers
+const float EMPTY_BIN = -3e38;
 
 void main() {
   int row = gl_VertexID / SAMPLER_WIDTH;
@@ -158,7 +160,7 @@ void main() {
     aggregatorTransform.isMean
   );
   if (weights.a == 0.0) {
-    value3 = vec3(NAN);
+    value3 = vec3(EMPTY_BIN);
   }
 
 #if NUM_DIMS == 1
@@ -201,6 +203,9 @@ flat in vec3 values;
 
 out vec4 fragColor;
 
+// Same sentinel as vertex shader
+const float EMPTY_BIN = -3e38;
+
 void main() {
   vec3 value3;
 #if NUM_CHANNELS == 3
@@ -210,7 +215,8 @@ void main() {
 #else
   value3.x = values;
 #endif
-  if (isnan(value3.x)) discard;
+  // Skip empty bins, with epsilon to account for potential floating point precision issues
+  if (value3.x <= EMPTY_BIN + 1e-5) discard;
   // This shader renders into a 2x1 texture with blending=max
   // The left pixel yields the max value of each channel
   // The right pixel yields the min value of each channel
