@@ -4,7 +4,7 @@
 
 /**
  * Type declarations for custom Vitest browser commands.
- * These augment the @vitest/browser/context module so TypeScript
+ * These augment the vitest/browser module so TypeScript
  * knows about our custom commands when importing `commands`.
  */
 
@@ -46,7 +46,7 @@ interface InputEvent {
   metaKey?: boolean;
 }
 
-declare module '@vitest/browser/context' {
+declare module 'vitest/browser' {
   interface BrowserCommands {
     /**
      * Captures a screenshot and compares it with a golden image.
