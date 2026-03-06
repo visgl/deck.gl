@@ -145,6 +145,17 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | `--menu-text` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgb(24, 24, 26)` |
 | `--menu-item-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(0, 0, 0, 0.08)` |
 
+### Range input
+
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--range-step-button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `24px`      |
+| `--range-track-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `16px`      |
+| `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
+| `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
+| `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |
+
+
 ### Icon
 
 Refer to each widget's API reference for icon variable names.

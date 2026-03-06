@@ -31,11 +31,11 @@ export type DeckWidgetTheme = {
   '--menu-text'?: string;
   '--menu-item-hover'?: string;
   // scrollbar
-  '--scrollbar-button-size'?: string;
-  '--scrollbar-track-size'?: string;
-  '--scrollbar-track-color'?: string;
-  '--scrollbar-thumb-color'?: string;
-  '--scrollbar-decoration-active-color'?: string;
+  '--range-step-button-size'?: string;
+  '--range-track-size'?: string;
+  '--range-track-color'?: string;
+  '--range-thumb-color'?: string;
+  '--range-decoration-active-color'?: string;
 };
 
 export const LightTheme = {
@@ -59,11 +59,11 @@ export const LightTheme = {
   '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
   '--menu-text': 'rgb(24, 24, 26, 1)',
   '--menu-item-hover': 'rgba(0, 0, 0, 0.08)',
-  '--scrollbar-button-size': '24px',
-  '--scrollbar-track-size': '16px',
-  '--scrollbar-track-color': '#b9b9c0',
-  '--scrollbar-thumb-color': '#7b7b7e',
-  '--scrollbar-decoration-active-color': '#f8dd50'
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-track-color': '#b9b9c0',
+  '--range-thumb-color': '#7b7b7e',
+  '--range-decoration-active-color': '#f8dd50'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const DarkTheme = {
@@ -87,11 +87,11 @@ export const DarkTheme = {
   '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
   '--menu-text': 'rgb(215, 214, 229, 1)',
   '--menu-item-hover': 'rgba(255, 255, 255, 0.1)',
-  '--scrollbar-button-size': '24px',
-  '--scrollbar-track-size': '16px',
-  '--scrollbar-track-color': '#2c2c30',
-  '--scrollbar-thumb-color': '#8c8b92',
-  '--scrollbar-decoration-active-color': '#dd7d2c'
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-track-color': '#2c2c30',
+  '--range-thumb-color': '#8c8b92',
+  '--range-decoration-active-color': '#dd7d2c'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const LightGlassTheme = {
@@ -116,11 +116,11 @@ export const LightGlassTheme = {
   '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
   '--menu-text': 'rgb(24, 24, 26, 1)',
   '--menu-item-hover': 'rgba(0, 0, 0, 0.08)',
-  '--scrollbar-button-size': '24px',
-  '--scrollbar-track-size': '16px',
-  '--scrollbar-track-color': 'rgba(24, 24, 26, 0.1)',
-  '--scrollbar-thumb-color': 'rgba(24, 24, 26, 0.5)',
-  '--scrollbar-decoration-active-color': 'rgba(255, 215, 0, 0.6)'
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-track-color': 'rgba(24, 24, 26, 0.1)',
+  '--range-thumb-color': 'rgba(24, 24, 26, 0.5)',
+  '--range-decoration-active-color': 'rgba(255, 215, 0, 0.6)'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const DarkGlassTheme = {
@@ -145,9 +145,9 @@ export const DarkGlassTheme = {
   '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
   '--menu-text': 'rgb(215, 214, 229, 1)',
   '--menu-item-hover': 'rgba(255, 255, 255, 0.1)',
-  '--scrollbar-button-size': '24px',
-  '--scrollbar-track-size': '16px',
-  '--scrollbar-track-color': 'rgba(215, 214, 229, 0.1)',
-  '--scrollbar-thumb-color': 'rgba(215, 214, 229, 0.5)',
-  '--scrollbar-decoration-active-color': 'rgba(255, 145, 0, 0.6)'
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-track-color': 'rgba(215, 214, 229, 0.1)',
+  '--range-thumb-color': 'rgba(215, 214, 229, 0.5)',
+  '--range-decoration-active-color': 'rgba(255, 145, 0, 0.6)'
 } as const satisfies Required<DeckWidgetTheme>;

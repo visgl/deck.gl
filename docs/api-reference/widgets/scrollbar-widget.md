@@ -108,8 +108,8 @@ Learn more about how to replace icons in the [styling guide](/docs/api-reference
 
 | Name     | Type      | Default      |
 | -------- | --------- | ------------ |
-| `--scrollbar-button-size` | string | `24px`      |
-| `--scrollbar-track-size` | string | `16px`      |
-| `--scrollbar-track-color` | color | `rgba(0, 0, 0, 0.08)`     |
-| `--scrollbar-thumb-color` | color | `rgba(0, 0, 0, 0.4)`      |
-| `--scrollbar-decoration-active-color` | color | `gold`  |
+| `--range-step-button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `24px`      |
+| `--range-track-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `16px`      |
+| `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
+| `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
+| `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |
