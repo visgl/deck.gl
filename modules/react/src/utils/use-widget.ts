@@ -6,7 +6,7 @@ import {useContext, useMemo, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
 import {log, Widget, type WidgetProps, _deepEqual as deepEqual} from '@deck.gl/core';
 
-export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetProps>(
+export function useWidget<WidgetT extends Widget<WidgetProps, any>, WidgetPropsT extends WidgetProps>(
   WidgetClass: {new (props_: WidgetPropsT): WidgetT},
   props: WidgetPropsT
 ): WidgetT {

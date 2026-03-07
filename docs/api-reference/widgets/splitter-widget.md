@@ -20,9 +20,7 @@ import {Deck} from '@deck.gl/core';
 import {MapView} from '@deck.gl/core';
 
 const deck = new Deck({
-  layers: [
-    // layers for view1 and view2
-  ],
+  layers: [],
   widgets: [
     new SplitterWidget({
       // style: DarkTheme,
