@@ -205,24 +205,56 @@
 
 /* Timeline widget styles */
 .deck-widget.deck-widget-timeline {
-  display: flex;
-  align-items: center;
-  pointer-events: 'auto';
+  position: absolute;
+  margin: var(--widget-margin, 12px);
+  left: 0;
+  right: 0;
+  pointer-events: all;
 }
-
-.deck-widget.deck-widget-timeline .timeline-slider {
-  margin: 0 8px;
-  flex: 1;
-  pointer-events: 'auto';
-  cursor: pointer;
+.deck-widget.deck-widget-timeline[data-placement^=top-] {
+  top: 0;
 }
-
-.deck-widget.deck-widget-timeline .text {
-  color: var(--button-icon-idle, rgb(97, 97, 102));
+.deck-widget.deck-widget-timeline[data-placement^=bottom-] {
+  bottom: 0;
 }
-
-.deck-widget.deck-widget-timeline .text:hover {
-  color: var(--button-icon-hover, rgb(24, 24, 26));
+.deck-widget.deck-widget-timeline .deck-widget-button-group {
+  box-sizing: border-box;
+  gap: var(--widget-margin, 12px);
+  padding: var(--widget-margin, 12px);
+}
+.deck-widget-timeline button.deck-widget-timeline-pause .deck-widget-icon {
+  mask-image: var(
+    --icon-pause,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-pause,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>')
+  );
+}
+.deck-widget-timeline button.deck-widget-timeline-play .deck-widget-icon {
+  mask-image: var(
+    --icon-play,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M320-200v-560l440 280-440 280Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-play,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M320-200v-560l440 280-440 280Z"/></svg>')
+  );
+}
+.deck-widget-timeline-label {
+  position: relative;
+  pointer-events: none;
+  width: fit-content;
+  font-size: 13px;
+  color: var(--menu-text, rgb(24, 24, 26));
+  white-space: nowrap;
+}
+.deck-widget-timeline-label--current {
+  transform: translate(-50%, -100%);
+  border-radius: var(--button-corner-radius, 8px);
+  background: var(--menu-background, #fff);
+  padding: 4px;
 }
 
 /* FPS widget styles */
@@ -479,7 +511,7 @@
 
 /** Range input */
 .deck-widget-range {
-  position: absolute;
+  position: relative;
   pointer-events: all;
   display: flex;
   align-items: center;
@@ -592,6 +624,9 @@
 }
 
 /** Scrollbar */
+.deck-widget-scrollbar .deck-widget-range {
+  position: absolute;
+}
 .deck-widget-scrollbar .deck-widget-range--vertical {
   top: var(--range-step-button-size, 24px);
   height: calc(100% - var(--range-step-button-size, 24px) * 2);
