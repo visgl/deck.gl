@@ -2,25 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, MapViewProps, PickingInfo} from '@deck.gl/core';
+import {Deck, MapView, MapViewProps} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {
-  CompassWidget,
-  ZoomWidget,
-  FullscreenWidget,
-  ScreenshotWidget,
-  ResetViewWidget,
-  _GeocoderWidget,
-  _ScaleWidget,
-  _LoadingWidget,
-  _ThemeWidget,
-  _FpsWidget,
-  _InfoWidget,
-  _ContextMenuWidget,
-  _SplitterWidget,
-  _TimelineWidget,
-  _StatsWidget
-} from '@deck.gl/widgets';
+import {LightTheme, DarkTheme, _SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -32,30 +16,12 @@ const AIR_PORTS =
 const INITIAL_VIEW_STATE = {
   latitude: 51.47,
   longitude: 0.45,
-  zoom: 4,
-  bearing: 0,
-  pitch: 30
+  zoom: 4
 };
 
-function getViewsForSplit(percentage: number) {
-  const x1 = '0%';
-  const width1 = `${percentage}%`;
-  const x2 = width1;
-  const width2 = `${100 - percentage}%`;
-
-  return [
-    new MapView({id: 'left-map', x: x1, width: width1, controller: true}),
-    new MapView({id: 'right-map', x: x2, width: width2, controller: true})
-  ];
-}
-
 const deck = new Deck({
-  initialViewState: {
-    'left-map': INITIAL_VIEW_STATE,
-    'right-map': INITIAL_VIEW_STATE
-  },
+  initialViewState: INITIAL_VIEW_STATE,
   // controller: true,
-  views: getViewsForSplit(50),
   layers: [
     new GeoJsonLayer({
       id: 'base-map',
@@ -94,74 +60,21 @@ const deck = new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget({viewId: 'left-map'}),
-    new CompassWidget({viewId: 'left-map'}),
-    new FullscreenWidget({viewId: 'left-map'}),
-    new ScreenshotWidget({viewId: 'left-map'}),
-    new ResetViewWidget({viewId: 'left-map'}),
-    new _FpsWidget({viewId: 'left-map'}),
-    new _LoadingWidget({viewId: 'left-map'}),
-    new _ScaleWidget({placement: 'bottom-right'}),
-    new _GeocoderWidget({viewId: 'right-map'}),
-    new _ThemeWidget({viewId: 'left-map'}),
-    new _ContextMenuWidget({
-      getMenuItems: (info: PickingInfo) => {
-        const name = info.layer?.id === 'airports' && info.object?.properties.name;
-        console.log('Context menu:', name);
-        return (
-          name && [
-            {key: 'airport', label: `${name}`},
-            {key: 'open', label: 'Open in new tab'},
-            {key: 'favorite', label: 'Set as favorite'},
-            {key: 'filter', label: 'Exclude from filter'}
-          ]
-        );
+    new SplitterWidget({
+      // style: DarkTheme,
+      viewLayout: {
+        orientation: 'horizontal',
+        views: [
+          new MapView({id: 'left', controller: true}),
+          {
+            orientation: 'vertical',
+            views: [
+              new MapView({id: 'right-top', controller: true}),
+              new MapView({id: 'right-bottom', controller: true})
+            ]
+          }
+        ]
       }
-    }),
-    new _InfoWidget({mode: 'hover', getTooltip}),
-    new _InfoWidget({mode: 'click', getTooltip}),
-    new _TimelineWidget({
-      placement: 'bottom-left',
-      timeRange: [0, 24],
-      step: 1,
-      initialTime: 0,
-      playInterval: 1000,
-      // eslint-disable-next-line no-console, no-undef
-      onTimeChange: time => console.log('Time:', time)
-    }),
-    new _SplitterWidget({
-      viewId1: 'left-map',
-      viewId2: 'right-map',
-      orientation: 'vertical',
-      onChange: ratio => deck.setProps({views: getViewsForSplit(ratio * 100)})
-    }),
-    new _StatsWidget({type: 'luma', viewId: 'left-map'})
+    })
   ]
 });
-
-function getTooltip(info: PickingInfo, widget: _InfoWidget) {
-  if (!info.object || info.layer?.id !== 'airports') {
-    return null;
-  }
-
-  let text: string;
-  switch (widget.props.mode) {
-    case 'hover':
-      text = `${info.object.properties.name} (${info.object.properties.abbrev})`;
-      break;
-    case 'click':
-    case 'static':
-      text = `\
-${info.object.properties.name} (${info.object.properties.abbrev})
-${info.object.properties.type}
-${info.object.properties.featureclass} (${info.object.properties.location})
-`;
-      break;
-  }
-
-  return {
-    position: info.object.geometry.coordinates,
-    text,
-    style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
-  };
-}
