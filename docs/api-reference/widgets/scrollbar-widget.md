@@ -98,17 +98,7 @@ A `ScrollbarDecoration` object
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
-
-| Name     | Type      | Default      |
-| -------- | --------- | ------------ |
-| `--range-step-button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `24px`      |
-| `--range-track-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `16px`      |
-| `--range-thumb-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `10px`      |
-| `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
-| `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
-| `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |
-
+The ScrollbarWidget uses theme CSS variables for [RangeInput](./styling.md#range-input).
 
 ## Source
 

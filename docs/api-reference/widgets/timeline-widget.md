@@ -89,18 +89,33 @@ Format time value for display.
 A [Timeline](https://luma.gl/docs/api-reference/engine/animation/timeline) instance that is manipulated by this widget.
 
 
+## Methods
+
+#### `play`
+
+```ts
+timelineWidget.play();
+```
+
+Start playback.
+
+#### `pause`
+
+```ts
+timelineWidget.pause();
+```
+
+Stop playback.
+
+
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+The TimelineWidget uses theme CSS variables for [RangeInput](./styling.md#range-input).
+
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name     | Type      | Default      |
 | -------- | --------- | ------------ |
-| `--range-step-button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `24px`      |
-| `--range-track-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `16px`      |
-| `--range-thumb-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `10px`      |
-| `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
-| `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
-| `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |
 | `--icon-play` | [SVG Data Url][data_url] | [Material Symbol Play Arrow][icon_play_url]      |
 | `--icon-pause`  | [SVG Data Url][data_url] | [Material Symbol Pause][icon_pause_url] |
 
