@@ -16,6 +16,17 @@ import type {DeckProps, View, Viewport} from '@deck.gl/core';
 
 export type ViewOrViews = View | View[] | null;
 
+// Props the wrapper always overrides regardless of what the user writes in JSX.
+// These must never be counted as user-controlled signals for widgets.
+const WRAPPER_OWNED_KEYS = new Set<string>([
+  'style',
+  'width',
+  'height',
+  'parent',
+  'canvas',
+  '_customRender'
+]);
+
 /* eslint-disable max-statements, accessor-pairs */
 type DeckInstanceRef<ViewsT extends ViewOrViews> = {
   deck?: Deck<ViewsT>;
@@ -160,6 +171,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
+    // `forwardProps` is the fully resolved snapshot Deck uses for rendering. It includes
+    // wrapper-owned overrides (style, width, height, parent, canvas) and wrapped callbacks.
     const forwardProps: DeckProps<ViewsT> = {
       widgets: [],
       ...props,
@@ -180,7 +193,12 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     delete forwardProps._customRender;
 
     if (thisRef.deck) {
-      thisRef.deck.setProps(forwardProps);
+      // `explicitProps` contains only what the user actually wrote in JSX. Wrapper-owned
+      // keys are excluded so widgets can freely manage props the user left unset.
+      const explicitProps = Object.fromEntries(
+        Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
+      ) as Partial<DeckProps<ViewsT>>;
+      thisRef.deck.setPropsFromReact(explicitProps, forwardProps);
     }
 
     return forwardProps;

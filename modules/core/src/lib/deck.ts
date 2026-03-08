@@ -324,6 +324,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   };
   private _metricsCounter: number = 0;
 
+  /**
+   * Tracks which props were explicitly supplied by the user.
+   * - Imperative `setProps` accumulates keys across calls (once set, always controlled).
+   * - React `setPropsFromReact` replaces this set on every render so that only the
+   *   props the user actually wrote in JSX are treated as controlled.
+   * Widgets can call `isControlled(key)` to avoid overwriting props the app owns.
+   */
+  private _controlledProps: Set<string> = new Set();
+
   private _needsRedraw: false | string = 'Initial render';
   private _pickRequest: {
     mode: string;
@@ -447,8 +456,46 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
-  /** Partially update props */
+  /**
+   * Partially update props (imperative API).
+   * Every supplied key is permanently marked as user-controlled so that widgets
+   * know not to overwrite it.
+   */
   setProps(props: DeckProps<ViewsT>): void {
+    for (const key of Object.keys(props)) {
+      this._controlledProps.add(key);
+    }
+    this._applyProps(props);
+  }
+
+  /**
+   * Full-snapshot update from the React wrapper.
+   * `explicitProps` contains only the keys the user actually wrote in JSX (not
+   * defaultProps or wrapper-owned overrides). These replace the controlled set so
+   * that each render reflects current user intent rather than accumulating across
+   * renders. `allProps` is the fully resolved snapshot used for rendering.
+   */
+  setPropsFromReact(explicitProps: Partial<DeckProps<ViewsT>>, allProps: DeckProps<ViewsT>): void {
+    this._controlledProps = new Set(Object.keys(explicitProps));
+    this._applyProps(allProps);
+  }
+
+  /**
+   * Returns true if the given prop key was explicitly supplied by the user via
+   * `setProps` or JSX. Widgets should avoid writing to controlled props:
+   *
+   * ```ts
+   * if (!deck.isControlled('viewState')) {
+   *   deck.setProps({viewState: nextViewState});
+   * }
+   * ```
+   */
+  isControlled(key: keyof DeckProps): boolean {
+    return this._controlledProps.has(key as string);
+  }
+
+  /** @internal Apply a props update without changing the controlled-props set. */
+  private _applyProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
 
     if ('onLayerHover' in props) {
