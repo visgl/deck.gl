@@ -238,7 +238,7 @@ test('MapboxLayer#drawLayer with zero-size canvas', t => {
       t.end();
     });
 
-    map.fire('render');
+    (map as any)._render();
   });
 });
 
