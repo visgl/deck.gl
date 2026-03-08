@@ -496,6 +496,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this._controlledProps.has(key as string);
   }
 
+  /**
+   * Apply a partial props update from a widget. Does not mark any keys as
+   * user-controlled, so `isControlled` continues to reflect only user intent.
+   * Widgets must use this instead of `setProps` to avoid polluting the
+   * controlled-props set.
+   * @internal
+   */
+  _setWidgetProps(props: Partial<DeckProps<ViewsT>>): void {
+    this._applyProps(props as DeckProps<ViewsT>);
+  }
+
   /** @internal Apply a props update without changing the controlled-props set. */
   private _applyProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
