@@ -63,17 +63,17 @@ You may also replace one or both item in `views` with a `ViewLayout` object, com
 #### `onChange` (Function, optional) {#onchange}
 
 ```ts
-(newSplit: number, source: ViewLayout) => void
+(views: View[]) => void
 ```
 
 * Default: `() => {}`
 
-Callback invoked during dragging with the updated split ratio.
+Callback invoked during dragging with the updated view instances
 
 #### `onDragStart` (Function, optional) {#ondragstart}
 
 ```ts
-(source: ViewLayout) => void
+() => void
 ```
 
 * Default: `() => {}`
@@ -83,7 +83,7 @@ Callback invoked when the user begins dragging the splitter.
 #### `onDragEnd` (Function, optional) {#ondragend}
 
 ```ts
-(source: ViewLayout) => void
+() => void
 ```
 
 * Default: `() => {}`

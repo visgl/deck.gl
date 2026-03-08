@@ -4,7 +4,13 @@
 
 import {JSX, render} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
-import {Widget, type Deck, type WidgetProps, type View} from '@deck.gl/core';
+import {
+  Widget,
+  _deepEqual as deepEqual,
+  type Deck,
+  type WidgetProps,
+  type View
+} from '@deck.gl/core';
 
 export type ViewLayout = {
   /** Stacking orientation of the sub views */
@@ -146,11 +152,11 @@ export type SplitterWidgetProps = WidgetProps & {
   /** Stacking views descriptor */
   viewLayout: ViewLayout;
   /** Callback invoked when the splitter is dragged with the new split value */
-  onChange?: (newSplit: number, source: ViewLayout) => void;
+  onChange?: (views: View[]) => void;
   /** Callback invoked when dragging starts */
-  onDragStart?: (source: ViewLayout) => void;
+  onDragStart?: () => void;
   /** Callback invoked when dragging ends */
-  onDragEnd?: (source: ViewLayout) => void;
+  onDragEnd?: () => void;
 };
 
 /**
@@ -170,33 +176,71 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
 
   className = 'deck-widget-splitter';
   placement = 'fill' as const;
-  viewLayouts: ManagedViewLayout[];
+  viewLayouts!: ManagedViewLayout[];
+  /** evaluated from the current viewLayouts */
+  views!: View[];
+  /** views set in the last update */
+  lastViews?: View[];
   needsUpdate = true;
 
   constructor(props: SplitterWidgetProps) {
     super(props);
-    this.viewLayouts = parseViewLayout(props.viewLayout);
+    this.viewLayouts = parseViewLayout(this.props.viewLayout);
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
-    if (props.viewLayout && props.viewLayout !== this.props.viewLayout) {
+    if (props.viewLayout && !deepEqual(props.viewLayout, this.props.viewLayout, -1)) {
       this.viewLayouts = parseViewLayout(props.viewLayout);
+      this.views = undefined!;
     }
     super.setProps(props);
   }
 
+  onRedraw() {
+    // Actually update DOM
+    super.updateHTML();
+  }
+
+  // Usually widgets rerender their DOM elements here
+  // In this case we need the widget UI to synchronize with deck view states
+  // so we update deck props here and rerender DOM in the next onRedraw
   updateHTML() {
-    const views = evaluateViews(this.viewLayouts[0]);
+    if (!this.views) {
+      // viewLayouts has changed, re-evaluate
+      this.views = evaluateViews(this.viewLayouts[0]);
+      // we send a copy to the callback so that externally set views can be differentiated from internal
+      this.props.onChange(this.views.slice());
+    }
+    // This method is called inside deck.setProps > widgetManager.setProps > widget.setProps
+    // Calling deck.setProps immediately would cause infinite loop
     requestAnimationFrame(() => {
-      this.deck?.setProps({views});
-      super.updateHTML();
+      this.doUpdate();
     });
   }
 
+  private doUpdate() {
+    if (this.deck) {
+      const deckViews = this.deck.props.views;
+      const isManagedExternally =
+        // is not empty
+        deckViews &&
+        // is not set by us
+        deckViews !== this.lastViews;
+
+      if (!isManagedExternally && this.lastViews !== this.views) {
+        this.lastViews = this.views;
+        this.deck.setProps({views: this.views});
+      }
+    }
+  }
+
   private onChange(newSplit: number, layout: ManagedViewLayout) {
-    this.viewLayouts[layout.id].split = newSplit;
-    this.props.onChange(newSplit, layout);
-    this.updateHTML();
+    layout.split = newSplit;
+    // layout has updated, re-evaluate
+    this.views = evaluateViews(this.viewLayouts[0]);
+    // we send a copy to the callback so that externally set views can be differentiated from internal
+    this.props.onChange(this.views.slice());
+    this.doUpdate();
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
@@ -208,8 +252,8 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
               <Splitter
                 {...layout}
                 onChange={newSplit => this.onChange(newSplit, layout)}
-                onDragStart={() => this.props.onDragStart(layout)}
-                onDragEnd={() => this.props.onDragStart(layout)}
+                onDragStart={() => this.props.onDragStart()}
+                onDragEnd={() => this.props.onDragStart()}
               />
             )
         )}
@@ -254,11 +298,10 @@ function Splitter({
 
   useEffect(() => {
     if (!dragging) {
-      onDragEnd?.();
       return undefined;
     }
 
-    const handleDragging = (event: MouseEvent) => {
+    const handleDragging = (event: PointerEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       let newSplit: number;
@@ -273,6 +316,7 @@ function Splitter({
     };
 
     const handleDragEnd = () => {
+      onDragEnd?.();
       setDragging(false);
     };
 
