@@ -24,7 +24,9 @@ const WRAPPER_OWNED_KEYS = new Set<string>([
   'height',
   'parent',
   'canvas',
-  '_customRender'
+  '_customRender',
+  'onViewStateChange',
+  'onInteractionStateChange'
 ]);
 
 /* eslint-disable max-statements, accessor-pairs */
@@ -199,7 +201,13 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     delete explicitProps._customRender;
 
     if (thisRef.deck) {
-      thisRef.deck._setPropsSnapshot(explicitProps);
+      // Strip wrapper-owned keys before snapshotting so they are never counted
+      // as user-controlled. The full explicitProps (including wrapper-owned keys)
+      // is still applied via _applyProps inside _setPropsSnapshot.
+      const userProps = Object.fromEntries(
+        Object.entries(explicitProps).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
+      ) as Partial<DeckProps<ViewsT>>;
+      thisRef.deck._setPropsSnapshot(userProps, explicitProps);
     }
 
     return explicitProps;

@@ -275,3 +275,43 @@ test('DeckGL#user views override widget views', t => {
   });
   t.ok(ref.current, 'DeckGL overlay is rendered.');
 });
+
+test('DeckGL#wrapper-owned keys are not user-controlled', t => {
+  const ref = createRef<any>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100,
+        gl: getMockContext(),
+        onLoad: () => {
+          const {deck} = ref.current;
+          t.notOk(deck.isControlled('style'), 'style is not user-controlled');
+          t.notOk(deck.isControlled('width'), 'width is not user-controlled');
+          t.notOk(deck.isControlled('height'), 'height is not user-controlled');
+          t.notOk(deck.isControlled('parent'), 'parent is not user-controlled');
+          t.notOk(deck.isControlled('canvas'), 'canvas is not user-controlled');
+          t.notOk(
+            deck.isControlled('onViewStateChange'),
+            'onViewStateChange is not user-controlled'
+          );
+          t.notOk(
+            deck.isControlled('onInteractionStateChange'),
+            'onInteractionStateChange is not user-controlled'
+          );
+
+          root.render(null);
+          container.remove();
+          t.end();
+        }
+      })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
+});

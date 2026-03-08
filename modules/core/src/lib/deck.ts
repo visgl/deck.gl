@@ -485,19 +485,23 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * can manage them freely.
    * @internal
    */
-  _setPropsSnapshot(explicitProps: Partial<DeckProps<ViewsT>>): void {
-    const newControlled = new Set(Object.keys(explicitProps));
+  _setPropsSnapshot(
+    userProps: Partial<DeckProps<ViewsT>>,
+    allProps: Partial<DeckProps<ViewsT>> = userProps
+  ): void {
+    const newControlled = new Set(Object.keys(userProps));
 
     // Keys that were user-controlled last render but aren't now — reset to default
     // so that removing a prop from JSX behaves the same as setting it to its default.
+    // Write resets into allProps so the full apply below picks them up.
     for (const key of this._controlledProps) {
       if (!newControlled.has(key)) {
-        (explicitProps as any)[key] = (defaultProps as any)[key];
+        (allProps as any)[key] = (defaultProps as any)[key];
       }
     }
 
     this._controlledProps = newControlled;
-    this._applyProps(explicitProps as DeckProps<ViewsT>);
+    this._applyProps(allProps as DeckProps<ViewsT>);
   }
 
   /**
