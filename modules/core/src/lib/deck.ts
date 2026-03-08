@@ -472,12 +472,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * Declarative snapshot update for framework wrappers (React, Vue, etc.).
    * Only the keys the user actually declared are passed — not framework defaults
    * or wrapper-owned overrides. The controlled set is replaced rather than
-   * accumulated so it always reflects the current declaration. Undeclared props
-   * in `this.props` are left untouched, allowing widgets to manage them freely.
+   * accumulated so it always reflects the current declaration.
+   *
+   * Props that were controlled last render but are absent this render are reset
+   * to their defaults, preserving the declarative contract (removing a prop from
+   * JSX clears it). Props the user never declared are left untouched so widgets
+   * can manage them freely.
    * @internal
    */
   _setPropsSnapshot(explicitProps: Partial<DeckProps<ViewsT>>): void {
-    this._controlledProps = new Set(Object.keys(explicitProps));
+    const newControlled = new Set(Object.keys(explicitProps));
+
+    // Keys that were user-controlled last render but aren't now — reset to default
+    // so that removing a prop from JSX behaves the same as setting it to its default.
+    for (const key of this._controlledProps) {
+      if (!newControlled.has(key)) {
+        (explicitProps as any)[key] = (defaultProps as any)[key];
+      }
+    }
+
+    this._controlledProps = newControlled;
     this._applyProps(explicitProps as DeckProps<ViewsT>);
   }
 
