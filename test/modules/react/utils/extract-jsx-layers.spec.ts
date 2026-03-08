@@ -34,14 +34,12 @@ const TEST_CASES = [
   },
   {
     input: {
-      children: null,
-      views: null,
-      layers: null
+      children: null
     },
     output: {
       children: [],
-      views: null,
-      layers: null
+      views: undefined,
+      layers: undefined
     },
     title: 'empty layers'
   },
@@ -145,7 +143,7 @@ const TEST_CASES = [
     output: {
       children: [],
       views: null,
-      layers: [lineLayer]
+      layers: [[lineLayer], []]
     },
     title: 'JSX layers'
   },
@@ -158,7 +156,7 @@ const TEST_CASES = [
     output: {
       children: [],
       views: null,
-      layers: [lineLayer, scatterplotLayer]
+      layers: [[lineLayer], [scatterplotLayer]]
     },
     title: 'JSX layers with layers prop'
   },
@@ -171,7 +169,7 @@ const TEST_CASES = [
     output: {
       children: [reactMapView, createElement(View, {}, noop)],
       views: [new MapView(reactMapView.props)],
-      layers: [lineLayer]
+      layers: [[lineLayer], []]
     },
     title: 'fragment with single child'
   },
@@ -184,7 +182,7 @@ const TEST_CASES = [
     output: {
       children: [reactMapView, createElement(View, {}, noop)],
       views: [new MapView(reactMapView.props)],
-      layers: [lineLayer]
+      layers: [[lineLayer], []]
     },
     title: 'fragment with statically known children'
   },
@@ -197,20 +195,18 @@ const TEST_CASES = [
     output: {
       children: [reactMapView, createElement(View, {}, noop)],
       views: [new MapView(reactMapView.props)],
-      layers: [lineLayer]
+      layers: [[lineLayer], []]
     },
     title: 'fragment with dynamic children'
   },
   {
     input: {
-      children: [reactMapView, reactLineLayer, noop],
-      views: null,
-      layers: []
+      children: [reactMapView, reactLineLayer, noop]
     },
     output: {
       children: [reactMapView, createElement(View, {}, noop)],
       views: [new MapView(reactMapView.props)],
-      layers: [lineLayer]
+      layers: [[lineLayer], undefined]
     },
     title: 'mixed children'
   }
