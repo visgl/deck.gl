@@ -327,7 +327,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /**
    * Tracks which props were explicitly declared by the user.
    * - Patch `setProps` accumulates keys across calls (once declared, always controlled).
-   * - React `setPropsFromReact` replaces this set on every render so that only the
+   * - Snapshot `_setPropsSnapshot` replaces this set on every render so that only the
    *   props the user actually declared in JSX are treated as controlled.
    * Widgets call `isControlled(key)` to avoid overwriting props the app owns.
    */
@@ -469,13 +469,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /**
-   * Declarative full-snapshot update from the React wrapper.
-   * `explicitProps` contains only the keys the user actually declared in JSX (not
-   * defaultProps or wrapper-owned overrides). The controlled set is replaced rather
-   * than accumulated so it always reflects current JSX, not the union of all past
-   * renders. `allProps` is the fully resolved snapshot used for rendering.
+   * Declarative full-snapshot update for framework wrappers (React, Vue, etc.).
+   * `explicitProps` contains only the keys the user actually declared — not
+   * framework defaults or wrapper-owned overrides. The controlled set is replaced
+   * rather than accumulated so it always reflects the current declaration, not the
+   * union of all past renders. `allProps` is the fully resolved snapshot used for
+   * rendering.
+   * @internal
    */
-  setPropsFromReact(explicitProps: Partial<DeckProps<ViewsT>>, allProps: DeckProps<ViewsT>): void {
+  _setPropsSnapshot(explicitProps: Partial<DeckProps<ViewsT>>, allProps: DeckProps<ViewsT>): void {
     this._controlledProps = new Set(Object.keys(explicitProps));
     this._applyProps(allProps);
   }

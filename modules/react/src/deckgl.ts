@@ -198,7 +198,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       const explicitProps = Object.fromEntries(
         Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
       ) as Partial<DeckProps<ViewsT>>;
-      thisRef.deck.setPropsFromReact(explicitProps, forwardProps);
+      thisRef.deck._setPropsSnapshot(explicitProps, forwardProps);
     }
 
     return forwardProps;
