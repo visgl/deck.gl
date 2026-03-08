@@ -131,6 +131,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
     map.addLayer(layerDefaultView);
 
     map.on('render', () => {
+      t.notOk((map as any)._renderError, 'render should not throw');
       t.deepEqual(
         drawLog,
         [
@@ -184,6 +185,7 @@ test('MapboxLayer#external Deck custom views', t => {
 
     map.addLayer(new MapboxLayer({id: 'scatterplot'}));
     map.on('render', () => {
+      t.notOk((map as any)._renderError, 'render should not throw');
       t.deepEqual(
         drawLog,
         [
