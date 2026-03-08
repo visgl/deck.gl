@@ -325,11 +325,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _metricsCounter: number = 0;
 
   /**
-   * Tracks which props were explicitly supplied by the user.
-   * - Imperative `setProps` accumulates keys across calls (once set, always controlled).
+   * Tracks which props were explicitly declared by the user.
+   * - Patch `setProps` accumulates keys across calls (once declared, always controlled).
    * - React `setPropsFromReact` replaces this set on every render so that only the
-   *   props the user actually wrote in JSX are treated as controlled.
-   * Widgets can call `isControlled(key)` to avoid overwriting props the app owns.
+   *   props the user actually declared in JSX are treated as controlled.
+   * Widgets call `isControlled(key)` to avoid overwriting props the app owns.
    */
   private _controlledProps: Set<string> = new Set();
 
@@ -457,9 +457,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /**
-   * Partially update props (imperative API).
+   * Declarative patch update: describes the desired state of a subset of props.
    * Every supplied key is permanently marked as user-controlled so that widgets
-   * know not to overwrite it.
+   * know not to overwrite it. Unmentioned props are left as-is.
    */
   setProps(props: DeckProps<ViewsT>): void {
     for (const key of Object.keys(props)) {
@@ -469,10 +469,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /**
-   * Full-snapshot update from the React wrapper.
-   * `explicitProps` contains only the keys the user actually wrote in JSX (not
-   * defaultProps or wrapper-owned overrides). These replace the controlled set so
-   * that each render reflects current user intent rather than accumulating across
+   * Declarative full-snapshot update from the React wrapper.
+   * `explicitProps` contains only the keys the user actually declared in JSX (not
+   * defaultProps or wrapper-owned overrides). The controlled set is replaced rather
+   * than accumulated so it always reflects current JSX, not the union of all past
    * renders. `allProps` is the fully resolved snapshot used for rendering.
    */
   setPropsFromReact(explicitProps: Partial<DeckProps<ViewsT>>, allProps: DeckProps<ViewsT>): void {
