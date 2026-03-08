@@ -171,37 +171,40 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
-    // `forwardProps` is the fully resolved snapshot Deck uses for rendering. It includes
-    // wrapper-owned overrides (style, width, height, parent, canvas) and wrapped callbacks.
-    const forwardProps: DeckProps<ViewsT> = {
-      widgets: [],
-      ...props,
-      // Override user styling props. We will set the canvas style in render()
+    // `explicitProps` is what gets passed to core. It contains:
+    //   - wrapper-owned props that always need to be applied (style, size, canvas, callbacks)
+    //   - user-declared props, with layers/views replaced by their JSX-processed equivalents
+    //     but only when the user actually declared them (or JSX children provided them).
+    // Undeclared props are omitted entirely so widgets can manage them without being stomped.
+    const hasExplicitLayers = 'layers' in props || jsxProps.hasJSXLayers;
+    const hasExplicitViews = 'views' in props || jsxProps.hasJSXViews;
+
+    const explicitProps: DeckProps<ViewsT> = {
+      ...Object.fromEntries(
+        Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
+      ),
+      // Wrapper-owned — always applied
       style: null,
       width: '100%',
       height: '100%',
       parent: containerRef.current,
       canvas: canvasRef.current,
-      layers: jsxProps.layers,
-      views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
-    };
+      onInteractionStateChange: handleInteractionStateChange,
+      // Layer/view props only when the user (or JSX children) declared them
+      ...(hasExplicitLayers && {layers: jsxProps.layers}),
+      ...(hasExplicitViews && {views: jsxProps.views as ViewsT})
+    } as DeckProps<ViewsT>;
 
     // The defaultValue for _customRender is null, which would overwrite the definition
     // of _customRender. Remove to avoid frequently redeclaring the method here.
-    delete forwardProps._customRender;
+    delete explicitProps._customRender;
 
     if (thisRef.deck) {
-      // `explicitProps` contains only what the user actually wrote in JSX. Wrapper-owned
-      // keys are excluded so widgets can freely manage props the user left unset.
-      const explicitProps = Object.fromEntries(
-        Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
-      ) as Partial<DeckProps<ViewsT>>;
-      thisRef.deck._setPropsSnapshot(explicitProps, forwardProps);
+      thisRef.deck._setPropsSnapshot(explicitProps);
     }
 
-    return forwardProps;
+    return explicitProps;
   }, [props]);
 
   useEffect(() => {
