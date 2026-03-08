@@ -202,6 +202,46 @@ test('MapboxLayer#external Deck custom views', t => {
   });
 });
 
+test('MapboxLayer#drawLayer with zero-size canvas', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  map.on('load', () => {
+    const deck = new Deck({
+      device,
+      viewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        new ScatterplotLayer({
+          id: 'scatterplot',
+          data: [],
+          getPosition: d => d.position,
+          getRadius: 10,
+          getFillColor: [255, 0, 0]
+        })
+      ]
+    });
+
+    getDeckInstance({map, deck});
+    map.addLayer(new MapboxLayer({id: 'scatterplot'}));
+
+    // Simulate a zero-size canvas (e.g. hidden or detached container).
+    // makeViewport() returns null when width or height is 0, so drawLayer
+    // must not pass that null into deck._drawLayers.
+    (deck as any).width = 0;
+    (deck as any).height = 0;
+
+    map.on('render', () => {
+      t.notOk((map as any)._renderError, 'render should not throw when canvas has zero dimensions');
+      deck.finalize();
+      t.end();
+    });
+
+    map.fire('render');
+  });
+});
+
 /** Used to compare view states */
 export function objectEqual(actual, expected) {
   if (equals(actual, expected)) {
