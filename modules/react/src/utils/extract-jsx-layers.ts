@@ -119,7 +119,13 @@ export default function extractJSXLayers({
   // Avoid modifying layers array if no JSX layers were found
   layers = jsxLayers.length > 0 ? [...jsxLayers, ...layers] : layers;
 
-  return {layers, children: reactChildren, views, hasJSXLayers: jsxLayers.length > 0, hasJSXViews: Object.keys(jsxViews).length > 0};
+  return {
+    layers,
+    children: reactChildren,
+    views,
+    hasJSXLayers: jsxLayers.length > 0,
+    hasJSXViews: Object.keys(jsxViews).length > 0
+  };
 }
 
 function createLayer(LayerType: typeof Layer, reactProps: any): Layer {

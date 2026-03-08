@@ -180,9 +180,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     const hasExplicitViews = 'views' in props || jsxProps.hasJSXViews;
 
     const explicitProps: DeckProps<ViewsT> = {
-      ...Object.fromEntries(
-        Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
-      ),
+      ...Object.fromEntries(Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))),
       // Wrapper-owned — always applied
       style: null,
       width: '100%',
