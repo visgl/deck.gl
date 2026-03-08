@@ -357,6 +357,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfo: PickingInfo | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
+    const userProps = props; // capture before merging with defaultProps
     // @ts-ignore views
     this.props = {...defaultProps, ...props};
     props = this.props;
@@ -411,7 +412,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
-    this.setProps(props);
+    // Mark only user-supplied keys as controlled; defaultProps keys are not user intent.
+    for (const key of Object.keys(userProps)) {
+      this._controlledProps.add(key);
+    }
+    this._applyProps(props);
 
     // UNSAFE/experimental prop: only set at initialization to avoid performance hit
     if (props._typedArrayManagerProps) {
