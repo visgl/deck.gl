@@ -137,11 +137,6 @@ export function drawLayer(
     clearStack = true;
   }
 
-  if (!currentViewport) {
-    // Viewport could not be created (e.g. canvas has zero dimensions).
-    return;
-  }
-
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     layerFilter: params =>
@@ -170,11 +165,6 @@ export function drawLayerGroup(
     currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
-  }
-
-  if (!currentViewport) {
-    // Viewport could not be created (e.g. canvas has zero dimensions).
-    return;
   }
 
   deck._drawLayers('mapbox-repaint', {
