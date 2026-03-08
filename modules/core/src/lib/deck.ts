@@ -529,6 +529,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._applyProps(props as DeckProps<ViewsT>);
   }
 
+  /**
+   * Replace the controlled-props set with the given keys.
+   * Used by framework wrappers (React etc.) to establish which props the user
+   * explicitly declared right after the Deck instance is first created, before
+   * the `onLoad` callback fires.
+   * @internal
+   */
+  _setControlledProps(keys: Iterable<string>): void {
+    this._controlledProps = new Set(keys);
+  }
+
   /** @internal Apply a props update without changing the controlled-props set. */
   private _applyProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
@@ -1232,7 +1243,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
-    this.setProps(this.props);
+    this._applyProps(this.props);
 
     this._updateCanvasSize();
     this.props.onLoad();

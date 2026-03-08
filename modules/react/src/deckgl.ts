@@ -216,11 +216,17 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   useEffect(() => {
     const DeckClass = props.Deck || Deck;
 
-    thisRef.deck = createDeckInstance(thisRef, DeckClass, {
+    const deckPropsToInit = {
       ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current
-    });
+    };
+    thisRef.deck = createDeckInstance(thisRef, DeckClass, deckPropsToInit);
+
+    // The constructor marks ALL passed keys as controlled. Correct this to only
+    // reflect the keys the user actually declared (excluding wrapper-owned keys).
+    const controlledKeys = Object.keys(deckPropsToInit).filter(k => !WRAPPER_OWNED_KEYS.has(k));
+    thisRef.deck._setControlledProps(controlledKeys);
 
     return () => thisRef.deck?.finalize();
   }, []);
