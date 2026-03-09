@@ -220,25 +220,26 @@ test('MapboxLayer#drawLayer with zero-size canvas', t => {
           getRadius: 10,
           getFillColor: [255, 0, 0]
         })
-      ]
+      ],
+      // Set zero dimensions before the first render so makeViewport returns null.
+      // getDeckInstance wraps onLoad, so by the time this fires deck.isInitialized
+      // is true and drawLayer won't return early.
+      onLoad: () => {
+        (deck as any).width = 0;
+        (deck as any).height = 0;
+
+        map.on('render', () => {
+          t.notOk((map as any)._renderError, 'render should not throw when canvas has zero dimensions');
+          deck.finalize();
+          t.end();
+        });
+
+        (map as any)._render();
+      }
     });
 
     getDeckInstance({map, deck});
     map.addLayer(new MapboxLayer({id: 'scatterplot'}));
-
-    // Simulate a zero-size canvas (e.g. hidden or detached container).
-    // makeViewport() returns null when width or height is 0, so drawLayer
-    // must not pass that null into deck._drawLayers.
-    (deck as any).width = 0;
-    (deck as any).height = 0;
-
-    map.on('render', () => {
-      t.notOk((map as any)._renderError, 'render should not throw when canvas has zero dimensions');
-      deck.finalize();
-      t.end();
-    });
-
-    (map as any)._render();
   });
 });
 
