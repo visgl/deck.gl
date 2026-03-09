@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import earcut from 'earcut';
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection, BinaryPolygonFeature, TypedArray} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
@@ -19,11 +19,11 @@ type CartoVectorTileLoaderOptions = LoaderOptions & {
   };
 };
 
-const DEFAULT_OPTIONS: CartoVectorTileLoaderOptions = {
+const DEFAULT_OPTIONS = {
   cartoVectorTile: {
     workerUrl: getWorkerUrl(id, VERSION)
   }
-};
+} as const satisfies CartoVectorTileLoaderOptions;
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',

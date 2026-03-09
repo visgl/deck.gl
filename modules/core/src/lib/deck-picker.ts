@@ -281,16 +281,17 @@ export default class DeckPicker {
       }
 
       let z;
-      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
+      const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
+      if (depthLayers.length > 0) {
         const {pickedColors: pickedColors2} = this._drawAndSample(
           {
-            layers: [pickInfo.pickedLayer],
+            layers: depthLayers,
             views,
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX as number,
-              y: pickInfo.pickedY as number,
+              x: pickInfo.pickedX ?? devicePixel[0],
+              y: pickInfo.pickedY ?? devicePixel[1],
               width: 1,
               height: 1
             },
@@ -444,16 +445,17 @@ export default class DeckPicker {
       }
 
       let z;
-      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
+      const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
+      if (depthLayers.length > 0) {
         const {pickedColors: pickedColors2} = this._drawAndSample(
           {
-            layers: [pickInfo.pickedLayer],
+            layers: depthLayers,
             views,
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX as number,
-              y: pickInfo.pickedY as number,
+              x: pickInfo.pickedX ?? devicePixel[0],
+              y: pickInfo.pickedY ?? devicePixel[1],
               width: 1,
               height: 1
             },
@@ -926,6 +928,25 @@ export default class DeckPicker {
     });
 
     return {pickedColors, decodePickingColor};
+  }
+
+  /**
+   * Determine which layers to use for the depth (pickZ) pass.
+   * - If a non-draped layer was picked, use just that layer.
+   * - If a draped layer was picked (geometry is at z=0) or no layer was picked
+   *   (e.g. no-FBO tiles at extreme zoom), fall back to terrain layers.
+   */
+  _getDepthLayers(pickInfo: PickedPixel, pickableLayers: Layer[], unproject3D?: boolean): Layer[] {
+    if (!unproject3D || !this.depthFBO) {
+      return [];
+    }
+    const {pickedLayer} = pickInfo;
+    const isDraped = pickedLayer?.state?.terrainDrawMode === 'drape';
+    if (pickedLayer && !isDraped) {
+      return [pickedLayer];
+    }
+    // For draped layers or when no layer was picked, use terrain layers for depth
+    return pickableLayers.filter(l => l.props.operation.includes('terrain'));
   }
 
   /**
