@@ -89,9 +89,6 @@ export default function App({
       id: 'laz-point-cloud-layer',
       data: LAZ_SAMPLE,
       onDataLoad,
-      loadOptions: {
-        core: {worker: false} // TODO remove once loaders published
-      },
       getNormal: [0, 1, 0],
       getColor: [255, 255, 255],
       opacity: 0.5,

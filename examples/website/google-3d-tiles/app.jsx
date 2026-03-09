@@ -24,12 +24,12 @@ export const COLORS = [
 const colorScale = scaleLinear().clamp(true).domain([0, 50, 100, 200, 300]).range(COLORS);
 
 const INITIAL_VIEW_STATE = {
-  latitude: 50.089,
-  longitude: 14.42,
-  zoom: 16,
+  latitude: 50.0662,
+  longitude: 14.437,
+  zoom: 16.6,
   minZoom: 14,
-  maxZoom: 16.5,
-  bearing: 90,
+  maxZoom: 20,
+  bearing: 98.91089,
   pitch: 60
 };
 
