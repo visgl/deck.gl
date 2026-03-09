@@ -348,8 +348,13 @@ function afterRender(deck: Deck, map: Map): void {
 
   if (hasNonMapboxLayers || hasNonMapboxViews) {
     if (mapboxViewportIdx >= 0) {
+      const mapboxViewport = getViewport(deck, map);
+      if (!mapboxViewport) {
+        (deck.userData as UserData).currentViewport = null;
+        return;
+      }
       viewports = viewports.slice();
-      viewports[mapboxViewportIdx] = getViewport(deck, map);
+      viewports[mapboxViewportIdx] = mapboxViewport;
     }
 
     deck._drawLayers('mapbox-repaint', {

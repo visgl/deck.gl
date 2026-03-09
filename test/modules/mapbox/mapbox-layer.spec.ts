@@ -246,6 +246,50 @@ test('MapboxLayer#drawLayer with zero-size canvas', t => {
   });
 });
 
+test('MapboxLayer#afterRender with zero-size canvas', t => {
+  // afterRender is triggered when deck has layers not registered as Mapbox layers.
+  // It also calls getViewport and must not pass null into deck._drawLayers.
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  map.on('load', () => {
+    const deck = new Deck({
+      device,
+      viewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        new ScatterplotLayer({
+          id: 'non-mapbox-layer',
+          data: [],
+          getPosition: d => d.position,
+          getRadius: 10,
+          getFillColor: [255, 0, 0]
+        })
+      ],
+      onLoad: () => {
+        (deck as any).width = 0;
+        (deck as any).height = 0;
+
+        map.on('render', () => {
+          t.notOk(
+            (map as any)._renderError,
+            'afterRender should not throw when canvas has zero dimensions'
+          );
+          deck.finalize();
+          t.end();
+        });
+
+        (map as any)._render();
+      }
+    });
+
+    // Do not add 'non-mapbox-layer' as a MapboxLayer — this causes afterRender
+    // to call getViewport for the non-Mapbox layer path.
+    getDeckInstance({map, deck});
+  });
+});
+
 /** Used to compare view states */
 export function objectEqual(actual, expected) {
   if (equals(actual, expected)) {
