@@ -67,6 +67,7 @@ const config = {
             '@deck.gl/mapbox': resolve('../modules/mapbox'),
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers'),
             '@deck.gl/react': resolve('../modules/react'),
+            '@deck.gl/widgets': resolve('../modules/widgets'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
@@ -77,6 +78,7 @@ const config = {
             '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
             '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
             '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
+            '@loaders.gl/schema': resolve('../node_modules/@loaders.gl/schema-utils'),
             '@loaders.gl': resolve('../node_modules/@loaders.gl')
           }
         },
