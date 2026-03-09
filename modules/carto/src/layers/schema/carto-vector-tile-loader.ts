@@ -37,7 +37,7 @@ const CartoVectorTileLoader: LoaderWithParser = {
     parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
   worker: true,
-  options: DEFAULT_OPTIONS as StrictLoaderOptions
+  options: DEFAULT_OPTIONS
 };
 
 function triangulatePolygon(

@@ -39,7 +39,7 @@ const CartoRasterTileLoader: LoaderWithParser = {
     parseCartoRasterTile(arrayBuffer, options),
   parseSync: parseCartoRasterTile,
   worker: true,
-  options: DEFAULT_OPTIONS as StrictLoaderOptions
+  options: DEFAULT_OPTIONS
 };
 
 export type Raster = {
