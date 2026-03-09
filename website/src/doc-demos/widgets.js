@@ -1,5 +1,4 @@
 import CodeBlock from '@theme/CodeBlock';
-import '@deck.gl/widgets/stylesheet.css';
 import {ScreenshotWidget, DarkTheme, LightTheme, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
 import {DeckGL} from '@deck.gl/react';
 

@@ -21,8 +21,8 @@ import {
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
-import type {ImageServiceType} from '@loaders.gl/wms';
-import {ImageSource, createImageSource} from '@loaders.gl/wms';
+import {createDataSource} from '@loaders.gl/core';
+import {ImageSource, WMSSource} from '@loaders.gl/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
 /** All props supported by the TileLayer */
@@ -31,7 +31,7 @@ export type WMSLayerProps = CompositeLayerProps & _WMSLayerProps;
 /** Props added by the TileLayer */
 type _WMSLayerProps = {
   data: string | ImageSource;
-  serviceType?: ImageServiceType | 'auto';
+  serviceType?: 'wms' | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
   onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
@@ -166,11 +166,12 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     }
 
     if (typeof props.data === 'string') {
-      return createImageSource({
-        url: props.data,
-        loadOptions: props.loadOptions,
-        type: props.serviceType
-      });
+      return createDataSource(props.data, [WMSSource], {
+        core: {
+          type: props.serviceType,
+          loadOptions: props.loadOptions
+        }
+      }) as ImageSource;
     }
 
     throw new Error('invalid image source in props.data');
