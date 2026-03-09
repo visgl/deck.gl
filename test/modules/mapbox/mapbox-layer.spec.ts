@@ -229,7 +229,10 @@ test('MapboxLayer#drawLayer with zero-size canvas', t => {
         (deck as any).height = 0;
 
         map.on('render', () => {
-          t.notOk((map as any)._renderError, 'render should not throw when canvas has zero dimensions');
+          t.notOk(
+            (map as any)._renderError,
+            'render should not throw when canvas has zero dimensions'
+          );
           deck.finalize();
           t.end();
         });
