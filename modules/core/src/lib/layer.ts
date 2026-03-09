@@ -96,9 +96,12 @@ const defaultProps: DefaultProps<LayerProps> = {
       if (signal) {
         loadOptions = {
           ...loadOptions,
-          fetch: {
-            ...loadOptions?.fetch,
-            signal
+          core: {
+            ...loadOptions?.core,
+            fetch: {
+              ...loadOptions?.core?.fetch,
+              signal
+            }
           }
         };
       }
