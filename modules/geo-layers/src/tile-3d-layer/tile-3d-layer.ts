@@ -208,6 +208,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileError: this.props.onTileError,
+      onUpdate: () => this.setNeedsUpdate(),
       ...options
     });
 
@@ -222,6 +223,9 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   private _onTileLoad(tileHeader: Tile3D): void {
     const {lastUpdatedViewports} = this.state;
+    // Mark as not yet drawn so transition hold keeps previous tiles
+    // visible until this tile's sublayer renders for the first time
+    tileHeader.tileDrawn = false;
     this.props.onTileLoad(tileHeader);
     this._updateTileset(lastUpdatedViewports);
     this.setNeedsUpdate();
@@ -340,7 +344,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
         getPosition: [0, 0, 0],
-        _offset: 0
+        _offset: 0,
+        onFirstDraw: () => {
+          tileHeader.tileDrawn = true;
+        }
       }
     );
   }
