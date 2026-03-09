@@ -58,11 +58,70 @@ Starting value of the slider.
 
 Callback invoked when the time value changes (drag or play).
 
+#### `autoPlay` (boolean, optional)
+
+* Default: `false`
+
+Start playing automatically.
+
+#### `loop` (boolean, optional)
+
+* Default: `false`
+
+Start playing from the beginning when time reaches the end.
+
 #### `playInterval` (number, optional) {#playinterval}
 
 * Default: `1000`
 
 Interval in milliseconds between automatic time increments when playing.
+
+#### `formatLabel` (function, optional)
+
+```ts
+(value: number) => string
+```
+
+Format time value for display.
+
+#### `timeline` (Timeline, optional)
+
+A [Timeline](https://luma.gl/docs/api-reference/engine/animation/timeline) instance that is manipulated by this widget.
+
+
+## Methods
+
+#### `play`
+
+```ts
+timelineWidget.play();
+```
+
+Start playback.
+
+#### `pause`
+
+```ts
+timelineWidget.pause();
+```
+
+Stop playback.
+
+
+## Styles
+
+The TimelineWidget uses theme CSS variables for [RangeInput](./styling.md#range-input).
+
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
+
+| Name     | Type      | Default      |
+| -------- | --------- | ------------ |
+| `--icon-play` | [SVG Data Url][data_url] | [Material Symbol Play Arrow][icon_play_url]      |
+| `--icon-pause`  | [SVG Data Url][data_url] | [Material Symbol Pause][icon_pause_url] |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[icon_play_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:play_arrow:FILL@1;wght@400;GRAD@0;opsz@24&icon.query=pause&icon.size=24&icon.style=Sharp
+[icon_pause_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:pause:FILL@1;wght@400;GRAD@0;opsz@24&icon.query=pause&icon.size=24&icon.style=Sharp
 
 ## Source
 
