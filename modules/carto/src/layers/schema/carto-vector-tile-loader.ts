@@ -19,11 +19,11 @@ type CartoVectorTileLoaderOptions = LoaderOptions & {
   };
 };
 
-const DEFAULT_OPTIONS: CartoVectorTileLoaderOptions = {
+const DEFAULT_OPTIONS = {
   cartoVectorTile: {
     workerUrl: getWorkerUrl(id, VERSION)
   }
-};
+} as const satisfies CartoVectorTileLoaderOptions;
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',

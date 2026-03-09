@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Timeline} from '@luma.gl/engine';
+import type {View} from '@deck.gl/core';
 
 function makeEvents(events, opts = {}) {
   return events.map((type, i) => makeEvent(type, opts, i));
@@ -206,6 +207,47 @@ const TEST_CASES = [
     interactionStates: 0
   }
 ];
+
+export function createTestController({
+  view,
+  initialViewState = {},
+  onViewStateChange,
+  onStateChange
+}: {
+  view: View;
+  initialViewState?: any;
+  onViewStateChange?: (params: any) => void;
+  onStateChange?: (newState: any) => void;
+}) {
+  const timeline = new Timeline();
+  const baseProps = {
+    id: 'test-view',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    ...initialViewState
+  };
+  let currentProps = {...view.controller, ...baseProps};
+  const ControllerClass = currentProps.type;
+
+  const controller = new ControllerClass({
+    timeline,
+    onViewStateChange: params => {
+      const viewState = onViewStateChange?.(params) ?? params.viewState;
+      currentProps = {...currentProps, ...viewState};
+      controller.setProps(currentProps);
+    },
+    onStateChange: newState => {
+      onStateChange?.(newState);
+    },
+    makeViewport: viewState =>
+      view.makeViewport({width: currentProps.width, height: currentProps.height, viewState})
+  });
+
+  controller.setProps(currentProps);
+  return controller;
+}
 
 export default async function testController(t, ViewClass, defaultProps, blackList = []) {
   const timeline = new Timeline();

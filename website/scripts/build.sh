@@ -29,10 +29,7 @@ case $MODE in
 esac
 
 # transpile workers
-(
-  cd ..
-  BABEL_ENV=es5 npx babel ./website/static/workers --out-dir ./website/$OUTPUT_DIR/workers
-)
+BABEL_ENV=es5 npx babel ./static/workers --out-dir ./$OUTPUT_DIR/workers
 
 # build gallery (scripting) examples
 (

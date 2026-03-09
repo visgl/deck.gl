@@ -20,12 +20,12 @@ type CartoRasterTileLoaderOptions = LoaderOptions & {
   };
 };
 
-const DEFAULT_OPTIONS: CartoRasterTileLoaderOptions = {
+const DEFAULT_OPTIONS = {
   cartoRasterTile: {
     metadata: null,
     workerUrl: getWorkerUrl(id, VERSION)
   }
-};
+} as const satisfies CartoRasterTileLoaderOptions;
 
 const CartoRasterTileLoader: LoaderWithParser = {
   name: 'CARTO Raster Tile',

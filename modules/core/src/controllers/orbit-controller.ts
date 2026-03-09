@@ -250,7 +250,7 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
       // If startZoom state is defined, then use the startZoom state;
       // otherwise assume discrete zooming
       startZoom = this.getViewportProps().zoom;
-      startZoomPosition = this._unproject(startPos) || this._unproject(pos);
+      startZoomPosition = this._unproject(startPos || pos);
     }
     if (!startZoomPosition) {
       return this;
@@ -329,10 +329,13 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
 
   /* Private methods */
 
-  _unproject(pos?: number[]): number[] | undefined {
+  _project(pos: number[]): number[] {
     const viewport = this.makeViewport(this.getViewportProps());
-    // @ts-ignore
-    return pos && viewport.unproject(pos);
+    return viewport.project(pos);
+  }
+  _unproject(pos: number[]): number[] {
+    const viewport = this.makeViewport(this.getViewportProps());
+    return viewport.unproject(pos);
   }
 
   // Calculates new zoom
@@ -352,10 +355,11 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
   }
 
   _panFromCenter(offset) {
-    const {width, height, target} = this.getViewportProps();
+    const {target} = this.getViewportProps();
+    const center = this._project(target);
     return this.pan({
       startPosition: target,
-      pos: [width / 2 + offset[0], height / 2 + offset[1]]
+      pos: [center[0] + offset[0], center[1] + offset[1]]
     });
   }
 

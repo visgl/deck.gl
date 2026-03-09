@@ -367,6 +367,6 @@ function createChannelProps(
 
 function createLoadOptions(accessToken: string) {
   return {
-    loadOptions: {'core.fetch': {headers: {Authorization: `Bearer ${accessToken}`}}}
+    loadOptions: {core: {fetch: {headers: {Authorization: `Bearer ${accessToken}`}}}}
   };
 }
