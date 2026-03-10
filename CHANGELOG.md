@@ -17,6 +17,37 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.3
+
+### deck.gl v9.3 Prereleases
+
+#### deck.gl [v9.3.0-alpha.1] - Mar 10 2026
+
+- fix(Tile3DLayer): Pass through tileset loadOptions to Tileset3D (#10079)
+- feat(Tile3DLayer): mark rendered tiles as drawn (#10058)
+- chore: bump to luma.gl@9.3 (#10034)
+- chore: bump to loaders.gl@4.4 (#9972)
+- feat(widgets): migrate TimelineWidget to RangeInput (#10071)
+- feat(widgets): Add ScrollbarWidget (#10068)
+- fix(TerrainExtension): Handle pick events in TerrainExtension & draped layers (#10037)
+- fix(widgets): Respect min/maxZoom (#10033)
+- Upgrade Node.js from 18 to 20 across build, test, website and repo (#10050)
+- feat(widgets): misc cleanup (#10045)
+- feat(widgets) StatsWidget styling and docs pass (#10044)
+- fix(widgets): ResetViewWidget default viewId (#10042)
+- update popover components (#10041)
+- Fix fullscreen widget default container (#10040)
+- fix(Tile3DLayer): prefers loaders prop over loader (#10036)
+- feat(core): 3D enable MapController using rotatationPivot option (#9938)
+- feat(widgets): ContextMenuWidget improvements (#10031)
+- feat(widgets): PopupWidget (#10030)
+- feat(widgets): Use popper to calculate popup position (#10029)
+- fix(widgets) events in react reverse controlled env (#8893)
+- Remove Volta from deck.gl (#9970)
+- Port IconLayer to WebGPU (#9819)
+- chore(ci): migrate from Volta to Corepack for automated builds (#9910)
+- Update .gitignore (#9878)
+
 ## deck.gl v9.2
 
 ### deck.gl v9.2 Prereleases
