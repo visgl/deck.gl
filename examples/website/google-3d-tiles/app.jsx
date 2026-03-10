@@ -67,7 +67,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
       loadOptions: {
         fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}},
         tileset: {
-          maximumScreenSpaceError: 100,
+          maximumScreenSpaceError: 10,
           maximumMemoryUsage: 128,
           onTraversalComplete
         }
