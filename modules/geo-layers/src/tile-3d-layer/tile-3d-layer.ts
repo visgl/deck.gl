@@ -183,7 +183,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const loaders = this.props.loaders?.length ? this.props.loaders : this.props.loader;
     const loader = Array.isArray(loaders) ? loaders[0] : loaders;
 
-    const options = {loadOptions: {...loadOptions}};
+    // Extract tileset-specific options so they are passed to the Tileset3D constructor
+    const {tileset3d: tileset3dOptions, ...remainingLoadOptions} = loadOptions;
+
+    const options = {loadOptions: {...remainingLoadOptions}, ...tileset3dOptions};
     let actualTilesetUrl = tilesetUrl;
     if ('preload' in loader && typeof loader.preload === 'function') {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);

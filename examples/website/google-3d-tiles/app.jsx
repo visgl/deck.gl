@@ -24,12 +24,12 @@ export const COLORS = [
 const colorScale = scaleLinear().clamp(true).domain([0, 50, 100, 200, 300]).range(COLORS);
 
 const INITIAL_VIEW_STATE = {
-  latitude: 50.0662,
-  longitude: 14.437,
-  zoom: 16.6,
+  latitude: 50.089,
+  longitude: 14.42,
+  zoom: 16,
   minZoom: 14,
-  maxZoom: 20,
-  bearing: 98.91089,
+  maxZoom: 16.5,
+  bearing: 90,
   pitch: 60
 };
 
@@ -66,7 +66,12 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
         };
       },
       loadOptions: {
-        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
+        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}},
+        tileset3d: {
+          maximumScreenSpaceError: 10,
+          maximumMemoryUsage: 128,
+          memoryAdjustedScreenSpaceError: true
+        }
       },
       operation: 'terrain+draw'
     }),
