@@ -89,7 +89,7 @@ export const Popover = ({
 
   useMemo(() => {
     updaterRef.current?.();
-  }, [placement, arrowSize, pixelOffset]);
+  }, [x, y, placement, arrowSize, pixelOffset]);
 
   useEffect(() => {
     // initial mount
