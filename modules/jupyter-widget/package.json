@@ -45,7 +45,7 @@
     "@luma.gl/constants": "^9.3.0-alpha.2",
     "@luma.gl/core": "^9.3.0-alpha.2",
     "@luma.gl/webgl": "^9.3.0-alpha.2",
-    "d3-dsv": "^1.0.8",
+    "d3-dsv": "^3.0.1",
     "mapbox-gl": "^1.13.2",
     "maplibre-gl": "^5.14.0"
   },
