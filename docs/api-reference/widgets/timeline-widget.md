@@ -6,6 +6,11 @@ This widget provides a time slider with play/pause controls. Configure a time ra
 
 ## Usage
 
+import {TimelineWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<TimelineWidgetDemo />
+
+
 ```ts
 import {Deck} from '@deck.gl/core';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';

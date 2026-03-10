@@ -21,13 +21,15 @@ import {
   _ViewSelectorWidget as ViewSelectorWidget,
   DarkTheme, LightTheme, DarkGlassTheme, LightGlassTheme
 } from '@deck.gl/widgets';
-import { MapView, OrthographicView, OrbitView, OrthographicViewport } from '@deck.gl/core';
+import { MapView, OrthographicView, OrbitView } from '@deck.gl/core';
 import { DeckGL } from '@deck.gl/react';
-import { ScatterplotLayer, GeoJsonLayer, IconLayer, BitmapLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, GeoJsonLayer, IconLayer, TextLayer } from '@deck.gl/layers';
+import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { useColorMode } from '@docusaurus/theme-common';
 import { MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
+import {OBJLoader} from '@loaders.gl/obj';
 
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
@@ -205,6 +207,40 @@ export function GimbalWidgetDemo() {
   }))
   return <NonGeoDemoBase initialViewState={viewState} widgets={[new GimbalWidget()]} />
 }
+export function TimelineWidgetDemo() {
+  const [time, setTime] = useState(0);
+
+  const value = Math.ceil(10 - time);
+  const data = useMemo(() => [value], [value]);
+
+  const layers = [
+    new TextLayer({
+      id: 'countdown',
+      data: data,
+      getText: d => String(d),
+      getPosition: d => [0, 0, 0],
+      getSize: 200 * Math.sqrt(1 - (time % 1)),
+      sizeUnits: 'pixels',
+      fontSettings: {
+        fontSize: 128,
+      }
+    })
+  ];
+
+  const widgets = useMemo(() => [
+    new TimelineWidget({
+      timeRange: [0, 10],
+      step: 0.01,
+      playInterval: 10,
+      autoPlay: true,
+      loop: false,
+      onTimeChange: setTime,
+      formatLabel: x => `00:${x.toFixed(0).padStart(2, '0')}`
+    })
+  ], []);
+
+  return <NonGeoDemoBase layers={layers} widgets={widgets} />
+}
 export function GeocoderWidgetDemo() {
   return <GeoDemoBase map mapLabels widgets={[new GeocoderWidget({
         geocoder: 'coordinates',
@@ -370,96 +406,102 @@ export function ScaleWidgetDemo() {
 }
 export function SplitterWidgetDemo() {
   const { colorMode } = useColorMode();
-  const [splitRatio, setSplitRatio] = useState(0.5);
-  const [viewState, setViewState] = useState({
-    target: [0, 0, 0],
-    zoom: 1
-  });
-  const deckRef = useRef();
 
-  const layers = useMemo(() => {
-    return [
-      new BitmapLayer({
-        id: '9_0_0',
-        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/9/0_0.jpeg?raw=true`,
-        bounds: [-204, -396, 396, 204],
-      }),
-      new BitmapLayer({
-        id: '11_1_1',
-        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/1_1.jpeg?raw=true`,
-        bounds: [0, -200, 200, 0],
-      }),
-      new BitmapLayer({
-        id: '11_0_1',
-        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/0_1.jpeg?raw=true`,
-        bounds: [-200, -200, 0, 0],
-      }),
-      new BitmapLayer({
-        id: '11_1_0',
-        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/1_0.jpeg?raw=true`,
-        bounds: [0, 0, 200, 200],
-      }),
-      new BitmapLayer({
-        id: '11_0_0',
-        image: `${DATA_URI}/image-tiles/moon.image/moon.image_files/11/0_0.jpeg?raw=true`,
-        bounds: [-200, 0, 0, 200],
-      }),
-    ]
-  }, []);
-
-  const layerFilter = useCallback(({layer, viewport}) => {
-    if (layer.id.startsWith('11_')) return viewport.id === 'right';
-    return viewport.id === 'left';
-  }, []);
-
-  const views = useMemo(() => {
-    return [
-      new OrthographicView({
-        id: 'left',
-        flipY: false,
-        x: 0,
-        width: `${splitRatio * 100}%`,
-        padding: {left: `100%`},
-      }),
-      new OrthographicView({
-        id: 'right',
-        flipY: false,
-        x: `${splitRatio * 100}%`,
-        width: `${(1 - splitRatio) * 100}%`,
-        padding: {right: `100%`},
-      }),
-    ]
-  }, [splitRatio]);
-
-  const onSplitChange = useCallback((newSplit) => {
-    setSplitRatio(newSplit);
-    const deck = deckRef.current?.deck;
-    if (deck) {
-      const x = deck.width * newSplit;
-      const y = deck.height / 2;
-      const p = deck.getViewports()[0].unproject([x, y]);
-      setViewState(vs => ({...vs, target: p}));
-    }
-  }, []);
+  const layers = useMemo(() => [
+    new SimpleMeshLayer({
+      id: 'fill',
+      data: [0],
+      
+      getColor: [100, 140, 20],
+      getPosition: [0, 0, -100],
+      mesh: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/humanoid_quad.obj',
+      sizeScale: 10,
+      pickable: true,
+      loaders: [OBJLoader],
+      material: {
+        ambient: 0.9
+      }
+    }),
+    new SimpleMeshLayer({
+      id: 'wireframe',
+      data: [0],
+      
+      getPosition: [0, 0, -100],
+      mesh: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/humanoid_quad.obj',
+      sizeScale: 10,
+      wireframe: true,
+      getLineColor: [0, 0, 0],
+      pickable: true,
+      loaders: [OBJLoader],
+    }),
+  ], []);
 
   return (
     <div style={DEMO_CONTAINER_STYLE}>
-      <DeckGL ref={deckRef}
-        views={views}
-        viewState={viewState}
-        onViewStateChange={({viewState: newViewState}) => setViewState(newViewState)}
+      <DeckGL
         style={colorMode === 'dark' ? DarkGlassTheme : LightGlassTheme}
+        initialViewState={{
+          'top': {
+            target: [0, 0, 0],
+            rotationX: 90,
+            rotationOrbit: 90,
+            zoom: 0,
+          },
+          'front': {
+            target: [0, 0, 0],
+            rotationX: 0,
+            rotationOrbit: 90,
+            zoom: 0,
+          },
+          'left': {
+            target: [0, 0, 0],
+            rotationX: -90,
+            rotationOrbit: 0,
+            zoom: 0,
+          },
+          'perspective': {
+            target: [0, 0, 0],
+            rotationX: 45,
+            rotationOrbit: 30,
+            zoom: 0,
+          }
+        }}
         widgets={[
           new SplitterWidget({
-            viewId1: 'left-map',
-            viewId2: 'right-map',
-            initialSplit: 0.5,
-            orientation: 'vertical',
-            onChange: onSplitChange
+            viewLayout: {
+              orientation: 'horizontal',
+              initialSplit: 0.5,
+              views: [
+                {
+                  orientation: 'vertical',
+                  initialSplit: 0.5,
+                  views: [
+                    new OrbitView({id: 'top', orbitAxis: 'Z', orthographic: true, controller: {
+                      dragMode: 'pan',
+                      dragRotate: false,
+                    }}),
+                    new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: {
+                      dragMode: 'pan',
+                      dragRotate: false,
+                    }}),
+                  ],
+                },
+                {
+                  orientation: 'vertical',
+                  initialSplit: 0.5,
+                  views: [
+                    new OrbitView({id: 'left', orbitAxis: 'Y', orthographic: true, controller: {
+                      dragMode: 'pan',
+                      dragRotate: false,
+                    }}),
+                    new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true}),
+                  ],
+                }
+              ]
+            }
           })
         ]}
         layers={layers}
-        layerFilter={layerFilter}
       />
     </div>
   )
