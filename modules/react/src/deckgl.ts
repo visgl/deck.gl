@@ -12,7 +12,7 @@ import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
 import type {DeckGLContextValue} from './utils/deckgl-context';
-import type {DeckProps, View, Viewport} from '@deck.gl/core';
+import type {DeckProps, View, Viewport, Widget} from '@deck.gl/core';
 
 export type ViewOrViews = View | View[] | null;
 
@@ -122,6 +122,11 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // DOM refs
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  // Stable widgets array for React widget components (survives StrictMode remounts)
+  const widgetsRef = useRef<Widget[]>([]);
+  // Track deferred onLoad - use state to trigger re-render when deck initializes
+  const [onLoadPending, setOnLoadPending] = useState(false);
+  const onLoadCalledRef = useRef(false);
 
   // extract any deck.gl layers masquerading as react elements from props.children
   const jsxProps = useMemo(
@@ -156,12 +161,20 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     }
   };
 
+  // Defer onLoad until after React widget children have had a chance to register.
+  // Deck's onLoad fires during initialization, before React children render.
+  // By using state to track pending status, we trigger a re-render when deck initializes,
+  // then call onLoad in useEffect after children have rendered and registered widgets.
+  const handleOnLoad: DeckProps<ViewsT>['onLoad'] = () => {
+    setOnLoadPending(true);
+  };
+
   // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
     const forwardProps: DeckProps<ViewsT> = {
-      widgets: [],
+      widgets: widgetsRef.current,
       ...props,
       // Override user styling props. We will set the canvas style in render()
       style: null,
@@ -172,7 +185,9 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       layers: jsxProps.layers,
       views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
+      onInteractionStateChange: handleInteractionStateChange,
+      // The deferred effect will only call the user's callback if they provided one.
+      onLoad: handleOnLoad
     };
 
     // The defaultValue for _customRender is null, which would overwrite the definition
@@ -197,6 +212,30 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
 
     return () => thisRef.deck?.finalize();
   }, []);
+
+  // Stable reference to onLoad callback for use in deferred effect
+  const onLoadRef = useRef(props.onLoad);
+  onLoadRef.current = props.onLoad;
+
+  // Call deferred onLoad after React widget children have registered.
+  // React guarantees parent effects run after children effects, so by this point
+  // any widgets using useWidget will have synced to deck.
+  // Use setTimeout(0) to escape React's commit phase and act() scope, allowing
+  // the callback to safely trigger state updates or nested act() calls in tests.
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (onLoadPending && !onLoadCalledRef.current) {
+      onLoadCalledRef.current = true;
+      timeoutId = setTimeout(() => {
+        onLoadRef.current?.();
+      }, 0);
+    }
+    return () => {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [onLoadPending]);
 
   useIsomorphicLayoutEffect(() => {
     // render has just been called. The children are positioned based on the current view state.
@@ -249,7 +288,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     const childrenUnderViews = positionChildrenUnderViews({
       children: jsxProps.children,
       deck: thisRef.deck,
-      ContextProvider
+      ContextProvider,
+      widgets: widgetsRef.current
     });
 
     const canvas = createElement('canvas', {
