@@ -16,6 +16,19 @@ import type {DeckProps, View, Viewport} from '@deck.gl/core';
 
 export type ViewOrViews = View | View[] | null;
 
+// Props the wrapper always overrides regardless of what the user writes in JSX.
+// These must never be counted as user-controlled signals for widgets.
+const WRAPPER_OWNED_KEYS = new Set<string>([
+  'style',
+  'width',
+  'height',
+  'parent',
+  'canvas',
+  '_customRender',
+  'onViewStateChange',
+  'onInteractionStateChange'
+]);
+
 /* eslint-disable max-statements, accessor-pairs */
 type DeckInstanceRef<ViewsT extends ViewOrViews> = {
   deck?: Deck<ViewsT>;
@@ -160,40 +173,60 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
-    const forwardProps: DeckProps<ViewsT> = {
-      widgets: [],
-      ...props,
-      // Override user styling props. We will set the canvas style in render()
+    // `explicitProps` is what gets passed to core. It contains:
+    //   - wrapper-owned props that always need to be applied (style, size, canvas, callbacks)
+    //   - user-declared props, with layers/views replaced by their JSX-processed equivalents
+    //     but only when the user actually declared them (or JSX children provided them).
+    // Undeclared props are omitted entirely so widgets can manage them without being stomped.
+    const hasExplicitLayers = 'layers' in props || jsxProps.hasJSXLayers;
+    const hasExplicitViews = 'views' in props || jsxProps.hasJSXViews;
+
+    const explicitProps: DeckProps<ViewsT> = {
+      ...Object.fromEntries(Object.entries(props).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))),
+      // Wrapper-owned — always applied
       style: null,
       width: '100%',
       height: '100%',
       parent: containerRef.current,
       canvas: canvasRef.current,
-      layers: jsxProps.layers,
-      views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
-    };
+      onInteractionStateChange: handleInteractionStateChange,
+      // Layer/view props only when the user (or JSX children) declared them
+      ...(hasExplicitLayers && {layers: jsxProps.layers}),
+      ...(hasExplicitViews && {views: jsxProps.views as ViewsT})
+    } as DeckProps<ViewsT>;
 
     // The defaultValue for _customRender is null, which would overwrite the definition
     // of _customRender. Remove to avoid frequently redeclaring the method here.
-    delete forwardProps._customRender;
+    delete explicitProps._customRender;
 
     if (thisRef.deck) {
-      thisRef.deck.setProps(forwardProps);
+      // Strip wrapper-owned keys before snapshotting so they are never counted
+      // as user-controlled. The full explicitProps (including wrapper-owned keys)
+      // is still applied via _applyProps inside _setPropsSnapshot.
+      const userProps = Object.fromEntries(
+        Object.entries(explicitProps).filter(([k]) => !WRAPPER_OWNED_KEYS.has(k))
+      ) as Partial<DeckProps<ViewsT>>;
+      thisRef.deck._setPropsSnapshot(userProps, explicitProps);
     }
 
-    return forwardProps;
+    return explicitProps;
   }, [props]);
 
   useEffect(() => {
     const DeckClass = props.Deck || Deck;
 
-    thisRef.deck = createDeckInstance(thisRef, DeckClass, {
+    const deckPropsToInit = {
       ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current
-    });
+    };
+    thisRef.deck = createDeckInstance(thisRef, DeckClass, deckPropsToInit);
+
+    // The constructor marks ALL passed keys as controlled. Correct this to only
+    // reflect the keys the user actually declared (excluding wrapper-owned keys).
+    const controlledKeys = Object.keys(deckPropsToInit).filter(k => !WRAPPER_OWNED_KEYS.has(k));
+    thisRef.deck._setControlledProps(controlledKeys);
 
     return () => thisRef.deck?.finalize();
   }, []);

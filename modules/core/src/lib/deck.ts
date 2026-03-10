@@ -324,6 +324,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   };
   private _metricsCounter: number = 0;
 
+  /**
+   * Tracks which props were explicitly declared by the user.
+   * - Patch `setProps` accumulates keys across calls (once declared, always controlled).
+   * - Snapshot `_setPropsSnapshot` replaces this set on every render so that only the
+   *   props the user actually declared in JSX are treated as controlled.
+   * Widgets call `isControlled(key)` to avoid overwriting props the app owns.
+   */
+  private _controlledProps: Set<string> = new Set();
+
   private _needsRedraw: false | string = 'Initial render';
   private _pickRequest: {
     mode: string;
@@ -348,6 +357,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfo: PickingInfo | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
+    const userProps = props; // capture before merging with defaultProps
     // @ts-ignore views
     this.props = {...defaultProps, ...props};
     props = this.props;
@@ -398,7 +408,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
-    this.setProps(props);
+    // Mark only user-supplied keys as controlled; defaultProps keys are not user intent.
+    for (const key of Object.keys(userProps)) {
+      this._controlledProps.add(key);
+    }
+    this._applyProps(props);
 
     // UNSAFE/experimental prop: only set at initialization to avoid performance hit
     if (props._typedArrayManagerProps) {
@@ -443,8 +457,87 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
-  /** Partially update props */
+  /**
+   * Declarative patch update: describes the desired state of a subset of props.
+   * Every supplied key is permanently marked as user-controlled so that widgets
+   * know not to overwrite it. Unmentioned props are left as-is.
+   */
   setProps(props: DeckProps<ViewsT>): void {
+    for (const key of Object.keys(props)) {
+      this._controlledProps.add(key);
+    }
+    this._applyProps(props);
+  }
+
+  /**
+   * Declarative snapshot update for framework wrappers (React, Vue, etc.).
+   * Only the keys the user actually declared are passed — not framework defaults
+   * or wrapper-owned overrides. The controlled set is replaced rather than
+   * accumulated so it always reflects the current declaration.
+   *
+   * Props that were controlled last render but are absent this render are reset
+   * to their defaults, preserving the declarative contract (removing a prop from
+   * JSX clears it). Props the user never declared are left untouched so widgets
+   * can manage them freely.
+   * @internal
+   */
+  _setPropsSnapshot(
+    userProps: Partial<DeckProps<ViewsT>>,
+    allProps: Partial<DeckProps<ViewsT>> = userProps
+  ): void {
+    const newControlled = new Set(Object.keys(userProps));
+
+    // Keys that were user-controlled last render but aren't now — reset to default
+    // so that removing a prop from JSX behaves the same as setting it to its default.
+    // Write resets into allProps so the full apply below picks them up.
+    for (const key of this._controlledProps) {
+      if (!newControlled.has(key)) {
+        (allProps as any)[key] = (defaultProps as any)[key];
+      }
+    }
+
+    this._controlledProps = newControlled;
+    this._applyProps(allProps as DeckProps<ViewsT>);
+  }
+
+  /**
+   * Returns true if the given prop key was explicitly supplied by the user via
+   * `setProps` or JSX. Widgets should avoid writing to controlled props:
+   *
+   * ```ts
+   * if (!deck.isControlled('viewState')) {
+   *   deck.setProps({viewState: nextViewState});
+   * }
+   * ```
+   */
+  isControlled(key: keyof DeckProps): boolean {
+    return this._controlledProps.has(key as string);
+  }
+
+  /**
+   * Apply a partial props update from a widget. Does not mark any keys as
+   * user-controlled, so `isControlled` continues to reflect only user intent.
+   * Widgets must use this instead of `setProps` to avoid polluting the
+   * controlled-props set.
+   * @internal
+   */
+  _setWidgetProps(props: Partial<DeckProps<ViewsT>>): void {
+    this._applyProps(props as DeckProps<ViewsT>);
+  }
+
+  /**
+   * Replace the controlled-props set with the given keys.
+   * Used by framework wrappers (React etc.) to establish which props the user
+   * explicitly declared right after the Deck instance is first created, before
+   * the `onLoad` callback fires.
+   * @internal
+   */
+  _setControlledProps(keys: Iterable<string>): void {
+    this._controlledProps = new Set(keys);
+  }
+
+  /** @internal Apply a props update without changing the controlled-props set. */
+  private _applyProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
 
     if ('onLayerHover' in props) {
@@ -1146,7 +1239,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
-    this.setProps(this.props);
+    this._applyProps(this.props);
 
     this._updateCanvasSize();
     this.props.onLoad();

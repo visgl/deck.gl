@@ -133,6 +133,10 @@ export function drawLayer(
     // This is the first layer drawn in this render cycle.
     // Generate viewport from the current map state.
     currentViewport = getViewport(deck, map, renderParameters);
+    if (!currentViewport) {
+      // Dimensions are 0 (e.g. canvas not yet sized); skip rendering this cycle.
+      return;
+    }
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
   }
@@ -163,6 +167,10 @@ export function drawLayerGroup(
     // This is the first layer drawn in this render cycle.
     // Generate viewport from the current map state.
     currentViewport = getViewport(deck, map, renderParameters);
+    if (!currentViewport) {
+      // Dimensions are 0 (e.g. canvas not yet sized); skip rendering this cycle.
+      return;
+    }
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
   }

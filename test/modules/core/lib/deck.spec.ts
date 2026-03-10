@@ -342,6 +342,47 @@ test('Deck#getView with multiple views', t => {
   });
 });
 
+test('Deck#isControlled', t => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+
+    onLoad: () => {
+      // Props declared at construction are controlled
+      t.ok(deck.isControlled('layers'), 'layers declared at construction is controlled');
+      t.notOk(deck.isControlled('views'), 'undeclared views is not controlled');
+
+      // setProps accumulates controlled keys
+      deck.setProps({views: [new MapView()]});
+      t.ok(deck.isControlled('views'), 'views controlled after setProps');
+
+      // _setWidgetProps does not mark props controlled
+      deck._setWidgetProps({widgets: []});
+      t.notOk(deck.isControlled('widgets'), '_setWidgetProps does not mark widgets controlled');
+
+      // _setPropsSnapshot replaces the controlled set
+      deck._setPropsSnapshot({layers: []});
+      t.ok(deck.isControlled('layers'), 'layers controlled after snapshot with layers');
+      t.notOk(
+        deck.isControlled('views'),
+        'views dropped from controlled set after snapshot without views'
+      );
+
+      // Dropped controlled key is reset to its default value
+      deck.setProps({views: [new MapView()]});
+      t.ok(deck.props.views?.length, 'views set via setProps');
+      deck._setPropsSnapshot({layers: []});
+      t.notOk(deck.props.views?.length, 'views reset to default when dropped from snapshot');
+
+      deck.finalize();
+      t.end();
+    }
+  });
+});
+
 test('Deck#props omitted are unchanged', async t => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',

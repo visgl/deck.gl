@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type Deck from './deck';
+import type {DeckProps} from './deck';
 import type Viewport from '../viewports/viewport';
 import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
@@ -110,6 +111,16 @@ export abstract class Widget<
   protected setViewState(viewId: string, viewState: Record<string, unknown>): void {
     // @ts-ignore Using private method temporary until there's a public one
     this.deck?._onViewStateChange({viewId, viewState, interactionState: {}});
+  }
+
+  /**
+   * Apply a partial Deck props update from this widget without marking any keys
+   * as user-controlled. Use this instead of `deck.setProps` so that
+   * `deck.isControlled` continues to reflect only what the user declared.
+   */
+  protected updateDeckProps(props: Partial<DeckProps>): void {
+    // @ts-ignore _setWidgetProps is internal
+    this.deck?._setWidgetProps(props);
   }
 
   // @note empty method calls have an overhead in V8 but it is very low, ~1ns

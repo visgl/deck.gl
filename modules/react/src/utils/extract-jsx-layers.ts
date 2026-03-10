@@ -73,6 +73,8 @@ export default function extractJSXLayers({
   children: React.ReactNode[];
   layers: LayersList;
   views: View | View[] | null;
+  hasJSXLayers: boolean;
+  hasJSXViews: boolean;
 } {
   const reactChildren: React.ReactNode[] = []; // extract real react elements (i.e. not deck.gl layers)
   const jsxLayers: LayersList = []; // extracted layer from react children, will add to deck.gl layer array
@@ -117,7 +119,13 @@ export default function extractJSXLayers({
   // Avoid modifying layers array if no JSX layers were found
   layers = jsxLayers.length > 0 ? [...jsxLayers, ...layers] : layers;
 
-  return {layers, children: reactChildren, views};
+  return {
+    layers,
+    children: reactChildren,
+    views,
+    hasJSXLayers: jsxLayers.length > 0,
+    hasJSXViews: Object.keys(jsxViews).length > 0
+  };
 }
 
 function createLayer(LayerType: typeof Layer, reactProps: any): Layer {

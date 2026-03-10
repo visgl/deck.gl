@@ -8,7 +8,7 @@ import {createElement, createRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {act} from 'react-dom/test-utils';
 
-import {DeckGL, Layer, Widget} from 'deck.gl';
+import {DeckGL, Layer, Widget, MapView} from 'deck.gl';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
 import {gl} from '@deck.gl/test-utils';
@@ -157,6 +157,158 @@ test('DeckGL#props omitted are reset', t => {
               })
             );
           });
+        }
+      })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
+});
+
+// A widget that takes ownership of `views` via updateDeckProps on mount.
+class ViewManagingWidget extends Widget<WidgetProps> {
+  placement: WidgetPlacement = 'top-left';
+  className = 'deck-view-managing-widget';
+  views: MapView[];
+
+  constructor(views: MapView[], props: WidgetProps = {}) {
+    super(props);
+    this.views = views;
+  }
+
+  onAdd({deck}: {deck: any}): void {
+    if (!deck.isControlled('views')) {
+      this.updateDeckProps({views: this.views});
+    }
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {}
+}
+
+test('DeckGL#widget-managed views survive re-render', t => {
+  const ref = createRef<any>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  const widgetViews = [new MapView({id: 'widget-view'})];
+  const widget = new ViewManagingWidget(widgetViews);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100,
+        gl: getMockContext(),
+        widgets: [widget],
+        onLoad: () => {
+          const {deck} = ref.current;
+          t.notOk(deck.isControlled('views'), 'views is not user-controlled');
+          t.ok(deck.props.views?.length, 'widget-set views are applied');
+
+          act(() => {
+            root.render(
+              createElement(DeckGL, {
+                ref,
+                width: 100,
+                height: 100,
+                gl: getMockContext(),
+                widgets: [widget],
+                onAfterRender: () => {
+                  const {deck} = ref.current;
+                  t.notOk(
+                    deck.isControlled('views'),
+                    'views still not user-controlled after re-render'
+                  );
+                  t.ok(deck.props.views?.length, 'widget-set views survive re-render');
+
+                  root.render(null);
+                  container.remove();
+                  t.end();
+                }
+              })
+            );
+          });
+        }
+      })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
+});
+
+test('DeckGL#user views override widget views', t => {
+  const ref = createRef<any>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  const widgetViews = [new MapView({id: 'widget-view'})];
+  const userViews = [new MapView({id: 'user-view'})];
+  const widget = new ViewManagingWidget(widgetViews);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100,
+        gl: getMockContext(),
+        views: userViews,
+        widgets: [widget],
+        onLoad: () => {
+          const {deck} = ref.current;
+          t.ok(deck.isControlled('views'), 'views is user-controlled');
+          t.is(
+            deck.props.views?.[0]?.id,
+            'user-view',
+            'user-declared views are not overwritten by widget'
+          );
+
+          root.render(null);
+          container.remove();
+          t.end();
+        }
+      })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
+});
+
+test('DeckGL#wrapper-owned keys are not user-controlled', t => {
+  const ref = createRef<any>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100,
+        gl: getMockContext(),
+        onLoad: () => {
+          const {deck} = ref.current;
+          t.notOk(deck.isControlled('style'), 'style is not user-controlled');
+          t.notOk(deck.isControlled('width'), 'width is not user-controlled');
+          t.notOk(deck.isControlled('height'), 'height is not user-controlled');
+          t.notOk(deck.isControlled('parent'), 'parent is not user-controlled');
+          t.notOk(deck.isControlled('canvas'), 'canvas is not user-controlled');
+          t.notOk(
+            deck.isControlled('onViewStateChange'),
+            'onViewStateChange is not user-controlled'
+          );
+          t.notOk(
+            deck.isControlled('onInteractionStateChange'),
+            'onInteractionStateChange is not user-controlled'
+          );
+
+          root.render(null);
+          container.remove();
+          t.end();
         }
       })
     );
