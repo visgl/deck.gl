@@ -176,7 +176,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   private async _loadTileset(tilesetUrl) {
-    const {loadOptions = {}} = this.props;
+    const loadOptions = this.props.loadOptions || {};
 
     // TODO: deprecate `loader` in v9.0
     // @ts-ignore
