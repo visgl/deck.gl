@@ -1,6 +1,3 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_SplitterWidget} from '@deck.gl/widgets';
-
 # SplitterWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
@@ -9,10 +6,6 @@ This widget lets the user to resize multiple views (e.g., two map or globe views
 
 ## Usage
 
-<WidgetPreview cls={_SplitterWidget} props={{
-  orientation: 'vertical',
-  initialSplit: 0.5
-}}/>
 
 ```ts
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
