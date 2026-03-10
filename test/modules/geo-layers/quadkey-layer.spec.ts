@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {QuadkeyLayer} from '@deck.gl/geo-layers';
 import {
   quadkeyToWorldBounds,
@@ -61,49 +61,41 @@ const TEST_DATA = [
   }
 ];
 
-test('QuadkeyLayer', t => {
+test('QuadkeyLayer', () => {
   const testCases = generateLayerTests({
     Layer: QuadkeyLayer,
     sampleProps: {
       data: TEST_DATA,
       getQuadkey: d => d.quadkey
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      t.ok(subLayer, 'subLayers rendered');
+      expect(subLayer, 'subLayers rendered').toBeTruthy();
 
       if (layer.props.data.length) {
-        t.equal(
-          subLayer.state.paths.length,
-          TEST_DATA.length,
-          'should update PolygonLayers state.paths'
+        expect(subLayer.state.paths.length, 'should update PolygonLayers state.paths').toBe(
+          TEST_DATA.length
         );
       }
     }
   });
 
-  testLayer({Layer: QuadkeyLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: QuadkeyLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('QuadkeyLayer#quadkeyToWorldBounds', t => {
+test('QuadkeyLayer#quadkeyToWorldBounds', () => {
   for (const {quadkey, coverage, expectedBounds} of TEST_DATA) {
     const bounds = quadkeyToWorldBounds(quadkey, coverage);
-    t.deepEquals(bounds, expectedBounds, 'Quadkey bounds calculated');
+    expect(bounds, 'Quadkey bounds calculated').toEqual(expectedBounds);
   }
-
-  t.end();
 });
 
-test('QuadkeyLayer#getQuadkeyPolygon', t => {
+test('QuadkeyLayer#getQuadkeyPolygon', () => {
   for (const {quadkey} of TEST_DATA) {
     const polygon = getQuadkeyPolygon(quadkey);
-    t.ok(polygon instanceof Array, 'polygon is flat array');
-    t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Array, 'polygon is flat array').toBeTruthy();
+    expect(polygon.length / 2 - 1, 'polygon has 4 sides').toBe(4);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
   }
-
-  t.end();
 });

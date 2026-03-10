@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {MapView, LayerManager} from '@deck.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const testViewport = new MapView().makeViewport({
   width: 100,
@@ -27,16 +27,15 @@ const TEST_LAYER = new SolidPolygonLayer({
   getPolygon: f => f
 });
 
-test('MaskEffect#constructor', t => {
+test('MaskEffect#constructor', () => {
   const maskEffect = new MaskEffect();
-  t.ok(maskEffect, 'Mask effect created');
-  t.ok(maskEffect.useInPicking, 'Mask effect enabled for picking render');
-  t.not(maskEffect.masks, 'Mask effect disabled by default');
+  expect(maskEffect, 'Mask effect created').toBeTruthy();
+  expect(maskEffect.useInPicking, 'Mask effect enabled for picking render').toBeTruthy();
+  expect(maskEffect.masks).not.toBe('Mask effect disabled by default');
   maskEffect.cleanup();
-  t.end();
 });
 
-test('MaskEffect#setup, cleanup', t => {
+test('MaskEffect#setup, cleanup', () => {
   const maskEffect = new MaskEffect();
 
   const layerManager = new LayerManager(device, {viewport: testViewport});
@@ -51,24 +50,23 @@ test('MaskEffect#setup, cleanup', t => {
     viewports: [testViewport]
   });
 
-  t.ok(maskEffect.masks, 'Masking is enabled');
-  t.ok(maskEffect.dummyMaskMap, 'Dummy mask map is created');
-  t.ok(maskEffect.maskPass, 'Mask pass is created');
-  t.ok(maskEffect.maskMap, 'Mask map is created');
+  expect(maskEffect.masks, 'Masking is enabled').toBeTruthy();
+  expect(maskEffect.dummyMaskMap, 'Dummy mask map is created').toBeTruthy();
+  expect(maskEffect.maskPass, 'Mask pass is created').toBeTruthy();
+  expect(maskEffect.maskMap, 'Mask map is created').toBeTruthy();
 
   maskEffect.cleanup();
 
-  t.notOk(maskEffect.masks, 'Masking is disabled');
-  t.notOk(maskEffect.dummyMaskMap, 'Dummy mask map is deleted');
-  t.notOk(maskEffect.maskPass, 'Mask pass is deleted');
-  t.notOk(maskEffect.maskMap, 'Mask map is deleted');
+  expect(maskEffect.masks, 'Masking is disabled').toBeFalsy();
+  expect(maskEffect.dummyMaskMap, 'Dummy mask map is deleted').toBeFalsy();
+  expect(maskEffect.maskPass, 'Mask pass is deleted').toBeFalsy();
+  expect(maskEffect.maskMap, 'Mask map is deleted').toBeFalsy();
 
   layerManager.finalize();
-  t.end();
 });
 
 /* eslint-disable max-statements */
-test('MaskEffect#update', t => {
+test('MaskEffect#update', () => {
   const maskEffect = new MaskEffect();
   maskEffect.setup({device});
 
@@ -82,7 +80,7 @@ test('MaskEffect#update', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
 
   const preRenderWithLayers = (layers, description) => {
-    t.comment(description);
+    console.log(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
     maskEffect.preRender({
@@ -96,31 +94,31 @@ test('MaskEffect#update', t => {
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
 
   let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
-  t.is(parameters.maskMap, maskEffect.maskMap, 'Mask map is in parameters');
+  expect(parameters.maskMap, 'Mask map is in parameters').toBe(maskEffect.maskMap);
   let mask = parameters.maskChannels['test-mask-layer'];
-  t.is(mask?.index, 0, 'Mask is rendered in channel 0');
-  t.ok(mask?.bounds, 'Mask has bounds');
+  expect(mask?.index, 'Mask is rendered in channel 0').toBe(0);
+  expect(mask?.bounds, 'Mask has bounds').toBeTruthy();
   let bounds = mask.bounds;
 
   preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER, TEST_MASK_LAYER2], 'Add second mask');
 
   parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
-  t.is(mask?.index, 0, 'Mask is rendered in channel 0');
-  t.is(mask?.bounds, bounds, 'Using cached mask bounds');
+  expect(mask?.index, 'Mask is rendered in channel 0').toBe(0);
+  expect(mask?.bounds, 'Using cached mask bounds').toBe(bounds);
   mask = parameters.maskChannels['test-mask-layer-2'];
-  t.ok(mask?.bounds, 'Second mask has bounds');
-  t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
+  expect(mask?.bounds, 'Second mask has bounds').toBeTruthy();
+  expect(mask?.index, 'Second mask is rendered in channel 1').toBe(1);
   bounds = mask.bounds;
 
   preRenderWithLayers([TEST_LAYER, TEST_MASK_LAYER2], 'Remove first mask');
 
   parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
-  t.notOk(mask, 'Mask is removed');
+  expect(mask, 'Mask is removed').toBeFalsy();
   mask = parameters.maskChannels['test-mask-layer-2'];
-  t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
-  t.is(mask?.bounds, bounds, 'Using cached mask bounds');
+  expect(mask?.index, 'Second mask is rendered in channel 1').toBe(1);
+  expect(mask?.bounds, 'Using cached mask bounds').toBe(bounds);
 
   preRenderWithLayers(
     [TEST_LAYER, TEST_MASK_LAYER2_ALT, TEST_MASK_LAYER3],
@@ -129,17 +127,16 @@ test('MaskEffect#update', t => {
 
   parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer-2'];
-  t.is(mask?.index, 1, 'Second mask is rendered in channel 1');
-  t.not(mask?.bounds, bounds, 'Second mask is updated');
+  expect(mask?.index, 'Second mask is rendered in channel 1').toBe(1);
+  expect(mask?.bounds, 'Second mask is updated').not.toBe(bounds);
   mask = parameters.maskChannels['test-mask-layer-3'];
-  t.is(mask?.index, 0, 'New mask is rendered in channel 0');
+  expect(mask?.index, 'New mask is rendered in channel 0').toBe(0);
 
   maskEffect.cleanup();
   layerManager.finalize();
-  t.end();
 });
 
-test('MaskEffect#coordinates', t => {
+test('MaskEffect#coordinates', () => {
   const maskEffect = new MaskEffect();
   maskEffect.setup({device});
 
@@ -151,7 +148,7 @@ test('MaskEffect#coordinates', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
 
   const preRenderWithLayers = (layers, description) => {
-    t.comment(description);
+    console.log(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
@@ -167,17 +164,20 @@ test('MaskEffect#coordinates', t => {
 
   let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   let mask = parameters.maskChannels['test-mask-layer'];
-  t.same(mask?.coordinateOrigin, [0, 0, 0], 'Mask has correct coordinate origin');
-  t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.DEFAULT, 'Mask has correct coordinate system');
+  expect(mask?.coordinateOrigin, 'Mask has correct coordinate origin').toEqual([0, 0, 0]);
+  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe(
+    COORDINATE_SYSTEM.DEFAULT
+  );
 
   preRenderWithLayers([TEST_MASK_LAYER_CARTESIAN, TEST_LAYER], 'Update to cartesion coordinates');
 
   parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
-  t.same(mask?.coordinateOrigin, [1, 2, 3], 'Mask has correct coordinate origin');
-  t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.CARTESIAN, 'Mask has correct coordinate system');
+  expect(mask?.coordinateOrigin, 'Mask has correct coordinate origin').toEqual([1, 2, 3]);
+  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe(
+    COORDINATE_SYSTEM.CARTESIAN
+  );
 
   maskEffect.cleanup();
   layerManager.finalize();
-  t.end();
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   LayerManager,
   CompositeLayer,
@@ -10,7 +10,7 @@ import {
   COORDINATE_SYSTEM,
   WebMercatorViewport
 } from '@deck.gl/core';
-import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -71,25 +71,22 @@ class TestCompositeLayer extends CompositeLayer {
 
 TestCompositeLayer.layerName = 'TestCompositeLayer';
 
-test('CompositeLayer#constructor', t => {
+test('CompositeLayer#constructor', () => {
   const layer = new TestCompositeLayer(Object.assign({id: BASE_LAYER_ID}, BASE_LAYER_PROPS));
-  t.ok(layer, 'CompositeLayer created');
-  t.equal(layer.id, BASE_LAYER_ID, 'CompositeLayer id set correctly');
-  t.ok(layer.props, 'CompositeLayer props not null');
-  t.end();
+  expect(layer, 'CompositeLayer created').toBeTruthy();
+  expect(layer.id, 'CompositeLayer id set correctly').toBe(BASE_LAYER_ID);
+  expect(layer.props, 'CompositeLayer props not null').toBeTruthy();
 });
 
-test('CompositeLayer#getSubLayerProps', t => {
+test('CompositeLayer#getSubLayerProps', () => {
   const layer = new TestCompositeLayer(Object.assign({id: BASE_LAYER_ID}, BASE_LAYER_PROPS));
 
   // TODO - add table driven test cases for all forwarded sublayer props
   const baseProps = layer.getSubLayerProps();
-  t.comment(JSON.stringify(baseProps));
+  console.log(JSON.stringify(baseProps));
   for (const propName in BASE_LAYER_PROPS) {
-    t.equal(
-      baseProps[propName],
-      BASE_LAYER_PROPS[propName],
-      `CompositeLayer baseLayerProp ${propName} ok`
+    expect(baseProps[propName], `CompositeLayer baseLayerProp ${propName} ok`).toBe(
+      BASE_LAYER_PROPS[propName]
     );
   }
 
@@ -98,18 +95,14 @@ test('CompositeLayer#getSubLayerProps', t => {
   const sublayers = layer.getSubLayers();
   const subProps = sublayers[0].props;
   for (const propName in BASE_LAYER_PROPS) {
-    t.equal(
-      subProps[propName],
-      BASE_LAYER_PROPS[propName],
-      `CompositeLayer subLayerProp ${propName} ok`
+    expect(subProps[propName], `CompositeLayer subLayerProp ${propName} ok`).toBe(
+      BASE_LAYER_PROPS[propName]
     );
   }
   layerManager.finalize();
-
-  t.end();
 });
 
-test('CompositeLayer#getSubLayerProps(override)', t => {
+test('CompositeLayer#getSubLayerProps(override)', () => {
   const TEST_CASES = [
     {
       name: 'No sublayer props',
@@ -167,18 +160,15 @@ test('CompositeLayer#getSubLayerProps(override)', t => {
       sublayerProps && Object.assign({id: SUB_LAYER_ID}, sublayerProps)
     );
     for (const propName in expected) {
-      t.deepEqual(
+      expect(
         combinedSublayerProps[propName],
-        expected[propName],
         `${name} : ${propName} sub layer prop should get set correctly`
-      );
+      ).toEqual(expected[propName]);
     }
   }
-
-  t.end();
 });
 
-test('CompositeLayer#getSubLayerProps(accessor)', t => {
+test('CompositeLayer#getSubLayerProps(accessor)', () => {
   class TestWrapperLayer extends CompositeLayer {
     initializeState() {}
 
@@ -226,17 +216,15 @@ test('CompositeLayer#getSubLayerProps(accessor)', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         let props = subLayers[0].props;
-        t.deepEqual(
+        expect(
           props.getColor(props.data[0]),
-          [255, 0, 0],
           `sublayer ${subLayers[0].id} getColor returns correct result`
-        );
+        ).toEqual([255, 0, 0]);
         props = subLayers[1].props;
-        t.deepEqual(
+        expect(
           props.getColor(props.data[0]),
-          [255, 0, 0],
           `sublayer ${subLayers[1].id} getColor returns correct result`
-        );
+        ).toEqual([255, 0, 0]);
       }
     },
     {
@@ -252,100 +240,89 @@ test('CompositeLayer#getSubLayerProps(accessor)', t => {
       },
       onAfterUpdate: ({subLayers}) => {
         let props = subLayers[0].props;
-        t.deepEqual(
+        expect(
           props.getColor(props.data[0]),
-          [255, 0, 0],
           `sublayer ${subLayers[0].id} getColor returns correct result`
-        );
+        ).toEqual([255, 0, 0]);
         props = subLayers[1].props;
-        t.deepEqual(
+        expect(
           props.getColor(props.data[0]),
-          [255, 0, 0],
           `sublayer ${subLayers[1].id} getColor returns correct result`
-        );
+        ).toEqual([255, 0, 0]);
       }
     }
   ];
 
-  testLayer({Layer: TestWrapperLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: TestWrapperLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', t => {
+test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', () => {
   const layer = new TestCompositeLayer(Object.assign({id: BASE_LAYER_ID}, BASE_LAYER_PROPS));
 
   const originalRow = {id: 'original datum', value: 100};
   const sublayerRow = layer.getSubLayerRow({id: 'sublayer datum'}, originalRow, 0);
 
   let accessor = layer.getSubLayerAccessor(1);
-  t.is(accessor, 1, 'returns valid accessor');
+  expect(accessor, 'returns valid accessor').toBe(1);
 
   accessor = layer.getSubLayerAccessor(d => d.value);
-  t.is(accessor(originalRow), 100, 'returns valid accessor');
-  t.is(accessor(sublayerRow), 100, 'returns valid accessor');
+  expect(accessor(originalRow), 'returns valid accessor').toBe(100);
+  expect(accessor(sublayerRow), 'returns valid accessor').toBe(100);
 
   accessor = layer.getSubLayerAccessor((d, {index}) => index);
-  t.is(accessor(originalRow, {index: 1}), 1, 'returns valid accessor');
-  t.is(accessor(sublayerRow, {index: 1}), 0, 'returns valid accessor');
+  expect(accessor(originalRow, {index: 1}), 'returns valid accessor').toBe(1);
+  expect(accessor(sublayerRow, {index: 1}), 'returns valid accessor').toBe(0);
 
-  t.deepEqual(
+  expect(
     layer.getPickingInfo({
       info: {object: originalRow, index: 1}
     }),
-    {object: originalRow, index: 1},
     'returns correct picking info'
-  );
-  t.deepEqual(
+  ).toEqual({object: originalRow, index: 1});
+  expect(
     layer.getPickingInfo({
       info: {object: sublayerRow, index: 1}
     }),
-    {object: originalRow, index: 0},
     'returns correct picking info'
-  );
-
-  t.end();
+  ).toEqual({object: originalRow, index: 0});
 });
 
-test('CompositeLayer#setState', t => {
+test('CompositeLayer#setState', () => {
   const layerManager = new LayerManager(device);
   const compositeLayer = new TestCompositeLayer(BASE_LAYER_PROPS);
   let subLayer = null;
 
   layerManager.setLayers([compositeLayer]);
   subLayer = compositeLayer.getSubLayers()[0];
-  t.is(subLayer.props.scale, 1, 'sublayer has default props');
+  expect(subLayer.props.scale, 'sublayer has default props').toBe(1);
 
   layerManager.updateLayers();
-  t.is(subLayer, compositeLayer.getSubLayers()[0], 'composite layer should not rerender');
+  expect(subLayer, 'composite layer should not rerender').toBe(compositeLayer.getSubLayers()[0]);
 
   compositeLayer.setState({scale: 2});
   layerManager.updateLayers();
-  t.not(subLayer, compositeLayer.getSubLayers()[0], 'composite layer should rerender');
+  expect(subLayer, 'composite layer should rerender').not.toBe(compositeLayer.getSubLayers()[0]);
   subLayer = compositeLayer.getSubLayers()[0];
-  t.is(subLayer.props.scale, 2, 'sublayer has updated props from state');
+  expect(subLayer.props.scale, 'sublayer has updated props from state').toBe(2);
 
   layerManager.finalize();
-
-  t.end();
 });
 
-test('CompositeLayer#isLoaded', t => {
+test('CompositeLayer#isLoaded', () => {
   const layer = new TestCompositeLayer({
     data: Promise.resolve([]),
     onDataLoad: () => {
-      t.ok(layer.isLoaded, 'data is loaded');
+      expect(layer.isLoaded, 'data is loaded').toBeTruthy();
       finalize();
-      t.end();
     }
   });
 
   const {finalize} = testInitializeLayer({layer, finalize: false});
 
-  t.notOk(layer.isLoaded, 'is loading data');
+  expect(layer.isLoaded, 'is loading data').toBeFalsy();
 });
 
-test('CompositeLayer#onViewportChange', t => {
+test('CompositeLayer#onViewportChange', () => {
   class CompLayer extends CompositeLayer {
     shouldUpdateState({changeFlags}) {
       return changeFlags.somethingChanged;
@@ -376,8 +353,8 @@ test('CompositeLayer#onViewportChange', t => {
       }),
       props: {},
       onAfterUpdate: ({subLayer}) => {
-        t.is(subLayer.props.zoom, 0, 'Sub layer prop is populated');
-        t.ok(subLayer.state, 'Sub layer is added to the stack');
+        expect(subLayer.props.zoom, 'Sub layer prop is populated').toBe(0);
+        expect(subLayer.state, 'Sub layer is added to the stack').toBeTruthy();
       }
     },
     {
@@ -389,13 +366,11 @@ test('CompositeLayer#onViewportChange', t => {
         height: 100
       }),
       onAfterUpdate: ({subLayer}) => {
-        t.is(subLayer.props.zoom, 1, 'Sub layer prop is populated');
-        t.ok(subLayer.state, 'Sub layer is added to the stack');
+        expect(subLayer.props.zoom, 'Sub layer prop is populated').toBe(1);
+        expect(subLayer.state, 'Sub layer is added to the stack').toBeTruthy();
       }
     }
   ];
 
-  testLayer({Layer: CompLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: CompLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

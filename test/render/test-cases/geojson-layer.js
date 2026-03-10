@@ -26,7 +26,7 @@ const sphere = new SphereGeometry({
   nlong: 20
 });
 
-const ICON_ATLAS = './test/data/icon-atlas.png';
+const ICON_ATLAS = '/test/data/icon-atlas.png';
 
 const MARKER_SIZE_MAP = {
   small: 200,

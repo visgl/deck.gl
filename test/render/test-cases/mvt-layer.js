@@ -37,7 +37,7 @@ function createMVTLayer(id, {highlight = false, binary = false, holes = false} =
     layers: [
       new MVTLayer({
         id,
-        data: [`./test/data/${holes ? 'mvt-with-hole' : 'mvt-tiles'}/{z}/{x}/{y}.mvt`],
+        data: [`/test/data/${holes ? 'mvt-with-hole' : 'mvt-tiles'}/{z}/{x}/{y}.mvt`],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],
         ...highlightProps,

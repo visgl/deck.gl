@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {parsePosition, getPosition, evaluateLayoutExpression} from '@deck.gl/core/utils/positions';
 import type {LayoutExpression} from '@deck.gl/core/utils/positions';
 
@@ -64,26 +64,23 @@ const EVALUATE_TEST_CASES: {
   }
 ];
 
-test('positions#import', t => {
-  t.ok(parsePosition, 'parsePosition imported OK');
-  t.ok(getPosition, 'getPosition imported OK');
-  t.ok(evaluateLayoutExpression, 'evaluateLayoutExpression imported OK');
-  t.end();
+test('positions#import', () => {
+  expect(parsePosition, 'parsePosition imported OK').toBeTruthy();
+  expect(getPosition, 'getPosition imported OK').toBeTruthy();
+  expect(evaluateLayoutExpression, 'evaluateLayoutExpression imported OK').toBeTruthy();
 });
 
-test('parsePosition#getPosition combinations', t => {
+test('parsePosition#getPosition combinations', () => {
   for (const tc of EXPRESSION_TEST_CASES) {
     const expression = parsePosition(tc.value);
     const result = getPosition(expression, tc.extent);
-    t.equal(result, tc.result, `parsePosition ${tc.title} returned expected result`);
+    expect(result, `parsePosition ${tc.title} returned expected result`).toBe(tc.result);
   }
-  t.end();
 });
 
-test('evaluateLayoutExpression#trees', t => {
+test('evaluateLayoutExpression#trees', () => {
   for (const tc of EVALUATE_TEST_CASES) {
     const result = evaluateLayoutExpression(tc.expression, tc.extent);
-    t.equal(result, tc.result, `evaluateLayoutExpression ${tc.title} returned expected result`);
+    expect(result, `evaluateLayoutExpression ${tc.title} returned expected result`).toBe(tc.result);
   }
-  t.end();
 });

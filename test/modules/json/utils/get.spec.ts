@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {get} from '@deck.gl/json/utils/get';
 
 const GET_TEST_CASES = [
@@ -56,10 +56,9 @@ const GET_TEST_CASES = [
   }
 ];
 
-test('container#get', t => {
+test('container#get', () => {
   for (const tc of GET_TEST_CASES) {
     const result = get(tc.container, tc.key);
-    t.deepEqual(result, tc.result, `get() on ${tc.title} returned expected result`);
+    expect(result, `get() on ${tc.title} returned expected result`).toEqual(tc.result);
   }
-  t.end();
 });

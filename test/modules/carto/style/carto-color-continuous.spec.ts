@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import {colorContinuous} from '@deck.gl/carto';
 
 const CONTINUOUS_TEST_CASES = [
@@ -54,7 +54,7 @@ const ERROR_TEST_CASES_DOMAIN = [
   }
 ];
 
-test('colorContinuous', t => {
+test('colorContinuous', () => {
   const colorContinuousManual = colorContinuous({
     attr: 'target',
     domain: [0, 100],
@@ -66,10 +66,8 @@ test('colorContinuous', t => {
 
   for (const tc of CONTINUOUS_TEST_CASES) {
     const func = colorContinuousManual(tc.argument);
-    t.deepEqual(func, tc.result, `colorContinuous ${tc.title} returned expected result`);
+    expect(func, `colorContinuous ${tc.title} returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
 const CONTINUOUS_TEST_CASES_USING_CARTO_COLORS = [
@@ -93,7 +91,7 @@ const CONTINUOUS_TEST_CASES_USING_CARTO_COLORS = [
   }
 ];
 
-test('colorContinuous#colorsAsCARTOColors', t => {
+test('colorContinuous#colorsAsCARTOColors', () => {
   const colorContinuousManual = colorContinuous({
     attr: 'target',
     domain: [0, 100],
@@ -102,15 +100,13 @@ test('colorContinuous#colorsAsCARTOColors', t => {
 
   for (const tc of CONTINUOUS_TEST_CASES_USING_CARTO_COLORS) {
     const func = colorContinuousManual(tc.argument);
-    t.deepEqual(func, tc.result, `colorContinuous ${tc.title} returned expected result`);
+    expect(func, `colorContinuous ${tc.title} returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
-test('colorContinuous#invalidColorsArgument', t => {
+test('colorContinuous#invalidColorsArgument', () => {
   for (const tc of ERROR_TEST_CASES_COLORS) {
-    t.throws(
+    expect(
       () =>
         colorContinuous({
           attr: 'target',
@@ -118,15 +114,13 @@ test('colorContinuous#invalidColorsArgument', t => {
           colors: tc.colors
         }),
       `throws on invalid colors ${tc.colors}`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });
 
-test('colorContinuous#invalidDomainArgument', t => {
+test('colorContinuous#invalidDomainArgument', () => {
   for (const tc of ERROR_TEST_CASES_DOMAIN) {
-    t.throws(
+    expect(
       () =>
         colorContinuous({
           attr: 'target',
@@ -134,8 +128,6 @@ test('colorContinuous#invalidDomainArgument', t => {
           colors: tc.colors
         }),
       `throws on invalid domain ${tc.domain}`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });

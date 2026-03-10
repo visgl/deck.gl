@@ -94,6 +94,8 @@ module.exports = getESLintConfig({
           '**/test/**/*.ts',
           '**/scripts/**/*.js',
           '*.config.js',
+          '*.config.ts',
+          '*.workspace.ts',
           '*.config.local.js',
           '*.config.local.mjs'
         ],

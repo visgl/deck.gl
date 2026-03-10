@@ -2,25 +2,24 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Deck} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import configuration from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
-import {gl} from '@deck.gl/test-utils';
+import {gl} from '@deck.gl/test-utils/vitest';
 
-test('JSONConverter#render', t => {
+test('JSONConverter#render', () => {
   const jsonConverter = new JSONConverter({configuration});
-  t.ok(jsonConverter, 'JSONConverter created');
+  expect(jsonConverter, 'JSONConverter created').toBeTruthy();
 
   const deckProps = jsonConverter.convert(JSON_DATA);
-  t.ok(deckProps, 'JSONConverter converted correctly');
+  expect(deckProps, 'JSONConverter converted correctly').toBeTruthy();
   const jsonDeck = new Deck({
     gl,
     onAfterRender: () => {
-      t.ok(jsonDeck, 'JSONConverter rendered');
+      expect(jsonDeck, 'JSONConverter rendered').toBeTruthy();
       jsonDeck.finalize();
-      t.end();
     },
     ...deckProps
   });

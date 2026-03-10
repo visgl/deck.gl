@@ -2,23 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
-test('DataFilterExtension#constructor', t => {
+test('DataFilterExtension#constructor', () => {
   let extension = new DataFilterExtension();
-  t.is(extension.opts.filterSize, 1, 'Extension has filterSize');
+  expect(extension.opts.filterSize, 'Extension has filterSize').toBe(1);
 
   extension = new DataFilterExtension({filterSize: 3, fp64: true});
-  t.is(extension.opts.filterSize, 3, 'Extension has filterSize');
-  t.ok(extension.opts.fp64, 'fp64 is enabled');
-
-  t.end();
+  expect(extension.opts.filterSize, 'Extension has filterSize').toBe(3);
+  expect(extension.opts.fp64, 'fp64 is enabled').toBeTruthy();
 });
 
-test('DataFilterExtension', t => {
+test('DataFilterExtension', () => {
   const testCases = [
     {
       props: {
@@ -33,18 +31,19 @@ test('DataFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.is(uniforms.min, 80, 'has correct uniforms');
-        t.is(uniforms.softMax, 160, 'has correct uniforms');
-        t.is(uniforms.useSoftMargin, false, 'has correct uniforms');
-        t.is(uniforms.enabled, true, 'has correct uniforms');
+        expect(uniforms.min, 'has correct uniforms').toBe(80);
+        expect(uniforms.softMax, 'has correct uniforms').toBe(160);
+        expect(uniforms.useSoftMargin, 'has correct uniforms').toBe(false);
+        expect(uniforms.enabled, 'has correct uniforms').toBe(true);
 
         const attributes = layer.getAttributeManager().getAttributes();
-        t.deepEqual(
-          attributes.filterValues.value,
-          [120, 140, 0, 0, 0, 0],
-          'filterValues attribute is populated'
-        );
-        t.notOk(attributes.filterCategoryValues, 'filterCategoryValues attribute is not populated');
+        expect(attributes.filterValues.value, 'filterValues attribute is populated').toEqual([
+          120, 140, 0, 0, 0, 0
+        ]);
+        expect(
+          attributes.filterCategoryValues,
+          'filterCategoryValues attribute is not populated'
+        ).toBeFalsy();
       }
     },
     {
@@ -64,10 +63,10 @@ test('DataFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.min, [10000, 0], 'has correct uniforms');
-        t.deepEqual(uniforms.softMax, [18000, 8000], 'has correct uniforms');
-        t.is(uniforms.useSoftMargin, true, 'has correct uniforms');
-        t.is(uniforms.transformSize, false, 'has correct uniforms');
+        expect(uniforms.min, 'has correct uniforms').toEqual([10000, 0]);
+        expect(uniforms.softMax, 'has correct uniforms').toEqual([18000, 8000]);
+        expect(uniforms.useSoftMargin, 'has correct uniforms').toBe(true);
+        expect(uniforms.transformSize, 'has correct uniforms').toBe(false);
       }
     },
     {
@@ -76,20 +75,18 @@ test('DataFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.min64High, [10000, 0], 'has double uniforms');
-        t.deepEqual(uniforms.max64High, [20000, 100000], 'has double uniforms');
-        t.deepEqual(uniforms.min, [0, 0], 'has correct uniforms');
-        t.deepEqual(uniforms.softMax, [-2000, -92000], 'has correct uniforms');
+        expect(uniforms.min64High, 'has double uniforms').toEqual([10000, 0]);
+        expect(uniforms.max64High, 'has double uniforms').toEqual([20000, 100000]);
+        expect(uniforms.min, 'has correct uniforms').toEqual([0, 0]);
+        expect(uniforms.softMax, 'has correct uniforms').toEqual([-2000, -92000]);
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('DataFilterExtension#categories', t => {
+test('DataFilterExtension#categories', () => {
   const data = [
     {position: [-122.453, 37.782], field1: 'a', field2: 7},
     {position: [-122.454, 37.781], field1: 'b', field2: 8}
@@ -105,15 +102,14 @@ test('DataFilterExtension#categories', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.categoryBitMask, [2 ** 0, 0, 2 ** 1, 0], 'has correct uniforms');
+        expect(uniforms.categoryBitMask, 'has correct uniforms').toEqual([2 ** 0, 0, 2 ** 1, 0]);
 
         const attributes = layer.getAttributeManager().getAttributes();
-        t.deepEqual(
+        expect(
           attributes.filterCategoryValues.value.slice(0, 4),
-          [0, 0, 1, 1],
           'filterCategoryValues attribute is populated'
-        );
-        t.notOk(attributes.filterValues, 'filterValues attribute is not populated');
+        ).toEqual([0, 0, 1, 1]);
+        expect(attributes.filterValues, 'filterValues attribute is not populated').toBeFalsy();
       }
     },
     {
@@ -122,7 +118,12 @@ test('DataFilterExtension#categories', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.categoryBitMask, [2 ** 1 + 2 ** 2, 0, 0, 0], 'has correct uniforms');
+        expect(uniforms.categoryBitMask, 'has correct uniforms').toEqual([
+          2 ** 1 + 2 ** 2,
+          0,
+          0,
+          0
+        ]);
       }
     },
     {
@@ -132,17 +133,15 @@ test('DataFilterExtension#categories', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.categoryBitMask, [2 ** 2, 0, 2 ** 2, 0], 'has correct uniforms');
+        expect(uniforms.categoryBitMask, 'has correct uniforms').toEqual([2 ** 2, 0, 2 ** 2, 0]);
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('DataFilterExtension#countItems', t => {
+test('DataFilterExtension#countItems', () => {
   let cbCalled = 0;
   let cbCount = -1;
 
@@ -163,8 +162,8 @@ test('DataFilterExtension#countItems', t => {
         extensions: [new DataFilterExtension({filterSize: 1, countItems: true})]
       },
       onAfterUpdate: () => {
-        t.is(cbCalled, 1, 'onFilteredItemsChange is called');
-        t.is(cbCount, 2, 'count is correct');
+        expect(cbCalled, 'onFilteredItemsChange is called').toBe(1);
+        expect(cbCount, 'count is correct').toBe(2);
       }
     },
     {
@@ -172,7 +171,9 @@ test('DataFilterExtension#countItems', t => {
         radiusMinPixels: 10
       },
       onAfterUpdate: () => {
-        t.is(cbCalled, 1, 'onFilteredItemsChange should not be called without filter change');
+        expect(cbCalled, 'onFilteredItemsChange should not be called without filter change').toBe(
+          1
+        );
       }
     },
     {
@@ -180,13 +181,11 @@ test('DataFilterExtension#countItems', t => {
         filterRange: [80, 100]
       },
       onAfterUpdate: () => {
-        t.is(cbCalled, 2, 'onFilteredItemsChange is called');
-        t.is(cbCount, 0, 'count is correct');
+        expect(cbCalled, 'onFilteredItemsChange is called').toBe(2);
+        expect(cbCount, 'count is correct').toBe(0);
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

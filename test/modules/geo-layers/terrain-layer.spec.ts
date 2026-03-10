@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
-test('TerrainLayer', async t => {
+test('TerrainLayer', async () => {
   const testCases = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
@@ -16,15 +16,15 @@ test('TerrainLayer', async t => {
       texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
       loaders: [TerrainLoader]
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer.props.elevationData) {
-        t.ok(subLayers[0] instanceof TileLayer, 'rendered TileLayer');
+        expect(subLayers[0] instanceof TileLayer, 'rendered TileLayer').toBeTruthy();
       }
     }
   });
-  await testLayerAsync({Layer: TerrainLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: TerrainLayer, testCases, onError: err => expect(err).toBeFalsy()});
 
   const testCasesNonTiled = generateLayerTests({
     Layer: TerrainLayer,
@@ -33,15 +33,17 @@ test('TerrainLayer', async t => {
       bounds: [-180, 85, 0, 0],
       loaders: [TerrainLoader]
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer.props.elevationData) {
-        t.ok(subLayers[0] instanceof SimpleMeshLayer, 'rendered SimpleMeshLayer');
+        expect(subLayers[0] instanceof SimpleMeshLayer, 'rendered SimpleMeshLayer').toBeTruthy();
       }
     }
   });
-  await testLayerAsync({Layer: TerrainLayer, testCases: testCasesNonTiled, onError: t.notOk});
-
-  t.end();
+  await testLayerAsync({
+    Layer: TerrainLayer,
+    testCases: testCasesNonTiled,
+    onError: err => expect(err).toBeFalsy()
+  });
 });

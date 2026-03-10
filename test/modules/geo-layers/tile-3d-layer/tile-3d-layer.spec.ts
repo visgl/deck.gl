@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
-import {LayerTestCase, testLayerAsync} from '@deck.gl/test-utils';
+import {LayerTestCase, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-test('Tile3DLayer', async t => {
+test('Tile3DLayer', async () => {
   const testCases: LayerTestCase<Tile3DLayer>[] = [
     {
       title: 'Tile3DLayer initial load',
@@ -16,10 +16,10 @@ test('Tile3DLayer', async t => {
         data: './test/data/3d-tiles/tileset.json',
         getPointColor: [0, 0, 0]
       },
-      onBeforeUpdate: () => t.comment('inital load'),
+      onBeforeUpdate: () => console.log('inital load'),
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.ok(subLayers[0], 'Renders sub layers');
+          expect(subLayers[0], 'Renders sub layers').toBeTruthy();
         }
       }
     },
@@ -28,10 +28,10 @@ test('Tile3DLayer', async t => {
       updateProps: {
         opacity: 0.5
       },
-      onBeforeUpdate: () => t.comment('update opacity'),
+      onBeforeUpdate: () => console.log('update opacity'),
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
-          t.is(subLayers[0].props.opacity, 0.5, 'Updated sub layer props');
+          expect(subLayers[0].props.opacity, 'Updated sub layer props').toBe(0.5);
         }
       }
     }
@@ -47,8 +47,6 @@ test('Tile3DLayer', async t => {
       zoom: 12
     }),
     testCases,
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
-
-  t.end();
 });
