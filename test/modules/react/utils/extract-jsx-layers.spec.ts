@@ -39,7 +39,7 @@ const TEST_CASES = [
     output: {
       children: [],
       views: undefined,
-      layers: undefined
+      layers: []
     },
     title: 'empty layers'
   },
@@ -206,7 +206,7 @@ const TEST_CASES = [
     output: {
       children: [reactMapView, createElement(View, {}, noop)],
       views: [new MapView(reactMapView.props)],
-      layers: [[lineLayer], undefined]
+      layers: [[lineLayer], []]
     },
     title: 'mixed children'
   }

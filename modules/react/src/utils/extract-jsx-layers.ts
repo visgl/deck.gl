@@ -64,7 +64,7 @@ function wrapInView(node: React.ReactNode | DeckGLRenderCallback): React.ReactNo
 // extracts any deck.gl layers masquerading as react elements from props.children
 export default function extractJSXLayers<ViewsT extends ViewOrViews>({
   children,
-  layers,
+  layers = [],
   views
 }: {
   children?: React.ReactNode | DeckGLRenderCallback;
@@ -72,7 +72,7 @@ export default function extractJSXLayers<ViewsT extends ViewOrViews>({
   views?: ViewsT;
 }): {
   children: React.ReactNode[];
-  layers: LayersList | undefined;
+  layers: LayersList;
   views: ViewsT | undefined;
 } {
   const reactChildren: React.ReactNode[] = []; // extract real react elements (i.e. not deck.gl layers)

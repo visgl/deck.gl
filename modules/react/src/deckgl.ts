@@ -169,13 +169,11 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       height: '100%',
       parent: containerRef.current,
       canvas: canvasRef.current,
+      layers: jsxProps.layers,
       onViewStateChange: handleViewStateChange,
       onInteractionStateChange: handleInteractionStateChange
     };
 
-    if (jsxProps.layers) {
-      forwardProps.layers = jsxProps.layers;
-    }
     if (jsxProps.views) {
       forwardProps.views = jsxProps.views;
     }
