@@ -170,10 +170,13 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       parent: containerRef.current,
       canvas: canvasRef.current,
       layers: jsxProps.layers,
-      views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
       onInteractionStateChange: handleInteractionStateChange
     };
+
+    if (jsxProps.views) {
+      forwardProps.views = jsxProps.views;
+    }
 
     // The defaultValue for _customRender is null, which would overwrite the definition
     // of _customRender. Remove to avoid frequently redeclaring the method here.
