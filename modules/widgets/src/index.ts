@@ -44,6 +44,7 @@ export type {FpsWidgetProps} from './fps-widget';
 export type {ScaleWidgetProps} from './scale-widget';
 export type {ThemeWidgetProps} from './theme-widget';
 export type {InfoWidgetProps} from './info-widget';
+export type {PopupWidgetProps} from './popup-widget';
 export type {StatsWidgetProps} from './stats-widget';
 export type {ContextMenuWidgetProps} from './context-menu-widget';
 export type {SplitterWidgetProps} from './splitter-widget';
