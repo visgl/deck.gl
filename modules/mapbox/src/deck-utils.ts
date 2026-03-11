@@ -137,6 +137,10 @@ export function drawLayer(
     clearStack = true;
   }
 
+  if (!currentViewport) {
+    return;
+  }
+
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     layerFilter: params =>
@@ -165,6 +169,10 @@ export function drawLayerGroup(
     currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
+  }
+
+  if (!currentViewport) {
+    return;
   }
 
   deck._drawLayers('mapbox-repaint', {
