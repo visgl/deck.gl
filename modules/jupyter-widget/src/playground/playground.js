@@ -16,8 +16,16 @@ export function initPlayground() {
   Transport.setCallbacks({
     onInitialize({transport}) {
       // Extract "deck.gl playground" props
-      const {width, height, customLibraries, mapboxApiKey, jsonInput, tooltip} =
-        getPlaygroundProps(transport);
+      const {
+        width,
+        height,
+        customLibraries,
+        mapboxApiKey,
+        googleMapsKey,
+        googleMapsMapId,
+        jsonInput,
+        tooltip
+      } = getPlaygroundProps(transport);
 
       // Load mapbox CSS
       loadMapboxCSS();
@@ -31,6 +39,8 @@ export function initPlayground() {
 
       const deck = createDeck({
         mapboxApiKey,
+        googleMapsKey,
+        googleMapsMapId,
         container: deckContainer,
         jsonInput: jsonProps,
         tooltip,
@@ -120,6 +130,8 @@ function getPlaygroundProps(transport) {
     height: jupyterModel.get('height'),
     customLibraries: jupyterModel.get('custom_libraries'),
     mapboxApiKey: jupyterModel.get('mapbox_key'),
+    googleMapsKey: jupyterModel.get('google_maps_key'),
+    googleMapsMapId: jupyterModel.get('google_maps_map_id'),
     jsonInput: jupyterModel.get('json_input'),
     tooltip: jupyterModel.get('tooltip')
   };

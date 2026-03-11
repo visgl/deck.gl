@@ -43,6 +43,8 @@ class DeckGLWidget(DOMWidget):
             See the ``Deck`` constructor.
         google_maps_key : str, default ''
             API key for Google Maps
+        google_maps_map_id : str, default ''
+            Optional ID for Google Maps Vector Maps
         selected_data : list of dict, default []
             Data selected on click, if the pydeck Jupyter widget is enabled for server use
     """
@@ -57,6 +59,7 @@ class DeckGLWidget(DOMWidget):
     carto_key = Unicode("", allow_none=True).tag(sync=True)
     mapbox_key = Unicode("", allow_none=True).tag(sync=True)
     google_maps_key = Unicode("", allow_none=True).tag(sync=True)
+    google_maps_map_id = Unicode("", allow_none=True).tag(sync=True)
 
     json_input = Unicode("").tag(sync=True)
     data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
