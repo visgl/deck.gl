@@ -5,6 +5,7 @@
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render} from 'preact';
+import {useEffect, useState} from 'preact/hooks';
 import type {Stats, Stat} from '@probe.gl/stats';
 import {IconButton} from './lib/components/icon-button';
 
@@ -70,7 +71,6 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   placement = 'top-left' as WidgetPlacement;
 
   private _counter = 0;
-  private _lastFps = -1;
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
   collapsed: boolean = true;
@@ -99,18 +99,25 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super.setProps(props);
   }
 
-  onAdd(): void {
-    this.updateHTML();
+  onRemove() {
+    if (this.rootElement) {
+      // Make sure all preact hooks are finalized
+      render(null, this.rootElement);
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const stats = this._getStats();
     const collapsed = this.collapsed;
+    if (collapsed) {
+      render(<FpsIcon getFps={this._getFps} onClick={this._toggleCollapsed} />, rootElement);
+      return;
+    }
+
+    const stats = this._getStats();
     const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
-    const fps = this._getFps();
     const items: JSX.Element[] = [];
 
-    if (!collapsed && stats) {
+    if (stats) {
       stats.forEach(stat => {
         const lines = this._getLines(stat).split('\n');
         if (this._resetOnUpdate && this._resetOnUpdate[stat.name]) {
@@ -127,54 +134,29 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     }
 
     render(
-      <div
-        className={`deck-widget-stats-container ${collapsed ? 'deck-widget-stats-container-collapsed' : ''}`}
-        style={{cursor: 'default'}}
-      >
-        {collapsed ? (
-          <div className="deck-widget-stats-collapsed">
-            <IconButton
-              className="deck-widget-stats-toggle"
-              label="Show stats"
-              onClick={this._toggleCollapsed}
-            >
-              <div className="text">
-                FPS
-                <br />
-                {fps}
-              </div>
-            </IconButton>
-          </div>
-        ) : (
-          <div
-            className="deck-widget-stats-header"
-            style={{cursor: 'pointer', pointerEvents: 'auto'}}
-            onClick={this._toggleCollapsed}
-          >
-            <b>{title}</b>
-            <button className="deck-widget-dropdown-button">
-              <span className={`deck-widget-dropdown-icon open`} />
-            </button>
-          </div>
-        )}
-        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
+      <div className="deck-widget-stats-container" style={{cursor: 'default'}}>
+        <div
+          className="deck-widget-stats-header"
+          style={{cursor: 'pointer', pointerEvents: 'auto'}}
+          onClick={this._toggleCollapsed}
+        >
+          <b>{title}</b>
+          <button className="deck-widget-dropdown-button">
+            <span className="deck-widget-dropdown-icon open" />
+          </button>
+        </div>
+        <div className="deck-widget-stats-content">{items}</div>
       </div>,
       rootElement
     );
   }
 
   onRedraw(): void {
-    const fps = this._getFps();
-    if (this.collapsed && this._lastFps !== fps) {
-      this._lastFps = fps;
-      this.updateHTML();
-      return;
-    }
-
-    const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
-    if (this._counter++ % framesPerUpdate === 0) {
-      this._lastFps = fps;
-      this.updateHTML();
+    if (!this.collapsed) {
+      const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
+      if (this._counter++ % framesPerUpdate === 0) {
+        this.updateHTML();
+      }
     }
   }
 
@@ -200,14 +182,13 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
   protected _toggleCollapsed = (): void => {
     this.collapsed = !this.collapsed;
-    this._lastFps = this._getFps();
     this.updateHTML();
   };
 
-  protected _getFps(): number {
+  protected _getFps = (): number => {
     // @ts-expect-error metrics is protected
     return Math.round(this.deck?.metrics.fps ?? 0);
-  }
+  };
 
   protected _getLines(stat: Stat | [key: string, value: number]): string {
     if ('count' in stat) {
@@ -224,4 +205,28 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
     return `${key}: ${formattedValue}`;
   }
+}
+
+function FpsIcon({getFps, onClick}: {getFps: () => number; onClick: () => void}) {
+  const [fps, setFps] = useState(getFps());
+  useEffect(() => {
+    const onUpdate = () => {
+      setFps(getFps());
+      timer = requestAnimationFrame(onUpdate);
+    };
+    let timer = requestAnimationFrame(onUpdate);
+    return () => {
+      cancelAnimationFrame(timer);
+    };
+  }, [getFps]);
+
+  return (
+    <IconButton onClick={onClick}>
+      <div className="text">
+        FPS
+        <br />
+        {fps}
+      </div>
+    </IconButton>
+  );
 }
