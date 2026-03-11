@@ -3,12 +3,30 @@
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
 import {FullscreenWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <FullscreenWidgetDemo />
 
 This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {Deck} from '@deck.gl/core';
@@ -16,9 +34,61 @@ import {FullscreenWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
-  widgets: [new FullscreenWidget()]
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
 });
 ```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL, FullscreenWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <FullscreenWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Installation
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/widgets
+```
+
+```ts
+import {FullscreenWidget, type FullscreenWidgetProps} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+new FullscreenWidget({} satisfies FullscreenWidgetProps);
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+```
+
+```js
+new deck.FullscreenWidget({});
+```
+
 
 ## Types
 

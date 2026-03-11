@@ -3,6 +3,8 @@
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
 import {ScreenshotWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <ScreenshotWidgetDemo />
 
@@ -13,16 +15,86 @@ Only the deck.gl canvas is captured, not other HTML DOM element underneath or on
 It is possible to use `props.onCapture` to integrate with more advanced screen capture modules such as [html2canvas](https://html2canvas.hertzen.com/)
 :::
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {ScreenshotWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new ScreenshotWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ScreenshotWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
-  widgets: [new ScreenshotWidget()]
+  widgets: [
+    new ScreenshotWidget({placement: 'top-left'})
+  ]
 });
 ```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_ScreenshotWidget as ScreenshotWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <ScreenshotWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Installation
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/widgets
+```
+
+```ts
+import {ScreenshotWidget, type ScreenshotWidgetProps} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+new ScreenshotWidget({} satisfies ScreenshotWidgetProps);
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+```
+
+```js
+new deck.ScreenshotWidget({});
+```
+
+## Types
 
 ### `ScreenshotWidgetProps` {#screenshotwidgetprops}
 

@@ -9,6 +9,7 @@ This module contains the following widgets:
 - [GimbalWidget](./gimbal-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
 - [ZoomWidget](./zoom-widget.md)
+- [ScrollbarWidget](./scrollbar-widget.md)
 
 ### Geospatial Widgets
 
@@ -25,6 +26,7 @@ This module contains the following widgets:
 
 - [ContextMenuWidget](./context-menu-widget.md)
 - [InfoWidget](./info-widget.md)
+- [PopupWidget](./popup-widget.md)
 
 ### Control Widgets
 

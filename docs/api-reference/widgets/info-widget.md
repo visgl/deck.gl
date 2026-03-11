@@ -4,27 +4,179 @@
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
 import {InfoWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <InfoWidgetDemo />
 
 This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
+```js
 import {Deck} from '@deck.gl/core';
 import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  },
+  controller: true,
+  layers: [
+    new ScatterplotLayer({
+      id: 'points',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+      getPosition: d => d.coordinates,
+      getRadius: 100,
+      getFillColor: [200, 0, 80],
+      pickable: true
+    })
+  ],
   widgets: [
     new InfoWidget({
-      getTooltip: (info) => ({
-        text: 'Info'
-      }),
-      style: {width: '200px', boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+      mode: 'hover',
+      getTooltip: info =>
+        info.object && {
+          text: info.object.name
+        },
+      style: {minWidth: '160px', fontSize: '12px'}
     })
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, type PickingInfo} from '@deck.gl/core';
+import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
+
+type BartStation = {
+  name: string;
+  coordinates: [longitude: number, latitude: number];
+};
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  },
+  controller: true,
+  layers: [
+    new ScatterplotLayer<BartStation>({
+      id: 'points',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+      getPosition: d => d.coordinates,
+      getRadius: 100,
+      getFillColor: [200, 0, 80],
+      pickable: true
+    })
+  ],
+  widgets: [
+    new InfoWidget({
+      mode: 'hover',
+      getTooltip: (info: PickingInfo<BartStation>) =>
+        info.object && {
+          text: info.object.name
+        },
+      style: {minWidth: '160px', fontSize: '12px'}
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useCallback} from 'react';
+import DeckGL, {_InfoWidget as InfoWidget} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import type {PickingInfo} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+type BartStation = {
+  name: string;
+  coordinates: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layers = [
+    new ScatterplotLayer<BartStation>({
+      id: 'points',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+      getPosition: d => d.coordinates,
+      getRadius: 100,
+      getFillColor: [200, 0, 80],
+      pickable: true
+    })
+  ];
+
+  const getTooltip = useCallback((info: PickingInfo<BartStation>) => {
+    return info.object && {
+      text: info.object.name
+    };
+  }, []);
+
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: -122.4,
+        latitude: 37.78,
+        zoom: 10
+      }}
+      controller
+      layers={layers}
+    >
+      <InfoWidget
+        mode="hover"
+        getTooltip={getTooltip}
+        style={{minWidth: '160px', fontSize: '12px'}}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Installation
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/widgets
+```
+
+```ts
+import {_InfoWidget as InfoWidget, type InfoWidgetProps} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+new InfoWidget({} satisfies InfoWidgetProps);
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+```
+
+```js
+new deck._InfoWidget({});
 ```
 
 ## Types

@@ -3,6 +3,8 @@
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
 import {ThemeWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <ThemeWidgetDemo />
 
@@ -13,16 +15,86 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
 :::
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new ThemeWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
-  widgets: [new ThemeWidget()]
+  widgets: [
+    new ThemeWidget({placement: 'top-left'})
+  ]
 });
 ```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_ThemeWidget as ThemeWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <ThemeWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Installation
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/widgets
+```
+
+```ts
+import {_ThemeWidget as ThemeWidget, type ThemeWidgetProps} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+new ThemeWidget({} satisfies ThemeWidgetProps);
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+```
+
+```js
+new deck._ThemeWidget({});
+```
+
+## Types
 
 ### `ThemeWidgetProps` {#themewidgetprops}
 
@@ -40,7 +112,7 @@ Styles for light mode theme.
 
 Styles for dark mode theme.
 
-#### `initialTheme` (`'auto' | 'light' | 'dark'`) {#initialtheme}
+#### `initialThemeMode` (`'auto' | 'light' | 'dark'`) {#initialthememode}
 
 * Default: `'auto'`
 
@@ -48,15 +120,15 @@ Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-sche
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
-* Default: `'Light Theme'`
+* Default: `'Light Mode'`
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+Tooltip message displayed while hovering a mouse over the widget when light mode is available.
 
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
-* Default: `'Dark Theme'`
+* Default: `'Dark Mode'`
 
-Tooltip message displayed while hovering a mouse over the widget when fullscreen.
+Tooltip message displayed while hovering a mouse over the widget when dark mode is available.
 
 ## Styles
 

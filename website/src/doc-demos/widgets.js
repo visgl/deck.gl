@@ -8,6 +8,7 @@ import {
   ResetViewWidget,
   GimbalWidget,
   PopupWidget,
+  ScrollbarWidget,
   _ThemeWidget as ThemeWidget,
   _ContextMenuWidget as ContextMenuWidget,
   _FpsWidget as FpsWidget,
@@ -190,7 +191,7 @@ export function ResetViewWidgetDemo() {
     initialViewState: {
       longitude: -20,
       latitude: 15,
-      zoom: 0
+      zoom: 1
     }
   })]} />
 }
@@ -240,6 +241,44 @@ export function TimelineWidgetDemo() {
   ], []);
 
   return <NonGeoDemoBase layers={layers} widgets={widgets} />
+}
+function bounce(x, max) {
+  x = x % (max * 2);
+  return x >= max ? max - x : x;
+}
+export function ScrollbarWidgetDemo() {
+  const data = Array.from({length: 1000}, (_, i) => ({
+    position: [i * 100, 0, 0],
+    color: [bounce(i * 11, 255), bounce(i * 7, 255), 100]
+  }));
+  const layers = [
+    new ScatterplotLayer({
+      id: 'points',
+      data: data,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      getRadius: 20,
+    })
+  ];
+  return <NonGeoDemoBase
+    views={new OrthographicView({id: 'ortho'})}
+    controller={{scrollZoom: false}}
+    layers={layers}
+    widgets={[
+      new ZoomWidget(),
+      new ResetViewWidget(),
+      new ScrollbarWidget({
+        placement: 'bottom-right',
+        viewId: 'ortho',
+        contentBounds: [
+          [-100, 0, 0],
+          [100 * 1001, 10, 0]
+        ],
+        orientation: 'horizontal',
+        captureWheel: true
+      })
+    ]}
+  />
 }
 export function GeocoderWidgetDemo() {
   return <GeoDemoBase map mapLabels widgets={[new GeocoderWidget({

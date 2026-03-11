@@ -3,25 +3,116 @@
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
 import {ZoomWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <ZoomWidgetDemo />
 
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ZoomWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ZoomWidget()]
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-### `ZoomProps` {#zoomprops}
+  </TabItem>
+  <TabItem value="react" label="React">
 
-The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
+```tsx
+import React from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Installation
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/widgets
+```
+
+```ts
+import {ZoomWidget, type ZoomWidgetProps} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+new ZoomWidget({} satisfies ZoomWidgetProps);
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+```
+
+```js
+new deck.ZoomWidget({});
+```
+
+## Types
+
+### `ZoomWidgetProps` {#zoomwidgetprops}
+
+The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `orientation` (string, optional) {#orientation}
 

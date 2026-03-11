@@ -2,31 +2,160 @@
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
-This widget provides a time slider with play/pause controls. Configure a time range, step interval, and play speed to animate data over time.
-
-## Usage
-
 import {TimelineWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <TimelineWidgetDemo />
 
+This widget provides a time slider with play/pause controls. Configure a time range, step interval, and play speed to animate data over time.
 
-```ts
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
 import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-new Deck({
+let time = 0;
+
+const renderLayer = currentTime =>
+  new ScatterplotLayer({
+    id: 'point',
+    data: [{position: [0, 0]}],
+    getPosition: d => d.position,
+    getRadius: 1000 + currentTime * 200,
+    getFillColor: [200, 0, 80]
+  });
+
+const deck = new Deck({
+  layers: [renderLayer(time)],
   widgets: [
     new TimelineWidget({
-      timeRange: [0, 24],
+      timeRange: [0, 10],
       step: 1,
-      playInterval: 500
+      playInterval: 250,
+      autoPlay: true,
+      onTimeChange: value => {
+        time = value;
+        deck.setProps({layers: [renderLayer(time)]});
+      }
     })
   ]
 });
 ```
 
-### `TimelineProps` {#timelineprops}
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+type Point = {position: [number, number]};
+
+let time = 0;
+
+const renderLayer = (currentTime: number) =>
+  new ScatterplotLayer<Point>({
+    id: 'point',
+    data: [{position: [0, 0]}],
+    getPosition: d => d.position,
+    getRadius: 1000 + currentTime * 200,
+    getFillColor: [200, 0, 80]
+  });
+
+const deck = new Deck({
+  layers: [renderLayer(time)],
+  widgets: [
+    new TimelineWidget({
+      timeRange: [0, 10],
+      step: 1,
+      playInterval: 250,
+      autoPlay: true,
+      onTimeChange: (value: number) => {
+        time = value;
+        deck.setProps({layers: [renderLayer(time)]});
+      }
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_TimelineWidget as TimelineWidget} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [time, setTime] = useState(0);
+
+  return (
+    <DeckGL
+      layers={[
+        new ScatterplotLayer({
+          id: 'point',
+          data: [{position: [0, 0]}],
+          getPosition: d => d.position,
+          getRadius: 1000 + time * 200,
+          getFillColor: [200, 0, 80]
+        })
+      ]}
+    >
+      <TimelineWidget
+        timeRange={[0, 10]}
+        step={1}
+        playInterval={250}
+        autoPlay
+        onTimeChange={setTime}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Installation
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/widgets @deck.gl/react
+```
+
+```ts
+import {_TimelineWidget as TimelineWidget, type TimelineWidgetProps} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+```
+
+```js
+new deck._TimelineWidget({});
+```
+
+## Types
+
+### `TimelineWidgetProps` {#timelinewidgetprops}
 
 The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
@@ -99,10 +228,10 @@ timelineWidget.play();
 
 Start playback.
 
-#### `pause`
+#### `stop`
 
 ```ts
-timelineWidget.pause();
+timelineWidget.stop();
 ```
 
 Stop playback.
