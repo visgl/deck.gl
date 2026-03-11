@@ -187,13 +187,13 @@ Starting value of the slider.
 
 Callback invoked when the time value changes (drag or play).
 
-#### `autoPlay` (boolean, optional)
+#### `autoPlay` (boolean, optional) {#autoplay}
 
 * Default: `false`
 
 Start playing automatically.
 
-#### `loop` (boolean, optional)
+#### `loop` (boolean, optional) {#loop}
 
 * Default: `false`
 
@@ -205,7 +205,7 @@ Start playing from the beginning when time reaches the end.
 
 Interval in milliseconds between automatic time increments when playing.
 
-#### `formatLabel` (function, optional)
+#### `formatLabel` (function, optional) {#formatlabel}
 
 ```ts
 (value: number) => string
@@ -213,14 +213,14 @@ Interval in milliseconds between automatic time increments when playing.
 
 Format time value for display.
 
-#### `timeline` (Timeline, optional)
+#### `timeline` (Timeline, optional) {#timeline}
 
 A [Timeline](https://luma.gl/docs/api-reference/engine/animation/timeline) instance that is manipulated by this widget.
 
 
 ## Methods
 
-#### `play`
+#### `play` {#play}
 
 ```ts
 timelineWidget.play();
@@ -228,7 +228,7 @@ timelineWidget.play();
 
 Start playback.
 
-#### `stop`
+#### `stop` {#stop}
 
 ```ts
 timelineWidget.stop();

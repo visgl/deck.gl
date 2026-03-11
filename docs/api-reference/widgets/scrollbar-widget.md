@@ -176,7 +176,7 @@ new deck.ScrollbarWidget({});
 
 ## Types
 
-### `ScrollbarWidgetProps`
+### `ScrollbarWidgetProps` {#scrollbarwidgetprops}
 
 The `ScrollbarWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 

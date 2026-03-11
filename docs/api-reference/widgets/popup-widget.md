@@ -217,7 +217,7 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name            | Type                     | Default                                         |
 | --------------- | ------------------------ | ----------------------------------------------- |

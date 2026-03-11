@@ -116,7 +116,7 @@ Tooltip message displayed while hovering a mouse over the widget when fullscreen
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name                      | Type                     | Default                                                      |
 | ------------------------- | ------------------------ | ------------------------------------------------------------ |

@@ -133,7 +133,7 @@ new deck._SplitterWidget({});
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### `viewLayout` (ViewLayout, required)
+#### `viewLayout` (ViewLayout, required) {#viewlayout}
 
 Layout descriptor of how views are arranged on the canvas. Contains the following fields:
 
