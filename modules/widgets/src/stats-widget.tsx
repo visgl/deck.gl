@@ -6,6 +6,7 @@ import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render} from 'preact';
 import type {Stats, Stat} from '@probe.gl/stats';
+import {IconButton} from './lib/components/icon-button';
 
 const DEFAULT_COUNT_FORMATTER = (stat: Stat): string => `${stat.name}: ${stat.count}`;
 
@@ -69,6 +70,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   placement = 'top-left' as WidgetPlacement;
 
   private _counter = 0;
+  private _lastFps = -1;
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
   collapsed: boolean = true;
@@ -105,6 +107,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     const stats = this._getStats();
     const collapsed = this.collapsed;
     const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
+    const fps = this._getFps();
     const items: JSX.Element[] = [];
 
     if (!collapsed && stats) {
@@ -124,17 +127,36 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     }
 
     render(
-      <div className="deck-widget-stats-container" style={{cursor: 'default'}}>
-        <div
-          className="deck-widget-stats-header"
-          style={{cursor: 'pointer', pointerEvents: 'auto'}}
-          onClick={this._toggleCollapsed}
-        >
-          <b>{title}</b>
-          <button className="deck-widget-dropdown-button">
-            <span className={`deck-widget-dropdown-icon ${collapsed ? '' : 'open'}`} />
-          </button>
-        </div>
+      <div
+        className={`deck-widget-stats-container ${collapsed ? 'deck-widget-stats-container-collapsed' : ''}`}
+        style={{cursor: 'default'}}
+      >
+        {collapsed ? (
+          <div className="deck-widget-stats-collapsed">
+            <IconButton
+              className="deck-widget-stats-toggle"
+              label="Show stats"
+              onClick={this._toggleCollapsed}
+            >
+              <div className="text">
+                FPS
+                <br />
+                {fps}
+              </div>
+            </IconButton>
+          </div>
+        ) : (
+          <div
+            className="deck-widget-stats-header"
+            style={{cursor: 'pointer', pointerEvents: 'auto'}}
+            onClick={this._toggleCollapsed}
+          >
+            <b>{title}</b>
+            <button className="deck-widget-dropdown-button">
+              <span className={`deck-widget-dropdown-icon open`} />
+            </button>
+          </div>
+        )}
         {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
       </div>,
       rootElement
@@ -142,8 +164,16 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   }
 
   onRedraw(): void {
+    const fps = this._getFps();
+    if (this.collapsed && this._lastFps !== fps) {
+      this._lastFps = fps;
+      this.updateHTML();
+      return;
+    }
+
     const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
     if (this._counter++ % framesPerUpdate === 0) {
+      this._lastFps = fps;
       this.updateHTML();
     }
   }
@@ -170,8 +200,14 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
   protected _toggleCollapsed = (): void => {
     this.collapsed = !this.collapsed;
+    this._lastFps = this._getFps();
     this.updateHTML();
   };
+
+  protected _getFps(): number {
+    // @ts-expect-error metrics is protected
+    return Math.round(this.deck?.metrics.fps ?? 0);
+  }
 
   protected _getLines(stat: Stat | [key: string, value: number]): string {
     if ('count' in stat) {

@@ -257,19 +257,6 @@
   padding: 4px;
 }
 
-/* FPS widget styles */
-
-.deck-widget.deck-widget-fps button {
-  pointer-events: none;
-}
-
-.deck-widget.deck-widget-fps .text {
-  color: var(--button-text, rgb(24, 24, 26));
-  font-family: monospace;
-  font-size: 8px;
-  font-weight: 700;
-}
-
 /* Loading styles */
 @keyframes spin {
   to {
@@ -462,6 +449,19 @@
   background-color: var(--menu-background, #fff);
   color: var(--menu-text, rgb(24, 24, 26));
   box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+}
+.deck-widget-stats-container.deck-widget-stats-container-collapsed {
+  background: none;
+  box-shadow: none;
+}
+.deck-widget-stats-collapsed .deck-widget-button {
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+}
+.deck-widget-stats-collapsed .deck-widget-icon-button .text {
+  color: var(--button-text, rgb(24, 24, 26));
+  font-family: monospace;
+  font-size: 8px;
+  font-weight: 700;
 }
 .deck-widget-stats-header {
   color: var(--button-icon-idle, rgba(97, 97, 102, 1));

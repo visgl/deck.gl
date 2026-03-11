@@ -5,7 +5,7 @@ import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
-Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget.
+Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget. When collapsed, it shows the current FPS in a compact button UI.
 
 ## Usage
 
@@ -77,7 +77,8 @@ Whether to reset particular stats after each update.
 
 ## Behavior
 
-- Click the header to expand/collapse the stats display
+- When collapsed, click the FPS button to expand the stats display
+- When expanded, click the header to collapse the stats display
 - Stats are automatically updated based on `framesPerUpdate`
 - Different stat types provide access to various performance metrics:
   - `'deck'`: deck.gl rendering statistics
