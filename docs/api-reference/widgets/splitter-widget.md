@@ -1,18 +1,11 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_SplitterWidget} from '@deck.gl/widgets';
-
 # SplitterWidget (Experimental)
 
-<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+<img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
-This widget renders a draggable splitter line across the deck.gl canvas to divide two views. It supports both vertical and horizontal orientations, allowing users to compare two views (e.g., two map or globe views) by dragging the splitter handle.
+This widget lets the user to resize multiple views (e.g., two map or globe views) across the deck.gl canvas, by draggable splitter handles between them. This widget will overwrite the `views` prop passed to Deck.
 
 ## Usage
 
-<WidgetPreview cls={_SplitterWidget} props={{
-  orientation: 'vertical',
-  initialSplit: 0.5
-}}/>
 
 ```ts
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
@@ -20,23 +13,24 @@ import {Deck} from '@deck.gl/core';
 import {MapView} from '@deck.gl/core';
 
 const deck = new Deck({
-  views: [
-    new MapView({id: 'view1', /* view settings */}),
-    new MapView({id: 'view2', /* view settings */})
-  ],
-  layers: [
-    // layers for view1 and view2
-  ],
+  layers: [],
   widgets: [
     new SplitterWidget({
-      viewId1: 'view1',
-      viewId2: 'view2',
-      orientation: 'vertical',
-      initialSplit: 0.5,
-      onChange: split => console.log('Split:', split),
-      onDragStart: () => console.log('Drag started'),
-      onDragEnd: () => console.log('Drag ended')
-    })
+      // style: DarkTheme,
+      viewLayout: {
+        orientation: 'horizontal',
+        views: [
+          new MapView({id: 'left', controller: true}),
+          {
+            orientation: 'vertical',
+            views: [
+              new MapView({id: 'right-top', controller: true}),
+              new MapView({id: 'right-bottom', controller: true}),
+            ],
+          }
+        ],
+      }
+    }),
   ]
 });
 ```
@@ -45,39 +39,29 @@ const deck = new Deck({
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### `viewId1` (string, required) {#viewid1}
+#### `viewLayout` (ViewLayout, required)
 
-* Default: `''`
+Layout descriptor of how views are arranged on the canvas. Contains the following fields:
 
-The `id` of the first (resizable) view.
+- `views` ([View](../core/view.md)[]) - two view instances used to compose this layout. `x`, `y`, `width` and `height` of the views' props at render time will be resolved according to the following settings as well as user input.
+- `orientation` (string, required) - the stacking orientation of the views. one of `'vertical'`, `'horizontal'`.
+- `initialSplit` (number, optional) - The ratio of view1's share over the whole available height (vertical) or width (horizontal). Between 0-1. Default `0.5`.
+- `editable` (boolean, optional) - Whether the split can be changed by dragging the border between the two views. Default `true`.
+- `minSplit` (number, optional) - Min value of the split. The user cannot make the first view smaller than this ratio. Default `0.05`.
+- `maxSplit` (number, optional) - Max value of the split. The user cannot make the first view larger than this ratio. Default `0.95`.
 
-#### `viewId2` (string, required) {#viewid2}
+You may also replace one or both item in `views` with a `ViewLayout` object, composing more than two views into a complex layout.
 
-* Default: `''`
-
-The `id` of the second view to compare against.
-
-#### `orientation` ('vertical' | 'horizontal', optional) {#orientation}
-
-* Default: `'vertical'`
-
-Orientation of the splitter line. Use `vertical` for side-by-side comparison or `horizontal` for top-bottom.
-
-#### `initialSplit` (number, optional) {#initialsplit}
-
-* Default: `0.5`
-
-Initial split ratio (between 0 and 1) for the first view.
 
 #### `onChange` (Function, optional) {#onchange}
 
 ```ts
-(newSplit: number) => void
+(views: View[]) => void
 ```
 
 * Default: `() => {}`
 
-Callback invoked during dragging with the updated split ratio.
+Callback invoked during dragging with the updated view instances
 
 #### `onDragStart` (Function, optional) {#ondragstart}
 
