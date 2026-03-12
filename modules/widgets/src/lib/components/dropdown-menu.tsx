@@ -4,6 +4,7 @@
 
 import {type JSX, type ComponentChild} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
+import {getCSSMask} from '../data-url';
 
 export type MenuItem = string | {label: string; value?: string; icon?: string};
 
@@ -92,10 +93,7 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
                 onClick={() => handleSelect(value)}
               >
                 {icon && (
-                  <span
-                    className="deck-widget-dropdown-item-icon"
-                    style={{maskImage: `url("${icon}")`, WebkitMaskImage: `url("${icon}")`}}
-                  />
+                  <span className="deck-widget-dropdown-item-icon" style={getCSSMask(icon)} />
                 )}
                 {getMenuItemLabel(item)}
               </li>
