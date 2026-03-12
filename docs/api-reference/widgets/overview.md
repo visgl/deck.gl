@@ -20,7 +20,6 @@ This module contains the following widgets:
 
 - [FullscreenWidget](./fullscreen-widget.md)
 - [SplitterWidget](./splitter-widget.md)
-- [ViewSelectorWidget](./view-selector-widget.md)
 
 ### Information Widgets
 
