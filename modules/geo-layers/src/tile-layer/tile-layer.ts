@@ -50,7 +50,8 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
-  zoomOffset: 0
+  zoomOffset: 0,
+  overdraw: true
 };
 
 /** All props supported by the TileLayer */
@@ -149,6 +150,16 @@ type _TileLayerProps<DataT> = {
    * @default 0
    */
   zoomOffset?: number;
+
+  /**
+   * Controls rendering behavior when viewport zoom is greater than maxZoom.
+   *
+   * When true (default), tiles at the clamped zoom level are shown.
+   * When false, no tiles are rendered.
+   *
+   * @default true
+   */
+  overdraw?: boolean;
 };
 
 export type TileLayerPickingInfo<
@@ -243,7 +254,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       minZoom,
       maxRequests,
       debounceTime,
-      zoomOffset
+      zoomOffset,
+      overdraw
     } = this.props;
 
     return {
@@ -257,6 +269,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxRequests,
       debounceTime,
       zoomOffset,
+      overdraw,
 
       getTileData: this.getTileData.bind(this),
       onTileLoad: this._onTileLoad.bind(this),

@@ -15,7 +15,11 @@ class MapTileDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/map-tile`;
 
   static parameters = {
-    showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false}
+    showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
+    minZoom: {displayName: 'Min Zoom', type: 'range', value: 0, step: 1, min: 0, max: 19},
+    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 19, step: 1, min: 0, max: 19},
+    overdraw: {displayName: 'Overdraw', type: 'checkbox', value: true},
+    useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
 
   static renderInfo(meta) {
@@ -44,7 +48,15 @@ class MapTileDemo extends Component {
     // eslint-disable-next-line no-unused-vars
     const {params, ...otherProps} = this.props;
     return (
-      <App {...otherProps} showBorder={params.showBorder.value} onTilesLoad={this._onTilesLoad} />
+      <App
+        {...otherProps}
+        showBorder={params.showBorder.value}
+        minZoom={params.minZoom.value}
+        maxZoom={params.maxZoom.value}
+        overdraw={params.overdraw.value}
+        useExtent={params.useExtent.value}
+        onTilesLoad={this._onTilesLoad}
+      />
     );
   }
 }
