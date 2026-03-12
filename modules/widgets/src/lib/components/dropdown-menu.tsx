@@ -11,15 +11,26 @@ export type MenuItem =
       value?: string;
       label: string;
       icon?: string;
-      disabled?: boolean;
       onSelect?: () => void;
     };
 
 export type DropdownMenuProps = {
   menuItems: MenuItem[];
-  onSelect?: (item: MenuItem) => void;
+  onSelect?: (value: string) => void;
   style?: Partial<CSSStyleDeclaration>;
 };
+
+function getMenuItemValue(item: MenuItem): string | undefined {
+  return typeof item === 'string' ? item : item.value;
+}
+
+function getMenuItemLabel(item: MenuItem): string {
+  return typeof item === 'string' ? item : item.label;
+}
+
+function getMenuItemIcon(item: MenuItem): string | undefined {
+  return typeof item === 'string' ? undefined : item.icon;
+}
 
 export const DropdownMenu = (props: DropdownMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,12 +71,14 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
     };
   }, []);
 
-  const handleSelect = (item: MenuItem) => {
-    if (typeof item === 'object') {
-      item.onSelect?.();
+  const handleSelect = (value: string | undefined, item: MenuItem) => {
+    if (value) {
+      if (typeof item === 'object') {
+        item.onSelect?.();
+      }
+      props.onSelect?.(value);
+      props.onClose();
     }
-    props.onSelect?.(item);
-    props.onClose();
   };
 
   // Don't render anything if there are no menu items
@@ -79,12 +92,13 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
       {props.isOpen && (
         <ul className="deck-widget-dropdown-menu" style={props.style as JSX.CSSProperties}>
           {props.menuItems.map((item, i) => {
-            const {disabled, label, icon} = typeof item === 'string' ? {label: item} : item;
+            const value = getMenuItemValue(item);
+            const icon = getMenuItemIcon(item);
             return (
               <li
-                className={`deck-widget-dropdown-item ${disabled ? 'disabled' : ''}`}
+                className={`deck-widget-dropdown-item ${value ? '' : 'disabled'}`}
                 key={i}
-                onClick={disabled ? undefined : () => handleSelect(item)}
+                onClick={() => handleSelect(value, item)}
               >
                 {icon && (
                   <span
@@ -92,7 +106,7 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
                     style={{maskImage: `url("${icon}")`, WebkitMaskImage: `url("${icon}")`}}
                   />
                 )}
-                {label}
+                {getMenuItemLabel(item)}
               </li>
             );
           })}

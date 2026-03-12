@@ -93,9 +93,8 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 Menu item definition:
 
 - `label` (string) - Display text for the menu item
-- `value` (string, optional) - Unique identifier for the menu item
+- `value` (string, optional) - Unique identifier for the menu item. If not supplied, then the item is not interactive.
 - `icon` (string, optional) - Data url of an icon that should be displayed with the menu item
-- `disabled` (boolean, optional) - If `true`, the item is not selectable
 - `onSelect` (function, optional) - Callback when this item is selected
 
 ## Source

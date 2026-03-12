@@ -17,7 +17,7 @@ export type ContextMenuWidgetProps = WidgetProps & {
   /** Callback to provide menu items for the menu given the picked object. Overrides `menuItems` */
   getMenuItems?: (info: PickingInfo, widget: ContextMenuWidget) => MenuItem[] | null;
   /** Callback when a menu item is selected */
-  onMenuItemSelected?: (item: MenuItem, pickInfo: PickingInfo | null) => void;
+  onMenuItemSelected?: (value: string, pickInfo: PickingInfo | null) => void;
   /** Position menu relative to the anchor.
    * @default 'bottom-start'
    */

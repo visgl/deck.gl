@@ -114,7 +114,7 @@ const deck = new Deck({
         const name = info.layer?.id === 'airports' && info.object?.properties.name;
         return (
           name && [
-            {label: `Airport: ${name}`, disabled: true},
+            {label: `Airport: ${name}`},
             {value: 'open', label: 'Open in new tab'},
             {value: 'favorite', label: 'Set as favorite'},
             {value: 'filter', label: 'Exclude from filter'}
