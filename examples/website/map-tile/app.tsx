@@ -22,6 +22,9 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
+// Approximate bounding box of France [west, south, east, north]
+const FRANCE_EXTENT = [-5.14, 41.33, 9.56, 51.09];
+
 const COPYRIGHT_LICENSE_STYLE: React.CSSProperties = {
   position: 'absolute',
   right: 0,
@@ -50,10 +53,18 @@ function getTooltip({tile}: TileLayerPickingInfo) {
 
 export default function App({
   showBorder = false,
-  onTilesLoad
+  onTilesLoad,
+  minZoom = 4,
+  maxZoom = 7,
+  overdraw = false,
+  useExtent = false
 }: {
   showBorder?: boolean;
   onTilesLoad?: () => void;
+  minZoom?: number;
+  maxZoom?: number;
+  overdraw?: boolean;
+  useExtent?: boolean;
 }) {
   const tileLayer = new TileLayer<ImageBitmap>({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
@@ -68,10 +79,12 @@ export default function App({
     autoHighlight: showBorder,
     highlightColor: [60, 60, 60, 40],
     // https://wiki.openstreetmap.org/wiki/Zoom_levels
-    minZoom: 0,
-    maxZoom: 19,
+    minZoom,
+    maxZoom,
     tileSize: 256,
     zoomOffset: devicePixelRatio === 1 ? -1 : 0,
+    overdraw,
+    extent: useExtent ? FRANCE_EXTENT : undefined,
     renderSubLayers: props => {
       const [[west, south], [east, north]] = props.tile.boundingBox;
       const {data, ...otherProps} = props;

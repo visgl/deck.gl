@@ -261,9 +261,15 @@ The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`)
 
 - Default: 0
 
+#### `overdraw` (boolean, optional) {#overdraw}
+
+Controls rendering behavior when viewport zoom is greater than maxZoom. When true (default), tiles at the clamped zoom level are shown. When false, no tiles are rendered.
+
+- Default: `true`
+
 #### `extent` (number[4], optional) {#extent}
 
-The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
+The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box.
 
 - Default: `null`
 
