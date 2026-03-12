@@ -5,25 +5,21 @@
 import {type JSX, type ComponentChild} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
 
-export type MenuItem = string | {label: string; value?: string; icon?: string};
+export type MenuItem =
+  | string
+  | {
+      id?: string;
+      label: string;
+      icon?: string;
+      disabled?: boolean;
+      onSelect?: () => void;
+    };
 
 export type DropdownMenuProps = {
   menuItems: MenuItem[];
-  onSelect: (value: string) => void;
+  onSelect?: (item: MenuItem) => void;
   style?: Partial<CSSStyleDeclaration>;
 };
-
-function getMenuItemValue(item: MenuItem): string | undefined {
-  return typeof item === 'string' ? item : item.value;
-}
-
-function getMenuItemLabel(item: MenuItem): string {
-  return typeof item === 'string' ? item : item.label;
-}
-
-function getMenuItemIcon(item: MenuItem): string | undefined {
-  return typeof item === 'string' ? undefined : item.icon;
-}
 
 export const DropdownMenu = (props: DropdownMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,24 +48,24 @@ export type SimpleMenuProps = DropdownMenuProps & {
 export const SimpleMenu = (props: SimpleMenuProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      props.onClose();
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        props.onClose();
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const handleSelect = (value?: string) => {
-    if (value) {
-      props.onSelect(value);
-      props.onClose();
+  const handleSelect = (item: MenuItem) => {
+    if (typeof item === 'object') {
+      item.onSelect?.();
     }
+    props.onSelect?.(item);
+    props.onClose();
   };
 
   // Don't render anything if there are no menu items
@@ -83,13 +79,12 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
       {props.isOpen && (
         <ul className="deck-widget-dropdown-menu" style={props.style as JSX.CSSProperties}>
           {props.menuItems.map((item, i) => {
-            const value = getMenuItemValue(item);
-            const icon = getMenuItemIcon(item);
+            const {disabled, label, icon} = typeof item === 'string' ? {label: item} : item;
             return (
               <li
-                className={`deck-widget-dropdown-item ${value ? '' : 'disabled'}`}
+                className={`deck-widget-dropdown-item ${disabled ? 'disabled' : ''}`}
                 key={i}
-                onClick={() => handleSelect(value)}
+                onClick={disabled ? undefined : () => handleSelect(item)}
               >
                 {icon && (
                   <span
@@ -97,7 +92,7 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
                     style={{maskImage: `url("${icon}")`, WebkitMaskImage: `url("${icon}")`}}
                   />
                 )}
-                {getMenuItemLabel(item)}
+                {label}
               </li>
             );
           })}

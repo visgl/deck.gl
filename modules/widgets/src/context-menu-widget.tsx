@@ -6,19 +6,18 @@
 import {Widget} from '@deck.gl/core';
 import type {Deck, PickingInfo, WidgetProps} from '@deck.gl/core';
 import {render, type JSX} from 'preact';
-import {SimpleMenu, SimpleMenuProps} from './lib/components/dropdown-menu';
+import {SimpleMenu, type MenuItem} from './lib/components/dropdown-menu';
 import {Popover, type PopoverProps} from './lib/components/popover';
 
 export type ContextMenuWidgetProps = WidgetProps & {
   /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
-  /** Provide menu items for the menu given the picked object */
-  getMenuItems: (
-    info: PickingInfo,
-    widget: ContextMenuWidget
-  ) => SimpleMenuProps['menuItems'] | null;
-  /** Callback with the selected item */
-  onMenuItemSelected?: (value: string, pickInfo: PickingInfo | null) => void;
+  /** Menu items for the menu. */
+  menuItems?: MenuItem[];
+  /** Callback to provide menu items for the menu given the picked object. Overrides `menuItems` */
+  getMenuItems?: (info: PickingInfo, widget: ContextMenuWidget) => MenuItem[] | null;
+  /** Callback when a menu item is selected */
+  onMenuItemSelected?: (item: MenuItem, pickInfo: PickingInfo | null) => void;
   /** Position menu relative to the anchor.
    * @default 'bottom-start'
    */
@@ -39,6 +38,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     ...Widget.defaultProps,
     id: 'context',
     viewId: null,
+    menuItems: [],
     getMenuItems: undefined!,
     onMenuItemSelected: () => {},
     placement: 'bottom-start',
@@ -50,7 +50,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
   placement = 'fill' as const;
 
   menu: {
-    items: SimpleMenuProps['menuItems'];
+    items: MenuItem[];
     pickInfo: PickingInfo;
   } | null = null;
 
@@ -77,7 +77,7 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
       index: -1,
       pixelRatio: 1
     };
-    const menuItems = this.props.getMenuItems(pickInfo, this) || [];
+    const menuItems = this.props.getMenuItems?.(pickInfo, this) || this.props.menuItems;
     this.menu =
       menuItems.length > 0
         ? {

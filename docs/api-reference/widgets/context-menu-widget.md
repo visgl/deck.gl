@@ -14,19 +14,23 @@ import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
 const deck = new Deck({
   widgets: [
     new ContextMenuWidget({
-      getMenuItems: (info, widget) => {
+      getMenuItems: (info) => {
         if (info.object) {
           return [
-            {value: 'delete', label: 'Delete pin'}
+            {
+              id: 'delete',
+              label: 'Delete pin',
+              onSelect: () => addPoint(info)
+            }
           ];
         }
         return [
-          {value: 'add', label: 'Add pin'}
+          {
+            id: 'add',
+            label: 'Add pin',
+            onSelect: () => deletePoint(info)
+          }
         ];
-      },
-      onMenuItemSelected: (key, pickInfo) => {
-        if (key === 'add') addPoint(pickInfo);
-        if (key === 'delete') deletePoint(pickInfo);
       }
     })
   ]
@@ -39,12 +43,18 @@ const deck = new Deck({
 
 The `ContextMenuWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### getMenuItems (Function)
+#### menuItems (ContextWidgetMenuItem[], optional)
+
+Items to display in the context menu. See [ContextWidgetMenuItem](#contextwidgetmenuitem).
+
+#### getMenuItems (Function, optional)
 
 Function that returns menu items based on the picked object. Receives the following parameters:
 - `pickInfo` ([PickingInfo](../../developer-guide/interactivity.md#picking)) - descriptor of what's under the pointer
 
 Expected to return an array of [ContextWidgetMenuItem](#contextwidgetmenuitem) objects, or `null` if no menu should be displayed.
+
+Overrides `menuItems` if supplied.
 
 #### onMenuItemSelected (Function, optional)
 
@@ -82,9 +92,11 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 
 Menu item definition:
 
+- `id` (string, optional) - Unique identifier of the item
 - `label` (string) - Display text for the menu item
-- `value` (string, optional) - Unique identifier for the menu item. If not supplied, then the item is not interactive.
 - `icon` (string, optional) - Data url of an icon that should be displayed with the menu item
+- `disabled` (boolean, optional) - If `true`, the item is not selectable
+- `onSelect` (function, optional) - Callback when this item is selected
 
 ## Source
 
