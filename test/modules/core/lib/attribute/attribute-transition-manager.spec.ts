@@ -37,7 +37,17 @@ const TEST_ATTRIBUTES = (function () {
   });
   instanceSizes.setData({value: new Float32Array(4)});
 
-  return {indices, instancePositions, instanceSizes};
+  const instanceColors = new Attribute(device, {
+    id: 'instanceColors',
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor',
+    defaultValue: [0, 0, 0, 255],
+    transition: true
+  });
+  instanceColors.setData({value: new Uint8ClampedArray(16)});
+
+  return {indices, instancePositions, instanceSizes, instanceColors};
 })();
 
 test('AttributeTransitionManager#constructor', t => {
@@ -63,16 +73,28 @@ test('AttributeTransitionManager#update', async t => {
   attributes.indices.setNeedsRedraw('initial');
   attributes.instanceSizes.setNeedsRedraw('initial');
   attributes.instancePositions.setNeedsRedraw('initial');
+  attributes.instanceColors.setNeedsRedraw('initial');
 
   manager.update({attributes, transitions: {}, numInstances: 4});
   t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
   t.notOk(manager.hasAttribute('instanceSizes'), 'no transition for instanceSizes');
   t.notOk(manager.hasAttribute('instancePositions'), 'no transition for instancePositions');
+  t.notOk(manager.hasAttribute('instanceColors'), 'no transition for instanceColors');
 
-  manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 0});
+  manager.update(
+    {attributes, transitions: {getSize: 1000, getElevation: 1000, getColor: 1000}, numInstances: 0}
+  );
   t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
   t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
   t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
+  t.ok(manager.hasAttribute('instanceColors'), 'added transition for instanceColors');
+
+  const colorTransition = manager.transitions.instanceColors;
+  t.is(
+    colorTransition.attributeInTransition.getBufferLayout().attributes![0].format,
+    'float32x4',
+    'normalized color transition uses float buffer layout'
+  );
 
   // byteLength = max(numInstances, 1) * 4. Later reallocation may skip the padding.
   const sizeTransition = manager.transitions.instanceSizes;
@@ -82,7 +104,9 @@ test('AttributeTransitionManager#update', async t => {
   t.ok(positionTransform, 'transform is constructed for instancePositions');
   delete attributes.instancePositions;
 
-  manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
+  manager.update(
+    {attributes, transitions: {getSize: 1000, getElevation: 1000, getColor: 1000}, numInstances: 4}
+  );
   t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
   t.notOk(manager.hasAttribute('instancePositions'), 'removed transition for instancePositions');
   t.notOk(positionTransform._handle, 'instancePositions transform is deleted');
