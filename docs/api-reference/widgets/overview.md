@@ -29,6 +29,9 @@ This module contains the following widgets:
 
 ### Control Widgets
 
+- [IconWidget](./icon-widget.md)
+- [ToggleWidget](./toggle-widget.md)
+- [SelectorWidget](./selector-widget.md)
 - [TimelineWidget](./timeline-widget.md)
 
 ### Utility Widgets
