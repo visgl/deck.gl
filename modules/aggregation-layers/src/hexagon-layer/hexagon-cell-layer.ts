@@ -108,11 +108,7 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     const elevationCutoff = this.props.elevationCutoff || [-Infinity, Infinity];
     const fillModel = this.state.fillModel!;
 
-    if (fillModel.vertexArray.indexBuffer) {
-      // indices are for drawing wireframe, disable them
-      // TODO - this should be handled in ColumnLayer?
-      fillModel.setIndexBuffer(null);
-    }
+    this._disableFillIndexBuffer();
     fillModel.setVertexCount(this.state.fillVertexCount);
 
     const hexagonProps: Omit<HexagonProps, 'colorRange'> = {
