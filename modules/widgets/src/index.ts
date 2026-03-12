@@ -30,7 +30,6 @@ export {TimelineWidget as _TimelineWidget} from './timeline-widget';
 export {ScreenshotWidget} from './screenshot-widget';
 export {ThemeWidget as _ThemeWidget} from './theme-widget';
 export {LoadingWidget as _LoadingWidget} from './loading-widget';
-export {FpsWidget as _FpsWidget} from './fps-widget';
 export {StatsWidget as _StatsWidget} from './stats-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';
@@ -40,7 +39,6 @@ export type {ScreenshotWidgetProps} from './screenshot-widget';
 export type {ResetViewWidgetProps} from './reset-view-widget';
 export type {GeocoderWidgetProps} from './geocoder-widget';
 export type {LoadingWidgetProps} from './loading-widget';
-export type {FpsWidgetProps} from './fps-widget';
 export type {ScaleWidgetProps} from './scale-widget';
 export type {ThemeWidgetProps} from './theme-widget';
 export type {InfoWidgetProps} from './info-widget';

@@ -23,7 +23,6 @@ export {SplitterWidget as _SplitterWidget} from './widgets/splitter-widget';
 export {ThemeWidget as _ThemeWidget} from './widgets/theme-widget';
 export {TimelineWidget as _TimelineWidget} from './widgets/timeline-widget';
 export {ViewSelectorWidget as _ViewSelectorWidget} from './widgets/view-selector-widget';
-export {FpsWidget as _FpsWidget} from './widgets/fps-widget';
 export {StatsWidget as _StatsWidget} from './widgets/stats-widget';
 export {useWidget} from './utils/use-widget';
 export type {
@@ -44,7 +43,6 @@ export type {
   ThemeWidgetProps,
   TimelineWidgetProps,
   ViewSelectorWidgetProps,
-  FpsWidgetProps,
   StatsWidgetProps
 } from '@deck.gl/widgets';
 

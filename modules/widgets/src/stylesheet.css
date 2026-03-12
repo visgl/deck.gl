@@ -257,19 +257,6 @@
   padding: 4px;
 }
 
-/* FPS widget styles */
-
-.deck-widget.deck-widget-fps button {
-  pointer-events: none;
-}
-
-.deck-widget.deck-widget-fps .text {
-  color: var(--button-text, rgb(24, 24, 26));
-  font-family: monospace;
-  font-size: 8px;
-  font-weight: 700;
-}
-
 /* Loading styles */
 @keyframes spin {
   to {
@@ -451,6 +438,12 @@
 }
 
 /* Stats styles */
+.deck-widget.deck-widget-stats button .text {
+  color: var(--button-text, rgb(24, 24, 26));
+  font-family: monospace;
+  font-size: 8px;
+  font-weight: 700;
+}
 .deck-widget-stats-container {
   border-radius: var(--button-corner-radius, 8px);
   display: inline-flex;
