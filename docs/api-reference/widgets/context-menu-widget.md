@@ -18,7 +18,7 @@ const deck = new Deck({
         if (info.object) {
           return [
             {
-              id: 'delete',
+              value: 'delete',
               label: 'Delete pin',
               onSelect: () => addPoint(info)
             }
@@ -26,7 +26,7 @@ const deck = new Deck({
         }
         return [
           {
-            id: 'add',
+            value: 'add',
             label: 'Add pin',
             onSelect: () => deletePoint(info)
           }
@@ -92,8 +92,8 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 
 Menu item definition:
 
-- `id` (string, optional) - Unique identifier of the item
 - `label` (string) - Display text for the menu item
+- `value` (string, optional) - Unique identifier for the menu item
 - `icon` (string, optional) - Data url of an icon that should be displayed with the menu item
 - `disabled` (boolean, optional) - If `true`, the item is not selectable
 - `onSelect` (function, optional) - Callback when this item is selected

@@ -8,7 +8,7 @@ import {useState, useRef, useEffect} from 'preact/hooks';
 export type MenuItem =
   | string
   | {
-      id?: string;
+      value?: string;
       label: string;
       icon?: string;
       disabled?: boolean;

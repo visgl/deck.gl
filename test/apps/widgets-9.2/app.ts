@@ -115,9 +115,9 @@ const deck = new Deck({
         return (
           name && [
             {label: `Airport: ${name}`, disabled: true},
-            {id: 'open', label: 'Open in new tab'},
-            {id: 'favorite', label: 'Set as favorite'},
-            {id: 'filter', label: 'Exclude from filter'}
+            {value: 'open', label: 'Open in new tab'},
+            {value: 'favorite', label: 'Set as favorite'},
+            {value: 'filter', label: 'Exclude from filter'}
           ]
         );
       },
