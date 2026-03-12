@@ -271,6 +271,7 @@
           "api-reference/extensions/fp64-extension",
           "api-reference/extensions/mask-extension",
           "api-reference/extensions/path-style-extension",
+          "api-reference/extensions/stroke-style-extension",
           "api-reference/extensions/terrain-extension"
         ]
       },

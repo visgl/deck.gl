@@ -8,6 +8,7 @@ import './collision-filter';
 import './clip.spec';
 import './fp64.spec';
 import './path.spec';
+import './stroke-style.spec';
 import './fill-style.spec';
 import './mask';
 import './terrain';
