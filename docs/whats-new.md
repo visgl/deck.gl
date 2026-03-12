@@ -36,7 +36,7 @@ Target release date: September, 2025
 
 - A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
   - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md)
-  - [FpsWidget](./api-reference/widgets/fps-widget.md)
+  - FpsWidget
   - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
   - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
   - [InfoWidget](./api-reference/widgets/info-widget.md)
