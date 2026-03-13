@@ -319,7 +319,6 @@
           "api-reference/widgets/styling",
           "api-reference/widgets/compass-widget",
           "api-reference/widgets/context-menu-widget",
-          "api-reference/widgets/fps-widget",
           "api-reference/widgets/fullscreen-widget",
           "api-reference/widgets/geocoder-widget",
           "api-reference/widgets/gimbal-widget",
