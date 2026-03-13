@@ -1,6 +1,6 @@
 # IconWidget
 
-<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+<img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
 This widget renders a single icon button. Use it for simple actions that should live alongside the other built-in deck.gl widgets.
 

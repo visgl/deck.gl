@@ -1,6 +1,6 @@
 # ToggleWidget
 
-<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+<img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
 This widget renders an icon button with internal on/off state. It is useful for lightweight toggles such as layer visibility, mode switches, or filter controls.
 

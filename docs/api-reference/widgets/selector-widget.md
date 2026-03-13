@@ -1,6 +1,6 @@
 # SelectorWidget
 
-<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+<img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
 This widget renders an icon button that opens a popover menu of selectable options. Each option provides an icon and an optional label, and the button updates to reflect the current selection.
 
