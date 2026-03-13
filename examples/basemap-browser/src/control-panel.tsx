@@ -56,6 +56,10 @@ function getDimensionsFromUrl(): Partial<Dimensions> {
     result.multiView = params.get('multiView') === 'true';
   }
 
+  if (params.has('billboard')) {
+    result.billboard = params.get('billboard') !== 'false';
+  }
+
   const stressTest = params.get('stressTest');
   if (
     stressTest === 'none' ||
@@ -80,6 +84,7 @@ function setUrlFromDimensions(dimensions: Dimensions) {
   params.set('batched', String(dimensions.batched));
   params.set('globe', String(dimensions.globe));
   params.set('multiView', String(dimensions.multiView));
+  params.set('billboard', String(dimensions.billboard));
   params.set('stressTest', dimensions.stressTest);
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', newUrl);
@@ -259,6 +264,18 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
               onChange={() => updateDimension('multiView', !dimensions.multiView)}
             />
             Multi-View
+          </label>
+        </div>
+
+        {/* Billboard Toggle */}
+        <div className="section">
+          <label>
+            <input
+              type="checkbox"
+              checked={dimensions.billboard}
+              onChange={() => updateDimension('billboard', !dimensions.billboard)}
+            />
+            Billboard (Icons/Text)
           </label>
         </div>
 
