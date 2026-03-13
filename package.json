@@ -48,7 +48,7 @@
     "@probe.gl/bench": "^4.1.1",
     "@vis.gl/dev-tools": "1.0.2",
     "@vis.gl/ts-plugins": "1.0.2",
-    "jsdom": "^20.0.0",
+    "jsdom": "^28.1.0",
     "pre-commit": "^1.2.2",
     "puppeteer": "^24.26.1",
     "s2-geometry": "^1.2.10",
