@@ -1,4 +1,4 @@
-# ContextMenuWidget (Experimental)
+# ContextMenuWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
@@ -16,7 +16,7 @@ Displays a context menu on right-click events with customizable menu items based
 ```js
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
+import {ContextMenuWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 let points = [[-122.4, 37.78]];
@@ -77,7 +77,7 @@ const deck = new Deck({
 ```ts
 import {Deck, type PickingInfo} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
+import {ContextMenuWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 type Point = [longitude: number, latitude: number];
@@ -139,7 +139,7 @@ const deck = new Deck({
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL, {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/react';
+import DeckGL, {ContextMenuWidget} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
@@ -206,7 +206,7 @@ function App() {
 ## Constructor
 
 ```ts
-import {_ContextMenuWidget as ContextMenuWidget, type ContextMenuWidgetProps} from '@deck.gl/widgets';
+import {ContextMenuWidget, type ContextMenuWidgetProps} from '@deck.gl/widgets';
 new ContextMenuWidget({} satisfies ContextMenuWidgetProps);
 ```
 

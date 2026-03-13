@@ -1,5 +1,20 @@
 # Upgrade Guide
 
+## Upgrading to v9.3
+
+### Widgets
+
+The following widgets have breaking changes in v9.3:
+
+- `ViewSelectorWidget` - removed. Use new [SelectorWidget](./api-reference/widgets/selector-widget.md) instead.
+- `FpsWidget` - removed. Use [StatsWidget](./api-reference/widgets/stats-widget.md) instead.
+- [InfoWidget](./api-reference/widgets/info-widget.md) - no longer experimental (removed underscore in export); `mode: 'static'` is removed and functionality is replaced by [PopupWidget](./api-reference/widgets/popup-widget.md).
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md) - configs are moved to a new prop `viewLayout` for more flexible controls. `onChange` callback signature is changed. See documentation for details.
+- [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) - no longer experimental (removed underscore in export)
+- [ThemeWidget](./api-reference/widgets/theme-widget.md) - no longer experimental (removed underscore in export)
+- [LoadingWidget](./api-reference/widgets/loading-widget.md) - no longer experimental (removed underscore in export)
+
+
 ## Upgrading to v9.1
 
 ### User input handling

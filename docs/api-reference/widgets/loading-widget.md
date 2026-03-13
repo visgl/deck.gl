@@ -1,4 +1,4 @@
-# LoadingWidget (Experimental)
+# LoadingWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
@@ -15,7 +15,7 @@ This widget shows a spinning indicator while any deck.gl layers are loading data
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
@@ -30,7 +30,7 @@ new Deck({
 
 ```ts
 import {Deck} from '@deck.gl/core';
-import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
@@ -45,7 +45,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {_LoadingWidget as LoadingWidget} from '@deck.gl/react';
+import DeckGL, {LoadingWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {
@@ -63,7 +63,7 @@ function App() {
 ## Constructor
 
 ```ts
-import {_LoadingWidget as LoadingWidget, type LoadingWidgetProps} from '@deck.gl/widgets';
+import {LoadingWidget, type LoadingWidgetProps} from '@deck.gl/widgets';
 new LoadingWidget({} satisfies LoadingWidgetProps);
 ```
 
