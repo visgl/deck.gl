@@ -1,4 +1,4 @@
-# ThemeWidget (Experimental)
+# ThemeWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
@@ -19,7 +19,7 @@ This widget changes the theme of deck.gl between light mode and dark mode. Click
   <TabItem value="js" label="JavaScript">
 
 ```js
-import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
+import {ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -34,7 +34,7 @@ new Deck({
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
+import {ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -50,7 +50,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {_ThemeWidget as ThemeWidget} from '@deck.gl/react';
+import DeckGL, {ThemeWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {
@@ -68,7 +68,7 @@ function App() {
 ## Constructor
 
 ```ts
-import {_ThemeWidget as ThemeWidget, type ThemeWidgetProps} from '@deck.gl/widgets';
+import {ThemeWidget, type ThemeWidgetProps} from '@deck.gl/widgets';
 new ThemeWidget({} satisfies ThemeWidgetProps);
 ```
 

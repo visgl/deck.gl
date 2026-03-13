@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {_ThemeWidget} from '@deck.gl/widgets';
+import {ThemeWidget as _ThemeWidget} from '@deck.gl/widgets';
 import type {ThemeWidgetProps} from '@deck.gl/widgets';
 import {useWidget} from '../utils/use-widget';
 

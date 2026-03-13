@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {_LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget as _LoadingWidget} from '@deck.gl/widgets';
 import type {LoadingWidgetProps} from '@deck.gl/widgets';
 import {useWidget} from '../utils/use-widget';
 
