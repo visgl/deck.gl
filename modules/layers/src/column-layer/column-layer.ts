@@ -378,6 +378,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     wireframeModel.setTopology('line-list');
   }
 
+  protected _disableFillIndexBuffer() {
+    const fillModel = this.state.fillModel!;
+    if (fillModel.vertexArray.indexBuffer) {
+      // Geometry indices are only for wireframe. Model rebuilds can reattach them.
+      fillModel.setIndexBuffer(null);
+    }
+  }
+
   draw({uniforms}) {
     const {
       lineWidthUnits,
@@ -398,6 +406,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const fillModel = this.state.fillModel!;
     const wireframeModel = this.state.wireframeModel!;
     const {fillVertexCount, edgeDistance} = this.state;
+
+    this._disableFillIndexBuffer();
 
     const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
