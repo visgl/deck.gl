@@ -1,40 +1,213 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
-
 # ContextMenuWidget (Experimental)
+
+<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ContextMenuWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ContextMenuWidgetDemo />
 
 Displays a context menu on right-click events with customizable menu items based on picked objects.
 
-<WidgetPreview cls={ContextMenuWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
+```js
 import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+let points = [[-122.4, 37.78]];
+
+const renderLayer = () =>
+  new ScatterplotLayer({
+    id: 'points',
+    data: points,
+    getPosition: d => d,
+    getRadius: 5000,
+    getFillColor: [200, 0, 80],
+    pickable: true
+  });
 
 const deck = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  },
+  controller: true,
+  layers: [renderLayer()],
   widgets: [
     new ContextMenuWidget({
-      getMenuItems: (info) => {
-        if (info.object) {
+      getMenuItems: info => {
+        if (info.layer?.id === 'points') {
           return [
             {
               value: 'delete',
-              label: 'Delete pin',
-              onSelect: () => addPoint(info)
+              label: 'Delete point',
+              onSelect: () => {
+                points = points.filter((_, index) => index !== info.index);
+                deck.setProps({layers: [renderLayer()]});
+              }
+            }
+          ];
+        } else {
+          return [
+            {
+              value: 'add',
+              label: 'Add point',
+              onSelect: () => {
+                points = points.concat([info.coordinate]);
+                deck.setProps({layers: [renderLayer()]});
+              }
             }
           ];
         }
-        return [
-          {
-            value: 'add',
-            label: 'Add pin',
-            onSelect: () => deletePoint(info)
-          }
-        ];
       }
     })
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, type PickingInfo} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+type Point = [longitude: number, latitude: number];
+
+let points: Point[] = [[-122.4, 37.78]];
+
+const renderLayer = () =>
+  new ScatterplotLayer<Point>({
+    id: 'points',
+    data: points,
+    getPosition: d => d,
+    getRadius: 5000,
+    getFillColor: [200, 0, 80],
+    pickable: true
+  });
+
+const deck = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  },
+  controller: true,
+  layers: [renderLayer()],
+  widgets: [
+    new ContextMenuWidget({
+      getMenuItems: (info: PickingInfo<Point>) => {
+        if (info.layer?.id === 'points') {
+          return [
+            {
+              value: 'delete',
+              label: 'Delete point',
+              onSelect: () => {
+                points = points.filter((_, index) => index !== info.index);
+                deck.setProps({layers: [renderLayer()]});
+              }
+            }
+          ];
+        } else {
+          return [
+            {
+              value: 'add',
+              label: 'Add point',
+              onSelect: () => {
+                points = points.concat([info.coordinate as Point]);
+                deck.setProps({layers: [renderLayer()]});
+              }
+            }
+          ];
+        }
+      }
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import DeckGL, {_ContextMenuWidget as ContextMenuWidget} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import type {PickingInfo} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+type Point = [longitude: number, latitude: number];
+
+function App() {
+  const [points, setPoints] = useState<Point[]>([[-122.4, 37.78]]);
+
+  const getMenuItems = useCallback(getMenuItems: (info: PickingInfo<Point>) => {
+    if (info.layer?.id === 'points') {
+      return [
+        {
+          value: 'delete',
+          label: 'Delete point',
+          onSelect: () => {
+            points = points.filter((_, index) => index !== info.index);
+            deck.setProps({layers: [renderLayer()]});
+          }
+        }
+      ];
+    } else {
+      return [
+        {
+          value: 'add',
+          label: 'Add point',
+          onSelect: () => {
+            points = points.concat([info.coordinate as Point]);
+            deck.setProps({layers: [renderLayer()]});
+          }
+        }
+      ];
+    }
+  }, []);
+
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: -122.4,
+        latitude: 37.78,
+        zoom: 10
+      }}
+      controller
+      layers={[
+        new ScatterplotLayer<Point>({
+          id: 'points',
+          data: points,
+          getPosition: d => d,
+          getRadius: 5000,
+          getFillColor: [200, 0, 80],
+          pickable: true
+        })
+      ]}
+    >
+      <ContextMenuWidget getMenuItems={getMenuItems} />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {_ContextMenuWidget as ContextMenuWidget, type ContextMenuWidgetProps} from '@deck.gl/widgets';
+new ContextMenuWidget({} satisfies ContextMenuWidgetProps);
 ```
 
 ## Types

@@ -6,6 +6,7 @@ export const MAPBOX_STYLES = {
   LIGHT: 'https://deck.gl/mapstyle/deck-light.json',
   LIGHT_LABEL: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   DARK: 'https://deck.gl/mapstyle/deck-dark.json',
+  DARK_LABEL: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
   BLANK: {
     version: 8,
     sources: {},

@@ -1,32 +1,140 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_TimelineWidget} from '@deck.gl/widgets';
-
 # TimelineWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {TimelineWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<TimelineWidgetDemo />
+
 This widget provides a time slider with play/pause controls. Configure a time range, step interval, and play speed to animate data over time.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-<WidgetPreview cls={_TimelineWidget}/>
-
-```ts
+```js
 import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-new Deck({
+let time = 0;
+
+const renderLayer = currentTime =>
+  new ScatterplotLayer({
+    id: 'point',
+    data: [{position: [0, 0]}],
+    getPosition: d => d.position,
+    getRadius: 1000 + currentTime * 200,
+    getFillColor: [200, 0, 80]
+  });
+
+const deck = new Deck({
+  layers: [renderLayer(time)],
   widgets: [
     new TimelineWidget({
-      timeRange: [0, 24],
+      timeRange: [0, 10],
       step: 1,
-      playInterval: 500
+      playInterval: 250,
+      autoPlay: true,
+      onTimeChange: value => {
+        time = value;
+        deck.setProps({layers: [renderLayer(time)]});
+      }
     })
   ]
 });
 ```
 
-### `TimelineProps` {#timelineprops}
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+type Point = {position: [number, number]};
+
+let time = 0;
+
+const renderLayer = (currentTime: number) =>
+  new ScatterplotLayer<Point>({
+    id: 'point',
+    data: [{position: [0, 0]}],
+    getPosition: d => d.position,
+    getRadius: 1000 + currentTime * 200,
+    getFillColor: [200, 0, 80]
+  });
+
+const deck = new Deck({
+  layers: [renderLayer(time)],
+  widgets: [
+    new TimelineWidget({
+      timeRange: [0, 10],
+      step: 1,
+      playInterval: 250,
+      autoPlay: true,
+      onTimeChange: (value: number) => {
+        time = value;
+        deck.setProps({layers: [renderLayer(time)]});
+      }
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_TimelineWidget as TimelineWidget} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [time, setTime] = useState(0);
+
+  return (
+    <DeckGL
+      layers={[
+        new ScatterplotLayer({
+          id: 'point',
+          data: [{position: [0, 0]}],
+          getPosition: d => d.position,
+          getRadius: 1000 + time * 200,
+          getFillColor: [200, 0, 80]
+        })
+      ]}
+    >
+      <TimelineWidget
+        timeRange={[0, 10]}
+        step={1}
+        playInterval={250}
+        autoPlay
+        onTimeChange={setTime}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {_TimelineWidget as TimelineWidget, type TimelineWidgetProps} from '@deck.gl/widgets';
+new TimelineWidget({} satisfies TimelineWidgetProps);
+```
+
+## Types
+
+### `TimelineWidgetProps` {#timelinewidgetprops}
 
 The `TimelineWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
@@ -58,13 +166,13 @@ Starting value of the slider.
 
 Callback invoked when the time value changes (drag or play).
 
-#### `autoPlay` (boolean, optional)
+#### `autoPlay` (boolean, optional) {#autoplay}
 
 * Default: `false`
 
 Start playing automatically.
 
-#### `loop` (boolean, optional)
+#### `loop` (boolean, optional) {#loop}
 
 * Default: `false`
 
@@ -76,7 +184,7 @@ Start playing from the beginning when time reaches the end.
 
 Interval in milliseconds between automatic time increments when playing.
 
-#### `formatLabel` (function, optional)
+#### `formatLabel` (function, optional) {#formatlabel}
 
 ```ts
 (value: number) => string
@@ -84,14 +192,14 @@ Interval in milliseconds between automatic time increments when playing.
 
 Format time value for display.
 
-#### `timeline` (Timeline, optional)
+#### `timeline` (Timeline, optional) {#timeline}
 
 A [Timeline](https://luma.gl/docs/api-reference/engine/animation/timeline) instance that is manipulated by this widget.
 
 
 ## Methods
 
-#### `play`
+#### `play` {#play}
 
 ```ts
 timelineWidget.play();
@@ -99,10 +207,10 @@ timelineWidget.play();
 
 Start playback.
 
-#### `pause`
+#### `stop` {#stop}
 
 ```ts
-timelineWidget.pause();
+timelineWidget.stop();
 ```
 
 Stop playback.

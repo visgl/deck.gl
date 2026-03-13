@@ -1,28 +1,96 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ZoomWidget} from '@deck.gl/widgets';
-
 # ZoomWidget
 
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
+import {ZoomWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ZoomWidgetDemo />
+
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-<WidgetPreview cls={ZoomWidget} props={{orientation: 'horizontal'}}/>
+```js
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ZoomWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ZoomWidget()]
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-### `ZoomProps` {#zoomprops}
+  </TabItem>
+  <TabItem value="react" label="React">
 
-The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
+```tsx
+import React from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ZoomWidget, type ZoomWidgetProps} from '@deck.gl/widgets';
+new ZoomWidget({} satisfies ZoomWidgetProps);
+```
+
+## Types
+
+### `ZoomWidgetProps` {#zoomwidgetprops}
+
+The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `orientation` (string, optional) {#orientation}
 
@@ -50,7 +118,7 @@ Zoom transition duration in milliseconds.
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name              | Type                     | Default                                     |
 | ----------------- | ------------------------ | ------------------------------------------- |

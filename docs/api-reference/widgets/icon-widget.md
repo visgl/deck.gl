@@ -2,26 +2,81 @@
 
 <img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
+import {IconWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<IconWidgetDemo />
+
 This widget renders a single icon button. Use it for simple actions that should live alongside the other built-in deck.gl widgets.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-
-```ts
+```js
 import {Deck} from '@deck.gl/core';
 import {IconWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [
     new IconWidget({
-      icon: `./action.svg`,
-      label: 'Custom action',
-      onClick: () => {
-        // do something
-      }
+      icon: `./run.svg`,
+      label: 'Run!',
+      onClick: () => alert('Running!')
     })
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {IconWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new IconWidget({
+      icon: `./run.svg`,
+      label: 'Run!',
+      onClick: () => alert('Running!')
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {IconWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <IconWidget
+        icon="./run.svg"
+        label="Run!"
+        onClick={() => alert('Running!')}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {IconWidget, type IconWidgetProps} from '@deck.gl/widgets';
+new IconWidget({} satisfies IconWidgetProps);
 ```
 
 ## Types

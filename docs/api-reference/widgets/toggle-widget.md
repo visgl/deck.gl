@@ -2,28 +2,90 @@
 
 <img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
+import {ToggleWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ToggleWidgetDemo />
+
 This widget renders an icon button with internal on/off state. It is useful for lightweight toggles such as layer visibility, mode switches, or filter controls.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-
-```ts
+```js
 import {Deck} from '@deck.gl/core';
 import {ToggleWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [
     new ToggleWidget({
-      icon: `./play.png`,
-      onIcon: `./pause.png`,
-      label: 'Play',
-      onLabel: 'Pause',
-      onChange: checked => {
-        // do something
-      }
+      icon: `./moon.png`,
+      onIcon: `./sun.png`,
+      label: 'Color mode',
+      color: 'dodgerblue',
+      onColor: 'orange',
+      onChange: checked => updateLayers(checked ? 'light' : 'dark')
     })
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {ToggleWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new ToggleWidget({
+      icon: `./moon.png`,
+      onIcon: `./sun.png`,
+      label: 'Color mode',
+      color: 'dodgerblue',
+      onColor: 'orange',
+      onChange: checked => updateLayers(checked ? 'light' : 'dark')
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {ToggleWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <ToggleWidget
+        icon="./moon.png"
+        onIcon="./sun.png"
+        label="Color mode"
+        color="dodgerblue"
+        onColor="orange"
+        onChange={checked => updateLayers(checked ? 'light' : 'dark')}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ToggleWidget, type ToggleWidgetProps} from '@deck.gl/widgets';
+new ToggleWidget({} satisfies ToggleWidgetProps);
 ```
 
 ## Types
@@ -50,7 +112,7 @@ Data URL used as the icon when the widget is checked.
 
 #### `label` (string, optional) {#label}
 
-Tooltip shown while the widget is unchecked.
+Tooltip message displayed while hovering over the widget.
 
 #### `onLabel` (string, optional) {#onlabel}
 
@@ -60,13 +122,13 @@ Tooltip shown while the widget is checked.
 
 #### `color` (string, optional) {#color}
 
-CSS color applied while the widget is unchecked.
+CSS color of the icon.
 
 #### `onColor` (string, optional) {#oncolor}
 
 * Default: same as `color`
 
-CSS color applied while the widget is checked.
+CSS color of the icon while the widget is checked.
 
 #### `onChange` (function, optional) {#onchange}
 

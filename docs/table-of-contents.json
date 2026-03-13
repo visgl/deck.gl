@@ -329,6 +329,7 @@
           "api-reference/widgets/reset-view-widget",
           "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/scrollbar-widget",
           "api-reference/widgets/selector-widget",
           "api-reference/widgets/splitter-widget",
           "api-reference/widgets/stats-widget",
