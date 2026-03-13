@@ -13,6 +13,9 @@ import {
   ScreenshotWidget,
   ResetViewWidget,
   PopupWidget,
+  IconWidget,
+  ToggleWidget,
+  SelectorWidget,
   _GeocoderWidget,
   _ScaleWidget,
   _LoadingWidget,
@@ -20,7 +23,6 @@ import {
   _InfoWidget,
   _ContextMenuWidget,
   _TimelineWidget,
-  _ViewSelectorWidget,
   _StatsWidget
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
@@ -144,8 +146,45 @@ const deck = new Deck({
           layers: getLayers([2, time])
         })
     }),
-    new _ViewSelectorWidget(),
-    new _StatsWidget({type: 'deck'})
+    new _StatsWidget({type: 'deck'}),
+    new IconWidget({
+      placement: 'top-right',
+      label: 'Run!',
+      icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 -960 960 960" width="100%" fill="currentColor"><path d="M520-40v-240l-84-80-40 176-276-56 16-80 192 40 64-324-72 28v136h-80v-188l158-68q35-15 51.5-19.5T480-720q21 0 39 11t29 29l40 64q26 42 70.5 69T760-520v80q-66 0-123.5-27.5T540-540l-24 120 84 80v300h-80Zm-36.5-723.5Q460-787 460-820t23.5-56.5Q507-900 540-900t56.5 23.5Q620-853 620-820t-23.5 56.5Q573-740 540-740t-56.5-23.5Z"/></svg>`,
+      onClick: () => console.log('Running...')
+    }),
+    new ToggleWidget({
+      placement: 'top-right',
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 -960 960 960" width="100%" fill="currentColor"><path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z"/></svg>',
+      onIcon:
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 -960 960 960" width="100%" fill="currentColor"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg>',
+      label: 'Favorite',
+      onLabel: 'Cancel',
+      onColor: 'skyblue',
+      onChange: checked => console.log(checked ? 'faved' : 'unfaved')
+    }),
+    new SelectorWidget({
+      placement: 'top-right',
+      initialValue: 'single',
+      options: [
+        {
+          value: 'single',
+          label: 'Single view',
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" /></svg>`
+        },
+        {
+          value: 'split-horizontal',
+          label: 'Split views horizontal',
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" stroke="currentColor" fill="none" stroke-width="2" /><rect x="4" y="13" width="16" height="7" stroke="currentColor" fill="none" stroke-width="2" /></svg>`
+        },
+        {
+          value: 'split-vertical',
+          label: 'Split views vertical',
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="16" stroke="currentColor" fill="none" stroke-width="2" /><rect x="13" y="4" width="7" height="16" stroke="currentColor" fill="none" stroke-width="2" /></svg>`
+        }
+      ],
+      onChange: console.log
+    })
   ]
 });
 

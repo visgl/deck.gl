@@ -20,7 +20,6 @@ This module contains the following widgets:
 
 - [FullscreenWidget](./fullscreen-widget.md)
 - [SplitterWidget](./splitter-widget.md)
-- [ViewSelectorWidget](./view-selector-widget.md)
 
 ### Information Widgets
 
@@ -29,6 +28,9 @@ This module contains the following widgets:
 
 ### Control Widgets
 
+- [IconWidget](./icon-widget.md)
+- [ToggleWidget](./toggle-widget.md)
+- [SelectorWidget](./selector-widget.md)
 - [TimelineWidget](./timeline-widget.md)
 
 ### Utility Widgets

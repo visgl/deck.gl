@@ -15,7 +15,6 @@ export {GeocoderWidget as _GeocoderWidget} from './geocoder-widget';
 // View widgets
 export {FullscreenWidget} from './fullscreen-widget';
 export {SplitterWidget as _SplitterWidget} from './splitter-widget';
-export {ViewSelectorWidget as _ViewSelectorWidget} from './view-selector-widget';
 
 // Information widgets
 export {InfoWidget as _InfoWidget} from './info-widget';
@@ -24,6 +23,9 @@ export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
 export {ScrollbarWidget} from './scrollbar-widget';
 
 // Control widgets
+export {IconWidget} from './icon-widget';
+export {ToggleWidget} from './toggle-widget';
+export {SelectorWidget} from './selector-widget';
 export {TimelineWidget as _TimelineWidget} from './timeline-widget';
 
 // Utility widgets
@@ -39,6 +41,8 @@ export type {ScreenshotWidgetProps} from './screenshot-widget';
 export type {ResetViewWidgetProps} from './reset-view-widget';
 export type {GeocoderWidgetProps} from './geocoder-widget';
 export type {LoadingWidgetProps} from './loading-widget';
+export type {IconWidgetProps} from './icon-widget';
+export type {ToggleWidgetProps} from './toggle-widget';
 export type {ScaleWidgetProps} from './scale-widget';
 export type {ThemeWidgetProps} from './theme-widget';
 export type {InfoWidgetProps} from './info-widget';
@@ -47,7 +51,7 @@ export type {StatsWidgetProps} from './stats-widget';
 export type {ContextMenuWidgetProps} from './context-menu-widget';
 export type {SplitterWidgetProps} from './splitter-widget';
 export type {TimelineWidgetProps} from './timeline-widget';
-export type {ViewSelectorWidgetProps} from './view-selector-widget';
+export type {SelectorWidgetProps} from './selector-widget';
 export type {GimbalWidgetProps} from './gimbal-widget';
 export type {ContentBounds, ScrollbarWidgetProps, ScrollbarDecoration} from './scrollbar-widget';
 
@@ -63,7 +67,6 @@ export {
   SimpleMenu as _SimpleMenu,
   type SimpleMenuProps
 } from './lib/components/dropdown-menu';
-export {IconMenu as _IconMenu, type IconMenuProps} from './lib/components/icon-menu';
 export {
   RangeInput as _RangeInput,
   type RangeInputProps,
