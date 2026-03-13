@@ -26,6 +26,8 @@ type DeckInstanceRef<ViewsT extends ViewOrViews> = {
   forceUpdate: () => void;
   version: number;
   control: React.ReactHTMLElement<HTMLElement> | null;
+  /** Saved view state used to restore Deck when re-shown via React 19 Activity */
+  savedViewState?: any;
 };
 
 // Remove prop types in the base Deck class that support externally supplied canvas/WebGLContext
@@ -192,13 +194,34 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   useEffect(() => {
     const DeckClass = props.Deck || Deck;
 
-    thisRef.deck = createDeckInstance(thisRef, DeckClass, {
+    const initProps: DeckProps<ViewsT> = {
       ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current
-    });
+    };
 
-    return () => thisRef.deck?.finalize();
+    // Restore view state if the component was previously hidden (e.g., via React 19 Activity).
+    // When Activity hides a component, React preserves ref state but runs effect cleanup,
+    // which would destroy the Deck instance. We save and restore the view state so that
+    // user interactions (pan/zoom) are not lost when the component is shown again.
+    if (thisRef.savedViewState) {
+      initProps.initialViewState = thisRef.savedViewState;
+      thisRef.savedViewState = undefined;
+    }
+
+    thisRef.deck = createDeckInstance(thisRef, DeckClass, initProps);
+
+    return () => {
+      if (thisRef.deck) {
+        // Save internal view state before destruction so it can be restored if this
+        // component is shown again after being hidden (e.g., via React 19 Activity).
+        // In controlled mode (props.viewState), viewState is managed externally so no save needed.
+        // @ts-expect-error accessing protected property
+        thisRef.savedViewState = thisRef.deck.viewState;
+        thisRef.deck.finalize();
+        thisRef.deck = undefined;
+      }
+    };
   }, []);
 
   useIsomorphicLayoutEffect(() => {
