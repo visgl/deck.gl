@@ -5,10 +5,9 @@
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render} from 'preact';
+import {useEffect, useState} from 'preact/hooks';
 import type {Stats, Stat} from '@probe.gl/stats';
-
-const RIGHT_ARROW = '\u25b6';
-const DOWN_ARROW = '\u2b07';
+import {IconButton} from './lib/components/icon-button';
 
 const DEFAULT_COUNT_FORMATTER = (stat: Stat): string => `${stat.name}: ${stat.count}`;
 
@@ -36,6 +35,10 @@ export type StatsWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Type of stats to display. */
   type?: 'deck' | 'luma' | 'device' | 'custom';
+  /** Expand the stats UI by default.
+   * @default false
+   */
+  defaultIsExpanded?: boolean;
   /** Stats object to visualize. */
   stats?: Stats;
   /** Title shown in the header of the pop-up. Defaults to stats.id. */
@@ -55,6 +58,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     type: 'deck',
     placement: 'top-left',
     viewId: null,
+    defaultIsExpanded: false,
     stats: undefined!,
     title: 'Stats',
     framesPerUpdate: 1,
@@ -75,6 +79,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
+    this.collapsed = !props.defaultIsExpanded;
     this.setProps(props);
   }
 
@@ -94,17 +99,25 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super.setProps(props);
   }
 
-  onAdd(): void {
-    this.updateHTML();
+  onRemove() {
+    if (this.rootElement) {
+      // Make sure all preact hooks are finalized
+      render(null, this.rootElement);
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const stats = this._getStats();
     const collapsed = this.collapsed;
+    if (collapsed) {
+      render(<FpsIcon getFps={this._getFps} onClick={this._toggleCollapsed} />, rootElement);
+      return;
+    }
+
+    const stats = this._getStats();
     const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
     const items: JSX.Element[] = [];
 
-    if (!collapsed && stats) {
+    if (stats) {
       stats.forEach(stat => {
         const lines = this._getLines(stat).split('\n');
         if (this._resetOnUpdate && this._resetOnUpdate[stat.name]) {
@@ -127,18 +140,23 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
           style={{cursor: 'pointer', pointerEvents: 'auto'}}
           onClick={this._toggleCollapsed}
         >
-          {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
+          <b>{title}</b>
+          <button className="deck-widget-dropdown-button">
+            <span className="deck-widget-dropdown-icon open" />
+          </button>
         </div>
-        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
+        <div className="deck-widget-stats-content">{items}</div>
       </div>,
       rootElement
     );
   }
 
   onRedraw(): void {
-    const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
-    if (this._counter++ % framesPerUpdate === 0) {
-      this.updateHTML();
+    if (!this.collapsed) {
+      const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
+      if (this._counter++ % framesPerUpdate === 0) {
+        this.updateHTML();
+      }
     }
   }
 
@@ -167,6 +185,11 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     this.updateHTML();
   };
 
+  protected _getFps = (): number => {
+    // @ts-expect-error metrics is protected
+    return Math.round(this.deck?.metrics.fps ?? 0);
+  };
+
   protected _getLines(stat: Stat | [key: string, value: number]): string {
     if ('count' in stat) {
       const formatter =
@@ -182,4 +205,28 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
     return `${key}: ${formattedValue}`;
   }
+}
+
+function FpsIcon({getFps, onClick}: {getFps: () => number; onClick: () => void}) {
+  const [fps, setFps] = useState(getFps());
+  useEffect(() => {
+    const onUpdate = () => {
+      setFps(getFps());
+      timer = requestAnimationFrame(onUpdate);
+    };
+    let timer = requestAnimationFrame(onUpdate);
+    return () => {
+      cancelAnimationFrame(timer);
+    };
+  }, [getFps]);
+
+  return (
+    <IconButton onClick={onClick}>
+      <div className="text">
+        FPS
+        <br />
+        {fps}
+      </div>
+    </IconButton>
+  );
 }

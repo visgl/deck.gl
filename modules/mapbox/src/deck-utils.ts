@@ -137,6 +137,10 @@ export function drawLayer(
     clearStack = true;
   }
 
+  if (!currentViewport) {
+    return;
+  }
+
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     layerFilter: params =>
@@ -165,6 +169,10 @@ export function drawLayerGroup(
     currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
+  }
+
+  if (!currentViewport) {
+    return;
   }
 
   deck._drawLayers('mapbox-repaint', {
@@ -301,7 +309,7 @@ type MaplibreRenderParameters = {
   projectionMatrix: number[];
 };
 
-function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport {
+function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport | null {
   const viewState = getViewState(map);
   // View is always MapView or GlobeView in this context
   const view = (deck.getView(MAPBOX_VIEW_ID) || getDefaultView(map)) as MapView | GlobeView;
@@ -327,7 +335,7 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
     width: deck.width,
     height: deck.height,
     viewState
-  }) as Viewport;
+  });
 }
 
 function afterRender(deck: Deck, map: Map): void {
@@ -341,7 +349,12 @@ function afterRender(deck: Deck, map: Map): void {
   if (hasNonMapboxLayers || hasNonMapboxViews) {
     if (mapboxViewportIdx >= 0) {
       viewports = viewports.slice();
-      viewports[mapboxViewportIdx] = getViewport(deck, map);
+      const mapboxViewport = getViewport(deck, map);
+      if (mapboxViewport) {
+        viewports[mapboxViewportIdx] = mapboxViewport;
+      } else {
+        viewports.splice(mapboxViewportIdx, 1);
+      }
     }
 
     deck._drawLayers('mapbox-repaint', {

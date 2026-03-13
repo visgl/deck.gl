@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {geomEach, along, rhumbBearing, lineDistance, lineString, booleanEqual} from '@turf/turf';
+import {geomEach, along, rhumbBearing, length, lineString, booleanEqual} from '@turf/turf';
 import type {FeatureCollection, Geometry, Feature, LineString} from 'geojson';
 
 export type Label<FeatureProperties> = {
@@ -31,7 +31,7 @@ export function calculateLabels<FeatureProperties>(
     //    1   2   3   <- depth 2
     //  1 2 3 4 5 6 7 <- depth 3
     const feature = lineString(coordinates, properties);
-    const lineLength = Math.floor(lineDistance(feature));
+    const lineLength = Math.floor(length(feature));
     let delta = lineLength / 2; // Spacing between points at level
     let depth = 1;
     while (delta > pointSpacing) {

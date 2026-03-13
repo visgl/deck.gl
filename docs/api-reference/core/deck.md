@@ -461,6 +461,7 @@ Receives arguments:
   + `isPanning` (boolean)
   + `isRotating` (boolean)
   + `isZooming` (boolean)
+  + `rotationPivotPosition` ([number, number, number]) - World coordinate `[lng, lat, altitude]` of the rotation pivot point when rotating. Only present when the `rotationPivot` controller option is set to `'2d'` or `'3d'`.
 * `oldViewState` - The previous [view state](../../developer-guide/views.md) object.
 
 Returns:
@@ -483,6 +484,7 @@ Receives arguments:
   + `isPanning` (boolean)
   + `isRotating` (boolean)
   + `isZooming` (boolean)
+  + `rotationPivotPosition` ([number, number, number]) - World coordinate `[lng, lat, altitude]` of the rotation pivot point when rotating. Only present when the `rotationPivot` controller option is set to `'2d'` or `'3d'`.
 
 Note:
 * `onInteractionStateChange` may be fired without `onViewStateChange`. For example, when the pointer is released at the end of a drag-pan, `isDragging` is reset to `false`, without the viewport's `longitude` and `latitude` changing.

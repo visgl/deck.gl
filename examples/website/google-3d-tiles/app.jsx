@@ -50,23 +50,27 @@ function getTooltip({object}) {
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
 
+  const onTraversalComplete = selectedTiles => {
+    const uniqueCredits = new Set();
+    selectedTiles.forEach(tile => {
+      const {copyright} = tile.content.gltf.asset;
+      copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
+    });
+    setCredits([...uniqueCredits].join('; '));
+    return selectedTiles;
+  };
+
   const layers = [
     new Tile3DLayer({
       id: 'google-3d-tiles',
       data: TILESET_URL,
-      onTilesetLoad: tileset3d => {
-        tileset3d.options.onTraversalComplete = selectedTiles => {
-          const uniqueCredits = new Set();
-          selectedTiles.forEach(tile => {
-            const {copyright} = tile.content.gltf.asset;
-            copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
-          });
-          setCredits([...uniqueCredits].join('; '));
-          return selectedTiles;
-        };
-      },
       loadOptions: {
-        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
+        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}},
+        tileset: {
+          maximumScreenSpaceError: 10,
+          maximumMemoryUsage: 128,
+          onTraversalComplete
+        }
       },
       operation: 'terrain+draw'
     }),

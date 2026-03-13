@@ -34,7 +34,7 @@ export default abstract class ViewState<
   abstract pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): T;
   abstract panEnd(): T;
 
-  abstract rotateStart(params: {pos: [number, number]}): T;
+  abstract rotateStart(params: {pos: [number, number]; altitude?: number}): T;
   abstract rotate(params: {pos?: [number, number]; deltaAngleX?: number; deltaAngleY: number}): T;
   abstract rotateEnd(): T;
 
@@ -77,7 +77,7 @@ export interface IViewState<T> {
   pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): T;
   panEnd(): T;
 
-  rotateStart(params: {pos: [number, number]}): T;
+  rotateStart(params: {pos: [number, number]; altitude?: number}): T;
   rotate(params: {pos?: [number, number]; deltaAngleX?: number; deltaAngleY?: number}): T;
   rotateEnd(): T;
 

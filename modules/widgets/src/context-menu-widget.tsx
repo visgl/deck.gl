@@ -5,32 +5,33 @@
 /* global document */
 import {Widget} from '@deck.gl/core';
 import type {Deck, PickingInfo, WidgetProps} from '@deck.gl/core';
-import {render} from 'preact';
-import {SimpleMenu} from './lib/components/simple-menu';
-
-/** The standard, modern way is to use event.button === 2, where button is the standardized property (0 = left, 1 = middle, 2 = right). */
-const MOUSE_BUTTON_RIGHT = 2;
-/** A name for the legacy MouseEvent.which value that corresponds to the right-mouse button. In older browsers, the check is: if (event.which === 3) */
-const MOUSE_WHICH_RIGHT = 3;
-
-export type ContextWidgetMenuItem = {
-  label: string;
-  key: string;
-};
+import {render, type JSX} from 'preact';
+import {SimpleMenu, SimpleMenuProps} from './lib/components/dropdown-menu';
+import {Popover, type PopoverProps} from './lib/components/popover';
 
 export type ContextMenuWidgetProps = WidgetProps & {
   /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
-  /** Controls visibility of the context menu */
-  visible?: boolean;
-  /** Screen position at which to place the menu */
-  position: {x: number; y: number};
-  /** Items to render */
-  menuItems: ContextWidgetMenuItem[];
   /** Provide menu items for the menu given the picked object */
-  getMenuItems: (info: PickingInfo, widget: ContextMenuWidget) => ContextWidgetMenuItem[] | null;
+  getMenuItems: (
+    info: PickingInfo,
+    widget: ContextMenuWidget
+  ) => SimpleMenuProps['menuItems'] | null;
   /** Callback with the selected item */
-  onMenuItemSelected?: (key: string, pickInfo: PickingInfo | null) => void;
+  onMenuItemSelected?: (value: string, pickInfo: PickingInfo | null) => void;
+  /** Position menu relative to the anchor.
+   * @default 'bottom-start'
+   */
+  placement?: PopoverProps['placement'];
+  /** Pixel offset
+   * @default 10
+   */
+  offset?: PopoverProps['offset'];
+  /**
+   * Show an arrow pointing at the anchor. Optionally accepts a pixel size.
+   * @default false
+   */
+  arrow?: PopoverProps['arrow'];
 };
 
 export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
@@ -38,83 +39,92 @@ export class ContextMenuWidget extends Widget<ContextMenuWidgetProps> {
     ...Widget.defaultProps,
     id: 'context',
     viewId: null,
-    visible: false,
-    position: {x: 0, y: 0},
     getMenuItems: undefined!,
-    menuItems: [],
-    // eslint-disable-next-line no-console
-    onMenuItemSelected: (key, pickInfo) => console.log('Context menu item selected:', key, pickInfo)
+    onMenuItemSelected: () => {},
+    placement: 'bottom-start',
+    offset: 10,
+    arrow: false
   };
 
   className = 'deck-widget-context-menu';
   placement = 'fill' as const;
 
-  pickInfo: PickingInfo | null = null;
+  menu: {
+    items: SimpleMenuProps['menuItems'];
+    pickInfo: PickingInfo;
+  } | null = null;
 
   constructor(props: ContextMenuWidgetProps) {
     super(props);
-    this.pickInfo = null;
     this.setProps(this.props);
   }
 
-  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
-    const element = document.createElement('div');
-    element.classList.add('deck-widget', 'deck-widget-context-menu');
-    const style = {
-      margin: '0px',
-      top: '0px',
-      left: '0px',
-      position: 'absolute',
-      pointerEvents: 'auto'
-    };
-    Object.entries(style).forEach(([key, value]) => element.style.setProperty(key, value));
-
-    deck.getCanvas()?.addEventListener('click', () => this.hide());
+  onAdd({deck}: {deck: Deck<any>}) {
     deck.getCanvas()?.addEventListener('contextmenu', event => this.handleContextMenu(event));
-    return element;
+  }
+
+  handleContextMenu(srcEvent: MouseEvent) {
+    const targetRect = (srcEvent.target as HTMLElement).getBoundingClientRect();
+    const x = srcEvent.clientX - targetRect.x;
+    const y = srcEvent.clientY - targetRect.y;
+
+    const pickInfo = this.deck?.pickObject({x, y}) || {
+      x,
+      y,
+      picked: false,
+      layer: null,
+      color: null,
+      index: -1,
+      pixelRatio: 1
+    };
+    const menuItems = this.props.getMenuItems(pickInfo, this) || [];
+    this.menu =
+      menuItems.length > 0
+        ? {
+            items: menuItems,
+            pickInfo
+          }
+        : null;
+    srcEvent.preventDefault();
+    this.updateHTML();
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {visible, position, menuItems} = this.props;
+    if (!this.menu) {
+      render(null, rootElement);
+      return;
+    }
+    const {items, pickInfo} = this.menu;
 
-    const ui =
-      visible && menuItems.length ? (
+    const style = {
+      pointerEvents: 'auto',
+      position: 'static',
+      ...this.props.style
+    };
+
+    const ui = (
+      <Popover
+        x={pickInfo.x}
+        y={pickInfo.y}
+        placement={this.props.placement}
+        arrow={this.props.arrow}
+        arrowColor="var(--menu-background, #fff)"
+        offset={this.props.offset}
+      >
         <SimpleMenu
-          menuItems={menuItems}
-          onItemSelected={key => this.props.onMenuItemSelected(key, this.pickInfo)}
-          position={position}
-          style={{pointerEvents: 'auto'}}
+          menuItems={items}
+          onSelect={value => this.props.onMenuItemSelected(value, pickInfo)}
+          style={style}
+          isOpen
+          onClose={() => this.hide()}
         />
-      ) : null;
+      </Popover>
+    );
     render(ui, rootElement);
   }
 
-  handleContextMenu(srcEvent: MouseEvent): boolean {
-    if (
-      srcEvent &&
-      (srcEvent.button === MOUSE_BUTTON_RIGHT || srcEvent.which === MOUSE_WHICH_RIGHT)
-    ) {
-      this.pickInfo =
-        this.deck?.pickObject({
-          x: srcEvent.clientX,
-          y: srcEvent.clientY
-        }) || null;
-      const menuItems = (this.pickInfo && this.props.getMenuItems?.(this.pickInfo, this)) || [];
-      const visible = menuItems.length > 0;
-      this.setProps({
-        visible,
-        position: {x: srcEvent.clientX, y: srcEvent.clientY},
-        menuItems
-      });
-      this.updateHTML();
-      srcEvent.preventDefault();
-      return visible;
-    }
-
-    return false;
-  }
-
-  hide(): void {
-    this.setProps({visible: false});
+  hide() {
+    this.menu = null;
+    this.updateHTML();
   }
 }

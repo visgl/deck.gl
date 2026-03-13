@@ -141,7 +141,9 @@ function resizeTexture(
     height: oldHeight
   });
   commandEncoder.finish();
-  newTexture.generateMipmapsWebGL();
+  if (device.type === 'webgl') {
+    newTexture.generateMipmapsWebGL();
+  }
 
   texture.destroy();
   return newTexture;
@@ -486,7 +488,9 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          this._texture?.generateMipmapsWebGL();
+          if (this.device.type === 'webgl') {
+            this._texture?.generateMipmapsWebGL();
+          }
 
           this.onUpdate(width !== maxWidth || height !== maxHeight);
         })

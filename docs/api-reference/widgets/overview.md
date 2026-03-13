@@ -33,7 +33,6 @@ This module contains the following widgets:
 
 ### Utility Widgets
 
-- [FpsWidget](./fps-widget.md)
 - [LoadingWidget](./loading-widget.md)
 - [ScreenshotWidget](./screenshot-widget.md)
 - [StatsWidget](./stats-widget.md)
