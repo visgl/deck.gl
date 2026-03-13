@@ -13,7 +13,6 @@ const _global: any = globalThis;
 
 /** global setTimeout, clearTimeout */
 _global.window = dom.window;
-_global.navigator = dom.window.navigator;
 _global.document = dom.window.document;
 _global.Element = dom.window.Element;
 _global.__JSDOM__ = true;
