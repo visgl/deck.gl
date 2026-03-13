@@ -150,33 +150,11 @@ function App() {
   </TabItem>
 </Tabs>
 
-## Installation
-
-```bash
-npm install deck.gl
-# or
-npm install @deck.gl/core @deck.gl/widgets
-```
+## Constructor
 
 ```ts
 import {_InfoWidget as InfoWidget, type InfoWidgetProps} from '@deck.gl/widgets';
-import '@deck.gl/widgets/stylesheet.css';
 new InfoWidget({} satisfies InfoWidgetProps);
-```
-
-To use pre-bundled scripts:
-
-```html
-<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
-<!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
-<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
-```
-
-```js
-new deck._InfoWidget({});
 ```
 
 ## Types

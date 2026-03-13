@@ -203,35 +203,12 @@ function App() {
   </TabItem>
 </Tabs>
 
-## Installation
-
-```bash
-npm install deck.gl
-# or
-npm install @deck.gl/core @deck.gl/layers @deck.gl/widgets @deck.gl/react
-```
+## Constructor
 
 ```ts
 import {_ContextMenuWidget as ContextMenuWidget, type ContextMenuWidgetProps} from '@deck.gl/widgets';
-import '@deck.gl/widgets/stylesheet.css';
 new ContextMenuWidget({} satisfies ContextMenuWidgetProps);
 ```
-
-To use pre-bundled scripts:
-
-```html
-<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
-<!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
-<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
-```
-
-```js
-new deck._ContextMenuWidget({});
-```
-
 
 ## Types
 

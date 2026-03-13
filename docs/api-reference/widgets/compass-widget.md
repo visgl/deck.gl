@@ -86,36 +86,13 @@ function App() {
   </TabItem>
 </Tabs>
 
-## Installation
-
-To install the dependencies from NPM:
-
-```bash
-npm install deck.gl
-# or
-npm install @deck.gl/core @deck.gl/widgets
-```
+## Constructor
 
 ```ts
 import {CompassWidget, type CompassWidgetProps} from '@deck.gl/widgets';
-import '@deck.gl/widgets/stylesheet.css';
 new CompassWidget({} satisfies CompassWidgetProps);
 ```
 
-To use pre-bundled scripts:
-
-```html
-<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-<link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
-<!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
-<link href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
-```
-
-```js
-new deck.CompassWidget({});
-```
 
 ## Types
 

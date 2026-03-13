@@ -9,6 +9,9 @@ import {
   GimbalWidget,
   PopupWidget,
   ScrollbarWidget,
+  IconWidget,
+  ToggleWidget,
+  SelectorWidget,
   _ThemeWidget as ThemeWidget,
   _ContextMenuWidget as ContextMenuWidget,
   _FpsWidget as FpsWidget,
@@ -69,7 +72,9 @@ function GeoDemoBase(deckProps) {
       pickable: true,
       autoHighlight: true,
     }),
-  ]
+  ];
+
+  const style = {...(isDarkMode ? DarkGlassTheme : LightGlassTheme), ...deckProps.style};
 
   return (
     <div style={DEMO_CONTAINER_STYLE}>
@@ -83,8 +88,8 @@ function GeoDemoBase(deckProps) {
         controller
         pickingRadius={5}
         layers={layers}
-        style={isDarkMode ? DarkGlassTheme : LightGlassTheme}
         {...deckProps}
+        style={style}
       >
         {deckProps.map && <Map reuseMaps mapStyle={deckProps.mapLabels
           ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
@@ -241,6 +246,101 @@ export function TimelineWidgetDemo() {
   ], []);
 
   return <NonGeoDemoBase layers={layers} widgets={widgets} />
+}
+export function IconWidgetDemo() {
+  return <GeoDemoBase viewState={{
+    longitude: 20,
+    latitude: 40,
+    zoom: 4,
+  }} widgets={[
+    new IconWidget({
+      label: 'Run!',
+      icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 -960 960 960" width="100%" fill="currentColor"><path d="M520-40v-240l-84-80-40 176-276-56 16-80 192 40 64-324-72 28v136h-80v-188l158-68q35-15 51.5-19.5T480-720q21 0 39 11t29 29l40 64q26 42 70.5 69T760-520v80q-66 0-123.5-27.5T540-540l-24 120 84 80v300h-80Zm-36.5-723.5Q460-787 460-820t23.5-56.5Q507-900 540-900t56.5 23.5Q620-853 620-820t-23.5 56.5Q573-740 540-740t-56.5-23.5Z"/></svg>`,
+      onClick: () => alert('Running!')
+    })
+  ]} />;
+}
+export function ToggleWidgetDemo() {
+  const [mode, setMode] = useState('light');
+  const layers = useMemo(() => {
+    return mode === 'light' ? getMVTLayer({
+      updateTriggers: {
+        getFillColor: [mode]
+      }
+    }) : getMVTLayer({
+      getLineColor: [132, 132, 132],
+      getFillColor: f => {
+        switch (f.properties.layerName) {
+          case 'poi':
+            return [255, 0, 0];
+          case 'water':
+            return [40, 60, 80];
+          case 'building':
+            return [30, 30, 30];
+          default:
+            return [168, 168, 168, 100];
+        }
+      },
+      updateTriggers: {
+        getFillColor: [mode]
+      }
+    });
+  }, [mode]);
+  const style = mode === 'light' ? null : {backgroundColor: 'black'};
+
+  return <GeoDemoBase 
+    layers={layers}
+    style={style}
+    widgets={[
+    new ToggleWidget({
+      initialChecked: true,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" ><circle cx="12" cy="12" r="6" fill="black" mask="url(%23moon-mask)" /><mask id="moon-mask" viewBox="0 0 24 24" ><rect x="0" y="0" width="24" height="24" fill="white" /><circle cx="24" cy="10" r="12" fill="black"/></mask></svg>',
+      onIcon:
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="black" stroke="black"><g ><circle cx="12" cy="12" r="6" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></g></svg>',
+      label: 'Color mode',
+      color: 'dodgerblue',
+      onColor: 'orange',
+      onChange: checked => setMode(checked ? 'light' : 'dark')
+    })
+  ]} />;
+}
+const ViewLayouts = {
+  single: [new MapView({id: 'main', controller: true})],
+  'split-vertical': [
+    new MapView({id: 'main', x: 0, width: '50%', controller: true}),
+    new MapView({id: 'right', x: '50%', width: '50%', controller: true})
+  ],
+  'split-horizontal': [
+    new MapView({id: 'main', y: 0, height: '50%', controller: true}),
+    new MapView({id: 'bottom', y: '50%', height: '50%', controller: true})
+  ]
+};
+export function SelectorWidgetDemo() {
+  const [viewLayout, setViewLayout] = useState('single');
+
+  return <GeoDemoBase views={ViewLayouts[viewLayout]} widgets={[
+    new SelectorWidget({
+      initialValue: 'single',
+      options: [
+        {
+          value: 'single',
+          label: 'Single view',
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" /></svg>`
+        },
+        {
+          value: 'split-horizontal',
+          label: 'Split views horizontal',
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" stroke="currentColor" fill="none" stroke-width="2" /><rect x="4" y="13" width="16" height="7" stroke="currentColor" fill="none" stroke-width="2" /></svg>`
+        },
+        {
+          value: 'split-vertical',
+          label: 'Split views vertical',
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="16" stroke="currentColor" fill="none" stroke-width="2" /><rect x="13" y="4" width="7" height="16" stroke="currentColor" fill="none" stroke-width="2" /></svg>`
+        }
+      ],
+      onChange: setViewLayout
+    })
+  ]} />;
 }
 function bounce(x, max) {
   x = x % (max * 2);
