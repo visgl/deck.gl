@@ -163,11 +163,11 @@ Callback invoked when a new option is selected.
 
 Value returned from `onChange` when this option is selected.
 
-#### `icon` (string, required) {#optionicon}
+#### `icon` (string, required) {#icon}
 
 Data URL used as the option icon mask.
 
-#### `label` (string, optional) {#optionlabel}
+#### `label` (string, optional) {#label}
 
 Text shown in the menu and used as the button tooltip when selected.
 

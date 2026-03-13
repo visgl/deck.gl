@@ -286,7 +286,7 @@ export function ToggleWidgetDemo() {
       }
     });
   }, [mode]);
-  const style = mode === 'light' ? null : {backgroundColor: 'black'};
+  const style = mode === 'light' ? {backgroundColor: 'white'} : {backgroundColor: 'black'};
 
   return <GeoDemoBase 
     layers={layers}
