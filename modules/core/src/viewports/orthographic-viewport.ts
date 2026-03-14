@@ -9,7 +9,8 @@ import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Padding} from './viewport';
 
-const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 1]});
+const DEGREES_TO_RADIANS = Math.PI / 180;
+const baseViewMatrix = new Matrix4().lookAt({eye: [0, 0, 1]});
 
 function getProjectionMatrix({
   width,
@@ -76,6 +77,8 @@ export type OrthographicViewportOptions = {
   far?: number;
   /** Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`. */
   flipY?: boolean;
+  /** Rotation angle around the Z axis, in degrees. Default `0`. */
+  rotationOrbit?: number;
 };
 
 export default class OrthographicViewport extends Viewport {
@@ -85,6 +88,7 @@ export default class OrthographicViewport extends Viewport {
   zoomX: number;
   zoomY: number;
   flipY: boolean;
+  rotationOrbit: number;
 
   constructor(props: OrthographicViewportOptions) {
     const {
@@ -95,7 +99,8 @@ export default class OrthographicViewport extends Viewport {
       zoom = 0,
       target = [0, 0, 0],
       padding = null,
-      flipY = true
+      flipY = true,
+      rotationOrbit = 0
     } = props;
     const zoomX = props.zoomX ?? (Array.isArray(zoom) ? zoom[0] : zoom);
     const zoomY = props.zoomY ?? (Array.isArray(zoom) ? zoom[1] : zoom);
@@ -113,13 +118,18 @@ export default class OrthographicViewport extends Viewport {
       };
     }
 
+    const viewMatrix = baseViewMatrix
+      .clone()
+      .rotateZ(-rotationOrbit * DEGREES_TO_RADIANS)
+      .scale([scale, scale * (flipY ? -1 : 1), scale]);
+
     super({
       ...props,
       // in case viewState contains longitude/latitude values,
       // make sure that the base Viewport class does not treat this as a geospatial viewport
       longitude: undefined,
       position: target,
-      viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
+      viewMatrix,
       projectionMatrix: getProjectionMatrix({
         width: width || 1,
         height: height || 1,
@@ -135,6 +145,7 @@ export default class OrthographicViewport extends Viewport {
     this.zoomX = zoomX;
     this.zoomY = zoomY;
     this.flipY = flipY;
+    this.rotationOrbit = rotationOrbit;
   }
 
   projectFlat([X, Y]: number[]): [number, number] {
