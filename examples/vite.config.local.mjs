@@ -1,3 +1,4 @@
+/* eslint-disable import/namespace */
 import {defineConfig} from 'vite';
 import {getOcularConfig} from '@vis.gl/dev-tools';
 import {join} from 'path';
