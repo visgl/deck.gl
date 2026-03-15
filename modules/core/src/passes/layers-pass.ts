@@ -65,7 +65,11 @@ export type RenderStats = {
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
-  render(options: LayersPassRenderOptions): any {
+  render(options: LayersPassRenderOptions): void {
+    this._render(options);
+  }
+
+  protected _render(options: LayersPassRenderOptions): RenderStats[] {
     const canvasContext = this.device.canvasContext!;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();

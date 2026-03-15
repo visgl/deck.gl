@@ -7,7 +7,8 @@ import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
-
+import type {RenderStats} from '../passes/layers-pass';
+import type {Stats} from '@probe.gl/stats';
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
@@ -24,14 +25,16 @@ export default class DeckRenderer {
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
   pickLayersPass: PickLayersPass;
+  stats?: Stats;
 
   private renderCount: number;
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
   private lastPostProcessEffect: string | null;
 
-  constructor(device: Device) {
+  constructor(device: Device, opts: {stats?: Stats} = {}) {
     this.device = device;
+    this.stats = opts.stats;
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(device);
@@ -88,7 +91,8 @@ export default class DeckRenderer {
       renderOpts.clearColor = [0, 0, 0, 0];
       renderOpts.clearCanvas = true;
     }
-    const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderResult = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderStats = 'stats' in renderResult ? renderResult.stats : renderResult;
 
     if (renderOpts.effects) {
       if (this.lastPostProcessEffect) {
@@ -102,6 +106,7 @@ export default class DeckRenderer {
     this.renderCount++;
 
     debug(TRACE_RENDER_LAYERS, this, renderStats, opts);
+    this._updateStats(renderStats);
   }
 
   needsRedraw(opts: {clearRedrawFlags: boolean} = {clearRedrawFlags: false}): string | false {
@@ -118,6 +123,15 @@ export default class DeckRenderer {
       buffer.delete();
     }
     renderBuffers.length = 0;
+  }
+
+  private _updateStats(source: RenderStats[]) {
+    if (!this.stats) return;
+    let layersCount = 0;
+    for (const {visibleCount} of source) {
+      layersCount += visibleCount;
+    }
+    this.stats.get('Layers rendered').addCount(layersCount);
   }
 
   private _preRender(effects: Effect[], opts: LayersPassRenderOptions) {

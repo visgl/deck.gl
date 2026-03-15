@@ -969,6 +969,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (!stateNeedsUpdate) {
       return;
     }
+    this.context.stats.get('Layer updates').incrementCount();
 
     const currentProps = this.props;
     const context = this.context;
