@@ -27,6 +27,8 @@ if (DOMWidgetModel) {
         custom_libraries: [],
         json_input: null,
         mapbox_key: null,
+        google_maps_key: null,
+        google_maps_map_id: null,
         selected_data: [],
         data_buffer: null,
         tooltip: null,

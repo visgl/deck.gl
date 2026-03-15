@@ -9,6 +9,7 @@ from pydeck.types.base import PydeckType
 IGNORE_KEYS = [
     "mapbox_key",
     "google_maps_key",
+    "google_maps_map_id",
     "deck_widget",
     "binary_data_sets",
     "_binary_data",

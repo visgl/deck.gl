@@ -13,6 +13,7 @@ export function createGoogleMapsDeckOverlay({
   onComplete,
   getTooltip,
   googleMapsKey,
+  googleMapsMapId,
   layers,
   mapStyle = 'satellite',
   initialViewState = {latitude: 0, longitude: 0, zoom: 1}
@@ -27,6 +28,9 @@ export function createGoogleMapsDeckOverlay({
     mapTypeId: mapStyle,
     zoom: initialViewState.zoom
   };
+  if (googleMapsMapId) {
+    view.mapId = googleMapsMapId;
+  }
 
   const map = new window.google.maps.Map(container, view);
   deckOverlay.setMap(map);

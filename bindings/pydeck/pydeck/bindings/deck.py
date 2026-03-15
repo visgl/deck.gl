@@ -62,6 +62,8 @@ class Deck(JSONMixin):
             Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
             and the values are the API key. Defaults to None if not set. Any of the environment variables
             ``MAPBOX_API_KEY``, ``GOOGLE_MAPS_API_KEY``, and ``CARTO_API_KEY`` can be set instead of hardcoding the key here.
+            If using Google Maps, you can also provide a ``google_maps_map_id`` in this dictionary to enable
+            Vector Map features (like 3D tilt and rotation), or set the ``GOOGLE_MAPS_MAP_ID`` environment variable.
         map_provider : str, default 'carto'
             If multiple API keys are set (e.g., both Mapbox and Google Maps), inform pydeck which basemap provider to prefer.
             Values can be ``carto``, ``mapbox``, ``google_maps``, or ``maplibre``.
@@ -151,15 +153,23 @@ class Deck(JSONMixin):
 
     def _set_api_keys(self, api_keys: dict = None):
         """Sets API key for base map provider for both HTML embedding and the Jupyter widget"""
+        valid_providers = [p.value for p in BaseMapProvider]
         for k in api_keys:
-            k and BaseMapProvider(k)
+            if k in valid_providers:
+                BaseMapProvider(k)
         for provider in BaseMapProvider:
             attr_name = f"{provider.value}_key"
             provider_env_var = f"{provider.name}_API_KEY"
-            attr_value = api_keys.get(provider.value) or os.getenv(provider_env_var)
+            attr_value = api_keys.get(provider.value) or api_keys.get(attr_name) or os.getenv(provider_env_var)
             setattr(self, attr_name, attr_value)
             if has_jupyter_extra():
                 setattr(self.deck_widget, attr_name, attr_value)
+
+        # Handle google_maps_map_id specifically
+        gm_map_id = api_keys.get("google_maps_map_id") or os.getenv("GOOGLE_MAPS_MAP_ID")
+        self.google_maps_map_id = gm_map_id
+        if has_jupyter_extra():
+            self.deck_widget.google_maps_map_id = gm_map_id
 
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
@@ -238,6 +248,7 @@ class Deck(JSONMixin):
             deck_json,
             mapbox_key=self.mapbox_key,
             google_maps_key=self.google_maps_key,
+            google_maps_map_id=self.google_maps_map_id,
             filename=filename,
             open_browser=open_browser,
             notebook_display=notebook_display,

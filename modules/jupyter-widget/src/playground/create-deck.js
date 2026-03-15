@@ -131,6 +131,7 @@ function createStandaloneFromProvider({
   props,
   mapboxApiKey,
   googleMapsKey,
+  googleMapsMapId,
   handleEvent,
   getTooltip,
   container,
@@ -183,7 +184,8 @@ function createStandaloneFromProvider({
       return createGoogleMapsDeckOverlay({
         ...sharedProps,
         ...props,
-        googleMapsKey
+        googleMapsKey,
+        googleMapsMapId
       });
     case 'maplibre':
       log.info('Using MapLibre')();
@@ -202,9 +204,10 @@ function createStandaloneFromProvider({
   }
 }
 
-function createDeck({
+export function createDeck({
   mapboxApiKey,
   googleMapsKey,
+  googleMapsMapId,
   container,
   jsonInput,
   tooltip,
@@ -251,6 +254,7 @@ function createDeck({
       props,
       mapboxApiKey,
       googleMapsKey,
+      googleMapsMapId,
       handleEvent,
       getTooltip,
       container,
@@ -284,4 +288,4 @@ function createDeck({
   return deckgl;
 }
 
-export {createDeck, updateDeck, jsonConverter};
+export {updateDeck, jsonConverter};
