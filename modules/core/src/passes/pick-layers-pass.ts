@@ -46,13 +46,17 @@ export default class PickLayersPass extends LayersPass {
     byAlpha: EncodedPickingColors[];
   } | null = null;
 
-  render(props: LayersPassRenderOptions | PickLayersPassRenderOptions) {
+  render(props: LayersPassRenderOptions | PickLayersPassRenderOptions): {
+    decodePickingColor: PickingColorDecoder | null;
+    stats: RenderStats[];
+  } {
     if ('pickingFBO' in props) {
       // When drawing into an off-screen buffer, use the alpha channel to encode layer index
       return this._drawPickingBuffer(props);
     }
     // When drawing to screen (debug mode), do not use the alpha channel so that result is always visible
-    return super.render(props);
+    const stats = super._render(props);
+    return {decodePickingColor: null, stats};
   }
 
   // Private
@@ -74,7 +78,7 @@ export default class PickLayersPass extends LayersPass {
     clearColor
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
-    stats: RenderStats;
+    stats: RenderStats[];
   } {
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
@@ -85,7 +89,7 @@ export default class PickLayersPass extends LayersPass {
     // Note that the callback here is called synchronously.
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    const renderStatus = super.render({
+    const renderStatus = super._render({
       target: pickingFBO,
       layers,
       layerFilter,
