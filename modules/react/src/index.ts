@@ -11,18 +11,20 @@ export {FullscreenWidget} from './widgets/fullscreen-widget';
 export {ZoomWidget} from './widgets/zoom-widget';
 export {GimbalWidget} from './widgets/gimbal-widget';
 export {GeocoderWidget as _GeocoderWidget} from './widgets/geocoder-widget';
-export {InfoWidget as _InfoWidget} from './widgets/info-widget';
+export {InfoWidget} from './widgets/info-widget';
 export {PopupWidget} from './widgets/popup-widget';
-export {ContextMenuWidget as _ContextMenuWidget} from './widgets/context-menu-widget';
+export {ContextMenuWidget} from './widgets/context-menu-widget';
 export {ScrollbarWidget} from './widgets/scrollbar-widget';
-export {LoadingWidget as _LoadingWidget} from './widgets/loading-widget';
+export {IconWidget} from './widgets/icon-widget';
+export {ToggleWidget} from './widgets/toggle-widget';
+export {SelectorWidget} from './widgets/selector-widget';
+export {LoadingWidget} from './widgets/loading-widget';
 export {ResetViewWidget as _ResetViewWidget} from './widgets/reset-view-widget';
 export {ScaleWidget as _ScaleWidget} from './widgets/scale-widget';
 export {ScreenshotWidget as _ScreenshotWidget} from './widgets/screenshot-widget';
 export {SplitterWidget as _SplitterWidget} from './widgets/splitter-widget';
-export {ThemeWidget as _ThemeWidget} from './widgets/theme-widget';
+export {ThemeWidget} from './widgets/theme-widget';
 export {TimelineWidget as _TimelineWidget} from './widgets/timeline-widget';
-export {ViewSelectorWidget as _ViewSelectorWidget} from './widgets/view-selector-widget';
 export {StatsWidget as _StatsWidget} from './widgets/stats-widget';
 export {useWidget} from './utils/use-widget';
 export type {
@@ -35,6 +37,9 @@ export type {
   PopupWidgetProps,
   ContextMenuWidgetProps,
   ScrollbarWidgetProps,
+  IconWidgetProps,
+  ToggleWidgetProps,
+  SelectorWidgetProps,
   LoadingWidgetProps,
   ResetViewWidgetProps,
   ScaleWidgetProps,
@@ -42,7 +47,6 @@ export type {
   SplitterWidgetProps,
   ThemeWidgetProps,
   TimelineWidgetProps,
-  ViewSelectorWidgetProps,
   StatsWidgetProps
 } from '@deck.gl/widgets';
 

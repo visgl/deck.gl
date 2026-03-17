@@ -1,28 +1,120 @@
-
 # PopupWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.3" />
 
+import {PopupWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<PopupWidgetDemo />
+
 This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {PopupWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    longitude: -0.453,
+    latitude: 51.471,
+    zoom: 10
+  },
+  controller: true,
+  widgets: [
+    new PopupWidget({
+      position: [-0.453, 51.471],
+      content: {
+        text: "I'm here"
+      },
+      marker: {
+        html: '<div style="font-size:28px;transform:translate(-50%,-50%);">🏠</div>'
+      },
+      defaultIsOpen: true,
+      closeButton: true,
+      closeOnClickOutside: true
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {Deck} from '@deck.gl/core';
 import {PopupWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
+  initialViewState: {
+    longitude: -0.453,
+    latitude: 51.471,
+    zoom: 10
+  },
+  controller: true,
   widgets: [
     new PopupWidget({
-      position: [0.45, 51.47],
-      content: `Look here`,
-      position: 'top',
+      position: [-0.453, 51.471],
+      content: {
+        text: "I'm here"
+      },
+      marker: {
+        html: '<div style="font-size:28px;transform:translate(-50%,-50%);">🏠</div>'
+      },
       defaultIsOpen: true,
       closeButton: true,
-      closeOnClickOutside: true,
+      closeOnClickOutside: true
     })
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {PopupWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: -0.453,
+        latitude: 51.471,
+        zoom: 10
+      }}
+      controller
+    >
+      <PopupWidget
+        position={[-0.453, 51.471]}
+        content={{text: "I'm here"}}
+        marker={{
+          html: '<div style="font-size:28px;transform:translate(-50%,-50%);">🏠</div>'
+        }}
+        defaultIsOpen
+        closeButton
+        closeOnClickOutside
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {PopupWidget, type PopupWidgetProps} from '@deck.gl/widgets';
+new PopupWidget({} satisfies PopupWidgetProps);
 ```
 
 ## Types
@@ -102,7 +194,7 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name            | Type                     | Default                                         |
 | --------------- | ------------------------ | ----------------------------------------------- |

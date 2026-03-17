@@ -40,9 +40,15 @@ Distance of far clipping plane. Default `1000`.
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
 * `target` (number[3], optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
-* `zoom` (number | number[2], optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. For example `zoom: 1` is 2x the original size, `zoom: 2` is 4x, `zoom: 3` is 8x etc.. To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`.
+* `zoom` (number, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. For example `zoom: 1` is 2x the original size, `zoom: 2` is 4x, `zoom: 3` is 8x etc.. To apply independent zoom levels to the X and Y axes, use `zoomX` and `zoomY`. Default `0`.
+* `zoomX` (number, optional) - The zoom level along X axis. Overrides `zoom` if supplied.
+* `zoomY` (number, optional) - The zoom level along Y axis. Overrides `zoom` if supplied.
 * `minZoom` (number, optional) - The min zoom level of the viewport. Default `-Infinity`.
 * `maxZoom` (number, optional) - The max zoom level of the viewport. Default `Infinity`.
+* `minZoomX` (number, optional) - The min zoom level of the viewport on X axis. Default `minZoom`.
+* `maxZoomX` (number, optional) - The max zoom level of the viewport on X axis. Default `maxZoom`.
+* `minZoomY` (number, optional) - The min zoom level of the viewport on Y axis. Default `minZoom`.
+* `maxZoomY` (number, optional) - The max zoom level of the viewport on Y axis. Default `maxZoom`.
 
 
 ## Controller

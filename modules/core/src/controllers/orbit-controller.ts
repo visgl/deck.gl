@@ -14,7 +14,7 @@ export type OrbitStateProps = {
   width: number;
   height: number;
   target?: number[];
-  zoom?: number | number[];
+  zoom?: number;
   rotationX?: number;
   rotationOrbit?: number;
 
@@ -378,9 +378,7 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom, maxRotationX, minRotationX, rotationOrbit} = props;
 
-    props.zoom = Array.isArray(zoom)
-      ? [clamp(zoom[0], minZoom, maxZoom), clamp(zoom[1], minZoom, maxZoom)]
-      : clamp(zoom, minZoom, maxZoom);
+    props.zoom = clamp(zoom, minZoom, maxZoom);
 
     props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
     if (rotationOrbit < -180 || rotationOrbit > 180) {

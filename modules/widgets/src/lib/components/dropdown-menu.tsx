@@ -6,11 +6,18 @@ import {type JSX, type ComponentChild} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
 import {getCSSMask} from '../data-url';
 
-export type MenuItem = string | {label: string; value?: string; icon?: string};
+export type MenuItem =
+  | string
+  | {
+      value?: string;
+      label: string;
+      icon?: string;
+      onSelect?: () => void;
+    };
 
 export type DropdownMenuProps = {
   menuItems: MenuItem[];
-  onSelect: (value: string) => void;
+  onSelect?: (value: string) => void;
   style?: Partial<CSSStyleDeclaration>;
 };
 
@@ -53,22 +60,24 @@ export type SimpleMenuProps = DropdownMenuProps & {
 export const SimpleMenu = (props: SimpleMenuProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      props.onClose();
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        props.onClose();
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const handleSelect = (value?: string) => {
+  const handleSelect = (value: string | undefined, item: MenuItem) => {
     if (value) {
-      props.onSelect(value);
+      if (typeof item === 'object') {
+        item.onSelect?.();
+      }
+      props.onSelect?.(value);
       props.onClose();
     }
   };
@@ -90,7 +99,7 @@ export const SimpleMenu = (props: SimpleMenuProps) => {
               <li
                 className={`deck-widget-dropdown-item ${value ? '' : 'disabled'}`}
                 key={i}
-                onClick={() => handleSelect(value)}
+                onClick={() => handleSelect(value, item)}
               >
                 {icon && (
                   <span className="deck-widget-dropdown-item-icon" style={getCSSMask(icon)} />
