@@ -48,6 +48,10 @@ function getProjectionMatrix({
   });
 }
 
+/** independent zoom levels for X and Y axes
+ * @deprecated use `zoomX` and `zoomY` instead */
+type Deprecated2DZoom = [number, number];
+
 export type OrthographicViewportOptions = {
   /** Name of the viewport */
   id?: string;
@@ -62,8 +66,10 @@ export type OrthographicViewportOptions = {
   /** The world position at the center of the viewport. Default `[0, 0, 0]`. */
   target?: [number, number, number] | [number, number];
   /**  The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large.
-   *   To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`. */
-  zoom?: number | [number, number];
+   *   To apply independent zoom levels to the X and Y axes, use `zoomX` and `zoomY`.
+   * @default 0
+   */
+  zoom?: number | Deprecated2DZoom;
   /** Independent zoom along the X axis. Overrides `zoom`. */
   zoomX?: number;
   /** Independent zoom along the Y axis. Overrides `zoom`. */

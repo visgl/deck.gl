@@ -253,7 +253,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const processedGLTF = gltf.json ? postProcessGLTF(gltf) : gltf;
 
       const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
-      scenegraphData = {gltf: processedGLTF, ...gltfObjects};
+      scenegraphData = gltfObjects;
 
       waitForGLTFAssets(gltfObjects)
         .then(() => this.setNeedsRedraw())

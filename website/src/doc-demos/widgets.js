@@ -12,17 +12,15 @@ import {
   IconWidget,
   ToggleWidget,
   SelectorWidget,
-  _ThemeWidget as ThemeWidget,
-  _ContextMenuWidget as ContextMenuWidget,
-  _FpsWidget as FpsWidget,
+  ThemeWidget,
+  ContextMenuWidget,
   _GeocoderWidget as GeocoderWidget,
-  _InfoWidget as InfoWidget,
-  _LoadingWidget as LoadingWidget,
+  InfoWidget,
+  LoadingWidget,
   _StatsWidget as StatsWidget,
   _ScaleWidget as ScaleWidget,
   _TimelineWidget as TimelineWidget,
   _SplitterWidget as SplitterWidget,
-  _ViewSelectorWidget as ViewSelectorWidget,
   DarkTheme, LightTheme, DarkGlassTheme, LightGlassTheme
 } from '@deck.gl/widgets';
 import { MapView, OrthographicView, OrbitView } from '@deck.gl/core';
@@ -416,20 +414,6 @@ export function PopupWidgetDemo() {
     closeOnClickOutside: true,
     style: {minWidth: '160px', fontSize: '12px'}
   })]} />
-}
-export function FpsWidgetDemo() {
-  const viewState = useAnimatedCamera({
-    longitude: 0,
-    latitude: 50,
-    zoom: 4,
-    pitch: 45,
-    bearing: 0,
-  }, v => ({
-    bearing: (v.bearing ?? 0) + 120,
-    transitionDuration: 4000,
-  }));
-
-  return <GeoDemoBase map initialViewState={viewState} widgets={[new FpsWidget()]} />
 }
 export function CompassWidgetDemo() {
   const viewState = useAnimatedCamera({

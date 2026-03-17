@@ -65,6 +65,8 @@ export type ControllerOptions = {
   dragMode?: 'pan' | 'rotate';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
+  /** Bounding box of content that the controller is constrained in */
+  maxBounds?: [min: [number, number], max: [number, number]] | [min: [number, number, number], max: [number, number, number]] | null;
 };
 
 export type ControllerProps = {

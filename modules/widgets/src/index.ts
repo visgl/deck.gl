@@ -17,9 +17,9 @@ export {FullscreenWidget} from './fullscreen-widget';
 export {SplitterWidget as _SplitterWidget} from './splitter-widget';
 
 // Information widgets
-export {InfoWidget as _InfoWidget} from './info-widget';
+export {InfoWidget} from './info-widget';
 export {PopupWidget} from './popup-widget';
-export {ContextMenuWidget as _ContextMenuWidget} from './context-menu-widget';
+export {ContextMenuWidget} from './context-menu-widget';
 export {ScrollbarWidget} from './scrollbar-widget';
 
 // Control widgets
@@ -30,8 +30,8 @@ export {TimelineWidget as _TimelineWidget} from './timeline-widget';
 
 // Utility widgets
 export {ScreenshotWidget} from './screenshot-widget';
-export {ThemeWidget as _ThemeWidget} from './theme-widget';
-export {LoadingWidget as _LoadingWidget} from './loading-widget';
+export {ThemeWidget} from './theme-widget';
+export {LoadingWidget} from './loading-widget';
 export {StatsWidget as _StatsWidget} from './stats-widget';
 
 export type {FullscreenWidgetProps} from './fullscreen-widget';

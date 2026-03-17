@@ -1,5 +1,5 @@
 
-# InfoWidget (Experimental)
+# InfoWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
@@ -16,7 +16,7 @@ This widget shows a popup at a fixed position, or when an item in a deck.gl laye
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
+import {InfoWidget} from '@deck.gl/widgets';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -55,7 +55,7 @@ new Deck({
 
 ```ts
 import {Deck, type PickingInfo} from '@deck.gl/core';
-import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
+import {InfoWidget} from '@deck.gl/widgets';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -99,7 +99,7 @@ new Deck({
 
 ```tsx
 import React, {useCallback} from 'react';
-import DeckGL, {_InfoWidget as InfoWidget} from '@deck.gl/react';
+import DeckGL, {InfoWidget} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
@@ -153,7 +153,7 @@ function App() {
 ## Constructor
 
 ```ts
-import {_InfoWidget as InfoWidget, type InfoWidgetProps} from '@deck.gl/widgets';
+import {InfoWidget, type InfoWidgetProps} from '@deck.gl/widgets';
 new InfoWidget({} satisfies InfoWidgetProps);
 ```
 

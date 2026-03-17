@@ -5,8 +5,9 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps, InteractionState} from './controller';
 import ViewState from './view-state';
-import {normalizeViewportProps} from '@math.gl/web-mercator';
+import {worldToLngLat, lngLatToWorld} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
+import {mod} from '../utils/math-utils';
 
 import LinearInterpolator from '../transitions/linear-interpolator';
 import type Viewport from '../viewports/viewport';
@@ -47,6 +48,8 @@ export type MapStateProps = {
 
   /** Normalize viewport props to fit map height into viewport. Default `true` */
   normalize?: boolean;
+
+  maxBounds?: ControllerProps['maxBounds'];
 };
 
 export type MapStateInternal = {
@@ -126,7 +129,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startZoom,
 
       /** Normalize viewport props to fit map height into viewport */
-      normalize = true
+      normalize = true,
+      maxBounds = null
     } = options;
 
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
@@ -148,7 +152,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         maxPitch,
         minPitch,
         normalize,
-        position
+        position,
+        maxBounds
       },
       {
         startPanLngLat,
@@ -323,10 +328,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       return this;
     }
 
-    const {maxZoom, minZoom} = this.getViewportProps();
-    let zoom = (startZoom as number) + Math.log2(scale);
-    zoom = clamp(zoom, minZoom, maxZoom);
-
+    const zoom = this._constrainZoom((startZoom as number) + Math.log2(scale));
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
 
     return this._getUpdatedState({
@@ -411,24 +413,64 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
-    // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom} = props;
-    props.zoom = clamp(zoom, minZoom, maxZoom);
-
     // Ensure pitch is within specified range
-    const {maxPitch, minPitch, pitch} = props;
+    const {maxPitch, minPitch, pitch, longitude, bearing, normalize, maxBounds} = props;
+
+    if (normalize) {
+      if (longitude < -180 || longitude > 180) {
+        props.longitude = mod(longitude + 180, 360) - 180;
+      }
+      if (bearing < -180 || bearing > 180) {
+        props.bearing = mod(bearing + 180, 360) - 180;
+      }
+    }
     props.pitch = clamp(pitch, minPitch, maxPitch);
 
-    // Normalize viewport props to fit map height into viewport
-    const {normalize = true} = props;
-    if (normalize) {
-      Object.assign(props, normalizeViewportProps(props));
+    props.zoom = this._constrainZoom(props.zoom, props);
+
+    if (maxBounds !== null || normalize) {
+      const bl = maxBounds ? lngLatToWorld(maxBounds[0]) : [-Infinity, 0];
+      const tr = maxBounds ? lngLatToWorld(maxBounds[1]) : [Infinity, 512]; // web-mercator tile size
+      // calculate center and zoom ranges at pitch=0 and bearing=0
+      // to maintain visual stability when rotating
+      const scale = 2 ** props.zoom;
+      const halfWidth = props.width / 2 / scale;
+      const halfHeight = props.height / 2 / scale;
+      const [minLng, minLat] = worldToLngLat([bl[0] + halfWidth, bl[1] + halfHeight]);
+      const [maxLng, maxLat] = worldToLngLat([tr[0] - halfWidth, tr[1] - halfHeight]);
+      props.longitude = clamp(props.longitude, minLng, maxLng);
+      props.latitude = clamp(props.latitude, minLat, maxLat);
     }
 
     return props;
   }
 
   /* Private methods */
+
+  _constrainZoom(zoom: number, props?: Required<MapStateProps>): number {
+    props ||= this.getViewportProps();
+    const {maxZoom, normalize, maxBounds} = props;
+
+    const shouldApplyMaxBounds =
+      (maxBounds !== null || normalize) && props.width > 0 && props.height > 0;
+    let {minZoom} = props;
+
+    if (shouldApplyMaxBounds) {
+      const bl = maxBounds ? lngLatToWorld(maxBounds[0]) : [-Infinity, 0];
+      const tr = maxBounds ? lngLatToWorld(maxBounds[1]) : [Infinity, 512]; // web-mercator tile size
+      const w = tr[0] - bl[0];
+      const h = tr[1] - bl[1];
+      // ignore bound size of 0 or Infinity
+      if (Number.isFinite(w) && w > 0) {
+        minZoom = Math.max(minZoom, Math.log2(props.width / w));
+      }
+      if (Number.isFinite(h) && h > 0) {
+        minZoom = Math.max(minZoom, Math.log2(props.height / h));
+      }
+      if (minZoom > maxZoom) minZoom = maxZoom;
+    }
+    return clamp(zoom, minZoom, maxZoom);
+  }
 
   _zoomFromCenter(scale) {
     const {width, height} = this.getViewportProps();

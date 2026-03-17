@@ -18,10 +18,10 @@ import {
   SelectorWidget,
   _GeocoderWidget,
   _ScaleWidget,
-  _LoadingWidget,
-  _ThemeWidget,
-  _InfoWidget,
-  _ContextMenuWidget,
+  LoadingWidget,
+  ThemeWidget,
+  InfoWidget,
+  ContextMenuWidget,
   _TimelineWidget,
   _StatsWidget
 } from '@deck.gl/widgets';
@@ -106,10 +106,10 @@ const deck = new Deck({
     new FullscreenWidget(),
     new ScreenshotWidget(),
     new ResetViewWidget(),
-    new _LoadingWidget(),
+    new LoadingWidget(),
     new _ScaleWidget({placement: 'bottom-right'}),
-    new _ThemeWidget(),
-    new _ContextMenuWidget({
+    new ThemeWidget(),
+    new ContextMenuWidget({
       getMenuItems: (info: PickingInfo) => {
         const name = info.layer?.id === 'airports' && info.object?.properties.name;
         return (
@@ -123,7 +123,7 @@ const deck = new Deck({
       },
       onMenuItemSelected: console.log
     }),
-    new _InfoWidget({mode: 'hover', getTooltip, arrow: 10, offset: 10}),
+    new InfoWidget({mode: 'hover', getTooltip, arrow: 10, offset: 10}),
     new PopupWidget({
       position: [-5, 52],
       marker: {
@@ -188,7 +188,7 @@ const deck = new Deck({
   ]
 });
 
-function getTooltip(info: PickingInfo, widget: _InfoWidget) {
+function getTooltip(info: PickingInfo, widget: InfoWidget) {
   if (!info.object || info.layer?.id !== 'airports') {
     return null;
   }
