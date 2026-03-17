@@ -5,7 +5,7 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps, InteractionState} from './controller';
 import ViewState from './view-state';
-import {worldToLngLat, lngLatToWorld} from '@math.gl/web-mercator';
+import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 import {mod} from '../utils/math-utils';
 
@@ -14,6 +14,25 @@ import type Viewport from '../viewports/viewport';
 
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
+const WEB_MERCATOR_TILE_SIZE = 512;
+const WEB_MERCATOR_MAX_BOUNDS = [
+  [-Infinity, -90],
+  [Infinity, 90]
+] satisfies ControllerProps['maxBounds'];
+
+/** The web mercator utility `lngLatToWorld` throws if invalid coordinates are provided.
+ * This wrapper clamps user input to calculate common positions safely. */
+function lngLatToWorld([lng, lat]: number[]): number[] {
+  if (Math.abs(lat) > 90) {
+    lat = Math.sign(lat) * 90;
+  }
+  if (Number.isFinite(lng)) {
+    const [x, y] = _lngLatToWorld([lng, lat]);
+    return [x, clamp(y, 0, WEB_MERCATOR_TILE_SIZE)];
+  }
+  const [, y] = _lngLatToWorld([0, lat]);
+  return [lng, clamp(y, 0, WEB_MERCATOR_TILE_SIZE)];
+}
 
 export type MapStateProps = {
   /** Mapbox viewport properties */
@@ -129,13 +148,14 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startZoom,
 
       /** Normalize viewport props to fit map height into viewport */
-      normalize = true,
-      maxBounds = null
+      normalize = true
     } = options;
 
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
     assert(Number.isFinite(zoom)); // `zoom` must be supplied
+
+    const maxBounds = options.maxBounds || (normalize ? WEB_MERCATOR_MAX_BOUNDS : null);
 
     super(
       {
@@ -428,9 +448,9 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
     props.zoom = this._constrainZoom(props.zoom, props);
 
-    if (maxBounds !== null || normalize) {
-      const bl = maxBounds ? lngLatToWorld(maxBounds[0]) : [-Infinity, 0];
-      const tr = maxBounds ? lngLatToWorld(maxBounds[1]) : [Infinity, 512]; // web-mercator tile size
+    if (maxBounds) {
+      const bl = lngLatToWorld(maxBounds[0]);
+      const tr = lngLatToWorld(maxBounds[1]);
       // calculate center and zoom ranges at pitch=0 and bearing=0
       // to maintain visual stability when rotating
       const scale = 2 ** props.zoom;
@@ -449,15 +469,14 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   _constrainZoom(zoom: number, props?: Required<MapStateProps>): number {
     props ||= this.getViewportProps();
-    const {maxZoom, normalize, maxBounds} = props;
+    const {maxZoom, maxBounds} = props;
 
-    const shouldApplyMaxBounds =
-      (maxBounds !== null || normalize) && props.width > 0 && props.height > 0;
+    const shouldApplyMaxBounds = maxBounds !== null && props.width > 0 && props.height > 0;
     let {minZoom} = props;
 
     if (shouldApplyMaxBounds) {
-      const bl = maxBounds ? lngLatToWorld(maxBounds[0]) : [-Infinity, 0];
-      const tr = maxBounds ? lngLatToWorld(maxBounds[1]) : [Infinity, 512]; // web-mercator tile size
+      const bl = lngLatToWorld(maxBounds[0]);
+      const tr = lngLatToWorld(maxBounds[1]);
       const w = tr[0] - bl[0];
       const h = tr[1] - bl[1];
       // ignore bound size of 0 or Infinity
@@ -599,21 +618,10 @@ export default class MapController extends Controller<MapState> {
       this.rotationPivot = props.rotationPivot || 'center';
     }
     props.position = props.position || [0, 0, 0];
-    const oldProps = this.props;
+    props.maxBounds =
+      props.maxBounds || (props.normalize === false ? null : WEB_MERCATOR_MAX_BOUNDS);
 
     super.setProps(props);
-
-    const dimensionChanged = !oldProps || oldProps.height !== props.height;
-    if (dimensionChanged) {
-      // Dimensions changed, normalize the props
-      this.updateViewport(
-        new this.ControllerState({
-          makeViewport: this.makeViewport,
-          ...props,
-          ...this.state
-        })
-      );
-    }
   }
 
   protected updateViewport(

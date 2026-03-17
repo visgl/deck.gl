@@ -7,6 +7,7 @@ import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {IViewState} from './view-state';
 import {ConstructorOf} from '../types/types';
+import {deepEqual} from '../utils/deep-equal';
 
 import type Viewport from '../viewports/viewport';
 
@@ -242,7 +243,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       ...this.props,
       ...this.state
     });
-    return this._controllerState ;
+    return this._controllerState;
   }
 
   getCenter(event: MjolnirGestureEvent | MjolnirWheelEvent) : [number, number] {
@@ -293,6 +294,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
+    const oldProps = this.props;
     this.props = props;
 
     if (!('transitionInterpolator' in props)) {
@@ -334,6 +336,19 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.touchZoom = touchZoom;
     this.touchRotate = touchRotate;
     this.keyboard = keyboard;
+
+    // Normalize view state if maxBounds is defined
+    const dimensionChanged = !oldProps || oldProps.height !== props.height || oldProps.width !== props.width || oldProps.maxBounds !== props.maxBounds;
+    if (dimensionChanged && props.maxBounds) {
+      // Dimensions changed, try re-normalize the props
+      const controllerState = new this.ControllerState(props);
+      const normalizedProps = controllerState.getViewportProps();
+      const changed = Object.keys(normalizedProps).some(key => !deepEqual(normalizedProps[key], props[key], 1));
+      if (changed) {
+        // some props are updated after normalization
+        this.updateViewport(controllerState);
+      }
+    }
   }
 
   updateTransition() {

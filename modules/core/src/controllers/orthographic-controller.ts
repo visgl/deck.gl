@@ -154,7 +154,7 @@ export class OrthographicState extends ViewState<
    * Start rotating
    */
   rotateStart(): OrthographicState {
-    return this._getUpdatedState({});
+    return this;
   }
 
   /**
@@ -168,7 +168,7 @@ export class OrthographicState extends ViewState<
    * End rotating
    */
   rotateEnd(): OrthographicState {
-    return this._getUpdatedState({});
+    return this;
   }
 
   // shortest path between two view states
@@ -267,19 +267,19 @@ export class OrthographicState extends ViewState<
   }
 
   rotateLeft(speed: number = 15): OrthographicState {
-    return this._getUpdatedState({});
+    return this;
   }
 
   rotateRight(speed: number = 15): OrthographicState {
-    return this._getUpdatedState({});
+    return this;
   }
 
   rotateUp(speed: number = 10): OrthographicState {
-    return this._getUpdatedState({});
+    return this;
   }
 
   rotateDown(speed: number = 10): OrthographicState {
-    return this._getUpdatedState({});
+    return this;
   }
 
   /* Private methods */
