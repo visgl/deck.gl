@@ -20,7 +20,8 @@
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap",
     "clean": "ocular-clean",
-    "build": "npm run clean && ocular-build && lerna run build",
+    "build": "npm run clean && npm run build:modules && lerna run build",
+    "build:modules": "bash scripts/build-modules.sh",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish-beta": "ocular-publish version-only-beta",

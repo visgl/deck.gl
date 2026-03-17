@@ -6,7 +6,9 @@
 import type {GroupNode, ScenegraphNode, ModelNode} from '@luma.gl/engine';
 import type {GLTFScenegraphs} from '@luma.gl/gltf';
 
-export async function waitForGLTFAssets(gltfObjects: GLTFScenegraphs | {scenes: GroupNode[]}): Promise<void> {
+export async function waitForGLTFAssets(
+  gltfObjects: GLTFScenegraphs | {scenes: GroupNode[]}
+): Promise<void> {
   const remaining: any[] = [];
 
   gltfObjects.scenes.forEach(scene => {
