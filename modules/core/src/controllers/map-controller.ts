@@ -436,14 +436,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       const scale = 2 ** props.zoom;
       const halfWidth = props.width / 2 / scale;
       const halfHeight = props.height / 2 / scale;
-      const [minLng, minLat] = worldToLngLat([
-        bl[0] + halfWidth,
-        bl[1] + halfHeight
-      ]);
-      const [maxLng, maxLat] = worldToLngLat([
-        tr[0] - halfWidth,
-        tr[1] - halfHeight
-      ]);
+      const [minLng, minLat] = worldToLngLat([bl[0] + halfWidth, bl[1] + halfHeight]);
+      const [maxLng, maxLat] = worldToLngLat([tr[0] - halfWidth, tr[1] - halfHeight]);
       props.longitude = clamp(props.longitude, minLng, maxLng);
       props.latitude = clamp(props.latitude, minLat, maxLat);
     }
@@ -457,7 +451,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     props ||= this.getViewportProps();
     const {maxZoom, normalize, maxBounds} = props;
 
-    const shouldApplyMaxBounds = (maxBounds !== null || normalize) && props.width > 0 && props.height > 0;
+    const shouldApplyMaxBounds =
+      (maxBounds !== null || normalize) && props.width > 0 && props.height > 0;
     let {minZoom} = props;
 
     if (shouldApplyMaxBounds) {

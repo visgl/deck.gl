@@ -3,16 +3,25 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {MapController, OrbitController, FirstPersonController} from '@deck.gl/core';
+import {MapController, OrbitController, FirstPersonController, Viewport} from '@deck.gl/core';
+import {normalizeViewportProps} from '@math.gl/web-mercator';
+
+const dummyMakeViewport = (props: any) => new Viewport(props);
 
 test('MapViewState', t => {
-  const MapViewState = new MapController({
-    longitude: 0,
-    latitude: 0,
-    zoom: 0
-  }).ControllerState;
+  const MapViewState = new MapController({} as any).ControllerState;
 
-  const viewState = new MapViewState({
+  let viewState = new MapViewState({
+    width: 800,
+    height: 600,
+    longitude: -182,
+    latitude: 36,
+    zoom: 0,
+    bearing: 180,
+    makeViewport: dummyMakeViewport
+  });
+  let viewportProps = viewState.getViewportProps();
+  const expectedProps = normalizeViewportProps({
     width: 800,
     height: 600,
     longitude: -182,
@@ -20,43 +29,62 @@ test('MapViewState', t => {
     zoom: 0,
     bearing: 180
   });
-  const viewportProps = viewState.getViewportProps();
 
   t.is(viewportProps.pitch, 0, 'added default pitch');
-  t.is(viewportProps.longitude, 178, 'props are normalized');
-  t.not(viewportProps.latitude, 36, 'props are normalized');
-  t.not(viewportProps.zoom, 0, 'props are normalized');
+  t.is(viewportProps.longitude, expectedProps.longitude, 'props are normalized');
+  t.is(viewportProps.latitude, expectedProps.latitude, 'props are normalized');
+  t.is(viewportProps.zoom, expectedProps.zoom, 'props are normalized');
 
   const viewState2 = new MapViewState({
+    width: 800,
+    height: 600,
+    longitude: -160,
+    latitude: 0,
+    zoom: 0,
+    bearing: -30,
+    makeViewport: dummyMakeViewport
+  });
+
+  const transitionViewportProps = viewState2.shortestPathFrom(viewState);
+  t.is(transitionViewportProps.longitude, 200, 'found shortest path for longitude');
+  t.is(transitionViewportProps.bearing, 330, 'found shortest path for bearing');
+
+  viewState = new MapViewState({
     width: 800,
     height: 600,
     longitude: -182,
     latitude: 36,
     zoom: 0,
     bearing: 180,
-    normalize: false
+    normalize: false,
+    makeViewport: dummyMakeViewport
   });
-  const viewportProps2 = viewState2.getViewportProps();
+  viewportProps = viewState.getViewportProps();
 
-  t.is(viewportProps2.zoom, 0, 'props are not normalized');
-
-  const viewState3 = new MapViewState({
-    width: 800,
-    height: 600,
-    longitude: -160,
-    latitude: 0,
-    zoom: 0,
-    bearing: -30
-  });
-
-  const transitionViewportProps = viewState3.shortestPathFrom(viewState);
-  t.is(transitionViewportProps.longitude, 200, 'found shortest path for longitude');
-  t.is(transitionViewportProps.bearing, 330, 'found shortest path for bearing');
+  t.is(viewportProps.zoom, 0, 'props are not normalized');
 
   t.throws(
-    () => new MapViewState({width: 400, height: 300}),
+    () => new MapViewState({width: 400, height: 300} as any),
     'should throw if missing geospatial props'
   );
+
+  viewState = new MapViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    bearing: 120,
+    maxBounds: [
+      [-5, 45],
+      [5, 55]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  t.is(viewportProps.longitude, 0, 'longitude is inside maxBounds');
+  t.ok(viewportProps.latitude > 45 && viewportProps.latitude < 55, 'latitude is inside maxBounds');
+  t.ok(viewportProps.zoom > 5, 'zoom is adjusted by maxBounds');
 
   t.end();
 });
