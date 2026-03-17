@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core';
-import Controller from './controller';
+import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
 
 import type Viewport from '../viewports/viewport';
@@ -30,6 +30,23 @@ type OrthographicStateInternal = {
   startZoomPosition?: number[];
   startZoom?: number[];
 };
+
+function normalizeZoom({
+  zoom = 0,
+  zoomX,
+  zoomY
+}: {
+  zoom?: number | number[];
+  zoomX?: number;
+  zoomY?: number;
+}): {
+  zoomX: number;
+  zoomY: number;
+} {
+  zoomX = zoomX ?? (Array.isArray(zoom) ? zoom[0] : zoom);
+  zoomY = zoomY ?? (Array.isArray(zoom) ? zoom[1] : zoom);
+  return {zoomX, zoomY};
+}
 
 export class OrthographicState extends ViewState<
   OrthographicState,
@@ -70,8 +87,7 @@ export class OrthographicState extends ViewState<
       startZoom
     } = options;
 
-    const zoomX = (options.zoomX ?? Array.isArray(zoom)) ? zoom[0] : zoom;
-    const zoomY = (options.zoomY ?? Array.isArray(zoom)) ? zoom[1] : zoom;
+    const {zoomX, zoomY} = normalizeZoom(options);
 
     super(
       {
@@ -138,7 +154,7 @@ export class OrthographicState extends ViewState<
    * Start rotating
    */
   rotateStart(): OrthographicState {
-    return this;
+    return this._getUpdatedState({});
   }
 
   /**
@@ -152,7 +168,7 @@ export class OrthographicState extends ViewState<
    * End rotating
    */
   rotateEnd(): OrthographicState {
-    return this;
+    return this._getUpdatedState({});
   }
 
   // shortest path between two view states
@@ -191,8 +207,7 @@ export class OrthographicState extends ViewState<
     startPos?: [number, number];
     scale: number;
   }): OrthographicState {
-    const {startZoom} = this.getState();
-    let {startZoomPosition} = this.getState();
+    let {startZoom, startZoomPosition} = this.getState();
     if (!startZoomPosition) {
       // We have two modes of zoom:
       // scroll zoom that are discrete events (transform from the current zoom level),
@@ -200,6 +215,8 @@ export class OrthographicState extends ViewState<
       // pinch started).
       // If startZoom state is defined, then use the startZoom state;
       // otherwise assume discrete zooming
+      const {zoomX, zoomY} = this.getViewportProps();
+      startZoom = [zoomX, zoomY];
       startZoomPosition = this._unproject(startPos || pos);
     }
     if (!startZoomPosition) {
@@ -250,19 +267,19 @@ export class OrthographicState extends ViewState<
   }
 
   rotateLeft(speed: number = 15): OrthographicState {
-    return this;
+    return this._getUpdatedState({});
   }
 
   rotateRight(speed: number = 15): OrthographicState {
-    return this;
+    return this._getUpdatedState({});
   }
 
   rotateUp(speed: number = 10): OrthographicState {
-    return this;
+    return this._getUpdatedState({});
   }
 
   rotateDown(speed: number = 10): OrthographicState {
-    return this;
+    return this._getUpdatedState({});
   }
 
   /* Private methods */
@@ -358,6 +375,11 @@ export default class OrthographicController extends Controller<OrthographicState
     transitionInterpolator: new LinearInterpolator(['target', 'zoomX', 'zoomY'])
   };
   dragMode: 'pan' | 'rotate' = 'pan';
+
+  setProps(props: ControllerProps & OrthographicStateProps) {
+    Object.assign(props, normalizeZoom(props));
+    super.setProps(props);
+  }
 
   _onPanRotate() {
     // No rotation in orthographic view
