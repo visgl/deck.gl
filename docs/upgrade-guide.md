@@ -2,6 +2,33 @@
 
 ## Upgrading to v9.3
 
+### OrthographicView
+
+Supplying a 2D array to `zoom` for per-axis zoom has been deprecated.
+
+```ts
+// Before
+new Deck({
+  views: new OrthographicView({controller: {zoomAxis: 'X'}}),
+  viewState: {
+    target: [0, 0, 0],
+    zoom: [0, 2]
+  },
+});
+
+// After
+new Deck({
+  views: new OrthographicView({controller: {zoomAxis: 'X'}}),
+  viewState: {
+    target: [0, 0, 0],
+    zoomX: 0,
+    zoomY: 2
+  },
+});
+```
+
+`zoom: [number, number]` will continue to work for the rest of v9.x if `zoomX` and `zoomY` are undefined. However, if you mutate `zoom` in the `onViewStateChange` callback, the change will not be picked up because `OrthographicController` always returns `zoomX` and `zoomY` which override `zoom`.
+
 ### Widgets
 
 The following widgets have breaking changes in v9.3:
