@@ -150,25 +150,65 @@ export class OrthographicState extends ViewState<
     });
   }
 
-  /**
-   * Start rotating
-   */
-  rotateStart(): OrthographicState {
-    return this._getUpdatedState({});
+  rotateStart({pos}: {pos: [number, number]}): OrthographicState {
+    const {width, height, rotationOrbit = 0} = this.getViewportProps();
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const startAngle = Math.atan2(centerY - pos[1], pos[0] - centerX);
+
+    return this._getUpdatedState({
+      startRotatePos: pos,
+      startRotationOrbit: rotationOrbit,
+      startRotationX: startAngle
+    }) as OrthographicState;
   }
 
-  /**
-   * Rotate
-   */
-  rotate(): OrthographicState {
-    return this;
+  rotate({
+    pos,
+    deltaAngleX = 0
+  }: {
+    pos?: [number, number];
+    deltaAngleX?: number;
+    deltaAngleY?: number;
+  }): OrthographicState {
+    const {startRotatePos, startRotationOrbit, startRotationX} = this.getState();
+    const {width, height, rotationOrbit = 0} = this.getViewportProps();
+
+    if (!startRotatePos || startRotationOrbit === undefined || startRotationX === undefined) {
+      return this;
+    }
+
+    let newRotationOrbit: number;
+
+    if (pos) {
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const currentAngle = Math.atan2(centerY - pos[1], pos[0] - centerX);
+      let deltaAngle = currentAngle - startRotationX;
+
+      if (deltaAngle > Math.PI) {
+        deltaAngle -= 2 * Math.PI;
+      } else if (deltaAngle < -Math.PI) {
+        deltaAngle += 2 * Math.PI;
+      }
+
+      const sensitivity = 1.5;
+      newRotationOrbit = startRotationOrbit - (deltaAngle * 180 * sensitivity) / Math.PI;
+    } else {
+      newRotationOrbit = rotationOrbit + deltaAngleX;
+    }
+
+    return this._getUpdatedState({
+      rotationOrbit: newRotationOrbit
+    }) as OrthographicState;
   }
 
-  /**
-   * End rotating
-   */
   rotateEnd(): OrthographicState {
-    return this._getUpdatedState({});
+    return this._getUpdatedState({
+      startRotatePos: null,
+      startRotationOrbit: null,
+      startRotationX: null
+    }) as OrthographicState;
   }
 
   // shortest path between two view states
@@ -366,23 +406,19 @@ export class OrthographicState extends ViewState<
 
     return props;
   }
+
 }
 
 export default class OrthographicController extends Controller<OrthographicState> {
   ControllerState = OrthographicState;
   transition = {
     transitionDuration: 300,
-    transitionInterpolator: new LinearInterpolator(['target', 'zoomX', 'zoomY'])
+    transitionInterpolator: new LinearInterpolator(['target', 'zoomX', 'zoomY', 'rotationOrbit'])
   };
   dragMode: 'pan' | 'rotate' = 'pan';
 
   setProps(props: ControllerProps & OrthographicStateProps) {
     Object.assign(props, normalizeZoom(props));
     super.setProps(props);
-  }
-
-  _onPanRotate() {
-    // No rotation in orthographic view
-    return false;
   }
 }

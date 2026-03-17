@@ -34,6 +34,8 @@ export type OrthographicViewState = {
    * @default Infinity
    */
   maxZoom?: number;
+  /** Rotation angle around the Z axis, in degrees. Default `0`. */
+  rotationOrbit?: number;
   /** The min zoom level along X axis.
    * @default `minZoom`
    */
