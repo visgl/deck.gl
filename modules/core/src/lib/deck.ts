@@ -1371,7 +1371,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     metrics.gpuTimePerFrame = stats.get('GPU Time').getAverageTime();
     metrics.cpuTimePerFrame = stats.get('CPU Time').getAverageTime();
 
-    const memoryStats = luma.stats.get('Resource Counts');
+    const memoryStats = luma.stats.get('GPU Time and Memory');
     metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
     metrics.textureMemory = memoryStats.get('Texture Memory').count;
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
