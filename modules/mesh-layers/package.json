@@ -38,17 +38,17 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/gltf": "^4.4.0-alpha.16",
-    "@loaders.gl/schema": "^4.4.0-alpha.16",
-    "@luma.gl/gltf": "^9.3.0-alpha.2",
-    "@luma.gl/shadertools": "^9.3.0-alpha.2"
+    "@loaders.gl/gltf": "^4.4.0-alpha.18",
+    "@loaders.gl/schema": "^4.4.0-alpha.18",
+    "@luma.gl/gltf": "^9.3.0-alpha.6",
+    "@luma.gl/shadertools": "^9.3.0-alpha.6"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.2.0",
-    "@luma.gl/core": "~9.3.0-alpha.2",
-    "@luma.gl/engine": "~9.3.0-alpha.2",
-    "@luma.gl/gltf": "~9.3.0-alpha.2",
-    "@luma.gl/shadertools": "~9.3.0-alpha.2"
+    "@luma.gl/core": "~9.3.0-alpha.6",
+    "@luma.gl/engine": "~9.3.0-alpha.6",
+    "@luma.gl/gltf": "~9.3.0-alpha.6",
+    "@luma.gl/shadertools": "~9.3.0-alpha.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
