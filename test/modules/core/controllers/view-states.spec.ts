@@ -8,8 +8,9 @@ import {
   OrbitController,
   FirstPersonController,
   _GlobeController as GlobeController,
-  Viewport,
-  OrbitViewport
+  OrbitViewport,
+  OrthographicController,
+  Viewport
 } from '@deck.gl/core';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 
@@ -243,6 +244,58 @@ test('OrbitViewState', t => {
   viewportProps = viewState.getViewportProps();
 
   t.ok(viewportProps.target[2] < 0, 'target is clipped inside maxBounds');
+
+  t.end();
+});
+
+test('OrthographicViewState', t => {
+  const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+
+  let viewState = new OrthographicViewState({
+    width: 800,
+    height: 600,
+    target: [0, 0, 0],
+    zoom: [1, 3],
+    zoomAxis: 'Y',
+    maxZoomY: 2,
+    makeViewport: dummyMakeViewport
+  });
+  let viewportProps = viewState.getViewportProps();
+  t.is(viewportProps.zoomX, 1, 'normalized zoom');
+  t.is(viewportProps.zoomY, 2, 'normalized zoom');
+
+  viewState = new OrthographicViewState({
+    width: 800,
+    height: 600,
+    target: [0, 0, 0],
+    zoom: [3, 4],
+    maxZoomX: 2,
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  t.is(viewportProps.zoomX, 2, 'normalized zoom');
+  t.is(viewportProps.zoomY, 3, 'normalized zoom');
+
+  viewState = new OrthographicViewState({
+    width: 800,
+    height: 600,
+    target: [0, 0, 0],
+    zoom: 0,
+    zoomAxis: 'X',
+    minZoomX: 0,
+    maxZoomX: 20,
+    minZoomY: 0,
+    maxZoomY: 0,
+    maxBounds: [
+      [100, 0],
+      [200, 150]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  t.deepEqual(viewportProps.target, [150, 300, 0], 'adjusted target to maxBounds');
+  t.is(viewportProps.zoomX, 3, 'adjusted zoom to maxBounds');
+  t.is(viewportProps.zoomY, 0, 'adjusted zoom to maxBounds');
 
   t.end();
 });

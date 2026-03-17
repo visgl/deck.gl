@@ -23,6 +23,8 @@ export type OrthographicStateProps = {
   minZoomX?: number;
   maxZoomY?: number;
   minZoomY?: number;
+
+  maxBounds?: ControllerProps['maxBounds'];
 };
 
 type OrthographicStateInternal = {
@@ -77,6 +79,8 @@ export class OrthographicState extends ViewState<
       minZoomY = minZoom,
       maxZoomY = maxZoom,
 
+      maxBounds = null,
+
       /** Interaction states, required to calculate change during transform */
       // Model state when the pan operation first started
       startPanPosition,
@@ -99,7 +103,8 @@ export class OrthographicState extends ViewState<
         minZoomX,
         maxZoomX,
         minZoomY,
-        maxZoomY
+        maxZoomY,
+        maxBounds
       },
       {
         startPanPosition,
@@ -219,7 +224,7 @@ export class OrthographicState extends ViewState<
     if (!startZoomPosition) {
       return this;
     }
-    const newZoomProps = this._calculateNewZoom({scale, startZoom});
+    const newZoomProps = this._constrainZoom(this._calculateNewZoom({scale, startZoom}));
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), ...newZoomProps});
 
     return this._getUpdatedState({
@@ -291,36 +296,27 @@ export class OrthographicState extends ViewState<
   }
 
   // Calculates new zoom
-  _calculateNewZoom({
-    scale,
-    startZoom
-  }: {
-    scale: number;
-    startZoom?: number[];
-  }): Partial<OrthographicStateProps> {
-    const {maxZoomX, minZoomX, maxZoomY, minZoomY, zoom, zoomX, zoomY, zoomAxis} =
-      this.getViewportProps();
+  _calculateNewZoom({scale, startZoom}: {scale: number; startZoom?: number[]}): {
+    zoomX: number;
+    zoomY: number;
+  } {
+    const {zoomX, zoomY, zoomAxis} = this.getViewportProps();
     if (startZoom === undefined) {
       startZoom = [zoomX, zoomY];
     }
-    let deltaZoom = Math.log2(scale);
+    const deltaZoom = Math.log2(scale);
     let [newZoomX, newZoomY] = startZoom;
     switch (zoomAxis) {
       case 'X':
         // Scale x only
-        newZoomX = clamp(newZoomX + deltaZoom, minZoomX, maxZoomX);
+        newZoomX += deltaZoom;
         break;
       case 'Y':
         // Scale y only
-        newZoomY = clamp(newZoomY + deltaZoom, minZoomY, maxZoomY);
+        newZoomY += deltaZoom;
         break;
       default:
         // Lock aspect ratio
-        deltaZoom = clamp(
-          deltaZoom,
-          Math.max(minZoomX - newZoomX, minZoomY - newZoomY),
-          Math.min(maxZoomX - newZoomX, maxZoomY - newZoomY)
-        );
         newZoomX += deltaZoom;
         newZoomY += deltaZoom;
     }
@@ -352,16 +348,81 @@ export class OrthographicState extends ViewState<
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<OrthographicStateProps>): Required<OrthographicStateProps> {
     // Ensure zoom is within specified range
-    const {maxZoomX, minZoomX, maxZoomY, minZoomY, zoom, zoomX, zoomY} = props;
-
-    props.zoomX = clamp(zoomX, minZoomX, maxZoomX);
-    props.zoomY = clamp(zoomY, minZoomY, maxZoomY);
+    const {zoomX, zoomY} = this._constrainZoom(props, props);
+    props.zoomX = zoomX;
+    props.zoomY = zoomY;
     // Backward compatibility: update zoom to reflect new view state
     // zoom will always be ignored when zoomX and zoomY are specified, but legacy apps may still read zoom in `onViewStateChange`
     props.zoom =
-      Array.isArray(zoom) || props.zoomX !== props.zoomY ? [props.zoomX, props.zoomY] : props.zoomX;
+      Array.isArray(props.zoom) || props.zoomX !== props.zoomY
+        ? [props.zoomX, props.zoomY]
+        : props.zoomX;
 
+    const {maxBounds, target} = props;
+    if (maxBounds) {
+      // only calculate center and zoom ranges at rotation=0
+      // to maintain visual stability when rotating
+      const halfWidth = props.width / 2 / 2 ** zoomX;
+      const halfHeight = props.height / 2 / 2 ** zoomY;
+      const minX = maxBounds[0][0] + halfWidth;
+      const maxX = maxBounds[1][0] - halfWidth;
+      const minY = maxBounds[0][1] + halfHeight;
+      const maxY = maxBounds[1][1] - halfHeight;
+      const x = clamp(target[0], minX, maxX);
+      const y = clamp(target[1], minY, maxY);
+      if (x !== target[0] || y !== target[1]) {
+        props.target = target.slice();
+        props.target[0] = x;
+        props.target[1] = y;
+      }
+    }
     return props;
+  }
+
+  _constrainZoom(
+    {zoomX, zoomY}: {zoomX: number; zoomY: number},
+    props?: Required<OrthographicStateProps>
+  ): {zoomX: number; zoomY: number} {
+    props ||= this.getViewportProps();
+    const {zoomAxis, maxZoomX, maxZoomY, maxBounds} = props;
+    let {minZoomX, minZoomY} = props;
+    const shouldApplyMaxBounds = maxBounds !== null && props.width > 0 && props.height > 0;
+
+    if (shouldApplyMaxBounds) {
+      const bl = maxBounds[0];
+      const tr = maxBounds[1];
+      const w = tr[0] - bl[0];
+      const h = tr[1] - bl[1];
+      // ignore bound size of 0 or Infinity
+      if (Number.isFinite(w) && w > 0) {
+        minZoomX = Math.max(minZoomX, Math.log2(props.width / w));
+        if (minZoomX > maxZoomX) minZoomX = maxZoomX;
+      }
+      if (Number.isFinite(h) && h > 0) {
+        minZoomY = Math.max(minZoomY, Math.log2(props.height / h));
+        if (minZoomY > maxZoomY) minZoomY = maxZoomY;
+      }
+    }
+
+    switch (zoomAxis) {
+      case 'X':
+        zoomX = clamp(zoomX, minZoomX, maxZoomX);
+        break;
+      case 'Y':
+        zoomY = clamp(zoomY, minZoomY, maxZoomY);
+        break;
+      default:
+        // Lock aspect ratio
+        let delta = Math.min(maxZoomX - zoomX, maxZoomY - zoomY, 0);
+        if (delta === 0) {
+          delta = Math.max(minZoomX - zoomX, minZoomY - zoomY, 0);
+        }
+        if (delta !== 0) {
+          zoomX += delta;
+          zoomY += delta;
+        }
+    }
+    return {zoomX, zoomY};
   }
 }
 
