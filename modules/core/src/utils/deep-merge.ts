@@ -22,6 +22,7 @@ export function deepMergeViewState<ViewStateT extends Record<string, any>>(
 }
 
 function mergeNumericArray(target: number[], source: number[]): number[] {
+  target = target.slice();
   for (let i = 0; i < source.length; i++) {
     const v = source[i];
     if (Number.isFinite(v)) {
