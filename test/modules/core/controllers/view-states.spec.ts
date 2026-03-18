@@ -3,7 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {MapController, OrbitController, FirstPersonController, Viewport} from '@deck.gl/core';
+import {
+  MapController,
+  OrbitController,
+  FirstPersonController,
+  _GlobeController as GlobeController,
+  Viewport
+} from '@deck.gl/core';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 
 const dummyMakeViewport = (props: any) => new Viewport(props);
@@ -85,6 +91,87 @@ test('MapViewState', t => {
   t.is(viewportProps.longitude, 0, 'longitude is inside maxBounds');
   t.ok(viewportProps.latitude > 45 && viewportProps.latitude < 55, 'latitude is inside maxBounds');
   t.ok(viewportProps.zoom > 5, 'zoom is adjusted by maxBounds');
+
+  t.end();
+});
+
+test('GlobeViewState', t => {
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+
+  let viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: -182,
+    latitude: 36,
+    zoom: 0,
+    makeViewport: dummyMakeViewport
+  });
+  let viewportProps = viewState.getViewportProps();
+
+  t.is(viewportProps.longitude, 178, 'no bounds#longitude is normalized');
+  t.is(viewportProps.latitude, 36, 'no bounds#latitude is not change');
+  t.is(viewportProps.zoom, 0, 'no bounds#zoom is not changed');
+
+  viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: -45,
+    latitude: 36,
+    zoom: 0,
+    maxBounds: [
+      [-180, -90],
+      [180, 90]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  t.is(viewportProps.longitude, -45, 'full coverage bounds#longitude is not changed');
+  t.is(viewportProps.latitude, 36, 'full coverage bounds#latitude is not changed');
+  t.ok(viewportProps.zoom > 1, 'full coverage bounds#zoom is adjusted');
+
+  viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: -45,
+    latitude: 36,
+    zoom: 0,
+    maxBounds: [
+      [-10, -10],
+      [30, 30]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  t.is(viewportProps.longitude, 10, 'medium bounds#longitude is adjusted');
+  t.ok(
+    viewportProps.latitude < 30 && viewportProps.latitude > -10,
+    'medium bounds#latitude is adjusted'
+  );
+  t.ok(viewportProps.zoom > 3, 'medium bounds#zoom is adjusted');
+
+  viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    maxBounds: [
+      [-122.46, 37.75],
+      [-122.44, 37.78]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  console.log(viewportProps);
+  t.ok(
+    viewportProps.longitude > -122.46 && viewportProps.longitude < -122.44,
+    'small bounds#longitude is adjusted'
+  );
+  t.ok(
+    viewportProps.latitude < 37.78 && viewportProps.latitude > 37.75,
+    'small bounds#latitude is adjusted'
+  );
+  t.ok(viewportProps.zoom > 12, 'small bounds#zoom is adjusted');
 
   t.end();
 });
