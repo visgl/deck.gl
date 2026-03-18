@@ -301,9 +301,9 @@ test('OrthographicViewState', t => {
 });
 
 test('FirstPersonViewState', t => {
-  const FirstPersonViewState = new FirstPersonController({}).ControllerState;
+  const FirstPersonViewState = new FirstPersonController({} as any).ControllerState;
 
-  const viewState = new FirstPersonViewState({
+  let viewState = new FirstPersonViewState({
     width: 800,
     height: 600,
     longitude: -182,
@@ -311,9 +311,10 @@ test('FirstPersonViewState', t => {
     bearing: 200,
     pitch: 60,
     maxPitch: 45,
-    minPitch: -45
+    minPitch: -45,
+    makeViewport: dummyMakeViewport
   });
-  const viewportProps = viewState.getViewportProps();
+  let viewportProps = viewState.getViewportProps();
 
   t.deepEqual(viewportProps.position, [0, 0, 0], 'added default position');
   t.is(viewportProps.pitch, 45, 'props are normalized');
@@ -325,12 +326,29 @@ test('FirstPersonViewState', t => {
     longitude: -160,
     latitude: 36,
     bearing: 120,
-    pitch: 0
+    pitch: 0,
+    makeViewport: dummyMakeViewport
   });
 
   const transitionViewportProps = viewState2.shortestPathFrom(viewState);
   t.is(transitionViewportProps.longitude, 200, 'found shortest path for longitude');
   t.is(transitionViewportProps.bearing, -240, 'found shortest path for rotationOrbit');
+
+  viewState = new FirstPersonViewState({
+    width: 800,
+    height: 600,
+    longitude: -122.4,
+    latitude: 37.8,
+    position: [-200, 100, 0],
+    maxBounds: [
+      [-100, -100],
+      [100, 100]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+
+  t.deepEqual(viewportProps.position, [-100, 100, 0], 'updated position to constraints');
 
   t.end();
 });
