@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, log} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
+import {Layer, project32, color, picking, log} from '@deck.gl/core';
+import type {Device, RenderPipelineParameters} from '@luma.gl/core';
 import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
@@ -15,6 +15,8 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
+import source from './scenegraph-layer.wgsl';
+import {scenegraphPbrMaterial} from './scenegraph-pbr-material';
 
 import {
   UpdateParameters,
@@ -77,7 +79,11 @@ type _ScenegraphLayerProps<DataT> = {
    */
   _imageBasedLightingEnvironment?:
     | PBREnvironment
-    | ((context: {gl: WebGL2RenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
+    | ((context: {
+        device?: Device;
+        gl?: WebGL2RenderingContext;
+        layer: ScenegraphLayer<DataT>;
+      }) => PBREnvironment);
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -183,22 +189,26 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   getShaders() {
     const defines: {LIGHTING_PBR?: 1} = {};
     let pbr;
+    const isWebGPU = this.context.device?.type === 'webgpu';
 
     if (this.props._lighting === 'pbr') {
-      pbr = pbrMaterial;
+      pbr = isWebGPU ? scenegraphPbrMaterial : pbrMaterial;
       defines.LIGHTING_PBR = 1;
+    } else if (isWebGPU) {
+      pbr = scenegraphPbrMaterial;
     } else {
       // Dummy shader module needed to handle
       // pbrMaterial.pbr_baseColorSampler binding
       pbr = {name: 'pbrMaterial'};
     }
 
-    const modules = [project32, picking, scenegraphUniforms, pbr];
-    return super.getShaders({defines, vs, fs, modules});
+    const modules = [project32, color, picking, scenegraphUniforms, pbr];
+    return super.getShaders({defines, vs, fs, source, modules});
   }
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
+    const supportsTransitions = this.context.device.type !== 'webgpu';
     // attributeManager is always defined for primitive layers
     attributeManager!.addInstanced({
       instancePositions: {
@@ -206,14 +216,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'float64',
         fp64: this.use64bitPositions(),
         accessor: 'getPosition',
-        transition: true
+        transition: supportsTransitions
       },
       instanceColors: {
         type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR,
-        transition: true
+        transition: supportsTransitions
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
@@ -346,11 +356,23 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     let env: PBREnvironment | undefined;
     if (_imageBasedLightingEnvironment) {
       if (typeof _imageBasedLightingEnvironment === 'function') {
-        env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
+        env = _imageBasedLightingEnvironment({
+          device: this.context.device,
+          gl: this.context.gl,
+          layer: this
+        });
       } else {
         env = _imageBasedLightingEnvironment;
       }
     }
+
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies RenderPipelineParameters)
+        : undefined;
 
     return {
       imageBasedLightingEnvironment: env,
@@ -358,6 +380,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         id: this.props.id,
         isInstanced: true,
         bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+        parameters,
         ...this.getShaders()
       },
       // tangents are not supported
@@ -389,7 +412,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           sizeScale,
           sizeMinPixels,
           sizeMaxPixels,
-          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
+          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem) ? 1 : 0,
           sceneModelMatrix: worldMatrix
         };
 
