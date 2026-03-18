@@ -36,7 +36,7 @@ export default class PathTesselator extends Tesselator<
           initialize: true,
           type: opts.fp64 ? Float64Array : Float32Array
         },
-        segmentTypes: {size: 1, type: Uint8ClampedArray}
+        segmentTypes: {size: 1, type: Float32Array}
       }
     });
   }

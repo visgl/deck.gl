@@ -4,7 +4,23 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const uniformBlockWGSL = /* wgsl */ `\
+struct PathUniforms {
+  widthScale: f32,
+  widthMinPixels: f32,
+  widthMaxPixels: f32,
+  jointType: f32,
+  capType: f32,
+  miterLimit: f32,
+  billboard: f32,
+  widthUnits: i32,
+};
+
+@group(0) @binding(1)
+var<uniform> path: PathUniforms;
+`;
+
+const uniformBlockGLSL = `\
 uniform pathUniforms {
   float widthScale;
   float widthMinPixels;
@@ -30,8 +46,9 @@ export type PathProps = {
 
 export const pathUniforms = {
   name: 'path',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: uniformBlockWGSL,
+  vs: uniformBlockGLSL,
+  fs: uniformBlockGLSL,
   uniformTypes: {
     widthScale: 'f32',
     widthMinPixels: 'f32',
