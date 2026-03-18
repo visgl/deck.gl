@@ -29,6 +29,7 @@ Layers will gradually be WebGPU enabled. Layers that support WebGPU can be teste
 
 - [`PointCloudLayer`](https://deck.gl/examples/point-cloud-layer)
 - [`ScatterplotLayer`](https://deck.gl/examples/scatterplot-layer)
+- [`ScenegraphLayer`](https://deck.gl/examples/scenegraph-layer)
 
 ## Features
 

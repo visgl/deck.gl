@@ -5,13 +5,26 @@
 import type {Matrix4} from '@math.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const uniformBlockWGSL = /* wgsl */ `\
+struct ScenegraphUniforms {
+  sizeScale: f32,
+  sizeMinPixels: f32,
+  sizeMaxPixels: f32,
+  sceneModelMatrix: mat4x4<f32>,
+  composeModelMatrix: f32,
+};
+
+@group(0) @binding(20)
+var<uniform> scenegraph: ScenegraphUniforms;
+`;
+
+const uniformBlockGLSL = /* glsl */ `\
 uniform scenegraphUniforms {
   float sizeScale;
   float sizeMinPixels;
   float sizeMaxPixels;
   mat4 sceneModelMatrix;
-  bool composeModelMatrix;
+  float composeModelMatrix;
 } scenegraph;
 `;
 
@@ -20,13 +33,14 @@ export type ScenegraphProps = {
   sizeMinPixels: number;
   sizeMaxPixels: number;
   sceneModelMatrix: Matrix4;
-  composeModelMatrix: boolean;
+  composeModelMatrix: number;
 };
 
 export const scenegraphUniforms = {
   name: 'scenegraph',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: uniformBlockWGSL,
+  vs: uniformBlockGLSL,
+  fs: uniformBlockGLSL,
   uniformTypes: {
     sizeScale: 'f32',
     sizeMinPixels: 'f32',
