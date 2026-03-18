@@ -8,7 +8,8 @@ import {
   OrbitController,
   FirstPersonController,
   _GlobeController as GlobeController,
-  Viewport
+  Viewport,
+  OrbitViewport
 } from '@deck.gl/core';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 
@@ -177,19 +178,20 @@ test('GlobeViewState', t => {
 });
 
 test('OrbitViewState', t => {
-  const OrbitViewState = new OrbitController({}).ControllerState;
+  const OrbitViewState = new OrbitController({} as any).ControllerState;
+  const makeViewport = props => new OrbitViewport(props);
 
-  const viewState = new OrbitViewState({
+  let viewState = new OrbitViewState({
     width: 800,
     height: 600,
-    orbitAxis: 'Y',
     rotationX: 60,
     rotationOrbit: 200,
     zoom: 0,
     minRotationX: -45,
-    maxRotationX: 45
+    maxRotationX: 45,
+    makeViewport
   });
-  const viewportProps = viewState.getViewportProps();
+  let viewportProps = viewState.getViewportProps();
 
   t.deepEqual(viewportProps.target, [0, 0, 0], 'added default target');
   t.is(viewportProps.rotationX, 45, 'props are normalized');
@@ -198,14 +200,49 @@ test('OrbitViewState', t => {
   const viewState2 = new OrbitViewState({
     width: 800,
     height: 600,
-    orbitAxis: 'Y',
     rotationX: 0,
     rotationOrbit: 120,
-    zoom: 0
+    zoom: 0,
+    makeViewport
   });
 
   const transitionViewportProps = viewState2.shortestPathFrom(viewState);
   t.is(transitionViewportProps.rotationOrbit, -240, 'found shortest path for rotationOrbit');
+
+  viewState = new OrbitViewState({
+    width: 800,
+    height: 600,
+    rotationX: 0,
+    rotationOrbit: 0,
+    zoom: 0,
+    target: [-3, 2, 0],
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    makeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+
+  t.deepEqual(viewportProps.target, [-1, 1, 0], 'target is clipped inside maxBounds');
+  t.ok(viewportProps.zoom > 6, 'zoom is adjusted to maxBounds');
+
+  viewState = new OrbitViewState({
+    width: 800,
+    height: 600,
+    rotationX: 60,
+    rotationOrbit: 0,
+    zoom: 0,
+    target: [-3, 2, 0],
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    makeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+
+  t.ok(viewportProps.target[2] < 0, 'target is clipped inside maxBounds');
 
   t.end();
 });

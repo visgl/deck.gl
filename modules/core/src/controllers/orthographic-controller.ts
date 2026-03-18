@@ -53,8 +53,6 @@ export class OrthographicState extends ViewState<
   OrthographicStateProps,
   OrthographicStateInternal
 > {
-  makeViewport: (props: Record<string, any>) => Viewport;
-
   constructor(
     options: OrthographicStateProps &
       OrthographicStateInternal & {
@@ -107,10 +105,9 @@ export class OrthographicState extends ViewState<
         startPanPosition,
         startZoomPosition,
         startZoom
-      }
+      },
+      options.makeViewport
     );
-
-    this.makeViewport = options.makeViewport;
   }
 
   /**

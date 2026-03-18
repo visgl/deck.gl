@@ -343,7 +343,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     const dimensionChanged = !oldProps || oldProps.height !== props.height || oldProps.width !== props.width || oldProps.maxBounds !== props.maxBounds;
     if (dimensionChanged && props.maxBounds) {
       // Dimensions changed, try re-normalize the props
-      const controllerState = new this.ControllerState(props);
+      const controllerState = new this.ControllerState({...props, makeViewport: this.makeViewport});
       const normalizedProps = controllerState.getViewportProps();
       const changed = Object.keys(normalizedProps).some(key => !deepEqual(normalizedProps[key], props[key], 1));
       if (changed) {

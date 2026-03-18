@@ -43,8 +43,6 @@ class FirstPersonState extends ViewState<
   FirstPersonStateProps,
   FirstPersonStateInternal
 > {
-  makeViewport: (props: Record<string, any>) => Viewport;
-
   constructor(
     options: FirstPersonStateProps &
       FirstPersonStateInternal & {
@@ -97,10 +95,9 @@ class FirstPersonState extends ViewState<
         startZoomPosition,
         startPanPos,
         startPanPosition
-      }
+      },
+      options.makeViewport
     );
-
-    this.makeViewport = options.makeViewport;
   }
 
   /* Public API */

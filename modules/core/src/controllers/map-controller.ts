@@ -92,7 +92,6 @@ export type MapStateInternal = {
 /* Utils */
 
 export class MapState extends ViewState<MapState, MapStateProps, MapStateInternal> {
-  makeViewport: (props: Record<string, any>) => Viewport;
   /* get optional altitude for rotation pivot
    *   - undefined: rotate around viewport center (no pivot point)
    *   - 0: rotate around pointer position at ground level
@@ -190,10 +189,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         startBearing,
         startPitch,
         startZoom
-      }
+      },
+      options.makeViewport
     );
 
-    this.makeViewport = options.makeViewport;
     this.getAltitude = options.getAltitude;
   }
 
