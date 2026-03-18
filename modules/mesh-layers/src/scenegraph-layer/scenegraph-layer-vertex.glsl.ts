@@ -59,9 +59,10 @@ void main(void) {
 
   float originalSize = project_size_to_pixel(scenegraph.sizeScale);
   float clampedSize = clamp(originalSize, scenegraph.sizeMinPixels, scenegraph.sizeMaxPixels);
+  float sizeRatio = originalSize == 0.0 ? 0.0 : clampedSize / originalSize;
 
-  vec3 pos = (instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(positions, 1.0)).xyz) * scenegraph.sizeScale * (clampedSize / originalSize) + instanceTranslation;
-  if(scenegraph.composeModelMatrix) {
+  vec3 pos = (instanceModelMatrix * (scenegraph.sceneModelMatrix * vec4(positions, 1.0)).xyz) * scenegraph.sizeScale * sizeRatio + instanceTranslation;
+  if(scenegraph.composeModelMatrix > 0.5) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
     // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
