@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core';
-import Controller from './controller';
+import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
 
@@ -36,11 +36,13 @@ type OrbitStateInternal = {
 
 export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStateInternal> {
   makeViewport: (props: Record<string, any>) => Viewport;
+  unproject3D?: (pos: number[]) => number[] | null;
 
   constructor(
     options: OrbitStateProps &
       OrbitStateInternal & {
         makeViewport: (props: Record<string, any>) => Viewport;
+        unproject3D?: (pos: number[]) => number[] | null;
       }
   ) {
     const {
@@ -94,6 +96,7 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
     );
 
     this.makeViewport = options.makeViewport;
+    this.unproject3D = options.unproject3D;
   }
 
   /**
@@ -334,6 +337,8 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
     return viewport.project(pos);
   }
   _unproject(pos: number[]): number[] {
+    const p = this.unproject3D?.(pos);
+    if (p) return p;
     const viewport = this.makeViewport(this.getViewportProps());
     return viewport.unproject(pos);
   }
@@ -400,5 +405,28 @@ export default class OrbitController extends Controller<OrbitState> {
         required: ['target', 'zoom']
       }
     })
+  };
+
+  setProps(
+    props: ControllerProps &
+      OrbitStateProps & {
+        unproject3D?: (pos: number[]) => number[] | null;
+      }
+  ) {
+    // this will be passed to OrbitState constructor
+    props.unproject3D = this._unproject3D;
+
+    super.setProps(props);
+  }
+
+  protected _unproject3D = (pos: number[]): number[] | null => {
+    if (this.pickPosition) {
+      const {x, y} = this.props;
+      const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
+      if (pickResult && pickResult.coordinate) {
+        return pickResult.coordinate;
+      }
+    }
+    return null;
   };
 }

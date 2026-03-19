@@ -125,6 +125,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
   protected makeViewport: (opts: Record<string, any>) => Viewport;
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -174,6 +175,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onViewStateChange = opts.onViewStateChange || (() => {});
     this.onStateChange = opts.onStateChange || (() => {});
     this.makeViewport = opts.makeViewport;
+    this.pickPosition = opts.pickPosition;
   }
 
   set events(customEvents) {
@@ -417,17 +419,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       alternateMode = !alternateMode;
     }
 
-    const newControllerState = alternateMode
-      ? this.controllerState.panStart({pos})
-      : this.controllerState.rotateStart(this._getRotateStartParams(pos));
+    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
+      pos
+    });
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
-  }
-
-  /** Returns parameters for rotateStart. Override to add extra params (e.g. altitude). */
-  protected _getRotateStartParams(pos: [number, number]): {pos: [number, number]} {
-    return {pos};
   }
 
   // Default handler for the `panmove` and `panend` event.
