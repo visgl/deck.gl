@@ -86,7 +86,7 @@ export default function App({data}: {data?: HierarchyNode<Datum>}) {
       id: 'labels-value',
       data: leaves,
       getPosition: d => [d.x0, d.y0],
-      getText: d => formatValue(d.value!),
+      getText: d => formatValue(d.data.value),
       getPixelOffset: [4, 12],
       getSize: 10,
       getColor: [255, 255, 255, 200],
@@ -121,7 +121,7 @@ function getTooltip({object}: PickingInfo<HierarchyRectangularNode<Datum>>) {
     .map(d => d.data.name)
     .reverse()
     .join('.')}
-  value: ${formatValue(object.value!)}
+  value: ${formatValue(object.data.value)}
   `
     : null;
 }
