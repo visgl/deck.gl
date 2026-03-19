@@ -10,6 +10,7 @@ export {default as FillStyleExtension} from './fill-style/fill-style-extension';
 export {default as ClipExtension} from './clip/clip-extension';
 export {default as CollisionFilterExtension} from './collision-filter/collision-filter-extension';
 export {default as MaskExtension} from './mask/mask-extension';
+export {default as ClippingTextExtension} from './clipping-text/clipping-text-extension';
 export {default as _TerrainExtension} from './terrain/terrain-extension';
 
 // Shader module
@@ -32,5 +33,6 @@ export type {
 export type {ClipExtensionProps} from './clip/clip-extension';
 export type {CollisionFilterExtensionProps} from './collision-filter/collision-filter-extension';
 export type {MaskExtensionProps} from './mask/mask-extension';
+export type {ClippingTextExtensionProps} from './clipping-text/clipping-text-extension';
 export type {TerrainExtensionProps} from './terrain/terrain-extension';
 export type {TerrainModuleProps} from './terrain/shader-module';

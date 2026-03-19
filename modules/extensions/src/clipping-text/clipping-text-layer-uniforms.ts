@@ -2,25 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type { ShaderModule } from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
-export enum AlignToViewportMode {
-  none = 0,
-  start = 1,
-  center = 2,
-  end = 3,
-}
+export const AlignToViewportModes = {
+  none: 0,
+  start: 1,
+  center: 2,
+  end: 3
+} as const;
 
 const glslUniformBlock = `\
 uniform clippingTextUniforms {
   highp vec2 cutoffPixels;
-  highp ivec2 scrollIntoView;
+  highp ivec2 align;
+  bool flipY;
 } clippingText;
 `;
 
 export type ClippingTextProps = {
   cutoffPixels: [number, number];
-  scrollIntoView: [AlignToViewportMode, AlignToViewportMode];
+  align: [number, number];
+  // If true, clipRect's x,y is the top-left corner instead of bottom-left
+  flipY: boolean;
 };
 
 export const clippingTextUniforms = {
@@ -29,6 +32,7 @@ export const clippingTextUniforms = {
   fs: glslUniformBlock,
   uniformTypes: {
     cutoffPixels: 'vec2<f32>',
-    scrollIntoView: 'vec2<i32>',
-  },
+    align: 'vec2<i32>',
+    flipY: 'f32'
+  }
 } as const satisfies ShaderModule<ClippingTextProps>;
