@@ -93,11 +93,18 @@ export type MapStateInternal = {
 
 export class MapState extends ViewState<MapState, MapStateProps, MapStateInternal> {
   makeViewport: (props: Record<string, any>) => Viewport;
+  /* get optional altitude for rotation pivot
+   *   - undefined: rotate around viewport center (no pivot point)
+   *   - 0: rotate around pointer position at ground level
+   *   - other value: rotate around pointer position at specified altitude
+   */
+  getAltitude?: (pos: [number, number]) => number | undefined;
 
   constructor(
     options: MapStateProps &
       MapStateInternal & {
         makeViewport: (props: Record<string, any>) => Viewport;
+        getAltitude?: (pos: [number, number]) => number | undefined;
       }
   ) {
     const {
@@ -187,6 +194,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     );
 
     this.makeViewport = options.makeViewport;
+    this.getAltitude = options.getAltitude;
   }
 
   /**
@@ -231,12 +239,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
-   * @param {Number} altitude - optional altitude for rotation pivot
-   *   - undefined: rotate around viewport center (no pivot point)
-   *   - 0: rotate around pointer position at ground level
-   *   - other value: rotate around pointer position at specified altitude
    */
-  rotateStart({pos, altitude}: {pos: [number, number]; altitude?: number}): MapState {
+  rotateStart({pos}: {pos: [number, number]}): MapState {
+    const altitude = this.getAltitude?.(pos);
+
     return this._getUpdatedState({
       startRotatePos: pos,
       startRotateLngLat: altitude !== undefined ? this._unproject3D(pos, altitude) : undefined,
@@ -603,20 +609,18 @@ export default class MapController extends Controller<MapState> {
    */
   protected rotationPivot: 'center' | '2d' | '3d' = 'center';
 
-  /**
-   * Internal callback to access deck picking engine. Populated by ViewManager
-   */
-  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
-
-  constructor(opts: ConstructorParameters<typeof Controller>[0]) {
-    super(opts);
-    this.pickPosition = opts.pickPosition;
-  }
-
-  setProps(props: ControllerProps & MapStateProps & {rotationPivot?: 'center' | '2d' | '3d'}) {
+  setProps(
+    props: ControllerProps &
+      MapStateProps & {
+        rotationPivot?: 'center' | '2d' | '3d';
+        getAltitude?: (pos: [number, number]) => number | undefined;
+      }
+  ) {
     if ('rotationPivot' in props) {
       this.rotationPivot = props.rotationPivot || 'center';
     }
+    // this will be passed to MapState constructor
+    props.getAltitude = this._getAltitude;
     props.position = props.position || [0, 0, 0];
     props.maxBounds =
       props.maxBounds || (props.normalize === false ? null : WEB_MERCATOR_MAX_BOUNDS);
@@ -645,22 +649,18 @@ export default class MapController extends Controller<MapState> {
   }
 
   /** Add altitude to rotateStart params based on rotationPivot mode */
-  protected _getRotateStartParams(pos: [number, number]): {
-    pos: [number, number];
-    altitude?: number;
-  } {
-    let altitude: number | undefined;
+  protected _getAltitude = (pos: [number, number]): number | undefined => {
     if (this.rotationPivot === '2d') {
-      altitude = 0;
+      return 0;
     } else if (this.rotationPivot === '3d') {
       if (this.pickPosition) {
         const {x, y} = this.props;
         const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
         if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
-          altitude = pickResult.coordinate[2];
+          return pickResult.coordinate[2];
         }
       }
     }
-    return {pos, altitude};
-  }
+    return undefined;
+  };
 }
