@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <title>deck.gl TextLayer Example</title>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+  </body>
+
+  <script type="module">
+
+    import {Deck, OrthographicView} from '@deck.gl/core';
+    import {SolidPolygonLayer} from '@deck.gl/layers';
+    import {ClippingTextLayer} from './clipping-text-layer';
+
+    const deckgl = new Deck({
+      views: new OrthographicView({
+        controller: {
+          zoomAxis: 'X',
+          maxZoom: 2,
+          minZoom: -3,
+        },
+      }),
+      initialViewState: {
+        target: [0, 0, 0],
+        zoom: [0, 0],
+      },
+      layers: [
+        new SolidPolygonLayer({
+          id: 'background-layer',
+          data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+          getPolygon: (_, {index}) => makeRectangle(-4, index * 32 -2, 108, 20),
+          getFillColor: [255, 255, 200, 200],
+        }),
+        new ClippingTextLayer({
+          id: 'text-layer',
+          data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+          getPosition: (_, {index}) => [0, index * 32, 0],
+          getText: d => d.name,
+          getSize: 16,
+          getColor: [0,0,0],
+          getTextAnchor: 'start',
+          getAlignmentBaseline: 'top',
+          getClipRect: [0, 0, 100, -1],
+          clipRectCutoffPixels: [50, 0],
+        })
+      ],
+    });
+
+    function makeRectangle(x, y, w, h) {
+      return [
+        x, y, 0, 
+        x, y + h, 0,
+        x + w, y + h, 0,
+        x + w, y, 0,
+        x, y, 0, 
+      ];
+    }
+
+  </script>
+</html>
