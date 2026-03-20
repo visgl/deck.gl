@@ -144,7 +144,6 @@ function App() {
     <>
       <DeckGL
         controller
-        parameters={{cullMode: 'back'}}
         views={opts.view}
         initialViewState={opts.viewState}
         layers={layers}

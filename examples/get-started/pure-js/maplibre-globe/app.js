@@ -41,9 +41,6 @@ const deckOverlay = new DeckOverlay({
     new ArcLayer({
       id: 'arcs',
       data: AIR_PORTS,
-      parameters: {
-        cullMode: 'none'
-      },
       dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
       // Styles
       getSourcePosition: f => [-0.4531566, 51.4709959], // London

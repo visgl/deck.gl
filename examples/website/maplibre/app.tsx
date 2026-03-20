@@ -92,7 +92,6 @@ export default function App({
           timeRange,
           getSourceColor: [63, 81, 181],
           getTargetColor: [63, 181, 173],
-          parameters: {cullMode: 'none'},
           ...(interleaveLabels ? {beforeId: 'watername_ocean'} : {})
         })
     );
