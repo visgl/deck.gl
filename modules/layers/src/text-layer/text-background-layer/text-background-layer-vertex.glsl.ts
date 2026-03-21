@@ -63,9 +63,11 @@ void main(void) {
     xy.y = -xy.y - wh.y;
   }
   if (instanceClipRect.z >= 0.0) {
+    dimensions.x = wh.x;
     pixelOffset.x = xy.x + uv.x * wh.x + mix(-textBackground.padding.x, textBackground.padding.z, uv.x);
   }
   if (instanceClipRect.w >= 0.0) {
+    dimensions.y = wh.y;
     pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
   }
 
