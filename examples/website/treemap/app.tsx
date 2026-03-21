@@ -8,7 +8,6 @@ import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import type {PickingInfo, OrthographicViewState, Color} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
-import {ClippingTextExtension, type ClippingTextExtensionProps} from '@deck.gl/extensions';
 import {scaleOrdinal, hierarchy, treemap, treemapSquarify, format} from 'd3';
 import type {HierarchyNode, HierarchyRectangularNode} from 'd3';
 
@@ -53,13 +52,10 @@ export default function App({data}: {data?: HierarchyNode<Datum>}) {
   const leaves = useMemo(() => layoutRoot?.leaves(), [layoutRoot]);
 
   const layers = [
-    new TextLayer<
-      HierarchyRectangularNode<Datum>,
-      ClippingTextExtensionProps<HierarchyRectangularNode<Datum>>
-    >({
+    new TextLayer<HierarchyRectangularNode<Datum>>({
       id: 'labels-name',
       data: leaves,
-      getPosition: d => [d.x0, d.y0],
+      getPosition: d => [d.x0, d.y1],
       getText: d => d.data.name,
       getPixelOffset: [4, 0],
       getSize: 12,
@@ -71,18 +67,12 @@ export default function App({data}: {data?: HierarchyNode<Datum>}) {
         while (d.depth > 1) d = d.parent!;
         return ColorScale(d.data.name);
       },
-
-      // ClippingTextExtension props
-      getClipRect: d => [0, 0, d.x1 - d.x0, d.y1 - d.y0],
-      clipRectAlignHorizontal: 'start',
-      clipRectAlignVertical: 'center',
-      clipRectCutoffPixels: [60, 30],
-      extensions: [new ClippingTextExtension()]
+      getContentBox: d => [0, d.y0 - d.y1, d.x1 - d.x0, d.y1 - d.y0],
+      contentAlignHorizontal: 'start',
+      contentAlignVertical: 'center',
+      contentCutoffPixels: [60, 30]
     }),
-    new TextLayer<
-      HierarchyRectangularNode<Datum>,
-      ClippingTextExtensionProps<HierarchyRectangularNode<Datum>>
-    >({
+    new TextLayer<HierarchyRectangularNode<Datum>>({
       id: 'labels-value',
       data: leaves,
       getPosition: d => [d.x0, d.y0],
@@ -92,20 +82,17 @@ export default function App({data}: {data?: HierarchyNode<Datum>}) {
       getColor: [255, 255, 255, 200],
       getTextAnchor: 'start',
       getAlignmentBaseline: 'center',
-
-      // ClippingTextExtension props
-      getClipRect: d => [0, 0, d.x1 - d.x0, d.y1 - d.y0],
-      clipRectAlignHorizontal: 'start',
-      clipRectAlignVertical: 'center',
-      clipRectCutoffPixels: [60, 60],
-      extensions: [new ClippingTextExtension()]
+      getContentBox: d => [0, 0, d.x1 - d.x0, d.y1 - d.y0],
+      contentAlignHorizontal: 'start',
+      contentAlignVertical: 'center',
+      contentCutoffPixels: [60, 60]
     })
   ];
 
   return (
     <DeckGL
       layers={layers}
-      views={new OrthographicView({flipY: true})}
+      views={new OrthographicView()}
       initialViewState={INITIAL_VIEW_STATE}
       controller
       getTooltip={getTooltip}
