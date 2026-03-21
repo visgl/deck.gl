@@ -112,6 +112,8 @@ export default function App({
   const plots: StationGroup[] = useMemo(() => sortData(data, groupBy), [data, groupBy]);
 
   const contentBounds = useMemo(() => {
+    if (!plots.length) return null;
+
     const padding = CHART_WIDTH;
     return [
       [-padding, -padding],
@@ -122,15 +124,12 @@ export default function App({
     ];
   }, [plots.length]);
 
-  const initialViewState: OrthographicViewState = useMemo(() => {
-    const centerX = (Math.min(plots.length, ROW_SIZE) / 2) * (CHART_WIDTH + SPACING);
-    const centerY = (Math.ceil(plots.length / ROW_SIZE) / 2) * (CHART_HEIGHT + SPACING);
-    return {
-      target: [centerX, centerY, 0],
-      zoom: -1,
-      minZoom: -2
-    };
-  }, [plots.length]);
+  const initialViewState: OrthographicViewState = {
+    target: [0, 0, 0],
+    zoom: -1,
+    minZoom: -2,
+    maxZoom: 2
+  };
 
   const yLabels = useMemo(
     () =>
@@ -223,7 +222,9 @@ export default function App({
     <DeckGL
       views={new OrthographicView()}
       initialViewState={initialViewState}
-      controller={true}
+      controller={{
+        maxBounds: contentBounds
+      }}
       layers={layers}
       layerFilter={layerFilter}
       getTooltip={getTooltip}
