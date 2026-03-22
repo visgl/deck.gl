@@ -23,6 +23,7 @@ import {Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
+import {getColumnLayerWGSL as source} from './column-layer.wgsl';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
@@ -234,6 +235,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
+      source: source(flatShading),
       vs,
       fs,
       defines,

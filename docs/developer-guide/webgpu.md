@@ -41,8 +41,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/layers` | `LineLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `ScatterplotLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `ColumnLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `GridCellLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `ColumnLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PathLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PolygonLayer` | ✅ | ❌ |
 | `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ❌ |
