@@ -1,68 +1,112 @@
-import BrowserOnly from '@docusaurus/BrowserOnly';
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_ThemeWidget} from '@deck.gl/widgets';
-
-# ThemeWidget (Experimental)
+# ThemeWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ThemeWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ThemeWidgetDemo />
 
 This widget changes the theme of deck.gl between light mode and dark mode. Click the widget to toggle the theme.
 
 :::info
 
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
-  :::
+:::
 
-<BrowserOnly>{() => <WidgetPreview cls={_ThemeWidget}/>}</BrowserOnly>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
-import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
+```js
+import {ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ThemeWidget()]
+new Deck({
+  widgets: [
+    new ThemeWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-### `ThemeWidgetProps`
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+```ts
+import {ThemeWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-- `id` (default `'theme'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+new Deck({
+  widgets: [
+    new ThemeWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {ThemeWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <ThemeWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ThemeWidget, type ThemeWidgetProps} from '@deck.gl/widgets';
+new ThemeWidget({} satisfies ThemeWidgetProps);
+```
+
+## Types
+
+### `ThemeWidgetProps` {#themewidgetprops}
+
+The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `lightModeTheme` (object, optional) {#lightmodetheme}
 
-Styles for light mode theme.
+* Default: Light Glass Theme
 
-Default: Light Glass Theme
+Styles for light mode theme.
 
 #### `darkModeTheme` (object, optional) {#darkmodetheme}
 
+* Default: Dark Glass Theme
+
 Styles for dark mode theme.
 
-Default: Dark Glass Theme
+#### `initialThemeMode` (`'auto' | 'light' | 'dark'`) {#initialthememode}
 
-#### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
+* Default: `'auto'`
 
-Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
-
-Default: `'auto'`
+Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+* Default: `'Light Mode'`
 
-Default: `'Light Theme'`
+Tooltip message displayed while hovering a mouse over the widget when light mode is available.
 
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when fullscreen.
+* Default: `'Dark Mode'`
 
-Default: `'Dark Theme'`
+Tooltip message displayed while hovering a mouse over the widget when dark mode is available.
 
 ## Styles
 

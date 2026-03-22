@@ -3,66 +3,87 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {parsePosition, getPosition} from '@deck.gl/core/utils/positions';
+import {parsePosition, getPosition, evaluateLayoutExpression} from '@deck.gl/core/utils/positions';
+import type {LayoutExpression} from '@deck.gl/core/utils/positions';
 
-const PARSE_TEST_CASES = [
+const EXPRESSION_TEST_CASES = [
+  {title: 'number literal', value: 10, extent: 101, result: 10},
+  {title: 'percent string', value: '10%', extent: 101, result: 10},
+  {title: 'percent decimal string', value: '33.3%', extent: 100, result: 33},
+  {title: 'pixel string', value: '10px', extent: 200, result: 10},
+  {title: 'calc addition', value: 'calc(50% + 10px)', extent: 100, result: 60},
   {
-    title: 'number',
-    value: 10,
-    result: {position: 10, relative: false}
+    title: 'calc subtraction with parentheses',
+    value: 'calc(100% - (25% + 10px))',
+    extent: 200,
+    result: 140
   },
   {
-    title: 'percent string',
-    value: '10%',
-    result: {position: 0.1, relative: true}
+    title: 'calc whitespace and nesting',
+    value: 'calc( (25% - 5px) + (10px - 5%) )',
+    extent: 120,
+    result: 29
   },
-  {
-    title: 'percent string',
-    value: '33.3%',
-    result: {position: 0.333, relative: true}
-  },
-  {
-    title: 'pixel string',
-    value: '10px',
-    result: {position: 10, relative: false}
-  }
+  {title: 'calc unary minus', value: 'calc(-10px + 50%)', extent: 100, result: 40},
+  {title: 'calc uppercase and px spacing', value: 'CALC(75% - 10 px)', extent: 80, result: 50},
+  {title: 'calc percent only', value: 'calc(25%)', extent: 101, result: 25}
 ];
 
-const GET_TEST_CASES = [
+const EVALUATE_TEST_CASES: {
+  title: string;
+  expression: LayoutExpression;
+  extent: number;
+  result: number;
+}[] = [
   {
-    title: 'absolute',
-    position: {position: 10, relative: false},
-    extent: 101,
-    result: 10
+    title: 'binary addition tree',
+    expression: {
+      type: 'binary',
+      operator: '+',
+      left: {type: 'literal', value: 5},
+      right: {type: 'percentage', value: 0.1}
+    },
+    extent: 120,
+    result: 17
   },
   {
-    title: 'relative',
-    position: {position: 0.1, relative: true},
-    extent: 101,
-    result: 10
+    title: 'binary subtraction tree',
+    expression: {
+      type: 'binary',
+      operator: '-',
+      left: {type: 'percentage', value: 0.75},
+      right: {
+        type: 'binary',
+        operator: '+',
+        left: {type: 'literal', value: 20},
+        right: {type: 'percentage', value: 0.3}
+      }
+    },
+    extent: 100,
+    result: 25
   }
 ];
 
 test('positions#import', t => {
   t.ok(parsePosition, 'parsePosition imported OK');
   t.ok(getPosition, 'getPosition imported OK');
+  t.ok(evaluateLayoutExpression, 'evaluateLayoutExpression imported OK');
   t.end();
 });
 
-test('parsePosition#tests', t => {
-  for (const tc of PARSE_TEST_CASES) {
-    const result = parsePosition(tc.value);
-    result.position = result.position.toPrecision(5);
-    tc.result.position = tc.result.position.toPrecision(5);
-    t.deepEqual(result, tc.result, `parsePosition ${tc.title} returned expected type`);
+test('parsePosition#getPosition combinations', t => {
+  for (const tc of EXPRESSION_TEST_CASES) {
+    const expression = parsePosition(tc.value);
+    const result = getPosition(expression, tc.extent);
+    t.equal(result, tc.result, `parsePosition ${tc.title} returned expected result`);
   }
   t.end();
 });
 
-test('getPosition#tests', t => {
-  for (const tc of GET_TEST_CASES) {
-    const result = getPosition(tc.position, tc.extent);
-    t.deepEqual(result, tc.result, `getPosition ${tc.title} returned expected type`);
+test('evaluateLayoutExpression#trees', t => {
+  for (const tc of EVALUATE_TEST_CASES) {
+    const result = evaluateLayoutExpression(tc.expression, tc.extent);
+    t.equal(result, tc.result, `evaluateLayoutExpression ${tc.title} returned expected result`);
   }
   t.end();
 });

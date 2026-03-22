@@ -2,25 +2,41 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {log} from '@deck.gl/core';
+import {log, createIterable} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import {SdfProps, sdfUniforms} from './sdf-uniforms';
+import {TextModuleProps, textUniforms, ContentAlignModes} from '../text-uniforms';
+
+import vs from './multi-icon-layer-vertex.glsl';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
-import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import type {
+  Attribute,
+  Accessor,
+  AccessorFunction,
+  Color,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
 
 type _MultiIconLayerProps<DataT> = {
-  getIconOffsets?: Accessor<DataT, number[]>;
+  getIconOffsets?: AccessorFunction<DataT, number[]>;
+  getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
+
   sdf?: boolean;
   smoothing?: number;
   outlineWidth?: number;
   outlineColor?: Color;
+
+  contentCutoffPixels?: [width: number, height: number];
+  contentAlignHorizontal?: ContentAlignModes;
+  contentAlignVertical?: ContentAlignModes;
 };
 
 export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
@@ -28,10 +44,14 @@ export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
 
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
   getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
+  getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
   alphaCutoff: 0.001,
   smoothing: 0.1,
   outlineWidth: 0,
-  outlineColor: {type: 'color', value: [0, 0, 0, 255]}
+  outlineColor: {type: 'color', value: [0, 0, 0, 255]},
+  contentCutoffPixels: {type: 'array', value: [0, 0]},
+  contentAlignHorizontal: 'none',
+  contentAlignVertical: 'none'
 };
 
 export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends IconLayer<
@@ -47,37 +67,52 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, modules: [...shaders.modules, sdfUniforms], fs};
+    return {...shaders, modules: [...shaders.modules, textUniforms, sdfUniforms], vs, fs};
   }
 
   initializeState() {
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
+    const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
     attributeManager!.addInstanced({
-      instanceOffsets: {
-        size: 2,
-        accessor: 'getIconOffsets'
-      },
       instancePickingColors: {
         type: 'uint8',
-        size: 3,
+        size: 4,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
+      },
+      instanceClipRect: {
+        size: 4,
+        accessor: 'getContentBox',
+        defaultValue: [0, 0, -1, -1]
       }
     });
   }
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const {props, oldProps} = params;
-    let {outlineColor} = props;
+    const {props, oldProps, changeFlags} = params;
+    const {outlineColor} = props;
 
+    if (
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.getIcon ||
+        changeFlags.updateTriggersChanged.getIconOffsets)
+    ) {
+      this.getAttributeManager()!.invalidate('instanceIconDefs');
+    }
     if (outlineColor !== oldProps.outlineColor) {
-      outlineColor = outlineColor.map(x => x / 255) as Color;
-      outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
+      const normalizedOutlineColor = [
+        outlineColor[0] / 255,
+        outlineColor[1] / 255,
+        outlineColor[2] / 255,
+        (outlineColor[3] ?? 255) / 255
+      ];
 
       this.setState({
-        outlineColor
+        outlineColor: normalizedOutlineColor
       });
     }
     if (!props.sdf && props.outlineWidth) {
@@ -86,7 +121,14 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
   }
 
   draw(params) {
-    const {sdf, smoothing, outlineWidth} = this.props;
+    const {
+      sdf,
+      smoothing,
+      outlineWidth,
+      contentCutoffPixels,
+      contentAlignHorizontal,
+      contentAlignVertical
+    } = this.props;
     const {outlineColor} = this.state;
     const outlineBuffer = outlineWidth
       ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth))
@@ -100,7 +142,13 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       enabled: Boolean(sdf),
       outlineColor
     };
-    model.shaderInputs.setProps({sdf: sdfProps});
+    const textProps: TextModuleProps = {
+      contentCutoffPixels,
+      contentAlignHorizontal,
+      contentAlignVertical,
+      viewport: this.context.viewport
+    };
+    model.shaderInputs.setProps({sdf: sdfProps, text: textProps});
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
@@ -115,17 +163,30 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     }
   }
 
-  protected getInstanceOffset(icons: string): number[] {
-    return icons ? Array.from(icons).flatMap(icon => super.getInstanceOffset(icon)) : EMPTY_ARRAY;
-  }
-
-  getInstanceColorMode(icons: string): number {
-    return 1; // mask
-  }
-
-  getInstanceIconFrame(icons: string): number[] {
-    return icons
-      ? Array.from(icons).flatMap(icon => super.getInstanceIconFrame(icon))
-      : EMPTY_ARRAY;
+  protected calculateInstanceIconDefs(
+    attribute: Attribute,
+    {startRow, endRow}: {startRow: number; endRow: number}
+  ) {
+    const {data, getIcon, getIconOffsets} = this.props;
+    let i = attribute.getVertexOffset(startRow);
+    const output = attribute.value as Float32Array;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = getIcon(object, objectInfo) as string; // forwarded getText
+      const offsets = getIconOffsets(object, objectInfo); // text length x 2
+      if (text) {
+        let j = 0;
+        for (const char of Array.from(text)) {
+          const def = super.getInstanceIconDef(char);
+          def[0] = offsets[j * 2];
+          def[1] = offsets[j * 2 + 1];
+          def[6] = 1; // mask
+          output.set(def, i);
+          i += attribute.size;
+          j++;
+        }
+      }
+    }
   }
 }

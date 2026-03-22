@@ -1,58 +1,124 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ZoomWidget} from '@deck.gl/widgets';
-
 # ZoomWidget
+
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
+import {ZoomWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ZoomWidgetDemo />
 
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
 
-<WidgetPreview cls={ZoomWidget} props={{orientation: 'horizontal'}}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ZoomWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ZoomWidget()]
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-### `ZoomProps`
+  </TabItem>
+  <TabItem value="react" label="React">
 
-The `Zoomidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+```tsx
+import React from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
-- `id` (default `'zoom'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ZoomWidget, type ZoomWidgetProps} from '@deck.gl/widgets';
+new ZoomWidget({} satisfies ZoomWidgetProps);
+```
+
+## Types
+
+### `ZoomWidgetProps` {#zoomwidgetprops}
+
+The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `orientation` (string, optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom in button.
+* Default: `'Zoom In'`
 
-Default: `'Zoom In'`
+Tooltip message displayed while hovering a mouse over the zoom in button.
 
 #### `zoomOutLabel` (string, optional) {#zoomoutlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom out button.
+* Default: `'Zoom Out'`
 
-Default: `'Zoom Out'`
+Tooltip message displayed while hovering a mouse over the zoom out button.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Zoom transition duration in milliseconds.
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name              | Type                     | Default                                     |
 | ----------------- | ------------------------ | ------------------------------------------- |

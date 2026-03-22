@@ -70,7 +70,7 @@ export type FillStyleExtensionProps<DataT = any> = {
    * Accessor for the offset of the pattern, relative to the original size. Offset `[0.5, 0.5]` shifts the pattern alignment by half.
    * @default [0, 0]
    */
-  getFillPatternOffset?: Accessor<DataT, [number, number]>;
+  getFillPatternOffset?: Accessor<DataT, Readonly<[number, number]>>;
 };
 
 export type FillStyleExtensionOptions = {

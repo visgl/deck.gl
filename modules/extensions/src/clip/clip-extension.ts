@@ -16,7 +16,7 @@ export type ClipExtensionProps = {
   /** Rectangular bounds to be used for clipping the rendered region, in `[left, bottom, right, top]`.
    * @default [0, 0, 1, 1]
    */
-  clipBounds?: [number, number, number, number];
+  clipBounds?: Readonly<[number, number, number, number]>;
   /**
    * Controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon).
    * If not specified, it is automatically deduced from the layer.
@@ -35,7 +35,7 @@ bool clip_isInBounds(vec2 position) {
 `;
 
 export type ClipModuleProps = {
-  bounds: [number, number, number, number];
+  bounds: Readonly<[number, number, number, number]>;
 };
 
 /*

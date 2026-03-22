@@ -96,9 +96,12 @@ const defaultProps: DefaultProps<LayerProps> = {
       if (signal) {
         loadOptions = {
           ...loadOptions,
-          fetch: {
-            ...loadOptions?.fetch,
-            signal
+          core: {
+            ...loadOptions?.core,
+            fetch: {
+              ...loadOptions?.core?.fetch,
+              signal
+            }
           }
         };
       }
@@ -489,7 +492,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const hasPickingBuffer = this.internalState!.hasPickingBuffer;
       const needsPickingBuffer =
         Number.isInteger(props.highlightedObjectIndex) ||
-        props.pickable ||
+        Boolean(props.pickable) ||
         props.extensions.some(extension => extension.getNeedsPickingBuffer.call(this, extension));
 
       // Only generate picking buffer if needed
@@ -966,6 +969,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (!stateNeedsUpdate) {
       return;
     }
+    this.context.stats.get('Layer updates').incrementCount();
 
     const currentProps = this.props;
     const context = this.context;

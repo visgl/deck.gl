@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
 
 import {Tile, TileReader} from './carto-properties-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -34,7 +34,7 @@ const CartoPropertiesTileLoader: LoaderWithParser = {
   worker: true,
   parse: async (arrayBuffer, options) => parseCartoPropertiesTile(arrayBuffer, options),
   parseSync: parseCartoPropertiesTile,
-  options: DEFAULT_OPTIONS
+  options: DEFAULT_OPTIONS as StrictLoaderOptions
 };
 
 function parseCartoPropertiesTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions): Tile | null {

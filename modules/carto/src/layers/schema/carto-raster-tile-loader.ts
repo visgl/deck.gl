@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
 import type {RasterMetadata} from '@carto/api-client';
 
 import {TileReader} from './carto-raster-tile';
@@ -20,12 +20,12 @@ type CartoRasterTileLoaderOptions = LoaderOptions & {
   };
 };
 
-const DEFAULT_OPTIONS: CartoRasterTileLoaderOptions = {
+const DEFAULT_OPTIONS = {
   cartoRasterTile: {
     metadata: null,
     workerUrl: getWorkerUrl(id, VERSION)
   }
-};
+} as const satisfies CartoRasterTileLoaderOptions;
 
 const CartoRasterTileLoader: LoaderWithParser = {
   name: 'CARTO Raster Tile',

@@ -23,11 +23,11 @@ GOOGLE_SATELLITE = "satellite"
 GOOGLE_ROAD = "roadmap"
 
 styles = {
-    DARK: {"mapbox": MAPBOX_DARK, "carto": CARTO_DARK},
-    DARK_NO_LABELS: {"carto": CARTO_DARK_NO_LABELS},
-    LIGHT: {"mapbox": MAPBOX_LIGHT, "carto": CARTO_LIGHT},
-    LIGHT_NO_LABELS: {"carto": CARTO_LIGHT_NO_LABELS},
-    ROAD: {"carto": CARTO_ROAD, "google_maps": GOOGLE_ROAD, "mapbox": MAPBOX_ROAD},
+    DARK: {"mapbox": MAPBOX_DARK, "carto": CARTO_DARK, "maplibre": CARTO_DARK},
+    DARK_NO_LABELS: {"carto": CARTO_DARK_NO_LABELS, "maplibre": CARTO_DARK_NO_LABELS},
+    LIGHT: {"mapbox": MAPBOX_LIGHT, "carto": CARTO_LIGHT, "maplibre": CARTO_LIGHT},
+    LIGHT_NO_LABELS: {"carto": CARTO_LIGHT_NO_LABELS, "maplibre": CARTO_LIGHT_NO_LABELS},
+    ROAD: {"carto": CARTO_ROAD, "google_maps": GOOGLE_ROAD, "mapbox": MAPBOX_ROAD, "maplibre": CARTO_ROAD},
     SATELLITE: {"mapbox": MAPBOX_SATELLITE, "google_maps": GOOGLE_SATELLITE},
 }
 
@@ -35,6 +35,7 @@ _default_map_identifers = {
     BaseMapProvider.CARTO: DARK,
     BaseMapProvider.MAPBOX: DARK,
     BaseMapProvider.GOOGLE_MAPS: GOOGLE_ROAD,
+    BaseMapProvider.MAPLIBRE: DARK,
 }
 
 
