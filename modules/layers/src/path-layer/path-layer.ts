@@ -211,7 +211,10 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           size: 4,
           type: 'uint8',
           accessor: (object, {index, target: value}) =>
-            this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
+            this.encodePickingColor(
+              object && object.__source ? object.__source.index : index,
+              value
+            )
         }
       });
     } else {
@@ -265,7 +268,10 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           size: 4,
           type: 'uint8',
           accessor: (object, {index, target: value}) =>
-            this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
+            this.encodePickingColor(
+              object && object.__source ? object.__source.index : index,
+              value
+            )
         }
       });
     }
@@ -392,18 +398,20 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const bufferLayout =
       this.context.device.type === 'webgpu'
         ? this.getAttributeManager()!.getBufferLayouts()
-        : this.getAttributeManager()!.getBufferLayouts().map(layout =>
-            layout.name === 'vertexPositions'
-              ? {
-                  ...layout,
-                  attributes: (layout.attributes || []).filter(
-                    attribute =>
-                      attribute.attribute !== 'vertexPositions' &&
-                      attribute.attribute !== 'vertexPositions64Low'
-                  )
-                }
-              : layout
-          );
+        : this.getAttributeManager()!
+            .getBufferLayouts()
+            .map(layout =>
+              layout.name === 'vertexPositions'
+                ? {
+                    ...layout,
+                    attributes: (layout.attributes || []).filter(
+                      attribute =>
+                        attribute.attribute !== 'vertexPositions' &&
+                        attribute.attribute !== 'vertexPositions64Low'
+                    )
+                  }
+                : layout
+            );
 
     /*
      *       _
