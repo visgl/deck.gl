@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default `\
+export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME text-background-layer-vertex-shader
 
@@ -11,6 +11,7 @@ in vec2 positions;
 in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec4 instanceRects;
+in vec4 instanceClipRect;
 in float instanceSizes;
 in float instanceAngles;
 in vec2 instancePixelOffsets;
@@ -55,6 +56,21 @@ void main(void) {
   pixelOffset += instancePixelOffsets;
   pixelOffset.y *= -1.0;
 
+  // apply clipping
+  vec2 xy = project_size_to_pixel(instanceClipRect.xy);
+  vec2 wh = project_size_to_pixel(instanceClipRect.zw);
+  if (text.flipY) {
+    xy.y = -xy.y - wh.y;
+  }
+  if (instanceClipRect.z >= 0.0) {
+    dimensions.x = wh.x;
+    pixelOffset.x = xy.x + uv.x * wh.x + mix(-textBackground.padding.x, textBackground.padding.z, uv.x);
+  }
+  if (instanceClipRect.w >= 0.0) {
+    dimensions.y = wh.y;
+    pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
+  }
+
   if (textBackground.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
@@ -63,6 +79,9 @@ void main(void) {
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
+    if (text.flipY) {
+      offset_common.y *= -1.;
+    }
     DECKGL_FILTER_SIZE(offset_common, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);

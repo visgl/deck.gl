@@ -7,6 +7,7 @@ import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
 import {TextBackgroundProps, textBackgroundUniforms} from './text-background-layer-uniforms';
+import {TextModuleProps, textUniforms} from '../text-uniforms';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
 
@@ -37,6 +38,7 @@ type _TextBackgroundLayerProps<DataT> = {
   getAngle?: Accessor<DataT, number>;
   getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   getBoundingRect?: Accessor<DataT, Readonly<[number, number, number, number]>>;
+  getClipRect?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
   getFillColor?: Accessor<DataT, Color>;
   getLineColor?: Accessor<DataT, Color>;
   getLineWidth?: Accessor<DataT, number>;
@@ -60,6 +62,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   getBoundingRect: {type: 'accessor', value: [0, 0, 0, 0]},
+  getClipRect: {type: 'accessor', value: [0, 0, -1, -1]},
   getFillColor: {type: 'accessor', value: [0, 0, 0, 255]},
   getLineColor: {type: 'accessor', value: [0, 0, 0, 255]},
   getLineWidth: {type: 'accessor', value: 1}
@@ -76,7 +79,11 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, textBackgroundUniforms]});
+    return super.getShaders({
+      vs,
+      fs,
+      modules: [project32, picking, textBackgroundUniforms, textUniforms]
+    });
   }
 
   initializeState() {
@@ -102,6 +109,11 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceRects: {
         size: 4,
         accessor: 'getBoundingRect'
+      },
+      instanceClipRect: {
+        size: 4,
+        accessor: 'getClipRect',
+        defaultValue: [0, 0, -1, -1]
       },
       instancePixelOffsets: {
         size: 2,
@@ -170,7 +182,10 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeMinPixels,
       sizeMaxPixels
     };
-    model.shaderInputs.setProps({textBackground: textBackgroundProps});
+    const textProps: TextModuleProps = {
+      viewport: this.context.viewport
+    };
+    model.shaderInputs.setProps({textBackground: textBackgroundProps, text: textProps});
     model.draw(this.context.renderPass);
   }
 
