@@ -771,11 +771,15 @@ Flag indicating that the Deck instance has initialized its resources. It is safe
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
 
 - `fps` - average number of frames rendered per second
-- `updateAttributesTime` - time spent updating layer attributes
 - `setPropsTime` - time spent setting deck properties
+- `layersCount` - total number of layers created recursively
+- `drawLayersCount` - number of layers drawn to screen in the last render pass
+- `updateAttributesCount` - number of times attribute buffers are updated
+- `updateAttributesTime` - time spent updating layer attributes
 - `framesRedrawn` - number of times the scene was rendered
 - `pickTime` - total time spent on picking operations
 - `pickCount` - number of times a pick operation was performed
+- `pickLayersCount` - number of layers drawn to the picking buffer in the last picking operation
 - `gpuTime` - total time spent on GPU processing
 - `gpuTimePerFrame` - average time spent on GPU processing per frame
 - `cpuTime` - total time spent on CPU processing
@@ -785,6 +789,13 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 - `renderbufferMemory` - total GPU memory allocated for renderbuffers
 - `gpuMemory` - total allocated GPU memory
 
+Note that `gpuTime` and `gpuTimePerFrame` metrics are disabled by default for performance reasons. To enable the readings, set `deviceProps.debugGPUTime: true` in Deck's constructor:
+
+```ts
+new Deck({
+  deviceProps: {debugGPUTime: true}
+})
+```
 
 ## Source
 

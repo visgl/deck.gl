@@ -131,6 +131,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
     map.addLayer(layerDefaultView);
 
     map.on('render', () => {
+      t.notOk((map as any)._renderError, 'render should not throw');
       t.deepEqual(
         drawLog,
         [
@@ -184,6 +185,7 @@ test('MapboxLayer#external Deck custom views', t => {
 
     map.addLayer(new MapboxLayer({id: 'scatterplot'}));
     map.on('render', () => {
+      t.notOk((map as any)._renderError, 'render should not throw');
       t.deepEqual(
         drawLog,
         [
@@ -197,6 +199,95 @@ test('MapboxLayer#external Deck custom views', t => {
 
       t.end();
     });
+  });
+});
+
+test('MapboxLayer#drawLayer with zero-size canvas', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  map.on('load', () => {
+    const deck = new Deck({
+      device,
+      viewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        new ScatterplotLayer({
+          id: 'scatterplot',
+          data: [],
+          getPosition: d => d.position,
+          getRadius: 10,
+          getFillColor: [255, 0, 0]
+        })
+      ],
+      // Set zero dimensions before the first render so makeViewport returns null.
+      // getDeckInstance wraps onLoad, so by the time this fires deck.isInitialized
+      // is true and drawLayer won't return early.
+      onLoad: () => {
+        (deck as any).width = 0;
+        (deck as any).height = 0;
+
+        map.on('render', () => {
+          t.notOk(
+            (map as any)._renderError,
+            'render should not throw when canvas has zero dimensions'
+          );
+          deck.finalize();
+          t.end();
+        });
+
+        (map as any)._render();
+      }
+    });
+
+    getDeckInstance({map, deck});
+    map.addLayer(new MapboxLayer({id: 'scatterplot'}));
+  });
+});
+
+test('MapboxLayer#afterRender with zero-size canvas', t => {
+  // afterRender is triggered when deck has multiple views (hasNonMapboxViews).
+  // It calls getViewport to replace the mapbox viewport and must not pass null
+  // into deck._drawLayers when the canvas has zero dimensions.
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  map.on('load', () => {
+    const deck = new Deck({
+      device,
+      views: [new MapView({id: 'mapbox'}), new MapView({id: 'overview'})],
+      viewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        new ScatterplotLayer({
+          id: 'scatterplot',
+          data: [],
+          getPosition: d => d.position,
+          getRadius: 10,
+          getFillColor: [255, 0, 0]
+        })
+      ],
+      onLoad: () => {
+        (deck as any).width = 0;
+        (deck as any).height = 0;
+
+        map.on('render', () => {
+          t.notOk(
+            (map as any)._renderError,
+            'afterRender should not throw when canvas has zero dimensions'
+          );
+          deck.finalize();
+          t.end();
+        });
+
+        (map as any)._render();
+      }
+    });
+
+    getDeckInstance({map, deck});
+    map.addLayer(new MapboxLayer({id: 'scatterplot'}));
   });
 });
 
