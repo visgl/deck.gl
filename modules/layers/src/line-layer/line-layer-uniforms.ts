@@ -13,7 +13,7 @@ struct LineUniforms {
   widthUnits: i32,
 };
 
-@group(0) @binding(1)
+@group(0) @binding(auto)
 var<uniform> line: LineUniforms;
 `;
 

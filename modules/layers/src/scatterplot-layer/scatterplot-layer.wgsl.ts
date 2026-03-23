@@ -38,7 +38,7 @@ struct ConstantAttributeUniforms {
  instancePickingColorsConstant: i32
 };
 
-@group(0) @binding(2) var<uniform> scatterplot: ScatterplotUniforms;
+@group(0) @binding(auto) var<uniform> scatterplot: ScatterplotUniforms;
 
 struct ConstantAttributes {
   instancePositions: vec3<f32>,

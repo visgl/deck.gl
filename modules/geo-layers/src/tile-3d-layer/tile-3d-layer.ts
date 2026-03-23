@@ -18,7 +18,8 @@ import {
   PickingInfo,
   UpdateParameters,
   Viewport,
-  DefaultProps
+  DefaultProps,
+  LayerContext
 } from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
@@ -136,6 +137,15 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         layerMap[key].needsUpdate = true;
       }
     }
+  }
+
+  finalizeState(context: LayerContext): void {
+    this.state.tileset3d?.destroy();
+    this.state.tileset3d = null;
+    this.state.layerMap = {};
+    this.state.activeViewports = {};
+    this.state.lastUpdatedViewports = null;
+    super.finalizeState(context);
   }
 
   activateViewport(viewport: Viewport): void {

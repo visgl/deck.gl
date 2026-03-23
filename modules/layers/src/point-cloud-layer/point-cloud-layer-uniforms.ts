@@ -10,7 +10,7 @@ struct PointCloudUniforms {
   sizeUnits: i32,
 };
 
-@group(0) @binding(3)
+@group(0) @binding(auto)
 var<uniform> pointCloud: PointCloudUniforms;
 `;
 

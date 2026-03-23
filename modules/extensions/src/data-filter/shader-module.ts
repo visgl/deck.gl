@@ -260,29 +260,21 @@ const inject = {
 
 type UniformTypesFunc = (opts: DataFilterExtensionOptions) => any;
 function uniformTypesFromOptions(opts: DataFilterExtensionOptions): any {
-  const {categorySize, filterSize, fp64} = opts;
+  const filterSize = opts.filterSize ?? 1;
+  const uniformFormat = (filterSize > 1 ? `vec${filterSize}<f32>` : 'f32') as UniformFormat;
   const uniformTypes: Record<string, UniformFormat> = {
     useSoftMargin: 'i32',
     enabled: 'i32',
     transformSize: 'i32',
-    transformColor: 'i32'
+    transformColor: 'i32',
+    min: uniformFormat,
+    softMin: uniformFormat,
+    softMax: uniformFormat,
+    max: uniformFormat,
+    min64High: uniformFormat,
+    max64High: uniformFormat,
+    categoryBitMask: 'vec4<i32>'
   };
-
-  if (filterSize) {
-    const uniformFormat: UniformFormat = filterSize === 1 ? 'f32' : `vec${filterSize}<f32>`;
-    uniformTypes.min = uniformFormat;
-    uniformTypes.softMin = uniformFormat;
-    uniformTypes.softMax = uniformFormat;
-    uniformTypes.max = uniformFormat;
-    if (fp64) {
-      uniformTypes.min64High = uniformFormat;
-      uniformTypes.max64High = uniformFormat;
-    }
-  }
-
-  if (categorySize) {
-    uniformTypes.categoryBitMask = 'vec4<i32>';
-  }
 
   return uniformTypes;
 }
