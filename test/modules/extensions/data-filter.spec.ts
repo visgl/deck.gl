@@ -33,8 +33,8 @@ test('DataFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.is(uniforms.min, 80, 'has correct uniforms');
-        t.is(uniforms.softMax, 160, 'has correct uniforms');
+        t.deepEqual(uniforms.min, [80, 0, 0, 0], 'has correct uniforms');
+        t.deepEqual(uniforms.softMax, [160, 0, 0, 0], 'has correct uniforms');
         t.is(uniforms.useSoftMargin, false, 'has correct uniforms');
         t.is(uniforms.enabled, true, 'has correct uniforms');
 
@@ -64,8 +64,8 @@ test('DataFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.min, [10000, 0], 'has correct uniforms');
-        t.deepEqual(uniforms.softMax, [18000, 8000], 'has correct uniforms');
+        t.deepEqual(uniforms.min, [10000, 0, 0, 0], 'has correct uniforms');
+        t.deepEqual(uniforms.softMax, [18000, 8000, 0, 0], 'has correct uniforms');
         t.is(uniforms.useSoftMargin, true, 'has correct uniforms');
         t.is(uniforms.transformSize, false, 'has correct uniforms');
       }
@@ -76,10 +76,10 @@ test('DataFilterExtension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.deepEqual(uniforms.min64High, [10000, 0], 'has double uniforms');
-        t.deepEqual(uniforms.max64High, [20000, 100000], 'has double uniforms');
-        t.deepEqual(uniforms.min, [0, 0], 'has correct uniforms');
-        t.deepEqual(uniforms.softMax, [-2000, -92000], 'has correct uniforms');
+        t.deepEqual(uniforms.min64High, [10000, 0, 0, 0], 'has double uniforms');
+        t.deepEqual(uniforms.max64High, [20000, 100000, 0, 0], 'has double uniforms');
+        t.deepEqual(uniforms.min, [0, 0, 0, 0], 'has correct uniforms');
+        t.deepEqual(uniforms.softMax, [-2000, -92000, 0, 0], 'has correct uniforms');
       }
     }
   ];
