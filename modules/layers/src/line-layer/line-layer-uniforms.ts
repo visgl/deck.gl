@@ -18,7 +18,7 @@ var<uniform> line: LineUniforms;
 `;
 
 const uniformBlockGLSL = /* glsl */ `\
-uniform lineUniforms {
+layout(std140) uniform lineUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;

@@ -9,7 +9,7 @@ import type {ProjectProps, ProjectUniforms} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
 const uniformBlock = /* glsl */ `\
-uniform fillUniforms {
+layout(std140) uniform fillUniforms {
   vec2 patternTextureSize;
   bool patternEnabled;
   bool patternMask;

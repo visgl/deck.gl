@@ -15,7 +15,7 @@ var<uniform> pointCloud: PointCloudUniforms;
 `;
 
 const glslUniformBlock = `\
-uniform pointCloudUniforms {
+layout(std140) uniform pointCloudUniforms {
   float radiusPixels;
   highp int sizeUnits;
 } pointCloud;

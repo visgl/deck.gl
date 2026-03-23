@@ -7,7 +7,7 @@ import {ShaderModule} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
 
 const uniformBlock = /* glsl */ `\
-uniform aggregatorTransformUniforms {
+layout(std140) uniform aggregatorTransformUniforms {
   ivec4 binIdRange;
   bvec3 isCount;
   bvec3 isMean;

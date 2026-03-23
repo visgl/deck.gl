@@ -112,7 +112,7 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
 }
 
 const uniformBlock = `\
-uniform interpolationUniforms {
+layout(std140) uniform interpolationUniforms {
   float time;
 } interpolation;
 `;

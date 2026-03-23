@@ -31,7 +31,7 @@ const GLOBE_RADIUS: f32 = 256.0;
 // Uniform block (converted from GLSL uniform block)
 // -----------------------------------------------------------------------------
 struct ProjectUniforms {
-  wrapLongitude: f32,
+  wrapLongitude: i32,
   coordinateSystem: i32,
   commonUnitsPerMeter: vec3<f32>,
   projectionMode: i32,
@@ -47,7 +47,7 @@ struct ProjectUniforms {
   cameraPosition: vec3<f32>,
   coordinateOrigin: vec3<f32>,
   commonOrigin: vec3<f32>,
-  pseudoMeters: f32,
+  pseudoMeters: i32,
 };
 
 @group(0) @binding(auto)

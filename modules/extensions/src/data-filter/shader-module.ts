@@ -32,7 +32,7 @@ export type Defines = {
 };
 
 const uniformBlock = /* glsl */ `\
-uniform dataFilterUniforms {
+layout(std140) uniform dataFilterUniforms {
   bool useSoftMargin;
   bool enabled;
   bool transformSize;

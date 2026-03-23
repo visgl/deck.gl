@@ -20,7 +20,7 @@ ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
-uniform projectUniforms {
+layout(std140) uniform projectUniforms {
   bool wrapLongitude;
   int coordinateSystem;
   vec3 commonUnitsPerMeter;

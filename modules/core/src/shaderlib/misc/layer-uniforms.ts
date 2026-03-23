@@ -6,7 +6,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import type {LayerProps} from '../../types/layer-props';
 
 const uniformBlock = `\
-uniform layerUniforms {
+layout(std140) uniform layerUniforms {
   uniform float opacity;
 } layer;
 `;

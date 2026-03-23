@@ -6,7 +6,7 @@ import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform weightUniforms {
+layout(std140) uniform weightUniforms {
   vec4 commonBounds;
   float radiusPixels;
   float textureWidth;
@@ -40,7 +40,7 @@ export type MaxWeightProps = {
 export const maxWeightUniforms = {
   name: 'maxWeight',
   vs: `\
-uniform maxWeightUniforms {
+layout(std140) uniform maxWeightUniforms {
   float textureSize;
 } maxWeight;
 `,
