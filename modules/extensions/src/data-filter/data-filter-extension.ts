@@ -116,10 +116,10 @@ const defaultOptions: Required<DataFilterExtensionOptions> = {
 };
 
 const CATEGORY_TYPE_FROM_SIZE = {
-  1: 'uint' as const,
-  2: 'uvec2' as const,
-  3: 'uvec3' as const,
-  4: 'uvec4' as const
+  1: 'int' as const,
+  2: 'ivec2' as const,
+  3: 'ivec3' as const,
+  4: 'ivec4' as const
 };
 const DATA_TYPE_FROM_SIZE = {
   1: 'float' as const,
@@ -179,7 +179,7 @@ export default class DataFilterExtension extends LayerExtension<
             size: categorySize,
             stepMode: 'dynamic',
             accessor: 'getFilterCategory',
-            type: 'uint32',
+            type: 'int32',
             transform:
               categorySize === 1
                 ? d => extension._getCategoryKey.call(this, d, 0)
@@ -367,7 +367,7 @@ export default class DataFilterExtension extends LayerExtension<
     const {categorySize} = extension.opts;
     if (!categorySize) return;
     const {filterCategories} = this.props;
-    const categoryBitMask: CategoryBitMask = new Uint32Array([0, 0, 0, 0]);
+    const categoryBitMask: CategoryBitMask = new Int32Array([0, 0, 0, 0]);
     const categoryFilters = (
       categorySize === 1 ? [filterCategories] : filterCategories
     ) as FilterCategory[][];
