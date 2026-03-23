@@ -54,7 +54,7 @@
     "@types/geojson": "^7946.0.8",
     "a5-js": "^0.5.0",
     "h3-js": "^4.1.0",
-    "long": "^3.2.0"
+    "long": "^5.3.2"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.2.0",
