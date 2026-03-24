@@ -57,7 +57,8 @@
   },
   "resolutions": {
     "wgsl_reflect": "^1.2.0",
-    "@loaders.gl/core": "4.4.0-alpha.18"
+    "@loaders.gl/core": "4.4.0-alpha.18",
+    "vite": "^7.3.1"
   },
   "pre-commit": [
     "test-fast",
