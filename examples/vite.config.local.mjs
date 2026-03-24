@@ -4,21 +4,29 @@ import {join} from 'path';
 
 const rootDir = join(__dirname, '..');
 
+function aliasScopedPackages(scope) {
+  // Redirect bare package imports to the repo root without rewriting package export subpaths.
+  return {
+    find: new RegExp(`^${scope.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)$`),
+    replacement: join(rootDir, `./node_modules/${scope}/$1`)
+  };
+}
+
 /** https://vitejs.dev/config/ */
 export default defineConfig(async () => {
   const {aliases} = await getOcularConfig({root: rootDir});
 
   return {
     resolve: {
-      alias: {
-        ...aliases,
+      alias: [
+        ...Object.entries(aliases).map(([find, replacement]) => ({find, replacement})),
         // Use root dependencies
-        'mjolnir.js': join(rootDir, './node_modules/mjolnir.js'),
-        '@luma.gl': join(rootDir, './node_modules/@luma.gl'),
-        '@math.gl': join(rootDir, './node_modules/@math.gl'),
-        '@arcgis/core': join(rootDir, './node_modules/@arcgis/core'),
-        '@loaders.gl/core': join(rootDir, './node_modules/@loaders.gl/core')
-      }
+        {find: 'mjolnir.js', replacement: join(rootDir, './node_modules/mjolnir.js')},
+        aliasScopedPackages('@luma.gl'),
+        aliasScopedPackages('@math.gl'),
+        {find: '@arcgis/core', replacement: join(rootDir, './node_modules/@arcgis/core')},
+        {find: '@loaders.gl/core', replacement: join(rootDir, './node_modules/@loaders.gl/core')}
+      ]
     },
     define: {
       'process.env.GoogleMapsAPIKey': JSON.stringify(process.env.GoogleMapsAPIKey),
