@@ -64,7 +64,7 @@
     "bindings-precommit-tests"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "yarn@1.22.19"
 }

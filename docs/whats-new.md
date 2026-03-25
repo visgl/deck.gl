@@ -2,15 +2,72 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## deck.gl v9.3 (in development)
+## deck.gl v9.3
 
-### Core
+Target release date: March 2026
 
-- View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
+### Layers
+
+![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
+
+- [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
+
+### Views
+
+View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
+
+It is a common use case for apps to constrain view state to the area where data is available. In 9.3, all controllers add a new option `maxBounds` that will:
+- Automatically zoom/pan viewport to fit content
+- Prevent user from navigating outside of the content bounding box
+
+Individual view improvements:
+- [MapController](./api-reference/core/map-controller.md) adds a new option `rotationPivot` for more natural interaction with terrain / 3D tiles that are not at sea level. See [PR#9938](https://github.com/visgl/deck.gl/pull/9938) for demos.
+- [GlobeController](./api-reference/core/globe-controller.md) gets major bug fixes and is more stable.
+- [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
+- [OrbitController](./api-reference/core/orbit-controller.md) works more intuitively when used with `maxBounds` and pickable layers.
+
+
+### Widgets
+
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/popup.jpg?raw=true" />
+        <p><i>PopupWidget</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/splitter.gif?raw=true" />
+        <p><i>SplitterWidget</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/scrollbar.gif?raw=true" />
+        <p><i>ScrollbarWidget</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Many experimental widgets got a design overhaul in v9.3, along with new additions to the catalog.
+
+- The [InfoWidget](./api-reference/widgets/info-widget.md), [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) and the new [PopupWidget](./api-reference/widgets/popup-widget.md) now use [popper](http://floating-ui.com/) under the hood to provide smarter UI placement that responds to window size, content size and scroll position.
+- New generic-purpose controls rendered by [IconWidget](./api-reference/widgets/icon-widget.md), [ToggleWidget](./api-reference/widgets/toggle-widget.md) and [SelectorWidget](./api-reference/widgets/selector-widget.md) cover many common use cases that would otherwise require implementing your own custom widget.
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md) now supports arbitrary division of the canvas, as well as a cleaner API that no longer requires any custom viewport calculation.
+- New [ScrollbarWidget](./api-reference/widgets/scrollbar-widget.md) lets users get around a large orthographic canvas just like scrolling an HTML page.
+- [TimelineWidget](./api-reference/widgets/timeline-widget.md) has a fresh new look that is entirely customizable via CSS variables.
+- `FpsWidget` is merged into [StatsWidget](./api-reference/widgets/stats-widget.md) as a unified, sleek-looking debugging surface.
+
+Aside from the above, all widgets also received the following improvements:
+
+- You can pass a `_container` prop to a widget to render it into any parent container.
+- All widgets now have React wrappers, exported from `@deck.gl/react`.
+- All widget documentation pages now have live demos and easy-to-follow code samples.
+- A bug was fixed where widgets used with the `DeckGL` React component did not block pointer interaction with the canvas underneath.
 
 ## deck.gl v9.2
 
-Target release date: September, 2025
+Release date: October 7, 2025
 
 <table style={{border: 0}} align="center">
   <tbody>

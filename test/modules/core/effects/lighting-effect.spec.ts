@@ -63,15 +63,16 @@ test('LightingEffect#getShaderModuleProps', t => {
   });
 
   const {lighting} = lightingEffect.getShaderModuleProps(layer);
-  t.is(lighting.pointLights.length, 2, 'Lights are exported');
+  t.is(lighting.lights.length, 2, 'Lights are exported');
   t.ok(
-    equals(lighting.pointLights[0].position, [0, 0, 0.018310546875]),
+    equals(lighting.lights[0].position, [0, 0, 0.018310546875]),
     'Camera light projection is ok'
   );
-  t.deepEqual(lighting.pointLights[1].color, [255, 0, 0], 'point light color is ok');
+  t.deepEqual(lighting.lights[1].color, [255, 0, 0], 'point light color is ok');
 
   t.equal(lighting.ambientLight, undefined, 'Lighting effect getGLParameters is ok');
-  t.deepEqual(lighting.directionalLights, [], 'Lighting effect getGLParameters is ok');
+  t.equal(lighting.directionalLights, undefined, 'Lighting effect getGLParameters is ok');
+  t.equal(lighting.pointLights, undefined, 'Lighting effect getGLParameters is ok');
 
   lightingEffect.cleanup(effectContext);
   layerManager.finalize();
