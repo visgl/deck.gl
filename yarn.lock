@@ -973,12 +973,7 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@^9.0.0":
-  version "9.0.27"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.27.tgz#65d65fa1ea407fd5f74bfa92dfba43261be33763"
-  integrity sha512-NBkMim3u0xt4UDe4e69L6E/pq5XNxfX60GrggJDzfilVRfIbx5XwKhBXTyNjjtNEk4oc6uYLHWd/05jGRHcfLg==
-
-"@luma.gl/constants@^9.3.0-alpha.10":
+"@luma.gl/constants@^9.0.0", "@luma.gl/constants@^9.3.0-alpha.10":
   version "9.3.0-alpha.10"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.3.0-alpha.10.tgz#90ca01787b028a9fbb44a3378db9b028f67aba00"
   integrity sha512-SKAoqGbAjY/0tGehzK7Cxvtk8rWhx2HO4cJQ8TSNxi92VlkMI8GjdcJWtiOPAfNzpGmJYVyy87YLIL+SMyokiQ==

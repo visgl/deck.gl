@@ -58,7 +58,16 @@
   "resolutions": {
     "wgsl_reflect": "^1.2.0",
     "@loaders.gl/core": "4.4.0-alpha.18",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "@luma.gl/constants": "^9.3.0-alpha.10",
+    "@luma.gl/core": "^9.3.0-alpha.10",
+    "@luma.gl/effects": "^9.3.0-alpha.10",
+    "@luma.gl/engine": "^9.3.0-alpha.10",
+    "@luma.gl/gltf": "^9.3.0-alpha.10",
+    "@luma.gl/shadertools": "^9.3.0-alpha.10",
+    "@luma.gl/test-utils": "^9.3.0-alpha.10",
+    "@luma.gl/webgl": "^9.3.0-alpha.10",
+    "@luma.gl/webgpu": "^9.3.0-alpha.10"
   },
   "pre-commit": [
     "test-fast",
