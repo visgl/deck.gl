@@ -160,11 +160,29 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return info;
   }
 
-  filterSubLayer({layer, viewport}: FilterContext): boolean {
+  filterSubLayer({layer, viewport, cullRect, isPicking}: FilterContext): boolean {
     // All sublayers will have a tile prop
     const {tile} = layer.props as unknown as {tile: Tile3D};
     const {id: viewportId} = viewport;
-    return tile.selected && tile.viewportIds.includes(viewportId);
+    if (!tile.selected || !tile.viewportIds.includes(viewportId)) {
+      return false;
+    }
+
+    // When picking, skip tiles whose content center is far from the
+    // pick point on screen. Avoids unnecessary draw calls.
+    if (isPicking && cullRect && tile.content?.cartographicOrigin) {
+      const [sx, sy] = viewport.project(tile.content.cartographicOrigin);
+      const cx = cullRect.x + cullRect.width / 2;
+      const cy = cullRect.y + cullRect.height / 2;
+      const threshold = Math.max(viewport.width, viewport.height) / 4;
+      const dx = sx - cx;
+      const dy = sy - cy;
+      if (dx * dx + dy * dy > threshold * threshold) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
