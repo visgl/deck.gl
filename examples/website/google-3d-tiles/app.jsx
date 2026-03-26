@@ -69,7 +69,8 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
         tileset: {
           maximumScreenSpaceError: 20,
           maximumMemoryUsage: 512,
-          memoryAdjustedScreenSpaceError: true
+          memoryAdjustedScreenSpaceError: true,
+          onTraversalComplete
         }
       },
       pickable: '3d',
