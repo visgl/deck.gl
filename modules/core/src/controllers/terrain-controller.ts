@@ -97,10 +97,8 @@ export default class TerrainController extends MapController {
     }
     const {x, y, width, height} = this.props;
     const pickResult = this.pickPosition(x + width / 2, y + height / 2);
-    {
-      if (pickResult?.coordinate && pickResult.coordinate.length >= 3) {
-        this._terrainAltitudeTarget = pickResult.coordinate[2];
-      }
+    if (pickResult?.coordinate && pickResult.coordinate.length >= 3) {
+      this._terrainAltitudeTarget = pickResult.coordinate[2];
     }
   }
 
