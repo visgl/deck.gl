@@ -95,7 +95,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
       <DeckGL
         style={{backgroundColor: '#061714'}}
         initialViewState={INITIAL_VIEW_STATE}
-        controller={{type: TerrainController, touchRotate: true, inertia: 500, rotationPivot: '3d'}}
+        controller={{type: TerrainController, touchRotate: true, inertia: 500}}
         layers={layers}
         getTooltip={getTooltip}
       />
