@@ -21,6 +21,39 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0-alpha.2] - Mar 26 2026
+
+- chore: upgrade Node.js from 20 to 22 (#10051)
+- chore(core): Use non-deprecated props for lighting module (#10121)
+- feat(layers): add clipping to TextLayer (#10118)
+- feat(core): FirstPersonController supports maxBounds (#10115)
+- feat(core): OrthographicView supports maxBounds (#10108)
+- feat(core): OrbitController supports maxBounds (#10116)
+- feat(core): GlobeView supports maxBounds (#10111)
+- feat(core): more intuitive OrbitController (#10117)
+- feat(core): controller normalizes viewport on dimension change (#10109)
+- feat(chore): new Deck metrics (#10100)
+- feat(core): deep merge view states (#10104)
+- chore: Bump to luma.gl@9.3.0-alpha.6 (#10107)
+- feat(core): controller maxBounds (#10105)
+- feat(core): OrthographicView: soft-deprecate array zoom (#10106)
+- feat(widgets): v9.3 graduation (#10096)
+- feat(website): Add ScrollbarWidget to OrthographicView example (#10099)
+- feat(website): Widget documentation pass (#10095)
+- feat(widgets): generic controls (#10090)
+- feat(widgets): ContextMenuWidget API audit (#10087)
+- feat(widgets): Widget common component improvements (#10089)
+- feat(widgets): Merge FpsWidget into StatsWidget (#10085)
+- fix(widgets): properly clean up Popover element on widget removal (#10088)
+- fix(mapbox): handle null viewport (#10086)
+- feat(widgets): Update SplitterWidget (#10072)
+- fix(widgets): TimelineWidget bugs (#10081)
+- feat(react): React widget exports (#10083)
+- Add missing update dependencies (#10082)
+- fix(mapbox): guard against null viewport when canvas has zero dimensions (#10076)
+- fix: updates pydeck pyproject.toml to include dynamic field (#10048)
+- fix(react): DeckGL avoid overwriting undefined views prop (#10074)
+
 #### deck.gl [v9.3.0-alpha.1] - Mar 10 2026
 
 - fix(Tile3DLayer): Pass through tileset loadOptions to Tileset3D (#10079)
