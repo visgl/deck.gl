@@ -39,6 +39,7 @@
     "jsdom": false
   },
   "devDependencies": {
+    "@floating-ui/dom": "^1.7.5",
     "@loaders.gl/csv": "^4.4.0-alpha.18",
     "@loaders.gl/polyfills": "^4.4.0-alpha.18",
     "@luma.gl/core": "^9.3.0-alpha.10",
