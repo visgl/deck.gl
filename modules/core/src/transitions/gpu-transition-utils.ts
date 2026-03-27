@@ -6,7 +6,7 @@ import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';
 import Attribute from '../lib/attribute/attribute';
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 /** Create a new empty attribute with the same settings: type, shader layout etc. */
 export function cloneAttribute(attribute: Attribute): Attribute {
@@ -150,9 +150,8 @@ export function padBuffer({
     ? (attribute.value as TypedArray)
     : // TODO(v9.1): Avoid non-portable synchronous reads.
       new ArrayType(
-        attribute
-          .getBuffer()!
-          .readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer as ArrayBuffer
+        attribute.getBuffer()!.readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT)
+          .buffer as ArrayBuffer
       );
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;

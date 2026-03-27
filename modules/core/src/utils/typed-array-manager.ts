@@ -97,7 +97,7 @@ export class TypedArrayManager {
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
       // Create a new array using an existing buffer
-      const array = new Type(pool.splice(i, 1)[0] as ArrayBuffer, 0, sizeToAllocate);
+      const array = new Type(pool.splice(i, 1)[0], 0, sizeToAllocate);
       if (initialize) {
         // Viewing a buffer with a different type may create NaNs
         array.fill(0);

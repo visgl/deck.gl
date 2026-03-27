@@ -8,7 +8,7 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
 
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import {GL as GLConstants} from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl/constants';
 
 import makeTooltip from './widget-tooltip';
 
