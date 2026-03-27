@@ -34,6 +34,7 @@ function createMVTLayer(id, {highlight = false, binary = false, holes = false} =
       };
   return {
     name: id,
+    timeout: holes ? 20000 : undefined,
     viewState,
     layers: [
       new MVTLayer({
