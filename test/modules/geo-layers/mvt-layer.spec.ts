@@ -423,7 +423,7 @@ test('MVTLayer#TileJSON', async t => {
   globalThis.fetch = fetch;
 });
 
-test('MVTLayer#worker false disables workers', async t => {
+test('MVTLayer#core.worker false disables workers', async t => {
   class TestMVTLayer extends MVTLayer {
     renderSubLayers(props) {
       return new ScatterplotLayer(props, {id: `${props.id}-fill`});
@@ -444,17 +444,20 @@ test('MVTLayer#worker false disables workers', async t => {
       props: {
         data: ['https://server.com/{z}/{x}/{y}.mvt'],
         binary: false,
+        loaders: [MVTLoader],
         fetch: (url, {loadOptions}) => {
           capturedLoadOptions = loadOptions;
           return Promise.resolve([]);
         },
         loadOptions: {
-          worker: false
+          core: {
+            worker: false
+          }
         }
       },
       onAfterUpdate: ({layer}) => {
         if (layer.isLoaded) {
-          t.is(capturedLoadOptions.worker, false, 'worker is disabled');
+          t.is(capturedLoadOptions.core.worker, false, 'worker is disabled');
         }
       }
     }
