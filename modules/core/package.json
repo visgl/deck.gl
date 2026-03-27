@@ -42,7 +42,6 @@
   "dependencies": {
     "@loaders.gl/core": "^4.4.0-alpha.18",
     "@loaders.gl/images": "^4.4.0-alpha.18",
-    "@luma.gl/constants": "^9.3.0-alpha.10",
     "@luma.gl/core": "^9.3.0-alpha.10",
     "@luma.gl/engine": "^9.3.0-alpha.10",
     "@luma.gl/shadertools": "^9.3.0-alpha.10",

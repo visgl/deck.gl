@@ -1043,15 +1043,12 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@^9.0.0", "@luma.gl/constants@^9.3.0-alpha.10":
-  version "9.3.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.3.0-alpha.10.tgz#90ca01787b028a9fbb44a3378db9b028f67aba00"
-  integrity sha512-SKAoqGbAjY/0tGehzK7Cxvtk8rWhx2HO4cJQ8TSNxi92VlkMI8GjdcJWtiOPAfNzpGmJYVyy87YLIL+SMyokiQ==
-  dependencies:
-    "@luma.gl/core" "9.3.0-alpha.10"
-    "@luma.gl/webgl" "9.3.0-alpha.10"
+"@luma.gl/constants@^9.0.0":
+  version "9.2.6"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.2.6.tgz#19baa45cd3b1a24eec7371a0127899b37d2644e8"
+  integrity sha512-rvFFrJuSm5JIWbDHFuR4Q2s4eudO3Ggsv0TsGKn9eqvO7bBiPm/ANugHredvh3KviEyYuMZZxtfJvBdr3kzldg==
 
-"@luma.gl/core@9.3.0-alpha.10", "@luma.gl/core@^9.3.0-alpha.10":
+"@luma.gl/core@^9.3.0-alpha.10":
   version "9.3.0-alpha.10"
   resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.3.0-alpha.10.tgz#58f3a21c8ef14e6fbe226b2b0d8cc3f2b41d27f3"
   integrity sha512-uSQ3Ly97wLuUCn6E3WEdL7XZ12KFx22ap4U54okEiIssn3DBXDOMbxmZ/kgqZoWEZRfxcowyztbjsSthtsuhBg==
@@ -1106,7 +1103,7 @@
     "@probe.gl/env" "^4.1.1"
     "@probe.gl/stats" "^4.1.1"
 
-"@luma.gl/webgl@9.3.0-alpha.10", "@luma.gl/webgl@^9.3.0-alpha.10":
+"@luma.gl/webgl@^9.3.0-alpha.10":
   version "9.3.0-alpha.10"
   resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.3.0-alpha.10.tgz#751070e50d5f148115f3e3b0b1db145edb253e8f"
   integrity sha512-vZOHHd78F1ktljQ7HWkQc3zSTBiNQlzsiHBr9TMNPL/p6g4C7lmeosU4RXFTZnnkX8e7bNGEQj/DA5FTdzYT6A==
