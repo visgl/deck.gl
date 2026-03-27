@@ -152,7 +152,7 @@ export function padBuffer({
       new ArrayType(
         attribute
           .getBuffer()!
-          .readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer
+          .readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer as ArrayBuffer
       );
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
@@ -166,7 +166,7 @@ export function padBuffer({
 
   // TODO(v9.1): Avoid non-portable synchronous reads.
   const source = buffer
-    ? new Float32Array(buffer.readSyncWebGL(targetByteOffset, fromLength * 4).buffer)
+    ? new Float32Array(buffer.readSyncWebGL(targetByteOffset, fromLength * 4).buffer as ArrayBuffer)
     : new Float32Array(0);
   const target = new Float32Array(toLength);
   padArray({

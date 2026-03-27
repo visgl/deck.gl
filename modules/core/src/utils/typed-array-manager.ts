@@ -52,7 +52,7 @@ export class TypedArrayManager {
         return typedArray;
       }
       if (newSize * typedArray.BYTES_PER_ELEMENT <= typedArray.buffer.byteLength) {
-        return new Type(typedArray.buffer, 0, newSize) as T;
+        return new Type(typedArray.buffer as ArrayBuffer, 0, newSize) as T;
       }
     }
 
@@ -97,7 +97,7 @@ export class TypedArrayManager {
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i >= 0) {
       // Create a new array using an existing buffer
-      const array = new Type(pool.splice(i, 1)[0], 0, sizeToAllocate);
+      const array = new Type(pool.splice(i, 1)[0] as ArrayBuffer, 0, sizeToAllocate);
       if (initialize) {
         // Viewing a buffer with a different type may create NaNs
         array.fill(0);
@@ -119,9 +119,9 @@ export class TypedArrayManager {
     const {byteLength} = buffer;
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i < 0) {
-      pool.push(buffer);
+      pool.push(buffer as ArrayBuffer);
     } else if (i > 0 || pool.length < this.opts.poolSize) {
-      pool.splice(i, 0, buffer);
+      pool.splice(i, 0, buffer as ArrayBuffer);
     }
     if (pool.length > this.opts.poolSize) {
       // Drop the smallest one
