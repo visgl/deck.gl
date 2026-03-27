@@ -24,7 +24,7 @@ export default class TerrainController extends MapController {
         getAltitude?: (pos: [number, number]) => number | undefined;
       }
   ) {
-    super.setProps(props);
+    super.setProps({rotationPivot: '3d', ...props});
 
     // Drive smoothing animation when terrain altitude hasn't converged yet.
     if (
