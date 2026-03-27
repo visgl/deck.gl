@@ -423,6 +423,47 @@ test('MVTLayer#TileJSON', async t => {
   globalThis.fetch = fetch;
 });
 
+test('MVTLayer#worker false disables workers', async t => {
+  class TestMVTLayer extends MVTLayer {
+    renderSubLayers(props) {
+      return new ScatterplotLayer(props, {id: `${props.id}-fill`});
+    }
+  }
+
+  const viewport = new WebMercatorViewport({
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 60,
+    zoom: 3
+  });
+
+  let capturedLoadOptions;
+  const testCases = [
+    {
+      props: {
+        data: ['https://server.com/{z}/{x}/{y}.mvt'],
+        binary: false,
+        fetch: (url, {loadOptions}) => {
+          capturedLoadOptions = loadOptions;
+          return Promise.resolve([]);
+        },
+        loadOptions: {
+          worker: false
+        }
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          t.is(capturedLoadOptions.worker, false, 'worker is disabled');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: TestMVTLayer, viewport, testCases, onError: t.notOk});
+  t.end();
+});
+
 test('MVTLayer#dataInWGS84', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {

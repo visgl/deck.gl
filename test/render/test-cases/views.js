@@ -125,9 +125,7 @@ export default [
           lineWidthMinPixels: 1,
           binary,
           loadOptions: {
-            mvt: {
-              workerUrl: null
-            }
+            worker: false
           }
         })
       ],
