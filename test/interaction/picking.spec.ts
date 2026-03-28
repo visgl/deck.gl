@@ -78,9 +78,7 @@ function resetEventLogs() {
   hoverEvents.length = 0;
 }
 
-// TODO: Hover test doesn't work with synthetic DOM pointer events in vitest browser mode
-// The pointermove events may not trigger deck.gl's picking system correctly
-test.skip('Picking hover', async () => {
+test('Picking hover', async () => {
   resetEventLogs();
 
   await emulateEvent({type: 'mousemove', x: 400, y: 200});

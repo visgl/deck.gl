@@ -332,7 +332,7 @@ yarn add -D @vitest/browser @vitest/browser-playwright playwright
 - Implement dual-API spy abstraction (vitest preferred, probe.gl as fallback)
 - Add both vitest and @probe.gl/test-utils as optional peer dependencies
 - Add deprecation warning for probe.gl path
-- Create tape backward compatibility smoke test (`test/smoke/tape-compat.ts`)
+- Create tape backward compatibility smoke test (`test/smoke/tape-compat.spec.ts`)
 - Add `DECK_TEST_UTILS_USE_PROBE_GL` environment variable for testing fallback path
 
 ### Phase 3: Migrate Test Files (~185 files)
@@ -459,7 +459,7 @@ The hybrid approach serves as a **discovery mechanism**:
 ```javascript
 // .ocularrc.js
 entry: {
-  'tape-compat': 'test/smoke/tape-compat.ts',  // Keep for backward compat testing
+  'tape-compat': 'test/smoke/tape-compat.spec.ts',  // Keep for backward compat testing
   bench: 'test/bench/index.js',                 // TODO: Migrate to vitest bench
   'bench-browser': 'test/bench/browser.html',   // TODO: Migrate to vitest bench
   size: 'test/size/import-nothing.js'           // TODO: Migrate to vitest

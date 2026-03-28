@@ -21,6 +21,7 @@ test('TerrainEffect', async () => {
   const terrainLayer = new TerrainLayer({
     elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
     loaders: [TerrainLoader],
+    loadOptions: {worker: false},
     operation: 'draw+terrain'
   });
   const geoLayer = new GeoJsonLayer({
@@ -123,6 +124,7 @@ test('TerrainEffect#without draw operation', async () => {
   const terrainLayer = new TerrainLayer({
     elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
     loaders: [TerrainLoader],
+    loadOptions: {worker: false},
     operation: 'terrain'
   });
   const geoLayer = new GeoJsonLayer({

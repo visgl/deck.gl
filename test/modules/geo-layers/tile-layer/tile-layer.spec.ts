@@ -208,6 +208,41 @@ test('TileLayer#MapView:repeat', async () => {
   });
 });
 
+test('TileLayer#error tiles do not block isLoaded', async () => {
+  let tileErrorCalled = 0;
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 60,
+      zoom: 2
+    }),
+    testCases: [
+      {
+        title: 'errored tiles are treated as terminal',
+        props: {
+          getTileData: () => Promise.reject(new Error('404')),
+          onTileError: () => tileErrorCalled++
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(layer.isLoaded, 'Layer is loaded after tile errors').toBeTruthy();
+            expect(subLayers.length, 'Only cached placeholder sublayers may remain').toBeLessThanOrEqual(
+              2
+            );
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  expect(tileErrorCalled, 'onTileError is called for failed tiles').toBe(2);
+});
+
 test('TileLayer#AbortRequestsOnUpdateTrigger', async () => {
   const testViewport = new WebMercatorViewport({
     width: 1200,

@@ -19,6 +19,37 @@ const DECODER = {
   offset: -32768 * 4
 };
 
+function waitForSettledFrames(frameCount = 2, waitMs = 0) {
+  let settledFrames = 0;
+  let doneScheduled = false;
+
+  return ({deck, layers, done}) => {
+    const needsUpdate = deck.layerManager?.needsUpdate();
+    const hasRenderableTerrain = layers.some(layer => {
+      return (
+        layer.id.includes('terrain') &&
+        typeof layer.getModels === 'function' &&
+        layer.getModels().length > 0
+      );
+    });
+
+    if (hasRenderableTerrain && !needsUpdate) {
+      settledFrames++;
+      if (settledFrames >= frameCount && !doneScheduled) {
+        doneScheduled = true;
+        if (waitMs > 0) {
+          setTimeout(done, waitMs);
+        } else {
+          done();
+        }
+      }
+    } else {
+      settledFrames = 0;
+      doneScheduled = false;
+    }
+  };
+}
+
 export default [
   {
     name: 'terrain-layer',
@@ -36,12 +67,11 @@ export default [
         elevationDecoder: DECODER
       })
     ],
+    onAfterRender: waitForSettledFrames(),
     goldenImage: './test/render/golden-images/terrain-layer.png'
   },
   {
     name: 'terrain-extension-drape',
-    // TODO: Timeout in vitest - TerrainExtension layers don't complete loading
-    skip: true,
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -63,12 +93,11 @@ export default [
         extensions: [new TerrainExtension()]
       })
     ],
+    onAfterRender: waitForSettledFrames(),
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
   },
   {
     name: 'terrain-extension-offset',
-    // TODO: Timeout in vitest - TerrainExtension layers don't complete loading
-    skip: true,
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -100,6 +129,7 @@ export default [
         extensions: [new TerrainExtension()]
       })
     ],
+    onAfterRender: waitForSettledFrames(3, 750),
     goldenImage: './test/render/golden-images/terrain-extension-offset.png'
   }
 ];

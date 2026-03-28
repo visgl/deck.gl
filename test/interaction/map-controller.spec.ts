@@ -143,9 +143,7 @@ test('MapController shift-dblclick zoom out', async () => {
   expect(newViewport.zoom < oldViewport.zoom, 'map zoomed out').toBeTruthy();
 });
 
-// TODO: Keyboard tests don't work with synthetic DOM events in vitest browser mode
-// deck.gl's EventManager may require real browser keyboard events for focus handling
-test.skip('MapController keyboard left', async () => {
+test('MapController keyboard left', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
@@ -156,7 +154,7 @@ test.skip('MapController keyboard left', async () => {
   expect(newViewport.longitude < oldViewport.longitude, 'map moved').toBeTruthy();
 });
 
-test.skip('MapController keyboard up', async () => {
+test('MapController keyboard up', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
@@ -167,7 +165,7 @@ test.skip('MapController keyboard up', async () => {
   expect(newViewport.latitude > oldViewport.latitude, 'map moved').toBeTruthy();
 });
 
-test.skip('MapController keyboard shift-left rotate', async () => {
+test('MapController keyboard shift-left rotate', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
@@ -178,7 +176,7 @@ test.skip('MapController keyboard shift-left rotate', async () => {
   expect(newViewport.bearing < oldViewport.bearing, 'map rotated').toBeTruthy();
 });
 
-test.skip('MapController keyboard shift-up rotate', async () => {
+test('MapController keyboard shift-up rotate', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
@@ -189,7 +187,7 @@ test.skip('MapController keyboard shift-up rotate', async () => {
   expect(newViewport.pitch > oldViewport.pitch, 'map rotated').toBeTruthy();
 });
 
-test.skip('MapController keyboard minus zoom out', async () => {
+test('MapController keyboard minus zoom out', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 
@@ -200,7 +198,7 @@ test.skip('MapController keyboard minus zoom out', async () => {
   expect(newViewport.zoom < oldViewport.zoom, 'map zoomed').toBeTruthy();
 });
 
-test.skip('MapController keyboard shift-plus zoom in', async () => {
+test('MapController keyboard shift-plus zoom in', async () => {
   await resetViewState();
   const oldViewport = getViewport();
 

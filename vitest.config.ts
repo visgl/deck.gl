@@ -5,8 +5,19 @@
 import {defineConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
+const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+
+const headlessPlaywright = playwright({
+  launchOptions: {
+    args: chromiumLaunchArgs
+  }
+});
+
 // Playwright provider with viewport configured for render tests
 const renderPlaywright = playwright({
+  launchOptions: {
+    args: chromiumLaunchArgs
+  },
   contextOptions: {
     viewport: {width: 1024, height: 768}
   }
@@ -29,29 +40,7 @@ const excludedTests = [
   // Commented out on master - Transform not exported from @luma.gl/engine
   'test/modules/layers/path-layer/path-layer-vertex.spec.ts',
   // Commented out on master - collision-filter extension test
-  'test/modules/extensions/collision-filter/collision-filter.spec.ts',
-  // Pre-existing code bug: data-column.ts overwrites user stride/offset - fix on master first
-  'test/modules/core/lib/attribute/attribute.spec.ts',
-  // Needs investigation: timeout, spy count mismatch, async timing issues
-  'test/modules/geo-layers/tile-3d-layer/tile-3d-layer.spec.ts',
-  // layer-extension: updateState called twice when swapping extensions (expected: 1) - needs investigation
-  'test/modules/core/lib/layer-extension.spec.ts',
-  'test/modules/core/lib/pick-layers.spec.ts',
-  'test/modules/geo-layers/terrain-layer.spec.ts',
-  // TODO: H3TileLayer autoHighlight test times out (>30s) - needs investigation
-  'test/modules/carto/layers/h3-tile-layer.spec.ts',
-  // Flaky in CI with isolate: false - GPU/WebGL state leakage between tests
-  // These tests pass individually but fail when run in the full suite
-  'test/modules/aggregation-layers/hexbin.spec.ts',
-  'test/modules/core/lib/deck-picker.spec.ts',
-  'test/modules/core/controllers/controllers.spec.ts',
-  // Interaction tests are timing-sensitive and fail in CI headless mode
-  // They work in the render project with proper viewport configuration
-  'test/interaction/map-controller.spec.ts',
-  // TerrainEffect tests timeout (>30s) with isolate: false
-  'test/modules/extensions/terrain/terrain-effect.spec.ts',
-  // GLViewport test fails due to viewport state leakage
-  'test/modules/core/passes/layers-pass.spec.ts'
+  'test/modules/extensions/collision-filter/collision-filter.spec.ts'
 ];
 
 // Match aliases from .ocularrc.js
@@ -111,7 +100,8 @@ const optimizeDepsConfig = {
     // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
-    '@loaders.gl/images'
+    '@loaders.gl/images',
+    'd3-hexbin'
   ]
 };
 
@@ -192,7 +182,7 @@ export default defineConfig({
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
-            provider: playwright(),
+            provider: headlessPlaywright,
             instances: [{browser: 'chromium'}],
             headless: true,
             screenshotFailures: false,
