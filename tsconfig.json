@@ -23,6 +23,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@luma.gl/webgl/constants": ["node_modules/@luma.gl/webgl/dist/constants/index"],
       "@deck.gl/aggregation-layers": ["modules/aggregation-layers/src"],
       "@deck.gl/arcgis": ["modules/arcgis/src"],
       "@deck.gl/carto": ["modules/carto/src"],
@@ -41,7 +42,7 @@
 
       "deck.gl-test/*": ["test/*"]
     },
-    "typeRoots" : ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types"],
     "plugins": [
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-version-inline"

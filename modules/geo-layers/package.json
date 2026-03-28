@@ -46,8 +46,8 @@
     "@loaders.gl/terrain": "^4.4.0-alpha.18",
     "@loaders.gl/tiles": "^4.4.0-alpha.18",
     "@loaders.gl/wms": "^4.4.0-alpha.18",
-    "@luma.gl/gltf": "^9.3.0-alpha.6",
-    "@luma.gl/shadertools": "^9.3.0-alpha.6",
+    "@luma.gl/gltf": "^9.3.0-alpha.10",
+    "@luma.gl/shadertools": "^9.3.0-alpha.10",
     "@math.gl/core": "^4.1.0",
     "@math.gl/culling": "^4.1.0",
     "@math.gl/web-mercator": "^4.1.0",
@@ -62,8 +62,8 @@
     "@deck.gl/layers": "~9.2.0",
     "@deck.gl/mesh-layers": "~9.2.0",
     "@loaders.gl/core": "^4.4.0-alpha.18",
-    "@luma.gl/core": "~9.3.0-alpha.6",
-    "@luma.gl/engine": "~9.3.0-alpha.6"
+    "@luma.gl/core": "~9.3.0-alpha.10",
+    "@luma.gl/engine": "~9.3.0-alpha.10"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

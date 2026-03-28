@@ -15,7 +15,7 @@ import {Texture} from '@luma.gl/core';
  */
 
 const fs = /* glsl */ `\
-uniform heatmapUniforms {
+layout(std140) uniform heatmapUniforms {
   vec2 colorDomain;
   vec2 delta;
   float intensity;

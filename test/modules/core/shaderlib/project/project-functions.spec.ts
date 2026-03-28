@@ -139,8 +139,6 @@ test('project#projectPosition', () => {
 
   TEST_CASES.forEach(testCase => {
     const result = projectPosition(testCase.position, testCase.projectProps);
-    console.log(result);
-    console.log(testCase.result);
     expect(equals(result, testCase.result), testCase.title).toBeTruthy();
   });
 });

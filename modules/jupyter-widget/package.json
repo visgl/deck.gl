@@ -42,9 +42,8 @@
     "@loaders.gl/3d-tiles": "^4.4.0-alpha.18",
     "@loaders.gl/core": "^4.4.0-alpha.18",
     "@loaders.gl/csv": "^4.4.0-alpha.18",
-    "@luma.gl/constants": "^9.3.0-alpha.6",
-    "@luma.gl/core": "^9.3.0-alpha.6",
-    "@luma.gl/webgl": "^9.3.0-alpha.6",
+    "@luma.gl/core": "^9.3.0-alpha.10",
+    "@luma.gl/webgl": "^9.3.0-alpha.10",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2",
     "maplibre-gl": "^5.14.0"

@@ -14,9 +14,9 @@ struct IconUniforms {
   alphaCutoff: f32
 };
 
-@group(0) @binding(2) var<uniform> icon: IconUniforms;
-@group(0) @binding(3) var iconsTexture : texture_2d<f32>;
-@group(0) @binding(4) var iconsTextureSampler : sampler;
+@group(0) @binding(auto) var<uniform> icon: IconUniforms;
+@group(0) @binding(auto) var iconsTexture : texture_2d<f32>;
+@group(0) @binding(auto) var iconsTextureSampler : sampler;
 
 fn rotate_by_angle(vertex: vec2<f32>, angle_deg: f32) -> vec2<f32> {
   let angle_radian = angle_deg * PI / 180.0;

@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform textBackgroundUniforms {
+layout(std140) uniform textBackgroundUniforms {
   bool billboard;
   float sizeScale;
   float sizeMinPixels;

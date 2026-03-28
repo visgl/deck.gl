@@ -325,7 +325,6 @@ for (const binary of [true, false]) {
           pickedLayerId: 'mvt-0-0-1-polygons-fill',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            console.log('hover over polygon');
             expect(info.object, 'info.object is populated').toBeTruthy();
             expect(info.object.properties, 'info.object.properties is populated').toBeTruthy();
             expect(info.object.geometry, 'info.object.geometry is populated').toBeTruthy();
@@ -340,7 +339,6 @@ for (const binary of [true, false]) {
           pickedLayerId: '',
           mode: 'hover',
           onAfterUpdate: ({layer, subLayers, info}) => {
-            console.log('pointer leave');
             expect(info.object, 'info.object is not populated').toBeFalsy();
             expect(
               subLayers.every(l => l.props.highlightedObjectIndex === -1),
@@ -422,6 +420,54 @@ test('MVTLayer#TileJSON', async () => {
 
   // restore fetcch
   globalThis.fetch = fetch;
+});
+
+test('MVTLayer#core.worker false disables workers', async () => {
+  class TestMVTLayer extends MVTLayer {
+    renderSubLayers(props) {
+      return new ScatterplotLayer(props, {id: `${props.id}-fill`});
+    }
+  }
+
+  const viewport = new WebMercatorViewport({
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 60,
+    zoom: 3
+  });
+
+  let capturedLoadOptions;
+  const testCases = [
+    {
+      props: {
+        data: ['https://server.com/{z}/{x}/{y}.mvt'],
+        binary: false,
+        loaders: [MVTLoader],
+        fetch: (url, {loadOptions}) => {
+          capturedLoadOptions = loadOptions;
+          return Promise.resolve([]);
+        },
+        loadOptions: {
+          core: {
+            worker: false
+          }
+        }
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          expect(capturedLoadOptions.core.worker, 'worker is disabled').toBe(false);
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('MVTLayer#dataInWGS84', async () => {

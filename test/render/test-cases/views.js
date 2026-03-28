@@ -13,6 +13,7 @@ import {
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLoader} from '@loaders.gl/mvt';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';
@@ -124,9 +125,10 @@ export default [
           },
           lineWidthMinPixels: 1,
           binary,
+          loaders: [MVTLoader],
           loadOptions: {
-            mvt: {
-              workerUrl: null
+            core: {
+              worker: false
             }
           }
         })

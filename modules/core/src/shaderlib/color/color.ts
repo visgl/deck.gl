@@ -43,9 +43,6 @@ export default {
     // TODO - v10: use raw opacity?
     // opacity: Math.pow(props.opacity!, 1 / 2.2)
     return {};
-  },
-  uniformTypes: {
-    opacity: 'f32'
   }
   // @ts-ignore TODO v9.1
 } as const satisfies ShaderModule<LayerProps, ColorUniforms, {}>;

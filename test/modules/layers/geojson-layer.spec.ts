@@ -196,8 +196,8 @@ webglTest('GeoJsonLayer#tests', () => {
         'every subLayer should receive getFilterValue binary attribute'
       ).toBeTruthy();
       const uniforms = getLayerUniforms(subLayer, 'dataFilter');
-      expect(uniforms.min, 'has correct uniforms').toBe(1);
-      expect(uniforms.max, 'has correct uniforms').toBe(1);
+      expect(uniforms.min, 'has correct uniforms').toEqual([1, 0, 0, 0]);
+      expect(uniforms.max, 'has correct uniforms').toEqual([1, 0, 0, 0]);
       expect(uniforms.useSoftMargin, 'has correct uniforms').toBe(false);
       expect(uniforms.enabled, 'has correct uniforms').toBe(true);
     },

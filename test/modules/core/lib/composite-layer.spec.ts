@@ -342,6 +342,8 @@ test('CompositeLayer#onViewportChange', () => {
     }
   }
 
+  CompLayer.layerName = 'CompLayer';
+
   const testCases = [
     {
       viewport: new WebMercatorViewport({
