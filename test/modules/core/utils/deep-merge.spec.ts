@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {deepMergeViewState} from '@deck.gl/core/utils/deep-merge';
 
-test('deepMergeViewState', t => {
+test('deepMergeViewState', () => {
   const TEST_CASES = [
     {
       a: {longitude: -122.45, latitude: 37.78, zoom: 8},
@@ -25,8 +25,6 @@ test('deepMergeViewState', t => {
   ];
   TEST_CASES.forEach(({a, b, output}) => {
     const result = deepMergeViewState(a, b);
-    t.deepEqual(result, output, `should ${output ? '' : 'not '}be equal`);
+    expect(result, `should ${output ? '' : 'not '}be equal`).toEqual(output);
   });
-
-  t.end();
 });

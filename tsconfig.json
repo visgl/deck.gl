@@ -68,7 +68,9 @@
   "include": [
     "modules",
     "test",
-    "examples"
+    "examples",
+    "vitest.config.ts",
+    "vitest.workspace.ts"
   ],
   "exclude": [
     "**/node_modules",
