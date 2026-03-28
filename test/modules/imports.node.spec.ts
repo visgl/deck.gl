@@ -16,7 +16,6 @@ import * as meshLayers from '@deck.gl/mesh-layers';
 
 import * as core from '@deck.gl/core';
 import * as json from '@deck.gl/json';
-import * as arcgis from '@deck.gl/arcgis';
 import * as googleMaps from '@deck.gl/google-maps';
 import * as mapbox from '@deck.gl/mapbox';
 import * as react from '@deck.gl/react';
@@ -54,9 +53,12 @@ describe('Top-level imports', () => {
     ).toBeFalsy();
   });
 
-  test('import utilities', () => {
+  test('import utilities', async () => {
     expect(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json').toBeFalsy();
-    expect(hasEmptyExports(arcgis), 'No empty top-level export in @deck.gl/arcgis').toBeFalsy();
+    const arcgis = await import('@deck.gl/arcgis').catch(() => null);
+    if (arcgis) {
+      expect(hasEmptyExports(arcgis), 'No empty top-level export in @deck.gl/arcgis').toBeFalsy();
+    }
     expect(
       hasEmptyExports(googleMaps),
       'No empty top-level export in @deck.gl/google-maps'

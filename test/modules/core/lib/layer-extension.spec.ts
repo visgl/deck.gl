@@ -47,6 +47,8 @@ class MockExtension extends LayerExtension {
   }
 }
 
+MockExtension.extensionName = 'MockExtension';
+
 MockExtension.defaultProps = {
   ext_getValue: {type: 'accessor', value: 0},
   ext_enabled: false,

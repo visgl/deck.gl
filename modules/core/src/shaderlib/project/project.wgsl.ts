@@ -50,7 +50,7 @@ struct ProjectUniforms {
   pseudoMeters: i32,
 };
 
-@group(0) @binding(0)
+@group(0) @binding(auto)
 var<uniform> project: ProjectUniforms;
 
 // -----------------------------------------------------------------------------

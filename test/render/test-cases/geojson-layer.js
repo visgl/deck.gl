@@ -259,9 +259,7 @@ export default [
         opacity: 1.0,
         getFillColor: [200, 0, 0],
         material: {
-          material: {
-            specularColor: [255, 255, 255]
-          }
+          specularColor: [255, 255, 255]
         },
         extruded: true,
         getElevation: f => 30,

@@ -53,8 +53,8 @@
     "@deck.gl/react": "9.3.0-alpha.3",
     "@deck.gl/widgets": "9.3.0-alpha.3",
     "@loaders.gl/core": "^4.4.0-alpha.18",
-    "@luma.gl/core": "^9.3.0-alpha.6",
-    "@luma.gl/engine": "^9.3.0-alpha.6"
+    "@luma.gl/core": "^9.3.0-alpha.10",
+    "@luma.gl/engine": "^9.3.0-alpha.10"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",

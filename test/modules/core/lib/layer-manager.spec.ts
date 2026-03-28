@@ -201,6 +201,8 @@ test('LayerManager#error handling', () => {
     }
   }
 
+  BadLayer.layerName = 'BadLayer';
+
   const layerManager = new LayerManager(device);
   layerManager.setProps({onError});
 

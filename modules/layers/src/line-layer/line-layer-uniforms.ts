@@ -13,12 +13,12 @@ struct LineUniforms {
   widthUnits: i32,
 };
 
-@group(0) @binding(1)
+@group(0) @binding(auto)
 var<uniform> line: LineUniforms;
 `;
 
 const uniformBlockGLSL = /* glsl */ `\
-uniform lineUniforms {
+layout(std140) uniform lineUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;

@@ -111,7 +111,6 @@ test('Sunlight#getProjectedLight', () => {
     sunLight.timestamp = testCase.timestamp;
     layer.context.viewport = testCase.viewport;
     const projectedLight = sunLight.getProjectedLight({layer});
-    console.log(projectedLight.direction.join(','));
     expect(
       vec3.angle(projectedLight.direction, testCase.expected) < 0.05,
       testCase.title

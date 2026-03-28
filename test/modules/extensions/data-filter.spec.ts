@@ -32,8 +32,8 @@ webglTest('DataFilterExtension', () => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        expect(uniforms.min, 'has correct uniforms').toBe(80);
-        expect(uniforms.softMax, 'has correct uniforms').toBe(160);
+        expect(uniforms.min, 'has correct uniforms').toEqual([80, 0, 0, 0]);
+        expect(uniforms.softMax, 'has correct uniforms').toEqual([160, 0, 0, 0]);
         expect(uniforms.useSoftMargin, 'has correct uniforms').toBe(false);
         expect(uniforms.enabled, 'has correct uniforms').toBe(true);
 
@@ -64,8 +64,8 @@ webglTest('DataFilterExtension', () => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        expect(uniforms.min, 'has correct uniforms').toEqual([10000, 0]);
-        expect(uniforms.softMax, 'has correct uniforms').toEqual([18000, 8000]);
+        expect(uniforms.min, 'has correct uniforms').toEqual([10000, 0, 0, 0]);
+        expect(uniforms.softMax, 'has correct uniforms').toEqual([18000, 8000, 0, 0]);
         expect(uniforms.useSoftMargin, 'has correct uniforms').toBe(true);
         expect(uniforms.transformSize, 'has correct uniforms').toBe(false);
       }
@@ -76,10 +76,10 @@ webglTest('DataFilterExtension', () => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        expect(uniforms.min64High, 'has double uniforms').toEqual([10000, 0]);
-        expect(uniforms.max64High, 'has double uniforms').toEqual([20000, 100000]);
-        expect(uniforms.min, 'has correct uniforms').toEqual([0, 0]);
-        expect(uniforms.softMax, 'has correct uniforms').toEqual([-2000, -92000]);
+        expect(uniforms.min64High, 'has double uniforms').toEqual([10000, 0, 0, 0]);
+        expect(uniforms.max64High, 'has double uniforms').toEqual([20000, 100000, 0, 0]);
+        expect(uniforms.min, 'has correct uniforms').toEqual([0, 0, 0, 0]);
+        expect(uniforms.softMax, 'has correct uniforms').toEqual([-2000, -92000, 0, 0]);
       }
     }
   ];

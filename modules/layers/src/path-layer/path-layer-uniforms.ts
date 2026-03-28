@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform pathUniforms {
+layout(std140) uniform pathUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;

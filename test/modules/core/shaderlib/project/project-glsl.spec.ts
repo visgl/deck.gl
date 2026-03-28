@@ -362,7 +362,7 @@ void main() {
   mat3 transform = project_get_orientation_matrix(test.uDirUp);
   outValue = transform * test.uInput;
 }
-  `;
+`;
   const runTransform = async (up: NumericArray, v: NumericArray): Promise<Vector3> => {
     const result = await runOnGPU({
       vs,

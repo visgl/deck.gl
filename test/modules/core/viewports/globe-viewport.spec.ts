@@ -91,8 +91,6 @@ test('GlobeViewport#projectPosition, unprojectPosition', () => {
       const pos1 = pos.length === 2 ? pos.concat(0) : pos;
       const pos2 = viewport.unprojectPosition(commonPosition);
 
-      console.log(pos1);
-      console.log(pos2);
       expect(
         equals(pos1, pos2),
         'center projectPosition/unprojectPosition round trip'
@@ -111,7 +109,6 @@ test('GlobeViewport#project, unproject#center', () => {
     const viewport = new GlobeViewport(testCase);
 
     let screenCenter = viewport.project([viewport.longitude, viewport.latitude, 0]);
-    console.log(screenCenter);
     expect(
       equals(screenCenter.slice(0, 2), [viewport.width / 2, viewport.height / 2]),
       'viewport center is projected to screen center'
@@ -119,7 +116,6 @@ test('GlobeViewport#project, unproject#center', () => {
     expect(screenCenter[2] > -1 && screenCenter[2] < 1, 'viewport center is visible').toBeTruthy();
 
     screenCenter = viewport.project([viewport.longitude, viewport.latitude, 1000]);
-    console.log(screenCenter);
     expect(
       equals(screenCenter.slice(0, 2), [viewport.width / 2, viewport.height / 2]),
       'point over viewport center is projected to screen center'
@@ -151,13 +147,10 @@ test('GlobeViewport#project, unproject', () => {
       const screenPosition = viewport.project(pos);
       let pos2 = viewport.unproject(screenPosition);
 
-      console.log(pos);
-      console.log(pos2);
       expect(equals(pos, pos2), 'center project/unproject round trip').toBeTruthy();
 
       if (pos.length === 3) {
         pos2 = viewport.unproject(screenPosition.slice(0, 2), {targetZ: pos[2]});
-        console.log(pos2);
         expect(equals(pos, pos2), 'center project/unproject (targetZ) round trip').toBeTruthy();
       }
     }
