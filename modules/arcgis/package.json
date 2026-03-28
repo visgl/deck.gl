@@ -40,7 +40,7 @@
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
-    "@deck.gl/core": "~9.2.0",
+    "@deck.gl/core": "~9.3.0-alpha.1",
     "@luma.gl/core": "~9.3.0-alpha.10",
     "@luma.gl/engine": "~9.3.0-alpha.10",
     "@luma.gl/webgl": "~9.3.0-alpha.10"
