@@ -42,7 +42,7 @@
 
       "deck.gl-test/*": ["test/*"]
     },
-    "typeRoots" : ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types"],
     "plugins": [
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-version-inline"
