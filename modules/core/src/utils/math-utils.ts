@@ -26,6 +26,18 @@ export function getCameraPosition(
   return [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]];
 }
 
+export function getProjectionParameters(projectionMatrix: Matrix4 | NumericArray): {
+  near: number;
+  far: number;
+} {
+  const m22 = projectionMatrix[10];
+  const m23 = projectionMatrix[14];
+  return {
+    near: m23 / (m22 - 1),
+    far: m23 / (m22 + 1)
+  };
+}
+
 export type FrustumPlane = {
   distance: number;
   normal: Vector3;

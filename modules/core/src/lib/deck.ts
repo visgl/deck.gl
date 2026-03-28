@@ -55,10 +55,15 @@ const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 export type DeckMetrics = {
   fps: number;
   setPropsTime: number;
+  layersCount: number;
+  drawLayersCount: number;
+  updateLayersCount: number;
   updateAttributesTime: number;
+  updateAttributesCount: number;
   framesRedrawn: number;
   pickTime: number;
   pickCount: number;
+  pickLayersCount: number;
   gpuTime: number;
   gpuTimePerFrame: number;
   cpuTime: number;
@@ -309,10 +314,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected metrics: DeckMetrics = {
     fps: 0,
     setPropsTime: 0,
+    layersCount: 0,
+    drawLayersCount: 0,
+    updateLayersCount: 0,
+    updateAttributesCount: 0,
     updateAttributesTime: 0,
     framesRedrawn: 0,
     pickTime: 0,
     pickCount: 0,
+    pickLayersCount: 0,
     gpuTime: 0,
     gpuTimePerFrame: 0,
     cpuTime: 0,
@@ -1132,9 +1142,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       device: this.device
     });
 
-    this.deckRenderer = new DeckRenderer(this.device);
+    this.deckRenderer = new DeckRenderer(this.device, {stats: this.stats});
 
-    this.deckPicker = new DeckPicker(this.device);
+    this.deckPicker = new DeckPicker(this.device, {stats: this.stats});
 
     const widgetParent =
       this.props.parent?.querySelector<HTMLDivElement>('.deck-widgets-root') ||
@@ -1349,13 +1359,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       stats.get('pickObjects Time').time;
     metrics.pickCount = stats.get('Pick Count').count;
 
+    metrics.layersCount = this.layerManager?.layers.length ?? 0;
+    metrics.drawLayersCount = stats.get('Layers rendered').lastSampleCount;
+    metrics.pickLayersCount = stats.get('Layers picked').lastSampleCount;
+    metrics.updateAttributesCount = stats.get('Layers updated').count;
+    metrics.updateAttributesCount = stats.get('Attributes updated').count;
+
     // Luma stats
     metrics.gpuTime = stats.get('GPU Time').time;
     metrics.cpuTime = stats.get('CPU Time').time;
     metrics.gpuTimePerFrame = stats.get('GPU Time').getAverageTime();
     metrics.cpuTimePerFrame = stats.get('CPU Time').getAverageTime();
 
-    const memoryStats = luma.stats.get('Memory Usage');
+    const memoryStats = luma.stats.get('GPU Time and Memory');
     metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
     metrics.textureMemory = memoryStats.get('Texture Memory').count;
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;

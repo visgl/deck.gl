@@ -17,10 +17,9 @@ import {
   ResetViewWidget,
   ScrollbarWidget,
   _TimelineWidget as TimelineWidget,
-  _ThemeWidget as ThemeWidget,
+  ThemeWidget,
   DarkTheme,
-  LightTheme,
-  _FpsWidget
+  LightTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -75,7 +74,6 @@ new Deck({
     new GimbalWidget(),
     new FullscreenWidget(),
     new ResetViewWidget(),
-    new _FpsWidget(),
     new ThemeWidget({
       // darkModeTheme: DarkTheme,
       // lightModeTheme: LightTheme,

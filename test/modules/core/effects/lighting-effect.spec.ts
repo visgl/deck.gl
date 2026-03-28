@@ -62,15 +62,16 @@ test('LightingEffect#getShaderModuleProps', () => {
   });
 
   const {lighting} = lightingEffect.getShaderModuleProps(layer);
-  expect(lighting.pointLights.length, 'Lights are exported').toBe(2);
+  expect(lighting.lights.length, 'Lights are exported').toBe(2);
   expect(
-    equals(lighting.pointLights[0].position, [0, 0, 0.018310546875]),
+    equals(lighting.lights[0].position, [0, 0, 0.018310546875]),
     'Camera light projection is ok'
   ).toBeTruthy();
-  expect(lighting.pointLights[1].color, 'point light color is ok').toEqual([255, 0, 0]);
+  expect(lighting.lights[1].color, 'point light color is ok').toEqual([255, 0, 0]);
 
   expect(lighting.ambientLight, 'Lighting effect getGLParameters is ok').toBe(undefined);
-  expect(lighting.directionalLights, 'Lighting effect getGLParameters is ok').toEqual([]);
+  expect(lighting.directionalLights, 'Lighting effect getGLParameters is ok').toBe(undefined);
+  expect(lighting.pointLights, 'Lighting effect getGLParameters is ok').toBe(undefined);
 
   lightingEffect.cleanup(effectContext);
   layerManager.finalize();

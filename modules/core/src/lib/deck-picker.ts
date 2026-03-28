@@ -11,7 +11,8 @@ import {
   getEmptyPickingInfo,
   PickingInfo
 } from './picking/pick-info';
-
+import type {RenderStats} from '../passes/layers-pass';
+import type {Stats} from '@probe.gl/stats';
 import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
@@ -52,6 +53,7 @@ export default class DeckPicker {
   depthFBO?: Framebuffer;
   pickLayersPass: PickLayersPass;
   layerFilter?: (context: FilterContext) => boolean;
+  stats?: Stats;
 
   /** Identifiers of the previously picked object, for callback tracking and auto highlight */
   lastPickedInfo: {
@@ -62,8 +64,9 @@ export default class DeckPicker {
 
   _pickable: boolean = true;
 
-  constructor(device: Device) {
+  constructor(device: Device, opts: {stats?: Stats} = {}) {
     this.device = device;
+    this.stats = opts.stats;
     this.pickLayersPass = new PickLayersPass(device);
     this.lastPickedInfo = {
       index: -1,
@@ -808,7 +811,8 @@ export default class DeckPicker {
       }
     }
 
-    const {decodePickingColor} = this.pickLayersPass.render(opts);
+    const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
+    this._updateStats(stats);
 
     // Read from an already rendered picking buffer
     // Returns an Uint8ClampedArray of picked pixels
@@ -913,7 +917,8 @@ export default class DeckPicker {
       }
     }
 
-    const {decodePickingColor} = this.pickLayersPass.render(opts);
+    const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
+    this._updateStats(stats);
 
     // Read from an already rendered picking buffer
     // Returns an Uint8ClampedArray of picked pixels
@@ -928,6 +933,15 @@ export default class DeckPicker {
     });
 
     return {pickedColors, decodePickingColor};
+  }
+
+  private _updateStats(source: RenderStats[]) {
+    if (!this.stats) return;
+    let layersCount = 0;
+    for (const {visibleCount} of source) {
+      layersCount += visibleCount;
+    }
+    this.stats.get('Layers picked').addCount(layersCount);
   }
 
   /**

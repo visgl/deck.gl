@@ -6,6 +6,7 @@ import Viewport from '../viewports/viewport';
 
 import {Matrix4} from '@math.gl/core';
 import {pixelsToWorld, fovyToAltitude} from '@math.gl/web-mercator';
+import {getProjectionParameters} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -150,9 +151,14 @@ export default class OrbitViewport extends Viewport {
 
   panByPosition(coords: number[], pixel: number[], startPixel?: number[]): OrbitViewportOptions {
     const p0 = this.project(coords);
+    const {near, far} = getProjectionParameters(this.projectionMatrix);
+    const pz = (near * far) / (far - p0[2] * (far - near));
+    const centerZ = (near * far) / (far - this.projectedCenter[2] * (far - near));
+    const shiftScale = pz / centerZ;
+
     const nextCenter = [
-      this.width / 2 + p0[0] - pixel[0],
-      this.height / 2 + p0[1] - pixel[1],
+      this.width / 2 + (p0[0] - pixel[0]) * shiftScale,
+      this.height / 2 + (p0[1] - pixel[1]) * shiftScale,
       this.projectedCenter[2]
     ];
     return {

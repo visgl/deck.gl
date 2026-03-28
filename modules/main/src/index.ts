@@ -36,6 +36,7 @@ export {
   // Controllers
   Controller,
   MapController,
+  TerrainController,
   OrbitController,
   FirstPersonController,
   OrthographicController,

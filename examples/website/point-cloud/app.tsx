@@ -39,10 +39,10 @@ export default function App({
   device?: Device;
 }) {
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [boundingBox, setBoundingBox] = useState<[number[], number[]] | null>(null);
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (!boundingBox) {
       return;
     }
     const rotateCamera = () => {
@@ -55,7 +55,7 @@ export default function App({
       }));
     };
     rotateCamera();
-  }, [isLoaded]);
+  }, [boundingBox]);
 
   const onDataLoad = useCallback((data: any) => {
     const header = (data as LASMesh).header!;
@@ -68,15 +68,12 @@ export default function App({
     }
     (data as LASMesh).attributes.POSITION.value = f64Pos;
     if (header.boundingBox) {
-      const [mins, maxs] = header.boundingBox;
-      // File contains bounding box info
+      const [min, max] = header.boundingBox;
       updateViewState({
         ...INITIAL_VIEW_STATE,
-        target: [(mins[0] + maxs[0]) / 2, (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2],
-        /* global window */
-        zoom: Math.log2(window.innerWidth / (maxs[0] - mins[0])) - 1
+        target: [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]
       });
-      setIsLoaded(true);
+      setBoundingBox(header.boundingBox);
     }
 
     if (onLoad) {
@@ -105,7 +102,9 @@ export default function App({
       device={device}
       views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
       initialViewState={viewState}
-      controller={true}
+      controller={{
+        maxBounds: boundingBox
+      }}
       layers={layers}
     />
   );

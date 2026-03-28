@@ -66,7 +66,13 @@ test('OrthographicController', async () => {
       zoom: 1
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'multipan']
+    [
+      'pan#function key',
+      'pan#function key#disabled',
+      'multipan',
+      'multipan#disabled',
+      'keyboard#function key'
+    ]
   );
 });
 
@@ -78,7 +84,13 @@ test('OrthographicController#2d zoom', async () => {
       zoom: [1, 2]
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'multipan']
+    [
+      'pan#function key',
+      'pan#function key#disabled',
+      'multipan',
+      'multipan#disabled',
+      'keyboard#function key'
+    ]
   );
 });
 
