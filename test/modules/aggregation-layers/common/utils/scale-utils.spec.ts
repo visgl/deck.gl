@@ -9,6 +9,7 @@ import {
   applyScaleOrdinal
 } from '@deck.gl/aggregation-layers/common/utils/scale-utils';
 import {device} from '@deck.gl/test-utils/vitest';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const QUANTILE_SCALE_TEST_CASES = [
   {
@@ -229,7 +230,7 @@ test('AttributeWithScale#CPU#update', () => {
   }
 });
 
-test('AttributeWithScale#GPU#update', () => {
+webglTest('AttributeWithScale#GPU#update', () => {
   for (const {title, input, length, testCases} of ATTRIBUTE_TEST_CASES) {
     // Simulate a binary attribute with only GPU buffer
     const gpuInput = {

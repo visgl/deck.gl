@@ -5,7 +5,8 @@
 import {test, expect} from 'vitest';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
+import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 test('DataFilterExtension#constructor', () => {
   let extension = new DataFilterExtension();
@@ -16,7 +17,7 @@ test('DataFilterExtension#constructor', () => {
   expect(extension.opts.fp64, 'fp64 is enabled').toBeTruthy();
 });
 
-test('DataFilterExtension', () => {
+webglTest('DataFilterExtension', () => {
   const testCases = [
     {
       props: {
@@ -141,7 +142,7 @@ test('DataFilterExtension#categories', () => {
   testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('DataFilterExtension#countItems', () => {
+webglTest('DataFilterExtension#countItems', () => {
   let cbCalled = 0;
   let cbCount = -1;
 

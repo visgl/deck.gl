@@ -9,6 +9,7 @@ import {test, expect} from 'vitest';
 import type {Buffer} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
 import {device} from '@deck.gl/test-utils/vitest';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_ATTRIBUTES = (function () {
   const indices = new Attribute(device, {
@@ -53,7 +54,7 @@ test('AttributeTransitionManager#constructor', () => {
   ).toThrow();
 });
 
-test('AttributeTransitionManager#update', async () => {
+webglTest('AttributeTransitionManager#update', async () => {
   const timeline = new Timeline();
   const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
   const attributes = Object.assign({}, TEST_ATTRIBUTES);
@@ -116,7 +117,7 @@ test('AttributeTransitionManager#update', async () => {
   expect(manager.transitions.instanceSizes, 'transition is deleted').toBeFalsy();
 });
 
-test('AttributeTransitionManager#transition', async () => {
+webglTest('AttributeTransitionManager#transition', async () => {
   const timeline = new Timeline();
   const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
   const attributes = Object.assign({}, TEST_ATTRIBUTES);

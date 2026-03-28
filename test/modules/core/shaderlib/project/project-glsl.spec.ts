@@ -22,7 +22,9 @@ import {
   testUniforms,
   verifyGPUResult
 } from './project-glsl-test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 const PIXEL_TOLERANCE = 1e-4;
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
@@ -324,7 +326,7 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#vs', async () => {
+webglTest('project#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
   for (const testCase of TEST_CASES) {
@@ -350,7 +352,7 @@ test('project#vs', async () => {
   config.EPSILON = oldEpsilon;
 });
 
-test('project#vs#project_get_orientation_matrix', async () => {
+webglTest('project#vs#project_get_orientation_matrix', async () => {
   const vs = `\
 #version 300 es
 

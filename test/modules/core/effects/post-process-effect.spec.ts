@@ -5,6 +5,7 @@
 import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const fs = `\
 vec4 testEffect_sampleColor(sampler2D texture, vec2 texSize, vec2 texCoord) {
@@ -27,7 +28,7 @@ test('PostProcessEffect#constructor', () => {
   expect(effect, 'post-processing effect created').toBeTruthy();
 });
 
-test('PostProcessEffect#postRender', () => {
+webglTest('PostProcessEffect#postRender', () => {
   const effect = new PostProcessEffect(testModule);
   effect.setup({device});
   effect.preRender();

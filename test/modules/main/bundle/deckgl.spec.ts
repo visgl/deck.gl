@@ -4,6 +4,7 @@
 
 import {test, expect} from 'vitest';
 import * as deckgl from 'deck.gl/../bundle';
+import {device} from '@deck.gl/test-utils/vitest';
 
 test('standalone#imports', () => {
   expect(deckgl.VERSION, 'version is exported').toBeTruthy();
@@ -18,28 +19,36 @@ test('standalone#imports', () => {
   expect(globalThis.loaders, 'loaders namespace is exported').toBeTruthy();
 });
 
-test('standalone#DeckGL', () => {
-  const deck = new deckgl.DeckGL({
-    longitude: -122.45,
-    latitude: 37.8,
-    zoom: 12,
-    layers: [
-      new deckgl.ScatterplotLayer({
-        data: [{position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}]
-      })
-    ],
-    onAfterRender: () => {
-      expect(
-        Object.keys(deck.viewManager.controllers).length > 0,
-        'component has controller'
-      ).toBeTruthy();
+test('standalone#DeckGL', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new deckgl.DeckGL({
+      device,
+      longitude: -122.45,
+      latitude: 37.8,
+      zoom: 12,
+      layers: [
+        new deckgl.ScatterplotLayer({
+          data: [{position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}]
+        })
+      ],
+      onAfterRender: () => {
+        try {
+          expect(
+            Object.keys(deck.viewManager.controllers).length > 0,
+            'component has controller'
+          ).toBeTruthy();
 
-      deck.finalize();
+          deck.finalize();
 
-      expect(deck.layerManager, 'component is finalized').toBeFalsy();
-      expect(deck.viewManager, 'component is finalized').toBeFalsy();
-    }
+          expect(deck.layerManager, 'component is finalized').toBeFalsy();
+          expect(deck.viewManager, 'component is finalized').toBeFalsy();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+
+    expect(deck, 'DeckGL constructor does not throw error').toBeTruthy();
   });
-
-  expect(deck, 'DeckGL constructor does not throw error').toBeTruthy();
 });

@@ -8,6 +8,7 @@ import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import ShadowPass from '@deck.gl/core/passes/shadow-pass';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 test('ShadowPass#constructor and delete', () => {
   const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
@@ -20,7 +21,7 @@ test('ShadowPass#constructor and delete', () => {
   expect(shadowPass.fbo, `ShadowPass deletes fbo`).toBeFalsy();
 });
 
-test('ShadowPass#render', () => {
+webglTest('ShadowPass#render', () => {
   const viewport = new MapView().makeViewport({
     width: 100,
     height: 100,

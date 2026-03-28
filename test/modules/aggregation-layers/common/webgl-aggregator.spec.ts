@@ -11,8 +11,7 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {IncomeSurvey} from './data-sample';
 import {getResourceCounts, binaryAttributeToArray} from './test-utils';
 
-const webglTest =
-  device.type === 'webgl' && WebGLAggregator.isSupported(device) ? test : test.skip;
+const webglTest = device.type === 'webgl' && WebGLAggregator.isSupported(device) ? test : test.skip;
 
 // luma.gl v9.3 caches GPU resources, so global resource counts no longer
 // reliably return to the exact pre-test baseline after destroy().

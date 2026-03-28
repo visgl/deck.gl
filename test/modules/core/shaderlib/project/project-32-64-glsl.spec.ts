@@ -13,8 +13,10 @@ import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, runOnGPU, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 import {TestCase} from './project-glsl.spec';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const PIXEL_TOLERANCE = 0.001;
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
@@ -150,7 +152,7 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project32&64#vs', async () => {
+webglTest('project32&64#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
   for (const usefp64 of [false, true]) {

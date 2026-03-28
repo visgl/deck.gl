@@ -6,10 +6,11 @@ import {test, expect} from 'vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, testLayerAsync, generateLayerTests} from '@deck.gl/test-utils/vitest';
+import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
 
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ContourLayer, ContourLayerProps} from '@deck.gl/aggregation-layers';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const getPosition = d => d.COORDINATES;
 const CONTOURS: ContourLayerProps['contours'] = [
@@ -35,7 +36,7 @@ test('ContourLayer', () => {
   testLayer({Layer: ContourLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('ContourLayer#updates', async () => {
+webglTest('ContourLayer#updates', async () => {
   let prevState: ContourLayer['state'];
   await testLayerAsync({
     Layer: ContourLayer,

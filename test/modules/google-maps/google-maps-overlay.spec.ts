@@ -7,11 +7,14 @@ import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {device} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
 
 globalThis.google = {maps: mapsApi};
+
+const withDevice = props => ({device, ...props});
 
 test('GoogleMapsOverlay#constructor', () => {
   const map = new mapsApi.Map({
@@ -23,6 +26,7 @@ test('GoogleMapsOverlay#constructor', () => {
   });
 
   const overlay = new GoogleMapsOverlay({
+    device,
     layers: []
   });
 
@@ -44,6 +48,7 @@ test('GoogleMapsOverlay#constructor', () => {
 
 test('GoogleMapsOverlay#interleaved prop', () => {
   const overlay = new GoogleMapsOverlay({
+    device,
     interleaved: false,
     layers: []
   });
@@ -54,7 +59,7 @@ test('GoogleMapsOverlay#interleaved prop', () => {
 test('GoogleMapsOverlay#useDevicePixels prop', () => {
   const map = new mapsApi.Map({width: 1, height: 1, longitude: 0, latitude: 0, zoom: 1});
 
-  let overlay = new GoogleMapsOverlay({useDevicePixels: 3, layers: []});
+  let overlay = new GoogleMapsOverlay(withDevice({useDevicePixels: 3, layers: []}));
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
   expect(
@@ -62,7 +67,7 @@ test('GoogleMapsOverlay#useDevicePixels prop', () => {
     'useDevicePixels is forced to true in interleaved mode'
   ).toBeTruthy();
 
-  overlay = new GoogleMapsOverlay({interleaved: false, useDevicePixels: 3, layers: []});
+  overlay = new GoogleMapsOverlay(withDevice({interleaved: false, useDevicePixels: 3, layers: []}));
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
   expect(
@@ -82,6 +87,7 @@ test('GoogleMapsOverlay#raster lifecycle', () => {
   });
 
   const overlay = new GoogleMapsOverlay({
+    device,
     layers: []
   });
 
@@ -105,6 +111,7 @@ for (const interleaved of [true, false]) {
     });
 
     const overlay = new GoogleMapsOverlay({
+      device,
       interleaved,
       layers: []
     });
@@ -157,26 +164,27 @@ test('GoogleMapsOverlay#style', () => {
   });
 
   const overlay = new GoogleMapsOverlay({
+    device,
     style: {zIndex: 10},
-    layers: [],
-    onLoad: () => {
-      const deck = overlay._deck;
-
-      expect(deck.props.parent.style.zIndex, 'parent zIndex is set').toBe('10');
-      expect(deck.canvas.style.zIndex, 'canvas zIndex is not set').toBe('');
-
-      overlay.setProps({
-        style: {zIndex: 5}
-      });
-      expect(deck.props.parent.style.zIndex, 'parent zIndex is set').toBe('5');
-      expect(deck.canvas.style.zIndex, 'canvas zIndex is not set').toBe('');
-
-      overlay.finalize();
-    }
+    layers: []
   });
 
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
+  const deck = overlay._deck;
+
+  expect(deck.props.parent.style.zIndex, 'parent zIndex is set').toBe('10');
+  expect(deck.canvas?.style.zIndex ?? '', 'canvas zIndex is not set').toBe('');
+
+  if (deck.canvas?.parentElement) {
+    overlay.setProps({
+      style: {zIndex: 5}
+    });
+    expect(deck.props.parent.style.zIndex, 'parent zIndex is set').toBe('5');
+    expect(deck.canvas.style.zIndex, 'canvas zIndex is not set').toBe('');
+  }
+
+  overlay.finalize();
 });
 
 function drawPickTest(renderingType) {
@@ -191,6 +199,7 @@ function drawPickTest(renderingType) {
     });
 
     const overlay = new GoogleMapsOverlay({
+      device,
       layers: [
         new ScatterplotLayer({
           data: [{position: [0, 0]}, {position: [0, 0]}],

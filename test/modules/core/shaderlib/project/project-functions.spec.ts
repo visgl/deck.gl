@@ -16,6 +16,7 @@ const {fp64LowPart} = fp64;
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {equals, config, NumberArray3} from '@math.gl/core';
 import {runOnGPU, TestProps, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122.45,
@@ -28,6 +29,7 @@ const TEST_VIEWPORT_2 = new WebMercatorViewport({
   zoom: 8
 });
 const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 export type TestCase = {
   title: string;
@@ -143,7 +145,7 @@ test('project#projectPosition', () => {
   });
 });
 
-test('project#projectPosition vs project_position', async () => {
+webglTest('project#projectPosition vs project_position', async () => {
   config.EPSILON = 1e-5;
 
   const vs = `\

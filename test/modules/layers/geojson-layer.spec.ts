@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils/vitest';
+import {testLayer, generateLayerTests, getLayerUniforms, device} from '@deck.gl/test-utils/vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
@@ -11,8 +11,9 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 
 import * as FIXTURES from 'deck.gl-test/data';
 import {testPickingLayer} from './test-picking-layer';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
-test('GeoJsonLayer#tests', () => {
+webglTest('GeoJsonLayer#tests', () => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {

@@ -7,20 +7,30 @@ import {Deck} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import configuration from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
-import {gl} from '@deck.gl/test-utils/vitest';
+import {device, gl} from '@deck.gl/test-utils/vitest';
 
-test('JSONConverter#render', () => {
+const getDeckProps = () => (globalThis.__JSDOM__ ? {gl} : {device});
+
+test('JSONConverter#render', async () => {
   const jsonConverter = new JSONConverter({configuration});
   expect(jsonConverter, 'JSONConverter created').toBeTruthy();
 
   const deckProps = jsonConverter.convert(JSON_DATA);
   expect(deckProps, 'JSONConverter converted correctly').toBeTruthy();
-  const jsonDeck = new Deck({
-    gl,
-    onAfterRender: () => {
-      expect(jsonDeck, 'JSONConverter rendered').toBeTruthy();
-      jsonDeck.finalize();
-    },
-    ...deckProps
+
+  await new Promise<void>((resolve, reject) => {
+    const jsonDeck = new Deck({
+      ...getDeckProps(),
+      onAfterRender: () => {
+        try {
+          expect(jsonDeck, 'JSONConverter rendered').toBeTruthy();
+          jsonDeck.finalize();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      },
+      ...deckProps
+    });
   });
 });

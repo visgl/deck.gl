@@ -9,6 +9,7 @@ import {_ComponentState as ComponentState, _Component as Component} from '@deck.
 import {device} from '@deck.gl/test-utils/vitest';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -190,7 +191,7 @@ test('ComponentState#asynchronous async props', async () => {
   ]);
 });
 
-test('ComponentState#async props with transform', async () => {
+webglTest('ComponentState#async props with transform', async () => {
   const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];

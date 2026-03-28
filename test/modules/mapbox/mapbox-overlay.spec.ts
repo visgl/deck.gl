@@ -7,14 +7,25 @@ import {test, expect} from 'vitest';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
 import {DEFAULT_PARAMETERS} from './fixtures';
 
+const webglTest = device.type === 'webgl' ? test : test.skip;
+
 function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => {
     setTimeout(resolve, milliseconds);
+  });
+}
+
+function waitForRender(map: MockMapboxMap, callback: () => void | Promise<void>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    map.once('render', () => {
+      Promise.resolve().then(callback).then(resolve, reject);
+    });
   });
 }
 
@@ -29,12 +40,13 @@ class TestScatterplotLayer extends ScatterplotLayer {
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
-test('MapboxOverlay#overlaid', () => {
+test('MapboxOverlay#overlaid', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
   });
   const overlay = new MapboxOverlay({
+    device,
     layers: [new ScatterplotLayer()]
   });
 
@@ -67,10 +79,7 @@ test('MapboxOverlay#overlaid', () => {
     layers: [new ScatterplotLayer()]
   });
 
-  map.setCenter({lng: 0.45, lat: 51.47});
-  map.setZoom(4);
-  map.triggerRepaint();
-  map.once('render', () => {
+  const renderPromise = waitForRender(map, () => {
     expect(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
@@ -88,14 +97,18 @@ test('MapboxOverlay#overlaid', () => {
 
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.setCenter({lng: 0.45, lat: 51.47});
+  map.setZoom(4);
+  map.triggerRepaint();
+  await renderPromise;
 });
 
-test('MapboxOverlay#overlaidNoIntitalLayers', () => {
+test('MapboxOverlay#overlaidNoIntitalLayers', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
   });
-  const overlay = new MapboxOverlay({});
+  const overlay = new MapboxOverlay({device});
 
   map.addControl(overlay);
 
@@ -128,10 +141,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', () => {
     layers: [new ScatterplotLayer()]
   });
 
-  map.setCenter({lng: 0.45, lat: 51.47});
-  map.setZoom(4);
-  map.triggerRepaint();
-  map.once('render', () => {
+  const renderPromise = waitForRender(map, () => {
     expect(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
@@ -152,9 +162,13 @@ test('MapboxOverlay#overlaidNoIntitalLayers', () => {
 
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.setCenter({lng: 0.45, lat: 51.47});
+  map.setZoom(4);
+  map.triggerRepaint();
+  await renderPromise;
 });
 
-test('MapboxOverlay#interleaved', () => {
+webglTest('MapboxOverlay#interleaved', async () => {
   let drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {
     drawLog.push(layer.id);
@@ -178,11 +192,7 @@ test('MapboxOverlay#interleaved', () => {
     useDevicePixels: 1
   });
 
-  map.addControl(overlay);
-
-  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
-
-  map.once('render', async () => {
+  const renderPromise = waitForRender(map, async () => {
     const VIEW_STATE = {
       longitude: -122.45,
       latitude: 37.78,
@@ -235,9 +245,13 @@ test('MapboxOverlay#interleaved', () => {
     map.removeControl(overlay);
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  await renderPromise;
 });
 
-test('MapboxOverlay#interleaved#remove and add', () => {
+webglTest('MapboxOverlay#interleaved#remove and add', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -265,7 +279,7 @@ test('MapboxOverlay#interleaved#remove and add', () => {
   expect(deck.animationLoop, 'Deck instance is finalized').toBeFalsy();
 });
 
-test('MapboxOverlay#interleavedNoInitialLayers', () => {
+webglTest('MapboxOverlay#interleavedNoInitialLayers', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -275,11 +289,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', () => {
     useDevicePixels: false
   });
 
-  map.addControl(overlay);
-
-  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
-
-  map.once('render', async () => {
+  const renderPromise = waitForRender(map, async () => {
     expect(overlay._deck.props.layers.length, 'Layers are empty').toBe(0);
     expect('layers' in overlay._props, 'Overlay layers arent set').toBeFalsy();
 
@@ -317,9 +327,13 @@ test('MapboxOverlay#interleavedNoInitialLayers', () => {
     map.removeControl(overlay);
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  await renderPromise;
 });
 
-test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', () => {
+webglTest('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -329,12 +343,7 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', () => {
     layers: [new ScatterplotLayer({id: 'poi'})]
   });
 
-  map.addControl(overlay);
-
-  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
-  expect('move' in map._listeners, 'No move listeners initially').toBeFalsy();
-
-  map.once('render', () => {
+  const renderPromise = waitForRender(map, () => {
     expect(
       map._listeners['move'].length === 1,
       'One move listener attached by overlay'
@@ -352,6 +361,11 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', () => {
     map.removeControl(overlay);
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  expect('move' in map._listeners, 'No move listeners initially').toBeFalsy();
+  await renderPromise;
 });
 
 const PROJECTION_TEST_CASES = [
@@ -361,7 +375,7 @@ const PROJECTION_TEST_CASES = [
 ];
 
 for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
-  test(`MapboxOverlay#${projection} projection view selection`, () => {
+  webglTest(`MapboxOverlay#${projection} projection view selection`, async () => {
     const map = new MockMapboxMap({
       center: {lng: -122.45, lat: 37.78},
       zoom: 14,
@@ -373,11 +387,7 @@ for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
       layers: [new ScatterplotLayer({id: 'test-layer'})]
     });
 
-    map.addControl(overlay);
-
-    expect(overlay._deck, 'Deck instance is created').toBeTruthy();
-
-    map.on('render', () => {
+    const renderPromise = waitForRender(map, () => {
       const mapboxView = overlay._deck.props.views;
       expect(
         mapboxView instanceof ExpectedView,
@@ -387,10 +397,14 @@ for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
       map.removeControl(overlay);
       expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
     });
+    map.addControl(overlay);
+
+    expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+    await renderPromise;
   });
 }
 
-test('MapboxOverlay#renderLayersInGroups - constructor', () => {
+webglTest('MapboxOverlay#renderLayersInGroups - constructor', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14,
@@ -408,12 +422,7 @@ test('MapboxOverlay#renderLayersInGroups - constructor', () => {
     ]
   });
 
-  map.addControl(overlay);
-
-  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
-  expect(overlay._renderLayersInGroups, '_renderLayersInGroups option is set').toBeTruthy();
-
-  map.once('render', async () => {
+  const renderPromise = waitForRender(map, async () => {
     await sleep(100);
 
     const groupId = 'deck-layer-group-before:park';
@@ -424,9 +433,14 @@ test('MapboxOverlay#renderLayersInGroups - constructor', () => {
     map.removeControl(overlay);
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  expect(overlay._renderLayersInGroups, '_renderLayersInGroups option is set').toBeTruthy();
+  await renderPromise;
 });
 
-test('MapboxOverlay#renderLayersInGroups - setProps', () => {
+webglTest('MapboxOverlay#renderLayersInGroups - setProps', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14,
@@ -441,9 +455,7 @@ test('MapboxOverlay#renderLayersInGroups - setProps', () => {
     layers: [new ScatterplotLayer({id: 'poi', beforeId: 'park'})]
   });
 
-  map.addControl(overlay);
-
-  map.once('render', async () => {
+  const renderPromise = waitForRender(map, async () => {
     await sleep(100);
 
     const parkGroup = 'deck-layer-group-before:park';
@@ -472,4 +484,6 @@ test('MapboxOverlay#renderLayersInGroups - setProps', () => {
     map.removeControl(overlay);
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+  await renderPromise;
 });

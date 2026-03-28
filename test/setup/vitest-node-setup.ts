@@ -7,8 +7,9 @@ import {registerTypedArrayEquality} from './typed-array-equality';
 // Register custom equality tester for typed arrays (tape compatibility)
 registerTypedArrayEquality();
 
-// Polyfill for loaders
-import '@loaders.gl/polyfills';
+// loaders.gl currently publishes an ESM entry that imports some node-only files
+// without the `.js` extension. Use the CJS build in Vitest node mode.
+import '../../node_modules/@loaders.gl/polyfills/dist/index.cjs';
 
 // Polyfill with JSDOM (same as current test/node.ts)
 import {JSDOM} from 'jsdom';

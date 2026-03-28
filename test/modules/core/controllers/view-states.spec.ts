@@ -203,9 +203,7 @@ test('OrbitViewState', () => {
   });
 
   const transitionViewportProps = viewState2.shortestPathFrom(viewState);
-  expect(transitionViewportProps.rotationOrbit, 'found shortest path for rotationOrbit').toBe(
-    -240
-  );
+  expect(transitionViewportProps.rotationOrbit, 'found shortest path for rotationOrbit').toBe(-240);
 
   viewState = new OrbitViewState({
     width: 800,

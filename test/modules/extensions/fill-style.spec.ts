@@ -5,16 +5,17 @@
 import {test, expect} from 'vitest';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
+import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const FILL_PATTERN_ATLAS = new Uint8Array(4);
 const FILL_PATTERN_MAPPING = {
   pattern: {x: 0, y: 0, width: 1, height: 1}
 };
 
-test('FillStyleExtension#PolygonLayer', () => {
+webglTest('FillStyleExtension#PolygonLayer', () => {
   const testCases = [
     {
       props: {
