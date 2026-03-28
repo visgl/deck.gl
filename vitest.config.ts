@@ -181,7 +181,14 @@ export default defineConfig({
         test: {
           name: 'headless',
           include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          exclude: [
+            ...excludedTests,
+            'test/modules/**/*.node.spec.ts',
+            // Temporarily exclude the hover interaction test from headless CI.
+            // It is still covered by the `render` project, but the headless
+            // Playwright path intermittently fails to deliver the hover event.
+            'test/interaction/picking.spec.ts'
+          ],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
