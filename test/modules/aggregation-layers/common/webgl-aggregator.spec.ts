@@ -11,7 +11,9 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {IncomeSurvey} from './data-sample';
 import {getResourceCounts, binaryAttributeToArray} from './test-utils';
 
-test('WebGLAggregator#resources', () => {
+const webglTest =
+  device.type === 'webgl' && WebGLAggregator.isSupported(device) ? test : test.skip;
+
 // luma.gl v9.3 caches GPU resources, so global resource counts no longer
 // reliably return to the exact pre-test baseline after destroy().
 test.skip('WebGLAggregator#resources', () => {
@@ -92,7 +94,7 @@ const binOptionsUniforms = {
   uniformTypes: {ageGroupSize: 'f32'}
 } as const satisfies ShaderModule<BinOptions>;
 
-test('WebGLAggregator#1D', () => {
+webglTest('WebGLAggregator#1D', () => {
   // An aggregator that calculates:
   // [0] total count [1] average income [2] highest education, grouped by age
   const aggregator = new WebGLAggregator(device, {
@@ -196,7 +198,7 @@ test('WebGLAggregator#1D', () => {
   aggregator.destroy();
 });
 
-test('WebGLAggregator#2D', () => {
+webglTest('WebGLAggregator#2D', () => {
   // An aggregator that calculates:
   // [0] total count [1] average income, grouped by [age, education]
   const aggregator = new WebGLAggregator(device, {
@@ -298,7 +300,7 @@ test('WebGLAggregator#2D', () => {
   aggregator.destroy();
 });
 
-test('CPUAggregator#setNeedsUpdate', () => {
+webglTest('CPUAggregator#setNeedsUpdate', () => {
   const aggregator = new WebGLAggregator(device, {
     dimensions: 1,
     channelCount: 2,

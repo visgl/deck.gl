@@ -123,8 +123,9 @@ test('MapboxLayer#external Deck multiple views supplied', async () => {
   getDeckInstance({map, deck});
 
   const layerDefaultView = new MapboxLayer({id: 'scatterplot-map'});
+  const renderPromise = map.once('render');
   map.addLayer(layerDefaultView);
-  (map as any)._render();
+  await renderPromise;
 
   expect((map as any)._renderError, 'render should not throw').toBeFalsy();
   expect(drawLog, 'layers drawn into the correct views').toEqual([
@@ -171,8 +172,9 @@ test('MapboxLayer#external Deck custom views', async () => {
   // Initialize deck on the map (simulates MapboxOverlay behavior)
   getDeckInstance({map, deck});
 
+  const renderPromise = map.once('render');
   map.addLayer(new MapboxLayer({id: 'scatterplot'}));
-  (map as any)._render();
+  await renderPromise;
 
   expect((map as any)._renderError, 'render should not throw').toBeFalsy();
   expect(drawLog, 'layer is drawn to both views').toEqual([
