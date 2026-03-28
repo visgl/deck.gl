@@ -39,6 +39,10 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `dragMode` - default `'pan'` (drag to pan, shift/ctrl + drag to rotate)
 - `keyboard` - arrow keys to pan, arrow keys with shift/ctrl down to rotate, +/- to zoom
 - `normalize` - normalize viewport props to fit map height into viewport. Default `true`
+- `rotationPivot` (string, optional) - Determines the pivot point used when rotating the map. Default `'center'`. Supported values:
+  - `'center'` - Rotate around the center of the viewport.
+  - `'2d'` - Rotate around the pointer position projected onto the ground plane (z=0).
+  - `'3d'` - Rotate around the picked object under the pointer. Falls back to `'center'` behavior if no pickable object is found.
 
 ## Custom MapController
 

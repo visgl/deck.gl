@@ -66,7 +66,7 @@ test('WidgetManager#setProps', t => {
   t.is(widgetManager.getWidgets().length, 1, 'widget is added');
   t.ok(widgetA.isVisible, 'widget.onAdd is called');
   t.ok(
-    widgetManager.containers['__root'].contains(widgetA.rootElement),
+    widgetManager.containers['root'].contains(widgetA.rootElement),
     'widget UI is added to the container'
   );
   t.is(container.childElementCount, 1, 'widget container is added');
@@ -93,7 +93,7 @@ test('WidgetManager#setProps', t => {
   t.notOk(widgetA.rootElement, 'widget context is cleared');
   t.notOk(widgetA.isVisible, 'widget.onRemove is called');
   t.notOk(
-    widgetManager.containers['__root'].contains(elementA),
+    widgetManager.containers['root'].contains(elementA),
     'widget UI is removed from the container'
   );
 
@@ -171,7 +171,7 @@ test('WidgetManager#onRedraw#without viewId', t => {
   t.is(onViewportChangeCalledCount, 1, 'widget.onViewportChange called');
   t.is(onRedrawCalledCount, 1, 'widget.onRedraw called');
 
-  const container = widgetManager.containers['__root'];
+  const container = widgetManager.containers['root'];
   t.is(container.style.left, '0px', 'container left is set');
   t.is(container.style.top, '0px', 'container top is set');
   t.is(container.style.width, '600px', 'container width is set');
@@ -332,6 +332,48 @@ test('WidgetManager#onRedraw#viewId', t => {
   });
   t.is(onViewportChangeCalledCount, 2, 'widget.onViewportChange not called');
   t.is(onRedrawCalledCount, 2, 'widget.onRedraw not called');
+
+  widgetManager.finalize();
+  t.end();
+});
+
+test('WidgetManager#onRedraw#container', t => {
+  const parentElement = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
+
+  const targetElement = document.createElement('div');
+  const widgetA = new TestWidget({id: 'A', _container: targetElement});
+  widgetManager.addDefault(widgetA);
+
+  t.is(widgetA.rootElement?.parentNode, targetElement, 'widget is attached to external container');
+  t.is(
+    Object.keys(widgetManager.containers).length,
+    0,
+    'WidgetManager does not create default container'
+  );
+
+  const widgetB = new TestWidget({id: 'B', placement: 'bottom-right', _container: 'root'});
+  widgetManager.addDefault(widgetB);
+
+  widgetManager.onRedraw({
+    viewports: [
+      new WebMercatorViewport({
+        id: 'map',
+        width: 600,
+        height: 400,
+        longitude: 0,
+        latitude: 0,
+        zoom: 4
+      })
+    ],
+    layers: []
+  });
+
+  const container = widgetManager.containers['root'];
+  t.is(container.style.left, '0px', 'container left is set');
+  t.is(container.style.top, '0px', 'container top is set');
+  t.is(container.style.width, '600px', 'container width is set');
+  t.is(container.style.height, '400px', 'container height is set');
 
   widgetManager.finalize();
   t.end();

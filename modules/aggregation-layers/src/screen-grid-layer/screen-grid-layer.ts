@@ -55,7 +55,7 @@ export type _ScreenGridLayerProps<DataT> = {
    * Color scale input domain. The color scale maps continues numeric domain into discrete color range.
    * @default [1, max(weight)]
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Specified as an array of colors [color1, color2, ...].

@@ -12,7 +12,7 @@ import {
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
 
-import testController from './test-controller';
+import testController, {createTestController} from './test-controller';
 
 test('MapController', async t => {
   await testController(t, MapView, {
@@ -76,7 +76,13 @@ test('OrthographicController', async t => {
       zoom: 1
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'multipan']
+    [
+      'pan#function key',
+      'pan#function key#disabled',
+      'multipan',
+      'multipan#disabled',
+      'keyboard#function key'
+    ]
   );
 
   t.end();
@@ -91,44 +97,62 @@ test('OrthographicController#2d zoom', async t => {
       zoom: [1, 2]
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'multipan']
+    [
+      'pan#function key',
+      'pan#function key#disabled',
+      'multipan',
+      'multipan#disabled',
+      'keyboard#function key'
+    ]
   );
 
   t.end();
 });
 
-test('OrthographicController scroll zoom responds without transition lag', t => {
-  const timeline = new Timeline();
-  const view = new OrthographicView({controller: true});
-  const baseProps = {
-    id: 'test-view',
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    target: [0, 0, 0],
-    zoom: 0,
-    scrollZoom: true
-  };
-  const controllerProps = {...view.controller, ...baseProps};
-  const ControllerClass = controllerProps.type;
-
-  let currentProps = {...controllerProps};
-  let lastViewState = currentProps;
-
-  const controller = new ControllerClass({
-    timeline,
-    onViewStateChange: ({viewState}) => {
-      lastViewState = viewState;
-      currentProps = {...currentProps, ...viewState};
-      controller.setProps(currentProps);
+test('OrthographicController keyboard navigation with padding', async t => {
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        keyboard: {moveSpeed: 10}
+      },
+      padding: {left: 50, top: 20}
+    }),
+    initialViewState: {
+      target: [0, 0, 0],
+      zoom: 0
     },
-    onStateChange: () => {},
-    makeViewport: viewState =>
-      view.makeViewport({width: currentProps.width, height: currentProps.height, viewState})
+    onViewStateChange: ({viewState}) => {
+      viewState.transitionDuration = 0;
+      return viewState;
+    }
   });
+  controller.setProps({...controller.props, target: [0, 0, 0], zoom: 0});
 
-  controller.setProps(currentProps);
+  const keyboardEvent = {
+    type: 'keydown',
+    srcEvent: {preventDefault() {}, code: 'ArrowLeft'},
+    stopPropagation: () => {}
+  };
+
+  controller.handleEvent(keyboardEvent);
+  t.deepEqual(controller.props.target, [10, 0], 'Moved 10px left');
+
+  keyboardEvent.srcEvent.code = 'ArrowUp';
+  controller.handleEvent(keyboardEvent);
+  t.deepEqual(controller.props.target, [10, 10], 'Moved 10px up');
+
+  t.end();
+});
+
+test('OrthographicController scroll zoom responds without transition lag', t => {
+  const controller = createTestController({
+    view: new OrthographicView({controller: true, padding: {left: 50, top: 20}}),
+    initialViewState: {
+      target: [0, 0, 0],
+      zoom: 0,
+      scrollZoom: true
+    }
+  });
 
   const wheelEvent = {
     type: 'wheel',
@@ -146,12 +170,50 @@ test('OrthographicController scroll zoom responds without transition lag', t => 
   if (delta < 0 && scale !== 0) {
     scale = 1 / scale;
   }
-  const expectedZoom = baseProps.zoom + Math.log2(scale);
+  const expectedZoom = Math.log2(scale);
 
   t.ok(
-    Math.abs((lastViewState.zoom as number) - expectedZoom) < 1e-6,
+    Math.abs((controller.props.zoom as number) - expectedZoom) < 1e-6,
     'zoom level updates immediately when scroll zoom is not smooth'
   );
+
+  t.end();
+});
+
+test('OrthographicController scroll zoom resets isZooming state', t => {
+  const interactionStates: any[] = [];
+  const controller = createTestController({
+    view: new OrthographicView({controller: true, padding: {left: 50, top: 20}}),
+    initialViewState: {
+      target: [0, 0, 0],
+      zoom: 0,
+      scrollZoom: true
+    },
+    onStateChange: state => {
+      interactionStates.push({...state});
+    }
+  });
+
+  const wheelEvent = {
+    type: 'wheel',
+    offsetCenter: {x: 50, y: 50},
+    delta: -1,
+    srcEvent: {preventDefault() {}},
+    stopPropagation: () => {}
+  };
+
+  controller.handleEvent(wheelEvent as any);
+
+  // Verify we get exactly 2 state changes for non-smooth scroll zoom
+  t.is(interactionStates.length, 2, 'scroll zoom triggers exactly 2 state changes');
+
+  // Verify first state has isZooming: true
+  t.is(interactionStates[0].isZooming, true, 'isZooming is set to true at start');
+  t.is(interactionStates[0].isPanning, true, 'isPanning is set to true at start');
+
+  // Verify last state has isZooming: false
+  t.is(interactionStates[1].isZooming, false, 'isZooming is reset to false at end');
+  t.is(interactionStates[1].isPanning, false, 'isPanning is reset to false at end');
 
   t.end();
 });

@@ -7,6 +7,7 @@ import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {IViewState} from './view-state';
 import {ConstructorOf} from '../types/types';
+import {deepEqual} from '../utils/deep-equal';
 
 import type Viewport from '../viewports/viewport';
 
@@ -65,6 +66,8 @@ export type ControllerOptions = {
   dragMode?: 'pan' | 'rotate';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
+  /** Bounding box of content that the controller is constrained in */
+  maxBounds?: [min: [number, number], max: [number, number]] | [min: [number, number, number], max: [number, number, number]] | null;
 };
 
 export type ControllerProps = {
@@ -92,6 +95,8 @@ export type InteractionState = {
   isRotating?: boolean;
   /** If the view is being zoomed, either from user input or transition */
   isZooming?: boolean;
+  /** World coordinate [lng, lat, altitude] of rotation pivot point when rotating */
+  rotationPivotPosition?: [number, number, number];
 }
 
 /** Parameters passed to the onViewStateChange callback */
@@ -119,7 +124,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected eventManager: EventManager;
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
-  protected makeViewport: (opts: Record<string, any>) => Viewport
+  protected makeViewport: (opts: Record<string, any>) => Viewport;
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -154,6 +160,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
     onStateChange: (state: InteractionState) => void;
+    pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
@@ -168,6 +175,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onViewStateChange = opts.onViewStateChange || (() => {});
     this.onStateChange = opts.onStateChange || (() => {});
     this.makeViewport = opts.makeViewport;
+    this.pickPosition = opts.pickPosition;
   }
 
   set events(customEvents) {
@@ -237,7 +245,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       ...this.props,
       ...this.state
     });
-    return this._controllerState ;
+    return this._controllerState;
   }
 
   getCenter(event: MjolnirGestureEvent | MjolnirWheelEvent) : [number, number] {
@@ -288,6 +296,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
+    const oldProps = this.props;
     this.props = props;
 
     if (!('transitionInterpolator' in props)) {
@@ -329,6 +338,19 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.touchZoom = touchZoom;
     this.touchRotate = touchRotate;
     this.keyboard = keyboard;
+
+    // Normalize view state if maxBounds is defined
+    const dimensionChanged = !oldProps || oldProps.height !== props.height || oldProps.width !== props.width || oldProps.maxBounds !== props.maxBounds;
+    if (dimensionChanged && props.maxBounds) {
+      // Dimensions changed, try re-normalize the props
+      const controllerState = new this.ControllerState({...props, makeViewport: this.makeViewport});
+      const normalizedProps = controllerState.getViewportProps();
+      const changed = Object.keys(normalizedProps).some(key => !deepEqual(normalizedProps[key], props[key], 1));
+      if (changed) {
+        // some props are updated after normalization
+        this.updateViewport(controllerState);
+      }
+    }
   }
 
   updateTransition() {
@@ -396,6 +418,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       // invertPan is replaced by props.dragMode, keeping for backward compatibility
       alternateMode = !alternateMode;
     }
+
     const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
       pos
     });
@@ -546,6 +569,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         isPanning: true
       }
     );
+
+    // When there's no transition (duration = 0), immediately reset interaction state
+    // since _onTransitionEnd callback won't fire
+    if (!smooth) {
+      this._setInteractionState({isZooming: false, isPanning: false});
+    }
     return true;
   }
 

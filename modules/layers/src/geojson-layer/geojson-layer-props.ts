@@ -104,12 +104,22 @@ export function createLayerPropsFromBinary(
   } as LayerData<any>;
   layerProps.lines._pathType = 'open';
 
+  const vertexCount = polygons.positions.value.length / polygons.positions.size;
+  const vertexValid = Array(vertexCount).fill(1);
+  for (const index of polygons.primitivePolygonIndices.value) {
+    vertexValid[index - 1] = 0;
+  }
+
   layerProps.polygons.data = {
     length: polygons.polygonIndices.value.length - 1,
     startIndices: polygons.polygonIndices.value,
     attributes: {
       ...polygons.attributes,
       getPolygon: polygons.positions,
+      instanceVertexValid: {
+        size: 1,
+        value: new Uint16Array(vertexValid)
+      },
       pickingColors: {
         size: 4,
         value: customPickingColors.polygons!

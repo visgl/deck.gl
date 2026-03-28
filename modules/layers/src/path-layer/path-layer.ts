@@ -95,7 +95,7 @@ type _PathLayerProps<DataT> = {
 
 export type PathLayerProps<DataT = unknown> = _PathLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<PathLayerProps> = {
   widthUnits: 'meters',

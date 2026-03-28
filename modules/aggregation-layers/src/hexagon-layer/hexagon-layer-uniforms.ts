@@ -15,11 +15,11 @@ uniform hexagonUniforms {
 `;
 
 export type HexagonProps = {
-  colorDomain: [number, number, number, number];
+  colorDomain: Readonly<[number, number, number, number]>;
   colorRange: Texture;
-  elevationDomain: [number, number, number, number];
-  elevationRange: [number, number];
-  originCommon: [number, number];
+  elevationDomain: Readonly<[number, number, number, number]>;
+  elevationRange: Readonly<[number, number]>;
+  originCommon: Readonly<[number, number]>;
 };
 
 export const hexagonUniforms = {

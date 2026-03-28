@@ -9,6 +9,7 @@ const uniformBlock = `\
 uniform iconUniforms {
   float sizeScale;
   vec2 iconsTextureDim;
+  float sizeBasis;
   float sizeMinPixels;
   float sizeMaxPixels;
   bool billboard;
@@ -24,6 +25,7 @@ type IconBindingProps = {
 type IconUniformProps = {
   sizeScale: number;
   iconsTextureDim: [number, number];
+  sizeBasis: number;
   sizeMinPixels: number;
   sizeMaxPixels: number;
   billboard: boolean;
@@ -40,6 +42,7 @@ export const iconUniforms = {
   uniformTypes: {
     sizeScale: 'f32',
     iconsTextureDim: 'vec2<f32>',
+    sizeBasis: 'f32',
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',
     billboard: 'f32',

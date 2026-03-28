@@ -47,8 +47,9 @@ void main(void) {
     icon.sizeMinPixels, icon.sizeMaxPixels
   );
 
-  // scale icon height to match instanceSize
-  float instanceScale = iconSize.y == 0.0 ? 0.0 : sizePixels / iconSize.y;
+  // Choose correct constraint based on the 'sizeBasis' value (0.0 = width, 1.0 = height)
+  float iconConstraint = icon.sizeBasis == 0.0 ? iconSize.x : iconSize.y;
+  float instanceScale = iconConstraint == 0.0 ? 0.0 : sizePixels / iconConstraint;
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
@@ -62,7 +63,6 @@ void main(void) {
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
-
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     DECKGL_FILTER_SIZE(offset_common, geometry);

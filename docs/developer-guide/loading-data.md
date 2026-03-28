@@ -20,17 +20,19 @@ All layers support a [loadOptions](../api-reference/core/layer.md#loadoptions) p
 
 In a production environment, deck.gl applications may need to load data from secure APIs that require special HTTP headers (such as `Authorization`) to be set.
 
-In order to access a secure API, the `loadOptions.fetch` option passes through additional parameters to [fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch), which deck.gl calls under the hood to load resources.
+In order to access a secure API, the `loadOptions.core.fetch` option passes through additional parameters to [fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch), which deck.gl calls under the hood to load resources.
 
 ```ts
 new ScatterplotLayer({
   data: 'https://secure-server.com/userActivity',
   loadOptions: {
-    fetch: {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
+    core: {
+      fetch: {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        }
       }
     }
   }
@@ -268,7 +270,7 @@ If the layer is used in an environment that does not support web workers, or you
 import {MVTLoader} from '@loaders.gl/mvt';
 new MVTLayer({
   loaders: [MVTLoader],
-  loadOptions: {worker: false}
+  loadOptions: {core: {worker: false}}
 });
 ```
 

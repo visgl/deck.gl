@@ -7,6 +7,7 @@ import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 
 export type CompassWidgetProps = WidgetProps & {
+  /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
   /** View to attach to and interact with. Required when using multiple views. */
   viewId?: string | null;
@@ -28,11 +29,10 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
 
   className = 'deck-widget-compass';
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: CompassWidgetProps = {}) {
-    super(props, CompassWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 
@@ -43,7 +43,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
+    const viewId = this.viewId || Object.values(this.viewports)[0]?.id;
     const widgetViewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(widgetViewport);
 
@@ -96,17 +96,17 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   }
 
   handleCompassReset(viewport: Viewport) {
-    const viewId = this.viewId || viewport.id || 'default-view';
+    const viewId = this.viewId || viewport.id;
     if (viewport instanceof WebMercatorViewport) {
+      const viewState = this.getViewState(viewId);
       const nextViewState = {
-        ...viewport,
+        ...viewState,
         bearing: 0,
         ...(this.getRotation(viewport)[0] === 0 ? {pitch: 0} : {}),
         transitionDuration: this.props.transitionDuration,
         transitionInterpolator: new FlyToInterpolator()
       };
-      // @ts-ignore Using private method temporary until there's a public one
-      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+      this.setViewState(viewId, nextViewState);
     }
   }
 }

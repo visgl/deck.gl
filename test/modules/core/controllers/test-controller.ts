@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Timeline} from '@luma.gl/engine';
+import type {View} from '@deck.gl/core';
 
 function makeEvents(events, opts = {}) {
   return events.map((type, i) => makeEvent(type, opts, i));
@@ -188,15 +189,23 @@ const TEST_CASES = [
         .concat(makeEvents(['keydown'], {code: 'Equal'}))
         .concat(makeEvents(['keydown'], {code: 'Equal', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowLeft'}))
-        .concat(makeEvents(['keydown'], {code: 'ArrowLeft', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowUp'}))
-        .concat(makeEvents(['keydown'], {code: 'ArrowUp', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowRight'}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowDown'})),
+    viewStateChanges: 8,
+    interactionStates: 2
+  },
+  {
+    title: 'keyboard#function key',
+    props: {},
+    events: () =>
+      makeEvents(['keydown'], {code: 'Minus'})
+        .concat(makeEvents(['keydown'], {code: 'ArrowLeft', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowUp', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowRight', shiftKey: true}))
-        .concat(makeEvents(['keydown'], {code: 'ArrowDown'}))
         .concat(makeEvents(['keydown'], {code: 'ArrowDown', shiftKey: true})),
-    viewStateChanges: 12,
-    interactionStates: 3
+    viewStateChanges: 5,
+    interactionStates: 2
   },
   {
     title: 'keyboard#disabled',
@@ -206,6 +215,47 @@ const TEST_CASES = [
     interactionStates: 0
   }
 ];
+
+export function createTestController({
+  view,
+  initialViewState = {},
+  onViewStateChange,
+  onStateChange
+}: {
+  view: View;
+  initialViewState?: any;
+  onViewStateChange?: (params: any) => void;
+  onStateChange?: (newState: any) => void;
+}) {
+  const timeline = new Timeline();
+  const baseProps = {
+    id: 'test-view',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    ...initialViewState
+  };
+  let currentProps = {...view.controller, ...baseProps};
+  const ControllerClass = currentProps.type;
+
+  const controller = new ControllerClass({
+    timeline,
+    onViewStateChange: params => {
+      const viewState = onViewStateChange?.(params) ?? params.viewState;
+      currentProps = {...currentProps, ...viewState};
+      controller.setProps(currentProps);
+    },
+    onStateChange: newState => {
+      onStateChange?.(newState);
+    },
+    makeViewport: viewState =>
+      view.makeViewport({width: currentProps.width, height: currentProps.height, viewState})
+  });
+
+  controller.setProps(currentProps);
+  return controller;
+}
 
 export default async function testController(t, ViewClass, defaultProps, blackList = []) {
   const timeline = new Timeline();
