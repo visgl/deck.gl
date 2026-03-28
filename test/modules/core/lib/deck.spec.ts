@@ -39,7 +39,13 @@ function createPointPickResult(props = {}) {
 
 async function waitForRender(deck: Deck): Promise<void> {
   await new Promise<void>(resolve => {
-    deck.setProps({onAfterRender: resolve});
+    const onAfterRender = deck.props.onAfterRender;
+    deck.setProps({
+      onAfterRender: (...args) => {
+        onAfterRender?.(...args);
+        resolve();
+      }
+    });
   });
 }
 
@@ -174,8 +180,6 @@ test('Deck#rendering, picking, logging', t => {
 });
 
 test('Deck#async picking', async t => {
-  let rendered = false;
-
   const deck = new Deck({
     device,
     width: 1,
@@ -194,17 +198,11 @@ test('Deck#async picking', async t => {
         pickable: true
       })
     ],
-
-    onAfterRender: () => {
-      rendered = true;
-    }
+    onAfterRender: () => {}
   });
 
-  // Wait for initial render
-  await new Promise<void>(resolve => {
-    deck.setProps({onAfterRender: resolve});
-  });
-  t.ok(rendered, 'Deck rendered');
+  await waitForRender(deck);
+  t.pass('Deck rendered');
 
   const info = await deck.pickObjectAsync({x: 0, y: 0});
   t.is(info && info.index, 1, 'Async picked object');
