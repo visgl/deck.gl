@@ -259,38 +259,38 @@ export function createTestController({
 }
 
 export default async function testController(ViewClass, defaultProps, blackList = []) {
-  const timeline = new Timeline();
   const view = new ViewClass({controller: true});
   const baseProps = {...BASE_PROPS, ...view.controller, ...defaultProps};
-  let onViewStateChangeCalled = 0;
-  const affectedStates = new Set();
-  let controllerProps = null;
   const ControllerClass = baseProps.type;
-  const controller = new ControllerClass({
-    timeline,
-    onViewStateChange: ({viewState, interactionState}) => {
-      if (!interactionState.inTransition) {
-        onViewStateChangeCalled++;
-      }
-      controllerProps = {...controllerProps, ...viewState};
-      controller.setProps(controllerProps);
-    },
-    onStateChange: state => {
-      for (const key in state) {
-        if (state[key] && key.startsWith('is')) {
-          affectedStates.add(key);
-        }
-      }
-    },
-    makeViewport: viewState =>
-      view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
-  });
-  controller.setProps(baseProps);
 
   for (const testCase of TEST_CASES) {
     if (blackList.includes(testCase.title)) {
       continue; // eslint-disable-line
     }
+    const timeline = new Timeline();
+    const affectedStates = new Set();
+    let onViewStateChangeCalled = 0;
+    let controllerProps = {...baseProps};
+    const controller = new ControllerClass({
+      timeline,
+      onViewStateChange: ({viewState, interactionState}) => {
+        if (!interactionState.inTransition) {
+          onViewStateChangeCalled++;
+        }
+        controllerProps = {...controllerProps, ...viewState};
+        controller.setProps(controllerProps);
+      },
+      onStateChange: state => {
+        for (const key in state) {
+          if (state[key] && key.startsWith('is')) {
+            affectedStates.add(key);
+          }
+        }
+      },
+      makeViewport: viewState =>
+        view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
+    });
+    controller.setProps(controllerProps);
     onViewStateChangeCalled = 0;
     affectedStates.clear();
     controllerProps = {...baseProps, ...testCase.props};
@@ -303,6 +303,8 @@ export default async function testController(ViewClass, defaultProps, blackList 
     expect(affectedStates.size, `${testCase.title} interaction state updated`).toBe(
       testCase.interactionStates
     );
+
+    controller.finalize();
   }
 }
 
