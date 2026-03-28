@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {BASEMAP, _MapLibreBasemap as MapLibreBasemap} from '@deck.gl/carto';
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
 import {fetchBasemapProps} from '@deck.gl/carto';
@@ -47,32 +47,27 @@ async function responseFunc(url: string) {
     };
   }
 }
-test('fetchBasemapProps#carto - no filters', async t =>
+test('fetchBasemapProps#carto - no filters', async () =>
   withMockFetchMapsV3(async calls => {
-    t.equals(calls.length, 0, '0 initial calls');
+    expect(calls.length, '0 initial calls').toBe(0);
 
     const r = await fetchBasemapProps({config: mockedMapConfig});
-    t.equals(calls.length, 0, 'no style loaded, when there are no filters');
-    t.deepEquals(
-      r,
-      {
-        type: 'maplibre',
-        props: {
-          style: BASEMAP.POSITRON,
-          center: [-122.0312, 33.3232],
-          zoom: 5,
-          pitch: 0,
-          bearing: 0
-        },
-        visibleLayerGroups: {},
-        rawStyle: BASEMAP.POSITRON
+    expect(calls.length, 'no style loaded, when there are no filters').toBe(0);
+    expect(r, 'style is just positron URL').toEqual({
+      type: 'maplibre',
+      props: {
+        style: BASEMAP.POSITRON,
+        center: [-122.0312, 33.3232],
+        zoom: 5,
+        pitch: 0,
+        bearing: 0
       },
-      'style is just positron URL'
-    );
-    t.end();
+      visibleLayerGroups: {},
+      rawStyle: BASEMAP.POSITRON
+    });
   }, responseFunc));
 
-test('fetchBasemapProps#carto - with filters', async t =>
+test('fetchBasemapProps#carto - with filters', async () =>
   withMockFetchMapsV3(async calls => {
     const visibleLayerGroups = {label: false, road: true, border: true, water: true};
     const r = await fetchBasemapProps({
@@ -84,24 +79,19 @@ test('fetchBasemapProps#carto - with filters', async t =>
         }
       }
     });
-    t.equals(calls.length, 1, 'should call fetch only once');
-    t.equals(calls[0].url, BASEMAP.VOYAGER, 'should request voyager style');
-    t.equals(r.type, 'maplibre', 'proper basemap type is returned');
+    expect(calls.length, 'should call fetch only once').toBe(1);
+    expect(calls[0].url, 'should request voyager style').toBe(BASEMAP.VOYAGER);
+    expect(r.type, 'proper basemap type is returned').toBe('maplibre');
     const r2 = r as MapLibreBasemap;
-    t.equals(r2.rawStyle, mockedCartoStyle, 'raw style is returned');
-    t.deepEquals(
-      r2.props.style,
-      {
-        ...mockedCartoStyle,
-        layers: mockedCartoStyle.layers.filter(l => l.id !== 'label')
-      },
-      'actual style is loaded with layers filtered-out'
-    );
-    t.deepEquals(r2.visibleLayerGroups, visibleLayerGroups, 'visibleLayerGroups are passed');
-    t.end();
+    expect(r2.rawStyle, 'raw style is returned').toBe(mockedCartoStyle);
+    expect(r2.props.style, 'actual style is loaded with layers filtered-out').toEqual({
+      ...mockedCartoStyle,
+      layers: mockedCartoStyle.layers.filter(l => l.id !== 'label')
+    });
+    expect(r2.visibleLayerGroups, 'visibleLayerGroups are passed').toEqual(visibleLayerGroups);
   }, responseFunc));
 
-test('fetchBasemapProps#custom', async t =>
+test('fetchBasemapProps#custom', async () =>
   withMockFetchMapsV3(async calls => {
     const r = await fetchBasemapProps({
       config: {
@@ -118,26 +108,21 @@ test('fetchBasemapProps#custom', async t =>
         }
       }
     });
-    t.equals(calls.length, 0, `shouldn't make any fetch requests`);
-    t.deepEquals(
-      r,
-      {
-        type: 'maplibre',
-        props: {
-          style: 'http://example.com/style.json',
-          center: [-122.0312, 33.3232],
-          zoom: 5,
-          pitch: 0,
-          bearing: 0
-        },
-        attribution: 'custom attribution'
+    expect(calls.length, `shouldn't make any fetch requests`).toBe(0);
+    expect(r, 'should return proper basemap settings').toEqual({
+      type: 'maplibre',
+      props: {
+        style: 'http://example.com/style.json',
+        center: [-122.0312, 33.3232],
+        zoom: 5,
+        pitch: 0,
+        bearing: 0
       },
-      'should return proper basemap settings'
-    );
-    t.end();
+      attribution: 'custom attribution'
+    });
   }, responseFunc));
 
-test('fetchBasemapProps#google', async t =>
+test('fetchBasemapProps#google', async () =>
   withMockFetchMapsV3(async calls => {
     const r = await fetchBasemapProps({
       config: {
@@ -148,29 +133,24 @@ test('fetchBasemapProps#google', async t =>
       }
     });
 
-    t.equals(calls.length, 0, 'should fetch anything');
-    t.deepEquals(
-      r,
-      {
-        type: 'google-maps',
-        props: {
-          mapTypeId: 'roadmap',
-          mapId: '885caf1e15bb9ef2',
-          center: {
-            lat: 33.3232,
-            lng: -122.0312
-          },
-          zoom: 6,
-          tilt: 0,
-          heading: 0
-        }
-      },
-      'should return proper google map props'
-    );
-    t.end();
+    expect(calls.length, 'should fetch anything').toBe(0);
+    expect(r, 'should return proper google map props').toEqual({
+      type: 'google-maps',
+      props: {
+        mapTypeId: 'roadmap',
+        mapId: '885caf1e15bb9ef2',
+        center: {
+          lat: 33.3232,
+          lng: -122.0312
+        },
+        zoom: 6,
+        tilt: 0,
+        heading: 0
+      }
+    });
   }, responseFunc));
 
-test('fetchBasemapProps#carto - error handling', async t =>
+test('fetchBasemapProps#carto - error handling', async () =>
   withMockFetchMapsV3(async calls => {
     const expectedError = await fetchBasemapProps({
       config: {
@@ -182,13 +162,10 @@ test('fetchBasemapProps#carto - error handling', async t =>
       }
     }).catch(error => error);
 
-    t.equals(calls.length, 1, 'should call fetch only once');
-    t.equals(calls[0].url, BASEMAP.DARK_MATTER, 'should request proper style URL');
-    t.true(expectedError instanceof CartoAPIError, 'error is CartoAPIError');
-    t.equals(
-      expectedError.errorContext.requestType,
-      'Basemap style',
-      'proper requestType in error'
+    expect(calls.length, 'should call fetch only once').toBe(1);
+    expect(calls[0].url, 'should request proper style URL').toBe(BASEMAP.DARK_MATTER);
+    expect(expectedError instanceof CartoAPIError, 'error is CartoAPIError').toBeTruthy();
+    expect(expectedError.errorContext.requestType, 'proper requestType in error').toBe(
+      'Basemap style'
     );
-    t.end();
   }, responseFunc));

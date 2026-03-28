@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
 
-test('TextLayer - fontAtlasCacheLimit', t => {
+test('TextLayer - fontAtlasCacheLimit', () => {
   TextLayer.fontAtlasCacheLimit = 10;
-  t.ok(true, 'fontAtlasCacheLimit is set without error');
-  t.end();
+  expect(true, 'fontAtlasCacheLimit is set without error').toBeTruthy();
 });
 
-test('TextLayer - fontAtlasCacheLimit - null argument', t => {
+test('TextLayer - fontAtlasCacheLimit - null argument', () => {
   let didThrow = false;
 
   try {
@@ -21,11 +20,10 @@ test('TextLayer - fontAtlasCacheLimit - null argument', t => {
     didThrow = true;
   }
 
-  t.ok(didThrow, 'exceptioh was thrown when null argument passed');
-  t.end();
+  expect(didThrow, 'exceptioh was thrown when null argument passed').toBeTruthy();
 });
 
-test('TextLayer - fontAtlasCacheLimit - invalid type argument', t => {
+test('TextLayer - fontAtlasCacheLimit - invalid type argument', () => {
   let didThrow = false;
 
   try {
@@ -34,11 +32,13 @@ test('TextLayer - fontAtlasCacheLimit - invalid type argument', t => {
     didThrow = true;
   }
 
-  t.ok(didThrow, 'exceptioh was thrown an exception when argument other than string passed');
-  t.end();
+  expect(
+    didThrow,
+    'exceptioh was thrown an exception when argument other than string passed'
+  ).toBeTruthy();
 });
 
-test('TextLayer - fontAtlasCacheLimit - less than hard limit', t => {
+test('TextLayer - fontAtlasCacheLimit - less than hard limit', () => {
   let didThrow = false;
 
   try {
@@ -47,6 +47,8 @@ test('TextLayer - fontAtlasCacheLimit - less than hard limit', t => {
     didThrow = true;
   }
 
-  t.ok(didThrow, 'exceptioh was thrown an exception when a limit less than hard limit passed');
-  t.end();
+  expect(
+    didThrow,
+    'exceptioh was thrown an exception when a limit less than hard limit passed'
+  ).toBeTruthy();
 });

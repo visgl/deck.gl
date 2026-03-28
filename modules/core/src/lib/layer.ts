@@ -1156,9 +1156,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Update composite flags
     const propsOrDataChanged = Boolean(
       changeFlags.dataChanged ||
-        changeFlags.updateTriggersChanged ||
-        changeFlags.propsChanged ||
-        changeFlags.extensionsChanged
+      changeFlags.updateTriggersChanged ||
+      changeFlags.propsChanged ||
+      changeFlags.extensionsChanged
     );
     changeFlags.propsOrDataChanged = propsOrDataChanged;
     changeFlags.somethingChanged =

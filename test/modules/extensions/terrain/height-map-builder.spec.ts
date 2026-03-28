@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {LifecycleTester} from '../utils';
 
-test('HeightMapBuilder#diffing', async t => {
+test('HeightMapBuilder#diffing', async () => {
   const lifecycle = new LifecycleTester();
   let viewport = new WebMercatorViewport({
     width: 400,
@@ -23,11 +23,11 @@ test('HeightMapBuilder#diffing', async t => {
 
   const heightMap = new HeightMapBuilder(terrainLayer.context.device);
 
-  t.notOk(
+  expect(
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
     'Height map should not require update'
-  );
-  t.notOk(heightMap.renderViewport, 'renderViewport is disabled');
+  ).toBeFalsy();
+  expect(heightMap.renderViewport, 'renderViewport is disabled').toBeFalsy();
 
   terrainLayer = new ScatterplotLayer({
     data: [
@@ -38,17 +38,17 @@ test('HeightMapBuilder#diffing', async t => {
   });
   await lifecycle.update({viewport, layers: [terrainLayer]});
 
-  t.ok(
+  expect(
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
     'Height map needs update (bounds changed)'
-  );
-  t.deepEqual(heightMap.bounds, [128, 192, 256, 256], 'Cartesian bounds');
-  t.ok(heightMap.renderViewport, 'renderViewport is populated');
+  ).toBeTruthy();
+  expect(heightMap.bounds, 'Cartesian bounds').toEqual([128, 192, 256, 256]);
+  expect(heightMap.renderViewport, 'renderViewport is populated').toBeTruthy();
 
-  t.notOk(
+  expect(
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
     'Height map should not require update'
-  );
+  ).toBeFalsy();
 
   viewport = new WebMercatorViewport({
     width: 400,
@@ -57,12 +57,11 @@ test('HeightMapBuilder#diffing', async t => {
     latitude: 0,
     zoom: 1
   });
-  t.ok(
+  expect(
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
     'Height map needs update (viewport changed)'
-  );
+  ).toBeTruthy();
 
   heightMap.delete();
   lifecycle.finalize();
-  t.end();
 });

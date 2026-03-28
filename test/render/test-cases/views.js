@@ -114,7 +114,7 @@ export default [
         }),
         new MVTLayer({
           id,
-          data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+          data: ['/test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
           maxZoom: 3,
           minZoom: 3,
           extent: [-180, -80, 180, 80],

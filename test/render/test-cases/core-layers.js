@@ -209,7 +209,7 @@ export default [
       new BitmapLayer({
         opacity: 0.8,
         bounds: [-122.45, 37.7, -122.35, 37.8],
-        image: './test/data/icon-atlas.png'
+        image: '/test/data/icon-atlas.png'
       })
     ],
     goldenImage: './test/render/golden-images/bitmap.png'
@@ -226,7 +226,7 @@ export default [
     layers: [
       new BitmapLayer({
         bounds: [-180, -90, 180, 90],
-        image: './test/data/world.jpg',
+        image: '/test/data/world.jpg',
         _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
       })
     ],
