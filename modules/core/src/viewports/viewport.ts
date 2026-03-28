@@ -408,9 +408,10 @@ export default class Viewport {
    *
    * @param {Array} coords - world coordinates
    * @param {Array} pixel - [x,y] coordinates on screen
+   * @param {Array} startPixel - [x,y] screen position where pan started (optional, for delta-based panning)
    * @return {Object} props of the new viewport
    */
-  panByPosition(coords: number[], pixel: number[]): any {
+  panByPosition(coords: number[], pixel: number[], startPixel?: number[]): any {
     return null;
   }
 

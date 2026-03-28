@@ -22,7 +22,7 @@ import type {
 } from '@deck.gl/core';
 import {Parameters} from '@luma.gl/core';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;

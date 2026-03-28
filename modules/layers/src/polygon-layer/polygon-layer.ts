@@ -198,8 +198,8 @@ type _PolygonLayerProps<DataT = unknown> = {
   material?: Material;
 };
 
-const defaultLineColor: [number, number, number, number] = [0, 0, 0, 255];
-const defaultFillColor: [number, number, number, number] = [0, 0, 0, 255];
+const defaultLineColor = [0, 0, 0, 255] as const;
+const defaultFillColor = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<PolygonLayerProps> = {
   stroked: true,

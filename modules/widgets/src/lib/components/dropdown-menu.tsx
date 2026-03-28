@@ -2,95 +2,112 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {type JSX} from 'preact';
+import {type JSX, type ComponentChild} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
+import {getCSSMask} from '../data-url';
+
+export type MenuItem =
+  | string
+  | {
+      value?: string;
+      label: string;
+      icon?: string;
+      onSelect?: () => void;
+    };
 
 export type DropdownMenuProps = {
-  menuItems: string[];
-  onSelect: (value: string) => void;
-  style?: JSX.CSSProperties;
+  menuItems: MenuItem[];
+  onSelect?: (value: string) => void;
+  style?: Partial<CSSStyleDeclaration>;
 };
+
+function getMenuItemValue(item: MenuItem): string | undefined {
+  return typeof item === 'string' ? item : item.value;
+}
+
+function getMenuItemLabel(item: MenuItem): string {
+  return typeof item === 'string' ? item : item.label;
+}
+
+function getMenuItemIcon(item: MenuItem): string | undefined {
+  return typeof item === 'string' ? undefined : item.icon;
+}
 
 export const DropdownMenu = (props: DropdownMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <SimpleMenu
+      {...props}
+      style={{...props.style, position: 'absolute'}}
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      trigger={
+        <button className="deck-widget-dropdown-button" onClick={() => setIsOpen(!isOpen)}>
+          <span className={`deck-widget-dropdown-icon ${isOpen ? 'open' : ''}`} />
+        </button>
+      }
+    />
+  );
+};
+
+export type SimpleMenuProps = DropdownMenuProps & {
+  trigger?: ComponentChild;
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export const SimpleMenu = (props: SimpleMenuProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setIsOpen(false);
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        props.onClose();
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const handleSelect = (value: string) => {
-    props.onSelect(value);
-    setIsOpen(false);
+  const handleSelect = (value: string | undefined, item: MenuItem) => {
+    if (value) {
+      if (typeof item === 'object') {
+        item.onSelect?.();
+      }
+      props.onSelect?.(value);
+      props.onClose();
+    }
   };
 
+  // Don't render anything if there are no menu items
+  if (props.menuItems.length === 0) {
+    return null;
+  }
+
   return (
-    <div
-      className="dropdown-container"
-      ref={dropdownRef}
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-        ...props.style
-      }}
-    >
-      <button
-        onClick={toggleDropdown}
-        style={{
-          width: '30px',
-          height: '30px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          background: '#fff',
-          cursor: 'pointer',
-          padding: 0
-        }}
-      >
-        ▼
-      </button>
-      {isOpen && (
-        <ul
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: '100%',
-            background: '#fff',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            listStyle: 'none',
-            padding: '4px 0',
-            margin: 0,
-            zIndex: 1000,
-            minWidth: '200px'
-          }}
-        >
-          {props.menuItems.map(item => (
-            <li
-              key={item}
-              onClick={() => handleSelect(item)}
-              style={{
-                padding: '4px 8px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {item}
-            </li>
-          ))}
+    <div className="deck-widget-dropdown-container" ref={dropdownRef}>
+      {props.trigger}
+      {props.isOpen && (
+        <ul className="deck-widget-dropdown-menu" style={props.style as JSX.CSSProperties}>
+          {props.menuItems.map((item, i) => {
+            const value = getMenuItemValue(item);
+            const icon = getMenuItemIcon(item);
+            return (
+              <li
+                className={`deck-widget-dropdown-item ${value ? '' : 'disabled'}`}
+                key={i}
+                onClick={() => handleSelect(value, item)}
+              >
+                {icon && (
+                  <span className="deck-widget-dropdown-item-icon" style={getCSSMask(icon)} />
+                )}
+                {getMenuItemLabel(item)}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

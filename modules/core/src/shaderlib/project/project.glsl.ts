@@ -265,6 +265,9 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 float project_size_to_pixel(float meters) {
   return project_size(meters) * project.scale;
 }
+vec2 project_size_to_pixel(vec2 meters) {
+  return project_size(meters) * project.scale;
+}
 float project_size_to_pixel(float size, int unit) {
   if (unit == UNIT_METERS) return project_size_to_pixel(size);
   if (unit == UNIT_COMMON) return size * project.scale;

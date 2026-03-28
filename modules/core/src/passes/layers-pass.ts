@@ -65,9 +65,14 @@ export type RenderStats = {
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
-  render(options: LayersPassRenderOptions): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+  render(options: LayersPassRenderOptions): void {
+    this._render(options);
+  }
+
+  protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    const canvasContext = this.device.canvasContext!;
+    const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
+    const [width, height] = canvasContext.getDrawingBufferSize();
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
@@ -85,7 +90,7 @@ export default class LayersPass extends Pass {
     }
 
     const renderPass = this.device.beginRenderPass({
-      framebuffer: options.target,
+      framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,
       clearDepth,

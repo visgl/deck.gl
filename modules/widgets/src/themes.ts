@@ -18,9 +18,25 @@ export type DeckWidgetTheme = {
   '--button-backdrop-filter'?: string;
   '--button-icon-idle'?: string;
   '--button-icon-hover'?: string;
+  '--button-text'?: string;
   // inter-icon color
   '--icon-compass-north-color'?: string;
   '--icon-compass-south-color'?: string;
+  // menu
+  '--menu-gap'?: string;
+  '--menu-background'?: string;
+  '--menu-backdrop-filter'?: string;
+  '--menu-border'?: string;
+  '--menu-shadow'?: string;
+  '--menu-text'?: string;
+  '--menu-item-hover'?: string;
+  // scrollbar
+  '--range-step-button-size'?: string;
+  '--range-track-size'?: string;
+  '--range-thumb-size'?: string;
+  '--range-track-color'?: string;
+  '--range-thumb-color'?: string;
+  '--range-decoration-active-color'?: string;
 };
 
 export const LightTheme = {
@@ -34,8 +50,22 @@ export const LightTheme = {
   '--button-backdrop-filter': 'unset',
   '--button-icon-idle': 'rgba(97, 97, 102, 1)',
   '--button-icon-hover': 'rgba(24, 24, 26, 1)',
+  '--button-text': 'rgb(24, 24, 26, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
-  '--icon-compass-south-color': 'rgb(204, 204, 204)'
+  '--icon-compass-south-color': 'rgb(204, 204, 204)',
+  '--menu-gap': '4px',
+  '--menu-background': '#fff',
+  '--menu-backdrop-filter': 'unset',
+  '--menu-border': 'unset',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
+  '--menu-text': 'rgb(24, 24, 26, 1)',
+  '--menu-item-hover': 'rgba(0, 0, 0, 0.08)',
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
+  '--range-track-color': '#d8d8e5',
+  '--range-thumb-color': '#616166',
+  '--range-decoration-active-color': '#f8dd50'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const DarkTheme = {
@@ -49,8 +79,22 @@ export const DarkTheme = {
   '--button-backdrop-filter': 'unset',
   '--button-icon-idle': 'rgba(158, 157, 168, 1)',
   '--button-icon-hover': 'rgba(215, 214, 229, 1)',
+  '--button-text': 'rgb(215, 214, 229, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
-  '--icon-compass-south-color': 'rgb(200, 199, 209)'
+  '--icon-compass-south-color': 'rgb(200, 199, 209)',
+  '--menu-gap': '4px',
+  '--menu-background': 'rgba(18, 18, 20, 1)',
+  '--menu-backdrop-filter': 'unset',
+  '--menu-border': 'unset',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
+  '--menu-text': 'rgb(215, 214, 229, 1)',
+  '--menu-item-hover': 'rgba(255, 255, 255, 0.1)',
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
+  '--range-track-color': '#2c2c30',
+  '--range-thumb-color': '#9e9da8',
+  '--range-decoration-active-color': '#dd7d2c'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const LightGlassTheme = {
@@ -65,8 +109,22 @@ export const LightGlassTheme = {
   '--button-backdrop-filter': 'blur(4px)',
   '--button-icon-idle': 'rgba(97, 97, 102, 1)',
   '--button-icon-hover': 'rgba(24, 24, 26, 1)',
+  '--button-text': 'rgb(24, 24, 26, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
-  '--icon-compass-south-color': 'rgb(204, 204, 204)'
+  '--icon-compass-south-color': 'rgb(204, 204, 204)',
+  '--menu-gap': '4px',
+  '--menu-background': 'rgba(255, 255, 255, 0.6)',
+  '--menu-backdrop-filter': 'blur(4px)',
+  '--menu-border': '1px solid rgba(255, 255, 255, 0.6)',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
+  '--menu-text': 'rgb(24, 24, 26, 1)',
+  '--menu-item-hover': 'rgba(0, 0, 0, 0.08)',
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
+  '--range-track-color': 'rgba(215, 214, 229, 0.3)',
+  '--range-thumb-color': 'rgba(97, 97, 102, 1)',
+  '--range-decoration-active-color': 'rgba(255, 215, 0, 0.6)'
 } as const satisfies Required<DeckWidgetTheme>;
 
 export const DarkGlassTheme = {
@@ -81,6 +139,20 @@ export const DarkGlassTheme = {
   '--button-backdrop-filter': 'blur(4px)',
   '--button-icon-idle': 'rgba(158, 157, 168, 1)',
   '--button-icon-hover': 'rgba(215, 214, 229, 1)',
+  '--button-text': 'rgb(215, 214, 229, 1)',
   '--icon-compass-north-color': 'rgb(240, 92, 68)',
-  '--icon-compass-south-color': 'rgb(200, 199, 209)'
+  '--icon-compass-south-color': 'rgb(200, 199, 209)',
+  '--menu-gap': '4px',
+  '--menu-background': 'rgba(18, 18, 20, 0.75)',
+  '--menu-backdrop-filter': 'blur(4px)',
+  '--menu-border': '1px solid rgba(18, 18, 20, 0.75)',
+  '--menu-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
+  '--menu-text': 'rgb(215, 214, 229, 1)',
+  '--menu-item-hover': 'rgba(255, 255, 255, 0.1)',
+  '--range-step-button-size': '24px',
+  '--range-track-size': '16px',
+  '--range-thumb-size': '10px',
+  '--range-track-color': 'rgba(24, 24, 26, 0.3)',
+  '--range-thumb-color': 'rgba(158, 157, 168, 1)',
+  '--range-decoration-active-color': 'rgba(255, 145, 0, 0.6)'
 } as const satisfies Required<DeckWidgetTheme>;

@@ -6,7 +6,8 @@
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';
-import {RasterTileLayer, rasterSource} from '@deck.gl/carto';
+import {RasterTileLayer} from '@deck.gl/carto';
+import {rasterSource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = rasterSource({

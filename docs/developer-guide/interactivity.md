@@ -602,7 +602,7 @@ The picking engine returns "picking info" objects which contains a variety of fi
 | `object` | any | The object that was picked. This is typically an element from the layer's `props.data` array, but can vary from layer to layer. This field is usually only present when picking from layers where `props.data` [is an array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray#description), unless indicated otherwise in the layer's documentation.|
 | `x`      | number | Mouse position x relative to the viewport. |
 | `y`      | number | Mouse position y relative to the viewport. |
-| `coordinate` | number[] | Corresponding point of the mouse position in the coordinate system of the layer. When using the built-in callbacks, this coordinate is 2D, assuming z=0 (i.e. on sea level in a geospatial dataset). You may optionally acquire a 3D position with a performance overhead by [calling the picking engine directly](#calling-the-picking-engine-directly). |
+| `coordinate` | number[] | Corresponding point of the mouse position in the coordinate system of the layer. When using the built-in callbacks, this coordinate is 2D, assuming z=0 (i.e. on sea level in a geospatial dataset). You may optionally acquire a 3D position by setting the layer's [`pickable`](../api-reference/core/layer.md#pickable) prop to `'3d'`, or by [calling the picking engine directly](#calling-the-picking-engine-directly) with `unproject3D: true`. Note that 3D picking comes with a performance overhead. |
 | `viewport` | Viewport | The viewport that the picked object belongs to. |
 
 

@@ -7,6 +7,7 @@ import test from 'tape-promise/tape';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';
+import {WebMercatorViewport} from '@deck.gl/core';
 
 const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 
@@ -101,5 +102,46 @@ test('TooltipWidget#remove', t => {
     'TooltipWidget element successfully removed'
   );
 
+  t.end();
+});
+
+test('TooltipWidget#onViewportChange', t => {
+  const {widgetManager, tooltip} = setupTest();
+
+  const viewportOptions = {
+    width: 800,
+    height: 600,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 12
+  };
+
+  // Simulate showing tooltip and initial viewport from render loop
+  tooltip.setTooltip('Test tooltip', 100, 100);
+  const viewport1 = new WebMercatorViewport(viewportOptions);
+  tooltip.onViewportChange(viewport1);
+
+  t.equals(tooltip.isVisible, true, 'Tooltip is visible');
+  t.equals(tooltip.lastViewport, viewport1, 'lastViewport is set');
+
+  // Create new viewport with same properties (simulates redraw without camera change)
+  const viewport2 = new WebMercatorViewport(viewportOptions);
+  t.notEquals(viewport1, viewport2, 'Viewports are different objects');
+  t.ok(viewport1.equals(viewport2), 'Viewports are equal by value');
+
+  // onViewportChange should NOT clear the tooltip when viewports are equal by value
+  tooltip.onViewportChange(viewport2);
+  t.equals(tooltip.isVisible, true, 'Tooltip remains visible when viewport is equal');
+  t.equals(tooltip.lastViewport, viewport2, 'lastViewport is updated');
+
+  // Create viewport with different camera position
+  const viewport3 = new WebMercatorViewport({...viewportOptions, longitude: -122.5});
+  t.notOk(viewport2.equals(viewport3), 'Viewports are not equal');
+
+  // onViewportChange SHOULD clear tooltip when camera moves
+  tooltip.onViewportChange(viewport3);
+  t.equals(tooltip.isVisible, false, 'Tooltip is hidden when camera moves');
+
+  widgetManager.finalize();
   t.end();
 });

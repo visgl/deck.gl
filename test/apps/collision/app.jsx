@@ -10,7 +10,8 @@ import DeckGL from '@deck.gl/react';
 import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
-import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
+import {VectorTileLayer} from '@deck.gl/carto';
+import {vectorTableSource} from '@carto/api-client';
 
 const accessToken =
   'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiJkOTU4OWMyZiJ9.78MdzU2J6y-J6Far71_Mh7IQO9eYIZD9nECUiZJAVL4';
@@ -110,10 +111,10 @@ export default function App() {
         pointType: 'text',
         getText: f => f.properties.name,
         getTextColor: [0, 0, 0],
-        getTextSize: 12,
+        textSizeScale: 12,
         parameters: {depthTest: false},
 
-        extensions: [new CollisionFilterExtension(), new MaskExtension()],
+        extensions: [new MaskExtension()],
         collisionEnabled,
         collisionGroup: 'def',
         getCollisionPriority: 0,

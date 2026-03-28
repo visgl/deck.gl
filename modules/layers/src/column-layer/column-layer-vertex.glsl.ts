@@ -64,6 +64,8 @@ void main(void) {
   vec2 offset = (rotationMatrix * positions.xy * strokeOffsetRatio + column.offset) * dotRadius;
   if (column.radiusUnits == UNIT_METERS) {
     offset = project_size(offset);
+  } else if (column.radiusUnits == UNIT_PIXELS) {
+    offset = project_pixel_size(offset);
   }
   vec3 pos = vec3(offset, 0.);
   DECKGL_FILTER_SIZE(pos, geometry);

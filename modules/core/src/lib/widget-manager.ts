@@ -23,7 +23,7 @@ const DEFAULT_PLACEMENT = 'top-left';
 
 export type WidgetPlacement = keyof typeof PLACEMENTS;
 
-const ROOT_CONTAINER_ID = '__root';
+const ROOT_CONTAINER_ID = 'root';
 
 export type WidgetManagerProps = {
   deck: Deck<any>;
@@ -196,17 +196,17 @@ export class WidgetManager {
   /** Initialize new widget */
   private _addWidget(widget: Widget) {
     const {viewId = null, placement = DEFAULT_PLACEMENT} = widget;
+    const container = widget.props._container ?? viewId;
 
     widget.widgetManager = this;
     widget.deck = this.deck;
 
     // Create an attach the HTML root element
-    widget.rootElement = widget.onCreateRootElement();
+    widget.rootElement = widget._onAdd({deck: this.deck, viewId});
     if (widget.rootElement) {
-      this._getContainer(viewId, placement).append(widget.rootElement);
+      this._getContainer(container, placement).append(widget.rootElement);
     }
 
-    widget.onAdd?.({deck: this.deck, viewId});
     widget.updateHTML();
   }
 
@@ -223,8 +223,14 @@ export class WidgetManager {
   }
 
   /** Get a container element based on view and placement */
-  private _getContainer(viewId: string | null, placement: WidgetPlacement): HTMLDivElement {
-    const containerId = viewId || ROOT_CONTAINER_ID;
+  private _getContainer(
+    viewIdOrContainer: string | HTMLDivElement | null,
+    placement: WidgetPlacement
+  ): HTMLDivElement {
+    if (viewIdOrContainer && typeof viewIdOrContainer !== 'string') {
+      return viewIdOrContainer;
+    }
+    const containerId = viewIdOrContainer || ROOT_CONTAINER_ID;
     let viewContainer = this.containers[containerId];
     if (!viewContainer) {
       viewContainer = document.createElement('div');
