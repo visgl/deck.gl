@@ -977,8 +977,7 @@ import {Deck} from '@deck.gl/core';
 const deckInstance = new Deck({
   // ...
   onClick: async ({x, y}) => {
-    // Query up to 5 overlapping objects under the pointer
-    const pickInfos = await deckInstance.pickMultipleObjectsAsync({x, y, radius: 1, depth: 5});
+    const pickInfo = await deckInstance.pickObjectAsync({x, y, radius: 1});
     console.log(pickInfo);
   }
 });
@@ -993,8 +992,7 @@ import {Deck, PickingInfo} from '@deck.gl/core';
 const deckInstance = new Deck({
   // ...
   onClick: async ({x, y}: PickingInfo) => {
-    // Query up to 5 overlapping objects under the pointer
-    const pickInfos: PickingInfo[] = await deckInstance.pickMultipleObjectsAsync({x, y, radius: 1, depth: 5});
+    const pickInfo: PickingInfo | null = await deckInstance.pickObjectAsync({x, y, radius: 1});
     console.log(pickInfo);
   }
 });
@@ -1016,8 +1014,7 @@ function App() {
     const containerRect = evt.currentTarget.getBoundingClientRect();
     const x = evt.clientX - containerRect.left;
     const y = evt.clientY = containerRect.top;
-    // Query up to 5 overlapping objects under the pointer
-    const pickInfos: PickingInfo[] = await deckRef.current?.pickMultipleObjectsAsync({x, y, radius: 1, depth: 5});
+    const pickInfo: PickingInfo | null = await deckRef.current?.pickObjectAsync({x, y, radius: 1});
     console.log(pickInfo);
   }, [])
 
@@ -1039,4 +1036,3 @@ If you are using the core layers, all has been taken care of.
 
 If you are implementing a custom layer, read more about
 [how picking is implemented](./custom-layers/picking.md).
-

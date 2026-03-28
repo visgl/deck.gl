@@ -707,32 +707,6 @@ Returns:
 * a single [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) object, or `null` if nothing is found.
 
 
-#### `pickMultipleObjectsAsync` {#pickmultipleobjectsasync}
-
-Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
-
-```ts
-await deck.pickMultipleObjectsAsync({x, y, radius, layerIds, depth, unproject3D})
-```
-
-Parameters:
-
-* `x` (number) - x position in pixels
-* `y` (number) - y position in pixels
-* `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
-* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
-* `depth` - Specifies the max number of objects to return. Default `10`.
-* `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
-
-Returns:
-
-* An array of [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects. The array will be empty if no object was picked.
-
-Notes:
-
-* Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
-
-
 #### `pickObjectsAsync` {#pickobjectsasync}
 
 Get all pickable and visible objects within a bounding box.
