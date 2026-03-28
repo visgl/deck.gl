@@ -26,9 +26,9 @@ export interface GPUTransition {
   delete(): void;
 }
 
-export abstract class GPUTransitionBase<
-  SettingsT extends TransitionSettings
-> implements GPUTransition {
+export abstract class GPUTransitionBase<SettingsT extends TransitionSettings>
+  implements GPUTransition
+{
   abstract get type(): string;
 
   device: Device;

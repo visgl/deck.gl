@@ -124,10 +124,10 @@ export class Evented {
   listens(type) {
     return Boolean(
       (this._listeners && this._listeners[type] && this._listeners[type].length > 0) ||
-      (this._oneTimeListeners &&
-        this._oneTimeListeners[type] &&
-        this._oneTimeListeners[type].length > 0) ||
-      (this._eventedParent && this._eventedParent.listens(type))
+        (this._oneTimeListeners &&
+          this._oneTimeListeners[type] &&
+          this._oneTimeListeners[type].length > 0) ||
+        (this._eventedParent && this._eventedParent.listens(type))
     );
   }
 

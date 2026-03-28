@@ -90,8 +90,8 @@ export default class ComponentState<ComponentT extends Component> {
       const asyncProp = this.asyncProps[propName];
       return Boolean(
         asyncProp &&
-        asyncProp.pendingLoadCount > 0 &&
-        asyncProp.pendingLoadCount !== asyncProp.resolvedLoadCount
+          asyncProp.pendingLoadCount > 0 &&
+          asyncProp.pendingLoadCount !== asyncProp.resolvedLoadCount
       );
     }
     for (const key in this.asyncProps) {
