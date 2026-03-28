@@ -7,19 +7,15 @@
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
 
-// Make sure there is a device registered
-import {luma} from '@luma.gl/core';
-import {WebGLDevice} from '@luma.gl/webgl';
-luma.registerDevices([WebGLDevice]);
-
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import {GL as GLConstants} from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl/constants';
 
 import makeTooltip from './widget-tooltip';
 
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
 import {loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
+import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
 import {addSupportComponents} from '../lib/components/index';
 
@@ -44,7 +40,18 @@ function extractElements(library = {}, filter) {
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractElements(deckExports, classesFilter),
+  classes: {
+    ...extractElements(deckExports, classesFilter),
+    // Add experimental widgets (exported with _ prefix)
+    FpsWidget: deckExports._FpsWidget,
+    StatsWidget: deckExports._StatsWidget,
+    ScaleWidget: deckExports._ScaleWidget,
+    GeocoderWidget: deckExports._GeocoderWidget,
+    SplitterWidget: deckExports._SplitterWidget,
+    InfoWidget: deckExports._InfoWidget,
+    ThemeWidget: deckExports._ThemeWidget,
+    LoadingWidget: deckExports._LoadingWidget
+  },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
@@ -116,12 +123,11 @@ function updateDeck(inputJson, deckgl) {
   deckgl.setProps(results);
 }
 
-function missingLayers(oldLayers, newLayers) {
-  return oldLayers.filter(ol => ol && ol.id && !newLayers.find(nl => nl.id === ol.id));
+function missingProps(oldProps, newProps) {
+  return oldProps.filter(op => op && op.id && !newProps.find(np => np.id === op.id));
 }
 
 function createStandaloneFromProvider({
-  mapProvider,
   props,
   mapboxApiKey,
   googleMapsKey,
@@ -155,7 +161,7 @@ function createStandaloneFromProvider({
     container
   };
 
-  switch (mapProvider) {
+  switch (props.mapProvider) {
     case 'mapbox':
       log.info('Using Mapbox base maps')();
       return new DeckGL({
@@ -178,6 +184,12 @@ function createStandaloneFromProvider({
         ...sharedProps,
         ...props,
         googleMapsKey
+      });
+    case 'maplibre':
+      log.info('Using MapLibre')();
+      return createMapLibreDeckOverlay({
+        ...sharedProps,
+        ...props
       });
     default:
       log.info('No recognized map provider specified')();
@@ -222,19 +234,20 @@ function createDeck({
     }
 
     const oldLayers = jsonInput.layers || [];
+    const oldWidgets = jsonInput.widgets || [];
     const props = jsonConverter.convert(jsonInput);
 
     addSupportComponents(container, props);
 
     const convertedLayers = (props.layers || []).filter(l => l);
+    const convertedWidgets = (props.widgets || []).filter(w => w);
 
-    // loading custom library is async, some layers might not be convertable before custom library loads
-    const layerToLoad = missingLayers(oldLayers, convertedLayers);
+    // loading custom library is async, some layers/widgets might not be convertable before custom library loads
+    const layersToLoad = missingProps(oldLayers, convertedLayers);
+    const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
     const getTooltip = makeTooltip(tooltip);
-    const {mapProvider} = props;
 
     deckgl = createStandaloneFromProvider({
-      mapProvider,
       props,
       mapboxApiKey,
       googleMapsKey,
@@ -245,14 +258,21 @@ function createDeck({
     });
 
     const onComplete = () => {
-      if (layerToLoad.length) {
-        // convert input layer again to presist layer order
-        const newProps = jsonConverter.convert({layers: jsonInput.layers});
-        const newLayers = (newProps.layers || []).filter(l => l);
+      if (layersToLoad.length || widgetsToLoad.length) {
+        const newProps = jsonConverter.convert({
+          layers: jsonInput.layers,
+          widgets: jsonInput.widgets
+        });
 
-        if (newLayers.length > convertedLayers.length) {
-          // if more layers are converted
-          deckgl.setProps({layers: newLayers});
+        const newLayers = (newProps.layers || []).filter(l => l);
+        const newWidgets = (newProps.widgets || []).filter(w => w);
+
+        if (
+          newLayers.length > convertedLayers.length ||
+          newWidgets.length > convertedWidgets.length
+        ) {
+          // if more layers/widgets are converted
+          deckgl.setProps({layers: newLayers, widgets: newWidgets});
         }
       }
     };

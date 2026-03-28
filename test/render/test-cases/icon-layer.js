@@ -6,7 +6,7 @@
 import {IconLayer} from '@deck.gl/layers';
 import {points, iconAtlas as iconMapping} from 'deck.gl-test/data';
 
-const ICON_ATLAS = './test/data/icon-atlas.png';
+const ICON_ATLAS = '/test/data/icon-atlas.png';
 
 export default [
   {
@@ -34,6 +34,48 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
+    name: 'icon-lnglat-rectangle',
+    viewState: {
+      longitude: -122.4269,
+      latitude: 37.75,
+      zoom: 15.6,
+      pitch: 0,
+      bearing: 0,
+      padding: {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0
+      }
+    },
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat-multi',
+        data: [
+          {position: [-122.4269, 37.7515], icon: 'tall'},
+          {position: [-122.4269, 37.7505], icon: 'wide'},
+          {position: [-122.4269, 37.7495], icon: 'square'},
+          {position: [-122.4269, 37.7485], icon: 'short'}
+        ],
+        iconAtlas: '/test/data/icons.png',
+        iconMapping: {
+          tall: {x: 0, y: 0, width: 40, height: 80, anchorY: 40},
+          wide: {x: 40, y: 0, width: 80, height: 40, anchorY: 20},
+          square: {x: 120, y: 0, width: 60, height: 60, anchorY: 30},
+          short: {x: 180, y: 0, width: 60, height: 20, anchorY: 10}
+        },
+        sizeUnits: 'pixels',
+        sizeScale: 1,
+        sizeBasis: 'width',
+        getPosition: d => d.position,
+        getIcon: d => d.icon,
+        getSize: 40, // target width in px
+        opacity: 0.8
+      })
+    ],
+    goldenImage: './test/render/golden-images/icon-lnglat-rectangle.png'
   },
   {
     name: 'icon-lnglat-external-buffer',
@@ -121,11 +163,11 @@ export default [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return Object.assign({}, iconMapping.marker, {
-              url: './test/data/icon-marker.png'
+              url: '/test/data/icon-marker.png'
             });
           }
           return Object.assign({}, iconMapping['marker-warning'], {
-            url: './test/data/icon-warning.png'
+            url: '/test/data/icon-warning.png'
           });
         }
       })
@@ -158,7 +200,7 @@ export default [
         getIcon: d => {
           if (d.PLACEMENT === 'SW') {
             return Object.assign({}, iconMapping.marker, {
-              url: './test/data/icon-marker.png',
+              url: '/test/data/icon-marker.png',
               id: 'marker-large',
               width: 256,
               height: 256
@@ -166,7 +208,7 @@ export default [
           }
           return Object.assign({}, iconMapping['marker-warning'], {
             id: 'warning-large',
-            url: './test/data/icon-warning.png',
+            url: '/test/data/icon-warning.png',
             width: 1024,
             height: 1024
           });

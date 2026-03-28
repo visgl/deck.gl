@@ -13,6 +13,7 @@ import {
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLoader} from '@loaders.gl/mvt';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';
@@ -113,7 +114,7 @@ export default [
         }),
         new MVTLayer({
           id,
-          data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+          data: ['/test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
           maxZoom: 3,
           minZoom: 3,
           extent: [-180, -80, 180, 80],
@@ -124,14 +125,64 @@ export default [
           },
           lineWidthMinPixels: 1,
           binary,
+          loaders: [MVTLoader],
           loadOptions: {
-            mvt: {
-              workerUrl: null
+            core: {
+              worker: false
             }
           }
         })
       ],
       goldenImage: `./test/render/golden-images/globe-mvt.png`
     };
-  })
+  }),
+  {
+    name: 'multi-view',
+    views: [
+      new MapView({id: 'background', clear: true, clearColor: [0, 0, 255, 128]}),
+      new MapView({
+        id: 'transparent',
+        x: 0,
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clear: true
+      }),
+      new MapView({
+        id: 'green',
+        x: '50%',
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clear: true,
+        clearColor: [0, 255, 0]
+      }),
+      new MapView({
+        id: 'clearing-color-disabled',
+        x: 0,
+        y: '50%',
+        width: '50%',
+        height: '50%',
+        clear: true,
+        clearColor: false
+      }),
+      new MapView({id: 'default', x: '50%', y: '50%', width: '50%', height: '50%'})
+    ],
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: getRes0Cells(),
+        getPosition: d => cellToLatLng(d).reverse(),
+        radiusMinPixels: 4,
+        getFillColor: [0, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/multi-view.png'
+  }
 ];

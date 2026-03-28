@@ -19,7 +19,7 @@ import {
 } from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
-uniform shadowUniforms {
+layout(std140) uniform shadowUniforms {
   bool drawShadowMap;
   bool useShadowMap;
   vec4 color;
@@ -240,7 +240,7 @@ function createShadowUniforms(
       .translate(new Vector3(projectProps.viewport.center).negate());
 
     if (
-      projectUniforms.coordinateSystem ===getShaderCoordinateSystem('lnglat') &&
+      projectUniforms.coordinateSystem === getShaderCoordinateSystem('lnglat') &&
       projectUniforms.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;

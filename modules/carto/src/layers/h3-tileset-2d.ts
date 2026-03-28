@@ -19,11 +19,19 @@ export type H3TileIndex = {i: string};
 
 const MAX_LATITUDE = 85.051128;
 
-// `polygonToCells()` fills based on hexagon center, this function will
-// pad the bounds such that all cells that overlap the bounds will be included
+/**
+ * `polygonToCells()` fills based on hexagon center, this function will
+ * pad the bounds such that all cells that overlap the bounds will be included.
+ *
+ * @param bbox - The bounding box to pad.
+ * @param resolution - The resolution of the hexagons.
+ * @param scale - The scale of the buffer. 1 is to pad by the max edge length of the tile cell.
+ * @returns The padded bounding box.
+ */
 function padBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
-  resolution: number
+  resolution: number,
+  scale: number = 1.0
 ): GeoBoundingBox {
   const corners = [
     [north, east],
@@ -35,7 +43,7 @@ function padBoundingBox(
   const cornerEdgeLengths = cornerCells.map(
     c => (Math.max(...originToDirectedEdges(c).map(e => edgeLength(e, UNITS.rads))) * 180) / Math.PI
   );
-  const bufferLat = Math.max(...cornerEdgeLengths);
+  const bufferLat = Math.max(...cornerEdgeLengths) * scale;
   const bufferLon = Math.min(180, bufferLat / Math.cos((((north + south) / 2) * Math.PI) / 180));
 
   return {
@@ -84,7 +92,12 @@ function tileToBoundingBox(index: string): GeoBoundingBox {
   const south = Math.min(...latitudes);
   const east = Math.max(...longitudes);
   const north = Math.max(...latitudes);
-  return {west, south, east, north};
+  const bbox = {west, south, east, north};
+
+  // H3 child cells extend beyond their parent's boundary forming a "snowflake"
+  // fractal pattern. The required buffer is approximately 10% of the
+  // edge length of the tile cell, add a bit more to be safe.
+  return padBoundingBox(bbox, getResolution(index), 0.12);
 }
 
 // Resolution conversion function. Takes a WebMercatorViewport and returns

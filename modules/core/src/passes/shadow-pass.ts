@@ -28,16 +28,12 @@ export default class ShadowPass extends LayersPass {
         magFilter: 'linear',
         addressModeU: 'clamp-to-edge',
         addressModeV: 'clamp-to-edge'
-      },
-      mipmaps: true
+      }
+      // TODO - texture API change in luma.gl v9.2
+      // mipmaps: true
     });
 
-    const depthBuffer = device.createTexture({
-      format: 'depth16unorm',
-      width: 1,
-      height: 1,
-      mipmaps: false
-    });
+    const depthBuffer = device.createTexture({format: 'depth16unorm', width: 1, height: 1});
 
     this.fbo = device.createFramebuffer({
       id: 'shadowmap',

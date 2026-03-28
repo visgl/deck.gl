@@ -6,7 +6,7 @@
 
 import {mat4, Matrix4Like, vec4} from '@math.gl/core';
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
+import {PROJECTION_MODE} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
 
@@ -15,7 +15,6 @@ import type {CoordinateSystem} from '../../lib/constants';
 
 type Vec3 = [number, number, number];
 type Vec4 = [number, number, number, number];
-
 
 // To quickly set a vector to zero
 const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
@@ -35,11 +34,14 @@ const COORDINATE_SYSTEM_NUMBERS = {
 } as const satisfies Record<CoordinateSystem, -1 | 0 | 1 | 2 | 3>;
 
 export function getShaderCoordinateSystem(coordinateSystem: CoordinateSystem) {
-  return COORDINATE_SYSTEM_NUMBERS[coordinateSystem];
+  const shaderCoordinateSystem = COORDINATE_SYSTEM_NUMBERS[coordinateSystem];
+  if (shaderCoordinateSystem === undefined) {
+    throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
+  }
+  return shaderCoordinateSystem;
 }
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
-
 
 export function getOffsetOrigin(
   viewport: Viewport,
@@ -331,13 +333,13 @@ function calculateViewportUniforms({
       unitsPerDegree2: Vec3;
     };
     switch (coordinateSystem) {
-      case COORDINATE_SYSTEM.METER_OFFSETS:
+      case 'meter-offsets':
         uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
         uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
         break;
 
-      case COORDINATE_SYSTEM.LNGLAT:
-      case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      case 'lnglat':
+      case 'lnglat-offsets':
         // @ts-expect-error _pseudoMeters only exists on WebMercatorView
         if (!viewport._pseudoMeters) {
           uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
@@ -347,7 +349,7 @@ function calculateViewportUniforms({
         break;
 
       // a.k.a "preprojected" positions
-      case COORDINATE_SYSTEM.CARTESIAN:
+      case 'cartesian':
         uniforms.commonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
         uniforms.commonUnitsPerWorldUnit2 = [0, 0, distanceScalesAtOrigin.unitsPerMeter2[2]];
         break;

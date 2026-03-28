@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getTypedArrayFromDataType, getDataTypeFromTypedArray} from '@luma.gl/core';
+import {dataTypeDecoder, getTypedArrayConstructor} from '@luma.gl/core';
 import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
@@ -16,17 +16,21 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
     case 'unorm8':
       return Uint8ClampedArray;
     default:
-      return getTypedArrayFromDataType(type);
+      return getTypedArrayConstructor(type);
   }
 }
 
-export const dataTypeFromTypedArray = getDataTypeFromTypedArray;
+export const dataTypeFromTypedArray = dataTypeDecoder.getDataType.bind(dataTypeDecoder);
 
 export function getBufferAttributeLayout(
   name: string,
   accessor: BufferAccessor,
   deviceType: 'webgpu' | 'wegbgl' | string
-): BufferAttributeLayout {
+): BufferAttributeLayout | null {
+  if ((accessor.size as number) > 4) {
+    // Definitely not valid. TODO - stricter validation?
+    return null;
+  }
   // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
   const type = deviceType === 'webgpu' && accessor.type === 'uint8' ? 'unorm8' : accessor.type;
   return {

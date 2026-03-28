@@ -27,6 +27,7 @@ const sidebars = {
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
+        'global-grids',
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',

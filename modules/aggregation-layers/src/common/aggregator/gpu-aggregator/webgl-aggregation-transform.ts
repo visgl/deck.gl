@@ -237,8 +237,11 @@ void main() {
       blendAlphaOperation: 'max'
     },
     defines: {
+      // @ts-expect-error TODO fix luma type
       NUM_DIMS: props.dimensions,
+      // @ts-expect-error TODO fix luma type
       NUM_CHANNELS: props.channelCount,
+      // @ts-expect-error TODO fix luma type
       SAMPLER_WIDTH: TEXTURE_WIDTH
     },
     varyings: ['binIds', 'values'],

@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// Note: The numeric values here are matched by shader code in the
-// "project" and "project64" shader modules. Both places need to be
-// updated.
 import log from '../utils/log';
 import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
@@ -19,10 +16,10 @@ export type CoordinateSystem =
   | 'lnglat-offsets'
   | 'cartesian';
 
-
 /**
  * The coordinate system that positions/dimensions are defined in.
- * @deprecated Use string constants
+ * String constants are the public API.
+ * @deprecated Use string constants directly.
  */
 export const COORDINATE_SYSTEM = {
   /**
@@ -60,7 +57,7 @@ export const COORDINATE_SYSTEM = {
 Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
   get: () => {
     log.deprecated('COORDINATE_SYSTEM.IDENTITY', 'COORDINATE_SYSTEM.CARTESIAN')();
-    return 0;
+    return COORDINATE_SYSTEM.CARTESIAN;
   }
 });
 /* eslint-enable accessor-pairs */
@@ -97,6 +94,7 @@ export const UNIT = {
 
 export const EVENT_HANDLERS = {
   click: 'onClick',
+  dblclick: 'onClick',
   panstart: 'onDragStart',
   panmove: 'onDrag',
   panend: 'onDragEnd'

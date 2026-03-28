@@ -1,56 +1,83 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_LoadingWidget} from '@deck.gl/widgets';
-
-# LoadingWidget (Experimental)
+# LoadingWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {LoadingWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<LoadingWidgetDemo />
+
 This widget shows a spinning indicator while any deck.gl layers are loading data.
 
-<WidgetPreview cls={_LoadingWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
-import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
+```js
 import {Deck} from '@deck.gl/core';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new LoadingWidget()]
+new Deck({
+  widgets: [
+    new LoadingWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-## Props
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-#### `id` (string, optional) {#id}
+```ts
+import {Deck} from '@deck.gl/core';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'loading'`
+new Deck({
+  widgets: [
+    new LoadingWidget({placement: 'top-left'})
+  ]
+});
+```
 
-The `id` must be unique among all your widgets at a given time. 
+  </TabItem>
+  <TabItem value="react" label="React">
 
-Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
+```tsx
+import React from 'react';
+import DeckGL, {LoadingWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
-#### `placement` (string, optional) {#placement}
+function App() {
+  return (
+    <DeckGL>
+      <LoadingWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
 
-Default: `'top-left'`
+  </TabItem>
+</Tabs>
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+## Constructor
+
+```ts
+import {LoadingWidget, type LoadingWidgetProps} from '@deck.gl/widgets';
+new LoadingWidget({} satisfies LoadingWidgetProps);
+```
+
+## Types
+
+### `LoadingWidgetProps` {#loadingwidgetprops}
+
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Loading data'`
+
 Tooltip message displayed while hovering a mouse over the widget.
-
-Default: `'Loading data'`
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-loading`.
 
 ## Source
 

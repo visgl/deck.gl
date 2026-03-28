@@ -57,7 +57,7 @@ df["fill_color"] = json["features"].apply(lambda row: color_scale(row["propertie
 # Add sunlight shadow to the polygons
 sunlight = {
     "@@type": "_SunLight",
-    "timestamp": 1564696800000,  # Date.UTC(2019, 7, 1, 22),
+    "timestamp": 1564696800000,  # datetime.datetime(2019, 7, 1, 22, tzinfo=datetime.timezone.utc).timestamp() * 1000
     "color": [255, 255, 255],
     "intensity": 1.0,
     "_shadow": True,

@@ -1,80 +1,219 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_InfoWidget} from '@deck.gl/widgets';
 
-# InfoWidget (Experimental)
+# InfoWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
-The InfoWidget shows a popup when an item in a layer has been clicked.
+import {InfoWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-<WidgetPreview cls={_InfoWidget} props={{
-  visible: true,
-  position: [0, 0],
-  text: "Info",
-  style: {width: 50, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
-}}/>
+<InfoWidgetDemo />
 
-```ts
-import {_InfoWidget as InfoWidget} from '@deck.gl/widgets';
+This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
 import {Deck} from '@deck.gl/core';
+import {InfoWidget} from '@deck.gl/widgets';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  },
+  controller: true,
+  layers: [
+    new ScatterplotLayer({
+      id: 'points',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+      getPosition: d => d.coordinates,
+      getRadius: 100,
+      getFillColor: [200, 0, 80],
+      pickable: true
+    })
+  ],
   widgets: [
     new InfoWidget({
-      visible: true,
-      position: [0.45, 51.47],
-      text: "Info",
-      style: {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'}
+      mode: 'hover',
+      getTooltip: info =>
+        info.object && {
+          text: info.object.name
+        },
+      style: {minWidth: '160px', fontSize: '12px'}
     })
   ]
 });
 ```
 
-## Props
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-#### `id` (string, optional) {#id}
+```ts
+import {Deck, type PickingInfo} from '@deck.gl/core';
+import {InfoWidget} from '@deck.gl/widgets';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'info'`
+type BartStation = {
+  name: string;
+  coordinates: [longitude: number, latitude: number];
+};
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  },
+  controller: true,
+  layers: [
+    new ScatterplotLayer<BartStation>({
+      id: 'points',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+      getPosition: d => d.coordinates,
+      getRadius: 100,
+      getFillColor: [200, 0, 80],
+      pickable: true
+    })
+  ],
+  widgets: [
+    new InfoWidget({
+      mode: 'hover',
+      getTooltip: (info: PickingInfo<BartStation>) =>
+        info.object && {
+          text: info.object.name
+        },
+      style: {minWidth: '160px', fontSize: '12px'}
+    })
+  ]
+});
+```
 
-#### position ([number, number]) {#position}
+  </TabItem>
+  <TabItem value="react" label="React">
 
-Position at which to place popup (e.g. [longitude, latitude]).
+```tsx
+import React, {useCallback} from 'react';
+import DeckGL, {InfoWidget} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import type {PickingInfo} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-#### text (string, optional) {#text}
+type BartStation = {
+  name: string;
+  coordinates: [longitude: number, latitude: number];
+};
 
-Text to display within widget.
+function App() {
+  const layers = [
+    new ScatterplotLayer<BartStation>({
+      id: 'points',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+      getPosition: d => d.coordinates,
+      getRadius: 100,
+      getFillColor: [200, 0, 80],
+      pickable: true
+    })
+  ];
 
-#### visible (boolean, optional) {#visible}
+  const getTooltip = useCallback((info: PickingInfo<BartStation>) => {
+    return info.object && {
+      text: info.object.name
+    };
+  }, []);
 
-Whether the widget is visible.
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: -122.4,
+        latitude: 37.78,
+        zoom: 10
+      }}
+      controller
+      layers={layers}
+    >
+      <InfoWidget
+        mode="hover"
+        getTooltip={getTooltip}
+        style={{minWidth: '160px', fontSize: '12px'}}
+      />
+    </DeckGL>
+  );
+}
+```
 
-Default: `false`
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {InfoWidget, type InfoWidgetProps} from '@deck.gl/widgets';
+new InfoWidget({} satisfies InfoWidgetProps);
+```
+
+## Types
+
+### `InfoWidgetProps` {#infowidgetprops}
+
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
+
+#### mode (string, optional) {#mode}
+
+* Default: `'hover'`
+
+Determines the interaction mode of the widget:
+* `'click'`: The widget is triggered by a user click.
+* `'hover'`: The widget is triggered when the user hovers over an element.
 
 #### minOffset (number, optional) {#minoffset}
 
+* Default: `0`
+
 Minimum offset (in pixels) to keep the popup away from the canvas edges.
 
-#### onClick (Function, optional) {#onclick}
+#### getTooltip (Function) {#gettooltip}
 
-`(widget: _InfoWidget, info: PickingInfo) => boolean`
+```ts
+(info: PickingInfo, widget: InfoWidget) => TooltipContent | null
+```
 
-#### `viewId` (string, optional) {#viewid}
+Function to generate the popup contents from the selected element. The returned object may contain the following fields:
 
-View to attach to and interact with. Required when using multiple views.
+* `position` (`number[]`) - Anchor of the popup in world coordinates, e.g. [longitude, latitude]. If not supplied, default to the mouse position where the popup was triggered.
+* `text` (`string`) - Text content to display in the popup
+* `html` (`string`) - HTML content to display in the popup. If supplied, `text` is ignored.
+* `element` (`HTMLElement`) - HTML element to attach to the popup
+* `className` (`string`) - additional class name to add to the popup
+* `style` - CSS style overrides
 
-#### `style` (object, optional) {#style}
+#### placement (string, optional) {#placement}
 
-Default: `{}`
+Position content relative to the anchor.
+One of `bottom` | `left` | `right` | `top` | `bottom-start` | `bottom-end` | `left-start` | `left-end` | `right-start` | `right-end` | `top-start` | `top-end`
 
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
+* Default: `'right'`
 
-#### `className` (string, optional) {#classname}
+#### offset (number) {#offset}
 
-Default: `undefined`
+Pixel offset from the anchor
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-info`.
+* Default: `10`
+
+#### arrow (false | number | [number, number]) {#arrow}
+
+Show an arrow pointing at the anchor. Value can be one of the following:
+
+* `false` - do not display an arrow
+* `number` - pixel size of the arrow
+* `[width: number, height: number]` - pixel size of the arrow
+
+* Default: `10`
 
 ## Source
 

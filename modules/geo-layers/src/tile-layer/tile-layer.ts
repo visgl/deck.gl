@@ -26,6 +26,7 @@ import {
   Tileset2DProps
 } from '../tileset-2d/index';
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
+import {Matrix4} from '@math.gl/core';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -193,7 +194,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   get isLoaded(): boolean {
     return Boolean(
       this.state?.tileset?.selectedTiles?.every(
-        tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+        tile =>
+          // Error / empty tiles resolve to `content === null`. Once Tile2DHeader marks those
+          // requests as loaded, do not wait for generated sublayers because there is nothing to
+          // render for that tile and `tile.layers` will remain null.
+          tile.isLoaded &&
+          (!tile.content || !tile.layers || tile.layers.every(layer => layer.isLoaded))
       )
     );
   }
@@ -401,6 +407,11 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-    return this.state.tileset!.isTileVisible(tile, cullRect);
+    const {modelMatrix} = this.props;
+    return this.state.tileset!.isTileVisible(
+      tile,
+      cullRect,
+      modelMatrix ? new Matrix4(modelMatrix) : null
+    );
   }
 }

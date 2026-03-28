@@ -7,7 +7,7 @@ To ease interacting with the CARTO platform, the CARTO deck.gl module includes a
 The data source functions are a compact way to describe the data that you want to fetch. For example, to fetch a table from a data warehouse from the connection `carto_dw`:
 
 ```js
-import {vectorTableSource} from '@deck.gl/carto';
+import {vectorTableSource} from '@carto/api-client';
 const data = vectorTableSource({
   accessToken: 'XXX',
   connectionName: 'carto_dw',
@@ -20,7 +20,8 @@ const data = vectorTableSource({
 All data source functions return a Promise, which can be resolved to obtain the actual Tilejson. However, as the [core deck.gl Layer prop supports Promises](../core/layer#data), it is often not necessary to resolve or await the Promise and the data source can be directly passed to the data prop:
 
 ```jsx
-import {H3TileLayer, h3TilesetSource} from '@deck.gl/carto';
+import {H3TileLayer} from '@deck.gl/carto';
+import {h3TilesetSource} from '@carto/api-client';
 new H3TileLayer({
   data: h3TilesetSource({
     accessToken: 'XXX',

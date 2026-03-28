@@ -64,7 +64,7 @@ type _ContourLayerProps<DataT> = {
    * The grid origin
    * @default [0, 0]
    */
-  gridOrigin?: [number, number];
+  gridOrigin?: Readonly<[number, number]>;
 
   /**
    * When set to true, aggregation is performed on GPU, provided other conditions are met.

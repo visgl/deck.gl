@@ -4,6 +4,7 @@
 
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
+import {AsyncTexture} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -129,8 +130,9 @@ function resizeTexture(
     width,
     height,
     sampler,
-    mipmaps: true
+    mipLevels: device.getMipLevelCount(width, height)
   });
+
   const commandEncoder = device.createCommandEncoder();
   commandEncoder.copyTextureToTexture({
     sourceTexture: texture,
@@ -139,6 +141,9 @@ function resizeTexture(
     height: oldHeight
   });
   commandEncoder.finish();
+  if (device.type === 'webgl') {
+    newTexture.generateMipmapsWebGL();
+  }
 
   texture.destroy();
   return newTexture;
@@ -293,7 +298,7 @@ export function getDiffIcons(
 export default class IconManager {
   device: Device;
 
-  private onUpdate: () => void;
+  private onUpdate: (didFrameChange: boolean) => void;
   private onError: (context: LoadIconErrorContext) => void;
   private _loadOptions: any = null;
   private _texture: Texture | null = null;
@@ -323,7 +328,7 @@ export default class IconManager {
       onError = noop
     }: {
       /** Callback when the texture updates */
-      onUpdate: () => void;
+      onUpdate: (didFrameChange: boolean) => void;
       /** Callback when an error is encountered */
       onError: (context: LoadIconErrorContext) => void;
     }
@@ -415,10 +420,11 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = this.device.createTexture({
           format: 'rgba8unorm',
+          data: null,
           width: this._canvasWidth,
           height: this._canvasHeight,
           sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
-          mipmaps: true
+          mipLevels: this.device.getMipLevelCount(this._canvasWidth, this._canvasHeight)
         });
       }
 
@@ -431,7 +437,7 @@ export default class IconManager {
         );
       }
 
-      this.onUpdate();
+      this.onUpdate(true);
 
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
@@ -457,7 +463,7 @@ export default class IconManager {
           const id = getIconId(icon);
 
           const iconDef = this._mapping[id];
-          const {x, y, width: maxWidth, height: maxHeight} = iconDef;
+          const {x: initialX, y: initialY, width: maxWidth, height: maxHeight} = iconDef;
 
           const {image, width, height} = resizeImage(
             ctx,
@@ -466,21 +472,27 @@ export default class IconManager {
             maxHeight
           );
 
+          const x = initialX + (maxWidth - width) / 2;
+          const y = initialY + (maxHeight - height) / 2;
+
           this._texture?.copyExternalImage({
             image,
-            x: x + (maxWidth - width) / 2,
-            y: y + (maxHeight - height) / 2,
+            x,
+            y,
             width,
             height
           });
+          iconDef.x = x;
+          iconDef.y = y;
           iconDef.width = width;
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          // @ts-expect-error TODO v9 API not yet clear
-          this._texture.generateMipmap();
+          if (this.device.type === 'webgl') {
+            this._texture?.generateMipmapsWebGL();
+          }
 
-          this.onUpdate();
+          this.onUpdate(width !== maxWidth || height !== maxHeight);
         })
         .catch(error => {
           this.onError({

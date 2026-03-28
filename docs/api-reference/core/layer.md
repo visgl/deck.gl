@@ -142,11 +142,15 @@ If this callback is supplied and returns `true`, the error is marked as handled 
 
 Layers can be interacted with using these properties.
 
-#### `pickable` (boolean, optional) {#pickable}
+#### `pickable` (boolean | '3d', optional) {#pickable}
 
 * Default: `false`
 
 Whether the layer responds to mouse pointer picking events.
+
+When set to `true`, the layer can be picked and the picking info will contain 2D coordinates (assuming z=0).
+
+When set to `'3d'`, the layer can be picked with depth picking enabled. The `coordinate` field in the [picking info object](../../developer-guide/interactivity.md#the-pickinginfo-object) will be a 3D point, unprojected onto the actual picked geometry. This is useful for getting accurate 3D coordinates in layers with elevation or 3D models, but comes with a performance overhead.
 
 #### `onHover` (Function, optional) {#onhover}
 
@@ -233,16 +237,22 @@ Requires `pickable` to be true.
 
 Normally only used when the application wants to work with coordinates that are not Web Mercator projected longitudes/latitudes.
 
-#### `coordinateSystem` (number, optional) {#coordinatesystem}
+#### `coordinateSystem` (string, optional) {#coordinatesystem}
 
 * Default: `COORDINATE_SYSTEM.DEFAULT`
 
 Specifies how layer positions and offsets should be geographically interpreted. One of:
 
+- `COORDINATE_SYSTEM.DEFAULT`
 - `COORDINATE_SYSTEM.CARTESIAN`
 - `COORDINATE_SYSTEM.LNGLAT`
 - `COORDINATE_SYSTEM.METER_OFFSETS`
 - `COORDINATE_SYSTEM.LNGLAT_OFFSETS`
+- `'default'`
+- `'cartesian'`
+- `'lnglat'`
+- `'meter-offsets'`
+- `'lnglat-offsets'`
 
 The default is to interpret positions as latitude and longitude, however it is also possible to interpret positions as meter offsets added to projection center specified by the `coordinateOrigin` prop.
 
@@ -849,9 +859,9 @@ Parameters:
   - `viewport` (Viewport) - defaults to `this.context.viewport`.
   - `modelMatrix` (Matrix4) - defaults to `this.props.modelMatrix`.
   - `coordinateOrigin` (number[3]) - defaults to `this.props.coordinateOrigin`.
-  - `coordinateSystem` (number) - defaults to `this.props.coordinateSystem`.
+  - `coordinateSystem` (string) - defaults to `this.props.coordinateSystem`.
   - `fromCoordinateOrigin` (number[3]) - defaults to passed `coordinateOrigin`.
-  - `fromCoordinateSystem` (number) - defaults to passed `coordinateSystem`.
+  - `fromCoordinateSystem` (string) - defaults to passed `coordinateSystem`.
 
 Returns:
 

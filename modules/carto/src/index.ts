@@ -61,7 +61,7 @@ export {
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {fetchMap} from './api/index';
+export {fetchMap, LayerFactory} from './api/fetch-map';
 export {fetchBasemapProps} from './api/basemap';
 export type {
   FetchMapOptions,
@@ -73,37 +73,8 @@ export type {
 
 // TODO(v10): Consider removing re-exports from '@carto/api-client' below.
 
-import {
-  boundaryQuerySource,
-  boundaryTableSource,
-  h3QuerySource,
-  h3TableSource,
-  h3TilesetSource,
-  rasterSource,
-  quadbinQuerySource,
-  quadbinTableSource,
-  quadbinTilesetSource,
-  vectorQuerySource,
-  vectorTableSource,
-  vectorTilesetSource
-} from '@carto/api-client';
-
-export const CARTO_SOURCES = {
-  boundaryQuerySource,
-  boundaryTableSource,
-  h3QuerySource,
-  h3TableSource,
-  h3TilesetSource,
-  rasterSource,
-  quadbinQuerySource,
-  quadbinTableSource,
-  quadbinTilesetSource,
-  vectorQuerySource,
-  vectorTableSource,
-  vectorTilesetSource
-};
-
 export {
+  CARTO_SOURCES,
   boundaryQuerySource,
   boundaryTableSource,
   h3QuerySource,
@@ -122,8 +93,6 @@ export {
 } from '@carto/api-client';
 
 export type {
-  GeojsonResult,
-  JsonResult,
   TilejsonResult,
   SourceOptions,
   QuerySourceOptions,

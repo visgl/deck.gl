@@ -5,11 +5,14 @@ version_ns = {}
 with open(join("pydeck_carto", "_version.py")) as f:
     exec(f.read(), {}, version_ns)
 
+with open("README.md") as f:
+    long_description = f.read()
+
 setup(
     name="pydeck-carto",
     version=version_ns["__version__"],
     description="Pydeck wrapper for use with CARTO",
-    long_description=open("README.md").read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     keywords=["pydeck", "carto", "visualization", "graphics", "GIS", "maps"],
     author="CARTO",

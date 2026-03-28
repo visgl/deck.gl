@@ -49,3 +49,9 @@ main .container {
 html[data-theme='dark'] .docusaurus-highlight-code-line {
   background-color: rgba(0, 0, 0, 0.3);
 }
+
+.footer-copy, .footer__copyright {
+  text-align: left;
+  font-size: .8rem;
+  line-height: 1.4;
+}

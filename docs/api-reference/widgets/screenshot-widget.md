@@ -1,9 +1,12 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ScreenshotWidget} from '@deck.gl/widgets';
-
 # ScreenshotWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ScreenshotWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ScreenshotWidgetDemo />
 
 This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
 
@@ -12,66 +15,100 @@ Only the deck.gl canvas is captured, not other HTML DOM element underneath or on
 It is possible to use `props.onCapture` to integrate with more advanced screen capture modules such as [html2canvas](https://html2canvas.hertzen.com/)
 :::
 
-<WidgetPreview cls={ScreenshotWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {ScreenshotWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new ScreenshotWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ScreenshotWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ScreenshotWidget()]
+new Deck({
+  widgets: [
+    new ScreenshotWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-## Props
+  </TabItem>
+  <TabItem value="react" label="React">
 
-#### `id` (string, optional) {#id}
+```tsx
+import React from 'react';
+import DeckGL, {_ScreenshotWidget as ScreenshotWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'screenshot'`
+function App() {
+  return (
+    <DeckGL>
+      <ScreenshotWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
+  </TabItem>
+</Tabs>
 
-#### `placement` (string, optional) {#placement}
+## Constructor
 
-Default: `'top-left'`
+```ts
+import {ScreenshotWidget, type ScreenshotWidgetProps} from '@deck.gl/widgets';
+new ScreenshotWidget({} satisfies ScreenshotWidgetProps);
+```
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+## Types
+
+### `ScreenshotWidgetProps` {#screenshotwidgetprops}
+
+The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Screenshot'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Screenshot'`
+#### `filename` (string, optional) {#filename}
 
-#### `imageFormat` (string, optional) {#imageFormat}
+* Default: `'screenshot.png'`
+
+Filename for captured screenshot.
+
+#### `imageFormat` (string, optional) {#imageformat}
+
+* Default: `'image/png'`
 
 Format of the downloaded image. Browser dependent, may support `image/jpeg`, `image/webp`, `image/avif`
-
-Default: `'image/png'`
 
 #### `onCapture` (function, optional) {#oncapture}
 
 ```ts
-onCapture(widget: ScreenshotWidget): void
+(widget: ScreenshotWidget) => void
 ```
+
+* Default: `undefined`
 
 Allows the application to define its own capture logic, perhaps to integrate a more advanced screen capture module such as [html2canvas](https://html2canvas.hertzen.com/).
 
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-screenshot`.
-
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name            | Type                     | Default                                         |
 | --------------- | ------------------------ | ----------------------------------------------- |

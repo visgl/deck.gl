@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {project, phongLighting} from '@deck.gl/core';
+import {test, expect} from 'vitest';
+import {project, phongMaterial} from '@deck.gl/core';
 import {mergeShaders} from '@deck.gl/core/utils/shader';
 
 const TEST_SHADERS = {vs: 'vs', fs: 'fs'};
@@ -34,26 +34,24 @@ const TEST_CASES = [
     input: {
       vs: 'vs-v2',
       defines: {DRAW: 0, EXTRUDE: 1},
-      modules: [phongLighting],
+      modules: [phongMaterial],
       inject: {'fs#main-end': 'filter_pickingColor(gl_FragColor);'}
     },
     output: {
       vs: 'vs-v2',
       fs: 'fs',
       defines: {DRAW: 0, EXTRUDE: 1},
-      modules: [project, phongLighting],
+      modules: [project, phongMaterial],
       inject: {'fs#main-start': 'discard;', 'fs#main-end': 'filter_pickingColor(gl_FragColor);'}
     }
   }
 ];
 
-test('mergeShaders', t => {
+test('mergeShaders', () => {
   let shaders = TEST_SHADERS;
 
   for (const testCase of TEST_CASES) {
     shaders = mergeShaders(shaders, testCase.input);
-    t.deepEqual(shaders, testCase.output, `${testCase.title} returned correct result`);
+    expect(shaders, `${testCase.title} returned correct result`).toEqual(testCase.output);
   }
-
-  t.end();
 });

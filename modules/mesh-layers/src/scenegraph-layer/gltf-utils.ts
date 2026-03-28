@@ -4,18 +4,22 @@
 
 /* global requestAnimationFrame */
 import type {GroupNode, ScenegraphNode, ModelNode} from '@luma.gl/engine';
+import type {GLTFScenegraphs} from '@luma.gl/gltf';
 
-export async function waitForGLTFAssets(gltfObjects: {scenes: GroupNode[]}): Promise<void> {
+export async function waitForGLTFAssets(
+  gltfObjects: GLTFScenegraphs | {scenes: GroupNode[]}
+): Promise<void> {
   const remaining: any[] = [];
 
   gltfObjects.scenes.forEach(scene => {
     scene.traverse((modelNode: ScenegraphNode) => {
+      // Not really clear how we can access the uniforms?
       // TODO v9 getUnforms() was removed, hack it with props.uniforms
-      Object.values((modelNode as ModelNode).model.uniforms).forEach((uniform: any) => {
-        if (uniform.loaded === false) {
-          remaining.push(uniform);
-        }
-      });
+      // Object.values((modelNode as ModelNode).model.uniforms).forEach((uniform: any) => {
+      //   if (uniform.loaded === false) {
+      //     remaining.push(uniform);
+      //   }
+      // });
     });
   });
 

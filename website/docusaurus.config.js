@@ -19,7 +19,11 @@ const config = {
   url: 'https://deck.gl',
   baseUrl: process.env.STAGING ? '/deck.gl/' : '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn'
+    }
+  },
   favicon: '/favicon.ico',
   organizationName: 'visgl', // Usually your GitHub org/user name.
   projectName: 'deck.gl', // Usually your repo name.
@@ -55,21 +59,25 @@ const config = {
         resolve: {
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
-            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers'),
-            '@deck.gl/arcgis': resolve('../modules/arcgis'),
-            '@deck.gl/carto': resolve('../modules/carto'),
-            '@deck.gl/core': resolve('../modules/core'),
-            '@deck.gl/extensions': resolve('../modules/extensions'),
-            '@deck.gl/geo-layers': resolve('../modules/geo-layers'),
-            '@deck.gl/google-maps': resolve('../modules/google-maps'),
-            '@deck.gl/json': resolve('../modules/json'),
-            '@deck.gl/layers': resolve('../modules/layers'),
-            '@deck.gl/mapbox': resolve('../modules/mapbox'),
-            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers'),
-            '@deck.gl/react': resolve('../modules/react'),
+            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
+            '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
+            '@deck.gl/carto': resolve('../modules/carto/dist'),
+            '@deck.gl/core': resolve('../modules/core/dist'),
+            '@deck.gl/extensions': resolve('../modules/extensions/dist'),
+            '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
+            '@deck.gl/google-maps': resolve('../modules/google-maps/dist'),
+            '@deck.gl/json': resolve('../modules/json/dist'),
+            '@deck.gl/layers': resolve('../modules/layers/dist'),
+            '@deck.gl/mapbox': resolve('../modules/mapbox/dist'),
+            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
+            '@deck.gl/react': resolve('../modules/react/dist'),
+            '@deck.gl/widgets': resolve('../modules/widgets/dist'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
+            '@luma.gl/webgl/constants': resolve(
+              '../node_modules/@luma.gl/webgl/dist/constants'
+            ),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
             '@math.gl': resolve('../node_modules/@math.gl'),
             '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
@@ -77,6 +85,7 @@ const config = {
             '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
             '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
             '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
+            '@loaders.gl/schema': resolve('../node_modules/@loaders.gl/schema-utils'),
             '@loaders.gl': resolve('../node_modules/@loaders.gl')
           }
         },
@@ -152,6 +161,11 @@ const config = {
             href: 'https://github.com/visgl/deck.gl',
             label: 'GitHub',
             position: 'right'
+          },
+          {
+            type: 'html',
+            position: 'right',
+            value: '<a href="https://openvisualization.org" target="_blank" style="content: \'\'; height: 24px; width: 80px; background-image: url(\'/openjs-foundation.svg\'); background-repeat: no-repeat;  background-size: 80px 24px; display: flex"></a>'
           }
         ]
       },
@@ -197,10 +211,6 @@ const config = {
               {
                 label: 'react-map-gl',
                 href: 'https://visgl.github.io/react-map-gl'
-              },
-              {
-                label: 'nebula.gl',
-                href: 'https://nebula.gl'
               }
             ]
           },
@@ -209,7 +219,7 @@ const config = {
             items: [
               {
                 label: 'Slack workspace',
-                href: 'https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg'
+                href: 'https://slack-invite.openjsf.org'
               },
               {
                 label: 'vis.gl blog on Medium',
@@ -222,7 +232,7 @@ const config = {
             ]
           }
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} OpenJS Foundation`
+        copyright: '<div class="footer-copy">Copyright <a href="https://openjsf.org">OpenJS Foundation</a> and vis.gl contributors. All rights reserved. The <a href="https://openjsf.org">OpenJS Foundation</a> has registered trademarks and uses trademarks. For a list of trademarks of the <a href="https://openjsf.org">OpenJS Foundation</a>, please see our <a href="https://trademark-policy.openjsf.org">Trademark Policy</a> and <a href="https://trademark-list.openjsf.org">Trademark List</a>. Trademarks and logos not indicated on the <a href="https://trademark-list.openjsf.org">list of OpenJS Foundation trademarks</a> are trademarks&trade; or registered&reg; trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.<br><br><a href="https://openjsf.org">The OpenJS Foundation</a> | <a href="https://terms-of-use.openjsf.org">Terms of Use</a> | <a href="https://privacy-policy.openjsf.org">Privacy Policy</a> | <a href="https://bylaws.openjsf.org">Bylaws</a> | <a href="https://code-of-conduct.openjsf.org">Code of Conduct</a> | <a href="https://trademark-policy.openjsf.org">Trademark Policy</a> | <a href="https://trademark-list.openjsf.org">Trademark List</a> | <a href="https://www.linuxfoundation.org/cookies">Cookie Policy</a></div>'
       },
       algolia: {
         // The application ID provided by Algolia

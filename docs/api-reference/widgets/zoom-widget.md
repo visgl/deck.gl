@@ -1,80 +1,124 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ZoomWidget} from '@deck.gl/widgets';
-
 # ZoomWidget
+
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
+import {ZoomWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ZoomWidgetDemo />
 
 This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
 
-<WidgetPreview cls={ZoomWidget} props={{orientation: 'horizontal'}}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ZoomWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ZoomWidget()]
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-## Props
+  </TabItem>
+  <TabItem value="react" label="React">
 
-#### `id` (string, optional) {#id}
+```tsx
+import React from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'zoom'`
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
+  </TabItem>
+</Tabs>
 
-#### `viewId` (string, optional) {#viewid}
+## Constructor
 
-Default: `null`
+```ts
+import {ZoomWidget, type ZoomWidgetProps} from '@deck.gl/widgets';
+new ZoomWidget({} satisfies ZoomWidgetProps);
+```
 
-The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
+## Types
 
-#### `placement` (string, optional) {#placement}
+### `ZoomWidgetProps` {#zoomwidgetprops}
 
-Default: `'top-left'`
-
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `orientation` (string, optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom in button.
+* Default: `'Zoom In'`
 
-Default: `'Zoom In'`
+Tooltip message displayed while hovering a mouse over the zoom in button.
 
 #### `zoomOutLabel` (string, optional) {#zoomoutlabel}
 
-Tooltip message displayed while hovering a mouse over the zoom out button.
+* Default: `'Zoom Out'`
 
-Default: `'Zoom Out'`
+Tooltip message displayed while hovering a mouse over the zoom out button.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Zoom transition duration in milliseconds.
 
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-zoom`.
-
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name              | Type                     | Default                                     |
 | ----------------- | ------------------------ | ------------------------------------------- |

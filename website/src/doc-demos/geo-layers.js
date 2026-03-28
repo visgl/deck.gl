@@ -6,6 +6,7 @@
 import {BitmapLayer} from '@deck.gl/layers';
 
 import {
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   TileLayer,
@@ -81,6 +82,25 @@ export const S2LayerDemo = makeLayerDemo({
     getS2Token: d => d.token,
     getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
     getElevation: d => d.value
+  }`
+});
+
+export const A5LayerDemo = makeLayerDemo({
+  Layer: A5Layer,
+  getTooltip: '({object}) => object && `${object.pentagon} count: ${object.count}`',
+  props: `{
+    data: '${DATA_URI}/sf.bike.parking.a5.json',
+    pickable: true,
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 10,
+    getPentagon: f => f.pentagon,
+    getFillColor: f => {
+      const value = f.count / 211;
+      return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+    },
+    getElevation: f => f.count
   }`
 });
 

@@ -28,24 +28,24 @@ A unique id of the view. In a multi-view use case, this is important for matchin
 
 #### `x` (string | number, optional) {#x}
 
-A relative (e.g. `'50%'`) or absolute position. Default `0`.
+A relative (e.g. `'50%'`) or absolute position. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `0`.
 
 
 #### `y` (string | number, optional) {#y}
 
-A relative (e.g. `'50%'`) or absolute position. Default `0`.
+A relative (e.g. `'50%'`) or absolute position. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `0`.
 
 #### `width` (string | number, optional) {#width}
 
-A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
+A relative (e.g. `'50%'`) or absolute extent. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `'100%'`.
 
 #### `height` (string | number, optional) {#height}
 
-A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
+A relative (e.g. `'50%'`) or absolute extent. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `'100%'`.
 
 #### `padding` (object, optional) {#padding}
 
-Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
+Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. These values support the same CSS-style expressions (numbers/percentages/`px` with parentheses and `calc()` addition/subtraction) as `x`, `y`, `width`, and `height`. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
 #### `controller` (Function | boolean | object, optional) {#controller}
 
@@ -81,18 +81,37 @@ The `viewState` property is intended to support a number of use cases:
 * Overriding a partial set of view state properties from a selected view state.
 
 
-#### `clear` (boolean | object, optional) {#clear}
+#### `clear` (boolean, optional) {#clear}
 
-Clears the contents (pixels) of the viewport. The value of the `clear` prop is passed as an argument to luma.gl's `clear` function. If `true` clears color and depth buffers. If an object, behaviour is controlled by the following fields:
+Clears the contents (pixels) of the viewport. If `true` clears color, depth, and stencil buffers. Behavior is controlled with the `clearColor`, `clearDepth`, and `clearStencil` properties.
 
-* `color` (boolean or Array) - if not `false`, clears all active color buffers with either the provided color or the currently set clear color.
-* `depth` (boolean)  - if `true`, clears the depth buffer.
-* `stencil` (boolean) - if `true` clears the stencil buffer.
-
-Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only specify the `clear` property if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
+Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only clear the viewport if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
 
 Default `false`.
 
+#### `clearColor` (number[] | false, optional) {#clearcolor}
+
+Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a?]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clearColor` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+
+Default `[0, 0, 0, 0]` (transparent).
+
+#### `clearDepth` (number | false, optional) {#cleardepth}
+
+Specifies the depth buffer value to clear the viewport with, as number between `0.0` and `1.0`. If `clearDepth` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+
+Default `1.0` (far plane).
+
+#### `clearStencil` (number | false, optional) {#clearstencil}
+
+Specifies the stencil buffer value to clear the viewport with, as number between `0` and `255`. If `clearStencil` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+
+Default `0` (clear).
+
+**Examples:**
+
+*   Clearing to a solid color: `new View({clear: true, clearColor: [80, 120, 200, 255]})`
+*   Clearing color and stencil but not depth: `new View({clear: true, clearColor: [50, 50, 50, 255], clearDepth: false})`
+*   No clearing at all: `new View({})` or `new View({clear: false})`
 
 
 ## Methods

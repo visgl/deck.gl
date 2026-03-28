@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const glslUniformBlock = `\
-uniform scatterplotUniforms {
+layout(std140) uniform scatterplotUniforms {
   float radiusScale;
   float radiusMinPixels;
   float radiusMaxPixels;

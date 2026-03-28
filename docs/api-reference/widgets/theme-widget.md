@@ -1,83 +1,112 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_ThemeWidget} from '@deck.gl/widgets';
-
-# ThemeWidget (Experimental)
+# ThemeWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ThemeWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ThemeWidgetDemo />
 
 This widget changes the theme of deck.gl between light mode and dark mode. Click the widget to toggle the theme.
 
 :::info
 
 - The `ThemeWidget` is mainly intended for minimal applications and to help developers test theme changes. More advanced applications that already support theming in their non-Deck UI will likely want to control change of deck themes using the same mechanism that is used for the remainder of their UI.
-  :::
+:::
 
-<WidgetPreview cls={_ThemeWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
-import {_ThemeWidget as ThemeWidget} from '@deck.gl/widgets';
+```js
+import {ThemeWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ThemeWidget()]
+new Deck({
+  widgets: [
+    new ThemeWidget({placement: 'top-left'})
+  ]
 });
 ```
 
-## Props
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-#### `id` (string, optional) {#id}
+```ts
+import {ThemeWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'theme'`
+new Deck({
+  widgets: [
+    new ThemeWidget({placement: 'top-left'})
+  ]
+});
+```
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
+  </TabItem>
+  <TabItem value="react" label="React">
 
-#### `placement` (string, optional) {#placement}
+```tsx
+import React from 'react';
+import DeckGL, {ThemeWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'top-left'`
+function App() {
+  return (
+    <DeckGL>
+      <ThemeWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ThemeWidget, type ThemeWidgetProps} from '@deck.gl/widgets';
+new ThemeWidget({} satisfies ThemeWidgetProps);
+```
+
+## Types
+
+### `ThemeWidgetProps` {#themewidgetprops}
+
+The `ThemeWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `lightModeTheme` (object, optional) {#lightmodetheme}
 
-Styles for light mode theme.
+* Default: Light Glass Theme
 
-Default: Light Glass Theme
+Styles for light mode theme.
 
 #### `darkModeTheme` (object, optional) {#darkmodetheme}
 
+* Default: Dark Glass Theme
+
 Styles for dark mode theme.
 
-Default: Dark Glass Theme
+#### `initialThemeMode` (`'auto' | 'light' | 'dark'`) {#initialthememode}
 
-#### `initialTheme` (`'auto' | 'light' | 'dark' | 'none'`) {#initialtheme}
+* Default: `'auto'`
 
-Set the initial theme. 'auto' inspects `window.matchMedia('(prefers-color-scheme: dark)')`, and `none` prevents the widget from changing the theme on-mount.
-
-Default: `'auto'`
+Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+* Default: `'Light Mode'`
 
-Default: `'Light Theme'`
+Tooltip message displayed while hovering a mouse over the widget when light mode is available.
 
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
-Tooltip message displayed while hovering a mouse over the widget when fullscreen.
+* Default: `'Dark Mode'`
 
-Default: `'Dark Theme'`
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-theme`.
+Tooltip message displayed while hovering a mouse over the widget when dark mode is available.
 
 ## Styles
 

@@ -18,7 +18,6 @@ import {
   AttributeManager,
   ChangeFlags,
   Color,
-  COORDINATE_SYSTEM,
   Layer,
   LayerContext,
   LayersList,
@@ -45,7 +44,9 @@ import {
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
-  mipmaps: false,
+  dimension: '2d',
+  width: 1,
+  height: 1,
   sampler: {
     minFilter: 'linear',
     magFilter: 'linear',
@@ -53,7 +54,7 @@ const TEXTURE_PROPS: TextureProps = {
     addressModeV: 'clamp-to-edge'
   }
 };
-const DEFAULT_COLOR_DOMAIN = [0, 0];
+const DEFAULT_COLOR_DOMAIN = [0, 0] as const;
 const AGGREGATION_MODE = {
   SUM: 0,
   MEAN: 1
@@ -124,7 +125,7 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default null
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Defines the type of aggregation operation
@@ -172,7 +173,7 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    colorDomain?: number[];
+    colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
@@ -234,6 +235,13 @@ export default class HeatmapLayer<
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
+
+      if (changeFlags.dataChanged) {
+        // Recreate weights transform if data changed, as buffer layout may have changed,
+        // happens when binary attibutes passed.
+        const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
+        this._createWeightsTransform(weightsTransformShaders);
+      }
     } else if (changeFlags.viewportZoomChanged) {
       // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
@@ -271,7 +279,7 @@ export default class HeatmapLayer<
       {
         // position buffer is filled with world coordinates generated from viewport.unproject
         // i.e. LNGLAT if geospatial, CARTESIAN otherwise
-        coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+        coordinateSystem: 'default',
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -404,6 +412,7 @@ export default class HeatmapLayer<
       targetTexture: weightsTexture!,
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'add',
         blendColorSrcFactor: 'one',
         blendColorDstFactor: 'one',
@@ -442,6 +451,7 @@ export default class HeatmapLayer<
       topology: 'point-list',
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'max',
         blendAlphaOperation: 'max',
         blendColorSrcFactor: 'one',
@@ -517,7 +527,7 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (this.props.coordinateSystem === 'lnglat') {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -556,19 +566,13 @@ export default class HeatmapLayer<
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
-    if (colorTexture && colorTexture?.width === colorRange.length) {
-      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setTexture2DData({data: colors});
-    } else {
-      colorTexture?.destroy();
-      // @ts-expect-error TODO(ib) - texture API change
-      colorTexture = this.context.device.createTexture({
-        ...TEXTURE_PROPS,
-        data: colors,
-        width: colorRange.length,
-        height: 1
-      });
-    }
+    colorTexture?.destroy();
+    colorTexture = this.context.device.createTexture({
+      ...TEXTURE_PROPS,
+      data: colors,
+      width: colorRange.length,
+      height: 1
+    });
     this.setState({colorTexture});
   }
 
@@ -589,7 +593,10 @@ export default class HeatmapLayer<
       const metersPerPixel =
         (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
         textureSize;
-      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+      this.state.colorDomain = [
+        colorDomain[0] * metersPerPixel * weightsScale,
+        colorDomain[1] * metersPerPixel * weightsScale
+      ];
     } else {
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
@@ -655,8 +662,7 @@ export default class HeatmapLayer<
 
     const offsetMode =
       useLayerCoordinateSystem &&
-      (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-        coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS);
+      (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
     const offsetOriginCommon = offsetMode
       ? viewport.projectPosition(this.props.coordinateOrigin)
       : [0, 0];

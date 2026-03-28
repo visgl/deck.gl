@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform columnUniforms {
+layout(std140) uniform columnUniforms {
   float radius;
   float angle;
   vec2 offset;
@@ -26,7 +26,7 @@ uniform columnUniforms {
 export type ColumnProps = {
   radius: number;
   angle: number;
-  offset: [number, number];
+  offset: Readonly<[number, number]>;
   extruded: boolean;
   stroked: boolean;
   isStroke: boolean;

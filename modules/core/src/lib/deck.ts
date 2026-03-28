@@ -20,8 +20,8 @@ import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
-import type {Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
+import {GL} from '@luma.gl/webgl/constants';
+import type {CanvasContextProps, Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -55,10 +55,15 @@ const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 export type DeckMetrics = {
   fps: number;
   setPropsTime: number;
+  layersCount: number;
+  drawLayersCount: number;
+  updateLayersCount: number;
   updateAttributesTime: number;
+  updateAttributesCount: number;
   framesRedrawn: number;
   pickTime: number;
   pickCount: number;
+  pickLayersCount: number;
   gpuTime: number;
   gpuTimePerFrame: number;
   cpuTime: number;
@@ -309,10 +314,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected metrics: DeckMetrics = {
     fps: 0,
     setPropsTime: 0,
+    layersCount: 0,
+    drawLayersCount: 0,
+    updateLayersCount: 0,
+    updateAttributesCount: 0,
     updateAttributesTime: 0,
     framesRedrawn: 0,
     pickTime: 0,
     pickCount: 0,
+    pickLayersCount: 0,
     gpuTime: 0,
     gpuTimePerFrame: 0,
     cpuTime: 0,
@@ -331,12 +341,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     x: number;
     y: number;
     radius: number;
+    unproject3D?: boolean;
   } = {
     mode: 'hover',
     x: -1,
     y: -1,
     radius: 0,
-    event: null
+    event: null,
+    unproject3D: false
   };
 
   /**
@@ -369,27 +381,29 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
-      deviceOrPromise = webgl2Adapter.attach(props.gl);
+      // Preserve user's callbacks and add resize handling
+      const userOnResize = this.props.deviceProps?.onResize;
+
+      deviceOrPromise = webgl2Adapter.attach(props.gl, {
+        // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
+        // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
+        _cacheShaders: true,
+        _cachePipelines: true,
+        ...this.props.deviceProps,
+        onResize: (canvasContext, info) => {
+          // Sync drawing buffer dimensions with externally-managed canvas
+          const {width, height} = canvasContext.canvas;
+          canvasContext.setDrawingBufferSize(width, height);
+
+          this._needsRedraw = 'Canvas resized';
+          userOnResize?.(canvasContext, info);
+        }
+      });
     }
 
     // Create a new device
     if (!deviceOrPromise) {
-      // Create the "best" device supported from the registered adapters
-      deviceOrPromise = luma.createDevice({
-        type: 'best-available',
-        // luma by default throws if a device is already attached
-        // asynchronous device creation could happen after finalize() is called
-        // TODO - createDevice should support AbortController?
-        _reuseDevices: true,
-        adapters: [webgl2Adapter],
-        ...props.deviceProps,
-        createCanvasContext: {
-          canvas: this._createCanvas(props),
-          useDevicePixels: this.props.useDevicePixels,
-          // TODO v9.2 - replace AnimationLoop's `autoResizeDrawingBuffer` with CanvasContext's `autoResize`
-          autoResize: false
-        }
-      });
+      deviceOrPromise = this._createDevice(props);
     }
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
@@ -478,8 +492,31 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       viewState: this._getViewState()
     });
 
+    if (props.device && props.device.id !== this.device?.id) {
+      this.animationLoop?.stop();
+      if (this.canvas !== props.device.canvasContext?.canvas) {
+        // remove old canvas if new one being used and de-register events
+        // TODO (ck): We might not own this canvas depending it's source, so removing it from the
+        // DOM here might be a bit unexpected but it should be ok for most users.
+        this.canvas?.remove();
+        this.eventManager?.destroy();
+
+        // ensure we will re-attach ourselves after createDevice callbacks
+        this.canvas = null;
+      }
+
+      log.log(`recreating animation loop for new device! id=${props.device.id}`)();
+
+      this.animationLoop = this._createAnimationLoop(props.device, props);
+      this.animationLoop.start();
+    }
+
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
+
+    if (props.useDevicePixels !== undefined && this.device?.canvasContext?.setProps) {
+      this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
+    }
 
     // If initialized, update sub manager props
     if (this.layerManager) {
@@ -574,6 +611,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this.viewManager.views;
   }
 
+  /** Get a view by id */
+  getView(viewId: string): View | undefined {
+    assert(this.viewManager);
+    return this.viewManager.getView(viewId);
+  }
+
   /** Get a list of viewports that are currently rendered.
    * @param rect If provided, only returns viewports within the given bounding box.
    */
@@ -639,6 +682,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     maxObjects?: number | null;
   }): PickingInfo[] {
     return this._pick('pickObjects', 'pickObjects Time', opts);
+  }
+
+  /**
+   * Internal method used by controllers to pick 3D position at a screen coordinate
+   * @private
+   */
+  private _pickPositionForController(x: number, y: number): {coordinate?: number[]} | null {
+    const pickResult = this.pickObject({x, y, radius: 0, unproject3D: true});
+    return pickResult;
   }
 
   /** Experimental
@@ -735,6 +787,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.id = props.id || 'deckgl-overlay';
+
+      // TODO this is a hack, investigate why these are not set for the picking
+      // tests
+      if (props.width && typeof props.width === 'number') {
+        canvas.width = props.width;
+      }
+      if (props.height && typeof props.height === 'number') {
+        canvas.height = props.height;
+      }
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
@@ -794,27 +855,77 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // height,
       gl,
       // debug,
-      onError,
+      onError
       // onBeforeRender,
       // onAfterRender,
-      useDevicePixels
     } = props;
 
     return new AnimationLoop({
       device: deviceOrPromise,
-      useDevicePixels,
       // TODO v9
       autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
-
       onRender: this._onRenderFrame.bind(this),
       // @ts-expect-error typing mismatch: AnimationLoop does not accept onError:null
       onError
 
       // onBeforeRender,
       // onAfterRender,
+    });
+  }
+
+  // Create a device from the deviceProps, assigning required defaults
+  private _createDevice(props: DeckProps<ViewsT>): Promise<Device> {
+    const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
+    const canvasContextProps =
+      typeof canvasContextUserProps === 'object' ? canvasContextUserProps : undefined;
+
+    // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
+    // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
+    const deviceProps = {
+      adapters: [],
+      _cacheShaders: true,
+      _cachePipelines: true,
+      ...props.deviceProps
+    };
+    if (!deviceProps.adapters.includes(webgl2Adapter)) {
+      deviceProps.adapters.push(webgl2Adapter);
+    }
+
+    const defaultCanvasProps: CanvasContextProps = {
+      // we must use 'premultiplied' canvas for webgpu to enable transparency and match shaders
+      alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
+    };
+
+    // Preserve user's onResize callback
+    const userOnResize = this.props.deviceProps?.onResize;
+
+    // Create the "best" device supported from the registered adapters
+    return luma.createDevice({
+      // luma by default throws if a device is already attached
+      // asynchronous device creation could happen after finalize() is called
+      // TODO - createDevice should support AbortController?
+      _reuseDevices: true,
+      // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
+      type: 'webgl',
+      ...deviceProps,
+      // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
+      createCanvasContext: {
+        ...defaultCanvasProps,
+        ...canvasContextProps,
+        canvas: this._createCanvas(props),
+        useDevicePixels: this.props.useDevicePixels,
+        autoResize: true
+      },
+      onResize: (canvasContext, info) => {
+        // Set redraw flag when luma.gl's CanvasContext detects a resize
+        // This restores pre-9.2 behavior where resize automatically triggered redraws
+        this._needsRedraw = 'Canvas resized';
+        // Call user's onResize if provided
+        userOnResize?.(canvasContext, info);
+      }
     });
   }
 
@@ -888,6 +999,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
+      // Check if any layer has pickable: '3d' to enable depth picking for hover
+      const layers = this.layerManager?.getLayers() || [];
+      const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+      _pickRequest.unproject3D = has3DPickableLayers;
+
       // Perform picking
       const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
       this.cursorState.isHovering = result.length > 0;
@@ -937,6 +1053,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+
+      // external canvas may not be in DOM
+      if (!this.canvas.isConnected && this.props.parent) {
+        this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
+      }
       // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
@@ -966,7 +1087,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(this.props.parent || this.canvas, {
+    const eventRoot =
+      this.props.parent?.querySelector<HTMLDivElement>('.deck-events-root') || this.canvas;
+    this.eventManager = new EventManager(eventRoot, {
       touchAction: this.props.touchAction,
       recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
         // Resolve recognizer settings
@@ -995,6 +1118,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
+      pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
       width: this.width,
@@ -1018,13 +1142,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       device: this.device
     });
 
-    this.deckRenderer = new DeckRenderer(this.device);
+    this.deckRenderer = new DeckRenderer(this.device, {stats: this.stats});
 
-    this.deckPicker = new DeckPicker(this.device);
+    this.deckPicker = new DeckPicker(this.device, {stats: this.stats});
+
+    const widgetParent =
+      this.props.parent?.querySelector<HTMLDivElement>('.deck-widgets-root') ||
+      this.canvas?.parentElement;
 
     this.widgetManager = new WidgetManager({
       deck: this,
-      parentElement: this.canvas?.parentElement
+      parentElement: widgetParent
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
@@ -1151,17 +1279,33 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
 
-    // Reuse last picked object
+    let info: PickingInfo;
+
+    // For click events, check if any layer has pickable: '3d' to determine if we need depth picking
     const layers = this.layerManager.getLayers();
-    const info = this.deckPicker!.getLastPickedObject(
-      {
+    const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+
+    if (event.type === 'click' && has3DPickableLayers) {
+      // Perform a fresh pick to get depth info for 3D coordinates
+      const pickResult = this._pick('pickObject', 'pickObject Time', {
         x: pos.x,
         y: pos.y,
-        layers,
-        viewports: this.getViewports(pos)
-      },
-      this._lastPointerDownInfo
-    ) as PickingInfo;
+        radius: this.props.pickingRadius,
+        unproject3D: true
+      });
+      info = pickResult.result[0] || pickResult.emptyInfo;
+    } else {
+      // Reuse last picked object for other events
+      info = this.deckPicker!.getLastPickedObject(
+        {
+          x: pos.x,
+          y: pos.y,
+          layers,
+          viewports: this.getViewports(pos)
+        },
+        this._lastPointerDownInfo
+      ) as PickingInfo;
+    }
 
     const {layer} = info;
     const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
@@ -1215,13 +1359,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       stats.get('pickObjects Time').time;
     metrics.pickCount = stats.get('Pick Count').count;
 
+    metrics.layersCount = this.layerManager?.layers.length ?? 0;
+    metrics.drawLayersCount = stats.get('Layers rendered').lastSampleCount;
+    metrics.pickLayersCount = stats.get('Layers picked').lastSampleCount;
+    metrics.updateAttributesCount = stats.get('Layers updated').count;
+    metrics.updateAttributesCount = stats.get('Attributes updated').count;
+
     // Luma stats
     metrics.gpuTime = stats.get('GPU Time').time;
     metrics.cpuTime = stats.get('CPU Time').time;
     metrics.gpuTimePerFrame = stats.get('GPU Time').getAverageTime();
     metrics.cpuTimePerFrame = stats.get('CPU Time').getAverageTime();
 
-    const memoryStats = luma.stats.get('Memory Usage');
+    const memoryStats = luma.stats.get('GPU Time and Memory');
     metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
     metrics.textureMemory = memoryStats.get('Texture Memory').count;
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;

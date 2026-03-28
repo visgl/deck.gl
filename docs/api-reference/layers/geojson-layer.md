@@ -501,7 +501,7 @@ import type {BinaryPointFeature} from '@loaders.gl/schema';
 
 data.points = {
   type: 'Point',
-  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
+  positions: {value: new Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
   // featureIds
   // globalFeatureIds
   // numericProps
@@ -518,8 +518,8 @@ import type {BinaryLineFeature} from '@loaders.gl/schema';
 
 data.lines = {
   type: 'LineString',
-  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
-  pathIndices: {value: Uint16Array([0, 5, 7, ...]), size: 1}, // First line contains vertex 0-4, second line contains vertex 5-6, ...
+  positions: {value: new Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
+  pathIndices: {value: new Uint16Array([0, 5, 7, ...]), size: 1}, // First line contains vertex 0-4, second line contains vertex 5-6, ...
   // featureIds
   // globalFeatureIds
   // numericProps
@@ -535,9 +535,9 @@ Polygons are an extension of the idea introduced with lines, but instead of `pat
 import type {BinaryPolygonFeature} from '@loaders.gl/schema';
 
 data.polygons = {
-  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
-  polygonIndices: {value: Uint16Array([0, 100, ...]), size: 1}, // First polygon contains vertex 0-99
-  primitivePolygonIndices: {value: Uint16Array([0, 60, 80, 100, ...]), size: 1}, // First polygon has 2 holes, made of vertex 60-79 and vertex 80-99
+  positions: {value: new Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
+  polygonIndices: {value: new Uint16Array([0, 100, ...]), size: 1}, // First polygon contains vertex 0-99
+  primitivePolygonIndices: {value: new Uint16Array([0, 60, 80, 100, ...]), size: 1}, // First polygon has 2 holes, made of vertex 60-79 and vertex 80-99
   // featureIds
   // globalFeatureIds
   // numericProps
@@ -569,13 +569,13 @@ data.points = {
   // featureIds
   // globalFeatureIds
   numericProps: {
-    population: {value: Float32Array([value0, value1, ...], size: 1}
+    population: {value: new Float32Array([value0, value1, ...]), size: 1}
   },
   // properties
  } as BinaryPointFeature
 ```
 
-Both `properties` and `numericProps` are specified per-feature.
+Both `properties` and `numericProps` are specified per-vertex.
 
 #### Feature IDs and global feature IDs
 
@@ -629,13 +629,13 @@ const geojson: FeatureCollection = {
 const binary: BinaryPointFeature = {
   shape: 'binary-feature-collection',
   points: {
-    positions: {value: Float32Array([1,23, 4.56]), size: 2},
+    positions: {value: new Float32Array([1,23, 4.56]), size: 2},
     properties: [{name: 'London'}],
     numericProps: {
-      population: {value: Float32Array([10000000], size: 1}
+      population: {value: new Float32Array([10000000]), size: 1}
     },
-    featureIds: {value: Uint16Array([0]), size: 1},
-    globalFeatureIds: {value: Uint16Array([0]), size: 1},
+    featureIds: {value: new Uint16Array([0]), size: 1},
+    globalFeatureIds: {value: new Uint16Array([0]), size: 1},
     fields: [{id: 123}]
   }
 };

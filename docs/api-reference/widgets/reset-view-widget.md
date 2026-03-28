@@ -1,58 +1,130 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ResetViewWidget} from '@deck.gl/widgets';
-
 # ResetViewWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {ResetViewWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ResetViewWidgetDemo />
+
 This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
 
-<WidgetPreview cls={ResetViewWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
-import {ResetViewWidget} from '@deck.gl/widgets';
+```js
 import {Deck} from '@deck.gl/core';
+import {ResetViewWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new ResetViewWidget()]
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ResetViewWidget({
+      initialViewState: {
+        longitude: -20,
+        latitude: 15,
+        zoom: 0
+      }
+    })
+  ]
 });
 ```
 
-## Props
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-#### `id` (string, optional) {#id}
+```ts
+import {Deck} from '@deck.gl/core';
+import {ResetViewWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'reset-view'`
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ResetViewWidget({
+      initialViewState: {
+        longitude: -20,
+        latitude: 15,
+        zoom: 0
+      }
+    })
+  ]
+});
+```
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly if you have multiple widgets of the same type.
+  </TabItem>
+  <TabItem value="react" label="React">
 
-#### `placement` (string, optional) {#placement}
+```tsx
+import React from 'react';
+import {DeckGL, _ResetViewWidget as ResetViewWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'top-left'`
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <ResetViewWidget
+        initialViewState={{
+          longitude: -20,
+          latitude: 15,
+          zoom: 0
+        }}
+      />
+    </DeckGL>
+  );
+}
+```
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ResetViewWidget, type ResetViewWidgetProps} from '@deck.gl/widgets';
+new ResetViewWidget({} satisfies ResetViewWidgetProps);
+```
+
+## Types
+
+### `ResetViewWidgetProps` {#resetviewwidgetprops}
+
+The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Reset View'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Reset View'`
+#### `initialViewState` (ViewState, optional) {#initialviewstate}
 
-#### `style` (object, optional) {#style}
+* Default: `deck.props.initialViewState`
 
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-widget-reset-view`.
+The initial view state to reset the view to.
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name                | Type                     | Default                                       |
 | ------------------- | ------------------------ | --------------------------------------------- |

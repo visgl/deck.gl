@@ -3,9 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import type {WidgetProps, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
-import {ButtonGroup, GroupedIconButton} from './lib/components';
+import {ButtonGroup} from './lib/components/button-group';
+import {IconButton} from './lib/components/icon-button';
 
 export type ZoomWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -31,18 +32,15 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
-    viewId: undefined!
+    viewId: null
   };
 
   className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
-  viewports: {[id: string]: Viewport} = {};
 
   constructor(props: ZoomWidgetProps = {}) {
-    super(props, ZoomWidget.defaultProps);
-    this.viewId = props.viewId ?? this.viewId;
-    this.placement = props.placement ?? this.placement;
+    super(props);
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<ZoomWidgetProps>) {
@@ -54,12 +52,12 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     const ui = (
       <ButtonGroup orientation={this.props.orientation}>
-        <GroupedIconButton
+        <IconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
           className="deck-widget-zoom-in"
         />
-        <GroupedIconButton
+        <IconButton
           onClick={() => this.handleZoomOut()}
           label={this.props.zoomOutLabel}
           className="deck-widget-zoom-out"
@@ -69,39 +67,48 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     render(ui, rootElement);
   }
 
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
-  }
+  handleZoom(viewId: string, nextZoom: number) {
+    // Respect minZoom/maxZoom constraints from the view state
+    const viewState = this.getViewState(viewId);
+    if (viewState) {
+      const {minZoom, maxZoom} = viewState as any;
+      if (Number.isFinite(minZoom)) {
+        nextZoom = Math.max(minZoom, nextZoom);
+      }
+      if (Number.isFinite(maxZoom)) {
+        nextZoom = Math.min(maxZoom, nextZoom);
+      }
+    }
 
-  handleZoom(viewport: Viewport, nextZoom: number) {
-    const viewId = this.viewId || viewport?.id || 'default-view';
     const nextViewState: Record<string, unknown> = {
-      ...viewport,
+      ...viewState,
       zoom: nextZoom
     };
     if (this.props.transitionDuration > 0) {
       nextViewState.transitionDuration = this.props.transitionDuration;
       nextViewState.transitionInterpolator =
-        'latitude' in nextViewState ? new FlyToInterpolator() : new LinearInterpolator();
+        'latitude' in nextViewState
+          ? new FlyToInterpolator()
+          : new LinearInterpolator({
+              transitionProps: ['zoom']
+            });
     }
     this.setViewState(viewId, nextViewState);
   }
 
   handleZoomIn() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom + 1);
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const viewState = this.getViewState(viewId);
+      this.handleZoom(viewId, (viewState.zoom as number) + 1);
     }
   }
 
   handleZoomOut() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom - 1);
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const viewState = this.getViewState(viewId);
+      this.handleZoom(viewId, (viewState.zoom as number) - 1);
     }
-  }
-
-  /** @todo - move to deck or widget manager */
-  private setViewState(viewId: string, viewState: Record<string, unknown>): void {
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
   }
 }

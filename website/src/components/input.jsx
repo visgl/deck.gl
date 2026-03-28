@@ -132,6 +132,47 @@ export default function GenericInput(props) {
 
   const inputProps = otherProps;
 
+  if (props.type === 'legend') {
+    // Use value prop which contains the correct array data
+    let items = props.value || [];
+    if (!Array.isArray(items)) {
+      items = [];
+    }
+    
+    const handleLegendClick = idx => {
+      const newItems = items.map((item, i) =>
+        i === idx ? {...item, selected: !item.selected} : item
+      );
+      if (props.onChange) {
+        props.onChange(props.name, newItems);
+      }
+    };
+    // Split into two columns
+    const left = items.filter((_, i) => i % 2 === 0);
+    const right = items.filter((_, i) => i % 2 === 1);
+    const maxRows = Math.max(left.length, right.length);
+    
+    return (
+      <InputContainer>
+        <label>{displayName}</label>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          marginTop: 8
+        }}>
+          {Array.from({length: maxRows}).map((_, row) => [
+            left[row] && (
+              <LegendItem key={`left-${row}`} color={left[row].color} label={left[row].label} selected={left[row].selected} onClick={() => handleLegendClick(row * 2)} />
+            ),
+            right[row] && (
+              <LegendItem key={`right-${row}`} color={right[row].color} label={right[row].label} right selected={right[row].selected} onClick={() => handleLegendClick(row * 2 + 1)} />
+            )
+          ])}
+        </div>
+      </InputContainer>
+    );
+  }
+
   switch (props.type) {
     case 'link':
       return (
@@ -186,4 +227,63 @@ export default function GenericInput(props) {
         </InputContainer>
       );
   }
+}
+
+function LegendItem({color, label, right, selected, onClick}) {
+  const faded = selected === false;
+  const fadeStyle = faded
+    ? {opacity: 0.6, filter: 'grayscale(0.7)'}
+    : {opacity: 1, filter: 'none'};
+  
+  // Convert color to CSS format - handle both RGB arrays and hex strings
+  const backgroundColor = Array.isArray(color) 
+    ? `rgb(${color.join(',')})`
+    : color;
+    
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: 2,
+        fontSize: 12,
+        flexDirection: right ? 'row-reverse' : 'row',
+        justifyContent: right ? 'flex-end' : 'flex-start',
+        textAlign: right ? 'right' : 'left',
+        minWidth: 0,
+        overflow: 'hidden',
+        width: '100%',
+        cursor: onClick ? 'pointer' : 'default',
+        userSelect: 'none',
+        transition: 'opacity 0.2s, filter 0.2s',
+        ...fadeStyle
+      }}
+    >
+      <div
+        style={{
+          width: 14,
+          height: 14,
+          background: backgroundColor,
+          marginLeft: right ? 6 : 2,
+          marginRight: right ? 2 : 6,
+          flexShrink: 0,
+          borderRadius: 14,
+          boxShadow: selected ? `0 0 0 1px ${backgroundColor}` : undefined,
+          transition: 'box-shadow 0.2s'
+        }}
+      />
+      <span
+        style={{
+          whiteSpace: 'normal',
+          wordBreak: 'break-word',
+          minWidth: 0,
+          overflow: 'hidden',
+          width: '100%'
+        }}
+      >
+        {label}
+      </span>
+    </div>
+  );
 }

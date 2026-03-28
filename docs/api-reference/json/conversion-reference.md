@@ -253,7 +253,7 @@ the `@@#<enum-name>.<enum-value>` will be resolved to values in the `enumeration
   layers: [
     new ScatterplotLayer({
       data: ...,
-      coordinateSystem: 2,  // The enumerated value of COORDINATE_SYSTEM.METER_OFFSETS
+      coordinateSystem: "meter-offsets",  // Equivalent to COORDINATE_SYSTEM.METER_OFFSETS
       parameters: {
         blend: true,
         blendFunc: [1, 0, 770, 772]
@@ -305,4 +305,3 @@ datum => [datum.lng, datum.lat, altitudeMeters / 1000]
 datum => [datum.color / 255, 200, 20]
 datum => datum.value > 10 ? [255, 0, 0] : [0, 255, 200]
 ```
-

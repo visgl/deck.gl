@@ -7,7 +7,8 @@ import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
-
+import type {RenderStats} from '../passes/layers-pass';
+import type {Stats} from '@probe.gl/stats';
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
@@ -24,14 +25,16 @@ export default class DeckRenderer {
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
   pickLayersPass: PickLayersPass;
+  stats?: Stats;
 
   private renderCount: number;
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
   private lastPostProcessEffect: string | null;
 
-  constructor(device: Device) {
+  constructor(device: Device, opts: {stats?: Stats} = {}) {
     this.device = device;
+    this.stats = opts.stats;
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(device);
@@ -83,19 +86,27 @@ export default class DeckRenderer {
     }
 
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+
     if (this.lastPostProcessEffect) {
       renderOpts.clearColor = [0, 0, 0, 0];
       renderOpts.clearCanvas = true;
     }
-    const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderResult = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderStats = 'stats' in renderResult ? renderResult.stats : renderResult;
 
     if (renderOpts.effects) {
+      if (this.lastPostProcessEffect) {
+        // Interleaved basemap rendering requires clearCanvas to be false
+        renderOpts.clearCanvas = opts.clearCanvas === undefined ? true : opts.clearCanvas;
+      }
+
       this._postRender(renderOpts.effects, renderOpts);
     }
 
     this.renderCount++;
 
     debug(TRACE_RENDER_LAYERS, this, renderStats, opts);
+    this._updateStats(renderStats);
   }
 
   needsRedraw(opts: {clearRedrawFlags: boolean} = {clearRedrawFlags: false}): string | false {
@@ -112,6 +123,15 @@ export default class DeckRenderer {
       buffer.delete();
     }
     renderBuffers.length = 0;
+  }
+
+  private _updateStats(source: RenderStats[]) {
+    if (!this.stats) return;
+    let layersCount = 0;
+    for (const {visibleCount} of source) {
+      layersCount += visibleCount;
+    }
+    this.stats.get('Layers rendered').addCount(layersCount);
   }
 
   private _preRender(effects: Effect[], opts: LayersPassRenderOptions) {
@@ -133,10 +153,13 @@ export default class DeckRenderer {
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
     const size = this.device.canvasContext!.getDrawingBufferSize();
+    const [width, height] = size;
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {
         const texture = this.device.createTexture({
-          sampler: {minFilter: 'linear', magFilter: 'linear'}
+          sampler: {minFilter: 'linear', magFilter: 'linear'},
+          width,
+          height
         });
         renderBuffers.push(
           this.device.createFramebuffer({

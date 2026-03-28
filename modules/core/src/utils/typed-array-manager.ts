@@ -52,7 +52,7 @@ export class TypedArrayManager {
         return typedArray;
       }
       if (newSize * typedArray.BYTES_PER_ELEMENT <= typedArray.buffer.byteLength) {
-        return new Type(typedArray.buffer, 0, newSize) as T;
+        return new Type(typedArray.buffer as ArrayBuffer, 0, newSize) as T;
       }
     }
 
@@ -119,9 +119,9 @@ export class TypedArrayManager {
     const {byteLength} = buffer;
     const i = pool.findIndex(b => b.byteLength >= byteLength);
     if (i < 0) {
-      pool.push(buffer);
+      pool.push(buffer as ArrayBuffer);
     } else if (i > 0 || pool.length < this.opts.poolSize) {
-      pool.splice(i, 0, buffer);
+      pool.splice(i, 0, buffer as ArrayBuffer);
     }
     if (pool.length > this.opts.poolSize) {
       // Drop the smallest one

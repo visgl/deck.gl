@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable complexity */
-import type {Device} from '@luma.gl/core';
-import {Buffer, BufferLayout, BufferAttributeLayout, VertexType} from '@luma.gl/core';
+import type {Device, NormalizedDataType} from '@luma.gl/core';
+import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 
 import {
   typedArrayFromDataType,
@@ -18,7 +18,7 @@ import log from '../../utils/log';
 
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
-export type DataType = Exclude<VertexType, 'float16'>;
+export type DataType = Exclude<NormalizedDataType, 'float16'>;
 export type LogicalDataType = DataType | 'float64';
 
 export type BufferAccessor = {
@@ -102,7 +102,7 @@ export type DataColumnOptions<Options> = Options &
     /** Internal API, use `type` instead */
     logicalType?: LogicalDataType;
     isIndexed?: boolean;
-    defaultValue?: number | number[];
+    defaultValue?: number | Readonly<number[]>;
   };
 
 export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
@@ -268,11 +268,10 @@ export default class DataColumn<Options, State> {
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {
     const accessor = this.getAccessor();
-    const attributes: BufferAttributeLayout[] = [];
+    const attributes: (BufferAttributeLayout | null)[] = [];
     const result: BufferLayout = {
       name: this.id,
-      byteStride: getStride(accessor),
-      attributes
+      byteStride: getStride(accessor)
     };
 
     if (this.doublePrecision) {
@@ -307,6 +306,7 @@ export default class DataColumn<Options, State> {
     } else {
       attributes.push(getBufferAttributeLayout(attributeName, accessor, this.device.type));
     }
+    result.attributes = attributes.filter(Boolean) as BufferAttributeLayout[];
     return result;
   }
 
@@ -387,7 +387,9 @@ export default class DataColumn<Options, State> {
           accessor.type = 'float32';
         } else {
           const type = dataTypeFromTypedArray(opts.value);
-          accessor.type = accessor.normalized ? (type.replace('int', 'norm') as DataType) : type;
+          // (lint wants to remove the cast)
+          // eslint-disable-next-line
+          accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;
         }
       }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;

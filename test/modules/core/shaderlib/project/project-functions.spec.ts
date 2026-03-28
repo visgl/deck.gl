@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
+  COORDINATE_SYSTEM,
   WebMercatorViewport,
   OrthographicViewport,
   project,
@@ -14,9 +15,9 @@ import {
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
-import { getShaderCoordinateSystem } from '@deck.gl/core/src/shaderlib/project/viewport-uniforms';
 import {equals, config, NumberArray3} from '@math.gl/core';
 import {runOnGPU, TestProps, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122.45,
@@ -29,6 +30,7 @@ const TEST_VIEWPORT_2 = new WebMercatorViewport({
   zoom: 8
 });
 const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 export type TestCase = {
   title: string;
@@ -133,20 +135,40 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#projectPosition', t => {
+test('project#projectPosition', () => {
   config.EPSILON = 1e-7;
 
   TEST_CASES.forEach(testCase => {
     const result = projectPosition(testCase.position, testCase.projectProps);
-    t.comment(result);
-    t.comment(testCase.result);
-    t.ok(equals(result, testCase.result), testCase.title);
+    expect(equals(result, testCase.result), testCase.title).toBeTruthy();
   });
-
-  t.end();
 });
 
-test.only('project#projectPosition vs project_position', async t => {
+test('project#projectPosition rejects legacy numeric coordinate systems', () => {
+  expect(
+    () =>
+      projectPosition([-122.46, 37.8, 1000], {
+        viewport: TEST_VIEWPORT,
+        coordinateSystem: 2 as never,
+        coordinateOrigin: TEST_COORDINATE_ORIGIN,
+        fromCoordinateSystem: 1 as never
+      }),
+    'Legacy numeric coordinate systems are rejected'
+  ).toThrow(/Invalid coordinateSystem/);
+
+  const identityResult = projectPosition([0, 0, 0], {
+    viewport: TEST_VIEWPORT,
+    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+    coordinateOrigin: [256, 256, 0]
+  });
+
+  expect(
+    equals(identityResult, [174.15110778808594, -58.11044311523443, 0]),
+    'IDENTITY aliases cartesian behavior'
+  ).toBeTruthy();
+});
+
+webglTest('project#projectPosition vs project_position', async () => {
   config.EPSILON = 1e-5;
 
   const vs = `\
@@ -169,8 +191,6 @@ void main()
       uPos: position,
       uPos64Low: position.map(fp64LowPart) as NumberArray3
     };
-
-    debugger
     const shaderResult = await runOnGPU({
       vs,
       varying: 'outValue',
@@ -179,8 +199,6 @@ void main()
       shaderInputProps: {project: projectProps, test: testProps}
     });
 
-    t.is(verifyGPUResult(shaderResult, cpuResult), true, title);
+    expect(verifyGPUResult(shaderResult, cpuResult), title).toBe(true);
   }
-
-  t.end();
 });

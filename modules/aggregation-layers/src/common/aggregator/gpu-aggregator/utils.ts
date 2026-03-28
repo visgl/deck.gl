@@ -16,7 +16,6 @@ export function createRenderTarget(device: Device, width: number, height: number
         width,
         height,
         format: 'rgba32float',
-        mipmaps: false,
         sampler: {
           minFilter: 'nearest',
           magFilter: 'nearest'

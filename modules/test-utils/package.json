@@ -3,7 +3,7 @@
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-beta.3",
+  "version": "9.3.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
@@ -25,6 +25,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./vitest": {
+      "types": "./dist/vitest.d.ts",
+      "import": "./dist/vitest.js",
+      "require": "./dist/vitest.cjs"
     }
   },
   "files": [
@@ -32,13 +37,20 @@
     "src"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.1.9"
+    "@luma.gl/test-utils": "^9.3.0-alpha.10",
+    "@luma.gl/webgl": "^9.3.0-alpha.10"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.1.0",
-    "@luma.gl/core": "^9.1.9",
-    "@luma.gl/engine": "^9.1.9",
-    "@probe.gl/test-utils": "^4.1.0-alpha.2"
+    "@deck.gl/core": "~9.2.0",
+    "@luma.gl/core": "~9.3.0-alpha.10",
+    "@luma.gl/engine": "~9.3.0-alpha.10",
+    "@probe.gl/test-utils": "^4.1.1",
+    "vitest": "^4.0.18"
+  },
+  "peerDependenciesMeta": {
+    "vitest": {
+      "optional": true
+    }
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

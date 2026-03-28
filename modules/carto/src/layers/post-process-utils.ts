@@ -17,7 +17,8 @@ import {
 
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
-  mipmaps: false,
+  width: 1,
+  height: 1,
   sampler: {
     minFilter: 'linear',
     magFilter: 'linear',
@@ -75,15 +76,16 @@ export function RTTModifier<T extends _ConstructorOf<Layer>>(BaseLayer: T): T {
       const {shaderModuleProps} = opts;
       const {picking} = shaderModuleProps;
       const postProcessLayer = getPostProcessLayer(this);
+      const enableRTT = !picking.isActive && postProcessLayer.enableRTT;
 
-      if (!picking.isActive) {
+      if (enableRTT) {
         postProcessLayer.enableRTT(opts);
       }
 
       // Draw actual layer
       super.draw(opts);
 
-      if (!picking.isActive) {
+      if (enableRTT) {
         postProcessLayer.disableRTT();
       }
     }
