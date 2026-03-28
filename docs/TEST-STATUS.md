@@ -140,14 +140,16 @@ Render tests use `test.skip(tc.name, () => {})` for test cases with `tc.skip: tr
 | `terrain-extension.spec.ts` | terrain-extension-drape | `tc.skip: true` in test case data |
 | `terrain-extension.spec.ts` | terrain-extension-offset | `tc.skip: true` in test case data |
 
-### Render Tests: Headed vs Headless Mode
+### Render Tests: Headless Source Of Truth
 
 | Mode | Config | Status |
 |------|--------|--------|
 | Headless (`headless: true`) | `render` project (vitest.config.ts:252) | polygon-lnglat fails at 98.45% |
-| Headed (`headless: false`) | `browser` project (vitest.config.ts:220) | More failures - vitest UI interference |
+| Headed (`headless: false`) | Local debugging only | Not used for golden image comparison |
 
-**Headed mode issue:** The screenshot includes vitest's browser UI (test status indicators, progress bar).
+Render tests now use the dedicated headless `render` project as the source of truth for golden image comparison. The headed `browser` project is for unit and interaction debugging only.
+
+**Historical headed mode issue:** The screenshot included vitest's browser UI (test status indicators, progress bar).
 
 In `browser-commands.ts`, the `captureAndDiffScreen` function:
 ```javascript

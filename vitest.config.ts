@@ -13,6 +13,16 @@ const headlessPlaywright = playwright({
   }
 });
 
+const browserPlaywright = playwright({
+  launchOptions: {
+    args: chromiumLaunchArgs
+  },
+  contextOptions: {
+    viewport: {width: 1280, height: 720},
+    deviceScaleFactor: 1
+  }
+});
+
 // Playwright provider with viewport configured for render tests
 const renderPlaywright = playwright({
   launchOptions: {
@@ -194,10 +204,9 @@ export default defineConfig({
         }
       },
 
-      // Browser project - full test suite in headed browser for local development
+      // Browser project - headed browser for debugging unit and interaction tests locally.
+      // Render/golden-image comparisons use the separate `render` project below.
       // Used by test-browser
-      // TODO: Add render tests back once viewport is configured in instances
-      // See: dev-docs/RFCs/proposals/vitest-migration-rfc.md#browser-project-render-test-exclusion
       {
         extends: true,
         resolve: {alias: browserAliases},
@@ -206,10 +215,7 @@ export default defineConfig({
         server: serverConfig,
         test: {
           name: 'browser',
-          include: [
-            'test/modules/**/*.spec.ts',
-            'test/interaction/**/*.spec.ts'
-          ],
+          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
@@ -218,9 +224,10 @@ export default defineConfig({
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
-            provider: renderPlaywright,
+            provider: browserPlaywright,
             instances: [{browser: 'chromium'}],
             headless: false,
+            ui: false,
             screenshotFailures: false,
             commands: browserCommands
           },
@@ -248,10 +255,12 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: renderPlaywright,
-            instances: [{
-              browser: 'chromium',
-              viewport: {width: 1024, height: 768}
-            }],
+            instances: [
+              {
+                browser: 'chromium',
+                viewport: {width: 1024, height: 768}
+              }
+            ],
             headless: true,
             screenshotFailures: false,
             commands: browserCommands

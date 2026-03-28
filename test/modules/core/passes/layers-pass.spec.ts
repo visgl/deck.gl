@@ -282,27 +282,28 @@ test('LayersPass#GLViewport', () => {
     height: 100,
     colorAttachments: ['rgba8unorm']
   });
+  // Browser-mode Playwright can expose a higher CSS-to-device ratio than headless/unit
+  // environments. Derive the expected GL viewport from the active device ratio so this
+  // test validates the coordinate conversion logic instead of hardcoding a 1x assumption.
+  const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
   layerManager.setLayers(layers);
 
   const testCases = [
     {
       name: 'default framebuffer',
-      viewport: {},
-      expectedGLViewport: [0, 0, 1, 1]
+      viewport: {}
     },
     {
       name: 'default framebuffer offset',
       viewport: {
         x: 0.5,
         y: 0.3
-      },
-      expectedGLViewport: [0.5, -0.30000000000000004, 1, 1]
+      }
     },
     {
       name: 'external framebuffer',
       target: framebuffer,
-      viewport: {},
-      expectedGLViewport: [0, 99, 1, 1]
+      viewport: {}
     },
     {
       name: 'external framebuffer pixel ratio 2',
@@ -312,20 +313,17 @@ test('LayersPass#GLViewport', () => {
         project: {
           devicePixelRatio: 2
         }
-      },
-      expectedGLViewport: [0, 98, 2, 2]
+      }
     },
     {
       name: 'external framebuffer fill viewport',
       target: framebuffer,
-      viewport: {x: 0, y: 0, width: 100, height: 100},
-      expectedGLViewport: [0, 0, 100, 100]
+      viewport: {x: 0, y: 0, width: 100, height: 100}
     },
     {
       name: 'external framebuffer offset',
       target: framebuffer,
-      viewport: {x: 5, y: 10, width: 30, height: 30},
-      expectedGLViewport: [5, 60, 30, 30]
+      viewport: {x: 5, y: 10, width: 30, height: 30}
     },
     {
       name: 'external framebuffer offset pixel ratio 2',
@@ -335,12 +333,11 @@ test('LayersPass#GLViewport', () => {
         project: {
           devicePixelRatio: 2
         }
-      },
-      expectedGLViewport: [10, 20, 60, 60]
+      }
     }
   ];
 
-  for (const {name, target, viewport, shaderModuleProps, expectedGLViewport} of testCases) {
+  for (const {name, target, viewport, shaderModuleProps} of testCases) {
     layersPass.render({
       target,
       viewports: [new Viewport({id: 'A', ...viewport})],
@@ -349,6 +346,17 @@ test('LayersPass#GLViewport', () => {
       shaderModuleProps,
       onError: err => expect(err).toBeFalsy()
     });
+
+    const pixelRatio =
+      shaderModuleProps?.project?.devicePixelRatio ?? device.canvasContext.cssToDeviceRatio();
+    const height = target ? target.height : drawingBufferHeight;
+    const dimensions = new Viewport({id: 'A', ...viewport});
+    const expectedGLViewport = [
+      dimensions.x * pixelRatio,
+      height - (dimensions.y + dimensions.height) * pixelRatio,
+      dimensions.width * pixelRatio,
+      dimensions.height * pixelRatio
+    ];
 
     expect(
       // @ts-expect-error glParameters not exposed
