@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {makeSpy} from '@probe.gl/test-utils';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
