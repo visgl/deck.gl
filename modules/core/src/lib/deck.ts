@@ -663,25 +663,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return infos.length ? infos[0] : null;
   }
 
-  /* Query all rendered objects at a given point */
-  async pickMultipleObjectsAsync(opts: {
-    /** x position in pixels */
-    x: number;
-    /** y position in pixels */
-    y: number;
-    /** Radius of tolerance in pixels. Default `0`. */
-    radius?: number;
-    /** Specifies the max number of objects to return. Default `10`. */
-    depth?: number;
-    /** A list of layer ids to query from. If not specified, then all pickable and visible layers are queried. */
-    layerIds?: string[];
-    /** If `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`. */
-    unproject3D?: boolean;
-  }): Promise<PickingInfo[]> {
-    opts.depth = opts.depth || 10;
-    return (await this._pickAsync('pickObjectAsync', 'pickMultipleObjects Time', opts)).result;
-  }
-
   /**
    * Query all objects rendered on top within a bounding box
    * @note Caveat: this method performs multiple async GPU queries, so state could potentially change between calls.
@@ -892,7 +873,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     ) as PickingInfo;
   }
 
-  private _applyHoverCallbacks({result, emptyInfo}: PointPickResult, event: MjolnirPointerEvent): void {
+  private _applyHoverCallbacks(
+    {result, emptyInfo}: PointPickResult,
+    event: MjolnirPointerEvent
+  ): void {
     if (!this.widgetManager) {
       return;
     }
@@ -1584,7 +1568,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       })
       .catch(error => {
         this.props.onError?.(error);
-        const fallbackInfo = this._getLastPointerDownPickingInfo(pos.x, pos.y, layers);
+        const fallbackInfo =
+          this.deckPicker && this.viewManager
+            ? this._getLastPointerDownPickingInfo(pos.x, pos.y, layers)
+            : ({} as PickingInfo);
         if (pointerDownPickSequence === this._pointerDownPickSequence) {
           this._lastPointerDownInfo = fallbackInfo;
         }

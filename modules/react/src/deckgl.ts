@@ -46,7 +46,6 @@ export type DeckGLRef<ViewsT extends ViewOrViews = null> = {
   deck?: Deck<ViewsT>;
   pickObjectAsync: Deck['pickObjectAsync'];
   pickObjectsAsync: Deck['pickObjectsAsync'];
-  pickMultipleObjectsAsync: Deck['pickMultipleObjectsAsync'];
   pickObject: Deck['pickObject'];
   pickObjects: Deck['pickObjects'];
   pickMultipleObjects: Deck['pickMultipleObjects'];
@@ -61,7 +60,6 @@ function getRefHandles<ViewsT extends ViewOrViews>(
     },
     // The following method can only be called after ref is available, by which point deck is defined in useEffect
     pickObjectAsync: opts => thisRef.deck!.pickObjectAsync(opts),
-    pickMultipleObjectsAsync: opts => thisRef.deck!.pickMultipleObjectsAsync(opts),
     pickObjectsAsync: opts => thisRef.deck!.pickObjectsAsync(opts),
     pickObject: opts => thisRef.deck!.pickObject(opts),
     pickMultipleObjects: opts => thisRef.deck!.pickMultipleObjects(opts),
