@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {OrbitViewport} from '@deck.gl/core';
 
-test('OrbitViewport#panByPosition', t => {
+test('OrbitViewport#panByPosition', () => {
   const testViewport = new OrbitViewport({
     width: 800,
     height: 600,
@@ -29,8 +29,9 @@ test('OrbitViewport#panByPosition', t => {
     const errorX = Math.abs(pixel[0] - x);
     const errorY = Math.abs(pixel[1] - y);
     // 0.1 screen pixel is indistinguishable to user eyes
-    t.ok(errorX < 0.1 && errorY < 0.1, `New viewport projects coords at desired pixel: ${x},${y}`);
+    expect(
+      errorX < 0.1 && errorY < 0.1,
+      `New viewport projects coords at desired pixel: ${x},${y}`
+    ).toBeTruthy();
   }
-
-  t.end();
 });

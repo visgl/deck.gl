@@ -38,14 +38,28 @@ jobs:
       - name: Run tests
         run: |
           yarn lint
-          yarn test ci
+          yarn test-ci
+
+      - name: Upload render test failure images
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: render-test-failures
+          path: |
+            test/render/golden-images/*-fail.png
+            test/render/golden-images/*-diff.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Run tape backward compatibility smoke test
+        run: yarn test-tape-compat
 
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on-error: false
-  
+
   test-website:
     runs-on: ubuntu-22.04
     permissions:

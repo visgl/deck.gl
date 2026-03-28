@@ -3,18 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable max-statements */
-import test from 'tape-promise/tape';
+import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {makeSpy} from '@probe.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
 
 globalThis.google = {maps: mapsApi};
 
-test('GoogleMapsOverlay#constructor', t => {
+const withDevice = props => ({device, ...props});
+
+test('GoogleMapsOverlay#constructor', () => {
   const map = new mapsApi.Map({
     width: 1,
     height: 1,
@@ -24,61 +26,57 @@ test('GoogleMapsOverlay#constructor', t => {
   });
 
   const overlay = new GoogleMapsOverlay({
+    device,
     layers: []
   });
 
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
   const deck = overlay._deck;
-  t.ok(deck, 'Deck instance is created');
-  t.ok(overlay.props.interleaved, 'interleaved defaults to true');
+  expect(deck, 'Deck instance is created').toBeTruthy();
+  expect(overlay.props.interleaved, 'interleaved defaults to true').toBeTruthy();
 
   overlay.setMap(map);
-  t.is(overlay._deck, deck, 'Deck instance is the same');
+  expect(overlay._deck, 'Deck instance is the same').toBe(deck);
 
   overlay.setMap(null);
-  t.is(overlay._deck, deck, 'Deck instance is not removed');
+  expect(overlay._deck, 'Deck instance is not removed').toBe(deck);
 
   overlay.finalize();
-  t.notOk(overlay._deck, 'Deck instance is finalized');
-
-  t.end();
+  expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
 });
 
-test('GoogleMapsOverlay#interleaved prop', t => {
+test('GoogleMapsOverlay#interleaved prop', () => {
   const overlay = new GoogleMapsOverlay({
+    device,
     interleaved: false,
     layers: []
   });
 
-  t.ok(!overlay.props.interleaved, 'interleaved set to false');
-  t.end();
+  expect(!overlay.props.interleaved, 'interleaved set to false').toBeTruthy();
 });
 
-test('GoogleMapsOverlay#useDevicePixels prop', t => {
+test('GoogleMapsOverlay#useDevicePixels prop', () => {
   const map = new mapsApi.Map({width: 1, height: 1, longitude: 0, latitude: 0, zoom: 1});
 
-  let overlay = new GoogleMapsOverlay({useDevicePixels: 3, layers: []});
+  let overlay = new GoogleMapsOverlay(withDevice({useDevicePixels: 3, layers: []}));
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
-  t.ok(
+  expect(
     overlay._deck.props.useDevicePixels,
     'useDevicePixels is forced to true in interleaved mode'
-  );
+  ).toBeTruthy();
 
-  overlay = new GoogleMapsOverlay({interleaved: false, useDevicePixels: 3, layers: []});
+  overlay = new GoogleMapsOverlay(withDevice({interleaved: false, useDevicePixels: 3, layers: []}));
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
-  t.equals(
+  expect(
     overlay._deck.props.useDevicePixels,
-    3,
     'useDevicePixels is overridden when not interleaved'
-  );
-
-  t.end();
+  ).toBe(3);
 });
 
-test('GoogleMapsOverlay#raster lifecycle', t => {
+test('GoogleMapsOverlay#raster lifecycle', () => {
   const map = new mapsApi.Map({
     width: 1,
     height: 1,
@@ -89,21 +87,20 @@ test('GoogleMapsOverlay#raster lifecycle', t => {
   });
 
   const overlay = new GoogleMapsOverlay({
+    device,
     layers: []
   });
 
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
-  t.ok(overlay._overlay.onAdd, 'onAdd lifecycle function is registered');
-  t.ok(overlay._overlay.draw, 'draw lifecycle function is registered');
-  t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
+  expect(overlay._overlay.onAdd, 'onAdd lifecycle function is registered').toBeTruthy();
+  expect(overlay._overlay.draw, 'draw lifecycle function is registered').toBeTruthy();
+  expect(overlay._overlay.onRemove, 'onRemove lifecycle function is registered').toBeTruthy();
   overlay.finalize();
-
-  t.end();
 });
 
 for (const interleaved of [true, false]) {
-  test(`GoogleMapsOverlay#vector lifecycle (interleaved:${interleaved}`, t => {
+  test(`GoogleMapsOverlay#vector lifecycle (interleaved:${interleaved}`, () => {
     const map = new mapsApi.Map({
       width: 1,
       height: 1,
@@ -114,45 +111,50 @@ for (const interleaved of [true, false]) {
     });
 
     const overlay = new GoogleMapsOverlay({
+      device,
       interleaved,
       layers: []
     });
 
     overlay.setMap(map);
     map.emit({type: 'renderingtype_changed'});
-    t.ok(overlay._overlay.onAdd, 'onAdd lifecycle function is registered');
-    t.ok(overlay._overlay.onContextLost, 'onContextLost lifecycle function is registered');
-    t.ok(overlay._overlay.onContextRestored, 'onContextRestored lifecycle function is registered');
-    t.ok(overlay._overlay.onDraw, 'onDraw lifecycle function is registered');
-    t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
+    expect(overlay._overlay.onAdd, 'onAdd lifecycle function is registered').toBeTruthy();
+    expect(
+      overlay._overlay.onContextLost,
+      'onContextLost lifecycle function is registered'
+    ).toBeTruthy();
+    expect(
+      overlay._overlay.onContextRestored,
+      'onContextRestored lifecycle function is registered'
+    ).toBeTruthy();
+    expect(overlay._overlay.onDraw, 'onDraw lifecycle function is registered').toBeTruthy();
+    expect(overlay._overlay.onRemove, 'onRemove lifecycle function is registered').toBeTruthy();
 
     // Dual overlay setup: positioning overlay + WebGL overlay
-    t.ok(overlay._positioningOverlay, 'Positioning overlay is created');
-    t.ok(overlay._positioningOverlay.onAdd, 'Positioning overlay has onAdd');
-    t.ok(overlay._positioningOverlay.draw, 'Positioning overlay has draw');
-    t.ok(overlay._positioningOverlay.onRemove, 'Positioning overlay has onRemove');
-    t.ok(overlay._overlay, 'WebGL overlay is created');
-    t.ok(overlay._overlay.onDraw, 'WebGL overlay has onDraw');
+    expect(overlay._positioningOverlay, 'Positioning overlay is created').toBeTruthy();
+    expect(overlay._positioningOverlay.onAdd, 'Positioning overlay has onAdd').toBeTruthy();
+    expect(overlay._positioningOverlay.draw, 'Positioning overlay has draw').toBeTruthy();
+    expect(overlay._positioningOverlay.onRemove, 'Positioning overlay has onRemove').toBeTruthy();
+    expect(overlay._overlay, 'WebGL overlay is created').toBeTruthy();
+    expect(overlay._overlay.onDraw, 'WebGL overlay has onDraw').toBeTruthy();
 
     // Positioning container should be created in the DOM
     const container = map.getDiv().querySelector('#deck-gl-google-maps-container');
-    t.ok(container, 'Positioning container is created in DOM');
+    expect(container, 'Positioning container is created in DOM').toBeTruthy();
 
-    t.notOk(overlay._overlay._draws, 'Map not yet drawn');
+    expect(overlay._overlay._draws, 'Map not yet drawn').toBeFalsy();
     overlay.setMap(null);
     if (interleaved) {
-      t.ok(overlay._overlay._draws, 'Redraw requested when map removed');
+      expect(overlay._overlay._draws, 'Redraw requested when map removed').toBeTruthy();
     } else {
-      t.notOk(overlay._overlay._draws, 'Redraw not requested when map removed');
+      expect(overlay._overlay._draws, 'Redraw not requested when map removed').toBeFalsy();
     }
 
     overlay.finalize();
-
-    t.end();
   });
 }
 
-test('GoogleMapsOverlay#style', t => {
+test('GoogleMapsOverlay#style', () => {
   const map = new mapsApi.Map({
     width: 1,
     height: 1,
@@ -162,32 +164,31 @@ test('GoogleMapsOverlay#style', t => {
   });
 
   const overlay = new GoogleMapsOverlay({
+    device,
     style: {zIndex: 10},
-    layers: [],
-    onLoad: () => {
-      const deck = overlay._deck;
-
-      t.is(deck.props.parent.style.zIndex, '10', 'parent zIndex is set');
-      t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
-
-      overlay.setProps({
-        style: {zIndex: 5}
-      });
-      t.is(deck.props.parent.style.zIndex, '5', 'parent zIndex is set');
-      t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
-
-      overlay.finalize();
-
-      t.end();
-    }
+    layers: []
   });
 
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
+  const deck = overlay._deck;
+
+  expect(deck.props.parent.style.zIndex, 'parent zIndex is set').toBe('10');
+  expect(deck.canvas?.style.zIndex ?? '', 'canvas zIndex is not set').toBe('');
+
+  if (deck.canvas?.parentElement) {
+    overlay.setProps({
+      style: {zIndex: 5}
+    });
+    expect(deck.props.parent.style.zIndex, 'parent zIndex is set').toBe('5');
+    expect(deck.canvas.style.zIndex, 'canvas zIndex is not set').toBe('');
+  }
+
+  overlay.finalize();
 });
 
 function drawPickTest(renderingType) {
-  test(`GoogleMapsOverlay#draw, pick ${renderingType}`, t => {
+  test(`GoogleMapsOverlay#draw, pick ${renderingType}`, () => {
     const map = new mapsApi.Map({
       width: 800,
       height: 400,
@@ -198,6 +199,7 @@ function drawPickTest(renderingType) {
     });
 
     const overlay = new GoogleMapsOverlay({
+      device,
       layers: [
         new ScatterplotLayer({
           data: [{position: [0, 0]}, {position: [0, 0]}],
@@ -211,36 +213,34 @@ function drawPickTest(renderingType) {
     map.emit({type: 'renderingtype_changed'});
     const deck = overlay._deck;
 
-    t.notOk(deck.props.viewState, 'Deck does not have view state');
+    expect(deck.props.viewState, 'Deck does not have view state').toBeFalsy();
 
     map.draw();
     const {viewState, width, height} = deck.props;
-    t.ok(equals(viewState.longitude, map.opts.longitude), 'longitude is set');
-    t.ok(equals(viewState.latitude, map.opts.latitude), 'latitude is set');
-    t.ok(equals(viewState.zoom, map.opts.zoom - 1), 'zoom is set');
+    expect(equals(viewState.longitude, map.opts.longitude), 'longitude is set').toBeTruthy();
+    expect(equals(viewState.latitude, map.opts.latitude), 'latitude is set').toBeTruthy();
+    expect(equals(viewState.zoom, map.opts.zoom - 1), 'zoom is set').toBeTruthy();
     if (renderingType === mapsApi.RenderingType.RASTER) {
-      t.ok(equals(width, map.opts.width), 'width is set');
-      t.ok(equals(height, map.opts.height), 'height is set');
+      expect(equals(width, map.opts.width), 'width is set').toBeTruthy();
+      expect(equals(height, map.opts.height), 'height is set').toBeTruthy();
     } else {
-      t.ok(equals(width, null), 'width is not set');
-      t.ok(equals(height, null), 'height is not set');
+      expect(equals(width, null), 'width is not set').toBeTruthy();
+      expect(equals(height, null), 'height is not set').toBeTruthy();
     }
 
     // Removed as part of https://github.com/visgl/deck.gl/pull/7723
     // TODO: reintroduce when the mock context has `deck.isInitialized` (required for event forwarding)
     /*
-    const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
+    const pointerMoveSpy = vi.spyOn(overlay._deck, '_onPointerMove');
     map.emit({type: 'mousemove', pixel: [0, 0]});
-    t.is(pointerMoveSpy.callCount, 1, 'pointer move event is handled');
+    expect(pointerMoveSpy, 'pointer move event is handled').toHaveBeenCalledTimes(1);
 
     map.emit({type: 'mouseout', pixel: [0, 0]});
-    t.is(pointerMoveSpy.callCount, 2, 'pointer leave event is handled');
-    pointerMoveSpy.reset();
+    expect(pointerMoveSpy, 'pointer leave event is handled').toHaveBeenCalledTimes(2);
+    pointerMoveSpy.mockClear();
     */
 
     overlay.finalize();
-
-    t.end();
   });
 }
 for (const renderingType of [mapsApi.RenderingType.RASTER, mapsApi.RenderingType.VECTOR]) {

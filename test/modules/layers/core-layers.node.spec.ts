@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
   ScatterplotLayer,
@@ -20,7 +20,7 @@ import {
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 
 const GRID = [
   {position: [37, 122]},
@@ -29,7 +29,7 @@ const GRID = [
   {position: [37.1, 122.8]}
 ];
 
-test('ScreenGridLayer', t => {
+test('ScreenGridLayer', async () => {
   const testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {
@@ -37,40 +37,42 @@ test('ScreenGridLayer', t => {
       getPosition: d => d.COORDINATES,
       gpuAggregation: false
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
+    onAfterUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayer({
+    Layer: ScreenGridLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('ScatterplotLayer', t => {
+test('ScatterplotLayer', async () => {
   const testCases = generateLayerTests({
     Layer: ScatterplotLayer,
     sampleProps: {
       data: FIXTURES.points,
       getPosition: d => d.COORDINATES
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.is(
-        getLayerUniforms(layer).radiusScale,
-        layer.props.radiusScale,
-        'should update radiusScale'
+      expect(getLayerUniforms(layer).radiusScale, 'should update radiusScale').toBe(
+        layer.props.radiusScale
       );
     }
   });
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayer({
+    Layer: ScatterplotLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('ArcLayer', t => {
+test('ArcLayer', async () => {
   const testCases = generateLayerTests({
     Layer: ArcLayer,
     sampleProps: {
@@ -78,35 +80,41 @@ test('ArcLayer', t => {
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: ArcLayer, testCases, onError: t.notOk});
-
-  t.end();
+  await testLayer({
+    Layer: ArcLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('PointCloudLayer', t => {
+test('PointCloudLayer', () => {
   const testCases = generateLayerTests({
     Layer: PointCloudLayer,
     sampleProps: {
       data: FIXTURES.getPointCloud(),
       getPosition: d => d.position
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.is(getLayerUniforms(layer).pointSize, layer.props.radiusPixels, 'should update pointSize');
+      expect(getLayerUniforms(layer).pointSize, 'should update pointSize').toBe(
+        layer.props.radiusPixels
+      );
     }
   });
 
-  testLayer({Layer: PointCloudLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: PointCloudLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('LineLayer', t => {
+test('LineLayer', () => {
   const testCases = generateLayerTests({
     Layer: LineLayer,
     sampleProps: {
@@ -114,51 +122,57 @@ test('LineLayer', t => {
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: LineLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: LineLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('ColumnLayer', t => {
+test('ColumnLayer', () => {
   const testCases = generateLayerTests({
     Layer: ColumnLayer,
     sampleProps: {
       data: GRID,
       getPosition: d => d.position
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.ok(layer.state.edgeDistance, 'edgeDistance is populated');
+      expect(layer.state.edgeDistance, 'edgeDistance is populated').toBeTruthy();
     }
   });
 
-  testLayer({Layer: ColumnLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: ColumnLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('GridCellLayer', t => {
+test('GridCellLayer', () => {
   const testCases = generateLayerTests({
     Layer: GridCellLayer,
     sampleProps: {
       data: GRID,
       getPosition: d => d.position
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: GridCellLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: GridCellLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('IconLayer', t => {
+test('IconLayer', () => {
   /* global document */
   const canvas = document.createElement('canvas');
   canvas.width = 24;
@@ -175,16 +189,18 @@ test('IconLayer', t => {
       getPosition: d => d.COORDINATES,
       getIcon: d => 'marker'
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title)
   });
 
-  testLayer({Layer: IconLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: IconLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
-test('PathLayer', t => {
+test('PathLayer', () => {
   const testCases = generateLayerTests({
     Layer: PathLayer,
     sampleProps: {
@@ -192,25 +208,25 @@ test('PathLayer', t => {
       getPath: d => d.path,
       getColor: (d, {index}) => [index, 0, 0]
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.is(
-        getLayerUniforms(layer).widthMinPixels,
-        layer.props.widthMinPixels,
-        'should update widthMinPixels'
+      expect(getLayerUniforms(layer).widthMinPixels, 'should update widthMinPixels').toBe(
+        layer.props.widthMinPixels
       );
-      t.ok(layer.getStartIndices(), 'should have vertex layout');
+      expect(layer.getStartIndices(), 'should have vertex layout').toBeTruthy();
     }
   });
 
-  testLayer({Layer: PathLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({
+    Layer: PathLayer,
+    testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 /* TextLayer tests don't work under Node due to fontAtlas needing canvas
-test('Text#constructor', t => {
+test('Text#constructor', () => {
   const data = [
     {
       text: 'north',
@@ -247,12 +263,10 @@ test('Text#constructor', t => {
           data: data.slice(0, 2)
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(layer.state.data.length !== oldState.data.length, 'should update state.data');
+          expect(layer.state.data.length !== oldState.data.length, 'should update state.data').toBeTruthy();
         }
       }
     ]
   });
-
-  t.end();
 });
 */
