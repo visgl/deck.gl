@@ -22,7 +22,7 @@ In the initial release, this class mainly addresses the need to render an overvi
 
 - No support for rotation (`pitch` or `bearing`). The camera always points towards the center of the earth, with north up.
 - No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
-- Only supports `COORDINATE_SYSTEM.LNGLAT` (default of the `coordinateSystem` prop).
+- Only supports `'lnglat'` (the default value of the `coordinateSystem` prop).
 - Known rendering issues when using multiple views mixing `GlobeView` and `MapView`, or switching between the two.
 - Support for `TileLayer` and `MVTLayer` is experimental.
 - These layers currently do not work in this view:

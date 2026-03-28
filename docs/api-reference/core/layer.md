@@ -239,15 +239,10 @@ Normally only used when the application wants to work with coordinates that are 
 
 #### `coordinateSystem` (string, optional) {#coordinatesystem}
 
-* Default: `COORDINATE_SYSTEM.DEFAULT`
+* Default: `'default'`
 
 Specifies how layer positions and offsets should be geographically interpreted. One of:
 
-- `COORDINATE_SYSTEM.DEFAULT`
-- `COORDINATE_SYSTEM.CARTESIAN`
-- `COORDINATE_SYSTEM.LNGLAT`
-- `COORDINATE_SYSTEM.METER_OFFSETS`
-- `COORDINATE_SYSTEM.LNGLAT_OFFSETS`
 - `'default'`
 - `'cartesian'`
 - `'lnglat'`
@@ -264,9 +259,9 @@ See the article on [Coordinate Systems](../../developer-guide/coordinate-systems
 
 Specifies a reference point for coordinates that are expressed as offsets. Used when the `coordinateSystem` is set to one of the following modes:
 
-- `COORDINATE_SYSTEM.CARTESIAN` (optional)
-- `COORDINATE_SYSTEM.METER_OFFSETS` (required)
-- `COORDINATE_SYSTEM.LNGLAT_OFFSETS` (required)
+- `'cartesian'` (optional)
+- `'meter-offsets'` (required)
+- `'lnglat-offsets'` (required)
 
 See the article on [Coordinate Systems](../../developer-guide/coordinate-systems.md) for details.
 
@@ -802,7 +797,7 @@ Parameters:
 
     + `x` (number) - Mouse position x relative to the viewport.
     + `y` (number) - Mouse position y relative to the viewport.
-    + `coordinate` (number[2]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](./layer.md#coordinatesystem) is `COORDINATE_SYSTEM.LNGLAT`.
+    + `coordinate` (number[2]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](./layer.md#coordinatesystem) is `'lnglat'`.
     + `color` (number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](./layer.md#encodepickingcolor).
     + `index` (number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](./layer.md#decodepickingcolor).
     + `picked` (boolean) - `true` if `index` is not `-1`.

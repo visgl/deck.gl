@@ -202,9 +202,6 @@ By default, the image is uniformly stretched to fill the geometry defined by `bo
 
 This prop allows you to explicitly inform the layer of the coordinate system of the image:
 
-- `COORDINATE_SYSTEM.DEFAULT` to use the layer's default image interpretation
-- `COORDINATE_SYSTEM.LNGLAT` if x-axis maps to longitude and y-axis maps to latitude
-- `COORDINATE_SYSTEM.CARTESIAN` if the image is pre-projected into the Web Mercator plane.
 - `'default'` to use the layer's default image interpretation
 - `'lnglat'` if x-axis maps to longitude and y-axis maps to latitude
 - `'cartesian'` if the image is pre-projected into the Web Mercator plane.
