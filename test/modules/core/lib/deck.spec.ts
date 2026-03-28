@@ -414,10 +414,7 @@ test('Deck#async pointerdown delays click callback until picking resolves', asyn
   // @ts-expect-error testing private method access
   deck._onEvent({type: 'click', offsetCenter: {x: 0, y: 0}});
 
-  expect(
-    clicked,
-    'click callback is deferred while pointerdown picking is pending'
-  ).toEqual([]);
+  expect(clicked, 'click callback is deferred while pointerdown picking is pending').toEqual([]);
 
   pointerDownPick.resolve(createPointPickResult({index: 7}));
   await sleep(0);

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/core';
+import type {Device, Texture} from '@luma.gl/core';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
@@ -814,19 +815,58 @@ export default class DeckPicker {
     const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
     this._updateStats(stats);
 
-    // Read from an already rendered picking buffer
-    // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
-    const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    this.device.readPixelsToArrayWebGL(pickingFBO as Framebuffer, {
-      sourceX: x,
-      sourceY: y,
-      sourceWidth: width,
-      sourceHeight: height,
-      target: pickedColors
-    });
+    const texture = (pickingFBO as Framebuffer).colorAttachments[0]?.texture;
+    if (!texture) {
+      throw new Error('Picking framebuffer color attachment is missing');
+    }
+
+    const pickedColors = await this._readTextureDataAsync(
+      texture,
+      {x, y, width, height},
+      pickZ ? Float32Array : Uint8Array
+    );
 
     return {pickedColors, decodePickingColor};
+  }
+
+  private async _readTextureDataAsync<T extends Uint8Array | Float32Array>(
+    texture: Texture,
+    options: {x: number; y: number; width: number; height: number},
+    ArrayType: Uint8ArrayConstructor | Float32ArrayConstructor
+  ): Promise<T> {
+    const {width, height} = options;
+    const layout = texture.computeMemoryLayout(options);
+    const readBuffer = this.device.createBuffer({
+      byteLength: layout.byteLength,
+      usage: Buffer.COPY_DST | Buffer.MAP_READ
+    });
+
+    try {
+      texture.readBuffer(options, readBuffer);
+      const readData = await readBuffer.readAsync(0, layout.byteLength);
+      const bytesPerElement = ArrayType.BYTES_PER_ELEMENT;
+      const source = new ArrayType(
+        readData.buffer,
+        readData.byteOffset,
+        layout.byteLength / bytesPerElement
+      );
+      const packedRowLength = width * 4;
+      const sourceRowLength = layout.bytesPerRow / bytesPerElement;
+      const packed = new ArrayType(width * height * 4);
+
+      for (let row = 0; row < height; row++) {
+        const sourceStart = row * sourceRowLength;
+        packed.set(
+          source.subarray(sourceStart, sourceStart + packedRowLength),
+          row * packedRowLength
+        );
+      }
+
+      return packed as T;
+    } finally {
+      readBuffer.destroy();
+    }
   }
 
   /**
