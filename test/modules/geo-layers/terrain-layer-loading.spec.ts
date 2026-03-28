@@ -83,9 +83,7 @@ test('TerrainLayer#isLoaded waits for elevation and texture in single-terrain mo
 
   texture.resolve(createTestTexture());
   const handle = await initPromise;
-  expect(layer.isLoaded, 'single-terrain layer is loaded after both resources resolve').toBe(
-    true
-  );
+  expect(layer.isLoaded, 'single-terrain layer is loaded after both resources resolve').toBe(true);
   handle?.finalize();
 });
 

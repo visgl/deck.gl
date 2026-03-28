@@ -230,9 +230,10 @@ test('TileLayer#error tiles do not block isLoaded', async () => {
         onAfterUpdate: ({layer, subLayers}) => {
           if (layer.isLoaded) {
             expect(layer.isLoaded, 'Layer is loaded after tile errors').toBeTruthy();
-            expect(subLayers.length, 'Only cached placeholder sublayers may remain').toBeLessThanOrEqual(
-              2
-            );
+            expect(
+              subLayers.length,
+              'Only cached placeholder sublayers may remain'
+            ).toBeLessThanOrEqual(2);
           }
         }
       }

@@ -57,12 +57,10 @@ function getPlaywrightKey(key: string): string {
 async function focusActiveCanvas(frame: any) {
   await frame.evaluate(() => {
     const canvases = Array.from(document.querySelectorAll('canvas'));
-    const canvas = canvases
-      .reverse()
-      .find(element => {
-        const rect = element.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-      });
+    const canvas = canvases.reverse().find(element => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
 
     if (canvas) {
       if (!canvas.hasAttribute('tabindex')) {
