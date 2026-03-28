@@ -22,18 +22,17 @@ const DECODER = {
 function waitForSettledFrames(frameCount = 2, waitMs = 0) {
   let settledFrames = 0;
   let doneScheduled = false;
+  let lastTerrainModelCount = 0;
 
   return ({deck, layers, done}) => {
-    const needsUpdate = deck.layerManager?.needsUpdate();
-    const hasRenderableTerrain = layers.some(layer => {
-      return (
-        layer.id.includes('terrain') &&
-        typeof layer.getModels === 'function' &&
-        layer.getModels().length > 0
-      );
-    });
+    const terrainModelCount = layers.reduce((count, layer) => {
+      if (layer.id.includes('terrain') && typeof layer.getModels === 'function') {
+        return count + layer.getModels().length;
+      }
+      return count;
+    }, 0);
 
-    if (hasRenderableTerrain && !needsUpdate) {
+    if (terrainModelCount > 0 && terrainModelCount === lastTerrainModelCount) {
       settledFrames++;
       if (settledFrames >= frameCount && !doneScheduled) {
         doneScheduled = true;
@@ -47,6 +46,8 @@ function waitForSettledFrames(frameCount = 2, waitMs = 0) {
       settledFrames = 0;
       doneScheduled = false;
     }
+
+    lastTerrainModelCount = terrainModelCount;
   };
 }
 
@@ -67,7 +68,7 @@ export default [
         elevationDecoder: DECODER
       })
     ],
-    onAfterRender: waitForSettledFrames(),
+    onAfterRender: waitForSettledFrames(2, 250),
     goldenImage: './test/render/golden-images/terrain-layer.png'
   },
   {
@@ -93,7 +94,7 @@ export default [
         extensions: [new TerrainExtension()]
       })
     ],
-    onAfterRender: waitForSettledFrames(),
+    onAfterRender: waitForSettledFrames(2, 250),
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
   },
   {
@@ -129,7 +130,7 @@ export default [
         extensions: [new TerrainExtension()]
       })
     ],
-    onAfterRender: waitForSettledFrames(3, 750),
+    onAfterRender: waitForSettledFrames(3, 1000),
     goldenImage: './test/render/golden-images/terrain-extension-offset.png'
   }
 ];

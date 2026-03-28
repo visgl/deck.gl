@@ -261,20 +261,19 @@ export function createTestController({
 export default async function testController(ViewClass, defaultProps, blackList = []) {
   const timeline = new Timeline();
   const view = new ViewClass({controller: true});
-
+  const baseProps = {...BASE_PROPS, ...view.controller, ...defaultProps};
   let onViewStateChangeCalled = 0;
   const affectedStates = new Set();
   let controllerProps = null;
-  Object.assign(defaultProps, BASE_PROPS, view.controller);
-  const ControllerClass = defaultProps.type;
+  const ControllerClass = baseProps.type;
   const controller = new ControllerClass({
     timeline,
     onViewStateChange: ({viewState, interactionState}) => {
       if (!interactionState.inTransition) {
         onViewStateChangeCalled++;
       }
-      // eslint-disable-next-line
-      controller.setProps({...controllerProps, ...viewState});
+      controllerProps = {...controllerProps, ...viewState};
+      controller.setProps(controllerProps);
     },
     onStateChange: state => {
       for (const key in state) {
@@ -286,7 +285,7 @@ export default async function testController(ViewClass, defaultProps, blackList 
     makeViewport: viewState =>
       view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
   });
-  controller.setProps(defaultProps);
+  controller.setProps(baseProps);
 
   for (const testCase of TEST_CASES) {
     if (blackList.includes(testCase.title)) {
@@ -294,7 +293,7 @@ export default async function testController(ViewClass, defaultProps, blackList 
     }
     onViewStateChangeCalled = 0;
     affectedStates.clear();
-    controllerProps = {...defaultProps, ...testCase.props};
+    controllerProps = {...baseProps, ...testCase.props};
     controller.setProps(controllerProps);
     await triggerEvents(controller, testCase, timeline);
 

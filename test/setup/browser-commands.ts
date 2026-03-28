@@ -71,6 +71,41 @@ async function focusActiveCanvas(frame: any) {
   });
 }
 
+async function dispatchCanvasMouseMove(frame: any, x: number, y: number) {
+  await frame.evaluate(
+    ({x, y}) => {
+      const canvases = Array.from(document.querySelectorAll('canvas'));
+      const canvas = canvases.reverse().find(element => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      });
+
+      if (!canvas) {
+        return;
+      }
+
+      const eventInit = {
+        clientX: x,
+        clientY: y,
+        bubbles: true,
+        cancelable: true,
+        buttons: 0
+      };
+
+      canvas.dispatchEvent(
+        new PointerEvent('pointermove', {
+          ...eventInit,
+          pointerId: 1,
+          pointerType: 'mouse',
+          isPrimary: true
+        })
+      );
+      canvas.dispatchEvent(new MouseEvent('mousemove', eventInit));
+    },
+    {x, y}
+  );
+}
+
 /**
  * Captures a screenshot and compares it with a golden image.
  * Replaces browserTestDriver_captureAndDiffScreen from @probe.gl/test-utils
@@ -321,7 +356,7 @@ export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, eve
     }
 
     case 'mousemove': {
-      await page.mouse.move(adjustX(event.x), adjustY(event.y));
+      await dispatchCanvasMouseMove(frame, event.x, event.y);
       break;
     }
 

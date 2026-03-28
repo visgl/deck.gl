@@ -26,6 +26,7 @@ const hoverEvents: any[] = [];
 
 // Shared Deck instance
 let deck: Deck<any> | null = null;
+let container: HTMLDivElement | null = null;
 
 const deckProps = {
   id: 'interaction-test-picking',
@@ -59,7 +60,11 @@ const deckProps = {
 };
 
 beforeAll(async () => {
-  deck = new Deck(deckProps);
+  container = document.createElement('div');
+  container.style.cssText = 'position: absolute; left: 0; top: 0;';
+  document.body.appendChild(container);
+
+  deck = new Deck({...deckProps, container});
   // Wait for deck to initialize
   await new Promise<void>(resolve => {
     deck!.setProps({onLoad: resolve});
@@ -70,6 +75,10 @@ afterAll(() => {
   if (deck) {
     deck.finalize();
     deck = null;
+  }
+  if (container) {
+    container.remove();
+    container = null;
   }
 });
 

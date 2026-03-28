@@ -49,7 +49,7 @@ const geoJSONData = [
 
 class TestMVTLayer extends MVTLayer {
   getTileData() {
-    return this.props.data;
+    return this.props.binary ? geoJSONBinaryData : geoJSONData;
   }
 }
 
@@ -59,7 +59,7 @@ const testMVTLayer = new TestMVTLayer({
   id: 'test-mvt-layer',
   autoHighlight: true,
   binary: false,
-  data: geoJSONData
+  data: ['https://json/{z}/{x}/{y}.mvt']
 });
 
 const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
@@ -69,7 +69,7 @@ const testMVTLayerBinary = new TestMVTLayer({
   id: 'test-mvt-layer-binary',
   autoHighlight: true,
   binary: true,
-  data: geoJSONBinaryData
+  data: ['https://binary/{z}/{x}/{y}.mvt']
 });
 
 const parameters = {
@@ -135,6 +135,31 @@ test('processPickInfo', async () => {
     });
     await sleep(100);
   }
+
+  // Async tile loads can flip `layer.isLoaded` before a final render pass has materialized
+  // the tile-backed GeoJson sublayers. Run one more update/render cycle against the now-loaded
+  // tiles so the live MVT picking layers exist before processPickInfo is exercised.
+  layerManager.updateLayers();
+  deckRenderer.renderLayers({
+    viewports: [layerManager.context.viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+
+  const renderedLayers = layerManager.getLayers();
+  const compositePointLayer = renderedLayers.find(
+    layer => layer.id === 'test-composite-layer-points-circle'
+  );
+  const mvtPointLayer = renderedLayers.find(
+    layer => layer.id === 'test-mvt-layer-0-0-1-points-circle'
+  );
+  const mvtPointLayerBinary = renderedLayers.find(
+    layer => layer.id === 'test-mvt-layer-binary-0-0-1-points-circle'
+  );
+
+  expect(compositePointLayer, 'GeoJson sublayer is available').toBeTruthy();
+  expect(mvtPointLayer, 'MVT sublayer is available').toBeTruthy();
+  expect(mvtPointLayerBinary, 'Binary MVT sublayer is available').toBeTruthy();
 
   const TEST_CASES = [
     {
@@ -224,7 +249,7 @@ test('processPickInfo', async () => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
-        pickedLayer: testCompositeLayer.getSubLayers()[0],
+        pickedLayer: compositePointLayer,
         pickedObjectIndex: 0
       },
       x: 100,
@@ -240,7 +265,7 @@ test('processPickInfo', async () => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
-        pickedLayer: testMVTLayer.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayer,
         pickedObjectIndex: 0
       },
       x: 100,
@@ -262,7 +287,7 @@ test('processPickInfo', async () => {
     {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
-        pickedLayer: testMVTLayer.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayer,
         pickedObjectIndex: 1
       },
       x: 100,
@@ -284,7 +309,7 @@ test('processPickInfo', async () => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
-        pickedLayer: testMVTLayerBinary.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayerBinary,
         pickedObjectIndex: 0
       },
       x: 100,
@@ -306,7 +331,7 @@ test('processPickInfo', async () => {
     {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
-        pickedLayer: testMVTLayerBinary.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayerBinary,
         pickedObjectIndex: 1
       },
       x: 100,
