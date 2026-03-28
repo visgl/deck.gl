@@ -24,7 +24,7 @@ import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<ArcLayerProps> = {
   getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},

@@ -1,66 +1,99 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {FullscreenWidget} from '@deck.gl/widgets';
-
 # FullscreenWidget
+
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
+
+import {FullscreenWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<FullscreenWidgetDemo />
 
 This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
 
-<WidgetPreview cls={FullscreenWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {FullscreenWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new FullscreenWidget()]
+new Deck({
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL, FullscreenWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <FullscreenWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {FullscreenWidget, type FullscreenWidgetProps} from '@deck.gl/widgets';
+new FullscreenWidget({} satisfies FullscreenWidgetProps);
 ```
 
 ## Types
 
 ### `FullscreenWidgetProps` {#fullscreenwidgetprops}
 
-The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops):
-
-- `id` (default `'fullscreen'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+The `FullscreenWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `container` (HTMLElement, optional) {#container}
 
-Default: `undefined`
+* Default: `undefined`
 
 A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen. By default, the map container element will be made full screen.
 
 #### `enterLabel` (string, optional) {#enterlabel}
 
-Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
+* Default: `'Enter Fullscreen'`
 
-Default: `'Enter Fullscreen'`
+Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
 
 #### `exitLabel` (string, optional) {#exitlabel}
 
+* Default: `'Exit Fullscreen'`
+
 Tooltip message displayed while hovering a mouse over the widget when fullscreen.
-
-Default: `'Exit Fullscreen'`
-
-#### `style` (object, optional) {#style}
-
-Default: `{}`
-
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
-
-#### `className` (string, optional) {#classname}
-
-Default: `undefined`
-
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-fullscreen-widget`.
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name                      | Type                     | Default                                                      |
 | ------------------------- | ------------------------ | ------------------------------------------------------------ |

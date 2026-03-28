@@ -46,7 +46,6 @@ export type DeckGLRef<ViewsT extends ViewOrViews = null> = {
   deck?: Deck<ViewsT>;
   pickObjectAsync: Deck['pickObjectAsync'];
   pickObjectsAsync: Deck['pickObjectsAsync'];
-  pickMultipleObjectsAsync: Deck['pickMultipleObjectsAsync'];
   pickObject: Deck['pickObject'];
   pickObjects: Deck['pickObjects'];
   pickMultipleObjects: Deck['pickMultipleObjects'];
@@ -61,7 +60,6 @@ function getRefHandles<ViewsT extends ViewOrViews>(
     },
     // The following method can only be called after ref is available, by which point deck is defined in useEffect
     pickObjectAsync: opts => thisRef.deck!.pickObjectAsync(opts),
-    pickMultipleObjectsAsync: opts => thisRef.deck!.pickMultipleObjectsAsync(opts),
     pickObjectsAsync: opts => thisRef.deck!.pickObjectsAsync(opts),
     pickObject: opts => thisRef.deck!.pickObject(opts),
     pickMultipleObjects: opts => thisRef.deck!.pickMultipleObjects(opts),
@@ -176,10 +174,13 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       parent: containerRef.current,
       canvas: canvasRef.current,
       layers: jsxProps.layers,
-      views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
       onInteractionStateChange: handleInteractionStateChange
     };
+
+    if (jsxProps.views) {
+      forwardProps.views = jsxProps.views;
+    }
 
     // The defaultValue for _customRender is null, which would overwrite the definition
     // of _customRender. Remove to avoid frequently redeclaring the method here.
@@ -265,11 +266,26 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       style: canvasStyle
     });
 
+    const eventRoot = createElement(
+      'div',
+      {
+        key: 'deck-events-root',
+        className: 'deck-events-root',
+        style: {width, height}
+      },
+      [canvas, childrenUnderViews]
+    );
+
+    const widgetRoot = createElement('div', {
+      key: 'deck-widgets-root',
+      className: 'deck-widgets-root'
+    });
+
     // Render deck.gl as the last child
     thisRef.control = createElement(
       'div',
       {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
-      [canvas, childrenUnderViews]
+      [eventRoot, widgetRoot]
     );
   }
 

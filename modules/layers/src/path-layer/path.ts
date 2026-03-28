@@ -22,7 +22,7 @@ export function normalizePath(
   size: number,
   gridResolution?: number,
   wrapLongitude?: boolean
-): number[][] | NumericArray {
+): NormalizedPathGeometry {
   let flatPath: NumericArray;
   if (Array.isArray(path[0])) {
     const length = path.length * size;
@@ -36,10 +36,12 @@ export function normalizePath(
     flatPath = path as NumericArray;
   }
   if (gridResolution) {
-    return cutPolylineByGrid(flatPath, {size, gridResolution});
+    return cutPolylineByGrid(flatPath, {size, gridResolution}) as
+      | FlatPathGeometry
+      | FlatPathGeometry[];
   }
   if (wrapLongitude) {
-    return cutPolylineByMercatorBounds(flatPath, {size});
+    return cutPolylineByMercatorBounds(flatPath, {size}) as FlatPathGeometry[];
   }
   return flatPath;
 }

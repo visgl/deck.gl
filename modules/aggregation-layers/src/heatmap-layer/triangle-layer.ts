@@ -11,7 +11,7 @@ import {TriangleProps, triangleUniforms} from './triangle-layer-uniforms';
 
 type _TriangleLayerProps = {
   data: {attributes: {positions: Buffer; texCoords: Buffer}};
-  colorDomain: [number, number];
+  colorDomain: Readonly<[number, number]>;
   aggregationMode: number;
   threshold: number;
   intensity: number;

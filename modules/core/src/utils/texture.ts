@@ -57,7 +57,9 @@ export function createTexture(
     },
     mipLevels: device.getMipLevelCount(width, height)
   });
-  texture.generateMipmapsWebGL();
+  if (device.type === 'webgl') {
+    texture.generateMipmapsWebGL();
+  }
 
   // Track this texture
   internalTextures[texture.id] = owner;

@@ -4,5 +4,7 @@
 
 import './viewport.spec';
 import './globe-viewport.spec';
+import './orbit-viewport.spec';
 import './web-mercator-project-unproject.spec';
 import './web-mercator-viewport.spec';
+import './conformance.spec';

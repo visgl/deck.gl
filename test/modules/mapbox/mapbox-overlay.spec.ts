@@ -215,8 +215,7 @@ test('MapboxOverlay#interleaved', t => {
       'Overlay parameters are intact'
     );
 
-    t.is(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
-    t.is(overlay._props.useDevicePixels, 1, 'useDevicePixels are intact');
+    t.is(overlay._props.useDevicePixels, undefined, 'useDevicePixels is not forwarded');
 
     await sleep(100);
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
@@ -294,8 +293,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     );
     t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
-    t.true(overlay._deck.props.useDevicePixels === false, 'useDevicePixels is set correctly');
-    t.true(overlay._props.useDevicePixels === false, 'useDevicePixels are intact');
+    t.is(overlay._props.useDevicePixels, undefined, 'useDevicePixels is not forwarded');
 
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})],
@@ -392,3 +390,89 @@ for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
     });
   });
 }
+
+test('MapboxOverlay#renderLayersInGroups - constructor', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14,
+    style: {
+      layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
+    }
+  });
+
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    _renderLayersInGroups: true,
+    layers: [
+      new ScatterplotLayer({id: 'poi1', beforeId: 'park'}),
+      new ScatterplotLayer({id: 'poi2', beforeId: 'park'})
+    ]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+  t.true(overlay._renderLayersInGroups, '_renderLayersInGroups option is set');
+
+  map.once('render', async () => {
+    await sleep(100);
+
+    const groupId = 'deck-layer-group-before:park';
+    t.ok(map.getLayer(groupId), 'Group layer exists');
+    t.notOk(map.getLayer('poi1'), 'Individual layer poi1 not added to map');
+    t.notOk(map.getLayer('poi2'), 'Individual layer poi2 not added to map');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});
+
+test('MapboxOverlay#renderLayersInGroups - setProps', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14,
+    style: {
+      layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
+    }
+  });
+
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    _renderLayersInGroups: true,
+    layers: [new ScatterplotLayer({id: 'poi', beforeId: 'park'})]
+  });
+
+  map.addControl(overlay);
+
+  map.once('render', async () => {
+    await sleep(100);
+
+    const parkGroup = 'deck-layer-group-before:park';
+    t.ok(map.getLayer(parkGroup), 'Park group exists initially');
+
+    // Update to different beforeId
+    overlay.setProps({
+      layers: [new ScatterplotLayer({id: 'poi', beforeId: 'building'})]
+    });
+
+    await sleep(100);
+
+    const buildingGroup = 'deck-layer-group-before:building';
+    t.ok(map.getLayer(buildingGroup), 'Building group exists after setProps');
+    t.notOk(map.getLayer(parkGroup), 'Park group removed after setProps');
+
+    // Remove all layers
+    overlay.setProps({
+      layers: []
+    });
+
+    await sleep(100);
+
+    t.notOk(map.getLayer(buildingGroup), 'Building group removed when layers cleared');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});

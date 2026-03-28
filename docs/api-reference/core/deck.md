@@ -147,27 +147,32 @@ Note:
 
 #### `parameters` (object) {#parameters}
 
-Expects an object with GPU parameters. Before each frame is rendered, this object will be passed to luma.gl's `setParameters` function to reset the GPU context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
+Expects an object with GPU parameters. Before each frame is rendered, this object will be passed to luma.gl's `RenderPass` to reset the GPU context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
 
 ```js
 {
   blend: true,
-  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendColorSrcFactor: 'src-alpha',
+  blendColorDstFactor: 'one-minus-src-alpha',  
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha'
   polygonOffsetFill: true,
-  depthTest: true,
-  depthFunc: GL.LEQUAL
+  depthWriteEnabled: true,
+  depthCompare: 'less-equal'
 }
 ```
 
-Refer to the luma.gl [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
+Refer to the luma.gl [GPU parameters](https://luma.gl/docs/api-reference/core/parameters) API for documentation on supported parameters and values.
 
 ```js
-import GL from '@luma.gl/constants';
 new Deck({
   // ...
   parameters: {
-    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-    depthTest: false
+    blendColorSrcFactor: 'one',
+    blendColorDstFactor: 'one',
+    blendAlphaSrcFactor: 'one',
+    blendAlphaDstFactor: 'one'
+    depthWriteEnabled: false
   }
 });
 ```
@@ -175,7 +180,6 @@ new Deck({
 Notes:
 
 - Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
-- An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setParameters` method inside it.
 
 #### `layers` (LayersList) {#layers}
 
@@ -457,6 +461,7 @@ Receives arguments:
   + `isPanning` (boolean)
   + `isRotating` (boolean)
   + `isZooming` (boolean)
+  + `rotationPivotPosition` ([number, number, number]) - World coordinate `[lng, lat, altitude]` of the rotation pivot point when rotating. Only present when the `rotationPivot` controller option is set to `'2d'` or `'3d'`.
 * `oldViewState` - The previous [view state](../../developer-guide/views.md) object.
 
 Returns:
@@ -479,6 +484,7 @@ Receives arguments:
   + `isPanning` (boolean)
   + `isRotating` (boolean)
   + `isZooming` (boolean)
+  + `rotationPivotPosition` ([number, number, number]) - World coordinate `[lng, lat, altitude]` of the rotation pivot point when rotating. Only present when the `rotationPivot` controller option is set to `'2d'` or `'3d'`.
 
 Note:
 * `onInteractionStateChange` may be fired without `onViewStateChange`. For example, when the pointer is released at the end of a drag-pan, `isDragging` is reset to `false`, without the viewport's `longitude` and `latitude` changing.
@@ -607,6 +613,52 @@ Notes:
 
 * See the [canvas](#canvas) prop for more information.
 
+#### `getViews` {#getviews}
+
+Get all views currently rendered by this `Deck` instance.
+
+`deck.getViews()`
+
+Returns:
+
+* An array of [View](./view.md) instances.
+
+#### `getView` {#getview}
+
+Get a specific view by id.
+
+```js
+deck.getView(viewId)
+```
+
+Parameters:
+
+* `viewId` (string) - the id of the view to retrieve
+
+Returns:
+
+* A [View](./view.md) instance, or `undefined` if no view with the given id exists.
+
+#### `getViewports` {#getviewports}
+
+Get all viewports currently rendered by this `Deck` instance.
+
+```js
+deck.getViewports(rect)
+```
+
+Parameters:
+
+* `rect` (object, optional) - if provided, only returns viewports that contain the given rectangle. Has the following fields:
+  + `x` (number) - left of the bounding box in pixels
+  + `y` (number) - top of the bounding box in pixels
+  + `width` (number, optional) - width of the bounding box in pixels
+  + `height` (number, optional) - height of the bounding box in pixels
+
+Returns:
+
+* An array of [Viewport](./viewport.md) instances.
+
 #### `setProps` {#setprops}
 
 Updates (partial) properties.
@@ -653,32 +705,6 @@ Parameters:
 Returns:
 
 * a single [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) object, or `null` if nothing is found.
-
-
-#### `pickMultipleObjectsAsync` {#pickmultipleobjectsasync}
-
-Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
-
-```ts
-await deck.pickMultipleObjectsAsync({x, y, radius, layerIds, depth, unproject3D})
-```
-
-Parameters:
-
-* `x` (number) - x position in pixels
-* `y` (number) - y position in pixels
-* `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
-* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
-* `depth` - Specifies the max number of objects to return. Default `10`.
-* `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
-
-Returns:
-
-* An array of [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects. The array will be empty if no object was picked.
-
-Notes:
-
-* Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
 
 
 #### `pickObjectsAsync` {#pickobjectsasync}
@@ -798,11 +824,15 @@ Flag indicating that the Deck instance has initialized its resources. It is safe
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
 
 - `fps` - average number of frames rendered per second
-- `updateAttributesTime` - time spent updating layer attributes
 - `setPropsTime` - time spent setting deck properties
+- `layersCount` - total number of layers created recursively
+- `drawLayersCount` - number of layers drawn to screen in the last render pass
+- `updateAttributesCount` - number of times attribute buffers are updated
+- `updateAttributesTime` - time spent updating layer attributes
 - `framesRedrawn` - number of times the scene was rendered
 - `pickTime` - total time spent on picking operations
 - `pickCount` - number of times a pick operation was performed
+- `pickLayersCount` - number of layers drawn to the picking buffer in the last picking operation
 - `gpuTime` - total time spent on GPU processing
 - `gpuTimePerFrame` - average time spent on GPU processing per frame
 - `cpuTime` - total time spent on CPU processing
@@ -812,6 +842,13 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 - `renderbufferMemory` - total GPU memory allocated for renderbuffers
 - `gpuMemory` - total allocated GPU memory
 
+Note that `gpuTime` and `gpuTimePerFrame` metrics are disabled by default for performance reasons. To enable the readings, set `deviceProps.debugGPUTime: true` in Deck's constructor:
+
+```ts
+new Deck({
+  deviceProps: {debugGPUTime: true}
+})
+```
 
 ## Source
 

@@ -2,18 +2,32 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+export type Defines = {
+  // Defines passed externally
+  /**
+   * Enable high precision dash rendering.
+   */
+  HIGH_PRECISION_DASH?: boolean;
+};
+
 export const dashShaders = {
   inject: {
     'vs:#decl': `
 in vec2 instanceDashArrays;
+#ifdef HIGH_PRECISION_DASH
 in float instanceDashOffsets;
+#endif
 out vec2 vDashArray;
 out float vDashOffset;
 `,
 
     'vs:#main-end': `
 vDashArray = instanceDashArrays;
+#ifdef HIGH_PRECISION_DASH
 vDashOffset = instanceDashOffsets / width.x;
+#else
+vDashOffset = 0.0;
+#endif
 `,
 
     'fs:#decl': `

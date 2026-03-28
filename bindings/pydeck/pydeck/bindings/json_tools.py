@@ -72,7 +72,18 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     """Default method for rendering JSON from a dictionary"""
     if issubclass(type(o), PydeckType):
         return repr(o)
-    attrs = vars(o)
+
+    # Handle objects without __dict__ (e.g., pandas 3.x DataFrames if detection fails)
+    try:
+        attrs = vars(o)
+    except TypeError:
+        if hasattr(o, "to_dict") and callable(getattr(o, "to_dict", None)):
+            try:
+                return o.to_dict(orient="records")
+            except (TypeError, ValueError):
+                pass
+        return str(o)
+
     attrs = {k: v for k, v in attrs.items() if v is not None}
     for ignore_attr in IGNORE_KEYS:
         if ignore_attr in attrs:

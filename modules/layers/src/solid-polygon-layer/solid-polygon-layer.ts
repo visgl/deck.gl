@@ -92,7 +92,7 @@ type _SolidPolygonLayerProps<DataT> = {
 /** Render filled and/or extruded polygons. */
 export type SolidPolygonLayerProps<DataT = unknown> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   filled: true,
