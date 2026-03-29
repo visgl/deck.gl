@@ -102,6 +102,15 @@ export function getWorldPosition(
   }
 
   switch (coordinateSystem) {
+    case 'default':
+      return getWorldPosition(position, {
+        viewport,
+        modelMatrix,
+        coordinateSystem: viewport.isGeospatial ? 'lnglat' : 'cartesian',
+        coordinateOrigin,
+        offsetMode
+      });
+
     case 'lnglat':
       return lngLatZToWorldPosition([x, y, z], viewport, offsetMode);
 
