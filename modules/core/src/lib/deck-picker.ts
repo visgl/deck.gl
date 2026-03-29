@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Buffer} from '@luma.gl/core';
-import type {Device, Texture} from '@luma.gl/core';
+import {Buffer, Texture} from '@luma.gl/core';
+import type {Device} from '@luma.gl/core';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
+import log from '../utils/log';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
   processPickInfo,
@@ -159,14 +160,26 @@ export default class DeckPicker {
   _resizeBuffer() {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
+      const pickingColorTexture = this.device.createTexture({
+        format: 'rgba8unorm',
+        width: 1,
+        height: 1,
+        usage: Texture.RENDER_ATTACHMENT | Texture.COPY_SRC
+      });
       this.pickingFBO = this.device.createFramebuffer({
-        colorAttachments: ['rgba8unorm'],
+        colorAttachments: [pickingColorTexture],
         depthStencilAttachment: 'depth16unorm'
       });
 
       if (this.device.isTextureFormatRenderable('rgba32float')) {
+        const depthColorTexture = this.device.createTexture({
+          format: 'rgba32float',
+          width: 1,
+          height: 1,
+          usage: Texture.RENDER_ATTACHMENT | Texture.COPY_SRC
+        });
         const depthFBO = this.device.createFramebuffer({
-          colorAttachments: ['rgba32float'],
+          colorAttachments: [depthColorTexture],
           depthStencilAttachment: 'depth16unorm'
         });
         this.depthFBO = depthFBO;
@@ -827,6 +840,22 @@ export default class DeckPicker {
       pickZ ? Float32Array : Uint8Array
     );
 
+    if (!pickZ) {
+      let hasNonZeroAlpha = false;
+      for (let i = 3; i < pickedColors.length; i += 4) {
+        if (pickedColors[i] !== 0) {
+          hasNonZeroAlpha = true;
+          break;
+        }
+      }
+      if (!hasNonZeroAlpha && pickedColors.length > 0) {
+        log.warn('Async pick readback returned only zero alpha values', {
+          deviceRect,
+          bytes: Array.from(pickedColors.subarray(0, Math.min(pickedColors.length, 16)))
+        })();
+      }
+    }
+
     return {pickedColors, decodePickingColor};
   }
 
@@ -846,13 +875,25 @@ export default class DeckPicker {
       texture.readBuffer(options, readBuffer);
       const readData = await readBuffer.readAsync(0, layout.byteLength);
       const bytesPerElement = ArrayType.BYTES_PER_ELEMENT;
+      if (layout.bytesPerRow % bytesPerElement !== 0) {
+        throw new Error(
+          `Texture readback row stride ${layout.bytesPerRow} is not aligned to ${bytesPerElement}-byte elements.`
+        );
+      }
       const source = new ArrayType(
         readData.buffer,
         readData.byteOffset,
         layout.byteLength / bytesPerElement
       );
+      // Picking textures are RGBA. WebGPU rows may be padded to satisfy GPU alignment
+      // requirements, so repack each row into a tightly packed CPU array before decode.
       const packedRowLength = width * 4;
       const sourceRowLength = layout.bytesPerRow / bytesPerElement;
+      if (sourceRowLength < packedRowLength) {
+        throw new Error(
+          `Texture readback row stride ${sourceRowLength} is smaller than packed row length ${packedRowLength}.`
+        );
+      }
       const packed = new ArrayType(width * height * 4);
 
       for (let row = 0; row < height; row++) {

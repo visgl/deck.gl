@@ -10,7 +10,7 @@ import {OrbitView, LinearInterpolator} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASLoader} from '@loaders.gl/las';
-import type {OrbitViewState} from '@deck.gl/core';
+import type {OrbitViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
 
 // TODO - export from loaders?
@@ -33,10 +33,12 @@ const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
 export default function App({
   onLoad,
-  device
+  device,
+  widgets
 }: {
   onLoad?: (data: {count: number; progress: number}) => void;
   device?: Device;
+  widgets?: Widget[];
 }) {
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
   const [boundingBox, setBoundingBox] = useState<[number[], number[]] | null>(null);
@@ -106,6 +108,7 @@ export default function App({
         maxBounds: boundingBox
       }}
       layers={layers}
+      widgets={widgets}
     />
   );
 }

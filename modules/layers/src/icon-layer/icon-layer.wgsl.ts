@@ -48,6 +48,7 @@ struct Varyings {
   @location(1) vColor: vec4<f32>,
   @location(2) vTextureCoords: vec2<f32>,
   @location(3) uv: vec2<f32>,
+  @location(4) pickingColor: vec3<f32>,
 };
 
 @vertex
@@ -102,6 +103,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
   // DECKGL_FILTER_COLOR(outp.vColor, geometry);
 
   outp.vColorMode = inp.instanceColorModes;
+  outp.pickingColor = inp.instancePickingColors;
 
   return outp;
 }
@@ -116,14 +118,38 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   // if colorMode == 0, use pixel color from the texture
   // if colorMode == 1 (or picking), use texture as transparency mask
   let rgb = mix(texColor.rgb, inp.vColor.rgb, inp.vColorMode);
-  let a = texColor.a * color.opacity * inp.vColor.a;
+  let a = texColor.a * layer.opacity * inp.vColor.a;
 
   if (a < icon.alphaCutoff) {
     discard;
   }
 
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(inp.pickingColor)) {
+      discard;
+    }
+    return vec4<f32>(inp.pickingColor, 1.0);
+  }
+
   var fragColor = deckgl_premultiplied_alpha(vec4<f32>(rgb, a));
-  // DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(inp.pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
+
   return fragColor;
 }
 `;

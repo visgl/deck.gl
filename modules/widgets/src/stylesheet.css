@@ -463,6 +463,14 @@
   align-items: center;
   gap: 4px;
 }
+.deck-widget-stats-device {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  line-height: 1.2;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+}
 .deck-widget-stats-header:hover {
   color: var(--button-icon-hover, rgb(24, 24, 26));
 }
