@@ -4,7 +4,8 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 import type {DataFilterExtensionOptions, DataFilterExtensionProps} from './data-filter-extension';
-import {UniformFormat} from '@luma.gl/shadertools/dist/types';
+
+type UniformFormat = 'i32' | 'vec4<f32>' | 'vec4<u32>';
 
 /*
  * data filter shader module
