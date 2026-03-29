@@ -30,6 +30,11 @@ interface DiffResult {
   error: string | null;
 }
 
+interface BrowserDiagnostic {
+  level: string;
+  text: string;
+}
+
 interface InputEvent {
   type: 'click' | 'dblclick' | 'drag' | 'mousemove' | 'keypress';
   x?: number;
@@ -65,6 +70,16 @@ declare module 'vitest/browser' {
      * Replaces browserTestDriver_isHeadless from @probe.gl/test-utils
      */
     isHeadless(): Promise<boolean>;
+
+    /**
+     * Clears buffered browser diagnostics for the current page.
+     */
+    resetBrowserDiagnostics(): Promise<void>;
+
+    /**
+     * Returns buffered browser diagnostics for the current page and clears them.
+     */
+    consumeBrowserDiagnostics(): Promise<BrowserDiagnostic[]>;
   }
 }
 
