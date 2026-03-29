@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Layer, project32, color, picking, UNIT} from '@deck.gl/core';
-import {Parameters} from '@luma.gl/core';
+import {BufferLayout, Parameters} from '@luma.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
@@ -167,6 +167,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         instancePositions: {
           size: 12,
           type: 'float32',
+          // WebGPU keeps the fp64 path by uploading float32 high parts and reconstructing
+          // with the matching `instancePositions64Low` residuals in WGSL.
           transition: false,
           accessor: 'getPath',
           // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -182,6 +184,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         instancePositions64Low: {
           size: 12,
           type: 'float32',
+          // This is the low-part companion to `instancePositions`, not a plain-fp32 downgrade.
           transition: false,
           accessor: 'getPath',
           // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -396,21 +399,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             depthCompare: 'less-equal'
           } satisfies Parameters)
         : undefined;
-    const bufferLayout =
-      this.context.device.type === 'webgpu'
-        ? this.getAttributeManager()!.getBufferLayouts()
-        : this.getAttributeManager()!.getBufferLayouts().map(layout =>
-            layout.name === 'vertexPositions'
-              ? {
-                  ...layout,
-                  attributes: (layout.attributes || []).filter(
-                    attribute =>
-                      attribute.attribute !== 'vertexPositions' &&
-                      attribute.attribute !== 'vertexPositions64Low'
-                  )
-                }
-              : layout
-          );
 
     /*
      *       _
@@ -459,7 +447,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout,
+      bufferLayout: this._getModelBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {
@@ -505,15 +493,18 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const numInstances = pathTesselator.instanceCount;
     const result = new Float32Array(numInstances * 12);
+    // WebGL reads a padded neighbor window using `vertexOffset: 1`; this materializes
+    // the same [-1, 0, 1, 2] access pattern explicitly for the WebGPU layout.
+    const neighborOffsets = [-1, 0, 1, 2];
 
     for (let i = 0; i < numInstances; i++) {
-      const sourceIndex = i * 3;
       const targetIndex = i * 12;
       for (let vertexOffset = 0; vertexOffset < 4; vertexOffset++) {
-        const sourceOffset = sourceIndex + vertexOffset * 3;
+        const sourceVertex = i + neighborOffsets[vertexOffset];
         const targetOffset = targetIndex + vertexOffset * 3;
         for (let j = 0; j < 3; j++) {
-          const position = value[sourceOffset + j];
+          const position =
+            sourceVertex >= 0 && sourceVertex < numInstances ? value[sourceVertex * 3 + j] : 0;
           result[targetOffset + j] = lowPart ? position - Math.fround(position) : position;
         }
       }
@@ -521,5 +512,26 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = result;
+  }
+
+  protected _getModelBufferLayouts(): BufferLayout[] {
+    const bufferLayouts = this.getAttributeManager()!.getBufferLayouts();
+
+    if (this.context.device.type === 'webgpu') {
+      return bufferLayouts;
+    }
+
+    return bufferLayouts.map(layout =>
+      layout.name === 'vertexPositions'
+        ? {
+            ...layout,
+            attributes: (layout.attributes || []).filter(
+              attribute =>
+                attribute.attribute !== 'vertexPositions' &&
+                attribute.attribute !== 'vertexPositions64Low'
+            )
+          }
+        : layout
+    );
   }
 }
