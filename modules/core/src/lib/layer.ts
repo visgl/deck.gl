@@ -1383,12 +1383,15 @@ function applyModelParameters(
 function syncModelAttachmentFormats(model: Model, renderPass: RenderPass): void {
   const framebuffer =
     renderPass.props.framebuffer ||
-    ((renderPass as RenderPass & {
-      framebuffer?: {
-        colorAttachments: Array<{texture: {format: string}}>;
-        depthStencilAttachment: {texture: {format: string}} | null;
-      };
-    }).framebuffer ?? null);
+    ((
+      renderPass as RenderPass & {
+        framebuffer?: {
+          colorAttachments: Array<{texture: {format: string}}>;
+          depthStencilAttachment: {texture: {format: string}} | null;
+        };
+      }
+    ).framebuffer ??
+      null);
 
   if (!framebuffer) {
     return;
@@ -1417,10 +1420,7 @@ function syncModelAttachmentFormats(model: Model, renderPass: RenderPass): void 
   }
 }
 
-function equalAttachmentFormats(
-  left?: (string | null)[],
-  right?: (string | null)[]
-): boolean {
+function equalAttachmentFormats(left?: (string | null)[], right?: (string | null)[]): boolean {
   if (left === right) {
     return true;
   }
