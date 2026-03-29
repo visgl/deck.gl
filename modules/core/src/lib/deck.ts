@@ -81,6 +81,12 @@ type CursorState = {
   isDragging: boolean;
 };
 
+type InternalPickingMode = 'sync' | 'async';
+type PointPickResult = {
+  result: PickingInfo[];
+  emptyInfo: PickingInfo;
+};
+
 export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Id of this Deck instance */
   id?: string;
@@ -103,6 +109,10 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * @default `0`
    */
   pickingRadius?: number;
+  /** Selects the internal picking policy used by deck-managed events and controllers.
+   * @default `'auto'`
+   */
+  pickAsync?: InternalPickingMode | 'auto';
 
   /** WebGL parameters to be set before each frame is rendered. */
   parameters?: Parameters;
@@ -233,6 +243,7 @@ const defaultProps: DeckProps = {
   viewState: null,
   initialViewState: null,
   pickingRadius: 0,
+  pickAsync: 'auto',
   layerFilter: null,
   parameters: {},
   parent: null,
@@ -333,6 +344,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     gpuMemory: 0
   };
   private _metricsCounter: number = 0;
+  private _hoverPickSequence: number = 0;
+  private _pointerDownPickSequence: number = 0;
 
   private _needsRedraw: false | string = 'Initial render';
   private _pickRequest: {
@@ -356,6 +369,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * This object is reused for subsequent `onClick` and `onDrag*` callbacks.
    */
   private _lastPointerDownInfo: PickingInfo | null = null;
+  private _lastPointerDownInfoPromise: Promise<PickingInfo> | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
     // @ts-ignore views
@@ -423,7 +437,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.animationLoop?.stop();
     this.animationLoop?.destroy();
     this.animationLoop = null;
+    this._hoverPickSequence++;
+    this._pointerDownPickSequence++;
     this._lastPointerDownInfo = null;
+    this._lastPointerDownInfoPromise = null;
 
     this.layerManager?.finalize();
     this.layerManager = null;
@@ -474,6 +491,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Merge with existing props
     Object.assign(this.props, props);
+    this._validateInternalPickingMode();
 
     // Update CSS size of canvas
     this._setCanvasSize(this.props);
@@ -631,6 +649,47 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /** Query the object rendered on top at a given point */
+  async pickObjectAsync(opts: {
+    /** x position in pixels */
+    x: number;
+    /** y position in pixels */
+    y: number;
+    /** Radius of tolerance in pixels. Default `0`. */
+    radius?: number;
+    /** A list of layer ids to query from. If not specified, then all pickable and visible layers are queried. */
+    layerIds?: string[];
+    /** If `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`. */
+    unproject3D?: boolean;
+  }): Promise<PickingInfo | null> {
+    const infos = (await this._pickAsync('pickObjectAsync', 'pickObject Time', opts)).result;
+    return infos.length ? infos[0] : null;
+  }
+
+  /**
+   * Query all objects rendered on top within a bounding box
+   * @note Caveat: this method performs multiple async GPU queries, so state could potentially change between calls.
+   */
+  async pickObjectsAsync(opts: {
+    /** Left of the bounding box in pixels */
+    x: number;
+    /** Top of the bounding box in pixels */
+    y: number;
+    /** Width of the bounding box in pixels. Default `1` */
+    width?: number;
+    /** Height of the bounding box in pixels. Default `1` */
+    height?: number;
+    /** A list of layer ids to query from. If not specified, then all pickable and visible layers are queried. */
+    layerIds?: string[];
+    /** If specified, limits the number of objects that can be returned. */
+    maxObjects?: number | null;
+  }): Promise<PickingInfo[]> {
+    return await this._pickAsync('pickObjectsAsync', 'pickObjects Time', opts);
+  }
+
+  /**
+   * Query the object rendered on top at a given point
+   * @deprecated WebGL only. Use `pickObjectsAsync` instead
+   */
   pickObject(opts: {
     /** x position in pixels */
     x: number;
@@ -647,7 +706,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return infos.length ? infos[0] : null;
   }
 
-  /* Query all rendered objects at a given point */
+  /**
+   * Query all rendered objects at a given point
+   * @deprecated WebGL only. Use `pickObjectsAsync` instead
+   */
   pickMultipleObjects(opts: {
     /** x position in pixels */
     x: number;
@@ -666,7 +728,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this._pick('pickObject', 'pickMultipleObjects Time', opts).result;
   }
 
-  /* Query all objects rendered on top within a bounding box */
+  /**
+   * Query all objects rendered on top within a bounding box
+   * @deprecated WebGL only. Use `pickObjectsAsync` instead
+   */
   pickObjects(opts: {
     /** Left of the bounding box in pixels */
     x: number;
@@ -689,8 +754,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * @private
    */
   private _pickPositionForController(x: number, y: number): {coordinate?: number[]} | null {
-    const pickResult = this.pickObject({x, y, radius: 0, unproject3D: true});
-    return pickResult;
+    const internalPickingMode = this._getInternalPickingMode();
+    if (internalPickingMode !== 'sync') {
+      return null;
+    }
+
+    return this.pickObject({x, y, radius: 0, unproject3D: true});
   }
 
   /** Experimental
@@ -732,6 +801,166 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   // Private Methods
+
+  private _resolveInternalPickingMode(): InternalPickingMode {
+    const {pickAsync} = this.props;
+    const deviceType = this.device?.type || this.props.deviceProps?.type;
+
+    if (pickAsync === 'auto') {
+      return deviceType === 'webgpu' ? 'async' : 'sync';
+    }
+    if (pickAsync === 'sync' && deviceType === 'webgpu') {
+      throw new Error('`pickAsync: "sync"` is not supported when Deck is using a WebGPU device.');
+    }
+    return pickAsync;
+  }
+
+  private _getInternalPickingMode(): InternalPickingMode | null {
+    try {
+      return this._resolveInternalPickingMode();
+    } catch (error) {
+      this.props.onError?.(error as Error);
+      return null;
+    }
+  }
+
+  private _validateInternalPickingMode(): void {
+    this._getInternalPickingMode();
+  }
+
+  private _getFirstPickedInfo({result, emptyInfo}: PointPickResult): PickingInfo {
+    return result[0] || emptyInfo;
+  }
+
+  private _shouldUnproject3D(layers = this.layerManager?.getLayers() || []): boolean {
+    return layers.some(layer => layer.props.pickable === '3d');
+  }
+
+  private _getPointPickOptions(
+    x: number,
+    y: number,
+    opts: Partial<PickByPointOptions> = {},
+    layers = this.layerManager?.getLayers() || []
+  ): PickByPointOptions {
+    return {
+      x,
+      y,
+      radius: this.props.pickingRadius,
+      unproject3D: this._shouldUnproject3D(layers),
+      ...opts
+    };
+  }
+
+  private _pickPointSync(opts: PickByPointOptions): PointPickResult {
+    return this._pick('pickObject', 'pickObject Time', opts);
+  }
+
+  private _pickPointAsync(opts: PickByPointOptions): Promise<PointPickResult> {
+    return this._pickAsync('pickObjectAsync', 'pickObject Time', opts);
+  }
+
+  private _getLastPointerDownPickingInfo(
+    x: number,
+    y: number,
+    layers = this.layerManager?.getLayers() || []
+  ): PickingInfo {
+    return this.deckPicker!.getLastPickedObject(
+      {
+        x,
+        y,
+        layers,
+        viewports: this.getViewports({x, y})
+      },
+      this._lastPointerDownInfo
+    ) as PickingInfo;
+  }
+
+  private _applyHoverCallbacks(
+    {result, emptyInfo}: PointPickResult,
+    event: MjolnirPointerEvent
+  ): void {
+    if (!this.widgetManager) {
+      return;
+    }
+
+    this.cursorState.isHovering = result.length > 0;
+
+    let pickedInfo = emptyInfo;
+    let handled = false;
+    for (const info of result) {
+      pickedInfo = info;
+      handled = info.layer?.onHover(info, event) || handled;
+    }
+    if (!handled) {
+      this.props.onHover?.(pickedInfo, event);
+      this.widgetManager.onHover(pickedInfo, event);
+    }
+  }
+
+  private _dispatchPickingEvent(info: PickingInfo, event: MjolnirGestureEvent): void {
+    if (!this.layerManager || !this.widgetManager) {
+      return;
+    }
+
+    const eventHandlerProp = EVENT_HANDLERS[event.type];
+    if (!eventHandlerProp) {
+      return;
+    }
+
+    const {layer} = info;
+    const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
+    const rootHandler = this.props[eventHandlerProp];
+    let handled = false;
+
+    if (layerHandler) {
+      handled = layerHandler.call(layer, info, event);
+    }
+    if (!handled) {
+      rootHandler?.(info, event);
+      this.widgetManager.onEvent(info, event);
+    }
+  }
+
+  private _pickAsync(
+    method: 'pickObjectAsync',
+    statKey: string,
+    opts: PickByPointOptions & {layerIds?: string[]}
+  ): Promise<{
+    result: PickingInfo[];
+    emptyInfo: PickingInfo;
+  }>;
+  private _pickAsync(
+    method: 'pickObjectsAsync',
+    statKey: string,
+    opts: PickByRectOptions & {layerIds?: string[]}
+  ): Promise<PickingInfo[]>;
+
+  private _pickAsync(
+    method: 'pickObjectAsync' | 'pickObjectsAsync',
+    statKey: string,
+    opts: (PickByPointOptions | PickByRectOptions) & {layerIds?: string[]}
+  ) {
+    assert(this.deckPicker);
+
+    const {stats} = this;
+
+    stats.get('Pick Count').incrementCount();
+    stats.get(statKey).timeStart();
+
+    const infos = this.deckPicker[method]({
+      // layerManager, viewManager and effectManager are always defined if deckPicker is
+      layers: this.layerManager!.getLayers(opts),
+      views: this.viewManager!.getViews(),
+      viewports: this.getViewports(opts),
+      onViewportActive: this.layerManager!.activateViewport,
+      effects: this.effectManager!.getEffects(),
+      ...opts
+    });
+
+    stats.get(statKey).timeEnd();
+
+    return infos;
+  }
 
   private _pick(
     method: 'pickObject',
@@ -992,46 +1221,41 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Actually run picking */
   private _pickAndCallback() {
-    if (this.device?.type === 'webgpu') {
-      return;
-    }
-
     const {_pickRequest} = this;
 
     if (_pickRequest.event) {
-      // Check if any layer has pickable: '3d' to enable depth picking for hover
+      const event = _pickRequest.event;
       const layers = this.layerManager?.getLayers() || [];
-      const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
-      _pickRequest.unproject3D = has3DPickableLayers;
+      const pickOptions = this._getPointPickOptions(
+        _pickRequest.x,
+        _pickRequest.y,
+        {
+          radius: _pickRequest.radius,
+          mode: _pickRequest.mode
+        },
+        layers
+      );
+      const internalPickingMode = this._getInternalPickingMode();
+      const hoverPickSequence = ++this._hoverPickSequence;
 
-      // Perform picking
-      const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
-      this.cursorState.isHovering = result.length > 0;
-
-      // There are 4 possible scenarios:
-      // result is [outInfo, pickedInfo] (moved from one pickable layer to another)
-      // result is [outInfo] (moved outside of a pickable layer)
-      // result is [pickedInfo] (moved into or over a pickable layer)
-      // result is [] (nothing is or was picked)
-      //
-      // `layer.props.onHover` should be called on all affected layers (out/over)
-      // `deck.props.onHover` should be called with the picked info if any, or empty info otherwise
-      // `deck.props.getTooltip` should be called with the picked info if any, or empty info otherwise
-
-      // Execute callbacks
-      let pickedInfo = emptyInfo;
-      let handled = false;
-      for (const info of result) {
-        pickedInfo = info;
-        handled = info.layer?.onHover(info, _pickRequest.event) || handled;
-      }
-      if (!handled) {
-        this.props.onHover?.(pickedInfo, _pickRequest.event);
-        this.widgetManager!.onHover(pickedInfo, _pickRequest.event);
-      }
-
-      // Clear pending pickRequest
       _pickRequest.event = null;
+
+      if (!internalPickingMode) {
+        return;
+      }
+
+      if (internalPickingMode === 'sync') {
+        this._applyHoverCallbacks(this._pickPointSync(pickOptions), event);
+        return;
+      }
+
+      this._pickPointAsync(pickOptions)
+        .then(({result, emptyInfo}) => {
+          if (hoverPickSequence === this._hoverPickSequence) {
+            this._applyHoverCallbacks({result, emptyInfo}, event);
+          }
+        })
+        .catch(error => this.props.onError?.(error));
     }
   }
 
@@ -1044,6 +1268,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   private _setDevice(device: Device) {
     this.device = device;
+    this._validateInternalPickingMode();
 
     if (!this.animationLoop) {
       // finalize() has been called
@@ -1231,10 +1456,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.layerManager!.updateLayers();
 
     // Perform picking request if any
-    // TODO(ibgreen): Picking not yet supported on WebGPU
-    if (this.device?.type !== 'webgpu') {
-      this._pickAndCallback();
-    }
+    this._pickAndCallback();
 
     // Redraw if necessary
     this.redraw();
@@ -1279,61 +1501,87 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
 
-    let info: PickingInfo;
-
-    // For click events, check if any layer has pickable: '3d' to determine if we need depth picking
     const layers = this.layerManager.getLayers();
-    const has3DPickableLayers = layers.some(layer => layer.props.pickable === '3d');
+    const internalPickingMode = this._getInternalPickingMode();
 
-    if (event.type === 'click' && has3DPickableLayers) {
-      // Perform a fresh pick to get depth info for 3D coordinates
-      const pickResult = this._pick('pickObject', 'pickObject Time', {
-        x: pos.x,
-        y: pos.y,
-        radius: this.props.pickingRadius,
-        unproject3D: true
-      });
-      info = pickResult.result[0] || pickResult.emptyInfo;
-    } else {
-      // Reuse last picked object for other events
-      info = this.deckPicker!.getLastPickedObject(
-        {
-          x: pos.x,
-          y: pos.y,
-          layers,
-          viewports: this.getViewports(pos)
-        },
-        this._lastPointerDownInfo
-      ) as PickingInfo;
+    if (!internalPickingMode) {
+      return;
     }
 
-    const {layer} = info;
-    const layerHandler = layer && (layer[eventHandlerProp] || layer.props[eventHandlerProp]);
-    const rootHandler = this.props[eventHandlerProp];
-    let handled = false;
+    if (internalPickingMode === 'sync') {
+      const info =
+        event.type === 'click' && this._shouldUnproject3D(layers)
+          ? this._getFirstPickedInfo(
+              this._pickPointSync(
+                this._getPointPickOptions(pos.x, pos.y, {unproject3D: true}, layers)
+              )
+            )
+          : this._getLastPointerDownPickingInfo(pos.x, pos.y, layers);
 
-    if (layerHandler) {
-      handled = layerHandler.call(layer, info, event);
+      this._dispatchPickingEvent(info, event);
+      return;
     }
-    if (!handled) {
-      rootHandler?.(info, event);
-      this.widgetManager!.onEvent(info, event);
-    }
+
+    const pointerDownInfoPromise =
+      this._lastPointerDownInfoPromise ||
+      Promise.resolve(this._getLastPointerDownPickingInfo(pos.x, pos.y, layers));
+
+    pointerDownInfoPromise
+      .then(info => {
+        this._dispatchPickingEvent(info, event);
+      })
+      .catch(error => this.props.onError?.(error));
   };
 
   /** Internal use only: evnet handler for pointerdown */
   _onPointerDown = (event: MjolnirPointerEvent) => {
-    // TODO(ibgreen) Picking not yet supported on WebGPU
-    if (this.device?.type === 'webgpu') {
+    const pos = event.offsetCenter;
+    if (!pos) {
       return;
     }
-    const pos = event.offsetCenter;
-    const pickedInfo = this._pick('pickObject', 'pickObject Time', {
-      x: pos.x,
-      y: pos.y,
-      radius: this.props.pickingRadius
-    });
-    this._lastPointerDownInfo = pickedInfo.result[0] || pickedInfo.emptyInfo;
+
+    const internalPickingMode = this._getInternalPickingMode();
+    if (!internalPickingMode) {
+      return;
+    }
+
+    const layers = this.layerManager?.getLayers() || [];
+    const pointerDownPickSequence = ++this._pointerDownPickSequence;
+
+    if (internalPickingMode === 'sync') {
+      const pickedInfo = this._pickPointSync({
+        x: pos.x,
+        y: pos.y,
+        radius: this.props.pickingRadius
+      });
+      const info = this._getFirstPickedInfo(pickedInfo);
+      this._lastPointerDownInfo = info;
+      this._lastPointerDownInfoPromise = Promise.resolve(info);
+      return;
+    }
+
+    const pickPromise = this._pickPointAsync(this._getPointPickOptions(pos.x, pos.y, {}, layers))
+      .then(pickResult => this._getFirstPickedInfo(pickResult))
+      .then(info => {
+        if (pointerDownPickSequence === this._pointerDownPickSequence) {
+          this._lastPointerDownInfo = info;
+        }
+        return info;
+      })
+      .catch(error => {
+        this.props.onError?.(error);
+        const fallbackInfo =
+          this.deckPicker && this.viewManager
+            ? this._getLastPointerDownPickingInfo(pos.x, pos.y, layers)
+            : ({} as PickingInfo);
+        if (pointerDownPickSequence === this._pointerDownPickSequence) {
+          this._lastPointerDownInfo = fallbackInfo;
+        }
+        return fallbackInfo;
+      });
+
+    this._lastPointerDownInfo = null;
+    this._lastPointerDownInfoPromise = pickPromise;
   };
 
   private _getFrameStats(): void {

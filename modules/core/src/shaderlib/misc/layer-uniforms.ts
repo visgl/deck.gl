@@ -5,6 +5,15 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import type {LayerProps} from '../../types/layer-props';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct LayerUniforms {
+  opacity: f32,
+};
+
+@group(0) @binding(auto)
+var<uniform> layer: LayerUniforms;
+`;
+
 const uniformBlock = `\
 layout(std140) uniform layerUniforms {
   uniform float opacity;
@@ -17,6 +26,7 @@ export type LayerUniforms = {
 
 export const layerUniforms = {
   name: 'layer',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   fs: uniformBlock,
   getUniforms: (props: Partial<LayerProps>) => {

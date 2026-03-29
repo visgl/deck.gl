@@ -148,8 +148,12 @@ export default class PickLayersPass extends LayersPass {
       // Encode pickable layers that include 'draw' operation (including 'terrain+draw')
       Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
-      // TODO: blendColor no longer part of luma.gl API
-      pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      if (this.device.type === 'webgpu') {
+        // WebGPU uses render-pass dynamic state for constant blending.
+        pickParameters.blendConstant = encodeColor(this._colorEncoderState, layer, viewport);
+      } else {
+        pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      }
       if (operation.includes('terrain') && layer.state?._hasPickingCover) {
         // For terrain+draw layers with a valid cover FBO, the terrain shader outputs the
         // cover FBO pixel which already has correctly encoded alpha from the cover encoder.

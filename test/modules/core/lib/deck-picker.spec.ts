@@ -101,3 +101,49 @@ test('DeckPicker#pick empty', () => {
   layerManager.finalize();
   deckPicker.finalize();
 });
+
+/* eslint-disable max-statements */
+test('DeckPicker#pick async empty', async () => {
+  const deckPicker = new DeckPicker(device);
+  const view = new MapView();
+  const viewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const layerManager = new LayerManager(device, {viewport});
+
+  const opts = {
+    layers: [],
+    views: [view],
+    viewports: [viewport],
+    effects: [],
+    onViewportActive: layerManager.activateViewport,
+    x: 1,
+    y: 1
+  };
+
+  const layer = new ScatterplotLayer({
+    data: [{position: [0, 0]}, {position: [0, 0]}],
+    radiusMinPixels: 100,
+    pickable: true
+  });
+  layerManager.setLayers([layer]);
+
+  let output = await deckPicker.pickObjectAsync(opts);
+  expect(output.result, 'No layer is picked (async)').toEqual([]);
+  expect(output.emptyInfo.x, 'emptyInfo.x is populated (async)').toBeTruthy();
+
+  const outputObjects = await deckPicker.pickObjectsAsync(opts);
+  expect(outputObjects, 'No layer is picked (async pickObjects)').toEqual([]);
+
+  opts.layers = [layer];
+  deckPicker.setProps({_pickable: true});
+  output = await deckPicker.pickObjectAsync(opts);
+  expect(output.result[0].layer, 'Layer is picked (async)').toBe(layer);
+
+  expect(deckPicker.pickingFBO, 'pickingFBO is generated (async)').toBeTruthy();
+
+  layerManager.finalize();
+  deckPicker.finalize();
+});

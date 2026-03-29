@@ -9,6 +9,46 @@ import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
 import {sleep} from './async-iterator-test-utils';
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return {promise, resolve, reject};
+}
+
+function createPickingInfo(props = {}) {
+  return {
+    x: 0,
+    y: 0,
+    coordinate: [0, 0],
+    layer: null,
+    viewport: null,
+    ...props
+  };
+}
+
+function createPointPickResult(props = {}) {
+  return {
+    result: [createPickingInfo(props)],
+    emptyInfo: createPickingInfo()
+  };
+}
+
+async function waitForRender(deck: Deck): Promise<void> {
+  await new Promise<void>(resolve => {
+    const onAfterRender = deck.props.onAfterRender;
+    deck.setProps({
+      onAfterRender: (...args) => {
+        onAfterRender?.(...args);
+        resolve();
+      }
+    });
+  });
+}
+
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 test('Deck#constructor', async () => {
@@ -167,6 +207,272 @@ webglTest('Deck#rendering, picking, logging', async () => {
   });
 });
 
+test('Deck#async picking', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    layers: [
+      new ScatterplotLayer({
+        data: [{position: [0, 0]}, {position: [0, 0]}],
+        radiusMinPixels: 100,
+        pickable: true
+      })
+    ],
+    onAfterRender: () => {}
+  });
+
+  await waitForRender(deck);
+  expect(true, 'Deck rendered').toBe(true);
+
+  const info = await deck.pickObjectAsync({x: 0, y: 0});
+  expect(info && info.index, 'Async picked object').toBe(1);
+
+  const rectInfos = await deck.pickObjectsAsync({x: 0, y: 0, width: 1, height: 1});
+  expect(rectInfos.length, 'Async picked objects').toBe(1);
+
+  deck.finalize();
+});
+
+webglTest('Deck#explicit sync picking unaffected by pickAsync', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    pickAsync: 'async',
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: [{position: [0, 0]}, {position: [0, 0]}],
+        radiusMinPixels: 100,
+        pickable: true
+      })
+    ]
+  });
+
+  await waitForRender(deck);
+
+  const info = deck.pickObject({x: 0, y: 0});
+  expect(info && info.index, 'Explicit sync picking still uses the sync API').toBe(1);
+
+  deck.finalize();
+});
+
+test('Deck#does not expose pickMultipleObjectsAsync', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  expect('pickMultipleObjectsAsync' in deck, 'Async deep-pick API is removed from Deck').toBe(
+    false
+  );
+
+  deck.finalize();
+});
+
+webglTest('Deck#internal hover uses sync picking on WebGL auto mode', async () => {
+  const hovered: number[] = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    pickAsync: 'auto',
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: [],
+    onHover: info => hovered.push(info.index)
+  });
+
+  await waitForRender(deck);
+
+  let syncCalls = 0;
+  let asyncCalls = 0;
+
+  // @ts-expect-error testing private method override
+  deck._pick = () => {
+    syncCalls++;
+    return createPointPickResult({index: 2});
+  };
+  // @ts-expect-error testing private method override
+  deck._pickAsync = () => {
+    asyncCalls++;
+    return Promise.resolve(createPointPickResult({index: 3}));
+  };
+
+  // @ts-expect-error testing private state injection
+  deck._pickRequest = {
+    mode: 'hover',
+    x: 0,
+    y: 0,
+    radius: 0,
+    event: {type: 'pointermove', offsetCenter: {x: 0, y: 0}}
+  };
+
+  // @ts-expect-error testing private method access
+  deck._pickAndCallback();
+
+  expect(syncCalls, 'sync internal picker is used').toBe(1);
+  expect(asyncCalls, 'async internal picker is not used').toBe(0);
+  expect(hovered, 'hover callback fires immediately with sync picking').toEqual([2]);
+
+  deck.finalize();
+});
+
+test('Deck#async hover ignores stale results', async () => {
+  const hovered: number[] = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    pickAsync: 'async',
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: [],
+    onHover: info => hovered.push(info.index)
+  });
+
+  await waitForRender(deck);
+
+  const firstPick = createDeferred<ReturnType<typeof createPointPickResult>>();
+  const secondPick = createDeferred<ReturnType<typeof createPointPickResult>>();
+  let asyncCalls = 0;
+
+  // @ts-expect-error testing private method override
+  deck._pickAsync = () => {
+    asyncCalls++;
+    return asyncCalls === 1 ? firstPick.promise : secondPick.promise;
+  };
+
+  // @ts-expect-error testing private state injection
+  deck._pickRequest = {
+    mode: 'hover',
+    x: 0,
+    y: 0,
+    radius: 0,
+    event: {type: 'pointermove', offsetCenter: {x: 0, y: 0}}
+  };
+  // @ts-expect-error testing private method access
+  deck._pickAndCallback();
+
+  // @ts-expect-error testing private state injection
+  deck._pickRequest = {
+    mode: 'hover',
+    x: 1,
+    y: 1,
+    radius: 0,
+    event: {type: 'pointermove', offsetCenter: {x: 1, y: 1}}
+  };
+  // @ts-expect-error testing private method access
+  deck._pickAndCallback();
+
+  secondPick.resolve(createPointPickResult({index: 22}));
+  await sleep(0);
+  firstPick.resolve(createPointPickResult({index: 11}));
+  await sleep(0);
+
+  expect(hovered, 'stale hover result is ignored').toEqual([22]);
+
+  deck.finalize();
+});
+
+test('Deck#async pointerdown delays click callback until picking resolves', async () => {
+  const clicked: number[] = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    pickAsync: 'async',
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: [],
+    onClick: info => clicked.push(info.index)
+  });
+
+  await waitForRender(deck);
+
+  const pointerDownPick = createDeferred<ReturnType<typeof createPointPickResult>>();
+
+  // @ts-expect-error testing private method override
+  deck._pickAsync = () => pointerDownPick.promise;
+
+  // @ts-expect-error testing private method access
+  deck._onPointerDown({offsetCenter: {x: 0, y: 0}});
+  // @ts-expect-error testing private method access
+  deck._onEvent({type: 'click', offsetCenter: {x: 0, y: 0}});
+
+  expect(clicked, 'click callback is deferred while pointerdown picking is pending').toEqual([]);
+
+  pointerDownPick.resolve(createPointPickResult({index: 7}));
+  await sleep(0);
+
+  expect(clicked, 'click callback uses resolved pointerdown picking info').toEqual([7]);
+
+  deck.finalize();
+});
+
+test('Deck#controller pickPosition returns null in async mode', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    pickAsync: 'async',
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  // @ts-expect-error testing private method access
+  expect(
+    deck._pickPositionForController(0, 0),
+    'controllers degrade gracefully in async mode'
+  ).toBe(null);
+
+  deck.finalize();
+});
+
+test('Deck#pickAsync sync on WebGPU reports an error', async () => {
+  const errors: Error[] = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: [],
+    onError: error => errors.push(error)
+  });
+
+  await waitForRender(deck);
+
+  // @ts-expect-error testing private device override
+  const fakeDevice = Object.create(deck.device);
+  Object.defineProperty(fakeDevice, 'type', {value: 'webgpu'});
+  Object.defineProperty(deck, 'device', {value: fakeDevice});
+
+  deck.setProps({pickAsync: 'sync'});
+
+  expect(errors.length, 'invalid sync-on-WebGPU configuration is reported').toBe(1);
+  expect(
+    errors[0].message.includes('`pickAsync: "sync"`'),
+    'error message explains the invalid config'
+  ).toBe(true);
+
+  deck.finalize();
+});
 test('Deck#auto view state', async () => {
   let onViewStateChangeCalled = 0;
 
@@ -427,14 +733,15 @@ test('Deck#props omitted are unchanged', async () => {
           deck.setProps({
             onAfterRender: () => {
               try {
-                const {widgets, layers} = deck.props;
+                const {widgets: nextWidgets, layers: nextLayers} = deck.props;
                 expect(
-                  widgets && Array.isArray(widgets) && widgets.length,
+                  nextWidgets && Array.isArray(nextWidgets) && nextWidgets.length,
                   'Widgets remain set'
                 ).toBe(1);
-                expect(layers && Array.isArray(layers) && layers.length, 'Layers remain set').toBe(
-                  1
-                );
+                expect(
+                  nextLayers && Array.isArray(nextLayers) && nextLayers.length,
+                  'Layers remain set'
+                ).toBe(1);
 
                 deck.finalize();
                 resolve();

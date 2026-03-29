@@ -38,7 +38,7 @@ struct ConstantAttributeUniforms {
  instancePickingColorsConstant: i32
 };
 
-@group(0) @binding(auto) var<uniform> scatterplot: ScatterplotUniforms;
+@group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
 
 struct ConstantAttributes {
   instancePositions: vec3<f32>,
@@ -80,6 +80,7 @@ struct Varyings {
   @location(2) unitPosition: vec2<f32>,
   @location(3) innerUnitRadius: f32,
   @location(4) outerRadiusPixels: f32,
+  @location(5) pickingColor: vec3<f32>,
 };
 
 @vertex
@@ -93,8 +94,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   //   return varyings;
   // }
 
-  // var geometry: Geometry;
-  // geometry.worldPosition = instancePositions;
+  geometry.worldPosition = attributes.instancePositions;
 
   // Multiply out radius and clamp to limits
   varyings.outerRadiusPixels = clamp(
@@ -140,10 +140,11 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   }
 
   // Apply opacity to instance color, or return instance picking color
-  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * color.opacity);
+  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(varyings.vFillColor, geometry);
-  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * color.opacity);
+  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
+  varyings.pickingColor = attributes.instancePickingColors;
 
   return varyings;
 }
@@ -188,7 +189,30 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   fragColor.a *= inCircle;
-  // DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(varyings.pickingColor)) {
+      discard;
+    }
+    return vec4<f32>(varyings.pickingColor, 1.0);
+  }
+
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(varyings.pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
 
   // Apply premultiplied alpha as required by transparent canvas
   fragColor = deckgl_premultiplied_alpha(fragColor);
