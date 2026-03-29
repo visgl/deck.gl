@@ -6,7 +6,7 @@ import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform triangleUniforms {
+layout(std140) uniform triangleUniforms {
   float aggregationMode;
   vec2 colorDomain;
   float intensity;

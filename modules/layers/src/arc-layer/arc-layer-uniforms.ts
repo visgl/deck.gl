@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform arcUniforms {
+layout(std140) uniform arcUniforms {
   bool greatCircle;
   bool useShortestPath;
   float numSegments;

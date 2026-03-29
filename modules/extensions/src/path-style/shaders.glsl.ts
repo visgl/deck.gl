@@ -31,7 +31,7 @@ vDashOffset = 0.0;
 `,
 
     'fs:#decl': `
-uniform pathStyleUniforms {
+layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
 } pathStyle;

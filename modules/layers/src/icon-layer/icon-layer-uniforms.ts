@@ -6,7 +6,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
 
 const uniformBlock = `\
-uniform iconUniforms {
+layout(std140) uniform iconUniforms {
   float sizeScale;
   vec2 iconsTextureDim;
   float sizeBasis;

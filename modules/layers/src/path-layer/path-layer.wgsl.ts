@@ -28,7 +28,7 @@ struct Attributes {
   @location(9) instanceRightPositions64Low: vec3<f32>,
   @location(10) instanceStrokeWidths: f32,
   @location(11) instanceColors: vec4<f32>,
-  @location(12) instancePickingColors: vec4<f32>,
+  @location(12) instancePickingColors: vec3<f32>,
 };
 
 struct Varyings {
@@ -39,6 +39,7 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
+  @location(6) pickingColor: vec3<f32>,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -145,7 +146,7 @@ fn getLineJoinOffset(
 fn vertexMain(attributes: Attributes) -> Varyings {
   var varyings: Varyings;
 
-  geometry.pickingColor = attributes.instancePickingColors.xyz;
+  geometry.pickingColor = attributes.instancePickingColors;
 
   let isEnd = attributes.positions.x;
 
@@ -169,6 +170,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   );
 
   geometry.worldPosition = currPosition;
+  let currPositionCommon = project_position_vec3_f64(currPosition, currPosition64Low);
+  geometry.position = vec4<f32>(currPositionCommon, 1.0);
 
   let widthPixels =
     clamp(
@@ -207,7 +210,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   } else {
     let prevPositionCommon = project_position_vec3_f64(prevPosition, prevPosition64Low);
-    let currPositionCommon = project_position_vec3_f64(currPosition, currPosition64Low);
     let nextPositionCommon = project_position_vec3_f64(nextPosition, nextPosition64Low);
 
     let width = vec2<f32>(
@@ -235,8 +237,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
-    attributes.instanceColors.a * color.opacity
+    attributes.instanceColors.a * layer.opacity
   );
+  varyings.pickingColor = attributes.instancePickingColors;
   return varyings;
 }
 
@@ -253,6 +256,32 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  var fragColor = varyings.vColor;
+
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(varyings.pickingColor)) {
+      discard;
+    }
+    return vec4<f32>(varyings.pickingColor, 1.0);
+  }
+
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(varyings.pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
+
+  return deckgl_premultiplied_alpha(fragColor);
 }
 `;

@@ -16,12 +16,12 @@ struct PathUniforms {
   widthUnits: i32,
 };
 
-@group(0) @binding(1)
+@group(0) @binding(auto)
 var<uniform> path: PathUniforms;
 `;
 
 const uniformBlockGLSL = `\
-uniform pathUniforms {
+layout(std140) uniform pathUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;

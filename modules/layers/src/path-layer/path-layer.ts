@@ -506,15 +506,16 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const numInstances = pathTesselator.instanceCount;
     const result = new Float32Array(numInstances * 12);
+    const neighborOffsets = [-1, 0, 1, 2];
 
     for (let i = 0; i < numInstances; i++) {
-      const sourceIndex = i * 3;
       const targetIndex = i * 12;
       for (let vertexOffset = 0; vertexOffset < 4; vertexOffset++) {
-        const sourceOffset = sourceIndex + vertexOffset * 3;
+        const sourceVertex = i + neighborOffsets[vertexOffset];
         const targetOffset = targetIndex + vertexOffset * 3;
         for (let j = 0; j < 3; j++) {
-          const position = value[sourceOffset + j];
+          const position =
+            sourceVertex >= 0 && sourceVertex < numInstances ? value[sourceVertex * 3 + j] : 0;
           result[targetOffset + j] = lowPart ? position - Math.fround(position) : position;
         }
       }

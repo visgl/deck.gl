@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import {colorBins} from '@deck.gl/carto';
 
 const OK_TEST_CASES = [
@@ -55,7 +55,7 @@ const ERROR_TEST_CASES_DOMAIN = [
   }
 ];
 
-test('colorBins', t => {
+test('colorBins', () => {
   const colorBinsManual = colorBins({
     attr: 'target',
     domain: [50, 100],
@@ -71,10 +71,8 @@ test('colorBins', t => {
 
   for (const tc of OK_TEST_CASES) {
     const func = colorBinsManual(tc.argument);
-    t.deepEqual(func, tc.result, `colorBins ${tc.title} returned expected result`);
+    expect(func, `colorBins ${tc.title} returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
 const TEST_CASES_USING_CARTO_COLORS = [
@@ -107,7 +105,7 @@ const TEST_CASES_USING_CARTO_COLORS = [
   }
 ];
 
-test('colorBins#colorsAsCARTOColors', t => {
+test('colorBins#colorsAsCARTOColors', () => {
   const colorBinsManual = colorBins({
     attr: 'target',
     domain: [50, 100],
@@ -116,15 +114,13 @@ test('colorBins#colorsAsCARTOColors', t => {
 
   for (const tc of TEST_CASES_USING_CARTO_COLORS) {
     const func = colorBinsManual(tc.argument);
-    t.deepEqual(func, tc.result, `colorBins ${tc.title} returned expected result`);
+    expect(func, `colorBins ${tc.title} returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
-test('colorBins#invalidColorsArgument', t => {
+test('colorBins#invalidColorsArgument', () => {
   for (const tc of ERROR_TEST_CASES_COLORS) {
-    t.throws(
+    expect(
       () =>
         colorBins({
           attr: 'target',
@@ -132,15 +128,13 @@ test('colorBins#invalidColorsArgument', t => {
           colors: tc.colors
         }),
       `throws on invalid colors ${tc.colors}`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });
 
-test('colorBins#invalidDomainArgument', t => {
+test('colorBins#invalidDomainArgument', () => {
   for (const tc of ERROR_TEST_CASES_DOMAIN) {
-    t.throws(
+    expect(
       () =>
         colorBins({
           attr: 'target',
@@ -148,8 +142,6 @@ test('colorBins#invalidDomainArgument', t => {
           colors: tc.colors
         }),
       `throws on invalid domain ${tc.domain}`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });

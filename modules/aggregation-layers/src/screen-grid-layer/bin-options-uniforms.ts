@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = /* glsl */ `\
-uniform binOptionsUniforms {
+layout(std140) uniform binOptionsUniforms {
   float cellSizePixels;
 } binOptions;
 `;

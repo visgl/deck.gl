@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App, {COLOR_SCALE} from 'website-examples/highway/app';
@@ -82,12 +83,14 @@ class HighwayDemo extends Component {
 
   render() {
     const {data, params, ...otherProps} = this.props;
+    const widgets = [new StatsWidget({type: 'device'})];
 
     return (
       <App
         {...otherProps}
         key={this.props.device?.type}
         device={this.props.device}
+        widgets={widgets}
         year={params.year.value}
         accidents={data && data[0]}
         roads={data && data[1]}
