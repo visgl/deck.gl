@@ -173,8 +173,9 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'ScenegraphLayer';
 
   state!: {
-    scenegraph: GroupNode;
-    animator: GLTFAnimator;
+    scenegraph: GroupNode | null;
+    animator: GLTFAnimator | null;
+    materials?: {destroy(): void}[] | null;
     models: Model[];
     firstDrawSignaled: boolean;
   };
@@ -231,7 +232,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this.state.scenegraph?.destroy();
+    this._destroyScenegraphAssets();
   }
 
   get isLoaded(): boolean {
@@ -267,7 +268,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const animator = props.getAnimator(scenegraphData, options);
 
     if (scenegraph instanceof GroupNode) {
-      this.state.scenegraph?.destroy();
+      this._destroyScenegraphAssets();
 
       this._applyAnimationsProp(animator, props._animations);
 
@@ -278,14 +279,29 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       });
 
-      this.setState({scenegraph, animator, models, firstDrawSignaled: false});
+      this.setState({
+        scenegraph,
+        animator,
+        materials: scenegraphData?.materials || null,
+        models,
+        firstDrawSignaled: false
+      });
       this.getAttributeManager()!.invalidateAll();
     } else if (scenegraph !== null) {
       log.warn('invalid scenegraph:', scenegraph)();
     }
   }
 
-  private _applyAnimationsProp(animator: GLTFAnimator, animationsProp: any): void {
+  private _destroyScenegraphAssets(): void {
+    this.state.scenegraph?.destroy();
+    this.state.materials?.forEach(material => material.destroy());
+    this.state.scenegraph = null;
+    this.state.animator = null;
+    this.state.materials = null;
+    this.state.models = [];
+  }
+
+  private _applyAnimationsProp(animator: GLTFAnimator | null, animationsProp: any): void {
     if (!animator || !animationsProp) {
       return;
     }

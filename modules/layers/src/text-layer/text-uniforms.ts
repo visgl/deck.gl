@@ -15,7 +15,7 @@ const CONTENT_ALIGN = {
 } as const;
 
 const glslUniformBlock = `\
-uniform textUniforms {
+layout(std140) uniform textUniforms {
   highp vec2 cutoffPixels;
   highp ivec2 align;
   bool flipY;

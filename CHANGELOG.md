@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0-alpha.3] - Mar 27 2026
+
+- feat(core): TerrainController (#10134)
+
 #### deck.gl [v9.3.0-alpha.2] - Mar 26 2026
 
 - chore: upgrade Node.js from 20 to 22 (#10051)

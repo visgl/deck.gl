@@ -25,7 +25,7 @@ export type ClipExtensionProps = {
 };
 
 const shaderFunction = /* glsl */ `
-uniform clipUniforms {
+layout(std140) uniform clipUniforms {
   vec4 bounds;
 } clip;
 

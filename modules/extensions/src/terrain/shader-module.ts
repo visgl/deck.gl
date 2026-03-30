@@ -56,7 +56,7 @@ const uniformBlock =
   // eslint-disable-next-line prefer-template
   TERRAIN_MODE_CONSTANTS +
   /* glsl */ `
-uniform terrainUniforms {
+layout(std140) uniform terrainUniforms {
   float mode;
   vec4 bounds;
 } terrain;

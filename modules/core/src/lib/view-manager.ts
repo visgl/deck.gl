@@ -181,7 +181,7 @@ export default class ViewManager<ViewsT extends View[]> {
       typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
     const viewState = (view && this.viewState[view.getViewStateId()]) || this.viewState;
-    return view ? view.filterViewState(viewState) : viewState;
+    return (view ? view.filterViewState(viewState) : viewState) as AnyViewStateOf<ViewsT>;
   }
 
   getViewport(viewId: string): Viewport | undefined {

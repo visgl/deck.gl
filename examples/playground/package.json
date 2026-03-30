@@ -14,7 +14,6 @@
     "@loaders.gl/csv": "^4.4.0-alpha.18",
     "@loaders.gl/draco": "^4.4.0-alpha.18",
     "@loaders.gl/gltf": "^4.4.0-alpha.18",
-    "@luma.gl/constants": "^9.3.0-alpha.6",
     "deck.gl": "^9.0.0",
     "maplibre-gl": "^5.0.0",
     "monaco-editor": "^0.39.0",
