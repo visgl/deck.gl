@@ -101,19 +101,6 @@ export default class TerrainController extends MapController {
     super.updateViewport(newControllerState, extraProps, interactionState);
   }
 
-  protected _onPanStart(event: MjolnirGestureEvent): boolean {
-    this._pickTerrainCenterAltitude();
-    return super._onPanStart(event);
-  }
-
-  protected _onWheel(event: MjolnirWheelEvent): boolean {
-    return super._onWheel(event);
-  }
-
-  protected _onDoubleClick(event: MjolnirGestureEvent): boolean {
-    return super._onDoubleClick(event);
-  }
-
   private _pickTerrainCenterAltitude(): void {
     if (!this.pickPosition) {
       return;
