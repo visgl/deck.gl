@@ -240,14 +240,18 @@ export default class DataColumn<Options, State> {
   ): Record<string, Buffer | TypedArray | null> {
     const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
-      const value = this.value as TypedArray;
-      if (options) {
-        const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
-        const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
-        const size = shaderAttributeDef.size || this.size;
-        result[attributeName] = value.subarray(offset, offset + size);
+      if (this.device.type === 'webgpu') {
+        result[attributeName] = this._getConstantBufferWebGPU();
       } else {
-        result[attributeName] = value;
+        const value = this.value as TypedArray;
+        if (options) {
+          const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
+          const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
+          const size = shaderAttributeDef.size || this.size;
+          result[attributeName] = value.subarray(offset, offset + size);
+        } else {
+          result[attributeName] = value;
+        }
       }
     } else {
       result[attributeName] = this.getBuffer();
@@ -261,6 +265,32 @@ export default class DataColumn<Options, State> {
       }
     }
     return result;
+  }
+
+  private _getConstantBufferWebGPU(): Buffer {
+    const value = this.value as TypedArray;
+    const accessor = this.getAccessor();
+    const stride = getStride(accessor);
+    const bytesPerElement = value.BYTES_PER_ELEMENT;
+    const strideElements = stride / bytesPerElement;
+    const byteOffsetElements = this.byteOffset / bytesPerElement;
+    const vertexCount = Math.max(this.numInstances, 1);
+    const ArrayType = value.constructor as TypedArrayConstructor;
+    const repeated = new ArrayType(
+      byteOffsetElements + (vertexCount - 1) * strideElements + value.length
+    );
+
+    for (let i = 0; i < vertexCount; i++) {
+      repeated.set(value, byteOffsetElements + i * strideElements);
+    }
+
+    let buffer = this._buffer;
+    const requiredBufferSize = repeated.byteLength + stride * 2;
+    if (!buffer || buffer.byteLength < requiredBufferSize) {
+      buffer = this._createBuffer(requiredBufferSize);
+    }
+    buffer.write(repeated, 0);
+    return buffer;
   }
 
   protected _getBufferLayout(
