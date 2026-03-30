@@ -16,10 +16,10 @@ export default class TerrainController extends MapController {
   private _terrainAltitude?: number = undefined;
   /** Raw (unsmoothed) terrain altitude from latest pick */
   private _terrainAltitudeTarget?: number = undefined;
-  /** Whether the pointermove listener is registered */
-  private _pointerMoveRegistered: boolean = false;
-  /** Timestamp of last hover pick */
-  private _lastHoverPickTime: number = 0;
+  /** rAF handle for periodic terrain altitude picking */
+  private _pickFrameId: number | null = null;
+  /** Timestamp of last pick */
+  private _lastPickTime: number = 0;
 
   setProps(
     props: ControllerProps &
@@ -30,30 +30,30 @@ export default class TerrainController extends MapController {
   ) {
     super.setProps({rotationPivot: '3d', ...props});
 
-    // Register pointermove to keep terrain altitude cache warm.
-    // Picking on hover means the altitude is ready before zoom/pan starts,
-    // avoiding expensive synchronous GPU readbacks during interaction.
-    if (!this._pointerMoveRegistered && this.eventManager) {
-      this.eventManager.on('pointermove', this._onPointerMove);
-      this._pointerMoveRegistered = true;
+    // Periodically pick terrain altitude at the viewport center using rAF.
+    // This keeps the altitude cache warm so interactions (zoom, pan)
+    // don't need expensive synchronous GPU readbacks.
+    // rAF naturally pauses when the tab is backgrounded.
+    if (this._pickFrameId === null) {
+      const loop = () => {
+        const now = Date.now();
+        if (now - this._lastPickTime > 500 && !this.isDragging()) {
+          this._lastPickTime = now;
+          this._pickTerrainCenterAltitude();
+        }
+        this._pickFrameId = requestAnimationFrame(loop);
+      };
+      this._pickFrameId = requestAnimationFrame(loop);
     }
   }
 
   finalize() {
-    if (this._pointerMoveRegistered && this.eventManager) {
-      this.eventManager.off('pointermove', this._onPointerMove);
-      this._pointerMoveRegistered = false;
+    if (this._pickFrameId !== null) {
+      cancelAnimationFrame(this._pickFrameId);
+      this._pickFrameId = null;
     }
     super.finalize();
   }
-
-  private _onPointerMove = (): void => {
-    const now = Date.now();
-    if (!this.isDragging() && now - this._lastHoverPickTime > 300) {
-      this._lastHoverPickTime = now;
-      this._pickTerrainCenterAltitude();
-    }
-  };
 
   protected updateViewport(
     newControllerState: MapState,
@@ -102,7 +102,6 @@ export default class TerrainController extends MapController {
   }
 
   private _pickTerrainCenterAltitude(): void {
-    // TODO use async picking?
     if (!this.pickPosition) {
       return;
     }
