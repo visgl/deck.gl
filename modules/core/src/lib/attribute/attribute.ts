@@ -45,10 +45,21 @@ export type Updater = (
   }
 ) => void;
 
+/**
+ * Attribute configuration used by {@link AttributeManager}.
+ *
+ * `bufferGroup` and `bufferGroupOrder` opt an attribute into WebGPU packed-buffer
+ * publishing. Attributes in the same group keep independent CPU-side values and
+ * update logic, but share a single GPU vertex buffer.
+ */
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
+  /** Identifier of a WebGPU packed-buffer group. Attributes with the same group id share one GPU buffer. */
+  bufferGroup?: string;
+  /** Stable ordering of attributes inside a packed-buffer group. */
+  bufferGroupOrder?: number;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
@@ -151,6 +162,23 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
     // Shorthand: use duration instead of parameter object
     return normalizeTransitionSettings(userSettings, layerSettings);
+  }
+
+  /** Returns every shader-visible attribute name produced by this logical attribute. */
+  getValueNames(): string[] {
+    const names = [this.id];
+    const shaderAttributeDefs = this.settings.shaderAttributes;
+
+    if (shaderAttributeDefs) {
+      names.push(...Object.keys(shaderAttributeDefs));
+    }
+
+    if (this.doublePrecision) {
+      const extraNames = names.map(name => `${name}64Low`);
+      names.push(...extraNames);
+    }
+
+    return names;
   }
 
   setNeedsUpdate(reason: string = this.id, dataRange?: {startRow?: number; endRow?: number}): void {

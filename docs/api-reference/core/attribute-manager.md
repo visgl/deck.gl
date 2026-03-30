@@ -10,6 +10,7 @@ Summary:
 * auto reallocates attributes when needed
 * auto updates attributes with registered updater functions
 * allows overriding with application supplied buffers
+* can publish multiple logical attributes through one shared WebGPU vertex buffer
 
 For more information consult the [Attribute Management](../../developer-guide/custom-layers/attribute-management.md) article.
 
@@ -67,6 +68,8 @@ Takes a single parameter as a map of attribute descriptor objects:
     * `stepMode` (string, optional) - One of `'vertex'`, `'instance'` and `'dynamic'`. If set to `'dynamic'`, will be resolved to `'instance'` when this attribute is applied to an instanced model, and `'vertex'` otherwise. Default `'vertex'`.
     * `isIndexed` (boolean, optional) - if this is an index attribute
       (a.k.a. indices). Default to `false`.
+    * `bufferGroup` (string, optional) - Opts the attribute into a shared WebGPU vertex buffer. Attributes with the same `bufferGroup` keep independent CPU-side values and invalidation behavior, but are uploaded into one GPU buffer and emitted as one `BufferLayout`.
+    * `bufferGroupOrder` (number, optional) - Stable ordering of attributes inside a `bufferGroup`.
     * `accessor` (string | string[] | Function) - accessor name(s) that will
       trigger an update of this attribute when changed. Used with
       [`updateTriggers`](./layer.md#updatetriggers).
@@ -156,8 +159,52 @@ Parameters:
 * `modelInfo` (object) - a luma.gl `Model` or a similarly shaped object
   + `isInstanced` (boolean) - used to resolve `stepMode: 'dynamic'`
 
+Notes:
+
+* On WebGPU, attributes that share the same `bufferGroup` are collapsed into a single layout entry.
+* Packed groups are currently intended for non-indexed attributes that do not use fp64 emulation.
+* Packing is not interleaving in the traditional sense: each logical attribute occupies its own contiguous region inside the shared GPU buffer, and is addressed with byte offsets.
+
 
 ## Remarks
+
+### Packed Buffers on WebGPU
+
+WebGPU limits the number of vertex buffer bindings that may be used by a pipeline. Some layers, especially text and billboard-style layers, naturally accumulate many small per-instance attributes and can hit that limit before they run out of total buffer space.
+
+`AttributeManager` can reduce binding pressure by grouping multiple logical attributes into one shared GPU buffer:
+
+```js
+attributeManager.addInstanced({
+  instanceSizes: {
+    size: 1,
+    accessor: 'getSize',
+    bufferGroup: 'label-instance-data',
+    bufferGroupOrder: 0
+  },
+  instanceAngles: {
+    size: 1,
+    accessor: 'getAngle',
+    bufferGroup: 'label-instance-data',
+    bufferGroupOrder: 1
+  },
+  instanceColors: {
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor',
+    bufferGroup: 'label-instance-data',
+    bufferGroupOrder: 2
+  }
+});
+```
+
+This preserves the existing attribute update model:
+
+* each attribute still has its own updater/accessor
+* each attribute can still be invalidated independently
+* `shaderAttributes` still work inside a grouped attribute
+
+What changes is only how the GPU-facing buffer is published on WebGPU.
 
 ### Attribute Type
 

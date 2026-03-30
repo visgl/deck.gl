@@ -87,6 +87,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   initializeState() {
+    // Pack background styling attributes into one WebGPU buffer while keeping
+    // anchor positions separate, since they may use fp64 emulation.
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
@@ -98,32 +100,44 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceSizes: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 0,
         accessor: 'getSize',
         defaultValue: 1
       },
       instanceAngles: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 1,
         accessor: 'getAngle'
       },
       instanceRects: {
         size: 4,
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 2,
         accessor: 'getBoundingRect'
       },
       instanceClipRect: {
         size: 4,
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 3,
         accessor: 'getClipRect',
         defaultValue: [0, 0, -1, -1]
       },
       instancePixelOffsets: {
         size: 2,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 4,
         accessor: 'getPixelOffset'
       },
       instanceFillColors: {
         size: 4,
         transition: true,
         type: 'unorm8',
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 5,
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -131,16 +145,20 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 4,
         transition: true,
         type: 'unorm8',
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 6,
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineWidths: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
+        bufferGroupOrder: 7,
         accessor: 'getLineWidth',
         defaultValue: 1
       }
-    });
+    } as any);
   }
 
   updateState(params: UpdateParameters<this>) {

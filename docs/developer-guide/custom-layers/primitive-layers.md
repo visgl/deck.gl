@@ -103,6 +103,8 @@ initializeState() {
 }
 ```
 
+On WebGPU, multiple logical attributes may also be grouped into one shared GPU buffer by assigning the same `bufferGroup`. This is mainly useful for layers with many per-instance attributes and does not change how those attributes are updated on the CPU.
+
 ### Handling property updates
 
 [`updateState()`](../../api-reference/core/layer.md#updatestate) - This is the method that you may want to implement to handle property changes.

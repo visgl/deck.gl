@@ -7,6 +7,10 @@ import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 
+function createWebGPUDevice() {
+  return Object.defineProperty(Object.create(device), 'type', {value: 'webgpu'});
+}
+
 function update(attribute, {data}) {
   const {value, size} = attribute;
   let i = 0;
@@ -413,4 +417,129 @@ test('AttributeManager.getBufferLayouts', () => {
     attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
     'dynamic attribute.stepMode in instancedModel'
   ).toBe('instance');
+});
+
+test('AttributeManager.getBufferLayouts - packed buffers', () => {
+  const webgpuDevice = createWebGPUDevice();
+  const attributeManager = new AttributeManager(webgpuDevice);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 1
+    },
+    instanceColors: {
+      size: 4,
+      type: 'unorm8',
+      accessor: 'getColor',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 2
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [{size: 1, angle: 10, color: [255, 0, 0, 255]}, {size: 2, angle: 20, color: [0, 255, 0, 255]}],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle,
+      getColor: x => x.color
+    }
+  });
+
+  expect(attributeManager.getBufferLayouts()).toEqual([
+    {
+      name: 'group-a',
+      byteStride: 4,
+      attributes: [
+        {attribute: 'instanceSizes', format: 'float32', byteOffset: 0},
+        {attribute: 'instanceAngles', format: 'float32', byteOffset: 16},
+        {attribute: 'instanceColors', format: 'unorm8x4', byteOffset: 32}
+      ],
+      stepMode: 'instance'
+    }
+  ]);
+
+  const packedAttributes = attributeManager.getPackedBufferAttributes(
+    attributeManager.getAttributes()
+  );
+  expect(packedAttributes.instanceSizes, 'group publishes packed buffer').toBe(
+    packedAttributes.instanceColors
+  );
+  expect(packedAttributes.instanceAngles, 'group publishes all attribute names').toBe(
+    packedAttributes.instanceColors
+  );
+});
+
+test('AttributeManager.getBufferLayouts - packed buffers require bufferGroupOrder', () => {
+  const webgpuDevice = createWebGPUDevice();
+  const attributeManager = new AttributeManager(webgpuDevice);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 1,
+    data: [{size: 1, angle: 10}],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle
+    }
+  });
+
+  expect(() => attributeManager.getBufferLayouts()).toThrow(
+    'Attribute instanceAngles specifies bufferGroup "group-a" but is missing bufferGroupOrder'
+  );
+});
+
+test('AttributeManager.getBufferLayouts - packed buffers reject conflicting bufferGroupOrder', () => {
+  const webgpuDevice = createWebGPUDevice();
+  const attributeManager = new AttributeManager(webgpuDevice);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 1,
+    data: [{size: 1, angle: 10}],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle
+    }
+  });
+
+  expect(() => attributeManager.getBufferLayouts()).toThrow(
+    'bufferGroup "group-a" has conflicting bufferGroupOrder 0 on attribute instanceAngles'
+  );
 });

@@ -111,6 +111,44 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Base map overlays | ❌ | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
 | Base map interleaving | ❌ | No current base map integration path supports WebGPU interleaving. |
 
+## Attribute Packing
+
+One practical difference between WebGL and WebGPU is that WebGPU enforces a relatively small limit on the number of vertex buffer bindings used by a pipeline. Layers with many small instance attributes can hit that limit even when the total amount of attribute data is modest.
+
+To address this, `AttributeManager` supports shared WebGPU buffers via `bufferGroup`:
+
+```ts
+attributeManager.addInstanced({
+  instanceSizes: {
+    size: 1,
+    accessor: 'getSize',
+    bufferGroup: 'label-instance-data',
+    bufferGroupOrder: 0
+  },
+  instanceAngles: {
+    size: 1,
+    accessor: 'getAngle',
+    bufferGroup: 'label-instance-data',
+    bufferGroupOrder: 1
+  },
+  instanceColors: {
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor',
+    bufferGroup: 'label-instance-data',
+    bufferGroupOrder: 2
+  }
+});
+```
+
+This keeps the existing attribute lifecycle intact:
+
+* attributes are still updated and invalidated independently
+* attributes may still define `shaderAttributes`
+* applications may still supply external attributes per logical attribute
+
+The change is only in the WebGPU publication step: grouped attributes are emitted as one `BufferLayout` and one shared GPU buffer with byte offsets for each logical attribute.
+
 ## Background
 
 While the visible WebGPU surface is still limited, much of the groundwork has already happened in luma.gl, the GPU framework powering deck.gl. deck.gl is following that work by porting its shader modules, layers, and render features incrementally.

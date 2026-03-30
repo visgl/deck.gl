@@ -774,9 +774,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const excludeAttributes = model.userData?.excludeAttributes || {};
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
+    const attributeManager = this.getAttributeManager();
+    const packedAttributes = attributeManager?.getPackedBufferAttributes(changedAttributes) || {};
 
     for (const name in changedAttributes) {
       if (excludeAttributes[name]) {
+        continue;
+      }
+      if (attributeManager?.isPackedAttribute(changedAttributes[name])) {
         continue;
       }
       const values = changedAttributes[name].getValue();
@@ -793,6 +798,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         }
       }
     }
+    Object.assign(attributeBuffers, packedAttributes);
     // TODO - update buffer map?
     model.setAttributes(attributeBuffers);
     model.setConstantAttributes(constantAttributes);

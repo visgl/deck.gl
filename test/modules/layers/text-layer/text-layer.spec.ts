@@ -8,6 +8,16 @@ import {TextLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
+function swapAttributeManagerDevice(attributeManager) {
+  const webgpuDevice = Object.defineProperty(Object.create(attributeManager.device), 'type', {
+    value: 'webgpu'
+  });
+  attributeManager.device = webgpuDevice;
+  for (const attribute of Object.values(attributeManager.getAttributes())) {
+    attribute.device = webgpuDevice;
+  }
+}
+
 test('TextLayer', () => {
   const testCases = generateLayerTests({
     Layer: TextLayer,
@@ -162,6 +172,32 @@ test('TextLayer - special texts', () => {
           layer.state.characterSet.has('\u{F0005}'),
           'characterSet is auto populated'
         ).toBeTruthy();
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - WebGPU packed buffer layouts', () => {
+  const testCases = [
+    {
+      props: {
+        data: FIXTURES.points.slice(0, 2),
+        background: true,
+        getText: d => d.ADDRESS,
+        getPosition: d => d.COORDINATES
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const attributeManager = subLayer.getAttributeManager();
+        swapAttributeManagerDevice(attributeManager);
+
+        const layoutCount = attributeManager.getBufferLayouts({isInstanced: true}).length;
+        if (subLayer.id.endsWith('characters')) {
+          expect(layoutCount, 'characters sublayer packs instance attributes').toBe(3);
+        } else if (subLayer.id.endsWith('background')) {
+          expect(layoutCount, 'background sublayer stays within WebGPU binding budget').toBe(3);
+        }
       }
     }
   ];
