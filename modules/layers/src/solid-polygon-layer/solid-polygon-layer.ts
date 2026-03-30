@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, color, layerUniforms, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, color, project32, picking, COORDINATE_SYSTEM, createIterable} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {gouraudMaterial} from '@luma.gl/shadertools';
-import type {BufferLayout} from '@luma.gl/core';
+import type {BufferLayout, Parameters} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -120,6 +120,59 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
+const APPLICATION_WGSL_BINDING_DECLARATIONS = [
+  /@binding\(\s*(\d+)\s*\)\s*@group\(\s*(\d+)\s*\)\s*(var(?:<[^>]+>)?\s+([A-Za-z_][A-Za-z0-9_]*))/g,
+  /@group\(\s*(\d+)\s*\)\s*@binding\(\s*(\d+)\s*\)\s*(var(?:<[^>]+>)?\s+([A-Za-z_][A-Za-z0-9_]*))/g
+] as const;
+
+const APPLICATION_WGSL_AUTO_BINDING_DECLARATIONS = [
+  /@binding\(\s*auto\s*\)\s*@group\(\s*(\d+)\s*\)\s*(var(?:<[^>]+>)?\s+([A-Za-z_][A-Za-z0-9_]*))/g,
+  /@group\(\s*(\d+)\s*\)\s*@binding\(\s*auto\s*\)\s*(var(?:<[^>]+>)?\s+([A-Za-z_][A-Za-z0-9_]*))/g
+] as const;
+
+function resolveApplicationWGSLBindings(source: string): string {
+  const usedBindingsByGroup = new Map<number, Set<number>>();
+
+  for (const regex of APPLICATION_WGSL_BINDING_DECLARATIONS) {
+    regex.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(source))) {
+      const isBindingFirst = regex === APPLICATION_WGSL_BINDING_DECLARATIONS[0];
+      const group = Number(match[isBindingFirst ? 2 : 1]);
+      const location = Number(match[isBindingFirst ? 1 : 2]);
+      let usedBindings = usedBindingsByGroup.get(group);
+      if (!usedBindings) {
+        usedBindings = new Set();
+        usedBindingsByGroup.set(group, usedBindings);
+      }
+      usedBindings.add(location);
+    }
+  }
+
+  for (const regex of APPLICATION_WGSL_AUTO_BINDING_DECLARATIONS) {
+    source = source.replace(regex, (...replaceArgs) => {
+      const match = replaceArgs[0] as string;
+      const isBindingFirst = regex === APPLICATION_WGSL_AUTO_BINDING_DECLARATIONS[0];
+      const group = Number(replaceArgs[isBindingFirst ? 1 : 2] as string);
+      let usedBindings = usedBindingsByGroup.get(group);
+      if (!usedBindings) {
+        usedBindings = new Set();
+        usedBindingsByGroup.set(group, usedBindings);
+      }
+
+      let location = group === 0 ? 0 : usedBindings.size > 0 ? Math.max(...usedBindings) + 1 : 0;
+      while (usedBindings.has(location)) {
+        location++;
+      }
+      usedBindings.add(location);
+
+      return match.replace(/@binding\(\s*auto\s*\)/, `@binding(${location})`);
+    });
+  }
+
+  return source;
+}
+
 export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_SolidPolygonLayerProps<DataT>>
 > {
@@ -142,7 +195,11 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
       fs,
-      source: isWebGPU ? getSolidPolygonShaderWGSL(type, Boolean(ringWindingOrderCW)) : undefined,
+      source: isWebGPU
+        ? resolveApplicationWGSLBindings(
+            getSolidPolygonShaderWGSL(type, Boolean(ringWindingOrderCW))
+          )
+        : undefined,
       ...(isWebGPU
         ? {}
         : {
@@ -150,7 +207,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
               RING_WINDING_ORDER_CW: ringWindingOrderCW
             }
           }),
-      modules: [layerUniforms, project32, color, gouraudMaterial, picking, solidPolygonUniforms]
+      modules: [project32, color, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 
@@ -260,8 +317,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         size: 4,
         type: 'uint8',
         stepMode: 'dynamic',
-        accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        update: this.calculatePickingColors
       }
     });
     /* eslint-enable max-len */
@@ -388,6 +445,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
   protected _getModels() {
     const {id, filled, extruded} = this.props;
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
 
     let topModel;
     let sideModel;
@@ -403,7 +467,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           'vertexPositions64Low',
           'elevations',
           'fillColors',
-          'lineColors',
           'pickingColors'
         ]));
       }
@@ -414,6 +477,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         topology: 'triangle-list',
         bufferLayout,
         isIndexed: true,
+        parameters,
         userData: {
           excludeAttributes: {instanceVertexValid: true}
         }
@@ -450,6 +514,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           }
         }),
         isInstanced: true,
+        parameters,
         userData: {
           excludeAttributes: {indices: true}
         }
@@ -470,6 +535,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           }
         }),
         isInstanced: true,
+        parameters,
         userData: {
           excludeAttributes: {indices: true}
         }
@@ -522,6 +588,42 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     }
 
     attribute.value = nextPositions;
+  }
+
+  protected calculatePickingColors(
+    attribute,
+    {data, startRow, endRow, numInstances}: {data: any; startRow: number; endRow: number; numInstances: number}
+  ) {
+    const {polygonTesselator} = this.state;
+    const startIndices = polygonTesselator.vertexStarts;
+    const value = attribute.value as Uint8ClampedArray;
+    const pickingColor: [number, number, number] = [0, 0, 0];
+    const pickable = Boolean(this.internalState?.hasPickingBuffer);
+
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const encodedIndex = object && object.__source ? object.__source.index : objectInfo.index;
+      if (pickable) {
+        this.encodePickingColor(encodedIndex, pickingColor);
+      } else {
+        pickingColor[0] = 0;
+        pickingColor[1] = 0;
+        pickingColor[2] = 0;
+      }
+
+      const vertexStart = startIndices[objectInfo.index];
+      const vertexEnd =
+        objectInfo.index < startIndices.length - 1 ? startIndices[objectInfo.index + 1] : numInstances;
+
+      for (let i = vertexStart; i < vertexEnd; i++) {
+        const offset = i * 4;
+        value[offset + 0] = pickingColor[0];
+        value[offset + 1] = pickingColor[1];
+        value[offset + 2] = pickingColor[2];
+        value[offset + 3] = 0;
+      }
+    }
   }
 }
 

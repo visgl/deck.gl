@@ -258,7 +258,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     // TODO(ibgreen): WebGPU does not support constant values,
     // they will be emulated as buffers instead for now.
     const isWebGPU = this.device.type === 'webgpu';
-    if (isWebGPU || value === undefined || typeof value === 'function') {
+    if (value === undefined || typeof value === 'function') {
+      return false;
+    }
+
+    if (isWebGPU) {
       if (isWebGPU && typeof value !== 'function') {
         const normalisedValue = this._normalizeValue(value, [], 0);
         // ensure we trigger an update for the attribute's emulated buffer
@@ -279,6 +283,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
     this.clearNeedsUpdate();
     return true;
+  }
+
+  setConstantBufferValue(value: any, numInstances: number): boolean {
+    const ArrayType = this.settings.defaultType;
+    const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
+    const repeatedValue = new ArrayType(Math.max(numInstances, 1) * this.size);
+
+    for (let i = 0; i < repeatedValue.length; i += this.size) {
+      repeatedValue.set(constantValue, i);
+    }
+
+    const hasChanged = this.setData({value: repeatedValue});
+    this.constant = false;
+    this.clearNeedsUpdate();
+
+    if (hasChanged) {
+      this.setNeedsRedraw();
+    }
+
+    return hasChanged;
   }
 
   // Use external buffer

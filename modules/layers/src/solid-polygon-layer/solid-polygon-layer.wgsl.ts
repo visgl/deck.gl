@@ -6,13 +6,13 @@ type SolidPolygonShaderType = 'top' | 'side';
 
 function getSolidPolygonVertexHelpers() {
   return /* wgsl */ `\
-struct SolidPolygonUniforms {
+struct solidPolygonUniforms {
   extruded: f32,
   isWireframe: f32,
   elevationScale: f32,
 };
 
-@group(0) @binding(0) var<uniform> solidPolygon: SolidPolygonUniforms;
+@group(0) @binding(auto) var<uniform> solidPolygon: solidPolygonUniforms;
 
 fn project_offset_normal(vector: vec3<f32>) -> vec3<f32> {
   if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
@@ -87,8 +87,7 @@ struct Attributes {
   @location(1) vertexPositions64Low: vec3<f32>,
   @location(2) elevations: f32,
   @location(3) fillColors: vec4<f32>,
-  @location(4) lineColors: vec4<f32>,
-  @location(5) pickingColors: vec3<f32>,
+  @location(4) pickingColors: vec3<f32>,
 };
 
 struct Varyings {
@@ -120,12 +119,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   let normal = project_normal(vec3<f32>(0.0, 0.0, 1.0));
   geometry.normal = normal;
 
-  let colors = select(
-    attributes.fillColors,
-    attributes.lineColors,
-    solidPolygon.isWireframe > 0.5
-  );
-  outp.vColor = apply_polygon_color(colors, normal, geometry.position);
+  outp.vColor = apply_polygon_color(attributes.fillColors, normal, geometry.position);
   outp.pickingColor = attributes.pickingColors;
 
   return outp;
@@ -186,10 +180,10 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   let position = mix(pos, nextPos, attributes.positions.x);
   let position64Low = mix(pos64Low, nextPos64Low, attributes.positions.x);
-
   var worldPosition = position;
   if (solidPolygon.extruded > 0.5) {
-    worldPosition.z += attributes.elevations * attributes.positions.y * solidPolygon.elevationScale;
+    worldPosition.z +=
+      attributes.elevations * attributes.positions.y * solidPolygon.elevationScale;
   }
 
   geometry.worldPosition = position;
