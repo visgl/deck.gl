@@ -20,6 +20,7 @@ export type SolidPolygonProps = {
 
 export const solidPolygonUniforms = {
   name: 'solidPolygon',
+  source: '',
   vs: uniformBlock,
   fs: uniformBlock,
   uniformTypes: {
