@@ -16,6 +16,10 @@ export default class TerrainController extends MapController {
   private _terrainAltitude?: number = undefined;
   /** Raw (unsmoothed) terrain altitude from latest pick */
   private _terrainAltitudeTarget?: number = undefined;
+  /** Whether the pointermove listener is registered */
+  private _pointerMoveRegistered: boolean = false;
+  /** Timestamp of last hover pick */
+  private _lastHoverPickTime: number = 0;
 
   setProps(
     props: ControllerProps &
@@ -26,21 +30,30 @@ export default class TerrainController extends MapController {
   ) {
     super.setProps({rotationPivot: '3d', ...props});
 
-    // Drive smoothing animation when terrain altitude hasn't converged yet.
-    if (
-      this._terrainAltitude !== undefined &&
-      this._terrainAltitudeTarget !== undefined &&
-      Math.abs(this._terrainAltitudeTarget - this._terrainAltitude) > 0.01
-    ) {
-      this.updateViewport(
-        new this.ControllerState({
-          makeViewport: this.makeViewport,
-          ...this.props,
-          ...this.state
-        } as any)
-      );
+    // Register pointermove to keep terrain altitude cache warm.
+    // Picking on hover means the altitude is ready before zoom/pan starts,
+    // avoiding expensive synchronous GPU readbacks during interaction.
+    if (!this._pointerMoveRegistered && this.eventManager) {
+      this.eventManager.on('pointermove', this._onPointerMove);
+      this._pointerMoveRegistered = true;
     }
   }
+
+  finalize() {
+    if (this._pointerMoveRegistered && this.eventManager) {
+      this.eventManager.off('pointermove', this._onPointerMove);
+      this._pointerMoveRegistered = false;
+    }
+    super.finalize();
+  }
+
+  private _onPointerMove = (): void => {
+    const now = Date.now();
+    if (!this.isDragging() && now - this._lastHoverPickTime > 300) {
+      this._lastHoverPickTime = now;
+      this._pickTerrainCenterAltitude();
+    }
+  };
 
   protected updateViewport(
     newControllerState: MapState,
@@ -81,12 +94,10 @@ export default class TerrainController extends MapController {
   }
 
   protected _onWheel(event: MjolnirWheelEvent): boolean {
-    this._pickTerrainCenterAltitude();
     return super._onWheel(event);
   }
 
   protected _onDoubleClick(event: MjolnirGestureEvent): boolean {
-    this._pickTerrainCenterAltitude();
     return super._onDoubleClick(event);
   }
 
