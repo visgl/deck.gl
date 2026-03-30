@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class MultiViewDemo extends Component {
   static title = 'Air Traffic During the Global Pandemic';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/air-traffic.txt`,
     worker: '/workers/air-traffic-decoder.js'
@@ -42,7 +44,7 @@ class MultiViewDemo extends Component {
   render() {
     return (
       <div style={{width: '100%', height: '100%', position: 'absolute', background: '#111'}}>
-        <App {...this.props} />
+        <App {...this.props} key={this.props.device?.type} device={this.props.device} />
       </div>
     );
   }

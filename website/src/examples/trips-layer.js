@@ -13,6 +13,8 @@ import {makeExample} from '../components';
 class TripsDemo extends Component {
   static title = 'Yellow Cab Vs. Green Cab Trips in Manhattan';
 
+  static hasDeviceTabs = true;
+
   static data = [
     {
       url: `${DATA_URI}/trips-data.txt`,
@@ -73,6 +75,8 @@ class TripsDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
+        device={this.props.device}
         trips={data && data[0]}
         buildings={data && data[1]}
         animationSpeed={1}
