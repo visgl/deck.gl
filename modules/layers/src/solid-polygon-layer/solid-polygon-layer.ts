@@ -192,6 +192,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     const attributeManager = this.getAttributeManager()!;
     const noAlloc = true;
+    const isWebGPU = this.context.device.type === 'webgpu';
 
     /* eslint-disable max-len */
     attributeManager.add({
@@ -211,21 +212,35 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         accessor: 'getPolygon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
-        noAlloc
+        noAlloc,
+        ...(isWebGPU
+          ? {}
+          : {
+              shaderAttributes: {
+                nextVertexPositions: {
+                  vertexOffset: 1
+                }
+              }
+            })
       },
-      nextVertexPositions: {
-        size: 3,
-        type: 'float64',
-        stepMode: 'dynamic',
-        fp64: this.use64bitPositions(),
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPolygon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        update: this.calculateNextPositions,
-        noAlloc
-      },
+      ...(isWebGPU
+        ? {
+            nextVertexPositions: {
+              size: 3,
+              type: 'float64',
+              stepMode: 'dynamic',
+              fp64: this.use64bitPositions(),
+              transition: ATTRIBUTE_TRANSITION,
+              accessor: 'getPolygon',
+              // eslint-disable-next-line @typescript-eslint/unbound-method
+              update: this.calculateNextPositions,
+              noAlloc
+            }
+          }
+        : {}),
       instanceVertexValid: {
         size: 1,
+        ...(isWebGPU ? {} : {type: 'uint16'}),
         stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
@@ -395,14 +410,17 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       shaders.defines = {...shaders.defines, NON_INSTANCED_MODEL: 1};
       let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
       if (this.context.device.type === 'webgpu') {
-        bufferLayout = filterBufferLayout(bufferLayout, new Set([
-          'vertexPositions',
-          'vertexPositions64Low',
-          'elevations',
-          'fillColors',
-          'lineColors',
-          'rowIndexes'
-        ]));
+        bufferLayout = filterBufferLayout(
+          bufferLayout,
+          new Set([
+            'vertexPositions',
+            'vertexPositions64Low',
+            'elevations',
+            'fillColors',
+            'lineColors',
+            'rowIndexes'
+          ])
+        );
       }
 
       topModel = new Model(this.context.device, {
@@ -419,17 +437,20 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     if (extruded) {
       let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
       if (this.context.device.type === 'webgpu') {
-        bufferLayout = filterBufferLayout(bufferLayout, new Set([
-          'vertexPositions',
-          'vertexPositions64Low',
-          'nextVertexPositions',
-          'nextVertexPositions64Low',
-          'instanceVertexValid',
-          'elevations',
-          'fillColors',
-          'lineColors',
-          'rowIndexes'
-        ]));
+        bufferLayout = filterBufferLayout(
+          bufferLayout,
+          new Set([
+            'vertexPositions',
+            'vertexPositions64Low',
+            'nextVertexPositions',
+            'nextVertexPositions64Low',
+            'instanceVertexValid',
+            'elevations',
+            'fillColors',
+            'lineColors',
+            'rowIndexes'
+          ])
+        );
       }
 
       sideModel = new Model(this.context.device, {
@@ -495,7 +516,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
   protected calculateVertexValid(attribute) {
     const vertexValid = this.state.polygonTesselator.get('vertexValid');
-    attribute.value = vertexValid ? Float32Array.from(vertexValid) : vertexValid;
+    attribute.value =
+      this.context.device.type === 'webgpu' && vertexValid
+        ? Float32Array.from(vertexValid)
+        : vertexValid;
   }
 
   protected calculateNextPositions(attribute) {
@@ -522,7 +546,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 }
 
-function filterBufferLayout(bufferLayout: BufferLayout[], allowedAttributes: Set<string>): BufferLayout[] {
+function filterBufferLayout(
+  bufferLayout: BufferLayout[],
+  allowedAttributes: Set<string>
+): BufferLayout[] {
   const filteredLayouts: BufferLayout[] = [];
 
   for (const layout of bufferLayout) {
