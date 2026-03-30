@@ -29,7 +29,9 @@ jobs:
         id: permitted
         run: |
           result=
-          if git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/master$'; then
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            result=true
+          elif git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/master$'; then
             result=true
           elif git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/.*-release$'; then
             result=true
