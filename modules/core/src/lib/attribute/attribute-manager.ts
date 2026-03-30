@@ -538,8 +538,12 @@ export default class AttributeManager {
     group: PackedBufferGroup,
     modelInfo?: {isInstanced?: boolean}
   ): PackedBufferGroupLayout {
-    const byteStride = Math.max(...group.attributes.map(attribute => getStride(attribute.getAccessor())));
-    const stepMode = group.attributes[0].getBufferLayout(modelInfo).stepMode as 'vertex' | 'instance';
+    const byteStride = Math.max(
+      ...group.attributes.map(attribute => getStride(attribute.getAccessor()))
+    );
+    const stepMode = group.attributes[0].getBufferLayout(modelInfo).stepMode as
+      | 'vertex'
+      | 'instance';
     const attributes: BufferAttributeLayout[] = [];
     const attributeOffsets: Record<string, number> = {};
     const attributeNames: string[] = [];
@@ -548,7 +552,13 @@ export default class AttributeManager {
     for (const attribute of group.attributes) {
       const accessor = attribute.getAccessor();
       const stride = getStride(accessor);
-      const baseOffset = byteOffset + (accessor.vertexOffset || 0) * stride + (accessor.offset || 0);
+      // WebGPU still expects a normal vertex-buffer binding model: one binding has one
+      // `byteStride`, and each shader attribute is addressed by a `byteOffset` into that
+      // binding. Packing works by reserving a contiguous byte range for each logical
+      // attribute inside the shared buffer, then layering the attribute's own offset rules
+      // (`vertexOffset`/`offset`) on top of the start of that range.
+      const baseOffset =
+        byteOffset + (accessor.vertexOffset || 0) * stride + (accessor.offset || 0);
       const baseLayout = getBufferAttributeLayout(
         attribute.id,
         {...accessor, stride: byteStride, offset: baseOffset},
@@ -562,6 +572,10 @@ export default class AttributeManager {
 
       if (attribute.settings.shaderAttributes) {
         for (const [name, def] of Object.entries(attribute.settings.shaderAttributes)) {
+          // `shaderAttributes` behave the same as they do for standalone buffers: they are
+          // additional views into the parent attribute's data. The only difference here is
+          // that the parent attribute itself already starts at `baseOffset` inside the shared
+          // packed buffer, so the shader attribute offsets are resolved relative to that.
           const shaderOffset =
             baseOffset +
             (def.vertexOffset || 0) * byteStride +
@@ -599,7 +613,10 @@ export default class AttributeManager {
   }
 
   /** Allocates or reuses the shared GPU buffer for a group and uploads the packed contents. */
-  private _updatePackedBufferGroup(group: PackedBufferGroup, layout: PackedBufferGroupLayout): Buffer {
+  private _updatePackedBufferGroup(
+    group: PackedBufferGroup,
+    layout: PackedBufferGroupLayout
+  ): Buffer {
     let buffer = this.packedBuffers[group.id];
     if (!buffer || buffer.byteLength < layout.byteLength) {
       buffer?.delete();
@@ -634,6 +651,9 @@ export default class AttributeManager {
   ) {
     const accessor = attribute.getAccessor();
     const sourceStride = getStride(accessor);
+    // CPU-side attribute values retain their original standalone layout. When repacking for
+    // WebGPU, we copy each logical vertex record from that source layout into the attribute's
+    // assigned region in the shared buffer, spaced by the group's shared `byteStride`.
     const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
 
     if (attribute.isConstant) {

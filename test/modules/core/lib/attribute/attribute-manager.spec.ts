@@ -447,7 +447,10 @@ test('AttributeManager.getBufferLayouts - packed buffers', () => {
 
   attributeManager.update({
     numInstances: 2,
-    data: [{size: 1, angle: 10, color: [255, 0, 0, 255]}, {size: 2, angle: 20, color: [0, 255, 0, 255]}],
+    data: [
+      {size: 1, angle: 10, color: [255, 0, 0, 255]},
+      {size: 2, angle: 20, color: [0, 255, 0, 255]}
+    ],
     props: {
       getSize: x => x.size,
       getAngle: x => x.angle,
