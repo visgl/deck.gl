@@ -2,19 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const FILL_PATTERN_ATLAS = new Uint8Array(4);
 const FILL_PATTERN_MAPPING = {
   pattern: {x: 0, y: 0, width: 1, height: 1}
 };
 
-test('FillStyleExtension#PolygonLayer', t => {
+webglTest('FillStyleExtension#PolygonLayer', () => {
   const testCases = [
     {
       props: {
@@ -31,28 +32,26 @@ test('FillStyleExtension#PolygonLayer', t => {
         extensions: [new FillStyleExtension({pattern: true})]
       },
       onAfterUpdate: ({layer, subLayers}) => {
-        t.notOk(layer.state.emptyTexture, 'should not be enabled in composite layer');
+        expect(layer.state.emptyTexture, 'should not be enabled in composite layer').toBeFalsy();
 
         const strokeLayer = subLayers.find(l => l.id.includes('stroke'));
         const fillLayer = subLayers.find(l => l.id.includes('fill'));
 
-        t.ok(fillLayer.state.emptyTexture, 'should be enabled in composite layer');
+        expect(fillLayer.state.emptyTexture, 'should be enabled in composite layer').toBeTruthy();
         let uniforms = getLayerUniforms(fillLayer);
-        t.ok(uniforms.patternMask, 'has patternMask uniform');
-        t.deepEqual(
+        expect(uniforms.patternMask, 'has patternMask uniform').toBeTruthy();
+        expect(
           fillLayer.getAttributeManager().getAttributes().fillPatternScales.value,
-          [2],
           'fillPatternScales attribute is populated'
-        );
-        t.deepEqual(
+        ).toEqual([2]);
+        expect(
           fillLayer.getAttributeManager().getAttributes().fillPatternFrames.value.slice(0, 4),
-          [0, 0, 1, 1],
           'fillPatternFrames attribute is populated'
-        );
+        ).toEqual([0, 0, 1, 1]);
 
         uniforms = getLayerUniforms(strokeLayer);
-        t.notOk(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer');
-        t.notOk('patternMask' in uniforms, 'should not be enabled in PathLayer');
+        expect(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer').toBeFalsy();
+        expect('patternMask' in uniforms, 'should not be enabled in PathLayer').toBeFalsy();
       }
     },
     {
@@ -61,12 +60,13 @@ test('FillStyleExtension#PolygonLayer', t => {
         data: []
       },
       onAfterUpdate: ({layer}) => {
-        t.ok(layer.props.fillPatternAtlas.handle, 'fillPatternAtlas texture is not deleted');
+        expect(
+          layer.props.fillPatternAtlas.handle,
+          'fillPatternAtlas texture is not deleted'
+        ).toBeTruthy();
       }
     }
   ];
 
-  testLayer({Layer: PolygonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

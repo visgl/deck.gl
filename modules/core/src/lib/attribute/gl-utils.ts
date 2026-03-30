@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getTypedArrayConstructor, getDataType} from '@luma.gl/core';
+import {dataTypeDecoder, getTypedArrayConstructor} from '@luma.gl/core';
 import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
@@ -20,7 +20,7 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
   }
 }
 
-export const dataTypeFromTypedArray = getDataType;
+export const dataTypeFromTypedArray = dataTypeDecoder.getDataType.bind(dataTypeDecoder);
 
 export function getBufferAttributeLayout(
   name: string,

@@ -26,7 +26,7 @@ const sphere = new SphereGeometry({
   nlong: 20
 });
 
-const ICON_ATLAS = './test/data/icon-atlas.png';
+const ICON_ATLAS = '/test/data/icon-atlas.png';
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -259,9 +259,7 @@ export default [
         opacity: 1.0,
         getFillColor: [200, 0, 0],
         material: {
-          material: {
-            specularColor: [255, 255, 255]
-          }
+          specularColor: [255, 255, 255]
         },
         extruded: true,
         getElevation: f => 30,

@@ -332,7 +332,7 @@ yarn add -D @vitest/browser @vitest/browser-playwright playwright
 - Implement dual-API spy abstraction (vitest preferred, probe.gl as fallback)
 - Add both vitest and @probe.gl/test-utils as optional peer dependencies
 - Add deprecation warning for probe.gl path
-- Create tape backward compatibility smoke test (`test/smoke/tape-compat.ts`)
+- Create tape backward compatibility smoke test (`test/smoke/tape-compat.spec.ts`)
 - Add `DECK_TEST_UTILS_USE_PROBE_GL` environment variable for testing fallback path
 
 ### Phase 3: Migrate Test Files (~185 files)
@@ -459,7 +459,7 @@ The hybrid approach serves as a **discovery mechanism**:
 ```javascript
 // .ocularrc.js
 entry: {
-  'tape-compat': 'test/smoke/tape-compat.ts',  // Keep for backward compat testing
+  'tape-compat': 'test/smoke/tape-compat.spec.ts',  // Keep for backward compat testing
   bench: 'test/bench/index.js',                 // TODO: Migrate to vitest bench
   'bench-browser': 'test/bench/browser.html',   // TODO: Migrate to vitest bench
   size: 'test/size/import-nothing.js'           // TODO: Migrate to vitest
@@ -530,6 +530,160 @@ Size tests verify bundle sizes don't regress. Options:
 | Many tests fail in Node environment | Discovery phase allows fallback to browser-only approach (Option A) |
 | Puppeteer → Playwright migration breaks snapshot comparison | Vitest requires Playwright; will need to regenerate golden images if pixel differences occur |
 | CI takes longer (running tests twice) | Node tests are fast; browser failures are the blocking check |
+
+## Known Issues and Technical Debt
+
+### luma.gl Async Shader Error Reporting (WebGL Program Cleanup)
+
+**Problem:** Vitest caught 18 unhandled promise rejections during test runs:
+
+```
+TypeError: Failed to execute 'getProgramInfoLog' on 'WebGL2RenderingContext':
+parameter 1 is not of type 'WebGLProgram'.
+```
+
+**Root Cause:** luma.gl compiles shaders asynchronously using `KHR_parallel_shader_compile`. When shader compilation has errors, the error reporting code runs asynchronously:
+
+```javascript
+// In @luma.gl/webgl webgl-render-pipeline.js
+const linkErrorLog = this.device.gl.getProgramInfoLog(this.handle);
+this.device.reportError(new Error(`${errorType}: ${linkErrorLog}`), this)();
+```
+
+When test cleanup (`layerManager.finalize()`) destroys WebGL resources before this async error reporting completes, `this.handle` becomes invalid, causing `getProgramInfoLog` to throw.
+
+**Why Tape Didn't Report This:** The tape/probe.gl test runner didn't catch unhandled promise rejections as aggressively as vitest does. The underlying race condition existed but was silently ignored.
+
+**Current Fix:** Added `cleanupAfterLayerTestsAsync()` which yields to the event loop before destroying resources:
+
+```typescript
+async function cleanupAfterLayerTestsAsync(resources: TestResources): Promise<Error | null> {
+  layerManager.setLayers([]);
+
+  // Wait for pending async operations (luma.gl shader error handling)
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  layerManager.finalize();
+  deckRenderer.finalize();
+  // ...
+}
+```
+
+This is used by `testLayerAsync`. With vitest's `isolate: false` configuration, async tests sprinkled throughout the suite provide "sync points" that flush pending promises from preceding synchronous tests.
+
+**Limitation:** This fix is somewhat fragile because it relies on:
+1. `isolate: false` - All tests run sequentially in the same browser context
+2. Async tests scattered throughout the suite providing natural delays
+3. Test execution order remaining stable
+
+If someone enables `isolate: true` or changes test ordering significantly, the unhandled rejections may reappear.
+
+**Follow-up Task:** Make `testLayer` async to properly await cleanup:
+
+| Approach | Effort | Impact |
+|----------|--------|--------|
+| Current (async cleanup in `testLayerAsync` only) | Done | Works but relies on test ordering |
+| Make `testLayer` return `Promise<void>` | ~39 files | Robust, explicit cleanup |
+
+The robust fix requires:
+1. Change `testLayer` to use `cleanupAfterLayerTestsAsync`
+2. Update all 39 test files to use `async` test functions and `await testLayer()`
+
+Example migration:
+```typescript
+// Before
+test('PolygonLayer', () => {
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+// After
+test('PolygonLayer', async () => {
+  await testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+```
+
+This is a mechanical change suitable for a follow-up PR.
+
+### Excluded Headless Tests Analysis
+
+The vitest migration required excluding some tests that were working with tape. This section documents each test and the path to re-enabling it.
+
+#### Tests Never Imported on Master (Keep Excluded)
+
+These tests were already commented out or never imported in the original tape suite:
+
+| Test File | Reason |
+|-----------|--------|
+| `carto/index.spec.ts` | Never imported - tests global `CartoLayerLibrary` |
+| `layers/path-tesselator.spec.ts` | Commented out on master |
+| `layers/polygon-tesselation.spec.ts` | Commented out on master |
+| `widgets/geocoders.spec.ts` | No index.ts, never imported |
+| `extensions/mask/mask.spec.ts` | Commented out - luma.gl v9 uniforms API change |
+| `extensions/mask/mask-pass.spec.ts` | Commented out - luma.gl v9 uniforms API change |
+| `layers/path-layer/path-layer-vertex.spec.ts` | Commented out - Transform not exported from @luma.gl/engine |
+| `extensions/collision-filter/collision-filter.spec.ts` | Commented out on master |
+
+#### Tests That Were Passing on Master (Need Investigation)
+
+These tests ran successfully with tape but fail with vitest:
+
+| Test File | Category | Issue | Fix Effort |
+|-----------|----------|-------|------------|
+| `core/lib/attribute/attribute.spec.ts` | PRE_EXISTING | Source code bug: `data-column.ts` overwrites user stride/offset | Fix in source |
+| `geo-layers/tile-3d-layer/tile-3d-layer.spec.ts` | MEDIUM | Async loading race conditions, spy count mismatch | Mock network requests |
+| `core/lib/layer-extension.spec.ts` | MEDIUM | `updateState` called twice when swapping extensions (expected: 1) | Investigate lifecycle |
+| `core/lib/pick-layers.spec.ts` | MEDIUM | Picking spy assertions fire at unexpected times | Add render cycle waits |
+| `geo-layers/terrain-layer.spec.ts` | MEDIUM | Network requests + GPU operations timeout | Mock terrain loader |
+| `carto/layers/h3-tile-layer.spec.ts` | HARD | `autoHighlight` test times out (>30s) - H3 generation expensive | Profile, simplify data |
+| `aggregation-layers/hexbin.spec.ts` | HARD | GPU/WebGL state leakage with `isolate: false` | Isolate GPU contexts |
+| `core/lib/deck-picker.spec.ts` | HARD | Picking FBO persists across tests | Cleanup GPU resources |
+| `core/controllers/controllers.spec.ts` | MEDIUM | Timeline animation state leakage | Reset controller state |
+| `interaction/map-controller.spec.ts` | MEDIUM | Timing-sensitive in headless mode, synthetic events | Increase waits, skip some |
+| `extensions/terrain/terrain-effect.spec.ts` | HARD | Timeout >30s, heavy GPU state | Profile, simplify data |
+| `core/passes/layers-pass.spec.ts` | MEDIUM | `glParameters.viewport` state leakage | Reset GL state per test |
+
+#### Fixed Tests (Re-enabled)
+
+The following tests were fixed and re-enabled:
+
+| Test File | Issue | Fix |
+|-----------|-------|-----|
+| `carto/layers/schema/carto-raster-tile.spec.ts` | `TileReader.compression` global state leakage | Reset state at start/end of test |
+| `carto/layers/schema/carto-raster-tile-loader.spec.ts` | Dependency on above test | Fixed by above |
+
+#### Browser Project Render Test Exclusion
+
+The `browser` project (headed mode for local development) currently excludes `test/render/**/*.spec.ts`. This was necessary because:
+
+1. **Viewport mismatch:** The browser project doesn't configure a fixed viewport in its instances, causing golden image comparisons to fail (97-98% match vs 99% threshold)
+2. **Headed vs headless:** Render tests are sensitive to exact pixel output; headed browser windows may have OS-level rendering differences
+
+**Current workaround:** Render tests only run in the dedicated `render` project which has:
+- `headless: true`
+- Fixed viewport `{width: 1024, height: 768}` in instances
+
+**Future fix:** Add viewport configuration to the browser project to enable local headed render test debugging:
+```typescript
+// In browser project config
+browser: {
+  instances: [{
+    browser: 'chromium',
+    viewport: {width: 1024, height: 768}  // Match render project
+  }]
+}
+```
+
+This would allow developers to run render tests in headed mode for visual debugging.
+
+#### Key Patterns Identified
+
+1. **GPU/WebGL State Leakage (5 tests):** Tests using GPU compute (hexbin, deck-picker, terrain-effect) suffer from WebGL context state persisting across tests when `isolate: false`. This is a trade-off for performance.
+
+2. **Global State Mutations (2 tests):** Tests that modify global/static state (like `TileReader.compression`) without cleanup cause flakiness. **Fix: Reset state at start and end of each test.**
+
+3. **Async Timing (4 tests):** Tests with network loading or complex render cycles have timing issues. **Fix: Mock network requests, add explicit waits, or increase timeouts.**
+
+4. **Source Code Bugs (1 test):** The attribute test reveals a real bug in `data-column.ts` that should be fixed independently.
 
 ## Alternatives Considered
 

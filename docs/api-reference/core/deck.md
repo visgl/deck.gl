@@ -686,7 +686,56 @@ Parameters:
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
+#### `pickObjectAsync` {#pickobjectasync}
+
+Get the closest pickable and visible object at the given screen coordinate.
+
+```ts
+await deck.pickObjectAsync({x, y, radius, layerIds, unproject3D})
+```
+
+Parameters:
+
+* `x` (number) - x position in pixels
+* `y` (number) - y position in pixels
+* `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
+* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
+
+Returns:
+
+* a single [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) object, or `null` if nothing is found.
+
+
+#### `pickObjectsAsync` {#pickobjectsasync}
+
+Get all pickable and visible objects within a bounding box.
+
+```ts
+await deck.pickObjectsAsync({x, y, width, height, layerIds, maxObjects})
+```
+
+Parameters:
+
+* `x` (number) - left of the bounding box in pixels
+* `y` (number) - top of the bouding box in pixels
+* `width` (number, optional) - width of the bouding box in pixels. Default `1`.
+* `height` (number, optional) - height of the bouding box in pixels. Default `1`.
+* `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `maxObjects` (number, optional) - if specified, limits the number of objects that can be returned.
+
+Returns:
+
+* an array of unique [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects
+
+Notes:
+
+* The query methods are designed to quickly find objects by utilizing the picking buffer.
+* The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
+
 #### `pickObject` {#pickobject}
+
+<img src="https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square" />
 
 Get the closest pickable and visible object at the given screen coordinate.
 
@@ -708,6 +757,8 @@ Returns:
 
 
 #### `pickMultipleObjects` {#pickmultipleobjects}
+
+<img src="https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square" />
 
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
@@ -734,6 +785,8 @@ Notes:
 
 
 #### `pickObjects` {#pickobjects}
+
+<img src="https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square" />
 
 Get all pickable and visible objects within a bounding box.
 
@@ -771,11 +824,15 @@ Flag indicating that the Deck instance has initialized its resources. It is safe
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
 
 - `fps` - average number of frames rendered per second
-- `updateAttributesTime` - time spent updating layer attributes
 - `setPropsTime` - time spent setting deck properties
+- `layersCount` - total number of layers created recursively
+- `drawLayersCount` - number of layers drawn to screen in the last render pass
+- `updateAttributesCount` - number of times attribute buffers are updated
+- `updateAttributesTime` - time spent updating layer attributes
 - `framesRedrawn` - number of times the scene was rendered
 - `pickTime` - total time spent on picking operations
 - `pickCount` - number of times a pick operation was performed
+- `pickLayersCount` - number of layers drawn to the picking buffer in the last picking operation
 - `gpuTime` - total time spent on GPU processing
 - `gpuTimePerFrame` - average time spent on GPU processing per frame
 - `cpuTime` - total time spent on CPU processing
@@ -785,6 +842,13 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 - `renderbufferMemory` - total GPU memory allocated for renderbuffers
 - `gpuMemory` - total allocated GPU memory
 
+Note that `gpuTime` and `gpuTimePerFrame` metrics are disabled by default for performance reasons. To enable the readings, set `deviceProps.debugGPUTime: true` in Deck's constructor:
+
+```ts
+new Deck({
+  deviceProps: {debugGPUTime: true}
+})
+```
 
 ## Source
 

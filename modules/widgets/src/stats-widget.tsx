@@ -115,6 +115,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
     const stats = this._getStats();
     const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
+    const deviceLabel = this._getDeviceLabel();
     const items: JSX.Element[] = [];
 
     if (stats) {
@@ -141,6 +142,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
           onClick={this._toggleCollapsed}
         >
           <b>{title}</b>
+          {deviceLabel && <span className="deck-widget-stats-device">{deviceLabel}</span>}
           <button className="deck-widget-dropdown-button">
             <span className="deck-widget-dropdown-icon open" />
           </button>
@@ -189,6 +191,22 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     // @ts-expect-error metrics is protected
     return Math.round(this.deck?.metrics.fps ?? 0);
   };
+
+  protected _getDeviceLabel(): string | null {
+    // @ts-expect-error device is protected
+    const deviceType = this.deck?.device?.type;
+    if (!deviceType) {
+      return null;
+    }
+    switch (deviceType) {
+      case 'webgpu':
+        return 'WebGPU';
+      case 'webgl':
+        return 'WebGL';
+      default:
+        return String(deviceType);
+    }
+  }
 
   protected _getLines(stat: Stat | [key: string, value: number]): string {
     if ('count' in stat) {

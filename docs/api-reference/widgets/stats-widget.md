@@ -1,28 +1,70 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
-
 # StatsWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {StatsWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<StatsWidgetDemo />
+
 Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget. When collapsed, it shows the current FPS in a compact button UI.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-<WidgetPreview cls={StatsWidget}/>
+```js
+import {Deck} from '@deck.gl/core';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new StatsWidget({defaultIsExpanded: true})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {Deck} from '@deck.gl/core';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
+new Deck({
   widgets: [
-    new StatsWidget({
-      type: 'deck',
-      framesPerUpdate: 5
-    })
+    new StatsWidget({defaultIsExpanded: true})
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_StatsWidget as StatsWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <StatsWidget defaultIsExpanded />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {_StatsWidget as StatsWidget, type StatsWidgetProps} from '@deck.gl/widgets';
+new StatsWidget({} satisfies StatsWidgetProps);
 ```
 
 ## Types

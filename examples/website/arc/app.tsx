@@ -12,7 +12,6 @@ import {scaleQuantile} from 'd3-scale';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Feature, Polygon, MultiPolygon} from 'geojson';
-import {CompassWidget, ZoomWidget, FullscreenWidget} from '@deck.gl/widgets';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -143,7 +142,6 @@ export default function App({
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       getTooltip={getTooltip}
-      widgets={[new ZoomWidget({}), new CompassWidget({}), new FullscreenWidget({})]}
     >
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>

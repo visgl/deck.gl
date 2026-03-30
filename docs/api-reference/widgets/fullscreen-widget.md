@@ -1,23 +1,70 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {FullscreenWidget} from '@deck.gl/widgets';
-
 # FullscreenWidget
 
 <img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
+import {FullscreenWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<FullscreenWidgetDemo />
+
 This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-<WidgetPreview cls={FullscreenWidget}/>
+```js
+import {Deck} from '@deck.gl/core';
+import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {Deck} from '@deck.gl/core';
 import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
-  widgets: [new FullscreenWidget()]
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL, FullscreenWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <FullscreenWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {FullscreenWidget, type FullscreenWidgetProps} from '@deck.gl/widgets';
+new FullscreenWidget({} satisfies FullscreenWidgetProps);
 ```
 
 ## Types
@@ -46,7 +93,7 @@ Tooltip message displayed while hovering a mouse over the widget when fullscreen
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name                      | Type                     | Default                                                      |
 | ------------------------- | ------------------------ | ------------------------------------------------------------ |

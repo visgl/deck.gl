@@ -11,7 +11,7 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
 
-import type {LightingProps} from '@luma.gl/shadertools';
+import type {Light, LightingProps} from '@luma.gl/shadertools';
 import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
@@ -140,15 +140,9 @@ export default class LightingEffect implements Effect {
         } satisfies ShadowModuleProps)
       : {};
 
-    // when not rendering to screen, turn off lighting by adding empty light source object
-    // lights shader module relies on the `lightSources` to turn on/off lighting
     const lightingProps: LightingProps = {
       enabled: true,
-      ambientLight: this.ambientLight,
-      directionalLights: this.directionalLights.map(directionalLight =>
-        directionalLight.getProjectedLight({layer})
-      ),
-      pointLights: this.pointLights.map(pointLight => pointLight.getProjectedLight({layer}))
+      lights: this._getLights(layer)
     };
     // @ts-expect-error material is not a Layer prop
     const materialProps = layer.props.material;
@@ -202,5 +196,23 @@ export default class LightingEffect implements Effect {
         new DirectionalLight(DEFAULT_DIRECTIONAL_LIGHT_PROPS[1])
       );
     }
+  }
+
+  private _getLights(layer: Layer): Light[] {
+    const lights: Light[] = [];
+
+    if (this.ambientLight) {
+      lights.push(this.ambientLight);
+    }
+
+    for (const pointLight of this.pointLights) {
+      lights.push(pointLight.getProjectedLight({layer}));
+    }
+
+    for (const directionalLight of this.directionalLights) {
+      lights.push(directionalLight.getProjectedLight({layer}));
+    }
+
+    return lights;
   }
 }

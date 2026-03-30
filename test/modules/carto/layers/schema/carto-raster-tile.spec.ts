@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {TileReader} from '@deck.gl/carto/layers/schema/carto-raster-tile';
 import Pbf from 'pbf';
 
@@ -36,20 +36,24 @@ export const TEST_DATA = buffer.finish();
  *   repeated Band bands = 2;
  * }
  */
-test('TileReader', t => {
-  const tile = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
-  t.equals(tile.blockSize, 256, 'Should read blockSize correctly');
-  t.equals(tile.bands.length, 1, 'Should have one band');
-  t.equals(tile.bands[0].name, 'band1', 'Band should have correct name');
-  t.deepEqual(tile.bands[0].data.value, COMPRESSED_BAND, 'Band should have compressed data');
+test('TileReader', () => {
+  // Ensure clean state at start of test (isolate: false can leak state)
+  TileReader.compression = null;
 
-  // Repeat with compressed data
+  const tile = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
+  expect(tile.blockSize, 'Should read blockSize correctly').toBe(256);
+  expect(tile.bands.length, 'Should have one band').toBe(1);
+  expect(tile.bands[0].name, 'Band should have correct name').toBe('band1');
+  expect(tile.bands[0].data.value, 'Band should have compressed data').toEqual(COMPRESSED_BAND);
+
+  // Repeat with compression enabled
   TileReader.compression = 'gzip';
   const tile2 = TileReader.read(new Pbf(TEST_DATA), TEST_DATA.byteLength);
-  t.equals(tile.blockSize, 256, 'Should read blockSize correctly');
-  t.equals(tile.bands.length, 1, 'Should have one band');
-  t.equals(tile.bands[0].name, 'band1', 'Band should have correct name');
-  t.deepEqual(tile2.bands[0].data.value, BAND, 'Band should have decompressed data');
+  expect(tile2.blockSize, 'Should read blockSize correctly').toBe(256);
+  expect(tile2.bands.length, 'Should have one band').toBe(1);
+  expect(tile2.bands[0].name, 'Band should have correct name').toBe('band1');
+  expect(tile2.bands[0].data.value, 'Band should have decompressed data').toEqual(BAND);
 
-  t.end();
+  // Reset state to avoid leaking to other tests
+  TileReader.compression = null;
 });

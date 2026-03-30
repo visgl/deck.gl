@@ -9,7 +9,7 @@ PRs and bug reports are welcome, and we are actively looking for new maintainers
 
 The **master** branch is the active development branch.
 
-Building deck.gl locally from the source requires node.js `>=20`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
+Building deck.gl locally from the source requires node.js `>=22`. Further limitations on the Node version may be imposed by [puppeteer](https://github.com/puppeteer/puppeteer#usage) and [headless-gl](https://github.com/stackgl/headless-gl#supported-platforms-and-nodejs-versions).
 We use [yarn](https://yarnpkg.com/en/docs/install) to manage the dependencies of deck.gl. The project's automated builds use Node [corepack](https://github.com/nodejs/corepack) to manage the yarn version. For local development, you can use [nvm](https://github.com/nvm-sh/nvm) or any other Node version manager of your choice - a `.nvmrc` configuration file is provided.
 
 ```bash
@@ -17,6 +17,31 @@ git checkout master
 yarn bootstrap
 yarn test
 ```
+
+## Running Tests
+
+deck.gl uses [Vitest](https://vitest.dev/) with browser mode for testing. Tests are organized into three projects:
+
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `yarn test` | Full test suite (node + headless browser + render tests) | CI validation |
+| `yarn test-fast` | Lint + node smoke tests only | Pre-commit hook (fast) |
+| `yarn test-headless` | Browser unit tests in headless Chromium | Quick browser test validation |
+| `yarn test-browser` | Browser unit + interaction tests in headed Chromium | Local debugging with visible browser |
+| `yarn test-ci` | Full suite with coverage | CI pipeline |
+
+### Test Projects
+
+- **node**: Fast smoke tests (`*.node.spec.ts`) - ~15 tests, runs in Node.js
+- **headless**: Full unit tests (~618 tests) - runs in headless Chromium via Playwright
+- **browser**: Headed browser unit + interaction tests - useful for debugging but resource-intensive
+
+### Notes
+
+- The `test-browser` command runs in headed mode which consumes more resources. If tests timeout or fail to collect, use `test-headless` instead.
+- Render/golden-image comparisons run in `yarn test-render`, not in the headed `browser` project.
+- Pre-commit hooks run `test-fast` for quick validation. Full test suite runs in CI.
+- Render and interaction tests use golden image comparison and require the Playwright browser to be installed (`npx playwright install chromium`).
 
 See [additional instructions](#troubleshooting) for Windows, Linux and Apple M1.
 

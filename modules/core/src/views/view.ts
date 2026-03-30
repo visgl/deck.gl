@@ -5,6 +5,7 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
+import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
@@ -148,14 +149,7 @@ export default abstract class View<
         return this.props.viewState as ViewState;
       }
 
-      // Merge in all props from View's viewState, except id
-      const newViewState = {...viewState};
-      for (const key in this.props.viewState) {
-        if (key !== 'id') {
-          newViewState[key] = this.props.viewState[key];
-        }
-      }
-      return newViewState;
+      return deepMergeViewState<ViewState>(viewState, this.props.viewState as ViewState);
     }
 
     return viewState;

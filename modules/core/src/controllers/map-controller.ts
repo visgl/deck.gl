@@ -5,14 +5,34 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps, InteractionState} from './controller';
 import ViewState from './view-state';
-import {normalizeViewportProps} from '@math.gl/web-mercator';
+import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
+import {mod} from '../utils/math-utils';
 
 import LinearInterpolator from '../transitions/linear-interpolator';
 import type Viewport from '../viewports/viewport';
 
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
+const WEB_MERCATOR_TILE_SIZE = 512;
+const WEB_MERCATOR_MAX_BOUNDS = [
+  [-Infinity, -90],
+  [Infinity, 90]
+] satisfies ControllerProps['maxBounds'];
+
+/** The web mercator utility `lngLatToWorld` throws if invalid coordinates are provided.
+ * This wrapper clamps user input to calculate common positions safely. */
+function lngLatToWorld([lng, lat]: number[]): number[] {
+  if (Math.abs(lat) > 90) {
+    lat = Math.sign(lat) * 90;
+  }
+  if (Number.isFinite(lng)) {
+    const [x, y] = _lngLatToWorld([lng, lat]);
+    return [x, clamp(y, 0, WEB_MERCATOR_TILE_SIZE)];
+  }
+  const [, y] = _lngLatToWorld([0, lat]);
+  return [lng, clamp(y, 0, WEB_MERCATOR_TILE_SIZE)];
+}
 
 export type MapStateProps = {
   /** Mapbox viewport properties */
@@ -47,6 +67,8 @@ export type MapStateProps = {
 
   /** Normalize viewport props to fit map height into viewport. Default `true` */
   normalize?: boolean;
+
+  maxBounds?: ControllerProps['maxBounds'];
 };
 
 export type MapStateInternal = {
@@ -70,12 +92,18 @@ export type MapStateInternal = {
 /* Utils */
 
 export class MapState extends ViewState<MapState, MapStateProps, MapStateInternal> {
-  makeViewport: (props: Record<string, any>) => Viewport;
+  /* get optional altitude for rotation pivot
+   *   - undefined: rotate around viewport center (no pivot point)
+   *   - 0: rotate around pointer position at ground level
+   *   - other value: rotate around pointer position at specified altitude
+   */
+  getAltitude?: (pos: [number, number]) => number | undefined;
 
   constructor(
     options: MapStateProps &
       MapStateInternal & {
         makeViewport: (props: Record<string, any>) => Viewport;
+        getAltitude?: (pos: [number, number]) => number | undefined;
       }
   ) {
     const {
@@ -133,6 +161,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
     assert(Number.isFinite(zoom)); // `zoom` must be supplied
 
+    const maxBounds = options.maxBounds || (normalize ? WEB_MERCATOR_MAX_BOUNDS : null);
+
     super(
       {
         width,
@@ -148,7 +178,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         maxPitch,
         minPitch,
         normalize,
-        position
+        position,
+        maxBounds
       },
       {
         startPanLngLat,
@@ -158,10 +189,11 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         startBearing,
         startPitch,
         startZoom
-      }
+      },
+      options.makeViewport
     );
 
-    this.makeViewport = options.makeViewport;
+    this.getAltitude = options.getAltitude;
   }
 
   /**
@@ -206,12 +238,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   /**
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
-   * @param {Number} altitude - optional altitude for rotation pivot
-   *   - undefined: rotate around viewport center (no pivot point)
-   *   - 0: rotate around pointer position at ground level
-   *   - other value: rotate around pointer position at specified altitude
    */
-  rotateStart({pos, altitude}: {pos: [number, number]; altitude?: number}): MapState {
+  rotateStart({pos}: {pos: [number, number]}): MapState {
+    const altitude = this.getAltitude?.(pos);
+
     return this._getUpdatedState({
       startRotatePos: pos,
       startRotateLngLat: altitude !== undefined ? this._unproject3D(pos, altitude) : undefined,
@@ -323,10 +353,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       return this;
     }
 
-    const {maxZoom, minZoom} = this.getViewportProps();
-    let zoom = (startZoom as number) + Math.log2(scale);
-    zoom = clamp(zoom, minZoom, maxZoom);
-
+    const zoom = this._constrainZoom((startZoom as number) + Math.log2(scale));
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
 
     return this._getUpdatedState({
@@ -411,24 +438,63 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
-    // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom} = props;
-    props.zoom = clamp(zoom, minZoom, maxZoom);
-
     // Ensure pitch is within specified range
-    const {maxPitch, minPitch, pitch} = props;
+    const {maxPitch, minPitch, pitch, longitude, bearing, normalize, maxBounds} = props;
+
+    if (normalize) {
+      if (longitude < -180 || longitude > 180) {
+        props.longitude = mod(longitude + 180, 360) - 180;
+      }
+      if (bearing < -180 || bearing > 180) {
+        props.bearing = mod(bearing + 180, 360) - 180;
+      }
+    }
     props.pitch = clamp(pitch, minPitch, maxPitch);
 
-    // Normalize viewport props to fit map height into viewport
-    const {normalize = true} = props;
-    if (normalize) {
-      Object.assign(props, normalizeViewportProps(props));
+    props.zoom = this._constrainZoom(props.zoom, props);
+
+    if (maxBounds) {
+      const bl = lngLatToWorld(maxBounds[0]);
+      const tr = lngLatToWorld(maxBounds[1]);
+      // calculate center and zoom ranges at pitch=0 and bearing=0
+      // to maintain visual stability when rotating
+      const scale = 2 ** props.zoom;
+      const halfWidth = props.width / 2 / scale;
+      const halfHeight = props.height / 2 / scale;
+      const [minLng, minLat] = worldToLngLat([bl[0] + halfWidth, bl[1] + halfHeight]);
+      const [maxLng, maxLat] = worldToLngLat([tr[0] - halfWidth, tr[1] - halfHeight]);
+      props.longitude = clamp(props.longitude, minLng, maxLng);
+      props.latitude = clamp(props.latitude, minLat, maxLat);
     }
 
     return props;
   }
 
   /* Private methods */
+
+  _constrainZoom(zoom: number, props?: Required<MapStateProps>): number {
+    props ||= this.getViewportProps();
+    const {maxZoom, maxBounds} = props;
+
+    const shouldApplyMaxBounds = maxBounds !== null && props.width > 0 && props.height > 0;
+    let {minZoom} = props;
+
+    if (shouldApplyMaxBounds) {
+      const bl = lngLatToWorld(maxBounds[0]);
+      const tr = lngLatToWorld(maxBounds[1]);
+      const w = tr[0] - bl[0];
+      const h = tr[1] - bl[1];
+      // ignore bound size of 0 or Infinity
+      if (Number.isFinite(w) && w > 0) {
+        minZoom = Math.max(minZoom, Math.log2(props.width / w));
+      }
+      if (Number.isFinite(h) && h > 0) {
+        minZoom = Math.max(minZoom, Math.log2(props.height / h));
+      }
+      if (minZoom > maxZoom) minZoom = maxZoom;
+    }
+    return clamp(zoom, minZoom, maxZoom);
+  }
 
   _zoomFromCenter(scale) {
     const {width, height} = this.getViewportProps();
@@ -542,36 +608,23 @@ export default class MapController extends Controller<MapState> {
    */
   protected rotationPivot: 'center' | '2d' | '3d' = 'center';
 
-  /**
-   * Internal callback to access deck picking engine. Populated by ViewManager
-   */
-  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
-
-  constructor(opts: ConstructorParameters<typeof Controller>[0]) {
-    super(opts);
-    this.pickPosition = opts.pickPosition;
-  }
-
-  setProps(props: ControllerProps & MapStateProps & {rotationPivot?: 'center' | '2d' | '3d'}) {
+  setProps(
+    props: ControllerProps &
+      MapStateProps & {
+        rotationPivot?: 'center' | '2d' | '3d';
+        getAltitude?: (pos: [number, number]) => number | undefined;
+      }
+  ) {
     if ('rotationPivot' in props) {
       this.rotationPivot = props.rotationPivot || 'center';
     }
+    // this will be passed to MapState constructor
+    props.getAltitude = this._getAltitude;
     props.position = props.position || [0, 0, 0];
-    const oldProps = this.props;
+    props.maxBounds =
+      props.maxBounds || (props.normalize === false ? null : WEB_MERCATOR_MAX_BOUNDS);
 
     super.setProps(props);
-
-    const dimensionChanged = !oldProps || oldProps.height !== props.height;
-    if (dimensionChanged) {
-      // Dimensions changed, normalize the props
-      this.updateViewport(
-        new this.ControllerState({
-          makeViewport: this.makeViewport,
-          ...props,
-          ...this.state
-        })
-      );
-    }
   }
 
   protected updateViewport(
@@ -595,22 +648,18 @@ export default class MapController extends Controller<MapState> {
   }
 
   /** Add altitude to rotateStart params based on rotationPivot mode */
-  protected _getRotateStartParams(pos: [number, number]): {
-    pos: [number, number];
-    altitude?: number;
-  } {
-    let altitude: number | undefined;
+  protected _getAltitude = (pos: [number, number]): number | undefined => {
     if (this.rotationPivot === '2d') {
-      altitude = 0;
+      return 0;
     } else if (this.rotationPivot === '3d') {
       if (this.pickPosition) {
         const {x, y} = this.props;
         const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
         if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
-          altitude = pickResult.coordinate[2];
+          return pickResult.coordinate[2];
         }
       }
     }
-    return {pos, altitude};
-  }
+    return undefined;
+  };
 }
