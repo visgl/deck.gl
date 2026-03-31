@@ -81,9 +81,10 @@ export type Tileset2DProps<DataT = any> = {
   debounceTime?: number;
   /** Changes the zoom level at which the tiles are fetched. Needs to be an integer. @default 0 */
   zoomOffset?: number;
-  /** If false, tiles are not rendered when the viewport zoom is outside the [minZoom, maxZoom] range. @default true */
-  overdraw?: boolean;
-
+  /** The minimum zoom level at which tiles are visible. @default null */
+  visibleMinZoom?: number | null;
+  /** The maximum zoom level at which tiles are visible. @default null */
+  visibleMaxZoom?: number | null;
   /** Called when a tile successfully loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
   /** Called when a tile is cleared from cache. */
@@ -111,7 +112,8 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   maxRequests: 6,
   debounceTime: 0,
   zoomOffset: 0,
-  overdraw: true,
+  visibleMinZoom: null,
+  visibleMaxZoom: null,
 
   // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
   // onViewportLoad: ((tiles: Tile2DHeader<DataT>[]) => void) | null,
@@ -356,7 +358,7 @@ export class Tileset2D {
     modelMatrixInverse?: Matrix4;
     zoomOffset?: number;
   }): TileIndex[] {
-    const {tileSize, extent, zoomOffset, overdraw} = this.opts;
+    const {tileSize, extent, zoomOffset, visibleMinZoom, visibleMaxZoom} = this.opts;
     return getTileIndices({
       viewport,
       maxZoom,
@@ -367,7 +369,8 @@ export class Tileset2D {
       modelMatrix,
       modelMatrixInverse,
       zoomOffset,
-      overdraw
+      visibleMinZoom,
+      visibleMaxZoom
     });
   }
 

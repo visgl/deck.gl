@@ -16,9 +16,24 @@ class MapTileDemo extends Component {
 
   static parameters = {
     showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
-    minZoom: {displayName: 'Min Zoom', type: 'range', value: 0, step: 1, min: 0, max: 19},
-    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 19, step: 1, min: 0, max: 19},
-    overdraw: {displayName: 'Overdraw', type: 'checkbox', value: true},
+    minZoom: {displayName: 'Min Zoom', type: 'range', value: 3, step: 1, min: 0, max: 19},
+    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19},
+    visibleMinZoom: {
+      displayName: 'Visible Min Zoom',
+      type: 'range',
+      value: 1,
+      step: 1,
+      min: 0,
+      max: 19
+    },
+    visibleMaxZoom: {
+      displayName: 'Visible Max Zoom',
+      type: 'range',
+      value: 12,
+      step: 1,
+      min: 0,
+      max: 19
+    },
     useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
 
@@ -53,7 +68,8 @@ class MapTileDemo extends Component {
         showBorder={params.showBorder.value}
         minZoom={params.minZoom.value}
         maxZoom={params.maxZoom.value}
-        overdraw={params.overdraw.value}
+        visibleMinZoom={params.visibleMinZoom.value}
+        visibleMaxZoom={params.visibleMaxZoom.value}
         useExtent={params.useExtent.value}
         onTilesLoad={this._onTilesLoad}
       />

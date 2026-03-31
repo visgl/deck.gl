@@ -261,11 +261,17 @@ The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`)
 
 - Default: 0
 
-#### `overdraw` (boolean, optional) {#overdraw}
+#### `visibleMinZoom` (number | null, optional) {#visibleminzoom}
 
-Controls rendering behavior when viewport zoom is greater than maxZoom. When true (default), tiles at the clamped zoom level are shown. When false, no tiles are rendered.
+The minimum zoom level at which tiles are visible. When the viewport zoom is below this level, no tiles are rendered. This is independent of `minZoom`, which controls the minimum zoom level at which tiles are *fetched*.
 
-- Default: `true`
+- Default: `null`
+
+#### `visibleMaxZoom` (number | null, optional) {#visiblemaxzoom}
+
+The maximum zoom level at which tiles are visible. When the viewport zoom is above this level, no tiles are rendered. This is independent of `maxZoom`, which controls the maximum zoom level at which tiles are *fetched*.
+
+- Default: `null`
 
 #### `extent` (number[4], optional) {#extent}
 
