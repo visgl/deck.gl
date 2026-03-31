@@ -28,12 +28,15 @@ module.exports = function (
       const {resolve, debug, module, plugins} = opts;
 
       // Custom merging
-      if (resolve?.modules) {
-        _config.resolve.modules = resolve.modules;
+      if (resolve) {
+        if (resolve.modules) {
+          _config.resolve.modules = resolve.modules;
+        }
+        Object.assign(_config.resolve.alias, resolve.alias);
       }
 
       // Uncomment to inspect config
-      // console.log(util.inspect(_config, {depth: null, color: true}));
+      // console.log(util.inspect(_config.module, {depth: null, color: true}));
 
       // Symlink docs crash otherwise, see https://github.com/facebook/docusaurus/issues/6257
       _config.resolve.symlinks = false;
