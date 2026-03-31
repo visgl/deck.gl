@@ -31,8 +31,13 @@ class MapTileDemo extends Component {
           <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a> and
           <a href="https://wiki.openstreetmap.org/wiki/Tile_servers"> Tile Servers </a>
         </p>
-        <div className="stat">
-          No. of Tiles Loaded<b>{meta.tileCount || 0}</b>
+        <div className="layout">
+          <div className="stat col-1-2">
+            No. of Tiles Loaded<b>{meta.tileCount || 0}</b>
+          </div>
+          <div className="stat col-1-2">
+            Viewport Zoom<b>{meta.zoom != null ? meta.zoom.toFixed(1) : '-'}</b>
+          </div>
         </div>
       </div>
     );
@@ -43,6 +48,10 @@ class MapTileDemo extends Component {
     // Updating React state here may trigger another round of layer updates and create a racing condition
     // TODO - Fix this in TileLayer
     requestAnimationFrame(() => this.props.onStateChange({tileCount: tiles.length}));
+  };
+
+  _onZoomChange = zoom => {
+    this.props.onStateChange({zoom});
   };
 
   render() {
@@ -58,6 +67,7 @@ class MapTileDemo extends Component {
         visibleMaxZoom={params.visibleMaxZoom.value}
         useExtent={params.useExtent.value}
         onTilesLoad={this._onTilesLoad}
+        onZoomChange={this._onZoomChange}
       />
     );
   }

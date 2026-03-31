@@ -52,6 +52,7 @@ function getTooltip({tile}: TileLayerPickingInfo) {
 export default function App({
   showBorder = false,
   onTilesLoad,
+  onZoomChange,
   minZoom = 4,
   maxZoom = 7,
   visibleMinZoom,
@@ -60,6 +61,7 @@ export default function App({
 }: {
   showBorder?: boolean;
   onTilesLoad?: () => void;
+  onZoomChange?: (zoom: number) => void;
   minZoom?: number;
   maxZoom?: number;
   visibleMinZoom?: number;
@@ -69,7 +71,8 @@ export default function App({
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(({viewState}) => {
     setZoom(viewState.zoom);
-  }, []);
+    onZoomChange?.(viewState.zoom);
+  }, [onZoomChange]);
 
   const tileLayer = new TileLayer<ImageBitmap>({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
