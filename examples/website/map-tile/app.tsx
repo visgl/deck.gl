@@ -41,9 +41,6 @@ const LINK_STYLE: React.CSSProperties = {
   cursor: 'grab'
 };
 
-/* global window */
-const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-
 function getTooltip({tile}: TileLayerPickingInfo) {
   if (tile) {
     const {x, y, z} = tile.index;
@@ -89,8 +86,7 @@ export default function App({
     // https://wiki.openstreetmap.org/wiki/Zoom_levels
     minZoom,
     maxZoom,
-    tileSize: 256,
-    zoomOffset: devicePixelRatio === 1 ? -1 : 0,
+    tileSize: 512,
     visibleMinZoom,
     visibleMaxZoom,
     extent: useExtent ? FRANCE_EXTENT : undefined,
