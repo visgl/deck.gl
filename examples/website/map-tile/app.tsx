@@ -69,10 +69,13 @@ export default function App({
   useExtent?: boolean;
 }) {
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
-  const onViewStateChange = useCallback(({viewState}) => {
-    setZoom(viewState.zoom);
-    onZoomChange?.(viewState.zoom);
-  }, [onZoomChange]);
+  const onViewStateChange = useCallback(
+    ({viewState}) => {
+      setZoom(viewState.zoom);
+      onZoomChange?.(viewState.zoom);
+    },
+    [onZoomChange]
+  );
 
   const tileLayer = new TileLayer<ImageBitmap>({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
