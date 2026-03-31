@@ -15,25 +15,11 @@ class MapTileDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/map-tile`;
 
   static parameters = {
+    minZoom: {displayName: 'Min Zoom', type: 'range', value: 3, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
+    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
+    visibleMinZoom: {displayName: 'Visible Min Zoom', type: 'range', value: 1, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
+    visibleMaxZoom: {displayName: 'Visible Max Zoom', type: 'range', value: 12, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
     showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
-    minZoom: {displayName: 'Min Zoom', type: 'range', value: 3, step: 1, min: 0, max: 19},
-    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19},
-    visibleMinZoom: {
-      displayName: 'Visible Min Zoom',
-      type: 'range',
-      value: 1,
-      step: 1,
-      min: 0,
-      max: 19
-    },
-    visibleMaxZoom: {
-      displayName: 'Visible Max Zoom',
-      type: 'range',
-      value: 12,
-      step: 1,
-      min: 0,
-      max: 19
-    },
     useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
 

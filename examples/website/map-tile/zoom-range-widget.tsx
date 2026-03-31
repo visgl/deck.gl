@@ -40,48 +40,57 @@ export default function ZoomRangeWidget({
           borderRadius: 3, fontSize: 13, fontWeight: 500
         }}>Fetch {minZoom}-{maxZoom}</span>
         <span style={{
-          backgroundColor: '#fff', color: '#1a2b4a', padding: '2px 8px',
-          borderRadius: 3, fontSize: 13, fontWeight: 500,
-          border: '1px solid rgba(0,0,0,0.3)'
+          backgroundColor: '#1a2b4a', color: '#fff', padding: '2px 8px',
+          borderRadius: 3, fontSize: 13, fontWeight: 500
         }}>Visible {visibleMinZoom ?? 0}-{visibleMaxZoom ?? RANGE_MAX}</span>
       </div>
-      <div style={{position: 'relative', height: barHeight + 16}}>
+      <div style={{position: 'relative', height: barHeight + 4}}>
         {/* Track - horizontal line */}
         <div style={{
           position: 'absolute', top: 8 + barHeight / 2 - 1, left: 0, right: 0,
           height: 2, backgroundColor: 'rgba(180,180,180,0.9)'
         }} />
-        {/* Visible range - white fill behind */}
+        {/* Visible range - dark blue fill behind */}
         <div style={{
           position: 'absolute', top: 8,
           left: `${visLeft}%`, width: `${visWidth}%`,
           height: barHeight, borderRadius: 3,
-          backgroundColor: '#fff',
+          backgroundColor: '#1a2b4a',
           border: '1px solid rgba(0,0,0,0.3)', boxSizing: 'border-box'
         }} />
-        {/* Fetch range - blue fill on top */}
-        <div style={{
-          position: 'absolute', top: 8 + barHeight * 0.2,
-          left: `${fetchLeft}%`, width: `${fetchWidth}%`,
-          height: barHeight * 0.6, borderRadius: 2,
-          backgroundColor: '#0275ff',
-          border: '1px solid rgba(0,0,0,0.3)', boxSizing: 'border-box'
-        }} />
+        {/* Fetch range - individual zoom level segments (boundaries at x.5) */}
+        {Array.from({length: maxZoom - minZoom + 1}, (_, i) => {
+          const z = minZoom + i;
+          const segLeft = toPercent(Math.max(z - 0.5, minZoom));
+          const segRight = toPercent(Math.min(z + 0.5, maxZoom));
+          const segWidth = segRight - segLeft;
+          const isFirst = i === 0;
+          const isLast = i === maxZoom - minZoom;
+          return (
+            <div key={z} style={{
+              position: 'absolute', top: 8 + barHeight * 0.2,
+              left: `${segLeft}%`, width: `${segWidth}%`,
+              height: barHeight * 0.6,
+              backgroundColor: z % 2 === 0 ? '#0275ff' : '#3d93ff',
+              borderTop: '1px solid rgba(0,0,0,0.3)',
+              borderBottom: '1px solid rgba(0,0,0,0.3)',
+              borderLeft: isFirst ? '1px solid rgba(0,0,0,0.3)' : 'none',
+              borderRight: isLast ? '1px solid rgba(0,0,0,0.3)' : 'none',
+              borderRadius: isFirst && isLast ? 2 : isFirst ? '2px 0 0 2px' : isLast ? '0 2px 2px 0' : 0,
+              boxSizing: 'border-box'
+            }} />
+          );
+        })}
         {/* Current zoom indicator */}
         <div style={{
           position: 'absolute', top: 4,
           left: `${zoomPos}%`,
           width: 2, height: barHeight + 8,
-          backgroundColor: '#4d84f5',
+          backgroundColor: '#1a2b4a',
           transform: 'translateX(-1px)',
-          borderRadius: 1
+          borderRadius: 1,
+          boxShadow: '0 0 0 1px #fff'
         }} />
-        {/* Tick labels */}
-        <div style={{position: 'absolute', top: barHeight + 10, left: 0, right: 0, display: 'flex', justifyContent: 'space-between'}}>
-          {[0, 5, 10, 15, 20].map(z => (
-            <span key={z} style={{fontSize: 9, color: 'rgba(100,100,100,0.8)'}}>{z}</span>
-          ))}
-        </div>
       </div>
     </div>
   );
