@@ -501,17 +501,17 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {pickingColors, instancePickingColors} = attributeManager.attributes;
         const pickingColorsAttribute = pickingColors || instancePickingColors;
         if (pickingColorsAttribute) {
-          if (needsPickingBuffer && pickingColorsAttribute.constant) {
-            pickingColorsAttribute.constant = false;
-            attributeManager.invalidate(pickingColorsAttribute.id);
-          }
-          if (!pickingColorsAttribute.value && !needsPickingBuffer) {
-            pickingColorsAttribute.constant = true;
-            pickingColorsAttribute.value = [0, 0, 0];
-          }
+        if (needsPickingBuffer && pickingColorsAttribute.constant) {
+          pickingColorsAttribute.constant = false;
+          attributeManager.invalidate(pickingColorsAttribute.id);
+        }
+        if (!pickingColorsAttribute.value && !needsPickingBuffer) {
+          pickingColorsAttribute.constant = true;
+          pickingColorsAttribute.value = [0, 0, 0];
         }
       }
     }
+  }
   }
 
   /** Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here. */
