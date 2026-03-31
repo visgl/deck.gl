@@ -29,7 +29,7 @@ const INITIAL_VIEW_STATE = {
   longitude: 14.42,
   zoom: 16,
   minZoom: 14,
-  maxZoom: 20,
+  maxZoom: 18,
   bearing: 90,
   pitch: 60
 };
