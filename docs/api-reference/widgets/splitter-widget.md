@@ -2,44 +2,116 @@
 
 <img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
-This widget lets the user to resize multiple views (e.g., two map or globe views) across the deck.gl canvas, by draggable splitter handles between them. This widget will overwrite the `views` prop passed to Deck.
+import {SplitterWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-## Usage
+<SplitterWidgetDemo />
 
+This widget lets the user to stack multiple views across the deck.gl canvas, and resize them by draggable splitter handles. This widget will only work if the `views` prop of Deck is unset.
 
-```ts
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
-import {Deck} from '@deck.gl/core';
-import {MapView} from '@deck.gl/core';
+import {Deck, OrbitView} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  layers: [],
+new Deck({
+  initialViewState: {
+    front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0},
+    perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0}
+  },
   widgets: [
     new SplitterWidget({
-      // style: DarkTheme,
       viewLayout: {
         orientation: 'horizontal',
         views: [
-          new MapView({id: 'left', controller: true}),
-          {
-            orientation: 'vertical',
-            views: [
-              new MapView({id: 'right-top', controller: true}),
-              new MapView({id: 'right-bottom', controller: true}),
-            ],
-          }
-        ],
+          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+        ]
       }
-    }),
+    })
   ]
 });
 ```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
+import {Deck, OrbitView, type OrbitViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
+    perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
+  },
+  widgets: [
+    new SplitterWidget({
+      viewLayout: {
+        orientation: 'horizontal',
+        views: [
+          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+        ]
+      }
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {OrbitView, type OrbitViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
+        perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
+      }}
+    >
+      <SplitterWidget
+        viewLayout={{
+          orientation: 'horizontal',
+          views: [
+          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+          ]
+        }}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
+new SplitterWidget({} satisfies SplitterWidgetProps);
+```
+
+## Types
 
 ### `SplitterWidgetProps` {#splitterwidgetprops}
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### `viewLayout` (ViewLayout, required)
+#### `viewLayout` (ViewLayout, required) {#viewlayout}
 
 Layout descriptor of how views are arranged on the canvas. Contains the following fields:
 

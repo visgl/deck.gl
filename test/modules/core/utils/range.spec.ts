@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import * as range from '@deck.gl/core/utils/range';
 
 const TEST_CASES = [
@@ -74,16 +74,14 @@ const TEST_CASES = [
   }
 ];
 
-test('range utils', t => {
+test('range utils', () => {
   let rangeCollection = range.EMPTY;
 
   for (const testCase of TEST_CASES) {
     rangeCollection = range.add(rangeCollection, testCase.range);
-    t.deepEqual(rangeCollection, testCase.output, 'Range added');
+    expect(rangeCollection, 'Range added').toEqual(testCase.output);
   }
 
-  t.deepEqual(range.EMPTY, [], 'Empty range');
-  t.deepEqual(range.FULL, [[0, Infinity]], 'Full range');
-
-  t.end();
+  expect(range.EMPTY, 'Empty range').toEqual([]);
+  expect(range.FULL, 'Full range').toEqual([[0, Infinity]]);
 });

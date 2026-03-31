@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import FlyToInterpolator from '@deck.gl/core/transitions/fly-to-interpolator';
-import {toLowPrecision} from '@deck.gl/test-utils';
+import {toLowPrecision} from '@deck.gl/test-utils/vitest';
 
 const START_PROPS = {
   width: 800,
@@ -117,23 +117,21 @@ const DURATION_TEST_CASES = [
   }
 ];
 
-test('ViewportFlyToInterpolator#initializeProps', t => {
+test('ViewportFlyToInterpolator#initializeProps', () => {
   const interpolator = new FlyToInterpolator();
 
   TEST_CASES.forEach(testCase => {
     const getResult = () => interpolator.initializeProps(testCase.startProps, testCase.endProps);
 
     if (testCase.shouldThrow) {
-      t.throws(getResult, testCase.title);
+      expect(getResult, testCase.title).toThrow();
     } else {
-      t.deepEqual(getResult(), testCase.expect, testCase.title);
+      expect(getResult(), testCase.title).toEqual(testCase.expect);
     }
   });
-
-  t.end();
 });
 
-test('ViewportFlyToInterpolator#interpolateProps', t => {
+test('ViewportFlyToInterpolator#interpolateProps', () => {
   const interpolator = new FlyToInterpolator();
 
   TEST_CASES.filter(testCase => testCase.transition).forEach(testCase => {
@@ -143,28 +141,23 @@ test('ViewportFlyToInterpolator#interpolateProps', t => {
         testCase.expect.end,
         Number(time)
       );
-      t.deepEqual(
+      expect(
         toLowPrecision(propsInTransition, 7),
-        testCase.transition[time],
         `${testCase.title} t = ${time} interpolated correctly`
-      );
+      ).toEqual(testCase.transition[time]);
     });
   });
-
-  t.end();
 });
 
-test('ViewportFlyToInterpolator#getDuration', t => {
+test('ViewportFlyToInterpolator#getDuration', () => {
   DURATION_TEST_CASES.forEach(testCase => {
     const interpolator = new FlyToInterpolator(testCase.opts);
-    t.equal(
+    expect(
       toLowPrecision(
         interpolator.getDuration(START_PROPS, Object.assign({}, END_PROPS, testCase.endProps)),
         7
       ),
-      testCase.expected,
       `${testCase.title}: should receive correct duration`
-    );
+    ).toBe(testCase.expected);
   });
-  t.end();
 });

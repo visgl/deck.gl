@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform sdfUniforms {
+layout(std140) uniform sdfUniforms {
   float gamma;
   bool enabled;
   float buffer;

@@ -12,3 +12,5 @@ mapbox-gl.js
 examples/layer-browser/
 test/apps/
 bindings/
+# TODO: Remove once eslint-plugin-import supports vite 5.x (vitest brings vite 5.x, master uses 4.x)
+examples/vite.config.local.mjs

@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform solidPolygonUniforms {
+layout(std140) uniform solidPolygonUniforms {
   bool extruded;
   bool isWireframe;
   float elevationScale;

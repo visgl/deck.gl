@@ -1,4 +1,4 @@
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   type Viewport,
   WebMercatorViewport,
@@ -8,7 +8,7 @@ import {
   FirstPersonViewport
 } from '@deck.gl/core';
 
-test('Viewport#recreate', t => {
+test('Viewport#recreate', () => {
   const TEST_CASES = [
     new WebMercatorViewport({
       width: 100,
@@ -88,7 +88,6 @@ test('Viewport#recreate', t => {
   for (const viewport of TEST_CASES) {
     const ViewportType = viewport.constructor as {new (props: unknown): Viewport};
     const clone = new ViewportType({...viewport});
-    t.ok(viewport.equals(clone), String(viewport.id));
+    expect(viewport.equals(clone), String(viewport.id)).toBeTruthy();
   }
-  t.end();
 });

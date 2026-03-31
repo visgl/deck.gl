@@ -13,7 +13,14 @@ export default abstract class ViewState<
   private _viewportProps: Required<Props>;
   private _state: State;
 
-  constructor(props: Required<Props>, state: State) {
+  makeViewport: (props: Record<string, any>) => Viewport;
+
+  constructor(
+    props: Required<Props>,
+    state: State,
+    makeViewport: (props: Record<string, any>) => Viewport
+  ) {
+    this.makeViewport = makeViewport;
     this._viewportProps = this.applyConstraints(props);
     this._state = state;
   }

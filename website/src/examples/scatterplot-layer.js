@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, { Component } from 'react';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import { MAPBOX_STYLES, DATA_URI, GITHUB_TREE } from '../constants/defaults';
 import { readableInteger } from '../utils/format-utils';
 import App from 'website-examples/scatterplot/app';
@@ -46,6 +47,7 @@ class ScatterPlotDemo extends Component {
 
   render() {
     const { params, data } = this.props;
+    const widgets = [new StatsWidget({type: 'device'})];
 
     return (
       <App
@@ -55,6 +57,7 @@ class ScatterPlotDemo extends Component {
         maleColor={params.colorM.value}
         femaleColor={params.colorF.value}
         radius={params.radius.value}
+        widgets={widgets}
       />
     );
   }
