@@ -4,7 +4,7 @@
 
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
-import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
+import {gouraudMaterial, phongMaterial} from './compat/materials';
 import {layerUniforms} from './misc/layer-uniforms';
 import color from './color/color';
 import geometry from './misc/geometry';
