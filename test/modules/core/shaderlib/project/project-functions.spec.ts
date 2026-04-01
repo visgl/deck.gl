@@ -135,15 +135,21 @@ const TEST_CASES: TestCase[] = [
 ];
 
 test('project#projectPosition', () => {
+  const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-7;
 
-  TEST_CASES.forEach(testCase => {
-    const result = projectPosition(testCase.position, testCase.projectProps);
-    expect(equals(result, testCase.result), testCase.title).toBeTruthy();
-  });
+  try {
+    TEST_CASES.forEach(testCase => {
+      const result = projectPosition(testCase.position, testCase.projectProps);
+      expect(equals(result, testCase.result), testCase.title).toBeTruthy();
+    });
+  } finally {
+    config.EPSILON = oldEpsilon;
+  }
 });
 
 webglTest('project#projectPosition vs project_position', async () => {
+  const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-5;
 
   const vs = `\
@@ -158,22 +164,26 @@ void main()
 }
 `;
 
-  for (const {title, position, projectProps} of TEST_CASES.filter(
-    testCase => !testCase.projectProps.fromCoordinateSystem
-  )) {
-    const cpuResult = projectPosition(position, projectProps);
-    const testProps: TestProps = {
-      uPos: position,
-      uPos64Low: position.map(fp64LowPart) as NumberArray3
-    };
-    const shaderResult = await runOnGPU({
-      vs,
-      varying: 'outValue',
-      modules: [project, testUniforms],
-      vertexCount: 1,
-      shaderInputProps: {project: projectProps, test: testProps}
-    });
+  try {
+    for (const {title, position, projectProps} of TEST_CASES.filter(
+      testCase => !testCase.projectProps.fromCoordinateSystem
+    )) {
+      const cpuResult = projectPosition(position, projectProps);
+      const testProps: TestProps = {
+        uPos: position,
+        uPos64Low: position.map(fp64LowPart) as NumberArray3
+      };
+      const shaderResult = await runOnGPU({
+        vs,
+        varying: 'outValue',
+        modules: [project, testUniforms],
+        vertexCount: 1,
+        shaderInputProps: {project: projectProps, test: testProps}
+      });
 
-    expect(verifyGPUResult(shaderResult, cpuResult), title).toBe(true);
+      expect(verifyGPUResult(shaderResult, cpuResult), title).toBe(true);
+    }
+  } finally {
+    config.EPSILON = oldEpsilon;
   }
 });

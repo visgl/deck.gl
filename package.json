@@ -49,6 +49,7 @@
     "@loaders.gl/polyfills": "^4.4.1",
     "@luma.gl/core": "^9.3.1",
     "@luma.gl/effects": "^9.3.1",
+    "@luma.gl/webgl": "^9.3.1",
     "@luma.gl/webgpu": "^9.3.1",
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.1",

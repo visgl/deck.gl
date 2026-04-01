@@ -5,14 +5,14 @@
 import {test, expect} from 'vitest';
 import {Deck} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
-import configuration from './json-configuration-for-deck';
+import {JSON_CONFIGURATION} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 import {device, gl} from '@deck.gl/test-utils/vitest';
 
 const getDeckProps = () => (globalThis.__JSDOM__ ? {gl} : {device});
 
 test('JSONConverter#render', async () => {
-  const jsonConverter = new JSONConverter({configuration});
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
   expect(jsonConverter, 'JSONConverter created').toBeTruthy();
 
   const deckProps = jsonConverter.convert(JSON_DATA);
