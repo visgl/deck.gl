@@ -75,6 +75,9 @@ const config = {
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
+            '@luma.gl/webgl/constants': resolve(
+              '../node_modules/@luma.gl/webgl/dist/constants'
+            ),
             '@luma.gl/constants': resolve(
               '../node_modules/@luma.gl/constants/dist'
             ),
