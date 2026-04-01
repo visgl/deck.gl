@@ -109,6 +109,9 @@ in vec2 vDashArray;
 #define PI 3.141592653589793
 #endif
 
+// Flag to track if current fragment is in a dash gap (for filled rectangles)
+bool strokeStyle_inDashGap = false;
+
 // Calculate position along rounded rectangle perimeter (0 to perimeter length)
 // Accounts for corner arcs when borderRadius > 0
 // Starting from bottom-left corner, going clockwise (up the left edge first)
@@ -268,13 +271,31 @@ float strokeStyle_getRectPerimeterPosition(vec2 uv, vec2 dims, float lineWidth) 
       // Determine if in gap
       float strokeStyle_unitOffset = mod(strokeStyle_positionAlongStroke, strokeStyle_unitLength);
       if (strokeStyle_unitOffset > strokeStyle_solidLength) {
-        // In dash gap - discard unless picking gaps
-        if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
-          discard;
+        // In dash gap
+        if (vFillColor.a > 0.0) {
+          // Filled rectangle - mark for fill color override at end of main
+          strokeStyle_inDashGap = true;
+        } else {
+          // Unfilled rectangle - discard unless picking gaps
+          if (!(strokeStyle.dashGapPickable && bool(picking.isActive))) {
+            discard;
+          }
         }
       }
     }
   }
+}
+`,
+
+    // Override stroke color with fill color in dash gaps for filled rectangles
+    'fs:#main-end': `
+if (strokeStyle_inDashGap) {
+  // In dash gap of filled rectangle - show fill color instead of stroke
+  // Preserve the shape alpha (for rounded corners antialiasing)
+  float strokeStyle_shapeAlpha = fragColor.a / max(vLineColor.a, 0.001);
+  fragColor = vec4(vFillColor.rgb, vFillColor.a * strokeStyle_shapeAlpha);
+  // Re-apply highlight since we're after DECKGL_FILTER_COLOR
+  fragColor = picking_filterHighlightColor(fragColor);
 }
 `
   }

@@ -3,7 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck} from '@deck.gl/core';
-import {ScatterplotLayer, _TextBackgroundLayer as TextBackgroundLayer} from '@deck.gl/layers';
+import {
+  ScatterplotLayer,
+  TextLayer,
+  _TextBackgroundLayer as TextBackgroundLayer
+} from '@deck.gl/layers';
 import {StrokeStyleExtension} from '@deck.gl/extensions';
 
 const INITIAL_VIEW_STATE = {
@@ -72,36 +76,56 @@ const SCATTERPLOT_DATA = [
   }
 ];
 
+// Labels for each element
+const LABELS = [
+  // Fill-only circle
+  {position: [-122.42, 37.79], text: 'Fill only\n(no stroke)'},
+  // Dashed filled circles
+  {position: [-122.41, 37.79], text: 'Filled + dashed\ndash: [3,2]'},
+  {position: [-122.4, 37.79], text: 'Filled + dashed\ndash: [5,2]'},
+  {position: [-122.39, 37.79], text: 'Filled + dashed\ndash: [2,1]'},
+  {position: [-122.38, 37.79], text: 'Filled + solid\n(no dash)'},
+  // Stroke-only circles
+  {position: [-122.41, 37.78], text: 'Stroke only\ndash: [4,3]'},
+  {position: [-122.4, 37.78], text: 'Stroke only\ndash: [6,2]'},
+  // Rectangles - position labels just below the shapes
+  {position: [-122.395, 37.7685], text: 'Rounded rect\nborderRadius: 20\ndash: [4,2]'},
+  {position: [-122.41, 37.759], text: 'Sharp corners\ndash: [4,2]'},
+  {position: [-122.4, 37.759], text: 'Rounded\ndash: [3,2]'},
+  {position: [-122.39, 37.759], text: 'Solid stroke\n(no dash)'}
+];
+
 // Sample data for TextBackgroundLayer - rectangles at different positions
+// getBoundingRect format: [x, y, width, height] where x,y is offset from position
 const TEXT_BG_DATA = [
-  // Large rounded rectangle - prominent example
+  // Large rounded rectangle - prominent example (centered 240x100)
   {
     position: [-122.395, 37.77],
-    bounds: [-120, -50, 120, 50],
+    bounds: [-120, -50, 240, 100],
     borderRadius: 25,
     dashArray: [4, 2],
     lineColor: [0, 100, 200]
   },
-  // Sharp corners
+  // Sharp corners (centered 120x40)
   {
     position: [-122.41, 37.76],
-    bounds: [-60, -20, 60, 20],
+    bounds: [-60, -20, 120, 40],
     borderRadius: 0,
     dashArray: [4, 2],
     lineColor: [0, 0, 0]
   },
-  // Rounded corners
+  // Rounded corners (centered 100x50)
   {
     position: [-122.4, 37.76],
-    bounds: [-50, -25, 50, 25],
+    bounds: [-50, -25, 100, 50],
     borderRadius: 12,
     dashArray: [3, 2],
     lineColor: [200, 0, 100]
   },
-  // Solid stroke for comparison
+  // Solid stroke for comparison (centered 80x40)
   {
     position: [-122.39, 37.76],
-    bounds: [-40, -20, 40, 20],
+    bounds: [-40, -20, 80, 40],
     borderRadius: 8,
     dashArray: [0, 0],
     lineColor: [100, 100, 100]
@@ -142,20 +166,52 @@ new Deck({
       extensions: [new StrokeStyleExtension({dash: true})]
     }),
 
-    // TextBackgroundLayer with dashed strokes
+    // TextBackgroundLayer with dashed strokes, rounded corners, and colored fill
     new TextBackgroundLayer({
-      id: 'text-bg-dashed',
-      data: TEXT_BG_DATA,
+      id: 'text-bg-rounded',
+      data: TEXT_BG_DATA.filter(d => d.borderRadius > 0),
       getPosition: d => d.position,
       getBoundingRect: d => d.bounds,
-      getBorderRadius: d => d.borderRadius,
+      borderRadius: 20,
       getLineColor: d => d.lineColor,
-      getFillColor: [255, 255, 255, 200],
+      getFillColor: [200, 230, 255, 200], // Light blue fill to test dash gaps show fill
       getLineWidth: 2,
       getDashArray: d => d.dashArray,
       pickable: true,
       autoHighlight: true,
       extensions: [new StrokeStyleExtension({dash: true})]
+    }),
+
+    // TextBackgroundLayer with dashed strokes and sharp corners
+    new TextBackgroundLayer({
+      id: 'text-bg-sharp',
+      data: TEXT_BG_DATA.filter(d => d.borderRadius === 0),
+      getPosition: d => d.position,
+      getBoundingRect: d => d.bounds,
+      borderRadius: 0,
+      getLineColor: d => d.lineColor,
+      getFillColor: [255, 230, 200, 200], // Light orange fill to test dash gaps show fill
+      getLineWidth: 2,
+      getDashArray: d => d.dashArray,
+      pickable: true,
+      autoHighlight: true,
+      extensions: [new StrokeStyleExtension({dash: true})]
+    }),
+
+    // Labels for each element
+    new TextLayer({
+      id: 'labels',
+      data: LABELS,
+      getPosition: d => d.position,
+      getText: d => d.text,
+      getSize: 12,
+      getColor: [60, 60, 60],
+      getTextAnchor: 'middle',
+      getAlignmentBaseline: 'center',
+      fontFamily: 'Monaco, monospace',
+      fontWeight: 'bold',
+      outlineWidth: 2,
+      outlineColor: [255, 255, 255]
     })
   ]
 });
