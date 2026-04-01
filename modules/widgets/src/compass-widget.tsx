@@ -19,7 +19,7 @@ export type CompassWidgetProps = WidgetProps & {
    * Callback when the compass reset button is clicked.
    * Called for each viewport that will be reset.
    */
-  onCompassReset?: (params: {
+  onReset?: (params: {
     /** The view being reset */
     viewId: string;
     /** The new bearing value (0) */
@@ -37,7 +37,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
     viewId: null,
     label: 'Reset Compass',
     transitionDuration: 200,
-    onCompassReset: () => {}
+    onReset: () => {}
   };
 
   className = 'deck-widget-compass';
@@ -117,7 +117,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
       const nextPitch = resetPitch ? 0 : viewport.pitch;
 
       // Call callback
-      this.props.onCompassReset?.({viewId, bearing: nextBearing, pitch: nextPitch});
+      this.props.onReset?.({viewId, bearing: nextBearing, pitch: nextPitch});
 
       const nextViewState = {
         ...viewState,

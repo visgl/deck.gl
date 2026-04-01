@@ -112,7 +112,7 @@ Tooltip message displayed while hovering a mouse over the widget.
 
 Bearing and pitch reset transition duration in milliseconds.
 
-#### `onCompassReset` (Function, optional) {#oncompassreset}
+#### `onReset` (Function, optional) {#onreset}
 
 ```ts
 (params: {viewId: string; bearing: number; pitch: number}) => void

@@ -20,7 +20,7 @@ export type GimbalWidgetProps = WidgetProps & {
    * Callback when the gimbal reset button is clicked.
    * Called for each viewport that will be reset.
    */
-  onGimbalReset?: (params: {
+  onReset?: (params: {
     /** The view being reset */
     viewId: string;
     /** The new rotationOrbit value (0) */
@@ -39,7 +39,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     label: 'Gimbal',
     strokeWidth: 1.5,
     transitionDuration: 200,
-    onGimbalReset: () => {}
+    onReset: () => {}
   };
 
   className = 'deck-widget-gimbal';
@@ -136,7 +136,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     const viewState = this.getViewState(viewId);
     if ('rotationOrbit' in viewState || 'rotationX' in viewState) {
       // Call callback
-      this.props.onGimbalReset?.({viewId, rotationOrbit: 0, rotationX: 0});
+      this.props.onReset?.({viewId, rotationOrbit: 0, rotationX: 0});
 
       const nextViewState = {
         ...viewState,

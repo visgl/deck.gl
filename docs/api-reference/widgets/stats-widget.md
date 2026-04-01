@@ -20,7 +20,7 @@ import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [
-    new StatsWidget({defaultIsExpanded: true})
+    new StatsWidget({initialExpanded: true})
   ]
 });
 ```
@@ -35,7 +35,7 @@ import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [
-    new StatsWidget({defaultIsExpanded: true})
+    new StatsWidget({initialExpanded: true})
   ]
 });
 ```
@@ -51,7 +51,7 @@ import '@deck.gl/widgets/stylesheet.css';
 function App() {
   return (
     <DeckGL>
-      <StatsWidget defaultIsExpanded />
+      <StatsWidget initialExpanded />
     </DeckGL>
   );
 }
@@ -89,7 +89,7 @@ Title shown in the widget header.
 
 * Default: `'Stats'`
 
-#### defaultIsExpanded (boolean, optional)
+#### initialExpanded (boolean, optional)
 
 If `true`, the UI is expanded at start.
 
@@ -109,13 +109,13 @@ Custom formatters for stat values.
 
 Whether to reset particular stats after each update.
 
-#### collapsed (boolean, optional)
+#### expanded (boolean, optional)
 
-Controlled collapsed state. When provided, the widget is in controlled mode and `defaultIsExpanded` is ignored.
+Controlled expanded state. When provided, the widget is in controlled mode and `initialExpanded` is ignored.
 
-#### onCollapsedChange (function, optional)
+#### onExpandedChange (function, optional)
 
-Callback when the collapsed state changes (user clicks header). In controlled mode, use this to update the `collapsed` prop.
+Callback when the expanded state changes (user clicks header). In controlled mode, use this to update the `expanded` prop.
 
 ### Built-in Formatters
 

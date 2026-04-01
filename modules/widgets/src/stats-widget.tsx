@@ -38,7 +38,7 @@ export type StatsWidgetProps = WidgetProps & {
   /** Expand the stats UI by default.
    * @default false
    */
-  defaultIsExpanded?: boolean;
+  initialExpanded?: boolean;
   /** Stats object to visualize. */
   stats?: Stats;
   /** Title shown in the header of the pop-up. Defaults to stats.id. */
@@ -50,14 +50,14 @@ export type StatsWidgetProps = WidgetProps & {
   /** Whether to reset particular stats after each update. */
   resetOnUpdate?: Record<string, boolean>;
   /**
-   * Controlled collapsed state. When provided, the widget is in controlled mode.
+   * Controlled expanded state. When provided, the widget is in controlled mode.
    */
-  collapsed?: boolean;
+  expanded?: boolean;
   /**
-   * Callback when the collapsed state changes (user clicks header).
-   * In controlled mode, use this to update the collapsed prop.
+   * Callback when the expanded state changes (user clicks header).
+   * In controlled mode, use this to update the expanded prop.
    */
-  onCollapsedChange?: (collapsed: boolean) => void;
+  onExpandedChange?: (expanded: boolean) => void;
 };
 
 /** Displays probe.gl stats in a floating pop-up. */
@@ -67,15 +67,15 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     type: 'deck',
     placement: 'top-left',
     viewId: null,
-    defaultIsExpanded: false,
+    initialExpanded: false,
     stats: undefined!,
     title: 'Stats',
     framesPerUpdate: 1,
     formatters: {},
     resetOnUpdate: {},
     id: 'stats',
-    collapsed: undefined!,
-    onCollapsedChange: () => {}
+    expanded: undefined!,
+    onExpandedChange: () => {}
   };
 
   className = 'deck-widget-stats';
@@ -84,22 +84,22 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   private _counter = 0;
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
-  private _collapsed: boolean = true;
+  private _expanded: boolean = false;
 
   /**
-   * Returns the current collapsed state.
-   * In controlled mode, returns the collapsed prop.
+   * Returns the current expanded state.
+   * In controlled mode, returns the expanded prop.
    * In uncontrolled mode, returns the internal state.
    */
-  getCollapsed(): boolean {
-    return this.props.collapsed ?? this._collapsed;
+  getExpanded(): boolean {
+    return this.props.expanded ?? this._expanded;
   }
 
   constructor(props: StatsWidgetProps = {}) {
     super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
-    this._collapsed = !props.defaultIsExpanded;
+    this._expanded = Boolean(props.initialExpanded);
     this.setProps(props);
   }
 
@@ -127,9 +127,9 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const isCollapsed = this.getCollapsed();
-    if (isCollapsed) {
-      render(<FpsIcon getFps={this._getFps} onClick={this._toggleCollapsed} />, rootElement);
+    const isExpanded = this.getExpanded();
+    if (!isExpanded) {
+      render(<FpsIcon getFps={this._getFps} onClick={this._toggleExpanded} />, rootElement);
       return;
     }
 
@@ -159,7 +159,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
         <div
           className="deck-widget-stats-header"
           style={{cursor: 'pointer', pointerEvents: 'auto'}}
-          onClick={this._toggleCollapsed}
+          onClick={this._toggleExpanded}
         >
           <b>{title}</b>
           {deviceLabel && <span className="deck-widget-stats-device">{deviceLabel}</span>}
@@ -174,7 +174,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   }
 
   onRedraw(): void {
-    if (!this.getCollapsed()) {
+    if (this.getExpanded()) {
       const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
       if (this._counter++ % framesPerUpdate === 0) {
         this.updateHTML();
@@ -202,18 +202,18 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     }
   }
 
-  protected _toggleCollapsed = (): void => {
-    const nextCollapsed = !this.getCollapsed();
+  protected _toggleExpanded = (): void => {
+    const nextExpanded = !this.getExpanded();
 
     // Always call callback if provided
-    this.props.onCollapsedChange?.(nextCollapsed);
+    this.props.onExpandedChange?.(nextExpanded);
 
     // Only update internal state if uncontrolled
-    if (this.props.collapsed === undefined) {
-      this._collapsed = nextCollapsed;
+    if (this.props.expanded === undefined) {
+      this._expanded = nextExpanded;
       this.updateHTML();
     }
-    // In controlled mode, parent will update collapsed prop which triggers updateHTML via setProps
+    // In controlled mode, parent will update expanded prop which triggers updateHTML via setProps
   };
 
   protected _getFps = (): number => {

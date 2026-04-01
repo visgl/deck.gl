@@ -117,7 +117,7 @@ Width of gimbal lines.
 
 View state transition duration in milliseconds.
 
-#### `onGimbalReset` (Function, optional) {#ongimbalreset}
+#### `onReset` (Function, optional) {#onreset}
 
 ```ts
 (params: {viewId: string; rotationOrbit: number; rotationX: number}) => void
