@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   MapView,
   OrbitView,
@@ -12,22 +12,20 @@ import {
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
 
-import testController from './test-controller';
+import testController, {createTestController} from './test-controller';
 
-test('MapController', async t => {
-  await testController(t, MapView, {
+test('MapController', async () => {
+  await testController(MapView, {
     longitude: -122.45,
     latitude: 37.78,
     zoom: 10,
     pitch: 30,
     bearing: -45
   });
-
-  t.end();
 });
 
-test('MapController#inertia', async t => {
-  await testController(t, MapView, {
+test('MapController#inertia', async () => {
+  await testController(MapView, {
     longitude: -122.45,
     latitude: 37.78,
     zoom: 10,
@@ -35,13 +33,10 @@ test('MapController#inertia', async t => {
     bearing: -45,
     inertia: true
   });
-
-  t.end();
 });
 
-test('GlobeController', async t => {
+test('GlobeController', async () => {
   await testController(
-    t,
     GlobeView,
     {
       longitude: -122.45,
@@ -51,84 +46,96 @@ test('GlobeController', async t => {
     // GlobeView cannot be rotated
     ['pan#function key', 'pinch', 'multipan']
   );
-
-  t.end();
 });
 
-test('OrbitController', async t => {
-  await testController(t, OrbitView, {
+test('OrbitController', async () => {
+  await testController(OrbitView, {
     orbitAxis: 'Y',
     rotationX: 30,
     rotationOrbit: -45,
     target: [1, 1, 0],
     zoom: 1
   });
-
-  t.end();
 });
 
-test('OrthographicController', async t => {
+test('OrthographicController', async () => {
   await testController(
-    t,
     OrthographicView,
     {
       target: [1, 1, 0],
       zoom: 1
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'multipan']
+    [
+      'pan#function key',
+      'pan#function key#disabled',
+      'multipan',
+      'multipan#disabled',
+      'keyboard#function key'
+    ]
   );
-
-  t.end();
 });
 
-test('OrthographicController#2d zoom', async t => {
+test('OrthographicController#2d zoom', async () => {
   await testController(
-    t,
     OrthographicView,
     {
       target: [1, 1, 0],
       zoom: [1, 2]
     },
     // OrthographicView cannot be rotated
-    ['pan#function key', 'multipan']
+    [
+      'pan#function key',
+      'pan#function key#disabled',
+      'multipan',
+      'multipan#disabled',
+      'keyboard#function key'
+    ]
   );
-
-  t.end();
 });
 
-test('OrthographicController scroll zoom responds without transition lag', t => {
-  const timeline = new Timeline();
-  const view = new OrthographicView({controller: true});
-  const baseProps = {
-    id: 'test-view',
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    target: [0, 0, 0],
-    zoom: 0,
-    scrollZoom: true
-  };
-  const controllerProps = {...view.controller, ...baseProps};
-  const ControllerClass = controllerProps.type;
-
-  let currentProps = {...controllerProps};
-  let lastViewState = currentProps;
-
-  const controller = new ControllerClass({
-    timeline,
-    onViewStateChange: ({viewState}) => {
-      lastViewState = viewState;
-      currentProps = {...currentProps, ...viewState};
-      controller.setProps(currentProps);
+test('OrthographicController keyboard navigation with padding', async () => {
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        keyboard: {moveSpeed: 10}
+      },
+      padding: {left: 50, top: 20}
+    }),
+    initialViewState: {
+      target: [0, 0, 0],
+      zoom: 0
     },
-    onStateChange: () => {},
-    makeViewport: viewState =>
-      view.makeViewport({width: currentProps.width, height: currentProps.height, viewState})
+    onViewStateChange: ({viewState}) => {
+      viewState.transitionDuration = 0;
+      return viewState;
+    }
   });
+  controller.setProps({...controller.props, target: [0, 0, 0], zoom: 0});
 
-  controller.setProps(currentProps);
+  const keyboardEvent = {
+    type: 'keydown',
+    srcEvent: {preventDefault() {}, code: 'ArrowLeft'},
+    stopPropagation: () => {}
+  };
+
+  controller.handleEvent(keyboardEvent);
+  expect(controller.props.target, 'Moved 10px left').toEqual([10, 0]);
+
+  keyboardEvent.srcEvent.code = 'ArrowUp';
+  controller.handleEvent(keyboardEvent);
+  expect(controller.props.target, 'Moved 10px up').toEqual([10, 10]);
+});
+
+test('OrthographicController scroll zoom responds without transition lag', () => {
+  const controller = createTestController({
+    view: new OrthographicView({controller: true, padding: {left: 50, top: 20}}),
+    initialViewState: {
+      target: [0, 0, 0],
+      zoom: 0,
+      scrollZoom: true
+    }
+  });
 
   const wheelEvent = {
     type: 'wheel',
@@ -146,19 +153,52 @@ test('OrthographicController scroll zoom responds without transition lag', t => 
   if (delta < 0 && scale !== 0) {
     scale = 1 / scale;
   }
-  const expectedZoom = baseProps.zoom + Math.log2(scale);
+  const expectedZoom = Math.log2(scale);
 
-  t.ok(
-    Math.abs((lastViewState.zoom as number) - expectedZoom) < 1e-6,
+  expect(
+    Math.abs((controller.props.zoom as number) - expectedZoom) < 1e-6,
     'zoom level updates immediately when scroll zoom is not smooth'
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('FirstPersonController', async t => {
+test('OrthographicController scroll zoom resets isZooming state', () => {
+  const interactionStates: any[] = [];
+  const controller = createTestController({
+    view: new OrthographicView({controller: true, padding: {left: 50, top: 20}}),
+    initialViewState: {
+      target: [0, 0, 0],
+      zoom: 0,
+      scrollZoom: true
+    },
+    onStateChange: state => {
+      interactionStates.push({...state});
+    }
+  });
+
+  const wheelEvent = {
+    type: 'wheel',
+    offsetCenter: {x: 50, y: 50},
+    delta: -1,
+    srcEvent: {preventDefault() {}},
+    stopPropagation: () => {}
+  };
+
+  controller.handleEvent(wheelEvent as any);
+
+  // Verify we get exactly 2 state changes for non-smooth scroll zoom
+  expect(interactionStates.length, 'scroll zoom triggers exactly 2 state changes').toBe(2);
+
+  // Verify first state has isZooming: true
+  expect(interactionStates[0].isZooming, 'isZooming is set to true at start').toBe(true);
+  expect(interactionStates[0].isPanning, 'isPanning is set to true at start').toBe(true);
+
+  // Verify last state has isZooming: false
+  expect(interactionStates[1].isZooming, 'isZooming is reset to false at end').toBe(false);
+  expect(interactionStates[1].isPanning, 'isPanning is reset to false at end').toBe(false);
+});
+
+test('FirstPersonController', async () => {
   await testController(
-    t,
     FirstPersonView,
     {
       longitude: -122.45,
@@ -170,6 +210,4 @@ test('FirstPersonController', async t => {
     // FirstPersonController does not pan
     ['pan#function key', 'pan#function key#disabled']
   );
-
-  t.end();
 });

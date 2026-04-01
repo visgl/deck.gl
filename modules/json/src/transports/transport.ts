@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/**
+ * Callback hooks invoked during the transport lifecycle.
+ */
 export type TransportCallbacks = {
+  /** Invoked when a transport connection is initialized. */
   onInitialize: (message: any) => void;
+  /** Invoked when a transport connection is finalized. */
   onFinalize: (message: any) => void;
+  /** Invoked when the transport receives a message. */
   onMessage: (message: any) => void;
 };
 
@@ -17,6 +23,10 @@ const state: TransportCallbacks = {
 
 /** Helper class for Python / Jupyter integration */
 export class Transport {
+  /**
+   * Registers lifecycle callbacks shared by all transport instances.
+   * @param callbacks Partial callback set to install.
+   */
   static setCallbacks({onInitialize, onFinalize, onMessage}: Partial<TransportCallbacks>) {
     if (onInitialize) {
       state.onInitialize = onInitialize;
@@ -30,11 +40,19 @@ export class Transport {
     // this._flushQueuedConnections();
   }
 
+  /** Human-readable transport name. */
   name: string;
+  /** Queue of inbound messages received before callbacks are ready. */
   _messageQueue = [];
+  /** Arbitrary user data associated with the transport instance. */
   userData = {};
+  /** Whether the transport has been finalized. */
   _destroyed: boolean = false;
 
+  /**
+   * Creates a transport instance.
+   * @param name Human-readable transport name.
+   */
   constructor(name = 'Transport') {
     this.name = name;
   }
@@ -49,7 +67,7 @@ export class Transport {
   }
 
   /**
-   * Back-channel messaging
+   * Sends a JSON message through the transport back-channel.
    */
   sendJSONMessage() {
     // eslint-disable-next-line
@@ -57,7 +75,7 @@ export class Transport {
   }
 
   /**
-   * Back-channel messaging
+   * Sends a binary message through the transport back-channel.
    */
   sendBinaryMessage() {
     // eslint-disable-next-line
@@ -68,6 +86,10 @@ export class Transport {
   // API for transports (not intended for apps)
   //
 
+  /**
+   * Marks the transport as initialized and emits the initialize callback.
+   * @param options Additional payload fields merged into the callback message.
+   */
   _initialize(options = {}) {
     const message = {transport: this, ...options};
     state.onInitialize(message);
@@ -76,6 +98,10 @@ export class Transport {
     // this._initResolvers.resolve(message);
   }
 
+  /**
+   * Marks the transport as finalized and emits the finalize callback.
+   * @param options Additional payload fields merged into the callback message.
+   */
   _finalize(options = {}) {
     const message = {transport: this, ...options};
 
@@ -84,6 +110,10 @@ export class Transport {
     this._destroyed = true;
   }
 
+  /**
+   * Delivers a received message to the registered message callback.
+   * @param message Additional payload fields merged into the callback message.
+   */
   _messageReceived(message = {}) {
     message = {transport: this, ...message};
 
@@ -120,6 +150,11 @@ export class Transport {
   }
   */
 
+  /**
+   * Serializes an object to JSON while tolerating circular references where possible.
+   * @param v Value to serialize.
+   * @returns A JSON string with cycles removed or deduplicated where possible.
+   */
   static _stringifyJSONSafe(v) {
     const cache = new Set();
     return JSON.stringify(v, (key, value) => {

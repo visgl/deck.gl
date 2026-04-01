@@ -270,7 +270,11 @@ export default class WebMercatorViewport extends Viewport {
     return addMetersToLngLat(lngLatZ, xyz);
   }
 
-  panByPosition(coords: number[], pixel: number[]): WebMercatorViewportOptions {
+  panByPosition(
+    coords: number[],
+    pixel: number[],
+    startPixel?: number[]
+  ): WebMercatorViewportOptions {
     const fromLocation = pixelsToWorld(pixel, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(coords);
 
@@ -279,6 +283,16 @@ export default class WebMercatorViewport extends Viewport {
 
     const [longitude, latitude] = this.unprojectFlat(newCenter);
     return {longitude, latitude};
+  }
+
+  /**
+   * Returns a new longitude and latitude that keeps a 3D world coordinate at a given screen pixel
+   * This version handles the z-component (altitude) properly for cameras positioned above ground
+   */
+  panByPosition3D(coords: number[], pixel: number[]): WebMercatorViewportOptions {
+    const targetZ = coords[2] || 0;
+    const deltaLngLat = vec2.sub([], coords, this.unproject(pixel, {targetZ}));
+    return {longitude: this.longitude + deltaLngLat[0], latitude: this.latitude + deltaLngLat[1]};
   }
 
   getBounds(options: {z?: number} = {}): [number, number, number, number] {

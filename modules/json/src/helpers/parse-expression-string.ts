@@ -7,17 +7,25 @@ import {get} from '../utils/get';
 // expression-eval: Small jsep based expression parser that supports array and object indexing
 import {parse, eval as evaluate} from '../expression-eval/expression-eval';
 
+/**
+ * Accessor function produced from a parsed JSON expression string.
+ */
 type AccessorFunction = (row: Record<string, unknown>) => unknown;
 
+/**
+ * Cache of compiled accessor expressions keyed by their original string form.
+ */
 const cachedExpressionMap: Record<string, AccessorFunction> = {
   // Identity function
   '-': object => object
 };
 
 /**
- * Generates an accessor function from a JSON string
- * '-' : x => x
- * 'a.b.c': x => x.a.b.c
+ * Generates an accessor function from a JSON string.
+ * `-` maps to the identity accessor and `a.b.c` maps to nested property access.
+ * @param propValue Expression string to compile.
+ * @param configuration Active conversion configuration.
+ * @returns A callable accessor compiled from the expression string.
  */
 export function parseExpressionString(
   propValue: string,
@@ -55,7 +63,11 @@ export function parseExpressionString(
   return func;
 }
 
-/** Helper function to search all nodes in AST returned by expressionEval */
+/**
+ * Recursively visits nodes in an expression AST.
+ * @param node AST node or node array to traverse.
+ * @param visitor Callback invoked for each visited AST node.
+ */
 // eslint-disable-next-line complexity
 function traverse(node, visitor) {
   if (Array.isArray(node)) {

@@ -96,9 +96,12 @@ const defaultProps: DefaultProps<LayerProps> = {
       if (signal) {
         loadOptions = {
           ...loadOptions,
-          fetch: {
-            ...loadOptions?.fetch,
-            signal
+          core: {
+            ...loadOptions?.core,
+            fetch: {
+              ...loadOptions?.core?.fetch,
+              signal
+            }
           }
         };
       }
@@ -489,7 +492,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const hasPickingBuffer = this.internalState!.hasPickingBuffer;
       const needsPickingBuffer =
         Number.isInteger(props.highlightedObjectIndex) ||
-        props.pickable ||
+        Boolean(props.pickable) ||
         props.extensions.some(extension => extension.getNeedsPickingBuffer.call(this, extension));
 
       // Only generate picking buffer if needed
@@ -966,6 +969,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (!stateNeedsUpdate) {
       return;
     }
+    this.context.stats.get('Layer updates').incrementCount();
 
     const currentProps = this.props;
     const context = this.context;
@@ -1067,14 +1071,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         context.device.setParametersWebGL({polygonOffset: offsets});
       }
 
-      for (const model of this.getModels()) {
-        if (model.device.type === 'webgpu') {
-          // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
-          model.setParameters({...model.parameters, ...parameters});
-        } else {
-          model.setParameters(parameters);
-        }
-      }
+      const webGPUDrawParameters =
+        context.device instanceof WebGLDevice ? null : splitWebGPUDrawParameters(parameters);
+
+      applyModelParameters(this.getModels(), renderPass, parameters, webGPUDrawParameters);
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
@@ -1089,6 +1089,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
+        if (webGPUDrawParameters?.renderPassParameters) {
+          renderPass.setParameters(webGPUDrawParameters.renderPassParameters);
+        }
         const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
@@ -1339,4 +1342,95 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this._diffProps(this.props, this.internalState.getOldProps());
     this.setNeedsUpdate();
   }
+}
+
+function splitWebGPUDrawParameters(parameters: LumaParameters): {
+  pipelineParameters: LumaParameters;
+  renderPassParameters?: {blendConstant: [number, number, number, number]};
+} {
+  const {blendConstant, ...pipelineParameters} = parameters as LumaParameters & {
+    blendConstant?: [number, number, number, number];
+  };
+
+  return blendConstant
+    ? {
+        pipelineParameters,
+        renderPassParameters: {blendConstant}
+      }
+    : {pipelineParameters};
+}
+
+function applyModelParameters(
+  models: Model[],
+  renderPass: RenderPass,
+  parameters: LumaParameters,
+  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
+): void {
+  for (const model of models) {
+    if (model.device.type === 'webgpu') {
+      syncModelAttachmentFormats(model, renderPass);
+      // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
+      model.setParameters({
+        ...model.parameters,
+        ...webGPUDrawParameters?.pipelineParameters
+      });
+    } else {
+      model.setParameters(parameters);
+    }
+  }
+}
+
+function syncModelAttachmentFormats(model: Model, renderPass: RenderPass): void {
+  const framebuffer =
+    renderPass.props.framebuffer ||
+    ((
+      renderPass as RenderPass & {
+        framebuffer?: {
+          colorAttachments: Array<{texture: {format: string}}>;
+          depthStencilAttachment: {texture: {format: string}} | null;
+        };
+      }
+    ).framebuffer ??
+      null);
+
+  if (!framebuffer) {
+    return;
+  }
+
+  const colorAttachmentFormats = framebuffer.colorAttachments.map(
+    attachment => attachment?.texture?.format ?? null
+  );
+  const depthStencilAttachmentFormat = framebuffer.depthStencilAttachment?.texture?.format;
+
+  const modelWithProps = model as unknown as {
+    props: {
+      colorAttachmentFormats?: (string | null)[];
+      depthStencilAttachmentFormat?: string;
+    };
+    _setPipelineNeedsUpdate(reason: string): void;
+  };
+
+  if (
+    !equalAttachmentFormats(modelWithProps.props.colorAttachmentFormats, colorAttachmentFormats) ||
+    modelWithProps.props.depthStencilAttachmentFormat !== depthStencilAttachmentFormat
+  ) {
+    modelWithProps.props.colorAttachmentFormats = colorAttachmentFormats;
+    modelWithProps.props.depthStencilAttachmentFormat = depthStencilAttachmentFormat;
+    modelWithProps._setPipelineNeedsUpdate('attachment formats');
+  }
+}
+
+function equalAttachmentFormats(left?: (string | null)[], right?: (string | null)[]): boolean {
+  if (left === right) {
+    return true;
+  }
+  if (!left || !right || left.length !== right.length) {
+    return false;
+  }
+  for (let i = 0; i < left.length; i++) {
+    if (left[i] !== right[i]) {
+      return false;
+    }
+  }
+  return true;
 }

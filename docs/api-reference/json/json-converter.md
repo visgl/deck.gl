@@ -14,14 +14,16 @@ Requirements on the JSON description:
 
 ```js
 import {JSONConverter} from '@deck.gl/json';
+import {MapView} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 import json from './us-map.json';
 
 const configuration = {
-  layers: require('@deck.gl/layers')
+  classes: {MapView, ScatterplotLayer}
 };
 
-const new jsonConverter = new JSONConverter({configuration});
+const jsonConverter = new JSONConverter({configuration});
 
 const deck = new Deck({
   canvas: 'deck-canvas',
@@ -30,6 +32,8 @@ const deck = new Deck({
 
 deck.setProps(jsonConverter.convert(json));
 ```
+
+`configuration` accepts the same single plain-object shape as [`JSONConfiguration`](./json-configuration.md). You can also add more entries later with `jsonConverter.mergeConfiguration({...})`.
 
 
 ## Properties
@@ -43,4 +47,3 @@ All properties in this object, after processing, are passed to a [Deck](../core/
 ## Configuration
 
 See more details in the [Configuration Reference](./conversion-reference.md) section.
-

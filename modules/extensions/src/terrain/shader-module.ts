@@ -56,7 +56,7 @@ const uniformBlock =
   // eslint-disable-next-line prefer-template
   TERRAIN_MODE_CONSTANTS +
   /* glsl */ `
-uniform terrainUniforms {
+layout(std140) uniform terrainUniforms {
   float mode;
   vec4 bounds;
 } terrain;
@@ -151,7 +151,6 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           : terrainCover.getRenderFramebuffer();
         sampler = fbo?.colorAttachments[0].texture;
         if (opts.isPicking) {
-          // Never render the layer itself in picking pass
           mode = TERRAIN_MODE.SKIP;
         }
         if (sampler) {
@@ -159,6 +158,10 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           bounds = terrainCover.bounds;
         } else {
           sampler = dummyHeightMap!;
+          if (opts.isPicking && !terrainSkipRender) {
+            // terrain+draw layer without cover FBO: render own picking colors
+            mode = TERRAIN_MODE.NONE;
+          }
         }
       }
 

@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLoader} from '@loaders.gl/mvt';
 
 function createMVTLayer(id, {highlight = false, binary = false, holes = false} = {}) {
   let goldenImage;
@@ -33,11 +34,12 @@ function createMVTLayer(id, {highlight = false, binary = false, holes = false} =
       };
   return {
     name: id,
+    timeout: holes ? 20000 : undefined,
     viewState,
     layers: [
       new MVTLayer({
         id,
-        data: [`./test/data/${holes ? 'mvt-with-hole' : 'mvt-tiles'}/{z}/{x}/{y}.mvt`],
+        data: [`/test/data/${holes ? 'mvt-with-hole' : 'mvt-tiles'}/{z}/{x}/{y}.mvt`],
         getFillColor: [0, 0, 0, 128],
         getLineColor: [255, 0, 0, 128],
         ...highlightProps,
@@ -50,9 +52,10 @@ function createMVTLayer(id, {highlight = false, binary = false, holes = false} =
         },
         lineWidthMinPixels: 1,
         binary,
+        loaders: [MVTLoader],
         loadOptions: {
-          mvt: {
-            workerUrl: null
+          core: {
+            worker: false
           }
         }
       })

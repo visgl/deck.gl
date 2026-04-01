@@ -23,7 +23,7 @@ type BrushingModuleUniforms = {
 };
 
 const uniformBlock = /* glsl */ `\
-uniform brushingUniforms {
+layout(std140) uniform brushingUniforms {
   bool enabled;
   highp int target;
   vec2 mousePos;

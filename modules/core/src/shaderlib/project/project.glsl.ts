@@ -20,7 +20,7 @@ ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
-uniform projectUniforms {
+layout(std140) uniform projectUniforms {
   bool wrapLongitude;
   int coordinateSystem;
   vec3 commonUnitsPerMeter;
@@ -263,6 +263,9 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
+  return project_size(meters) * project.scale;
+}
+vec2 project_size_to_pixel(vec2 meters) {
   return project_size(meters) * project.scale;
 }
 float project_size_to_pixel(float size, int unit) {

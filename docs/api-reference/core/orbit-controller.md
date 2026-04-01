@@ -39,6 +39,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 
 - `dragMode`: default `'rotate'` (drag to rotate, shift/ctrl + drag to pan)
 - `keyboard`: arrow keys to pan, arrow keys with shift/ctrl down to rotate, +/- to zoom
+- `maxBounds` - constrains the target position within the specified bounding box `[[minX, minY, minZ], [maxX, maxY, maxZ]]`
 
 ## Custom OrbitController
 

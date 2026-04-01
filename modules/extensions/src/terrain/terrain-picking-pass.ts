@@ -58,6 +58,12 @@ export class TerrainPickingPass extends PickLayersPass {
     }
     target.resize(viewport);
 
+    // Use the terrain layer's encoded alpha as the cover clear color.
+    // At pixels where no layer renders in the cover (e.g. mesh gaps at tile edges),
+    // this ensures the pixel still maps to the terrain layer instead of MISS.
+    const terrainParams = this.drawParameters[terrainLayer.id];
+    const terrainAlpha = terrainParams?.blendColor?.[3] ?? 0;
+
     this.render({
       ...opts,
       pickingFBO: target,
@@ -69,7 +75,8 @@ export class TerrainPickingPass extends PickLayersPass {
       // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
       cullRect: undefined,
       deviceRect: viewport,
-      pickZ: false
+      pickZ: false,
+      clearColor: [0, 0, 0, terrainAlpha]
     });
   }
 
@@ -81,7 +88,10 @@ export class TerrainPickingPass extends PickLayersPass {
       parameters = super.getLayerParameters(layer, layerIndex, viewport);
       parameters.blend = true;
     }
-    return {...parameters, depthCompare: 'always'};
+    // Cover rendering must use 'constant' blend factor to correctly encode layer indices
+    // in the alpha channel. The main picking pass uses 'one' for terrain+draw layers to
+    // pass through the cover alpha, but the cover itself needs proper encoding.
+    return {...parameters, depthCompare: 'always', blendAlphaSrcFactor: 'constant'};
   }
 
   getShaderModuleProps(layer: Layer, effects: any, otherShaderModuleProps: Record<string, any>) {

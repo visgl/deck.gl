@@ -42,7 +42,7 @@ export class ScaleWidget extends Widget<ScaleWidgetProps> {
   scaleText: string = '';
 
   constructor(props: ScaleWidgetProps = {}) {
-    super(props, ScaleWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 

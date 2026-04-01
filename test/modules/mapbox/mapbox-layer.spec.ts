@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import MapboxLayer from '@deck.gl/mapbox/mapbox-layer';
-import {device} from '@deck.gl/test-utils';
+import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
@@ -24,85 +25,8 @@ class TestScatterplotLayer extends ScatterplotLayer {
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
-test('MapboxLayer#onAdd, onRemove, setProps', t => {
-  const layers = Array.from(
-    {length: 2},
-    (_, i) =>
-      new MapboxLayer({
-        id: `scatterplot-layer-${i}`,
-        type: ScatterplotLayer,
-        data: [],
-        getPosition: d => d.position,
-        getRadius: 10,
-        getFillColor: [255, 0, 0]
-      })
-  );
-
-  t.ok(layers[0] && layers[1], 'MapboxLayer constructor does not throw');
-
-  const map = new MockMapboxMap({
-    version: '1.10.0-beta.1',
-    center: {lng: -122.45, lat: 37.78},
-    zoom: 12
-  });
-  map.on('load', () => {
-    map.addLayer(layers[0]);
-    const {deck} = layers[0];
-
-    t.ok(deck, 'Deck is initialized');
-    t.ok(
-      deck.props.layers.find(
-        l => l.id === 'scatterplot-layer-0' && l.constructor === ScatterplotLayer
-      ),
-      'Layer is added to deck'
-    );
-    // t.deepEqual(deck.userData.mapboxVersion, {major: 1, minor: 10}, 'Mapbox version is parsed');
-    t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
-    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
-
-    t.ok(
-      objectEqual(deck.props.viewState, {
-        longitude: -122.45,
-        latitude: 37.78,
-        zoom: 12,
-        bearing: 0,
-        pitch: 0,
-        padding: {left: 0, right: 0, top: 0, bottom: 0},
-        repeat: true
-      }),
-      'viewState is set correctly'
-    );
-
-    map.removeLayer(layers[0].id);
-    t.is(deck.props.layers.length, 0, 'Layer is removed from deck');
-
-    map.addLayer(layers[1]);
-    t.is(deck, layers[1].deck, 'Deck is reused');
-    t.is(deck.props.layers[0].props.getRadius, 10, 'Layer is added');
-
-    layers[1].setProps({
-      getRadius: 20
-    });
-
-    t.is(deck.props.layers[0].props.getRadius, 20, 'Layer is updated');
-
-    map.fire('render');
-    t.notOk(deck.layerManager, 'Deck is waiting initialization');
-    t.pass('Map render does not throw');
-
-    deck.props.onLoad = () => {
-      map.fire('render');
-      t.pass('Map render does not throw');
-
-      map.fire('remove');
-      t.notOk(deck.layerManager, 'Deck is finalized');
-
-      t.end();
-    };
-  });
-});
-
-test('MapboxLayer#external Deck', t => {
+test('MapboxLayer#external Deck', async () => {
+  // Create Deck with merged parameters like MapboxOverlay._onAddInterleaved does
   const deck = new Deck({
     device,
     viewState: {
@@ -119,47 +43,100 @@ test('MapboxLayer#external Deck', t => {
         getFillColor: [255, 0, 0]
       })
     ],
-    parameters: {
-      depthTest: false
+    parameters: {...DEFAULT_PARAMETERS, depthTest: false}
+  });
+
+  const layer = new MapboxLayer({id: 'scatterplot-layer-0'});
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  await map.once('load');
+
+  // Initialize deck on the map (simulates MapboxOverlay behavior)
+  getDeckInstance({map, deck});
+
+  map.addLayer(layer);
+  expect(deck.props.views.id === 'mapbox', 'mapbox view exists').toBeTruthy();
+
+  expect(() => (map as any)._render(), 'Map render does not throw').not.toThrow();
+
+  map.fire('remove');
+  expect(deck.layerManager, 'External Deck should not be finalized with map').toBeTruthy();
+
+  deck.finalize();
+
+  expect(() => (map as any)._render(), 'Map render does not throw after finalize').not.toThrow();
+  expect(() => layer.render(), 'Layer render does not throw after finalize').not.toThrow();
+});
+
+test('MapboxLayer#external Deck multiple views supplied', async () => {
+  const drawLog = [];
+  const onRedrawLayer = ({viewport, layer}) => {
+    drawLog.push([viewport.id, layer.id]);
+  };
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  await map.once('load');
+
+  // Create Deck with default parameters like MapboxOverlay._onAddInterleaved does
+  const deck = new Deck({
+    device,
+    views: [new MapView({id: 'view-two'}), new MapView({id: 'mapbox'})],
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    },
+    layers: [
+      new TestScatterplotLayer({
+        id: 'scatterplot-map',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0],
+        onAfterRedraw: onRedrawLayer
+      }),
+      new TestScatterplotLayer({
+        id: 'scatterplot-second-view',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0],
+        onAfterRedraw: onRedrawLayer
+      })
+    ],
+    parameters: DEFAULT_PARAMETERS,
+    layerFilter: ({viewport, layer}) => {
+      if (viewport.id === 'mapbox') return layer.id === 'scatterplot-map';
+      return layer.id === 'scatterplot-second-view';
     }
   });
 
-  const layer = new MapboxLayer({id: 'scatterplot-layer-0', deck});
+  // Initialize deck on the map (simulates MapboxOverlay behavior)
+  getDeckInstance({map, deck});
 
-  const map = new MockMapboxMap({
-    center: {lng: -122.45, lat: 37.78},
-    zoom: 12
-  });
+  const layerDefaultView = new MapboxLayer({id: 'scatterplot-map'});
+  const renderPromise = map.once('render');
+  map.addLayer(layerDefaultView);
+  await renderPromise;
 
-  map.on('load', () => {
-    map.addLayer(layer);
-    t.is(layer.deck, deck, 'Used external Deck instance');
-    // t.ok(deck.userData.mapboxVersion, 'Mapbox version is parsed');
-    t.ok(deck.props.views.id === 'mapbox', 'mapbox view exists');
-    t.ok(
-      objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
-      'Parameters are set correctly'
-    );
+  expect((map as any)._renderError, 'render should not throw').toBeFalsy();
+  expect(drawLog, 'layers drawn into the correct views').toEqual([
+    ['mapbox', 'scatterplot-map'],
+    ['view-two', 'scatterplot-second-view']
+  ]);
 
-    map.fire('render');
-    t.pass('Map render does not throw');
-
-    map.fire('remove');
-    t.ok(deck.layerManager, 'External Deck should not be finalized with map');
-
-    deck.finalize();
-
-    map.fire('render');
-    t.pass('Map render does not throw');
-
-    layer.render();
-    t.pass('Map render does not throw');
-
-    t.end();
-  });
+  deck.finalize();
 });
 
-test('MapboxLayer#external Deck multiple views supplied', t => {
+test('MapboxLayer#external Deck custom views', async () => {
   const drawLog = [];
   const onRedrawLayer = ({viewport, layer}) => {
     drawLog.push([viewport.id, layer.id]);
@@ -170,107 +147,137 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
     zoom: 12
   });
 
-  map.on('load', () => {
-    const deck = new Deck({
-      device,
-      views: [new MapView({id: 'view-two'}), new MapView({id: 'mapbox'})],
-      viewState: {
-        longitude: 0,
-        latitude: 0,
-        zoom: 1
-      },
-      layers: [
-        new TestScatterplotLayer({
-          id: 'scatterplot-map',
-          data: [],
-          getPosition: d => d.position,
-          getRadius: 10,
-          getFillColor: [255, 0, 0],
-          onAfterRedraw: onRedrawLayer
-        }),
-        new TestScatterplotLayer({
-          id: 'scatterplot-second-view',
-          data: [],
-          getPosition: d => d.position,
-          getRadius: 10,
-          getFillColor: [255, 0, 0],
-          onAfterRedraw: onRedrawLayer
-        })
-      ],
-      layerFilter: ({viewport, layer}) => {
-        if (viewport.id === 'mapbox') return layer.id === 'scatterplot-map';
-        return layer.id === 'scatterplot-second-view';
-      }
+  await map.once('load');
+
+  const deck = new Deck({
+    device,
+    views: [new MapView({id: 'view-two'})],
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    },
+    layers: [
+      new TestScatterplotLayer({
+        id: 'scatterplot',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0],
+        onAfterRedraw: onRedrawLayer
+      })
+    ]
+  });
+
+  // Initialize deck on the map (simulates MapboxOverlay behavior)
+  getDeckInstance({map, deck});
+
+  const renderPromise = map.once('render');
+  map.addLayer(new MapboxLayer({id: 'scatterplot'}));
+  await renderPromise;
+
+  expect((map as any)._renderError, 'render should not throw').toBeFalsy();
+  expect(drawLog, 'layer is drawn to both views').toEqual([
+    ['mapbox', 'scatterplot'],
+    ['view-two', 'scatterplot']
+  ]);
+
+  deck.finalize();
+});
+
+test('MapboxLayer#drawLayer with zero-size canvas', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const map = new MockMapboxMap({
+      center: {lng: -122.45, lat: 37.78},
+      zoom: 12
     });
 
-    const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
-    map.addLayer(layerDefaultView);
-    t.is(layerDefaultView.deck, deck, 'Used external Deck instance');
-    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
-
-    map.on('render', () => {
-      t.deepEqual(
-        drawLog,
-        [
-          ['mapbox', 'scatterplot-map'],
-          ['view-two', 'scatterplot-second-view']
+    map.on('load', () => {
+      const deck = new Deck({
+        device,
+        viewState: {longitude: 0, latitude: 0, zoom: 1},
+        layers: [
+          new ScatterplotLayer({
+            id: 'scatterplot',
+            data: [],
+            getPosition: d => d.position,
+            getRadius: 10,
+            getFillColor: [255, 0, 0]
+          })
         ],
-        'layers drawn into the correct views'
-      );
+        // Set zero dimensions before the first render so makeViewport returns null.
+        // getDeckInstance wraps onLoad, so by the time this fires deck.isInitialized
+        // is true and drawLayer won't return early.
+        onLoad: () => {
+          try {
+            (deck as any).width = 0;
+            (deck as any).height = 0;
+            (map as any)._render();
 
-      deck.finalize();
+            expect(
+              (map as any)._renderError,
+              'render should not throw when canvas has zero dimensions'
+            ).toBeFalsy();
 
-      t.end();
+            deck.finalize();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      });
+
+      getDeckInstance({map, deck});
+      map.addLayer(new MapboxLayer({id: 'scatterplot'}));
     });
   });
 });
 
-test('MapboxLayer#external Deck custom views', t => {
-  const drawLog = [];
-  const onRedrawLayer = ({viewport, layer}) => {
-    drawLog.push([viewport.id, layer.id]);
-  };
-
-  const map = new MockMapboxMap({
-    center: {lng: -122.45, lat: 37.78},
-    zoom: 12
-  });
-
-  map.on('load', () => {
-    const deck = new Deck({
-      device,
-      views: [new MapView({id: 'view-two'})],
-      viewState: {
-        longitude: 0,
-        latitude: 0,
-        zoom: 1
-      },
-      layers: [
-        new TestScatterplotLayer({
-          id: 'scatterplot',
-          data: [],
-          getPosition: d => d.position,
-          getRadius: 10,
-          getFillColor: [255, 0, 0],
-          onAfterRedraw: onRedrawLayer
-        })
-      ]
+test('MapboxLayer#afterRender with zero-size canvas', async () => {
+  // afterRender is triggered when deck has multiple views (hasNonMapboxViews).
+  // It calls getViewport to replace the mapbox viewport and must not pass null
+  // into deck._drawLayers when the canvas has zero dimensions.
+  await new Promise<void>((resolve, reject) => {
+    const map = new MockMapboxMap({
+      center: {lng: -122.45, lat: 37.78},
+      zoom: 12
     });
 
-    map.addLayer(new MapboxLayer({id: 'scatterplot', deck}));
-    map.on('render', () => {
-      t.deepEqual(
-        drawLog,
-        [
-          ['mapbox', 'scatterplot'],
-          ['view-two', 'scatterplot']
+    map.on('load', () => {
+      const deck = new Deck({
+        device,
+        views: [new MapView({id: 'mapbox'}), new MapView({id: 'overview'})],
+        viewState: {longitude: 0, latitude: 0, zoom: 1},
+        layers: [
+          new ScatterplotLayer({
+            id: 'scatterplot',
+            data: [],
+            getPosition: d => d.position,
+            getRadius: 10,
+            getFillColor: [255, 0, 0]
+          })
         ],
-        'layer is drawn to both views'
-      );
+        onLoad: () => {
+          try {
+            (deck as any).width = 0;
+            (deck as any).height = 0;
+            (map as any)._render();
 
-      deck.finalize();
+            expect(
+              (map as any)._renderError,
+              'afterRender should not throw when canvas has zero dimensions'
+            ).toBeFalsy();
 
-      t.end();
+            deck.finalize();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      });
+
+      getDeckInstance({map, deck});
+      map.addLayer(new MapboxLayer({id: 'scatterplot'}));
     });
   });
 });

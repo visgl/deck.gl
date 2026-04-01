@@ -12,8 +12,13 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object';
 }
 
+/**
+ * Properties accepted by `JSONConverter`.
+ */
 export type JSONConverterProps = {
+  /** Configuration catalogs and hooks used during conversion. */
   configuration: JSONConfiguration | JSONConfigurationProps;
+  /** Optional callback fired when JSON input changes. */
   onJSONChange: () => void;
 };
 
@@ -30,19 +35,33 @@ export type JSONConverterProps = {
  *   non-JSON specific mechanisms like prop types.
  */
 export class JSONConverter {
+  /** Logger used by downstream helpers for warnings. */
   log = console; // eslint-disable-line
+  /** Active configuration used by the converter. */
   configuration!: JSONConfiguration;
+  /** Callback invoked when the configured JSON input changes. */
   onJSONChange: () => void = () => {};
+  /** Most recently converted JSON input. */
   json: unknown = null;
+  /** Cached result for the most recently converted JSON input. */
   convertedJson: unknown = null;
 
+  /**
+   * Creates a converter for a configuration object or `JSONConfiguration` instance.
+   * @param props Converter properties.
+   */
   constructor(props) {
     this.setProps(props);
   }
 
+  /** Releases resources held by the converter. Present for API symmetry. */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   finalize() {}
 
+  /**
+   * Updates the active configuration and callbacks.
+   * @param props Converter properties or an already-created configuration instance.
+   */
   setProps(props: JSONConverterProps | JSONConfiguration) {
     // HANDLE CONFIGURATION PROPS
     if ('configuration' in props) {
@@ -58,10 +77,19 @@ export class JSONConverter {
     }
   }
 
-  mergeConfiguration(config: JSONConfiguration) {
-    this.configuration.merge(config.config);
+  /**
+   * Merges additional configuration into the current converter.
+   * @param config Additional catalogs or hooks to merge.
+   */
+  mergeConfiguration(config: JSONConfiguration | JSONConfigurationProps) {
+    this.configuration.merge(config instanceof JSONConfiguration ? config.getProps() : config);
   }
 
+  /**
+   * Converts a JSON object or JSON string into runtime props.
+   * @param json JSON payload to convert.
+   * @returns The converted runtime value.
+   */
   convert(json: unknown): unknown {
     // Use shallow equality to ensure we only convert same json once
     if (!json || json === this.json) {
@@ -85,19 +113,35 @@ export class JSONConverter {
     return convertedJson;
   }
 
-  // DEPRECATED: Backwards compatibility
+  /**
+   * Backwards-compatible alias for `convert()`.
+   * @param json JSON payload to convert.
+   * @returns The converted runtime value.
+   */
   convertJson(json) {
     return this.convert(json);
   }
 }
 
+/**
+ * Clones the configuration before conversion so nested merges do not mutate the live converter state.
+ * @param json Parsed JSON object to convert.
+ * @param configuration Active configuration to clone.
+ * @returns The converted runtime value.
+ */
 function convertJSON(json: Record<string, unknown>, configuration: JSONConfiguration) {
   // Fixup configuration
-  configuration = new JSONConfiguration(configuration.config);
+  configuration = new JSONConfiguration(configuration.getProps());
   return convertJSONRecursively(json, '', configuration);
 }
 
-/** Converts JSON to props ("hydrating" classes, resolving enums and functions etc). */
+/**
+ * Recursively converts JSON values into runtime values using the provided configuration.
+ * @param json JSON value to convert.
+ * @param key Property key associated with the current value.
+ * @param configuration Active conversion configuration.
+ * @returns The converted runtime value.
+ */
 function convertJSONRecursively(json: unknown, key, configuration) {
   if (Array.isArray(json)) {
     return json.map((element, i) => convertJSONRecursively(element, String(i), configuration));
@@ -125,13 +169,24 @@ function convertJSONRecursively(json: unknown, key, configuration) {
   return json;
 }
 
-/** Returns true if an object has a `type` field */
+/**
+ * Checks whether a JSON object should be instantiated as a configured class/component.
+ * @param json JSON object under inspection.
+ * @param configuration Active conversion configuration.
+ * @returns `true` if the object contains the configured type key.
+ */
 function isClassInstance(json: Record<string, unknown>, configuration: JSONConfiguration) {
   const {typeKey} = configuration.config;
   const isClass = isObject(json) && Boolean(json[typeKey]);
   return isClass;
 }
 
+/**
+ * Instantiates a configured class/component from a JSON object.
+ * @param json JSON object describing the class instance.
+ * @param configuration Active conversion configuration.
+ * @returns The instantiated runtime value.
+ */
 function convertClassInstance(json: Record<string, unknown>, configuration: JSONConfiguration) {
   // Extract the class type field
   const {typeKey} = configuration.config;
@@ -146,7 +201,12 @@ function convertClassInstance(json: Record<string, unknown>, configuration: JSON
   return instantiateClass(type as string, props, configuration);
 }
 
-/** Plain JS object, embed functions. */
+/**
+ * Executes a configured function from a JSON object.
+ * @param json JSON object describing the function invocation.
+ * @param configuration Active conversion configuration.
+ * @returns The function result.
+ */
 function convertFunctionObject(json, configuration: JSONConfiguration) {
   // Extract the target function field
   const {functionKey} = configuration.config;
@@ -161,7 +221,12 @@ function convertFunctionObject(json, configuration: JSONConfiguration) {
   return executeFunction(targetFunction, props, configuration);
 }
 
-/** Plain JS object, convert each key and return. */
+/**
+ * Recursively converts each property in a plain object.
+ * @param json Plain object to convert.
+ * @param configuration Active conversion configuration.
+ * @returns A converted object with the same keys.
+ */
 function convertPlainObject(json: unknown, configuration: JSONConfiguration) {
   if (!isObject(json)) {
     throw new Error('convertPlainObject: expected an object');
@@ -174,8 +239,13 @@ function convertPlainObject(json: unknown, configuration: JSONConfiguration) {
   return result;
 }
 
-/** Convert one string value in an object
- * @todo We could also support string syntax for hydrating other types, like regexps... But no current use case
+/**
+ * Converts a single string literal, handling configured function, constant, and enum syntax.
+ * @param string String value to convert.
+ * @param key Property key associated with the string value.
+ * @param configuration Active conversion configuration.
+ * @returns The converted runtime value or the original string.
+ * @todo We could also support string syntax for hydrating other types, like regexps.
  */
 function convertString(string: string, key: string, configuration: JSONConfiguration) {
   // Here the JSON value is supposed to be treated as a function

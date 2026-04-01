@@ -6,6 +6,7 @@
 import {Deck, MapView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
+export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -45,7 +46,8 @@ export function createDeckInstance(
 
   const newDeck = new Deck({
     ...props,
-    useDevicePixels: props.interleaved ? true : props.useDevicePixels,
+    // Default to true for high-DPI displays, but allow user override
+    useDevicePixels: props.useDevicePixels ?? true,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     views: new MapView({repeat: true}),
@@ -80,12 +82,17 @@ function getContainer(
   container.style.position = 'absolute';
   Object.assign(container.style, style);
 
-  // The DOM structure has a different structure depending on whether
-  // the Google map is rendered as vector or raster
-  if ('getPanes' in overlay) {
+  const googleMapsContainer = (overlay.getMap() as google.maps.Map).getDiv();
+
+  // Check if there's a pre-created positioning container (for vector maps)
+  const positioningContainer = googleMapsContainer.querySelector(`#${POSITIONING_CONTAINER_ID}`);
+
+  if (positioningContainer) {
+    // Vector maps (both interleaved and non-interleaved): Use positioning container
+    positioningContainer.appendChild(container);
+  } else if ('getPanes' in overlay) {
+    // Raster maps: Append to overlayLayer pane
     overlay.getPanes()?.overlayLayer.appendChild(container);
-  } else {
-    overlay.getMap()?.getDiv().appendChild(container);
   }
   return container;
 }

@@ -17,7 +17,6 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Parameters} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
@@ -25,7 +24,7 @@ import {shaderWGSL as source} from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<LineLayerProps> = {
   getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},
@@ -190,15 +189,6 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
-    // TODO(ibgreen): WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
-    const parameters =
-      this.context.device.type === 'webgpu'
-        ? ({
-            depthWriteEnabled: true,
-            depthCompare: 'less-equal'
-          } satisfies Parameters)
-        : undefined;
-
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -218,7 +208,6 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
-      parameters,
       isInstanced: true
     });
   }

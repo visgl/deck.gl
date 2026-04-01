@@ -116,7 +116,7 @@ export default class GPUSpringTransition extends GPUTransitionBase<SpringTransit
 }
 
 const uniformBlock = `\
-uniform springUniforms {
+layout(std140) uniform springUniforms {
   float damping;
   float stiffness;
 } spring;

@@ -55,7 +55,7 @@ const TEXTURE_PROPS: TextureProps = {
     addressModeV: 'clamp-to-edge'
   }
 };
-const DEFAULT_COLOR_DOMAIN = [0, 0];
+const DEFAULT_COLOR_DOMAIN = [0, 0] as const;
 const AGGREGATION_MODE = {
   SUM: 0,
   MEAN: 1
@@ -126,7 +126,7 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default null
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Defines the type of aggregation operation
@@ -174,7 +174,7 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    colorDomain?: number[];
+    colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
@@ -408,11 +408,13 @@ export default class HeatmapLayer<
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
+      ...shaders,
       bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
       targetTexture: weightsTexture!,
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'add',
         blendColorSrcFactor: 'one',
         blendColorDstFactor: 'one',
@@ -420,7 +422,6 @@ export default class HeatmapLayer<
         blendAlphaDstFactor: 'one'
       },
       topology: 'point-list',
-      ...shaders,
       modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
@@ -451,6 +452,7 @@ export default class HeatmapLayer<
       topology: 'point-list',
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'max',
         blendAlphaOperation: 'max',
         blendColorSrcFactor: 'one',
@@ -592,7 +594,10 @@ export default class HeatmapLayer<
       const metersPerPixel =
         (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
         textureSize;
-      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+      this.state.colorDomain = [
+        colorDomain[0] * metersPerPixel * weightsScale,
+        colorDomain[1] * metersPerPixel * weightsScale
+      ];
     } else {
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }

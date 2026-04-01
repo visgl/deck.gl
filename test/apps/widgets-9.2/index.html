@@ -4,9 +4,12 @@
     <meta charset="utf-8">
     <title>deck.gl Example</title>
     <style>
-      body {margin: 0; width: 100vw; height: 100vh; overflow: hidden;}
+      body {height: 300vh; overflow-y: auto; }
+      #app {position: absolute; top: 15vh; right: 0; width: 50vw; height: 70vh; overflow: hidden;}
     </style>
   </head>
-  <body></body>
+  <body>
+    <div id="app" ></div>
+  </body>
   <script type="module" src="app.ts"></script>
 </html>

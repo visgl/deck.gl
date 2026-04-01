@@ -50,14 +50,13 @@ struct ProjectUniforms {
   pseudoMeters: i32,
 };
 
-@group(0) @binding(0)
+@group(0) @binding(auto)
 var<uniform> project: ProjectUniforms;
 
 // -----------------------------------------------------------------------------
-// Geometry data
-// (In your GLSL code, "geometry" was assumed to be available globally. In WGSL,
-// you might supply this via vertex attributes or a uniform. Here we define a
-// uniform struct for demonstration.)
+// Geometry data shared across the project helpers.
+// The active layer shader is responsible for populating this private module
+// state before calling the project functions below.
 // -----------------------------------------------------------------------------
 
 // Structure to carry additional geometry data used by deck.gl filters.
@@ -70,7 +69,6 @@ struct Geometry {
   pickingColor: vec3<f32>,
 };
 
-// @group(0) @binding(1)
 var<private> geometry: Geometry;
 `;
 

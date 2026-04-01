@@ -54,7 +54,6 @@ export function resolveLayers(
       map.addLayer(
         new MapboxLayer({
           id: layer.id,
-          deck,
           // @ts-expect-error slot is not defined in LayerProps
           slot: layer.props.slot
         }),

@@ -42,7 +42,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps = {}) {
-    super(props, FullscreenWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 
@@ -74,7 +74,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   getContainer() {
-    return this.props.container || this.deck?.getCanvas()?.parentElement;
+    return this.props.container || this.deck?.props.parent || this.deck?.getCanvas()?.parentElement;
   }
 
   onFullscreenChange() {

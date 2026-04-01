@@ -602,7 +602,7 @@ The picking engine returns "picking info" objects which contains a variety of fi
 | `object` | any | The object that was picked. This is typically an element from the layer's `props.data` array, but can vary from layer to layer. This field is usually only present when picking from layers where `props.data` [is an array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray#description), unless indicated otherwise in the layer's documentation.|
 | `x`      | number | Mouse position x relative to the viewport. |
 | `y`      | number | Mouse position y relative to the viewport. |
-| `coordinate` | number[] | Corresponding point of the mouse position in the coordinate system of the layer. When using the built-in callbacks, this coordinate is 2D, assuming z=0 (i.e. on sea level in a geospatial dataset). You may optionally acquire a 3D position with a performance overhead by [calling the picking engine directly](#calling-the-picking-engine-directly). |
+| `coordinate` | number[] | Corresponding point of the mouse position in the coordinate system of the layer. When using the built-in callbacks, this coordinate is 2D, assuming z=0 (i.e. on sea level in a geospatial dataset). You may optionally acquire a 3D position by setting the layer's [`pickable`](../api-reference/core/layer.md#pickable) prop to `'3d'`, or by [calling the picking engine directly](#calling-the-picking-engine-directly) with `unproject3D: true`. Note that 3D picking comes with a performance overhead. |
 | `viewport` | Viewport | The viewport that the picked object belongs to. |
 
 
@@ -965,7 +965,7 @@ function App() {
 
 While the default events handle most of the use cases, sometimes applications need more control over when and how picking is performed.
 
-The picking engine is exposed through the [`Deck.pickObject`](../api-reference/core/deck.md#pickobject) and [`Deck.pickObjects`](../api-reference/core/deck.md#pickobjects) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `PickingInfo` objects as described above.
+The picking engine is exposed through the [`Deck.pickObjectAsync`](../api-reference/core/deck.md#pickobjectasync) and [`Deck.pickObjectsAsync`](../api-reference/core/deck.md#pickobjectsasync) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `PickingInfo` objects as described above.
 
 
 <Tabs groupId="language">
@@ -976,9 +976,8 @@ import {Deck} from '@deck.gl/core';
 
 const deckInstance = new Deck({
   // ...
-  onClick: ({x, y}) => {
-    // Query up to 5 overlapping objects under the pointer
-    const pickInfos = deckInstance.pickMultipleObjects({x, y, radius: 1, depth: 5});
+  onClick: async ({x, y}) => {
+    const pickInfo = await deckInstance.pickObjectAsync({x, y, radius: 1});
     console.log(pickInfo);
   }
 });
@@ -992,9 +991,8 @@ import {Deck, PickingInfo} from '@deck.gl/core';
 
 const deckInstance = new Deck({
   // ...
-  onClick: ({x, y}: PickingInfo) => {
-    // Query up to 5 overlapping objects under the pointer
-    const pickInfos: PickingInfo[] = deckInstance.pickMultipleObjects({x, y, radius: 1, depth: 5});
+  onClick: async ({x, y}: PickingInfo) => {
+    const pickInfo: PickingInfo | null = await deckInstance.pickObjectAsync({x, y, radius: 1});
     console.log(pickInfo);
   }
 });
@@ -1011,13 +1009,12 @@ import {PickingInfo} from '@deck.gl/core';
 function App() {
   const deckRef = useRef<DeckGL>();
 
-  const onClick = useCallback((evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const onClick = useCallback(async (evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // Get mouse position relative to the containing div
     const containerRect = evt.currentTarget.getBoundingClientRect();
     const x = evt.clientX - containerRect.left;
     const y = evt.clientY = containerRect.top;
-    // Query up to 5 overlapping objects under the pointer
-    const pickInfos: PickingInfo[] = deckRef.current?.pickMultipleObjects({x, y, radius: 1, depth: 5});
+    const pickInfo: PickingInfo | null = await deckRef.current?.pickObjectAsync({x, y, radius: 1});
     console.log(pickInfo);
   }, [])
 
@@ -1031,7 +1028,7 @@ function App() {
 </Tabs>
 
 
-Also note that by directly calling `pickObject`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
+Also note that by directly calling `pickObjectAsync`, integrating deck.gl into an existing application often becomes easier since you don't have to change the application's existing approach to event handling.
 
 ### Under The Hood
 
@@ -1039,4 +1036,3 @@ If you are using the core layers, all has been taken care of.
 
 If you are implementing a custom layer, read more about
 [how picking is implemented](./custom-layers/picking.md).
-

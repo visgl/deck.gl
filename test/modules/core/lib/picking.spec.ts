@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {LayerManager, WebMercatorViewport, DeckRenderer} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import {equals} from '@math.gl/core';
 
@@ -49,7 +49,7 @@ const geoJSONData = [
 
 class TestMVTLayer extends MVTLayer {
   getTileData() {
-    return this.props.data;
+    return this.props.binary ? geoJSONBinaryData : geoJSONData;
   }
 }
 
@@ -59,7 +59,7 @@ const testMVTLayer = new TestMVTLayer({
   id: 'test-mvt-layer',
   autoHighlight: true,
   binary: false,
-  data: geoJSONData
+  data: ['https://json/{z}/{x}/{y}.mvt']
 });
 
 const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
@@ -69,7 +69,7 @@ const testMVTLayerBinary = new TestMVTLayer({
   id: 'test-mvt-layer-binary',
   autoHighlight: true,
   binary: true,
-  data: geoJSONBinaryData
+  data: ['https://binary/{z}/{x}/{y}.mvt']
 });
 
 const parameters = {
@@ -118,9 +118,9 @@ function validateUniforms(actual, expected) {
 }
 
 /* eslint-disable max-statements */
-test('processPickInfo', async t => {
+test('processPickInfo', async () => {
   const layerManager = new LayerManager(device, {viewport: parameters.viewports[0]});
-  layerManager.setProps({onError: t.notOk});
+  layerManager.setProps({onError: err => expect(err).toBeFalsy()});
   const deckRenderer = new DeckRenderer(device);
 
   layerManager.setLayers(parameters.layers);
@@ -135,6 +135,31 @@ test('processPickInfo', async t => {
     });
     await sleep(100);
   }
+
+  // Async tile loads can flip `layer.isLoaded` before a final render pass has materialized
+  // the tile-backed GeoJson sublayers. Run one more update/render cycle against the now-loaded
+  // tiles so the live MVT picking layers exist before processPickInfo is exercised.
+  layerManager.updateLayers();
+  deckRenderer.renderLayers({
+    viewports: [layerManager.context.viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+
+  const renderedLayers = layerManager.getLayers();
+  const compositePointLayer = renderedLayers.find(
+    layer => layer.id === 'test-composite-layer-points-circle'
+  );
+  const mvtPointLayer = renderedLayers.find(
+    layer => layer.id === 'test-mvt-layer-0-0-1-points-circle'
+  );
+  const mvtPointLayerBinary = renderedLayers.find(
+    layer => layer.id === 'test-mvt-layer-binary-0-0-1-points-circle'
+  );
+
+  expect(compositePointLayer, 'GeoJson sublayer is available').toBeTruthy();
+  expect(mvtPointLayer, 'MVT sublayer is available').toBeTruthy();
+  expect(mvtPointLayerBinary, 'Binary MVT sublayer is available').toBeTruthy();
 
   const TEST_CASES = [
     {
@@ -224,7 +249,7 @@ test('processPickInfo', async t => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
-        pickedLayer: testCompositeLayer.getSubLayers()[0],
+        pickedLayer: compositePointLayer,
         pickedObjectIndex: 0
       },
       x: 100,
@@ -240,7 +265,7 @@ test('processPickInfo', async t => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
-        pickedLayer: testMVTLayer.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayer,
         pickedObjectIndex: 0
       },
       x: 100,
@@ -262,7 +287,7 @@ test('processPickInfo', async t => {
     {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
-        pickedLayer: testMVTLayer.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayer,
         pickedObjectIndex: 1
       },
       x: 100,
@@ -284,7 +309,7 @@ test('processPickInfo', async t => {
     {
       pickInfo: {
         pickedColor: [1, 0, 0, 0],
-        pickedLayer: testMVTLayerBinary.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayerBinary,
         pickedObjectIndex: 0
       },
       x: 100,
@@ -306,7 +331,7 @@ test('processPickInfo', async t => {
     {
       pickInfo: {
         pickedColor: [2, 0, 0, 0],
-        pickedLayer: testMVTLayerBinary.getSubLayers()[0].getSubLayers()[0],
+        pickedLayer: mvtPointLayerBinary,
         pickedObjectIndex: 1
       },
       x: 100,
@@ -377,46 +402,46 @@ test('processPickInfo', async t => {
     parameters.x = testCase.x;
     parameters.y = testCase.y;
     const infos = processPickInfo(parameters);
-    t.is(infos.size, testCase.size, 'returns expected infos');
+    expect(infos.size, 'returns expected infos').toBe(testCase.size);
 
     const info = infos.get(testCase.info.layer && testCase.info.layer.id);
 
     for (const key in testCase.info) {
       const expected = testCase.info[key];
       if (Number.isFinite(expected) || Array.isArray(expected)) {
-        t.ok(equals(info[key], expected), `info.${key}`);
+        expect(equals(info[key], expected), `info.${key}`).toBeTruthy();
       } else {
-        t.deepEqual(info[key], expected, `info.${key}`);
+        expect(info[key], `info.${key}`).toEqual(expected);
       }
     }
     for (const key in testCase.lastPickedInfo) {
-      t.deepEqual(lastPickedInfo[key], testCase.lastPickedInfo[key], `lastPickedInfo.${key}`);
+      expect(lastPickedInfo[key], `lastPickedInfo.${key}`).toEqual(testCase.lastPickedInfo[key]);
     }
     testLayerPickingUniforms = testLayer.getModels()[0].shaderInputs.getUniformValues().picking;
-    t.notOk(
+    expect(
       validateUniforms(testLayerPickingUniforms, testCase.testLayerPickingUniforms),
       'testLayerPickingUniforms'
-    );
+    ).toBeFalsy();
     if (testCase.currentLayerPickingUniforms) {
       currentLayerPickingUniforms = testCase.pickInfo.pickedLayer
         .getModels()[0]
         .shaderInputs.getUniformValues().picking;
-      t.notOk(
+      expect(
         validateUniforms(currentLayerPickingUniforms, testCase.currentLayerPickingUniforms),
         'currentLayerPickingUniforms'
-      );
+      ).toBeFalsy();
     }
 
     if (testCase.highlightedObjectIndex !== undefined) {
       const renderedLayer = info.layer.renderLayers()[0][0];
       const {highlightedObjectIndex} = renderedLayer.props;
-      t.deepEqual(highlightedObjectIndex, testCase.highlightedObjectIndex, 'highlightObjectIndex');
+      expect(highlightedObjectIndex, 'highlightObjectIndex').toEqual(
+        testCase.highlightedObjectIndex
+      );
     }
   }
 
   layerManager.finalize();
-
-  t.end();
 });
 
 function sleep(ms) {

@@ -1,28 +1,70 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
-
 # StatsWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
-Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget.
+import {StatsWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-## Usage
+<StatsWidgetDemo />
 
-<WidgetPreview cls={StatsWidget}/>
+Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget. When collapsed, it shows the current FPS in a compact button UI.
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new StatsWidget({defaultIsExpanded: true})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {Deck} from '@deck.gl/core';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
+new Deck({
   widgets: [
-    new StatsWidget({
-      type: 'deck',
-      framesPerUpdate: 5
-    })
+    new StatsWidget({defaultIsExpanded: true})
   ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_StatsWidget as StatsWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <StatsWidget defaultIsExpanded />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {_StatsWidget as StatsWidget, type StatsWidgetProps} from '@deck.gl/widgets';
+new StatsWidget({} satisfies StatsWidgetProps);
 ```
 
 ## Types
@@ -31,12 +73,41 @@ const deck = new Deck({
 
 The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-- `type` (string, default `'deck'`) - Type of stats to display: `'deck'`, `'luma'`, `'device'`, or `'custom'`
-- `stats` (Stats, optional) - Custom stats object when using `type: 'custom'`
-- `title` (string, default `'Stats'`) - Title shown in the widget header
-- `framesPerUpdate` (number, default `1`) - Number of frames to wait between updates
-- `formatters` (object, default `{}`) - Custom formatters for stat values
-- `resetOnUpdate` (object, default `{}`) - Whether to reset particular stats after each update
+#### type (string, optional)
+
+Type of stats to display. One of `'deck'`, `'luma'`, `'device'`, or `'custom'`.
+
+* Default: `'deck'`
+
+#### stats (Stats, optional)
+
+A [Stats](https://visgl.github.io/probe.gl/docs/modules/stats) instance to display when using `type: 'custom'`.
+
+#### title (string, optional)
+
+Title shown in the widget header.
+
+* Default: `'Stats'`
+
+#### defaultIsExpanded (boolean, optional)
+
+If `true`, the UI is expanded at start.
+
+* Default: `false`
+
+#### framesPerUpdate (number, optional)
+
+Number of frames to wait between refresh.
+
+* Default: `1`
+
+#### formatters (object, optional)
+
+Custom formatters for stat values.
+
+#### resetOnUpdate (object, optional)
+
+Whether to reset particular stats after each update.
 
 ### Built-in Formatters
 
@@ -48,7 +119,8 @@ The `StatsWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpr
 
 ## Behavior
 
-- Click the header to expand/collapse the stats display
+- When collapsed, click the FPS button to expand the stats display
+- When expanded, click the header to collapse the stats display
 - Stats are automatically updated based on `framesPerUpdate`
 - Different stat types provide access to various performance metrics:
   - `'deck'`: deck.gl rendering statistics

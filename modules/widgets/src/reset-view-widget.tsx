@@ -3,10 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
-import type {ViewStateMap, ViewOrViews} from '@deck.gl/core/src/lib/view-manager';
+import type {ViewStateMap, View} from '@deck.gl/core';
 import {render} from 'preact';
 import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
+
+/** @note Mirrors an internal calss in deck.gl/core. We can easily redefine it here */
+type ViewOrViews = View | View[] | null;
 
 /** Properties for the ResetViewWidget */
 export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProps & {
@@ -40,7 +43,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
   placement: WidgetPlacement = 'top-left';
 
   constructor(props: ResetViewWidgetProps<ViewsT> = {}) {
-    super(props, ResetViewWidget.defaultProps as Required<ResetViewWidgetProps<ViewsT>>);
+    super(props);
     this.setProps(this.props);
   }
 
@@ -63,18 +66,19 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
 
   handleClick() {
     const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
-    this.setViewState(initialViewState);
+    this.resetViewState(initialViewState);
   }
 
-  setViewState(viewState?: ViewStateMap<ViewsT>) {
-    const viewId = (this.props.viewId || 'default-view') as unknown as string;
-    const nextViewState = {
-      ...(viewId !== 'default-view' ? viewState?.[viewId] : viewState)
-      // only works for geospatial?
-      // transitionDuration: this.props.transitionDuration,
-      // transitionInterpolator: new FlyToInterpolator()
-    };
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+  resetViewState(viewState?: ViewStateMap<ViewsT>) {
+    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+    for (const viewId of viewIds) {
+      const nextViewState = {
+        ...(viewState?.[viewId] ?? viewState)
+        // only works for geospatial?
+        // transitionDuration: this.props.transitionDuration,
+        // transitionInterpolator: new FlyToInterpolator()
+      };
+      this.setViewState(viewId, nextViewState);
+    }
   }
 }

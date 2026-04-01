@@ -19,7 +19,11 @@ const config = {
   url: 'https://deck.gl',
   baseUrl: process.env.STAGING ? '/deck.gl/' : '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn'
+    }
+  },
   favicon: '/favicon.ico',
   organizationName: 'visgl', // Usually your GitHub org/user name.
   projectName: 'deck.gl', // Usually your repo name.
@@ -55,21 +59,25 @@ const config = {
         resolve: {
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
-            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers'),
-            '@deck.gl/arcgis': resolve('../modules/arcgis'),
-            '@deck.gl/carto': resolve('../modules/carto'),
-            '@deck.gl/core': resolve('../modules/core'),
-            '@deck.gl/extensions': resolve('../modules/extensions'),
-            '@deck.gl/geo-layers': resolve('../modules/geo-layers'),
-            '@deck.gl/google-maps': resolve('../modules/google-maps'),
-            '@deck.gl/json': resolve('../modules/json'),
-            '@deck.gl/layers': resolve('../modules/layers'),
-            '@deck.gl/mapbox': resolve('../modules/mapbox'),
-            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers'),
-            '@deck.gl/react': resolve('../modules/react'),
+            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
+            '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
+            '@deck.gl/carto': resolve('../modules/carto/dist'),
+            '@deck.gl/core': resolve('../modules/core/dist'),
+            '@deck.gl/extensions': resolve('../modules/extensions/dist'),
+            '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
+            '@deck.gl/google-maps': resolve('../modules/google-maps/dist'),
+            '@deck.gl/json': resolve('../modules/json/dist'),
+            '@deck.gl/layers': resolve('../modules/layers/dist'),
+            '@deck.gl/mapbox': resolve('../modules/mapbox/dist'),
+            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
+            '@deck.gl/react': resolve('../modules/react/dist'),
+            '@deck.gl/widgets': resolve('../modules/widgets/dist'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
+            '@luma.gl/webgl/constants': resolve(
+              '../node_modules/@luma.gl/webgl/dist/constants'
+            ),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
             '@math.gl': resolve('../node_modules/@math.gl'),
             '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
@@ -77,6 +85,7 @@ const config = {
             '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
             '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
             '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
+            '@loaders.gl/schema': resolve('../node_modules/@loaders.gl/schema-utils'),
             '@loaders.gl': resolve('../node_modules/@loaders.gl')
           }
         },

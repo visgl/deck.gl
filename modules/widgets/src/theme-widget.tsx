@@ -45,7 +45,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
   themeMode: 'light' | 'dark' = 'dark';
 
   constructor(props: ThemeWidgetProps = {}) {
-    super(props, ThemeWidget.defaultProps);
+    super(props);
     this.themeMode = this._getInitialThemeMode();
     this.setProps(this.props);
   }
@@ -116,10 +116,12 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
   /** Read browser preference */
   _getInitialThemeMode(): 'light' | 'dark' {
     const {initialThemeMode} = this.props;
-    return initialThemeMode === 'auto'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      : initialThemeMode;
+    if (initialThemeMode !== 'auto') {
+      return initialThemeMode;
+    }
+    if (typeof window === 'undefined') {
+      return 'light';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 }

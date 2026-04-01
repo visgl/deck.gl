@@ -15,7 +15,7 @@ import type Viewport from '../../viewports/viewport';
 import type {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
-uniform shadowUniforms {
+layout(std140) uniform shadowUniforms {
   bool drawShadowMap;
   bool useShadowMap;
   vec4 color;

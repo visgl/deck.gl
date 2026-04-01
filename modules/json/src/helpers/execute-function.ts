@@ -5,7 +5,11 @@
 import {type JSONConfiguration} from '../json-configuration';
 
 /**
- * Attempt to execute a function
+ * Executes a configured JSON function reference.
+ * @param targetFunction Function name resolved from JSON.
+ * @param props Props passed to the configured function.
+ * @param configuration Active conversion configuration.
+ * @returns The function result, or `null` if the function is not registered.
  */
 export function executeFunction(
   targetFunction: string,
