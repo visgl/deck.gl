@@ -42,6 +42,7 @@
   "dependencies": {
     "@loaders.gl/core": "^4.4.1",
     "@loaders.gl/images": "^4.4.1",
+    "@luma.gl/constants": "^9.3.1",
     "@luma.gl/core": "^9.3.1",
     "@luma.gl/engine": "^9.3.1",
     "@luma.gl/shadertools": "^9.3.1",
