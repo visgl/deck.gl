@@ -112,9 +112,14 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   setProps(props: Partial<TimelineWidgetProps>): void {
-    const {playing: prevPlaying} = this.props;
+    const {playing: prevPlaying, time: prevTime} = this.props;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
+
+    // Sync Timeline object when controlled time prop changes
+    if (props.time !== undefined && props.time !== prevTime) {
+      this.props.timeline?.setTime(props.time);
+    }
 
     // Handle controlled playing state changes
     if (props.playing !== undefined && props.playing !== prevPlaying) {
@@ -218,8 +223,12 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
       timeRange: [min, max]
     } = this.props;
     if (this.getTime() >= max) {
-      this.currentTime = min;
       this.props.onTimeChange(min);
+      // Only update internal state if uncontrolled
+      if (this.props.time === undefined) {
+        this.currentTime = min;
+        this.props.timeline?.setTime(min);
+      }
     }
     this.updateHTML();
     this.tick();
@@ -271,6 +280,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
       // Only update internal state if uncontrolled
       if (this.props.time === undefined) {
         this.currentTime = next;
+        this.props.timeline?.setTime(next);
       }
       this.updateHTML();
     }
