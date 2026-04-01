@@ -60,7 +60,7 @@ jobs:
         run: yarn build
       
       - name: Run tests from transpiled code
-        run: npx ocular-test dist
+        run: yarn test-fast
 
       - name: Login to NPM
         run: npm config set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"

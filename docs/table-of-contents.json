@@ -183,6 +183,7 @@
         "items": [
           "api-reference/core/controller",
           "api-reference/core/map-controller",
+          "api-reference/core/terrain-controller",
           "api-reference/core/globe-controller",
           "api-reference/core/first-person-controller",
           "api-reference/core/orthographic-controller",

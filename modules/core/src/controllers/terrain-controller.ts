@@ -16,6 +16,10 @@ export default class TerrainController extends MapController {
   private _terrainAltitude?: number = undefined;
   /** Raw (unsmoothed) terrain altitude from latest pick */
   private _terrainAltitudeTarget?: number = undefined;
+  /** rAF handle for periodic terrain altitude picking */
+  private _pickFrameId: number | null = null;
+  /** Timestamp of last pick */
+  private _lastPickTime: number = 0;
 
   setProps(
     props: ControllerProps &
@@ -26,20 +30,50 @@ export default class TerrainController extends MapController {
   ) {
     super.setProps({rotationPivot: '3d', ...props});
 
-    // Drive smoothing animation when terrain altitude hasn't converged yet.
-    if (
-      this._terrainAltitude !== undefined &&
-      this._terrainAltitudeTarget !== undefined &&
-      Math.abs(this._terrainAltitudeTarget - this._terrainAltitude) > 0.01
-    ) {
-      this.updateViewport(
-        new this.ControllerState({
-          makeViewport: this.makeViewport,
-          ...this.props,
-          ...this.state
-        } as any)
-      );
+    // Periodically pick terrain altitude at the viewport center using rAF.
+    // Keeps the altitude cache warm so interactions don't need expensive
+    // synchronous GPU readbacks. rAF naturally pauses when tab is backgrounded.
+    if (this._pickFrameId === null) {
+      const loop = () => {
+        const now = Date.now();
+        if (now - this._lastPickTime > 500 && !this.isDragging()) {
+          this._lastPickTime = now;
+          this._pickTerrainCenterAltitude();
+          // On first successful pick, rebase viewport to terrain altitude.
+          // Runs from rAF (outside React render) so onViewStateChange won't loop.
+          if (this._terrainAltitude === undefined && this._terrainAltitudeTarget !== undefined) {
+            this._terrainAltitude = this._terrainAltitudeTarget;
+            const controllerState = new this.ControllerState({
+              makeViewport: this.makeViewport,
+              ...this.props,
+              ...this.state
+            } as any);
+            const rebaseProps = this._rebaseViewport(this._terrainAltitudeTarget, controllerState);
+            if (rebaseProps) {
+              // Build a controllerState that includes the rebase adjustments so
+              // internal state matches the rebased viewState after React round-trip.
+              const rebasedState = new this.ControllerState({
+                makeViewport: this.makeViewport,
+                ...this.props,
+                ...this.state,
+                ...rebaseProps
+              } as any);
+              super.updateViewport(rebasedState);
+            }
+          }
+        }
+        this._pickFrameId = requestAnimationFrame(loop);
+      };
+      this._pickFrameId = requestAnimationFrame(loop);
     }
+  }
+
+  finalize() {
+    if (this._pickFrameId !== null) {
+      cancelAnimationFrame(this._pickFrameId);
+      this._pickFrameId = null;
+    }
+    super.finalize();
   }
 
   protected updateViewport(
@@ -47,23 +81,15 @@ export default class TerrainController extends MapController {
     extraProps: Record<string, any> | null = null,
     interactionState: InteractionState = {}
   ): void {
-    const SMOOTHING = 0.05;
-
-    // No interactions yet, do not update
-    if (this._terrainAltitudeTarget === undefined) return;
-
+    // Not initialized yet — pass through to MapController
     if (this._terrainAltitude === undefined) {
-      // First interaction, rebase to avoid jump
-      this._terrainAltitude = this._terrainAltitudeTarget;
-      extraProps = this._rebaseViewport(
-        this._terrainAltitudeTarget,
-        newControllerState,
-        extraProps
-      );
-    } else {
-      // Standard interaction, smoothly blend target into actual altitude
-      this._terrainAltitude += (this._terrainAltitudeTarget - this._terrainAltitude) * SMOOTHING;
+      super.updateViewport(newControllerState, extraProps, interactionState);
+      return;
     }
+
+    // Smoothly blend toward target altitude
+    const SMOOTHING = 0.05;
+    this._terrainAltitude += (this._terrainAltitudeTarget! - this._terrainAltitude) * SMOOTHING;
 
     const viewportProps = newControllerState.getViewportProps();
     const pos = viewportProps.position || [0, 0, 0];
@@ -75,23 +101,7 @@ export default class TerrainController extends MapController {
     super.updateViewport(newControllerState, extraProps, interactionState);
   }
 
-  protected _onPanStart(event: MjolnirGestureEvent): boolean {
-    this._pickTerrainCenterAltitude();
-    return super._onPanStart(event);
-  }
-
-  protected _onWheel(event: MjolnirWheelEvent): boolean {
-    this._pickTerrainCenterAltitude();
-    return super._onWheel(event);
-  }
-
-  protected _onDoubleClick(event: MjolnirGestureEvent): boolean {
-    this._pickTerrainCenterAltitude();
-    return super._onDoubleClick(event);
-  }
-
   private _pickTerrainCenterAltitude(): void {
-    // TODO use async picking?
     if (!this.pickPosition) {
       return;
     }
@@ -103,13 +113,12 @@ export default class TerrainController extends MapController {
   }
 
   /**
-   * Utility function to return viewport that looks the same, but with
-   * a position shifted to [0, 0, altitude]
+   * Compute viewport adjustments to keep the view visually the same
+   * when shifting position to [0, 0, altitude].
    */
   private _rebaseViewport(
     altitude: number,
-    newControllerState: MapState,
-    extraProps: Record<string, any> | null
+    newControllerState: MapState
   ): Record<string, any> | null {
     const viewportProps = newControllerState.getViewportProps();
     const oldViewport = this.makeViewport({...viewportProps, position: [0, 0, 0]});
@@ -119,7 +128,7 @@ export default class TerrainController extends MapController {
     const cameraHeightAboveOldCenter = oldCameraPos[2];
     const newCameraHeightAboveCenter = cameraHeightAboveOldCenter - centerZOffset;
     if (newCameraHeightAboveCenter <= 0) {
-      return extraProps;
+      return null;
     }
 
     const zoomDelta = Math.log2(cameraHeightAboveOldCenter / newCameraHeightAboveCenter);
@@ -139,8 +148,8 @@ export default class TerrainController extends MapController {
       typeof newViewport.panByPosition3D === 'function'
     ) {
       const adjusted = newViewport.panByPosition3D(worldPoint, screenCenter);
-      return {...extraProps, position: [0, 0, altitude], zoom: newZoom, ...adjusted};
+      return {position: [0, 0, altitude], zoom: newZoom, ...adjusted};
     }
-    return extraProps;
+    return null;
   }
 }

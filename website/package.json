@@ -40,6 +40,7 @@
     "react-dom": "^18.0.0",
     "react-map-gl": "^8.0.0",
     "react-virtualized-auto-sizer": "^1.0.2",
+    "source-map-loader": "^5.0.0",
     "styled-components": "^5.3.3",
     "supercluster": "^8.0.1",
     "zustand": "^5.0.5"
