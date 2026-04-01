@@ -90,6 +90,13 @@ export class PopupWidget extends Widget<PopupWidgetProps> {
     this.deck = deck;
   }
 
+  onRemove() {
+    // Invoke clean up of preact hooks
+    if (this.rootElement) {
+      render(null, this.rootElement);
+    }
+  }
+
   onViewportChange(viewport) {
     this.viewport = viewport;
     this.updateHTML();

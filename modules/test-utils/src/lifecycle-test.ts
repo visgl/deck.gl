@@ -324,16 +324,7 @@ function cleanupAfterLayerTests({
   layerManager.finalize();
   deckRenderer.finalize();
 
-  const resourceCounts = getResourceCounts();
-
-  for (const resourceName in resourceCounts) {
-    if (resourceCounts[resourceName] !== oldResourceCounts[resourceName]) {
-      return new Error(
-        `${resourceCounts[resourceName] - oldResourceCounts[resourceName]} ${resourceName}s`
-      );
-    }
-  }
-  return null;
+  return getResourceCountDelta(oldResourceCounts);
 }
 
 /**
@@ -357,6 +348,19 @@ async function cleanupAfterLayerTestsAsync({
   layerManager.finalize();
   deckRenderer.finalize();
 
+  return getResourceCountDelta(oldResourceCounts);
+}
+
+function getResourceCounts(): Record<string, number> {
+  /* global luma */
+  const resourceStats = (luma.stats as StatsManager).get('Resource Counts');
+  return {
+    Texture2D: resourceStats.get('Texture2Ds Active').count,
+    Buffer: resourceStats.get('Buffers Active').count
+  };
+}
+
+function getResourceCountDelta(oldResourceCounts: Record<string, number>): Error | null {
   const resourceCounts = getResourceCounts();
 
   for (const resourceName in resourceCounts) {
@@ -367,15 +371,6 @@ async function cleanupAfterLayerTestsAsync({
     }
   }
   return null;
-}
-
-function getResourceCounts(): Record<string, number> {
-  /* global luma */
-  const resourceStats = (luma.stats as StatsManager).get('Resource Counts');
-  return {
-    Texture2D: resourceStats.get('Texture2Ds Active').count,
-    Buffer: resourceStats.get('Buffers Active').count
-  };
 }
 
 function injectSpies(layer: Layer, spies: string[], spyFactory: SpyFactory): Record<string, Spy> {

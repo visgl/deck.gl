@@ -89,16 +89,17 @@ export const Popover = ({
 
   useMemo(() => {
     updaterRef.current?.();
-  }, [placement, arrowSize, pixelOffset]);
+  }, [x, y, placement, arrowSize, pixelOffset]);
 
   useEffect(() => {
     // initial mount
-    if (contentRef.current) {
-      contentRef.current.style.visibility = 'visible';
+    const anchor = anchorRef.current;
+    const content = contentRef.current;
+    if (!anchor || !content) {
+      return undefined;
     }
-    const cleanup = autoUpdate(anchorRef.current!, contentRef.current!, () =>
-      updaterRef.current?.()
-    );
+    content.style.visibility = 'visible';
+    const cleanup = autoUpdate(anchor, content, () => updaterRef.current?.());
     return () => {
       cleanup();
     };

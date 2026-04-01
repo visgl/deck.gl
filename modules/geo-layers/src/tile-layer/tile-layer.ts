@@ -194,7 +194,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   get isLoaded(): boolean {
     return Boolean(
       this.state?.tileset?.selectedTiles?.every(
-        tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+        tile =>
+          // Error / empty tiles resolve to `content === null`. Once Tile2DHeader marks those
+          // requests as loaded, do not wait for generated sublayers because there is nothing to
+          // render for that tile and `tile.layers` will remain null.
+          tile.isLoaded &&
+          (!tile.content || !tile.layers || tile.layers.every(layer => layer.isLoaded))
       )
     );
   }

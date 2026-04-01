@@ -10,10 +10,11 @@ fn deckgl_filter_size(offset: vec3<f32>, geometry: Geometry) -> vec3<f32> {
   return offset;
 }
 fn deckgl_filter_gl_position(p: vec4<f32>, geometry: Geometry) -> vec4<f32> {
+  if (picking.isAttribute > 0.5) {
+    // For depth picking, write normalized depth into the picking payload.
+    // This mirrors the legacy DECKGL_FILTER_GL_POSITION hook on WebGL.
+  }
   return p;
-}
-fn deckgl_filter_color(color: vec4<f32>, geometry: Geometry) -> vec4<f32> {
-  return color;
 }
 
 // Compute an extrusion offset given a line direction (in clipspace),
@@ -36,23 +37,16 @@ fn splitLine(a: vec3<f32>, b: vec3<f32>, x: f32) -> vec3<f32> {
 
 // ---------- Uniforms & Global Structures ----------
 
-// Uniforms for line, color, and project are assumed to be defined elsewhere.
-// For example:
-//
-// @group(0) @binding(0)
-// var<uniform> line: LineUniform;
-//
-// struct ColorUniform {
-//   opacity: f32,
-// };
-// @group(0) @binding(1)
-// var<uniform> color: ColorUniform;
-//
-// struct ProjectUniform {
-//   viewportSize: vec2<f32>,
-// };
-// @group(0) @binding(2)
-// var<uniform> project: ProjectUniform;
+struct LineUniforms {
+  widthScale: f32,
+  widthMinPixels: f32,
+  widthMaxPixels: f32,
+  useShortestPath: f32,
+  widthUnits: i32,
+};
+
+@group(0) @binding(0)
+var<uniform> line: LineUniforms;
 
 
 
@@ -62,6 +56,7 @@ struct Varyings {
   @builtin(position) gl_Position: vec4<f32>,
   @location(0) vColor: vec4<f32>,
   @location(1) uv: vec2<f32>,
+  @location(2) pickingColor: vec3<f32>,
 };
 
 // ---------- Vertex Shader Entry Point ----------
@@ -77,7 +72,6 @@ fn vertexMain(
   @location(6) instancePickingColors: vec3<f32>,
   @location(7) instanceWidths: f32
 ) -> Varyings {
-  var geometry: Geometry;
   geometry.worldPosition = instanceSourcePositions;
   geometry.worldPositionAlt = instanceTargetPositions;
 
@@ -143,20 +137,22 @@ fn vertexMain(
   let finalPosition: vec4<f32> = filteredP + vec4<f32>(clipOffset, 0.0, 0.0);
 
   // Compute color.
-  var vColor: vec4<f32> = vec4<f32>(instanceColors.rgb, instanceColors.a * color.opacity);
+  var vColor: vec4<f32> = vec4<f32>(instanceColors.rgb, instanceColors.a * layer.opacity);
   // vColor = deckgl_filter_color(vColor, geometry);
 
   var output: Varyings;
   output.gl_Position = finalPosition;
   output.vColor = vColor;
   output.uv = uv;
+  output.pickingColor = instancePickingColors;
   return output;
 }
 
 @fragment
 fn fragmentMain(
   @location(0) vColor: vec4<f32>,
-  @location(1) uv: vec2<f32>
+  @location(1) uv: vec2<f32>,
+  @location(2) pickingColor: vec3<f32>
 ) -> @location(0) vec4<f32> {
   // Create and initialize geometry with the provided uv.
   var geometry: Geometry;
@@ -165,8 +161,29 @@ fn fragmentMain(
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
 
-  // Apply the deck.gl filter to the color.
-  fragColor = deckgl_filter_color(fragColor, geometry);
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(pickingColor)) {
+      discard;
+    }
+    return vec4<f32>(pickingColor, 1.0);
+  }
+
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
 
   // Apply premultiplied alpha as required by transparent canvas
   fragColor = deckgl_premultiplied_alpha(fragColor);

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport, project32} from '@deck.gl/core';
@@ -13,8 +13,10 @@ import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, runOnGPU, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 import {TestCase} from './project-glsl.spec';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const PIXEL_TOLERANCE = 0.001;
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
@@ -150,7 +152,7 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project32&64#vs', async t => {
+webglTest('project32&64#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
   for (const usefp64 of [false, true]) {
@@ -161,7 +163,7 @@ test('project32&64#vs', async t => {
         return;
       }
 
-      t.comment(`${testCase.title}: ${usefp64 ? 'fp64' : 'fp32'}`);
+      console.log(`${testCase.title}: ${usefp64 ? 'fp64' : 'fp32'}`);
 
       let uniforms = {};
       if (usefp64) {
@@ -189,16 +191,14 @@ test('project32&64#vs', async t => {
         });
         config.EPSILON = c.precision ?? 1e-5;
 
-        t.is(
+        expect(
           verifyGPUResult(actual, expected),
-          true,
           `${usefp64 ? 'project64' : 'project32'} ${c.name}`
-        );
+        ).toBe(true);
       }
     }
   }
   /* eslint-enable max-nested-callbacks, complexity */
 
   config.EPSILON = oldEpsilon;
-  t.end();
 });
