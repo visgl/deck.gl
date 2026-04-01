@@ -98,6 +98,20 @@ export abstract class Widget<
     }
   }
 
+  // VIEW STATE HELPERS
+
+  /** Returns the current view state for the given view */
+  protected getViewState(viewId: string): Record<string, unknown> {
+    // @ts-ignore viewManager is private
+    return this.deck?.viewManager?.getViewState(viewId) || {};
+  }
+
+  /** Updates the view state for the given view */
+  protected setViewState(viewId: string, viewState: Record<string, unknown>): void {
+    // @ts-ignore Using private method temporary until there's a public one
+    this.deck?._onViewStateChange({viewId, viewState, interactionState: {}});
+  }
+
   // @note empty method calls have an overhead in V8 but it is very low, ~1ns
 
   /**

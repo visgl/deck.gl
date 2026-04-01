@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {PathLayer, PolygonLayer} from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-test('PathStyleExtension#PathLayer', t => {
+test('PathStyleExtension#PathLayer', () => {
   const testCases = [
     {
       props: {
@@ -22,18 +22,15 @@ test('PathStyleExtension#PathLayer', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
+        expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(0);
         const attributes = layer.getAttributeManager().getAttributes();
-        t.deepEqual(
+        expect(
           attributes.instanceDashArrays.value,
-          [0, 0],
           'instanceDashArrays attribute is populated'
-        );
-        t.deepEqual(
-          attributes.instanceOffsets.value,
-          [0],
-          'instanceOffsets attribute is populated'
-        );
+        ).toEqual([0, 0]);
+        expect(attributes.instanceOffsets.value, 'instanceOffsets attribute is populated').toEqual([
+          0
+        ]);
 
         let dashOffsetValid = true;
         let i;
@@ -44,7 +41,7 @@ test('PathStyleExtension#PathLayer', t => {
         }
         dashOffsetValid = dashOffsetValid && attributes.instanceDashOffsets.value[i + 1] === 0;
 
-        t.ok(dashOffsetValid, 'instanceDashOffsets attribute is populated');
+        expect(dashOffsetValid, 'instanceDashOffsets attribute is populated').toBeTruthy();
       }
     },
     {
@@ -59,28 +56,24 @@ test('PathStyleExtension#PathLayer', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
+        expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(1);
         const attributes = layer.getAttributeManager().getAttributes();
-        t.deepEqual(
+        expect(
           attributes.instanceDashArrays.value.slice(0, 4),
-          [3, 1, 3, 1],
           'instanceDashArrays attribute is populated'
-        );
-        t.deepEqual(
+        ).toEqual([3, 1, 3, 1]);
+        expect(
           attributes.instanceOffsets.value.slice(0, 4),
-          [0.5, 0.5, 0.5, 0.5],
           'instanceOffsets attribute is populated'
-        );
+        ).toEqual([0.5, 0.5, 0.5, 0.5]);
       }
     }
   ];
 
-  testLayer({Layer: PathLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('PathStyleExtension#PolygonLayer', t => {
+test('PathStyleExtension#PolygonLayer', () => {
   const testCases = [
     {
       props: {
@@ -94,11 +87,11 @@ test('PathStyleExtension#PolygonLayer', t => {
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
         const uniforms = getLayerUniforms(pathLayer);
-        t.is(uniforms.dashAlignMode, 0, 'has dashAlignMode uniform');
-        t.ok(
+        expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(0);
+        expect(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
           'instanceDashArrays attribute is populated'
-        );
+        ).toBeTruthy();
       }
     },
     {
@@ -109,16 +102,14 @@ test('PathStyleExtension#PolygonLayer', t => {
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
         const uniforms = getLayerUniforms(pathLayer);
-        t.is(uniforms.dashAlignMode, 1, 'has dashAlignMode uniform');
-        t.ok(
+        expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(1);
+        expect(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
           'instanceDashArrays attribute is populated'
-        );
+        ).toBeTruthy();
       }
     }
   ];
 
-  testLayer({Layer: PolygonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

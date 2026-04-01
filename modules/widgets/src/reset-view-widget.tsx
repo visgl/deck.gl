@@ -76,10 +76,10 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
 
   handleClick() {
     const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
-    this.setViewState(initialViewState);
+    this.resetViewState(initialViewState);
   }
 
-  setViewState(viewState?: ViewStateMap<ViewsT>) {
+  resetViewState(viewState?: ViewStateMap<ViewsT>) {
     const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
     for (const viewId of viewIds) {
       const nextViewState = {
@@ -92,8 +92,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
       // Call callback
       this.props.onReset?.({viewId, viewState: nextViewState as Record<string, unknown>});
 
-      // @ts-ignore Using private method temporary until there's a public one
-      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+      this.setViewState(viewId, nextViewState);
     }
   }
 }

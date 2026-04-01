@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {Buffer, Texture} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
+import log from '../utils/log';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
   processPickInfo,
@@ -11,7 +13,8 @@ import {
   getEmptyPickingInfo,
   PickingInfo
 } from './picking/pick-info';
-
+import type {RenderStats} from '../passes/layers-pass';
+import type {Stats} from '@probe.gl/stats';
 import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
@@ -52,6 +55,7 @@ export default class DeckPicker {
   depthFBO?: Framebuffer;
   pickLayersPass: PickLayersPass;
   layerFilter?: (context: FilterContext) => boolean;
+  stats?: Stats;
 
   /** Identifiers of the previously picked object, for callback tracking and auto highlight */
   lastPickedInfo: {
@@ -62,8 +66,9 @@ export default class DeckPicker {
 
   _pickable: boolean = true;
 
-  constructor(device: Device) {
+  constructor(device: Device, opts: {stats?: Stats} = {}) {
     this.device = device;
+    this.stats = opts.stats;
     this.pickLayersPass = new PickLayersPass(device);
     this.lastPickedInfo = {
       index: -1,
@@ -113,7 +118,7 @@ export default class DeckPicker {
   /**
    * Pick the closest info at given coordinate
    * @returns picking info
-   * @deprecated WebGL only - use pickObjectAsync instead
+   * @note WebGL only - use pickObjectAsync instead
    */
   pickObject(opts: PickByPointOptions & PickOperationContext) {
     return this._pickClosestObject(opts);
@@ -122,7 +127,7 @@ export default class DeckPicker {
   /**
    * Get all unique infos within a bounding box
    * @returns all unique infos within a bounding box
-   * @deprecated WebGL only - use pickObjectAsync instead
+   * @note WebGL only - use pickObjectAsync instead
    */
   pickObjects(opts: PickByRectOptions & PickOperationContext) {
     return this._pickVisibleObjects(opts);
@@ -155,14 +160,26 @@ export default class DeckPicker {
   _resizeBuffer() {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
+      const pickingColorTexture = this.device.createTexture({
+        format: 'rgba8unorm',
+        width: 1,
+        height: 1,
+        usage: Texture.RENDER_ATTACHMENT | Texture.COPY_SRC
+      });
       this.pickingFBO = this.device.createFramebuffer({
-        colorAttachments: ['rgba8unorm'],
+        colorAttachments: [pickingColorTexture],
         depthStencilAttachment: 'depth16unorm'
       });
 
       if (this.device.isTextureFormatRenderable('rgba32float')) {
+        const depthColorTexture = this.device.createTexture({
+          format: 'rgba32float',
+          width: 1,
+          height: 1,
+          usage: Texture.RENDER_ATTACHMENT | Texture.COPY_SRC
+        });
         const depthFBO = this.device.createFramebuffer({
-          colorAttachments: ['rgba32float'],
+          colorAttachments: [depthColorTexture],
           depthStencilAttachment: 'depth16unorm'
         });
         this.depthFBO = depthFBO;
@@ -255,7 +272,7 @@ export default class DeckPicker {
       let pickInfo: PickedPixel;
 
       if (deviceRect) {
-        const pickedResult = this._drawAndSample({
+        const pickedResult = await this._drawAndSampleAsync({
           layers: pickableLayers,
           views,
           viewports,
@@ -281,16 +298,17 @@ export default class DeckPicker {
       }
 
       let z;
-      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
-        const {pickedColors: pickedColors2} = this._drawAndSample(
+      const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
+      if (depthLayers.length > 0) {
+        const {pickedColors: pickedColors2} = await this._drawAndSampleAsync(
           {
-            layers: [pickInfo.pickedLayer],
+            layers: depthLayers,
             views,
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX as number,
-              y: pickInfo.pickedY as number,
+              x: pickInfo.pickedX ?? devicePixel[0],
+              y: pickInfo.pickedY ?? devicePixel[1],
               width: 1,
               height: 1
             },
@@ -444,16 +462,17 @@ export default class DeckPicker {
       }
 
       let z;
-      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
+      const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
+      if (depthLayers.length > 0) {
         const {pickedColors: pickedColors2} = this._drawAndSample(
           {
-            layers: [pickInfo.pickedLayer],
+            layers: depthLayers,
             views,
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX as number,
-              y: pickInfo.pickedY as number,
+              x: pickInfo.pickedX ?? devicePixel[0],
+              y: pickInfo.pickedY ?? devicePixel[1],
               width: 1,
               height: 1
             },
@@ -561,7 +580,7 @@ export default class DeckPicker {
       height: deviceTop - deviceBottom
     };
 
-    const pickedResult = this._drawAndSample({
+    const pickedResult = await this._drawAndSampleAsync({
       layers: pickableLayers,
       views,
       viewports,
@@ -806,21 +825,89 @@ export default class DeckPicker {
       }
     }
 
-    const {decodePickingColor} = this.pickLayersPass.render(opts);
+    const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
+    this._updateStats(stats);
 
-    // Read from an already rendered picking buffer
-    // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
-    const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    this.device.readPixelsToArrayWebGL(pickingFBO as Framebuffer, {
-      sourceX: x,
-      sourceY: y,
-      sourceWidth: width,
-      sourceHeight: height,
-      target: pickedColors
-    });
+    const texture = (pickingFBO as Framebuffer).colorAttachments[0]?.texture;
+    if (!texture) {
+      throw new Error('Picking framebuffer color attachment is missing');
+    }
+
+    const pickedColors = await this._readTextureDataAsync(
+      texture,
+      {x, y, width, height},
+      pickZ ? Float32Array : Uint8Array
+    );
+
+    if (!pickZ) {
+      let hasNonZeroAlpha = false;
+      for (let i = 3; i < pickedColors.length; i += 4) {
+        if (pickedColors[i] !== 0) {
+          hasNonZeroAlpha = true;
+          break;
+        }
+      }
+      if (!hasNonZeroAlpha && pickedColors.length > 0) {
+        log.warn('Async pick readback returned only zero alpha values', {
+          deviceRect,
+          bytes: Array.from(pickedColors.subarray(0, Math.min(pickedColors.length, 16)))
+        })();
+      }
+    }
 
     return {pickedColors, decodePickingColor};
+  }
+
+  private async _readTextureDataAsync<T extends Uint8Array | Float32Array>(
+    texture: Texture,
+    options: {x: number; y: number; width: number; height: number},
+    ArrayType: Uint8ArrayConstructor | Float32ArrayConstructor
+  ): Promise<T> {
+    const {width, height} = options;
+    const layout = texture.computeMemoryLayout(options);
+    const readBuffer = this.device.createBuffer({
+      byteLength: layout.byteLength,
+      usage: Buffer.COPY_DST | Buffer.MAP_READ
+    });
+
+    try {
+      texture.readBuffer(options, readBuffer);
+      const readData = await readBuffer.readAsync(0, layout.byteLength);
+      const bytesPerElement = ArrayType.BYTES_PER_ELEMENT;
+      if (layout.bytesPerRow % bytesPerElement !== 0) {
+        throw new Error(
+          `Texture readback row stride ${layout.bytesPerRow} is not aligned to ${bytesPerElement}-byte elements.`
+        );
+      }
+      const source = new ArrayType(
+        readData.buffer,
+        readData.byteOffset,
+        layout.byteLength / bytesPerElement
+      );
+      // Picking textures are RGBA. WebGPU rows may be padded to satisfy GPU alignment
+      // requirements, so repack each row into a tightly packed CPU array before decode.
+      const packedRowLength = width * 4;
+      const sourceRowLength = layout.bytesPerRow / bytesPerElement;
+      if (sourceRowLength < packedRowLength) {
+        throw new Error(
+          `Texture readback row stride ${sourceRowLength} is smaller than packed row length ${packedRowLength}.`
+        );
+      }
+      const packed = new ArrayType(width * height * 4);
+
+      for (let row = 0; row < height; row++) {
+        const sourceStart = row * sourceRowLength;
+        packed.set(
+          source.subarray(sourceStart, sourceStart + packedRowLength),
+          row * packedRowLength
+        );
+      }
+
+      return packed as T;
+    } finally {
+      readBuffer.destroy();
+    }
   }
 
   /**
@@ -911,7 +998,8 @@ export default class DeckPicker {
       }
     }
 
-    const {decodePickingColor} = this.pickLayersPass.render(opts);
+    const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
+    this._updateStats(stats);
 
     // Read from an already rendered picking buffer
     // Returns an Uint8ClampedArray of picked pixels
@@ -926,6 +1014,34 @@ export default class DeckPicker {
     });
 
     return {pickedColors, decodePickingColor};
+  }
+
+  private _updateStats(source: RenderStats[]) {
+    if (!this.stats) return;
+    let layersCount = 0;
+    for (const {visibleCount} of source) {
+      layersCount += visibleCount;
+    }
+    this.stats.get('Layers picked').addCount(layersCount);
+  }
+
+  /**
+   * Determine which layers to use for the depth (pickZ) pass.
+   * - If a non-draped layer was picked, use just that layer.
+   * - If a draped layer was picked (geometry is at z=0) or no layer was picked
+   *   (e.g. no-FBO tiles at extreme zoom), fall back to terrain layers.
+   */
+  _getDepthLayers(pickInfo: PickedPixel, pickableLayers: Layer[], unproject3D?: boolean): Layer[] {
+    if (!unproject3D || !this.depthFBO) {
+      return [];
+    }
+    const {pickedLayer} = pickInfo;
+    const isDraped = pickedLayer?.state?.terrainDrawMode === 'drape';
+    if (pickedLayer && !isDraped) {
+      return [pickedLayer];
+    }
+    // For draped layers or when no layer was picked, use terrain layers for depth
+    return pickableLayers.filter(l => l.props.operation.includes('terrain'));
   }
 
   /**

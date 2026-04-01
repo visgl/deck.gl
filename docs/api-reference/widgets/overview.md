@@ -9,6 +9,7 @@ This module contains the following widgets:
 - [GimbalWidget](./gimbal-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
 - [ZoomWidget](./zoom-widget.md)
+- [ScrollbarWidget](./scrollbar-widget.md)
 
 ### Geospatial Widgets
 
@@ -20,20 +21,22 @@ This module contains the following widgets:
 
 - [FullscreenWidget](./fullscreen-widget.md)
 - [SplitterWidget](./splitter-widget.md)
-- [ViewSelectorWidget](./view-selector-widget.md)
 
 ### Information Widgets
 
 - [ContextMenuWidget](./context-menu-widget.md)
 - [InfoWidget](./info-widget.md)
+- [PopupWidget](./popup-widget.md)
 
 ### Control Widgets
 
+- [IconWidget](./icon-widget.md)
+- [ToggleWidget](./toggle-widget.md)
+- [SelectorWidget](./selector-widget.md)
 - [TimelineWidget](./timeline-widget.md)
 
 ### Utility Widgets
 
-- [FpsWidget](./fps-widget.md)
 - [LoadingWidget](./loading-widget.md)
 - [ScreenshotWidget](./screenshot-widget.md)
 - [StatsWidget](./stats-widget.md)

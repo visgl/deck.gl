@@ -6,6 +6,7 @@ import React, {useState} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import {TerrainController} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -28,7 +29,7 @@ const INITIAL_VIEW_STATE = {
   longitude: 14.42,
   zoom: 16,
   minZoom: 14,
-  maxZoom: 16.5,
+  maxZoom: 18,
   bearing: 90,
   pitch: 60
 };
@@ -38,7 +39,7 @@ const BUILDING_DATA =
 
 function getTooltip({object}) {
   return (
-    object && {
+    object?.properties && {
       html: `\
     <div><b>Distance to nearest tree</b></div>
     <div>${object.properties.distance_to_nearest_tree}</div>
@@ -49,25 +50,30 @@ function getTooltip({object}) {
 
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
+  const onTraversalComplete = selectedTiles => {
+    const uniqueCredits = new Set();
+    selectedTiles.forEach(tile => {
+      const {copyright} = tile.content.gltf.asset;
+      copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
+    });
+    setCredits([...uniqueCredits].join('; '));
+    return selectedTiles;
+  };
 
   const layers = [
     new Tile3DLayer({
       id: 'google-3d-tiles',
       data: TILESET_URL,
-      onTilesetLoad: tileset3d => {
-        tileset3d.options.onTraversalComplete = selectedTiles => {
-          const uniqueCredits = new Set();
-          selectedTiles.forEach(tile => {
-            const {copyright} = tile.content.gltf.asset;
-            copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
-          });
-          setCredits([...uniqueCredits].join('; '));
-          return selectedTiles;
-        };
-      },
       loadOptions: {
-        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
+        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}},
+        tileset: {
+          maximumScreenSpaceError: 20,
+          maximumMemoryUsage: 512,
+          memoryAdjustedScreenSpaceError: true,
+          onTraversalComplete
+        }
       },
+      pickable: '3d',
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({
@@ -89,7 +95,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
       <DeckGL
         style={{backgroundColor: '#061714'}}
         initialViewState={INITIAL_VIEW_STATE}
-        controller={{touchRotate: true, inertia: 250}}
+        controller={{type: TerrainController, touchRotate: true, inertia: 500}}
         layers={layers}
         getTooltip={getTooltip}
       />

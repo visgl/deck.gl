@@ -86,11 +86,12 @@ void main(void) {
     #endif
 
     #ifdef HAS_UV
-      pbr_vUV = texCoords;
+      pbr_vUV0 = texCoords;
     #else
-      pbr_vUV = vec2(0., 0.);
+      pbr_vUV0 = vec2(0., 0.);
     #endif
-    geometry.uv = pbr_vUV;
+    pbr_vUV1 = vec2(0., 0.);
+    geometry.uv = pbr_vUV0;
   #endif
 
   vColor = instanceColors;

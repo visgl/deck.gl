@@ -56,7 +56,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
+    const viewId = this.viewId || Object.values(this.viewports)[0]?.id;
     const widgetViewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(widgetViewport);
 
@@ -109,8 +109,9 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   }
 
   handleCompassReset(viewport: Viewport) {
-    const viewId = this.viewId || viewport.id || 'default-view';
+    const viewId = this.viewId || viewport.id;
     if (viewport instanceof WebMercatorViewport) {
+      const viewState = this.getViewState(viewId);
       const resetPitch = this.getRotation(viewport)[0] === 0;
       const nextBearing = 0;
       const nextPitch = resetPitch ? 0 : viewport.pitch;
@@ -119,14 +120,13 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
       this.props.onCompassReset?.({viewId, bearing: nextBearing, pitch: nextPitch});
 
       const nextViewState = {
-        ...viewport,
+        ...viewState,
         bearing: nextBearing,
         ...(resetPitch ? {pitch: nextPitch} : {}),
         transitionDuration: this.props.transitionDuration,
         transitionInterpolator: new FlyToInterpolator()
       };
-      // @ts-ignore Using private method temporary until there's a public one
-      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+      this.setViewState(viewId, nextViewState);
     }
   }
 }

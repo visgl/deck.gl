@@ -39,7 +39,7 @@ Additional inline CSS styles on the top HTML element of the widget. camelCase CS
 
 Additional CSS classnames on the top HTML element.
 
-#### `_container` (string | HTMLDivElement, optional) {#container}
+#### `_container` (string | HTMLDivElement, optional) {#_container}
 
 Experimental. The container that this widget is being attached to. Default to `viewId`.
 - If set to `'root'`, the widget is placed relative to the whole deck.gl canvas.

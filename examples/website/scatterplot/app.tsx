@@ -8,7 +8,7 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
-import type {Color, MapViewState} from '@deck.gl/core';
+import type {Color, MapViewState, Widget} from '@deck.gl/core';
 import type {Device, DeviceProps} from '@luma.gl/core';
 
 const MALE_COLOR: Color = [0, 128, 255, 255];
@@ -36,7 +36,8 @@ export default function App({
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
+  mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  widgets
 }: {
   device?: Device;
   deviceProps?: DeviceProps;
@@ -45,6 +46,7 @@ export default function App({
   maleColor?: Color;
   femaleColor?: Color;
   mapStyle?: string;
+  widgets?: Widget[];
 }) {
   const layers = [
     new ScatterplotLayer<DataPoint>({
@@ -69,6 +71,7 @@ export default function App({
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
+      widgets={widgets}
     >
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>

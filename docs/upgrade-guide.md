@@ -1,5 +1,47 @@
 # Upgrade Guide
 
+## Upgrading to v9.3
+
+### OrthographicView
+
+Supplying a 2D array to `zoom` for per-axis zoom has been deprecated.
+
+```ts
+// Before
+new Deck({
+  views: new OrthographicView({controller: {zoomAxis: 'X'}}),
+  viewState: {
+    target: [0, 0, 0],
+    zoom: [0, 2]
+  },
+});
+
+// After
+new Deck({
+  views: new OrthographicView({controller: {zoomAxis: 'X'}}),
+  viewState: {
+    target: [0, 0, 0],
+    zoomX: 0,
+    zoomY: 2
+  },
+});
+```
+
+`zoom: [number, number]` will continue to work for the rest of v9.x if `zoomX` and `zoomY` are undefined. However, if you mutate `zoom` in the `onViewStateChange` callback, the change will not be picked up because `OrthographicController` always returns `zoomX` and `zoomY` which override `zoom`.
+
+### Widgets
+
+The following widgets have breaking changes in v9.3:
+
+- `ViewSelectorWidget` - removed. Use new [SelectorWidget](./api-reference/widgets/selector-widget.md) instead.
+- `FpsWidget` - removed. Use [StatsWidget](./api-reference/widgets/stats-widget.md) instead.
+- [InfoWidget](./api-reference/widgets/info-widget.md) - no longer experimental (removed underscore in export); `mode: 'static'` is removed and functionality is replaced by [PopupWidget](./api-reference/widgets/popup-widget.md).
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md) - configs are moved to a new prop `viewLayout` for more flexible controls. `onChange` callback signature is changed. See documentation for details.
+- [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) - no longer experimental (removed underscore in export)
+- [ThemeWidget](./api-reference/widgets/theme-widget.md) - no longer experimental (removed underscore in export)
+- [LoadingWidget](./api-reference/widgets/loading-widget.md) - no longer experimental (removed underscore in export)
+
+
 ## Upgrading to v9.1
 
 ### User input handling
@@ -171,7 +213,7 @@ new Deck({
 // deck.gl v9 using GL constants
 // The constant module remains but is now considered an internal luma.gl module, and is no longer intended to be imported by applications.
 import {Deck} from '@deck.gl/core'
-import {GL} from '@luma.gl/constants' // Note the ESM import
+import {GL} from '@luma.gl/webgl/constants'
 
 new Deck({
   parameters: {
@@ -182,7 +224,7 @@ new Deck({
 
 // deck.gl v8
 import {Deck} from '@deck.gl/core/typed'
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 new Deck({
   parameters: {

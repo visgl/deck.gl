@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {colorRangeToFlatArray} from '@deck.gl/aggregation-layers/common/utils/color-utils';
 
-test('color-utils#colorRangeToFlatArray', t => {
+test('color-utils#colorRangeToFlatArray', () => {
   const TESTS = [
     {
       title: 'flat array',
@@ -40,12 +40,8 @@ test('color-utils#colorRangeToFlatArray', t => {
   ];
 
   for (const testCase of TESTS) {
-    t.deepEqual(
-      colorRangeToFlatArray(testCase.colorRange, testCase.normalize),
-      testCase.output,
-      testCase.title
+    expect(colorRangeToFlatArray(testCase.colorRange, testCase.normalize), testCase.title).toEqual(
+      testCase.output
     );
   }
-
-  t.end();
 });

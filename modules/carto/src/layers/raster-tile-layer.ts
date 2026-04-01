@@ -45,6 +45,8 @@ type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> &
   };
 
 class PostProcessTileLayer extends PostProcessModifier(TileLayer, copy) {
+  static layerName = 'PostProcessTileLayer';
+
   filterSubLayer(context: FilterContext) {
     // Handle DrawCallbackLayer
     const {tile} = (context.layer as Layer<{tile: any}>).props;

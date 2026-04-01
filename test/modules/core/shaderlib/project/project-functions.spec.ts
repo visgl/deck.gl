@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
   COORDINATE_SYSTEM,
@@ -16,6 +16,7 @@ const {fp64LowPart} = fp64;
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {equals, config, NumberArray3} from '@math.gl/core';
 import {runOnGPU, TestProps, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122.45,
@@ -28,6 +29,7 @@ const TEST_VIEWPORT_2 = new WebMercatorViewport({
   zoom: 8
 });
 const TEST_COORDINATE_ORIGIN: NumberArray3 = [-122.45, 37.78, 0];
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 export type TestCase = {
   title: string;
@@ -132,20 +134,22 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#projectPosition', t => {
+test('project#projectPosition', () => {
+  const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-7;
 
-  TEST_CASES.forEach(testCase => {
-    const result = projectPosition(testCase.position, testCase.projectProps);
-    t.comment(result);
-    t.comment(testCase.result);
-    t.ok(equals(result, testCase.result), testCase.title);
-  });
-
-  t.end();
+  try {
+    TEST_CASES.forEach(testCase => {
+      const result = projectPosition(testCase.position, testCase.projectProps);
+      expect(equals(result, testCase.result), testCase.title).toBeTruthy();
+    });
+  } finally {
+    config.EPSILON = oldEpsilon;
+  }
 });
 
-test('project#projectPosition vs project_position', async t => {
+webglTest('project#projectPosition vs project_position', async () => {
+  const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-5;
 
   const vs = `\
@@ -160,24 +164,26 @@ void main()
 }
 `;
 
-  for (const {title, position, projectProps} of TEST_CASES.filter(
-    testCase => !testCase.projectProps.fromCoordinateSystem
-  )) {
-    const cpuResult = projectPosition(position, projectProps);
-    const testProps: TestProps = {
-      uPos: position,
-      uPos64Low: position.map(fp64LowPart) as NumberArray3
-    };
-    const shaderResult = await runOnGPU({
-      vs,
-      varying: 'outValue',
-      modules: [project, testUniforms],
-      vertexCount: 1,
-      shaderInputProps: {project: projectProps, test: testProps}
-    });
+  try {
+    for (const {title, position, projectProps} of TEST_CASES.filter(
+      testCase => !testCase.projectProps.fromCoordinateSystem
+    )) {
+      const cpuResult = projectPosition(position, projectProps);
+      const testProps: TestProps = {
+        uPos: position,
+        uPos64Low: position.map(fp64LowPart) as NumberArray3
+      };
+      const shaderResult = await runOnGPU({
+        vs,
+        varying: 'outValue',
+        modules: [project, testUniforms],
+        vertexCount: 1,
+        shaderInputProps: {project: projectProps, test: testProps}
+      });
 
-    t.is(verifyGPUResult(shaderResult, cpuResult), true, title);
+      expect(verifyGPUResult(shaderResult, cpuResult), title).toBe(true);
+    }
+  } finally {
+    config.EPSILON = oldEpsilon;
   }
-
-  t.end();
 });

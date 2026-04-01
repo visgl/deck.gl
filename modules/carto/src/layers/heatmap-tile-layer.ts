@@ -87,7 +87,7 @@ function colorRangeToFlatArray(colorRange: Color[]): Uint8Array {
 }
 
 const uniformBlock = `\
-uniform densityUniforms {
+layout(std140) uniform densityUniforms {
   float factor;
 } density;
 `;
