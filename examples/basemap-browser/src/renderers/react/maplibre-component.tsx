@@ -91,7 +91,6 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
           <MapLibreDeckOverlay
             layers={layers}
             interleaved={interleaved}
-            _renderLayersInGroups={batched}
             views={multiView ? views : undefined}
             layerFilter={multiView ? layerFilter : undefined}
             initialViewState={multiView ? initialViewState : undefined}

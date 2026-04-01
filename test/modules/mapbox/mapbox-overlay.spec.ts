@@ -4,14 +4,16 @@
 
 import {test, expect} from 'vitest';
 
+import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
+import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
+import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 
-import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
-import {DEFAULT_PARAMETERS} from './fixtures';
+import {DEFAULT_PARAMETERS, objectEqual} from './fixtures';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -227,8 +229,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
     expect(overlay._props.useDevicePixels, 'useDevicePixels is not forwarded').toBe(undefined);
 
     await sleep(100);
-    expect(map.getLayer('poi'), 'MapboxLayer is added').toBeTruthy();
-    expect(map.getLayer('poi2'), 'MapboxLayer is added').toBeTruthy();
+    expect(map.getLayer('deck-layer-group-last'), 'Layer group is added').toBeTruthy();
     expect(drawLog, 'layers correctly filtered').toEqual(['poi']);
     drawLog = [];
 
@@ -238,8 +239,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
     });
 
     await sleep(100);
-    expect(map.getLayer('poi'), 'MapboxLayer is removed').toBeFalsy();
-    expect(map.getLayer('cities'), 'MapboxLayer is added').toBeTruthy();
+    expect(map.getLayer('deck-layer-group-last'), 'Layer group exists').toBeTruthy();
     expect(drawLog, 'layers correctly filtered').toEqual(['cities']);
 
     map.removeControl(overlay);
@@ -308,7 +308,7 @@ webglTest('MapboxOverlay#interleavedNoInitialLayers', async () => {
       }
     });
     await sleep(100);
-    expect(map.getLayer('cities'), 'MapboxLayer is added').toBeTruthy();
+    expect(map.getLayer('deck-layer-group-last'), 'Layer group is added').toBeTruthy();
 
     expect(
       objectEqual(overlay._deck.props.parameters, {
@@ -415,7 +415,6 @@ webglTest('MapboxOverlay#renderLayersInGroups - constructor', async () => {
 
   const overlay = new MapboxOverlay({
     interleaved: true,
-    _renderLayersInGroups: true,
     layers: [
       new ScatterplotLayer({id: 'poi1', beforeId: 'park'}),
       new ScatterplotLayer({id: 'poi2', beforeId: 'park'})
@@ -436,7 +435,6 @@ webglTest('MapboxOverlay#renderLayersInGroups - constructor', async () => {
   map.addControl(overlay);
 
   expect(overlay._deck, 'Deck instance is created').toBeTruthy();
-  expect(overlay._renderLayersInGroups, '_renderLayersInGroups option is set').toBeTruthy();
   await renderPromise;
 });
 
@@ -451,7 +449,6 @@ webglTest('MapboxOverlay#renderLayersInGroups - setProps', async () => {
 
   const overlay = new MapboxOverlay({
     interleaved: true,
-    _renderLayersInGroups: true,
     layers: [new ScatterplotLayer({id: 'poi', beforeId: 'park'})]
   });
 
@@ -486,4 +483,243 @@ webglTest('MapboxOverlay#renderLayersInGroups - setProps', async () => {
   });
   map.addControl(overlay);
   await renderPromise;
+});
+
+// Tests ported from mapbox-layer.spec.ts, adapted for MapboxLayerGroup
+
+test('MapboxLayerGroup#external Deck lifecycle', async () => {
+  const deck = new Deck({
+    device,
+    viewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-layer-0',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0]
+      })
+    ],
+    parameters: {...DEFAULT_PARAMETERS, depthTest: false}
+  });
+
+  const group = new MapboxLayerGroup({id: 'deck-layer-group-last'});
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  await map.once('load');
+
+  getDeckInstance({map, deck});
+
+  map.addLayer(group);
+  expect(deck.props.views.id === 'mapbox', 'mapbox view exists').toBeTruthy();
+
+  expect(() => (map as any)._render(), 'Map render does not throw').not.toThrow();
+
+  map.fire('remove');
+  expect(deck.layerManager, 'External Deck should not be finalized with map').toBeTruthy();
+
+  deck.finalize();
+
+  expect(() => (map as any)._render(), 'Map render does not throw after finalize').not.toThrow();
+  expect(
+    () => group.render(null, null),
+    'Group render does not throw after finalize'
+  ).not.toThrow();
+});
+
+test('MapboxLayerGroup#external Deck multiple views', async () => {
+  const drawLog: [string, string][] = [];
+  const onRedrawLayer = ({viewport, layer}) => {
+    drawLog.push([viewport.id, layer.id]);
+  };
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  await map.once('load');
+
+  const deck = new Deck({
+    device,
+    views: [new MapView({id: 'view-two'}), new MapView({id: 'mapbox'})],
+    viewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: [
+      new TestScatterplotLayer({
+        id: 'scatterplot-map',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0],
+        onAfterRedraw: onRedrawLayer
+      }),
+      new TestScatterplotLayer({
+        id: 'scatterplot-second-view',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0],
+        onAfterRedraw: onRedrawLayer
+      })
+    ],
+    parameters: DEFAULT_PARAMETERS,
+    layerFilter: ({viewport, layer}) => {
+      if (viewport.id === 'mapbox') return layer.id === 'scatterplot-map';
+      return layer.id === 'scatterplot-second-view';
+    }
+  });
+
+  getDeckInstance({map, deck});
+
+  const group = new MapboxLayerGroup({id: 'deck-layer-group-last'});
+  const renderPromise = map.once('render');
+  map.addLayer(group);
+  await renderPromise;
+
+  expect((map as any)._renderError, 'render should not throw').toBeFalsy();
+  expect(drawLog, 'layers drawn into the correct views').toEqual([
+    ['mapbox', 'scatterplot-map'],
+    ['view-two', 'scatterplot-second-view']
+  ]);
+
+  deck.finalize();
+});
+
+test('MapboxLayerGroup#external Deck custom views', async () => {
+  const drawLog: [string, string][] = [];
+  const onRedrawLayer = ({viewport, layer}) => {
+    drawLog.push([viewport.id, layer.id]);
+  };
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  await map.once('load');
+
+  const deck = new Deck({
+    device,
+    views: [new MapView({id: 'view-two'})],
+    viewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: [
+      new TestScatterplotLayer({
+        id: 'scatterplot',
+        data: [],
+        getPosition: d => d.position,
+        getRadius: 10,
+        getFillColor: [255, 0, 0],
+        onAfterRedraw: onRedrawLayer
+      })
+    ]
+  });
+
+  getDeckInstance({map, deck});
+
+  const renderPromise = map.once('render');
+  map.addLayer(new MapboxLayerGroup({id: 'deck-layer-group-last'}));
+  await renderPromise;
+
+  expect((map as any)._renderError, 'render should not throw').toBeFalsy();
+  expect(drawLog, 'layer is drawn to both views').toEqual([
+    ['mapbox', 'scatterplot'],
+    ['view-two', 'scatterplot']
+  ]);
+
+  deck.finalize();
+});
+
+test('MapboxLayerGroup#drawLayerGroup with zero-size canvas', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const map = new MockMapboxMap({
+      center: {lng: -122.45, lat: 37.78},
+      zoom: 12
+    });
+
+    map.on('load', () => {
+      const deck = new Deck({
+        device,
+        viewState: {longitude: 0, latitude: 0, zoom: 1},
+        layers: [
+          new ScatterplotLayer({
+            id: 'scatterplot',
+            data: [],
+            getPosition: d => d.position,
+            getRadius: 10,
+            getFillColor: [255, 0, 0]
+          })
+        ],
+        onLoad: () => {
+          try {
+            (deck as any).width = 0;
+            (deck as any).height = 0;
+            (map as any)._render();
+
+            expect(
+              (map as any)._renderError,
+              'render should not throw when canvas has zero dimensions'
+            ).toBeFalsy();
+
+            deck.finalize();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      });
+
+      getDeckInstance({map, deck});
+      map.addLayer(new MapboxLayerGroup({id: 'deck-layer-group-last'}));
+    });
+  });
+});
+
+test('MapboxLayerGroup#afterRender with zero-size canvas', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const map = new MockMapboxMap({
+      center: {lng: -122.45, lat: 37.78},
+      zoom: 12
+    });
+
+    map.on('load', () => {
+      const deck = new Deck({
+        device,
+        views: [new MapView({id: 'mapbox'}), new MapView({id: 'overview'})],
+        viewState: {longitude: 0, latitude: 0, zoom: 1},
+        layers: [
+          new ScatterplotLayer({
+            id: 'scatterplot',
+            data: [],
+            getPosition: d => d.position,
+            getRadius: 10,
+            getFillColor: [255, 0, 0]
+          })
+        ],
+        onLoad: () => {
+          try {
+            (deck as any).width = 0;
+            (deck as any).height = 0;
+            (map as any)._render();
+
+            expect(
+              (map as any)._renderError,
+              'afterRender should not throw when canvas has zero dimensions'
+            ).toBeFalsy();
+
+            deck.finalize();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      });
+
+      getDeckInstance({map, deck});
+      map.addLayer(new MapboxLayerGroup({id: 'deck-layer-group-last'}));
+    });
+  });
 });

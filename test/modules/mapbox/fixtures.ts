@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {equals} from '@math.gl/core';
 import {GL} from '@luma.gl/webgl/constants';
 
 export const DEFAULT_PARAMETERS = {
@@ -16,3 +17,25 @@ export const DEFAULT_PARAMETERS = {
   blendColorOperation: 'add',
   blendAlphaOperation: 'add'
 };
+
+/** Deep equal using math.gl's tolerance-based float comparison (unlike vitest's toEqual) */
+export function objectEqual(actual, expected) {
+  if (equals(actual, expected)) {
+    return true;
+  }
+  if (typeof actual !== 'object' || typeof expected !== 'object') {
+    return false;
+  }
+
+  const keys0 = Object.keys(actual);
+  const keys1 = Object.keys(expected);
+  if (keys0.length !== keys1.length) {
+    return false;
+  }
+  for (const key of keys1) {
+    if (!objectEqual(actual[key], expected[key])) {
+      return false;
+    }
+  }
+  return true;
+}

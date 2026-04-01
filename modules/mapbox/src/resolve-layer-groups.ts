@@ -10,7 +10,7 @@ import MapboxLayerGroup from './mapbox-layer-group';
 
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 
-function getLayerGroupId(layer: Layer<LayerOverlayProps>): string {
+export function getLayerGroupId(layer: Layer<LayerOverlayProps>): string {
   if (layer.props.beforeId) {
     return `deck-layer-group-before:${layer.props.beforeId}`;
   } else if (layer.props.slot) {

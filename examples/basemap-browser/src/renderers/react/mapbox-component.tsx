@@ -60,7 +60,6 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
         <MapboxDeckOverlay
           layers={layers}
           interleaved={interleaved}
-          _renderLayersInGroups={batched}
           views={multiView ? views : undefined}
           layerFilter={multiView ? layerFilter : undefined}
           initialViewState={multiView ? initialViewState : undefined}

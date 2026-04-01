@@ -117,9 +117,10 @@ new MapboxOverlay(props: MapboxOverlayProps);
 The constructor additionally accepts the following options:
 
 - `interleaved` (boolean) - If `false`, a dedicated deck.gl canvas is added on top of the base map. If `true`, deck.gl layers are inserted into mapbox-gl's layer stack, and share the same `WebGL2RenderingContext` as the base map. Default is `false`. Note that interleaving with basemaps such as mapbox-gl-js v1 that only support WebGL 1 is not supported, see [compatibility](./overview#interleaved-renderer-compatibility).
-- `_renderLayersInGroups` (boolean, _experimental_) In interleaved mode, render layers in batches to enable cross-layer extension handling. Default is `false`.
 
-When using `interleaved: true`, you may control the ordering of layers in the Mapbox/MapLibre stack by optionally add a `beforeId` prop to a layer. If multiple deck.gl layers have the same `beforeId`, they are rendered in the order that is passed into the `layers` array. If used with Mapbox v3 Standard Style, supply a [slot](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to layers instead.
+When using `interleaved: true`, deck.gl layers are grouped by their `beforeId` or `slot` prop and rendered in batches. You may control the ordering of layers in the Mapbox/MapLibre stack by optionally adding a `beforeId` prop to a layer. If multiple deck.gl layers have the same `beforeId`, they are rendered together in the order that is passed into the `layers` array, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension). If used with Mapbox v3 Standard Style, supply a [slot](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to layers instead.
+
+Note that extensions which require layers to share a rendering context (such as MaskExtension and CollisionFilterExtension) only work between layers within the same group. Ensure that layers using these extensions share the same `beforeId` or `slot` value.
 
 ## Methods
 

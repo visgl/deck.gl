@@ -35,7 +35,6 @@ export function mount(container: HTMLElement, config: Config): () => void {
 
   const overlayConfig: any = {
     interleaved,
-    _renderLayersInGroups: batched,
     layers
   };
 
