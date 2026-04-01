@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, UniformTypes} from '@luma.gl/shadertools';
 import type {DataFilterExtensionOptions, DataFilterExtensionProps} from './data-filter-extension';
-
-type UniformFormat = 'i32' | 'vec4<f32>' | 'vec4<u32>';
 
 /*
  * data filter shader module
@@ -231,6 +229,22 @@ export type DataFilterModuleProps = {
   categoryBitMask?: CategoryBitMask;
 } & DataFilterExtensionProps;
 
+type DataFilterUniformTypeMap = Required<
+  UniformTypes<{
+    useSoftMargin: boolean;
+    enabled: boolean;
+    transformSize: boolean;
+    transformColor: boolean;
+    min: [number, number, number, number];
+    softMin: [number, number, number, number];
+    softMax: [number, number, number, number];
+    max: [number, number, number, number];
+    min64High: [number, number, number, number];
+    max64High: [number, number, number, number];
+    categoryBitMask: [number, number, number, number];
+  }>
+>;
+
 /* eslint-disable camelcase */
 function getUniforms(opts?: DataFilterModuleProps | {}): Record<string, any> {
   if (!opts || !('extensions' in opts)) {
@@ -331,9 +345,9 @@ const inject = {
   `
 };
 
-type UniformTypesFunc = (opts: DataFilterExtensionOptions) => any;
-function uniformTypesFromOptions(opts: DataFilterExtensionOptions): any {
-  const uniformTypes: Record<string, UniformFormat> = {
+type UniformTypesFunc = (opts: DataFilterExtensionOptions) => DataFilterUniformTypeMap;
+function uniformTypesFromOptions(opts: DataFilterExtensionOptions): DataFilterUniformTypeMap {
+  const uniformTypes: DataFilterUniformTypeMap = {
     useSoftMargin: 'i32',
     enabled: 'i32',
     transformSize: 'i32',
