@@ -6,9 +6,21 @@
 /* global console */
 import {test, expect, describe, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
+import {getNullTestDevice, getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import {Buffer} from '@luma.gl/core';
+
+async function getWebGPUAttributeTestDevice() {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (webgpuDevice) {
+    return webgpuDevice;
+  }
+
+  const nullDevice = await getNullTestDevice();
+  nullDevice.type = 'webgpu';
+  return nullDevice;
+}
 
 test('Attribute#imports', () => {
   expect(typeof Attribute, 'Attribute import successful').toBe('function');
@@ -163,6 +175,34 @@ test('Attribute#setConstantValue', () => {
 
   attribute.setConstantValue(this, [255, 255, 0]);
   expect(attribute.getValue().colors, 'constant value is normalized').toEqual([1, 1, 0]);
+});
+
+test('Attribute#setConstantBufferValue - webgpu', async () => {
+  const webgpuDevice = await getWebGPUAttributeTestDevice();
+  const attribute = new Attribute(webgpuDevice, {
+    id: 'positions',
+    size: 3,
+    accessor: 'getPosition'
+  });
+
+  attribute.numInstances = 2;
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant materializes a buffer').toBe(
+    true
+  );
+
+  expect(attribute.state.constant, 'webgpu constant is materialized as a buffer').toBeFalsy();
+  expect(attribute.value, 'repeated attribute value is generated').toEqual([1, 2, 3, 1, 2, 3]);
+  expect(
+    attribute.getValue().positions instanceof Buffer,
+    'webgpu constant is exposed as a buffer'
+  ).toBeTruthy();
+
+  expect(
+    attribute.setConstantValue(this, [1, 2, 3]),
+    'same emulated constant does not regenerate the buffer'
+  ).toBe(false);
+
+  attribute.delete();
 });
 
 test('Attribute#allocate - partial', async () => {
