@@ -26,7 +26,7 @@ const TRACE_ATTRIBUTE_UPDATE_START = 'attribute.updateStart';
 const TRACE_ATTRIBUTE_ALLOCATE = 'attribute.allocate';
 const TRACE_ATTRIBUTE_UPDATE_END = 'attribute.updateEnd';
 
-/** Logical attributes that should be published through the same WebGPU vertex buffer. */
+/** Logical attributes that should be published through the same shared vertex buffer. */
 type PackedBufferGroup = {
   id: string;
   attributes: Attribute[];
@@ -47,6 +47,12 @@ type PackedBufferGroupLayout = {
   attributeOffsets: Record<string, number>;
   attributeNames: string[];
   layout: BufferLayout;
+};
+
+/** Cached shared buffer plus the packed layout used to populate it. */
+type PackedBufferGroupState = {
+  buffer: Buffer;
+  layout: PackedBufferGroupLayout;
 };
 
 export default class AttributeManager {
@@ -84,7 +90,7 @@ export default class AttributeManager {
   private attributeTransitionManager: AttributeTransitionManager;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
   /** Reusable shared GPU buffers keyed by `AttributeOptions.bufferGroup`. */
-  private packedBuffers: Record<string, Buffer>;
+  private packedBuffers: Record<string, PackedBufferGroupState>;
 
   constructor(
     device: Device,
@@ -123,8 +129,8 @@ export default class AttributeManager {
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].delete();
     }
-    for (const buffer of Object.values(this.packedBuffers)) {
-      buffer.delete();
+    for (const state of Object.values(this.packedBuffers)) {
+      state.buffer.delete();
     }
     this.attributeTransitionManager.finalize();
   }
@@ -325,7 +331,7 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  /** Generate WebGPU-style buffer layout descriptors from all attributes */
+  /** Generate backend-neutral buffer layout descriptors from all attributes. */
   getBufferLayouts(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {
@@ -355,12 +361,19 @@ export default class AttributeManager {
   }
 
   /**
-   * Returns `true` if the attribute will be published via a packed WebGPU
+   * Returns `true` if the attribute will be published via a packed shared
    * buffer instead of its own standalone GPU buffer.
    */
   isPackedAttribute(attribute: Attribute): boolean {
     const groupId = this._getPackedBufferGroupId(attribute);
     return Boolean(groupId && this._getPackedBufferGroups([attribute])[groupId]);
+  }
+
+  /** Returns `true` if any current attribute participates in a packed buffer group. */
+  hasPackedBufferGroups(): boolean {
+    return Boolean(
+      Object.keys(this._getPackedBufferGroups(Object.values(this.getAttributes()))).length
+    );
   }
 
   /**
@@ -382,7 +395,7 @@ export default class AttributeManager {
     for (const groupId of touchedGroupIds) {
       const group = packedGroups[groupId];
       const layout = this._getPackedBufferGroupLayout(group);
-      const buffer = this._updatePackedBufferGroup(group, layout);
+      const buffer = this._updatePackedBufferGroup(group, layout, changedAttributes);
       for (const attributeName of layout.attributeNames) {
         packedAttributes[attributeName] = buffer;
       }
@@ -455,10 +468,10 @@ export default class AttributeManager {
   /** Returns the opted-in packed-buffer group id, or `null` if packing is unsupported. */
   private _getPackedBufferGroupId(attribute: Attribute): string | null {
     if (
-      this.device.type !== 'webgpu' ||
       !attribute.settings.bufferGroup ||
       attribute.settings.isIndexed ||
-      attribute.doublePrecision
+      attribute.doublePrecision ||
+      (this.device.type !== 'webgpu' && attribute.isConstant)
     ) {
       return null;
     }
@@ -615,9 +628,13 @@ export default class AttributeManager {
   /** Allocates or reuses the shared GPU buffer for a group and uploads the packed contents. */
   private _updatePackedBufferGroup(
     group: PackedBufferGroup,
-    layout: PackedBufferGroupLayout
+    layout: PackedBufferGroupLayout,
+    changedAttributes: {[id: string]: Attribute}
   ): Buffer {
-    let buffer = this.packedBuffers[group.id];
+    let state: PackedBufferGroupState | undefined = this.packedBuffers[group.id];
+    let buffer = state?.buffer;
+    const layoutChanged = !state || !this._packedBufferGroupLayoutEquals(state.layout, layout);
+
     if (!buffer || buffer.byteLength < layout.byteLength) {
       buffer?.delete();
       buffer = this.device.createBuffer({
@@ -625,21 +642,69 @@ export default class AttributeManager {
         usage: Buffer.VERTEX | Buffer.COPY_DST,
         byteLength: layout.byteLength
       });
-      this.packedBuffers[group.id] = buffer;
+      state = undefined;
     }
 
-    const packed = new Uint8Array(layout.byteLength);
-    for (const attribute of group.attributes) {
-      this._writePackedAttribute(
-        packed,
-        attribute,
-        layout.byteStride,
-        layout.attributeOffsets[attribute.id]
-      );
+    if (!state || layoutChanged) {
+      const packed = new Uint8Array(layout.byteLength);
+      for (const attribute of group.attributes) {
+        this._writePackedAttribute(
+          packed,
+          attribute,
+          layout.byteStride,
+          layout.attributeOffsets[attribute.id]
+        );
+      }
+      buffer.write(packed, 0);
+    } else {
+      for (const attribute of group.attributes) {
+        if (!changedAttributes[attribute.id]) {
+          continue;
+        }
+        buffer.write(
+          this._getPackedAttributeData(attribute, layout.byteStride),
+          layout.attributeOffsets[attribute.id]
+        );
+      }
     }
 
-    buffer.write(packed, 0);
+    this.packedBuffers[group.id] = {buffer, layout};
     return buffer;
+  }
+
+  /** Returns one logical attribute's packed byte range inside a shared buffer. */
+  private _getPackedAttributeData(attribute: Attribute, byteStride: number): Uint8Array {
+    const accessor = attribute.getAccessor();
+    const sourceStride = getStride(accessor);
+    const instanceCount = Math.max(attribute.numInstances, attribute.isConstant ? 1 : 0);
+    const byteLength = byteStride * instanceCount;
+    const target = new Uint8Array(byteLength);
+    // CPU-side attribute values retain their original standalone layout. When repacking for
+    // a shared GPU buffer, we copy each logical vertex record from that source layout into the
+    // assigned region in the shared buffer, spaced by the group's shared `byteStride`.
+    const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
+
+    if (attribute.isConstant) {
+      const value = attribute.value as TypedArray;
+      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+      for (let i = 0; i < instanceCount; i++) {
+        target.set(bytes, i * byteStride);
+      }
+      return target;
+    }
+
+    const value = attribute.value as TypedArray | null;
+    if (!value) {
+      return target;
+    }
+
+    const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+    for (let i = 0; i < attribute.numInstances; i++) {
+      const srcStart = sourceOffset + i * sourceStride;
+      target.set(bytes.subarray(srcStart, srcStart + sourceStride), i * byteStride);
+    }
+
+    return target;
   }
 
   /** Copies one logical attribute's CPU-side value into its assigned region in the shared buffer payload. */
@@ -649,32 +714,34 @@ export default class AttributeManager {
     byteStride: number,
     byteOffset: number
   ) {
-    const accessor = attribute.getAccessor();
-    const sourceStride = getStride(accessor);
-    // CPU-side attribute values retain their original standalone layout. When repacking for
-    // WebGPU, we copy each logical vertex record from that source layout into the attribute's
-    // assigned region in the shared buffer, spaced by the group's shared `byteStride`.
-    const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
+    target.set(this._getPackedAttributeData(attribute, byteStride), byteOffset);
+  }
 
-    if (attribute.isConstant) {
-      const value = attribute.value as TypedArray;
-      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-      for (let i = 0; i < Math.max(attribute.numInstances, 1); i++) {
-        target.set(bytes, byteOffset + i * byteStride);
+  /** Compares two derived packed-buffer layouts to decide whether the shared buffer must be rebuilt. */
+  private _packedBufferGroupLayoutEquals(
+    a: PackedBufferGroupLayout,
+    b: PackedBufferGroupLayout
+  ): boolean {
+    if (
+      a.byteStride !== b.byteStride ||
+      a.byteLength !== b.byteLength ||
+      a.stepMode !== b.stepMode ||
+      a.attributeNames.length !== b.attributeNames.length
+    ) {
+      return false;
+    }
+
+    for (let i = 0; i < a.attributeNames.length; i++) {
+      const attributeName = a.attributeNames[i];
+      if (
+        attributeName !== b.attributeNames[i] ||
+        a.attributeOffsets[attributeName] !== b.attributeOffsets[attributeName]
+      ) {
+        return false;
       }
-      return;
     }
 
-    const value = attribute.value as TypedArray | null;
-    if (!value) {
-      return;
-    }
-
-    const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-    for (let i = 0; i < attribute.numInstances; i++) {
-      const srcStart = sourceOffset + i * sourceStride;
-      target.set(bytes.subarray(srcStart, srcStart + sourceStride), byteOffset + i * byteStride);
-    }
+    return true;
   }
 
   private _updateAttribute(opts: {

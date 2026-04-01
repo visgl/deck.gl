@@ -762,19 +762,23 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
-    if (bufferLayoutChanged) {
-      // AttributeManager is always defined when this method is called
-      const attributeManager = this.getAttributeManager()!;
-      model.setBufferLayout(attributeManager.getBufferLayouts(model));
-      // All attributes must be reset after buffer layout change
-      changedAttributes = attributeManager.getAttributes();
+    const attributeManager = this.getAttributeManager();
+    const hasPackedBufferGroups = attributeManager?.hasPackedBufferGroups() || false;
+
+    if (bufferLayoutChanged || hasPackedBufferGroups) {
+      // AttributeManager is always defined when this method is called.
+      // Packed groups can change byte offsets when instance counts or constant-vs-buffer state
+      // changes, so their buffer layout must be refreshed before rebinding attributes.
+      const manager = attributeManager!;
+      model.setBufferLayout(manager.getBufferLayouts(model));
+      // All attributes must be reset after buffer layout change.
+      changedAttributes = manager.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
     const excludeAttributes = model.userData?.excludeAttributes || {};
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
-    const attributeManager = this.getAttributeManager();
     const packedAttributes = attributeManager?.getPackedBufferAttributes(changedAttributes) || {};
 
     for (const name in changedAttributes) {

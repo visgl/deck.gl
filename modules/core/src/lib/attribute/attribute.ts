@@ -48,15 +48,16 @@ export type Updater = (
 /**
  * Attribute configuration used by {@link AttributeManager}.
  *
- * `bufferGroup` and `bufferGroupOrder` opt an attribute into WebGPU packed-buffer
+ * `bufferGroup` and `bufferGroupOrder` opt an attribute into packed-buffer
  * publishing. Attributes in the same group keep independent CPU-side values and
- * update logic, but share a single GPU vertex buffer.
+ * update logic, but share a single GPU vertex buffer when the backend and
+ * attribute state support packing.
  */
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
-  /** Identifier of a WebGPU packed-buffer group. Attributes with the same group id share one GPU buffer. */
+  /** Identifier of a packed-buffer group. Attributes with the same group id share one GPU buffer. */
   bufferGroup?: string;
   /** Stable ordering of attributes inside a packed-buffer group. */
   bufferGroupOrder?: number;
@@ -283,29 +284,74 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Use generic value
   // Returns true if successful
   setConstantValue(context: any, value?: any): boolean {
-    // TODO(ibgreen): WebGPU does not support constant values,
-    // they will be emulated as buffers instead for now.
-    const isWebGPU = this.device.type === 'webgpu';
-    if (isWebGPU || value === undefined || typeof value === 'function') {
-      if (isWebGPU && typeof value !== 'function') {
-        const normalisedValue = this._normalizeValue(value, [], 0);
-        // ensure we trigger an update for the attribute's emulated buffer
-        // where webgl would perform the update here
-        if (!this._areValuesEqual(normalisedValue, this.value)) {
-          this.setNeedsUpdate('WebGPU constant updated');
-        }
-      }
+    if (value === undefined || typeof value === 'function') {
       return false;
     }
 
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+
+    if (this.device.type === 'webgpu') {
+      return this.setConstantBufferValue(transformedValue, this.numInstances);
+    }
+
     const hasChanged = this.setData({constant: true, value: transformedValue});
 
     if (hasChanged) {
       this.setNeedsRedraw();
     }
     this.clearNeedsUpdate();
+    return true;
+  }
+
+  /** Expands a constant attribute value into a regular per-instance buffer. */
+  setConstantBufferValue(value: any, numInstances: number): boolean {
+    const ArrayType = this.settings.defaultType;
+    const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
+    if (this._hasConstantBufferValue(constantValue, numInstances)) {
+      this.constant = false;
+      this.clearNeedsUpdate();
+      return false;
+    }
+
+    const repeatedValue = new ArrayType(Math.max(numInstances, 1) * this.size);
+
+    for (let i = 0; i < repeatedValue.length; i += this.size) {
+      repeatedValue.set(constantValue, i);
+    }
+
+    const hasChanged = this.setData({value: repeatedValue});
+    this.constant = false;
+    this.clearNeedsUpdate();
+
+    if (hasChanged) {
+      this.setNeedsRedraw();
+    }
+
+    return hasChanged;
+  }
+
+  /** Returns `true` if the current buffer-backed value already matches the supplied constant. */
+  private _hasConstantBufferValue(value: NumericArray, numInstances: number): boolean {
+    const currentValue = this.value;
+    const expectedLength = Math.max(numInstances, 1) * this.size;
+
+    if (
+      !ArrayBuffer.isView(currentValue) ||
+      currentValue.length !== expectedLength ||
+      currentValue.length % this.size !== 0
+    ) {
+      return false;
+    }
+
+    for (let i = 0; i < currentValue.length; i += this.size) {
+      for (let j = 0; j < this.size; j++) {
+        if (currentValue[i + j] !== value[j]) {
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 

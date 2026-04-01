@@ -4,7 +4,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 
 function createWebGPUDevice() {
@@ -479,6 +479,172 @@ test('AttributeManager.getBufferLayouts - packed buffers', () => {
   );
   expect(packedAttributes.instanceAngles, 'group publishes all attribute names').toBe(
     packedAttributes.instanceColors
+  );
+});
+
+test('AttributeManager.getBufferLayouts - packed buffers on WebGL', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 1
+    },
+    instanceColors: {
+      size: 4,
+      type: 'unorm8',
+      accessor: 'getColor',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 2
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 10, color: [255, 0, 0, 255]},
+      {size: 2, angle: 20, color: [0, 255, 0, 255]}
+    ],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle,
+      getColor: x => x.color
+    }
+  });
+
+  expect(attributeManager.getBufferLayouts()).toEqual([
+    {
+      name: 'group-a',
+      byteStride: 4,
+      attributes: [
+        {attribute: 'instanceSizes', format: 'float32', byteOffset: 0},
+        {attribute: 'instanceAngles', format: 'float32', byteOffset: 16},
+        {attribute: 'instanceColors', format: 'unorm8x4', byteOffset: 32}
+      ],
+      stepMode: 'instance'
+    }
+  ]);
+
+  const packedAttributes = attributeManager.getPackedBufferAttributes(
+    attributeManager.getAttributes()
+  );
+  expect(packedAttributes.instanceSizes, 'webgl group publishes packed buffer').toBe(
+    packedAttributes.instanceColors
+  );
+  expect(packedAttributes.instanceAngles, 'webgl group publishes all attribute names').toBe(
+    packedAttributes.instanceColors
+  );
+});
+
+test('AttributeManager.getBufferLayouts - WebGL constants stay out of packed buffers', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 1
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [{angle: 10}, {angle: 20}],
+    props: {
+      getSize: 3,
+      getAngle: x => x.angle
+    }
+  });
+
+  expect(attributeManager.getAttributes().instanceSizes.isConstant).toBe(true);
+  expect(attributeManager.isPackedAttribute(attributeManager.getAttributes().instanceSizes)).toBe(
+    false
+  );
+  expect(attributeManager.getBufferLayouts()).toEqual([
+    {
+      name: 'instanceSizes',
+      attributes: [{attribute: 'instanceSizes', format: 'float32', byteOffset: 0}],
+      byteStride: 4,
+      stepMode: 'instance'
+    },
+    {
+      name: 'group-a',
+      byteStride: 4,
+      attributes: [{attribute: 'instanceAngles', format: 'float32', byteOffset: 0}],
+      stepMode: 'instance'
+    }
+  ]);
+});
+
+test('AttributeManager.getPackedBufferAttributes - only rewrites changed attributes when layout is stable', () => {
+  const webgpuDevice = createWebGPUDevice();
+  const attributeManager = new AttributeManager(webgpuDevice);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 0
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a',
+      bufferGroupOrder: 1
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 10},
+      {size: 2, angle: 20}
+    ],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle
+    }
+  });
+
+  const packedAttributes = attributeManager.getPackedBufferAttributes(
+    attributeManager.getAttributes()
+  );
+  const writeSpy = vi.spyOn(packedAttributes.instanceSizes, 'write');
+
+  attributeManager.invalidate('getAngle');
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 30},
+      {size: 2, angle: 40}
+    ],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle
+    }
+  });
+
+  const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+  attributeManager.getPackedBufferAttributes({instanceAngles: changedAttributes.instanceAngles});
+
+  expect(writeSpy, 'stable packed layouts rewrite only the changed attribute').toHaveBeenCalledTimes(
+    1
   );
 });
 
