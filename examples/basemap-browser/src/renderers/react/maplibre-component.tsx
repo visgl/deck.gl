@@ -26,7 +26,6 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
     initialViewState,
     layers,
     interleaved,
-    batched,
     globe,
     multiView,
     views,
@@ -59,7 +58,7 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapLibreMap
-        key={`maplibre-${interleaved}-${batched}-${globe}-${multiView}`}
+        key={`maplibre-${interleaved}-${globe}-${multiView}`}
         mapStyle={mapStyle}
         initialViewState={mapInitialViewState}
         onLoad={e => {

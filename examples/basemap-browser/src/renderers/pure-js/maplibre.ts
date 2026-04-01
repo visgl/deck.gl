@@ -13,7 +13,6 @@ export function mount(container: HTMLElement, config: Config): () => void {
     initialViewState,
     layers,
     interleaved,
-    batched,
     globe,
     multiView,
     views,
