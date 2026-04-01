@@ -41,6 +41,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `dragPan`: default `true` (supported only from v9.0)
 - `keyboard`: arrow keys to move camera, arrow keys with shift/ctrl down to rotate, +/- to move vertically
 - `scrollZoom`: scroll to move in direction of mouse pointer, in horizontal 2D plane
+- `maxBounds` - constrains the camera position within the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 
 
 ## Custom FirstPersonController

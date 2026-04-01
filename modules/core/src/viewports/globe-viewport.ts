@@ -13,7 +13,7 @@ import {vec3, vec4} from '@math.gl/core';
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const EARTH_RADIUS = 6370972;
-const GLOBE_RADIUS = 256;
+export const GLOBE_RADIUS = 256;
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;

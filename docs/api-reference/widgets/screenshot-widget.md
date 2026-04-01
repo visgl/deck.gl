@@ -1,9 +1,12 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {ScreenshotWidget} from '@deck.gl/widgets';
-
 # ScreenshotWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {ScreenshotWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ScreenshotWidgetDemo />
 
 This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
 
@@ -12,18 +15,64 @@ Only the deck.gl canvas is captured, not other HTML DOM element underneath or on
 It is possible to use `props.onCapture` to integrate with more advanced screen capture modules such as [html2canvas](https://html2canvas.hertzen.com/)
 :::
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-<WidgetPreview cls={ScreenshotWidget}/>
+```js
+import {ScreenshotWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new ScreenshotWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {ScreenshotWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
-  widgets: [new ScreenshotWidget()]
+  widgets: [
+    new ScreenshotWidget({placement: 'top-left'})
+  ]
 });
 ```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_ScreenshotWidget as ScreenshotWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <ScreenshotWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ScreenshotWidget, type ScreenshotWidgetProps} from '@deck.gl/widgets';
+new ScreenshotWidget({} satisfies ScreenshotWidgetProps);
+```
+
+## Types
 
 ### `ScreenshotWidgetProps` {#screenshotwidgetprops}
 
@@ -59,7 +108,7 @@ Allows the application to define its own capture logic, perhaps to integrate a m
 
 ## Styles
 
-Learn more about how to replace icons in the [styling guide](/docs/api-reference/widgets/styling#replacing-icons).
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
 
 | Name            | Type                     | Default                                         |
 | --------------- | ------------------------ | ----------------------------------------------- |

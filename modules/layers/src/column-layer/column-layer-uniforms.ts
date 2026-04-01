@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform columnUniforms {
+layout(std140) uniform columnUniforms {
   float radius;
   float angle;
   vec2 offset;

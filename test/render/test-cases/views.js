@@ -13,6 +13,7 @@ import {
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLoader} from '@loaders.gl/mvt';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';
@@ -113,7 +114,7 @@ export default [
         }),
         new MVTLayer({
           id,
-          data: ['./test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+          data: ['/test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
           maxZoom: 3,
           minZoom: 3,
           extent: [-180, -80, 180, 80],
@@ -124,9 +125,10 @@ export default [
           },
           lineWidthMinPixels: 1,
           binary,
+          loaders: [MVTLoader],
           loadOptions: {
-            mvt: {
-              workerUrl: null
+            core: {
+              worker: false
             }
           }
         })

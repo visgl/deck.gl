@@ -3,24 +3,48 @@
 
 <img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
+import {ScrollbarWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<ScrollbarWidgetDemo />
+
 This widget renders a scrollbar UI that mimics the native HTML scrolling behavior. It works with the [OrthographicView](../core/orthographic-view.md) to create a "scrollable" canvas of arbitrary size.
 
-## Usage
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-```ts
+```js
 import {Deck, OrthographicView} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {ScrollbarWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+const data = Array.from({length: 1000}, (_, i) => [i * 100, 0]);
 
 new Deck({
-  views: new OrthographicView(),
+  views: new OrthographicView({'ortho'}),
+  controller: {scrollZoom: false},
+  initialViewState: {
+    target: [0, 0, 0],
+    zoom: 0
+  },
+  layers: [
+    new ScatterplotLayer({
+      id: 'points',
+      data,
+      getPosition: d => d,
+      getRadius: 20,
+      getFillColor: [200, 0, 80]
+    })
+  ],
   widgets: [
     new ScrollbarWidget({
-      viewId: 'ortho-view',
+      viewId: 'ortho',
       contentBounds: [
-        [0, 0, 0],
-        [100000, 100, 0]
+        [-100, 0, 0],
+        [100 * 1001, 0, 0]
       ],
-      placement: 'bottom-right',
       orientation: 'horizontal',
       captureWheel: true
     })
@@ -28,9 +52,109 @@ new Deck({
 });
 ```
 
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, OrthographicView} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {ScrollbarWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+type Point = [x: number, y: number];
+
+const data = Array.from({length: 1000}, (_, i) => [i * 100, 0] as Point);
+
+new Deck({
+  views: new OrthographicView({'ortho'}),
+  controller: {scrollZoom: false},
+  initialViewState: {
+    target: [0, 0, 0],
+    zoom: 0
+  },
+  layers: [
+    new ScatterplotLayer<Point>({
+      id: 'points',
+      data,
+      getPosition: d => d,
+      getRadius: 20,
+      getFillColor: [200, 0, 80]
+    })
+  ],
+  widgets: [
+    new ScrollbarWidget({
+      viewId: 'ortho',
+      contentBounds: [
+        [-100, 0, 0],
+        [100 * 1001, 0, 0]
+      ],
+      orientation: 'horizontal',
+      captureWheel: true
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {ScrollbarWidget} from '@deck.gl/react';
+import {OrthographicView} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
+
+type Point = [x: number, y: number];
+
+const data = Array.from({length: 1000}, (_, i) => [i * 100, 0] as Point);
+
+function App() {
+  return (
+    <DeckGL
+      views={new OrthographicView({'ortho'})}
+      controller={{scrollZoom: false}}
+      initialViewState={{
+        target: [0, 0, 0],
+        zoom: 0
+      }}
+      layers={[
+        new ScatterplotLayer<Point>({
+          id: 'points',
+          data,
+          getPosition: d => d,
+          getRadius: 20,
+          getFillColor: [200, 0, 80]
+        })
+      ]}
+    >
+      <ScrollbarWidget
+        viewId="ortho"
+        contentBounds={[
+          [-100, 0, 0],
+          [100 * 1001, 0, 0]
+        ]}
+        orientation="horizontal"
+        captureWheel
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ScrollbarWidget, type ScrollbarWidgetProps} from '@deck.gl/widgets';
+new ScrollbarWidget({} satisfies ScrollbarWidgetProps);
+```
+
 ## Types
 
-### `ScrollbarWidgetProps`
+### `ScrollbarWidgetProps` {#scrollbarwidgetprops}
 
 The `ScrollbarWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {
   COORDINATE_SYSTEM,
@@ -22,7 +22,9 @@ import {
   testUniforms,
   verifyGPUResult
 } from './project-glsl-test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 const PIXEL_TOLERANCE = 1e-4;
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
@@ -324,34 +326,35 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project#vs', async t => {
+webglTest('project#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
-  for (const testCase of TEST_CASES) {
-    t.comment(testCase.title);
+  try {
+    for (const testCase of TEST_CASES) {
+      console.log(testCase.title);
 
-    for (const {name, vs, testProps, output, precision = 1e-7} of testCase.tests) {
-      config.EPSILON = precision;
-      let actual: NumericArray = await runOnGPU({
-        vs,
-        varying: 'outValue',
-        modules: [project, testUniforms],
-        vertexCount: 1,
-        shaderInputProps: {
-          project: testCase.projectProps,
-          test: testProps
-        }
-      });
+      for (const {name, vs, testProps, output, precision = 1e-7} of testCase.tests) {
+        config.EPSILON = precision;
+        let actual: NumericArray = await runOnGPU({
+          vs,
+          varying: 'outValue',
+          modules: [project, testUniforms],
+          vertexCount: 1,
+          shaderInputProps: {
+            project: testCase.projectProps,
+            test: testProps
+          }
+        });
 
-      t.is(verifyGPUResult(actual, output), true, name);
+        expect(verifyGPUResult(actual, output), name).toBe(true);
+      }
     }
+  } finally {
+    config.EPSILON = oldEpsilon;
   }
-
-  config.EPSILON = oldEpsilon;
-  t.end();
 });
 
-test('project#vs#project_get_orientation_matrix', async t => {
+webglTest('project#vs#project_get_orientation_matrix', async () => {
   const vs = `\
 #version 300 es
 
@@ -361,7 +364,7 @@ void main() {
   mat3 transform = project_get_orientation_matrix(test.uDirUp);
   outValue = transform * test.uInput;
 }
-  `;
+`;
   const runTransform = async (up: NumericArray, v: NumericArray): Promise<Vector3> => {
     const result = await runOnGPU({
       vs,
@@ -393,20 +396,24 @@ void main() {
     const up = matrix.transformAsVector([0, 0, 1]);
 
     const transformedUp = await runTransform(up, [0, 0, 1]);
-    t.comment(`actual=${transformedUp}`);
-    t.comment(`expected=${up}`);
-    t.ok(equals(transformedUp, up, 1e-7), 'Transformed up as expected');
+    console.log(`actual=${transformedUp}`);
+    console.log(`expected=${up}`);
+    expect(equals(transformedUp, up, 1e-7), 'Transformed up as expected').toBeTruthy();
 
     const transformedA = await runTransform(up, vectorA);
-    t.ok(equals(transformedA.length, vectorA.length, 1e-7), 'Vector length is preserved');
+    expect(
+      equals(transformedA.length, vectorA.length, 1e-7),
+      'Vector length is preserved'
+    ).toBeTruthy();
     const transformedB = await runTransform(up, vectorB);
-    t.ok(equals(transformedB.length, vectorB.length, 1e-7), 'Vector length is preserved');
+    expect(
+      equals(transformedB.length, vectorB.length, 1e-7),
+      'Vector length is preserved'
+    ).toBeTruthy();
 
-    t.ok(
+    expect(
       equals(transformedA.normalize().dot(transformedB.normalize()), angleAB, 1e-7),
       'Angle between vectors is preserved'
-    );
+    ).toBeTruthy();
   }
-
-  t.end();
 });

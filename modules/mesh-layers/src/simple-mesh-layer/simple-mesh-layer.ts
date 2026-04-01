@@ -6,11 +6,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, DefaultProps, log, LayerContext, Material} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  picking,
+  DefaultProps,
+  log,
+  LayerContext,
+  Material,
+  phongMaterial
+} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
-import {phongMaterial} from '@luma.gl/shadertools';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 

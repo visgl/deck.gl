@@ -136,7 +136,11 @@ export default class Map extends Evented {
   }
 
   _render() {
-    this.style.render();
+    try {
+      this.style.render();
+    } catch (e) {
+      this._renderError = e;
+    }
     this.fire(new Event('render'));
   }
 

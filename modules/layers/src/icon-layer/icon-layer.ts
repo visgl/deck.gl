@@ -26,7 +26,6 @@ import type {
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
-import {Parameters} from '@luma.gl/core';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -289,13 +288,6 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
-    const parameters =
-      this.context.device.type === 'webgpu'
-        ? ({
-            depthWriteEnabled: true,
-            depthCompare: 'less-equal'
-          } satisfies Parameters)
-        : undefined;
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -315,8 +307,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         }
       }),
-      isInstanced: true,
-      parameters
+      isInstanced: true
     });
   }
 

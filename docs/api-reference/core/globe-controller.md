@@ -41,6 +41,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `dragRotate`: not effective, this view does not currently support rotation
 - `touchRotate`: not effective, this view does not currently support rotation
 - `keyboard`: arrow keys to pan, +/- to zoom
+- `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 
 ## Custom GlobeController
 
