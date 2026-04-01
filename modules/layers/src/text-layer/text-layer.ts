@@ -13,7 +13,7 @@ import {transformParagraph, getTextFromBuffer} from './utils';
 import TextBackgroundLayer from './text-background-layer/text-background-layer';
 import type {ContentAlignModes} from './text-uniforms';
 
-import type {FontSettings} from './font-atlas-manager';
+import type {FontSettings, FontRenderer} from './font-atlas-manager';
 import type {
   LayerProps,
   LayerDataSource,
@@ -212,6 +212,12 @@ type _TextLayerProps<DataT> = {
    * @default 'none'
    */
   contentAlignVertical?: ContentAlignModes;
+
+  /**
+   * Experimental.
+   * Custom font rendering methods.
+   */
+  _getFontRenderer?: (settings: Required<FontSettings>) => FontRenderer;
 };
 
 export type TextLayerProps<DataT = unknown> = _TextLayerProps<DataT> & LayerProps;
@@ -417,13 +423,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   ): ReturnType<typeof transformParagraph> {
     const {fontAtlasManager} = this.state;
     const iconMapping = fontAtlasManager.mapping!;
+    const {fontSize} = fontAtlasManager.props;
     const getText = this.state.getText!;
     const {wordBreak, lineHeight, maxWidth} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
     return transformParagraph(
       paragraph,
-      lineHeight,
+      lineHeight * fontSize,
       wordBreak,
       maxWidth * fontAtlasManager.props.fontSize,
       iconMapping
@@ -440,9 +447,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     let {
       size: [width, height]
     } = this.transformParagraph(object, objectInfo);
-    const {fontSize} = this.state.fontAtlasManager.props;
-    width /= fontSize;
-    height /= fontSize;
 
     const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
@@ -471,6 +475,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       rowWidth,
       size: [width, height]
     } = this.transformParagraph(object, objectInfo);
+    const {baselineOffset} = this.state.fontAtlasManager.atlas!;
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -489,9 +494,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     for (let i = 0; i < numCharacters; i++) {
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
-      const rowOffset = ((1 - anchorX) * (width - rowWidth[i])) / 2;
-      offsets[index++] = ((anchorX - 1) * width) / 2 + rowOffset + x[i];
-      offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
+      offsets[index++] = ((anchorX - 1) * rowWidth[i]) / 2 + x[i];
+      offsets[index++] = (anchorY * height) / 2 + baselineOffset + y[i];
     }
     return offsets;
   };
@@ -501,7 +505,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, atlas, mapping},
+      fontAtlasManager: {atlas, mapping},
       styleVersion
     } = this.state;
 
@@ -537,6 +541,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
+    const {fontSize} = this.state.fontAtlasManager.props;
 
     return [
       background &&
@@ -560,6 +565,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,
+            fontSize,
 
             transitions: transitions && {
               getPosition: transitions.getPosition,
@@ -621,10 +627,11 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getContentBox,
 
           billboard,
-          sizeScale: sizeScale * scale,
+          sizeScale,
           sizeUnits,
-          sizeMinPixels: sizeMinPixels * scale,
-          sizeMaxPixels: sizeMaxPixels * scale,
+          sizeMinPixels,
+          sizeMaxPixels,
+          fontSize,
           contentCutoffPixels,
           contentAlignHorizontal,
           contentAlignVertical,

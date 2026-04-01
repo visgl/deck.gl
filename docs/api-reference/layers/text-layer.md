@@ -263,6 +263,28 @@ Options:
 * `cutoff` (number): How much of the radius (relative) is used for the inside part the glyph. Default is `0.25`. Bigger `cutoff` makes character thinner. Smaller `cutoff` makes character look thicker. Only applies when `sdf: true`.
 * `smoothing` (number): How much smoothing to apply to the text edges. Default `0.1`. Only applies when `sdf: true`.
 
+#### `_getFontRenderer` (function, optional) {#_getfontrenderer}
+
+**Experimental** - supplies a custom glyph renderer.
+
+```ts
+(settings: Required<FontSettings>) => FontRenderer
+```
+
+If provided, this callback is invoked with the resolved font settings and should return an object with:
+
+* `measure`: given a character, returns glyph metrics. The metrics are expected to contain the following fields:
+  - `advance` (number): horizontal distance to move the cursor before placing the next glyph, in pixels.
+  - `width` (number): width of the visible glyph bounds, in pixels.
+  - `ascent` (number): distance from the baseline to the top of the glyph, in pixels.
+  - `descent` (number): distance from the baseline to the bottom of the glyph, in pixels.
+* `draw`: renders a character to glyph image.
+  - `data` ([ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData)): rasterized glyph pixels.
+  - `left` (number, optional): x offset from the glyph origin to the left edge of `data`, in pixels. Default `0`.
+  - `top` (number, optional): y offset from the glyph origin to the top edge of `data`, in pixels. Default `0`.
+
+This hook overrides the default glyph generation path, including the built-in SDF renderer used when `fontSettings.sdf` is enabled.
+
 #### `wordBreak` (string, optional) {#wordbreak}
 
 * Default: `break-word`
