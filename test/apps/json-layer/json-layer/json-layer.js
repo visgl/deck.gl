@@ -29,9 +29,11 @@ const defaultProps = {
 
 export default class JSONLayer extends CompositeLayer {
   initializeState() {
+    const configuration = new JSONConfiguration(DEFAULT_CONFIGURATION);
+    configuration.merge(this.props.configuration);
     this.state = {
       jsonConverter: new JSONConverter({
-        configuration: new JSONConfiguration(DEFAULT_CONFIGURATION, this.props.configuration)
+        configuration
       }),
       layers: []
     };

@@ -369,7 +369,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (!this.state.scenegraph) return;
 
     if (this.props._animations && this.state.animator) {
-      this.state.animator.animate(context.timeline.getTime());
+      this.state.animator.setTime(context.timeline.getTime());
       this.setNeedsRedraw();
     }
 

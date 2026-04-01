@@ -4,7 +4,7 @@
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import {test, expect} from 'vitest';
-import parseExpressionString from '@deck.gl/json/helpers/parse-expression-string';
+import {parseExpressionString} from '@deck.gl/json/helpers/parse-expression-string';
 
 const row = Object.freeze({
   foo: {
@@ -104,20 +104,17 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-const isAccessor = true;
-
 test('parseExpressionString', () => {
   for (const testCase of TEST_CASES) {
     const isErrorCase = Boolean(testCase.errorRegex);
     if (isErrorCase) {
-      expect(
-        () => parseExpressionString(testCase.expr, null, isAccessor),
-        `throws on ${testCase.expr}`
-      ).toThrow(testCase.errorRegex);
+      expect(() => parseExpressionString(testCase.expr), `throws on ${testCase.expr}`).toThrow(
+        testCase.errorRegex
+      );
       /* eslint-disable-next-line no-continue */
       continue;
     }
-    const func = parseExpressionString(testCase.expr, null, isAccessor);
+    const func = parseExpressionString(testCase.expr);
 
     expect(func, `parseExpressionString converted ${testCase.expr}`).toBeTruthy();
     expect(
@@ -126,7 +123,7 @@ test('parseExpressionString', () => {
     ).toEqual(testCase.expected);
   }
 
-  const func = parseExpressionString('-', null, isAccessor);
+  const func = parseExpressionString('-');
   expect(func('identity'), 'parseExpressionString of - returns a cached identity function').toEqual(
     'identity'
   );

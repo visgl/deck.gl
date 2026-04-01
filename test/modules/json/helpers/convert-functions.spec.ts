@@ -4,7 +4,10 @@
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import {test, expect} from 'vitest';
-import convertFunctions from '@deck.gl/json/helpers/convert-functions';
+import {JSONConfiguration} from '@deck.gl/json';
+import {convertFunctions} from '@deck.gl/json/helpers/convert-functions';
+
+const TEST_CONFIGURATION = new JSONConfiguration({constants: {}, functions: {}});
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
@@ -86,7 +89,7 @@ test('convertFunctions#asStrings', () => {
     // Add a mix of function and value props
     props[`value-{i}`] = testCase.expr;
   });
-  const convertedProps = convertFunctions(props, {});
+  const convertedProps = convertFunctions(props, TEST_CONFIGURATION);
   for (const key in convertedProps) {
     expect(
       typeof convertedProps[key] !== 'function',
@@ -100,7 +103,7 @@ test('convertFunctions#asFunctions', () => {
   TEST_CASES.forEach((testCase, i) => {
     props[`func-{i}`] = `@@=${testCase.expr}`;
   });
-  const convertedProps = convertFunctions(props, {});
+  const convertedProps = convertFunctions(props, TEST_CONFIGURATION);
   for (const key in convertedProps) {
     expect(
       typeof convertedProps[key] === 'function',
@@ -119,7 +122,7 @@ test('convertFunctions#assureAllKeysPresent', () => {
     opacity: 0.9
   };
 
-  const convertedProps = convertFunctions(EXAMPLE_PROPS, {});
+  const convertedProps = convertFunctions(EXAMPLE_PROPS, TEST_CONFIGURATION);
   for (const key in EXAMPLE_PROPS) {
     if (key !== 'getElevation') {
       expect(

@@ -5,16 +5,32 @@
 import {get} from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
-import {parse, eval as evaluate} from '../utils/expression-eval';
+import {parse, eval as evaluate} from '../expression-eval/expression-eval';
 
-const cachedExpressionMap = {
+/**
+ * Accessor function produced from a parsed JSON expression string.
+ */
+type AccessorFunction = (row: Record<string, unknown>) => unknown;
+
+/**
+ * Cache of compiled accessor expressions keyed by their original string form.
+ */
+const cachedExpressionMap: Record<string, AccessorFunction> = {
+  // Identity function
   '-': object => object
 };
 
-// Calculates an accessor function from a JSON string
-// '-' : x => x
-// 'a.b.c': x => x.a.b.c
-export default function parseExpressionString(propValue, configuration) {
+/**
+ * Generates an accessor function from a JSON string.
+ * `-` maps to the identity accessor and `a.b.c` maps to nested property access.
+ * @param propValue Expression string to compile.
+ * @param configuration Active conversion configuration.
+ * @returns A callable accessor compiled from the expression string.
+ */
+export function parseExpressionString(
+  propValue: string,
+  configuration?
+): (row: Record<string, unknown>) => unknown {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be omitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
@@ -47,7 +63,11 @@ export default function parseExpressionString(propValue, configuration) {
   return func;
 }
 
-// Helper function to search all nodes in AST returned by expressionEval
+/**
+ * Recursively visits nodes in an expression AST.
+ * @param node AST node or node array to traverse.
+ * @param visitor Callback invoked for each visited AST node.
+ */
 // eslint-disable-next-line complexity
 function traverse(node, visitor) {
   if (Array.isArray(node)) {

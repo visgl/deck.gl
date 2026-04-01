@@ -59,6 +59,8 @@ export function createTexture(
   });
   if (device.type === 'webgl') {
     texture.generateMipmapsWebGL();
+  } else if (device.type === 'webgpu') {
+    device.generateMipmapsWebGPU(texture);
   }
 
   // Track this texture

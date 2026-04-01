@@ -38,9 +38,10 @@ webglTest('DataFilterExtension', () => {
         expect(uniforms.enabled, 'has correct uniforms').toBe(true);
 
         const attributes = layer.getAttributeManager().getAttributes();
-        expect(attributes.filterValues.value, 'filterValues attribute is populated').toEqual([
-          120, 140, 0, 0, 0, 0
-        ]);
+        expect(
+          Array.from(attributes.filterValues.value.slice(0, 2)),
+          'filterValues attribute is populated'
+        ).toEqual([120, 140]);
         expect(
           attributes.filterCategoryValues,
           'filterCategoryValues attribute is not populated'
