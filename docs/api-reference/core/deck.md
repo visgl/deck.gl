@@ -842,7 +842,7 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 - `renderbufferMemory` - total GPU memory allocated for renderbuffers
 - `gpuMemory` - total allocated GPU memory
 
-Note that `gpuTime` and `gpuTimePerFrame` metrics are disabled by default for performance reasons. To enable the readings, set `deviceProps.debugGPUTime: true` in Deck's constructor:
+Note that `gpuTime` and `gpuTimePerFrame` metrics are automatically enabled when the `_onMetrics` callback is provided (assuming the device supports `timestamp-query`). They can also be enabled explicitly by setting `deviceProps.debugGPUTime: true` in Deck's constructor:
 
 ```ts
 new Deck({

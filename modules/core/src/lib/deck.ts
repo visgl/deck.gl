@@ -529,6 +529,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.animationLoop.start();
     }
 
+    // Enable GPU timing if _onMetrics was just added and the device is ready
+    if (props._onMetrics && this.device && !this.device._isDebugGPUTimeEnabled()) {
+      (this.device.props as any).debugGPUTime = true;
+      this.device._enableDebugGPUTime();
+    }
+
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
@@ -1273,6 +1279,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (!this.animationLoop) {
       // finalize() has been called
       return;
+    }
+
+    // Enable GPU timing when _onMetrics is set, so gpuTime/gpuTimePerFrame are reported.
+    // The AnimationLoop already called _enableDebugGPUTime() during init, but it's gated
+    // on device.props.debugGPUTime. Set the prop and retry if the user hasn't opted in.
+    if (this.props._onMetrics && !device._isDebugGPUTimeEnabled()) {
+      (device.props as any).debugGPUTime = true;
+      device._enableDebugGPUTime();
     }
 
     // if external context...
