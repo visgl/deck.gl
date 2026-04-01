@@ -229,21 +229,21 @@ export type DataFilterModuleProps = {
   categoryBitMask?: CategoryBitMask;
 } & DataFilterExtensionProps;
 
-type DataFilterUniformTypeMap = Required<
-  UniformTypes<{
-    useSoftMargin: boolean;
-    enabled: boolean;
-    transformSize: boolean;
-    transformColor: boolean;
-    min: [number, number, number, number];
-    softMin: [number, number, number, number];
-    softMax: [number, number, number, number];
-    max: [number, number, number, number];
-    min64High: [number, number, number, number];
-    max64High: [number, number, number, number];
-    categoryBitMask: [number, number, number, number];
-  }>
->;
+type DataFilterUniforms = {
+  useSoftMargin: boolean;
+  enabled: boolean;
+  transformSize: boolean;
+  transformColor: boolean;
+  min: [number, number, number, number];
+  softMin: [number, number, number, number];
+  softMax: [number, number, number, number];
+  max: [number, number, number, number];
+  min64High: [number, number, number, number];
+  max64High: [number, number, number, number];
+  categoryBitMask: [number, number, number, number];
+};
+
+type DataFilterUniformTypeMap = Required<UniformTypes<DataFilterUniforms>>;
 
 /* eslint-disable camelcase */
 function getUniforms(opts?: DataFilterModuleProps | {}): Record<string, any> {
@@ -364,7 +364,7 @@ function uniformTypesFromOptions(opts: DataFilterExtensionOptions): DataFilterUn
   return uniformTypes;
 }
 
-export const dataFilter: ShaderModule<DataFilterModuleProps> & {
+export const dataFilter: ShaderModule<DataFilterModuleProps, DataFilterUniforms> & {
   uniformTypesFromOptions: UniformTypesFunc;
 } = {
   name: 'dataFilter',
@@ -375,7 +375,7 @@ export const dataFilter: ShaderModule<DataFilterModuleProps> & {
   uniformTypesFromOptions
 };
 
-export const dataFilter64: ShaderModule<DataFilterModuleProps> & {
+export const dataFilter64: ShaderModule<DataFilterModuleProps, DataFilterUniforms> & {
   uniformTypesFromOptions: UniformTypesFunc;
 } = {
   name: 'dataFilter',
