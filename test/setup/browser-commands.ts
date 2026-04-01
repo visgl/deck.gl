@@ -38,9 +38,123 @@ interface DiffResult {
   error: string | null;
 }
 
+interface BrowserDiagnostic {
+  level: string;
+  text: string;
+}
+
 interface InputEvent {
   type: string;
   [key: string]: any;
+}
+
+interface DiagnosticState {
+  attached: boolean;
+  entries: BrowserDiagnostic[];
+}
+
+const diagnosticStateByPage = new WeakMap<any, DiagnosticState>();
+const MAX_DIAGNOSTIC_ENTRIES = 200;
+
+function pushDiagnostic(state: DiagnosticState, entry: BrowserDiagnostic) {
+  state.entries.push(entry);
+  if (state.entries.length > MAX_DIAGNOSTIC_ENTRIES) {
+    state.entries.splice(0, state.entries.length - MAX_DIAGNOSTIC_ENTRIES);
+  }
+}
+
+function ensureDiagnosticCapture(page: any): DiagnosticState {
+  let state = diagnosticStateByPage.get(page);
+  if (!state) {
+    state = {attached: false, entries: []};
+    diagnosticStateByPage.set(page, state);
+  }
+
+  if (!state.attached) {
+    page.on('console', (message: any) => {
+      const level = message.type();
+      if (level === 'error' || level === 'warning' || level === 'assert') {
+        pushDiagnostic(state!, {
+          level,
+          text: message.text()
+        });
+      }
+    });
+
+    page.on('pageerror', (error: Error) => {
+      pushDiagnostic(state!, {
+        level: 'pageerror',
+        text: error.stack || error.message
+      });
+    });
+
+    state.attached = true;
+  }
+
+  return state;
+}
+
+function getPlaywrightKey(key: string): string {
+  switch (key) {
+    case 'Equal':
+      return '=';
+    case 'Minus':
+      return '-';
+    default:
+      return key;
+  }
+}
+
+async function focusActiveCanvas(frame: any) {
+  await frame.evaluate(() => {
+    const canvases = Array.from(document.querySelectorAll('canvas'));
+    const canvas = canvases.reverse().find(element => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+
+    if (canvas) {
+      if (!canvas.hasAttribute('tabindex')) {
+        canvas.setAttribute('tabindex', '0');
+      }
+      canvas.focus();
+    }
+  });
+}
+
+async function dispatchCanvasMouseMove(frame: any, x: number, y: number) {
+  await frame.evaluate(
+    ({x, y}) => {
+      const canvases = Array.from(document.querySelectorAll('canvas'));
+      const canvas = canvases.reverse().find(element => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      });
+
+      if (!canvas) {
+        return;
+      }
+
+      const eventInit = {
+        clientX: x,
+        clientY: y,
+        bubbles: true,
+        cancelable: true,
+        buttons: 0
+      };
+
+      canvas.dispatchEvent(
+        new PointerEvent('pointermove', {
+          ...eventInit,
+          pointerId: 1,
+          pointerType: 'mouse',
+          isPrimary: true
+        })
+      );
+      canvas.dispatchEvent(new MouseEvent('mousemove', eventInit));
+    },
+    {x, y}
+  );
 }
 
 /**
@@ -53,6 +167,7 @@ export const captureAndDiffScreen: BrowserCommand<[options: DiffOptions]> = asyn
 ): Promise<DiffResult> => {
   const frame = await ctx.frame();
   const page = frame.page();
+  ensureDiagnosticCapture(page);
 
   // Resolve golden image path relative to project root
   const goldenPath = path.resolve(ctx.project.config.root, options.goldenImage);
@@ -250,12 +365,17 @@ export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, eve
 
     case 'drag': {
       const {startX, startY, endX, endY, steps = 5, shiftKey} = event;
-
-      // Use DOM pointer events for drag - deck.gl's mjolnir.js uses pointer events
       await frame.evaluate(
         ({startX, startY, endX, endY, steps, shiftKey}) => {
-          const canvas = document.querySelector('canvas');
-          if (!canvas) return;
+          const canvas = Array.from(document.querySelectorAll('canvas'))
+            .reverse()
+            .find(element => {
+              const rect = element.getBoundingClientRect();
+              return rect.width > 0 && rect.height > 0;
+            });
+          if (!canvas) {
+            return;
+          }
 
           const dispatchPointerEvent = (type: string, x: number, y: number) => {
             canvas.dispatchEvent(
@@ -274,17 +394,12 @@ export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, eve
             );
           };
 
-          // Start drag
           dispatchPointerEvent('pointerdown', startX, startY);
-
-          // Move in steps
           for (let i = 1; i <= steps; i++) {
             const x = startX + ((endX - startX) * i) / steps;
             const y = startY + ((endY - startY) * i) / steps;
             dispatchPointerEvent('pointermove', x, y);
           }
-
-          // End drag
           dispatchPointerEvent('pointerup', endX, endY);
         },
         {startX, startY, endX, endY, steps, shiftKey: shiftKey || false}
@@ -293,74 +408,21 @@ export const emulateInput: BrowserCommand<[event: InputEvent]> = async (ctx, eve
     }
 
     case 'mousemove': {
-      // Use DOM pointer events for mousemove - deck.gl's mjolnir.js uses pointer events
-      await frame.evaluate(
-        ({x, y}) => {
-          const canvas = document.querySelector('canvas');
-          if (!canvas) return;
-
-          // Get canvas position to calculate offset coordinates
-          const rect = canvas.getBoundingClientRect();
-          const offsetX = x - rect.left;
-          const offsetY = y - rect.top;
-
-          // Create pointer event with all coordinate properties
-          const createPointerEvent = (type: string, bubbles = true) => {
-            return new PointerEvent(type, {
-              clientX: x,
-              clientY: y,
-              screenX: x,
-              screenY: y,
-              pageX: x,
-              pageY: y,
-              offsetX,
-              offsetY,
-              bubbles,
-              cancelable: true,
-              pointerId: 1,
-              pointerType: 'mouse',
-              isPrimary: true,
-              button: 0,
-              buttons: 0,
-              view: window
-            } as PointerEventInit);
-          };
-
-          // Dispatch pointerenter first to ensure deck.gl recognizes the pointer
-          canvas.dispatchEvent(createPointerEvent('pointerenter', false));
-          canvas.dispatchEvent(createPointerEvent('pointermove', true));
-        },
-        {x: event.x, y: event.y}
-      );
+      await dispatchCanvasMouseMove(frame, event.x, event.y);
       break;
     }
 
     case 'keypress': {
       const {key, shiftKey} = event;
+      await focusActiveCanvas(frame);
 
-      // Focus the canvas and dispatch keyboard events
-      // deck.gl's EventManager requires focus on the container to process keyboard events
-      await frame.evaluate(
-        ({key, shiftKey}) => {
-          const canvas = document.querySelector('canvas');
-          if (canvas) {
-            // Ensure canvas is focusable and focused
-            if (!canvas.hasAttribute('tabindex')) {
-              canvas.setAttribute('tabindex', '0');
-            }
-            canvas.focus();
-
-            // Dispatch both keydown and keyup to simulate a full keypress
-            canvas.dispatchEvent(
-              new KeyboardEvent('keydown', {key, shiftKey, bubbles: true, cancelable: true})
-            );
-            canvas.dispatchEvent(
-              new KeyboardEvent('keyup', {key, shiftKey, bubbles: true, cancelable: true})
-            );
-          }
-        },
-        {key, shiftKey}
-      );
+      if (shiftKey) {
+        await page.keyboard.down('Shift');
+      }
+      await page.keyboard.press(getPlaywrightKey(key));
+      if (shiftKey) {
+        await page.keyboard.up('Shift');
+      }
       break;
     }
 
@@ -378,9 +440,35 @@ export const isHeadless: BrowserCommand<[]> = async ctx => {
   return ctx.project.config.browser?.headless ?? true;
 };
 
+/**
+ * Clears any buffered browser diagnostics for the current page.
+ * Used at the start of each render test so failures include only relevant logs.
+ */
+export const resetBrowserDiagnostics: BrowserCommand<[]> = async ctx => {
+  const frame = await ctx.frame();
+  const page = frame.page();
+  const state = ensureDiagnosticCapture(page);
+  state.entries = [];
+};
+
+/**
+ * Returns buffered browser diagnostics and clears them.
+ * Used to append shader/page errors to failing render assertions.
+ */
+export const consumeBrowserDiagnostics: BrowserCommand<[]> = async ctx => {
+  const frame = await ctx.frame();
+  const page = frame.page();
+  const state = ensureDiagnosticCapture(page);
+  const entries = [...state.entries];
+  state.entries = [];
+  return entries;
+};
+
 // Export all commands for registration in vitest config
 export const browserCommands = {
   captureAndDiffScreen,
   emulateInput,
-  isHeadless
+  isHeadless,
+  resetBrowserDiagnostics,
+  consumeBrowserDiagnostics
 };

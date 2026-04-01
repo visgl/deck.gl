@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform meshUniforms {
+layout(std140) uniform meshUniforms {
   bool pickFeatureIds;
 } mesh;
 `;

@@ -123,7 +123,7 @@ export const getLoggers = (log: Log): Record<string, Function> => ({
   /* Render events */
 
   'deckRenderer.renderLayers': (deckRenderer, renderStats, opts) => {
-    const {pass, redrawReason, stats} = opts;
+    const {pass, redrawReason} = opts;
     for (const status of renderStats) {
       const {totalCount, visibleCount, compositeCount, pickableCount} = status;
       const primitiveCount = totalCount - compositeCount;
@@ -135,10 +135,6 @@ export const getLoggers = (log: Log): Record<string, Function> => ({
   ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} \
   (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`
       )();
-
-      if (stats) {
-        stats.get('Redraw Layers').add(visibleCount);
-      }
     }
   }
 });

@@ -235,6 +235,7 @@ export default class AttributeManager {
 
     if (this.stats) {
       this.stats.get('Update Attributes').timeEnd();
+      if (updated) this.stats.get('Attributes updated').incrementCount();
     }
 
     this.attributeTransitionManager.update({

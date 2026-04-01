@@ -151,6 +151,13 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
 
   public play(): void {
     this.playing = true;
+    const {
+      timeRange: [min, max]
+    } = this.props;
+    if (this.currentTime >= max) {
+      this.currentTime = min;
+      this.props.onTimeChange(min);
+    }
     this.updateHTML();
     this.tick();
   }
@@ -171,7 +178,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
       loop
     } = this.props;
     if (step > 0) {
-      let next = Math.floor(this.currentTime / step) * step + step;
+      let next = Math.round(this.currentTime / step) * step + step;
       if (next > max) {
         if (this.currentTime < max) {
           next = max;

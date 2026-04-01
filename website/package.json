@@ -16,11 +16,11 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
-    "@loaders.gl/core": "^4.4.0-alpha.16",
-    "@loaders.gl/i3s": "^4.4.0-alpha.16",
-    "@loaders.gl/las": "^4.4.0-alpha.16",
-    "@loaders.gl/obj": "^4.4.0-alpha.16",
-    "@loaders.gl/ply": "^4.4.0-alpha.16",
+    "@loaders.gl/core": "^4.4.0-alpha.18",
+    "@loaders.gl/i3s": "^4.4.0-alpha.18",
+    "@loaders.gl/las": "^4.4.0-alpha.18",
+    "@loaders.gl/obj": "^4.4.0-alpha.18",
+    "@loaders.gl/ply": "^4.4.0-alpha.18",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -40,6 +40,7 @@
     "react-dom": "^18.0.0",
     "react-map-gl": "^8.0.0",
     "react-virtualized-auto-sizer": "^1.0.2",
+    "source-map-loader": "^5.0.0",
     "styled-components": "^5.3.3",
     "supercluster": "^8.0.1",
     "zustand": "^5.0.5"
@@ -62,6 +63,6 @@
   ],
   "packageManager": "yarn@1.22.19",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

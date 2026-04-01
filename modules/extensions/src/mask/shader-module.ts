@@ -7,7 +7,7 @@ import {project} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
 const uniformBlock = /* glsl */ `\
-uniform maskUniforms {
+layout(std140) uniform maskUniforms {
   vec4 bounds;
   highp int channel;
   bool enabled;

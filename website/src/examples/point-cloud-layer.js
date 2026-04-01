@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
+import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {readableInteger} from '../utils/format-utils';
 import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/point-cloud/app';
@@ -36,8 +37,14 @@ class PointCloudDemo extends Component {
   };
 
   render() {
+    const widgets = [new StatsWidget({type: 'device'})];
     return <div style={{width: '100%', height: '100%', background: '#ecdbce'}}>
-      <App key={this.props.device?.type} device={this.props.device} onLoad={this._onLoad} />
+      <App
+        key={this.props.device?.type}
+        device={this.props.device}
+        onLoad={this._onLoad}
+        widgets={widgets}
+      />
     </div>;
   }
 }
