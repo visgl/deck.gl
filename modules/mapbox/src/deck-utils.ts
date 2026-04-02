@@ -367,7 +367,8 @@ function afterRender(deck: Deck, map: Map): void {
   } else {
     // Even when there are no non-Mapbox layers to draw, fire lifecycle callbacks
     // so that consumers can still track view state changes via onAfterRender
-    const {device, gl} = deck.layerManager!.context;
+    const device = (deck as any).device;
+    const gl = device?.gl;
     deck.props.onBeforeRender?.({device, gl});
     deck.props.onAfterRender?.({device, gl});
   }
