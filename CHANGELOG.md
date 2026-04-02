@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0-alpha.6] - Apr 2 2026
+
+- feat(TileLayer): Add visibleMinZoom & visibleMaxZoom props (#10091)
+- fix(mapbox): onBefore|AfterRender fires without layers (#10166)
+- fix(mapbox): Prevent crash when deck uninitialized (#10167)
+- feat(main): export all widgets from deck.gl main module (#10160)
+- chore: Bump to luma@9.3.1 & loaders@4.4.1 (#10158)
+- fix(layers): Texture handling in WebGPU (#10157)
+- chore: Bump luma.gl@alpha.11 (#10141)
+- chore(json): Typing improvements (#9641)
+- feat(core): simplify layer plumbing for WebGPU (#9820)
+- chore: enable source map in website dev mode (#10156)
+
 #### deck.gl [v9.3.0-alpha.5] - Mar 31 2026
 
 #### deck.gl [v9.3.0-alpha.4] - Mar 31 2026
