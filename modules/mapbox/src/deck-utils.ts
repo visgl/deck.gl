@@ -333,6 +333,13 @@ function afterRender(deck: Deck, map: Map): void {
           !map.getLayer(getLayerGroupId(params.layer as Layer<LayerOverlayProps>))),
       clearCanvas: false
     });
+  } else {
+    // Even when there are no non-Mapbox layers to draw, fire lifecycle callbacks
+    // so that consumers can still track view state changes via onAfterRender
+    const device = (deck as any).device;
+    const gl = device?.gl;
+    deck.props.onBeforeRender?.({device, gl});
+    deck.props.onAfterRender?.({device, gl});
   }
 
   // End of render cycle, clear generated viewport
