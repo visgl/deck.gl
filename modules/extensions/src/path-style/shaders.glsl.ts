@@ -140,6 +140,7 @@ in vec2 vDashArray;
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
+    fragColor = picking_filterPickingColor(fragColor);
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
@@ -295,6 +296,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
+    fragColor = picking_filterPickingColor(fragColor);
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
