@@ -120,7 +120,14 @@ test('TextLayer - utils#transformParagraph - single line', () => {
     size: [5, 4]
   };
 
-  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(
+    text,
+    baselineOffset,
+    lineHeight,
+    null,
+    null,
+    iconMapping
+  );
 
   expect(transformedData).toEqual(expected);
 });
@@ -143,7 +150,14 @@ test('TextLayer - utils#transformParagraph - multiple lines', () => {
     size: [6, 8]
   };
 
-  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(
+    text,
+    baselineOffset,
+    lineHeight,
+    null,
+    null,
+    iconMapping
+  );
   expect(transformedData).toEqual(expected);
 });
 
@@ -164,7 +178,14 @@ test('TextLayer - utils#transformParagraph - unicode', () => {
     size: [3, 8]
   };
 
-  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(
+    text,
+    baselineOffset,
+    lineHeight,
+    null,
+    null,
+    iconMapping
+  );
 
   expect(transformedData).toEqual(expected);
 });
@@ -187,7 +208,14 @@ test('TextLayer - utils#transformParagraph - multiple lines with line height', (
     size: [6, 12]
   };
 
-  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(
+    text,
+    baselineOffset,
+    lineHeight,
+    null,
+    null,
+    iconMapping
+  );
   expect(transformedData).toEqual(expected);
 });
 
@@ -212,7 +240,14 @@ test('TextLayer - utils#transformParagraph - autoWrapping', () => {
     size: [10, 18]
   };
 
-  const transformedData = transformParagraph(text, baselineOffset, lineHeight, 'break-word', 12, iconMapping);
+  const transformedData = transformParagraph(
+    text,
+    baselineOffset,
+    lineHeight,
+    'break-word',
+    12,
+    iconMapping
+  );
   expect(transformedData).toEqual(expected);
 });
 
