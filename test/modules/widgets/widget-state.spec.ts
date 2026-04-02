@@ -133,6 +133,39 @@ test('TimelineWidget - uncontrolled playing: tick stops naturally at end without
   vi.useRealTimers();
 });
 
+test('TimelineWidget - controlled playing: timer stops after reaching end without loop', () => {
+  vi.useFakeTimers();
+  const onPlayingChange = vi.fn();
+  const onTimeChange = vi.fn();
+  const widget = new TimelineWidget({
+    timeRange: [0, 10],
+    step: 5,
+    time: 10, // already at max
+    loop: false,
+    playInterval: 100,
+    playing: true,
+    onPlayingChange,
+    onTimeChange
+  });
+
+  // Manually start timer (simulating controlled mode activation)
+  (widget as any)._startTimer();
+
+  // First tick: reaches end, calls onPlayingChange(false)
+  vi.advanceTimersByTime(100);
+  expect(onPlayingChange).toHaveBeenCalledWith(false);
+
+  onTimeChange.mockClear();
+  onPlayingChange.mockClear();
+
+  // Second tick should NOT fire — timer should have stopped
+  vi.advanceTimersByTime(100);
+  expect(onTimeChange).not.toHaveBeenCalled();
+  expect(onPlayingChange).not.toHaveBeenCalled();
+
+  vi.useRealTimers();
+});
+
 test('TimelineWidget - controlled: getPlaying returns playing prop', () => {
   const widget = new TimelineWidget({timeRange: [0, 100], playing: true});
   expect(widget.getPlaying()).toBe(true);

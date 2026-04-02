@@ -285,7 +285,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
       }
       this.updateHTML();
     }
-    if (this.getPlaying()) {
+    if (this._playing) {
       this.timerId = window.setTimeout(this.tick, this.props.playInterval);
     } else {
       this.timerId = null;
