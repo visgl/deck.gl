@@ -282,6 +282,52 @@ test('MapboxLayer#afterRender with zero-size canvas', async () => {
   });
 });
 
+test('MapboxLayer#afterRender fires onBeforeRender/onAfterRender without non-Mapbox layers', async () => {
+  // When there are no deck layers (and thus no non-Mapbox layers to draw),
+  // afterRender should still fire onBeforeRender and onAfterRender callbacks
+  // so consumers can track view state changes.
+  await new Promise<void>((resolve, reject) => {
+    const callLog: string[] = [];
+
+    const map = new MockMapboxMap({
+      center: {lng: -122.45, lat: 37.78},
+      zoom: 12
+    });
+
+    map.on('load', () => {
+      const deck = new Deck({
+        device,
+        viewState: {longitude: 0, latitude: 0, zoom: 1},
+        layers: [],
+        parameters: DEFAULT_PARAMETERS,
+        onBeforeRender: () => callLog.push('onBeforeRender'),
+        onAfterRender: () => callLog.push('onAfterRender'),
+        onLoad: () => {
+          try {
+            // Clear any callbacks from initialization
+            callLog.length = 0;
+            // Render after deck is initialized - no MapboxLayers on the map,
+            // so afterRender's else branch (no non-Mapbox layers) should fire callbacks
+            (map as any)._render();
+
+            expect(callLog, 'onBeforeRender and onAfterRender should be called').toEqual([
+              'onBeforeRender',
+              'onAfterRender'
+            ]);
+
+            deck.finalize();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      });
+
+      getDeckInstance({map, deck});
+    });
+  });
+});
+
 /** Used to compare view states */
 export function objectEqual(actual, expected) {
   if (equals(actual, expected)) {
