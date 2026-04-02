@@ -25,14 +25,7 @@ export type FullscreenWidgetProps = WidgetProps & {
    */
   container?: HTMLElement;
   /**
-   * Controlled fullscreen state. When provided, the widget is in controlled mode.
-   * Note: The actual fullscreen state is managed by the browser. This prop controls
-   * the widget's visual state and determines whether clicking triggers enter or exit.
-   */
-  fullscreen?: boolean;
-  /**
    * Callback when fullscreen state changes (via user click or browser fullscreen events).
-   * In controlled mode, use this to update the fullscreen prop.
    */
   onFullscreenChange?: (fullscreen: boolean) => void;
 };
@@ -46,7 +39,6 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
     container: undefined!,
-    fullscreen: undefined!,
     onFullscreenChange: () => {}
   };
 
@@ -91,26 +83,14 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     return this.props.container || this.deck?.props.parent || this.deck?.getCanvas()?.parentElement;
   }
 
-  /**
-   * Returns the current fullscreen state.
-   * In controlled mode, returns the fullscreen prop.
-   * In uncontrolled mode, returns the internal state.
-   */
   getFullscreen(): boolean {
-    return this.props.fullscreen ?? this.fullscreen;
+    return this.fullscreen;
   }
 
   onFullscreenChange() {
     const fullscreen = document.fullscreenElement === this.getContainer();
-
-    // Always call callback if provided
+    this.fullscreen = fullscreen;
     this.props.onFullscreenChange?.(fullscreen);
-
-    // Only update internal state if uncontrolled
-    if (this.props.fullscreen === undefined) {
-      this.fullscreen = fullscreen;
-    }
-
     this.updateHTML();
   }
 
@@ -144,11 +124,8 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   togglePseudoFullscreen() {
     this.getContainer()?.classList.toggle('deck-pseudo-fullscreen');
     // No fullscreenchange event fires for pseudo-fullscreen, so manually update state
-    const fullscreen = !this.getFullscreen();
-    this.props.onFullscreenChange?.(fullscreen);
-    if (this.props.fullscreen === undefined) {
-      this.fullscreen = fullscreen;
-    }
+    this.fullscreen = !this.fullscreen;
+    this.props.onFullscreenChange?.(this.fullscreen);
     this.updateHTML();
   }
 }

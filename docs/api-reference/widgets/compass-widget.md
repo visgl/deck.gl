@@ -84,6 +84,36 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import {DeckGL, CompassWidget} from '@deck.gl/react';
+import type {MapViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [viewState, setViewState] = useState<MapViewState>({
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 11,
+    pitch: 45,
+    bearing: 30
+  });
+
+  const onViewStateChange = useCallback(({viewState: vs}) => {
+    setViewState(vs as MapViewState);
+  }, []);
+
+  return (
+    <DeckGL viewState={viewState} onViewStateChange={onViewStateChange} controller>
+      <CompassWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor

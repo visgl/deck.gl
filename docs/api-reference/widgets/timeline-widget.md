@@ -123,6 +123,45 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import DeckGL, {_TimelineWidget as TimelineWidget} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [time, setTime] = useState(0);
+  const [playing, setPlaying] = useState(false);
+
+  return (
+    <DeckGL
+      layers={[
+        new ScatterplotLayer({
+          id: 'point',
+          data: [{position: [0, 0]}],
+          getPosition: d => d.position,
+          getRadius: 1000 + time * 200,
+          getFillColor: [200, 0, 80]
+        })
+      ]}
+    >
+      <TimelineWidget
+        timeRange={[0, 10]}
+        step={1}
+        playInterval={250}
+        time={time}
+        onTimeChange={setTime}
+        playing={playing}
+        onPlayingChange={setPlaying}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor

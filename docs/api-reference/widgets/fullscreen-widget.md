@@ -91,10 +91,6 @@ Tooltip message displayed while hovering a mouse over the widget when out of ful
 
 Tooltip message displayed while hovering a mouse over the widget when fullscreen.
 
-#### `fullscreen` (boolean, optional) {#fullscreen}
-
-Controlled fullscreen state. When provided, the widget is in controlled mode. Note that the actual fullscreen state is managed by the browser; this prop controls the widget's visual state and determines whether clicking triggers enter or exit.
-
 #### `onFullscreenChange` (Function, optional) {#onfullscreenchange}
 
 ```ts

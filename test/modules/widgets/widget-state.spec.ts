@@ -232,11 +232,6 @@ test('FullscreenWidget - uncontrolled: defaults to not fullscreen', () => {
   expect(widget.getFullscreen()).toBe(false);
 });
 
-test('FullscreenWidget - controlled: getFullscreen returns fullscreen prop', () => {
-  const widget = new FullscreenWidget({fullscreen: true});
-  expect(widget.getFullscreen()).toBe(true);
-});
-
 test('FullscreenWidget - pseudo-fullscreen toggles state and calls callback', () => {
   const onFullscreenChange = vi.fn();
   const widget = new FullscreenWidget({onFullscreenChange});
@@ -259,20 +254,6 @@ test('FullscreenWidget - pseudo-fullscreen toggles state and calls callback', ()
   expect(onFullscreenChange).toHaveBeenCalledWith(false);
   expect(widget.fullscreen).toBe(false);
   expect(container.classList.contains('deck-pseudo-fullscreen')).toBe(false);
-});
-
-test('FullscreenWidget - controlled pseudo-fullscreen calls callback but does not update internal state', () => {
-  const onFullscreenChange = vi.fn();
-  const widget = new FullscreenWidget({fullscreen: false, onFullscreenChange});
-
-  const container = document.createElement('div');
-  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
-
-  widget.togglePseudoFullscreen();
-
-  expect(onFullscreenChange).toHaveBeenCalledWith(true);
-  // Internal state unchanged in controlled mode
-  expect(widget.fullscreen).toBe(false);
 });
 
 // ---- CompassWidget ----

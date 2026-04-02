@@ -63,6 +63,29 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {ThemeWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+
+  return (
+    <DeckGL>
+      <ThemeWidget
+        placement="top-left"
+        themeMode={themeMode}
+        onThemeModeChange={setThemeMode}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor

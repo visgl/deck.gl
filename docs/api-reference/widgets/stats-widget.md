@@ -58,6 +58,28 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_StatsWidget as StatsWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <DeckGL>
+      <StatsWidget
+        expanded={expanded}
+        onExpandedChange={setExpanded}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor
