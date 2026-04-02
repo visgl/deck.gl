@@ -14,6 +14,7 @@ layout(std140) uniform textBackgroundUniforms {
   vec4 padding;
   highp int sizeUnits;
   bool stroked;
+  bool dashGapPickable;
 } textBackground;
 `;
 
@@ -26,6 +27,7 @@ export type TextBackgroundProps = {
   padding: Readonly<[number, number, number, number]>;
   sizeUnits: number;
   stroked: boolean;
+  dashGapPickable: boolean;
 };
 
 export const textBackgroundUniforms = {
@@ -40,6 +42,7 @@ export const textBackgroundUniforms = {
     borderRadius: 'vec4<f32>',
     padding: 'vec4<f32>',
     sizeUnits: 'i32',
-    stroked: 'f32'
+    stroked: 'f32',
+    dashGapPickable: 'f32'
   }
 } as const satisfies ShaderModule<TextBackgroundProps>;

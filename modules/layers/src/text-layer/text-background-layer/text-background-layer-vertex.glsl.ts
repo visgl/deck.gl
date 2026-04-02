@@ -18,6 +18,7 @@ in vec2 instancePixelOffsets;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
+in vec2 instanceDashArrays;
 in vec3 instancePickingColors;
 
 out vec4 vFillColor;
@@ -25,6 +26,7 @@ out vec4 vLineColor;
 out float vLineWidth;
 out vec2 uv;
 out vec2 dimensions;
+out vec2 vDashArray;
 
 vec2 rotate_by_angle(vec2 vertex, float angle) {
   float angle_radian = radians(angle);
@@ -92,5 +94,7 @@ void main(void) {
   DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
+
+  vDashArray = instanceDashArrays;
 }
 `;

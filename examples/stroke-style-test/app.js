@@ -8,7 +8,6 @@ import {
   TextLayer,
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
-import {StrokeStyleExtension} from '@deck.gl/extensions';
 
 const INITIAL_VIEW_STATE = {
   latitude: 37.78,
@@ -162,8 +161,7 @@ new Deck({
       filled: true,
       lineWidthMinPixels: 4,
       pickable: true,
-      autoHighlight: true,
-      extensions: [new StrokeStyleExtension({dash: true})]
+      autoHighlight: true
     }),
 
     // TextBackgroundLayer with dashed strokes, rounded corners, and colored fill
@@ -178,8 +176,7 @@ new Deck({
       getLineWidth: 2,
       getDashArray: d => d.dashArray,
       pickable: true,
-      autoHighlight: true,
-      extensions: [new StrokeStyleExtension({dash: true})]
+      autoHighlight: true
     }),
 
     // TextBackgroundLayer with dashed strokes and sharp corners
@@ -194,8 +191,7 @@ new Deck({
       getLineWidth: 2,
       getDashArray: d => d.dashArray,
       pickable: true,
-      autoHighlight: true,
-      extensions: [new StrokeStyleExtension({dash: true})]
+      autoHighlight: true
     }),
 
     // Labels for each element

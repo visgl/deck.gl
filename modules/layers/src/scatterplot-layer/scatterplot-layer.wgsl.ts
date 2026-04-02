@@ -16,6 +16,7 @@ struct ScatterplotUniforms {
   filled: i32,
   antialiasing: i32,
   billboard: i32,
+  dashGapPickable: i32,
   radiusUnits: i32,
   lineWidthUnits: i32,
 };
@@ -70,7 +71,8 @@ struct Attributes {
   @location(4) instanceLineWidths: f32,
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instancePickingColors: vec3<f32>
+  @location(7) instancePickingColors: vec3<f32>,
+  @location(8) instanceDashArrays: vec2<f32>
 };
 
 struct Varyings {
@@ -81,6 +83,7 @@ struct Varyings {
   @location(3) innerUnitRadius: f32,
   @location(4) outerRadiusPixels: f32,
   @location(5) pickingColor: vec3<f32>,
+  @location(6) vDashArray: vec2<f32>,
 };
 
 @vertex
@@ -145,6 +148,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
   varyings.pickingColor = attributes.instancePickingColors;
+  varyings.vDashArray = attributes.instanceDashArrays;
 
   return varyings;
 }
@@ -163,6 +167,30 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   if (inCircle == 0.0) {
     discard;
+  }
+
+  // Dash gap detection
+  var inDashGap = false;
+  let dashUnitLength = varyings.vDashArray.x + varyings.vDashArray.y;
+  if (dashUnitLength > 0.0 && scatterplot.stroked != 0.0) {
+    let innerRadius = varyings.innerUnitRadius * varyings.outerRadiusPixels;
+    if (distToCenter >= innerRadius) {
+      let strokeWidth = (1.0 - varyings.innerUnitRadius) * varyings.outerRadiusPixels;
+      let midStrokeRadius = (varyings.innerUnitRadius + 1.0) * 0.5 * varyings.outerRadiusPixels;
+      let angle = atan2(varyings.unitPosition.y, varyings.unitPosition.x) + 3.141592653589793;
+      let circumference = 2.0 * 3.141592653589793 * midStrokeRadius;
+      let posAlongStroke = (angle / (2.0 * 3.141592653589793)) * circumference / strokeWidth;
+      let unitOffset = posAlongStroke % dashUnitLength;
+      if (unitOffset > varyings.vDashArray.x) {
+        if (scatterplot.filled != 0) {
+          inDashGap = true;
+        } else {
+          if (!(scatterplot.dashGapPickable != 0 && picking.isActive > 0.5)) {
+            discard;
+          }
+        }
+      }
+    }
   }
 
   var fragColor: vec4<f32>;
@@ -210,6 +238,27 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
         );
       } else {
         fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
+
+  // Override stroke color with fill color in dash gaps for filled circles
+  if (inDashGap) {
+    let alphaFactor = fragColor.a / max(varyings.vLineColor.a, 0.001);
+    fragColor = vec4<f32>(varyings.vFillColor.rgb, varyings.vFillColor.a * alphaFactor);
+    // Re-apply highlight
+    if (picking.isHighlightActive > 0.5) {
+      let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+      if (picking_isColorZero(abs(varyings.pickingColor - highlightedObjectColor))) {
+        let highLightAlpha = picking.highlightColor.a;
+        let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+        if (blendedAlpha > 0.0) {
+          let highLightRatio = highLightAlpha / blendedAlpha;
+          fragColor = vec4<f32>(
+            mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+            blendedAlpha
+          );
+        }
       }
     }
   }

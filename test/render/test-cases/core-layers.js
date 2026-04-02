@@ -13,7 +13,7 @@ import {
   LineLayer
 } from '@deck.gl/layers';
 
-import {Fp64Extension, StrokeStyleExtension} from '@deck.gl/extensions';
+import {Fp64Extension} from '@deck.gl/extensions';
 import * as dataSamples from 'deck.gl-test/data';
 
 // prettier-ignore
@@ -195,8 +195,7 @@ export default [
         radiusScale: 30,
         radiusMinPixels: 10,
         radiusMaxPixels: 50,
-        lineWidthMinPixels: 4,
-        extensions: [new StrokeStyleExtension({dash: true})]
+        lineWidthMinPixels: 4
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-dash.png'
@@ -223,8 +222,7 @@ export default [
         radiusScale: 30,
         radiusMinPixels: 10,
         radiusMaxPixels: 50,
-        lineWidthMinPixels: 3,
-        extensions: [new StrokeStyleExtension({dash: true})]
+        lineWidthMinPixels: 3
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-dash-stroked-only.png'

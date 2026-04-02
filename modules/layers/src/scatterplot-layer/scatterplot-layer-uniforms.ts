@@ -16,6 +16,7 @@ layout(std140) uniform scatterplotUniforms {
   float filled;
   bool antialiasing;
   bool billboard;
+  bool dashGapPickable;
   highp int radiusUnits;
   highp int lineWidthUnits;
 } scatterplot;
@@ -32,6 +33,7 @@ export type ScatterplotProps = {
   filled: boolean;
   antialiasing: boolean;
   billboard: boolean;
+  dashGapPickable: boolean;
   radiusUnits: number;
   lineWidthUnits: number;
 };
@@ -52,6 +54,7 @@ export const scatterplotUniforms = {
     filled: 'f32',
     antialiasing: 'f32',
     billboard: 'f32',
+    dashGapPickable: 'f32',
     radiusUnits: 'i32',
     lineWidthUnits: 'i32'
   }
