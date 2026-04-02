@@ -18,8 +18,8 @@ export const DEFAULT_PARAMETERS = {
   blendAlphaOperation: 'add'
 };
 
-/** Deep equal using math.gl's tolerance-based float comparison (unlike vitest's toEqual) */
-export function objectEqual(actual, expected) {
+/** Deep equal using math.gl's tolerance-based float comparison for numeric leaf values */
+export function deepEqual(actual, expected) {
   if (equals(actual, expected)) {
     return true;
   }
@@ -33,7 +33,7 @@ export function objectEqual(actual, expected) {
     return false;
   }
   for (const key of keys1) {
-    if (!objectEqual(actual[key], expected[key])) {
+    if (!deepEqual(actual[key], expected[key])) {
       return false;
     }
   }
