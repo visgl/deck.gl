@@ -271,6 +271,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
         } else {
           next = max;
           this._playing = false;
+          this.props.onPlayingChange?.(false);
         }
       }
 

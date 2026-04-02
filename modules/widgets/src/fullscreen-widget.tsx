@@ -143,5 +143,12 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   togglePseudoFullscreen() {
     this.getContainer()?.classList.toggle('deck-pseudo-fullscreen');
+    // No fullscreenchange event fires for pseudo-fullscreen, so manually update state
+    const fullscreen = !this.getFullscreen();
+    this.props.onFullscreenChange?.(fullscreen);
+    if (this.props.fullscreen === undefined) {
+      this.fullscreen = fullscreen;
+    }
+    this.updateHTML();
   }
 }
