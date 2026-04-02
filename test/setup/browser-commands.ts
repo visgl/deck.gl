@@ -38,9 +38,60 @@ interface DiffResult {
   error: string | null;
 }
 
+interface BrowserDiagnostic {
+  level: string;
+  text: string;
+}
+
 interface InputEvent {
   type: string;
   [key: string]: any;
+}
+
+interface DiagnosticState {
+  attached: boolean;
+  entries: BrowserDiagnostic[];
+}
+
+const diagnosticStateByPage = new WeakMap<any, DiagnosticState>();
+const MAX_DIAGNOSTIC_ENTRIES = 200;
+
+function pushDiagnostic(state: DiagnosticState, entry: BrowserDiagnostic) {
+  state.entries.push(entry);
+  if (state.entries.length > MAX_DIAGNOSTIC_ENTRIES) {
+    state.entries.splice(0, state.entries.length - MAX_DIAGNOSTIC_ENTRIES);
+  }
+}
+
+function ensureDiagnosticCapture(page: any): DiagnosticState {
+  let state = diagnosticStateByPage.get(page);
+  if (!state) {
+    state = {attached: false, entries: []};
+    diagnosticStateByPage.set(page, state);
+  }
+
+  if (!state.attached) {
+    page.on('console', (message: any) => {
+      const level = message.type();
+      if (level === 'error' || level === 'warning' || level === 'assert') {
+        pushDiagnostic(state!, {
+          level,
+          text: message.text()
+        });
+      }
+    });
+
+    page.on('pageerror', (error: Error) => {
+      pushDiagnostic(state!, {
+        level: 'pageerror',
+        text: error.stack || error.message
+      });
+    });
+
+    state.attached = true;
+  }
+
+  return state;
 }
 
 function getPlaywrightKey(key: string): string {
@@ -116,6 +167,7 @@ export const captureAndDiffScreen: BrowserCommand<[options: DiffOptions]> = asyn
 ): Promise<DiffResult> => {
   const frame = await ctx.frame();
   const page = frame.page();
+  ensureDiagnosticCapture(page);
 
   // Resolve golden image path relative to project root
   const goldenPath = path.resolve(ctx.project.config.root, options.goldenImage);
@@ -388,9 +440,35 @@ export const isHeadless: BrowserCommand<[]> = async ctx => {
   return ctx.project.config.browser?.headless ?? true;
 };
 
+/**
+ * Clears any buffered browser diagnostics for the current page.
+ * Used at the start of each render test so failures include only relevant logs.
+ */
+export const resetBrowserDiagnostics: BrowserCommand<[]> = async ctx => {
+  const frame = await ctx.frame();
+  const page = frame.page();
+  const state = ensureDiagnosticCapture(page);
+  state.entries = [];
+};
+
+/**
+ * Returns buffered browser diagnostics and clears them.
+ * Used to append shader/page errors to failing render assertions.
+ */
+export const consumeBrowserDiagnostics: BrowserCommand<[]> = async ctx => {
+  const frame = await ctx.frame();
+  const page = frame.page();
+  const state = ensureDiagnosticCapture(page);
+  const entries = [...state.entries];
+  state.entries = [];
+  return entries;
+};
+
 // Export all commands for registration in vitest config
 export const browserCommands = {
   captureAndDiffScreen,
   emulateInput,
-  isHeadless
+  isHeadless,
+  resetBrowserDiagnostics,
+  consumeBrowserDiagnostics
 };

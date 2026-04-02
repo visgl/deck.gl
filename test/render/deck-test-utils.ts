@@ -29,6 +29,23 @@ export interface DeckTestContext {
   container: HTMLDivElement | null;
 }
 
+function formatBrowserDiagnostics(
+  diagnostics: Array<{level: string; text: string}>,
+  maxEntries = 10
+): string {
+  if (diagnostics.length === 0) {
+    return '';
+  }
+
+  const recentDiagnostics = diagnostics.slice(-maxEntries);
+  const lines = recentDiagnostics.map(({level, text}) => `- [${level}] ${text}`);
+  if (diagnostics.length > maxEntries) {
+    lines.unshift(`- ... ${diagnostics.length - maxEntries} earlier diagnostic(s) omitted`);
+  }
+
+  return `\nBrowser diagnostics:\n${lines.join('\n')}`;
+}
+
 /**
  * Creates the container element for Deck tests.
  * Call this in beforeAll.
@@ -131,6 +148,8 @@ export async function runRenderTest(
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
 
+  await commands.resetBrowserDiagnostics();
+
   // Create a new Deck instance for each test (like the old SnapshotTestRunner)
   // This ensures Deck enters a fresh render loop and properly handles async loading
   await new Promise<void>((resolve, reject) => {
@@ -225,9 +244,12 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
     }
   }
 
+  const diagnostics = await commands.consumeBrowserDiagnostics();
+  const diagnosticsText = formatBrowserDiagnostics(diagnostics);
+
   expect(
     finalResult.success,
-    `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}`
+    `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}${diagnosticsText}`
   ).toBe(true);
 }
 
@@ -245,6 +267,8 @@ export async function updateDeckForTest(
 ): Promise<void> {
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
+
+  await commands.resetBrowserDiagnostics();
 
   if (!ctx.deck) {
     throw new Error('Deck instance not found. Call createDeck() in beforeAll first.');

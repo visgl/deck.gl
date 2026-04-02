@@ -21,6 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0-alpha.5] - Mar 31 2026
+
+#### deck.gl [v9.3.0-alpha.4] - Mar 31 2026
+
+- fix(TerrainController): Better React controlled mode behavior (#10144)
+- fix(react): Avoid double render in controlled mode (#10143)
+- feat(core,react,docs): Add async deck picking methods (#9733)
+- chore: bump peerDependencies to ~9.3.0-alpha.1 (#10139)
+- chore: Upgrade to luma.gl 9.3.0-alpha.10 (#10123)
+
 #### deck.gl [v9.3.0-alpha.3] - Mar 27 2026
 
 - feat(core): TerrainController (#10134)

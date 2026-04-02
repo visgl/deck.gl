@@ -39,7 +39,7 @@ function extractElements(library = {}, filter) {
 }
 
 // Handle JSONConverter and loaders configuration
-const jsonConverterConfiguration = {
+const JSON_CONVERTER_CONFIGURATION = {
   classes: {
     ...extractElements(deckExports, classesFilter),
     // Add experimental widgets (exported with _ prefix)
@@ -62,7 +62,7 @@ const jsonConverterConfiguration = {
 registerLoaders([CSVLoader]);
 
 const jsonConverter = new JSONConverter({
-  configuration: jsonConverterConfiguration
+  configuration: JSON_CONVERTER_CONFIGURATION
 });
 
 function addModuleToConverter(module, converter) {
