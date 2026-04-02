@@ -10,20 +10,19 @@ Target release date: March 2026
 
 deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support:
 
-- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
-- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
-- [OrbitController](./api-reference/core/orbit-controller.md) - 3D `maxBounds` constrains the target position within a 3D bounding box.
-- [OrthographicController](./api-reference/core/orthographic-controller.md) - `maxBounds` support.
-- [FirstPersonController](./api-reference/core/first-person-controller.md) - `maxBounds` support.
-- [GlobeController](./api-reference/core/globe-controller.md) - `maxBounds` support and major bug fixes.
 - New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
-- Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better load options passthrough and tile tracking.
+- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
+- Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
+- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
+- All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
+- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
 
 ### Layers
 
 ![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
 
 - [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
+- [TileLayer](./api-reference/geo-layers/tile-layer.md) adds new `visibleMinZoom` and `visibleMaxZoom` props to control the zoom range at which tiles are drawn, independent of the zoom range at which data is loaded.
 
 ### Views
 
