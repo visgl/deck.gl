@@ -229,7 +229,7 @@ export default [
     {target: [0, 100, 0]},
     {target: [0, -100, 0]}
   ].map((viewState, caseIndex) => ({
-    name: 'text-layer-content-box',
+    name: `text-layer-content-box-${caseIndex}`,
     viewState: {
       ...viewState,
       zoom: 0
@@ -288,15 +288,16 @@ export default [
       target: [0, 0, 0],
       zoom: 0
     },
-    views: [new OrthographicView({padding: {bottom: '100%', right: '100%'}})],
+    views: [new OrthographicView({padding: {bottom: '100%'}})],
     layers: [
       new TextLayer({
         id: 'labels',
         data: points.slice(0, 10),
         _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
-        getPosition: (_, {index}) => [50, index * 50],
+        getPosition: (_, {index}) => [0, index * 60],
         getText: d => d.ADDRESS,
+        getAngle: 30,
         lineHeight: 2,
         getSize: 16,
         getColor: [200, 0, 0],

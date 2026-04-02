@@ -329,14 +329,15 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   /** Returns true if font has changed */
   private _updateFontAtlas(): boolean {
-    const {fontSettings, fontFamily, fontWeight} = this.props;
+    const {fontSettings, fontFamily, fontWeight, _getFontRenderer} = this.props;
     const {fontAtlasManager, characterSet} = this.state;
 
     const fontProps = {
       ...fontSettings,
       characterSet,
       fontFamily,
-      fontWeight
+      fontWeight,
+      _getFontRenderer
     };
 
     if (!fontAtlasManager.mapping) {
