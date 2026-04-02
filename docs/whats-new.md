@@ -6,6 +6,19 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: March 2026
 
+### Improved 3D Support
+
+deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support:
+
+- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
+- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
+- [OrbitController](./api-reference/core/orbit-controller.md) - 3D `maxBounds` constrains the target position within a 3D bounding box.
+- [OrthographicController](./api-reference/core/orthographic-controller.md) - `maxBounds` support.
+- [FirstPersonController](./api-reference/core/first-person-controller.md) - `maxBounds` support.
+- [GlobeController](./api-reference/core/globe-controller.md) - `maxBounds` support and major bug fixes.
+- New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
+- Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better load options passthrough and tile tracking.
+
 ### Layers
 
 ![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
@@ -16,15 +29,7 @@ Target release date: March 2026
 
 View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
 
-It is a common use case for apps to constrain view state to the area where data is available. In 9.3, all controllers add a new option `maxBounds` that will:
-- Automatically zoom/pan viewport to fit content
-- Prevent user from navigating outside of the content bounding box
-
-Individual view improvements:
-- [MapController](./api-reference/core/map-controller.md) adds a new option `rotationPivot` for more natural interaction with terrain / 3D tiles that are not at sea level. See [PR#9938](https://github.com/visgl/deck.gl/pull/9938) for demos.
-- [GlobeController](./api-reference/core/globe-controller.md) gets major bug fixes and is more stable.
 - [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
-- [OrbitController](./api-reference/core/orbit-controller.md) works more intuitively when used with `maxBounds` and pickable layers.
 
 
 ### Widgets
