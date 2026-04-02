@@ -196,6 +196,8 @@ export default [
       new TextLayer({
         id: 'labels',
         data: alignmentTestData,
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
         getPosition: ({anchor: [x, y]}) => (flipY ? [x, y] : [x, -y]),
         getText: d => 'Hello TextLayer',
         billboard,
@@ -233,27 +235,26 @@ export default [
       zoom: 0
     },
     views: [new OrthographicView()],
-    layers: alignmentTestData.map(({
-        anchor: [x, y],
-        hAlign,
-        vAlign
-      }, i) =>
-      new TextLayer({
-        id: `labels-${i}`,
-        data: [0],
-        getPosition: _ => [-x * 2, -y * 2],
-        getText: _ => 'Hello',
-        getSize: 16,
-        getTextAnchor: TextAnchors[hAlign],
-        getAlignmentBaseline: TextBaselines[vAlign],
-        getColor: [0, 0, 0],
-        getPixelOffset: [(1 - hAlign) * 4, (1 - vAlign) * 4],
-        background: true,
-        getBackgroundColor: [255, 255, 0],
-        getContentBox: [-hAlign * 100, -vAlign * 60, 200, 120],
-        contentAlignHorizontal: ContentAlignment[hAlign],
-        contentAlignVertical: ContentAlignment[vAlign]
-      })
+    layers: alignmentTestData.map(
+      ({anchor: [x, y], hAlign, vAlign}, i) =>
+        new TextLayer({
+          id: `labels-${i}`,
+          data: [0],
+          _getFontRenderer: () => fontRenderer,
+          fontFamily: 'Arial',
+          getPosition: _ => [-x * 2, -y * 2],
+          getText: _ => 'Hello',
+          getSize: 16,
+          getTextAnchor: TextAnchors[hAlign],
+          getAlignmentBaseline: TextBaselines[vAlign],
+          getColor: [0, 0, 0],
+          getPixelOffset: [(1 - hAlign) * 4, (1 - vAlign) * 4],
+          background: true,
+          getBackgroundColor: [255, 255, 0],
+          getContentBox: [-hAlign * 100, -vAlign * 60, 200, 120],
+          contentAlignHorizontal: ContentAlignment[hAlign],
+          contentAlignVertical: ContentAlignment[vAlign]
+        })
     ),
     goldenImage: `./test/render/golden-images/text-layer-content-alignment-${caseIndex}.png`
   })),
@@ -268,10 +269,12 @@ export default [
       new TextLayer({
         id: 'labels',
         data: points.slice(2, 5),
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
         getPosition: (_, {index}) => [0, (index - 1) * 160],
         getText: d => `${d.ADDRESS}\n${d.LOCATION_NAME}\n${d.RACKS} racks - ${d.SPACES} spaces`,
         getSize: 20,
-        getTextAnchor:  (_, {index}) => TextAnchors[index],
+        getTextAnchor: (_, {index}) => TextAnchors[index],
         getAlignmentBaseline: (_, {index}) => TextBaselines[index],
         background: true,
         getBackgroundColor: [255, 255, 0]
@@ -290,6 +293,8 @@ export default [
       new TextLayer({
         id: 'labels',
         data: points.slice(0, 10),
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
         getPosition: (_, {index}) => [50, index * 50],
         getText: d => d.ADDRESS,
         lineHeight: 2,
@@ -318,11 +323,13 @@ export default [
       new TextLayer({
         id: 'labels',
         data: [0],
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
         getPosition: d => [40, 40],
         getText: d => `The TextLayer renders text labels at given coordinates.
 TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically creates an atlas texture from the specified font settings and characterSet.`,
-        getSize: 20,
-        maxWidth: 30,
+        getSize: 24,
+        maxWidth: 20,
         lineHeight: 1.5,
         getAlignmentBaseline: 'top',
         getTextAnchor: 'start',
