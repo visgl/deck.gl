@@ -37,32 +37,12 @@ const VALIDATION_RULES: ValidationRule[] = [
     })
   },
 
-  // Batched requires interleaved
-  {
-    check: d => d.batched && !d.interleaved,
-    warning: () => ({
-      dimension: 'batched',
-      message: 'Batched rendering requires interleaved mode',
-      severity: 'warning'
-    })
-  },
-
   // MultiView not supported with Google Maps
   {
     check: d => d.multiView && d.basemap === 'google-maps',
     warning: () => ({
       dimension: 'multiView',
       message: 'Multi-view is not supported with Google Maps',
-      severity: 'warning'
-    })
-  },
-
-  // Batched not supported with Google Maps
-  {
-    check: d => d.batched && d.basemap === 'google-maps',
-    warning: () => ({
-      dimension: 'batched',
-      message: 'Batched rendering is not supported with Google Maps',
       severity: 'warning'
     })
   },
