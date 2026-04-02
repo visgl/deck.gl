@@ -62,7 +62,7 @@ export async function loadPrepackedFontAtlas() {
   ctx.drawImage(image, 0, 0);
 
   fontRenderer = {
-    measure: (char) => {
+    measure: char => {
       const frame = fontMapping[char] ?? fontMapping[''];
       return {
         advance: frame.advance,
@@ -71,12 +71,12 @@ export async function loadPrepackedFontAtlas() {
         descent: frame.height - frame.anchorY
       };
     },
-    draw: (char) => {
+    draw: char => {
       const frame = fontMapping[char] ?? fontMapping[''];
       const glyph = ctx.getImageData(frame.x, frame.y, frame.width, frame.height);
       return {data: glyph};
     }
-  }
+  };
 }
 
 export default [
@@ -286,7 +286,4 @@ export default [
     ],
     goldenImage: './test/render/golden-images/text-layer-background.png'
   }
-].map(c => {
-  c.saveOnFail = true;
-  return c;
-});
+];
