@@ -350,8 +350,6 @@ export default class FontAtlasManager {
 
         frame.x += x0 - x;
         frame.y += y0 - y;
-        frame.anchorX += x0 - x;
-        frame.anchorY += y0 - y;
       }
     } else {
       for (const char of characterSet) {
