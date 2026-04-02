@@ -5,8 +5,7 @@
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {points} from 'deck.gl-test/data';
-
-import {OS} from '../constants';
+import fontMapping from '../../data/font-atlas.json';
 
 function getBinaryAttributes(data, getText, accessors) {
   const startIndices = new Uint16Array(
@@ -45,10 +44,75 @@ function getBinaryAttributes(data, getText, accessors) {
   };
 }
 
-// Use lower threshold to account for differences in font hinting/antialiasing
-const imageDiffOptions = {threshold: 0.96};
+/** Text rendering is highly platform dependent. We insert a custom font renderer here to remove the discrepancy between dev box and CI */
+let fontRenderer = null;
+export async function loadPrepackedFontAtlas() {
+  const image = new Image();
 
-const macOnlyTests = [
+  await new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+    image.src = '/test/data/font-atlas.png';
+  });
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+  ctx.drawImage(image, 0, 0);
+
+  fontRenderer = {
+    measure: (char) => {
+      const frame = fontMapping[char] ?? fontMapping[''];
+      return {
+        advance: frame.advance,
+        width: frame.width,
+        ascent: frame.anchorY,
+        descent: frame.height - frame.anchorY
+      };
+    },
+    draw: (char) => {
+      const frame = fontMapping[char] ?? fontMapping[''];
+      const glyph = ctx.getImageData(frame.x, frame.y, frame.width, frame.height);
+      return {data: glyph};
+    }
+  }
+}
+
+export default [
+  {
+    name: 'text-layer-background-border-radius',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.44,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer-2',
+        data: points.slice(0, 10),
+        coordinateOrigin: [-122.44, 37.75],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
+        background: true,
+        backgroundPadding: [10, 10],
+        backgroundBorderRadius: [100, 5, 15, 0],
+        getBackgroundColor: [255, 255, 0, 200],
+        getBorderWidth: 1,
+        getText: x => `${x.ADDRESS}-${x.SPACES}`,
+        getPosition: (_, {index}) => [0, (index - 5) * 1000],
+        getColor: [255, 0, 0],
+        getAngle: 15,
+        getSize: 20,
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'center'
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-background-border-radius.png'
+  },
   {
     name: 'text-layer',
     viewState: {
@@ -62,6 +126,7 @@ const macOnlyTests = [
       new TextLayer({
         id: 'text-layer',
         data: points.slice(0, 50),
+        _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -74,7 +139,6 @@ const macOnlyTests = [
         getPixelOffset: x => [10, 0]
       })
     ],
-    imageDiffOptions,
     goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
@@ -90,6 +154,7 @@ const macOnlyTests = [
       new TextLayer({
         id: 'text-layer',
         data: points.slice(0, 50),
+        _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
@@ -103,7 +168,6 @@ const macOnlyTests = [
         getPixelOffset: x => [10, 0]
       })
     ],
-    imageDiffOptions,
     goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
@@ -122,6 +186,7 @@ const macOnlyTests = [
           getPosition: {accessor: x => x.COORDINATES, size: 2},
           getColor: {accessor: x => [1, 0, 0], size: 3, normalized: false}
         }),
+        _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
         getSize: 20,
         getAngle: 0,
@@ -131,7 +196,6 @@ const macOnlyTests = [
         getPixelOffset: [10, 0]
       })
     ],
-    imageDiffOptions,
     goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
@@ -149,6 +213,7 @@ const macOnlyTests = [
         data: points.slice(0, 10),
         coordinateOrigin: [-122.44, 37.75],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
         getText: x => `${x.ADDRESS}\n${x.SPACES}`,
         getPosition: (_, {index}) => [0, (index - 5) * 1000],
@@ -158,7 +223,6 @@ const macOnlyTests = [
         getAlignmentBaseline: 'center'
       })
     ],
-    imageDiffOptions,
     goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
   },
   {
@@ -176,6 +240,7 @@ const macOnlyTests = [
         data: points.slice(0, 5),
         coordinateOrigin: [-122.44, 37.75],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
         wordBreak: 'break-word',
         maxWidth: 16,
@@ -187,7 +252,6 @@ const macOnlyTests = [
         getAlignmentBaseline: 'center'
       })
     ],
-    imageDiffOptions,
     goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
   },
   {
@@ -205,6 +269,7 @@ const macOnlyTests = [
         data: points.slice(0, 10),
         coordinateOrigin: [-122.44, 37.75],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        _getFontRenderer: () => fontRenderer,
         fontFamily: 'Arial',
         background: true,
         backgroundPadding: [10, 10],
@@ -219,46 +284,9 @@ const macOnlyTests = [
         getAlignmentBaseline: 'center'
       })
     ],
-    imageDiffOptions,
     goldenImage: './test/render/golden-images/text-layer-background.png'
   }
-];
-
-const optionalTests = OS === 'Mac' ? macOnlyTests : [];
-
-export default [
-  {
-    name: 'text-layer-background-border-radius',
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.44,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new TextLayer({
-        id: 'text-layer-2',
-        data: points.slice(0, 10),
-        coordinateOrigin: [-122.44, 37.75],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        fontFamily: 'Arial',
-        background: true,
-        backgroundPadding: [10, 10],
-        backgroundBorderRadius: [100, 5, 15, 0],
-        getBackgroundColor: [255, 255, 0, 200],
-        getBorderWidth: 1,
-        getText: x => `${x.ADDRESS}-${x.SPACES}`,
-        getPosition: (_, {index}) => [0, (index - 5) * 1000],
-        getColor: [255, 0, 0],
-        getAngle: 15,
-        getSize: 20,
-        getTextAnchor: 'start',
-        getAlignmentBaseline: 'center'
-      })
-    ],
-    imageDiffOptions,
-    goldenImage: './test/render/golden-images/text-layer-background-border-radius.png'
-  },
-  ...optionalTests
-];
+].map(c => {
+  c.saveOnFail = true;
+  return c;
+});
