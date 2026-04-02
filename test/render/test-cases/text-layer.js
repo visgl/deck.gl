@@ -2,10 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {TextLayer} from '@deck.gl/layers';
+import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
+import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
+
+const TextAnchors = ['start', 'middle', 'end'];
+const TextBaselines = ['top', 'center', 'bottom'];
+const ContentAlignment = ['start', 'center', 'end'];
+const alignmentTestData = [
+  {anchor: [-200, -100], hAlign: 2, vAlign: 2},
+  {anchor: [0, -100], hAlign: 1, vAlign: 2},
+  {anchor: [200, -100], hAlign: 0, vAlign: 2},
+  {anchor: [-200, 0], hAlign: 2, vAlign: 1},
+  {anchor: [0, 0], hAlign: 1, vAlign: 1},
+  {anchor: [200, 0], hAlign: 0, vAlign: 1},
+  {anchor: [-200, 100], hAlign: 2, vAlign: 0},
+  {anchor: [0, 100], hAlign: 1, vAlign: 0},
+  {anchor: [200, 100], hAlign: 0, vAlign: 0}
+];
 
 function getBinaryAttributes(data, getText, accessors) {
   const startIndices = new Uint16Array(
@@ -81,44 +96,11 @@ export async function loadPrepackedFontAtlas() {
 
 export default [
   {
-    name: 'text-layer-background-border-radius',
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.44,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new TextLayer({
-        id: 'text-layer-2',
-        data: points.slice(0, 10),
-        coordinateOrigin: [-122.44, 37.75],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
-        background: true,
-        backgroundPadding: [10, 10],
-        backgroundBorderRadius: [100, 5, 15, 0],
-        getBackgroundColor: [255, 255, 0, 200],
-        getBorderWidth: 1,
-        getText: x => `${x.ADDRESS}-${x.SPACES}`,
-        getPosition: (_, {index}) => [0, (index - 5) * 1000],
-        getColor: [255, 0, 0],
-        getAngle: 15,
-        getSize: 20,
-        getTextAnchor: 'start',
-        getAlignmentBaseline: 'center'
-      })
-    ],
-    goldenImage: './test/render/golden-images/text-layer-background-border-radius.png'
-  },
-  {
     name: 'text-layer',
     viewState: {
-      latitude: 37.751,
-      longitude: -122.427,
-      zoom: 11.5,
+      latitude: 37.766,
+      longitude: -122.42,
+      zoom: 14,
       pitch: 0,
       bearing: 0
     },
@@ -144,9 +126,9 @@ export default [
   {
     name: 'text-layer-meter-size',
     viewState: {
-      latitude: 37.751,
-      longitude: -122.427,
-      zoom: 11.5,
+      latitude: 37.766,
+      longitude: -122.42,
+      zoom: 14,
       pitch: 0,
       bearing: 0
     },
@@ -161,7 +143,7 @@ export default [
         getColor: x => [255, 0, 0],
         getSize: x => 20,
         getAngle: x => 0,
-        sizeScale: 21.343755,
+        sizeScale: 3.77307847,
         sizeUnits: 'meters',
         getTextAnchor: x => 'start',
         getAlignmentBaseline: x => 'center',
@@ -173,9 +155,9 @@ export default [
   {
     name: 'text-layer-binary',
     viewState: {
-      latitude: 37.751,
-      longitude: -122.427,
-      zoom: 11.5,
+      latitude: 37.766,
+      longitude: -122.42,
+      zoom: 14,
       pitch: 0,
       bearing: 0
     },
@@ -198,92 +180,158 @@ export default [
     ],
     goldenImage: './test/render/golden-images/text-layer.png'
   },
+  ...[
+    {flipY: false, billboard: false},
+    {flipY: false, billboard: true},
+    {flipY: true, billboard: false},
+    {flipY: true, billboard: true}
+  ].map(({flipY, billboard}, i) => ({
+    name: `text-layer-alignment-${i}`,
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView({flipY})],
+    layers: [
+      new TextLayer({
+        id: 'labels',
+        data: alignmentTestData,
+        getPosition: ({anchor: [x, y]}) => (flipY ? [x, y] : [x, -y]),
+        getText: d => 'Hello TextLayer',
+        billboard,
+        getSize: 20,
+        getAlignmentBaseline: d => TextBaselines[d.vAlign],
+        getTextAnchor: d => TextAnchors[d.hAlign],
+        getColor: [0, 0, 0],
+        background: true,
+        getBackgroundColor: [255, 255, 0]
+      }),
+      new PathLayer({
+        id: 'reference-lines',
+        data: alignmentTestData,
+        getPath: ({anchor: [x, y], hAlign}) => [
+          [x - hAlign * 100, y],
+          [x + (2 - hAlign) * 100, y]
+        ],
+        getColor: [255, 0, 0],
+        getWidth: 1,
+        widthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-alignment.png'
+  })),
+  ...[
+    {target: [0, 0, 0]},
+    {target: [100, 0, 0]},
+    {target: [-100, 0, 0]},
+    {target: [0, 100, 0]},
+    {target: [0, -100, 0]}
+  ].map((viewState, caseIndex) => ({
+    name: 'text-layer-content-box',
+    viewState: {
+      ...viewState,
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: alignmentTestData.map(({
+        anchor: [x, y],
+        hAlign,
+        vAlign
+      }, i) =>
+      new TextLayer({
+        id: `labels-${i}`,
+        data: [0],
+        getPosition: _ => [-x * 2, -y * 2],
+        getText: _ => 'Hello',
+        getSize: 16,
+        getTextAnchor: TextAnchors[hAlign],
+        getAlignmentBaseline: TextBaselines[vAlign],
+        getColor: [0, 0, 0],
+        getPixelOffset: [(1 - hAlign) * 4, (1 - vAlign) * 4],
+        background: true,
+        getBackgroundColor: [255, 255, 0],
+        getContentBox: [-hAlign * 100, -vAlign * 60, 200, 120],
+        contentAlignHorizontal: ContentAlignment[hAlign],
+        contentAlignVertical: ContentAlignment[vAlign]
+      })
+    ),
+    goldenImage: `./test/render/golden-images/text-layer-content-alignment-${caseIndex}.png`
+  })),
   {
     name: 'text-layer-multi-lines',
     viewState: {
-      latitude: 37.75,
-      longitude: -122.44,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
+      target: [0, 0, 0],
+      zoom: 0
     },
+    views: [new OrthographicView()],
     layers: [
       new TextLayer({
-        id: 'text-layer-2',
-        data: points.slice(0, 10),
-        coordinateOrigin: [-122.44, 37.75],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
-        getText: x => `${x.ADDRESS}\n${x.SPACES}`,
-        getPosition: (_, {index}) => [0, (index - 5) * 1000],
-        getColor: [255, 0, 0],
+        id: 'labels',
+        data: points.slice(2, 5),
+        getPosition: (_, {index}) => [0, (index - 1) * 160],
+        getText: d => `${d.ADDRESS}\n${d.LOCATION_NAME}\n${d.RACKS} racks - ${d.SPACES} spaces`,
         getSize: 20,
-        getTextAnchor: 'middle',
-        getAlignmentBaseline: 'center'
+        getTextAnchor:  (_, {index}) => TextAnchors[index],
+        getAlignmentBaseline: (_, {index}) => TextBaselines[index],
+        background: true,
+        getBackgroundColor: [255, 255, 0]
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
   },
   {
-    name: 'text-layer-auto-wrapping',
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.44,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new TextLayer({
-        id: 'text-layer-2',
-        data: points.slice(0, 5),
-        coordinateOrigin: [-122.44, 37.75],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
-        wordBreak: 'break-word',
-        maxWidth: 16,
-        getText: x => `${x.LOCATION_NAME} ${x.ADDRESS}`,
-        getPosition: (_, {index}) => [0, (index - 2) * 2000],
-        getColor: [255, 0, 0],
-        getSize: 20,
-        getTextAnchor: 'middle',
-        getAlignmentBaseline: 'center'
-      })
-    ],
-    goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
-  },
-  {
     name: 'text-layer-background',
     viewState: {
-      latitude: 37.75,
-      longitude: -122.44,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
+      target: [0, 0, 0],
+      zoom: 0
     },
+    views: [new OrthographicView({padding: {bottom: '100%', right: '100%'}})],
     layers: [
       new TextLayer({
-        id: 'text-layer-2',
+        id: 'labels',
         data: points.slice(0, 10),
-        coordinateOrigin: [-122.44, 37.75],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
-        background: true,
-        backgroundPadding: [10, 10],
-        getBackgroundColor: [255, 255, 0, 200],
-        getBorderWidth: 1,
-        getText: x => `${x.ADDRESS}-${x.SPACES}`,
-        getPosition: (_, {index}) => [0, (index - 5) * 1000],
-        getColor: [255, 0, 0],
-        getAngle: 15,
-        getSize: 20,
+        getPosition: (_, {index}) => [50, index * 50],
+        getText: d => d.ADDRESS,
+        lineHeight: 2,
+        getSize: 16,
+        getColor: [200, 0, 0],
         getTextAnchor: 'start',
-        getAlignmentBaseline: 'center'
+        getAlignmentBaseline: 'top',
+        background: true,
+        getBackgroundColor: [200, 255, 255],
+        getBorderWidth: 2,
+        getBorderColor: [0, 100, 150],
+        backgroundPadding: [12, 8],
+        backgroundBorderRadius: 8
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-background.png'
+  },
+  {
+    name: 'text-layer-auto-wrapping',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView({padding: {bottom: '100%', right: '100%'}})],
+    layers: [
+      new TextLayer({
+        id: 'labels',
+        data: [0],
+        getPosition: d => [40, 40],
+        getText: d => `The TextLayer renders text labels at given coordinates.
+TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically creates an atlas texture from the specified font settings and characterSet.`,
+        getSize: 20,
+        maxWidth: 30,
+        lineHeight: 1.5,
+        getAlignmentBaseline: 'top',
+        getTextAnchor: 'start',
+        getColor: [0, 0, 0],
+        background: true,
+        getBackgroundColor: [255, 255, 0],
+        backgroundPadding: [10, 10]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
   }
 ];
