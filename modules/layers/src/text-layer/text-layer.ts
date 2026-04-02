@@ -88,14 +88,6 @@ type _TextLayerProps<DataT> = {
    * @default 0
    */
   getBorderWidth?: Accessor<DataT, number>;
-  /** Border dash array accessor: `[dashSize, gapSize]` relative to border width.
-   * @default [0, 0]
-   */
-  getBorderDashArray?: Accessor<DataT, [number, number]>;
-  /** If `true`, gaps between dashes are pickable.
-   * @default false
-   */
-  borderDashGapPickable?: boolean;
   /** The border radius of the background.
    * If a number is supplied, it is the same border radius in pixel for all corners.
    * If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
@@ -235,8 +227,6 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
-  getBorderDashArray: {type: 'accessor', value: [0, 0]},
-  borderDashGapPickable: false,
   backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
@@ -526,8 +516,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
-      getBorderDashArray,
-      borderDashGapPickable,
       getContentBox,
       backgroundBorderRadius,
       backgroundPadding,
@@ -558,8 +546,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getFillColor: getBackgroundColor,
             getLineColor: getBorderColor,
             getLineWidth: getBorderWidth,
-            getDashArray: getBorderDashArray,
-            dashGapPickable: borderDashGapPickable,
             borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
 
@@ -582,7 +568,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getFillColor: transitions.getBackgroundColor,
               getLineColor: transitions.getBorderColor,
               getLineWidth: transitions.getBorderWidth,
-              getDashArray: transitions.getBorderDashArray,
               getPixelOffset: transitions.getPixelOffset
             }
           },
@@ -595,7 +580,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getFillColor: updateTriggers.getBackgroundColor,
               getLineColor: updateTriggers.getBorderColor,
               getLineWidth: updateTriggers.getBorderWidth,
-              getDashArray: updateTriggers.getBorderDashArray,
               getPixelOffset: updateTriggers.getPixelOffset,
               getBoundingRect: {
                 getText: updateTriggers.getText,

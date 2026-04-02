@@ -42,8 +42,6 @@ type _TextBackgroundLayerProps<DataT> = {
   getFillColor?: Accessor<DataT, Color>;
   getLineColor?: Accessor<DataT, Color>;
   getLineWidth?: Accessor<DataT, number>;
-  getDashArray?: Accessor<DataT, [number, number]>;
-  dashGapPickable?: boolean;
 };
 
 export type TextBackgroundLayerProps<DataT = unknown> = _TextBackgroundLayerProps<DataT> &
@@ -67,9 +65,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   getClipRect: {type: 'accessor', value: [0, 0, -1, -1]},
   getFillColor: {type: 'accessor', value: [0, 0, 0, 255]},
   getLineColor: {type: 'accessor', value: [0, 0, 0, 255]},
-  getLineWidth: {type: 'accessor', value: 1},
-  getDashArray: {type: 'accessor', value: [0, 0]},
-  dashGapPickable: false
+  getLineWidth: {type: 'accessor', value: 1}
 };
 
 export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
@@ -143,10 +139,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         accessor: 'getLineWidth',
         defaultValue: 1
-      },
-      instanceDashArrays: {
-        size: 2,
-        accessor: 'getDashArray'
       }
     });
   }
@@ -162,15 +154,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {
-      billboard,
-      sizeScale,
-      sizeUnits,
-      sizeMinPixels,
-      sizeMaxPixels,
-      getLineWidth,
-      dashGapPickable
-    } = this.props;
+    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth} =
+      this.props;
     let {padding, borderRadius} = this.props;
 
     if (padding.length < 4) {
@@ -195,8 +180,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeUnits: UNIT[sizeUnits],
       sizeScale,
       sizeMinPixels,
-      sizeMaxPixels,
-      dashGapPickable: Boolean(dashGapPickable)
+      sizeMaxPixels
     };
     const textProps: TextModuleProps = {
       viewport: this.context.viewport

@@ -14,7 +14,6 @@ in float instanceRadius;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
-in vec2 instanceDashArrays;
 in vec3 instancePickingColors;
 
 out vec4 vFillColor;
@@ -22,7 +21,6 @@ out vec4 vLineColor;
 out vec2 unitPosition;
 out float innerUnitRadius;
 out float outerRadiusPixels;
-out vec2 vDashArray;
 
 
 void main(void) {
@@ -70,7 +68,5 @@ void main(void) {
   DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
-
-  vDashArray = instanceDashArrays;
 }
 `;

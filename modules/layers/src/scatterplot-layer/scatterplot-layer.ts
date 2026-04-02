@@ -93,17 +93,6 @@ type _ScatterplotLayerProps<DataT> = {
   antialiasing?: boolean;
 
   /**
-   * Accessor for the dash array to draw each stroke with: `[dashSize, gapSize]` relative to the stroke width.
-   * @default [0, 0]
-   */
-  getDashArray?: Accessor<DataT, [number, number]>;
-  /**
-   * If `true`, gaps between solid strokes are pickable. If `false`, only the solid strokes are pickable.
-   * @default false
-   */
-  dashGapPickable?: boolean;
-
-  /**
    * Center position accessor.
    */
   getPosition?: Accessor<DataT, Position>;
@@ -156,9 +145,6 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   filled: true,
   billboard: false,
   antialiasing: true,
-  getDashArray: {type: 'accessor', value: [0, 0]},
-  dashGapPickable: false,
-
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -225,10 +211,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         accessor: 'getLineWidth',
         defaultValue: 1
-      },
-      instanceDashArrays: {
-        size: 2,
-        accessor: 'getDashArray'
       }
     });
   }
@@ -253,7 +235,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       filled,
       billboard,
       antialiasing,
-      dashGapPickable,
       lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
@@ -264,7 +245,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       filled,
       billboard,
       antialiasing,
-      dashGapPickable: Boolean(dashGapPickable),
       radiusUnits: UNIT[radiusUnits],
       radiusScale,
       radiusMinPixels,
