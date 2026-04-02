@@ -423,6 +423,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   ): ReturnType<typeof transformParagraph> {
     const {fontAtlasManager} = this.state;
     const iconMapping = fontAtlasManager.mapping!;
+    const {baselineOffset} = fontAtlasManager.atlas!;
     const {fontSize} = fontAtlasManager.props;
     const getText = this.state.getText!;
     const {wordBreak, lineHeight, maxWidth} = this.props;
@@ -430,9 +431,10 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const paragraph = getText(object, objectInfo) || '';
     return transformParagraph(
       paragraph,
+      baselineOffset,
       lineHeight * fontSize,
       wordBreak,
-      maxWidth * fontAtlasManager.props.fontSize,
+      maxWidth * fontSize,
       iconMapping
     );
   }
@@ -473,9 +475,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       x,
       y,
       rowWidth,
-      size: [width, height]
+      size: [, height]
     } = this.transformParagraph(object, objectInfo);
-    const {baselineOffset} = this.state.fontAtlasManager.atlas!;
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -495,7 +496,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
       offsets[index++] = ((anchorX - 1) * rowWidth[i]) / 2 + x[i];
-      offsets[index++] = (anchorY * height) / 2 + baselineOffset + y[i];
+      offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
     }
     return offsets;
   };

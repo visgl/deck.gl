@@ -106,6 +106,7 @@ test('TextLayer - utils#buildMapping with cache', () => {
 test('TextLayer - utils#transformParagraph - single line', () => {
   const text = 'ab';
   const lineHeight = 4;
+  const baselineOffset = 1;
 
   const iconMapping = {
     a: {width: 1, height: 4, advance: 2, anchorX: 0.5, anchorY: 3},
@@ -114,12 +115,12 @@ test('TextLayer - utils#transformParagraph - single line', () => {
 
   const expected = {
     x: [0.5, 3],
-    y: [0, 0],
+    y: [3, 3],
     rowWidth: [5, 5],
     size: [5, 4]
   };
 
-  const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
 
   expect(transformedData).toEqual(expected);
 });
@@ -127,6 +128,7 @@ test('TextLayer - utils#transformParagraph - single line', () => {
 test('TextLayer - utils#transformParagraph - multiple lines', () => {
   const text = 'ab\nc';
   const lineHeight = 4;
+  const baselineOffset = 1;
 
   const iconMapping = {
     a: {width: 1, height: 4, advance: 2, anchorX: 0.5, anchorY: 3},
@@ -136,18 +138,19 @@ test('TextLayer - utils#transformParagraph - multiple lines', () => {
 
   const expected = {
     x: [0.5, 3.5, 0, 1],
-    y: [0, 0, 0, 4],
+    y: [3, 3, 0, 7],
     rowWidth: [6, 6, 0, 3],
     size: [6, 8]
   };
 
-  const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
   expect(transformedData).toEqual(expected);
 });
 
 test('TextLayer - utils#transformParagraph - unicode', () => {
   const text = '\u{F0004}\n\u{F0005}';
   const lineHeight = 4;
+  const baselineOffset = 1;
 
   const iconMapping = {
     ['\u{F0004}']: {width: 1, height: 4, advance: 2, anchorX: 0.5, anchorY: 3},
@@ -156,12 +159,12 @@ test('TextLayer - utils#transformParagraph - unicode', () => {
 
   const expected = {
     x: [0.5, 0, 1],
-    y: [0, 0, 4],
+    y: [3, 0, 7],
     rowWidth: [2, 0, 3],
     size: [3, 8]
   };
 
-  const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
 
   expect(transformedData).toEqual(expected);
 });
@@ -169,6 +172,7 @@ test('TextLayer - utils#transformParagraph - unicode', () => {
 test('TextLayer - utils#transformParagraph - multiple lines with line height', () => {
   const text = 'ab\nc';
   const lineHeight = 6;
+  const baselineOffset = 1;
 
   const iconMapping = {
     a: {width: 1, height: 4, advance: 2, anchorX: 0.5, anchorY: 3},
@@ -178,18 +182,19 @@ test('TextLayer - utils#transformParagraph - multiple lines with line height', (
 
   const expected = {
     x: [0.5, 3.5, 0, 1],
-    y: [0, 0, 0, 6],
+    y: [4, 4, 0, 10],
     rowWidth: [6, 6, 0, 3],
     size: [6, 12]
   };
 
-  const transformedData = transformParagraph(text, lineHeight, null, null, iconMapping);
+  const transformedData = transformParagraph(text, baselineOffset, lineHeight, null, null, iconMapping);
   expect(transformedData).toEqual(expected);
 });
 
 test('TextLayer - utils#transformParagraph - autoWrapping', () => {
   const text = 'ab cd e';
   const lineHeight = 6;
+  const baselineOffset = 1;
 
   const iconMapping = {
     a: {width: 1, height: 4, advance: 2, anchorX: 0.5, anchorY: 3},
@@ -202,12 +207,12 @@ test('TextLayer - utils#transformParagraph - autoWrapping', () => {
 
   const expected = {
     x: [0.5, 3, 5.5, 1.5, 6, 9.5, 2.5],
-    y: [0, 0, 0, 6, 6, 6, 12],
+    y: [4, 4, 4, 10, 10, 10, 16],
     rowWidth: [6, 6, 6, 10, 10, 10, 6],
     size: [10, 18]
   };
 
-  const transformedData = transformParagraph(text, lineHeight, 'break-word', 12, iconMapping);
+  const transformedData = transformParagraph(text, baselineOffset, lineHeight, 'break-word', 12, iconMapping);
   expect(transformedData).toEqual(expected);
 });
 

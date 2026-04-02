@@ -269,6 +269,8 @@ function transformRow(
  */
 export function transformParagraph(
   paragraph: string,
+  /** font property - distance from baseline to vertical center */
+  baselineOffset: number,
   /** line-height in pixels */
   lineHeight: number,
   /** CSS word-break option */
@@ -300,7 +302,8 @@ export function transformParagraph(
   // maxWidth and height of the paragraph
   const size: [number, number] = [0, 0];
   const rowSize: [number, number] = [0, 0];
-  let rowOffsetTop = 0;
+  let rowCount = 0;
+  let rowOffsetTop = baselineOffset + lineHeight / 2; // this places the top of the first row at 0
   let lineStartIndex = 0;
   let lineEndIndex = 0;
 
@@ -325,6 +328,7 @@ export function transformParagraph(
           rowWidth[j] = rowSize[0];
         }
 
+        rowCount++;
         rowOffsetTop += lineHeight;
         size[0] = Math.max(size[0], rowSize[0]);
       }
@@ -341,7 +345,7 @@ export function transformParagraph(
   }
 
   // last row
-  size[1] = rowOffsetTop;
+  size[1] = rowCount * lineHeight;
   return {x, y, rowWidth, size};
 }
 
