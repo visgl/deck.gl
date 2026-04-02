@@ -13,7 +13,7 @@ import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
-import {DEFAULT_PARAMETERS, deepEqual} from './fixtures';
+import {DEFAULT_PARAMETERS, approxDeepEqual} from './fixtures';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -58,7 +58,7 @@ test('MapboxOverlay#overlaid', async () => {
   expect(deck, 'Deck instance is created').toBeTruthy();
 
   expect(
-    deepEqual(deck.props.viewState, {
+    approxDeepEqual(deck.props.viewState, {
       longitude: -122.45,
       latitude: 37.78,
       zoom: 14,
@@ -74,7 +74,7 @@ test('MapboxOverlay#overlaid', async () => {
   expect(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly').toBeTruthy();
   expect('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set').toBeFalsy();
 
-  expect(deepEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
+  expect(approxDeepEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
   expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
   overlay.setProps({
@@ -83,7 +83,7 @@ test('MapboxOverlay#overlaid', async () => {
 
   const renderPromise = waitForRender(map, () => {
     expect(
-      deepEqual(deck.props.viewState, {
+      approxDeepEqual(deck.props.viewState, {
         longitude: 0.45,
         latitude: 51.47,
         zoom: 4,
@@ -118,7 +118,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', async () => {
   expect(deck, 'Deck instance is created').toBeTruthy();
 
   expect(
-    deepEqual(deck.props.viewState, {
+    approxDeepEqual(deck.props.viewState, {
       longitude: -122.45,
       latitude: 37.78,
       zoom: 14,
@@ -136,7 +136,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', async () => {
   expect(deck.props.layers.length, 'Layers are empty').toBe(0);
   expect('layers' in overlay._props, 'Overlay layers arent set').toBeFalsy();
 
-  expect(deepEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
+  expect(approxDeepEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
   expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
   overlay.setProps({
@@ -145,7 +145,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', async () => {
 
   const renderPromise = waitForRender(map, () => {
     expect(
-      deepEqual(deck.props.viewState, {
+      approxDeepEqual(deck.props.viewState, {
         longitude: 0.45,
         latitude: 51.47,
         zoom: 4,
@@ -157,7 +157,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', async () => {
       'View state is updated'
     ).toBeTruthy();
 
-    expect(deepEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
+    expect(approxDeepEqual(deck.props.parameters, {}), 'Parameters are empty').toBeTruthy();
     expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
 
     map.removeControl(overlay);
@@ -205,13 +205,13 @@ webglTest('MapboxOverlay#interleaved', async () => {
       repeat: true
     };
     expect(
-      deepEqual(overlay._deck.props.viewState, VIEW_STATE),
+      approxDeepEqual(overlay._deck.props.viewState, VIEW_STATE),
       'View state is set correcly'
     ).toBeTruthy();
     expect('viewState' in overlay._props, 'Overlay viewState arent set').toBeFalsy();
 
     expect(
-      deepEqual(overlay._deck.props.parameters, {
+      approxDeepEqual(overlay._deck.props.parameters, {
         ...DEFAULT_PARAMETERS,
         depthWriteEnabled: false,
         cullMode: 'back'
@@ -219,7 +219,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
       'Parameters are set correctly'
     ).toBeTruthy();
     expect(
-      deepEqual(overlay._props.parameters, {
+      approxDeepEqual(overlay._props.parameters, {
         depthWriteEnabled: false,
         cullMode: 'back'
       }),
@@ -294,7 +294,7 @@ webglTest('MapboxOverlay#interleavedNoInitialLayers', async () => {
     expect('layers' in overlay._props, 'Overlay layers arent set').toBeFalsy();
 
     expect(
-      deepEqual(overlay._deck.props.parameters, DEFAULT_PARAMETERS),
+      approxDeepEqual(overlay._deck.props.parameters, DEFAULT_PARAMETERS),
       'Parameters are set correctly'
     ).toBeTruthy();
     expect('parameters' in overlay._props, 'Overlay parameters arent set').toBeFalsy();
@@ -311,14 +311,14 @@ webglTest('MapboxOverlay#interleavedNoInitialLayers', async () => {
     expect(map.getLayer('deck-layer-group-last'), 'Layer group is added').toBeTruthy();
 
     expect(
-      deepEqual(overlay._deck.props.parameters, {
+      approxDeepEqual(overlay._deck.props.parameters, {
         ...DEFAULT_PARAMETERS,
         depthWriteEnabled: false
       }),
       'Parameters are updated correctly'
     ).toBeTruthy();
     expect(
-      deepEqual(overlay._props.parameters, {
+      approxDeepEqual(overlay._props.parameters, {
         depthWriteEnabled: false
       }),
       'Overlay parameters are updated correctly'

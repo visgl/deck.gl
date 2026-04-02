@@ -19,7 +19,7 @@ export const DEFAULT_PARAMETERS = {
 };
 
 /** Deep equal using math.gl's tolerance-based float comparison for numeric leaf values */
-export function deepEqual(actual, expected) {
+export function approxDeepEqual(actual, expected) {
   if (equals(actual, expected)) {
     return true;
   }
@@ -33,7 +33,7 @@ export function deepEqual(actual, expected) {
     return false;
   }
   for (const key of keys1) {
-    if (!deepEqual(actual[key], expected[key])) {
+    if (!approxDeepEqual(actual[key], expected[key])) {
       return false;
     }
   }
