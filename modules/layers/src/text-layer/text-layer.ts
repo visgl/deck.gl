@@ -444,7 +444,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     object,
     objectInfo
   ) => {
-    let {
+    const {
       size: [width, height]
     } = this.transformParagraph(object, objectInfo);
 
