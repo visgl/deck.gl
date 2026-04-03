@@ -136,7 +136,7 @@ test('Attribute#setConstantValue', () => {
   ).toBeTruthy();
   attribute.needsRedraw({clearChangedFlags: true});
 
-  attribute.setConstantValue(this, [0, 0, 1]);
+  attribute.setConstantValue(this, [0, 0, 0]);
   expect(
     attribute.getValue().positions instanceof Buffer,
     'WebGL attribute constant uses native constant attributes'
