@@ -4,7 +4,10 @@
 
 import {test, expect} from 'vitest';
 import {picking} from '@deck.gl/core';
-import {getShaderModuleSource, getShaderModuleUniformLayoutValidationResult} from '@luma.gl/shadertools';
+import {
+  getShaderModuleSource,
+  getShaderModuleUniformLayoutValidationResult
+} from '@luma.gl/shadertools';
 
 test('picking#wgsl uniform layout matches luma module contract', () => {
   const validationResult = getShaderModuleUniformLayoutValidationResult(picking, 'wgsl');
