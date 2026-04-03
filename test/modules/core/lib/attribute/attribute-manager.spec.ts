@@ -30,6 +30,10 @@ test('AttributeManager constructor', () => {
 test('AttributeManager.add', () => {
   const attributeManager = new AttributeManager(device);
 
+  // Now autodeduced from shader declarations
+  // expect(//   () => attributeManager.add({positions: {update}}), //   'AttributeManager.add - throws on missing attribute size'
+  //).toThrow();
+
   expect(
     () => attributeManager.add({positions: {size: 2}}),
     'AttributeManager.add - throws on missing attribute update'
@@ -55,15 +59,19 @@ test('AttributeManager.update', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
 
+  let attribute;
+
+  // First update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 1,
     data: [{}]
   });
 
-  let attribute = attributeManager.getAttributes()['positions'];
+  attribute = attributeManager.getAttributes()['positions'];
   expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
   expect(attribute.value[1], 'attribute value is correct').toBe(1);
 
+  // Second update without invalidation, should not update
   attribute.value[1] = 2;
   attributeManager.update({
     numInstances: 1,
@@ -71,8 +79,10 @@ test('AttributeManager.update', () => {
   });
 
   attribute = attributeManager.getAttributes()['positions'];
+  expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
   expect(attribute.value[1], 'Second update, attribute value was not changed').toBe(2);
 
+  // Third update, with invalidation, should update
   attributeManager.invalidateAll();
   attributeManager.update({
     numInstances: 1,
@@ -80,6 +90,7 @@ test('AttributeManager.update', () => {
   });
 
   attribute = attributeManager.getAttributes()['positions'];
+  expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
   expect(attribute.value[1], 'Third update, attribute value was updated').toBe(1);
 });
 
@@ -87,6 +98,7 @@ test('AttributeManager.update - 0 numInstances', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
 
+  // First update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 0,
     data: []
@@ -123,6 +135,7 @@ test('AttributeManager.update - constant attribute', () => {
   attribute.constant = true;
   attribute.value = [0, 1, 0];
 
+  // First update, should set constant value
   attributeManager.update({
     numInstances: 2,
     props: {getColor: [0.5, 0.75, 0.125]},
@@ -136,6 +149,7 @@ test('AttributeManager.update - constant attribute', () => {
   attribute.constant = false;
   attributeManager.invalidate('colors');
 
+  // second update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 2,
     props: {getColor: [0.5, 0.75, 0.125]},
@@ -148,6 +162,8 @@ test('AttributeManager.update - constant attribute', () => {
   expect(attribute.state.constant, 'constant value is set').toBeTruthy();
 
   attributeManager.invalidate('colors');
+
+  // third update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 2,
     props: {getColor: x => [x, x, x]},
@@ -161,6 +177,7 @@ test('AttributeManager.update - constant attribute', () => {
 
 test('AttributeManager.update - external virtual buffers', () => {
   const attributeManager = new AttributeManager(device);
+
   const dummyUpdate = () => {
     throw new Error('updater should not be called when external buffer is present');
   };
@@ -170,6 +187,7 @@ test('AttributeManager.update - external virtual buffers', () => {
     colors: {size: 3, type: 'uint8', update: dummyUpdate}
   });
 
+  // First update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 1,
     buffers: {
@@ -209,6 +227,7 @@ test('AttributeManager.update - external virtual buffers', () => {
 
 test('AttributeManager.update - external logical buffers', () => {
   const attributeManager = new AttributeManager(device);
+
   const dummyAccessor = () => {
     throw new Error('accessor should not be called when external buffer is present');
   };
@@ -219,6 +238,7 @@ test('AttributeManager.update - external logical buffers', () => {
     types: {size: 1, accessor: 'getType', transform: x => x - 65}
   });
 
+  // First update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 2,
     data: {length: 2},
@@ -250,6 +270,7 @@ test('AttributeManager.update - external logical buffers', () => {
 
 test('AttributeManager.update - external logical buffers - variable width', () => {
   const attributeManager = new AttributeManager(device);
+
   const dummyAccessor = () => {
     throw new Error('accessor should not be called when external buffer is present');
   };
@@ -259,6 +280,7 @@ test('AttributeManager.update - external logical buffers - variable width', () =
     colors: {size: 4, type: 'uint8', accessor: 'getColor', defaultValue: [0, 0, 0, 255]}
   });
 
+  // First update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 3,
     startIndices: [0, 2],
@@ -313,9 +335,13 @@ test('AttributeManager.invalidate', () => {
 test('AttributeManager.getBufferLayouts', () => {
   const attributeManager = new AttributeManager(device);
   attributeManager.add({
+    // indexed attribute
     indices: {size: 1, isIndexed: true, update},
+    // non-instanced attribute
     colors: {size: 4, type: 'unorm8', stepMode: 'vertex', accessor: 'getColor'},
+    // instanced attribute
     instanceColors: {size: 4, type: 'unorm8', stepMode: 'instance', accessor: 'getColor'},
+    // dynamically assigned stepMode
     positions: {size: 3, type: 'float64', fp64: true, stepMode: 'dynamic', accessor: 'getPosition'}
   });
 

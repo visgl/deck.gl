@@ -13,9 +13,10 @@ import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
-import {bufferLayoutEqual} from './gl-utils';
+import {bufferLayoutEqual, getBufferAttributeLayout, getStride} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
-import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/core';
+import type {Device, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -198,7 +199,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     this.state.needsRedraw = this.state.needsRedraw || reason;
   }
 
-  allocate(numInstances: number): boolean {
+  allocate(numInstances: number, generateBuffer: boolean = true): boolean {
     const {state, settings} = this;
 
     if (settings.noAlloc) {
@@ -207,7 +208,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     if (settings.update) {
-      super.allocate(numInstances, state.updateRanges !== range.FULL);
+      super.allocate(numInstances, state.updateRanges !== range.FULL, generateBuffer);
       return true;
     }
 
@@ -218,12 +219,14 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     numInstances,
     data,
     props,
-    context
+    context,
+    generateBuffer = true
   }: {
     numInstances: number;
     data: any;
     props: any;
     context: any;
+    generateBuffer?: boolean;
   }): boolean {
     if (!this.needsUpdate()) {
       return false;
@@ -243,14 +246,18 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       if (!this.value) {
         // no value was assigned during update
       } else if (
+        !generateBuffer ||
         this.constant ||
         !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
-        this.setData({
-          value: this.value,
-          constant: this.constant
-        });
+        this.setData(
+          {
+            value: this.value,
+            constant: this.constant
+          },
+          generateBuffer
+        );
         // Setting attribute.constant in updater is a legacy approach that interferes with allocation in the next cycle
         // Respect it here but reset after use
         this.constant = false;
@@ -289,7 +296,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         this.settings.transform && context ? this.settings.transform.call(context, value) : value;
 
       if (!generateBuffer) {
-        const hasChanged = this.setData({constant: true, value: transformedValue});
+        const hasChanged = this.setData({constant: true, value: transformedValue}, false);
         this.constant = false;
         this.clearNeedsUpdate();
 
@@ -300,7 +307,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         return hasChanged;
       }
 
-      return this.setConstantBufferValue(transformedValue, this.numInstances);
+      return this.setConstantBufferValue(transformedValue, this.numInstances, generateBuffer);
     }
 
     // TODO(ibgreen): WebGPU does not support constant values,
@@ -329,7 +336,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return true;
   }
 
-  setConstantBufferValue(value: any, numInstances: number): boolean {
+  setConstantBufferValue(
+    value: any,
+    numInstances: number,
+    generateBuffer: boolean = true
+  ): boolean {
     const ArrayType = this.settings.defaultType;
     const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
     if (this._hasConstantBufferValue(constantValue, numInstances)) {
@@ -344,7 +355,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       repeatedValue.set(constantValue, i);
     }
 
-    const hasChanged = this.setData({value: repeatedValue});
+    const hasChanged = this.setData({value: repeatedValue}, generateBuffer);
     this.constant = false;
     this.clearNeedsUpdate();
 
@@ -405,7 +416,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Otherwise use the auto updater for transform/normalization
   setBinaryValue(
     buffer?: TypedArray | Buffer | BinaryAttribute,
-    startIndices: NumericArray | null = null
+    startIndices: NumericArray | null = null,
+    generateBuffer: boolean = true
   ): boolean {
     const {state, settings} = this;
 
@@ -449,7 +461,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     this.clearNeedsUpdate();
-    this.setData(buffer);
+    this.setData(buffer, generateBuffer);
     return true;
   }
 
@@ -476,6 +488,157 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       );
     }
     return result;
+  }
+
+  /**
+   * Classifies the current attribute output into regular vertex buffers, constants,
+   * or a dedicated index buffer.
+   */
+  getPublishedValues(bufferName?: string): {
+    buffers: Record<string, Buffer>;
+    constants: Record<string, TypedArray>;
+    indexBuffer: Buffer | null;
+  } {
+    const buffers: Record<string, Buffer> = {};
+    const constants: Record<string, TypedArray> = {};
+    let indexBuffer: Buffer | null = null;
+
+    for (const [name, value] of Object.entries(this.getValue())) {
+      if (value instanceof Buffer) {
+        if (this.settings.isIndexed) {
+          indexBuffer = value;
+        } else {
+          buffers[bufferName || name] = value;
+        }
+      } else if (value) {
+        constants[name] = value;
+      }
+    }
+
+    return {buffers, constants, indexBuffer};
+  }
+
+  /**
+   * Returns whether this attribute can participate in a packed shared buffer for
+   * the given vertex step mode, ignoring whether data has been allocated yet.
+   */
+  supportsPackedBuffer(stepMode: 'vertex' | 'instance'): boolean {
+    return (
+      !this.doublePrecision &&
+      !this.settings.isIndexed &&
+      this.getBufferLayout().stepMode === stepMode
+    );
+  }
+
+  /**
+   * Returns whether this attribute can be packed into a shared buffer using its
+   * current CPU-side typed array contents.
+   */
+  canBePacked(): boolean {
+    const stepMode = this.getBufferLayout().stepMode as 'vertex' | 'instance';
+    return ArrayBuffer.isView(this.value) && this.supportsPackedBuffer(stepMode);
+  }
+
+  /** Returns the source byte stride this attribute contributes to a packed group. */
+  getPackedBufferStride(): number {
+    return getStride(this.getAccessor());
+  }
+
+  /** Returns the padded byte length reserved for this attribute inside a packed group. */
+  getPackedBufferByteLength(byteStride: number): number {
+    return byteStride * (this.numInstances + 2);
+  }
+
+  /**
+   * Builds the packed buffer layout entries for this attribute and any shader
+   * attribute views at the supplied byte offset.
+   */
+  getPackedBufferLayout(
+    byteStride: number,
+    baseOffset: number,
+    deviceType: Device['type']
+  ): {
+    attributes: BufferAttributeLayout[];
+    attributeOffsets: Record<string, number>;
+    attributeNames: string[];
+  } {
+    const accessor = this.getAccessor();
+    const attributes: BufferAttributeLayout[] = [];
+    const attributeOffsets: Record<string, number> = {};
+    const attributeNames: string[] = [];
+    const stride = getStride(accessor);
+    const attributeOffset =
+      baseOffset + (accessor.vertexOffset || 0) * stride + (accessor.offset || 0);
+    const layout = getBufferAttributeLayout(
+      this.id,
+      {...accessor, stride: byteStride, offset: attributeOffset},
+      deviceType
+    );
+
+    if (layout) {
+      attributes.push(layout);
+      attributeOffsets[this.id] = attributeOffset;
+      attributeNames.push(this.id);
+    }
+
+    if (this.settings.shaderAttributes) {
+      for (const [name, def] of Object.entries(this.settings.shaderAttributes)) {
+        const shaderOffset =
+          attributeOffset +
+          (def.vertexOffset || 0) * byteStride +
+          (def.elementOffset || 0) * accessor.bytesPerElement;
+        const shaderLayout = getBufferAttributeLayout(
+          name,
+          {...accessor, ...def, stride: byteStride, offset: shaderOffset},
+          deviceType
+        );
+        if (shaderLayout) {
+          attributes.push(shaderLayout);
+          attributeOffsets[name] = shaderOffset;
+          attributeNames.push(name);
+        }
+      }
+    }
+
+    return {attributes, attributeOffsets, attributeNames};
+  }
+
+  /** Materializes this attribute's packed byte slice for upload into a shared buffer. */
+  getPackedBufferData(byteStride: number): Uint8Array {
+    const accessor = this.getAccessor();
+    const sourceStride = getStride(accessor);
+    const isConstant = this.constant || this.isConstant;
+    const instanceCount = Math.max(this.numInstances, isConstant ? 1 : 0);
+    const byteLength = byteStride * instanceCount;
+    const target = new Uint8Array(byteLength);
+    const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
+
+    if (isConstant) {
+      const value = this.value as TypedArray;
+      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+      for (let i = 0; i < instanceCount; i++) {
+        target.set(bytes, i * byteStride);
+      }
+      return target;
+    }
+
+    const value = this.value as TypedArray | null;
+    if (!value) {
+      return target;
+    }
+    const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+
+    for (let i = 0; i < this.numInstances; i++) {
+      const srcStart = sourceOffset + i * sourceStride;
+      target.set(bytes.subarray(srcStart, srcStart + sourceStride), i * byteStride);
+    }
+
+    return target;
+  }
+
+  /** Writes this attribute's packed byte slice into a destination shared buffer. */
+  writePackedBuffer(buffer: Buffer, byteStride: number, byteOffset: number): void {
+    buffer.write(this.getPackedBufferData(byteStride), byteOffset);
   }
 
   /** Generate WebGPU-style buffer layout descriptor from this attribute */

@@ -360,7 +360,8 @@ export default class DataColumn<Options, State> {
           buffer?: Buffer;
           /** Set to `true` if supplying float values to a unorm attribute */
           normalized?: boolean;
-        } & Partial<BufferAccessor>)
+        } & Partial<BufferAccessor>),
+    createBuffer: boolean = true
   ): boolean {
     const {state} = this;
 
@@ -413,6 +414,10 @@ export default class DataColumn<Options, State> {
       state.externalBuffer = null;
       state.constant = true;
       this.value = ArrayBuffer.isView(value) ? value : new Float32Array(value);
+      if (!createBuffer && this._buffer) {
+        this._buffer.destroy();
+        this._buffer = null;
+      }
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;
@@ -443,12 +448,19 @@ export default class DataColumn<Options, State> {
 
       // A small over allocation is used as safety margin
       // Shader attributes may try to access this buffer with bigger offsets
-      const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
-      if (!buffer || buffer.byteLength < requiredBufferSize) {
-        buffer = this._createBuffer(requiredBufferSize);
-      }
+      if (!createBuffer) {
+        if (this._buffer) {
+          this._buffer.destroy();
+          this._buffer = null;
+        }
+      } else {
+        const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
+        if (!buffer || buffer.byteLength < requiredBufferSize) {
+          buffer = this._createBuffer(requiredBufferSize);
+        }
 
-      buffer.write(value, byteOffset);
+        buffer.write(value, byteOffset);
+      }
     }
 
     this.setAccessor(accessor);
@@ -478,7 +490,7 @@ export default class DataColumn<Options, State> {
     );
   }
 
-  allocate(numInstances: number, copy: boolean = false): boolean {
+  allocate(numInstances: number, copy: boolean = false, createBuffer: boolean = true): boolean {
     const {state} = this;
     const oldValue = state.allocatedValue;
 
@@ -494,7 +506,12 @@ export default class DataColumn<Options, State> {
     const {byteOffset} = this;
     let {buffer} = this;
 
-    if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
+    if (!createBuffer) {
+      if (buffer) {
+        buffer.destroy();
+        this._buffer = null;
+      }
+    } else if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
       buffer = this._createBuffer(value.byteLength + byteOffset);
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer

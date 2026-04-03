@@ -152,6 +152,37 @@ test('GroupedAttributeManager.getPackedBufferAttributes - preserves shared buffe
   expect(updatedBuffer).toBe(initialBuffer);
 });
 
+test('GroupedAttributeManager.update - shared packed attributes skip standalone buffers', () => {
+  const attributeManager = new GroupedAttributeManager(createWebGPUDevice());
+  attributeManager.addInstanced({
+    instanceSizes: {size: 1, accessor: 'getSize', bufferGroup: 'group-a'},
+    instanceAngles: {size: 1, accessor: 'getAngle', bufferGroup: 'group-a'},
+    instancePositions: {size: 3, accessor: 'getPosition'}
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {angle: 10, position: [0, 0, 0]},
+      {angle: 20, position: [1, 1, 1]}
+    ],
+    props: {
+      getSize: 3,
+      getAngle: (x: {angle: number}) => x.angle,
+      getPosition: (x: {position: number[]}) => x.position
+    },
+    transitions: {}
+  });
+
+  const attributes = attributeManager.getAttributes();
+  expect(attributes.instanceAngles.getBuffer()).toBeNull();
+  expect(attributes.instanceSizes.isConstant).toBeTruthy();
+  expect(attributes.instancePositions.getBuffer()).toBeTruthy();
+  expect(
+    attributeManager.getPublishedAttributes(attributeManager.getAttributes()).buffers['group-a']
+  ).toBeTruthy();
+});
+
 test('GroupedAttributeManager.getBufferLayouts - grouped layout stays stable across accessor/constant flips', () => {
   const attributeManager = new GroupedAttributeManager(device);
   attributeManager.addInstanced({

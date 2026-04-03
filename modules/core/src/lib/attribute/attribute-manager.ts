@@ -54,9 +54,9 @@ export default class AttributeManager {
   needsRedraw: string | boolean;
   userData: any;
 
-  private stats?: Stats;
-  private attributeTransitionManager: AttributeTransitionManager;
-  private mergeBoundsMemoized: any = memoize(mergeBounds);
+  protected stats?: Stats;
+  protected attributeTransitionManager: AttributeTransitionManager;
+  protected mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
     device: Device,
@@ -86,8 +86,10 @@ export default class AttributeManager {
       timeline
     });
 
-    // For debugging sanity, prevent uninitialized members
-    Object.seal(this);
+    // For debugging sanity, prevent uninitialized members on the base class.
+    if (new.target === AttributeManager) {
+      Object.seal(this);
+    }
   }
 
   finalize() {
@@ -178,6 +180,7 @@ export default class AttributeManager {
     buffers: any;
     context: any;
   }) {
+    // keep track of whether some attributes are updated
     let updated = false;
 
     debug(TRACE_UPDATE_START, this);
@@ -234,9 +237,7 @@ export default class AttributeManager {
 
     if (this.stats) {
       this.stats.get('Update Attributes').timeEnd();
-      if (updated) {
-        this.stats.get('Attributes updated').incrementCount();
-      }
+      if (updated) this.stats.get('Attributes updated').incrementCount();
     }
 
     this.attributeTransitionManager.update({
@@ -246,6 +247,8 @@ export default class AttributeManager {
     });
   }
 
+  // Update attribute transition to the current timestamp
+  // Returns `true` if any transition is in progress
   updateTransition() {
     const {attributeTransitionManager} = this;
     const transitionUpdated = attributeTransitionManager.run();
@@ -253,19 +256,33 @@ export default class AttributeManager {
     return transitionUpdated;
   }
 
+  /**
+   * Returns all attribute descriptors
+   * Note: Format matches luma.gl Model/Program.setAttributes()
+   * @return {Object} attributes - descriptors
+   */
   getAttributes(): {[id: string]: Attribute} {
     return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
   }
 
+  /**
+   * Computes the spatial bounds of a given set of attributes
+   */
   getBounds(attributeNames: string[]) {
     const bounds = attributeNames.map(attributeName => this.attributes[attributeName]?.getBounds());
     return this.mergeBoundsMemoized(bounds);
   }
 
+  /**
+   * Returns changed attribute descriptors
+   * This indicates which WebGLBuffers need to be updated
+   * @return {Object} attributes - descriptors
+   */
   getChangedAttributes(opts: {clearChangedFlags?: boolean} = {clearChangedFlags: false}): {
     [id: string]: Attribute;
   } {
     const {attributes, attributeTransitionManager} = this;
+
     const changedAttributes = {...attributeTransitionManager.getAttributes()};
 
     for (const attributeName in attributes) {
@@ -278,14 +295,26 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  getBufferLayouts(modelInfo?: {isInstanced?: boolean}): BufferLayout[] {
+  /** Generate WebGPU-style buffer layout descriptors from all attributes */
+  getBufferLayouts(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {
+      /** Whether the model is instanced */
+      isInstanced?: boolean;
+    }
+  ): BufferLayout[] {
     return Object.values(this.getAttributes()).map(attribute =>
       attribute.getBufferLayout(modelInfo)
     );
   }
 
-  private _add(
+  // PRIVATE METHODS
+
+  /** Register new attributes */
+  protected _add(
+    /** A map from attribute name to attribute descriptors */
     attributes: {[id: string]: AttributeOptions},
+    /** Additional attribute settings to pass to all attributes */
     overrideOptions?: Partial<AttributeOptions>
   ) {
     for (const attributeName in attributes) {
@@ -298,6 +327,7 @@ export default class AttributeManager {
         ...overrideOptions
       };
 
+      // Initialize the attribute descriptor, with WebGL and metadata fields
       this.attributes[attributeName] = new Attribute(this.device, props);
     }
 
@@ -305,7 +335,7 @@ export default class AttributeManager {
   }
 
   // build updateTrigger name to attribute name mapping
-  private _mapUpdateTriggersToAttributes() {
+  protected _mapUpdateTriggersToAttributes() {
     const triggers: {[name: string]: string[]} = {};
 
     for (const attributeName in this.attributes) {
@@ -321,7 +351,7 @@ export default class AttributeManager {
     this.updateTriggers = triggers;
   }
 
-  private _invalidateTrigger(
+  protected _invalidateTrigger(
     triggerName: string,
     dataRange?: {startRow?: number; endRow?: number}
   ): string[] {
@@ -339,7 +369,7 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  private _updateAttribute(opts: {
+  protected _updateAttribute(opts: {
     attribute: Attribute;
     numInstances: number;
     data: any;
@@ -361,6 +391,7 @@ export default class AttributeManager {
       debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
+    // Calls update on any buffers that need update
     const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
