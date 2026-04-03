@@ -716,7 +716,7 @@ Below is an interactive demo of the content box clipping and alignment behavior.
 </iframe>
 
 
-You may observe that text simply disappears with a content box is specified. This is likely because the content box is "too tight" - the characters bounding boxes interset with the content box, resulting in them being clipped at all times. This is because for most fonts, the actual bounding box of the glyphs may be larger than the default line height. For example, the Arial fontface with the default `getSize: 32` and `lineHeight: 1` produces a single-line text block of 32px heigh, but glyphs could be as tall as 36px. If the borders of the content box are right against the text box, then taller glyphs will be clipped. This can be mitigated by either setting a padding with `getPixelOffset`, or using a larger `lineHeight`.
+You may observe that text simply disappears when a content box is specified. This is likely because the content box is "too tight" - the characters' bounding boxes interset with the content box, resulting in them being clipped at all times. This is because for many fonts, the actual dimensions of the glyphs can be larger than the number indicated by font size. For example, the Arial fontface with the default `getSize: 32` and `lineHeight: 1` produces a single-line text block of 32px heigh, but glyphs could be as tall as 36px. If the borders of the content box are right against the text block, then taller glyphs will be clipped. This can be mitigated by either setting a padding with `getPixelOffset`, or using a larger `lineHeight`.
 
 ## Source
 
