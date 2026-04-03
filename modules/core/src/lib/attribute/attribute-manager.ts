@@ -97,24 +97,44 @@ export default class AttributeManager {
     this.attributeTransitionManager.finalize();
   }
 
+  // Returns the redraw flag, optionally clearing it.
+  // Redraw flag will be set if any attributes attributes changed since
+  // flag was last cleared.
+  //
+  // @param {String} [clearRedrawFlags=false] - whether to clear the flag
+  // @return {false|String} - reason a redraw is needed.
   getNeedsRedraw(opts: {clearRedrawFlags?: boolean} = {clearRedrawFlags: false}): string | false {
     const redraw = this.needsRedraw;
     this.needsRedraw = this.needsRedraw && !opts.clearRedrawFlags;
     return redraw && this.id;
   }
 
+  // Sets the redraw flag.
+  // @param {Boolean} redraw=true
   setNeedsRedraw() {
     this.needsRedraw = true;
   }
 
+  // Adds attributes
   add(attributes: {[id: string]: AttributeOptions}) {
     this._add(attributes);
   }
 
+  // Adds attributes
   addInstanced(attributes: {[id: string]: AttributeOptions}) {
     this._add(attributes, {stepMode: 'instance'});
   }
 
+  /**
+   * Removes attributes
+   * Takes an array of attribute names and delete them from
+   * the attribute map if they exists
+   *
+   * @example
+   * attributeManager.remove(['position']);
+   *
+   * @param {Object} attributeNameArray - attribute name array (see above)
+   */
   remove(attributeNameArray: string[]) {
     for (const name of attributeNameArray) {
       if (this.attributes[name] !== undefined) {
@@ -124,8 +144,10 @@ export default class AttributeManager {
     }
   }
 
+  // Marks an attribute for update
   invalidate(triggerName: string, dataRange?: {startRow?: number; endRow?: number}) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
+    // For performance tuning
     debug(TRACE_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
@@ -133,9 +155,11 @@ export default class AttributeManager {
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
+    // For performance tuning
     debug(TRACE_INVALIDATE, this, 'all');
   }
 
+  // Ensure all attribute buffers are updated from props or data.
   // eslint-disable-next-line complexity
   update({
     data,
@@ -186,7 +210,10 @@ export default class AttributeManager {
         attribute.setConstantValue(context, props[accessorName])
       ) {
         // Step 3: try set constant value from props
+        // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
+        // This may happen when setBinaryValue falls through to use the auto updater
       } else if (attribute.needsUpdate()) {
+        // Step 4: update via updater callback
         updated = true;
         this._updateAttribute({
           attribute,
@@ -201,6 +228,7 @@ export default class AttributeManager {
     }
 
     if (updated) {
+      // Only initiate alloc/update (and logging) if actually needed
       debug(TRACE_UPDATE_END, this, numInstances);
     }
 
@@ -276,6 +304,7 @@ export default class AttributeManager {
     this._mapUpdateTriggersToAttributes();
   }
 
+  // build updateTrigger name to attribute name mapping
   private _mapUpdateTriggersToAttributes() {
     const triggers: {[name: string]: string[]} = {};
 
@@ -321,6 +350,8 @@ export default class AttributeManager {
     debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.constant) {
+      // The attribute is flagged as constant outside of an update cycle
+      // Skip allocation and updater call
       // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
       attribute.setConstantValue(opts.context, attribute.value);
       return;

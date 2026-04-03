@@ -324,7 +324,7 @@ export default class GroupedAttributeManager {
         }
       } else if (
         group.attributes.length === 1 &&
-        group.attributes[0].isConstant &&
+        (group.attributes[0].constant || group.attributes[0].isConstant) &&
         !this.generateConstantAttributes
       ) {
         const values = group.attributes[0].getValue();
@@ -333,7 +333,10 @@ export default class GroupedAttributeManager {
             constants[name] = value;
           }
         }
-      } else if (group.attributes.length === 1 && !group.attributes[0].isConstant) {
+      } else if (
+        group.attributes.length === 1 &&
+        !(group.attributes[0].constant || group.attributes[0].isConstant)
+      ) {
         const values = group.attributes[0].getValue();
         for (const [name, value] of Object.entries(values)) {
           if (value instanceof Buffer) {
@@ -348,7 +351,7 @@ export default class GroupedAttributeManager {
         buffers[group.id] = buffer;
         if (!this.generateConstantAttributes) {
           for (const attribute of group.attributes) {
-            if (!attribute.isConstant) {
+            if (!(attribute.constant || attribute.isConstant)) {
               continue;
             }
             const values = attribute.getValue();
@@ -570,7 +573,7 @@ export default class GroupedAttributeManager {
 
     if (!state || layoutChanged) {
       for (const attribute of group.attributes) {
-        if (attribute.isConstant && !this.generateConstantAttributes) {
+        if ((attribute.constant || attribute.isConstant) && !this.generateConstantAttributes) {
           continue;
         }
         buffer.write(
@@ -583,7 +586,7 @@ export default class GroupedAttributeManager {
         if (!changedAttributes[attribute.id]) {
           continue;
         }
-        if (attribute.isConstant && !this.generateConstantAttributes) {
+        if ((attribute.constant || attribute.isConstant) && !this.generateConstantAttributes) {
           continue;
         }
         buffer.write(
@@ -600,12 +603,15 @@ export default class GroupedAttributeManager {
   private _getPackedAttributeData(attribute: Attribute, byteStride: number): Uint8Array {
     const accessor = attribute.getAccessor();
     const sourceStride = getStride(accessor);
-    const instanceCount = Math.max(attribute.numInstances, attribute.isConstant ? 1 : 0);
+    const instanceCount = Math.max(
+      attribute.numInstances,
+      attribute.constant || attribute.isConstant ? 1 : 0
+    );
     const byteLength = byteStride * instanceCount;
     const target = new Uint8Array(byteLength);
     const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
 
-    if (attribute.isConstant) {
+    if (attribute.constant || attribute.isConstant) {
       const value = attribute.value as TypedArray;
       const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
       for (let i = 0; i < instanceCount; i++) {

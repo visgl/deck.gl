@@ -37,7 +37,7 @@ test('AttributeManager.add', () => {
 
   attributeManager.add({positions: {size: 2, accessor: 'getPosition', update}});
   expect(
-    attributeManager.getAttributes().positions,
+    attributeManager.getAttributes()['positions'],
     'AttributeManager.add - add attribute successful'
   ).toBeTruthy();
   expect(
@@ -46,7 +46,7 @@ test('AttributeManager.add', () => {
   ).toEqual({positions: ['positions'], getPosition: ['positions']});
   attributeManager.addInstanced({instancePositions: {size: 2, accessor: 'getPosition', update}});
   expect(
-    attributeManager.getAttributes().instancePositions.settings.stepMode,
+    attributeManager.getAttributes()['instancePositions'].settings.stepMode,
     'AttributeManager.addInstanced creates attribute with stepMode:instance'
   ).toBe('instance');
 });
@@ -60,7 +60,7 @@ test('AttributeManager.update', () => {
     data: [{}]
   });
 
-  let attribute = attributeManager.getAttributes().positions;
+  let attribute = attributeManager.getAttributes()['positions'];
   expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
   expect(attribute.value[1], 'attribute value is correct').toBe(1);
 
@@ -70,7 +70,7 @@ test('AttributeManager.update', () => {
     data: [{}]
   });
 
-  attribute = attributeManager.getAttributes().positions;
+  attribute = attributeManager.getAttributes()['positions'];
   expect(attribute.value[1], 'Second update, attribute value was not changed').toBe(2);
 
   attributeManager.invalidateAll();
@@ -79,7 +79,7 @@ test('AttributeManager.update', () => {
     data: [{}]
   });
 
-  attribute = attributeManager.getAttributes().positions;
+  attribute = attributeManager.getAttributes()['positions'];
   expect(attribute.value[1], 'Third update, attribute value was updated').toBe(1);
 });
 
@@ -92,7 +92,7 @@ test('AttributeManager.update - 0 numInstances', () => {
     data: []
   });
 
-  const attribute = attributeManager.getAttributes().positions;
+  const attribute = attributeManager.getAttributes()['positions'];
   expect(ArrayBuffer.isView(attribute.value), 'attribute has typed array').toBeTruthy();
 });
 
@@ -119,7 +119,7 @@ test('AttributeManager.update - constant attribute', () => {
     }
   });
 
-  const attribute = attributeManager.getAttributes().colors;
+  const attribute = attributeManager.getAttributes()['colors'];
   attribute.constant = true;
   attribute.value = [0, 1, 0];
 
@@ -178,9 +178,9 @@ test('AttributeManager.update - external virtual buffers', () => {
     }
   });
 
-  let attribute = attributeManager.getAttributes().positions;
+  let attribute = attributeManager.getAttributes()['positions'];
   expect(ArrayBuffer.isView(attribute.value), 'positions attribute has typed array').toBeTruthy();
-  attribute = attributeManager.getAttributes().colors;
+  attribute = attributeManager.getAttributes()['colors'];
   expect(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array').toBeTruthy();
 
   attributeManager.update({
@@ -234,17 +234,17 @@ test('AttributeManager.update - external logical buffers', () => {
     }
   });
 
-  let attribute = attributeManager.getAttributes().positions;
+  let attribute = attributeManager.getAttributes()['positions'];
   expect(attribute.value, 'positions attribute has value').toEqual([1, 1, 2, 2]);
   expect(attribute.getVertexOffset(0), 'getVertexOffset returns correct result').toBe(0);
   expect(attribute.getVertexOffset(1), 'getVertexOffset returns correct result').toBe(2);
   expect(attribute.getVertexOffset(2), 'getVertexOffset returns correct result').toBe(4);
 
-  attribute = attributeManager.getAttributes().colors;
+  attribute = attributeManager.getAttributes()['colors'];
   expect(attribute.value, 'colors attribute has value').toEqual([255, 0, 0, 0, 255, 0]);
   expect(attribute.getAccessor().size, 'colors attribute has correct size').toBe(3);
 
-  attribute = attributeManager.getAttributes().types;
+  attribute = attributeManager.getAttributes()['types'];
   expect(attribute.value.slice(0, 2), 'types attribute has value').toEqual([0, 3]);
 });
 
@@ -276,13 +276,13 @@ test('AttributeManager.update - external logical buffers - variable width', () =
     }
   });
 
-  let attribute = attributeManager.getAttributes().positions;
+  let attribute = attributeManager.getAttributes()['positions'];
   expect(attribute.value.slice(0, 6), 'positions attribute has value').toEqual([1, 1, 1, 1, 2, 2]);
   expect(attribute.getVertexOffset(0), 'getVertexOffset returns correct result').toBe(0);
   expect(attribute.getVertexOffset(1), 'getVertexOffset returns correct result').toBe(4);
   expect(attribute.getVertexOffset(2), 'getVertexOffset returns correct result').toBe(6);
 
-  attribute = attributeManager.getAttributes().colors;
+  attribute = attributeManager.getAttributes()['colors'];
   expect(attribute.value.slice(0, 12), 'colors attribute has value').toEqual([
     255, 0, 0, 255, 255, 0, 0, 255, 0, 255, 0, 255
   ]);
@@ -299,13 +299,13 @@ test('AttributeManager.invalidate', () => {
 
   attributeManager.invalidate('positions');
   expect(
-    attributeManager.getAttributes().positions.needsUpdate,
+    attributeManager.getAttributes()['positions'].needsUpdate,
     'invalidated attribute by name'
   ).toBeTruthy();
 
   attributeManager.invalidate('getColor');
   expect(
-    attributeManager.getAttributes().colors.needsUpdate,
+    attributeManager.getAttributes()['colors'].needsUpdate,
     'invalidated attribute by accessor name'
   ).toBeTruthy();
 });
