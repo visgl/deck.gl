@@ -14,7 +14,7 @@ import {
   COORDINATE_SYSTEM
 } from '@deck.gl/core';
 import * as layers from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 const DEFAULT_CONFIGURATION = {
   classes: Object.assign({MapView, FirstPersonView, OrbitView, OrthographicView}, layers),

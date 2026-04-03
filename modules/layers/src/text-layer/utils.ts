@@ -15,9 +15,9 @@ export type Character = {
   y: number;
   width: number;
   height: number;
-  layoutWidth: number;
-  layoutHeight: number;
-  layoutOffsetY?: number;
+  anchorX: number;
+  anchorY: number;
+  advance: number;
 };
 
 export type CharacterMapping = Record<string, Character>;
@@ -31,20 +31,18 @@ export function nextPowOfTwo(number: number): number {
  */
 export function buildMapping({
   characterSet,
-  getFontWidth,
-  fontHeight,
+  measureText,
   buffer,
   maxCanvasWidth,
   mapping = {},
   xOffset = 0,
-  yOffset = 0
+  yOffsetMin = 0,
+  yOffsetMax = 0
 }: {
   /** list of characters */
   characterSet: Set<string>;
   /** function to get width of each character */
-  getFontWidth: (char: string) => number;
-  /** height of font */
-  fontHeight: number;
+  measureText: (char: string) => {advance: number; width: number; ascent: number; descent: number};
   /** bleeding buffer surround each character */
   buffer: number;
   /** max width of font atlas */
@@ -54,50 +52,57 @@ export function buildMapping({
   /** x position of last character in the existing mapping table */
   xOffset?: number;
   /** y position of last character in the existing mapping table */
-  yOffset?: number;
+  yOffsetMin?: number;
+  /** bottom position of any character in the existing mapping table */
+  yOffsetMax?: number;
 }): {
   /** new mapping table */
   mapping: CharacterMapping;
   /** x position of last character in the new mapping table */
   xOffset: number;
   /** y position of last character in the new mapping table */
-  yOffset: number;
+  yOffsetMin: number;
+  /** bottom position of any character in the new mapping table */
+  yOffsetMax: number;
   /** height of the font atlas canvas, power of 2 */
   canvasHeight: number;
 } {
-  let row = 0;
+  const row = 0;
   // continue from x position of last character in the old mapping
   let x = xOffset;
-  const rowHeight = fontHeight + buffer * 2;
+  let yMin = yOffsetMin;
+  let yMax = yOffsetMax;
 
   for (const char of characterSet) {
     if (!mapping[char]) {
       // measure texts
-      // TODO - use Advanced text metrics when they are adopted:
-      // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-      const width = getFontWidth(char);
+      const {advance, width, ascent, descent} = measureText(char);
+      const height = ascent + descent;
 
       if (x + width + buffer * 2 > maxCanvasWidth) {
         x = 0;
-        row++;
+        yMin = yMax;
       }
       mapping[char] = {
         x: x + buffer,
-        y: yOffset + row * rowHeight + buffer,
+        y: yMin + buffer,
         width,
-        height: rowHeight,
-        layoutWidth: width,
-        layoutHeight: fontHeight
+        height,
+        advance,
+        anchorX: width / 2,
+        anchorY: ascent
       };
       x += width + buffer * 2;
+      yMax = Math.max(yMax, yMin + height + buffer * 2);
     }
   }
 
   return {
     mapping,
     xOffset: x,
-    yOffset: yOffset + row * rowHeight,
-    canvasHeight: nextPowOfTwo(yOffset + (row + 1) * rowHeight)
+    yOffsetMin: yMin,
+    yOffsetMax: yMax,
+    canvasHeight: nextPowOfTwo(yMax)
   };
 }
 
@@ -110,7 +115,7 @@ function getTextWidth(
   let width = 0;
   for (let i = startIndex; i < endIndex; i++) {
     const character = text[i];
-    width += mapping[character]?.layoutWidth || 0;
+    width += mapping[character]?.advance || 0;
   }
 
   return width;
@@ -238,12 +243,16 @@ function transformRow(
     const character = line[i];
     const frame = iconMapping[character];
     if (frame) {
-      if (!rowHeight) {
-        // frame.height should be a constant
-        rowHeight = frame.layoutHeight;
-      }
-      leftOffsets[i] = x + frame.layoutWidth / 2;
-      x += frame.layoutWidth;
+      rowHeight = Math.max(rowHeight, frame.height);
+    }
+  }
+
+  for (let i = startIndex; i < endIndex; i++) {
+    const character = line[i];
+    const frame = iconMapping[character];
+    if (frame) {
+      leftOffsets[i] = x + frame.anchorX;
+      x += frame.advance;
     } else {
       log.warn(`Missing character: ${character} (${character.codePointAt(0)})`)();
       leftOffsets[i] = x;
@@ -260,7 +269,9 @@ function transformRow(
  */
 export function transformParagraph(
   paragraph: string,
-  /** CSS line-height */
+  /** font property - distance from baseline to vertical center */
+  baselineOffset: number,
+  /** line-height in pixels */
   lineHeight: number,
   /** CSS word-break option */
   wordBreak: 'break-word' | 'break-all',
@@ -291,7 +302,8 @@ export function transformParagraph(
   // maxWidth and height of the paragraph
   const size: [number, number] = [0, 0];
   const rowSize: [number, number] = [0, 0];
-  let rowOffsetTop = 0;
+  let rowCount = 0;
+  let rowOffsetTop = baselineOffset + lineHeight / 2; // this places the top of the first row at 0
   let lineStartIndex = 0;
   let lineEndIndex = 0;
 
@@ -312,15 +324,12 @@ export function transformParagraph(
 
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
-          // const rowOffsetLeft = x[j] - rowSize[0] / 2;
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          const char = characters[j];
-          const layoutOffsetY = iconMapping[char]?.layoutOffsetY || 0;
-          y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;
+          y[j] = rowOffsetTop;
           rowWidth[j] = rowSize[0];
         }
 
-        rowOffsetTop = rowOffsetTop + rowSize[1] * lineHeight;
+        rowCount++;
+        rowOffsetTop += lineHeight;
         size[0] = Math.max(size[0], rowSize[0]);
       }
       lineStartIndex = lineEndIndex;
@@ -336,7 +345,7 @@ export function transformParagraph(
   }
 
   // last row
-  size[1] = rowOffsetTop;
+  size[1] = rowCount * lineHeight;
   return {x, y, rowWidth, size};
 }
 

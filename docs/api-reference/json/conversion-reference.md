@@ -217,7 +217,7 @@ For example, when this configuration is passed to the `JSONConverter`–
 
 ```js
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 const configuration = {
   ...
@@ -305,4 +305,3 @@ datum => [datum.lng, datum.lat, altitudeMeters / 1000]
 datum => [datum.color / 255, 200, 20]
 datum => datum.value > 10 ? [255, 0, 0] : [0, 255, 200]
 ```
-
