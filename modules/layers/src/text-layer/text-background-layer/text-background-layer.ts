@@ -87,7 +87,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   initializeState() {
-    // Pack background styling attributes into one WebGPU buffer while keeping
+    // Pack background styling attributes into one shared buffer while keeping
     // anchor positions separate, since they may use fp64 emulation.
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
@@ -101,7 +101,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 1,
         transition: true,
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 0,
         accessor: 'getSize',
         defaultValue: 1
       },
@@ -109,19 +108,16 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 1,
         transition: true,
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 1,
         accessor: 'getAngle'
       },
       instanceRects: {
         size: 4,
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 2,
         accessor: 'getBoundingRect'
       },
       instanceClipRect: {
         size: 4,
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 3,
         accessor: 'getClipRect',
         defaultValue: [0, 0, -1, -1]
       },
@@ -129,7 +125,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 2,
         transition: true,
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 4,
         accessor: 'getPixelOffset'
       },
       instanceFillColors: {
@@ -137,7 +132,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         type: 'unorm8',
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 5,
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -146,7 +140,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         type: 'unorm8',
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 6,
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -154,7 +147,6 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 1,
         transition: true,
         bufferGroup: 'text-background-instance-data',
-        bufferGroupOrder: 7,
         accessor: 'getLineWidth',
         defaultValue: 1
       }

@@ -501,7 +501,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {pickingColors, instancePickingColors} = attributeManager.attributes;
         const pickingColorsAttribute = pickingColors || instancePickingColors;
         if (pickingColorsAttribute) {
-          if (needsPickingBuffer && pickingColorsAttribute.constant) {
+          if (
+            needsPickingBuffer &&
+            (pickingColorsAttribute.constant || pickingColorsAttribute.isConstant)
+          ) {
             pickingColorsAttribute.constant = false;
             attributeManager.invalidate(pickingColorsAttribute.id);
           }
@@ -767,8 +770,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     if (bufferLayoutChanged || hasPackedBufferGroups) {
       // AttributeManager is always defined when this method is called.
-      // Packed groups can change byte offsets when instance counts or constant-vs-buffer state
-      // changes, so their buffer layout must be refreshed before rebinding attributes.
+      // Group-derived layouts can change when instance counts or constant materialization changes,
+      // so refresh them before rebinding buffers.
       const manager = attributeManager!;
       model.setBufferLayout(manager.getBufferLayouts(model));
       // All attributes must be reset after buffer layout change.
@@ -777,35 +780,30 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // @ts-ignore luma.gl type issue
     const excludeAttributes = model.userData?.excludeAttributes || {};
+    const publishedAttributes = attributeManager?.getPublishedAttributes(changedAttributes) || {
+      buffers: {},
+      constants: {},
+      indexBuffers: []
+    };
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
-    const packedAttributes = attributeManager?.getPackedBufferAttributes(changedAttributes) || {};
 
-    for (const name in changedAttributes) {
-      if (excludeAttributes[name]) {
-        continue;
-      }
-      if (attributeManager?.isPackedAttribute(changedAttributes[name])) {
-        continue;
-      }
-      const values = changedAttributes[name].getValue();
-      for (const attributeName in values) {
-        const value = values[attributeName];
-        if (value instanceof Buffer) {
-          if (changedAttributes[name].settings.isIndexed) {
-            model.setIndexBuffer(value);
-          } else {
-            attributeBuffers[attributeName] = value;
-          }
-        } else if (value) {
-          constantAttributes[attributeName] = value;
-        }
+    for (const [name, buffer] of Object.entries(publishedAttributes.buffers)) {
+      if (!excludeAttributes[name]) {
+        attributeBuffers[name] = buffer;
       }
     }
-    Object.assign(attributeBuffers, packedAttributes);
-    // TODO - update buffer map?
+    for (const [name, value] of Object.entries(publishedAttributes.constants)) {
+      if (!excludeAttributes[name]) {
+        constantAttributes[name] = value;
+      }
+    }
+
     model.setAttributes(attributeBuffers);
     model.setConstantAttributes(constantAttributes);
+    for (const buffer of publishedAttributes.indexBuffers) {
+      model.setIndexBuffer(buffer);
+    }
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.

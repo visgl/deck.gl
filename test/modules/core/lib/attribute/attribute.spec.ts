@@ -133,7 +133,11 @@ test('Attribute#setConstantValue', () => {
   attribute.needsRedraw({clearChangedFlags: true});
 
   attribute.setConstantValue(this, [0, 0, 0]);
-  expect(attribute.getValue().positions, 'attribute set to constant value').toEqual([0, 0, 0]);
+  expect(
+    attribute.getValue().positions instanceof Buffer,
+    'attribute constant is materialized as a buffer'
+  ).toBeTruthy();
+  expect(attribute.value, 'attribute set to constant value').toEqual([0, 0, 0]);
   expect(
     attribute.needsRedraw({clearChangedFlags: true}),
     'attribute marked needs redraw'
@@ -146,7 +150,7 @@ test('Attribute#setConstantValue', () => {
   ).toBeFalsy();
 
   attribute.setConstantValue(this, [0, 0, 1]);
-  expect(attribute.getValue().positions, 'attribute set to constant value').toEqual([0, 0, 1]);
+  expect(attribute.value, 'attribute set to constant value').toEqual([0, 0, 1]);
   expect(
     attribute.needsRedraw({clearChangedFlags: true}),
     'attribute marked needs redraw'
@@ -162,7 +166,7 @@ test('Attribute#setConstantValue', () => {
   });
 
   attribute.setConstantValue(this, [255, 255, 0]);
-  expect(attribute.getValue().colors, 'constant value is normalized').toEqual([1, 1, 0]);
+  expect(attribute.value, 'constant value is stored in source units').toEqual([255, 255, 0]);
 });
 
 test('Attribute#allocate - partial', async () => {

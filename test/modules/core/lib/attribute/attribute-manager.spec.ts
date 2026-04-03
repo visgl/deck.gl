@@ -150,7 +150,11 @@ test('AttributeManager.update - constant attribute', () => {
 
   expect(updateCalled, 'should not call updater for constant attribute').toBe(0);
   expect(attribute.state.allocatedValue, 'should not allocate for constant attribute').toBe(null);
-  expect(attribute.state.constant, 'constant value is set').toBeTruthy();
+  expect(
+    attribute.state.constant,
+    'webgl keeps managed constants as constant attributes'
+  ).toBeTruthy();
+  expect(attribute.value, 'constant value stays compact when not materialized').toEqual([0, 1, 0]);
 
   attribute.constant = false;
   attributeManager.invalidate('colors');
@@ -163,9 +167,15 @@ test('AttributeManager.update - constant attribute', () => {
   });
 
   expect(updateCalled, 'updater is called').toBe(1);
-  expect(attribute.state.allocatedValue, 'should allocate new value array').toBeTruthy();
+  expect(
+    attribute.state.allocatedValue,
+    'constant updater reuses the allocated working array even when the resolved value is constant'
+  ).toBeTruthy();
   expect(attribute.value, 'correct attribute value').toEqual([0.5, 0.75, 0.125]);
-  expect(attribute.state.constant, 'constant value is set').toBeTruthy();
+  expect(
+    attribute.state.constant,
+    'updater-backed constant still uses the constant flag'
+  ).toBeTruthy();
 
   attributeManager.invalidate('colors');
 
@@ -179,6 +189,47 @@ test('AttributeManager.update - constant attribute', () => {
   expect(updateCalled, 'updater is called').toBe(2);
   expect(attribute.value.slice(0, 6), 'correct attribute value').toEqual([1, 1, 1, 2, 2, 2]);
   expect(attribute.state.constant, 'no longer a constant').toBeFalsy();
+});
+
+test('AttributeManager.update - constant attribute on WebGPU remains buffer-backed', () => {
+  const attributeManager = new AttributeManager(createWebGPUDevice(), {
+    generateConstantAttributes: false
+  });
+  attributeManager.add({
+    colors: {
+      size: 3,
+      accessor: 'getColor',
+      update: (attr, {numInstances, props}) => {
+        if (Array.isArray(props.getColor)) {
+          attr.constant = true;
+          attr.value = props.getColor;
+        } else {
+          for (let i = 0, j = 0; i < numInstances; i++) {
+            const color = props.getColor(i);
+            attr.value[j++] = color[0];
+            attr.value[j++] = color[1];
+            attr.value[j++] = color[2];
+          }
+        }
+      }
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    props: {getColor: [0.25, 0.5, 0.75]},
+    data: [1, 2]
+  });
+
+  const attribute = attributeManager.getAttributes().colors;
+  expect(
+    attributeManager.generateConstantAttributes,
+    'webgpu ignores generateConstantAttributes: false'
+  ).toBe(true);
+  expect(attribute.state.constant, 'managed constants stay buffer-backed on webgpu').toBeFalsy();
+  expect(attribute.value, 'constant value is expanded for publication').toEqual([
+    0.25, 0.5, 0.75, 0.25, 0.5, 0.75
+  ]);
 });
 
 test('AttributeManager.update - external virtual buffers', () => {
@@ -427,21 +478,18 @@ test('AttributeManager.getBufferLayouts - packed buffers', () => {
     instanceSizes: {
       size: 1,
       accessor: 'getSize',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
+      bufferGroup: 'group-a'
     },
     instanceAngles: {
       size: 1,
       accessor: 'getAngle',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 1
+      bufferGroup: 'group-a'
     },
     instanceColors: {
       size: 4,
       type: 'unorm8',
       accessor: 'getColor',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 2
+      bufferGroup: 'group-a'
     }
   });
 
@@ -463,9 +511,9 @@ test('AttributeManager.getBufferLayouts - packed buffers', () => {
       name: 'group-a',
       byteStride: 4,
       attributes: [
-        {attribute: 'instanceSizes', format: 'float32', byteOffset: 0},
-        {attribute: 'instanceAngles', format: 'float32', byteOffset: 16},
-        {attribute: 'instanceColors', format: 'unorm8x4', byteOffset: 32}
+        {attribute: 'instanceAngles', format: 'float32', byteOffset: 0},
+        {attribute: 'instanceColors', format: 'unorm8x4', byteOffset: 16},
+        {attribute: 'instanceSizes', format: 'float32', byteOffset: 32}
       ],
       stepMode: 'instance'
     }
@@ -474,12 +522,61 @@ test('AttributeManager.getBufferLayouts - packed buffers', () => {
   const packedAttributes = attributeManager.getPackedBufferAttributes(
     attributeManager.getAttributes()
   );
-  expect(packedAttributes.instanceSizes, 'group publishes packed buffer').toBe(
-    packedAttributes.instanceColors
+  expect(packedAttributes['group-a'], 'group publishes one shared buffer').toBeTruthy();
+});
+
+test('AttributeManager.getBufferLayouts - implicit single-attribute groups', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize'
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 10},
+      {size: 2, angle: 20}
+    ],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle
+    }
+  });
+
+  expect(attributeManager.getBufferLayouts()).toEqual([
+    {
+      name: 'instanceSizes',
+      byteStride: 4,
+      attributes: [{attribute: 'instanceSizes', format: 'float32', byteOffset: 0}],
+      stepMode: 'instance'
+    },
+    {
+      name: 'instanceAngles',
+      byteStride: 4,
+      attributes: [{attribute: 'instanceAngles', format: 'float32', byteOffset: 0}],
+      stepMode: 'instance'
+    }
+  ]);
+
+  const packedAttributes = attributeManager.getPackedBufferAttributes(
+    attributeManager.getAttributes()
   );
-  expect(packedAttributes.instanceAngles, 'group publishes all attribute names').toBe(
-    packedAttributes.instanceColors
-  );
+  expect(
+    packedAttributes.instanceAngles,
+    'implicit single-attribute group publishes its buffer'
+  ).toBeTruthy();
+  expect(
+    packedAttributes.instanceSizes,
+    'implicit single-attribute group publishes its buffer'
+  ).toBeTruthy();
 });
 
 test('AttributeManager.getBufferLayouts - packed buffers on WebGL', () => {
@@ -489,21 +586,18 @@ test('AttributeManager.getBufferLayouts - packed buffers on WebGL', () => {
     instanceSizes: {
       size: 1,
       accessor: 'getSize',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
+      bufferGroup: 'group-a'
     },
     instanceAngles: {
       size: 1,
       accessor: 'getAngle',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 1
+      bufferGroup: 'group-a'
     },
     instanceColors: {
       size: 4,
       type: 'unorm8',
       accessor: 'getColor',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 2
+      bufferGroup: 'group-a'
     }
   });
 
@@ -525,9 +619,9 @@ test('AttributeManager.getBufferLayouts - packed buffers on WebGL', () => {
       name: 'group-a',
       byteStride: 4,
       attributes: [
-        {attribute: 'instanceSizes', format: 'float32', byteOffset: 0},
-        {attribute: 'instanceAngles', format: 'float32', byteOffset: 16},
-        {attribute: 'instanceColors', format: 'unorm8x4', byteOffset: 32}
+        {attribute: 'instanceAngles', format: 'float32', byteOffset: 0},
+        {attribute: 'instanceColors', format: 'unorm8x4', byteOffset: 16},
+        {attribute: 'instanceSizes', format: 'float32', byteOffset: 32}
       ],
       stepMode: 'instance'
     }
@@ -536,59 +630,7 @@ test('AttributeManager.getBufferLayouts - packed buffers on WebGL', () => {
   const packedAttributes = attributeManager.getPackedBufferAttributes(
     attributeManager.getAttributes()
   );
-  expect(packedAttributes.instanceSizes, 'webgl group publishes packed buffer').toBe(
-    packedAttributes.instanceColors
-  );
-  expect(packedAttributes.instanceAngles, 'webgl group publishes all attribute names').toBe(
-    packedAttributes.instanceColors
-  );
-});
-
-test('AttributeManager.getBufferLayouts - WebGL constants stay out of packed buffers', () => {
-  const attributeManager = new AttributeManager(device);
-
-  attributeManager.addInstanced({
-    instanceSizes: {
-      size: 1,
-      accessor: 'getSize',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
-    },
-    instanceAngles: {
-      size: 1,
-      accessor: 'getAngle',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 1
-    }
-  });
-
-  attributeManager.update({
-    numInstances: 2,
-    data: [{angle: 10}, {angle: 20}],
-    props: {
-      getSize: 3,
-      getAngle: x => x.angle
-    }
-  });
-
-  expect(attributeManager.getAttributes().instanceSizes.isConstant).toBe(true);
-  expect(attributeManager.isPackedAttribute(attributeManager.getAttributes().instanceSizes)).toBe(
-    false
-  );
-  expect(attributeManager.getBufferLayouts()).toEqual([
-    {
-      name: 'instanceSizes',
-      attributes: [{attribute: 'instanceSizes', format: 'float32', byteOffset: 0}],
-      byteStride: 4,
-      stepMode: 'instance'
-    },
-    {
-      name: 'group-a',
-      byteStride: 4,
-      attributes: [{attribute: 'instanceAngles', format: 'float32', byteOffset: 0}],
-      stepMode: 'instance'
-    }
-  ]);
+  expect(packedAttributes['group-a'], 'webgl group publishes one shared buffer').toBeTruthy();
 });
 
 test('AttributeManager.getPackedBufferAttributes - only rewrites changed attributes when layout is stable', () => {
@@ -599,14 +641,12 @@ test('AttributeManager.getPackedBufferAttributes - only rewrites changed attribu
     instanceSizes: {
       size: 1,
       accessor: 'getSize',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
+      bufferGroup: 'group-a'
     },
     instanceAngles: {
       size: 1,
       accessor: 'getAngle',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 1
+      bufferGroup: 'group-a'
     }
   });
 
@@ -625,7 +665,7 @@ test('AttributeManager.getPackedBufferAttributes - only rewrites changed attribu
   const packedAttributes = attributeManager.getPackedBufferAttributes(
     attributeManager.getAttributes()
   );
-  const writeSpy = vi.spyOn(packedAttributes.instanceSizes, 'write');
+  const writeSpy = vi.spyOn(packedAttributes['group-a'], 'write');
 
   attributeManager.invalidate('getAngle');
   attributeManager.update({
@@ -643,21 +683,23 @@ test('AttributeManager.getPackedBufferAttributes - only rewrites changed attribu
   const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
   attributeManager.getPackedBufferAttributes({instanceAngles: changedAttributes.instanceAngles});
 
-  expect(writeSpy, 'stable packed layouts rewrite only the changed attribute').toHaveBeenCalledTimes(
-    1
-  );
+  expect(
+    writeSpy,
+    'stable packed layouts rewrite only the changed attribute'
+  ).toHaveBeenCalledTimes(1);
 });
 
-test('AttributeManager.getBufferLayouts - packed buffers require bufferGroupOrder', () => {
-  const webgpuDevice = createWebGPUDevice();
-  const attributeManager = new AttributeManager(webgpuDevice);
+test('AttributeManager.getPublishedAttributes - groups vertex, constant, and index bindings together', () => {
+  const attributeManager = new AttributeManager(device);
 
+  attributeManager.add({
+    indices: {size: 1, isIndexed: true, accessor: 'getIndex'}
+  });
   attributeManager.addInstanced({
     instanceSizes: {
       size: 1,
       accessor: 'getSize',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
+      bufferGroup: 'group-a'
     },
     instanceAngles: {
       size: 1,
@@ -667,48 +709,277 @@ test('AttributeManager.getBufferLayouts - packed buffers require bufferGroupOrde
   });
 
   attributeManager.update({
-    numInstances: 1,
-    data: [{size: 1, angle: 10}],
+    numInstances: 2,
+    data: [
+      {index: 0, angle: 10},
+      {index: 1, angle: 20}
+    ],
     props: {
-      getSize: x => x.size,
+      getIndex: x => x.index,
+      getSize: 3,
       getAngle: x => x.angle
     }
   });
 
-  expect(() => attributeManager.getBufferLayouts()).toThrow(
-    'Attribute instanceAngles specifies bufferGroup "group-a" but is missing bufferGroupOrder'
+  const publishedAttributes = attributeManager.getPublishedAttributes(
+    attributeManager.getAttributes()
   );
+
+  expect(
+    publishedAttributes.buffers['group-a'],
+    'shared vertex group publishes one buffer'
+  ).toBeTruthy();
+  expect(
+    Array.from(publishedAttributes.constants.instanceSizes),
+    'grouped constants are published alongside shared buffers'
+  ).toEqual([3]);
+  expect(
+    publishedAttributes.indexBuffers,
+    'index buffers are returned from the same publication path'
+  ).toHaveLength(1);
 });
 
-test('AttributeManager.getBufferLayouts - packed buffers reject conflicting bufferGroupOrder', () => {
-  const webgpuDevice = createWebGPUDevice();
-  const attributeManager = new AttributeManager(webgpuDevice);
+test('AttributeManager.getBufferLayouts - constant attributes reserve implicit group buffers on WebGL', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize'
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [{angle: 10}, {angle: 20}],
+    props: {
+      getSize: 3,
+      getAngle: x => x.angle
+    }
+  });
+
+  expect(attributeManager.getAttributes().instanceSizes.isConstant).toBe(true);
+  expect(attributeManager.getBufferLayouts()).toEqual([
+    {
+      name: 'instanceSizes',
+      byteStride: 4,
+      attributes: [{attribute: 'instanceSizes', format: 'float32', byteOffset: 0}],
+      stepMode: 'instance'
+    },
+    {
+      name: 'group-a',
+      byteStride: 4,
+      attributes: [{attribute: 'instanceAngles', format: 'float32', byteOffset: 0}],
+      stepMode: 'instance'
+    }
+  ]);
+
+  const packedAttributes = attributeManager.getPackedBufferAttributes(
+    attributeManager.getAttributes()
+  );
+  expect(
+    packedAttributes.instanceSizes,
+    'single-attribute constant groups bind through WebGL constants instead of a dummy buffer'
+  ).toBeUndefined();
+});
+
+test('AttributeManager.getPackedBufferAttributes - webgl constants reserve space but skip uploads', () => {
+  const attributeManager = new AttributeManager(device);
 
   attributeManager.addInstanced({
     instanceSizes: {
       size: 1,
       accessor: 'getSize',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
+      bufferGroup: 'group-a'
     },
     instanceAngles: {
       size: 1,
       accessor: 'getAngle',
-      bufferGroup: 'group-a',
-      bufferGroupOrder: 0
+      bufferGroup: 'group-a'
     }
   });
 
   attributeManager.update({
-    numInstances: 1,
-    data: [{size: 1, angle: 10}],
+    numInstances: 2,
+    data: [{angle: 10}, {angle: 20}],
+    props: {
+      getSize: 3,
+      getAngle: x => x.angle
+    }
+  });
+
+  const packedAttributes = attributeManager.getPackedBufferAttributes(
+    attributeManager.getAttributes()
+  );
+  const writeSpy = vi.spyOn(packedAttributes['group-a'], 'write');
+
+  attributeManager.invalidate('instanceSizes');
+  attributeManager.update({
+    numInstances: 2,
+    data: [{angle: 30}, {angle: 40}],
+    props: {
+      getSize: 4,
+      getAngle: x => x.angle
+    }
+  });
+
+  const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+  attributeManager.getPackedBufferAttributes({instanceSizes: changedAttributes.instanceSizes});
+
+  expect(
+    writeSpy,
+    'constant webgl attributes do not upload into reserved group space'
+  ).not.toHaveBeenCalled();
+});
+
+test('AttributeManager.update - generateConstantAttributes true materializes constants on WebGL', () => {
+  const attributeManager = new AttributeManager(device, {generateConstantAttributes: true});
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [{}, {}],
+    props: {
+      getSize: 3
+    }
+  });
+
+  const attribute = attributeManager.getAttributes().instanceSizes;
+  expect(attribute.isConstant, 'webgl override materializes constant values').toBe(false);
+  expect(attribute.value, 'materialized constant expands to the instance count').toEqual([3, 3]);
+});
+
+test('AttributeManager.getBufferLayouts - shared group layout is stable across accessor and constant updates', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a'
+    },
+    instanceAngles: {
+      size: 1,
+      accessor: 'getAngle',
+      bufferGroup: 'group-a'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 10},
+      {size: 2, angle: 20}
+    ],
     props: {
       getSize: x => x.size,
       getAngle: x => x.angle
     }
   });
 
-  expect(() => attributeManager.getBufferLayouts()).toThrow(
-    'bufferGroup "group-a" has conflicting bufferGroupOrder 0 on attribute instanceAngles'
+  const accessorLayout = attributeManager.getBufferLayouts();
+
+  attributeManager.invalidate('instanceAngles');
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 10},
+      {size: 2, angle: 20}
+    ],
+    props: {
+      getSize: x => x.size,
+      getAngle: 30
+    }
+  });
+
+  const constantLayout = attributeManager.getBufferLayouts();
+  expect(constantLayout, 'layout is stable when a grouped attribute becomes constant').toEqual(
+    accessorLayout
   );
+  expect(
+    attributeManager.getPackedBufferAttributes(attributeManager.getAttributes())['group-a'],
+    'shared group still publishes under the same buffer-layout name'
+  ).toBeTruthy();
+
+  attributeManager.invalidate('instanceAngles');
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {size: 1, angle: 40},
+      {size: 2, angle: 50}
+    ],
+    props: {
+      getSize: x => x.size,
+      getAngle: x => x.angle
+    }
+  });
+
+  expect(
+    attributeManager.getBufferLayouts(),
+    'layout stays stable when a grouped attribute switches back to accessor-driven values'
+  ).toEqual(accessorLayout);
+});
+
+test('AttributeManager.getBufferLayouts - implicit group layout is stable across accessor and constant updates', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [{size: 1}, {size: 2}],
+    props: {
+      getSize: x => x.size
+    }
+  });
+
+  const accessorLayout = attributeManager.getBufferLayouts();
+
+  attributeManager.invalidate('instanceSizes');
+  attributeManager.update({
+    numInstances: 2,
+    data: [{size: 1}, {size: 2}],
+    props: {
+      getSize: 3
+    }
+  });
+
+  expect(
+    attributeManager.getBufferLayouts(),
+    'implicit single-attribute group keeps the same layout when becoming constant'
+  ).toEqual(accessorLayout);
+  expect(
+    attributeManager.getPublishedAttributes(attributeManager.getAttributes()).constants
+      .instanceSizes,
+    'implicit single-attribute group keeps the same published attribute name when becoming constant'
+  ).toBeTruthy();
+
+  attributeManager.invalidate('instanceSizes');
+  attributeManager.update({
+    numInstances: 2,
+    data: [{size: 4}, {size: 5}],
+    props: {
+      getSize: x => x.size
+    }
+  });
+
+  expect(
+    attributeManager.getBufferLayouts(),
+    'implicit single-attribute group keeps the same layout when switching back to accessor values'
+  ).toEqual(accessorLayout);
 });

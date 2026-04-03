@@ -29,7 +29,7 @@ The application provided update functions describe how attributes should be upda
 
 Note that the attribute manager intentionally does not do advanced change detection, but instead makes it easy to build such detection by offering the ability to "invalidate" each attribute separately.
 
-On WebGPU, `AttributeManager` can also reduce vertex-buffer binding pressure by publishing multiple logical attributes through one shared GPU buffer. This is useful for layers with many small per-instance attributes, where the WebGPU vertex-buffer binding limit can become the main constraint.
+`AttributeManager` can also reduce vertex-buffer binding pressure by publishing multiple logical attributes through one shared GPU buffer. This is useful for layers with many small per-instance attributes, where the vertex-buffer binding limit can become the main constraint.
 
 Grouped attributes still behave like separate attributes on the CPU:
 
@@ -44,26 +44,23 @@ attributeManager.addInstanced({
   instanceSizes: {
     size: 1,
     accessor: 'getSize',
-    bufferGroup: 'label-instance-data',
-    bufferGroupOrder: 0
+    bufferGroup: 'label-instance-data'
   },
   instanceAngles: {
     size: 1,
     accessor: 'getAngle',
-    bufferGroup: 'label-instance-data',
-    bufferGroupOrder: 1
+    bufferGroup: 'label-instance-data'
   },
   instanceColors: {
     size: 4,
     type: 'unorm8',
     accessor: 'getColor',
-    bufferGroup: 'label-instance-data',
-    bufferGroupOrder: 2
+    bufferGroup: 'label-instance-data'
   }
 });
 ```
 
-This packing is non-interleaved: each attribute occupies its own contiguous region within the shared GPU buffer and is addressed by byte offset in the generated `BufferLayout`.
+This packing is non-interleaved: each attribute occupies its own contiguous region within the shared GPU buffer and is addressed by byte offset in the generated `BufferLayout`. Attributes inside a shared group are packed in lexical order by attribute name. Attributes without `bufferGroup` still use the same publication path through an implicit single-attribute group.
 
 
 ### Accessors, Shallow Comparisons and updateTriggers
@@ -85,7 +82,7 @@ While this allows for ultimate performance and control of updates, as well as po
 
 **Note:** The application can provide some buffers and let others be managed by the layer. As an example management of the `instancePickingColors` buffer is normally left to the layer.
 
-When using `bufferGroup`, external buffers are still supplied per logical attribute. Grouping only affects how deck.gl republishes those attributes to WebGPU when binding model inputs.
+When using `bufferGroup`, external buffers are still supplied per logical attribute. Grouping only affects how deck.gl republishes those attributes when binding model inputs.
 
 
 ## More information

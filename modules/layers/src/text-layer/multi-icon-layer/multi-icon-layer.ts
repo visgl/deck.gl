@@ -77,14 +77,13 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
     // eslint-disable-next-line @typescript-eslint/unbound-method
     instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
-    // Pack non-fp64 per-glyph attributes into one WebGPU buffer. Positions stay separate
-    // because they may require fp64 emulation and are not currently packable.
+    // Pack non-fp64 per-glyph attributes into one shared buffer. Positions stay separate
+    // because they may require fp64 emulation and are not currently shareable.
     attributeManager!.addInstanced({
       instanceSizes: {
         size: 1,
         transition: true,
         bufferGroup: 'text-glyph-instance-data',
-        bufferGroupOrder: 0,
         accessor: 'getSize',
         defaultValue: 1
       },
@@ -93,7 +92,6 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         bufferGroup: 'text-glyph-instance-data',
-        bufferGroupOrder: 1,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -101,27 +99,23 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
         size: 1,
         transition: true,
         bufferGroup: 'text-glyph-instance-data',
-        bufferGroupOrder: 2,
         accessor: 'getAngle'
       },
       instancePixelOffset: {
         size: 2,
         transition: true,
         bufferGroup: 'text-glyph-instance-data',
-        bufferGroupOrder: 3,
         accessor: 'getPixelOffset'
       },
       instancePickingColors: {
         type: 'uint8',
         size: 4,
         bufferGroup: 'text-glyph-instance-data',
-        bufferGroupOrder: 4,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       },
       instanceClipRect: {
         size: 4,
         bufferGroup: 'text-glyph-instance-data',
-        bufferGroupOrder: 5,
         accessor: 'getContentBox',
         defaultValue: [0, 0, -1, -1]
       }

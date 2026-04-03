@@ -115,28 +115,25 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 
 One practical difference between WebGL and WebGPU is that WebGPU enforces a relatively small limit on the number of vertex buffer bindings used by a pipeline. Layers with many small instance attributes can hit that limit even when the total amount of attribute data is modest.
 
-To address this, `AttributeManager` supports shared WebGPU buffers via `bufferGroup`:
+To address this, `AttributeManager` supports shared buffers via `bufferGroup`:
 
 ```ts
 attributeManager.addInstanced({
   instanceSizes: {
     size: 1,
     accessor: 'getSize',
-    bufferGroup: 'label-instance-data',
-    bufferGroupOrder: 0
+    bufferGroup: 'label-instance-data'
   },
   instanceAngles: {
     size: 1,
     accessor: 'getAngle',
-    bufferGroup: 'label-instance-data',
-    bufferGroupOrder: 1
+    bufferGroup: 'label-instance-data'
   },
   instanceColors: {
     size: 4,
     type: 'unorm8',
     accessor: 'getColor',
-    bufferGroup: 'label-instance-data',
-    bufferGroupOrder: 2
+    bufferGroup: 'label-instance-data'
   }
 });
 ```
@@ -147,7 +144,7 @@ This keeps the existing attribute lifecycle intact:
 * attributes may still define `shaderAttributes`
 * applications may still supply external attributes per logical attribute
 
-The change is only in the WebGPU publication step: grouped attributes are emitted as one `BufferLayout` and one shared GPU buffer with byte offsets for each logical attribute.
+The change is only in the publication step: grouped attributes are emitted as one `BufferLayout` and one shared GPU buffer with byte offsets for each logical attribute. Attributes inside a shared group are packed in lexical order by attribute name, and attributes without `bufferGroup` still use the same publication path through implicit single-attribute groups.
 
 ## Background
 

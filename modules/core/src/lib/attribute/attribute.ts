@@ -48,10 +48,9 @@ export type Updater = (
 /**
  * Attribute configuration used by {@link AttributeManager}.
  *
- * `bufferGroup` and `bufferGroupOrder` opt an attribute into packed-buffer
- * publishing. Attributes in the same group keep independent CPU-side values and
- * update logic, but share a single GPU vertex buffer when the backend and
- * attribute state support packing.
+ * `bufferGroup` opts an attribute into a shared packed-buffer group.
+ * Attributes without `bufferGroup` still participate in the same publication
+ * path, but use an implicit one-attribute group named after the attribute id.
  */
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
@@ -59,8 +58,6 @@ export type AttributeOptions = DataColumnOptions<{
   noAlloc?: boolean;
   /** Identifier of a packed-buffer group. Attributes with the same group id share one GPU buffer. */
   bufferGroup?: string;
-  /** Stable ordering of attributes inside a packed-buffer group. */
-  bufferGroupOrder?: number;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
@@ -283,7 +280,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   // Use generic value
   // Returns true if successful
-  setConstantValue(context: any, value?: any): boolean {
+  setConstantValue(context: any, value?: any, generateBuffer: boolean = true): boolean {
     if (value === undefined || typeof value === 'function') {
       return false;
     }
@@ -291,17 +288,19 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
 
-    if (this.device.type === 'webgpu') {
-      return this.setConstantBufferValue(transformedValue, this.numInstances);
+    if (!generateBuffer) {
+      const hasChanged = this.setData({constant: true, value: transformedValue});
+      this.constant = false;
+      this.clearNeedsUpdate();
+
+      if (hasChanged) {
+        this.setNeedsRedraw();
+      }
+
+      return hasChanged;
     }
 
-    const hasChanged = this.setData({constant: true, value: transformedValue});
-
-    if (hasChanged) {
-      this.setNeedsRedraw();
-    }
-    this.clearNeedsUpdate();
-    return true;
+    return this.setConstantBufferValue(transformedValue, this.numInstances);
   }
 
   /** Expands a constant attribute value into a regular per-instance buffer. */
