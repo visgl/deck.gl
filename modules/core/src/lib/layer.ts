@@ -801,8 +801,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     model.setAttributes(attributeBuffers);
     model.setConstantAttributes(constantAttributes);
-    for (const buffer of publishedAttributes.indexBuffers) {
-      model.setIndexBuffer(buffer);
+    if (!excludeAttributes.indices) {
+      for (const buffer of publishedAttributes.indexBuffers) {
+        model.setIndexBuffer(buffer);
+      }
     }
   }
 

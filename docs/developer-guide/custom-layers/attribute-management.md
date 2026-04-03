@@ -60,7 +60,7 @@ attributeManager.addInstanced({
 });
 ```
 
-This packing is non-interleaved: each attribute occupies its own contiguous region within the shared GPU buffer and is addressed by byte offset in the generated `BufferLayout`. Attributes inside a shared group are packed in lexical order by attribute name. Attributes without `bufferGroup` still use the same publication path through an implicit single-attribute group.
+This packing is non-interleaved: each attribute occupies its own contiguous region within the shared GPU buffer and is addressed by byte offset in the generated `BufferLayout`. Attributes inside a shared group are packed in lexical order by attribute name. Attributes without `bufferGroup` still use the same publication path through an implicit single-attribute group. Attributes that are actively in transition temporarily remain in standalone groups so their animated buffers can be bound directly.
 
 
 ### Accessors, Shallow Comparisons and updateTriggers

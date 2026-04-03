@@ -739,6 +739,46 @@ test('AttributeManager.getPublishedAttributes - groups vertex, constant, and ind
   ).toHaveLength(1);
 });
 
+test('AttributeManager.getBufferLayouts - actively transitioning attributes stay in standalone groups', () => {
+  const attributeManager = new AttributeManager(device);
+
+  attributeManager.addInstanced({
+    instancePositions: {
+      size: 2,
+      accessor: 'getPosition',
+      bufferGroup: 'group-a'
+    },
+    instanceSizes: {
+      size: 1,
+      accessor: 'getSize',
+      bufferGroup: 'group-a'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {position: [0, 0], size: 1},
+      {position: [0, 0], size: 2}
+    ],
+    props: {
+      getPosition: x => x.position,
+      getSize: x => x.size
+    }
+  });
+
+  const transitionManager = (attributeManager as any).attributeTransitionManager;
+  const hasAttribute = vi.spyOn(transitionManager, 'hasAttribute');
+  hasAttribute.mockImplementation((attributeName: string) => attributeName === 'instancePositions');
+
+  expect(
+    attributeManager.getBufferLayouts().map(layout => layout.name),
+    'actively transitioning attributes ignore shared bufferGroup and keep their own layout entries'
+  ).toEqual(['instancePositions', 'group-a']);
+
+  hasAttribute.mockRestore();
+});
+
 test('AttributeManager.getBufferLayouts - constant attributes reserve implicit group buffers on WebGL', () => {
   const attributeManager = new AttributeManager(device);
 

@@ -144,7 +144,7 @@ This keeps the existing attribute lifecycle intact:
 * attributes may still define `shaderAttributes`
 * applications may still supply external attributes per logical attribute
 
-The change is only in the publication step: grouped attributes are emitted as one `BufferLayout` and one shared GPU buffer with byte offsets for each logical attribute. Attributes inside a shared group are packed in lexical order by attribute name, and attributes without `bufferGroup` still use the same publication path through implicit single-attribute groups.
+The change is only in the publication step: grouped attributes are emitted as one `BufferLayout` and one shared GPU buffer with byte offsets for each logical attribute. Attributes inside a shared group are packed in lexical order by attribute name, and attributes without `bufferGroup` still use the same publication path through implicit single-attribute groups. Attributes that are actively in transition temporarily remain in standalone groups so their animated buffers can stay on the direct binding path.
 
 ## Background
 

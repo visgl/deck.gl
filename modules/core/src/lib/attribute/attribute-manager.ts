@@ -549,9 +549,10 @@ export default class AttributeManager {
 
   /** Returns the attribute's group id, defaulting to its own attribute name. */
   private _getAttributeGroupId(attribute: Attribute): string {
-    return attribute.settings.isIndexed
-      ? attribute.id
-      : attribute.settings.bufferGroup || attribute.id;
+    if (attribute.settings.isIndexed || this.attributeTransitionManager.hasAttribute(attribute.id)) {
+      return attribute.id;
+    }
+    return attribute.settings.bufferGroup || attribute.id;
   }
 
   /** Collects attributes into explicit or implicit publication groups. */
@@ -745,8 +746,8 @@ export default class AttributeManager {
     if (!value) {
       return target;
     }
-
     const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+
     for (let i = 0; i < attribute.numInstances; i++) {
       const srcStart = sourceOffset + i * sourceStride;
       target.set(bytes.subarray(srcStart, srcStart + sourceStride), i * byteStride);

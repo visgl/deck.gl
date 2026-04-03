@@ -400,6 +400,45 @@ test('Layer#_setModelAttributes binds unified publication results including inde
   getPublishedAttributesSpy.mockRestore();
 });
 
+test('Layer#_setModelAttributes skips index buffers for models that exclude indices', () => {
+  const layer = new PackedIndexedLayer({
+    id: 'packed-indexed-layer',
+    data: [
+      {index: 0, angle: 10},
+      {index: 1, angle: 20}
+    ],
+    getIndex: (x: {index: number}) => x.index,
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  const indexBuffer = {} as any;
+  const getPublishedAttributesSpy = vi
+    .spyOn(Object.getPrototypeOf(attributeManager), 'getPublishedAttributes')
+    .mockReturnValue({
+      buffers: {'group-a': {} as any},
+      constants: {},
+      indexBuffers: [indexBuffer]
+    });
+
+  const changedAttributes = attributeManager.getAttributes();
+  const model = {
+    userData: {excludeAttributes: {indices: true}},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, changedAttributes, true);
+
+  expect(model.setIndexBuffer, 'excluded index buffers are not rebound').not.toHaveBeenCalled();
+  getPublishedAttributesSpy.mockRestore();
+});
+
 test('Layer#use64bitPositions', () => {
   let layer = new SubLayer({});
   expect(layer.use64bitPositions(), 'returns true for default settings').toBeTruthy();

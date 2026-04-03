@@ -51,6 +51,8 @@ export type Updater = (
  * `bufferGroup` opts an attribute into a shared packed-buffer group.
  * Attributes without `bufferGroup` still participate in the same publication
  * path, but use an implicit one-attribute group named after the attribute id.
+ * Attributes that are actively in transition remain in standalone groups even
+ * if `bufferGroup` is specified.
  */
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
