@@ -549,7 +549,10 @@ export default class AttributeManager {
 
   /** Returns the attribute's group id, defaulting to its own attribute name. */
   private _getAttributeGroupId(attribute: Attribute): string {
-    if (attribute.settings.isIndexed || this.attributeTransitionManager.hasAttribute(attribute.id)) {
+    if (
+      attribute.settings.isIndexed ||
+      this.attributeTransitionManager.hasAttribute(attribute.id)
+    ) {
       return attribute.id;
     }
     return attribute.settings.bufferGroup || attribute.id;
