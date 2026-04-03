@@ -6,18 +6,7 @@
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getNullTestDevice, getWebGPUTestDevice} from '@luma.gl/test-utils';
-
-async function getWebGPUAttributeManagerTestDevice() {
-  const webgpuDevice = await getWebGPUTestDevice();
-  if (webgpuDevice) {
-    return webgpuDevice;
-  }
-
-  const nullDevice = await getNullTestDevice();
-  nullDevice.type = 'webgpu';
-  return nullDevice;
-}
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 function update(attribute, {data}) {
   const {value, size} = attribute;
@@ -189,8 +178,11 @@ test('AttributeManager.update - constant attribute', () => {
   expect(attribute.state.constant, 'no longer a constant').toBeFalsy();
 });
 
-test('AttributeManager.update - constant attribute webgpu', async () => {
-  const webgpuDevice = await getWebGPUAttributeManagerTestDevice();
+test('AttributeManager.update - constant attribute webgpu', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
   const attributeManager = new AttributeManager(webgpuDevice);
   let updateCalled = 0;
 
