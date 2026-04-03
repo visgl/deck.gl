@@ -9,15 +9,12 @@ import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
 import debug from '../../debug/index';
 import {NumericArray} from '../../types/types';
-import {getBufferAttributeLayout, getStride} from './gl-utils';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import {Buffer} from '@luma.gl/core';
-import type {Device, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
+import type {Device, BufferLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
-import type {TypedArray} from '../../types/types';
 
 const TRACE_INVALIDATE = 'attributeManager.invalidate';
 const TRACE_UPDATE_START = 'attributeManager.updateStart';
@@ -25,42 +22,6 @@ const TRACE_UPDATE_END = 'attributeManager.updateEnd';
 const TRACE_ATTRIBUTE_UPDATE_START = 'attribute.updateStart';
 const TRACE_ATTRIBUTE_ALLOCATE = 'attribute.allocate';
 const TRACE_ATTRIBUTE_UPDATE_END = 'attribute.updateEnd';
-
-/** Logical attributes that should be published together. */
-type AttributeGroup = {
-  id: string;
-  attributes: Attribute[];
-};
-
-/** Buffers and constants that should be bound for the current attribute update. */
-type PublishedAttributes = {
-  buffers: Record<string, Buffer>;
-  constants: Record<string, TypedArray>;
-  indexBuffers: Buffer[];
-};
-
-/**
- * Derived layout for a packed buffer group.
- *
- * Each grouped attribute occupies its own contiguous region in a shared GPU
- * buffer. The group uses a single binding stride and exposes per-attribute
- * byte offsets into that buffer.
- */
-type PackedBufferGroupLayout = {
-  id: string;
-  byteStride: number;
-  byteLength: number;
-  stepMode: 'vertex' | 'instance';
-  attributeOffsets: Record<string, number>;
-  attributeNames: string[];
-  layout: BufferLayout;
-};
-
-/** Cached shared buffer plus the packed layout used to populate it. */
-type PackedBufferGroupState = {
-  buffer: Buffer;
-  layout: PackedBufferGroupLayout;
-};
 
 export default class AttributeManager {
   /**
@@ -96,26 +57,17 @@ export default class AttributeManager {
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
-  /** Reusable shared GPU buffers keyed by group id. */
-  private packedBuffers: Record<string, PackedBufferGroupState>;
-  /**
-   * Controls whether managed constant attributes are expanded into buffer-backed
-   * data during publication. WebGPU always resolves this to `true`.
-   */
-  readonly generateConstantAttributes: boolean;
 
   constructor(
     device: Device,
     {
       id = 'attribute-manager',
       stats,
-      timeline,
-      generateConstantAttributes
+      timeline
     }: {
       id?: string;
       stats?: Stats;
       timeline?: Timeline;
-      generateConstantAttributes?: boolean;
     } = {}
   ) {
     this.id = id;
@@ -128,14 +80,11 @@ export default class AttributeManager {
 
     this.userData = {};
     this.stats = stats;
-    this.generateConstantAttributes =
-      device.type === 'webgpu' ? true : (generateConstantAttributes ?? false);
 
     this.attributeTransitionManager = new AttributeTransitionManager(device, {
       id: `${id}-transitions`,
       timeline
     });
-    this.packedBuffers = {};
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -145,50 +94,27 @@ export default class AttributeManager {
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].delete();
     }
-    for (const state of Object.values(this.packedBuffers)) {
-      state.buffer.delete();
-    }
     this.attributeTransitionManager.finalize();
   }
 
-  // Returns the redraw flag, optionally clearing it.
-  // Redraw flag will be set if any attributes attributes changed since
-  // flag was last cleared.
-  //
-  // @param {String} [clearRedrawFlags=false] - whether to clear the flag
-  // @return {false|String} - reason a redraw is needed.
   getNeedsRedraw(opts: {clearRedrawFlags?: boolean} = {clearRedrawFlags: false}): string | false {
     const redraw = this.needsRedraw;
     this.needsRedraw = this.needsRedraw && !opts.clearRedrawFlags;
     return redraw && this.id;
   }
 
-  // Sets the redraw flag.
-  // @param {Boolean} redraw=true
   setNeedsRedraw() {
     this.needsRedraw = true;
   }
 
-  // Adds attributes
   add(attributes: {[id: string]: AttributeOptions}) {
     this._add(attributes);
   }
 
-  // Adds attributes
   addInstanced(attributes: {[id: string]: AttributeOptions}) {
     this._add(attributes, {stepMode: 'instance'});
   }
 
-  /**
-   * Removes attributes
-   * Takes an array of attribute names and delete them from
-   * the attribute map if they exists
-   *
-   * @example
-   * attributeManager.remove(['position']);
-   *
-   * @param {Object} attributeNameArray - attribute name array (see above)
-   */
   remove(attributeNameArray: string[]) {
     for (const name of attributeNameArray) {
       if (this.attributes[name] !== undefined) {
@@ -198,10 +124,8 @@ export default class AttributeManager {
     }
   }
 
-  // Marks an attribute for update
   invalidate(triggerName: string, dataRange?: {startRow?: number; endRow?: number}) {
     const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
-    // For performance tuning
     debug(TRACE_INVALIDATE, this, triggerName, invalidatedAttributes);
   }
 
@@ -209,11 +133,9 @@ export default class AttributeManager {
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
-    // For performance tuning
     debug(TRACE_INVALIDATE, this, 'all');
   }
 
-  // Ensure all attribute buffers are updated from props or data.
   // eslint-disable-next-line complexity
   update({
     data,
@@ -232,7 +154,6 @@ export default class AttributeManager {
     buffers: any;
     context: any;
   }) {
-    // keep track of whether some attributes are updated
     let updated = false;
 
     debug(TRACE_UPDATE_START, this);
@@ -262,17 +183,10 @@ export default class AttributeManager {
       } else if (
         typeof accessorName === 'string' &&
         !buffers[accessorName] &&
-        attribute.setConstantValue(
-          context,
-          props[accessorName],
-          this.generateConstantAttributes || Boolean(attribute.settings.transition)
-        )
+        attribute.setConstantValue(context, props[accessorName])
       ) {
         // Step 3: try set constant value from props
-        // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
-        // This may happen when setBinaryValue falls through to use the auto updater
       } else if (attribute.needsUpdate()) {
-        // Step 4: update via updater callback
         updated = true;
         this._updateAttribute({
           attribute,
@@ -287,13 +201,14 @@ export default class AttributeManager {
     }
 
     if (updated) {
-      // Only initiate alloc/update (and logging) if actually needed
       debug(TRACE_UPDATE_END, this, numInstances);
     }
 
     if (this.stats) {
       this.stats.get('Update Attributes').timeEnd();
-      if (updated) this.stats.get('Attributes updated').incrementCount();
+      if (updated) {
+        this.stats.get('Attributes updated').incrementCount();
+      }
     }
 
     this.attributeTransitionManager.update({
@@ -303,8 +218,6 @@ export default class AttributeManager {
     });
   }
 
-  // Update attribute transition to the current timestamp
-  // Returns `true` if any transition is in progress
   updateTransition() {
     const {attributeTransitionManager} = this;
     const transitionUpdated = attributeTransitionManager.run();
@@ -312,33 +225,19 @@ export default class AttributeManager {
     return transitionUpdated;
   }
 
-  /**
-   * Returns all attribute descriptors
-   * Note: Format matches luma.gl Model/Program.setAttributes()
-   * @return {Object} attributes - descriptors
-   */
   getAttributes(): {[id: string]: Attribute} {
     return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
   }
 
-  /**
-   * Computes the spatial bounds of a given set of attributes
-   */
   getBounds(attributeNames: string[]) {
     const bounds = attributeNames.map(attributeName => this.attributes[attributeName]?.getBounds());
     return this.mergeBoundsMemoized(bounds);
   }
 
-  /**
-   * Returns changed attribute descriptors
-   * This indicates which WebGLBuffers need to be updated
-   * @return {Object} attributes - descriptors
-   */
   getChangedAttributes(opts: {clearChangedFlags?: boolean} = {clearChangedFlags: false}): {
     [id: string]: Attribute;
   } {
     const {attributes, attributeTransitionManager} = this;
-
     const changedAttributes = {...attributeTransitionManager.getAttributes()};
 
     for (const attributeName in attributes) {
@@ -351,148 +250,14 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  /** Generate backend-neutral buffer layout descriptors from all attributes. */
-  getBufferLayouts(
-    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
-    modelInfo?: {
-      /** Whether the model is instanced */
-      isInstanced?: boolean;
-    }
-  ): BufferLayout[] {
-    const attributes = Object.values(this.getAttributes());
-    const groups = this._getAttributeGroups(attributes);
-    const seenGroups = new Set<string>();
-    const layouts: BufferLayout[] = [];
-
-    for (const attribute of attributes) {
-      const groupId = this._getAttributeGroupId(attribute);
-      const group = groups[groupId];
-
-      if (!seenGroups.has(groupId)) {
-        seenGroups.add(groupId);
-        if (group.attributes[0].settings.isIndexed) {
-          layouts.push(group.attributes[0].getBufferLayout(modelInfo));
-        } else if (this._canPackAttributes(group.attributes)) {
-          layouts.push(this._getPackedBufferGroupLayout(group, modelInfo).layout);
-        } else {
-          for (const member of group.attributes) {
-            layouts.push(member.getBufferLayout(modelInfo));
-          }
-        }
-      }
-    }
-
-    return layouts;
-  }
-
-  /**
-   * Returns `true` if the attribute will be published via a packed shared
-   * buffer instead of its own standalone GPU buffer.
-   */
-  isPackedAttribute(attribute: Attribute): boolean {
-    return !attribute.settings.isIndexed;
-  }
-
-  /** Returns `true` if any current attribute participates in a packed buffer group. */
-  hasPackedBufferGroups(): boolean {
-    return Object.values(this._getAttributeGroups(Object.values(this.getAttributes()))).some(
-      group => group.attributes.length > 1 && this._canPackAttributes(group.attributes)
+  getBufferLayouts(modelInfo?: {isInstanced?: boolean}): BufferLayout[] {
+    return Object.values(this.getAttributes()).map(attribute =>
+      attribute.getBufferLayout(modelInfo)
     );
   }
 
-  /**
-   * Builds all buffers and constant bindings that should be refreshed for the
-   * supplied changed attributes.
-   */
-  getPublishedAttributes(changedAttributes: {[id: string]: Attribute}): PublishedAttributes {
-    const groups = this._getAttributeGroups(Object.values(this.getAttributes()));
-    const touchedGroupIds = new Set<string>();
-
-    for (const attribute of Object.values(changedAttributes)) {
-      const groupId = this._getAttributeGroupId(attribute);
-      touchedGroupIds.add(groupId);
-    }
-
-    const buffers: Record<string, Buffer> = {};
-    const constants: Record<string, TypedArray> = {};
-    const indexBuffers: Buffer[] = [];
-    for (const groupId of touchedGroupIds) {
-      const group = groups[groupId];
-      if (group.attributes[0].settings.isIndexed) {
-        const values = group.attributes[0].getValue();
-        for (const value of Object.values(values)) {
-          if (value instanceof Buffer) {
-            indexBuffers.push(value);
-          }
-        }
-      } else if (
-        group.attributes.length === 1 &&
-        group.attributes[0].isConstant &&
-        !this.generateConstantAttributes
-      ) {
-        const values = group.attributes[0].getValue();
-        for (const [name, value] of Object.entries(values)) {
-          if (value && !(value instanceof Buffer)) {
-            constants[name] = value;
-          }
-        }
-      } else if (group.attributes.length === 1 && !group.attributes[0].isConstant) {
-        const values = group.attributes[0].getValue();
-        for (const [name, value] of Object.entries(values)) {
-          if (value instanceof Buffer) {
-            buffers[group.id] = value;
-          } else if (value) {
-            constants[name] = value;
-          }
-        }
-      } else if (this._canPackAttributes(group.attributes)) {
-        const layout = this._getPackedBufferGroupLayout(group);
-        const buffer = this._updatePackedBufferGroup(group, layout, changedAttributes);
-        buffers[group.id] = buffer;
-        if (!this.generateConstantAttributes) {
-          for (const attribute of group.attributes) {
-            if (!attribute.isConstant) {
-              continue;
-            }
-            const values = attribute.getValue();
-            for (const [name, value] of Object.entries(values)) {
-              if (value && !(value instanceof Buffer)) {
-                constants[name] = value;
-              }
-            }
-          }
-        }
-      } else {
-        for (const attribute of group.attributes) {
-          const values = attribute.getValue();
-          for (const [name, value] of Object.entries(values)) {
-            if (value instanceof Buffer) {
-              buffers[name] = value;
-            } else if (value) {
-              constants[name] = value;
-            }
-          }
-        }
-      }
-    }
-
-    return {buffers, constants, indexBuffers};
-  }
-
-  /**
-   * Backward-compatible buffer-only view of the publication result.
-   */
-  getPackedBufferAttributes(changedAttributes: {[id: string]: Attribute}): Record<string, Buffer> {
-    return this.getPublishedAttributes(changedAttributes).buffers;
-  }
-
-  // PRIVATE METHODS
-
-  /** Register new attributes */
   private _add(
-    /** A map from attribute name to attribute descriptors */
     attributes: {[id: string]: AttributeOptions},
-    /** Additional attribute settings to pass to all attributes */
     overrideOptions?: Partial<AttributeOptions>
   ) {
     for (const attributeName in attributes) {
@@ -505,14 +270,12 @@ export default class AttributeManager {
         ...overrideOptions
       };
 
-      // Initialize the attribute descriptor, with WebGL and metadata fields
       this.attributes[attributeName] = new Attribute(this.device, props);
     }
 
     this._mapUpdateTriggersToAttributes();
   }
 
-  // build updateTrigger name to attribute name mapping
   private _mapUpdateTriggersToAttributes() {
     const triggers: {[name: string]: string[]} = {};
 
@@ -547,245 +310,6 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  /** Returns the attribute's group id, defaulting to its own attribute name. */
-  private _getAttributeGroupId(attribute: Attribute): string {
-    if (
-      attribute.settings.isIndexed ||
-      this.attributeTransitionManager.hasAttribute(attribute.id)
-    ) {
-      return attribute.id;
-    }
-    return attribute.settings.bufferGroup || attribute.id;
-  }
-
-  /** Collects attributes into explicit or implicit publication groups. */
-  private _getAttributeGroups(attributes: Attribute[]): Record<string, AttributeGroup> {
-    const groups: Record<string, AttributeGroup> = {};
-
-    for (const attribute of attributes) {
-      const groupId = this._getAttributeGroupId(attribute);
-
-      if (!groups[groupId]) {
-        groups[groupId] = {id: groupId, attributes: []};
-      }
-      groups[groupId].attributes.push(attribute);
-    }
-
-    for (const group of Object.values(groups)) {
-      group.attributes.sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    return groups;
-  }
-
-  /** Packing currently supports only non-indexed, non-fp64 attributes with concrete CPU-side values. */
-  private _canPackAttributes(attributes: Attribute[]): boolean {
-    if (!attributes.length) {
-      return false;
-    }
-    const stepMode = attributes[0].getBufferLayout().stepMode;
-
-    return attributes.every(attribute => {
-      if (attribute.doublePrecision || attribute.settings.isIndexed) {
-        return false;
-      }
-      if (!ArrayBuffer.isView(attribute.value)) {
-        return false;
-      }
-      return attribute.getBufferLayout().stepMode === stepMode;
-    });
-  }
-
-  /** Computes the binding layout and byte ranges for a packed-buffer group. */
-  private _getPackedBufferGroupLayout(
-    group: AttributeGroup,
-    modelInfo?: {isInstanced?: boolean}
-  ): PackedBufferGroupLayout {
-    const byteStride = Math.max(
-      ...group.attributes.map(attribute => getStride(attribute.getAccessor()))
-    );
-    const stepMode = group.attributes[0].getBufferLayout(modelInfo).stepMode as
-      | 'vertex'
-      | 'instance';
-    const attributes: BufferAttributeLayout[] = [];
-    const attributeOffsets: Record<string, number> = {};
-    const attributeNames: string[] = [];
-    let byteOffset = 0;
-
-    for (const attribute of group.attributes) {
-      const accessor = attribute.getAccessor();
-      const stride = getStride(accessor);
-      // WebGPU still expects a normal vertex-buffer binding model: one binding has one
-      // `byteStride`, and each shader attribute is addressed by a `byteOffset` into that
-      // binding. Packing works by reserving a contiguous byte range for each logical
-      // attribute inside the shared buffer, then layering the attribute's own offset rules
-      // (`vertexOffset`/`offset`) on top of the start of that range.
-      const baseOffset =
-        byteOffset + (accessor.vertexOffset || 0) * stride + (accessor.offset || 0);
-      const baseLayout = getBufferAttributeLayout(
-        attribute.id,
-        {...accessor, stride: byteStride, offset: baseOffset},
-        this.device.type
-      );
-      if (baseLayout) {
-        attributes.push(baseLayout);
-        attributeOffsets[attribute.id] = baseOffset;
-        attributeNames.push(attribute.id);
-      }
-
-      if (attribute.settings.shaderAttributes) {
-        for (const [name, def] of Object.entries(attribute.settings.shaderAttributes)) {
-          // `shaderAttributes` behave the same as they do for standalone buffers: they are
-          // additional views into the parent attribute's data. The only difference here is
-          // that the parent attribute itself already starts at `baseOffset` inside the shared
-          // packed buffer, so the shader attribute offsets are resolved relative to that.
-          const shaderOffset =
-            baseOffset +
-            (def.vertexOffset || 0) * byteStride +
-            (def.elementOffset || 0) * accessor.bytesPerElement;
-          const shaderLayout = getBufferAttributeLayout(
-            name,
-            {...accessor, ...def, stride: byteStride, offset: shaderOffset},
-            this.device.type
-          );
-          if (shaderLayout) {
-            attributes.push(shaderLayout);
-            attributeOffsets[name] = shaderOffset;
-            attributeNames.push(name);
-          }
-        }
-      }
-
-      byteOffset += byteStride * (attribute.numInstances + 2);
-    }
-
-    return {
-      id: group.id,
-      byteStride,
-      byteLength: byteOffset,
-      stepMode,
-      attributeOffsets,
-      attributeNames,
-      layout: {
-        name: group.id,
-        byteStride,
-        attributes,
-        stepMode
-      }
-    };
-  }
-
-  /** Allocates or reuses the shared GPU buffer for a group and uploads the packed contents. */
-  private _updatePackedBufferGroup(
-    group: AttributeGroup,
-    layout: PackedBufferGroupLayout,
-    changedAttributes: {[id: string]: Attribute}
-  ): Buffer {
-    let state: PackedBufferGroupState | undefined = this.packedBuffers[group.id];
-    let buffer = state?.buffer;
-    const layoutChanged = !state || !this._packedBufferGroupLayoutEquals(state.layout, layout);
-
-    if (!buffer || buffer.byteLength < layout.byteLength) {
-      buffer?.delete();
-      buffer = this.device.createBuffer({
-        id: `${this.id}-${group.id}`,
-        usage: Buffer.VERTEX | Buffer.COPY_DST,
-        byteLength: layout.byteLength
-      });
-      state = undefined;
-    }
-
-    if (!state || layoutChanged) {
-      for (const attribute of group.attributes) {
-        if (attribute.isConstant && !this.generateConstantAttributes) {
-          continue;
-        }
-        buffer.write(
-          this._getPackedAttributeData(attribute, layout.byteStride),
-          layout.attributeOffsets[attribute.id]
-        );
-      }
-    } else {
-      for (const attribute of group.attributes) {
-        if (!changedAttributes[attribute.id]) {
-          continue;
-        }
-        if (attribute.isConstant && !this.generateConstantAttributes) {
-          continue;
-        }
-        buffer.write(
-          this._getPackedAttributeData(attribute, layout.byteStride),
-          layout.attributeOffsets[attribute.id]
-        );
-      }
-    }
-
-    this.packedBuffers[group.id] = {buffer, layout};
-    return buffer;
-  }
-
-  /** Returns one logical attribute's packed byte range inside a shared buffer. */
-  private _getPackedAttributeData(attribute: Attribute, byteStride: number): Uint8Array {
-    const accessor = attribute.getAccessor();
-    const sourceStride = getStride(accessor);
-    const instanceCount = Math.max(attribute.numInstances, attribute.isConstant ? 1 : 0);
-    const byteLength = byteStride * instanceCount;
-    const target = new Uint8Array(byteLength);
-    // CPU-side attribute values retain their original standalone layout. When repacking for
-    // a shared GPU buffer, we copy each logical vertex record from that source layout into the
-    // assigned region in the shared buffer, spaced by the group's shared `byteStride`.
-    const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
-
-    if (attribute.isConstant) {
-      const value = attribute.value as TypedArray;
-      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-      for (let i = 0; i < instanceCount; i++) {
-        target.set(bytes, i * byteStride);
-      }
-      return target;
-    }
-
-    const value = attribute.value as TypedArray | null;
-    if (!value) {
-      return target;
-    }
-    const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-
-    for (let i = 0; i < attribute.numInstances; i++) {
-      const srcStart = sourceOffset + i * sourceStride;
-      target.set(bytes.subarray(srcStart, srcStart + sourceStride), i * byteStride);
-    }
-
-    return target;
-  }
-
-  /** Compares two derived packed-buffer layouts to decide whether the shared buffer must be rebuilt. */
-  private _packedBufferGroupLayoutEquals(
-    a: PackedBufferGroupLayout,
-    b: PackedBufferGroupLayout
-  ): boolean {
-    if (
-      a.byteStride !== b.byteStride ||
-      a.byteLength !== b.byteLength ||
-      a.stepMode !== b.stepMode ||
-      a.attributeNames.length !== b.attributeNames.length
-    ) {
-      return false;
-    }
-
-    for (let i = 0; i < a.attributeNames.length; i++) {
-      const attributeName = a.attributeNames[i];
-      if (
-        attributeName !== b.attributeNames[i] ||
-        a.attributeOffsets[attributeName] !== b.attributeOffsets[attributeName]
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   private _updateAttribute(opts: {
     attribute: Attribute;
     numInstances: number;
@@ -797,14 +321,8 @@ export default class AttributeManager {
     debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.constant) {
-      // The attribute is flagged as constant outside of an update cycle
-      // Skip allocation and updater call
       // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
-      attribute.setConstantValue(
-        opts.context,
-        attribute.value,
-        this.generateConstantAttributes || Boolean(attribute.settings.transition)
-      );
+      attribute.setConstantValue(opts.context, attribute.value);
       return;
     }
 
@@ -812,7 +330,6 @@ export default class AttributeManager {
       debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
-    // Calls update on any buffers that need update
     const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;

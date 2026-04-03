@@ -29,40 +29,6 @@ The application provided update functions describe how attributes should be upda
 
 Note that the attribute manager intentionally does not do advanced change detection, but instead makes it easy to build such detection by offering the ability to "invalidate" each attribute separately.
 
-`AttributeManager` can also reduce vertex-buffer binding pressure by publishing multiple logical attributes through one shared GPU buffer. This is useful for layers with many small per-instance attributes, where the vertex-buffer binding limit can become the main constraint.
-
-Grouped attributes still behave like separate attributes on the CPU:
-
-* they keep separate typed-array values
-* they are invalidated independently
-* they may still use `shaderAttributes`
-
-Only the GPU-facing publication step changes.
-
-```js
-attributeManager.addInstanced({
-  instanceSizes: {
-    size: 1,
-    accessor: 'getSize',
-    bufferGroup: 'label-instance-data'
-  },
-  instanceAngles: {
-    size: 1,
-    accessor: 'getAngle',
-    bufferGroup: 'label-instance-data'
-  },
-  instanceColors: {
-    size: 4,
-    type: 'unorm8',
-    accessor: 'getColor',
-    bufferGroup: 'label-instance-data'
-  }
-});
-```
-
-This packing is non-interleaved: each attribute occupies its own contiguous region within the shared GPU buffer and is addressed by byte offset in the generated `BufferLayout`. Attributes inside a shared group are packed in lexical order by attribute name. Attributes without `bufferGroup` still use the same publication path through an implicit single-attribute group. Attributes that are actively in transition temporarily remain in standalone groups so their animated buffers can be bound directly.
-
-
 ### Accessors, Shallow Comparisons and updateTriggers
 
 The layer will expect each object to provide a number of "attributes" that it can use to set the GL buffers. By default, the layer will look for these attributes to be available as fields directly on the objects during iteration over the supplied data set. To gain more control of attribute access and/or to do on-the-fly calculation of attributes.
@@ -81,9 +47,6 @@ While most apps rely on their layers to automatically generate appropriate GPU b
 While this allows for ultimate performance and control of updates, as well as potential sharing of buffers between layers, the application will need to generate attributes in exactly the format that the layer shaders expect, creating a strong coupling between the application and the layer.
 
 **Note:** The application can provide some buffers and let others be managed by the layer. As an example management of the `instancePickingColors` buffer is normally left to the layer.
-
-When using `bufferGroup`, external buffers are still supplied per logical attribute. Grouping only affects how deck.gl republishes those attributes when binding model inputs.
-
 
 ## More information
 

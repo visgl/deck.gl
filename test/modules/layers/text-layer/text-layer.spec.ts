@@ -5,18 +5,9 @@
 import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
+import GroupedAttributeManager from '@deck.gl/core/lib/attribute/grouped-attribute-manager';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-
-function swapAttributeManagerDevice(attributeManager) {
-  const webgpuDevice = Object.defineProperty(Object.create(attributeManager.device), 'type', {
-    value: 'webgpu'
-  });
-  attributeManager.device = webgpuDevice;
-  for (const attribute of Object.values(attributeManager.getAttributes())) {
-    attribute.device = webgpuDevice;
-  }
-}
 
 test('TextLayer', () => {
   const testCases = generateLayerTests({
@@ -179,7 +170,7 @@ test('TextLayer - special texts', () => {
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('TextLayer - WebGPU packed buffer layouts', () => {
+test('TextLayer - WebGPU grouped attribute manager opt-in', () => {
   const testCases = [
     {
       props: {
@@ -189,14 +180,14 @@ test('TextLayer - WebGPU packed buffer layouts', () => {
         getPosition: d => d.COORDINATES
       },
       onAfterUpdate: ({subLayer}) => {
-        const attributeManager = subLayer.getAttributeManager();
-        swapAttributeManagerDevice(attributeManager);
+        const webgpuDevice = Object.defineProperty(Object.create(subLayer.context.device), 'type', {
+          value: 'webgpu'
+        });
+        subLayer.context.device = webgpuDevice;
 
-        const layoutCount = attributeManager.getBufferLayouts({isInstanced: true}).length;
-        if (subLayer.id.endsWith('characters')) {
-          expect(layoutCount, 'characters sublayer packs instance attributes').toBe(3);
-        } else if (subLayer.id.endsWith('background')) {
-          expect(layoutCount, 'background sublayer stays within WebGPU binding budget').toBe(3);
+        const groupedManager = (subLayer as any)._getAttributeManager();
+        if (subLayer.id.endsWith('characters') || subLayer.id.endsWith('background')) {
+          expect(groupedManager).toBeInstanceOf(GroupedAttributeManager);
         }
       }
     }

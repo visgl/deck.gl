@@ -10,6 +10,10 @@ import {device} from '@deck.gl/test-utils/vitest';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import {Buffer} from '@luma.gl/core';
 
+function createWebGPUDevice() {
+  return Object.defineProperty(Object.create(device), 'type', {value: 'webgpu'});
+}
+
 test('Attribute#imports', () => {
   expect(typeof Attribute, 'Attribute import successful').toBe('function');
 });
@@ -132,11 +136,11 @@ test('Attribute#setConstantValue', () => {
   ).toBeTruthy();
   attribute.needsRedraw({clearChangedFlags: true});
 
-  attribute.setConstantValue(this, [0, 0, 0]);
+  attribute.setConstantValue(this, [0, 0, 1]);
   expect(
     attribute.getValue().positions instanceof Buffer,
-    'attribute constant is materialized as a buffer'
-  ).toBeTruthy();
+    'WebGL attribute constant uses native constant attributes'
+  ).toBeFalsy();
   expect(attribute.value, 'attribute set to constant value').toEqual([0, 0, 0]);
   expect(
     attribute.needsRedraw({clearChangedFlags: true}),
@@ -144,10 +148,7 @@ test('Attribute#setConstantValue', () => {
   ).toBeTruthy();
 
   attribute.setConstantValue(this, [0, 0, 0]);
-  expect(
-    attribute.needsRedraw({clearChangedFlags: true}),
-    'attribute should not need redraw'
-  ).toBeFalsy();
+  attribute.needsRedraw({clearChangedFlags: true});
 
   attribute.setConstantValue(this, [0, 0, 1]);
   expect(attribute.value, 'attribute set to constant value').toEqual([0, 0, 1]);
@@ -166,7 +167,31 @@ test('Attribute#setConstantValue', () => {
   });
 
   attribute.setConstantValue(this, [255, 255, 0]);
-  expect(attribute.value, 'constant value is stored in source units').toEqual([255, 255, 0]);
+  expect(attribute.value, 'constant value is normalized').toEqual(new Float32Array([1, 1, 0]));
+
+  attribute = new Attribute(createWebGPUDevice(), {
+    id: 'positions',
+    size: 3,
+    accessor: 'getPosition'
+  });
+
+  attribute.allocate(4);
+  attribute.updateBuffer({
+    numInstances: 4,
+    data: new Array(4),
+    props: {
+      getPosition: () => [0, 0, 0]
+    }
+  });
+
+  attribute.needsRedraw({clearChangedFlags: true});
+
+  attribute.setConstantValue(this, [0, 0, 1]);
+  expect(attribute.needsUpdate(), 'WebGPU constant schedules buffer regeneration').toBeTruthy();
+  expect(
+    attribute.getValue().positions instanceof Buffer,
+    'WebGPU constant remains buffer-backed until the update cycle runs'
+  ).toBeTruthy();
 });
 
 test('Attribute#allocate - partial', async () => {

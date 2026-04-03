@@ -10,7 +10,6 @@ Summary:
 * auto reallocates attributes when needed
 * auto updates attributes with registered updater functions
 * allows overriding with application supplied buffers
-* can publish logical attributes through one shared or implicit single-attribute vertex buffer group
 
 For more information consult the [Attribute Management](../../developer-guide/custom-layers/attribute-management.md) article.
 
@@ -68,7 +67,6 @@ Takes a single parameter as a map of attribute descriptor objects:
     * `stepMode` (string, optional) - One of `'vertex'`, `'instance'` and `'dynamic'`. If set to `'dynamic'`, will be resolved to `'instance'` when this attribute is applied to an instanced model, and `'vertex'` otherwise. Default `'vertex'`.
     * `isIndexed` (boolean, optional) - if this is an index attribute
       (a.k.a. indices). Default to `false`.
-    * `bufferGroup` (string, optional) - Places the attribute into a named shared vertex buffer group. Attributes without `bufferGroup` still participate in the same publication path using an implicit group named after the attribute id. Attributes that are actively in transition remain in standalone groups even if `bufferGroup` is specified.
     * `accessor` (string | string[] | Function) - accessor name(s) that will
       trigger an update of this attribute when changed. Used with
       [`updateTriggers`](./layer.md#updatetriggers).
@@ -158,52 +156,8 @@ Parameters:
 * `modelInfo` (object) - a luma.gl `Model` or a similarly shaped object
   + `isInstanced` (boolean) - used to resolve `stepMode: 'dynamic'`
 
-Notes:
-
-* Every non-indexed managed attribute is published through a buffer group.
-* Attributes that share the same `bufferGroup` are collapsed into a single layout entry.
-* Attributes inside a shared group are packed in lexical order by attribute name.
-* Attributes that are actively in transition are emitted as standalone groups.
-* Packed groups are currently intended for non-indexed attributes that do not use fp64 emulation.
-* Packing is not interleaving in the traditional sense: each logical attribute occupies its own contiguous region inside the shared GPU buffer, and is addressed with byte offsets.
-
 
 ## Remarks
-
-### Buffer Groups
-
-WebGPU limits the number of vertex buffer bindings that may be used by a pipeline. Some layers, especially text and billboard-style layers, naturally accumulate many small per-instance attributes and can hit that limit before they run out of total buffer space.
-
-`AttributeManager` can reduce binding pressure by grouping multiple logical attributes into one shared GPU buffer:
-
-```js
-attributeManager.addInstanced({
-  instanceSizes: {
-    size: 1,
-    accessor: 'getSize',
-    bufferGroup: 'label-instance-data'
-  },
-  instanceAngles: {
-    size: 1,
-    accessor: 'getAngle',
-    bufferGroup: 'label-instance-data'
-  },
-  instanceColors: {
-    size: 4,
-    type: 'unorm8',
-    accessor: 'getColor',
-    bufferGroup: 'label-instance-data'
-  }
-});
-```
-
-This preserves the existing attribute update model:
-
-* each attribute still has its own updater/accessor
-* each attribute can still be invalidated independently
-* `shaderAttributes` still work inside a grouped attribute
-
-Attributes without `bufferGroup` still use the same path, but default to one implicit group per attribute. Shared groups are packed in lexical order by attribute name. Attributes that are actively in transition temporarily stay in their own groups so animated buffers remain the direct render source.
 
 ### Attribute Type
 

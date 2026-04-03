@@ -70,6 +70,10 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     return {...shaders, modules: [...shaders.modules, textUniforms, sdfUniforms], vs, fs};
   }
 
+  protected _useGroupedAttributeManager(): boolean {
+    return this.context.device.type === 'webgpu';
+  }
+
   initializeState() {
     super.initializeState();
 

@@ -48,17 +48,14 @@ export type Updater = (
 /**
  * Attribute configuration used by {@link AttributeManager}.
  *
- * `bufferGroup` opts an attribute into a shared packed-buffer group.
- * Attributes without `bufferGroup` still participate in the same publication
- * path, but use an implicit one-attribute group named after the attribute id.
- * Attributes that are actively in transition remain in standalone groups even
- * if `bufferGroup` is specified.
+ * `bufferGroup` is consumed by the internal `GroupedAttributeManager` to place
+ * multiple attributes into one shared GPU buffer.
  */
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
-  /** Identifier of a packed-buffer group. Attributes with the same group id share one GPU buffer. */
+  /** Identifier of a shared packed-buffer group used by `GroupedAttributeManager`. */
   bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
@@ -282,30 +279,56 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   // Use generic value
   // Returns true if successful
-  setConstantValue(context: any, value?: any, generateBuffer: boolean = true): boolean {
-    if (value === undefined || typeof value === 'function') {
+  setConstantValue(context: any, value?: any, generateBuffer?: boolean): boolean {
+    if (generateBuffer !== undefined) {
+      if (value === undefined || typeof value === 'function') {
+        return false;
+      }
+
+      const transformedValue =
+        this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+
+      if (!generateBuffer) {
+        const hasChanged = this.setData({constant: true, value: transformedValue});
+        this.constant = false;
+        this.clearNeedsUpdate();
+
+        if (hasChanged) {
+          this.setNeedsRedraw();
+        }
+
+        return hasChanged;
+      }
+
+      return this.setConstantBufferValue(transformedValue, this.numInstances);
+    }
+
+    // TODO(ibgreen): WebGPU does not support constant values,
+    // they will be emulated as buffers instead for now.
+    const isWebGPU = this.device.type === 'webgpu';
+    if (isWebGPU || value === undefined || typeof value === 'function') {
+      if (isWebGPU && typeof value !== 'function') {
+        const normalisedValue = this._normalizeValue(value, [], 0);
+        // ensure we trigger an update for the attribute's emulated buffer
+        // where webgl would perform the update here
+        if (!this._areValuesEqual(normalisedValue, this.value)) {
+          this.setNeedsUpdate('WebGPU constant updated');
+        }
+      }
       return false;
     }
 
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+    const hasChanged = this.setData({constant: true, value: transformedValue});
 
-    if (!generateBuffer) {
-      const hasChanged = this.setData({constant: true, value: transformedValue});
-      this.constant = false;
-      this.clearNeedsUpdate();
-
-      if (hasChanged) {
-        this.setNeedsRedraw();
-      }
-
-      return hasChanged;
+    if (hasChanged) {
+      this.setNeedsRedraw();
     }
-
-    return this.setConstantBufferValue(transformedValue, this.numInstances);
+    this.clearNeedsUpdate();
+    return true;
   }
 
-  /** Expands a constant attribute value into a regular per-instance buffer. */
   setConstantBufferValue(value: any, numInstances: number): boolean {
     const ArrayType = this.settings.defaultType;
     const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
@@ -332,7 +355,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return hasChanged;
   }
 
-  /** Returns `true` if the current buffer-backed value already matches the supplied constant. */
   private _hasConstantBufferValue(value: NumericArray, numInstances: number): boolean {
     const currentValue = this.value;
     const expectedLength = Math.max(numInstances, 1) * this.size;

@@ -7,6 +7,7 @@ import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
 import type AttributeManager from './attribute/attribute-manager';
+import type GroupedAttributeManager from './attribute/grouped-attribute-manager';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
 
@@ -25,7 +26,7 @@ export type ChangeFlags = {
 };
 
 export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
-  attributeManager: AttributeManager | null;
+  attributeManager: AttributeManager | GroupedAttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;
   /**
@@ -56,7 +57,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     attributeManager,
     layer
   }: {
-    attributeManager: AttributeManager | null;
+    attributeManager: AttributeManager | GroupedAttributeManager | null;
     layer: LayerT;
   }) {
     super(layer);

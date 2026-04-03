@@ -86,6 +86,10 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     });
   }
 
+  protected _useGroupedAttributeManager(): boolean {
+    return this.context.device.type === 'webgpu';
+  }
+
   initializeState() {
     // Pack background styling attributes into one shared buffer while keeping
     // anchor positions separate, since they may use fp64 emulation.

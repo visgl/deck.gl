@@ -111,40 +111,11 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Base map overlays | ❌ | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
 | Base map interleaving | ❌ | No current base map integration path supports WebGPU interleaving. |
 
-## Attribute Packing
+## Internal Attribute Packing
 
-One practical difference between WebGL and WebGPU is that WebGPU enforces a relatively small limit on the number of vertex buffer bindings used by a pipeline. Layers with many small instance attributes can hit that limit even when the total amount of attribute data is modest.
+WebGPU has a relatively small limit on the number of vertex buffer bindings used by a pipeline. deck.gl currently handles some of this pressure with internal layer-specific packing work, for example in parts of `TextLayer`.
 
-To address this, `AttributeManager` supports shared buffers via `bufferGroup`:
-
-```ts
-attributeManager.addInstanced({
-  instanceSizes: {
-    size: 1,
-    accessor: 'getSize',
-    bufferGroup: 'label-instance-data'
-  },
-  instanceAngles: {
-    size: 1,
-    accessor: 'getAngle',
-    bufferGroup: 'label-instance-data'
-  },
-  instanceColors: {
-    size: 4,
-    type: 'unorm8',
-    accessor: 'getColor',
-    bufferGroup: 'label-instance-data'
-  }
-});
-```
-
-This keeps the existing attribute lifecycle intact:
-
-* attributes are still updated and invalidated independently
-* attributes may still define `shaderAttributes`
-* applications may still supply external attributes per logical attribute
-
-The change is only in the publication step: grouped attributes are emitted as one `BufferLayout` and one shared GPU buffer with byte offsets for each logical attribute. Attributes inside a shared group are packed in lexical order by attribute name, and attributes without `bufferGroup` still use the same publication path through implicit single-attribute groups. Attributes that are actively in transition temporarily remain in standalone groups so their animated buffers can stay on the direct binding path.
+This is currently an internal implementation detail rather than a general custom-layer API. Public `AttributeManager` docs describe the baseline behavior.
 
 ## Background
 

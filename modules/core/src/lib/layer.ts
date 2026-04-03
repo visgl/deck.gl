@@ -7,6 +7,7 @@ import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
+import GroupedAttributeManager from './attribute/grouped-attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
@@ -340,7 +341,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Returns the attribute manager of this layer */
-  getAttributeManager(): AttributeManager | null {
+  getAttributeManager(): AttributeManager | GroupedAttributeManager | null {
     return this.internalState && this.internalState.attributeManager;
   }
 
@@ -766,46 +767,73 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     const attributeManager = this.getAttributeManager();
-    const hasPackedBufferGroups = attributeManager?.hasPackedBufferGroups() || false;
+    if (attributeManager instanceof GroupedAttributeManager) {
+      const hasPackedBufferGroups = attributeManager.hasPackedBufferGroups();
 
-    if (bufferLayoutChanged || hasPackedBufferGroups) {
-      // AttributeManager is always defined when this method is called.
-      // Group-derived layouts can change when instance counts or constant materialization changes,
-      // so refresh them before rebinding buffers.
+      if (bufferLayoutChanged || hasPackedBufferGroups) {
+        model.setBufferLayout(attributeManager.getBufferLayouts(model));
+        changedAttributes = attributeManager.getAttributes();
+      }
+
+      // @ts-ignore luma.gl type issue
+      const excludeAttributes = model.userData?.excludeAttributes || {};
+      const publishedAttributes = attributeManager.getPublishedAttributes(changedAttributes);
+      const attributeBuffers: Record<string, Buffer> = {};
+      const constantAttributes: Record<string, TypedArray> = {};
+
+      for (const [name, buffer] of Object.entries(publishedAttributes.buffers)) {
+        if (!excludeAttributes[name]) {
+          attributeBuffers[name] = buffer;
+        }
+      }
+      for (const [name, value] of Object.entries(publishedAttributes.constants)) {
+        if (!excludeAttributes[name]) {
+          constantAttributes[name] = value;
+        }
+      }
+
+      model.setAttributes(attributeBuffers);
+      model.setConstantAttributes(constantAttributes);
+      if (!excludeAttributes.indices) {
+        for (const buffer of publishedAttributes.indexBuffers) {
+          model.setIndexBuffer(buffer);
+        }
+      }
+      return;
+    }
+
+    if (bufferLayoutChanged) {
       const manager = attributeManager!;
       model.setBufferLayout(manager.getBufferLayouts(model));
-      // All attributes must be reset after buffer layout change.
       changedAttributes = manager.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
     const excludeAttributes = model.userData?.excludeAttributes || {};
-    const publishedAttributes = attributeManager?.getPublishedAttributes(changedAttributes) || {
-      buffers: {},
-      constants: {},
-      indexBuffers: []
-    };
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
 
-    for (const [name, buffer] of Object.entries(publishedAttributes.buffers)) {
-      if (!excludeAttributes[name]) {
-        attributeBuffers[name] = buffer;
+    for (const name in changedAttributes) {
+      if (excludeAttributes[name]) {
+        continue;
       }
-    }
-    for (const [name, value] of Object.entries(publishedAttributes.constants)) {
-      if (!excludeAttributes[name]) {
-        constantAttributes[name] = value;
+      const values = changedAttributes[name].getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (changedAttributes[name].settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
+          constantAttributes[attributeName] = value;
+        }
       }
     }
 
     model.setAttributes(attributeBuffers);
     model.setConstantAttributes(constantAttributes);
-    if (!excludeAttributes.indices) {
-      for (const buffer of publishedAttributes.indexBuffers) {
-        model.setIndexBuffer(buffer);
-      }
-    }
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
@@ -1254,9 +1282,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Create new attribute manager */
-  protected _getAttributeManager(): AttributeManager | null {
+  protected _useGroupedAttributeManager(): boolean {
+    return false;
+  }
+
+  protected _getAttributeManager(): AttributeManager | GroupedAttributeManager | null {
     const context = this.context;
-    return new AttributeManager(context.device, {
+    const AttributeManagerType = this._useGroupedAttributeManager()
+      ? GroupedAttributeManager
+      : AttributeManager;
+    return new AttributeManagerType(context.device, {
       id: this.props.id,
       stats: context.stats,
       timeline: context.timeline
