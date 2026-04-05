@@ -149,8 +149,8 @@ function resizeTexture(
     width: oldWidth,
     height: oldHeight
   });
-  commandEncoder.finish();
-  device.submit();
+  const commandBuffer = commandEncoder.finish();
+  device.submit(commandBuffer);
   regenerateMipmaps(newTexture);
 
   texture.destroy();
