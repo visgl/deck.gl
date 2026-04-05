@@ -150,6 +150,7 @@ function resizeTexture(
     height: oldHeight
   });
   commandEncoder.finish();
+  device.submit();
   regenerateMipmaps(newTexture);
 
   texture.destroy();
