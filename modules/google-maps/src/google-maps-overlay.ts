@@ -302,7 +302,19 @@ export default class GoogleMapsOverlay {
   }
 
   _onDrawVector({gl, transformer}) {
-    if (!this._deck || !this._map) {
+    if (!this._map) {
+      return;
+    }
+
+    // When a WebGLOverlayView is removed and a new one is added to the same map,
+    // Google Maps may not fire onContextRestored again because the WebGL context
+    // was never actually lost. In that case, initialize the deck instance here
+    // using the GL context provided by onDraw.
+    if (!this._deck && this.props.interleaved) {
+      this._onContextRestored({gl});
+    }
+
+    if (!this._deck) {
       return;
     }
 
