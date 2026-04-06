@@ -306,8 +306,7 @@ test('Attribute#updateBuffer', () => {
       {id: 'E', value: 0, color: undefined}
     ],
     getColor: d => d.color,
-    getValue: d => d.value,
-    getValueConstant: [20]
+    getValue: d => d.value
   };
 
   const TEST_PARAMS = [
@@ -370,18 +369,6 @@ test('Attribute#updateBuffer', () => {
       }),
       standard: [20, 40, 14, 0],
       'variable size': [20, 20, 40, 14, 14, 14, 14, 0, 0, 0]
-    },
-    {
-      title: 'constant accessor with transform',
-      attribute: new Attribute(device, {
-        id: 'values',
-        type: 'float32',
-        size: 1,
-        accessor: 'getValueConstant',
-        transform: x => x * 2
-      }),
-      standard: [40, 40, 40, 40],
-      'variable size': [40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
     },
     {
       title: 'custom accessor',
