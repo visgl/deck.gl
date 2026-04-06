@@ -47,6 +47,17 @@ const VALIDATION_RULES: ValidationRule[] = [
     })
   },
 
+  // Mask demo works best in interleaved mode (demonstrates grouped rendering)
+  {
+    check: d => d.maskDemo && !d.interleaved,
+    warning: () => ({
+      dimension: 'maskDemo',
+      message:
+        'Mask Extension demo works in overlay mode, but interleaved mode demonstrates grouped rendering',
+      severity: 'info'
+    })
+  },
+
   // Google Maps has limited interleaved support (info only)
   {
     check: d => d.interleaved && d.basemap === 'google-maps',

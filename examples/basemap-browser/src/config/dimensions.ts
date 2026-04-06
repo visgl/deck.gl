@@ -13,6 +13,7 @@ export const DEFAULT_DIMENSIONS: Dimensions = {
   interleaved: true,
   globe: false,
   multiView: false,
+  maskDemo: false,
   stressTest: 'none'
 };
 

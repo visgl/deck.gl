@@ -2,9 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {GeoJsonLayer, ArcLayer, TextLayer, IconLayer} from '@deck.gl/layers';
+import {
+  GeoJsonLayer,
+  ArcLayer,
+  TextLayer,
+  IconLayer,
+  PolygonLayer,
+  ScatterplotLayer
+} from '@deck.gl/layers';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
+import {MaskExtension} from '@deck.gl/extensions';
 
 // Icon atlas for markers
 const ICON_ATLAS =
@@ -27,6 +35,7 @@ type LayerBuildOptions = {
   interleaved: boolean;
   globe: boolean;
   multiView: boolean;
+  maskDemo: boolean;
   stressTest: StressTest;
 };
 
@@ -35,7 +44,7 @@ type LayerBuildOptions = {
  * Single source of truth for layer configuration.
  */
 export function buildLayers(options: LayerBuildOptions): Layer[] {
-  const {basemap, interleaved, globe, multiView, stressTest} = options;
+  const {basemap, interleaved, globe, multiView, maskDemo, stressTest} = options;
 
   const interleavedProps = getInterleavedProps(basemap, interleaved);
 
@@ -106,6 +115,56 @@ export function buildLayers(options: LayerBuildOptions): Layer[] {
       ...interleavedProps
     })
   ];
+
+  // Add mask extension demo layers if enabled
+  // Both layers share the same beforeId/slot so they land in the same render group,
+  // which is required for MaskExtension to work in interleaved mode.
+  if (maskDemo) {
+    const maskProps = interleavedProps;
+
+    // Mask polygon: a rectangle over Western Europe
+    baseLayers.push(
+      new PolygonLayer({
+        id: 'mask-region',
+        data: [
+          {
+            polygon: [
+              [-5, 48],
+              [5, 48],
+              [5, 53],
+              [-5, 53]
+            ]
+          }
+        ],
+        getPolygon: (d: any) => d.polygon,
+        getFillColor: [255, 200, 0, 80],
+        operation: 'mask',
+        ...maskProps
+      })
+    );
+
+    // Scattered points across Europe, masked by the polygon above
+    const maskedPoints = [];
+    for (let i = 0; i < 200; i++) {
+      maskedPoints.push({
+        position: [-10 + Math.random() * 30, 40 + Math.random() * 20],
+        radius: 20000 + Math.random() * 40000
+      });
+    }
+
+    baseLayers.push(
+      new ScatterplotLayer({
+        id: 'masked-points',
+        data: maskedPoints,
+        getPosition: (d: any) => d.position,
+        getRadius: (d: any) => d.radius,
+        getFillColor: [255, 200, 0, 200],
+        extensions: [new MaskExtension()],
+        maskId: 'mask-region',
+        ...maskProps
+      })
+    );
+  }
 
   // Add stress test layer if enabled
   const stressTestLayer = buildStressTestLayer(stressTest, basemap, interleaved);

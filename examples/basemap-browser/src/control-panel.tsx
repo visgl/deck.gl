@@ -44,6 +44,10 @@ function getDimensionsFromUrl(): Partial<Dimensions> {
     result.interleaved = params.get('interleaved') !== 'false';
   }
 
+  if (params.has('maskDemo')) {
+    result.maskDemo = params.get('maskDemo') === 'true';
+  }
+
   if (params.has('globe')) {
     result.globe = params.get('globe') === 'true';
   }
@@ -75,6 +79,7 @@ function setUrlFromDimensions(dimensions: Dimensions) {
   params.set('interleaved', String(dimensions.interleaved));
   params.set('globe', String(dimensions.globe));
   params.set('multiView', String(dimensions.multiView));
+  params.set('maskDemo', String(dimensions.maskDemo));
   params.set('stressTest', dimensions.stressTest);
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', newUrl);
@@ -242,6 +247,18 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
               onChange={() => updateDimension('multiView', !dimensions.multiView)}
             />
             Multi-View
+          </label>
+        </div>
+
+        {/* Mask Extension Demo */}
+        <div className="section">
+          <label>
+            <input
+              type="checkbox"
+              checked={dimensions.maskDemo}
+              onChange={() => updateDimension('maskDemo', !dimensions.maskDemo)}
+            />
+            Mask Extension Demo
           </label>
         </div>
 

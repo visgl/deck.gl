@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
+// eslint-disable-next-line import/default
 import mapboxgl from 'mapbox-gl';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';

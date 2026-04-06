@@ -38,6 +38,7 @@ export type Dimensions = {
   interleaved: boolean;
   globe: boolean;
   multiView: boolean;
+  maskDemo: boolean;
   stressTest: StressTest;
 };
 
@@ -66,6 +67,7 @@ export type Config = {
   interleaved: boolean;
   globe: boolean;
   multiView: boolean;
+  maskDemo: boolean;
   stressTest: StressTest;
 
   // Computed configuration
