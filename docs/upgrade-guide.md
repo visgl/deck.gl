@@ -213,7 +213,7 @@ new Deck({
 // deck.gl v9 using GL constants
 // The constant module remains but is now considered an internal luma.gl module, and is no longer intended to be imported by applications.
 import {Deck} from '@deck.gl/core'
-import {GL} from '@luma.gl/constants' // Note the ESM import
+import {GL} from '@luma.gl/webgl/constants'
 
 new Deck({
   parameters: {
@@ -224,7 +224,7 @@ new Deck({
 
 // deck.gl v8
 import {Deck} from '@deck.gl/core/typed'
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 new Deck({
   parameters: {

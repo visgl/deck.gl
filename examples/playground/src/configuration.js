@@ -13,7 +13,7 @@ import {CARTO_LAYERS, colorBins, colorCategories, colorContinuous} from '@deck.g
 import {CARTO_SOURCES} from '@carto/api-client';
 import * as Widgets from '@deck.gl/widgets';
 
-import {GL as GLConstants} from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl/constants';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';

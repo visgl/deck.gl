@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import jsep from 'jsep';
-
 /**
  * Sources:
  * - Copyright (c) 2013 Stephen Oney, http://jsep.from.so/, MIT License
  * - Copyright (c) 2023 Don McCurdy, https://github.com/donmccurdy/expression-eval, MIT License
  */
 
-// Default operator precedence from https://github.com/EricSmekens/jsep/blob/master/src/jsep.js#L55
+import jsep from 'jsep';
+
+/** Default operator precedence from https://github.com/EricSmekens/jsep/blob/master/src/jsep.js#L55 */
 const DEFAULT_PRECEDENCE = {
   '||': 1,
   '&&': 2,

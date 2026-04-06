@@ -22,7 +22,7 @@ void main(void) {
 #ifdef MODULE_PBRMATERIAL
 
   fragColor = vColor * pbr_filterColor(vec4(0));
-  geometry.uv = pbr_vUV;
+  geometry.uv = pbr_vUV0;
   fragColor.a *= layer.opacity;
 
 #else

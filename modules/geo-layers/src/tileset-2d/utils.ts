@@ -272,7 +272,9 @@ export function getTileIndices({
   tileSize = TILE_SIZE,
   modelMatrix,
   modelMatrixInverse,
-  zoomOffset = 0
+  zoomOffset = 0,
+  visibleMinZoom,
+  visibleMaxZoom
 }: {
   viewport: Viewport;
   maxZoom?: number;
@@ -283,6 +285,8 @@ export function getTileIndices({
   modelMatrix?: Matrix4;
   modelMatrixInverse?: Matrix4;
   zoomOffset?: number;
+  visibleMinZoom?: number | null;
+  visibleMaxZoom?: number | null;
 }) {
   let z = viewport.isGeospatial
     ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
@@ -295,6 +299,12 @@ export function getTileIndices({
   }
   if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
+  }
+  if (visibleMinZoom != null && viewport.zoom < visibleMinZoom) {
+    return [];
+  }
+  if (visibleMaxZoom != null && viewport.zoom > visibleMaxZoom) {
+    return [];
   }
   let transformedExtent = extent;
   if (modelMatrix && modelMatrixInverse && extent && !viewport.isGeospatial) {

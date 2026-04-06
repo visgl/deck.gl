@@ -216,7 +216,7 @@ resolver. The `@@#` prefix on an enumeration triggers this lookup.
 For example, when this configuration is passed to the `JSONConverter`–
 
 ```js
-import GL from '@luma.gl/constants';
+import GL from '@luma.gl/webgl/constants';
 
 const configuration = {
   ...

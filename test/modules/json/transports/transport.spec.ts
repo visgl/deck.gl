@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import Transport from '@deck.gl/json/transports/transport';
+import {Transport} from '@deck.gl/json/transports/transport';
 
 test('delayed onInitialized()', () => {
   Transport.setCallbacks({
