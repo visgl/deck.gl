@@ -10,16 +10,18 @@ requires = [
   "wheel",
 ]
 
+[tool.uv]
+python-preference = "managed"
+
 [tool.black]
 line-length = 120
-target-version = ['py34']
+target-version = ['py38']
 include = '\.pyi?$'
 exclude = '''
-
 (
   /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
+      \.eggs
+    | \.git
     | \.hg
     | \.mypy_cache
     | \.tox
@@ -28,8 +30,7 @@ exclude = '''
     | buck-out
     | build
     | dist
+    | env
   )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
 )
 '''
