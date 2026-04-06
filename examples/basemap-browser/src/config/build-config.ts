@@ -24,7 +24,7 @@ export function buildConfig(
   dimensions: Dimensions,
   onViewStateChange?: ViewStateChangeCallback
 ): Config {
-  const {basemap, framework, interleaved, batched, globe, multiView, stressTest} = dimensions;
+  const {basemap, framework, interleaved, globe, multiView, maskDemo, stressTest} = dimensions;
 
   // Validate dimensions (warnings only)
   const validation = validateDimensions(dimensions);
@@ -38,6 +38,7 @@ export function buildConfig(
     interleaved,
     globe,
     multiView,
+    maskDemo,
     stressTest
   });
 
@@ -53,9 +54,9 @@ export function buildConfig(
     basemap,
     framework,
     interleaved,
-    batched,
     globe,
     multiView,
+    maskDemo,
     stressTest,
 
     // Computed configuration

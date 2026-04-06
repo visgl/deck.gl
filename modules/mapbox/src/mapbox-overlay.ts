@@ -9,14 +9,14 @@ import {
   getDeckInstance,
   removeDeckInstance,
   getDefaultParameters,
-  getProjection
+  getProjection,
+  MAPBOX_VIEW_ID
 } from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {DeckProps, LayersList} from '@deck.gl/core';
 
-import {resolveLayers} from './resolve-layers';
 import {resolveLayerGroups} from './resolve-layer-groups';
 
 export type MapboxOverlayProps = Omit<
@@ -35,12 +35,6 @@ export type MapboxOverlayProps = Omit<
    * deck.gl layers are inserted into mapbox-gl's layer stack, and share the same WebGL2RenderingContext as the base map.
    */
   interleaved?: boolean;
-
-  /**
-   * (experimental) render deck.gl layers in batches grouped by `beforeId` or `slot` to enable cross-layer extension handling.
-   * @default false
-   */
-  _renderLayersInGroups?: boolean;
 };
 
 /**
@@ -53,13 +47,11 @@ export default class MapboxOverlay implements IControl {
   private _map?: Map;
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
-  private _renderLayersInGroups: boolean;
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
 
   constructor(props: MapboxOverlayProps) {
     const {interleaved = false} = props;
     this._interleaved = interleaved;
-    this._renderLayersInGroups = props._renderLayersInGroups || false;
     this._props = this.filterProps(props);
   }
 
@@ -84,6 +76,7 @@ export default class MapboxOverlay implements IControl {
     if (this._deck && this._map) {
       this._deck.setProps({
         ...this._props,
+        views: this._getViews(this._map),
         parameters: {
           ...getDefaultParameters(this._map, this._interleaved),
           ...this._props.parameters
@@ -116,7 +109,7 @@ export default class MapboxOverlay implements IControl {
       ...this._props,
       parent: container,
       parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
-      views: this._props.views || getDefaultView(map),
+      views: this._getViews(map),
       viewState: getViewState(map)
     });
 
@@ -147,6 +140,7 @@ export default class MapboxOverlay implements IControl {
       map,
       deck: new Deck({
         ...this._props,
+        views: this._getViews(map),
         gl,
         parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
       })
@@ -160,15 +154,11 @@ export default class MapboxOverlay implements IControl {
 
   private _resolveLayers(
     map: Map | undefined,
-    deck: Deck | undefined,
+    _deck: Deck | undefined,
     prevLayers: LayersList | undefined,
     newLayers: LayersList | undefined
   ): void {
-    if (this._renderLayersInGroups) {
-      resolveLayerGroups(map, prevLayers, newLayers);
-    } else {
-      resolveLayers(map, deck, prevLayers, newLayers);
-    }
+    resolveLayerGroups(map, prevLayers, newLayers);
   }
 
   /** Called when the control is removed from a map */
@@ -253,8 +243,9 @@ export default class MapboxOverlay implements IControl {
 
     // getProjection() returns undefined before style is loaded
     const projection = getProjection(this._map);
-    if (projection && !this._props.views) {
-      this._deck?.setProps({views: getDefaultView(this._map)});
+    if (projection) {
+      // Update views to match new projection (MapView vs GlobeView)
+      this._deck?.setProps({views: this._getViews(this._map)});
     }
   };
 
@@ -268,12 +259,26 @@ export default class MapboxOverlay implements IControl {
     }
   };
 
+  private _getViews(map: Map) {
+    if (!this._props.views) {
+      return getDefaultView(map);
+    }
+    // Check if custom views already include a 'mapbox' view
+    const views = Array.isArray(this._props.views) ? this._props.views : [this._props.views];
+    const hasMapboxView = views.some((v: any) => v.id === MAPBOX_VIEW_ID);
+    if (hasMapboxView) {
+      return this._props.views;
+    }
+    // Add default 'mapbox' view to custom views for consistency with interleaved mode
+    return [getDefaultView(map), ...views];
+  }
+
   private _updateViewState = () => {
     const deck = this._deck;
     const map = this._map;
     if (deck && map) {
       deck.setProps({
-        views: this._props.views || getDefaultView(map),
+        views: this._getViews(map),
         viewState: getViewState(map)
       });
       // Redraw immediately if view state has changed
