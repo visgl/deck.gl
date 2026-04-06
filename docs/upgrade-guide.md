@@ -605,6 +605,7 @@ const layer = new Tile3DLayer({
 - `COORDINATE_SYSTEM` enum
   + `LNGLAT_DEPRECATED`: use `LNGLAT`
   + `METERS`: use `METER_OFFSETS`
+  + constants are now string-valued; raw numeric `coordinateSystem` inputs are no longer supported. Use `COORDINATE_SYSTEM.*` or the equivalent string literal.
 
 
 ##### React

@@ -9,7 +9,6 @@ import {createRoot} from 'react-dom/client';
 
 import {DeckGL} from '@deck.gl/react';
 import {
-  COORDINATE_SYSTEM,
   _GlobeView as GlobeView,
   LightingEffect,
   AmbientLight,
@@ -87,7 +86,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
         id: 'earth-sphere',
         data: [0],
         mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPosition: [0, 0, 0],
         getColor: [255, 255, 255]
       }),

@@ -105,7 +105,7 @@ const PROPS1 = {
   onHover: () => {},
   onClick: () => {},
 
-  coordinateSystem: 1,
+  coordinateSystem: 'lnglat',
   coordinateOrigin: [0, 0, 0],
 
   parameters: {},
