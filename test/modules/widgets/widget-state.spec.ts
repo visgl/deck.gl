@@ -2,12 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi, beforeEach, afterEach} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {CompassWidget} from '@deck.gl/widgets';
 import {GimbalWidget} from '@deck.gl/widgets';
+import {ZoomWidget} from '@deck.gl/widgets';
+import {ThemeWidget} from '@deck.gl/widgets';
+import {LoadingWidget} from '@deck.gl/widgets';
+import {_GeocoderWidget as GeocoderWidget} from '@deck.gl/widgets';
+import {ResetViewWidget} from '@deck.gl/widgets';
 
 // ---- TimelineWidget ----
 
@@ -166,6 +171,29 @@ test('TimelineWidget - controlled playing: timer stops after reaching end withou
   vi.useRealTimers();
 });
 
+test('TimelineWidget - uncontrolled: loop wraps around at end', () => {
+  vi.useFakeTimers();
+  const onTimeChange = vi.fn();
+  const widget = new TimelineWidget({
+    timeRange: [0, 10],
+    step: 10,
+    loop: true,
+    playInterval: 100,
+    onTimeChange
+  });
+
+  widget.play();
+  // play() calls tick() synchronously, which moves time to 10 (max)
+  expect(widget.getTime()).toBe(10);
+
+  // Next tick wraps to 0 (loop)
+  vi.advanceTimersByTime(100);
+  expect(widget.getTime()).toBe(0);
+  expect(widget.getPlaying()).toBe(true);
+
+  vi.useRealTimers();
+});
+
 test('TimelineWidget - controlled: getPlaying returns playing prop', () => {
   const widget = new TimelineWidget({timeRange: [0, 100], playing: true});
   expect(widget.getPlaying()).toBe(true);
@@ -256,6 +284,110 @@ test('FullscreenWidget - pseudo-fullscreen toggles state and calls callback', ()
   expect(container.classList.contains('deck-pseudo-fullscreen')).toBe(false);
 });
 
+test('FullscreenWidget - onFullscreenChange event updates state and calls callback', () => {
+  const onFullscreenChange = vi.fn();
+  const widget = new FullscreenWidget({onFullscreenChange});
+
+  // Mock getContainer - document.fullscreenElement won't match, so fullscreen = false
+  const container = document.createElement('div');
+  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
+
+  widget.onFullscreenChange();
+
+  expect(onFullscreenChange).toHaveBeenCalledWith(false);
+  expect(widget.fullscreen).toBe(false);
+});
+
+// ---- ThemeWidget ----
+
+test('ThemeWidget - uncontrolled: initialThemeMode sets starting state', () => {
+  const widget = new ThemeWidget({initialThemeMode: 'light'});
+  expect(widget.getThemeMode()).toBe('light');
+});
+
+test('ThemeWidget - uncontrolled: initialThemeMode dark', () => {
+  const widget = new ThemeWidget({initialThemeMode: 'dark'});
+  expect(widget.getThemeMode()).toBe('dark');
+});
+
+test('ThemeWidget - controlled: getThemeMode returns themeMode prop', () => {
+  const widget = new ThemeWidget({themeMode: 'light'});
+  expect(widget.getThemeMode()).toBe('light');
+
+  widget.setProps({themeMode: 'dark'});
+  expect(widget.getThemeMode()).toBe('dark');
+});
+
+test('ThemeWidget - controlled: _handleClick calls onThemeModeChange but does not update internal state', () => {
+  const onThemeModeChange = vi.fn();
+  const widget = new ThemeWidget({themeMode: 'dark', onThemeModeChange});
+  const internalBefore = widget.themeMode;
+
+  (widget as any)._handleClick();
+
+  expect(onThemeModeChange).toHaveBeenCalledWith('light');
+  // Internal state unchanged in controlled mode
+  expect(widget.themeMode).toBe(internalBefore);
+  // getThemeMode still returns the controlled prop
+  expect(widget.getThemeMode()).toBe('dark');
+});
+
+test('ThemeWidget - uncontrolled: _handleClick updates internal state and calls callback', () => {
+  const onThemeModeChange = vi.fn();
+  const widget = new ThemeWidget({initialThemeMode: 'dark', onThemeModeChange});
+
+  expect(widget.getThemeMode()).toBe('dark');
+  (widget as any)._handleClick();
+
+  expect(onThemeModeChange).toHaveBeenCalledWith('light');
+  expect(widget.themeMode).toBe('light');
+});
+
+// ---- ZoomWidget ----
+
+test('ZoomWidget - onZoom callback is stored in props', () => {
+  const onZoom = vi.fn();
+  const widget = new ZoomWidget({onZoom});
+  expect(widget.props.onZoom).toBe(onZoom);
+});
+
+test('ZoomWidget - default onZoom is a no-op', () => {
+  const widget = new ZoomWidget();
+  expect(() => widget.props.onZoom({viewId: 'test', delta: 1, zoom: 5})).not.toThrow();
+});
+
+test('ZoomWidget - handleZoom calls onZoom with correct params', () => {
+  const onZoom = vi.fn();
+  const widget = new ZoomWidget({onZoom});
+
+  // Mock getViewState to return a basic view state
+  vi.spyOn(widget, 'getViewState').mockReturnValue({zoom: 10});
+  // Mock setViewState to prevent actual state changes
+  vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
+
+  widget.handleZoom('default-view', 11, 1);
+
+  expect(onZoom).toHaveBeenCalledWith({viewId: 'default-view', delta: 1, zoom: 11});
+});
+
+test('ZoomWidget - handleZoom respects minZoom/maxZoom constraints', () => {
+  const onZoom = vi.fn();
+  const widget = new ZoomWidget({onZoom});
+
+  vi.spyOn(widget, 'getViewState').mockReturnValue({zoom: 10, minZoom: 2, maxZoom: 12});
+  vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
+
+  // Try to zoom beyond maxZoom
+  widget.handleZoom('default-view', 15, 1);
+  expect(onZoom).toHaveBeenCalledWith({viewId: 'default-view', delta: 1, zoom: 12});
+
+  onZoom.mockClear();
+
+  // Try to zoom below minZoom
+  widget.handleZoom('default-view', 1, -1);
+  expect(onZoom).toHaveBeenCalledWith({viewId: 'default-view', delta: -1, zoom: 2});
+});
+
 // ---- CompassWidget ----
 
 test('CompassWidget - onReset callback is called with correct params', () => {
@@ -282,4 +414,123 @@ test('GimbalWidget - default onReset is a no-op', () => {
   expect(() =>
     widget.props.onReset({viewId: 'test', rotationOrbit: 0, rotationX: 0})
   ).not.toThrow();
+});
+
+test('GimbalWidget - resetOrbitView calls onReset and sets view state', () => {
+  const onReset = vi.fn();
+  const widget = new GimbalWidget({onReset});
+
+  vi.spyOn(widget, 'getViewState').mockReturnValue({rotationOrbit: 45, rotationX: 30});
+  vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
+
+  widget.resetOrbitView();
+
+  expect(onReset).toHaveBeenCalledWith({viewId: 'OrbitView', rotationOrbit: 0, rotationX: 0});
+});
+
+// ---- LoadingWidget ----
+
+test('LoadingWidget - onLoadingChange callback is stored in props', () => {
+  const onLoadingChange = vi.fn();
+  const widget = new LoadingWidget({onLoadingChange});
+  expect(widget.props.onLoadingChange).toBe(onLoadingChange);
+});
+
+test('LoadingWidget - default onLoadingChange is a no-op', () => {
+  const widget = new LoadingWidget();
+  expect(() => widget.props.onLoadingChange(true)).not.toThrow();
+});
+
+test('LoadingWidget - onRedraw calls onLoadingChange when loading state changes', () => {
+  const onLoadingChange = vi.fn();
+  const widget = new LoadingWidget({onLoadingChange});
+  widget.loading = true;
+
+  // Simulate all layers loaded
+  widget.onRedraw({layers: [{isLoaded: true} as any]});
+  expect(onLoadingChange).toHaveBeenCalledWith(false);
+  expect(widget.loading).toBe(false);
+
+  onLoadingChange.mockClear();
+
+  // Simulate a layer loading
+  widget.onRedraw({layers: [{isLoaded: false} as any]});
+  expect(onLoadingChange).toHaveBeenCalledWith(true);
+  expect(widget.loading).toBe(true);
+});
+
+test('LoadingWidget - onRedraw does not call callback when state unchanged', () => {
+  const onLoadingChange = vi.fn();
+  const widget = new LoadingWidget({onLoadingChange});
+  widget.loading = true;
+
+  // Still loading - no change
+  widget.onRedraw({layers: [{isLoaded: false} as any]});
+  expect(onLoadingChange).not.toHaveBeenCalled();
+});
+
+// ---- GeocoderWidget ----
+
+test('GeocoderWidget - onGeocode callback is stored in props', () => {
+  const onGeocode = vi.fn();
+  const widget = new GeocoderWidget({onGeocode});
+  expect(widget.props.onGeocode).toBe(onGeocode);
+});
+
+test('GeocoderWidget - default onGeocode is a no-op', () => {
+  const widget = new GeocoderWidget();
+  expect(() =>
+    widget.props.onGeocode({viewId: 'test', coordinates: {longitude: -122, latitude: 37}})
+  ).not.toThrow();
+});
+
+test('GeocoderWidget - flyTo calls onGeocode with coordinates', () => {
+  const onGeocode = vi.fn();
+  const widget = new GeocoderWidget({onGeocode});
+
+  // Mock deck to provide view IDs
+  (widget as any).deck = {
+    getViews: () => [{id: 'default-view'}]
+  };
+  vi.spyOn(widget, 'getViewState').mockReturnValue({});
+  vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
+
+  widget.flyTo({longitude: -122.4, latitude: 37.8, zoom: 12});
+
+  expect(onGeocode).toHaveBeenCalledWith({
+    viewId: 'default-view',
+    coordinates: {longitude: -122.4, latitude: 37.8, zoom: 12}
+  });
+});
+
+// ---- ResetViewWidget ----
+
+test('ResetViewWidget - onReset callback is stored in props', () => {
+  const onReset = vi.fn();
+  const widget = new ResetViewWidget({onReset});
+  expect(widget.props.onReset).toBe(onReset);
+});
+
+test('ResetViewWidget - default onReset is a no-op', () => {
+  const widget = new ResetViewWidget();
+  expect(() => widget.props.onReset({viewId: 'test', viewState: {}})).not.toThrow();
+});
+
+test('ResetViewWidget - resetViewState calls onReset for each view', () => {
+  const onReset = vi.fn();
+  const widget = new ResetViewWidget({onReset});
+
+  // Mock deck to provide view IDs
+  (widget as any).deck = {
+    getViews: () => [{id: 'default-view'}]
+  };
+  vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
+
+  const initialViewState = {longitude: -122.4, latitude: 37.8, zoom: 11};
+  widget.resetViewState(initialViewState as any);
+
+  expect(onReset).toHaveBeenCalledWith({
+    viewId: 'default-view',
+    viewState: initialViewState
+  });
 });
