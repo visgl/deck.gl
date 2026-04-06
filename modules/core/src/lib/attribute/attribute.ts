@@ -488,13 +488,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    let accessorFunc: Accessor<any, any> =
+    const accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
-    if (typeof accessorFunc !== 'function' && typeof accessor === 'string') {
-      accessorFunc = () => props[accessor];
-    }
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = attribute.getVertexOffset(startRow);
