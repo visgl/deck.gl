@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* global google */
-import {GL, GLParameters} from '@luma.gl/webgl/constants';
+import type {GLParameters} from '@luma.gl/webgl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {
   createDeckInstance,

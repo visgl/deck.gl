@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ShaderAssembler} from '@luma.gl/shadertools';
-
-import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
+import {ShaderAssembler, gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
 import {layerUniforms} from './misc/layer-uniforms';
 import color from './color/color';
 import geometry from './misc/geometry';

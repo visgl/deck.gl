@@ -48,10 +48,11 @@ void main(void) {
     project_size_to_pixel(instanceSizes * textBackground.sizeScale, textBackground.sizeUnits),
     textBackground.sizeMinPixels, textBackground.sizeMaxPixels
   );
+  float instanceScale = sizePixels / text.fontSize;
 
-  dimensions = instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
+  dimensions = instanceRects.zw * instanceScale + textBackground.padding.xy + textBackground.padding.zw;
 
-  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
+  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * instanceScale + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
   pixelOffset += instancePixelOffsets;
   pixelOffset.y *= -1.0;

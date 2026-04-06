@@ -18,9 +18,9 @@ import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/webgl/constants';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import {GL} from '@luma.gl/webgl/constants';
 import type {CanvasContextProps, Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 

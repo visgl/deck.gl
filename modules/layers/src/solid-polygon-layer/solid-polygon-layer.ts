@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, project32, picking, COORDINATE_SYSTEM, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';

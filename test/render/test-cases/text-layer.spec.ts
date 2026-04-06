@@ -12,14 +12,16 @@ import {
   TestCase
 } from '../deck-test-utils';
 import testCases from './text-layer';
+import {loadPrepackedFontAtlas} from './text-layer';
 
 const ctx: DeckTestContext = {
   deck: null,
   container: null
 };
 
-beforeAll(() => {
+beforeAll(async () => {
   ctx.container = createContainer();
+  await loadPrepackedFontAtlas();
 });
 
 afterEach(() => {

@@ -29,6 +29,7 @@ type _TextBackgroundLayerProps<DataT> = {
   sizeUnits?: Unit;
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
+  fontSize?: number;
 
   borderRadius?: number | Readonly<[number, number, number, number]>;
   padding?: Readonly<[number, number]> | Readonly<[number, number, number, number]>;
@@ -53,6 +54,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   sizeUnits: 'pixels',
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+  fontSize: 1,
 
   borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
@@ -154,7 +156,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth} =
+    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, fontSize} =
       this.props;
     let {padding, borderRadius} = this.props;
 
@@ -183,6 +185,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeMaxPixels
     };
     const textProps: TextModuleProps = {
+      fontSize,
       viewport: this.context.viewport
     };
     model.shaderInputs.setProps({textBackground: textBackgroundProps, text: textProps});

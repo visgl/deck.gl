@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
 import type {SnapshotTestCase} from '@deck.gl/test-utils';
 

@@ -45,11 +45,12 @@
   },
   "devDependencies": {
     "@floating-ui/dom": "^1.7.5",
-    "@loaders.gl/csv": "^4.4.0-alpha.18",
-    "@loaders.gl/polyfills": "^4.4.0-alpha.18",
-    "@luma.gl/core": "^9.3.0-alpha.11",
-    "@luma.gl/effects": "^9.3.0-alpha.11",
-    "@luma.gl/webgpu": "^9.3.0-alpha.11",
+    "@loaders.gl/csv": "^4.4.1",
+    "@loaders.gl/polyfills": "^4.4.1",
+    "@luma.gl/core": "^9.3.2",
+    "@luma.gl/effects": "^9.3.2",
+    "@luma.gl/webgl": "^9.3.2",
+    "@luma.gl/webgpu": "^9.3.2",
     "@math.gl/proj4": "^4.1.0",
     "@probe.gl/bench": "^4.1.1",
     "@probe.gl/test-utils": "^4.1.1",
@@ -72,17 +73,15 @@
     "vite-bundle-analyzer": "^1.3.6"
   },
   "resolutions": {
-    "wgsl_reflect": "^1.2.0",
-    "@loaders.gl/core": "4.4.0-alpha.18",
     "vite": "^7.3.1",
-    "@luma.gl/core": "^9.3.0-alpha.11",
-    "@luma.gl/effects": "^9.3.0-alpha.11",
-    "@luma.gl/engine": "^9.3.0-alpha.11",
-    "@luma.gl/gltf": "^9.3.0-alpha.11",
-    "@luma.gl/shadertools": "^9.3.0-alpha.11",
-    "@luma.gl/test-utils": "^9.3.0-alpha.11",
-    "@luma.gl/webgl": "^9.3.0-alpha.11",
-    "@luma.gl/webgpu": "^9.3.0-alpha.11"
+    "@luma.gl/core": "^9.3.2",
+    "@luma.gl/effects": "^9.3.2",
+    "@luma.gl/engine": "^9.3.2",
+    "@luma.gl/gltf": "^9.3.2",
+    "@luma.gl/shadertools": "^9.3.2",
+    "@luma.gl/test-utils": "^9.3.2",
+    "@luma.gl/webgl": "^9.3.2",
+    "@luma.gl/webgpu": "^9.3.2"
   },
   "pre-commit": [
     "test-fast",

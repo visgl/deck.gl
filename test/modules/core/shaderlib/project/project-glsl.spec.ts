@@ -329,27 +329,29 @@ const TEST_CASES: TestCase[] = [
 webglTest('project#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
-  for (const testCase of TEST_CASES) {
-    console.log(testCase.title);
+  try {
+    for (const testCase of TEST_CASES) {
+      console.log(testCase.title);
 
-    for (const {name, vs, testProps, output, precision = 1e-7} of testCase.tests) {
-      config.EPSILON = precision;
-      let actual: NumericArray = await runOnGPU({
-        vs,
-        varying: 'outValue',
-        modules: [project, testUniforms],
-        vertexCount: 1,
-        shaderInputProps: {
-          project: testCase.projectProps,
-          test: testProps
-        }
-      });
+      for (const {name, vs, testProps, output, precision = 1e-7} of testCase.tests) {
+        config.EPSILON = precision;
+        let actual: NumericArray = await runOnGPU({
+          vs,
+          varying: 'outValue',
+          modules: [project, testUniforms],
+          vertexCount: 1,
+          shaderInputProps: {
+            project: testCase.projectProps,
+            test: testProps
+          }
+        });
 
-      expect(verifyGPUResult(actual, output), name).toBe(true);
+        expect(verifyGPUResult(actual, output), name).toBe(true);
+      }
     }
+  } finally {
+    config.EPSILON = oldEpsilon;
   }
-
-  config.EPSILON = oldEpsilon;
 });
 
 webglTest('project#vs#project_get_orientation_matrix', async () => {
