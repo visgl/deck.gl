@@ -167,10 +167,13 @@ See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`,
 
 When using `MapboxOverlay` with multiple views passed to the `views` prop, only one of the views can match the base map and receive interaction.
 
-With that said, it is still possible to take advantage of deck's multi-view system and render a mapbox base map onto any one MapView of your choice by setting the `views` array and a `layerFilter` callback.
+With that said, it is still possible to take advantage of deck's multi-view system and render a mapbox base map onto any one `MapView` of your choice by setting the `views` array and a `layerFilter` callback.
 
-- To use multiple views, define a `MapView` with the id `“mapbox”`. This view will receive the state that matches the base map at each render.
-- If views are provided but the array does not contain this id, then a `MapView({id: 'mapbox'})` will be inserted at the bottom of the stack.
+**View ID Conventions:**
+- `MapboxOverlay` internally uses a `MapView` with the id `"mapbox"` to synchronize with the base map's camera.
+- You can reference this view id in your `layerFilter` to control which layers render on the main map.
+- When providing custom views, you do **not** need to explicitly include a view with id `"mapbox"` - it will be automatically injected if not present.
+- If you want to customize the mapbox-synchronized view (e.g., to control draw order with other custom views), you can explicitly define a `MapView({id: 'mapbox'})` in your views array.
 
 ```ts
 import {MapboxOverlay} from '@deck.gl/mapbox';

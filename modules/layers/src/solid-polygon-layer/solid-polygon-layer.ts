@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, COORDINATE_SYSTEM, gouraudMaterial} from '@deck.gl/core';
+import {Layer, project32, picking, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 // Polygon geometry generation is managed by the polygon tesselator
@@ -155,13 +155,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
-    if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-      coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    if (viewport.isGeospatial && coordinateSystem === 'default') {
+      coordinateSystem = 'lnglat';
     }
 
     let preproject: ((xy: number[]) => number[]) | undefined;
 
-    if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+    if (coordinateSystem === 'lnglat') {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {
