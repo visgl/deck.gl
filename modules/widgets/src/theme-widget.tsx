@@ -116,10 +116,12 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
   /** Read browser preference */
   _getInitialThemeMode(): 'light' | 'dark' {
     const {initialThemeMode} = this.props;
-    return initialThemeMode === 'auto'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      : initialThemeMode;
+    if (initialThemeMode !== 'auto') {
+      return initialThemeMode;
+    }
+    if (typeof window === 'undefined') {
+      return 'light';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 }

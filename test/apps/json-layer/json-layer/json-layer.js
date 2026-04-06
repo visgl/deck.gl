@@ -14,7 +14,7 @@ import {
   COORDINATE_SYSTEM
 } from '@deck.gl/core';
 import * as layers from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 const DEFAULT_CONFIGURATION = {
   classes: Object.assign({MapView, FirstPersonView, OrbitView, OrthographicView}, layers),
@@ -29,9 +29,11 @@ const defaultProps = {
 
 export default class JSONLayer extends CompositeLayer {
   initializeState() {
+    const configuration = new JSONConfiguration(DEFAULT_CONFIGURATION);
+    configuration.merge(this.props.configuration);
     this.state = {
       jsonConverter: new JSONConverter({
-        configuration: new JSONConfiguration(DEFAULT_CONFIGURATION, this.props.configuration)
+        configuration
       }),
       layers: []
     };

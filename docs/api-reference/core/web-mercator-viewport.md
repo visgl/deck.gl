@@ -125,6 +125,19 @@ Returns:
 
 * New coordinate array in `[longitude, latitude]` or `[longitude, latitude, altitude]` if `z` is provided.
 
+#### `panByPosition3D` {#panbyposition3d}
+
+Returns a new longitude and latitude that keeps a 3D world coordinate at a given screen pixel. Unlike `panByPosition`, this method correctly handles the z-component (altitude) for cameras positioned above ground, making it suitable for use during rotation around 3D pivot points.
+
+Parameters:
+
+* `coords` (number[]) - `[longitude, latitude, altitude]` world coordinate to keep fixed. `altitude` is in meters and defaults to `0` if not supplied.
+* `pixel` (number[]) - `[x, y]` screen pixel position where the coordinate should remain.
+
+Returns:
+
+* An object with `{longitude, latitude}` representing the new viewport center.
+
 #### `fitBounds` {#fitbounds}
 
 Returns a new viewport that fit around the given bounding box. Viewport `width` and `height` must be either set or provided as options. Only supports non-perspective mode.

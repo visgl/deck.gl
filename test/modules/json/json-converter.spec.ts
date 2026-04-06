@@ -2,94 +2,175 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {makeSpy} from '@probe.gl/test-utils';
+import {test, expect, vi} from 'vitest';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core/lib/constants';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapController} from '@deck.gl/core';
-import {JSONConverter} from '@deck.gl/json';
-import configuration, {log, calculateRadius} from './json-configuration-for-deck';
+import {JSONConfiguration, JSONConverter} from '@deck.gl/json';
+import {JSON_CONFIGURATION, log, calculateRadius} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 import COMPLEX_JSON from './data/complex-data.json';
 
 import {OrbitView} from '@deck.gl/core';
 
-test('JSONConverter#import', t => {
-  t.ok(JSONConverter, 'JSONConverter imported');
-  t.end();
+test('JSONConverter#import', () => {
+  expect(JSONConverter, 'JSONConverter imported').toBeTruthy();
 });
 
-test('JSONConverter#create', t => {
-  const jsonConverter = new JSONConverter({configuration});
-  t.ok(jsonConverter, 'JSONConverter created');
-  t.end();
+test('JSONConverter#create', () => {
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+  expect(jsonConverter, 'JSONConverter created').toBeTruthy();
 });
 
-test('JSONConverter#convert', t => {
-  const jsonConverter = new JSONConverter({configuration});
-  t.ok(jsonConverter, 'JSONConverter created');
+test('JSONConverter#convert', () => {
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+  expect(jsonConverter, 'JSONConverter created').toBeTruthy();
 
-  let deckProps = jsonConverter.convert(JSON_DATA);
-  t.ok(deckProps, 'JSONConverter converted correctly');
-  t.is(deckProps.views.length, 2, 'JSONConverter converted views');
-  t.is(deckProps.controller, MapController, 'Should evaluate constants.');
+  let deckProps = jsonConverter.convert(JSON_DATA) as any;
+  expect(deckProps, 'JSONConverter converted correctly').toBeTruthy();
+  expect(deckProps.views.length, 'JSONConverter converted views').toBe(2);
+  expect(deckProps.controller, 'Should evaluate constants.').toBe(MapController);
 
   deckProps = jsonConverter.convert(COMPLEX_JSON);
   const pointCloudLayerProps = deckProps.layers[3].props;
-  t.is(
-    pointCloudLayerProps.coordinateSystem,
-    COORDINATE_SYSTEM.METER_OFFSETS,
-    'Should evaluate enums.'
+  expect(pointCloudLayerProps.coordinateSystem, 'Should evaluate enums.').toBe(
+    COORDINATE_SYSTEM.METER_OFFSETS
   );
 
-  t.deepEqual(
-    deckProps.layers[0].props.getRadius,
-    calculateRadius({base: 10, exponent: 3}),
-    'Should evaluate functions.'
+  expect(deckProps.layers[0].props.getRadius, 'Should evaluate functions.').toEqual(
+    calculateRadius({base: 10, exponent: 3})
   );
-
-  t.end();
 });
 
-test('JSONConverter#merge', t => {
-  const jsonConverter = new JSONConverter({configuration});
-  jsonConverter.mergeConfiguration({
-    classes: {OrbitView}
-  });
+test('JSONConverter#merge', () => {
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+  jsonConverter.mergeConfiguration({classes: {OrbitView}});
   const deckProps = jsonConverter.convert({
     views: [{'@@type': 'OrbitView'}, {'@@type': 'NoSuchView'}]
-  });
-  t.ok(
+  }) as any;
+  expect(
     deckProps.views[0] instanceof OrbitView && deckProps.views[0].id,
     'JSONConverter added a new class to its configuration'
-  );
-  t.ok(!deckProps.views[1], 'JSONConverter does not add a class not in its configuration');
-
-  t.end();
+  ).toBeTruthy();
+  expect(
+    !deckProps.views[1],
+    'JSONConverter does not add a class not in its configuration'
+  ).toBeTruthy();
 });
 
-test('JSONConverter#badConvert', t => {
-  const jsonConverter = new JSONConverter({configuration});
-  t.ok(jsonConverter, 'JSONConverter created');
+test('JSONConverter#mergeFunctions', () => {
+  const jsonConverter = new JSONConverter({configuration: {}});
+  jsonConverter.mergeConfiguration({
+    functions: {
+      buildValue: ({value}) => value * 2
+    }
+  });
+
+  const deckProps = jsonConverter.convert({
+    value: {
+      '@@function': 'buildValue',
+      value: 3
+    }
+  }) as any;
+
+  expect(deckProps.value, 'JSONConverter should merge plain-object functions').toBe(6);
+});
+
+test('JSONConverter#badConvert', () => {
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+  expect(jsonConverter, 'JSONConverter created').toBeTruthy();
   const badData = JSON.parse(JSON.stringify(JSON_DATA));
   badData.layers[0]['@@type'] = 'InvalidLayer';
-  makeSpy(log, 'warn');
+  const warnSpy = vi.spyOn(log, 'warn');
   jsonConverter.convert(badData);
-  t.ok(log.warn.called, 'should produce a warning message if the layer type is invalid');
-  log.warn.restore();
-  t.end();
+  expect(
+    warnSpy,
+    'should produce a warning message if the layer type is invalid'
+  ).toHaveBeenCalled();
+  warnSpy.mockRestore();
 });
 
-test('JSONConverter#handleTypeAsKey', t => {
-  const jsonConverter = new JSONConverter({configuration});
-  t.ok(jsonConverter, 'JSONConverter created');
+test('JSONConverter#handleTypeAsKey', () => {
+  const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+  expect(jsonConverter, 'JSONConverter created').toBeTruthy();
   const complexData = JSON.parse(JSON.stringify(COMPLEX_JSON));
-  const deckProps = jsonConverter.convert(complexData);
-  t.ok(deckProps.layers.length, 4, 'should have four layers');
-  t.ok(deckProps.layers[0].id === 'ScatterplotLayer', 'should have a ScatterplotLayer at index 0');
-  t.ok(deckProps.layers[1].id === 'TextLayer', 'should have a TextLayer at index 1');
-  t.ok(deckProps.layers[2].id === 'GeoJsonLayer', 'should have a GeoJsonLayer at index 2');
-  t.ok(deckProps.layers[3].id === 'PointCloudLayer', 'should have a PointCloudLayer at index 3');
-  t.ok(deckProps.layers[2].props.data.features[0].type === 'Feature');
-  t.end();
+  const deckProps = jsonConverter.convert(complexData) as any;
+  expect(deckProps.layers.length, 'should have four layers').toBe(4);
+  expect(
+    deckProps.layers[0].id === 'ScatterplotLayer',
+    'should have a ScatterplotLayer at index 0'
+  ).toBeTruthy();
+  expect(deckProps.layers[1].id === 'TextLayer', 'should have a TextLayer at index 1').toBeTruthy();
+  expect(
+    deckProps.layers[2].id === 'GeoJsonLayer',
+    'should have a GeoJsonLayer at index 2'
+  ).toBeTruthy();
+  expect(
+    deckProps.layers[3].id === 'PointCloudLayer',
+    'should have a PointCloudLayer at index 3'
+  ).toBeTruthy();
+  expect(deckProps.layers[2].props.data.features[0].type === 'Feature').toBeTruthy();
+});
+
+test('JSONConverter#hookedConfiguration', () => {
+  class TestClass {
+    props: Record<string, unknown>;
+
+    constructor(props: Record<string, unknown>) {
+      this.props = props;
+    }
+  }
+
+  const jsonConverter = new JSONConverter({
+    configuration: {
+      classes: {TestClass},
+      convertFunction: value => row => `${value}:${row.suffix}`,
+      preProcessClassProps: (_Class, props) => ({...props, id: 'preprocessed'}),
+      postProcessConvertedJson: json => ({...json, tagged: true})
+    }
+  });
+
+  const deckProps = jsonConverter.convert({
+    item: {
+      '@@type': 'TestClass',
+      getValue: '@@=hello'
+    }
+  }) as any;
+
+  expect(deckProps.tagged, 'postProcessConvertedJson should run').toBeTruthy();
+  expect(deckProps.item.props.id, 'preProcessClassProps should run').toBe('preprocessed');
+  expect(deckProps.item.props.getValue({suffix: 'world'}), 'convertFunction should run').toBe(
+    'hello:world'
+  );
+});
+
+test('JSONConverter#hooksSurviveMergeConfiguration', () => {
+  class TestClass {
+    props: Record<string, unknown>;
+
+    constructor(props: Record<string, unknown>) {
+      this.props = props;
+    }
+  }
+
+  const jsonConverter = new JSONConverter({
+    configuration: {
+      classes: {TestClass},
+      postProcessConvertedJson: json => ({...json, initial: true})
+    }
+  });
+
+  jsonConverter.mergeConfiguration({
+    preProcessClassProps: (_Class, props) => ({...props, merged: true}),
+    postProcessConvertedJson: json => ({...json, mergedPostProcess: true})
+  });
+
+  const deckProps = jsonConverter.convert({
+    item: {
+      '@@type': 'TestClass'
+    }
+  }) as any;
+
+  expect(deckProps.mergedPostProcess, 'merged postProcessConvertedJson should run').toBeTruthy();
+  expect(deckProps.item.props.merged, 'merged preProcessClassProps should run').toBeTruthy();
 });

@@ -31,7 +31,7 @@ export default [
       new ScenegraphLayer({
         id: 'scenegraph-layer',
         data: meshSampleData,
-        scenegraph: './test/data/BoxAnimated.glb',
+        scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
@@ -62,7 +62,7 @@ export default [
       new ScenegraphLayer({
         id: 'scenegraph-layer',
         data: meshSampleData,
-        scenegraph: './test/data/BoxAnimated.glb',
+        scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
@@ -93,7 +93,7 @@ export default [
       new ScenegraphLayer({
         id: 'scenegraph-layer',
         data: meshSampleData,
-        scenegraph: './test/data/BoxAnimated.glb',
+        scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],

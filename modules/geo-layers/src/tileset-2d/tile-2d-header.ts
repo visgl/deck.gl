@@ -148,7 +148,8 @@ export class Tile2DHeader<DataT = any> {
     // Clear the `isLoading` flag
     this._loader = undefined;
     // Rewrite tile content with the result of getTileData if successful, or `null` in case of
-    // error or cancellation
+    // error or cancellation. A `null` tile is still a terminal result for the request: the tile
+    // should stop blocking viewport loading even if the source returned 404 / empty content.
     this.content = tileData;
     // If cancelled, do not invoke the callbacks
     // Consider it loaded if we tried to cancel but `getTileData` still returned data
@@ -156,6 +157,9 @@ export class Tile2DHeader<DataT = any> {
       this._isLoaded = false;
       return;
     }
+    // Errors are reported via onError below, but the request itself has completed. Mark the tile
+    // as loaded so higher-level layers can treat expected missing tiles as settled instead of
+    // waiting forever for content or sublayers that will never exist.
     this._isLoaded = true;
     this._isCancelled = false;
 

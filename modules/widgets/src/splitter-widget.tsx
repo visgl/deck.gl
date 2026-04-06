@@ -2,22 +2,157 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {h, render} from 'preact';
-import {useState, useRef} from 'preact/hooks';
-import {Widget, type WidgetProps} from '@deck.gl/core';
+import {JSX, render} from 'preact';
+import {useState, useRef, useEffect} from 'preact/hooks';
+import {
+  Widget,
+  _deepEqual as deepEqual,
+  type Deck,
+  type WidgetProps,
+  type View
+} from '@deck.gl/core';
+
+export type ViewLayout = {
+  /** Stacking orientation of the sub views */
+  orientation: 'vertical' | 'horizontal';
+  /** Initial instances that describe the sub views.
+   * x, y, width and height of the views' props will be overwritten by the SplitterWidget as split changes. */
+  views: [view1: View | ViewLayout, view2: View | ViewLayout];
+  /** The ratio of view1's share over the whole available height (vertical) or width (horizontal). Between 0-1.
+   * @default 0.5
+   */
+  initialSplit?: number;
+  /** Whether the split can be changed by dragging the border between the two views.
+   * @default true
+   */
+  editable?: boolean;
+  /** Min value of the split
+   * @default 0.05
+   */
+  minSplit?: number;
+  /** Max value of the split
+   * @default 0.95
+   */
+  maxSplit?: number;
+};
+
+type ManagedViewLayout = {
+  id: number;
+  orientation: 'vertical' | 'horizontal';
+  views: [view1: View | ManagedViewLayout, view2: View | ManagedViewLayout];
+  split: number;
+  editable: boolean;
+  minSplit: number;
+  maxSplit: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+function parseViewLayout(root: ViewLayout): ManagedViewLayout[] {
+  const layoutsById: ManagedViewLayout[] = [];
+  const isViewLayout = (v: View | ViewLayout): v is ViewLayout => 'views' in v;
+  function createManagedViewLayout(l: ViewLayout): ManagedViewLayout {
+    const id = layoutsById.length;
+    const minSplit = l.minSplit ?? 0.05;
+    const maxSplit = l.maxSplit ?? 0.95;
+    const split = Math.min(Math.max(l.initialSplit ?? 0.5, minSplit), maxSplit);
+    const managed: ManagedViewLayout = {
+      id,
+      orientation: l.orientation,
+      views: l.views as [view1: View | ManagedViewLayout, view2: View | ManagedViewLayout],
+      split,
+      editable: l.editable ?? true,
+      minSplit,
+      maxSplit,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0
+    };
+    layoutsById.push(managed);
+    managed.views = [
+      isViewLayout(l.views[0]) ? createManagedViewLayout(l.views[0]) : l.views[0],
+      isViewLayout(l.views[1]) ? createManagedViewLayout(l.views[1]) : l.views[1]
+    ];
+    return managed;
+  }
+  createManagedViewLayout(root);
+  return layoutsById;
+}
+
+function evaluateViews(root: ManagedViewLayout): View[] {
+  const views: View[] = [];
+  function evaluateViewLayout(
+    l: ManagedViewLayout,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    l.x = x;
+    l.y = y;
+    l.width = width;
+    l.height = height;
+
+    const child1X = x;
+    const child1Y = y;
+    let child1Width = width;
+    let child1Height = height;
+    let child2X = x;
+    let child2Y = y;
+    let child2Width = width;
+    let child2Height = height;
+
+    if (l.orientation === 'horizontal') {
+      child1Width = width * l.split;
+      child2X = x + child1Width;
+      child2Width = width - child1Width;
+    } else {
+      child1Height = height * l.split;
+      child2Y = y + child1Height;
+      child2Height = height - child1Height;
+    }
+
+    const [view1, view2] = l.views;
+    if ('views' in view1) {
+      evaluateViewLayout(view1, child1X, child1Y, child1Width, child1Height);
+    } else {
+      views.push(
+        view1.clone({
+          x: `${child1X}%`,
+          y: `${child1Y}%`,
+          width: `${child1Width}%`,
+          height: `${child1Height}%`
+        })
+      );
+    }
+
+    if ('views' in view2) {
+      evaluateViewLayout(view2, child2X, child2Y, child2Width, child2Height);
+    } else {
+      views.push(
+        view2.clone({
+          x: `${child2X}%`,
+          y: `${child2Y}%`,
+          width: `${child2Width}%`,
+          height: `${child2Height}%`
+        })
+      );
+    }
+  }
+
+  evaluateViewLayout(root, 0, 0, 100, 100);
+  return views;
+}
 
 /** Properties for the SplitterWidget */
 export type SplitterWidgetProps = WidgetProps & {
-  /** The view id for the first (resizable) view */
-  viewId1: string;
-  /** The view id for the second view */
-  viewId2: string;
-  /** Orientation of the splitter: vertical (default) or horizontal */
-  orientation?: 'vertical' | 'horizontal';
-  /** The initial split percentage (0 to 1) for the first view, default 0.5 */
-  initialSplit?: number;
+  /** Stacking views descriptor */
+  viewLayout: ViewLayout;
   /** Callback invoked when the splitter is dragged with the new split value */
-  onChange?: (newSplit: number) => void;
+  onChange?: (views: View[]) => void;
   /** Callback invoked when dragging starts */
   onDragStart?: () => void;
   /** Callback invoked when dragging ends */
@@ -29,14 +164,11 @@ export type SplitterWidgetProps = WidgetProps & {
  * across the deck.gl canvas. It positions itself based on the split percentage
  * of the first view and provides callbacks when dragged.
  */
-export class SplitterWidget extends Widget<SplitterWidgetProps> {
+export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
   static defaultProps: Required<SplitterWidgetProps> = {
     ...Widget.defaultProps,
     id: 'splitter-widget',
-    viewId1: '',
-    viewId2: '',
-    orientation: 'vertical',
-    initialSplit: 0.5,
+    viewLayout: undefined!,
     onChange: () => {},
     onDragStart: () => {},
     onDragEnd: () => {}
@@ -44,33 +176,88 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
 
   className = 'deck-widget-splitter';
   placement = 'fill' as const;
+  viewLayouts!: ManagedViewLayout[];
+  /** evaluated from the current viewLayouts */
+  views!: View[];
+  /** views set in the last update */
+  lastViews?: View[];
+  needsUpdate = true;
 
   constructor(props: SplitterWidgetProps) {
     super(props);
+    this.viewLayouts = parseViewLayout(this.props.viewLayout);
   }
 
   setProps(props: Partial<SplitterWidgetProps>) {
+    if (props.viewLayout && !deepEqual(props.viewLayout, this.props.viewLayout, -1)) {
+      this.viewLayouts = parseViewLayout(props.viewLayout);
+      this.views = undefined!;
+    }
     super.setProps(props);
   }
 
-  onRenderHTML(rootElement: HTMLElement): void {
-    // Ensure the widget container fills the deck.gl canvas.
-    // TODO - Move styling to CSS
-    rootElement.style.position = 'absolute';
-    rootElement.style.top = '0';
-    rootElement.style.left = '0';
-    rootElement.style.width = '100%';
-    rootElement.style.height = '100%';
-    rootElement.style.margin = '0px';
+  onRedraw() {
+    // Actually update DOM
+    super.updateHTML();
+  }
 
+  // Usually widgets rerender their DOM elements here
+  // In this case we need the widget UI to synchronize with deck view states
+  // so we update deck props here and rerender DOM in the next onRedraw
+  updateHTML() {
+    if (!this.views) {
+      // viewLayouts has changed, re-evaluate
+      this.views = evaluateViews(this.viewLayouts[0]);
+      // we send a copy to the callback so that externally set views can be differentiated from internal
+      this.props.onChange(this.views.slice());
+    }
+    // This method is called inside deck.setProps > widgetManager.setProps > widget.setProps
+    // Calling deck.setProps immediately would cause infinite loop
+    requestAnimationFrame(() => {
+      this.doUpdate();
+    });
+  }
+
+  private doUpdate() {
+    if (this.deck) {
+      const deckViews = this.deck.props.views;
+      const isManagedExternally =
+        // is not empty
+        deckViews &&
+        // is not set by us
+        deckViews !== this.lastViews;
+
+      if (!isManagedExternally && this.lastViews !== this.views) {
+        this.lastViews = this.views;
+        this.deck.setProps({views: this.views});
+      }
+    }
+  }
+
+  private onChange(newSplit: number, layout: ManagedViewLayout) {
+    layout.split = newSplit;
+    // layout has updated, re-evaluate
+    this.views = evaluateViews(this.viewLayouts[0]);
+    // we send a copy to the callback so that externally set views can be differentiated from internal
+    this.props.onChange(this.views.slice());
+    this.doUpdate();
+  }
+
+  onRenderHTML(rootElement: HTMLElement): void {
     render(
-      <Splitter
-        orientation={this.props.orientation}
-        initialSplit={this.props.initialSplit}
-        onChange={this.props.onChange}
-        onDragStart={this.props.onDragStart}
-        onDragEnd={this.props.onDragEnd}
-      />,
+      <>
+        {this.viewLayouts.map(
+          layout =>
+            layout.editable && (
+              <Splitter
+                {...layout}
+                onChange={newSplit => this.onChange(newSplit, layout)}
+                onDragStart={() => this.props.onDragStart()}
+                onDragEnd={() => this.props.onDragStart()}
+              />
+            )
+        )}
+      </>,
       rootElement
     );
   }
@@ -83,94 +270,92 @@ export class SplitterWidget extends Widget<SplitterWidgetProps> {
  */
 function Splitter({
   orientation,
-  initialSplit,
+  x,
+  y,
+  width,
+  height,
+  split,
+  minSplit,
+  maxSplit,
   onChange,
   onDragStart,
   onDragEnd
 }: {
   orientation: 'vertical' | 'horizontal';
-  initialSplit: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  split: number;
+  minSplit: number;
+  maxSplit: number;
   onChange?: (newSplit: number) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
 }) {
-  const [split, setSplit] = useState(initialSplit);
-  const dragging = useRef(false);
+  const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleDragStart = (event: MouseEvent) => {
-    dragging.current = true;
+  useEffect(() => {
+    if (!dragging) {
+      return undefined;
+    }
+
+    const handleDragging = (event: PointerEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      let newSplit: number;
+      if (orientation === 'horizontal') {
+        newSplit = (event.clientX - rect.left) / rect.width;
+      } else {
+        newSplit = (event.clientY - rect.top) / rect.height;
+      }
+      // Clamp newSplit between 5% and 95%
+      newSplit = Math.min(Math.max(newSplit, minSplit), maxSplit);
+      onChange?.(newSplit);
+    };
+
+    const handleDragEnd = () => {
+      onDragEnd?.();
+      setDragging(false);
+    };
+
+    document.addEventListener('pointermove', handleDragging);
+    document.addEventListener('pointerup', handleDragEnd);
+    document.addEventListener('pointerleave', handleDragEnd);
+
+    return () => {
+      document.removeEventListener('pointermove', handleDragging);
+      document.removeEventListener('pointerup', handleDragEnd);
+      document.removeEventListener('pointerleave', handleDragEnd);
+    };
+  }, [dragging]);
+
+  const handleDragStart = (event: PointerEvent) => {
+    setDragging(true);
     onDragStart?.();
-    document.addEventListener('mousemove', handleDragging);
-    document.addEventListener('mouseup', handleDragEnd);
     event.preventDefault();
   };
 
-  const handleDragging = (event: MouseEvent) => {
-    if (!dragging.current || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    let newSplit: number;
-    if (orientation === 'vertical') {
-      newSplit = (event.clientX - rect.left) / rect.width;
-    } else {
-      newSplit = (event.clientY - rect.top) / rect.height;
-    }
-    // Clamp newSplit between 5% and 95%
-    newSplit = Math.min(Math.max(newSplit, 0.05), 0.95);
-    setSplit(newSplit);
-    onChange?.(newSplit);
-  };
-
-  const handleDragEnd = (event: MouseEvent) => {
-    if (!dragging.current) return;
-    dragging.current = false;
-    onDragEnd?.();
-    document.removeEventListener('mousemove', handleDragging);
-    document.removeEventListener('mouseup', handleDragEnd);
-  };
-
   // The splitter line style based on orientation and the current split percentage.
-  const splitterStyle: h.JSX.CSSProperties =
-    orientation === 'vertical'
-      ? {
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: `${split * 100}%`,
-          width: '4px',
-          cursor: 'col-resize',
-          background: '#ccc',
-          zIndex: 10,
-          pointerEvents: 'auto',
-          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-        }
-      : {
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: `${split * 100}%`,
-          height: '4px',
-          cursor: 'row-resize',
-          background: '#ccc',
-          zIndex: 10,
-          pointerEvents: 'auto',
-          boxShadow: 'inset -1px 0 0 white, inset 1px 0 0 white'
-        };
+  const splitterStyle: JSX.CSSProperties =
+    orientation === 'horizontal' ? {left: `${split * 100}%`} : {top: `${split * 100}%`};
 
   // Container style to fill the entire deck.gl canvas.
-  const containerStyle: h.JSX.CSSProperties = {
+  const containerStyle: JSX.CSSProperties = {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0
+    top: `${y}%`,
+    left: `${x}%`,
+    width: `${width}%`,
+    height: `${height}%`
   };
 
   return (
     <div ref={containerRef} style={containerStyle}>
       <div
+        className={`deck-widget-splitter-handle deck-widget-splitter-handle--${orientation} ${dragging ? 'active' : ''}`}
         style={splitterStyle}
-        onMouseDown={handleDragStart as h.JSX.MouseEventHandler<HTMLElement>} // Use the appropriate Preact event type.
+        onPointerDown={handleDragStart} // Use the appropriate Preact event type.
       />
     </div>
   );

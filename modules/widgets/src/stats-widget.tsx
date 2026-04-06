@@ -5,10 +5,9 @@
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render} from 'preact';
+import {useEffect, useState} from 'preact/hooks';
 import type {Stats, Stat} from '@probe.gl/stats';
-
-const RIGHT_ARROW = '\u25b6';
-const DOWN_ARROW = '\u2b07';
+import {IconButton} from './lib/components/icon-button';
 
 const DEFAULT_COUNT_FORMATTER = (stat: Stat): string => `${stat.name}: ${stat.count}`;
 
@@ -36,6 +35,10 @@ export type StatsWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Type of stats to display. */
   type?: 'deck' | 'luma' | 'device' | 'custom';
+  /** Expand the stats UI by default.
+   * @default false
+   */
+  defaultIsExpanded?: boolean;
   /** Stats object to visualize. */
   stats?: Stats;
   /** Title shown in the header of the pop-up. Defaults to stats.id. */
@@ -55,6 +58,7 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     type: 'deck',
     placement: 'top-left',
     viewId: null,
+    defaultIsExpanded: false,
     stats: undefined!,
     title: 'Stats',
     framesPerUpdate: 1,
@@ -70,20 +74,18 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
   collapsed: boolean = true;
-  _stats: Stats;
 
   constructor(props: StatsWidgetProps = {}) {
     super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
-    this._stats = this.props.stats;
+    this.collapsed = !props.defaultIsExpanded;
     this.setProps(props);
   }
 
   setProps(props: Partial<StatsWidgetProps>): void {
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
-    this._stats = this._getStats();
     if (props.formatters) {
       for (const name in props.formatters) {
         const f = props.formatters[name];
@@ -97,20 +99,28 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super.setProps(props);
   }
 
-  onAdd(): void {
-    this._stats = this._getStats();
-    this.updateHTML();
+  onRemove() {
+    if (this.rootElement) {
+      // Make sure all preact hooks are finalized
+      render(null, this.rootElement);
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const stats = this._stats;
     const collapsed = this.collapsed;
-    const title = this.props.title || stats?.id || 'Stats';
+    if (collapsed) {
+      render(<FpsIcon getFps={this._getFps} onClick={this._toggleCollapsed} />, rootElement);
+      return;
+    }
+
+    const stats = this._getStats();
+    const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
+    const deviceLabel = this._getDeviceLabel();
     const items: JSX.Element[] = [];
 
-    if (!collapsed && stats) {
+    if (stats) {
       stats.forEach(stat => {
-        const lines = this._getLines(stat);
+        const lines = this._getLines(stat).split('\n');
         if (this._resetOnUpdate && this._resetOnUpdate[stat.name]) {
           stat.reset();
         }
@@ -131,34 +141,40 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
           style={{cursor: 'pointer', pointerEvents: 'auto'}}
           onClick={this._toggleCollapsed}
         >
-          {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
+          <b>{title}</b>
+          {deviceLabel && <span className="deck-widget-stats-device">{deviceLabel}</span>}
+          <button className="deck-widget-dropdown-button">
+            <span className="deck-widget-dropdown-icon open" />
+          </button>
         </div>
-        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
+        <div className="deck-widget-stats-content">{items}</div>
       </div>,
       rootElement
     );
   }
 
   onRedraw(): void {
-    const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
-    if (this._counter++ % framesPerUpdate === 0) {
-      this._stats = this._getStats();
-      this.updateHTML();
+    if (!this.collapsed) {
+      const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
+      if (this._counter++ % framesPerUpdate === 0) {
+        this.updateHTML();
+      }
     }
   }
 
-  protected _getStats(): Stats {
+  protected _getStats(): Stats | [key: string, value: number][] {
     switch (this.props.type) {
       case 'deck':
-        // @ts-expect-error stats is protected
-        return this.deck?.stats;
+        // @ts-expect-error metrics is protected
+        const metrics = this.deck?.metrics ?? {};
+        return Object.entries(metrics);
       case 'luma':
         return Array.from(luma.stats.stats.values())[0];
       case 'device':
         // @ts-expect-error is protected
         const device = this.deck?.device;
         const stats = device?.statsManager.stats.values();
-        return stats ? Array.from(stats)[0] : undefined;
+        return stats ? Array.from(stats)[0] : [];
       case 'custom':
         return this.props.stats;
       default:
@@ -171,9 +187,64 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     this.updateHTML();
   };
 
-  protected _getLines(stat: Stat): string[] {
-    const formatter =
-      this._formatters[stat.name] || this._formatters[stat.type || ''] || DEFAULT_COUNT_FORMATTER;
-    return formatter(stat).split('\n');
+  protected _getFps = (): number => {
+    // @ts-expect-error metrics is protected
+    return Math.round(this.deck?.metrics.fps ?? 0);
+  };
+
+  protected _getDeviceLabel(): string | null {
+    // @ts-expect-error device is protected
+    const deviceType = this.deck?.device?.type;
+    if (!deviceType) {
+      return null;
+    }
+    switch (deviceType) {
+      case 'webgpu':
+        return 'WebGPU';
+      case 'webgl':
+        return 'WebGL';
+      default:
+        return String(deviceType);
+    }
   }
+
+  protected _getLines(stat: Stat | [key: string, value: number]): string {
+    if ('count' in stat) {
+      const formatter =
+        this._formatters[stat.name] || this._formatters[stat.type || ''] || DEFAULT_COUNT_FORMATTER;
+      return formatter(stat);
+    }
+    const [key, value] = stat;
+    const formattedValue = key.endsWith('Memory')
+      ? formatMemory(value)
+      : key.includes('Time')
+        ? formatTime(value)
+        : `${value.toFixed(2)}`;
+
+    return `${key}: ${formattedValue}`;
+  }
+}
+
+function FpsIcon({getFps, onClick}: {getFps: () => number; onClick: () => void}) {
+  const [fps, setFps] = useState(getFps());
+  useEffect(() => {
+    const onUpdate = () => {
+      setFps(getFps());
+      timer = requestAnimationFrame(onUpdate);
+    };
+    let timer = requestAnimationFrame(onUpdate);
+    return () => {
+      cancelAnimationFrame(timer);
+    };
+  }, [getFps]);
+
+  return (
+    <IconButton onClick={onClick}>
+      <div className="text">
+        FPS
+        <br />
+        {fps}
+      </div>
+    </IconButton>
+  );
 }

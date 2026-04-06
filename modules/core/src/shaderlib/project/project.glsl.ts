@@ -2,12 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE, UNIT} from '../../lib/constants';
+import {PROJECTION_MODE, UNIT} from '../../lib/constants';
+import {getShaderCoordinateSystem} from './viewport-uniforms';
 
-// We are generating these from the js code in constants.js
-const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
-  .map(key => `const int COORDINATE_SYSTEM_${key} = ${COORDINATE_SYSTEM[key]};`)
-  .join('');
+const SHADER_COORDINATE_SYSTEMS = [
+  'default',
+  'lnglat',
+  'meter-offsets',
+  'lnglat-offsets',
+  'cartesian'
+] as const;
+
+const COORDINATE_SYSTEM_GLSL_CONSTANTS = SHADER_COORDINATE_SYSTEMS.map(
+  coordinateSystem =>
+    `const int COORDINATE_SYSTEM_${coordinateSystem.toUpperCase().replaceAll('-', '_')} = ${getShaderCoordinateSystem(coordinateSystem)};`
+).join('');
 const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
   .map(key => `const int PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]};`)
   .join('');
@@ -20,7 +29,7 @@ ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
-uniform projectUniforms {
+layout(std140) uniform projectUniforms {
   bool wrapLongitude;
   int coordinateSystem;
   vec3 commonUnitsPerMeter;
@@ -263,6 +272,9 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
+  return project_size(meters) * project.scale;
+}
+vec2 project_size_to_pixel(vec2 meters) {
   return project_size(meters) * project.scale;
 }
 float project_size_to_pixel(float size, int unit) {

@@ -17,6 +17,97 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.3
+
+### deck.gl v9.3 Prereleases
+
+#### deck.gl [v9.3.0-alpha.6] - Apr 2 2026
+
+- feat(TileLayer): Add visibleMinZoom & visibleMaxZoom props (#10091)
+- fix(mapbox): onBefore|AfterRender fires without layers (#10166)
+- fix(mapbox): Prevent crash when deck uninitialized (#10167)
+- feat(main): export all widgets from deck.gl main module (#10160)
+- chore: Bump to luma@9.3.1 & loaders@4.4.1 (#10158)
+- fix(layers): Texture handling in WebGPU (#10157)
+- chore: Bump luma.gl@alpha.11 (#10141)
+- chore(json): Typing improvements (#9641)
+- feat(core): simplify layer plumbing for WebGPU (#9820)
+- chore: enable source map in website dev mode (#10156)
+
+#### deck.gl [v9.3.0-alpha.5] - Mar 31 2026
+
+#### deck.gl [v9.3.0-alpha.4] - Mar 31 2026
+
+- fix(TerrainController): Better React controlled mode behavior (#10144)
+- fix(react): Avoid double render in controlled mode (#10143)
+- feat(core,react,docs): Add async deck picking methods (#9733)
+- chore: bump peerDependencies to ~9.3.0-alpha.1 (#10139)
+- chore: Upgrade to luma.gl 9.3.0-alpha.10 (#10123)
+
+#### deck.gl [v9.3.0-alpha.3] - Mar 27 2026
+
+- feat(core): TerrainController (#10134)
+
+#### deck.gl [v9.3.0-alpha.2] - Mar 26 2026
+
+- chore: upgrade Node.js from 20 to 22 (#10051)
+- chore(core): Use non-deprecated props for lighting module (#10121)
+- feat(layers): add clipping to TextLayer (#10118)
+- feat(core): FirstPersonController supports maxBounds (#10115)
+- feat(core): OrthographicView supports maxBounds (#10108)
+- feat(core): OrbitController supports maxBounds (#10116)
+- feat(core): GlobeView supports maxBounds (#10111)
+- feat(core): more intuitive OrbitController (#10117)
+- feat(core): controller normalizes viewport on dimension change (#10109)
+- feat(chore): new Deck metrics (#10100)
+- feat(core): deep merge view states (#10104)
+- chore: Bump to luma.gl@9.3.0-alpha.6 (#10107)
+- feat(core): controller maxBounds (#10105)
+- feat(core): OrthographicView: soft-deprecate array zoom (#10106)
+- feat(widgets): v9.3 graduation (#10096)
+- feat(website): Add ScrollbarWidget to OrthographicView example (#10099)
+- feat(website): Widget documentation pass (#10095)
+- feat(widgets): generic controls (#10090)
+- feat(widgets): ContextMenuWidget API audit (#10087)
+- feat(widgets): Widget common component improvements (#10089)
+- feat(widgets): Merge FpsWidget into StatsWidget (#10085)
+- fix(widgets): properly clean up Popover element on widget removal (#10088)
+- fix(mapbox): handle null viewport (#10086)
+- feat(widgets): Update SplitterWidget (#10072)
+- fix(widgets): TimelineWidget bugs (#10081)
+- feat(react): React widget exports (#10083)
+- Add missing update dependencies (#10082)
+- fix(mapbox): guard against null viewport when canvas has zero dimensions (#10076)
+- fix: updates pydeck pyproject.toml to include dynamic field (#10048)
+- fix(react): DeckGL avoid overwriting undefined views prop (#10074)
+
+#### deck.gl [v9.3.0-alpha.1] - Mar 10 2026
+
+- fix(Tile3DLayer): Pass through tileset loadOptions to Tileset3D (#10079)
+- feat(Tile3DLayer): mark rendered tiles as drawn (#10058)
+- chore: bump to luma.gl@9.3 (#10034)
+- chore: bump to loaders.gl@4.4 (#9972)
+- feat(widgets): migrate TimelineWidget to RangeInput (#10071)
+- feat(widgets): Add ScrollbarWidget (#10068)
+- fix(TerrainExtension): Handle pick events in TerrainExtension & draped layers (#10037)
+- fix(widgets): Respect min/maxZoom (#10033)
+- Upgrade Node.js from 18 to 20 across build, test, website and repo (#10050)
+- feat(widgets): misc cleanup (#10045)
+- feat(widgets) StatsWidget styling and docs pass (#10044)
+- fix(widgets): ResetViewWidget default viewId (#10042)
+- update popover components (#10041)
+- Fix fullscreen widget default container (#10040)
+- fix(Tile3DLayer): prefers loaders prop over loader (#10036)
+- feat(core): 3D enable MapController using rotatationPivot option (#9938)
+- feat(widgets): ContextMenuWidget improvements (#10031)
+- feat(widgets): PopupWidget (#10030)
+- feat(widgets): Use popper to calculate popup position (#10029)
+- fix(widgets) events in react reverse controlled env (#8893)
+- Remove Volta from deck.gl (#9970)
+- Port IconLayer to WebGPU (#9819)
+- chore(ci): migrate from Volta to Corepack for automated builds (#9910)
+- Update .gitignore (#9878)
+
 ## deck.gl v9.2
 
 ### deck.gl v9.2 Prereleases

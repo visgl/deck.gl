@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core';
-import Controller from './controller';
+import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
 
@@ -13,8 +13,8 @@ import LinearInterpolator from '../transitions/linear-interpolator';
 export type OrbitStateProps = {
   width: number;
   height: number;
-  target?: number[];
-  zoom?: number | number[];
+  target?: [number, number, number];
+  zoom?: number;
   rotationX?: number;
   rotationOrbit?: number;
 
@@ -23,6 +23,8 @@ export type OrbitStateProps = {
   minZoom?: number;
   minRotationX?: number;
   maxRotationX?: number;
+
+  maxBounds?: ControllerProps['maxBounds'];
 };
 
 type OrbitStateInternal = {
@@ -35,12 +37,13 @@ type OrbitStateInternal = {
 };
 
 export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStateInternal> {
-  makeViewport: (props: Record<string, any>) => Viewport;
+  unproject3D?: (pos: number[]) => number[] | null;
 
   constructor(
     options: OrbitStateProps &
       OrbitStateInternal & {
         makeViewport: (props: Record<string, any>) => Viewport;
+        unproject3D?: (pos: number[]) => number[] | null;
       }
   ) {
     const {
@@ -57,6 +60,8 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
       maxRotationX = 90,
       minZoom = -Infinity,
       maxZoom = Infinity,
+
+      maxBounds = null,
 
       /** Interaction states, required to calculate change during transform */
       // Model state when the pan operation first started
@@ -81,7 +86,8 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
         minRotationX,
         maxRotationX,
         minZoom,
-        maxZoom
+        maxZoom,
+        maxBounds
       },
       {
         startPanPosition,
@@ -90,10 +96,11 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
         startRotationOrbit,
         startZoomPosition,
         startZoom
-      }
+      },
+      options.makeViewport
     );
 
-    this.makeViewport = options.makeViewport;
+    this.unproject3D = options.unproject3D;
   }
 
   /**
@@ -250,7 +257,7 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
       // If startZoom state is defined, then use the startZoom state;
       // otherwise assume discrete zooming
       startZoom = this.getViewportProps().zoom;
-      startZoomPosition = this._unproject(startPos) || this._unproject(pos);
+      startZoomPosition = this._unproject(startPos || pos);
     }
     if (!startZoomPosition) {
       return this;
@@ -329,10 +336,15 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
 
   /* Private methods */
 
-  _unproject(pos?: number[]): number[] | undefined {
+  _project(pos: number[]): number[] {
     const viewport = this.makeViewport(this.getViewportProps());
-    // @ts-ignore
-    return pos && viewport.unproject(pos);
+    return viewport.project(pos);
+  }
+  _unproject(pos: number[]): number[] {
+    const p = this.unproject3D?.(pos);
+    if (p) return p;
+    const viewport = this.makeViewport(this.getViewportProps());
+    return viewport.unproject(pos);
   }
 
   // Calculates new zoom
@@ -343,19 +355,19 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
     scale: number;
     startZoom?: number | number[];
   }): number | number[] {
-    const {maxZoom, minZoom} = this.getViewportProps();
     if (startZoom === undefined) {
       startZoom = this.getViewportProps().zoom;
     }
     const zoom = (startZoom as number) + Math.log2(scale);
-    return clamp(zoom, minZoom, maxZoom);
+    return this._constrainZoom(zoom);
   }
 
   _panFromCenter(offset) {
-    const {width, height, target} = this.getViewportProps();
+    const {target} = this.getViewportProps();
+    const center = this._project(target);
     return this.pan({
       startPosition: target,
-      pos: [width / 2 + offset[0], height / 2 + offset[1]]
+      pos: [center[0] + offset[0], center[1] + offset[1]]
     });
   }
 
@@ -372,18 +384,121 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<OrbitStateProps>): Required<OrbitStateProps> {
     // Ensure zoom is within specified range
-    const {maxZoom, minZoom, zoom, maxRotationX, minRotationX, rotationOrbit} = props;
+    const {maxRotationX, minRotationX, rotationOrbit} = props;
 
-    props.zoom = Array.isArray(zoom)
-      ? [clamp(zoom[0], minZoom, maxZoom), clamp(zoom[1], minZoom, maxZoom)]
-      : clamp(zoom, minZoom, maxZoom);
+    props.zoom = this._constrainZoom(props.zoom, props);
 
     props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
     if (rotationOrbit < -180 || rotationOrbit > 180) {
       props.rotationOrbit = mod(rotationOrbit + 180, 360) - 180;
     }
 
+    props.target = this._constrainTarget(props);
+
     return props;
+  }
+
+  _constrainZoom(zoom: number, props?: Required<OrbitStateProps>) {
+    props ||= this.getViewportProps();
+    const {maxZoom, maxBounds} = props;
+    let {minZoom} = props;
+
+    if (maxBounds && props.width > 0 && props.height > 0) {
+      const dx = maxBounds[1][0] - maxBounds[0][0];
+      const dy = maxBounds[1][1] - maxBounds[0][1];
+      const dz = (maxBounds[1][2] ?? 0) - (maxBounds[0][2] ?? 0);
+      const maxDiameter = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (maxDiameter > 0) {
+        minZoom = Math.max(minZoom, Math.log2(Math.min(props.width, props.height) / maxDiameter));
+        if (minZoom > maxZoom) minZoom = maxZoom;
+      }
+    }
+
+    return clamp(zoom, minZoom, maxZoom);
+  }
+
+  _constrainTarget(props: Required<OrbitStateProps>): [number, number, number] {
+    const {target, maxBounds} = props;
+    if (!maxBounds) return target;
+    const [[minX, minY, minZ = 0], [maxX, maxY, maxZ = 0]] = maxBounds;
+    if (
+      target[0] >= minX &&
+      target[0] <= maxX &&
+      target[1] >= minY &&
+      target[1] <= maxY &&
+      target[2] >= minZ &&
+      target[2] <= maxZ
+    ) {
+      return target;
+    }
+
+    const vp = this.makeViewport?.(props);
+    if (vp) {
+      // Given the bounding box and the target plane (defined by target position and distance to near plane)
+      // Move target to the closest point on the plane that is also inside the bounding box
+      const {cameraPosition} = vp;
+      const nx = cameraPosition[0] - target[0];
+      const ny = cameraPosition[1] - target[1];
+      const nz = cameraPosition[2] - target[2];
+      const c = nx * target[0] + ny * target[1] + nz * target[2];
+      const minDot =
+        nx * (nx >= 0 ? minX : maxX) + ny * (ny >= 0 ? minY : maxY) + nz * (nz >= 0 ? minZ : maxZ);
+      const maxDot =
+        nx * (nx >= 0 ? maxX : minX) + ny * (ny >= 0 ? maxY : minY) + nz * (nz >= 0 ? maxZ : minZ);
+
+      if ((nx || ny || nz) && c >= minDot && c <= maxDot) {
+        // Target plane intersects the bounding box
+        const clampX = (value: number) => clamp(value, minX, maxX);
+        const clampY = (value: number) => clamp(value, minY, maxY);
+        const clampZ = (value: number) => clamp(value, minZ, maxZ);
+        const f = (lambda: number) =>
+          nx * clampX(target[0] - lambda * nx) +
+          ny * clampY(target[1] - lambda * ny) +
+          nz * clampZ(target[2] - lambda * nz) -
+          c;
+
+        let lo = -1;
+        let hi = 1;
+        let flo = f(lo);
+        let fhi = f(hi);
+
+        while (flo < 0) {
+          hi = lo;
+          fhi = flo;
+          lo *= 2;
+          flo = f(lo);
+        }
+        while (fhi > 0) {
+          lo = hi;
+          flo = fhi;
+          hi *= 2;
+          fhi = f(hi);
+        }
+
+        for (let i = 0; i < 30; i++) {
+          const mid = (lo + hi) / 2;
+          const fm = f(mid);
+          if (fm > 0) {
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+
+        const lambda = (lo + hi) / 2;
+        return [
+          clampX(target[0] - lambda * nx),
+          clampY(target[1] - lambda * ny),
+          clampZ(target[2] - lambda * nz)
+        ];
+      }
+    }
+    // Fallback if the camera vector degenerates or the plane misses the box.
+    return [
+      clamp(target[0], minX, maxX),
+      clamp(target[1], minY, maxY),
+      clamp(target[2], minZ, maxZ)
+    ];
   }
 }
 
@@ -398,5 +513,28 @@ export default class OrbitController extends Controller<OrbitState> {
         required: ['target', 'zoom']
       }
     })
+  };
+
+  setProps(
+    props: ControllerProps &
+      OrbitStateProps & {
+        unproject3D?: (pos: number[]) => number[] | null;
+      }
+  ) {
+    // this will be passed to OrbitState constructor
+    props.unproject3D = this._unproject3D;
+
+    super.setProps(props);
+  }
+
+  protected _unproject3D = (pos: number[]): number[] | null => {
+    if (this.pickPosition) {
+      const {x, y} = this.props;
+      const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
+      if (pickResult && pickResult.coordinate) {
+        return pickResult.coordinate;
+      }
+    }
+    return null;
   };
 }

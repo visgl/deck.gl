@@ -22,11 +22,12 @@ const DemoContainer = styled.div`
     padding: 4px 12px;
     background: rgba(0, 0, 0, 0.8);
     color: var(--ifm-color-white);
+    overflow: hidden;
+    overflow-wrap: break-word;
     max-width: 300px;
     font-size: 12px;
     z-index: 9;
     pointer-events: none;
-    white-space: nowrap;
   }
 `;
 

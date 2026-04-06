@@ -183,6 +183,7 @@
         "items": [
           "api-reference/core/controller",
           "api-reference/core/map-controller",
+          "api-reference/core/terrain-controller",
           "api-reference/core/globe-controller",
           "api-reference/core/first-person-controller",
           "api-reference/core/orthographic-controller",
@@ -319,20 +320,23 @@
           "api-reference/widgets/styling",
           "api-reference/widgets/compass-widget",
           "api-reference/widgets/context-menu-widget",
-          "api-reference/widgets/fps-widget",
           "api-reference/widgets/fullscreen-widget",
           "api-reference/widgets/geocoder-widget",
           "api-reference/widgets/gimbal-widget",
           "api-reference/widgets/info-widget",
+          "api-reference/widgets/icon-widget",
           "api-reference/widgets/loading-widget",
+          "api-reference/widgets/popup-widget",
           "api-reference/widgets/reset-view-widget",
           "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
+          "api-reference/widgets/scrollbar-widget",
+          "api-reference/widgets/selector-widget",
           "api-reference/widgets/splitter-widget",
           "api-reference/widgets/stats-widget",
           "api-reference/widgets/theme-widget",
           "api-reference/widgets/timeline-widget",
-          "api-reference/widgets/view-selector-widget",
+          "api-reference/widgets/toggle-widget",
           "api-reference/widgets/zoom-widget"
         ]
       }

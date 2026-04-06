@@ -102,7 +102,7 @@ export type DataColumnOptions<Options> = Options &
     /** Internal API, use `type` instead */
     logicalType?: LogicalDataType;
     isIndexed?: boolean;
-    defaultValue?: number | number[];
+    defaultValue?: number | Readonly<number[]>;
   };
 
 export type DataColumnSettings<Options> = DataColumnOptions<Options> & {

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {A5Layer} from '@deck.gl/geo-layers';
 
 const data = [
@@ -18,29 +18,25 @@ const data = [
   0b0110001101011111101100010000100111000110011000000000000000000000n
 ];
 
-test('A5Layer', t => {
+test('A5Layer', () => {
   const testCases = generateLayerTests({
     Layer: A5Layer,
     sampleProps: {
       data,
       getPentagon: d => d
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
-      t.ok(subLayer, 'subLayers rendered');
+      expect(subLayer, 'subLayers rendered').toBeTruthy();
 
       if (layer.props.data.length) {
-        t.equal(
-          subLayer.state.paths.length,
-          data.length,
-          'should update PolygonLayers state.paths'
+        expect(subLayer.state.paths.length, 'should update PolygonLayers state.paths').toBe(
+          data.length
         );
       }
     }
   });
 
-  testLayer({Layer: A5Layer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: A5Layer, testCases, onError: err => expect(err).toBeFalsy()});
 });

@@ -26,7 +26,6 @@ import type {
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
-import {Parameters} from '@luma.gl/core';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -91,7 +90,7 @@ type _IconLayerProps<DataT> = {
    * Icon offsest accessor, in pixels.
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, [number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
@@ -103,7 +102,7 @@ type _IconLayerProps<DataT> = {
 
 export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<IconLayerProps> = {
   iconAtlas: {type: 'image', value: null, async: true},
@@ -289,13 +288,6 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
-    const parameters =
-      this.context.device.type === 'webgpu'
-        ? ({
-            depthWriteEnabled: true,
-            depthCompare: 'less-equal'
-          } satisfies Parameters)
-        : undefined;
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -315,8 +307,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         }
       }),
-      isInstanced: true,
-      parameters
+      isInstanced: true
     });
   }
 

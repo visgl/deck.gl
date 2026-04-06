@@ -46,6 +46,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 Also accepts additional options:
 
 - `zoomAxis` (string) - which axes to apply zoom to. Affects scroll, keyboard +/- and double tap. One of `X` (zoom along the X axis only), `Y` (zoom along the Y axis only), `all`. Default `all`. If this option is set to `X` or `Y`, `viewState.zoom` must be an array to enable independent zoom for each axis.
+- `maxBounds` - constrains the target position within the specified bounding box `[[minX, minY], [maxX, maxY]]`
 
 ## Custom OrthographicController
 

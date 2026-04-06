@@ -198,6 +198,8 @@ If `true`, the text always faces camera. Otherwise the text faces up (z).
 
 Whether to render background for the text blocks.
 
+If a valid content box is defined by [getContentBox](#getcontentbox), the background will fill this box. Otherwise, background is generated around the natural bounding box of the text.
+
 #### `backgroundBorderRadius` (number | number[4], optional) {#backgroundborderradius}
 
 - Default `0`
@@ -261,6 +263,28 @@ Options:
 * `cutoff` (number): How much of the radius (relative) is used for the inside part the glyph. Default is `0.25`. Bigger `cutoff` makes character thinner. Smaller `cutoff` makes character look thicker. Only applies when `sdf: true`.
 * `smoothing` (number): How much smoothing to apply to the text edges. Default `0.1`. Only applies when `sdf: true`.
 
+#### `_getFontRenderer` (function, optional) {#_getfontrenderer}
+
+**Experimental** - supplies a custom glyph renderer.
+
+```ts
+(settings: Required<FontSettings>) => FontRenderer
+```
+
+If provided, this callback is invoked with the resolved font settings and should return an object with:
+
+* `measure`: given a character, returns glyph metrics. The metrics are expected to contain the following fields:
+  - `advance` (number): horizontal distance to move the cursor before placing the next glyph, in pixels.
+  - `width` (number): width of the visible glyph bounds, in pixels.
+  - `ascent` (number): distance from the baseline to the top of the glyph, in pixels.
+  - `descent` (number): distance from the baseline to the bottom of the glyph, in pixels.
+* `draw`: renders a character to glyph image.
+  - `data` ([ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData)): rasterized glyph pixels.
+  - `left` (number, optional): x offset from the glyph origin to the left edge of `data`, in pixels. Default `0`.
+  - `top` (number, optional): y offset from the glyph origin to the top edge of `data`, in pixels. Default `0`.
+
+This hook overrides the default glyph generation path, including the built-in SDF renderer used when `fontSettings.sdf` is enabled.
+
 #### `wordBreak` (string, optional) {#wordbreak}
 
 * Default: `break-word`
@@ -274,6 +298,50 @@ Available options are `break-all` and `break-word`. A valid `maxWidth` has to be
 A unitless number that will be multiplied with the current text size to set the width limit of a string. If specified, when the text is longer than the width limit, it will be wrapped into multiple lines using the strategy of `wordBreak`.
 
 For example, `maxWidth: 10.0` used with `getSize: 12` is roughly the equivalent of `max-width: 120px` in CSS.
+
+
+#### `contentCutoffPixels` (number[2], optional) {#contentcutoffpixels}
+
+* Default: `[0, 0]`
+
+Minimum visible region of the content box, as `[width, height]` in screen pixels. If the visible width or height is smaller than the specified cutoff, the corresponding text is hidden completely.
+This prop can be used to set the minimum length of clipped texts to improve readability.
+
+Only effective with a valid content box returned by [getContentBox](#getcontentbox).
+
+#### `contentAlignHorizontal` (string, optional) {#contentalignhorizontal}
+
+* Default: `'none'`
+
+Align the text horizontally to the visible region of the content box.
+This prop can be used to keep the text visible while zooming and panning, similar to the CSS `position: 'sticky'` behavior.
+
+Only effective with a valid content box returned by [getContentBox](#getcontentbox). Usually used with a matching [getTextAnchor](#gettextanchor) prop. See the demo of "dynamic align" in [content box behavior](#content-box-behavior).
+
+Supported values:
+
+- `'none'`
+- `'start'`
+- `'center'`
+- `'end'`
+
+
+#### `contentAlignVertical` (string, optional) {#contentalignvertical}
+
+* Default: `'none'`
+
+Align the text vertically to the visible region of the content box.
+This prop can be used to keep the text visible while zooming and panning, similar to the CSS `position: 'sticky'` behavior.
+
+Only effective with a valid content box returned by [getContentBox](#getcontentbox). Usually used with a matching [getAlignmentBaseline](#getalignmentbaseline) prop. See the demo of "dynamic align" in [content box behavior](#content-box-behavior).
+
+Supported values:
+
+- `'none'`
+- `'start'`
+- `'center'`
+- `'end'`
+
 
 #### `outlineWidth` (number, optional) {#outlinewidth}
 
@@ -362,6 +430,19 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
+
+#### `getContentBox` ([Accessor&lt;number[4]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getcontentbox}
+
+* Default: `[0, 0, -1, -1]`
+
+Called to retrieve the context box that contains the text. Characters that overflow the area are not displayed. Returns `[x, y, width, height]`, where all values are world space (meter) offsets from the text anchor position.
+
+- `x`, `y` define the rectangle's origin relative to the text anchor.
+- `width`, `height` define the rectangle size.
+- A negative `width` disables clipping on the X axis.
+- A negative `height` disables clipping on the Y axis.
+
+Read more about [content box behavior](#content-box-behavior).
 
 #### `getBackgroundColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getbackgroundcolor}
 
@@ -622,6 +703,20 @@ TextLayer.fontAtlasCacheLimit = 10;
 ```
 
 It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtlas`.
+
+### Content Box Behavior
+
+Below is an interactive demo of the content box clipping and alignment behavior. Note the coordination between the props.
+
+
+<iframe height="480" style={{width:'100%'}} scrolling="no" title="deck.gl TextLayer content box" src="https://codepen.io/vis-gl/embed/QwKxLRE?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true">
+  See the Pen <a href="https://codepen.io/vis-gl/pen/QwKxLRE">
+  deck.gl TextLayer content box</a> by vis.gl (<a href="https://codepen.io/vis-gl">@vis-gl</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+You may observe that text simply disappears when a content box is specified. This is likely because the content box is "too tight" - the characters' bounding boxes interset with the content box, resulting in them being clipped at all times. This is because for many fonts, the actual dimensions of the glyphs can be larger than the number indicated by font size. For example, the Arial fontface with the default `getSize: 32` and `lineHeight: 1` produces a single-line text block of 32px heigh, but glyphs could be as tall as 36px. If the borders of the content box are right against the text block, then taller glyphs will be clipped. This can be mitigated by either setting a padding with `getPixelOffset`, or using a larger `lineHeight`.
 
 ## Source
 

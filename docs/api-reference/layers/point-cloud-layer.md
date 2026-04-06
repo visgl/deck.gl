@@ -14,7 +14,7 @@ import TabItem from '@theme/TabItem';
   <TabItem value="js" label="JavaScript">
 
 ```js
-import {Deck, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 const layer = new PointCloudLayer({
@@ -26,7 +26,7 @@ const layer = new PointCloudLayer({
   getPosition: d => d.position,
   pointSize: 2,
   coordinateOrigin: [-122.4, 37.74],
-  coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  coordinateSystem: 'meter-offsets',
   pickable: true
 });
 
@@ -46,7 +46,7 @@ new Deck({
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {Deck, COORDINATE_SYSTEM, PickingInfo} from '@deck.gl/core';
+import {Deck, PickingInfo} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 type DataType = {
@@ -64,7 +64,7 @@ const layer = new PointCloudLayer<DataType>({
   getPosition: (d: DataType) => d.position,
   pointSize: 2,
   coordinateOrigin: [-122.4, 37.74],
-  coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  coordinateSystem: 'meter-offsets',
   pickable: true
 });
 
@@ -86,7 +86,6 @@ new Deck({
 ```tsx
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -106,7 +105,7 @@ function App() {
     getPosition: (d: DataType) => d.position,
     pointSize: 2,
     coordinateOrigin: [-122.4, 37.74],
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     pickable: true
   });
 

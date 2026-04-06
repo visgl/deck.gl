@@ -53,14 +53,18 @@ export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
  */
-export type Position = [number, number] | [number, number, number] | Float32Array | Float64Array;
+export type Position =
+  | Readonly<[number, number]>
+  | Readonly<[number, number, number]>
+  | Readonly<Float32Array>
+  | Readonly<Float64Array>;
 
 /** A color in the format of `[r, g, b, a?]` */
 export type Color =
-  | [number, number, number]
-  | [number, number, number, number]
-  | Uint8Array
-  | Uint8ClampedArray;
+  | Readonly<[number, number, number]>
+  | Readonly<[number, number, number, number]>
+  | Readonly<Uint8Array>
+  | Readonly<Uint8ClampedArray>;
 
 export type Material = LightingModuleSettings['material'];
 

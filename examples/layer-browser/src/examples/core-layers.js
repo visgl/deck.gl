@@ -279,12 +279,22 @@ const ScatterplotLayerExample = {
 
 const ColumnLayerExample = {
   layer: ColumnLayer,
+  propTypes: {
+    radiusUnits: {type: 'compound', elements: ['radiusUnitsPixels']},
+    radiusUnitsPixels: {
+      type: 'boolean',
+      onUpdate: (newValue, newSettings, change) => {
+        change('radiusUnits', newValue ? 'pixels' : 'meters');
+      }
+    }
+  },
   props: {
     id: 'columnLayer',
     data: dataSamples.worldGrid.data,
     extruded: true,
     pickable: true,
     radius: 100,
+    radiusUnits: 'meters',
     opacity: 1,
     getFillColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000

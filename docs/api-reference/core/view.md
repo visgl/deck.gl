@@ -28,24 +28,24 @@ A unique id of the view. In a multi-view use case, this is important for matchin
 
 #### `x` (string | number, optional) {#x}
 
-A relative (e.g. `'50%'`) or absolute position. Default `0`.
+A relative (e.g. `'50%'`) or absolute position. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `0`.
 
 
 #### `y` (string | number, optional) {#y}
 
-A relative (e.g. `'50%'`) or absolute position. Default `0`.
+A relative (e.g. `'50%'`) or absolute position. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `0`.
 
 #### `width` (string | number, optional) {#width}
 
-A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
+A relative (e.g. `'50%'`) or absolute extent. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `'100%'`.
 
 #### `height` (string | number, optional) {#height}
 
-A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
+A relative (e.g. `'50%'`) or absolute extent. Accepts CSS-like expressions that mix numbers, `%`, `px`, whitespace/parentheses, and `calc()` with `+`/`-` to combine units. Default `'100%'`.
 
 #### `padding` (object, optional) {#padding}
 
-Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
+Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. These values support the same CSS-style expressions (numbers/percentages/`px` with parentheses and `calc()` addition/subtraction) as `x`, `y`, `width`, and `height`. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
 #### `controller` (Function | boolean | object, optional) {#controller}
 

@@ -119,7 +119,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
   }
 
   resetOrbitView(viewport?: Viewport) {
-    const viewId = this.getViewId(viewport);
+    const viewId = this.viewId || viewport?.id || 'OrbitView';
     const viewState = this.getViewState(viewId);
     if ('rotationOrbit' in viewState || 'rotationX' in viewState) {
       const nextViewState = {
@@ -131,13 +131,13 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
           transitionProps: ['rotationOrbit', 'rotationX']
         })
       };
-      // @ts-ignore Using private method temporary until there's a public one
-      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+      this.setViewState(viewId, nextViewState);
     }
   }
 
   getNormalizedRotation(viewport?: Viewport): {rotationOrbit: number; rotationX: number} {
-    const viewState = this.getViewState(this.getViewId(viewport));
+    const viewId = this.viewId || viewport?.id || 'OrbitView';
+    const viewState = this.getViewState(viewId);
     const [rz, rx] = this.getRotation(viewState);
     const rotationOrbit = normalizeAndClampAngle(rz);
     const rotationX = normalizeAndClampAngle(rx);
@@ -149,28 +149,6 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
       return [-(viewState.rotationOrbit || 0), viewState.rotationX || 0];
     }
     return [0, 0];
-  }
-
-  // Move to Widget/WidgetManager?
-
-  getViewId(viewport?: Viewport) {
-    const viewId = this.viewId || viewport?.id || 'OrbitView';
-    return viewId;
-  }
-
-  getViewState(viewId: string) {
-    const viewManager = this.getViewManager();
-    const viewState = (viewId && viewManager.getViewState(viewId)) || viewManager.viewState;
-    return viewState;
-  }
-
-  getViewManager() {
-    // @ts-expect-error protected
-    const viewManager = this.deck?.viewManager;
-    if (!viewManager) {
-      throw new Error('wigdet must be added to a deck instance');
-    }
-    return viewManager;
   }
 }
 

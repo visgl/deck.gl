@@ -18,7 +18,6 @@ import {
   AttributeManager,
   ChangeFlags,
   Color,
-  COORDINATE_SYSTEM,
   Layer,
   LayerContext,
   LayersList,
@@ -55,7 +54,7 @@ const TEXTURE_PROPS: TextureProps = {
     addressModeV: 'clamp-to-edge'
   }
 };
-const DEFAULT_COLOR_DOMAIN = [0, 0];
+const DEFAULT_COLOR_DOMAIN = [0, 0] as const;
 const AGGREGATION_MODE = {
   SUM: 0,
   MEAN: 1
@@ -126,7 +125,7 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default null
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Defines the type of aggregation operation
@@ -174,7 +173,7 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    colorDomain?: number[];
+    colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
@@ -280,7 +279,7 @@ export default class HeatmapLayer<
       {
         // position buffer is filled with world coordinates generated from viewport.unproject
         // i.e. LNGLAT if geospatial, CARTESIAN otherwise
-        coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+        coordinateSystem: 'default',
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -408,11 +407,13 @@ export default class HeatmapLayer<
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
+      ...shaders,
       bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
       targetTexture: weightsTexture!,
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'add',
         blendColorSrcFactor: 'one',
         blendColorDstFactor: 'one',
@@ -420,7 +421,6 @@ export default class HeatmapLayer<
         blendAlphaDstFactor: 'one'
       },
       topology: 'point-list',
-      ...shaders,
       modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
@@ -451,6 +451,7 @@ export default class HeatmapLayer<
       topology: 'point-list',
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'max',
         blendAlphaOperation: 'max',
         blendColorSrcFactor: 'one',
@@ -526,7 +527,7 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (this.props.coordinateSystem === 'lnglat') {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -592,7 +593,10 @@ export default class HeatmapLayer<
       const metersPerPixel =
         (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
         textureSize;
-      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+      this.state.colorDomain = [
+        colorDomain[0] * metersPerPixel * weightsScale,
+        colorDomain[1] * metersPerPixel * weightsScale
+      ];
     } else {
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
@@ -658,8 +662,7 @@ export default class HeatmapLayer<
 
     const offsetMode =
       useLayerCoordinateSystem &&
-      (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-        coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS);
+      (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
     const offsetOriginCommon = offsetMode
       ? viewport.projectPosition(this.props.coordinateOrigin)
       : [0, 0];

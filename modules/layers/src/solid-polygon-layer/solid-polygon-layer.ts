@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, project32, picking, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -92,7 +91,7 @@ type _SolidPolygonLayerProps<DataT> = {
 /** Render filled and/or extruded polygons. */
 export type SolidPolygonLayerProps<DataT = unknown> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   filled: true,
@@ -156,13 +155,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
-    if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-      coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    if (viewport.isGeospatial && coordinateSystem === 'default') {
+      coordinateSystem = 'lnglat';
     }
 
     let preproject: ((xy: number[]) => number[]) | undefined;
 
-    if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+    if (coordinateSystem === 'lnglat') {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {

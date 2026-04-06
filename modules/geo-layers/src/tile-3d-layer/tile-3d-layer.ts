@@ -18,7 +18,8 @@ import {
   PickingInfo,
   UpdateParameters,
   Viewport,
-  DefaultProps
+  DefaultProps,
+  LayerContext
 } from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
@@ -138,6 +139,15 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
   }
 
+  finalizeState(context: LayerContext): void {
+    this.state.tileset3d?.destroy();
+    this.state.tileset3d = null;
+    this.state.layerMap = {};
+    this.state.activeViewports = {};
+    this.state.lastUpdatedViewports = null;
+    super.finalizeState(context);
+  }
+
   activateViewport(viewport: Viewport): void {
     const {activeViewports, lastUpdatedViewports} = this.state;
     this.internalState!.viewport = viewport;
@@ -160,11 +170,29 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return info;
   }
 
-  filterSubLayer({layer, viewport}: FilterContext): boolean {
+  filterSubLayer({layer, viewport, cullRect, isPicking}: FilterContext): boolean {
     // All sublayers will have a tile prop
     const {tile} = layer.props as unknown as {tile: Tile3D};
     const {id: viewportId} = viewport;
-    return tile.selected && tile.viewportIds.includes(viewportId);
+    if (!tile.selected || !tile.viewportIds.includes(viewportId)) {
+      return false;
+    }
+
+    // When picking, skip tiles whose content center is far from the
+    // pick point on screen. Avoids unnecessary draw calls.
+    if (isPicking && cullRect && tile.content?.cartographicOrigin) {
+      const [sx, sy] = viewport.project(tile.content.cartographicOrigin);
+      const cx = cullRect.x + cullRect.width / 2;
+      const cy = cullRect.y + cullRect.height / 2;
+      const threshold = Math.max(viewport.width, viewport.height) / 4;
+      const dx = sx - cx;
+      const dy = sy - cy;
+      if (dx * dx + dy * dy > threshold * threshold) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
@@ -176,25 +204,31 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   private async _loadTileset(tilesetUrl) {
-    const {loadOptions = {}} = this.props;
+    const loadOptions = this.props.loadOptions || {};
 
     // TODO: deprecate `loader` in v9.0
     // @ts-ignore
-    const loaders = this.props.loader || this.props.loaders;
+    const loaders = this.props.loaders?.length ? this.props.loaders : this.props.loader;
     const loader = Array.isArray(loaders) ? loaders[0] : loaders;
 
-    const options = {loadOptions: {...loadOptions}};
+    // Extract tileset-specific options so they are passed to the Tileset3D constructor
+    const {tileset: tilesetOptions, ...remainingLoadOptions} = loadOptions;
+
+    const options = {loadOptions: {...remainingLoadOptions}, ...tilesetOptions};
     let actualTilesetUrl = tilesetUrl;
-    if (loader.preload) {
+    if ('preload' in loader && typeof loader.preload === 'function') {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
       if (preloadOptions.url) {
         actualTilesetUrl = preloadOptions.url;
       }
 
       if (preloadOptions.headers) {
-        options.loadOptions.fetch = {
-          ...options.loadOptions.fetch,
-          headers: preloadOptions.headers
+        options.loadOptions.core = {
+          ...options.loadOptions.core,
+          fetch: {
+            ...options.loadOptions.core?.fetch,
+            headers: preloadOptions.headers
+          }
         };
       }
       Object.assign(options, preloadOptions);
@@ -205,6 +239,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileError: this.props.onTileError,
+      onUpdate: () => this.setNeedsUpdate(),
       ...options
     });
 
@@ -219,6 +254,9 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   private _onTileLoad(tileHeader: Tile3D): void {
     const {lastUpdatedViewports} = this.state;
+    // Mark as not yet drawn so transition hold keeps previous tiles
+    // visible until this tile's sublayer renders for the first time
+    tileHeader.tileDrawn = false;
     this.props.onTileLoad(tileHeader);
     this._updateTileset(lastUpdatedViewports);
     this.setNeedsUpdate();
@@ -337,7 +375,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
         getPosition: [0, 0, 0],
-        _offset: 0
+        _offset: 0,
+        onFirstDraw: () => {
+          tileHeader.tileDrawn = true;
+        }
       }
     );
   }

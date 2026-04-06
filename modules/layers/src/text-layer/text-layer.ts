@@ -11,8 +11,9 @@ import FontAtlasManager, {
 import {transformParagraph, getTextFromBuffer} from './utils';
 
 import TextBackgroundLayer from './text-background-layer/text-background-layer';
+import type {ContentAlignModes} from './text-uniforms';
 
-import type {FontSettings} from './font-atlas-manager';
+import type {FontSettings, FontRenderer} from './font-atlas-manager';
 import type {
   LayerProps,
   LayerDataSource,
@@ -40,7 +41,7 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 } as const;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
 
@@ -92,14 +93,14 @@ type _TextLayerProps<DataT> = {
    * If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
    * @default 0
    */
-  backgroundBorderRadius?: number | [number, number, number, number];
+  backgroundBorderRadius?: number | Readonly<[number, number, number, number]>;
   /**
-   * The padding of the background..
+   * The padding around the text to position the background. Only effective if content box is unset.
    * If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
    * If an array of 4 is supplied, it is interpreted as `[padding_left, padding_top, padding_right, padding_bottom]` in pixels.
    * @default [0, 0, 0, 0]
    */
-  backgroundPadding?: [number, number] | [number, number, number, number];
+  backgroundPadding?: Readonly<[number, number]> | Readonly<[number, number, number, number]>;
   /**
    * Specifies a list of characters to include in the font. If set to 'auto', will be automatically generated from the data set.
    * @default (ASCII characters 32-128)
@@ -180,11 +181,43 @@ type _TextLayerProps<DataT> = {
    * Label offset from the anchor position, [x, y] in pixels
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, [number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * @deprecated Use `background` and `getBackgroundColor` instead
    */
   backgroundColor?: Color;
+
+  /** Container limits for each object, as meter offsets from the anchor position.
+   * Characters that overflow the area are not displayed.
+   * Use negative width/height to disable clipping.
+   * @default [0, 0, -1, -1]
+   */
+  getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
+
+  /**
+   * Minimum visible region of the content box in screen pixels. If the visible width or height is smaller than the specified cutoff, the corresponding text is hidden completely.
+   * This prop can be used to set the minimum length of clipped texts to improve readability.
+   * @default [0, 0]
+   */
+  contentCutoffPixels?: [width: number, height: number];
+
+  /**
+   * Align the text horizontally to the visible region of the content box.
+   * @default 'none'
+   */
+  contentAlignHorizontal?: ContentAlignModes;
+
+  /**
+   * Align the text vertically to the visible region of the content box.
+   * @default 'none'
+   */
+  contentAlignVertical?: ContentAlignModes;
+
+  /**
+   * Experimental.
+   * Custom font rendering methods.
+   */
+  _getFontRenderer?: (settings: Required<FontSettings>) => FontRenderer;
 };
 
 export type TextLayerProps<DataT = unknown> = _TextLayerProps<DataT> & LayerProps;
@@ -214,6 +247,9 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   // auto wrapping options
   wordBreak: 'break-word',
   maxWidth: {type: 'number', value: -1},
+  contentCutoffPixels: {type: 'array', value: [0, 0]},
+  contentAlignHorizontal: 'none',
+  contentAlignVertical: 'none',
 
   getText: {type: 'accessor', value: (x: any) => x.text},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
@@ -223,6 +259,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getTextAnchor: {type: 'accessor', value: 'middle'},
   getAlignmentBaseline: {type: 'accessor', value: 'center'},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
 
   // deprecated
   backgroundColor: {deprecatedFor: ['background', 'getBackgroundColor']}
@@ -292,14 +329,15 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   /** Returns true if font has changed */
   private _updateFontAtlas(): boolean {
-    const {fontSettings, fontFamily, fontWeight} = this.props;
+    const {fontSettings, fontFamily, fontWeight, _getFontRenderer} = this.props;
     const {fontAtlasManager, characterSet} = this.state;
 
     const fontProps = {
       ...fontSettings,
       characterSet,
       fontFamily,
-      fontWeight
+      fontWeight,
+      _getFontRenderer
     };
 
     if (!fontAtlasManager.mapping) {
@@ -386,15 +424,18 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   ): ReturnType<typeof transformParagraph> {
     const {fontAtlasManager} = this.state;
     const iconMapping = fontAtlasManager.mapping!;
+    const {baselineOffset} = fontAtlasManager.atlas!;
+    const {fontSize} = fontAtlasManager.props;
     const getText = this.state.getText!;
     const {wordBreak, lineHeight, maxWidth} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
     return transformParagraph(
       paragraph,
-      lineHeight,
+      baselineOffset,
+      lineHeight * fontSize,
       wordBreak,
-      maxWidth * fontAtlasManager.props.fontSize,
+      maxWidth * fontSize,
       iconMapping
     );
   }
@@ -406,12 +447,9 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     object,
     objectInfo
   ) => {
-    let {
+    const {
       size: [width, height]
     } = this.transformParagraph(object, objectInfo);
-    const {fontSize} = this.state.fontAtlasManager.props;
-    width /= fontSize;
-    height /= fontSize;
 
     const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
@@ -438,7 +476,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       x,
       y,
       rowWidth,
-      size: [width, height]
+      size: [, height]
     } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
@@ -458,8 +496,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     for (let i = 0; i < numCharacters; i++) {
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
-      const rowOffset = ((1 - anchorX) * (width - rowWidth[i])) / 2;
-      offsets[index++] = ((anchorX - 1) * width) / 2 + rowOffset + x[i];
+      offsets[index++] = ((anchorX - 1) * rowWidth[i]) / 2 + x[i];
       offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
     }
     return offsets;
@@ -470,7 +507,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, atlas, mapping},
+      fontAtlasManager: {atlas, mapping},
       styleVersion
     } = this.state;
 
@@ -485,6 +522,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getBackgroundColor,
       getBorderColor,
       getBorderWidth,
+      getContentBox,
       backgroundBorderRadius,
       backgroundPadding,
       background,
@@ -496,12 +534,16 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       sizeUnits,
       sizeMinPixels,
       sizeMaxPixels,
+      contentCutoffPixels,
+      contentAlignHorizontal,
+      contentAlignVertical,
       transitions,
       updateTriggers
     } = this.props;
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
+    const {fontSize} = this.state.fontAtlasManager.props;
 
     return [
       background &&
@@ -519,11 +561,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getSize,
             getAngle,
             getPixelOffset,
+            getClipRect: getContentBox,
             billboard,
             sizeScale,
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,
+            fontSize,
 
             transitions: transitions && {
               getPosition: transitions.getPosition,
@@ -582,19 +626,25 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getSize,
           getAngle,
           getPixelOffset,
+          getContentBox,
 
           billboard,
-          sizeScale: sizeScale * scale,
+          sizeScale,
           sizeUnits,
-          sizeMinPixels: sizeMinPixels * scale,
-          sizeMaxPixels: sizeMaxPixels * scale,
+          sizeMinPixels,
+          sizeMaxPixels,
+          fontSize,
+          contentCutoffPixels,
+          contentAlignHorizontal,
+          contentAlignVertical,
 
           transitions: transitions && {
             getPosition: transitions.getPosition,
             getAngle: transitions.getAngle,
             getColor: transitions.getColor,
             getSize: transitions.getSize,
-            getPixelOffset: transitions.getPixelOffset
+            getPixelOffset: transitions.getPixelOffset,
+            getContentBox: transitions.getContentBox
           }
         },
         this.getSubLayerProps({
@@ -606,6 +656,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
+            getContentBox: updateTriggers.getContentBox,
             getIconOffsets: {
               getTextAnchor: updateTriggers.getTextAnchor,
               getAlignmentBaseline: updateTriggers.getAlignmentBaseline,

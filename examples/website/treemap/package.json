@@ -1,0 +1,25 @@
+{
+  "name": "deckgl-examples-treemap",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "d3": "^7.9.0",
+    "deck.gl": "^9.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^8.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.0",
+    "vite": "^7.3.1"
+  }
+}
