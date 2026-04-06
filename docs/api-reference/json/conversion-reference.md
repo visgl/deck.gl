@@ -216,13 +216,11 @@ resolver. The `@@#` prefix on an enumeration triggers this lookup.
 For example, when this configuration is passed to the `JSONConverter`–
 
 ```js
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {GL} from '@luma.gl/webgl/constants';
+import GL from '@luma.gl/webgl/constants';
 
 const configuration = {
   ...
   enumerations: {
-    COORDINATE_SYSTEM,
     GL
   }
 };
@@ -236,7 +234,7 @@ and used to resolve this JSON object–
     {
       "@@type": "ScatterplotLayer",
       "data": ...,
-      "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
+      "coordinateSystem": "meter-offsets",
       "parameters": {
         "blend": true,
         "blendFunc": ["@@#GL.ONE", "@@#GL.ZERO", "@@#GL.SRC_ALPHA", "@@#GL.DST_ALPHA"]
@@ -253,7 +251,7 @@ the `@@#<enum-name>.<enum-value>` will be resolved to values in the `enumeration
   layers: [
     new ScatterplotLayer({
       data: ...,
-      coordinateSystem: 2,  // The enumerated value of COORDINATE_SYSTEM.METER_OFFSETS
+      coordinateSystem: "meter-offsets",
       parameters: {
         blend: true,
         blendFunc: [1, 0, 770, 772]

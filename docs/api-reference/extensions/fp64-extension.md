@@ -54,7 +54,7 @@ new Fp64Extension();
 
 ## Layer Properties
 
-When added to a layer via the `extensions` prop, the `Fp64Extension` requires the `coordinateSystem` prop of the layer to be `COORDINATE_SYSTEM.LNGLAT_DEPRECATED`.
+When added to a layer via the `extensions` prop, the `Fp64Extension` requires the `coordinateSystem` prop of the layer to be `'lnglat'`.
 
 
 ## Source

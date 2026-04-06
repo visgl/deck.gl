@@ -10,7 +10,7 @@ import {MapboxOverlay} from '@deck.gl/mapbox';
 import autobind from 'react-autobind';
 
 import {DeckGL} from '@deck.gl/react';
-import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
+import {View} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';
 import {RenderMetrics} from './render-metrics';
@@ -128,7 +128,7 @@ export default class DeckMap extends PureComponent {
   // Only show infovis layers in infovis mode and vice versa
   _layerFilter({layer, renderPass}) {
     const {settings} = this.props;
-    const isIdentity = layer.props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN;
+    const isIdentity = layer.props.coordinateSystem === 'cartesian';
     return settings.infovis ? isIdentity : !isIdentity;
   }
 

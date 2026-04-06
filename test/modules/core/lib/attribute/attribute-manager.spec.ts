@@ -6,6 +6,7 @@
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 function update(attribute, {data}) {
   const {value, size} = attribute;
@@ -175,6 +176,64 @@ test('AttributeManager.update - constant attribute', () => {
   expect(updateCalled, 'updater is called').toBe(2);
   expect(attribute.value.slice(0, 6), 'correct attribute value').toEqual([1, 1, 1, 2, 2, 2]);
   expect(attribute.state.constant, 'no longer a constant').toBeFalsy();
+});
+
+test('AttributeManager.update - constant attribute webgpu', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+  const attributeManager = new AttributeManager(webgpuDevice);
+  let updateCalled = 0;
+
+  attributeManager.add({
+    colors: {
+      size: 3,
+      update: (attr, {numInstances, data, props}) => {
+        updateCalled++;
+        if (Array.isArray(props.getColor)) {
+          attr.constant = true;
+          attr.value = props.getColor;
+        } else {
+          for (let i = 0, j = 0; i < numInstances; i++) {
+            const color = props.getColor(data[i]);
+            attr.value[j++] = color[0];
+            attr.value[j++] = color[1];
+            attr.value[j++] = color[2];
+          }
+        }
+      }
+    }
+  });
+
+  const attribute = attributeManager.getAttributes().colors;
+  attribute.constant = true;
+  attribute.value = [0.5, 0.75, 0.125];
+
+  attributeManager.update({
+    numInstances: 2,
+    props: {getColor: [0.5, 0.75, 0.125]},
+    data: [1, 2]
+  });
+
+  expect(updateCalled, 'legacy constant path skips updater').toBe(0);
+  expect(attribute.state.constant, 'webgpu constant is materialized as a buffer').toBeFalsy();
+  expect(attribute.value, 'constant value is expanded for each instance').toEqual([
+    0.5, 0.75, 0.125, 0.5, 0.75, 0.125
+  ]);
+
+  attributeManager.invalidate('colors');
+  attributeManager.update({
+    numInstances: 2,
+    props: {getColor: [0.25, 0.5, 0.75]},
+    data: [1, 2]
+  });
+
+  expect(updateCalled, 'updater still runs for legacy constant updaters').toBe(1);
+  expect(attribute.state.constant, 'updater-backed constant also becomes a buffer').toBeFalsy();
+  expect(attribute.value, 'updater constant is expanded for each instance').toEqual([
+    0.25, 0.5, 0.75, 0.25, 0.5, 0.75
+  ]);
 });
 
 test('AttributeManager.update - external virtual buffers', () => {

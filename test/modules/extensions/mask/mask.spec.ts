@@ -27,7 +27,7 @@ test('MaskExtension', () => {
             index: 0,
             bounds: [0, 10, 5, 20],
             coordinateOrigin: [0, 0, 0],
-            coordinateSystem: -1
+            coordinateSystem: 'default'
           }
         }
       },
