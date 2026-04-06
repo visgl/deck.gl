@@ -168,7 +168,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', async () => {
   await renderPromise;
 });
 
-test('MapboxOverlay#overlaidAutoInjectMapboxView', t => {
+test('MapboxOverlay#overlaidAutoInjectMapboxView', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -181,16 +181,15 @@ test('MapboxOverlay#overlaidAutoInjectMapboxView', t => {
   map.addControl(overlay);
 
   const deck = overlay._deck;
-  t.ok(deck, 'Deck instance is created');
+  expect(deck, 'Deck instance is created').toBeTruthy();
 
-  let views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
-  t.is(views.length, 1, 'Single view is present');
-  t.is(views[0].id, 'mapbox', 'Default mapbox view is auto-injected');
-  t.ok(views[0] instanceof MapView, 'View is a MapView');
+  const views = Array.isArray(deck.props.views) ? deck.props.views : [deck.props.views];
+  expect(views.length, 'Single view is present').toBe(1);
+  expect(views[0].id, 'Default mapbox view is auto-injected').toBe('mapbox');
+  expect(views[0] instanceof MapView, 'View is a MapView').toBeTruthy();
 
   map.removeControl(overlay);
-  t.notOk(overlay._deck, 'Deck instance is finalized');
-  t.end();
+  expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
 });
 
 // Note: Additional overlaid mode tests for setProps, custom views, and duplicate prevention
@@ -398,7 +397,7 @@ webglTest('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', async () => {
   await renderPromise;
 });
 
-test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
+webglTest('MapboxOverlay#interleavedAutoInjectMapboxView', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -409,17 +408,13 @@ test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
     layers: [new ScatterplotLayer({id: 'test'})]
   });
 
-  map.addControl(overlay);
-
-  t.ok(overlay._deck, 'Deck instance is created');
-
-  map.once('render', () => {
+  const renderPromise = waitForRender(map, () => {
     let views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
       : [overlay._deck.props.views];
-    t.is(views.length, 1, 'Single view is present');
-    t.is(views[0].id, 'mapbox', 'Default mapbox view is auto-injected');
-    t.ok(views[0] instanceof MapView, 'View is a MapView');
+    expect(views.length, 'Single view is present').toBe(1);
+    expect(views[0].id, 'Default mapbox view is auto-injected').toBe('mapbox');
+    expect(views[0] instanceof MapView, 'View is a MapView').toBeTruthy();
 
     // Test that setProps with custom views still auto-injects mapbox view
     const customView = new MapView({
@@ -434,17 +429,20 @@ test('MapboxOverlay#interleavedAutoInjectMapboxView', t => {
     views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
       : [overlay._deck.props.views];
-    t.is(views.length, 2, 'After setProps has two views');
-    t.is(views[0].id, 'mapbox', 'Mapbox view is still auto-injected after setProps');
-    t.is(views[1].id, 'minimap', 'Custom view is added');
+    expect(views.length, 'After setProps has two views').toBe(2);
+    expect(views[0].id, 'Mapbox view is still auto-injected after setProps').toBe('mapbox');
+    expect(views[1].id, 'Custom view is added').toBe('minimap');
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  await renderPromise;
 });
 
-test('MapboxOverlay#interleavedAutoInjectMapboxViewWithCustomViews', t => {
+webglTest('MapboxOverlay#interleavedAutoInjectMapboxViewWithCustomViews', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -458,28 +456,27 @@ test('MapboxOverlay#interleavedAutoInjectMapboxViewWithCustomViews', t => {
     layers: [new ScatterplotLayer({id: 'test'})]
   });
 
-  map.addControl(overlay);
-
-  t.ok(overlay._deck, 'Deck instance is created');
-
-  map.once('render', () => {
+  const renderPromise = waitForRender(map, () => {
     const views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
       : [overlay._deck.props.views];
 
-    t.is(views.length, 2, 'Two views are present');
-    t.is(views[0].id, 'mapbox', 'Mapbox view is auto-injected at the start');
-    t.ok(views[0] instanceof MapView, 'First view is MapView');
-    t.is(views[1].id, 'minimap', 'Custom view is preserved');
-    t.is(views[1], customView, 'Custom view is the same instance');
+    expect(views.length, 'Two views are present').toBe(2);
+    expect(views[0].id, 'Mapbox view is auto-injected at the start').toBe('mapbox');
+    expect(views[0] instanceof MapView, 'First view is MapView').toBeTruthy();
+    expect(views[1].id, 'Custom view is preserved').toBe('minimap');
+    expect(views[1], 'Custom view is the same instance').toBe(customView);
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  await renderPromise;
 });
 
-test('MapboxOverlay#interleavedNoDuplicateWhenMapboxViewProvided', t => {
+webglTest('MapboxOverlay#interleavedNoDuplicateWhenMapboxViewProvided', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
     zoom: 14
@@ -494,23 +491,22 @@ test('MapboxOverlay#interleavedNoDuplicateWhenMapboxViewProvided', t => {
     layers: [new ScatterplotLayer({id: 'test'})]
   });
 
-  map.addControl(overlay);
-
-  t.ok(overlay._deck, 'Deck instance is created');
-
-  map.once('render', () => {
+  const renderPromise = waitForRender(map, () => {
     const views = Array.isArray(overlay._deck.props.views)
       ? overlay._deck.props.views
       : [overlay._deck.props.views];
 
-    t.is(views.length, 2, 'Two views only (no duplicate)');
-    t.is(views[0], explicitMapboxView, 'First view is the explicitly provided mapbox view');
-    t.is(views[1], customView, 'Second view is the custom view');
+    expect(views.length, 'Two views only (no duplicate)').toBe(2);
+    expect(views[0], 'First view is the explicitly provided mapbox view').toBe(explicitMapboxView);
+    expect(views[1], 'Second view is the custom view').toBe(customView);
 
     map.removeControl(overlay);
-    t.notOk(overlay._deck, 'Deck instance is finalized');
-    t.end();
+    expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
   });
+  map.addControl(overlay);
+
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  await renderPromise;
 });
 
 const PROJECTION_TEST_CASES = [

@@ -11,7 +11,7 @@ import type {LayerOverlayProps, Map} from './types';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
-const MAPBOX_VIEW_ID = 'mapbox';
+export const MAPBOX_VIEW_ID = 'mapbox';
 
 type UserData = {
   currentViewport?: Viewport | null;

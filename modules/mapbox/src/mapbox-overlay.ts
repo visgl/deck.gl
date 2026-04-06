@@ -9,7 +9,8 @@ import {
   getDeckInstance,
   removeDeckInstance,
   getDefaultParameters,
-  getProjection
+  getProjection,
+  MAPBOX_VIEW_ID
 } from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
@@ -275,9 +276,9 @@ export default class MapboxOverlay implements IControl {
     if (!this._props.views) {
       return getDefaultView(map);
     }
-    // Check if custom views include a view with id 'mapbox'
+    // Check if custom views already include a 'mapbox' view
     const views = Array.isArray(this._props.views) ? this._props.views : [this._props.views];
-    const hasMapboxView = views.some((v: any) => v.id === 'mapbox');
+    const hasMapboxView = views.some((v: any) => v.id === MAPBOX_VIEW_ID);
     if (hasMapboxView) {
       return this._props.views;
     }
