@@ -4,6 +4,7 @@
 
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
+import {PathStyleExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
 
@@ -341,5 +342,36 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
+  },
+  {
+    name: 'text-layer-background-dash',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView({padding: {bottom: '100%'}})],
+    layers: [
+      new TextLayer({
+        id: 'labels',
+        data: points.slice(0, 6),
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
+        getPosition: (_, {index}) => [0, index * 80],
+        getText: d => d.ADDRESS,
+        getSize: 16,
+        getColor: [200, 0, 0],
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'top',
+        background: true,
+        getBackgroundColor: [200, 255, 255],
+        getBorderWidth: 3,
+        getBorderColor: [0, 100, 150],
+        backgroundPadding: [12, 8],
+        backgroundBorderRadius: 8,
+        getDashArray: [4, 2],
+        extensions: [new PathStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-background-dash.png'
   }
 ];
