@@ -261,9 +261,21 @@ The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`)
 
 - Default: 0
 
+#### `visibleMinZoom` (number | null, optional) {#visibleminzoom}
+
+The minimum zoom level at which tiles are visible. When the viewport zoom is below this level, no tiles are rendered. This is independent of `minZoom`, which controls the minimum zoom level at which tiles are *fetched*.
+
+- Default: `null`
+
+#### `visibleMaxZoom` (number | null, optional) {#visiblemaxzoom}
+
+The maximum zoom level at which tiles are visible. When the viewport zoom is above this level, no tiles are rendered. This is independent of `maxZoom`, which controls the maximum zoom level at which tiles are *fetched*.
+
+- Default: `null`
+
 #### `extent` (number[4], optional) {#extent}
 
-The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
+The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box.
 
 - Default: `null`
 

@@ -29,6 +29,7 @@ type _MultiIconLayerProps<DataT> = {
   getIconOffsets?: AccessorFunction<DataT, number[]>;
   getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
 
+  fontSize?: number;
   sdf?: boolean;
   smoothing?: number;
   outlineWidth?: number;
@@ -45,6 +46,7 @@ export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
   getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
   getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
+  fontSize: 1,
   alphaCutoff: 0.001,
   smoothing: 0.1,
   outlineWidth: 0,
@@ -124,6 +126,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const {
       sdf,
       smoothing,
+      fontSize,
       outlineWidth,
       contentCutoffPixels,
       contentAlignHorizontal,
@@ -146,6 +149,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       contentCutoffPixels,
       contentAlignHorizontal,
       contentAlignVertical,
+      fontSize,
       viewport: this.context.viewport
     };
     model.shaderInputs.setProps({sdf: sdfProps, text: textProps});
@@ -180,7 +184,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
         for (const char of Array.from(text)) {
           const def = super.getInstanceIconDef(char);
           def[0] = offsets[j * 2];
-          def[1] = offsets[j * 2 + 1];
+          def[1] += offsets[j * 2 + 1];
           def[6] = 1; // mask
           output.set(def, i);
           i += attribute.size;

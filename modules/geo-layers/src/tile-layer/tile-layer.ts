@@ -50,7 +50,9 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
-  zoomOffset: 0
+  zoomOffset: 0,
+  visibleMinZoom: null,
+  visibleMaxZoom: null
 };
 
 /** All props supported by the TileLayer */
@@ -149,6 +151,22 @@ type _TileLayerProps<DataT> = {
    * @default 0
    */
   zoomOffset?: number;
+
+  /**
+   * The minimum zoom level at which tiles are visible.
+   * When the viewport zoom is below this level, no tiles are rendered.
+   *
+   * @default null
+   */
+  visibleMinZoom?: number | null;
+
+  /**
+   * The maximum zoom level at which tiles are visible.
+   * When the viewport zoom is above this level, no tiles are rendered.
+   *
+   * @default null
+   */
+  visibleMaxZoom?: number | null;
 };
 
 export type TileLayerPickingInfo<
@@ -248,7 +266,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       minZoom,
       maxRequests,
       debounceTime,
-      zoomOffset
+      zoomOffset,
+      visibleMinZoom,
+      visibleMaxZoom
     } = this.props;
 
     return {
@@ -262,6 +282,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxRequests,
       debounceTime,
       zoomOffset,
+      visibleMinZoom,
+      visibleMaxZoom,
 
       getTileData: this.getTileData.bind(this),
       onTileLoad: this._onTileLoad.bind(this),
@@ -370,6 +392,19 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   renderLayers(): Layer | null | LayersList {
+    const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
+    const zoom = this.context.viewport.zoom;
+    const hidden =
+      (visibleMinZoom != null && zoom < visibleMinZoom) ||
+      (visibleMaxZoom != null && zoom > visibleMaxZoom) ||
+      (minZoom != null && !extent && zoom < minZoom);
+    if (hidden) {
+      // Clear cached sublayer references so they are recreated when visible again
+      for (const tile of this.state.tileset!.tiles) {
+        tile.layers = null;
+      }
+      return [];
+    }
     return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile

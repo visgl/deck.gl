@@ -20,6 +20,37 @@ function getDefaultCharacterSet() {
   return charSet;
 }
 
+export interface FontRenderer {
+  /**
+   * Measure the dimensions of a given character. If no parameter is passed, returns the bounding metrics of the font.
+   *
+   * Returned metrics:
+   * - `advance`: horizontal distance to move the cursor before placing the next glyph, in pixels.
+   * - `width`: width of the visible glyph bounds, in pixels.
+   * - `ascent`: distance from the baseline to the top of the glyph, in pixels.
+   * - `descent`: distance from the baseline to the bottom of the glyph, in pixels.
+   */
+  measure(char?: string): {
+    advance: number;
+    width: number;
+    ascent: number;
+    descent: number;
+  };
+  /**
+   * Render the given character to an image.
+   *
+   * Returned image data:
+   * - `data`: rasterized glyph pixels.
+   * - `left`: x offset from the glyph origin to the left edge of `data`, in pixels. Default `0`.
+   * - `top`: y offset from the glyph origin to the top edge of `data`, in pixels. Default `0`.
+   */
+  draw(char: string): {
+    data: ImageData;
+    left?: number;
+    top?: number;
+  };
+}
+
 export type FontSettings = {
   /** CSS font family
    * @default 'Monaco, monospace'
@@ -73,17 +104,20 @@ export const DEFAULT_FONT_SETTINGS: Required<FontSettings> = {
 
 const MAX_CANVAS_WIDTH = 1024;
 
-const BASELINE_SCALE = 0.9;
-const HEIGHT_SCALE = 1.2;
+const DEFAULT_ASCENT = 0.9;
+const DEFAULT_DESCENT = 0.3;
 
 // only preserve latest three fontAtlas
 const CACHE_LIMIT = 3;
 
 type FontAtlas = {
+  baselineOffset: number;
   /** x position of last character in mapping */
   xOffset: number;
   /** y position of last character in mapping */
-  yOffset: number;
+  yOffsetMin: number;
+  /** bottom position of any character in mapping */
+  yOffsetMax: number;
   /** bounding box of each character in the texture */
   mapping: CharacterMapping;
   /** packed texture */
@@ -121,7 +155,10 @@ function getNewChars(cacheKey: string, characterSet: Set<string> | string[] | st
   return newCharSet;
 }
 
-function populateAlphaChannel(alphaChannel: Uint8ClampedArray, imageData: ImageData): void {
+function populateAlphaChannel(
+  alphaChannel: Uint8ClampedArray | Uint8Array,
+  imageData: ImageData
+): void {
   // populate distance value from tinySDF to image alpha channel
   for (let i = 0; i < alphaChannel.length; i++) {
     imageData.data[4 * i + 3] = alphaChannel[i];
@@ -138,6 +175,47 @@ function setTextStyle(
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
+}
+
+function measureText(
+  ctx: CanvasRenderingContext2D,
+  fontSize: number,
+  char: string | undefined
+): {advance: number; width: number; ascent: number; descent: number} {
+  if (char === undefined) {
+    const fontMetrics = ctx.measureText('A');
+    if (fontMetrics.fontBoundingBoxAscent) {
+      return {
+        advance: 0,
+        width: 0,
+        ascent: Math.ceil(fontMetrics.fontBoundingBoxAscent),
+        descent: Math.ceil(fontMetrics.fontBoundingBoxDescent)
+      };
+    }
+    return {
+      advance: 0,
+      width: 0,
+      ascent: fontSize * DEFAULT_ASCENT,
+      descent: fontSize * DEFAULT_DESCENT
+    };
+  }
+
+  const metrics = ctx.measureText(char);
+  if (!metrics.actualBoundingBoxAscent) {
+    // TextMetrics not fully supported
+    return {
+      advance: metrics.width,
+      width: metrics.width,
+      ascent: fontSize * DEFAULT_ASCENT,
+      descent: fontSize * DEFAULT_DESCENT
+    };
+  }
+  return {
+    advance: metrics.width,
+    width: Math.ceil(metrics.actualBoundingBoxRight - metrics.actualBoundingBoxLeft),
+    ascent: Math.ceil(metrics.actualBoundingBoxAscent),
+    descent: Math.ceil(metrics.actualBoundingBoxDescent)
+  };
 }
 
 /**
@@ -159,6 +237,8 @@ export default class FontAtlasManager {
   /** The current font atlas */
   private _atlas?: FontAtlas;
 
+  private _getFontRenderer?: (settings: Required<FontSettings>) => FontRenderer;
+
   get atlas(): Readonly<FontAtlas> | undefined {
     return this._atlas;
   }
@@ -172,13 +252,15 @@ export default class FontAtlasManager {
     return this._atlas && this._atlas.mapping;
   }
 
-  get scale(): number {
-    const {fontSize, buffer} = this.props;
-    return (fontSize * HEIGHT_SCALE + buffer * 2) / fontSize;
-  }
-
-  setProps(props: FontSettings = {}) {
+  setProps(
+    props: FontSettings & {
+      _getFontRenderer?: (settings: Required<FontSettings>) => FontRenderer;
+    } = {}
+  ) {
     Object.assign(this.props, props);
+    if (props._getFontRenderer) {
+      this._getFontRenderer = props._getFontRenderer;
+    }
 
     // update cache key
     this._key = this._getKey();
@@ -213,61 +295,76 @@ export default class FontAtlasManager {
       canvas.width = MAX_CANVAS_WIDTH;
     }
     const ctx = canvas.getContext('2d', {willReadFrequently: true})!;
-
     setTextStyle(ctx, fontFamily, fontSize, fontWeight);
+    const defaultMeasure = (char?: string) => measureText(ctx, fontSize, char);
+
+    let renderer: FontRenderer | undefined;
+    if (this._getFontRenderer) {
+      renderer = this._getFontRenderer(this.props);
+    } else if (sdf) {
+      renderer = {
+        measure: defaultMeasure,
+        draw: getSdfFontRenderer(this.props)
+      };
+    }
 
     // 1. build mapping
-    const {mapping, canvasHeight, xOffset, yOffset} = buildMapping({
-      getFontWidth: char => ctx.measureText(char).width,
-      fontHeight: fontSize * HEIGHT_SCALE,
+    const {mapping, canvasHeight, xOffset, yOffsetMin, yOffsetMax} = buildMapping({
+      measureText: char => (renderer ? renderer.measure(char) : defaultMeasure(char)),
       buffer,
       characterSet,
       maxCanvasWidth: MAX_CANVAS_WIDTH,
       ...(cachedFontAtlas && {
         mapping: cachedFontAtlas.mapping,
         xOffset: cachedFontAtlas.xOffset,
-        yOffset: cachedFontAtlas.yOffset
+        yOffsetMin: cachedFontAtlas.yOffsetMin,
+        yOffsetMax: cachedFontAtlas.yOffsetMax
       })
     });
 
     // 2. update canvas
     // copy old canvas data to new canvas only when height changed
     if (canvas.height !== canvasHeight) {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const imageData =
+        canvas.height > 0 ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
       canvas.height = canvasHeight;
-      ctx.putImageData(imageData, 0, 0);
+      if (imageData) {
+        ctx.putImageData(imageData, 0, 0);
+      }
     }
     setTextStyle(ctx, fontFamily, fontSize, fontWeight);
 
     // 3. layout characters
-    if (sdf) {
-      const tinySDF = new TinySDF({
-        fontSize,
-        buffer,
-        radius,
-        cutoff,
-        fontFamily,
-        fontWeight: `${fontWeight}`
-      });
-
+    if (renderer) {
       for (const char of characterSet) {
-        const {data, width, height, glyphTop} = tinySDF.draw(char);
-        mapping[char].width = width;
-        mapping[char].layoutOffsetY = fontSize * BASELINE_SCALE - glyphTop;
+        const frame = mapping[char];
+        const {data, left = 0, top = 0} = renderer.draw(char);
+        const x = frame.x - left;
+        const y = frame.y - top;
+        // snap origin to the nearest pixel
+        const x0 = Math.max(0, Math.round(x));
+        const y0 = Math.max(0, Math.round(y));
+        const w = Math.min(data.width, canvas.width - x0);
+        const h = Math.min(data.height, canvas.height - y0);
+        ctx.putImageData(data, x0, y0, 0, 0, w, h);
 
-        const imageData = ctx.createImageData(width, height);
-        populateAlphaChannel(data, imageData);
-        ctx.putImageData(imageData, mapping[char].x, mapping[char].y);
+        frame.x += x0 - x;
+        frame.y += y0 - y;
       }
     } else {
       for (const char of characterSet) {
-        ctx.fillText(char, mapping[char].x, mapping[char].y + buffer + fontSize * BASELINE_SCALE);
+        const frame = mapping[char];
+        ctx.fillText(char, frame.x, frame.y + frame.anchorY);
       }
     }
 
+    const fontMetrics = renderer ? renderer.measure() : defaultMeasure();
+
     return {
+      baselineOffset: (fontMetrics.ascent - fontMetrics.descent) / 2,
       xOffset,
-      yOffset,
+      yOffsetMin,
+      yOffsetMax,
       mapping,
       data: canvas,
       width: canvas.width,
@@ -282,4 +379,29 @@ export default class FontAtlasManager {
     }
     return `${fontFamily} ${fontWeight} ${fontSize} ${buffer}`;
   }
+}
+
+function getSdfFontRenderer({
+  fontSize,
+  buffer,
+  radius,
+  cutoff,
+  fontFamily,
+  fontWeight
+}: Required<FontSettings>): FontRenderer['draw'] {
+  const tinySDF = new TinySDF({
+    fontSize,
+    buffer,
+    radius,
+    cutoff,
+    fontFamily,
+    fontWeight: `${fontWeight}`
+  });
+
+  return (char: string) => {
+    const {data, width, height} = tinySDF.draw(char);
+    const imageData = new ImageData(width, height);
+    populateAlphaChannel(data, imageData);
+    return {data: imageData, left: buffer, top: buffer};
+  };
 }
