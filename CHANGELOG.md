@@ -21,6 +21,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0-beta.1] - Apr 7 2026
+
+- feat(extensions): Add dashed stroke support for ScatterplotLayer and TextBackgroundLayer (#9976)
+- chore(test-utils): Separate tape tests from vitest and clean up CI (#10061)
+- fix(geo-layers): Ensure zoomOffset is correctly part of the round/ceil Z calculation (#9807)
+- feat(widgets): Add controlled mode and state callbacks (#9973)
+- chore(mapbox): Remove MapboxLayer and _renderLayersInGroups (#10163)
+- fix(mapbox): automatically inject 'mapbox' view in overlaid mode for multi-view consistency (#9947)
+- feat(core): AttributeManager allocates Buffers for constant WebGPU at… (#10152)
+- feat(core) coordinateSystem prop now accepts no-import string constants (#10140)
+- fix(layers): discard fragments outside rounded rect in TextBackgroundLayer (#10177)
+- fix(layers): submit command buffer after texture copy in IconLayer resize (#10176)
+- fix(core): WebGPU Picking fix (#10175)
+- feat(layers): TextLayer uses real text metrics (#10164)
+- chore(geo-layers): Update h3 & a5 dependencies (#10170)
+
 #### deck.gl [v9.3.0-alpha.6] - Apr 2 2026
 
 - feat(TileLayer): Add visibleMinZoom & visibleMaxZoom props (#10091)

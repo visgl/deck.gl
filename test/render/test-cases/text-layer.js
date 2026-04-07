@@ -4,6 +4,7 @@
 
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
+import {PathStyleExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
 
@@ -341,5 +342,74 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-auto-wrapping.png'
+  },
+  {
+    name: 'text-layer-background-dash',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      // Rounded corners
+      new TextLayer({
+        id: 'rounded',
+        data: [
+          {
+            text: 'Multi-line\nwith longer dashes',
+            anchor: 'middle',
+            baseline: 'center',
+            dash: [6, 3]
+          },
+          {text: 'Dense dots', anchor: 'end', baseline: 'bottom', dash: [1, 1]}
+        ],
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
+        getPosition: (_, {index}) => [-120, (index - 0.5) * 120],
+        getText: d => d.text,
+        getSize: 18,
+        getColor: [40, 40, 40],
+        getTextAnchor: d => d.anchor,
+        getAlignmentBaseline: d => d.baseline,
+        background: true,
+        getBackgroundColor: [230, 240, 255],
+        getBorderWidth: 2,
+        getBorderColor: [0, 80, 160],
+        backgroundPadding: [12, 8],
+        backgroundBorderRadius: 10,
+        getDashArray: d => d.dash,
+        extensions: [new PathStyleExtension({dash: true})]
+      }),
+      // Sharp corners
+      new TextLayer({
+        id: 'sharp',
+        data: [
+          {text: 'Sharp short dash', anchor: 'start', baseline: 'top', dash: [2, 1]},
+          {
+            text: 'Wide gaps between\ndash segments here',
+            anchor: 'start',
+            baseline: 'center',
+            dash: [3, 5]
+          }
+        ],
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
+        getPosition: (_, {index}) => [120, (index - 0.5) * 120],
+        getText: d => d.text,
+        getSize: 18,
+        getColor: [40, 40, 40],
+        getTextAnchor: d => d.anchor,
+        getAlignmentBaseline: d => d.baseline,
+        background: true,
+        getBackgroundColor: [255, 240, 220],
+        getBorderWidth: 2,
+        getBorderColor: [160, 80, 0],
+        backgroundPadding: [12, 8],
+        backgroundBorderRadius: 0,
+        getDashArray: d => d.dash,
+        extensions: [new PathStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-background-dash.png'
   }
 ];
