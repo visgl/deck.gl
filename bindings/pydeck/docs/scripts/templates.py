@@ -1,7 +1,6 @@
 import jinja2
 
-HTML_TEMPLATE = jinja2.Template(
-    """
+HTML_TEMPLATE = jinja2.Template("""
 <style>
 .wrapper {
   display: grid;
@@ -35,12 +34,10 @@ HTML_TEMPLATE = jinja2.Template(
   </div>
 {% endfor %}
 </div>
-"""
-)
+""")
 
 
-DOC_TEMPLATE = jinja2.Template(
-    """
+DOC_TEMPLATE = jinja2.Template("""
 {{ page_title }}
 ^^^^^^^^^^^^^^^^
 
@@ -78,11 +75,9 @@ Source
 
 {{ python_code|indent(4, True) }}
 
-"""
-)
+""")
 
-IMAGES_RST_TEMPLATE = jinja2.Template(
-    """
+IMAGES_RST_TEMPLATE = jinja2.Template("""
 
 {% for image_basename in assets %}
 .. image:: gallery/images/{{ image_basename }}.png
@@ -95,5 +90,4 @@ IMAGES_RST_TEMPLATE = jinja2.Template(
 {% for rst_name in assets %}
    gallery/{{rst_name}}
 {% endfor %}
-"""
-)
+""")

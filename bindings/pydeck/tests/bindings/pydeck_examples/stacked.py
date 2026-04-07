@@ -2,7 +2,6 @@ import pandas as pd
 
 from pydeck import Deck, Layer, ViewState
 
-
 data = [
     {"position": [-0.002, 0.002], "rgb": [136, 45, 97]},
     {"position": [-0.002, -0.002], "rgb": [170, 57, 57]},
