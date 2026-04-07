@@ -137,6 +137,8 @@ const assetsIncludeConfig = [
 
 export default defineConfig({
   test: {
+    // Globally exclude tape-based tests from all vitest projects
+    exclude: ['**/*.tape.spec.ts'],
     projects: [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation
