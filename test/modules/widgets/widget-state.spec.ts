@@ -334,10 +334,24 @@ test('FullscreenWidget - onFullscreenChange event updates state and calls callba
   const container = document.createElement('div');
   vi.spyOn(widget, 'getContainer').mockReturnValue(container);
 
+  // Set fullscreen to true so the event handler detects a change
+  widget.fullscreen = true;
   widget.onFullscreenChange();
 
   expect(onFullscreenChange).toHaveBeenCalledWith(false);
   expect(widget.fullscreen).toBe(false);
+});
+
+test('FullscreenWidget - onFullscreenChange does not fire callback when state unchanged', () => {
+  const onFullscreenChange = vi.fn();
+  const widget = new FullscreenWidget({onFullscreenChange});
+
+  const container = document.createElement('div');
+  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
+
+  // fullscreen is already false, calling onFullscreenChange should be a no-op
+  widget.onFullscreenChange();
+  expect(onFullscreenChange).not.toHaveBeenCalled();
 });
 
 // ---- ThemeWidget ----
