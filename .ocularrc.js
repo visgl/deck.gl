@@ -55,8 +55,7 @@ const config = {
     // TODO: Migrate bench and size to vitest (Phase 7)
     bench: 'test/bench/index.js',
     'bench-browser': 'test/bench/browser.html',
-    size: 'test/size/import-nothing.js',
-    'tape-compat': 'test/smoke/tape-compat.ts'
+    size: 'test/size/import-nothing.js'
   }
 };
 
