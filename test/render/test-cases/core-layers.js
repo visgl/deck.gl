@@ -175,59 +175,79 @@ export default [
   {
     name: 'scatterplot-dash',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
+      target: [0, 0, 0],
+      zoom: 0
     },
+    views: [new OrthographicView()],
     layers: [
       new ScatterplotLayer({
         id: 'scatterplot-dash',
-        data: dataSamples.points,
-        getPosition: d => d.COORDINATES,
-        getFillColor: [255, 200, 0, 128],
-        getLineColor: [0, 100, 200],
-        getRadius: d => d.SPACES,
-        getDashArray: [3, 2],
+        data: [
+          // Filled + dashed, varying dash patterns
+          {
+            pos: [-200, -120],
+            radius: 55,
+            dash: [3, 2],
+            fill: [255, 200, 0, 180],
+            line: [0, 100, 200],
+            filled: true
+          },
+          {
+            pos: [0, -120],
+            radius: 70,
+            dash: [6, 2],
+            fill: [100, 255, 100, 180],
+            line: [0, 0, 0],
+            filled: true
+          },
+          {
+            pos: [200, -120],
+            radius: 45,
+            dash: [1, 1],
+            fill: [255, 180, 180, 180],
+            line: [150, 50, 50],
+            filled: true
+          },
+          // Stroke-only, varying dash patterns
+          {
+            pos: [-200, 100],
+            radius: 60,
+            dash: [4, 3],
+            fill: [0, 0, 0, 0],
+            line: [200, 50, 100],
+            filled: false
+          },
+          {
+            pos: [0, 100],
+            radius: 50,
+            dash: [2, 4],
+            fill: [0, 0, 0, 0],
+            line: [0, 150, 0],
+            filled: false
+          },
+          // Solid stroke for comparison (no dash)
+          {
+            pos: [200, 100],
+            radius: 50,
+            dash: [0, 0],
+            fill: [220, 220, 255, 180],
+            line: [100, 0, 100],
+            filled: true
+          }
+        ],
+        getPosition: d => d.pos,
+        getRadius: d => d.radius,
+        getFillColor: d => d.fill,
+        getLineColor: d => d.line,
+        getDashArray: d => d.dash,
         stroked: true,
-        filled: true,
-        radiusScale: 30,
-        radiusMinPixels: 10,
-        radiusMaxPixels: 50,
+        getFilled: d => d.filled,
+        radiusUnits: 'pixels',
         lineWidthMinPixels: 4,
         extensions: [new PathStyleExtension({dash: true})]
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-dash.png'
-  },
-  {
-    name: 'scatterplot-dash-stroked-only',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new ScatterplotLayer({
-        id: 'scatterplot-dash-stroked-only',
-        data: dataSamples.points,
-        getPosition: d => d.COORDINATES,
-        getLineColor: [200, 50, 100],
-        getRadius: d => d.SPACES,
-        getDashArray: [2, 1],
-        stroked: true,
-        filled: false,
-        radiusScale: 30,
-        radiusMinPixels: 10,
-        radiusMaxPixels: 50,
-        lineWidthMinPixels: 3,
-        extensions: [new PathStyleExtension({dash: true})]
-      })
-    ],
-    goldenImage: './test/render/golden-images/scatterplot-dash-stroked-only.png'
   },
   {
     name: 'line-lnglat',
