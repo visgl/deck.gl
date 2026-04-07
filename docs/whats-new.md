@@ -11,6 +11,7 @@ Target release date: March 2026
 ![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
 
 - [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
+- [PathStyleExtension](./api-reference/extensions/path-style-extension.md) now supports dashed strokes on [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md) and [TextLayer](./api-reference/layers/text-layer.md) backgrounds, in addition to PathLayer. See [#9864](https://github.com/visgl/deck.gl/issues/9864).
 - WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
 
 ### @deck.gl/mapbox
