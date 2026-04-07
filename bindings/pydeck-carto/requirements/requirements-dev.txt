@@ -1,6 +1,6 @@
 black==24.3.0
 carto-auth>=0.2.0
-flake8==4.0.1
+flake8>=6.0.0
 ipython>=7.8.0
 pytest-cov==3.0.0
 pytest-mock==3.8.2
