@@ -26,8 +26,8 @@ init:
 	yarn bootstrap; \
 	yarn build
 	$(MAKE) copy-bundle
-	uv pip install -r requirements/requirements.txt; \
-	uv pip install -r requirements/requirements-dev.txt; \
+	uv pip install -r requirements/requirements.txt && \
+	uv pip install -r requirements/requirements-dev.txt && \
 	uv pip install -e .
 
 fast-build:
