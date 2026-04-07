@@ -27,6 +27,10 @@ type PathStyleProps = {
   dashGapPickable: boolean;
 };
 
+type SDFDashStyleProps = {
+  dashGapPickable: boolean;
+};
+
 export type PathStyleExtensionProps<DataT = any> = {
   /**
    * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
@@ -116,11 +120,10 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
         layerType === 'scatterplot'
           ? scatterplotDashShaders.inject
           : textBackgroundDashShaders.inject;
-      const pathStyle: ShaderModule<PathStyleProps> = {
+      const pathStyle: ShaderModule<SDFDashStyleProps> = {
         name: 'pathStyle',
         inject,
         uniformTypes: {
-          dashAlignMode: 'f32',
           dashGapPickable: 'i32'
         }
       };
@@ -193,11 +196,19 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
 
     if (extension.opts.dash) {
-      const pathStyleProps: PathStyleProps = {
-        dashAlignMode: this.props.dashJustified ? 1 : 0,
-        dashGapPickable: Boolean(this.props.dashGapPickable)
-      };
-      this.setShaderModuleProps({pathStyle: pathStyleProps});
+      const layerType = extension.getLayerType(this);
+      if (layerType === 'scatterplot' || layerType === 'textBackground') {
+        const pathStyleProps: SDFDashStyleProps = {
+          dashGapPickable: Boolean(this.props.dashGapPickable)
+        };
+        this.setShaderModuleProps({pathStyle: pathStyleProps});
+      } else {
+        const pathStyleProps: PathStyleProps = {
+          dashAlignMode: this.props.dashJustified ? 1 : 0,
+          dashGapPickable: Boolean(this.props.dashGapPickable)
+        };
+        this.setShaderModuleProps({pathStyle: pathStyleProps});
+      }
     }
   }
 

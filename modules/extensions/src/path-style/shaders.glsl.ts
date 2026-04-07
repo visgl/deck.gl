@@ -101,7 +101,6 @@ vDashArray = instanceDashArrays;
 
     'fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
-  float dashAlignMode;
   bool dashGapPickable;
 } pathStyle;
 
@@ -160,7 +159,6 @@ vDashArray = instanceDashArrays;
 
     'fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
-  float dashAlignMode;
   bool dashGapPickable;
 } pathStyle;
 
