@@ -30,7 +30,6 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
     initialViewState,
     layers,
     interleaved,
-    batched,
     multiView,
     views,
     layerFilter,
@@ -43,7 +42,7 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapboxMap
-        key={`mapbox-${interleaved}-${batched}-${multiView}`}
+        key={`mapbox-${interleaved}-${multiView}`}
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={mapInitialViewState}
@@ -60,7 +59,6 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
         <MapboxDeckOverlay
           layers={layers}
           interleaved={interleaved}
-          _renderLayersInGroups={batched}
           views={multiView ? views : undefined}
           layerFilter={multiView ? layerFilter : undefined}
           initialViewState={multiView ? initialViewState : undefined}

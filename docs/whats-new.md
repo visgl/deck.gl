@@ -13,6 +13,10 @@ Target release date: March 2026
 - [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
 - WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
 
+### @deck.gl/mapbox
+
+In interleaved mode, `MapboxOverlay` now always renders layers in groups by `beforeId` or `slot`. This enables cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default, without needing the previously experimental `_renderLayersInGroups` prop.
+
 ### Views
 
 View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
