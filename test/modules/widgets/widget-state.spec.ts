@@ -217,6 +217,40 @@ test('TimelineWidget - handlePlayPause in controlled mode calls onPlayingChange'
   expect(onPlayingChange).toHaveBeenCalledWith(true);
 });
 
+test('TimelineWidget - controlled: autoPlay calls onPlayingChange instead of play()', () => {
+  const onPlayingChange = vi.fn();
+  const onTimeChange = vi.fn();
+  const widget = new TimelineWidget({
+    timeRange: [0, 100],
+    playing: false,
+    autoPlay: true,
+    onPlayingChange,
+    onTimeChange
+  });
+
+  // Simulate widget being added to deck
+  widget.onAdd();
+
+  // Should notify parent instead of starting timer directly
+  expect(onPlayingChange).toHaveBeenCalledWith(true);
+  // Timer should NOT be running (parent controls playing state)
+  expect(widget['_playing']).toBe(false);
+});
+
+test('TimelineWidget - uncontrolled: autoPlay starts playing directly', () => {
+  vi.useFakeTimers();
+  const widget = new TimelineWidget({
+    timeRange: [0, 100],
+    autoPlay: true,
+    playInterval: 100
+  });
+
+  widget.onAdd();
+
+  expect(widget.getPlaying()).toBe(true);
+  vi.useRealTimers();
+});
+
 // ---- StatsWidget ----
 
 test('StatsWidget - uncontrolled: initialExpanded sets starting state', () => {

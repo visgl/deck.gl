@@ -134,7 +134,14 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   onAdd(): void {
     this._playing = false;
     this.timerId = null;
-    if (this.props.autoPlay) this.play();
+    if (this.props.autoPlay) {
+      if (this.props.playing !== undefined) {
+        // In controlled mode, notify parent instead of starting directly
+        this.props.onPlayingChange?.(true);
+      } else {
+        this.play();
+      }
+    }
   }
 
   onRemove(): void {
