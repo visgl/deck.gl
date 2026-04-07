@@ -20,11 +20,11 @@ init:
 	yarn build; \
 	uv pip install -r requirements/requirements.txt; \
 	uv pip install -r requirements/requirements-dev.txt; \
-	python setup.py develop
+	uv pip install -e .
 
 fast-build:
 	cd ../../modules/jupyter-widget; webpack; cd -; \
-	python setup.py develop
+	uv pip install -e .
 
 pre-commit:
 	$(BIN)/python -m black . && $(MAKE) test
