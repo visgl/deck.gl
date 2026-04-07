@@ -108,28 +108,17 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       return null;
     }
 
-    if (layerType === 'scatterplot') {
+    if (layerType === 'scatterplot' || layerType === 'textBackground') {
       if (!extension.opts.dash) {
         return null;
       }
+      const inject =
+        layerType === 'scatterplot'
+          ? scatterplotDashShaders.inject
+          : textBackgroundDashShaders.inject;
       const pathStyle: ShaderModule<PathStyleProps> = {
         name: 'pathStyle',
-        inject: scatterplotDashShaders.inject,
-        uniformTypes: {
-          dashAlignMode: 'f32',
-          dashGapPickable: 'i32'
-        }
-      };
-      return {modules: [pathStyle]};
-    }
-
-    if (layerType === 'textBackground') {
-      if (!extension.opts.dash) {
-        return null;
-      }
-      const pathStyle: ShaderModule<PathStyleProps> = {
-        name: 'pathStyle',
-        inject: textBackgroundDashShaders.inject,
+        inject,
         uniformTypes: {
           dashAlignMode: 'f32',
           dashGapPickable: 'i32'
