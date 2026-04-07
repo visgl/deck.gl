@@ -26,6 +26,8 @@ def read(*parts):
 
 
 log = logging.getLogger(__name__)
+log.addHandler(logging.StreamHandler())
+log.setLevel(logging.INFO)
 log.info("setup.py entered")
 log.info("$PATH=%s" % os.environ["PATH"])
 
