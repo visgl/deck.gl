@@ -31,6 +31,12 @@ test('TimelineWidget - controlled: getTime returns time prop', () => {
   expect(widget.getTime()).toBe(42);
 });
 
+test('TimelineWidget - controlled: constructor syncs Timeline to controlled time prop', () => {
+  const timeline = {setTime: vi.fn()};
+  new TimelineWidget({timeRange: [0, 100], time: 50, timeline: timeline as any});
+  expect(timeline.setTime).toHaveBeenCalledWith(50);
+});
+
 test('TimelineWidget - controlled: setProps updates time and syncs Timeline', () => {
   const timeline = {setTime: vi.fn()};
   const widget = new TimelineWidget({timeRange: [0, 100], time: 0, timeline: timeline as any});

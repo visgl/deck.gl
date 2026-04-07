@@ -107,7 +107,9 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   constructor(props: TimelineWidgetProps = {}) {
     super(props);
     this.currentTime = this.props.initialTime ?? this.props.timeRange[0];
-    this.props.timeline?.setTime(this.currentTime);
+    // In controlled mode, sync Timeline to the controlled time prop
+    const syncTime = this.props.time ?? this.currentTime;
+    this.props.timeline?.setTime(syncTime);
     this.setProps(this.props);
   }
 
