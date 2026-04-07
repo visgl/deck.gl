@@ -6,31 +6,6 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: March 2026
 
-### Improved 3D Support
-
-deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support. See the new [Using with 3D Tiles](./developer-guide/base-maps/using-with-3d-tiles.md) guide for a complete walkthrough.
-
-- New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
-- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
-- Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
-- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
-- All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
-- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
-
-### Layers
-
-![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
-
-- [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
-- [TileLayer](./api-reference/geo-layers/tile-layer.md) adds new `visibleMinZoom` and `visibleMaxZoom` props to control the zoom range at which tiles are drawn, independent of the zoom range at which data is loaded.
-
-### Views
-
-View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
-
-- [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
-
-
 ### Widgets
 
 
@@ -68,6 +43,31 @@ Aside from the above, all widgets also received the following improvements:
 - All widgets now have React wrappers, exported from `@deck.gl/react`.
 - All widget documentation pages now have live demos and easy-to-follow code samples.
 - A bug was fixed where widgets used with the `DeckGL` React component did not block pointer interaction with the canvas underneath.
+
+### Layers
+
+![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
+
+- [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
+- [TileLayer](./api-reference/geo-layers/tile-layer.md) adds new `visibleMinZoom` and `visibleMaxZoom` props to control the zoom range at which tiles are drawn, independent of the zoom range at which data is loaded.
+
+### Views
+
+View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
+
+- [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
+
+### Improved 3D Support
+
+deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support. See the new [Using with 3D Tiles](./developer-guide/base-maps/using-with-3d-tiles.md) guide for a complete walkthrough.
+
+- New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
+- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
+- Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
+- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
+- [OrbitController](./api-reference/core/orbit-controller.md) now uses 3D picking to determine zoom and pan anchors, providing more intuitive navigation around 3D content.
+- All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
+- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
 
 ## deck.gl v9.2
 
