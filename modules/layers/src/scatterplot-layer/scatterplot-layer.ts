@@ -145,6 +145,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   filled: true,
   billboard: false,
   antialiasing: true,
+
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
