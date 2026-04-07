@@ -89,9 +89,11 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   onFullscreenChange() {
     const fullscreen = document.fullscreenElement === this.getContainer();
-    this.fullscreen = fullscreen;
-    this.props.onFullscreenChange?.(fullscreen);
-    this.updateHTML();
+    if (fullscreen !== this.fullscreen) {
+      this.fullscreen = fullscreen;
+      this.props.onFullscreenChange?.(fullscreen);
+      this.updateHTML();
+    }
   }
 
   async handleClick() {
