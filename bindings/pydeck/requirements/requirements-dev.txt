@@ -8,7 +8,9 @@ requests
 sphinx
 recommonmark
 jupyterlab<4.0.0
+y-py==0.6.0 # y-py 0.6.2 has a broken pyproject.toml that uv cannot parse
 ipython>=5.8.0
+setuptools
 semver # necessary for PEP440-compliant semantic versions
 sphinx-markdown-builder
 wheel
