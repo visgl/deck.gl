@@ -126,13 +126,15 @@ function App() {
   <TabItem value="react-controlled" label="React Controlled">
 
 ```tsx
-import React, {useState, useCallback} from 'react';
+import React, {useState} from 'react';
 import DeckGL, {_TimelineWidget as TimelineWidget} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import '@deck.gl/widgets/stylesheet.css';
 
+const TIME_RANGE: [number, number] = [0, 10];
+
 function App() {
-  const [time, setTime] = useState(0);
+  const [time, setTime] = useState(TIME_RANGE[0]);
   const [playing, setPlaying] = useState(false);
 
   return (
@@ -148,13 +150,19 @@ function App() {
       ]}
     >
       <TimelineWidget
-        timeRange={[0, 10]}
+        timeRange={TIME_RANGE}
         step={1}
         playInterval={250}
         time={time}
         onTimeChange={setTime}
         playing={playing}
-        onPlayingChange={setPlaying}
+        onPlayingChange={(next) => {
+          // In controlled mode, the app handles restart-from-beginning
+          if (next && time >= TIME_RANGE[1]) {
+            setTime(TIME_RANGE[0]);
+          }
+          setPlaying(next);
+        }}
       />
     </DeckGL>
   );
@@ -197,7 +205,7 @@ Starting value of the slider for uncontrolled usage.
 
 #### `time` (number, optional) {#time}
 
-Controlled time value. When provided, the widget is in controlled mode for the time slider. Use with `onTimeChange` to handle user interactions.
+Controlled time value. When provided, the widget is in controlled mode for the time slider and will not update its internal time — the app is the sole source of truth. Use with `onTimeChange` to handle updates.
 
 #### `onTimeChange` (Function, optional) {#ontimechange}
 
@@ -213,7 +221,7 @@ Callback invoked when the time value changes (drag or play).
 
 * Default: `false`
 
-Start playing automatically.
+Start playing automatically when the widget is added. In controlled mode, this calls `onPlayingChange(true)` instead of starting playback directly, allowing the app to decide how to respond.
 
 #### `loop` (boolean, optional) {#loop}
 
@@ -229,7 +237,9 @@ Interval in milliseconds between automatic time increments when playing.
 
 #### `playing` (boolean, optional) {#playing}
 
-Controlled playing state. When provided, the widget is in controlled mode for play/pause. Use with `onPlayingChange` to handle user interactions.
+Controlled playing state. When provided, the widget is in controlled mode for play/pause and will not start or stop playback on its own — the app is the sole source of truth. Use with `onPlayingChange` to handle updates.
+
+In controlled mode, the widget does not automatically reset time to the beginning when playback starts at the end of the range. The app is responsible for handling this in its `onPlayingChange` callback (see the React Controlled example above).
 
 #### `onPlayingChange` (Function, optional) {#onplayingchange}
 
