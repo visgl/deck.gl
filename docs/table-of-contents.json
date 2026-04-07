@@ -49,6 +49,7 @@
         "type": "category",
         "label": "Supported Base Maps",
         "items": [
+          "developer-guide/base-maps/using-with-3d-tiles",
           "developer-guide/base-maps/using-with-arcgis",
           "developer-guide/base-maps/using-with-google-maps",
           "developer-guide/base-maps/using-with-mapbox",
