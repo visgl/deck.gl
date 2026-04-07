@@ -29,6 +29,11 @@ new Deck({
 
 `zoom: [number, number]` will continue to work for the rest of v9.x if `zoomX` and `zoomY` are undefined. However, if you mutate `zoom` in the `onViewStateChange` callback, the change will not be picked up because `OrthographicController` always returns `zoomX` and `zoomY` which override `zoom`.
 
+### @deck.gl/mapbox
+
+- The experimental `_renderLayersInGroups` prop has been removed from `MapboxOverlay`. In interleaved mode, layers are now always rendered in groups by `beforeId` or `slot`, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default. If you were using `_renderLayersInGroups: true`, simply remove the prop.
+- Note: extensions that require shared rendering context (MaskExtension, CollisionFilterExtension) only work between layers in the same group. Ensure affected layers share the same `beforeId` or `slot` value.
+
 ### Widgets
 
 The following widgets have breaking changes in v9.3:
