@@ -222,13 +222,11 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
     const {
       timeRange: [min, max]
     } = this.props;
-    if (this.getTime() >= max) {
+    // In uncontrolled mode, reset to start if at end
+    if (this.props.time === undefined && this.getTime() >= max) {
+      this.currentTime = min;
       this.props.onTimeChange(min);
-      // Only update internal state if uncontrolled
-      if (this.props.time === undefined) {
-        this.currentTime = min;
-        this.props.timeline?.setTime(min);
-      }
+      this.props.timeline?.setTime(min);
     }
     this.updateHTML();
     this.tick();

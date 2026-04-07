@@ -71,22 +71,24 @@ test('TimelineWidget - uncontrolled: handleTimeChange updates internal state and
   expect(timeline.setTime).toHaveBeenCalledWith(50);
 });
 
-test('TimelineWidget - controlled: play() does not update internal time when at max', () => {
-  const onTimeChange = vi.fn();
+test('TimelineWidget - controlled: play() at max does not reset time (app handles restart)', () => {
   vi.useFakeTimers();
+  const onTimeChange = vi.fn();
+  const onPlayingChange = vi.fn();
   const widget = new TimelineWidget({
     timeRange: [0, 100],
-    initialTime: 50,
     time: 100,
     onTimeChange,
-    playInterval: 100000 // large interval to prevent tick from firing
+    onPlayingChange,
+    playInterval: 100
   });
 
   widget.play();
 
-  expect(onTimeChange).toHaveBeenCalledWith(0);
-  // Internal state should not change in controlled mode
-  expect(widget.currentTime).toBe(50);
+  // In controlled mode, play() does NOT auto-reset time to min.
+  // The app is responsible for resetting time in its onPlayingChange handler.
+  // tick() fires immediately, sees time=100 (at max), and stops.
+  expect(onPlayingChange).toHaveBeenCalledWith(false);
   vi.useRealTimers();
 });
 

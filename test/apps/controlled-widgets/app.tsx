@@ -3,13 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 // Manual testing app for controlled widget state and callbacks.
-// Run with: cd examples/get-started/react/controlled-widgets && npm run start-local
+// Run with: cd test/apps/controlled-widgets && npm run start-local
 
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
+import {DeckGL, GeoJsonLayer} from 'deck.gl';
 import {
-  DeckGL,
-  GeoJsonLayer,
   CompassWidget,
   ZoomWidget,
   FullscreenWidget,
@@ -19,7 +18,7 @@ import {
   _TimelineWidget as TimelineWidget,
   _StatsWidget as StatsWidget,
   _SplitterWidget as SplitterWidget
-} from 'deck.gl';
+} from '@deck.gl/widgets';
 import {MapView} from '@deck.gl/core';
 import type {MapViewState, View} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
@@ -79,6 +78,62 @@ function MapViewDemo() {
     setViewState(vs as MapViewState);
   }, []);
 
+  const widgets = useMemo(
+    () => [
+      new CompassWidget({
+        placement: 'top-left',
+        onReset: ({bearing, pitch}) =>
+          setLastCallback(`CompassWidget.onReset(bearing=${bearing}, pitch=${pitch})`)
+      }),
+      new ZoomWidget({
+        placement: 'top-left',
+        onZoom: ({delta, zoom}) =>
+          setLastCallback(`ZoomWidget.onZoom(delta=${delta}, zoom=${zoom.toFixed(1)})`)
+      }),
+      new ResetViewWidget({
+        placement: 'top-left',
+        initialViewState: {longitude: -122.4, latitude: 37.8, zoom: 11, pitch: 45, bearing: 30},
+        onReset: () => setLastCallback('ResetViewWidget.onReset')
+      }),
+      new FullscreenWidget({
+        placement: 'top-left',
+        onFullscreenChange: fs => setLastCallback(`FullscreenWidget.onFullscreenChange(${fs})`)
+      }),
+      new ThemeWidget({placement: 'top-left', themeMode, onThemeModeChange: setThemeMode}),
+      new LoadingWidget({placement: 'top-left', onLoadingChange: setLoading}),
+      new StatsWidget({placement: 'top-left', expanded, onExpandedChange: setExpanded}),
+      new TimelineWidget({
+        placement: 'bottom-left',
+        timeRange: [0, 100],
+        step: 1,
+        time,
+        onTimeChange: setTime,
+        playing,
+        onPlayingChange: (next: boolean) => {
+          // Reset to beginning when starting play at the end
+          if (next && time >= 100) {
+            setTime(0);
+          }
+          setPlaying(next);
+        }
+      })
+    ],
+    [themeMode, expanded, time, playing]
+  );
+
+  const layers = [
+    new GeoJsonLayer({
+      id: 'base-map',
+      data: COUNTRIES,
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 2,
+      opacity: 0.4,
+      getLineColor: [60, 60, 60],
+      getFillColor: [200, 200, 200]
+    })
+  ];
+
   return (
     <>
       <StatePanel
@@ -94,52 +149,13 @@ function MapViewDemo() {
           lastCallback
         }}
       />
-      <DeckGL viewState={viewState} onViewStateChange={onViewStateChange} controller>
-        <GeoJsonLayer
-          id="base-map"
-          data={COUNTRIES}
-          stroked
-          filled
-          lineWidthMinPixels={2}
-          opacity={0.4}
-          getLineColor={[60, 60, 60]}
-          getFillColor={[200, 200, 200]}
-        />
-
-        <CompassWidget
-          placement="top-left"
-          onReset={({bearing, pitch}) =>
-            setLastCallback(`CompassWidget.onReset(bearing=${bearing}, pitch=${pitch})`)
-          }
-        />
-        <ZoomWidget
-          placement="top-left"
-          onZoom={({delta, zoom}) =>
-            setLastCallback(`ZoomWidget.onZoom(delta=${delta}, zoom=${zoom.toFixed(1)})`)
-          }
-        />
-        <ResetViewWidget
-          placement="top-left"
-          initialViewState={{longitude: -122.4, latitude: 37.8, zoom: 11, pitch: 45, bearing: 30}}
-          onReset={() => setLastCallback('ResetViewWidget.onReset')}
-        />
-        <FullscreenWidget
-          placement="top-left"
-          onFullscreenChange={fs => setLastCallback(`FullscreenWidget.onFullscreenChange(${fs})`)}
-        />
-        <ThemeWidget placement="top-left" themeMode={themeMode} onThemeModeChange={setThemeMode} />
-        <LoadingWidget placement="top-left" onLoadingChange={setLoading} />
-        <StatsWidget placement="top-left" expanded={expanded} onExpandedChange={setExpanded} />
-        <TimelineWidget
-          placement="bottom-left"
-          timeRange={[0, 100]}
-          step={1}
-          time={time}
-          onTimeChange={setTime}
-          playing={playing}
-          onPlayingChange={setPlaying}
-        />
-      </DeckGL>
+      <DeckGL
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller
+        layers={layers}
+        widgets={widgets}
+      />
     </>
   );
 }
@@ -150,6 +166,35 @@ function SplitterDemo() {
     left: {longitude: -122.4, latitude: 37.8, zoom: 11},
     right: {longitude: -73.97, latitude: 40.77, zoom: 11}
   });
+
+  const widgets = useMemo(
+    () => [
+      new SplitterWidget({
+        viewLayout: {
+          orientation: 'horizontal',
+          views: [
+            new MapView({id: 'left', controller: true}),
+            new MapView({id: 'right', controller: true})
+          ]
+        },
+        onChange: setViews
+      })
+    ],
+    []
+  );
+
+  const layers = [
+    new GeoJsonLayer({
+      id: 'base-map',
+      data: COUNTRIES,
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 2,
+      opacity: 0.4,
+      getLineColor: [60, 60, 60],
+      getFillColor: [200, 200, 200]
+    })
+  ];
 
   return (
     <>
@@ -166,28 +211,9 @@ function SplitterDemo() {
         onViewStateChange={({viewId, viewState: vs}) => {
           setViewState(prev => ({...prev, [viewId]: vs as MapViewState}));
         }}
-      >
-        <GeoJsonLayer
-          id="base-map"
-          data={COUNTRIES}
-          stroked
-          filled
-          lineWidthMinPixels={2}
-          opacity={0.4}
-          getLineColor={[60, 60, 60]}
-          getFillColor={[200, 200, 200]}
-        />
-        <SplitterWidget
-          viewLayout={{
-            orientation: 'horizontal',
-            views: [
-              new MapView({id: 'left', controller: true}),
-              new MapView({id: 'right', controller: true})
-            ]
-          }}
-          onChange={setViews}
-        />
-      </DeckGL>
+        layers={layers}
+        widgets={widgets}
+      />
     </>
   );
 }
