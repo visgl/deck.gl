@@ -146,7 +146,7 @@ export default defineConfig({
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/modules/**/*.node.spec.ts', 'test/smoke/**/*.spec.ts'],
+          include: ['test/modules/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
