@@ -17,7 +17,6 @@ export type TerrainModuleProps = {
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
-  dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
@@ -119,23 +118,27 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
   },
   // eslint-disable-next-line complexity
   getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
-    if ('dummyHeightMap' in opts) {
+    const dummyHeightMap = terrainModule.dummyHeightMap;
+    if (!dummyHeightMap) {
+      // TerrainEffect has not been set up yet
+      return {};
+    }
+
+    if ('terrainSkipRender' in opts || 'drawToTerrainHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
         heightMap,
         heightMapBounds,
-        dummyHeightMap,
         terrainCover,
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-
       const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
       const {commonOrigin} = projectUniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler: Texture | undefined = dummyHeightMap as Texture;
+      let sampler: Texture = dummyHeightMap;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
@@ -150,15 +153,15 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         const fbo = opts.isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
-        sampler = fbo?.colorAttachments[0].texture;
+        const coverTexture = fbo?.colorAttachments[0].texture;
         if (opts.isPicking) {
           mode = TERRAIN_MODE.SKIP;
         }
-        if (sampler) {
+        if (coverTexture) {
+          sampler = coverTexture;
           mode = mode === TERRAIN_MODE.SKIP ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
         } else {
-          sampler = dummyHeightMap!;
           if (opts.isPicking && !terrainSkipRender) {
             // terrain+draw layer without cover FBO: render own picking colors
             mode = TERRAIN_MODE.NONE;
@@ -181,22 +184,20 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           : [0, 0, 0, 0]
       };
     }
-    // When terrain props are not provided (e.g. mask pass), provide the dummy
-    // texture to satisfy the terrain_map binding and prevent draw abort.
-    // dummyHeightMap is stored on the module by TerrainEffect.setup.
-    if (terrainModule.dummyHeightMap) {
-      return {
-        mode: TERRAIN_MODE.NONE,
-        terrain_map: terrainModule.dummyHeightMap,
-        bounds: [0, 0, 0, 0]
-      };
-    }
-    return {};
+    // No terrain-specific props provided (e.g. mask pass or other non-terrain render pass).
+    // Provide the dummy texture to satisfy the terrain_map binding.
+    return {
+      mode: TERRAIN_MODE.NONE,
+      terrain_map: dummyHeightMap,
+      bounds: [0, 0, 0, 0]
+    };
   },
   uniformTypes: {
     mode: 'f32',
     bounds: 'vec4<f32>'
   },
-  /** Dummy texture stored by TerrainEffect.setup, used as fallback terrain_map binding */
+  /** Dummy texture created by TerrainEffect.setup, used as default terrain_map binding */
   dummyHeightMap: null as Texture | null
-} as ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings> & {dummyHeightMap: Texture | null};
+} as ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings> & {
+  dummyHeightMap: Texture | null;
+};
