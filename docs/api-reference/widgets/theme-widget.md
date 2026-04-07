@@ -63,6 +63,29 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {ThemeWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+
+  return (
+    <DeckGL>
+      <ThemeWidget
+        placement="top-left"
+        themeMode={themeMode}
+        onThemeModeChange={setThemeMode}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor
@@ -94,7 +117,21 @@ Styles for dark mode theme.
 
 * Default: `'auto'`
 
-Set the initial theme. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
+Set the initial theme for uncontrolled usage. `'auto'` inspects `window.matchMedia('(prefers-color-scheme: dark)')`.
+
+#### `themeMode` (`'light' | 'dark'`, optional) {#thememode}
+
+Controlled theme mode. When provided, the widget is in controlled mode and this prop determines the current theme. Use with `onThemeModeChange` to handle user interactions.
+
+#### `onThemeModeChange` (Function, optional) {#onthememodechange}
+
+```ts
+(newMode: 'light' | 'dark') => void
+```
+
+* Default: `() => {}`
+
+Callback when the user clicks the theme toggle button.
 
 #### `lightModeLabel` (string, optional) {#lightmodelabel}
 

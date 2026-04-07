@@ -48,13 +48,15 @@ void main(void) {
 
   if (textBackground.borderRadius != vec4(0.0)) {
     float distToEdge = round_rect(uv, dimensions, textBackground.borderRadius);
+    float shapeAlpha = smoothedge(-distToEdge, 0.0);
+    if (shapeAlpha == 0.0) {
+      discard;
+    }
     if (textBackground.stroked) {
       fragColor = get_stroked_fragColor(distToEdge);
     } else {
       fragColor = vFillColor;
     }
-    // add border radius
-    float shapeAlpha = smoothedge(-distToEdge, 0.0);
     fragColor.a *= shapeAlpha;
   } else {
     if (textBackground.stroked) {

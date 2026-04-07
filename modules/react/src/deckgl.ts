@@ -191,7 +191,9 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       // Sync viewport tracking after the update. Without this, _customRender would see
       // stale lastRenderedViewports and trigger a redundant forceUpdate, causing
       // double renders on every viewport change when using externally managed view state.
-      thisRef.lastRenderedViewports = thisRef.deck.getViewports();
+      if (thisRef.deck.isInitialized) {
+        thisRef.lastRenderedViewports = thisRef.deck.getViewports();
+      }
     }
 
     return forwardProps;

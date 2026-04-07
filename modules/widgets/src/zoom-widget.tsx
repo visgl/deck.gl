@@ -21,6 +21,18 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomOutLabel?: string;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
+  /**
+   * Callback when zoom buttons are clicked.
+   * Called for each viewport that will be zoomed.
+   */
+  onZoom?: (params: {
+    /** The view being zoomed */
+    viewId: string;
+    /** Zoom direction: +1 for zoom in, -1 for zoom out */
+    delta: number;
+    /** The new zoom level */
+    zoom: number;
+  }) => void;
 };
 
 export class ZoomWidget extends Widget<ZoomWidgetProps> {
@@ -32,7 +44,8 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
-    viewId: null
+    viewId: null,
+    onZoom: () => {}
   };
 
   className = 'deck-widget-zoom';
@@ -67,7 +80,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     render(ui, rootElement);
   }
 
-  handleZoom(viewId: string, nextZoom: number) {
+  handleZoom(viewId: string, nextZoom: number, delta: number) {
     // Respect minZoom/maxZoom constraints from the view state
     const viewState = this.getViewState(viewId);
     if (viewState) {
@@ -79,6 +92,9 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
         nextZoom = Math.min(maxZoom, nextZoom);
       }
     }
+
+    // Call callback
+    this.props.onZoom?.({viewId, delta, zoom: nextZoom});
 
     const nextViewState: Record<string, unknown> = {
       ...viewState,
@@ -100,7 +116,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
     for (const viewId of viewIds) {
       const viewState = this.getViewState(viewId);
-      this.handleZoom(viewId, (viewState.zoom as number) + 1);
+      this.handleZoom(viewId, (viewState.zoom as number) + 1, 1);
     }
   }
 
@@ -108,7 +124,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
     for (const viewId of viewIds) {
       const viewState = this.getViewState(viewId);
-      this.handleZoom(viewId, (viewState.zoom as number) - 1);
+      this.handleZoom(viewId, (viewState.zoom as number) - 1, -1);
     }
   }
 }

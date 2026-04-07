@@ -19,8 +19,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
+import {gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {gouraudMaterial} from '@luma.gl/shadertools';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';

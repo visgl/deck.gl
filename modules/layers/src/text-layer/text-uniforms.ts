@@ -18,6 +18,7 @@ const glslUniformBlock = `\
 layout(std140) uniform textUniforms {
   highp vec2 cutoffPixels;
   highp ivec2 align;
+  highp float fontSize;
   bool flipY;
 } text;
 
@@ -30,12 +31,14 @@ export type TextModuleProps = {
   contentCutoffPixels?: [number, number];
   contentAlignHorizontal?: ContentAlignModes;
   contentAlignVertical?: ContentAlignModes;
+  fontSize: number;
   viewport: Viewport;
 };
 
 type TextUniforms = {
   cutoffPixels: [number, number];
   align: [number, number];
+  fontSize: number;
   // If true, content's x,y is the top-left corner instead of bottom-left
   flipY: boolean;
 };
@@ -47,15 +50,18 @@ export const textUniforms = {
     contentCutoffPixels = [0, 0],
     contentAlignHorizontal = 'none',
     contentAlignVertical = 'none',
+    fontSize,
     viewport
   }: Partial<TextModuleProps>) => ({
     cutoffPixels: contentCutoffPixels,
     align: [CONTENT_ALIGN[contentAlignHorizontal], CONTENT_ALIGN[contentAlignVertical]],
+    fontSize,
     flipY: (viewport as OrthographicViewport)?.flipY ?? false
   }),
   uniformTypes: {
     cutoffPixels: 'vec2<f32>',
     align: 'vec2<i32>',
+    fontSize: 'f32',
     flipY: 'f32'
   }
 } as const satisfies ShaderModule<TextModuleProps, TextUniforms>;

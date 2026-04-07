@@ -7,11 +7,10 @@ deck.gl supports a selection of coordinate systems, addressing diverse geospatia
 Many layers also provide props for defining the units that dimensions are measured in, usually named as `*Units`. A layer can leverage such props to control its appearance in a way that makes the most sense for the data and the desired user experience.
 
 ```js
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 new PointCloudLayer({
-  coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  coordinateSystem: 'meter-offsets',
   coordinateOrigin: [-122.4004935, 37.7900486, 0],  // anchor point in longitude/latitude/altitude
   data: [
     {position: [33.22, 109.87, 1.455]}, // offsets from the coordinate origin in meters
@@ -51,7 +50,7 @@ For a given dataset, positions in the common space normally do not change with u
 
 Each layer is expected to specify its `coordinateSystem` prop to match the world space of its `data`. Within the data supplied to a single layer, all positions will be interpreted in the same coordinate system.
 
-By default, a layer's [coordinateSystem](../api-reference/core/layer.md#coordinatesystem) is assumed to be `COORDINATE_SYSTEM.LNGLAT` if rendered in a geospatial view (e.g. `MapView`, `GlobeView`) and `COORDINATE_SYSTEM.CARTESIAN` if rendered in a non-geospatial view (e.g. `OrbitView`, `OrthographicView`).
+By default, a layer's [coordinateSystem](../api-reference/core/layer.md#coordinatesystem) is assumed to be `'lnglat'` if rendered in a geospatial view (e.g. `MapView`, `GlobeView`) and `'cartesian'` if rendered in a non-geospatial view (e.g. `OrbitView`, `OrthographicView`).
 
 Some coordinate systems need to be used with the [coordinateOrigin](../api-reference/core/layer.md#coordinateorigin) prop, which specifies where the positions are measured from.
 
@@ -60,10 +59,10 @@ Some coordinate systems need to be used with the [coordinateOrigin](../api-refer
 
 | Coordinate system               | Positions                   | Coordinate origin | Notes |
 | ---                                  | ---                           | --- | --- |
-| `COORDINATE_SYSTEM.LNGLAT` | `[longitude, latitude, altitude]` | ignored | Longitude and latitude are specified as [WGS84](https://gisgeography.com/wgs84-world-geodetic-system/) coordinates in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
-| `COORDINATE_SYSTEM.METER_OFFSETS`   | `[Δx, Δy, Δz]`   | `[longitude, latitude, altitude]` | Positions are given in meter offsets from a reference geo-location that is specified by `coordinateOrigin`. The `x` axis points map east, the `y` axis points map north, and `z` points up. Only works with geospatial views. |
-| `COORDINATE_SYSTEM.LNGLAT_OFFSETS`    | `[Δlongitude, Δlatitude, Δaltitude]`   | `[longitude, latitude, altitude]` | Positions are given in degree offsets from a reference geo-location that is specified by `coordinateOrigin`. Only works with geospatial views. |
-| `COORDINATE_SYSTEM.CARTESIAN`         | `[x, y, z]` | `[x, y, z]` (optional, default `[0, 0, 0]`) | A linear system that measures equally on all 3 axes. |
+| `'lnglat'` | `[longitude, latitude, altitude]` | ignored | Longitude and latitude are specified as [WGS84](https://gisgeography.com/wgs84-world-geodetic-system/) coordinates in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
+| `'meter-offsets'`   | `[Δx, Δy, Δz]`   | `[longitude, latitude, altitude]` | Positions are given in meter offsets from a reference geo-location that is specified by `coordinateOrigin`. The `x` axis points map east, the `y` axis points map north, and `z` points up. Only works with geospatial views. |
+| `'lnglat-offsets'`    | `[Δlongitude, Δlatitude, Δaltitude]`   | `[longitude, latitude, altitude]` | Positions are given in degree offsets from a reference geo-location that is specified by `coordinateOrigin`. Only works with geospatial views. |
+| `'cartesian'`         | `[x, y, z]` | `[x, y, z]` (optional, default `[0, 0, 0]`) | A linear system that measures equally on all 3 axes. |
 
 Remarks:
 
@@ -87,7 +86,7 @@ Raw data do not always align cleanly with one of the provided coordinate systems
 
 Again, converting raw data to match the coordinate system expectations can be very expensive if done on the CPU. This should be avoided whenever possible.
 
-Instead, in addition to specifying `coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS` and `coordinateOrigin`, a layer could also specify the `modelMatrix` prop as a 4x4 transformation matrix. The [math.gl](https://math.gl/modules/core/docs/api-reference/matrix4) library (a light wrapper of [gl-matrix](http://glmatrix.net/)) can be used for this purpose, which is already a dependency of deck.gl.
+Instead, in addition to specifying `coordinateSystem: 'meter-offsets'` and `coordinateOrigin`, a layer could also specify the `modelMatrix` prop as a 4x4 transformation matrix. The [math.gl](https://math.gl/modules/core/docs/api-reference/matrix4) library (a light wrapper of [gl-matrix](http://glmatrix.net/)) can be used for this purpose, which is already a dependency of deck.gl.
 
 The `modelMatrix` prop is most useful with the `METER_OFFSETS` and `CARTESIAN` coordinate systems. It is usually the right solution for pre-processing (flipping, rotating, scaling etc) your data, since these operations will be done very performantly in the GPU. Note that these two coordinate systems are the only ones that are linear and uniform in all directions. Longitude and latitude based positions cannot be scaled/rotated/translated correctly with a 4x4 matrix.
 

@@ -78,18 +78,13 @@ describe('Top-level imports', () => {
     expect(deck.ArcLayer, 'ArcLayer symbol imported').toBeTruthy();
     expect(deck.LineLayer, 'LineLayer symbol imported').toBeTruthy();
 
-    expect(
-      Number.isFinite(deck.COORDINATE_SYSTEM.LNGLAT),
-      'COORDINATE_SYSTEM.LNGLAT imported'
-    ).toBeTruthy();
-    expect(
-      Number.isFinite(deck.COORDINATE_SYSTEM.METER_OFFSETS),
-      'COORDINATE_SYSTEM.METERS imported'
-    ).toBeTruthy();
-    expect(
-      Number.isFinite(deck.COORDINATE_SYSTEM.CARTESIAN),
-      'COORDINATE_SYSTEM.CARTESIAN imported'
-    ).toBeTruthy();
+    expect(deck.COORDINATE_SYSTEM.LNGLAT, 'COORDINATE_SYSTEM.LNGLAT imported').toBe('lnglat');
+    expect(deck.COORDINATE_SYSTEM.METER_OFFSETS, 'COORDINATE_SYSTEM.METERS imported').toBe(
+      'meter-offsets'
+    );
+    expect(deck.COORDINATE_SYSTEM.CARTESIAN, 'COORDINATE_SYSTEM.CARTESIAN imported').toBe(
+      'cartesian'
+    );
   });
 
   test('deck.gl default import', () => {
