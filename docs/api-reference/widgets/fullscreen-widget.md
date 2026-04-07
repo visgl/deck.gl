@@ -91,6 +91,16 @@ Tooltip message displayed while hovering a mouse over the widget when out of ful
 
 Tooltip message displayed while hovering a mouse over the widget when fullscreen.
 
+#### `onFullscreenChange` (Function, optional) {#onfullscreenchange}
+
+```ts
+(fullscreen: boolean) => void
+```
+
+* Default: `() => {}`
+
+Callback when fullscreen state changes (via user click or browser fullscreen events).
+
 ## Styles
 
 Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).

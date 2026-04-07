@@ -288,9 +288,12 @@ export function getTileIndices({
   visibleMinZoom?: number | null;
   visibleMaxZoom?: number | null;
 }) {
+  // This round/ceil operation ensures that tiles are rendered in the same way as Google Maps, Map Libre, etc.
+  // eg. at viewport.zoom = 9.5, you should fetch tiles at z = 10, not z = 9.
   let z = viewport.isGeospatial
-    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
-    : Math.ceil(viewport.zoom) + zoomOffset;
+    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize) + zoomOffset)
+    : Math.ceil(viewport.zoom + zoomOffset);
+
   if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];
