@@ -36,9 +36,9 @@ export type Dimensions = {
   basemap: Basemap;
   framework: Framework;
   interleaved: boolean;
-  batched: boolean;
   globe: boolean;
   multiView: boolean;
+  maskDemo: boolean;
   stressTest: StressTest;
 };
 
@@ -65,9 +65,9 @@ export type Config = {
   basemap: Basemap;
   framework: Framework;
   interleaved: boolean;
-  batched: boolean;
   globe: boolean;
   multiView: boolean;
+  maskDemo: boolean;
   stressTest: StressTest;
 
   // Computed configuration

@@ -11,9 +11,9 @@ export const DEFAULT_DIMENSIONS: Dimensions = {
   basemap: 'maplibre',
   framework: 'react',
   interleaved: true,
-  batched: true,
   globe: false,
   multiView: false,
+  maskDemo: false,
   stressTest: 'none'
 };
 

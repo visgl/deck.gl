@@ -7,7 +7,6 @@ import {
   project32,
   picking,
   CoordinateSystem,
-  COORDINATE_SYSTEM,
   LayerProps,
   PickingInfo,
   GetPickingInfoParams,
@@ -30,7 +29,7 @@ import fs from './bitmap-layer-fragment';
 const defaultProps: DefaultProps<BitmapLayerProps> = {
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
-  _imageCoordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+  _imageCoordinateSystem: 'default',
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
   // More context: because of the blending mode we're using for ground imagery,
@@ -293,23 +292,24 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   _getCoordinateUniforms() {
-    const {LNGLAT, CARTESIAN, DEFAULT} = COORDINATE_SYSTEM;
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== DEFAULT) {
+    if (imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
       if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
       }
 
       // The default behavior (linearly interpolated tex coords)
-      const defaultImageCoordinateSystem = this.context.viewport.resolution ? LNGLAT : CARTESIAN;
-      imageCoordinateSystem = imageCoordinateSystem === LNGLAT ? LNGLAT : CARTESIAN;
+      const defaultImageCoordinateSystem = this.context.viewport.resolution
+        ? 'lnglat'
+        : 'cartesian';
+      imageCoordinateSystem = imageCoordinateSystem === 'lnglat' ? 'lnglat' : 'cartesian';
 
-      if (imageCoordinateSystem === LNGLAT && defaultImageCoordinateSystem === CARTESIAN) {
+      if (imageCoordinateSystem === 'lnglat' && defaultImageCoordinateSystem === 'cartesian') {
         // LNGLAT in Mercator, e.g. display LNGLAT-encoded image in WebMercator projection
         return {coordinateConversion: -1, bounds};
       }
-      if (imageCoordinateSystem === CARTESIAN && defaultImageCoordinateSystem === LNGLAT) {
+      if (imageCoordinateSystem === 'cartesian' && defaultImageCoordinateSystem === 'lnglat') {
         // Mercator in LNGLAT, e.g. display WebMercator encoded image in Globe projection
         const bottomLeft = lngLatToWorld([bounds[0], bounds[1]]);
         const topRight = lngLatToWorld([bounds[2], bounds[3]]);

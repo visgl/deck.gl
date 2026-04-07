@@ -3288,10 +3288,10 @@ JSONStream@^1.3.5:
     jsonparse "^1.2.0"
     through ">=2.2.7 <3"
 
-a5-js@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.5.0.tgz#b0241651efdf573229d6f8e25243be31cd0b9451"
-  integrity sha512-VAw19sWdYadhdovb0ViOIi1SdKx6H6LwcGMRFKwMfgL5gcmL/1fKJHfgsNgNaJ7xC/eEyjs6VK+VVd4N0a+peg==
+a5-js@^0.7.2:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.7.2.tgz#78b698404308fce69050e400681db963e0a88cdd"
+  integrity sha512-dMzoDsOiTdDBe8eC8u0hfRbqLuH+Sx58K+qbpdZmp3fUSJgp5AUzJGUcW0I4KIqQUAu0HENZMjujVL5wmNuzKg==
   dependencies:
     gl-matrix "^3.4.3"
 
@@ -6029,10 +6029,10 @@ grid-index@^1.1.0:
   resolved "https://registry.yarnpkg.com/grid-index/-/grid-index-1.1.0.tgz#97f8221edec1026c8377b86446a7c71e79522ea7"
   integrity sha512-HZRwumpOGUrHyxO5bqKZL0B0GlUpwtCAzZ42sgxUPniu33R1LSFH5yrIcBCHjkctCAh3mtWKcKd9J4vDDdeVHA==
 
-h3-js@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-4.1.0.tgz#f8c4a8ad36612489a954f1a0bb3f4b7657d364e5"
-  integrity sha512-LQhmMl1dRQQjMXPzJc7MpZ/CqPOWWuAvVEoVJM9n/s7vHypj+c3Pd5rLQCkAsOgAoAYKbNCsYFE++LF7MvSfCQ==
+h3-js@^4.1.0, h3-js@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-4.4.0.tgz#858586205d49fc2b164df8e2d1ab855565ee9e81"
+  integrity sha512-DvJh07MhGgY2KcC4OeZc8SSyA+ZXpdvoh6uCzGpoKvWtZxJB+g6VXXC1+eWYkaMIsLz7J/ErhOalHCpcs1KYog==
 
 handlebars@^4.7.7:
   version "4.7.8"

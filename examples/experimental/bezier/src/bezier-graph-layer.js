@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import BezierCurveLayer from './bezier-curve-layer/bezier-curve-layer';
 
@@ -20,7 +20,7 @@ export default class BezierGraphLayer extends CompositeLayer {
       new BezierCurveLayer({
         id: 'edges',
         data: edges,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getSourcePosition: e => e.source,
         getTargetPosition: e => e.target,
         getControlPoint: e => e.controlPoint,
@@ -34,7 +34,7 @@ export default class BezierGraphLayer extends CompositeLayer {
       new ScatterplotLayer({
         id: 'nodes',
         data: nodes,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPosition: d => d.position,
         getRadius: 5,
         getFillColor: [0, 0, 150, 255],

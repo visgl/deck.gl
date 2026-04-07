@@ -16,7 +16,7 @@
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",
     "extrude-polyline": "^1.0.6",
-    "h3-js": "^4.1.0",
+    "h3-js": "^4.4.0",
     "maplibre-gl": "^5.0.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
