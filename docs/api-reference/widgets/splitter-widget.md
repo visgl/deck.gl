@@ -85,10 +85,49 @@ function App() {
         viewLayout={{
           orientation: 'horizontal',
           views: [
-          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
-          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+            new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+            new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
           ]
         }}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {MapView, type MapViewState, type View} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [views, setViews] = useState<View[]>([]);
+  const [viewState, setViewState] = useState<Record<string, MapViewState>>({
+    left: {longitude: -122.4, latitude: 37.8, zoom: 11},
+    right: {longitude: -73.97, latitude: 40.77, zoom: 11}
+  });
+
+  return (
+    <DeckGL
+      views={views}
+      viewState={viewState}
+      onViewStateChange={({viewId, viewState: vs}) => {
+        setViewState(prev => ({...prev, [viewId]: vs as MapViewState}));
+      }}
+    >
+      <SplitterWidget
+        viewLayout={{
+          orientation: 'horizontal',
+          views: [
+            new MapView({id: 'left', controller: true}),
+            new MapView({id: 'right', controller: true})
+          ]
+        }}
+        onChange={setViews}
       />
     </DeckGL>
   );

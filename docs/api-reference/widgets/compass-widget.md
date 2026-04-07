@@ -84,6 +84,36 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import {DeckGL, CompassWidget} from '@deck.gl/react';
+import type {MapViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [viewState, setViewState] = useState<MapViewState>({
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 11,
+    pitch: 45,
+    bearing: 30
+  });
+
+  const onViewStateChange = useCallback(({viewState: vs}) => {
+    setViewState(vs as MapViewState);
+  }, []);
+
+  return (
+    <DeckGL viewState={viewState} onViewStateChange={onViewStateChange} controller>
+      <CompassWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor
@@ -111,6 +141,20 @@ Tooltip message displayed while hovering a mouse over the widget.
 * Default: `200`
 
 Bearing and pitch reset transition duration in milliseconds.
+
+#### `onReset` (Function, optional) {#onreset}
+
+```ts
+(params: {viewId: string; bearing: number; pitch: number}) => void
+```
+
+* Default: `() => {}`
+
+Callback when the compass reset button is clicked. Called for each viewport that will be reset.
+
+- `viewId`: The view being reset
+- `bearing`: The new bearing value (0)
+- `pitch`: The new pitch value (0 if bearing was already 0)
 
 ## Styles
 

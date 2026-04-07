@@ -84,6 +84,40 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import DeckGL, {GimbalWidget} from '@deck.gl/react';
+import {OrbitView, type OrbitViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [viewState, setViewState] = useState<OrbitViewState>({
+    target: [0, 0, 0],
+    zoom: 0,
+    rotationX: -45,
+    rotationOrbit: 30
+  });
+
+  const onViewStateChange = useCallback(({viewState: vs}) => {
+    setViewState(vs as OrbitViewState);
+  }, []);
+
+  return (
+    <DeckGL
+      views={new OrbitView({orbitAxis: 'Y'})}
+      viewState={viewState}
+      onViewStateChange={onViewStateChange}
+      controller
+    >
+      <GimbalWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor
@@ -116,6 +150,20 @@ Width of gimbal lines.
 * Default: `200`
 
 View state transition duration in milliseconds.
+
+#### `onReset` (Function, optional) {#onreset}
+
+```ts
+(params: {viewId: string; rotationOrbit: number; rotationX: number}) => void
+```
+
+* Default: `() => {}`
+
+Callback when the gimbal reset button is clicked. Called for each viewport that will be reset.
+
+- `viewId`: The view being reset
+- `rotationOrbit`: The new rotationOrbit value (0)
+- `rotationX`: The new rotationX value (0)
 
 ## Styles
 
