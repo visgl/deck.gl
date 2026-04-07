@@ -14,16 +14,25 @@ help:
 	@echo "setup-env - detect basic requirements and set up a virtualenv using uv"
 	@echo "pre-commit - run pre-commit hook for pydeck"
 
+WIDGET_DIST=../../modules/jupyter-widget/dist
+NBEXT_STATIC=pydeck/nbextension/static
+
+copy-bundle:
+	cp $(WIDGET_DIST)/index.js $(NBEXT_STATIC)/index.js
+	cp $(WIDGET_DIST)/index.js.map $(NBEXT_STATIC)/index.js.map
+
 init:
 	. $(BIN)/activate; \
 	yarn bootstrap; \
-	yarn build; \
+	yarn build
+	$(MAKE) copy-bundle
 	uv pip install -r requirements/requirements.txt; \
 	uv pip install -r requirements/requirements-dev.txt; \
 	uv pip install -e .
 
 fast-build:
-	cd ../../modules/jupyter-widget; webpack; cd -; \
+	cd ../../modules/jupyter-widget; webpack; cd -
+	$(MAKE) copy-bundle
 	uv pip install -e .
 
 pre-commit:
