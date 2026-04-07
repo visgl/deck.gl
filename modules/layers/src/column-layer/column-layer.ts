@@ -16,9 +16,10 @@ import {
   Accessor,
   Color,
   Material,
-  DefaultProps
+  DefaultProps,
+  gouraudMaterial,
+  phongMaterial
 } from '@deck.gl/core';
-import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 

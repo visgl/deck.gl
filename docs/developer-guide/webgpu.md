@@ -107,6 +107,7 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Picking | ❌ | `Deck` currently skips picking on WebGPU, including hover and click picking paths. |
 | Shader hooks / layer extensions | ❌ | deck.gl's WGSL shader hook list is currently empty, so injection-based extensions are not yet portable. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
+| Constant attributes | 🚧 | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |
 | Base map overlays | ❌ | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
 | Base map interleaving | ❌ | No current base map integration path supports WebGPU interleaving. |

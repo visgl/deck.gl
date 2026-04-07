@@ -514,7 +514,7 @@ export function LoadingWidgetDemo() {
 }
 export function StatsWidgetDemo() {
   return <GeoDemoBase layers={[getMVTLayer({pickable: true})]} widgets={[new StatsWidget({
-    defaultIsExpanded: true
+    initialExpanded: true
   })]} />
 }
 export function ThemeWidgetDemo() {

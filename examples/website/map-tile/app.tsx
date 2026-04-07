@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, PathLayer} from '@deck.gl/layers';
+import ZoomRangeWidget from './zoom-range-widget';
 
 import type {Position, MapViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
@@ -21,6 +22,9 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxPitch: 89,
   bearing: 0
 };
+
+// Approximate bounding box of France [west, south, east, north]
+const FRANCE_EXTENT = [-5.14, 41.33, 9.56, 51.09];
 
 const COPYRIGHT_LICENSE_STYLE: React.CSSProperties = {
   position: 'absolute',
@@ -37,9 +41,6 @@ const LINK_STYLE: React.CSSProperties = {
   cursor: 'grab'
 };
 
-/* global window */
-const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-
 function getTooltip({tile}: TileLayerPickingInfo) {
   if (tile) {
     const {x, y, z} = tile.index;
@@ -50,11 +51,32 @@ function getTooltip({tile}: TileLayerPickingInfo) {
 
 export default function App({
   showBorder = false,
-  onTilesLoad
+  onTilesLoad,
+  onZoomChange,
+  minZoom = 4,
+  maxZoom = 7,
+  visibleMinZoom,
+  visibleMaxZoom = 7,
+  useExtent = false
 }: {
   showBorder?: boolean;
   onTilesLoad?: () => void;
+  onZoomChange?: (zoom: number) => void;
+  minZoom?: number;
+  maxZoom?: number;
+  visibleMinZoom?: number;
+  visibleMaxZoom?: number;
+  useExtent?: boolean;
 }) {
+  const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
+  const onViewStateChange = useCallback(
+    ({viewState}) => {
+      setZoom(viewState.zoom);
+      onZoomChange?.(viewState.zoom);
+    },
+    [onZoomChange]
+  );
+
   const tileLayer = new TileLayer<ImageBitmap>({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
     data: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
@@ -68,10 +90,12 @@ export default function App({
     autoHighlight: showBorder,
     highlightColor: [60, 60, 60, 40],
     // https://wiki.openstreetmap.org/wiki/Zoom_levels
-    minZoom: 0,
-    maxZoom: 19,
-    tileSize: 256,
-    zoomOffset: devicePixelRatio === 1 ? -1 : 0,
+    minZoom,
+    maxZoom,
+    tileSize: 512,
+    visibleMinZoom,
+    visibleMaxZoom,
+    extent: useExtent ? FRANCE_EXTENT : undefined,
     renderSubLayers: props => {
       const [[west, south], [east, north]] = props.tile.boundingBox;
       const {data, ...otherProps} = props;
@@ -108,7 +132,15 @@ export default function App({
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       getTooltip={getTooltip}
+      onViewStateChange={onViewStateChange}
     >
+      <ZoomRangeWidget
+        zoom={zoom}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        visibleMinZoom={visibleMinZoom}
+        visibleMaxZoom={visibleMaxZoom}
+      />
       <div style={COPYRIGHT_LICENSE_STYLE}>
         {'© '}
         <a style={LINK_STYLE} href="http://www.openstreetmap.org/copyright" target="blank">

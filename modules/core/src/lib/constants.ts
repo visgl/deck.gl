@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// Note: The numeric values here are matched by shader code in the
-// "project" and "project64" shader modules. Both places need to be
-// updated.
 import log from '../utils/log';
 import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
@@ -12,46 +9,55 @@ import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions}
 /**
  * The coordinate system that positions/dimensions are defined in.
  */
+export type CoordinateSystem =
+  | 'default'
+  | 'lnglat'
+  | 'meter-offsets'
+  | 'lnglat-offsets'
+  | 'cartesian';
+
+/**
+ * The coordinate system that positions/dimensions are defined in.
+ * String constants are the public API.
+ * @deprecated Use string constants directly.
+ */
 export const COORDINATE_SYSTEM = {
   /**
    * `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
    */
-  DEFAULT: -1,
+  DEFAULT: 'default',
   /**
    * Positions are interpreted as [longitude, latitude, elevation]
    * longitude/latitude are in degrees, elevation is in meters.
    * Dimensions are in meters.
    */
-  LNGLAT: 1,
+  LNGLAT: 'lnglat',
 
   /**
    * Positions are interpreted as [x, y, z] in meter offsets from the coordinate origin.
    * Dimensions are in meters.
    */
-  METER_OFFSETS: 2,
+  METER_OFFSETS: 'meter-offsets',
 
   /**
    * Positions are interpreted as [deltaLng, deltaLat, elevation] from the coordinate origin.
    * deltaLng/deltaLat are in degrees, elevation is in meters.
    * Dimensions are in meters.
    */
-  LNGLAT_OFFSETS: 3,
+  LNGLAT_OFFSETS: 'lnglat-offsets',
 
   /**
    * Positions and dimensions are in the common units of the viewport.
    */
-  CARTESIAN: 0
+  CARTESIAN: 'cartesian'
 } as const;
-
-// Enums cannot be directly exported as they are not transpiled correctly into ES5, see https://github.com/visgl/deck.gl/issues/7130
-export type CoordinateSystem = -1 | 0 | 1 | 2 | 3;
 
 // Deprecated
 /* eslint-disable accessor-pairs */
 Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
   get: () => {
     log.deprecated('COORDINATE_SYSTEM.IDENTITY', 'COORDINATE_SYSTEM.CARTESIAN')();
-    return 0;
+    return COORDINATE_SYSTEM.CARTESIAN;
   }
 });
 /* eslint-enable accessor-pairs */
