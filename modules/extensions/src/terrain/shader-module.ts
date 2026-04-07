@@ -129,6 +129,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
+
       const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
       const {commonOrigin} = projectUniforms;
 
@@ -180,10 +181,22 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           : [0, 0, 0, 0]
       };
     }
+    // When terrain props are not provided (e.g. mask pass), provide the dummy
+    // texture to satisfy the terrain_map binding and prevent draw abort.
+    // dummyHeightMap is stored on the module by TerrainEffect.setup.
+    if (terrainModule.dummyHeightMap) {
+      return {
+        mode: TERRAIN_MODE.NONE,
+        terrain_map: terrainModule.dummyHeightMap,
+        bounds: [0, 0, 0, 0]
+      };
+    }
     return {};
   },
   uniformTypes: {
     mode: 'f32',
     bounds: 'vec4<f32>'
-  }
-} as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
+  },
+  /** Dummy texture stored by TerrainEffect.setup, used as fallback terrain_map binding */
+  dummyHeightMap: null as Texture | null
+} as ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings> & {dummyHeightMap: Texture | null};

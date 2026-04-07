@@ -38,6 +38,10 @@ export class TerrainEffect implements Effect {
       height: 1,
       data: new Uint8Array([0, 0, 0, 0])
     });
+    // Store on the module so it can provide a fallback terrain_map binding
+    // when rendered in passes that don't provide terrain effect props (e.g. mask pass)
+    terrainModule.dummyHeightMap = this.dummyHeightMap;
+
     this.terrainPass = new TerrainPass(device, {id: 'terrain'});
     this.terrainPickingPass = new TerrainPickingPass(device, {id: 'terrain-picking'});
 
@@ -83,7 +87,14 @@ export class TerrainEffect implements Effect {
     }
 
     const drapeLayers = layers.filter(l => l.state.terrainDrawMode === 'drape');
-    this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
+    // Filter out the terrain effect itself to avoid feedback loops when rendering terrain covers
+    // (the terrain cover FBO would be both read and written to). Other effects like MaskEffect
+    // need to be passed through so they can apply to draped layers.
+    const nonTerrainEffects = opts.effects?.filter(e => e !== this);
+    this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, {
+      ...opts,
+      effects: nonTerrainEffects
+    });
   }
 
   getShaderModuleProps(
@@ -116,6 +127,7 @@ export class TerrainEffect implements Effect {
     if (this.dummyHeightMap) {
       this.dummyHeightMap.delete();
       this.dummyHeightMap = undefined;
+      terrainModule.dummyHeightMap = null;
     }
 
     if (this.heightMap) {
