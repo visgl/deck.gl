@@ -297,6 +297,15 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 * If a function is provided, it is called on each object to retrieve its outline width.
 * If not provided, it falls back to `strokeWidth`.
 
+#### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+
+* Default: `[0, 0]`
+
+Screen space offset relative to the `coordinates` in pixel unit.
+
+* If an array is provided, it is used as the offset for all objects.
+* If a function is provided, it is called on each object to retrieve its offset.
+
 ## Source
 
 [modules/layers/src/scatterplot-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/scatterplot-layer)
