@@ -164,7 +164,7 @@ export default class GoogleMapsOverlay {
 
     // Create WebGL overlay for camera data (and GL context if interleaved)
     const overlay = new google.maps.WebGLOverlayView();
-    overlay.onAdd = noop;
+    overlay.onAdd = interleaved ? this._onAddInterleaved.bind(this) : noop;
     overlay.onContextRestored = interleaved ? this._onContextRestored.bind(this) : noop;
     overlay.onDraw = this._onDrawVector.bind(this);
     overlay.onContextLost = interleaved ? this._onContextLost.bind(this) : noop;
@@ -203,6 +203,23 @@ export default class GoogleMapsOverlay {
     // @ts-ignore (TS2345) map is defined at this stage
     // Pass the positioning overlay for deck canvas creation (not WebGL overlay)
     this._deck = createDeckInstance(this._map, overlay, this._deck, this.props);
+  }
+
+  _onAddInterleaved() {
+    // When a WebGLOverlayView is removed and a new one is added to the same map,
+    // Google Maps may skip onContextRestored because the WebGL context was never
+    // actually lost. In that case, retrieve the existing GL context from the map's
+    // canvas and initialize the deck instance here in onAdd.
+    if (!this._map) {
+      return;
+    }
+    const mapCanvas = this._map.getDiv().querySelector('canvas');
+    if (mapCanvas) {
+      const gl = mapCanvas.getContext('webgl2');
+      if (gl) {
+        this._onContextRestored({gl});
+      }
+    }
   }
 
   _updateContainerSize() {
@@ -302,19 +319,7 @@ export default class GoogleMapsOverlay {
   }
 
   _onDrawVector({gl, transformer}) {
-    if (!this._map) {
-      return;
-    }
-
-    // When a WebGLOverlayView is removed and a new one is added to the same map,
-    // Google Maps may not fire onContextRestored again because the WebGL context
-    // was never actually lost. In that case, initialize the deck instance here
-    // using the GL context provided by onDraw.
-    if (!this._deck && this.props.interleaved) {
-      this._onContextRestored({gl});
-    }
-
-    if (!this._deck) {
+    if (!this._deck || !this._map) {
       return;
     }
 
