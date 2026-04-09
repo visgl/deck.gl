@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react-dom": "^19.2.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^19.2.5"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
