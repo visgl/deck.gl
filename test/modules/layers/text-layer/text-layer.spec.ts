@@ -5,6 +5,7 @@
 import test from 'tape-promise/tape';
 
 import {TextLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
@@ -269,6 +270,53 @@ test('TextLayer - fontAtlasCacheLimit', t => {
       t.ok(subLayer, 'Renders sublayer');
     }
   });
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('TextLayer - collision filter forwards pixel offset to sublayers', t => {
+  const testCases = [
+    {
+      props: {
+        data: [{position: [-122.4, 37.8], text: 'collision'}],
+        background: true,
+        getText: d => d.text,
+        getPosition: d => d.position,
+        getPixelOffset: [40, 18],
+        extensions: [new CollisionFilterExtension()],
+        collisionEnabled: true
+      },
+      onAfterUpdate: ({subLayers}) => {
+        t.equal(
+          subLayers.length,
+          3,
+          'renders background, character and collision marker sublayers'
+        );
+        t.deepEqual(
+          subLayers[0].props.getPixelOffset,
+          [40, 18],
+          'background inherits pixel offset'
+        );
+        t.deepEqual(subLayers[1].props.getPixelOffset, [40, 18], 'characters inherit pixel offset');
+        t.ok(subLayers[2].id.includes('collision-marker'), 'marker layer is created');
+        t.equal(
+          subLayers[2].props.collisionDrawMode,
+          'map-only',
+          'marker only writes to collision map'
+        );
+        t.ok(
+          subLayers.every(layer =>
+            layer.props.extensions?.some(
+              extension => extension.constructor.extensionName === 'CollisionFilterExtension'
+            )
+          ),
+          'collision extension is forwarded to both sublayers'
+        );
+      }
+    }
+  ];
+
   testLayer({Layer: TextLayer, testCases, onError: t.notOk});
 
   t.end();

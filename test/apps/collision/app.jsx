@@ -36,6 +36,8 @@ export default function App() {
   const [showCarto, setShowCarto] = useState(false);
   const [showPoints, setShowPoints] = useState(true);
   const [showLabels, setShowLabels] = useState(false);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
   const [selectedCounty, selectCounty] = useState(null);
 
   const props = {
@@ -151,6 +153,7 @@ export default function App() {
         getColor: [0, 155, 0],
         getSize: 24,
         getPosition: f => f.geometry.coordinates,
+        getPixelOffset: [offsetX, offsetY],
         ...props,
 
         extensions: [new CollisionFilterExtension(), new MaskExtension()],
@@ -198,6 +201,36 @@ export default function App() {
           <input type="checkbox" checked={showLabels} onChange={() => setShowLabels(!showLabels)} />
           Show labels
         </label>
+        {showLabels && (
+          <>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{width: 72, whiteSpace: 'nowrap'}}>Offset X</span>
+              <input
+                style={{width: 180}}
+                type="range"
+                min="-200"
+                max="200"
+                step="1"
+                value={offsetX}
+                onChange={event => setOffsetX(Number(event.target.value))}
+              />
+              <span style={{width: 40, textAlign: 'right'}}>{offsetX}</span>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{width: 72, whiteSpace: 'nowrap'}}>Offset Y</span>
+              <input
+                style={{width: 180}}
+                type="range"
+                min="-200"
+                max="200"
+                step="1"
+                value={offsetY}
+                onChange={event => setOffsetY(Number(event.target.value))}
+              />
+              <span style={{width: 40, textAlign: 'right'}}>{offsetY}</span>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

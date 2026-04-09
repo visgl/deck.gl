@@ -32,10 +32,16 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
   return rotationMatrix * vertex;
 }
 
+vec2 icon_getCollisionTexCoords(vec2 anchorTexCoords, vec2 pixelOffset) {
+  return anchorTexCoords +
+    vec2(pixelOffset.x, -pixelOffset.y) * project.devicePixelRatio / project.viewportSize;
+}
+
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
   geometry.pickingColor = instancePickingColors;
+  geometryCollisionUseTexCoordsOverride = false;
   uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;
@@ -59,6 +65,12 @@ void main(void) {
 
   if (icon.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+    vec2 anchorTexCoords = vec2(gl_Position.x / gl_Position.w + 1.0, gl_Position.y / gl_Position.w + 1.0) / 2.0;
+    // For billboard text in v9.2, MultiIconLayer shares this shader with IconLayer.
+    // Sampling collisions at the offset anchor keeps text visibility aligned with
+    // getPixelOffset without changing the actual collision footprint drawn by glyphs.
+    geometryCollisionTexCoordsOverride = icon_getCollisionTexCoords(anchorTexCoords, instancePixelOffset);
+    geometryCollisionUseTexCoordsOverride = true;
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);

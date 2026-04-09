@@ -44,6 +44,35 @@ const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
 
+function hasCollisionFilterExtension(extensions: LayerProps['extensions'] = []): boolean {
+  return extensions.some(extension => {
+    const extensionName =
+      (extension as {extensionName?: string}).extensionName ??
+      (extension.constructor as {extensionName?: string}).extensionName;
+    return extensionName === 'CollisionFilterExtension';
+  });
+}
+
+type CollisionMarkerProps<DataT> = {
+  billboard?: boolean;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  extensions?: LayerProps['extensions'];
+};
+
+function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
+  const {billboard, getPixelOffset} = props;
+  if (!billboard || !hasCollisionFilterExtension(props.extensions)) {
+    return false;
+  }
+
+  const usesPixelOffset =
+    typeof getPixelOffset === 'function' ||
+    (getPixelOffset?.[0] ?? 0) !== 0 ||
+    (getPixelOffset?.[1] ?? 0) !== 0;
+
+  return usesPixelOffset;
+}
+
 type _TextLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   /** If `true`, the text always faces camera. Otherwise the text faces up (z).
@@ -499,6 +528,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       transitions,
       updateTriggers
     } = this.props;
+    const collisionMarkerEnabled = needsCollisionMarker(this.props);
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
@@ -610,6 +640,12 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getTextAnchor: updateTriggers.getTextAnchor,
               getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
               styleVersion
+            },
+            getBoundingRect: {
+              getText: updateTriggers.getText,
+              getTextAnchor: updateTriggers.getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+              styleVersion
             }
           }
         }),
@@ -621,7 +657,50 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getIconOffsets: this.getIconOffsets,
           getIcon: getText
         }
-      )
+      ),
+      collisionMarkerEnabled &&
+        new BackgroundLayerClass(
+          {
+            // Keep the visible text/background on the normal collision path and add a tiny
+            // hidden marker at the offset anchor so the visibility lookup follows getPixelOffset.
+            getFillColor: [0, 0, 0, 0],
+            getLineColor: [0, 0, 0, 0],
+            getLineWidth: 0,
+            borderRadius: 0,
+            padding: [0, 0, 0, 0],
+            getPosition,
+            getSize: 1,
+            getAngle,
+            getPixelOffset,
+            billboard,
+            collisionDrawMode: 'map-only',
+            sizeScale: 1,
+            sizeUnits: 'pixels',
+            sizeMinPixels: 1,
+            sizeMaxPixels: 1,
+            pickable: false,
+            transitions: transitions && {
+              getPosition: transitions.getPosition,
+              getAngle: transitions.getAngle,
+              getPixelOffset: transitions.getPixelOffset
+            }
+          },
+          this.getSubLayerProps({
+            id: 'collision-marker',
+            updateTriggers: {
+              getPosition: updateTriggers.getPosition,
+              getAngle: updateTriggers.getAngle,
+              getPixelOffset: updateTriggers.getPixelOffset
+            }
+          }),
+          {
+            data,
+            _dataDiff,
+            autoHighlight: false,
+            collisionDrawMode: 'map-only',
+            getBoundingRect: [-0.5, -0.5, 1, 1]
+          }
+        )
     ];
   }
 

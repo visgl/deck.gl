@@ -216,11 +216,12 @@ export default class CollisionFilterEffect implements Effect {
   getShaderModuleProps(layer: Layer): {
     collision: CollisionModuleProps;
   } {
-    const {collisionGroup, collisionEnabled} = (layer as Layer<CollisionFilterExtensionProps>)
-      .props;
+    const {collisionGroup, collisionEnabled, collisionDrawMode} = (
+      layer as Layer<CollisionFilterExtensionProps>
+    ).props;
     const {collisionFBOs, dummyCollisionMap} = this;
     const collisionFBO = collisionFBOs[collisionGroup!];
-    const enabled = collisionEnabled && Boolean(collisionFBO);
+    const enabled = collisionEnabled && Boolean(collisionFBO) && collisionDrawMode !== 'map-only';
     return {
       collision: {
         enabled,
