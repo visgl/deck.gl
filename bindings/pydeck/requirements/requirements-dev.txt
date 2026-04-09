@@ -1,19 +1,18 @@
 jupyter>=1.0.0
-mock>=3.0.5;python_version<"3.4"
 pandas>=0.23.4
+geopandas  # used by examples/geopandas_integration.py, needed for docs build (make html)
 pytest>=4.0.2
 pytest-cov>=2.6.1
-pytest-asyncio>=0.10.0;python_version>="3.5"
-pathlib>=1.0.1;python_version<="2.7"
-typing_extensions>=3.7.4;python_version<="3.5"
+pytest-asyncio>=0.10.0
 flake8
 requests
 sphinx
 recommonmark
-jupyterlab<4.0.0
-ipython>=5.8.0;python_version<"3.4"
+jupyterlab
+ipython>=5.8.0
+setuptools
 semver # necessary for PEP440-compliant semantic versions
 sphinx-markdown-builder
 wheel
 sphinx_rtd_theme==2.0.0
-black;python_version>="3.6"
+black

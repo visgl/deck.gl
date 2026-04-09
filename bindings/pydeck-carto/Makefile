@@ -1,13 +1,13 @@
-VENV=env
+VENV=.venv
 DIST=dist
 BUILD=build
 BIN=$(VENV)/bin
 
 init:
-	test `command -v python3` || echo Please install python3
-	[ -d $(VENV) ] || python3 -m venv $(VENV)
-	$(BIN)/pip install -r requirements/requirements-dev.txt
-	$(BIN)/pip install -e .
+	test `command -v uv` || echo "Please install uv: https://docs.astral.sh/uv/getting-started/installation/"
+	uv venv --python 3.13 $(VENV)
+	uv pip install -r requirements/requirements-dev.txt
+	uv pip install -e .
 
 lint:
 	$(BIN)/black pydeck_carto tests examples setup.py

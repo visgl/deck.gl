@@ -10,9 +10,8 @@ from .view_state import ViewState
 from .base_map_provider import BaseMapProvider
 from .map_styles import DARK, get_from_map_identifier, get_default_map_identifier
 
-
 # Special default value to for querying the default style for a map provider.
-_DEFAULT_MAP_STYLE_SENTINEL = '__MAP_STYLE__'
+_DEFAULT_MAP_STYLE_SENTINEL = "__MAP_STYLE__"
 
 
 def has_jupyter_extra():
@@ -193,9 +192,7 @@ class Deck(JSONMixin):
         #         has_binary = True
         # if has_binary:
         #     self.deck_widget.data_buffer = binary_data_sets
-        raise NotImplementedError(
-            "Jupyter-specific features not currently supported in pydeck v0.9."
-        )
+        raise NotImplementedError("Jupyter-specific features not currently supported in pydeck v0.9.")
 
     def to_html(
         self,

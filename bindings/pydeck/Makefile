@@ -1,4 +1,5 @@
-BIN=env/bin/
+VENV=.venv
+BIN=$(VENV)/bin
 
 help:
 	@echo "\nPlease use \`make target\` where target is one of\n"
@@ -10,31 +11,40 @@ help:
 	@echo "publish-test-pypi - prepare pydeck for publication to the test.pypi.org"
 	@echo "release - package and upload a release"
 	@echo "fast-build - rebuild @deck.gl/jupyter-widget"
-	@echo "setup-env - detect basic requirements for building the library and set up a virtualenv"
+	@echo "setup-env - detect basic requirements and set up a virtualenv using uv"
 	@echo "pre-commit - run pre-commit hook for pydeck"
+
+WIDGET_DIST=../../modules/jupyter-widget/dist
+NBEXT_STATIC=pydeck/nbextension/static
+
+copy-bundle:
+	cp $(WIDGET_DIST)/index.js $(NBEXT_STATIC)/index.js
+	cp $(WIDGET_DIST)/index.js.map $(NBEXT_STATIC)/index.js.map
 
 init:
 	. $(BIN)/activate; \
 	yarn bootstrap; \
-	yarn build; \
-	$(BIN)pip install -r requirements/requirements.txt; \
-	$(BIN)pip install -r requirements/requirements-dev.txt; \
-	python setup.py develop
+	yarn build
+	$(MAKE) copy-bundle
+	uv pip install -r requirements/requirements.txt && \
+	uv pip install -r requirements/requirements-dev.txt && \
+	uv pip install -e .
 
 fast-build:
-	cd ../../modules/jupyter-widget; webpack; cd -; \
-	python setup.py develop
+	cd ../../modules/jupyter-widget; webpack; cd -
+	$(MAKE) copy-bundle
+	uv pip install -e .
 
 pre-commit:
-	python -m black . --exclude=env --target-version py34 && $(MAKE) test
+	$(BIN)/python -m black . && $(MAKE) test
 
 setup-env:
-	test `command -v python3` || echo Please install python3
+	test `command -v uv` || echo "Please install uv: https://docs.astral.sh/uv/getting-started/installation/"
 	test `command -v yarn` || echo Please install yarn
-	test `command -v python3` && test `command -v yarn`
-	python3 -m venv env
-# 	avoid conflict between any js code in the env that in the root
-	echo '{"type": "commonjs"}' > env/package.json
+	test `command -v uv` && test `command -v yarn`
+	uv venv --python 3.13 $(VENV)
+#	avoid conflict between any js code in the venv and the root
+	echo '{"type": "commonjs"}' > $(VENV)/package.json
 
 prepare-jupyter:
 	# Enable the notebook extension
@@ -49,8 +59,8 @@ prepare-jupyter:
 	cd ../../bindings/pydeck
 
 test:
-	$(BIN)python -m flake8 . && \
-	$(BIN)python -m pytest --cov=pydeck
+	$(BIN)/python -m flake8 . && \
+	$(BIN)/python -m pytest --cov=pydeck
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \

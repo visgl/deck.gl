@@ -5,6 +5,7 @@ GlobeView
 Over 33,000 power plants of the world plotted by their production capacity (given by height)
 and fuel type (green if renewable) on an experimental deck.gl GlobeView.
 """
+
 import pydeck as pdk
 import pandas as pd
 

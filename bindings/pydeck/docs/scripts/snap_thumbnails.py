@@ -1,4 +1,5 @@
 """Script to generate thumbnails viewable in the pydeck docs"""
+
 import asyncio
 import os
 from pathlib import Path
