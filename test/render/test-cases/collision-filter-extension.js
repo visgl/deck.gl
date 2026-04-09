@@ -2,13 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ScatterplotLayer} from '@deck.gl/layers';
-import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
+import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
+import {OS} from '../constants';
 
 const getYear = d => d.YR_INSTALLED || 1997;
+const textCollisionData = [
+  {position: [-122.4269, 37.7515], text: 'Alpha', priority: 3},
+  {position: [-122.4269, 37.7515], text: 'Bravo', priority: 2},
+  {position: [-122.4269, 37.7515], text: 'Charlie', priority: 1}
+];
 
-export default [
+const scatterplotCases = [
   {
     name: 'simple',
     props: {}
@@ -58,3 +64,44 @@ export default [
   },
   goldenImage: `./test/render/golden-images/collision-filter-effect-${name}.png`
 }));
+
+const textCases =
+  OS === 'Mac'
+    ? [
+        {
+          name: 'collision-filter-effect-text-pixel-offset',
+          viewState: {
+            latitude: 37.751537058389985,
+            longitude: -122.42694203247012,
+            zoom: 13,
+            pitch: 0,
+            bearing: 0
+          },
+          layers: [
+            new TextLayer({
+              id: 'text-pixel-offset',
+              data: textCollisionData,
+              background: true,
+              backgroundPadding: [8, 4],
+              fontFamily: 'Arial',
+              getText: d => d.text,
+              getPosition: d => d.position,
+              getSize: 20,
+              getColor: [0, 0, 0],
+              getBackgroundColor: [255, 255, 200, 255],
+              getBorderColor: [220, 90, 0, 255],
+              getBorderWidth: 1,
+              getPixelOffset: [80, 24],
+              getCollisionPriority: d => d.priority,
+              extensions: [new CollisionFilterExtension()]
+            })
+          ],
+          imageDiffOptions: {
+            threshold: 0.96
+          },
+          goldenImage: './test/render/golden-images/collision-filter-effect-text-pixel-offset.png'
+        }
+      ]
+    : [];
+
+export default [...scatterplotCases, ...textCases];

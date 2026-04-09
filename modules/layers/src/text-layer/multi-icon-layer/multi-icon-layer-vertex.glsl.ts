@@ -33,6 +33,11 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
   return rotationMatrix * vertex;
 }
 
+vec2 text_getCollisionTexCoords(vec2 anchorTexCoords, vec2 pixelOffset) {
+  return anchorTexCoords +
+    vec2(pixelOffset.x, -pixelOffset.y) * project.devicePixelRatio / project.viewportSize;
+}
+
 float getPixelOffsetFromAlignment(float anchor, float extent, float clipStart, float clipEnd, int mode) {
   if (clipEnd < clipStart) return 0.0;
   if (mode == ALIGN_MODE_START) {
@@ -53,6 +58,7 @@ void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
   geometry.pickingColor = instancePickingColors;
+  geometryCollisionUseTexCoordsOverride = false;
   uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;
@@ -73,13 +79,13 @@ void main(void) {
   pixelOffset.y *= -1.0;
 
   vec2 anchorPosScreen;
+  vec2 anchorTexCoords = vec2(0.0);
+  vec2 collisionAnchorTexCoords = vec2(0.0);
   if (icon.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     anchorPosScreen = gl_Position.xy / gl_Position.w;
-    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-    vec3 offset = vec3(pixelOffset, 0.0);
-    DECKGL_FILTER_SIZE(offset, geometry);
-    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+    anchorTexCoords = vec2(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0;
+    collisionAnchorTexCoords = vec2(anchorPosScreen.x + 1.0, anchorPosScreen.y + 1.0) / 2.0;
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     if (text.flipY) {
@@ -92,20 +98,38 @@ void main(void) {
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   }
 
-  anchorPosScreen = vec2(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0 * project.viewportSize / project.devicePixelRatio;
+  anchorPosScreen =
+    (icon.billboard ? anchorTexCoords : vec2(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0) *
+    project.viewportSize /
+    project.devicePixelRatio;
   vec2 xy = project_size_to_pixel(instanceClipRect.xy);
   vec2 wh = project_size_to_pixel(instanceClipRect.zw);
   if (text.flipY) {
     xy.y = -xy.y - wh.y;
   }
+  vec2 scrollPixels = vec2(0.0);
   if (text.align.x > 0 || text.align.y > 0) {
     vec2 viewportPixels = project.viewportSize / project.devicePixelRatio;
-    vec2 scrollPixels = vec2(
+    scrollPixels = vec2(
       getPixelOffsetFromAlignment(anchorPosScreen.x, viewportPixels.x, xy.x, xy.x + wh.x, text.align.x),
       -getPixelOffsetFromAlignment(anchorPosScreen.y, viewportPixels.y, -xy.y - wh.y, -xy.y, text.align.y)
     );
     pixelOffset += scrollPixels;
-    gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
+    if (!icon.billboard) {
+      gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
+    }
+  }
+
+  if (icon.billboard)  {
+    geometryCollisionTexCoordsOverride = text_getCollisionTexCoords(
+      collisionAnchorTexCoords,
+      instancePixelOffset + vec2(scrollPixels.x, -scrollPixels.y)
+    );
+    geometryCollisionUseTexCoordsOverride = true;
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+    vec3 offset = vec3(pixelOffset, 0.0);
+    DECKGL_FILTER_SIZE(offset, geometry);
+    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
   }
 
   if (instanceClipRect.z >= 0.) {

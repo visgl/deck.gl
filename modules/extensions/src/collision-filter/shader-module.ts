@@ -68,8 +68,12 @@ const inject = {
 
   if (collision.enabled) {
     vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
-    vec2 collision_texCoords = collision_getCoords(collision_common_position);
-    collision_fade = collision_isVisible(collision_texCoords, geometry.pickingColor / 255.0);
+    vec2 collision_texCoords = geometryCollisionUseTexCoordsOverride
+      ? geometryCollisionTexCoordsOverride
+      : collision_getCoords(collision_common_position);
+    collision_fade = geometryCollisionFadeOverride >= 0.0
+      ? geometryCollisionFadeOverride
+      : collision_isVisible(collision_texCoords, geometry.pickingColor / 255.0);
     if (collision_fade < 0.0001) {
       // Position outside clip space bounds to discard
       position = vec4(0.0, 0.0, 2.0, 1.0);

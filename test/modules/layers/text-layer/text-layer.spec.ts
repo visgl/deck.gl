@@ -5,6 +5,7 @@
 import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
@@ -259,5 +260,50 @@ test('TextLayer - fontAtlasCacheLimit', () => {
       expect(subLayer, 'Renders sublayer').toBeTruthy();
     }
   });
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
+  const testCases = [
+    {
+      props: {
+        data: [{position: [-122.4, 37.8], text: 'collision'}],
+        background: true,
+        getText: d => d.text,
+        getPosition: d => d.position,
+        getPixelOffset: [40, 18],
+        extensions: [new CollisionFilterExtension()],
+        collisionEnabled: true
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(
+          subLayers.length,
+          'renders background, character and collision marker sublayers'
+        ).toBe(3);
+        expect(subLayers[0].props.getPixelOffset, 'background inherits pixel offset').toEqual([
+          40, 18
+        ]);
+        expect(subLayers[1].props.getPixelOffset, 'characters inherit pixel offset').toEqual([
+          40, 18
+        ]);
+        expect(
+          subLayers[2].id.includes('collision-marker'),
+          'marker layer is created'
+        ).toBeTruthy();
+        expect(subLayers[2].props.collisionDrawMode, 'marker only writes to collision map').toBe(
+          'map-only'
+        );
+        expect(
+          subLayers.every(layer =>
+            layer.props.extensions?.some(
+              extension => extension.constructor.extensionName === 'CollisionFilterExtension'
+            )
+          ),
+          'collision extension is forwarded to both sublayers'
+        ).toBeTruthy();
+      }
+    }
+  ];
+
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
