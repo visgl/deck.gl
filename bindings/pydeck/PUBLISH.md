@@ -14,18 +14,17 @@ Check that the version matches `DECKGL_SEMVER` in `pydeck/frontend_semver.py`.
 
 ### Version bump
 
-Run `make bump-version` and select a release type at the prompt. This bumps `pydeck/_version.py`
-and syncs `pydeck/frontend_semver.py` to the deck.gl version in `lerna.json`.
+Run `make bump-version` and select a release type at the prompt. This bumps all version files:
+
+- `pydeck/_version.py` — the canonical Python version
+- `pyproject.toml` — the package metadata version (used by `python -m build`)
+- `docs/conf.py` — the Sphinx documentation version and release
+- `pydeck/frontend_semver.py` — synced to the deck.gl version in `lerna.json`
 
 **Note:** `bump_version.py` reads `lerna.json` to set `DECKGL_SEMVER`. When releasing from a
 release branch (e.g. `9.2-release`), lerna.json has the stable version and this works correctly.
 If releasing from `master` where lerna.json may contain a pre-release version (e.g. `9.3.0-beta.1`),
-you must manually update the version files instead:
-
-- `pydeck/_version.py` — the canonical Python version
-- `pyproject.toml` — the package metadata version
-- `docs/conf.py` — the Sphinx documentation version and release
-- `pydeck/frontend_semver.py` — only if the CDN semver range needs updating
+you must manually update `pydeck/frontend_semver.py` after running `make bump-version`.
 
 Update `docs/CHANGELOG.rst` with release notes for the new version.
 
