@@ -14,14 +14,18 @@ Check that the version matches `DECKGL_SEMVER` in `pydeck/frontend_semver.py`.
 
 ### Version bump
 
-Update the version in the following files:
+Run `make bump-version` and select a release type at the prompt. This bumps `pydeck/_version.py`
+and syncs `pydeck/frontend_semver.py` to the deck.gl version in `lerna.json`.
+
+**Note:** `bump_version.py` reads `lerna.json` to set `DECKGL_SEMVER`. When releasing from a
+release branch (e.g. `9.2-release`), lerna.json has the stable version and this works correctly.
+If releasing from `master` where lerna.json may contain a pre-release version (e.g. `9.3.0-beta.1`),
+you must manually update the version files instead:
 
 - `pydeck/_version.py` — the canonical Python version
 - `pyproject.toml` — the package metadata version
 - `docs/conf.py` — the Sphinx documentation version and release
-
-**Do not** run `bump_version.py` — it reads `lerna.json` which may contain a pre-release deck.gl version
-and would overwrite `DECKGL_SEMVER` in `pydeck/frontend_semver.py`.
+- `pydeck/frontend_semver.py` — only if the CDN semver range needs updating
 
 Update `docs/CHANGELOG.rst` with release notes for the new version.
 
@@ -36,13 +40,21 @@ environments:
 - `.to_html()` in JupyterLab
 - `.to_html()` in a Python REPL
 
-2) Build and publish the package:
+2) Build and publish:
 
 ```bash
-uv pip install build twine
-rm -rf dist/
-python -m build
-python -m twine upload dist/*
+make publish-pypi
+```
+
+This runs `python -m build` to create sdist (.tar.gz) and wheel (.whl) distribution files
+in `dist/`, then uses [twine](https://twine.readthedocs.io/) to upload them to PyPI. Twine
+is the standard tool for securely uploading Python packages — it handles authentication,
+TLS verification, and upload retries.
+
+Or to run the full release flow (bump + test + commit + publish):
+
+```bash
+make release
 ```
 
 3) Verify that your publications are successful:
@@ -55,21 +67,13 @@ python -m twine upload dist/*
 
 ### Producing a test release
 
-1) Build the package:
+1) Build and upload to test.pypi:
 
 ```bash
-uv pip install build twine
-rm -rf dist/
-python -m build
+make publish-test-pypi
 ```
 
-2) Upload to the test.pypi environment:
-
-```bash
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-```
-
-3) In a fresh virtualenv, install pydeck from test.pypi:
+2) In a fresh virtualenv, install pydeck from test.pypi:
 
 ```bash
 uv pip install -i https://test.pypi.org/simple/ pydeck=={{version}}
@@ -77,9 +81,9 @@ uv pip install -i https://test.pypi.org/simple/ pydeck=={{version}}
 
 where `{{version}}` is your semantic version.
 
-4) Verify that pydeck works from test.pypi in the same environments as above.
+3) Verify that pydeck works from test.pypi in the same environments as above.
 
-5) If everything appears to be working, publish to PyPI (see production release steps).
+4) If everything appears to be working, publish to PyPI (see production release steps).
 
 ## Updating documentation
 
@@ -102,3 +106,16 @@ make html
 # Serve at http://localhost:8000
 python -m http.server -d _build/html
 ```
+
+### Binder examples (dormant)
+
+There is a historical `binder` branch with a Dockerfile that let users run pydeck examples
+interactively on [mybinder.org](https://mybinder.org). It was last updated around the 0.4
+release (~2020) and is not currently maintained. To revive it, update the Dockerfile on
+the `binder` branch and verify at mybinder.org.
+
+### Screenshot examples (not working)
+
+`make screenshot-examples` previously generated static screenshots of pydeck examples for
+the website at pydeck.gl. This target no longer exists in the Makefile and would need to
+be rebuilt. See `docs/scripts/embed_examples.py` for the current example embedding approach.

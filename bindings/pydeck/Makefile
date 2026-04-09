@@ -67,23 +67,23 @@ bump-version:
 	python bump_version.py "$$choice";
 
 publish-pypi:
+	uv pip install build twine
 	rm -rf ./dist/*
-	python setup.py sdist bdist_wheel
-	pip install twine
+	python -m build
 	python -m twine upload dist/*
 
 publish-test-pypi:
+	uv pip install build twine
 	rm -rf ./dist/*
-	python setup.py sdist bdist_wheel
-	pip install twine
+	python -m build
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 release:
-	$(MAKE) bump-version;
-	$(MAKE) test;
-	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
-	git commit -am "pydeck $$VERSION";
-	$(MAKE) publish-pypi;
+	$(MAKE) bump-version
+	$(MAKE) test
+	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)"); \
+	git commit -am "pydeck $$VERSION"
+	$(MAKE) publish-pypi
 
 ci:
 	$(MAKE) test
