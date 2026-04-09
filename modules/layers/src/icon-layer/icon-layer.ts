@@ -91,6 +91,11 @@ type _IconLayerProps<DataT> = {
    */
   getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   /**
+   * Internal-only: collision sample offset relative to rendered size.
+   * @default [0, 0]
+   */
+  getCollisionOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
   onIconError?: ((context: LoadIconErrorContext) => void) | null;
@@ -120,6 +125,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getCollisionOffset: {type: 'accessor', value: [0, 0]},
 
   onIconError: {type: 'function', value: null, optional: true},
 
@@ -201,6 +207,10 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
+      },
+      instanceCollisionOffsets: {
+        size: 2,
+        accessor: 'getCollisionOffset'
       }
     });
     /* eslint-enable max-len */

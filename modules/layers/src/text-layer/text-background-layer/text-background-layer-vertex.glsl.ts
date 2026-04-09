@@ -14,6 +14,7 @@ in vec4 instanceRects;
 in float instanceSizes;
 in float instanceAngles;
 in vec2 instancePixelOffsets;
+in vec2 instanceCollisionOffsets;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
@@ -54,11 +55,22 @@ void main(void) {
     textBackground.sizeMinPixels, textBackground.sizeMaxPixels
   );
 
-  dimensions = instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
+  vec2 collisionPixelOffset = rotate_by_angle(instanceCollisionOffsets * sizePixels, instanceAngles);
 
-  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
-  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
-  pixelOffset += instancePixelOffsets;
+  dimensions = textBackground.markerMode
+    ? vec2(1.0)
+    : instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
+
+  vec2 pixelOffset;
+  if (textBackground.markerMode) {
+    pixelOffset = collisionPixelOffset + instancePixelOffsets + positions - vec2(0.5);
+  } else {
+    pixelOffset =
+      (positions * instanceRects.zw + instanceRects.xy) * sizePixels +
+      mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
+    pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
+    pixelOffset += instancePixelOffsets;
+  }
   pixelOffset.y *= -1.0;
 
   if (textBackground.billboard)  {
@@ -66,7 +78,7 @@ void main(void) {
     vec2 anchorTexCoords = vec2(gl_Position.x / gl_Position.w + 1.0, gl_Position.y / gl_Position.w + 1.0) / 2.0;
     geometryCollisionTexCoordsOverride = text_getCollisionTexCoords(
       anchorTexCoords,
-      instancePixelOffsets
+      instancePixelOffsets + collisionPixelOffset
     );
     geometryCollisionUseTexCoordsOverride = true;
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
