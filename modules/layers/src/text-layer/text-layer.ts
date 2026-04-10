@@ -56,13 +56,25 @@ function hasCollisionFilterExtension(extensions: LayerProps['extensions'] = []):
 
 type CollisionMarkerProps<DataT> = Pick<
   TextLayerProps<DataT>,
-  'billboard' | 'getPixelOffset' | 'contentAlignHorizontal' | 'contentAlignVertical'
+  | 'billboard'
+  | 'getPixelOffset'
+  | 'getTextAnchor'
+  | 'getAlignmentBaseline'
+  | 'contentAlignHorizontal'
+  | 'contentAlignVertical'
 > & {
   extensions?: LayerProps['extensions'];
 };
 
 function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
-  const {billboard, getPixelOffset, contentAlignHorizontal, contentAlignVertical} = props;
+  const {
+    billboard,
+    getPixelOffset,
+    getTextAnchor,
+    getAlignmentBaseline,
+    contentAlignHorizontal,
+    contentAlignVertical
+  } = props;
   if (!billboard || !hasCollisionFilterExtension(props.extensions)) {
     return false;
   }
@@ -72,7 +84,20 @@ function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
     (getPixelOffset?.[0] ?? 0) !== 0 ||
     (getPixelOffset?.[1] ?? 0) !== 0;
 
-  return usesPixelOffset || contentAlignHorizontal !== 'none' || contentAlignVertical !== 'none';
+  const usesTextAnchor =
+    typeof getTextAnchor === 'function' || (getTextAnchor != null && getTextAnchor !== 'middle');
+
+  const usesAlignmentBaseline =
+    typeof getAlignmentBaseline === 'function' ||
+    (getAlignmentBaseline != null && getAlignmentBaseline !== 'center');
+
+  return (
+    usesPixelOffset ||
+    usesTextAnchor ||
+    usesAlignmentBaseline ||
+    contentAlignHorizontal !== 'none' ||
+    contentAlignVertical !== 'none'
+  );
 }
 
 type _TextLayerProps<DataT> = {
@@ -496,6 +521,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
   };
 
+  /** Returns the center of each text block relative to the anchor position.
+   * Used to move billboard collision sampling away from edge/corner anchors.
+   */
+  private getCollisionOffset: AccessorFunction<DataT, [number, number]> = (object, objectInfo) => {
+    const [x, y, width, height] = this.getBoundingRect(object, objectInfo);
+    return [x + width / 2, y + height / 2];
+  };
+
   /** Returns the x, y offsets of each character in a text string, in texture size.
    * Used to layout characters in the vertex shader.
    */
@@ -544,10 +577,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {
       data,
       _dataDiff,
+      getText: textAccessor,
       getPosition,
       getColor,
       getSize,
       getAngle,
+      getTextAnchor,
+      getAlignmentBaseline,
       getPixelOffset,
       getBackgroundColor,
       getBorderColor,
@@ -592,6 +628,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getSize,
             getAngle,
             getPixelOffset,
+            getCollisionOffset: this.getCollisionOffset,
             getClipRect: getContentBox,
             billboard,
             sizeScale,
@@ -620,10 +657,16 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getLineColor: updateTriggers.getBorderColor,
               getLineWidth: updateTriggers.getBorderWidth,
               getPixelOffset: updateTriggers.getPixelOffset,
+              getCollisionOffset: {
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              },
               getBoundingRect: {
-                getText: updateTriggers.getText,
-                getTextAnchor: updateTriggers.getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
                 styleVersion
               }
             }
@@ -657,6 +700,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getSize,
           getAngle,
           getPixelOffset,
+          getCollisionOffset: this.getCollisionOffset,
           getContentBox,
 
           billboard,
@@ -687,16 +731,22 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
+            getCollisionOffset: {
+              getText: updateTriggers.getText ?? textAccessor,
+              getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+              styleVersion
+            },
             getContentBox: updateTriggers.getContentBox,
             getIconOffsets: {
-              getTextAnchor: updateTriggers.getTextAnchor,
-              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+              getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
               styleVersion
             },
             getBoundingRect: {
-              getText: updateTriggers.getText,
-              getTextAnchor: updateTriggers.getTextAnchor,
-              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+              getText: updateTriggers.getText ?? textAccessor,
+              getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
               styleVersion
             }
           }
@@ -721,19 +771,23 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             borderRadius: 0,
             padding: [0, 0, 0, 0],
             getPosition,
-            getSize: 1,
+            getSize,
             getAngle,
             getPixelOffset,
+            getCollisionOffset: this.getCollisionOffset,
+            getClipRect: [0, 0, -1, -1],
             billboard,
             collisionDrawMode: 'map-only',
-            sizeScale: 1,
-            sizeUnits: 'pixels',
-            sizeMinPixels: 1,
-            sizeMaxPixels: 1,
+            markerMode: true,
+            sizeScale,
+            sizeUnits,
+            sizeMinPixels,
+            sizeMaxPixels,
             pickable: false,
             transitions: transitions && {
               getPosition: transitions.getPosition,
               getAngle: transitions.getAngle,
+              getSize: transitions.getSize,
               getPixelOffset: transitions.getPixelOffset
             }
           },
@@ -742,7 +796,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             updateTriggers: {
               getPosition: updateTriggers.getPosition,
               getAngle: updateTriggers.getAngle,
-              getPixelOffset: updateTriggers.getPixelOffset
+              getSize: updateTriggers.getSize,
+              getPixelOffset: updateTriggers.getPixelOffset,
+              getCollisionOffset: {
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              }
             }
           }),
           {

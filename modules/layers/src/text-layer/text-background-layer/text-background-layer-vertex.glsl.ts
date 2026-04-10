@@ -15,6 +15,7 @@ in vec4 instanceClipRect;
 in float instanceSizes;
 in float instanceAngles;
 in vec2 instancePixelOffsets;
+in vec2 instanceCollisionOffsets;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
@@ -54,13 +55,22 @@ void main(void) {
     project_size_to_pixel(instanceSizes * textBackground.sizeScale, textBackground.sizeUnits),
     textBackground.sizeMinPixels, textBackground.sizeMaxPixels
   );
-  float instanceScale = sizePixels / text.fontSize;
+  vec2 collisionPixelOffset = rotate_by_angle(instanceCollisionOffsets * sizePixels, instanceAngles);
 
-  dimensions = instanceRects.zw * instanceScale + textBackground.padding.xy + textBackground.padding.zw;
+  dimensions = textBackground.markerMode
+    ? vec2(1.0)
+    : instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
 
-  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * instanceScale + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
-  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
-  pixelOffset += instancePixelOffsets;
+  vec2 pixelOffset;
+  if (textBackground.markerMode) {
+    pixelOffset = collisionPixelOffset + instancePixelOffsets + positions - vec2(0.5);
+  } else {
+    pixelOffset =
+      (positions * instanceRects.zw + instanceRects.xy) * sizePixels +
+      mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
+    pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
+    pixelOffset += instancePixelOffsets;
+  }
   pixelOffset.y *= -1.0;
 
   // apply clipping
@@ -69,11 +79,11 @@ void main(void) {
   if (text.flipY) {
     xy.y = -xy.y - wh.y;
   }
-  if (instanceClipRect.z >= 0.0) {
+  if (!textBackground.markerMode && instanceClipRect.z >= 0.0) {
     dimensions.x = wh.x;
     pixelOffset.x = xy.x + uv.x * wh.x + mix(-textBackground.padding.x, textBackground.padding.z, uv.x);
   }
-  if (instanceClipRect.w >= 0.0) {
+  if (!textBackground.markerMode && instanceClipRect.w >= 0.0) {
     dimensions.y = wh.y;
     pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
   }
@@ -83,7 +93,7 @@ void main(void) {
     vec2 anchorTexCoords = vec2(gl_Position.x / gl_Position.w + 1.0, gl_Position.y / gl_Position.w + 1.0) / 2.0;
     geometryCollisionTexCoordsOverride = text_getCollisionTexCoords(
       anchorTexCoords,
-      instancePixelOffsets
+      instancePixelOffsets + collisionPixelOffset
     );
     geometryCollisionUseTexCoordsOverride = true;
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);

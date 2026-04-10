@@ -263,6 +263,59 @@ test('TextLayer - fontAtlasCacheLimit', () => {
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
+test('TextLayer - layout updates when anchor or baseline changes', () => {
+  let initialOffsets;
+  let baselineOffsets;
+
+  const testCases = [
+    {
+      props: {
+        data: [{position: [-122.4, 37.8], text: 'collision'}],
+        getText: d => d.text,
+        getPosition: d => d.position,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instanceIconDefs} = subLayer.getAttributeManager().getAttributes();
+        initialOffsets = Array.from(instanceIconDefs.value.slice(0, 2));
+      }
+    },
+    {
+      updateProps: {
+        getAlignmentBaseline: 'top'
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instanceIconDefs} = subLayer.getAttributeManager().getAttributes();
+        baselineOffsets = Array.from(instanceIconDefs.value.slice(0, 2));
+        expect(
+          baselineOffsets,
+          'character offsets update when alignment baseline changes'
+        ).not.toEqual(initialOffsets);
+      }
+    },
+    {
+      updateProps: {
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instanceIconDefs} = subLayer.getAttributeManager().getAttributes();
+        const anchorOffsets = Array.from(instanceIconDefs.value.slice(0, 2));
+        expect(anchorOffsets, 'character offsets update when text anchor changes').not.toEqual(
+          initialOffsets
+        );
+        expect(
+          anchorOffsets,
+          'anchor change produces a distinct text layout from baseline change'
+        ).not.toEqual(baselineOffsets);
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
 test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
   const testCases = [
     {
@@ -301,6 +354,46 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
           ),
           'collision extension is forwarded to both sublayers'
         ).toBeTruthy();
+      }
+    },
+    {
+      updateProps: {
+        getPixelOffset: [0, 0],
+        getTextAnchor: 'start'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(subLayers.length, 'non-default text anchor still renders marker layer').toBe(3);
+        expect(
+          subLayers[2].id.includes('collision-marker'),
+          'marker layer is created for text anchor'
+        ).toBeTruthy();
+      }
+    },
+    {
+      updateProps: {
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'top'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(subLayers.length, 'non-default alignment baseline still renders marker layer').toBe(
+          3
+        );
+        expect(
+          subLayers[2].id.includes('collision-marker'),
+          'marker layer is created for alignment baseline'
+        ).toBeTruthy();
+      }
+    },
+    {
+      updateProps: {
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(subLayers.length, 'default anchor and baseline do not render marker layer').toBe(2);
+        expect(
+          subLayers.some(layer => layer.id.includes('collision-marker')),
+          'marker layer is omitted for default anchor and baseline'
+        ).toBeFalsy();
       }
     }
   ];

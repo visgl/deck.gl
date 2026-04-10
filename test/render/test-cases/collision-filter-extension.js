@@ -100,6 +100,41 @@ const textCases =
             threshold: 0.96
           },
           goldenImage: './test/render/golden-images/collision-filter-effect-text-pixel-offset.png'
+        },
+        {
+          name: 'collision-filter-effect-text-anchor-baseline',
+          viewState: {
+            latitude: 37.751537058389985,
+            longitude: -122.42694203247012,
+            zoom: 13,
+            pitch: 0,
+            bearing: 0
+          },
+          layers: [
+            new TextLayer({
+              id: 'text-anchor-baseline',
+              data: textCollisionData,
+              background: true,
+              backgroundPadding: [8, 4],
+              fontFamily: 'Arial',
+              getText: d => d.text,
+              getPosition: d => d.position,
+              getSize: 20,
+              getColor: [0, 0, 0],
+              getBackgroundColor: [255, 255, 200, 255],
+              getBorderColor: [220, 90, 0, 255],
+              getBorderWidth: 1,
+              getTextAnchor: 'start',
+              getAlignmentBaseline: 'top',
+              getCollisionPriority: d => d.priority,
+              extensions: [new CollisionFilterExtension()]
+            })
+          ],
+          imageDiffOptions: {
+            threshold: 0.96
+          },
+          goldenImage:
+            './test/render/golden-images/collision-filter-effect-text-anchor-baseline.png'
         }
       ]
     : [];

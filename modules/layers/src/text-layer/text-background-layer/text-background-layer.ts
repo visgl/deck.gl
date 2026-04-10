@@ -38,11 +38,13 @@ type _TextBackgroundLayerProps<DataT> = {
   getSize?: Accessor<DataT, number>;
   getAngle?: Accessor<DataT, number>;
   getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  getCollisionOffset?: Accessor<DataT, Readonly<[number, number]>>;
   getBoundingRect?: Accessor<DataT, Readonly<[number, number, number, number]>>;
   getClipRect?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
   getFillColor?: Accessor<DataT, Color>;
   getLineColor?: Accessor<DataT, Color>;
   getLineWidth?: Accessor<DataT, number>;
+  markerMode?: boolean;
 };
 
 export type TextBackgroundLayerProps<DataT = unknown> = _TextBackgroundLayerProps<DataT> &
@@ -63,11 +65,13 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getCollisionOffset: {type: 'accessor', value: [0, 0]},
   getBoundingRect: {type: 'accessor', value: [0, 0, 0, 0]},
   getClipRect: {type: 'accessor', value: [0, 0, -1, -1]},
   getFillColor: {type: 'accessor', value: [0, 0, 0, 255]},
   getLineColor: {type: 'accessor', value: [0, 0, 0, 255]},
-  getLineWidth: {type: 'accessor', value: 1}
+  getLineWidth: {type: 'accessor', value: 1},
+  markerMode: false
 };
 
 export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
@@ -122,6 +126,10 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         accessor: 'getPixelOffset'
       },
+      instanceCollisionOffsets: {
+        size: 2,
+        accessor: 'getCollisionOffset'
+      },
       instanceFillColors: {
         size: 4,
         transition: true,
@@ -156,8 +164,16 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, fontSize} =
-      this.props;
+    const {
+      billboard,
+      markerMode,
+      sizeScale,
+      sizeUnits,
+      sizeMinPixels,
+      sizeMaxPixels,
+      getLineWidth,
+      fontSize
+    } = this.props;
     let {padding, borderRadius} = this.props;
 
     if (padding.length < 4) {
@@ -176,6 +192,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     const model = this.state.model!;
     const textBackgroundProps: TextBackgroundProps = {
       billboard,
+      markerMode,
       stroked: Boolean(getLineWidth),
       borderRadius: borderRadius as [number, number, number, number],
       padding: padding as [number, number, number, number],
