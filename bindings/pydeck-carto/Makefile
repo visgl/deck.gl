@@ -10,8 +10,8 @@ init:
 	uv pip install -e .
 
 lint:
-	$(BIN)/black pydeck_carto tests examples setup.py
-	$(BIN)/flake8 pydeck_carto tests examples setup.py
+	$(BIN)/black pydeck_carto tests examples
+	$(BIN)/flake8 pydeck_carto tests examples
 
 test:
 	$(BIN)/pytest tests --cov=pydeck_carto
@@ -21,12 +21,12 @@ test-scripts:
 
 publish-pypi:
 	rm -rf $(DIST) $(BUILD) *.egg-info
-	$(BIN)/python setup.py sdist bdist_wheel
+	$(BIN)/python -m build
 	$(BIN)/twine upload $(DIST)/*
 
 publish-test-pypi:
 	rm -rf $(DIST) $(BUILD) *.egg-info
-	$(BIN)/python setup.py sdist bdist_wheel
+	$(BIN)/python -m build
 	$(BIN)/twine upload --repository-url https://test.pypi.org/legacy/ $(DIST)/* --verbose
 
 clean:
