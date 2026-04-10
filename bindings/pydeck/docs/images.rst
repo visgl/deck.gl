@@ -1,13 +1,16 @@
 ..
   These image tags are manually added to include these images in the _static directory
 
+.. image:: gallery/images/a5_layer.png
+   :width: 0
+
 .. image:: gallery/images/arc_layer.png
    :width: 0
 
-.. image:: gallery/images/bitmap_layer.png
+.. image:: gallery/images/binary_transport.png
    :width: 0
 
-.. image:: gallery/images/binary_transport.png
+.. image:: gallery/images/bitmap_layer.png
    :width: 0
 
 .. image:: gallery/images/column_layer.png
@@ -52,6 +55,9 @@
 .. image:: gallery/images/line_layer.png
    :width: 0
 
+.. image:: gallery/images/maplibre_globe.png
+   :width: 0
+
 .. image:: gallery/images/path_layer.png
    :width: 0
 
@@ -67,6 +73,9 @@
 .. image:: gallery/images/scatterplot_layer.png
    :width: 0
 
+.. image:: gallery/images/scenegraph_layer.png
+   :width: 0
+
 .. image:: gallery/images/screengrid_layer.png
    :width: 0
 
@@ -79,11 +88,16 @@
 .. image:: gallery/images/trips_layer.png
    :width: 0
 
+.. image:: gallery/images/widgets.png
+   :width: 0
+
 .. toctree::
    :hidden:
    :maxdepth: 0
 
+   gallery/a5_layer
    gallery/arc_layer
+   gallery/binary_transport
    gallery/bitmap_layer
    gallery/column_layer
    gallery/contour_layer
@@ -99,13 +113,15 @@
    gallery/hexagon_layer
    gallery/icon_layer
    gallery/line_layer
+   gallery/maplibre_globe
    gallery/path_layer
    gallery/point_cloud_layer
    gallery/polygon_layer
    gallery/s2_layer
    gallery/scatterplot_layer
+   gallery/scenegraph_layer
    gallery/screengrid_layer
    gallery/terrain_layer
    gallery/text_layer
-   gallery/tile_3d_layer
    gallery/trips_layer
+   gallery/widgets

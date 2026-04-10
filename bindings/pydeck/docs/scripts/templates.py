@@ -39,7 +39,7 @@ HTML_TEMPLATE = jinja2.Template("""
 
 DOC_TEMPLATE = jinja2.Template("""
 {{ page_title }}
-^^^^^^^^^^^^^^^^
+{{ '^' * page_title|length }}
 
 .. raw:: html
 

@@ -1,14 +1,14 @@
 """
-Multi-View Widgets Example
-===========================
+Widgets
+=======
 
-Demonstrates deck.gl widgets with multiple synchronized views using SplitterWidget.
+Demonstrates deck.gl UI widgets in pydeck.
 
-This example shows:
-- Two side-by-side MapView instances
-- SplitterWidget to adjust the split between views
-- Widgets assigned to specific views using view_id
-- Synchronized navigation between views
+This example shows several built-in widgets for map navigation and interaction:
+- ZoomWidget and CompassWidget for camera control
+- FullscreenWidget and ScreenshotWidget for utility
+- ScaleWidget for displaying map scale
+- StatsWidget for rendering performance stats
 """
 
 import pydeck as pdk
@@ -18,12 +18,7 @@ COUNTRIES = "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_adm
 AIR_PORTS = "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson"
 
 # Initial view centered on London
-INITIAL_VIEW_STATE = pdk.ViewState(latitude=51.47, longitude=0.45, zoom=4, bearing=0, pitch=30)
-
-# Create two map views side-by-side
-left_view = pdk.View(type="MapView", id="left-map", x="0%", width="50%", controller=True)
-
-right_view = pdk.View(type="MapView", id="right-map", x="50%", width="50%", controller=True)
+view_state = pdk.ViewState(latitude=51.47, longitude=0.45, zoom=4, bearing=0, pitch=30)
 
 # Layers
 countries_layer = pdk.Layer(
@@ -51,37 +46,21 @@ airports_layer = pdk.Layer(
     auto_highlight=True,
 )
 
-# Create widgets - some are assigned to specific views
+# Widgets for map navigation and interaction
 widgets = [
-    # Left map widgets
-    pdk.Widget("ZoomWidget", view_id="left-map"),
-    pdk.Widget("CompassWidget", view_id="left-map"),
-    pdk.Widget("FullscreenWidget", view_id="left-map"),
-    pdk.Widget("ScreenshotWidget", view_id="left-map"),
-    pdk.Widget("ResetViewWidget", view_id="left-map"),
-    pdk.Widget("FpsWidget", view_id="left-map"),
-    pdk.Widget("LoadingWidget", view_id="left-map"),
-    pdk.Widget("ThemeWidget", view_id="left-map"),
-    pdk.Widget("StatsWidget", statsType="luma", view_id="left-map"),
-    # Right map widgets
-    pdk.Widget("GeocoderWidget", view_id="right-map"),
-    # Global widgets (not tied to a specific view)
+    pdk.Widget("ZoomWidget"),
+    pdk.Widget("CompassWidget"),
+    pdk.Widget("FullscreenWidget"),
+    pdk.Widget("ScreenshotWidget"),
     pdk.Widget("ScaleWidget", placement="bottom-right"),
-    # Splitter widget to adjust view sizes
-    pdk.Widget("SplitterWidget", view_id1="left-map", view_id2="right-map", orientation="vertical"),
+    pdk.Widget("StatsWidget", statsType="luma", placement="bottom-left"),
 ]
 
-# Create deck with multiple views
 deck = pdk.Deck(
-    views=[left_view, right_view],
-    initial_view_state={"left-map": INITIAL_VIEW_STATE, "right-map": INITIAL_VIEW_STATE},
     layers=[countries_layer, airports_layer],
+    initial_view_state=view_state,
     widgets=widgets,
     tooltip={"text": "{properties.name} ({properties.abbrev})\n{properties.type}"},
-    map_provider="carto",
-    map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
 )
 
-# Save to HTML
-deck.to_html("widgets.html", css_background_color="#f0f0f0", offline=True)
-print("Saved to widgets.html")
+deck.to_html("widgets.html")
