@@ -16,3 +16,5 @@ sphinx-markdown-builder
 wheel
 sphinx_rtd_theme==2.0.0
 black
+playwright  # used by docs/scripts/snap_thumbnails.py for gallery screenshots
+Pillow  # used by docs/scripts/snap_thumbnails.py for thumbnail resizing

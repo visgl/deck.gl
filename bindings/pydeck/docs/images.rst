@@ -79,6 +79,18 @@
 .. image:: gallery/images/trips_layer.png
    :width: 0
 
+.. image:: gallery/images/a5_layer.png
+   :width: 0
+
+.. image:: gallery/images/maplibre_globe.png
+   :width: 0
+
+.. image:: gallery/images/scenegraph_layer.png
+   :width: 0
+
+.. image:: gallery/images/widgets.png
+   :width: 0
+
 .. toctree::
    :hidden:
    :maxdepth: 0
