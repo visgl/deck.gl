@@ -105,6 +105,7 @@ Index
    view
    light_settings
    widget
+   types
 
 .. toctree::
    :maxdepth: 1
