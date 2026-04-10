@@ -1,0 +1,49 @@
+[project]
+name = "pydeck-carto"
+version = "0.2.0"
+description = "Pydeck wrapper for use with CARTO"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.8"
+authors = [
+    { name = "CARTO", email = "jarroyo@carto.com" },
+]
+keywords = ["pydeck", "carto", "visualization", "graphics", "GIS", "maps"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Jupyter",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "pydeck>=0.9.0",
+    "carto-auth>=0.2.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/visgl/deck.gl/tree/master/bindings/pydeck-carto"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["examples", "tests"]
+
+[tool.uv]
+python-preference = "managed"
+
+[tool.black]
+line-length = 88
+
+[tool.flake8]
+max-line-length = 88
