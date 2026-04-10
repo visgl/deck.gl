@@ -40,7 +40,21 @@ You can learn more about Mapbox tokens via their `documentation <https://docs.ma
 
 You can also use a Google Maps API key in a similar way. Currently Google Maps is not supported for 3D visualizations.
 
-If you set a ``MAPBOX_API_KEY`` or ``GOOGLE_MAPS_API_KEY`` environment variables, pydeck will detect them.
+pydeck checks for API keys via environment variables automatically. Both the deck.gl JavaScript convention
+and the pydeck convention are supported (the deck.gl convention is checked first):
+
+- **Mapbox**: ``MapboxAccessToken`` (deck.gl) or ``MAPBOX_API_KEY`` (pydeck)
+- **Google Maps**: ``GoogleMapsAPIKey`` (deck.gl) or ``GOOGLE_MAPS_API_KEY`` (pydeck)
+- **Carto**: ``CARTO_API_KEY``
+
+For example, to set your Mapbox key:
+
+.. code-block:: bash
+
+        export MapboxAccessToken=pk.your_token_here
+
+If you're already working with deck.gl JavaScript projects, you likely have ``MapboxAccessToken`` set
+and pydeck will pick it up automatically.
 
 Enabling pydeck for Jupyter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

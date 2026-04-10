@@ -57,7 +57,7 @@ a count of visible points.
 
 
 Cursor events with ``on_click``
-------------------------------
+-------------------------------
 
 Clicking data in a visualization passes the following data back as the ``payload`` object
 in the ``on_click`` handler:

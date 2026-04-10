@@ -105,7 +105,11 @@
    gallery/s2_layer
    gallery/scatterplot_layer
    gallery/screengrid_layer
+   gallery/a5_layer
+   gallery/binary_transport
+   gallery/maplibre_globe
+   gallery/scenegraph_layer
    gallery/terrain_layer
    gallery/text_layer
-   gallery/tile_3d_layer
    gallery/trips_layer
+   gallery/widgets
