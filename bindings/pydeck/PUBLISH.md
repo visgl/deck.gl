@@ -28,10 +28,56 @@ you must manually update `pydeck/frontend_semver.py` after running `make bump-ve
 
 Update `docs/CHANGELOG.rst` with release notes for the new version.
 
+### Local build testing
+
+Build the wheel from the pydeck dev environment:
+
+```bash
+cd bindings/pydeck
+source .venv/bin/activate
+uv pip install build
+python -m build
+```
+
+Then install it in a fresh venv with Jupyter dependencies:
+
+```bash
+uv venv /tmp/pydeck-test
+source /tmp/pydeck-test/bin/activate
+uv pip install dist/pydeck-*.whl notebook jupyterlab pandas numpy requests ipywidgets networkx
+```
+
+Run through the verification checklist:
+
+```bash
+# 1. .to_html() in a Python REPL
+python -c "
+import pydeck as pdk
+layer = pdk.Layer('ScatterplotLayer', data=[{'pos': [-122.4, 37.8]}], get_position='pos', get_radius=1000, get_fill_color=[255, 0, 0])
+view = pdk.ViewState(latitude=37.8, longitude=-122.4, zoom=10)
+deck = pdk.Deck(layers=[layer], initial_view_state=view)
+deck.to_html('/tmp/pydeck-test.html')
+print('to_html: OK')
+"
+open /tmp/pydeck-test.html
+
+# 2. Run example notebooks in Jupyter Notebook or JupyterLab
+jupyter notebook examples/
+jupyter lab examples/
+```
+
+**Note on `.show()` vs `.to_html()`:** In pydeck v0.9+, `.show()` is a wrapper around
+`.to_html()` — both render via an HTML iframe using the deck.gl JS bundle from jsDelivr.
+The earlier ipywidgets-based `.show()` (which supported binary transport, data selection,
+and live `.update()` calls) is not currently functional. Neither nbextension nor labextension
+setup is required for the current `.show()` / `.to_html()` behavior.
+
+Restoring full Jupyter widget support (ipywidgets protocol, prebuilt labextension) is
+tracked as a future improvement.
+
 ### Producing a production release
 
-1) Verify that Deck object works on a fresh install from the source in the following
-environments:
+1) Verify that pydeck renders correctly (see *Local build testing*):
 
 - `.show()` in a Jupyter Notebook
 - `.to_html()` in a Jupyter Notebook
