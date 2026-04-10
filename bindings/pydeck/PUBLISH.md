@@ -159,8 +159,13 @@ interactively on [mybinder.org](https://mybinder.org). It was last updated aroun
 release (~2020) and is not currently maintained. To revive it, update the Dockerfile on
 the `binder` branch and verify at mybinder.org.
 
-### Screenshot examples (not working)
+### Screenshot examples
 
-`make screenshot-examples` previously generated static screenshots of pydeck examples for
-the website at pydeck.gl. This target no longer exists in the Makefile and would need to
-be rebuilt. See `docs/scripts/embed_examples.py` for the current example embedding approach.
+Gallery thumbnails are generated with `make html-thumbnails` from the `docs/` directory.
+This uses Playwright to render each example's HTML output and save a screenshot. See
+`docs/scripts/snap_thumbnails.py` for details. To snap a single example:
+
+```bash
+cd docs
+uv run python scripts/snap_thumbnails.py ../examples/widgets.py
+```
