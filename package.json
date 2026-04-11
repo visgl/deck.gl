@@ -73,15 +73,7 @@
     "vite-bundle-analyzer": "^1.3.6"
   },
   "resolutions": {
-    "vite": "^7.3.1",
-    "@luma.gl/core": "^9.3.2",
-    "@luma.gl/effects": "^9.3.2",
-    "@luma.gl/engine": "^9.3.2",
-    "@luma.gl/gltf": "^9.3.2",
-    "@luma.gl/shadertools": "^9.3.2",
-    "@luma.gl/test-utils": "^9.3.2",
-    "@luma.gl/webgl": "^9.3.2",
-    "@luma.gl/webgpu": "^9.3.2"
+    "vite": "^7.3.1"
   },
   "pre-commit": [
     "test-fast",

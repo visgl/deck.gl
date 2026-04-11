@@ -4,14 +4,15 @@
 
 /* eslint-disable no-unused-vars */
 import {test, expect} from 'vitest';
-import {createElement, createRef} from 'react';
+import {createElement, createRef, act} from 'react';
 import {createRoot} from 'react-dom/client';
-import {act} from 'react-dom/test-utils';
 
 import {DeckGL, Layer, Widget} from 'deck.gl';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
 import {device, gl} from '@deck.gl/test-utils/vitest';
+
+self.IS_REACT_ACT_ENVIRONMENT = true;
 
 const TEST_VIEW_STATE = {
   latitude: 37.7515,
