@@ -4,6 +4,9 @@ dist/
 node_modules/
 coverage/
 test/**/*-failed.png
+test/render/golden-images/**/*-fail.png
+test/render/golden-images/**/*-diff.png
+test/**/__screenshots__/
 .nyc_output/
 .reify-cache/
 
@@ -25,6 +28,7 @@ test/**/yarn.lock
 yarn-error.log
 package-lock.json
 
+.claude/
 .vscode/
 .project
 .idea

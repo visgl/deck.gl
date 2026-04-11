@@ -4,9 +4,39 @@
 
 import {picking} from '@luma.gl/shadertools';
 
+const sourceWGSL = /* wgsl */ `\
+struct pickingUniforms {
+  isActive: f32,
+  isAttribute: f32,
+  isHighlightActive: f32,
+  useByteColors: f32,
+  highlightedObjectColor: vec3<f32>,
+  highlightColor: vec4<f32>,
+};
+
+@group(0) @binding(auto) var<uniform> picking: pickingUniforms;
+
+fn picking_normalizeColor(color: vec3<f32>) -> vec3<f32> {
+  return select(color, color / 255.0, picking.useByteColors > 0.5);
+}
+
+fn picking_normalizeColor4(color: vec4<f32>) -> vec4<f32> {
+  return select(color, color / 255.0, picking.useByteColors > 0.5);
+}
+
+fn picking_isColorZero(color: vec3<f32>) -> bool {
+  return dot(color, vec3<f32>(1.0)) < 0.00001;
+}
+
+fn picking_isColorValid(color: vec3<f32>) -> bool {
+  return dot(color, vec3<f32>(1.0)) > 0.00001;
+}
+`;
+
 export default {
   ...picking,
-  defaultUniforms: {...picking.defaultUniforms, useFloatColors: false},
+  source: sourceWGSL,
+  defaultUniforms: {...picking.defaultUniforms, useByteColors: true},
   inject: {
     'vs:DECKGL_FILTER_GL_POSITION': `
     // for picking depth values

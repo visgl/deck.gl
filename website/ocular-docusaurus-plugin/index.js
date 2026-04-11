@@ -36,20 +36,29 @@ module.exports = function (
       }
 
       // Uncomment to inspect config
-      // console.log(util.inspect(_config.module, {depth: null}));
+      // console.log(util.inspect(_config.module, {depth: null, color: true}));
 
       // Symlink docs crash otherwise, see https://github.com/facebook/docusaurus/issues/6257
       _config.resolve.symlinks = false;
 
+      // Load existing source maps
+      _config.module.rules.push({
+        test: /\/dist\/.+\.js$/,
+        enforce: "pre",
+        use: ["source-map-loader"],
+      });
+
+      const devtool = debug ? 'source-map' : false;
+
       if (isServer) {
         return {
-          devtool: debug ? 'eval' : false,
+          devtool,
           module,
           plugins,
           node: {__dirname: true}
         };
       }
-      return {module, plugins};
+      return {devtool, module, plugins};
     }
   };
 };

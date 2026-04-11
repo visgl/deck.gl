@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import PlotLayer from '../../../website/plot/plot-layer';
 
-// TODO - add point cloud layer for COORDINATE_SYSTEM.CARTESIAN
+// TODO - add point cloud layer for 'cartesian'
 
 // import {PointCloudLayer} from 'deck.gl';
 // import * as dataSamples from '../data-samples';
@@ -24,7 +23,7 @@ const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 const PlotLayerInfovisExample = {
   layer: PlotLayer,
   props: {
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     uCount: 200,
     vCount: 200,
     drawAxes: true,
@@ -56,7 +55,7 @@ const PointCloudLayerInfovisExample = {
   props: {
     id: 'pointCloudLayer',
     outline: true,
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     coordinateOrigin: dataSamples.positionOrigin,
     opacity: 1,
     radiusPixels: 4,

@@ -12,10 +12,22 @@ export type GimbalWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message. */
   label?: string;
-  /** Width of gimbal lines */
+  /** Width of gimbal lines. */
   strokeWidth?: number;
   /** Transition duration in ms when resetting rotation. */
   transitionDuration?: number;
+  /**
+   * Callback when the gimbal reset button is clicked.
+   * Called for each viewport that will be reset.
+   */
+  onReset?: (params: {
+    /** The view being reset */
+    viewId: string;
+    /** The new rotationOrbit value (0) */
+    rotationOrbit: number;
+    /** The new rotationX value (0) */
+    rotationX: number;
+  }) => void;
 };
 
 export class GimbalWidget extends Widget<GimbalWidgetProps> {
@@ -23,18 +35,19 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     ...Widget.defaultProps,
     id: 'gimbal',
     placement: 'top-left',
-    viewId: undefined!,
+    viewId: null,
     label: 'Gimbal',
     strokeWidth: 1.5,
-    transitionDuration: 200
+    transitionDuration: 200,
+    onReset: () => {}
   };
 
   className = 'deck-widget-gimbal';
   placement: WidgetPlacement = 'top-left';
-  viewId?: string | null = null;
+  viewports: {[id: string]: Viewport} = {};
 
   constructor(props: GimbalWidgetProps = {}) {
-    super(props, GimbalWidget.defaultProps);
+    super(props);
     this.setProps(this.props);
   }
 
@@ -45,14 +58,18 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {rotationOrbit, rotationX} = this.getNormalizedRotation();
+    const viewId = this.viewId || Object.values(this.viewports)[0]?.id || 'default-view';
+    const widgetViewport = this.viewports[viewId];
+    const {rotationOrbit, rotationX} = this.getNormalizedRotation(widgetViewport);
     // Note - we use CSS 3D transforms instead of SVG 2D transforms
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100, pointerEvents: 'auto'}}>
         <button
           type="button"
           onClick={() => {
-            this.resetOrbitView();
+            for (const viewport of Object.values(this.viewports)) {
+              this.resetOrbitView(viewport);
+            }
           }}
           title={this.props.label}
           style={{position: 'relative', width: 26, height: 26}}
@@ -110,13 +127,17 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
   }
 
   onViewportChange(viewport: Viewport) {
+    this.viewports[viewport.id] = viewport;
     this.updateHTML();
   }
 
-  resetOrbitView() {
-    const viewId = this.getViewId();
+  resetOrbitView(viewport?: Viewport) {
+    const viewId = this.viewId || viewport?.id || 'OrbitView';
     const viewState = this.getViewState(viewId);
     if ('rotationOrbit' in viewState || 'rotationX' in viewState) {
+      // Call callback
+      this.props.onReset?.({viewId, rotationOrbit: 0, rotationX: 0});
+
       const nextViewState = {
         ...viewState,
         rotationOrbit: 0,
@@ -126,13 +147,13 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
           transitionProps: ['rotationOrbit', 'rotationX']
         })
       };
-      // @ts-ignore Using private method temporary until there's a public one
-      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+      this.setViewState(viewId, nextViewState);
     }
   }
 
-  getNormalizedRotation() {
-    const viewState = this.getViewState(this.getViewId());
+  getNormalizedRotation(viewport?: Viewport): {rotationOrbit: number; rotationX: number} {
+    const viewId = this.viewId || viewport?.id || 'OrbitView';
+    const viewState = this.getViewState(viewId);
     const [rz, rx] = this.getRotation(viewState);
     const rotationOrbit = normalizeAndClampAngle(rz);
     const rotationX = normalizeAndClampAngle(rx);
@@ -144,28 +165,6 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
       return [-(viewState.rotationOrbit || 0), viewState.rotationX || 0];
     }
     return [0, 0];
-  }
-
-  // Move to Widget/WidgetManager?
-
-  getViewId() {
-    const viewId = this.viewId || 'OrbitView';
-    return viewId;
-  }
-
-  getViewState(viewId: string) {
-    const viewManager = this.getViewManager();
-    const viewState = (viewId && viewManager.getViewState(viewId)) || viewManager.viewState;
-    return viewState;
-  }
-
-  getViewManager() {
-    // @ts-expect-error protected
-    const viewManager = this.deck?.viewManager;
-    if (!viewManager) {
-      throw new Error('wigdet must be added to a deck instance');
-    }
-    return viewManager;
   }
 }
 

@@ -46,13 +46,17 @@ export default class PickLayersPass extends LayersPass {
     byAlpha: EncodedPickingColors[];
   } | null = null;
 
-  render(props: LayersPassRenderOptions | PickLayersPassRenderOptions) {
+  render(props: LayersPassRenderOptions | PickLayersPassRenderOptions): {
+    decodePickingColor: PickingColorDecoder | null;
+    stats: RenderStats[];
+  } {
     if ('pickingFBO' in props) {
       // When drawing into an off-screen buffer, use the alpha channel to encode layer index
       return this._drawPickingBuffer(props);
     }
     // When drawing to screen (debug mode), do not use the alpha channel so that result is always visible
-    return super.render(props);
+    const stats = super._render(props);
+    return {decodePickingColor: null, stats};
   }
 
   // Private
@@ -70,10 +74,11 @@ export default class PickLayersPass extends LayersPass {
     effects,
     pass = 'picking',
     pickZ,
-    shaderModuleProps
+    shaderModuleProps,
+    clearColor
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
-    stats: RenderStats;
+    stats: RenderStats[];
   } {
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
@@ -84,7 +89,7 @@ export default class PickLayersPass extends LayersPass {
     // Note that the callback here is called synchronously.
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    const renderStatus = super.render({
+    const renderStatus = super._render({
       target: pickingFBO,
       layers,
       layerFilter,
@@ -96,7 +101,7 @@ export default class PickLayersPass extends LayersPass {
       pass,
       isPicking: true,
       shaderModuleProps,
-      clearColor: [0, 0, 0, 0],
+      clearColor: clearColor ?? [0, 0, 0, 0],
       colorMask: 0xf,
       scissorRect
     });
@@ -137,13 +142,28 @@ export default class PickLayersPass extends LayersPass {
     };
     const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState || operation.includes('terrain')) {
+    if (!this._colorEncoderState) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
+      // Encode pickable layers that include 'draw' operation (including 'terrain+draw')
       Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
-      // TODO: blendColor no longer part of luma.gl API
-      pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      if (this.device.type === 'webgpu') {
+        // WebGPU uses render-pass dynamic state for constant blending.
+        pickParameters.blendConstant = encodeColor(this._colorEncoderState, layer, viewport);
+      } else {
+        pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      }
+      if (operation.includes('terrain') && layer.state?._hasPickingCover) {
+        // For terrain+draw layers with a valid cover FBO, the terrain shader outputs the
+        // cover FBO pixel which already has correctly encoded alpha from the cover encoder.
+        // Use srcFactor 'one' to pass through the cover alpha without double-encoding.
+        // Without a cover FBO, keep 'constant' so the layer's own picking colors encode correctly.
+        pickParameters.blendAlphaSrcFactor = 'one';
+      }
+    } else if (operation.includes('terrain')) {
+      // Pure terrain layers (without 'draw') don't need picking colors
+      pickParameters.blend = false;
     }
 
     return pickParameters;

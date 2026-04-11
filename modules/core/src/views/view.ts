@@ -3,8 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import Viewport from '../viewports/viewport';
-import {parsePosition, getPosition, Position} from '../utils/positions';
+import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
+import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
@@ -63,15 +64,15 @@ export default abstract class View<
   abstract getViewportType(viewState: ViewState): ConstructorOf<Viewport>;
   protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
-  private _x: Position;
-  private _y: Position;
-  private _width: Position;
-  private _height: Position;
+  private _x: LayoutExpression;
+  private _y: LayoutExpression;
+  private _width: LayoutExpression;
+  private _height: LayoutExpression;
   private _padding: {
-    left: Position;
-    right: Position;
-    top: Position;
-    bottom: Position;
+    left: LayoutExpression;
+    right: LayoutExpression;
+    top: LayoutExpression;
+    bottom: LayoutExpression;
   } | null;
 
   readonly props: ViewProps;
@@ -148,14 +149,7 @@ export default abstract class View<
         return this.props.viewState as ViewState;
       }
 
-      // Merge in all props from View's viewState, except id
-      const newViewState = {...viewState};
-      for (const key in this.props.viewState) {
-        if (key !== 'id') {
-          newViewState[key] = this.props.viewState[key];
-        }
-      }
-      return newViewState;
+      return deepMergeViewState<ViewState>(viewState, this.props.viewState as ViewState);
     }
 
     return viewState;

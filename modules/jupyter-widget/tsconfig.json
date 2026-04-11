@@ -14,6 +14,7 @@
     {"path": "../google-maps"},
     {"path": "../json"},
     {"path": "../layers"},
+    {"path": "../mapbox"},
     {"path": "../mesh-layers"}
   ]
 }

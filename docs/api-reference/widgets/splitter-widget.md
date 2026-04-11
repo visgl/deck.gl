@@ -1,89 +1,196 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_SplitterWidget} from '@deck.gl/widgets';
-
 # SplitterWidget (Experimental)
 
-<img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+<img src="https://img.shields.io/badge/from-v9.3-green.svg?style=flat-square" alt="from v9.3" />
 
-This widget renders a draggable splitter line across the deck.gl canvas to divide two views. It supports both vertical and horizontal orientations, allowing users to compare two views (e.g., two map or globe views) by dragging the splitter handle.
+import {SplitterWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-<WidgetPreview cls={_SplitterWidget} props={{
-  orientation: 'vertical',
-  initialSplit: 0.5
-}}/>
+<SplitterWidgetDemo />
 
-```ts
+This widget lets the user to stack multiple views across the deck.gl canvas, and resize them by draggable splitter handles. This widget will only work if the `views` prop of Deck is unset.
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
-import {Deck} from '@deck.gl/core';
-import {MapView} from '@deck.gl/core';
+import {Deck, OrbitView} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  views: [
-    new MapView({id: 'view1', /* view settings */}),
-    new MapView({id: 'view2', /* view settings */})
-  ],
-  layers: [
-    // layers for view1 and view2
-  ],
+new Deck({
+  initialViewState: {
+    front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0},
+    perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0}
+  },
   widgets: [
     new SplitterWidget({
-      viewId1: 'view1',
-      viewId2: 'view2',
-      orientation: 'vertical',
-      initialSplit: 0.5,
-      onChange: split => console.log('Split:', split),
-      onDragStart: () => console.log('Drag started'),
-      onDragEnd: () => console.log('Drag ended')
+      viewLayout: {
+        orientation: 'horizontal',
+        views: [
+          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+        ]
+      }
     })
   ]
 });
 ```
 
-### `SplitterWidgetProps`
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
+```ts
+import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
+import {Deck, OrbitView, type OrbitViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-- `id` (default `'splitter'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
+new Deck({
+  initialViewState: {
+    front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
+    perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
+  },
+  widgets: [
+    new SplitterWidget({
+      viewLayout: {
+        orientation: 'horizontal',
+        views: [
+          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+        ]
+      }
+    })
+  ]
+});
+```
 
-#### `viewId1` (string, required) {#viewid1}
+  </TabItem>
+  <TabItem value="react" label="React">
 
-The `id` of the first (resizable) view.
+```tsx
+import React from 'react';
+import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {OrbitView, type OrbitViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-#### `viewId2` (string, required) {#viewid2}
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
+        perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
+      }}
+    >
+      <SplitterWidget
+        viewLayout={{
+          orientation: 'horizontal',
+          views: [
+            new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+            new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+          ]
+        }}
+      />
+    </DeckGL>
+  );
+}
+```
 
-The `id` of the second view to compare against.
+  </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
 
-#### `orientation` ('vertical' | 'horizontal', optional) {#orientation}
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {MapView, type MapViewState, type View} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'vertical'`
+function App() {
+  const [views, setViews] = useState<View[]>([]);
+  const [viewState, setViewState] = useState<Record<string, MapViewState>>({
+    left: {longitude: -122.4, latitude: 37.8, zoom: 11},
+    right: {longitude: -73.97, latitude: 40.77, zoom: 11}
+  });
 
-Orientation of the splitter line. Use `vertical` for side-by-side comparison or `horizontal` for top-bottom.
+  return (
+    <DeckGL
+      views={views}
+      viewState={viewState}
+      onViewStateChange={({viewId, viewState: vs}) => {
+        setViewState(prev => ({...prev, [viewId]: vs as MapViewState}));
+      }}
+    >
+      <SplitterWidget
+        viewLayout={{
+          orientation: 'horizontal',
+          views: [
+            new MapView({id: 'left', controller: true}),
+            new MapView({id: 'right', controller: true})
+          ]
+        }}
+        onChange={setViews}
+      />
+    </DeckGL>
+  );
+}
+```
 
-#### `initialSplit` (number, optional) {#initialsplit}
+  </TabItem>
+</Tabs>
 
-Default: `0.5`
+## Constructor
 
-Initial split ratio (between 0 and 1) for the first view.
+```ts
+import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
+new SplitterWidget({} satisfies SplitterWidgetProps);
+```
+
+## Types
+
+### `SplitterWidgetProps` {#splitterwidgetprops}
+
+The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
+
+#### `viewLayout` (ViewLayout, required) {#viewlayout}
+
+Layout descriptor of how views are arranged on the canvas. Contains the following fields:
+
+- `views` ([View](../core/view.md)[]) - two view instances used to compose this layout. `x`, `y`, `width` and `height` of the views' props at render time will be resolved according to the following settings as well as user input.
+- `orientation` (string, required) - the stacking orientation of the views. one of `'vertical'`, `'horizontal'`.
+- `initialSplit` (number, optional) - The ratio of view1's share over the whole available height (vertical) or width (horizontal). Between 0-1. Default `0.5`.
+- `editable` (boolean, optional) - Whether the split can be changed by dragging the border between the two views. Default `true`.
+- `minSplit` (number, optional) - Min value of the split. The user cannot make the first view smaller than this ratio. Default `0.05`.
+- `maxSplit` (number, optional) - Max value of the split. The user cannot make the first view larger than this ratio. Default `0.95`.
+
+You may also replace one or both item in `views` with a `ViewLayout` object, composing more than two views into a complex layout.
+
 
 #### `onChange` (Function, optional) {#onchange}
 
-`(newSplit: number) => void`
+```ts
+(views: View[]) => void
+```
 
-Callback invoked during dragging with the updated split ratio.
+* Default: `() => {}`
+
+Callback invoked during dragging with the updated view instances
 
 #### `onDragStart` (Function, optional) {#ondragstart}
 
-`() => void`
+```ts
+() => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the user begins dragging the splitter.
 
 #### `onDragEnd` (Function, optional) {#ondragend}
 
-`() => void`
+```ts
+() => void
+```
+
+* Default: `() => {}`
 
 Callback invoked when the user releases the splitter.
 

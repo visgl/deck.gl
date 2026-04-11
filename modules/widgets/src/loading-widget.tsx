@@ -2,17 +2,24 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {WidgetPlacement, Layer} from '@deck.gl/core';
+import type {WidgetPlacement, Layer, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
-import {Widget, WidgetProps} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
 
 /** Properties for the LoadingWidget */
 export type LoadingWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views */
+  viewId?: string | null;
   /** Tooltip message when loading */
   label?: string;
+  /**
+   * Callback when the loading state changes.
+   * Called when layers transition between loading and loaded states.
+   */
+  onLoadingChange?: (loading: boolean) => void;
 };
 
 /**
@@ -23,7 +30,9 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
     ...Widget.defaultProps,
     id: 'loading',
     placement: 'top-left',
-    label: 'Loading layer data'
+    viewId: null,
+    label: 'Loading layer data',
+    onLoadingChange: () => {}
   };
 
   className = 'deck-widget-loading';
@@ -31,12 +40,13 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
   loading = true;
 
   constructor(props: LoadingWidgetProps = {}) {
-    super(props, LoadingWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    super(props);
+    this.setProps(this.props);
   }
 
   setProps(props: Partial<LoadingWidgetProps>) {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 
@@ -45,7 +55,7 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
       // TODO(ibgreen) - this should not be a button, but styling is so nested that it is easier to reuse this component.
       this.loading && (
         <IconButton
-          className="deck-widget-spinner-icon"
+          className="deck-widget-spinner"
           label={this.props.label}
           onClick={this.handleClick.bind(this)}
         />
@@ -55,9 +65,13 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
   }
 
   onRedraw({layers}: {layers: Layer[]}): void {
-    const loading = !layers.some(layer => !layer.isLoaded);
+    const loading = layers.some(layer => !layer.isLoaded);
     if (loading !== this.loading) {
       this.loading = loading;
+
+      // Call callback when loading state changes
+      this.props.onLoadingChange?.(loading);
+
       this.updateHTML();
     }
   }

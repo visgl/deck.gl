@@ -8,15 +8,15 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@loaders.gl/core": "^4.2.0",
-    "@loaders.gl/gltf": "^4.2.0",
-    "@loaders.gl/ply": "^4.2.0",
+    "@loaders.gl/core": "^4.4.1",
+    "@loaders.gl/gltf": "^4.4.1",
+    "@loaders.gl/ply": "^4.4.1",
     "@probe.gl/log": "^4.0.9",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",
     "extrude-polyline": "^1.0.6",
-    "h3-js": "^4.1.0",
+    "h3-js": "^4.4.0",
     "maplibre-gl": "^5.0.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "typescript": "^4.6.0",
-    "vite": "^4.0.0"
+    "vite": "^7.3.1"
   }
 }

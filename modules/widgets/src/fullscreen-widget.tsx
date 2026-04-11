@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
+import {log, Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './lib/components/icon-button';
 
@@ -13,6 +13,8 @@ export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
   /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
+  /** View to attach to and interact with. Required when using multiple views. */
+  viewId?: string | null;
   /** Tooltip message when out of fullscreen. */
   enterLabel?: string;
   /** Tooltip message when fullscreen. */
@@ -22,6 +24,10 @@ export type FullscreenWidgetProps = WidgetProps & {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements
    */
   container?: HTMLElement;
+  /**
+   * Callback when fullscreen state changes (via user click or browser fullscreen events).
+   */
+  onFullscreenChange?: (fullscreen: boolean) => void;
 };
 
 export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
@@ -29,9 +35,11 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     ...Widget.defaultProps,
     id: 'fullscreen',
     placement: 'top-left',
+    viewId: null,
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
-    container: undefined!
+    container: undefined!,
+    onFullscreenChange: () => {}
   };
 
   className = 'deck-widget-fullscreen';
@@ -39,8 +47,8 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps = {}) {
-    super(props, FullscreenWidget.defaultProps);
-    this.placement = props.placement ?? this.placement;
+    super(props);
+    this.setProps(this.props);
   }
 
   onAdd(): void {
@@ -52,11 +60,14 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
+    const isFullscreen = this.getFullscreen();
     render(
       <IconButton
-        onClick={this.handleClick.bind(this)}
-        label={this.fullscreen ? this.props.exitLabel : this.props.enterLabel}
-        className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
+        onClick={() => {
+          this.handleClick().catch(err => log.error(err)());
+        }}
+        label={isFullscreen ? this.props.exitLabel : this.props.enterLabel}
+        className={isFullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />,
       rootElement
     );
@@ -64,29 +75,35 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   setProps(props: Partial<FullscreenWidgetProps>) {
     this.placement = props.placement ?? this.placement;
+    this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
   }
 
   getContainer() {
-    return this.props.container || this.deck?.getCanvas()?.parentElement;
+    return this.props.container || this.deck?.props.parent || this.deck?.getCanvas()?.parentElement;
+  }
+
+  getFullscreen(): boolean {
+    return this.fullscreen;
   }
 
   onFullscreenChange() {
-    const prevFullscreen = this.fullscreen;
     const fullscreen = document.fullscreenElement === this.getContainer();
-    if (prevFullscreen !== fullscreen) {
-      this.fullscreen = !this.fullscreen;
+    if (fullscreen !== this.fullscreen) {
+      this.fullscreen = fullscreen;
+      this.props.onFullscreenChange?.(fullscreen);
+      this.updateHTML();
     }
-    this.updateHTML();
   }
 
   async handleClick() {
-    if (this.fullscreen) {
+    const isFullscreen = this.getFullscreen();
+    if (isFullscreen) {
       await this.exitFullscreen();
     } else {
       await this.requestFullscreen();
     }
-    this.updateHTML();
+    // Note: updateHTML is called by onFullscreenChange event handler
   }
 
   async requestFullscreen() {
@@ -108,5 +125,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   togglePseudoFullscreen() {
     this.getContainer()?.classList.toggle('deck-pseudo-fullscreen');
+    // No fullscreenchange event fires for pseudo-fullscreen, so manually update state
+    this.fullscreen = !this.fullscreen;
+    this.props.onFullscreenChange?.(this.fullscreen);
+    this.updateHTML();
   }
 }

@@ -92,7 +92,7 @@ type _HexagonLayerProps<DataT> = {
    * Color scale domain, default is set to the extent of aggregated weights in each cell.
    * @default [min(colorWeight), max(colorWeight)]
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
@@ -109,13 +109,13 @@ type _HexagonLayerProps<DataT> = {
    * Elevation scale input domain, default is set to between 0 and the max of aggregated weights in each cell.
    * @default [0, max(elevationWeight)]
    */
-  elevationDomain?: [number, number] | null;
+  elevationDomain?: Readonly<[number, number]> | null;
 
   /**
    * Elevation scale output range.
    * @default [0, 1000]
    */
-  elevationRange?: [number, number];
+  elevationRange?: Readonly<[number, number]>;
 
   /**
    * Cell elevation multiplier.

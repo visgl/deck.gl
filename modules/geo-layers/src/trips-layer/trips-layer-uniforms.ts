@@ -5,7 +5,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform tripsUniforms {
+layout(std140) uniform tripsUniforms {
   bool fadeTrail;
   float trailLength;
   float currentTime;

@@ -4,9 +4,15 @@
 
 import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';
-import {dashShaders, offsetShaders} from './shaders.glsl';
+import {
+  dashShaders,
+  Defines,
+  offsetShaders,
+  scatterplotDashShaders,
+  textBackgroundDashShaders
+} from './shaders.glsl';
 
-import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+import type {Accessor, Layer, LayerContext, UpdateParameters} from '@deck.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
@@ -21,12 +27,16 @@ type PathStyleProps = {
   dashGapPickable: boolean;
 };
 
+type SDFDashStyleProps = {
+  dashGapPickable: boolean;
+};
+
 export type PathStyleExtensionProps<DataT = any> = {
   /**
    * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
    * Requires the `dash` option to be on.
    */
-  getDashArray?: Accessor<DataT, [number, number]>;
+  getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * Accessor for the offset to draw each path with, relative to the width of the path.
    * Negative offset is to the left hand side, and positive offset is to the right hand side.
@@ -63,7 +73,9 @@ export type PathStyleExtensionOptions = {
   highPrecisionDash: boolean;
 };
 
-/** Adds selected features to the `PathLayer` and composite layers that render the `PathLayer`. */
+type LayerType = 'path' | 'scatterplot' | 'textBackground';
+
+/** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
 export default class PathStyleExtension extends LayerExtension<PathStyleExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'PathStyleExtension';
@@ -76,19 +88,56 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
   }
 
+  private getLayerType(layer: Layer): LayerType | null {
+    if ('pathTesselator' in layer.state) {
+      return 'path';
+    }
+    const layerName = (layer.constructor as any).layerName;
+    if (layerName === 'ScatterplotLayer') {
+      return 'scatterplot';
+    }
+    if (layerName === 'TextBackgroundLayer') {
+      return 'textBackground';
+    }
+    return null;
+  }
+
   isEnabled(layer: Layer<PathStyleExtensionProps>): boolean {
-    return 'pathTesselator' in layer.state;
+    return this.getLayerType(layer) !== null;
   }
 
   getShaders(this: Layer<PathStyleExtensionProps>, extension: this): any {
-    if (!extension.isEnabled(this)) {
+    const layerType = extension.getLayerType(this);
+    if (!layerType) {
       return null;
     }
 
-    // Merge shader injection
+    if (layerType === 'scatterplot' || layerType === 'textBackground') {
+      if (!extension.opts.dash) {
+        return null;
+      }
+      const inject =
+        layerType === 'scatterplot'
+          ? scatterplotDashShaders.inject
+          : textBackgroundDashShaders.inject;
+      const pathStyle: ShaderModule<SDFDashStyleProps> = {
+        name: 'pathStyle',
+        inject,
+        uniformTypes: {
+          dashGapPickable: 'i32'
+        }
+      };
+      return {modules: [pathStyle]};
+    }
+
+    // PathLayer: existing logic
     let result = {} as {inject: Record<string, string>};
+    const defines: Defines = {};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
+      if (extension.opts.highPrecisionDash) {
+        defines.HIGH_PRECISION_DASH = true;
+      }
     }
     if (extension.opts.offset) {
       result = mergeShaders(result, offsetShaders);
@@ -104,36 +153,33 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       }
     };
     return {
-      modules: [pathStyle]
+      modules: [pathStyle],
+      defines
     };
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
-    if (!attributeManager || !extension.isEnabled(this)) {
-      // This extension only works with the PathLayer
+    const layerType = extension.getLayerType(this);
+    if (!attributeManager || !layerType) {
       return;
     }
 
     if (extension.opts.dash) {
       attributeManager.addInstanced({
         instanceDashArrays: {size: 2, accessor: 'getDashArray'},
-        instanceDashOffsets: extension.opts.highPrecisionDash
+        ...(layerType === 'path' && extension.opts.highPrecisionDash
           ? {
-              size: 1,
-              accessor: 'getPath',
-              transform: extension.getDashOffsets.bind(this)
-            }
-          : {
-              size: 1,
-              update: attribute => {
-                attribute.constant = true;
-                attribute.value = [0];
+              instanceDashOffsets: {
+                size: 1,
+                accessor: 'getPath',
+                transform: extension.getDashOffsets.bind(this)
               }
             }
+          : {})
       });
     }
-    if (extension.opts.offset) {
+    if (layerType === 'path' && extension.opts.offset) {
       attributeManager.addInstanced({
         instanceOffsets: {size: 1, accessor: 'getOffset'}
       });
@@ -150,11 +196,19 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
 
     if (extension.opts.dash) {
-      const pathStyleProps: PathStyleProps = {
-        dashAlignMode: this.props.dashJustified ? 1 : 0,
-        dashGapPickable: Boolean(this.props.dashGapPickable)
-      };
-      this.setShaderModuleProps({pathStyle: pathStyleProps});
+      const layerType = extension.getLayerType(this);
+      if (layerType === 'scatterplot' || layerType === 'textBackground') {
+        const pathStyleProps: SDFDashStyleProps = {
+          dashGapPickable: Boolean(this.props.dashGapPickable)
+        };
+        this.setShaderModuleProps({pathStyle: pathStyleProps});
+      } else {
+        const pathStyleProps: PathStyleProps = {
+          dashAlignMode: this.props.dashJustified ? 1 : 0,
+          dashGapPickable: Boolean(this.props.dashGapPickable)
+        };
+        this.setShaderModuleProps({pathStyle: pathStyleProps});
+      }
     }
   }
 

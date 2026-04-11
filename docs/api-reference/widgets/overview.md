@@ -6,25 +6,41 @@ This module contains the following widgets:
 
 ### Navigation Widgets
 
-- [ZoomWidget](./zoom-widget.md)
+- [GimbalWidget](./gimbal-widget.md)
 - [ResetViewWidget](./reset-view-widget.md)
-<!-- - [GimbalWidget](./gimbal-widget.md) -->
+- [ZoomWidget](./zoom-widget.md)
+- [ScrollbarWidget](./scrollbar-widget.md)
 
 ### Geospatial Widgets
 
 - [CompassWidget](./compass-widget.md)
-<!-- - [ScaleWidget](./scale-widget.md) -->
-<!-- - [GeocoderWidget](./geocoder-widget.md) -->
+- [GeocoderWidget](./geocoder-widget.md)
+- [ScaleWidget](./scale-widget.md)
+
+### View Widgets
+
+- [FullscreenWidget](./fullscreen-widget.md)
+- [SplitterWidget](./splitter-widget.md)
+
+### Information Widgets
+
+- [ContextMenuWidget](./context-menu-widget.md)
+- [InfoWidget](./info-widget.md)
+- [PopupWidget](./popup-widget.md)
+
+### Control Widgets
+
+- [IconWidget](./icon-widget.md)
+- [ToggleWidget](./toggle-widget.md)
+- [SelectorWidget](./selector-widget.md)
+- [TimelineWidget](./timeline-widget.md)
 
 ### Utility Widgets
 
-- [FullscreenWidget](./fullscreen-widget.md)
-- [ScreenshotWidget](./screenshot-widget.md)
 - [LoadingWidget](./loading-widget.md)
+- [ScreenshotWidget](./screenshot-widget.md)
+- [StatsWidget](./stats-widget.md)
 - [ThemeWidget](./theme-widget.md)
-- [InfoWidget](./info-widget.md)
-- [SplitterWidget](./splitter-widget.md)
-- [TimelineWidget](./timeline-widget.md)
 
 ## Installation
 
@@ -111,6 +127,94 @@ new Deck({
   ]
 });
 ```
+
+### Using with Multiple Views
+
+Widgets with UI (e.g. a button or panel) can be positioned relative to the deck.gl view they are controlling, via the `viewId` and `placement` props. See [WidgetProps](../core/widget.md#widgetprops).
+
+The `viewId` controls which HTML container will mount to, and the `placement` prop will position it relative to the container it is in, like so:
+
+```ts
+new Deck({
+  views:[
+    new MapView({id: 'left-map'}),
+    new MapView({id: 'right-map'})
+  ],
+  widgets: [
+    new FullscreenWidget({placement: 'top-right'}),
+    new ZoomWidget({viewId: 'left-map'}),
+    new GimbalWidget({viewId: 'right-map'}),
+  ]
+})
+```
+
+This configuration will result in the following HTML structure:
+
+```html
+<!-- map container -->
+<div class="deck-widget-container">
+  <canvas id="deckgl-overlay">
+  <!-- size of full map container -->
+  <div>
+    <div class="top-right">
+      </FullscreenWidget>
+    </div>
+  </div>
+  <!-- size and position of the "left-map" view -->
+  <div>
+    <div class="top-left">
+      </ZoomWidget>
+    </div>
+  </div>
+  <!-- size and position of the "right-map" view -->
+  <div>
+    <div class="top-left">
+      </GimbalWidget>
+    </div>
+  </div>
+</div>
+```
+
+Remarks:
+
+* Widgets in the default container will be overlapped by view-specific widgets.
+* Widget UI with dynamic positioning, such as an `InfoWidget`, may not expose the `placement` prop as they control positioning internally.
+* For more information about using multiple deck.gl views, see the [Using Multiple Views](../../developer-guide/views.md#using-multiple-views) guide.
+
+## Controlled vs Uncontrolled Mode
+
+Many deck.gl widgets support both controlled and uncontrolled modes, similar to React form components.
+
+### Uncontrolled Mode (Default)
+
+By default, widgets manage their own internal state. You can optionally provide an initial value and receive callbacks when the state changes:
+
+```ts
+new ThemeWidget({
+  initialThemeMode: 'light',
+  onThemeModeChange: (mode) => console.log('Theme changed:', mode)
+})
+```
+
+### Controlled Mode
+
+When you provide a state prop (e.g., `themeMode`, `fullscreen`, `time`), the widget enters controlled mode. In this mode, the widget's state is driven entirely by the prop value, and you must update it via callbacks:
+
+```ts
+let themeMode = 'light';
+
+new ThemeWidget({
+  themeMode,
+  onThemeModeChange: (mode) => {
+    themeMode = mode;
+    deck.setProps({widgets: [new ThemeWidget({themeMode, onThemeModeChange: ...})]});
+  }
+})
+```
+
+### Reading Widget State
+
+Widgets with internal state expose getter methods (e.g., `getThemeMode()`, `getFullscreen()`) that return the current state regardless of whether the widget is controlled or uncontrolled.
 
 ## Writing new Widgets
 

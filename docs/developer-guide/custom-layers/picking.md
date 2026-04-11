@@ -56,7 +56,7 @@ To take full control of picking, a layer need to take the following steps:
 Add an attribute for each vertex using the layer's [AttributeManager](../../api-reference/core/attribute-manager.md):
 
 ```js
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 class MyLayer extends Layer {
   initializeState() {

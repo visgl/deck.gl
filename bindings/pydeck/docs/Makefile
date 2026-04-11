@@ -24,7 +24,7 @@ html-embeds:
 
 html-thumbnails:
 	@echo "Producing HTML thumbnail assets"
-	python scripts/snap_thumbnails.py
+	uv run python scripts/snap_thumbnails.py
 
 html-grid-page:
 	@echo "Producing examples grid"

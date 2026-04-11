@@ -17,9 +17,161 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.3
+
+### deck.gl v9.3 Prereleases
+
+#### deck.gl [v9.3.0-beta.1] - Apr 7 2026
+
+- feat(extensions): Add dashed stroke support for ScatterplotLayer and TextBackgroundLayer (#9976)
+- chore(test-utils): Separate tape tests from vitest and clean up CI (#10061)
+- fix(geo-layers): Ensure zoomOffset is correctly part of the round/ceil Z calculation (#9807)
+- feat(widgets): Add controlled mode and state callbacks (#9973)
+- chore(mapbox): Remove MapboxLayer and _renderLayersInGroups (#10163)
+- fix(mapbox): automatically inject 'mapbox' view in overlaid mode for multi-view consistency (#9947)
+- feat(core): AttributeManager allocates Buffers for constant WebGPU at… (#10152)
+- feat(core) coordinateSystem prop now accepts no-import string constants (#10140)
+- fix(layers): discard fragments outside rounded rect in TextBackgroundLayer (#10177)
+- fix(layers): submit command buffer after texture copy in IconLayer resize (#10176)
+- fix(core): WebGPU Picking fix (#10175)
+- feat(layers): TextLayer uses real text metrics (#10164)
+- chore(geo-layers): Update h3 & a5 dependencies (#10170)
+
+#### deck.gl [v9.3.0-alpha.6] - Apr 2 2026
+
+- feat(TileLayer): Add visibleMinZoom & visibleMaxZoom props (#10091)
+- fix(mapbox): onBefore|AfterRender fires without layers (#10166)
+- fix(mapbox): Prevent crash when deck uninitialized (#10167)
+- feat(main): export all widgets from deck.gl main module (#10160)
+- chore: Bump to luma@9.3.1 & loaders@4.4.1 (#10158)
+- fix(layers): Texture handling in WebGPU (#10157)
+- chore: Bump luma.gl@alpha.11 (#10141)
+- chore(json): Typing improvements (#9641)
+- feat(core): simplify layer plumbing for WebGPU (#9820)
+- chore: enable source map in website dev mode (#10156)
+
+#### deck.gl [v9.3.0-alpha.5] - Mar 31 2026
+
+#### deck.gl [v9.3.0-alpha.4] - Mar 31 2026
+
+- fix(TerrainController): Better React controlled mode behavior (#10144)
+- fix(react): Avoid double render in controlled mode (#10143)
+- feat(core,react,docs): Add async deck picking methods (#9733)
+- chore: bump peerDependencies to ~9.3.0-alpha.1 (#10139)
+- chore: Upgrade to luma.gl 9.3.0-alpha.10 (#10123)
+
+#### deck.gl [v9.3.0-alpha.3] - Mar 27 2026
+
+- feat(core): TerrainController (#10134)
+
+#### deck.gl [v9.3.0-alpha.2] - Mar 26 2026
+
+- chore: upgrade Node.js from 20 to 22 (#10051)
+- chore(core): Use non-deprecated props for lighting module (#10121)
+- feat(layers): add clipping to TextLayer (#10118)
+- feat(core): FirstPersonController supports maxBounds (#10115)
+- feat(core): OrthographicView supports maxBounds (#10108)
+- feat(core): OrbitController supports maxBounds (#10116)
+- feat(core): GlobeView supports maxBounds (#10111)
+- feat(core): more intuitive OrbitController (#10117)
+- feat(core): controller normalizes viewport on dimension change (#10109)
+- feat(chore): new Deck metrics (#10100)
+- feat(core): deep merge view states (#10104)
+- chore: Bump to luma.gl@9.3.0-alpha.6 (#10107)
+- feat(core): controller maxBounds (#10105)
+- feat(core): OrthographicView: soft-deprecate array zoom (#10106)
+- feat(widgets): v9.3 graduation (#10096)
+- feat(website): Add ScrollbarWidget to OrthographicView example (#10099)
+- feat(website): Widget documentation pass (#10095)
+- feat(widgets): generic controls (#10090)
+- feat(widgets): ContextMenuWidget API audit (#10087)
+- feat(widgets): Widget common component improvements (#10089)
+- feat(widgets): Merge FpsWidget into StatsWidget (#10085)
+- fix(widgets): properly clean up Popover element on widget removal (#10088)
+- fix(mapbox): handle null viewport (#10086)
+- feat(widgets): Update SplitterWidget (#10072)
+- fix(widgets): TimelineWidget bugs (#10081)
+- feat(react): React widget exports (#10083)
+- Add missing update dependencies (#10082)
+- fix(mapbox): guard against null viewport when canvas has zero dimensions (#10076)
+- fix: updates pydeck pyproject.toml to include dynamic field (#10048)
+- fix(react): DeckGL avoid overwriting undefined views prop (#10074)
+
+#### deck.gl [v9.3.0-alpha.1] - Mar 10 2026
+
+- fix(Tile3DLayer): Pass through tileset loadOptions to Tileset3D (#10079)
+- feat(Tile3DLayer): mark rendered tiles as drawn (#10058)
+- chore: bump to luma.gl@9.3 (#10034)
+- chore: bump to loaders.gl@4.4 (#9972)
+- feat(widgets): migrate TimelineWidget to RangeInput (#10071)
+- feat(widgets): Add ScrollbarWidget (#10068)
+- fix(TerrainExtension): Handle pick events in TerrainExtension & draped layers (#10037)
+- fix(widgets): Respect min/maxZoom (#10033)
+- Upgrade Node.js from 18 to 20 across build, test, website and repo (#10050)
+- feat(widgets): misc cleanup (#10045)
+- feat(widgets) StatsWidget styling and docs pass (#10044)
+- fix(widgets): ResetViewWidget default viewId (#10042)
+- update popover components (#10041)
+- Fix fullscreen widget default container (#10040)
+- fix(Tile3DLayer): prefers loaders prop over loader (#10036)
+- feat(core): 3D enable MapController using rotatationPivot option (#9938)
+- feat(widgets): ContextMenuWidget improvements (#10031)
+- feat(widgets): PopupWidget (#10030)
+- feat(widgets): Use popper to calculate popup position (#10029)
+- fix(widgets) events in react reverse controlled env (#8893)
+- Remove Volta from deck.gl (#9970)
+- Port IconLayer to WebGPU (#9819)
+- chore(ci): migrate from Volta to Corepack for automated builds (#9910)
+- Update .gitignore (#9878)
+
 ## deck.gl v9.2
 
 ### deck.gl v9.2 Prereleases
+
+#### deck.gl [v9.2.0-beta.4] - Oct 6 2025
+
+- Invoke transform function for constant attributes (#9741)
+- Pass `vertexValid` to SolidPolygonLayer when using binary GeoJSON (#9805)
+- Add IconLayer sizeBasis prop (#9736)
+- fix: Maplibre interleaved resize handling (#9803)
+- Fix potential undefined deck in FPS calculation (#9800)
+
+#### deck.gl [v9.2.0-beta.3] - Sep 26 2025
+
+- fix(extensions): correctly activate picking module in terrain picking pass (#9768)
+- fix(widgets): widget bug bash (#9797)
+- chore(widgets) audit props and docs (#9796)
+- fix(maplibre): Update default view once projection is known (#9794)
+
+#### deck.gl [v9.2.0-beta.2] - Sep 25 2025
+
+- chore: bump luma to 9.2.0 (#9792)
+- fix: HeatmapLayer working with binary data (#9787)
+- fix: picking on non-geospatial tile layer with modelMatrix (#9703)
+- CARTO: Support h3 in ClusterTileLayer (#9755)
+
+#### deck.gl [v9.2.0-beta.1] - Sep 19 2025
+
+#### deck.gl [v9.2.0-alpha.3] - Sep 15 2025
+
+- fix(core): orthographic scroll zoom transitions (#9769)
+- fix(widgets): Minor widget fixes (#9758)
+- CARTO: Support h3 in HeatmapTileLayer (#9753)
+- feat(widgets): Support custom widgets in pydeck via custom_libraries (#9745)
+- feat(core): Add async DeckPicker methods (#9732)
+- feat(webgpu): Enable transparency for WebGPU and ported example layers (#9730)
+- fix(webgpu): Emulate constant attributes as buffers and trigger update on constant change (#9726)
+- fix(layers): correctly identify elevationData strings using TMS (#9712)
+- fix(mesh-layers): Include `@loaders.gl/schema` dependency (#9697)
+- feat(layers): Port ScatterplotLayer to WebGPU / WGSL (#9432)
+- chore(geo-layers): version bump A5 (#9707)
+- fix(core): correct opacity in interleaved mode (#9642)
+- feat(core): Support clear color, depth, and stencil on multiple views (#9650)
+- fix(mapbox): Fix view selection logic in getViewport (#9688)
+- chore: Bump to luma.gl@9.2.0-alpha (#9241)
+- fix(google): Do not force canvas resize (#9695)
+- fix(CARTO): H3 tile bounding box includes edge children (#9693)
+- fix(core): onClick callback does not handle dblclick (#9629)
 
 #### deck.gl [v9.2.0-alpha.2] - Jun 4 2025
 

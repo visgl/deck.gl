@@ -1,4 +1,4 @@
-import {_ContextMenuWidget} from '@deck.gl/widgets';
+import {ContextMenuWidget as _ContextMenuWidget} from '@deck.gl/widgets';
 import type {ContextMenuWidgetProps} from '@deck.gl/widgets';
 import {useWidget} from '../utils/use-widget';
 

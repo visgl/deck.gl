@@ -6,7 +6,8 @@
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';
-import {H3TileLayer, h3QuerySource} from '@deck.gl/carto';
+import {H3TileLayer} from '@deck.gl/carto';
+import {h3QuerySource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = h3QuerySource({

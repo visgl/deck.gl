@@ -98,7 +98,7 @@ function getLayerRange(
     const layerNames: Record<string, LayerRange> = {};
     const {properties} = geomData;
     for (let i = 0; i < properties.length; i++) {
-      const {layerName: key} = properties[i] as Record<string, any>;
+      const {layerName: key} = properties[i];
       if (!key) {
         // ignore
       } else if (layerNames[key]) {

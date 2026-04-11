@@ -43,6 +43,7 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
+  pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
 };
@@ -65,6 +66,7 @@ export default class ViewManager<ViewsT extends View[]> {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
+  private _pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
 
   constructor(
     props: ViewManagerProps<ViewsT> & {
@@ -92,6 +94,7 @@ export default class ViewManager<ViewsT extends View[]> {
       onViewStateChange: props.onViewStateChange,
       onInteractionStateChange: props.onInteractionStateChange
     };
+    this._pickPosition = props.pickPosition;
 
     Object.seal(this);
 
@@ -178,7 +181,7 @@ export default class ViewManager<ViewsT extends View[]> {
       typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
     const viewState = (view && this.viewState[view.getViewStateId()]) || this.viewState;
-    return view ? view.filterViewState(viewState) : viewState;
+    return (view ? view.filterViewState(viewState) : viewState) as AnyViewStateOf<ViewsT>;
   }
 
   getViewport(viewId: string): Viewport | undefined {
@@ -222,6 +225,10 @@ export default class ViewManager<ViewsT extends View[]> {
 
     if ('width' in props || 'height' in props) {
       this._setSize(props.width as number, props.height as number);
+    }
+
+    if ('pickPosition' in props) {
+      this._pickPosition = props.pickPosition;
     }
 
     // Important: avoid invoking _update() inside itself
@@ -308,7 +315,8 @@ export default class ViewManager<ViewsT extends View[]> {
           viewState,
           width: this.width,
           height: this.height
-        })
+        }),
+      pickPosition: this._pickPosition
     });
 
     return controller;

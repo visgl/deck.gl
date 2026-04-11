@@ -1,56 +1,93 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_LoadingWidget} from '@deck.gl/widgets';
-
-# LoadingWidget (Experimental)
+# LoadingWidget
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
 
+import {LoadingWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<LoadingWidgetDemo />
+
 This widget shows a spinning indicator while any deck.gl layers are loading data.
 
-<WidgetPreview cls={_LoadingWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  widgets: [
+    new LoadingWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {_LoadingWidget as LoadingWidget} from '@deck.gl/widgets';
 import {Deck} from '@deck.gl/core';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-const deck = new Deck({
-  widgets: [new LoadingWidget()]
+new Deck({
+  widgets: [
+    new LoadingWidget({placement: 'top-left'})
+  ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {LoadingWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL>
+      <LoadingWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {LoadingWidget, type LoadingWidgetProps} from '@deck.gl/widgets';
+new LoadingWidget({} satisfies LoadingWidgetProps);
 ```
 
 ## Types
 
-### `LoadingnWidgetProps`
+### `LoadingWidgetProps` {#loadingwidgetprops}
 
-The `LoadingnWidget` accepts the generic [`WidgetProps`](../core/widget.md#props):
-
-- `id` (default `'loading'`) -  Unique id for this widget
-- `placement` (default `'top-left'`) - Widget position within the view relative to the map container
-- `viewId` (default `null`) - The `viewId` prop controls how a widget interacts with views. 
-- `style` (default `{}`) - Additional inline styles on the top HTML element.
-- `className` (default `''`) - Additional classnames on the top HTML element.
-
-## Props
-
-#### `id` (string, optional) {#id}
-
-Default: `'loading'`
-
-The `id` must be unique among all your widgets at a given time. 
-
-Note: It is necessary to set `id` explicitly if you have more than once instance of the same widget.
-
-#### `placement` (string, optional) {#placement}
-
-Default: `'top-left'`
-
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Loading data'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Loading data'`
+#### `onLoadingChange` (Function, optional) {#onloadingchange}
+
+```ts
+(loading: boolean) => void
+```
+
+* Default: `() => {}`
+
+Callback when the loading state changes. Called when layers transition between loading and loaded states.
 
 ## Source
 

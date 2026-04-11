@@ -131,6 +131,31 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
 | `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)` |
 | `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+| `--button-text-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+
+### Menu
+
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--menu-gap` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `4px` |
+| `--menu-background` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#fff` |
+| `--menu-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
+| `--menu-border` | [Border](https://developer.mozilla.org/en-US/docs/Web/CSS/border) | `unset` |
+| `--menu-shadow` | [Box Shadow](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow) | `0px 0px 8px 0px rgba(0, 0, 0, 0.25)` |
+| `--menu-text` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgb(24, 24, 26)` |
+| `--menu-item-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(0, 0, 0, 0.08)` |
+
+### Range input
+
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--range-step-button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `24px`      |
+| `--range-track-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `16px`      |
+| `--range-thumb-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `10px`      |
+| `--range-track-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#888`     |
+| `--range-thumb-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#444`      |
+| `--range-decoration-active-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `gold`  |
+
 
 ### Icon
 

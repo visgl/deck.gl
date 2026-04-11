@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^4.2.0",
+    "@loaders.gl/obj": "^4.4.1",
     "@math.gl/core": "^4.1.0",
     "deck.gl": "^9.0.0",
     "react": "^18.0.0",
@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "typescript": "^4.6.0",
-    "vite": "^4.0.0"
+    "vite": "^7.3.1"
   }
 }

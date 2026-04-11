@@ -7,6 +7,7 @@ import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
 import {TextBackgroundProps, textBackgroundUniforms} from './text-background-layer-uniforms';
+import {TextModuleProps, textUniforms} from '../text-uniforms';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
 
@@ -28,15 +29,17 @@ type _TextBackgroundLayerProps<DataT> = {
   sizeUnits?: Unit;
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
+  fontSize?: number;
 
-  borderRadius?: number | [number, number, number, number];
-  padding?: [number, number] | [number, number, number, number];
+  borderRadius?: number | Readonly<[number, number, number, number]>;
+  padding?: Readonly<[number, number]> | Readonly<[number, number, number, number]>;
 
   getPosition?: Accessor<DataT, Position>;
   getSize?: Accessor<DataT, number>;
   getAngle?: Accessor<DataT, number>;
-  getPixelOffset?: Accessor<DataT, [number, number]>;
-  getBoundingRect?: Accessor<DataT, [number, number, number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  getBoundingRect?: Accessor<DataT, Readonly<[number, number, number, number]>>;
+  getClipRect?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
   getFillColor?: Accessor<DataT, Color>;
   getLineColor?: Accessor<DataT, Color>;
   getLineWidth?: Accessor<DataT, number>;
@@ -51,6 +54,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   sizeUnits: 'pixels',
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+  fontSize: 1,
 
   borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
@@ -60,6 +64,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   getBoundingRect: {type: 'accessor', value: [0, 0, 0, 0]},
+  getClipRect: {type: 'accessor', value: [0, 0, -1, -1]},
   getFillColor: {type: 'accessor', value: [0, 0, 0, 255]},
   getLineColor: {type: 'accessor', value: [0, 0, 0, 255]},
   getLineWidth: {type: 'accessor', value: 1}
@@ -76,7 +81,11 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, textBackgroundUniforms]});
+    return super.getShaders({
+      vs,
+      fs,
+      modules: [project32, picking, textBackgroundUniforms, textUniforms]
+    });
   }
 
   initializeState() {
@@ -102,6 +111,11 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceRects: {
         size: 4,
         accessor: 'getBoundingRect'
+      },
+      instanceClipRect: {
+        size: 4,
+        accessor: 'getClipRect',
+        defaultValue: [0, 0, -1, -1]
       },
       instancePixelOffsets: {
         size: 2,
@@ -142,7 +156,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth} =
+    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, fontSize} =
       this.props;
     let {padding, borderRadius} = this.props;
 
@@ -151,21 +165,30 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     }
 
     if (!Array.isArray(borderRadius)) {
-      borderRadius = [borderRadius, borderRadius, borderRadius, borderRadius];
+      borderRadius = [
+        borderRadius as number,
+        borderRadius as number,
+        borderRadius as number,
+        borderRadius as number
+      ];
     }
 
     const model = this.state.model!;
     const textBackgroundProps: TextBackgroundProps = {
       billboard,
       stroked: Boolean(getLineWidth),
-      borderRadius,
+      borderRadius: borderRadius as [number, number, number, number],
       padding: padding as [number, number, number, number],
       sizeUnits: UNIT[sizeUnits],
       sizeScale,
       sizeMinPixels,
       sizeMaxPixels
     };
-    model.shaderInputs.setProps({textBackground: textBackgroundProps});
+    const textProps: TextModuleProps = {
+      fontSize,
+      viewport: this.context.viewport
+    };
+    model.shaderInputs.setProps({textBackground: textBackgroundProps, text: textProps});
     model.draw(this.context.renderPass);
   }
 

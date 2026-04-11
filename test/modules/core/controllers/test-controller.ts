@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {expect} from 'vitest';
 import {Timeline} from '@luma.gl/engine';
+import type {View} from '@deck.gl/core';
 
 function makeEvents(events, opts = {}) {
   return events.map((type, i) => makeEvent(type, opts, i));
@@ -188,15 +190,23 @@ const TEST_CASES = [
         .concat(makeEvents(['keydown'], {code: 'Equal'}))
         .concat(makeEvents(['keydown'], {code: 'Equal', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowLeft'}))
-        .concat(makeEvents(['keydown'], {code: 'ArrowLeft', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowUp'}))
-        .concat(makeEvents(['keydown'], {code: 'ArrowUp', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowRight'}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowDown'})),
+    viewStateChanges: 8,
+    interactionStates: 2
+  },
+  {
+    title: 'keyboard#function key',
+    props: {},
+    events: () =>
+      makeEvents(['keydown'], {code: 'Minus'})
+        .concat(makeEvents(['keydown'], {code: 'ArrowLeft', shiftKey: true}))
+        .concat(makeEvents(['keydown'], {code: 'ArrowUp', shiftKey: true}))
         .concat(makeEvents(['keydown'], {code: 'ArrowRight', shiftKey: true}))
-        .concat(makeEvents(['keydown'], {code: 'ArrowDown'}))
         .concat(makeEvents(['keydown'], {code: 'ArrowDown', shiftKey: true})),
-    viewStateChanges: 12,
-    interactionStates: 3
+    viewStateChanges: 5,
+    interactionStates: 2
   },
   {
     title: 'keyboard#disabled',
@@ -207,52 +217,94 @@ const TEST_CASES = [
   }
 ];
 
-export default async function testController(t, ViewClass, defaultProps, blackList = []) {
+export function createTestController({
+  view,
+  initialViewState = {},
+  onViewStateChange,
+  onStateChange
+}: {
+  view: View;
+  initialViewState?: any;
+  onViewStateChange?: (params: any) => void;
+  onStateChange?: (newState: any) => void;
+}) {
   const timeline = new Timeline();
-  const view = new ViewClass({controller: true});
+  const baseProps = {
+    id: 'test-view',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    ...initialViewState
+  };
+  let currentProps = {...view.controller, ...baseProps};
+  const ControllerClass = currentProps.type;
 
-  let onViewStateChangeCalled = 0;
-  const affectedStates = new Set();
-  let controllerProps = null;
-  Object.assign(defaultProps, BASE_PROPS, view.controller);
-  const ControllerClass = defaultProps.type;
   const controller = new ControllerClass({
     timeline,
-    onViewStateChange: ({viewState, interactionState}) => {
-      if (!interactionState.inTransition) {
-        onViewStateChangeCalled++;
-      }
-      // eslint-disable-next-line
-      controller.setProps({...controllerProps, ...viewState});
+    onViewStateChange: params => {
+      const viewState = onViewStateChange?.(params) ?? params.viewState;
+      currentProps = {...currentProps, ...viewState};
+      controller.setProps(currentProps);
     },
-    onStateChange: state => {
-      for (const key in state) {
-        if (state[key] && key.startsWith('is')) {
-          affectedStates.add(key);
-        }
-      }
+    onStateChange: newState => {
+      onStateChange?.(newState);
     },
     makeViewport: viewState =>
-      view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
+      view.makeViewport({width: currentProps.width, height: currentProps.height, viewState})
   });
-  controller.setProps(defaultProps);
+
+  controller.setProps(currentProps);
+  return controller;
+}
+
+export default async function testController(ViewClass, defaultProps, blackList = []) {
+  const view = new ViewClass({controller: true});
+  const baseProps = {...BASE_PROPS, ...view.controller, ...defaultProps};
+  const ControllerClass = baseProps.type;
 
   for (const testCase of TEST_CASES) {
     if (blackList.includes(testCase.title)) {
       continue; // eslint-disable-line
     }
+    const timeline = new Timeline();
+    const affectedStates = new Set();
+    let onViewStateChangeCalled = 0;
+    let controllerProps = {...baseProps};
+    const controller = new ControllerClass({
+      timeline,
+      onViewStateChange: ({viewState, interactionState}) => {
+        if (!interactionState.inTransition) {
+          onViewStateChangeCalled++;
+        }
+        controllerProps = {...controllerProps, ...viewState};
+        controller.setProps(controllerProps);
+      },
+      onStateChange: state => {
+        for (const key in state) {
+          if (state[key] && key.startsWith('is')) {
+            affectedStates.add(key);
+          }
+        }
+      },
+      makeViewport: viewState =>
+        view.makeViewport({width: BASE_PROPS.width, height: BASE_PROPS.height, viewState})
+    });
+    controller.setProps(controllerProps);
     onViewStateChangeCalled = 0;
     affectedStates.clear();
-    controllerProps = {...defaultProps, ...testCase.props};
+    controllerProps = {...baseProps, ...testCase.props};
     controller.setProps(controllerProps);
     await triggerEvents(controller, testCase, timeline);
 
-    t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
-    t.is(
-      affectedStates.size,
-      testCase.interactionStates,
-      `${testCase.title} interaction state updated`
+    expect(onViewStateChangeCalled, `${testCase.title} onViewStateChange`).toBe(
+      testCase.viewStateChanges
     );
+    expect(affectedStates.size, `${testCase.title} interaction state updated`).toBe(
+      testCase.interactionStates
+    );
+
+    controller.finalize();
   }
 }
 

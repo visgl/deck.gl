@@ -9,17 +9,11 @@ import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
-import {
-  CARTO_LAYERS,
-  CARTO_SOURCES,
-  colorBins,
-  colorCategories,
-  colorContinuous
-} from '@deck.gl/carto';
+import {CARTO_LAYERS, colorBins, colorCategories, colorContinuous} from '@deck.gl/carto';
+import {CARTO_SOURCES} from '@carto/api-client';
 import * as Widgets from '@deck.gl/widgets';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {GL as GLConstants} from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl/constants';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
@@ -52,7 +46,6 @@ export default {
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    COORDINATE_SYSTEM,
     GL: GLConstants
   },
 

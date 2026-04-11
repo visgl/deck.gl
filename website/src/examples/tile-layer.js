@@ -15,7 +15,12 @@ class MapTileDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/map-tile`;
 
   static parameters = {
-    showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false}
+    minZoom: {displayName: 'Min Zoom', type: 'range', value: 3, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
+    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
+    visibleMinZoom: {displayName: 'Visible Min Zoom', type: 'range', value: 1, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
+    visibleMaxZoom: {displayName: 'Visible Max Zoom', type: 'range', value: 12, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
+    showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
+    useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
 
   static renderInfo(meta) {
@@ -26,8 +31,13 @@ class MapTileDemo extends Component {
           <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a> and
           <a href="https://wiki.openstreetmap.org/wiki/Tile_servers"> Tile Servers </a>
         </p>
-        <div className="stat">
-          No. of Tiles Loaded<b>{meta.tileCount || 0}</b>
+        <div className="layout">
+          <div className="stat col-1-2">
+            No. of Tiles Loaded<b>{meta.tileCount || 0}</b>
+          </div>
+          <div className="stat col-1-2">
+            Viewport Zoom<b>{meta.zoom != null ? meta.zoom.toFixed(1) : '-'}</b>
+          </div>
         </div>
       </div>
     );
@@ -40,11 +50,25 @@ class MapTileDemo extends Component {
     requestAnimationFrame(() => this.props.onStateChange({tileCount: tiles.length}));
   };
 
+  _onZoomChange = zoom => {
+    this.props.onStateChange({zoom});
+  };
+
   render() {
     // eslint-disable-next-line no-unused-vars
     const {params, ...otherProps} = this.props;
     return (
-      <App {...otherProps} showBorder={params.showBorder.value} onTilesLoad={this._onTilesLoad} />
+      <App
+        {...otherProps}
+        showBorder={params.showBorder.value}
+        minZoom={params.minZoom.value}
+        maxZoom={params.maxZoom.value}
+        visibleMinZoom={params.visibleMinZoom.value}
+        visibleMaxZoom={params.visibleMaxZoom.value}
+        useExtent={params.useExtent.value}
+        onTilesLoad={this._onTilesLoad}
+        onZoomChange={this._onZoomChange}
+      />
     );
   }
 }

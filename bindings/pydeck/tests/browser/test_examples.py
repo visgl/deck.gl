@@ -10,7 +10,6 @@ import urllib
 
 import asyncio
 
-
 here = os.path.dirname(os.path.abspath(__file__))
 notebook_directory = os.path.join(here, "../../examples/")
 jupyter_execution_directory = os.path.join(notebook_directory, "./..")

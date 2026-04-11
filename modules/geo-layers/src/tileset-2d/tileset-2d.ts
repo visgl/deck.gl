@@ -9,7 +9,7 @@ import {Matrix4, equals, NumericArray} from '@math.gl/core';
 
 import {Tile2DHeader} from './tile-2d-header';
 
-import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
+import {getTileIndices, tileToBoundingBox, getCullBounds, transformBox} from './utils';
 import {Bounds, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
@@ -81,7 +81,10 @@ export type Tileset2DProps<DataT = any> = {
   debounceTime?: number;
   /** Changes the zoom level at which the tiles are fetched. Needs to be an integer. @default 0 */
   zoomOffset?: number;
-
+  /** The minimum zoom level at which tiles are visible. @default null */
+  visibleMinZoom?: number | null;
+  /** The maximum zoom level at which tiles are visible. @default null */
+  visibleMaxZoom?: number | null;
   /** Called when a tile successfully loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
   /** Called when a tile is cleared from cache. */
@@ -109,6 +112,8 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   maxRequests: 6,
   debounceTime: 0,
   zoomOffset: 0,
+  visibleMinZoom: null,
+  visibleMaxZoom: null,
 
   // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
   // onViewportLoad: ((tiles: Tile2DHeader<DataT>[]) => void) | null,
@@ -204,6 +209,8 @@ export class Tileset2D {
     if (Number.isFinite(opts.minZoom)) {
       this._minZoom = Math.ceil(opts.minZoom as number);
     }
+    // Force re-evaluation of tile indices on next update
+    this._viewport = null;
   }
 
   // Clean up any outstanding tile requests.
@@ -291,7 +298,8 @@ export class Tileset2D {
   // eslint-disable-next-line complexity
   isTileVisible(
     tile: Tile2DHeader,
-    cullRect?: {x: number; y: number; width: number; height: number}
+    cullRect?: {x: number; y: number; width: number; height: number},
+    modelMatrix?: Matrix4 | null
   ): boolean {
     if (!tile.isVisible) {
       return false;
@@ -303,12 +311,19 @@ export class Tileset2D {
         z: this._zRange,
         cullRect
       });
-      const {bbox} = tile;
+      let {bbox} = tile;
       for (const [minX, minY, maxX, maxY] of boundsArr) {
         let overlaps;
         if ('west' in bbox) {
           overlaps = bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
         } else {
+          if (modelMatrix && !Matrix4.IDENTITY.equals(modelMatrix)) {
+            const [left, top, right, bottom] = transformBox(
+              [bbox.left, bbox.top, bbox.right, bbox.bottom],
+              modelMatrix
+            );
+            bbox = {left, top, right, bottom};
+          }
           // top/bottom could be swapped depending on the indexing system
           const y0 = Math.min(bbox.top, bbox.bottom);
           const y1 = Math.max(bbox.top, bbox.bottom);
@@ -343,7 +358,7 @@ export class Tileset2D {
     modelMatrixInverse?: Matrix4;
     zoomOffset?: number;
   }): TileIndex[] {
-    const {tileSize, extent, zoomOffset} = this.opts;
+    const {tileSize, extent, zoomOffset, visibleMinZoom, visibleMaxZoom} = this.opts;
     return getTileIndices({
       viewport,
       maxZoom,
@@ -353,7 +368,9 @@ export class Tileset2D {
       extent: extent as Bounds | undefined,
       modelMatrix,
       modelMatrixInverse,
-      zoomOffset
+      zoomOffset,
+      visibleMinZoom,
+      visibleMaxZoom
     });
   }
 

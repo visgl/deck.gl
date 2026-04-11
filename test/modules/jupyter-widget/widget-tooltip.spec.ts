@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line
 /* global document */
-import test from 'tape-promise/tape';
+import {test, expect, describe} from 'vitest';
 import makeTooltip, {
   getTooltipDefault,
   substituteIn,
@@ -31,19 +31,18 @@ const TOOLTIP_HTML = {
   }
 };
 
-test('jupyter-widget: tooltip', t0 => {
-  t0.test('getTooltipDefault', t => {
+describe('jupyter-widget: tooltip', () => {
+  test('getTooltipDefault', () => {
     Object.assign(pickedInfo, {picked: false});
-    t.equal(getTooltipDefault(pickedInfo), null, 'should return null if nothing picked');
+    expect(getTooltipDefault(pickedInfo), 'should return null if nothing picked').toBe(null);
     Object.assign(pickedInfo, {picked: true});
     const tooltip = getTooltipDefault(pickedInfo);
-    t.deepEquals(tooltip, TOOLTIP_HTML, 'tooltip is expected result');
+    expect(tooltip, 'tooltip is expected result').toEqual(TOOLTIP_HTML);
     const tooltipCached = getTooltipDefault(pickedInfo);
-    t.deepEquals(tooltipCached, TOOLTIP_HTML, 'tooltip called twice hits its cached value');
-    t.end();
+    expect(tooltipCached, 'tooltip called twice hits its cached value').toEqual(TOOLTIP_HTML);
   });
 
-  t0.test('toText', t => {
+  test('toText', () => {
     const TESTING_TABLE = [
       {
         input: ['arma', 'virumque', 'cano', 'Troiae'],
@@ -79,12 +78,11 @@ test('jupyter-widget: tooltip', t0 => {
       }
     ];
     for (const kv of TESTING_TABLE) {
-      t.equal(toText(kv.input), kv.expected, kv.message);
+      expect(toText(kv.input), kv.message).toBe(kv.expected);
     }
-    t.end();
   });
 
-  t0.test('substituteIn', t => {
+  test('substituteIn', () => {
     const TESTING_TABLE = [
       {
         template: '"{quote}" - {origin}',
@@ -146,13 +144,12 @@ test('jupyter-widget: tooltip', t0 => {
       }
     ];
     for (const kv of TESTING_TABLE) {
-      t.equal(substituteIn(kv.template, kv.json), kv.expected);
+      expect(substituteIn(kv.template, kv.json)).toBe(kv.expected);
     }
-    t.end();
   });
 
-  t0.test('makeTooltip', t => {
-    t.equal(makeTooltip(null), null, 'If no tooltip JSON passed, return null');
+  test('makeTooltip', () => {
+    expect(makeTooltip(null), 'If no tooltip JSON passed, return null').toBe(null);
     const htmlTooltip = {
       html: '<b>Elevation Value:</b> {elevationValue}',
       style: {
@@ -160,7 +157,7 @@ test('jupyter-widget: tooltip', t0 => {
       }
     };
     const tooltip = makeTooltip(htmlTooltip)(pickedInfo);
-    t.deepEquals(tooltip, {
+    expect(tooltip).toEqual({
       style: {backgroundColor: 'lemonchiffon'},
       html: '<b>Elevation Value:</b> 10'
     });
@@ -171,13 +168,9 @@ test('jupyter-widget: tooltip', t0 => {
         backgroundColor: 'lemonchiffon'
       }
     };
-    t.deepEquals(textTooltip, {
+    expect(textTooltip).toEqual({
       style: {backgroundColor: 'lemonchiffon'},
       text: 'testing'
     });
-
-    t.end();
   });
-
-  t0.end();
 });

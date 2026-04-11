@@ -1,8 +1,9 @@
 Event handling
 ^^^^^^^^^^^^^^
 
-.. WARNING::
-   Jupyter-specific features are not currently supported in pydeck v0.9+.
+.. NOTE::
+   Event handling requires the Jupyter widget integration, which is not currently
+   functional in pydeck v0.9+. See :doc:`jupyter` for details.
 
 pydeck provides bidirectional interactions in Jupyter via event handlers,
 ``on_hover``, ``on_resize``, ``on_view_state_change``, and ``on_click``. Each corresponds
@@ -16,8 +17,7 @@ to the Jupyter kernel. The data structure varies slightly by handler.
 
 To inspect the payload of a handler, you can print the result to an `ipywidgets HTML <https://ipywidgets.readthedocs.io/en/latest/examples/Widget%20List.html#HTML>`__ object.
 
-For a live demo of the handlers, see `03 - Event handlers and data selection in pydeck <https://mybinder.org/v2/gh/uber/deck.gl/binder>`__
-or run the `Jupyter demo locally <https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/examples/03%20-%20Event%20handlers%20and%20data%20selection%20in%20pydeck.ipynb>`__.
+For a live demo of the handlers, see `03 - Event handlers and data selection in pydeck <https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/examples/03%20-%20Event%20handlers%20and%20data%20selection%20in%20pydeck.ipynb>`__.
 
 The following code is a snippet from the notebook above, where a view state change triggers
 a count of visible points.
@@ -57,7 +57,7 @@ a count of visible points.
 
 
 Cursor events with ``on_click``
-------------------------------
+-------------------------------
 
 Clicking data in a visualization passes the following data back as the ``payload`` object
 in the ``on_click`` handler:
@@ -85,7 +85,7 @@ in the ``on_click`` handler:
                'pixelRatio': int,
                'object': {
                    # Metadata from selected clicked object which varies by layer
-                }
+               }
             }
         }
 
