@@ -4,7 +4,7 @@
 
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
-import {render} from 'preact';
+import {render, type JSX} from 'preact';
 import {useEffect, useState} from 'preact/hooks';
 import type {Stats, Stat} from '@probe.gl/stats';
 import {IconButton} from './lib/components/icon-button';
