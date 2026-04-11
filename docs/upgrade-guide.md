@@ -2,6 +2,8 @@
 
 ## Upgrading to v9.3
 
+Upgraded dependencies to [luma.gl v9.3](https://luma.gl/docs/upgrade-guide) and [loaders.gl v4.4](https://loaders.gl/docs/upgrade-guide). Your app may be affected if it contains custom layers.
+
 ### OrthographicView
 
 Supplying a 2D array to `zoom` for per-axis zoom has been deprecated.
