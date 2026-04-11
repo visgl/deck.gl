@@ -114,13 +114,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
         nextZoom = zoomX;
         nextZoomY = clamp(zoomY + delta, minZoomY, maxZoomY);
       } else {
-        delta = clamp(
+        const clampedDelta = clamp(
           delta,
           Math.max(minZoomX - zoomX, minZoomY - zoomY),
           Math.min(maxZoomX - zoomX, maxZoomY - zoomY)
         );
-        nextZoom = zoomX + delta;
-        nextZoomY = zoomY + delta;
+        nextZoom = zoomX + clampedDelta;
+        nextZoomY = zoomY + clampedDelta;
       }
       newViewState.zoom = [nextZoom, nextZoomY];
       newViewState.zoomX = nextZoom;
