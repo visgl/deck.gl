@@ -5,12 +5,32 @@
 import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
+/**
+ * Returns true if the viewport uses globe (spherical) projection.
+ * GlobeViewport is the only viewport type that sets a `resolution` property.
+ */
+function isGlobeViewport(viewport: Viewport): boolean {
+  return 'resolution' in viewport && viewport.isGeospatial;
+}
+
+/**
+ * For GlobeViewport, return a WebMercatorViewport that can project lng/lat
+ * to Mercator common space. The mask pass always renders into a WebMercatorViewport,
+ * so bounds must be in Mercator coordinates to stay consistent.
+ */
+function getMercatorProjectionViewport(viewport: Viewport): Viewport {
+  if (isGlobeViewport(viewport)) {
+    return new WebMercatorViewport({id: viewport.id, zoom: 0});
+  }
+  return viewport;
+}
+
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
 
 /*
  * Compute the union of bounds from multiple layers
- * Returns bounds in CARTESIAN coordinates
+ * Returns bounds in CARTESIAN coordinates (Mercator for geospatial viewports)
  */
 export function joinLayerBounds(
   /** The layers to combine */
@@ -18,13 +38,24 @@ export function joinLayerBounds(
   /** A Viewport instance that is used to determine the type of the view */
   viewport: Viewport
 ): Bounds | null {
+  // For GlobeViewport, GlobeViewport.projectFlat() is an identity transform, so we must
+  // use a WebMercatorViewport to project lng/lat → Mercator common space.  The mask pass
+  // always renders into a WebMercatorViewport, so all bounds must be in Mercator space.
+  const projectionViewport = getMercatorProjectionViewport(viewport);
+
   // Join the bounds of layer data
   const bounds: Bounds = [Infinity, Infinity, -Infinity, -Infinity];
   for (const layer of layers) {
     const layerBounds = layer.getBounds();
     if (layerBounds) {
-      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport, autoOffset: false});
-      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport, autoOffset: false});
+      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {
+        viewport: projectionViewport,
+        autoOffset: false
+      });
+      const topRightCommon = layer.projectPosition(layerBounds[1], {
+        viewport: projectionViewport,
+        autoOffset: false
+      });
 
       bounds[0] = Math.min(bounds[0], bottomLeftCommon[0]);
       bounds[1] = Math.min(bounds[1], bottomLeftCommon[1]);
@@ -63,7 +94,12 @@ export function makeViewport(opts: {
     return null;
   }
 
-  const centerWorld = viewport.unprojectPosition([
+  // For GlobeViewport, bounds are in Mercator common space (from joinLayerBounds).
+  // GlobeViewport.unprojectPosition() is an identity transform, so we must use a
+  // WebMercatorViewport to convert the Mercator center back to lng/lat.
+  const projectionViewport = getMercatorProjectionViewport(viewport);
+
+  const centerWorld = projectionViewport.unprojectPosition([
     (bounds[0] + bounds[2]) / 2,
     (bounds[1] + bounds[3]) / 2,
     0
@@ -156,6 +192,13 @@ export function getRenderBounds(
 ): Bounds {
   if (!layerBounds) {
     return [0, 0, 1, 1];
+  }
+
+  // GlobeViewport.projectFlat() is an identity, so getViewportBounds() would return
+  // lng/lat coordinates while layerBounds are in Mercator. Skip viewport clipping and
+  // render the full layer extent instead.
+  if (isGlobeViewport(viewport)) {
+    return layerBounds;
   }
 
   const viewportBounds = getViewportBounds(viewport, zRange);

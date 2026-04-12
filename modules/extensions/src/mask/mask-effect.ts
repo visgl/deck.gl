@@ -93,11 +93,6 @@ export default class MaskEffect implements Effect {
     const viewport = viewports[0];
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
-    if (viewport.resolution !== undefined) {
-      log.warn('MaskExtension is not supported in GlobeView')();
-      return {didRender};
-    }
-
     for (const maskId in channelMap) {
       const result = this._renderChannel(channelMap[maskId], {
         layerFilter,
