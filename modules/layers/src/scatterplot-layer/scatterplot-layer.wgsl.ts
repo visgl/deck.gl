@@ -70,7 +70,7 @@ struct Attributes {
   @location(4) instanceLineWidths: f32,
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instancePickingColors: vec3<f32>
+  @location(7) instancePickingColors: vec3<f32>,
 };
 
 struct Varyings {

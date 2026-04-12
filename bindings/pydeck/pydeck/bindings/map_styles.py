@@ -1,6 +1,5 @@
 from .base_map_provider import BaseMapProvider
 
-
 DARK = "dark"
 LIGHT = "light"
 SATELLITE = "satellite"

@@ -20,7 +20,7 @@ import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [
-    new StatsWidget({defaultIsExpanded: true})
+    new StatsWidget({initialExpanded: true})
   ]
 });
 ```
@@ -35,7 +35,7 @@ import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
   widgets: [
-    new StatsWidget({defaultIsExpanded: true})
+    new StatsWidget({initialExpanded: true})
   ]
 });
 ```
@@ -51,7 +51,29 @@ import '@deck.gl/widgets/stylesheet.css';
 function App() {
   return (
     <DeckGL>
-      <StatsWidget defaultIsExpanded />
+      <StatsWidget initialExpanded />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_StatsWidget as StatsWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <DeckGL>
+      <StatsWidget
+        expanded={expanded}
+        onExpandedChange={setExpanded}
+      />
     </DeckGL>
   );
 }
@@ -89,7 +111,7 @@ Title shown in the widget header.
 
 * Default: `'Stats'`
 
-#### defaultIsExpanded (boolean, optional)
+#### initialExpanded (boolean, optional)
 
 If `true`, the UI is expanded at start.
 
@@ -108,6 +130,14 @@ Custom formatters for stat values.
 #### resetOnUpdate (object, optional)
 
 Whether to reset particular stats after each update.
+
+#### expanded (boolean, optional)
+
+Controlled expanded state. When provided, the widget is in controlled mode and `initialExpanded` is ignored.
+
+#### onExpandedChange (function, optional)
+
+Callback when the expanded state changes (user clicks header). In controlled mode, use this to update the `expanded` prop.
 
 ### Built-in Formatters
 

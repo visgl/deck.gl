@@ -38,7 +38,7 @@ export function isComponent(child: React.ReactNode): child is React.ReactElement
 }
 
 function isReactMap(child: React.ReactElement): boolean {
-  return child.props?.mapStyle;
+  return (child.props as any)?.mapStyle;
 }
 
 function needsDeckGLViewProps(child: React.ReactElement): boolean {

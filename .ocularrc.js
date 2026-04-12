@@ -51,7 +51,7 @@ const config = {
   entry: {
     // Tests now use vitest (yarn test, yarn test-headless, yarn test-render)
     // Only tape-compat smoke test still uses ocular-test for backward compatibility testing
-    'tape-compat': 'test/smoke/tape-compat.spec.ts',
+    'tape-compat': 'test/smoke/tape-compat.tape.spec.ts',
     // TODO: Migrate bench and size to vitest (Phase 7)
     bench: 'test/bench/index.js',
     'bench-browser': 'test/bench/browser.html',

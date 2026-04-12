@@ -12,7 +12,11 @@ import {pixelsToWorld} from '@math.gl/web-mercator';
 import type {Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
-import type {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
+import {
+  ProjectProps,
+  ProjectUniforms,
+  getShaderCoordinateSystem
+} from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
 layout(std140) uniform shadowUniforms {
@@ -236,7 +240,7 @@ function createShadowUniforms(
       .translate(new Vector3(projectProps.viewport.center).negate());
 
     if (
-      projectUniforms.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+      projectUniforms.coordinateSystem === getShaderCoordinateSystem('lnglat') &&
       projectUniforms.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;

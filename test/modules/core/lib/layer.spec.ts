@@ -288,7 +288,23 @@ test('Layer#use64bitPositions', () => {
 });
 
 test('Layer#project', () => {
-  let layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
+  let layer = new SubLayer({});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+  layer.context.viewport = new MapView().makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {longitude: 0, latitude: 0, zoom: 10}
+  });
+  expect(
+    () => layer.project([0, 0, 100]),
+    'default coordinate system does not throw'
+  ).not.toThrow();
+  expect(
+    equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]),
+    'returns correct value for default coordinate system'
+  ).toBeTruthy();
+
+  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,

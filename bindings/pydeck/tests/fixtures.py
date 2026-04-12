@@ -3,7 +3,6 @@ import json
 import os
 import logging
 
-
 here = os.path.dirname(os.path.abspath(__file__))
 fixture_path = os.path.join(here, "./fixtures/")
 json_glob = os.path.join(fixture_path, "*.json")

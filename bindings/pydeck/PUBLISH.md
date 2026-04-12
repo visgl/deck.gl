@@ -3,19 +3,81 @@ Publication checklist for pydeck
 
 ### Notes before publication
 
-- Run these commands in a virtual environment.
+- Run these commands in a virtual environment managed by [uv](https://docs.astral.sh/uv/).
 - Build deck.gl from its source.
 - Install pydeck from its source.
-- This checklist also assumes that you have PyPI credentials to publish pydeck
-and valid NPM credentials to publish @deck.gl/juypter-widget.
+- This checklist assumes that you have PyPI credentials to publish pydeck.
 - Verify that there is a CDN-hosted release of @deck.gl/jupyter-widget for the standalone html template
 within pydeck accessible on [JSDelivr](https://www.jsdelivr.com/package/npm/@deck.gl/jupyter-widget).
+Check that the version matches `DECKGL_SEMVER` in `pydeck/frontend_semver.py`.
 - Optional but encouraged: Check that the build works on test.pypi. See *Producing a test release* below.
+
+### Version bump
+
+Run `make bump-version` and select a release type at the prompt. This bumps all version files:
+
+- `pydeck/_version.py` — the canonical Python version
+- `pyproject.toml` — the package metadata version (used by `python -m build`)
+- `docs/conf.py` — the Sphinx documentation version and release
+- `pydeck/frontend_semver.py` — synced to the deck.gl version in `lerna.json`
+
+**Note:** `bump_version.py` reads `lerna.json` to set `DECKGL_SEMVER`. When releasing from a
+release branch (e.g. `9.2-release`), lerna.json has the stable version and this works correctly.
+If releasing from `master` where lerna.json may contain a pre-release version (e.g. `9.3.0-beta.1`),
+you must manually update `pydeck/frontend_semver.py` after running `make bump-version`.
+
+Update `docs/CHANGELOG.rst` with release notes for the new version.
+
+### Local build testing
+
+Build the wheel from the pydeck dev environment:
+
+```bash
+cd bindings/pydeck
+source .venv/bin/activate
+uv pip install build
+python -m build
+```
+
+Then install it in a fresh venv with Jupyter dependencies:
+
+```bash
+uv venv /tmp/pydeck-test
+source /tmp/pydeck-test/bin/activate
+uv pip install dist/pydeck-*.whl notebook jupyterlab pandas numpy requests ipywidgets networkx
+```
+
+Run through the verification checklist:
+
+```bash
+# 1. .to_html() in a Python REPL
+python -c "
+import pydeck as pdk
+layer = pdk.Layer('ScatterplotLayer', data=[{'pos': [-122.4, 37.8]}], get_position='pos', get_radius=1000, get_fill_color=[255, 0, 0])
+view = pdk.ViewState(latitude=37.8, longitude=-122.4, zoom=10)
+deck = pdk.Deck(layers=[layer], initial_view_state=view)
+deck.to_html('/tmp/pydeck-test.html')
+print('to_html: OK')
+"
+open /tmp/pydeck-test.html
+
+# 2. Run example notebooks in Jupyter Notebook or JupyterLab
+jupyter notebook examples/
+jupyter lab examples/
+```
+
+**Note on `.show()` vs `.to_html()`:** In pydeck v0.9+, `.show()` is a wrapper around
+`.to_html()` — both render via an HTML iframe using the deck.gl JS bundle from jsDelivr.
+The earlier ipywidgets-based `.show()` (which supported binary transport, data selection,
+and live `.update()` calls) is not currently functional. Neither nbextension nor labextension
+setup is required for the current `.show()` / `.to_html()` behavior.
+
+Restoring full Jupyter widget support (ipywidgets protocol, prebuilt labextension) is
+tracked as a future improvement.
 
 ### Producing a production release
 
-1) Verify that Deck object works on a fresh install from the source in the following
-environments:
+1) Verify that pydeck renders correctly (see *Local build testing*):
 
 - `.show()` in a Jupyter Notebook
 - `.to_html()` in a Jupyter Notebook
@@ -23,87 +85,87 @@ environments:
 - `.to_html()` in JupyterLab
 - `.to_html()` in a Python REPL
 
-2) Run `make bump-and-publish` and select the kind of release at the prompt.
-This will run Python and JS tests and produce a commit with the release version.
+2) Build and publish:
+
+```bash
+make publish-pypi
+```
+
+This runs `python -m build` to create sdist (.tar.gz) and wheel (.whl) distribution files
+in `dist/`, then uses [twine](https://twine.readthedocs.io/) to upload them to PyPI. Twine
+is the standard tool for securely uploading Python packages — it handles authentication,
+TLS verification, and upload retries.
+
+Or to run the full release flow (bump + test + commit + publish):
+
+```bash
+make release
+```
 
 3) Verify that your publications are successful:
 
-- [pydeck](https://pypi.org/project/pydeck/)
-- [Conda-forge](https://anaconda.org/conda-forge/pydeck)
+- [pydeck on PyPI](https://pypi.org/project/pydeck/)
+- [pydeck on Conda-forge](https://anaconda.org/conda-forge/pydeck) (updated automatically via feedstock)
 
 4) Inform the deck.gl Slack channel that a new version of pydeck has been published.
 
 
 ### Producing a test release
 
-1) Run `python bump_version.py -h` to bump the version programmatically.
+1) Build and upload to test.pypi:
 
-2) Run the following commands to publish to the test.pypi environment:
-
-```
-rm -r ./dist/*  # If exists, clear out the current dist folder
-pip install . --verbose
-python setup.py sdist bdist_wheel
-pip install twine  # If you have not installed twine
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+```bash
+make publish-test-pypi
 ```
 
-3) In a fresh virtualenv, you can install pydeck from test.pypi:
+2) In a fresh virtualenv, install pydeck from test.pypi:
 
-```
-pip install -i https://test.pypi.org/simple/ pydeck=={{version}}
+```bash
+uv pip install -i https://test.pypi.org/simple/ pydeck=={{version}}
 ```
 
 where `{{version}}` is your semantic version.
 
-4)  Verify that pydeck works from test.pypi in the same environments as above.
+3) Verify that pydeck works from test.pypi in the same environments as above.
 
-5) If everything appears to be working, you can publish to PyPI and conda-forge.
+4) If everything appears to be working, publish to PyPI (see production release steps).
 
 ## Updating documentation
 
-The pydeck documentation has three main components
+The pydeck documentation has three main components:
 
 - The .md files in the pydeck directory.
 - The .rst files in the pydeck directory under `docs/`.
-- The Binder examples, which are kept on the `binder` branch of this repository.
-- Most critically, the docstrings in the Python code itself, which combined with the .rst files generates
+- The docstrings in the Python code itself, which combined with the .rst files generates
 the documentation at https://deckgl.readthedocs.io/en/latest/.
 
-The documentation is currently build manually at the [readthedocs](https://readthedocs.org/projects/deckgl/) admin page.
+Documentation is built automatically by [ReadTheDocs](https://readthedocs.org/projects/deckgl/)
+on push via webhook. The build configuration is in `.readthedocs.yaml` and uses uv for
+dependency installation.
 
-### Updating the binder branch
-
-Align the binder branch in-line with what's on master:
-
-```
-git checkout master
-git pull
-git checkout binder
-git merge binder
-git push
-```
-
-The Dockerfile at the root of the deck.gl repository on the binder branch can be tested locally with the following code:
+To build docs locally:
 
 ```bash
-docker build -t test-binder:latest .
-docker run -p 8888:8888 test-binder:latest jupyter notebook --ip 0.0.0.0
-```
-
-This is what Binder will be executing when running the examples.
-
-Verify the current examples work at https://mybinder.org/v2/gh/uber/deck.gl/binder
-
-
-### Populating website pydeck.gl (WIP)
-
-```bash
-# If you've never done any Python setup for pydeck
-make pre-init
-# To create static images and .html files associated with the examples in `examples/`
-make screenshot-examples
-# To make markdown documentation
 cd docs
-make markdown
+make html
+# Serve at http://localhost:8000
+python -m http.server -d _build/html
+```
+
+### Binder examples (dormant)
+
+There is a historical `binder` branch with a Dockerfile that let users run pydeck examples
+interactively on [mybinder.org](https://mybinder.org). It was last updated around the 0.4
+release (~2020) and is not currently maintained. To revive it, update the Dockerfile on
+the `binder` branch and verify at mybinder.org.
+
+### Screenshot examples
+
+Gallery thumbnails are generated with `make html-thumbnails` from the `docs/` directory.
+This uses Playwright to render each example's HTML output and save a screenshot. See
+`docs/scripts/snap_thumbnails.py` for details. To snap a single example:
+
+```bash
+cd docs
+uv run python scripts/snap_thumbnails.py ../examples/widgets.py
 ```

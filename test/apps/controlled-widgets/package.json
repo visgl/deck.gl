@@ -1,0 +1,22 @@
+{
+  "name": "deckgl-example-react-controlled-widgets",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "deck.gl": "^9.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1"
+  }
+}

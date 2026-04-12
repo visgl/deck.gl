@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
+// eslint-disable-next-line import/default
 import mapboxgl from 'mapbox-gl';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
@@ -13,7 +14,6 @@ export function mount(container: HTMLElement, config: Config): () => void {
     initialViewState,
     layers,
     interleaved,
-    batched,
     multiView,
     views,
     layerFilter,
@@ -49,7 +49,6 @@ export function mount(container: HTMLElement, config: Config): () => void {
 
   const overlayConfig: any = {
     interleaved,
-    _renderLayersInGroups: batched,
     layers
   };
 

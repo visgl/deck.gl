@@ -222,10 +222,16 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
-        this.setData({
-          value: this.value,
-          constant: this.constant
-        });
+        if (this.constant) {
+          // Route constant updater output through the same path used by constant accessors
+          // so WebGPU can materialize a real buffer while WebGL keeps a constant attribute.
+          this.setConstantValue(context, this.value);
+        } else {
+          this.setData({
+            value: this.value,
+            constant: this.constant
+          });
+        }
         // Setting attribute.constant in updater is a legacy approach that interferes with allocation in the next cycle
         // Respect it here but reset after use
         this.constant = false;
@@ -255,29 +261,76 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // Use generic value
   // Returns true if successful
   setConstantValue(context: any, value?: any): boolean {
-    // TODO(ibgreen): WebGPU does not support constant values,
-    // they will be emulated as buffers instead for now.
-    const isWebGPU = this.device.type === 'webgpu';
-    if (isWebGPU || value === undefined || typeof value === 'function') {
-      if (isWebGPU && typeof value !== 'function') {
-        const normalisedValue = this._normalizeValue(value, [], 0);
-        // ensure we trigger an update for the attribute's emulated buffer
-        // where webgl would perform the update here
-        if (!this._areValuesEqual(normalisedValue, this.value)) {
-          this.setNeedsUpdate('WebGPU constant updated');
-        }
-      }
+    if (value === undefined || typeof value === 'function') {
       return false;
     }
 
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+
+    if (this.device.type === 'webgpu') {
+      // WebGPU has no equivalent of WebGL constant vertex attributes, so we expand the
+      // constant into a full per-instance buffer before passing it to luma.gl.
+      return this.setConstantBufferValue(transformedValue, this.numInstances);
+    }
+
+    // WebGL can bind the normalized/transformed value directly as a constant attribute.
     const hasChanged = this.setData({constant: true, value: transformedValue});
 
     if (hasChanged) {
       this.setNeedsRedraw();
     }
     this.clearNeedsUpdate();
+    return true;
+  }
+
+  setConstantBufferValue(value: any, numInstances: number): boolean {
+    const ArrayType = this.settings.defaultType;
+    const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
+    if (this._hasConstantBufferValue(constantValue, numInstances)) {
+      // The emulated buffer already matches this constant, so avoid a redundant upload.
+      this.constant = false;
+      this.clearNeedsUpdate();
+      return false;
+    }
+
+    const repeatedValue = new ArrayType(Math.max(numInstances, 1) * this.size);
+
+    for (let i = 0; i < repeatedValue.length; i += this.size) {
+      repeatedValue.set(constantValue, i);
+    }
+
+    const hasChanged = this.setData({value: repeatedValue});
+    this.constant = false;
+    this.clearNeedsUpdate();
+
+    if (hasChanged) {
+      this.setNeedsRedraw();
+    }
+
+    return hasChanged;
+  }
+
+  private _hasConstantBufferValue(value: NumericArray, numInstances: number): boolean {
+    const currentValue = this.value;
+    const expectedLength = Math.max(numInstances, 1) * this.size;
+
+    if (
+      !ArrayBuffer.isView(currentValue) ||
+      currentValue.length !== expectedLength ||
+      currentValue.length % this.size !== 0
+    ) {
+      return false;
+    }
+
+    for (let i = 0; i < currentValue.length; i += this.size) {
+      for (let j = 0; j < this.size; j++) {
+        if (currentValue[i + j] !== value[j]) {
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 
@@ -432,23 +485,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       numInstances: number;
     }
   ): void {
-    if (attribute.constant) {
-      // @ts-ignore TODO(ibgreen) declare context?
-      if (this.context.device.type !== 'webgpu') {
-        return;
-      }
-    }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
-    let accessorFunc: Accessor<any, any> =
+    const accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
-    // TODO(ibgreen) WebGPU needs buffers, generate an accessor function from a constant
-    if (typeof accessorFunc !== 'function' && typeof accessor === 'string') {
-      accessorFunc = () => props[accessor];
-    }
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = attribute.getVertexOffset(startRow);

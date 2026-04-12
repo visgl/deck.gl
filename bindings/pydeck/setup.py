@@ -1,14 +1,14 @@
 from __future__ import print_function
 
-from distutils.command.install import install
 from setuptools import setup, find_packages, Command
+from setuptools.command.install import install
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
 from setuptools.command.develop import develop
 
 import atexit
-from distutils import log
+import logging
 import os
 from shutil import copy
 from subprocess import check_call, check_output
@@ -25,6 +25,9 @@ def read(*parts):
     return open(os.path.join(here, *parts), "r").read()
 
 
+log = logging.getLogger(__name__)
+log.addHandler(logging.StreamHandler())
+log.setLevel(logging.INFO)
 log.info("setup.py entered")
 log.info("$PATH=%s" % os.environ["PATH"])
 
@@ -212,8 +215,7 @@ if __name__ == "__main__":
             "jupyter": [
                 "ipywidgets>=7,<8",
                 "traitlets>=4.3.2",
-                'ipython>=5.8.0;python_version<"3.4"',
-                'ipykernel>=5.1.2;python_version>="3.4"',
+                "ipykernel>=5.1.2",
             ],
         },
         install_requires=[

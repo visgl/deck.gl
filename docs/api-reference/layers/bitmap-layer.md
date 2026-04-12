@@ -192,7 +192,7 @@ new BitmapLayer({
 
 This prop is only used when `image` initially loads or changes.
 
-#### `_imageCoordinateSystem` (number, optional) {#_imagecoordinatesystem}
+#### `_imageCoordinateSystem` (string, optional) {#_imagecoordinatesystem}
 
 > Note: this prop is experimental.
 
@@ -202,8 +202,9 @@ By default, the image is uniformly stretched to fill the geometry defined by `bo
 
 This prop allows you to explicitly inform the layer of the coordinate system of the image:
 
-- `COORDINATE_SYSTEM.LNGLAT` if x-axis maps to longitude and y-axis maps to latitude
-- `COORDINATE_SYSTEM.CARTESIAN` if the image is pre-projected into the Web Mercator plane.
+- `'default'` to use the layer's default image interpretation
+- `'lnglat'` if x-axis maps to longitude and y-axis maps to latitude
+- `'cartesian'` if the image is pre-projected into the Web Mercator plane.
 
 This option only works with geospatial views and `bounds` that is orthogonal (`[left, bottom, right, top]`).
 

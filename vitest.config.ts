@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {defineConfig} from 'vitest/config';
+import {defineConfig, configDefaults} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
@@ -137,6 +137,8 @@ const assetsIncludeConfig = [
 
 export default defineConfig({
   test: {
+    // Globally exclude tape-based tests from all vitest projects
+    exclude: [...configDefaults.exclude, '**/*.tape.spec.ts'],
     projects: [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation

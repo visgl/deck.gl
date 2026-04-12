@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, createIterable} from '@deck.gl/core';
+import {createIterable} from '@deck.gl/core';
 
 /* eslint-disable max-statements, complexity, camelcase */
 const RADIAN_PER_DEGREE = Math.PI / 180;
@@ -160,8 +160,8 @@ export const MATRIX_ATTRIBUTES = {
 // when in LNGLAT and LNGLAT_OFFSET coordinates.
 export function shouldComposeModelMatrix(viewport, coordinateSystem) {
   return (
-    coordinateSystem === COORDINATE_SYSTEM.CARTESIAN ||
-    coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS ||
-    (coordinateSystem === COORDINATE_SYSTEM.DEFAULT && !viewport.isGeospatial)
+    coordinateSystem === 'cartesian' ||
+    coordinateSystem === 'meter-offsets' ||
+    (coordinateSystem === 'default' && !viewport.isGeospatial)
   );
 }
