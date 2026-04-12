@@ -196,4 +196,4 @@ Callback invoked when the user releases the splitter.
 
 ## Source
 
-[modules/widgets/src/splitter-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/splitter-widget.tsx)
+[modules/widgets/src/splitter-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/splitter-widget.tsx)

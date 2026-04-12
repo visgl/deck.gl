@@ -178,4 +178,4 @@ The `SelectorWidget` uses the shared button and menu theme variables described i
 
 ## Source
 
-[modules/widgets/src/selector-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/selector-widget.tsx)
+[modules/widgets/src/selector-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/selector-widget.tsx)

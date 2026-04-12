@@ -174,4 +174,4 @@ Callback when the gimbal reset button is clicked. Called for each viewport that 
 
 ## Source
 
-[modules/widgets/src/gimbal-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/gimbal-widget.tsx)
+[modules/widgets/src/gimbal-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/gimbal-widget.tsx)

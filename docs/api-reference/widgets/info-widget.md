@@ -217,4 +217,4 @@ Show an arrow pointing at the anchor. Value can be one of the following:
 
 ## Source
 
-[modules/widgets/src/info-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/info-widget.tsx)
+[modules/widgets/src/info-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/info-widget.tsx)

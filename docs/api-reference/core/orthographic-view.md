@@ -64,4 +64,4 @@ Visit the [OrthographicController](./orthographic-controller.md) documentation f
 
 ## Source
 
-[modules/core/src/views/orthographic-view.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/orthographic-view.ts)
+[modules/core/src/views/orthographic-view.ts](https://github.com/visgl/deck.gl/tree/9.3-release/modules/core/src/views/orthographic-view.ts)

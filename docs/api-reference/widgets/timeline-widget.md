@@ -300,4 +300,4 @@ Learn more about how to replace icons in the [styling guide](./styling#replacing
 
 ## Source
 
-[modules/widgets/src/timeline-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/timeline-widget.tsx)
+[modules/widgets/src/timeline-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/timeline-widget.tsx)

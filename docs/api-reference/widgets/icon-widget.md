@@ -112,4 +112,4 @@ The `IconWidget` uses the shared button theme variables described in the [stylin
 
 ## Source
 
-[modules/widgets/src/icon-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/icon-widget.tsx)
+[modules/widgets/src/icon-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/icon-widget.tsx)

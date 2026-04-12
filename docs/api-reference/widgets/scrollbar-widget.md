@@ -226,4 +226,4 @@ The ScrollbarWidget uses theme CSS variables for [RangeInput](./styling.md#range
 
 ## Source
 
-[modules/widgets/src/scrollbar-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/scrollbar-widget.tsx)
+[modules/widgets/src/scrollbar-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/scrollbar-widget.tsx)

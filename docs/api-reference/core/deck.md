@@ -852,4 +852,4 @@ new Deck({
 
 ## Source
 
-[modules/core/src/lib/deck.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/deck.ts)
+[modules/core/src/lib/deck.ts](https://github.com/visgl/deck.gl/tree/9.3-release/modules/core/src/lib/deck.ts)

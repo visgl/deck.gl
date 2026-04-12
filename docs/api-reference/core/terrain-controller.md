@@ -53,4 +53,4 @@ Supports all [MapController options](./map-controller.md#options) with the follo
 
 ## Source
 
-[modules/core/src/controllers/terrain-controller.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/terrain-controller.ts)
+[modules/core/src/controllers/terrain-controller.ts](https://github.com/visgl/deck.gl/tree/9.3-release/modules/core/src/controllers/terrain-controller.ts)

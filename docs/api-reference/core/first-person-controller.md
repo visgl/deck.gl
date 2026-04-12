@@ -74,4 +74,4 @@ See the `Controller` class [documentation](./controller.md#methods) for the meth
 
 ## Source
 
-[modules/core/src/controllers/first-person-controller.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/first-person-controller.ts)
+[modules/core/src/controllers/first-person-controller.ts](https://github.com/visgl/deck.gl/tree/9.3-release/modules/core/src/controllers/first-person-controller.ts)

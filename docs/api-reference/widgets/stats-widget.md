@@ -160,4 +160,4 @@ Callback when the expanded state changes (user clicks header). In controlled mod
 
 ## Source
 
-[modules/widgets/src/stats-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/stats-widget.tsx)
+[modules/widgets/src/stats-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/stats-widget.tsx)

@@ -272,4 +272,4 @@ Menu item definition:
 
 ## Source
 
-[modules/widgets/src/context-menu-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/context-menu-widget.tsx)
+[modules/widgets/src/context-menu-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/context-menu-widget.tsx)

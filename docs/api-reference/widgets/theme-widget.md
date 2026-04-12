@@ -158,4 +158,4 @@ Tooltip message displayed while hovering a mouse over the widget when dark mode 
 
 ## Source
 
-[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/theme-widget.tsx)
+[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/theme-widget.tsx)

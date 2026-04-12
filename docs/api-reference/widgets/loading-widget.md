@@ -91,4 +91,4 @@ Callback when the loading state changes. Called when layers transition between l
 
 ## Source
 
-[modules/widgets/src/loading-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/loading-widget.tsx)
+[modules/widgets/src/loading-widget.tsx](https://github.com/visgl/deck.gl/tree/9.3-release/modules/widgets/src/loading-widget.tsx)
