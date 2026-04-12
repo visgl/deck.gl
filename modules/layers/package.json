@@ -47,7 +47,7 @@
     "earcut": "^2.2.4"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.0-alpha.1",
+    "@deck.gl/core": "~9.3.0",
     "@loaders.gl/core": "^4.4.1",
     "@luma.gl/core": "~9.3.2",
     "@luma.gl/engine": "~9.3.2"

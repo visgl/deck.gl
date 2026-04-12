@@ -41,7 +41,7 @@
     "@math.gl/web-mercator": "^4.1.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.0-alpha.1",
+    "@deck.gl/core": "~9.3.0",
     "@luma.gl/core": "~9.3.2",
     "@math.gl/web-mercator": "^4.1.0"
   },
