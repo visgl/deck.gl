@@ -156,9 +156,9 @@ export default class GlobeViewport extends Viewport {
 
     return [
       Math.min(left[0], right[0], top[0], bottom[0]),
-      Math.min(left[1], right[1], top[1], bottom[1]),
+      Math.max(-MAX_LATITUDE, Math.min(left[1], right[1], top[1], bottom[1])),
       Math.max(left[0], right[0], top[0], bottom[0]),
-      Math.max(left[1], right[1], top[1], bottom[1])
+      Math.min(MAX_LATITUDE, Math.max(left[1], right[1], top[1], bottom[1]))
     ];
   }
 
@@ -188,10 +188,19 @@ export default class GlobeViewport extends Viewport {
       const sSqr = (4 * l0Sqr * l1Sqr - (lSqr - l0Sqr - l1Sqr) ** 2) / 16;
       const dSqr = (4 * sSqr) / lSqr;
       const r0 = Math.sqrt(l0Sqr - dSqr);
-      const dr = Math.sqrt(Math.max(0, lt * lt - dSqr));
-      const t = (r0 - dr) / Math.sqrt(lSqr);
+      const discriminant = lt * lt - dSqr;
 
-      coord = vec3.lerp([], coord0, coord1, t);
+      if (discriminant < 0) {
+        // Ray misses the sphere — project the closest-approach point onto the sphere surface
+        const tClosest = r0 / Math.sqrt(lSqr);
+        const closest = vec3.lerp([], coord0, coord1, tClosest);
+        const len = vec3.len(closest);
+        coord = len > 0 ? vec3.scale([], closest, lt / len) : [0, 0, lt];
+      } else {
+        const dr = Math.sqrt(discriminant);
+        const t = (r0 - dr) / Math.sqrt(lSqr);
+        coord = vec3.lerp([], coord0, coord1, t);
+      }
     }
     const [X, Y, Z] = this.unprojectPosition(coord);
 

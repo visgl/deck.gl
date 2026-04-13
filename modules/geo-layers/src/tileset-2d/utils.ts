@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Viewport} from '@deck.gl/core';
+import {Viewport, _GlobeViewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
@@ -226,6 +226,19 @@ export function tileToBoundingBox(
   if (viewport.isGeospatial) {
     const [west, north] = osmTile2lngLat(x, y, z);
     const [east, south] = osmTile2lngLat(x + 1, y + 1, z);
+
+    // On a globe, stretch polar-edge tiles to ±90° to fill the Mercator hole at the poles.
+    // Web Mercator tiles only cover ~±85.05° — this stretches the texture to the pole.
+    if (viewport instanceof _GlobeViewport) {
+      const scale = Math.pow(2, z);
+      return {
+        west,
+        north: y === 0 ? 90 : north,
+        east,
+        south: y === scale - 1 ? -90 : south
+      };
+    }
+
     return {west, north, east, south};
   }
   const [left, top] = tile2XY(x, y, z, tileSize);
