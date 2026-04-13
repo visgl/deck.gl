@@ -2,27 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
+import {OrthographicViewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 /**
- * Returns true if the viewport uses globe (spherical) projection.
- * GlobeViewport is the only viewport type that sets a `resolution` property.
+ * GlobeViewport uses a sphere projection — its projectFlat()/projectPosition() output
+ * is sphere XYZ, not the Mercator common space that mask/collision textures are rendered
+ * into. Return a flat WebMercatorViewport for any globe viewport so that bound
+ * calculations stay consistent with the texture coordinate space.
  */
-function isGlobeViewport(viewport: Viewport): boolean {
-  return 'resolution' in viewport && viewport.isGeospatial;
-}
-
-/**
- * For GlobeViewport, return a WebMercatorViewport that can project lng/lat
- * to Mercator common space. The mask pass always renders into a WebMercatorViewport,
- * so bounds must be in Mercator coordinates to stay consistent.
- */
-function getMercatorProjectionViewport(viewport: Viewport): Viewport {
-  if (isGlobeViewport(viewport)) {
-    return new WebMercatorViewport({id: viewport.id, zoom: 0});
-  }
-  return viewport;
+function getFlatProjectionViewport(viewport: Viewport): Viewport {
+  return viewport instanceof _GlobeViewport
+    ? new WebMercatorViewport({id: viewport.id, zoom: 0})
+    : viewport;
 }
 
 /** Bounds in CARTESIAN coordinates */
@@ -38,10 +30,11 @@ export function joinLayerBounds(
   /** A Viewport instance that is used to determine the type of the view */
   viewport: Viewport
 ): Bounds | null {
-  // For GlobeViewport, GlobeViewport.projectFlat() is an identity transform, so we must
-  // use a WebMercatorViewport to project lng/lat → Mercator common space.  The mask pass
-  // always renders into a WebMercatorViewport, so all bounds must be in Mercator space.
-  const projectionViewport = getMercatorProjectionViewport(viewport);
+  // Use the flat projection viewport so that layer bounds are expressed in the
+  // same coordinate space as the mask texture (Mercator for geospatial viewports,
+  // Cartesian for orthographic). For GlobeViewport this returns a WebMercatorViewport;
+  // for all other viewport types it returns the viewport itself.
+  const projectionViewport = getFlatProjectionViewport(viewport);
 
   // Join the bounds of layer data
   const bounds: Bounds = [Infinity, Infinity, -Infinity, -Infinity];
@@ -94,10 +87,10 @@ export function makeViewport(opts: {
     return null;
   }
 
-  // For GlobeViewport, bounds are in Mercator common space (from joinLayerBounds).
-  // GlobeViewport.unprojectPosition() is an identity transform, so we must use a
-  // WebMercatorViewport to convert the Mercator center back to lng/lat.
-  const projectionViewport = getMercatorProjectionViewport(viewport);
+  // Bounds are in flat common space (Mercator for geospatial, Cartesian otherwise).
+  // For GlobeViewport, unprojectPosition() maps sphere XYZ → lng/lat, not Mercator → lng/lat,
+  // so use the flat projection viewport to convert the Mercator center back to lng/lat.
+  const projectionViewport = getFlatProjectionViewport(viewport);
 
   const centerWorld = projectionViewport.unprojectPosition([
     (bounds[0] + bounds[2]) / 2,
@@ -194,10 +187,10 @@ export function getRenderBounds(
     return [0, 0, 1, 1];
   }
 
-  // GlobeViewport.projectFlat() is an identity, so getViewportBounds() would return
-  // lng/lat coordinates while layerBounds are in Mercator. Skip viewport clipping and
-  // render the full layer extent instead.
-  if (isGlobeViewport(viewport)) {
+  // Non-flat viewports (e.g. GlobeViewport) use Mercator bounds from joinLayerBounds,
+  // but getViewportBounds() returns lng/lat for those viewports. Skip viewport clipping
+  // and render the full layer extent instead.
+  if (viewport instanceof _GlobeViewport) {
     return layerBounds;
   }
 

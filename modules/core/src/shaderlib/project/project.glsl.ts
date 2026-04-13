@@ -182,6 +182,16 @@ vec3 project_globe_(vec3 lnglatz) {
   ) * D;
 }
 
+// Inverse of project_globe_: convert a position in globe common space (sphere
+// XYZ) back to Mercator common space. Used when the mask texture is always
+// rendered flat (Mercator) but the main viewport uses globe projection.
+vec2 project_globe_to_mercator_(vec3 spherePos) {
+  float D = length(spherePos);
+  float lat = degrees(asin(clamp(spherePos.z / D, -1.0, 1.0)));
+  float lng = degrees(atan(spherePos.x, -spherePos.y));
+  return project_mercator_(vec2(lng, lat));
+}
+
 //
 // Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //

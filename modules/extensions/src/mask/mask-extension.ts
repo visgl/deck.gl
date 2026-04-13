@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Layer, LayerExtension, WebMercatorViewport, log} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, Layer, LayerExtension, WebMercatorViewport, _GlobeViewport, log} from '@deck.gl/core';
 import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
 
@@ -73,11 +73,10 @@ export default class MaskExtension extends LayerExtension {
       }
 
       let bl: number[], tr: number[];
-      // GlobeViewport.projectFlat() is an identity transform (lng/lat pass through
-      // unchanged), while the mask texture is always rendered in Mercator space.
-      // We must convert the mask bounds to Mercator common space so the shader's
-      // texture-coordinate lookup stays consistent with the rendered texture.
-      if ('resolution' in viewport && viewport.isGeospatial) {
+      // mask.bounds comes from maskViewport.getBounds() which returns lng/lat world
+      // coordinates. We need them in flat Mercator common space. GlobeViewport.projectFlat()
+      // is an identity transform, so we use a WebMercatorViewport directly for globe.
+      if (viewport instanceof _GlobeViewport) {
         const mercatorViewport = new WebMercatorViewport({zoom: 0});
         bl = mercatorViewport.projectPosition([bounds[0], bounds[1], 0]);
         tr = mercatorViewport.projectPosition([bounds[2], bounds[3], 0]);

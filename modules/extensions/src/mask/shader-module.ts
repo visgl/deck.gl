@@ -67,18 +67,15 @@ out vec2 mask_texCoords;
    vec4 mask_common_position;
    if (project.projectionMode == PROJECTION_MODE_GLOBE) {
      // The mask texture is always rendered into a WebMercatorViewport, so bounds and
-     // texture coordinates must be expressed in Mercator common space even when the
-     // main viewport uses globe (sphere) projection.
+     // texture coordinates must be in Mercator common space even when the main viewport
+     // uses globe (sphere) projection.
      if (mask.maskByInstance) {
        // geometry.worldPosition holds the instance anchor in lng/lat — project to Mercator.
        mask_common_position = vec4(project_mercator_(geometry.worldPosition.xy), 0.0, 1.0);
      } else {
-       // geometry.position is already in sphere space; invert to recover lng/lat then
-       // project to Mercator so the lookup is consistent with the mask texture.
-       float D = length(geometry.position.xyz);
-       float lat = degrees(asin(clamp(geometry.position.z / D, -1.0, 1.0)));
-       float lng = degrees(atan(geometry.position.x, -geometry.position.y));
-       mask_common_position = vec4(project_mercator_(vec2(lng, lat)), 0.0, 1.0);
+       // geometry.position is in sphere XYZ — use project_globe_to_mercator_() from the
+       // project module to invert back to lng/lat and re-project to Mercator.
+       mask_common_position = vec4(project_globe_to_mercator_(geometry.position.xyz), 0.0, 1.0);
      }
    } else {
      if (mask.maskByInstance) {
