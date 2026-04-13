@@ -70,7 +70,7 @@ const EventBanner = styled.div`
   width: 100%;
   top: var(--ifm-navbar-height);
   background: #a01000;
-  padding: 20px;
+  padding: 12px;
   color: #fff !important;
 `;
 
@@ -80,8 +80,8 @@ export default function IndexPage() {
   return (
     <Layout title="Home" description="deck.gl">
       <EventBanner >
-        Open Visualization Collaborators Summit 2026: September 8-9 @ Zurich
-        <a href="https://deck.gl/events/zurich-summit-2026/">sign up</a>
+        Open Visualization Collaborators Summit 2026: September 9-10 @ Zurich
+        <a href="https://deck.gl/events/zurich-summit-2026/"> sign up</a>
       </EventBanner>
       <Home HeroExample={HeroExample}>
         <div style={{position: 'relative'}}>
