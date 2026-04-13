@@ -2638,18 +2638,20 @@ a {
 }
 
 header {
+    position: relative;
     height: 628px;
     background-color: #202020;
 }
 
 .header {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     display: flex;
     flex-direction: column;
     color: #fff;
     justify-content: center;
+
+    position: absolute;
+    top: 0;
+    height: 100%;
 }
 
 .header .container {
@@ -2683,5 +2685,39 @@ h1 b {
     .header img {
         width: 260px;
         max-width: 50%;
+    }
+
+    .top-paragraphs {
+        padding-top: 45px;
+    }
+
+    header h1 {
+        font-size: calc(1em + 3vw);
+    }
+
+    header .container {
+        margin-left: calc(1em - 1.5vw);
+    }
+
+    header  {
+        height: 410px;
+    }
+}
+
+@media (max-width:400px) {
+    header h1 {
+        font-size: calc(1em + 3vw);
+    }
+    header .container {
+        margin-left: calc(1em - 3.5vw);
+    }
+}
+
+@media (max-width:360px) {
+    .top-paragraphs {
+        padding-top: 20px;
+    }
+    header .container {
+        margin-left: calc(1em - 6.25vw);
     }
 }
