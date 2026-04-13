@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0] - Apr 13 2026
+
+deck.gl v9.3 features big improvements to widgets, controllers and WebGPU. Find out more on [What's New](https://deck.gl/docs/whats-new) and [Upgrade Guide](https://deck.gl/docs/upgrade-guide).
+
+
 #### deck.gl [v9.3.0-beta.2] - Apr 11 2026
 
 - fix(widgets): ZoomWidget works with OrthographicView (#10202)
