@@ -46,6 +46,23 @@ Aside from the above, all widgets also received the following improvements:
 - All widget documentation pages now have live demos and easy-to-follow code samples.
 - A bug was fixed where widgets used with the `DeckGL` React component did not block pointer interaction with the canvas underneath.
 
+### Views and Controllers
+
+deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support. See the new [Using with 3D Tiles](./developer-guide/base-maps/using-with-3d-tiles.md) guide for a complete walkthrough.
+
+New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
+
+View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
+
+Class-specific improvements:
+
+- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
+- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
+- [OrbitController](./api-reference/core/orbit-controller.md) now uses 3D picking to determine zoom and pan anchors, providing more intuitive navigation around 3D content.
+- All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
+- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
+- [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
+
 ### Layers
 
 ![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
@@ -55,7 +72,7 @@ Aside from the above, all widgets also received the following improvements:
 - Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
 - WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
 
-### @deck.gl/extensions
+### Extensions
 
 - [PathStyleExtension](./api-reference/extensions/path-style-extension.md) now supports dashed strokes on [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md) and [TextLayer](./api-reference/layers/text-layer.md) backgrounds, in addition to PathLayer. See [#9864](https://github.com/visgl/deck.gl/issues/9864).
 
@@ -63,29 +80,12 @@ Aside from the above, all widgets also received the following improvements:
 
 - In interleaved mode, `MapboxOverlay` now always renders layers in groups by `beforeId` or `slot`. This enables cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default, without needing the previously experimental `_renderLayersInGroups` prop. ([#10163](https://github.com/visgl/deck.gl/pull/10163))
 - `MapboxOverlay` now automatically injects a `MapView` with id `"mapbox"` when custom views are provided, so overlaid and interleaved modes behave the same way with multi-view setups. ([#9947](https://github.com/visgl/deck.gl/pull/9947))
-- Fixed null viewport handling when the map canvas has zero dimensions. ([#10076](https://github.com/visgl/deck.gl/pull/10076), [#10086](https://github.com/visgl/deck.gl/pull/10086))
-- Fixed heatmap layer blending in interleaved mode. ([#9993](https://github.com/visgl/deck.gl/pull/9993))
+- Basemap now works correctly when canvas has zero dimensions. ([#10076](https://github.com/visgl/deck.gl/pull/10076), [#10086](https://github.com/visgl/deck.gl/pull/10086))
+- Heatmap layer now blends correctly in interleaved mode. ([#9993](https://github.com/visgl/deck.gl/pull/9993))
 
 ### @deck.gl/google-maps
 
-- Fixed DOM positioning when `interleaved: false`. ([#9992](https://github.com/visgl/deck.gl/pull/9992))
-
-### Improved 3D Support
-
-deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support. See the new [Using with 3D Tiles](./developer-guide/base-maps/using-with-3d-tiles.md) guide for a complete walkthrough.
-
-- New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
-- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
-- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
-- [OrbitController](./api-reference/core/orbit-controller.md) now uses 3D picking to determine zoom and pan anchors, providing more intuitive navigation around 3D content.
-- All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
-- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
-
-### Views
-
-View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
-
-- [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
+- Overlaid layers now render at the correct DOM position when `interleaved: false`. ([#9992](https://github.com/visgl/deck.gl/pull/9992))
 
 ## deck.gl v9.2
 
