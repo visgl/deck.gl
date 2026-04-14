@@ -323,7 +323,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
   }
 
-  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThinkness: boolean, cap?: string) {
+  getGeometry(
+    diskResolution: number,
+    vertices: number[] | undefined,
+    hasThinkness: boolean,
+    cap?: string
+  ) {
     const geometry = new ColumnGeometry({
       radius: 1,
       height: hasThinkness ? 2 : 0,
