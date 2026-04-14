@@ -78,7 +78,14 @@ Class-specific improvements:
 
 ### @deck.gl/mapbox
 
-In interleaved mode, `MapboxOverlay` now always renders layers in groups by `beforeId` or `slot`. This enables cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default, without needing the previously experimental `_renderLayersInGroups` prop.
+- In interleaved mode, `MapboxOverlay` now always renders layers in groups by `beforeId` or `slot`. This enables cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default, without needing the previously experimental `_renderLayersInGroups` prop.
+- Multi-view setups now work consistently across overlaid and interleaved modes.
+- Basemap now works correctly when canvas has zero dimensions.
+- Heatmap layer now blends correctly in interleaved mode.
+
+### @deck.gl/google-maps
+
+- Overlaid layers now render at the correct DOM position when `interleaved: false`.
 
 ## deck.gl v9.2
 
