@@ -80,7 +80,8 @@ export class TooltipWidget extends Widget<TooltipWidgetProps> {
       return;
     }
     const displayInfo = getTooltip(info);
-    this.setTooltip(displayInfo, info.x, info.y);
+    const {x, y} = this.widgetManager?.getTooltipPosition(info) || info;
+    this.setTooltip(displayInfo, x, y);
   }
 
   setTooltip(displayInfo: TooltipContent, x?: number, y?: number): void {

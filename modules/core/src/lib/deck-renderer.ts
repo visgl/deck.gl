@@ -65,6 +65,8 @@ export default class DeckRenderer {
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
     target?: Framebuffer | null;
+    shaderModuleProps?: any;
+    renderPassId?: string;
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;

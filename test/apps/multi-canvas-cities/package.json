@@ -1,0 +1,23 @@
+{
+  "name": "deckgl-example-multi-canvas-cities",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/layers": "^9.3.0-alpha.11",
+    "@deck.gl/react": "^9.3.0-alpha.11",
+    "maplibre-gl": "^3.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.1.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}

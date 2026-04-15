@@ -36,6 +36,7 @@ const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
   target?: Framebuffer | null;
+  renderPassId?: string;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -107,6 +108,7 @@ export default class LayersPass extends Pass {
     }
 
     const renderPass = this.device.beginRenderPass({
+      id: options.renderPassId || options.pass,
       framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,
