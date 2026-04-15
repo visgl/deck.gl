@@ -125,6 +125,24 @@ export class WidgetManager {
     }
   }
 
+  /** Resolve tooltip coordinates relative to the shared widget root. */
+  getTooltipPosition(info: PickingInfo): {x: number; y: number} {
+    const {x, y, viewport} = info;
+    const parentRect = this.parentElement?.getBoundingClientRect();
+    const deck = this.deck as any;
+    const canvasId = viewport && deck.viewManager?.getCanvasId(viewport.id);
+    const canvas = (canvasId && deck._canvasTargets?.[canvasId]?.canvas) || deck.getCanvas?.();
+    if (!parentRect || !canvas) {
+      return {x, y};
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: x + rect.left - parentRect.left,
+      y: y + rect.top - parentRect.top
+    };
+  }
+
   onEvent(info: PickingInfo, event: MjolnirGestureEvent) {
     const eventHandlerProp = EVENT_HANDLERS[event.type];
     if (!eventHandlerProp) {
@@ -253,8 +271,8 @@ export class WidgetManager {
   }
 
   private _updateContainers() {
-    const canvasWidth = this.deck.width;
-    const canvasHeight = this.deck.height;
+    const canvasWidth = this.parentElement?.clientWidth || this.deck.width;
+    const canvasHeight = this.parentElement?.clientHeight || this.deck.height;
     for (const id in this.containers) {
       const viewport = this.lastViewports[id] || null;
       const visible = id === ROOT_CONTAINER_ID || viewport;

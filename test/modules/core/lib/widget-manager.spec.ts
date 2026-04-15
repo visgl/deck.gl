@@ -220,6 +220,26 @@ test('WidgetManager#onRedraw#without viewId', () => {
   widgetManager.finalize();
 });
 
+test('WidgetManager#onRedraw#without viewId in multi-canvas uses parent size', () => {
+  const parentElement = document.createElement('div');
+  Object.defineProperty(parentElement, 'clientWidth', {value: 1200});
+  Object.defineProperty(parentElement, 'clientHeight', {value: 800});
+  const widgetManager = new WidgetManager({
+    deck: {...mockDeckInstance, _isMultiCanvasMode: () => true},
+    parentElement
+  });
+
+  const widget = new TestWidget({id: 'A'});
+  widgetManager.addDefault(widget);
+  widgetManager.onRedraw({viewports: [], layers: []});
+
+  const container = widgetManager.containers['root'];
+  expect(container.style.width, 'root container width uses parent size').toBe('1200px');
+  expect(container.style.height, 'root container height uses parent size').toBe('800px');
+
+  widgetManager.finalize();
+});
+
 test('WidgetManager#onRedraw#viewId', () => {
   const parentElement = document.createElement('div');
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
