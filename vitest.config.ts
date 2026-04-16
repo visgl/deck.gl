@@ -89,8 +89,7 @@ const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
-  exclude: ['modules/test-utils/**', '**/node_modules/**', 'test/**', 'examples/**'],
-  excludeAfterRemap: true
+  exclude: ['modules/test-utils/**', '**/node_modules/**']
 };
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
@@ -140,6 +139,7 @@ export default defineConfig({
   test: {
     // Globally exclude tape-based tests from all vitest projects
     exclude: [...configDefaults.exclude, '**/*.tape.spec.ts'],
+    coverage: coverageConfig,
     projects: [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation
@@ -153,10 +153,9 @@ export default defineConfig({
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
-          coverage: coverageConfig,
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [1]}
-        }
+          sequence: {groupOrder: 1}
+        },
       },
 
       // Scripts project - codemod and build tool tests
@@ -170,7 +169,7 @@ export default defineConfig({
           globals: false,
           testTimeout: 30000,
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [0]}
+          sequence: {groupOrder: 0}
         }
       },
 
@@ -206,9 +205,8 @@ export default defineConfig({
             screenshotFailures: false,
             commands: browserCommands
           },
-          coverage: coverageConfig,
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [2]}
+          sequence: {groupOrder: 2}
         }
       },
 
@@ -240,7 +238,7 @@ export default defineConfig({
             commands: browserCommands
           },
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [3]}
+          sequence: {groupOrder: 3}
         }
       },
 
@@ -276,9 +274,8 @@ export default defineConfig({
             screenshotFailures: false,
             commands: browserCommands
           },
-          coverage: coverageConfig,
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [4]}
+          sequence: {groupOrder: 4}
         }
       }
     ]
