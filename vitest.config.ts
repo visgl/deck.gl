@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {defineConfig, configDefaults} from 'vitest/config';
+import {defineConfig, configDefaults, TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
@@ -85,11 +85,12 @@ const browserAliases = {
 };
 
 // Shared coverage configuration
-const coverageConfig = {
+const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
-  exclude: ['modules/test-utils/**', '**/node_modules/**']
+  exclude: ['modules/test-utils/**', '**/node_modules/**', 'test/**', 'examples/**'],
+  excludeAfterRemap: true
 };
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
@@ -152,6 +153,7 @@ export default defineConfig({
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
+          coverage: coverageConfig,
           // Unique sequence order for running multiple projects together
           sequence: {groupOrder: [1]}
         }
@@ -274,6 +276,7 @@ export default defineConfig({
             screenshotFailures: false,
             commands: browserCommands
           },
+          coverage: coverageConfig,
           // Unique sequence order for running multiple projects together
           sequence: {groupOrder: [4]}
         }
