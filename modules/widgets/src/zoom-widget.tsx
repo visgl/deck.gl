@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import type {WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import {Widget, FlyToInterpolator, LinearInterpolator, OrthographicView} from '@deck.gl/core';
+import type {WidgetProps, WidgetPlacement, OrthographicViewState} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
 import {IconButton} from './lib/components/icon-button';
@@ -21,6 +21,10 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomOutLabel?: string;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
+  /**  Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
+   * Only effective if the current view is OrthographicView.
+   */
+  zoomAxis?: 'X' | 'Y' | 'all';
   /**
    * Callback when zoom buttons are clicked.
    * Called for each viewport that will be zoomed.
@@ -32,6 +36,10 @@ export type ZoomWidgetProps = WidgetProps & {
     delta: number;
     /** The new zoom level */
     zoom: number;
+    /** The new zoom level of the X axis, if using OrthographicView */
+    zoomX?: number;
+    /** The new zoom level of the Y axis, if using OrthographicView */
+    zoomY?: number;
   }) => void;
 };
 
@@ -44,6 +52,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
+    zoomAxis: 'all',
     viewId: null,
     onZoom: () => {}
   };
@@ -80,25 +89,66 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     render(ui, rootElement);
   }
 
-  handleZoom(viewId: string, nextZoom: number, delta: number) {
+  isOrthographicView(viewId: string): boolean {
+    const deck = this.deck;
+    const view = deck?.isInitialized && deck.getView(viewId);
+    return view instanceof OrthographicView;
+  }
+
+  handleZoom(viewId: string, delta: number) {
     // Respect minZoom/maxZoom constraints from the view state
     const viewState = this.getViewState(viewId);
-    if (viewState) {
-      const {minZoom, maxZoom} = viewState as any;
-      if (Number.isFinite(minZoom)) {
-        nextZoom = Math.max(minZoom, nextZoom);
-      }
-      if (Number.isFinite(maxZoom)) {
-        nextZoom = Math.min(maxZoom, nextZoom);
-      }
-    }
+    const newViewState: Record<string, unknown> = {};
 
-    // Call callback
-    this.props.onZoom?.({viewId, delta, zoom: nextZoom});
+    if (this.isOrthographicView(viewId)) {
+      const {zoomAxis} = this.props;
+      const {zoomX, minZoomX, maxZoomX, zoomY, minZoomY, maxZoomY} = normalizeOrthographicViewState(
+        viewState as any
+      );
+      let nextZoom: number;
+      let nextZoomY: number;
+      if (zoomAxis === 'X') {
+        nextZoom = clamp(zoomX + delta, minZoomX, maxZoomX);
+        nextZoomY = zoomY;
+      } else if (zoomAxis === 'Y') {
+        nextZoom = zoomX;
+        nextZoomY = clamp(zoomY + delta, minZoomY, maxZoomY);
+      } else {
+        const clampedDelta = clamp(
+          delta,
+          Math.max(minZoomX - zoomX, minZoomY - zoomY),
+          Math.min(maxZoomX - zoomX, maxZoomY - zoomY)
+        );
+        nextZoom = zoomX + clampedDelta;
+        nextZoomY = zoomY + clampedDelta;
+      }
+      newViewState.zoom = [nextZoom, nextZoomY];
+      newViewState.zoomX = nextZoom;
+      newViewState.zoomY = nextZoomY;
+      // Call callback
+      this.props.onZoom?.({
+        viewId,
+        delta,
+        // `zoom` will not match the new state if using 2D zoom. Deprecated behavior for backward compatibility.
+        zoom: zoomAxis === 'Y' ? nextZoomY : nextZoom,
+        zoomX: nextZoom,
+        zoomY: nextZoomY
+      });
+    } else {
+      const {zoom = 0, minZoom, maxZoom} = viewState as any;
+      const nextZoom = clamp(zoom + delta, minZoom, maxZoom);
+      newViewState.zoom = nextZoom;
+      // Call callback
+      this.props.onZoom?.({
+        viewId,
+        delta,
+        zoom: nextZoom
+      });
+    }
 
     const nextViewState: Record<string, unknown> = {
       ...viewState,
-      zoom: nextZoom
+      ...newViewState
     };
     if (this.props.transitionDuration > 0) {
       nextViewState.transitionDuration = this.props.transitionDuration;
@@ -106,7 +156,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
         'latitude' in nextViewState
           ? new FlyToInterpolator()
           : new LinearInterpolator({
-              transitionProps: ['zoom']
+              transitionProps: 'zoomX' in newViewState ? ['zoomX', 'zoomY'] : ['zoom']
             });
     }
     this.setViewState(viewId, nextViewState);
@@ -115,16 +165,41 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   handleZoomIn() {
     const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
     for (const viewId of viewIds) {
-      const viewState = this.getViewState(viewId);
-      this.handleZoom(viewId, (viewState.zoom as number) + 1, 1);
+      this.handleZoom(viewId, 1);
     }
   }
 
   handleZoomOut() {
     const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
     for (const viewId of viewIds) {
-      const viewState = this.getViewState(viewId);
-      this.handleZoom(viewId, (viewState.zoom as number) - 1, -1);
+      this.handleZoom(viewId, -1);
     }
   }
+}
+
+function clamp(zoom: number, minZoom: number, maxZoom: number): number {
+  return zoom < minZoom ? minZoom : zoom > maxZoom ? maxZoom : zoom;
+}
+
+function normalizeOrthographicViewState({
+  zoom = 0,
+  zoomX,
+  zoomY,
+  minZoom = -Infinity,
+  maxZoom = Infinity,
+  minZoomX = minZoom,
+  maxZoomX = maxZoom,
+  minZoomY = minZoom,
+  maxZoomY = maxZoom
+}: OrthographicViewState): {
+  zoomX: number;
+  zoomY: number;
+  minZoomX: number;
+  maxZoomX: number;
+  minZoomY: number;
+  maxZoomY: number;
+} {
+  zoomX = zoomX ?? (Array.isArray(zoom) ? zoom[0] : zoom);
+  zoomY = zoomY ?? (Array.isArray(zoom) ? zoom[1] : zoom);
+  return {zoomX, zoomY, minZoomX, minZoomY, maxZoomX, maxZoomY};
 }
