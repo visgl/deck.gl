@@ -14,7 +14,7 @@ import type {Tileset3D} from '@loaders.gl/tiles';
 
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3NjEwMjA4Ni00YmVkLTQyMjgtYjRmZS1lY2M3ZWFiMmFmNTYiLCJpZCI6MjYxMzMsImlhdCI6MTY3NTM2ODY4NX0.chGkGL6DkDNv5wYJQDMzWIvi9iDoVa27dgng_5ARDmo';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4OGMyMDVmMS0zNjIyLTRkMDQtYTQ2MS05YmQ3MTc5ZDJhOTAiLCJpZCI6MjYxMzMsImlhdCI6MTc3NjA4NzkxNX0.wfqN4Vu94UsALYDIunRGWO8wKFYMoe67ooozJwDAo-c';
 const TILESET_URL = `https://assets.ion.cesium.com/${ION_ASSET_ID}/tileset.json`;
 
 const INITIAL_VIEW_STATE: MapViewState = {

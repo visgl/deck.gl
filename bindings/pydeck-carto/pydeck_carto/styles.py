@@ -31,7 +31,7 @@ def color_bins(
     """
     return pdk.types.Function(
         "colorBins",
-        **{"attr": attr, "domain": domain, "colors": colors, "nullColor": null_color}
+        **{"attr": attr, "domain": domain, "colors": colors, "nullColor": null_color},
     )
 
 
@@ -73,7 +73,7 @@ def color_categories(
             "colors": colors,
             "nullColor": null_color,
             "othersColor": others_color,
-        }
+        },
     )
 
 
@@ -105,5 +105,5 @@ def color_continuous(
     """
     return pdk.types.Function(
         "colorContinuous",
-        **{"attr": attr, "domain": domain, "colors": colors, "nullColor": null_color}
+        **{"attr": attr, "domain": domain, "colors": colors, "nullColor": null_color},
     )

@@ -340,38 +340,43 @@ export function SelectorWidgetDemo() {
     })
   ]} />;
 }
-function bounce(x, max) {
-  x = x % (max * 2);
-  return x >= max ? max - x : x;
-}
 export function ScrollbarWidgetDemo() {
-  const data = Array.from({length: 1000}, (_, i) => ({
-    position: [i * 100, 0, 0],
-    color: [bounce(i * 11, 255), bounce(i * 7, 255), 100]
+  const N = 1000;
+  const Spacing = 40;
+  const data = Array.from({length: N + 1}, (_, i) => ({
+    position: [(i - N / 2) * Spacing, 0, 0],
+    color: [
+      (Math.sin(i / 20) + 1) * 128,
+      (Math.sin(i / 20 + Math.PI * 2 / 3) + 1) * 128,
+      (Math.sin(i / 20 + Math.PI * 4 / 3) + 1) * 128,
+    ]
   }));
+  const contentBounds = [
+    [-N / 2 * Spacing - Spacing, -Spacing, 0],
+    [N / 2 * Spacing + Spacing, Spacing, 0]
+  ];
+
   const layers = [
     new ScatterplotLayer({
       id: 'points',
       data: data,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      getRadius: 20,
+      getRadius: 10,
     })
   ];
   return <NonGeoDemoBase
     views={new OrthographicView({id: 'ortho'})}
-    controller={{scrollZoom: false}}
+    initialViewState={{target: [0, 0], zoom: 0, zoomX: 0, zoomY: 10}}
+    controller={{scrollZoom: false, maxBounds: contentBounds}}
     layers={layers}
     widgets={[
-      new ZoomWidget(),
+      new ZoomWidget({ zoomAxis: 'X' }),
       new ResetViewWidget(),
       new ScrollbarWidget({
         placement: 'bottom-right',
         viewId: 'ortho',
-        contentBounds: [
-          [-100, 0, 0],
-          [100 * 1001, 10, 0]
-        ],
+        contentBounds,
         orientation: 'horizontal',
         captureWheel: true
       })

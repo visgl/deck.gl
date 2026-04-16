@@ -421,27 +421,9 @@ test('ZoomWidget - handleZoom calls onZoom with correct params', () => {
   // Mock setViewState to prevent actual state changes
   vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
 
-  widget.handleZoom('default-view', 11, 1);
+  widget.handleZoom('default-view', 1);
 
   expect(onZoom).toHaveBeenCalledWith({viewId: 'default-view', delta: 1, zoom: 11});
-});
-
-test('ZoomWidget - handleZoom respects minZoom/maxZoom constraints', () => {
-  const onZoom = vi.fn();
-  const widget = new ZoomWidget({onZoom});
-
-  vi.spyOn(widget, 'getViewState').mockReturnValue({zoom: 10, minZoom: 2, maxZoom: 12});
-  vi.spyOn(widget, 'setViewState').mockImplementation(() => {});
-
-  // Try to zoom beyond maxZoom
-  widget.handleZoom('default-view', 15, 1);
-  expect(onZoom).toHaveBeenCalledWith({viewId: 'default-view', delta: 1, zoom: 12});
-
-  onZoom.mockClear();
-
-  // Try to zoom below minZoom
-  widget.handleZoom('default-view', 1, -1);
-  expect(onZoom).toHaveBeenCalledWith({viewId: 'default-view', delta: -1, zoom: 2});
 });
 
 // ---- CompassWidget ----

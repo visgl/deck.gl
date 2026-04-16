@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.0-beta.2] - Apr 11 2026
+
+- fix(widgets): ZoomWidget works with OrthographicView (#10202)
+- fix(aggregation-layers) Fix nvidia compilation error (#10191)
+- fix(widgets): Move @floating-ui/dom to dependencies (#10189)
+
 #### deck.gl [v9.3.0-beta.1] - Apr 7 2026
 
 - feat(extensions): Add dashed stroke support for ScatterplotLayer and TextBackgroundLayer (#9976)
