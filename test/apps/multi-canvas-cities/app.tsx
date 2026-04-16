@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {MapView, View} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {BasemapLayer} from '@deck.gl-community/basemap-layers';
 import {Map} from 'react-map-gl/maplibre';
 
 type Landmark = {
@@ -10,10 +11,6 @@ type Landmark = {
   cityId: string;
   name: string;
   position: [number, number];
-};
-
-type LandmarkLayerProps = {
-  viewportId?: string;
 };
 
 const CITY_PANELS = [
@@ -83,15 +80,24 @@ const CITY_TITLES = Object.fromEntries(CITY_PANELS.map(city => [city.id, city.ti
 
 function App() {
   const [hoveredLandmark, setHoveredLandmark] = useState<Landmark | null>(null);
+  const [useDeckBasemap, setUseDeckBasemap] = useState(false);
 
   const layers = useMemo(
-    () =>
-      CITY_PANELS.map(
+    () => [
+      ...(useDeckBasemap
+        ? CITY_PANELS.map(
+            city =>
+              new BasemapLayer({
+                id: `${city.id}-basemap`,
+                style: city.mapStyle
+              })
+          )
+        : []),
+      ...CITY_PANELS.map(
         city =>
           new ScatterplotLayer<Landmark>({
             id: `${city.id}-landmarks`,
             data: city.landmarks,
-            viewportId: city.id,
             pickable: true,
             parameters: {depthTest: false},
             radiusUnits: 'pixels',
@@ -110,8 +116,9 @@ function App() {
             getLineColor: [255, 255, 255],
             onHover: info => setHoveredLandmark((info.object as Landmark) || null)
           })
-      ),
-    [hoveredLandmark]
+      )
+    ],
+    [hoveredLandmark, useDeckBasemap]
   );
 
   return (
@@ -145,16 +152,42 @@ function App() {
           padding: '12px 14px',
           background: 'rgba(255,255,255,0.06)',
           border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 8
+          borderRadius: 8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12
         }}
       >
-        {hoveredLandmark ? (
-          <strong>
-            {hoveredLandmark.name} in {CITY_PANELS.find(city => city.id === hoveredLandmark.cityId)?.title}
-          </strong>
-        ) : (
-          <strong>Hover any highlighted landmark</strong>
-        )}
+        <div>
+          {hoveredLandmark ? (
+            <strong>
+              {hoveredLandmark.name} in {CITY_PANELS.find(city => city.id === hoveredLandmark.cityId)?.title}
+            </strong>
+          ) : (
+            <strong>Hover any highlighted landmark</strong>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => setUseDeckBasemap(value => !value)}
+          style={{
+            appearance: 'none',
+            border: '1px solid rgba(255,255,255,0.18)',
+            borderRadius: 8,
+            background: useDeckBasemap ? '#54c4ff' : 'rgba(255,255,255,0.08)',
+            color: useDeckBasemap ? '#081018' : '#f5f7fb',
+            font: 'inherit',
+            fontWeight: 700,
+            padding: '8px 12px',
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+        >
+          {useDeckBasemap
+            ? 'Deck BasemapLayer (1 WebGL Context)'
+            : 'React Basemap (5 WebGL Contexts)'}
+        </button>
       </div>
 
       <DeckGL
@@ -170,9 +203,7 @@ function App() {
               }
             : null;
         }}
-        layerFilter={({layer, viewport}) =>
-          Boolean(viewport && (layer.props as LandmarkLayerProps).viewportId === viewport.id)
-        }
+        layerFilter={({layer, viewport}) => Boolean(viewport && layer.id.startsWith(`${viewport.id}-`))}
         style={{
           position: 'relative',
           display: 'grid',
@@ -186,7 +217,12 @@ function App() {
       >
         {CITY_PANELS.map(city => (
           <View key={city.id} id={city.id}>
-            <Map reuseMaps interactive={false} mapStyle={city.mapStyle} />
+            <Map
+              reuseMaps
+              interactive={false}
+              mapStyle={city.mapStyle}
+              style={{opacity: useDeckBasemap ? 0 : 1}}
+            />
             <div
               style={{
                 position: 'absolute',
