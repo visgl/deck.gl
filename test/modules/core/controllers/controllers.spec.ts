@@ -41,10 +41,12 @@ test('GlobeController', async () => {
     {
       longitude: -122.45,
       latitude: 37.78,
-      zoom: 0
+      zoom: 0,
+      bearing: 0,
+      pitch: 0
     },
-    // GlobeView cannot be rotated
-    ['pan#function key', 'pinch', 'multipan']
+    // GlobeView uses globe-specific zoom (no mouse position), so pinch behaves differently
+    ['pinch']
   );
 });
 
