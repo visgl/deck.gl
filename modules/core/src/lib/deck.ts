@@ -405,11 +405,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         _cachePipelines: true,
         ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
-          // Sync drawing buffer dimensions with externally-managed canvas
-          const {width, height} = canvasContext.canvas;
-          canvasContext.setDrawingBufferSize(width, height);
-
-          this._needsRedraw = 'Canvas resized';
+          // Attached contexts still emit resize through luma's CanvasContext.
+          // Deck only mirrors that state into viewport dimensions and redraw flags.
+          this._onCanvasContextResize(canvasContext);
           userOnResize?.(canvasContext, info);
         }
       });
@@ -1054,15 +1052,20 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
-  /** If canvas size has changed, reads out the new size and update */
-  private _updateCanvasSize(): void {
+  /**
+   * Sync Deck viewport dimensions from the active canvas context.
+   * luma.gl owns resize observation, DPR tracking and drawing buffer sizing.
+   */
+  private _updateCanvasSize(
+    canvasContext: {getCSSSize(): [number, number]} | null = this.device?.getDefaultCanvasContext?.() || null
+  ): void {
     const {canvas} = this;
-    if (!canvas) {
-      return;
-    }
-    // Fallback to width/height when clientWidth/clientHeight are undefined (OffscreenCanvas).
-    const newWidth = canvas.clientWidth ?? canvas.width;
-    const newHeight = canvas.clientHeight ?? canvas.height;
+    const [newWidth, newHeight] = canvasContext
+      // The canvas context owns the authoritative CSS size after resize/DPR observation.
+      ? canvasContext.getCSSSize()
+      : // Fallback to width/height when there is no default canvas context available yet.
+        [canvas?.clientWidth ?? canvas?.width ?? 0, canvas?.clientHeight ?? canvas?.height ?? 0];
+
     if (newWidth !== this.width || newHeight !== this.height) {
       // @ts-expect-error private assign to read-only property
       this.width = newWidth;
@@ -1073,6 +1076,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.layerManager?.activateViewport(this.getViewports()[0]);
       this.props.onResize({width: newWidth, height: newHeight});
     }
+  }
+
+  private _onCanvasContextResize(canvasContext: {getCSSSize(): [number, number]}): void {
+    // luma owns resize detection; Deck reacts by invalidating redraw and updating view state.
+    this._needsRedraw = 'Canvas resized';
+    this._updateCanvasSize(canvasContext);
   }
 
   private _createAnimationLoop(
@@ -1149,10 +1158,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         autoResize: true
       },
       onResize: (canvasContext, info) => {
-        // Set redraw flag when luma.gl's CanvasContext detects a resize
-        // This restores pre-9.2 behavior where resize automatically triggered redraws
-        this._needsRedraw = 'Canvas resized';
-        // Call user's onResize if provided
+        // Deck-created canvases follow the same contract as attached canvases:
+        // luma updates canvas state, Deck updates viewport bookkeeping and callbacks.
+        this._onCanvasContextResize(canvasContext);
         userOnResize?.(canvasContext, info);
       }
     });
@@ -1383,7 +1391,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.setProps(this.props);
 
-    this._updateCanvasSize();
+    // Seed the initial Deck width/height from the current canvas context before onLoad fires.
+    this._updateCanvasSize(this.device.getDefaultCanvasContext());
     this.props.onLoad();
   }
 
@@ -1446,8 +1455,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         this.props._onMetrics(this.metrics);
       }
     }
-
-    this._updateCanvasSize();
 
     this._updateCursor();
 

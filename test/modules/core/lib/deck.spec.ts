@@ -134,6 +134,73 @@ test('Deck#abort', async () => {
   console.log('Deck initialization aborted');
 });
 
+test('Deck#canvas context resize drives Deck dimensions', async () => {
+  const resizeEvents: Array<{width: number; height: number}> = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    onResize: dimensions => resizeEvents.push(dimensions)
+  });
+
+  await waitForRender(deck);
+
+  const canvasContext = device.getDefaultCanvasContext();
+  const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
+  const nextSize: [number, number] = [17, 19];
+
+  try {
+    canvasContext.getCSSSize = () => nextSize;
+    resizeEvents.length = 0;
+
+    // Call the internal resize hook directly so the test verifies Deck's reaction to luma state.
+    // @ts-expect-error testing private resize hook
+    deck._onCanvasContextResize(canvasContext);
+
+    expect(deck.width, 'Deck width comes from canvas context CSS size').toBe(nextSize[0]);
+    expect(deck.height, 'Deck height comes from canvas context CSS size').toBe(nextSize[1]);
+    expect(resizeEvents, 'Deck onResize fires from canvas context resize').toEqual([
+      {width: nextSize[0], height: nextSize[1]}
+    ]);
+    expect(deck.needsRedraw(), 'resize invalidates redraw').toBeTruthy();
+  } finally {
+    canvasContext.getCSSSize = originalGetCSSSize;
+    deck.finalize();
+  }
+});
+
+test('Deck#useDevicePixels forwards to canvas context', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  const canvasContext = device.getDefaultCanvasContext();
+  const initialUseDevicePixels = canvasContext.props.useDevicePixels;
+
+  try {
+    // Deck.setProps should only forward the preference into luma's canvas context.
+    deck.setProps({useDevicePixels: false});
+    expect(canvasContext.props.useDevicePixels, 'canvas context useDevicePixels updated').toBe(
+      false
+    );
+
+    // Numeric overrides should flow through unchanged so luma can size the drawing buffer.
+    deck.setProps({useDevicePixels: 2});
+    expect(canvasContext.props.useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
+  } finally {
+    canvasContext.setProps({useDevicePixels: initialUseDevicePixels});
+    deck.finalize();
+  }
+});
+
 test('Deck#no views', async () => {
   await new Promise<void>((resolve, reject) => {
     const deck = new Deck({
