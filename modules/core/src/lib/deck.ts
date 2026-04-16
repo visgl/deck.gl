@@ -346,6 +346,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _metricsCounter: number = 0;
   private _hoverPickSequence: number = 0;
   private _pointerDownPickSequence: number = 0;
+  private _pollCanvasContextSize: boolean = false;
 
   private _needsRedraw: false | string = 'Initial render';
   private _pickRequest: {
@@ -386,6 +387,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // See if we already have a device
     if (props.device) {
       this.device = props.device;
+      // External Device ownership means Deck cannot wrap luma's onResize callback.
+      // Keep a render-loop poll so viewport dimensions still follow CanvasContext state.
+      this._pollCanvasContextSize = true;
     }
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
@@ -1057,12 +1061,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * luma.gl owns resize observation, DPR tracking and drawing buffer sizing.
    */
   private _updateCanvasSize(
-    canvasContext: {getCSSSize(): [number, number]} | null = this.device?.getDefaultCanvasContext?.() || null
+    canvasContext: {
+      getCSSSize(): [number, number];
+    } | null = this.device?.getDefaultCanvasContext?.() || null
   ): void {
     const {canvas} = this;
     const [newWidth, newHeight] = canvasContext
-      // The canvas context owns the authoritative CSS size after resize/DPR observation.
-      ? canvasContext.getCSSSize()
+      ? // The canvas context owns the authoritative CSS size after resize/DPR observation.
+        canvasContext.getCSSSize()
       : // Fallback to width/height when there is no default canvas context available yet.
         [canvas?.clientWidth ?? canvas?.width ?? 0, canvas?.clientHeight ?? canvas?.height ?? 0];
 
@@ -1454,6 +1460,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (this.props._onMetrics) {
         this.props._onMetrics(this.metrics);
       }
+    }
+
+    if (this._pollCanvasContextSize) {
+      // Callers that hand Deck an existing Device keep luma's CanvasContext as the source
+      // of truth, but Deck does not own that context's onResize wiring. Poll the context
+      // once per frame so width/height stay in sync without falling back to DOM reads.
+      this._updateCanvasSize();
     }
 
     this._updateCursor();

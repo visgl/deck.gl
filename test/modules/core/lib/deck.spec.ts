@@ -201,6 +201,43 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
   }
 });
 
+test('Deck#render frame syncs provided device canvas context size', async () => {
+  const resizeEvents: Array<{width: number; height: number}> = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    onResize: dimensions => resizeEvents.push(dimensions)
+  });
+
+  await waitForRender(deck);
+
+  const canvasContext = device.getDefaultCanvasContext();
+  const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
+  const nextSize: [number, number] = [23, 29];
+
+  try {
+    canvasContext.getCSSSize = () => nextSize;
+    resizeEvents.length = 0;
+
+    // Provided Device instances do not route luma's onResize callback through Deck.
+    // The render loop still refreshes dimensions from CanvasContext so view state stays current.
+    // @ts-expect-error testing private render loop
+    deck._onRenderFrame();
+
+    expect(deck.width, 'Deck width is refreshed during render frame').toBe(nextSize[0]);
+    expect(deck.height, 'Deck height is refreshed during render frame').toBe(nextSize[1]);
+    expect(resizeEvents, 'Deck onResize fires from render-frame canvas context sync').toEqual([
+      {width: nextSize[0], height: nextSize[1]}
+    ]);
+  } finally {
+    canvasContext.getCSSSize = originalGetCSSSize;
+    deck.finalize();
+  }
+});
+
 test('Deck#no views', async () => {
   await new Promise<void>((resolve, reject) => {
     const deck = new Deck({
