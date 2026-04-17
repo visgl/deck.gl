@@ -196,8 +196,7 @@ export class GeocoderWidget extends Widget<GeocoderWidgetProps> {
   };
 
   flyTo(viewState: ViewState) {
-    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
-    for (const viewId of viewIds) {
+    for (const viewId of this.viewIds) {
       // Call callback with geocoded coordinates
       if ('longitude' in viewState && 'latitude' in viewState) {
         this.props.onGeocode?.({
