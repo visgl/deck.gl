@@ -162,7 +162,8 @@ The `ScrollbarWidget` accepts the generic [`WidgetProps`](../core/widget.md#widg
 
 The full extent of the scrollable content, in world coordinates.
 The widget relies on this value to calculate the position and size of the slider button and track.
-If not supplied, the scrollbar will always be hidden.
+If not supplied, falls back to [maxBounds](../core/controller.md#options) of the controller.
+If no bounds definition is found, the scrollbar will always be hidden.
 
 #### orientation (string, optional)
 
