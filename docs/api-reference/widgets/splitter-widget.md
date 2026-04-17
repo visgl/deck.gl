@@ -45,13 +45,13 @@ import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
 import {Deck, OrbitView, type OrbitViewState} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 
-new Deck({
+new Deck<OrbitView[]>({
   initialViewState: {
     front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
     perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
   },
   widgets: [
-    new SplitterWidget({
+    new SplitterWidget<OrbitView[]>({
       viewLayout: {
         orientation: 'horizontal',
         views: [
@@ -141,7 +141,7 @@ function App() {
 
 ```ts
 import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
-new SplitterWidget({} satisfies SplitterWidgetProps);
+new SplitterWidget<ViewType[]>({} satisfies SplitterWidgetProps);
 ```
 
 ## Types
