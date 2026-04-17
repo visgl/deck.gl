@@ -1,5 +1,8 @@
-import {test, expect} from 'vitest';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
+import {test, expect, vi} from 'vitest';
 import {OrthographicView, type MapViewState, type OrthographicViewState} from '@deck.gl/core';
 import {ZoomWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
@@ -10,17 +13,23 @@ test('ZoomWidget', async () => {
     latitude: 37.78,
     zoom: 8
   };
+  const onZoom = vi.fn();
   const testInstance = new WidgetTester({
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
     },
-    widgets: [new ZoomWidget()]
+    widgets: [new ZoomWidget({onZoom})]
   });
 
   await testInstance.idle();
   testInstance.click('.deck-widget-zoom-in');
   expect(viewState.zoom).toBe(9);
+  expect(onZoom).toHaveBeenCalledWith({
+    delta: 1,
+    viewId: 'default-view',
+    zoom: 9
+  });
 
   await testInstance.idle();
   testInstance.click('.deck-widget-zoom-out');

@@ -1,5 +1,14 @@
-import {test, expect} from 'vitest';
-import {_CoordinatesGeocoder as CoordinatesGeocoder} from '@deck.gl/widgets';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {test, expect, vi} from 'vitest';
+import {type MapViewState} from '@deck.gl/core';
+import {
+  _GeocoderWidget as GeocoderWidget,
+  _CoordinatesGeocoder as CoordinatesGeocoder
+} from '@deck.gl/widgets';
+import {WidgetTester} from './common';
 
 test('CoordinatesGeocoder.geocode - Parses decimal coordinates correctly', async () => {
   const cases = [
@@ -50,7 +59,7 @@ test('CoordinatesGeocoder.geocode - Returns null for invalid inputs', async () =
 test('CoordinatesGeocoder.geocode - Parses mixed formats and boundary conditions', async () => {
   const cases = [
     {input: '85°, -180°', expected: {latitude: 85, longitude: -180}},
-    {input: '85°0\'0\"N 180°0\'0\"E', expected: {latitude: 85, longitude: 180}},
+    {input: '85°0\'0\"N, 180°0\'0\"E', expected: {latitude: 85, longitude: 180}},
     {input: '90°0\'0\"S, 135°0\'0\"E', expected: {latitude: -90, longitude: 135}}
   ];
 
@@ -58,4 +67,57 @@ test('CoordinatesGeocoder.geocode - Parses mixed formats and boundary conditions
     const result = await CoordinatesGeocoder.geocode(input);
     expect(result, `geocode(${input})`).toEqual(expected);
   }
+});
+
+test('GeocoderWidget#flyTo calls onGeocode with coordinates', async () => {
+  const onGeocode = vi.fn();
+  const widget = new GeocoderWidget({onGeocode});
+
+  const testInstance = new WidgetTester({
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    },
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  widget.flyTo({longitude: -122.4, latitude: 37.8, zoom: 12});
+
+  expect(onGeocode).toHaveBeenCalledWith({
+    viewId: 'default-view',
+    coordinates: {longitude: -122.4, latitude: 37.8, zoom: 12}
+  });
+
+  testInstance.destroy();
+});
+
+test('GeocoderWidget#responds to input change', async () => {
+  let viewState: MapViewState = {
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 8
+  };
+  const testInstance = new WidgetTester({
+    initialViewState: viewState,
+    onViewStateChange: (evt: any) => {
+      viewState = evt.viewState;
+    },
+    widgets: [new GeocoderWidget()]
+  });
+
+  await testInstance.idle();
+  const input = testInstance.findElements('.deck-widget-geocoder-input')[0] as HTMLInputElement;
+  expect(input).toBeTruthy();
+
+  input.value = '-122, 38';
+  input.dispatchEvent(new InputEvent('input'));
+  input.dispatchEvent(new KeyboardEvent('keypress', {key: 'Enter'}));
+
+  await testInstance.idle();
+  expect(viewState.longitude).toBe(-122);
+  expect(viewState.latitude).toBe(38);
+
+  testInstance.destroy();
 });

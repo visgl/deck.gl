@@ -1,14 +1,21 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck} from '@deck.gl/core';
 import type {DeckProps, View} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
 const WIDTH = 600;
 const HEIGHT = 400;
 
-export class WidgetTester {
-  private deck: Deck<any> | null;
+type ViewOrViews = View | View[] | null;
+
+export class WidgetTester<ViewsT extends ViewOrViews = null> {
+  private deck: Deck<ViewsT> | null;
   private container: HTMLDivElement | null;
 
-  constructor(deckProps?: DeckProps<any>) {
+  constructor(deckProps?: DeckProps<ViewsT>) {
     const container = document.createElement('div');
     container.id = 'deck-container';
     container.style.cssText = `position: absolute; left: 0; top: 0; width: ${WIDTH}px; height: ${HEIGHT}px;`;
@@ -23,8 +30,15 @@ export class WidgetTester {
     });
   }
 
-  setProps(deckProps: DeckProps) {
+  setProps(deckProps: DeckProps<ViewsT>) {
     this.deck?.setProps(deckProps);
+  }
+
+  getProps(): DeckProps<ViewsT> {
+    if (!this.deck) {
+      throw new Error('Tester has been finalized');
+    }
+    return this.deck.props;
   }
 
   idle(): Promise<void> {
