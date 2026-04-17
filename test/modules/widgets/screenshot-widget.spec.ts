@@ -48,3 +48,14 @@ test('ScreenshotWidget', async () => {
   expect(dataUrl).toContain('data:');
   expect(fileName).toBe('test.png');
 });
+
+test('ScreenshotWidget#custom callback', async () => {
+  const onCapture = vi.fn();
+  testInstance = new WidgetTester({
+    widgets: [new ScreenshotWidget({onCapture})]
+  });
+
+  await testInstance.idle();
+  testInstance.click('.deck-widget-camera');
+  expect(onCapture).toHaveBeenCalledOnce();
+});

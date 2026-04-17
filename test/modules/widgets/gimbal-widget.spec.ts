@@ -67,3 +67,55 @@ test('GimbalWidget#resetOrbitView calls onReset and sets view state', async () =
   widget.resetOrbitView();
   expect(onReset).toHaveBeenCalledWith({viewId: 'OrbitView', rotationOrbit: 0, rotationX: 0});
 });
+
+test('GimbalWidget#normalizeRotation', () => {
+  const widget = new GimbalWidget();
+  const spy = vi.spyOn(widget, 'getViewState');
+
+  const cases: {viewState: Partial<OrbitViewState>; expected: any}[] = [
+    {
+      viewState: {},
+      expected: {rotationOrbit: 0, rotationX: 0}
+    },
+    {
+      viewState: {
+        rotationOrbit: 30,
+        rotationX: 45
+      },
+      expected: {rotationOrbit: -30, rotationX: 45}
+    },
+    {
+      viewState: {
+        rotationOrbit: -270,
+        rotationX: 270
+      },
+      expected: {rotationOrbit: -90, rotationX: -90}
+    },
+    {
+      viewState: {
+        rotationOrbit: -80,
+        rotationX: 80
+      },
+      expected: {rotationOrbit: 80, rotationX: 80}
+    },
+    {
+      viewState: {
+        rotationOrbit: -85,
+        rotationX: 85
+      },
+      expected: {rotationOrbit: 100, rotationX: 100}
+    },
+    {
+      viewState: {
+        rotationOrbit: -95,
+        rotationX: 95
+      },
+      expected: {rotationOrbit: 100, rotationX: 100}
+    }
+  ];
+
+  for (const {viewState, expected} of cases) {
+    spy.mockReturnValueOnce(viewState);
+    expect(widget.getNormalizedRotation()).toEqual(expected);
+  }
+});

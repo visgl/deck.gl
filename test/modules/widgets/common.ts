@@ -62,7 +62,8 @@ export class WidgetTester<ViewsT extends ViewOrViews = null> {
     if (!this.container) {
       throw new Error('Tester has been finalized');
     }
-    return Array.from(this.container.querySelectorAll(`.deck-widget-container ${selector}`));
+    if (!selector) return [this.container];
+    return Array.from(this.container.querySelectorAll(selector));
   }
 
   click(
@@ -76,7 +77,7 @@ export class WidgetTester<ViewsT extends ViewOrViews = null> {
     if (!this.container) {
       throw new Error('Tester has been finalized');
     }
-    const element = this.container.querySelector(`.deck-widget-container ${selector}`);
+    const element = this.container.querySelector(selector);
     if (!element) {
       throw new Error(`Element ${selector} is not found`);
     }

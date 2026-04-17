@@ -33,6 +33,7 @@ test('LoadingWidget', async () => {
   expect(spinner).toBeTruthy();
 
   resolveDataLoader([]);
+  await vi.waitUntil(() => layer.isLoaded);
   await testInstance.idle();
   // Spinner is hidden
   spinner = testInstance.findElements('.deck-widget-spinner')[0];

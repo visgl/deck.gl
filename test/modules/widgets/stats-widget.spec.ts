@@ -4,6 +4,7 @@
 
 import {afterEach, test, expect, vi} from 'vitest';
 import {Stats} from '@probe.gl/stats';
+import {luma} from '@luma.gl/core';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {DEFAULT_FORMATTERS} from '../../../modules/widgets/src/stats-widget';
 import {WidgetTester} from './common';
@@ -70,7 +71,7 @@ test('StatsWidget', async () => {
   expect(contentDiv.innerHTML).toContain('setPropsTime');
 });
 
-test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
+test('StatsWidget#custom Stats', async () => {
   const stats = new Stats({id: 'Custom Stats'});
   const requestsStat = stats.get('Requests');
   requestsStat.addCount(7);
@@ -78,6 +79,9 @@ test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
   const uploadTimeStat = stats.get('Upload Time');
   uploadTimeStat.time = 1500;
   vi.spyOn(uploadTimeStat, 'getAverageTime').mockReturnValue(12.34);
+
+  const totalTimeStat = stats.get('Parsing Time');
+  totalTimeStat.time = 1500;
 
   const frameRateStat = stats.get('Frame Rate', 'fps');
   vi.spyOn(frameRateStat, 'getHz').mockReturnValue(60);
@@ -93,6 +97,7 @@ test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
     title: '',
     formatters: {
       'Upload Time': 'averageTime',
+      'Parsing Time': 'totalTime',
       'Frame Rate': 'fps',
       'GPU Memory': 'memory'
     }
@@ -110,6 +115,61 @@ test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
   expect(statsContainer.innerHTML).toContain('Custom Stats');
   expect(statsContainer.innerHTML).toContain('Requests: 7');
   expect(statsContainer.innerHTML).toContain('Upload Time: 12.34ms');
+  expect(statsContainer.innerHTML).toContain('Parsing Time: 1.50s');
   expect(statsContainer.innerHTML).toContain('Frame Rate: 60fps');
   expect(statsContainer.innerHTML).toContain('GPU Memory: 4.2 MB');
+});
+
+test('StatsWidget#type luma', async () => {
+  const lumaStatsGroup = new Stats({id: 'Luma Stats'});
+  const gpuMemoryStat = lumaStatsGroup.get('GPU Memory', 'memory');
+  gpuMemoryStat.addCount(2100000);
+
+  const originalStatsMap = luma.stats.stats;
+  luma.stats.stats = new Map([['Luma Stats', lumaStatsGroup]]);
+
+  try {
+    testInstance = new WidgetTester({
+      widgets: [new StatsWidget({id: 'stats', type: 'luma', expanded: true, title: ''})]
+    });
+
+    await testInstance.idle();
+    const statsContainer = testInstance.findElements(
+      '.deck-widget-stats-container'
+    )[0] as HTMLDivElement;
+    expect(statsContainer).toBeTruthy();
+    expect(statsContainer.innerHTML).toContain('Luma Stats');
+    expect(statsContainer.innerHTML).toContain('GPU Memory: 2.1 MB');
+  } finally {
+    luma.stats.stats = originalStatsMap;
+  }
+});
+
+test('StatsWidget#type device', async () => {
+  const deviceStatsGroup = new Stats({id: 'Device Stats'});
+  const frameRateStat = deviceStatsGroup.get('Frame Rate', 'fps');
+  vi.spyOn(frameRateStat, 'getHz').mockReturnValue(30);
+
+  const widget = new StatsWidget({id: 'stats', type: 'device', expanded: true, title: ''});
+  testInstance = new WidgetTester({
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  (widget as any).deck.device = {
+    type: 'webgl',
+    statsManager: {
+      stats: new Map([['Device Stats', deviceStatsGroup]])
+    }
+  };
+  widget.updateHTML();
+  await testInstance.idle();
+
+  const statsContainer = testInstance.findElements(
+    '.deck-widget-stats-container'
+  )[0] as HTMLDivElement;
+  expect(statsContainer).toBeTruthy();
+  expect(statsContainer.innerHTML).toContain('Device Stats');
+  expect(statsContainer.innerHTML).toContain('Frame Rate: 30fps');
+  expect(statsContainer.innerHTML).toContain('WebGL');
 });

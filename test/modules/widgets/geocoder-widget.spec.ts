@@ -6,7 +6,8 @@ import {afterEach, test, expect, vi} from 'vitest';
 import {type MapViewState} from '@deck.gl/core';
 import {
   _GeocoderWidget as GeocoderWidget,
-  _CoordinatesGeocoder as CoordinatesGeocoder
+  _CoordinatesGeocoder as CoordinatesGeocoder,
+  _CurrentLocationGeocoder as CurrentLocationGeocoder
 } from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
@@ -123,4 +124,36 @@ test('GeocoderWidget#responds to input change', async () => {
   await testInstance.idle();
   expect(viewState.longitude).toBe(-122);
   expect(viewState.latitude).toBe(38);
+});
+
+test('GeocoderWidget#getCurrentLocation flies to current location', async () => {
+  let viewState: MapViewState = {
+    longitude: 0,
+    latitude: 0,
+    zoom: 1
+  };
+  const onGeocode = vi.fn();
+  const geocodeSpy = vi
+    .spyOn(CurrentLocationGeocoder, 'geocode')
+    .mockResolvedValue({longitude: -122.4, latitude: 37.8});
+
+  const widget = new GeocoderWidget({onGeocode});
+  testInstance = new WidgetTester({
+    initialViewState: viewState,
+    onViewStateChange: (evt: any) => {
+      viewState = evt.viewState;
+    },
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  await widget.getCurrentLocation();
+
+  expect(geocodeSpy).toHaveBeenCalledOnce();
+  expect(onGeocode).toHaveBeenCalledWith({
+    viewId: 'default-view',
+    coordinates: {longitude: -122.4, latitude: 37.8, zoom: undefined}
+  });
+  expect(viewState.longitude).toBe(-122.4);
+  expect(viewState.latitude).toBe(37.8);
 });
