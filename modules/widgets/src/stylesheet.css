@@ -486,6 +486,11 @@
 .deck-widget.deck-widget-popover {
   margin: 0 !important;
 }
+.deck-widget-popup-marker {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+}
 .deck-widget-popup-content {
   border-radius: var(--button-corner-radius, 8px);
   background: var(--menu-background, #fff);

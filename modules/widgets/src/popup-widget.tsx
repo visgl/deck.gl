@@ -129,9 +129,7 @@ export class PopupWidget extends Widget<PopupWidgetProps> {
     const ui = (
       <div>
         {marker && (
-          <div
-            style={{position: 'absolute', left: x, top: y, pointerEvents: 'all', cursor: 'pointer'}}
-          >
+          <div className="deck-widget-popup-marker" style={{left: x, top: y}}>
             <UserContent {...marker} onClick={() => this._setIsOpen(true)} />
           </div>
         )}
