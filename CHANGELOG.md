@@ -21,6 +21,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.1] - Apr 17 2026
+
+- feat(widgets): ScrollbarWidget falls back to controller.maxBounds (#10236)
+- fix(widgets): ThemeWidget does not apply theme variables on initial add (#10238)
+- fix(widgets): CoordinateGeocoder edge case handling (#10235)
+- feat(widgets) unify viewId handling (#10234)
+- fix(widgets): SplitterWidget types (#10233)
+
 #### deck.gl [v9.3.0] - Apr 13 2026
 
 deck.gl v9.3 features big improvements to widgets, controllers and WebGPU. Find out more on [What's New](https://deck.gl/docs/whats-new) and [Upgrade Guide](https://deck.gl/docs/upgrade-guide).
