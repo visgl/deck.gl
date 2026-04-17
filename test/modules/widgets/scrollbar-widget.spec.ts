@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {afterEach, test, expect} from 'vitest';
 import {OrthographicView, type OrthographicViewState} from '@deck.gl/core';
 import {ScrollbarWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
+
 test('ScrollbarWidget - slider placement#vertical', async () => {
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: new OrthographicView({id: 'ortho', controller: true}),
     initialViewState: {
       target: [0, 0],
@@ -39,12 +46,10 @@ test('ScrollbarWidget - slider placement#vertical', async () => {
   expect(scrollbar.getAttribute('aria-valuenow')).toBe('200');
   expect(thumb.style.height).toBe('50%');
   expect(thumb.style.top).toBe('25%');
-
-  testInstance.destroy();
 });
 
 test('ScrollbarWidget - slider placement#horizontal', async () => {
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: new OrthographicView({id: 'ortho', controller: true}),
     initialViewState: {
       target: [0, 0],
@@ -77,8 +82,6 @@ test('ScrollbarWidget - slider placement#horizontal', async () => {
   expect(scrollbar.getAttribute('aria-valuenow')).toBe('200');
   expect(thumb.style.width).toBe('60%');
   expect(thumb.style.left).toBe('20%');
-
-  testInstance.destroy();
 });
 
 test('ScrollbarWidget - step button and wheel events', async () => {
@@ -86,7 +89,7 @@ test('ScrollbarWidget - step button and wheel events', async () => {
     target: [0, 0],
     zoom: 0
   };
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: new OrthographicView({id: 'ortho', controller: true}),
     initialViewState: viewState,
     onViewStateChange: ({viewState: nextViewState}: {viewState: OrthographicViewState}) => {
@@ -134,6 +137,4 @@ test('ScrollbarWidget - step button and wheel events', async () => {
   await testInstance.idle();
 
   expect(scrollbar.getAttribute('aria-valuenow')).toBe('275');
-
-  testInstance.destroy();
 });

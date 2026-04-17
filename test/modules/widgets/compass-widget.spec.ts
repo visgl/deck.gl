@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {type MapViewState} from '@deck.gl/core';
 import {CompassWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('CompassWidget', async () => {
   let viewState: MapViewState = {
@@ -16,7 +23,7 @@ test('CompassWidget', async () => {
     pitch: 45
   };
   const onReset = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
@@ -41,6 +48,4 @@ test('CompassWidget', async () => {
     pitch: 0
   });
   expect(viewState.pitch).toBe(0);
-
-  testInstance.destroy();
 });

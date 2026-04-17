@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {OrthographicView, type MapViewState, type OrthographicViewState} from '@deck.gl/core';
 import {ZoomWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('ZoomWidget', async () => {
   let viewState: MapViewState = {
@@ -14,7 +21,7 @@ test('ZoomWidget', async () => {
     zoom: 8
   };
   const onZoom = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
@@ -34,8 +41,6 @@ test('ZoomWidget', async () => {
   await testInstance.idle();
   testInstance.click('.deck-widget-zoom-out');
   expect(viewState.zoom).toBe(8);
-
-  testInstance.destroy();
 });
 
 test('ZoomWidget#constraints', async () => {
@@ -46,7 +51,7 @@ test('ZoomWidget#constraints', async () => {
     maxZoom: 8.5,
     minZoom: 7.8
   };
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
@@ -61,8 +66,6 @@ test('ZoomWidget#constraints', async () => {
   await testInstance.idle();
   testInstance.click('.deck-widget-zoom-out');
   expect(viewState.zoom).toBe(7.8);
-
-  testInstance.destroy();
 });
 
 test('ZoomWidget#zoomAxis', async () => {
@@ -72,7 +75,7 @@ test('ZoomWidget#zoomAxis', async () => {
     maxZoomX: 0.5,
     minZoomY: 2
   };
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: new OrthographicView(),
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
@@ -113,6 +116,4 @@ test('ZoomWidget#zoomAxis', async () => {
   testInstance.click('.deck-widget-zoom-in');
   expect(viewState.zoomX).toBe(-0.5);
   expect(viewState.zoomY).toBe(3);
-
-  testInstance.destroy();
 });

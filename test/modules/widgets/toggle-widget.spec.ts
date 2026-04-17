@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {ToggleWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
+
 test('ToggleWidget', async () => {
   const onChange = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     widgets: [
       new ToggleWidget({
         icon: './icon-off.png',
@@ -37,6 +44,4 @@ test('ToggleWidget', async () => {
   expect(root.dataset.checked).toBe('true');
   expect(button.title).toBe('Toggle on');
   expect(icon.style.backgroundColor).toBe('rgb(0, 255, 0)');
-
-  testInstance.destroy();
 });

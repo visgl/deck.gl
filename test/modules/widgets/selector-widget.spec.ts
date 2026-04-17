@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {SelectorWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
+
 test('SelectorWidget', async () => {
   const onChange = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     widgets: [
       new SelectorWidget({
         initialValue: 'grid',
@@ -40,6 +47,4 @@ test('SelectorWidget', async () => {
   button = testInstance.findElements('.deck-widget-icon-button')[0] as HTMLButtonElement;
   expect(button.title).toBe('List');
   expect(testInstance.findElements('.deck-widget-dropdown-item')).toHaveLength(0);
-
-  testInstance.destroy();
 });

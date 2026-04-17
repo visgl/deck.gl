@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {PopupWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
+
 test('PopupWidget', async () => {
   const onOpenChange = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -33,13 +40,11 @@ test('PopupWidget', async () => {
 
   expect(onOpenChange).toHaveBeenCalledWith(false);
   expect(testInstance.findElements('.deck-widget-popup-content')).toHaveLength(0);
-
-  testInstance.destroy();
 });
 
 test('PopupWidget#marker opens popup', async () => {
   const onOpenChange = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -65,6 +70,4 @@ test('PopupWidget#marker opens popup', async () => {
   expect(onOpenChange).toHaveBeenCalledWith(true);
   const popupContent = testInstance.findElements('.deck-widget-popup-content')[0] as HTMLDivElement;
   expect(popupContent.textContent).toContain('Opened from marker');
-
-  testInstance.destroy();
 });

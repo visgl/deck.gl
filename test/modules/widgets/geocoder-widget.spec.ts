@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {type MapViewState} from '@deck.gl/core';
 import {
   _GeocoderWidget as GeocoderWidget,
   _CoordinatesGeocoder as CoordinatesGeocoder
 } from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('CoordinatesGeocoder.geocode - Parses decimal coordinates correctly', async () => {
   const cases = [
@@ -73,7 +80,7 @@ test('GeocoderWidget#flyTo calls onGeocode with coordinates', async () => {
   const onGeocode = vi.fn();
   const widget = new GeocoderWidget({onGeocode});
 
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -89,8 +96,6 @@ test('GeocoderWidget#flyTo calls onGeocode with coordinates', async () => {
     viewId: 'default-view',
     coordinates: {longitude: -122.4, latitude: 37.8, zoom: 12}
   });
-
-  testInstance.destroy();
 });
 
 test('GeocoderWidget#responds to input change', async () => {
@@ -99,7 +104,7 @@ test('GeocoderWidget#responds to input change', async () => {
     latitude: 37.78,
     zoom: 8
   };
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
@@ -118,6 +123,4 @@ test('GeocoderWidget#responds to input change', async () => {
   await testInstance.idle();
   expect(viewState.longitude).toBe(-122);
   expect(viewState.latitude).toBe(38);
-
-  testInstance.destroy();
 });

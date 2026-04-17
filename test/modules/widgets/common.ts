@@ -4,6 +4,7 @@
 
 import {Deck} from '@deck.gl/core';
 import type {DeckProps, View} from '@deck.gl/core';
+import {nullAdapter} from '@luma.gl/test-utils';
 import '@deck.gl/widgets/stylesheet.css';
 
 const WIDTH = 600;
@@ -24,6 +25,11 @@ export class WidgetTester<ViewsT extends ViewOrViews = null> {
     this.container = container;
     this.deck = new Deck({
       id: 'widget-test-deck',
+      // Most tests do not need a GL context
+      deviceProps: {
+        type: 'null',
+        adapters: [nullAdapter]
+      },
       ...deckProps,
       parent: container,
       debug: true

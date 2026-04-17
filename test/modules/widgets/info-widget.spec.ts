@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {InfoWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('InfoWidget', async () => {
   const getTooltip = vi.fn().mockReturnValue({
@@ -15,7 +22,7 @@ test('InfoWidget', async () => {
     mode: 'click',
     getTooltip
   });
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -44,6 +51,4 @@ test('InfoWidget', async () => {
   expect(popupContent).toBeTruthy();
   expect(popupContent.textContent).toContain('Picked feature info');
   expect(popupContent.className).toContain('custom-tooltip');
-
-  testInstance.destroy();
 });

@@ -2,14 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {OrthographicView} from '@deck.gl/core';
 import {ResetViewWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
+
 test('ResetViewWidget', async () => {
   const onReset = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -52,13 +59,11 @@ test('ResetViewWidget', async () => {
       zoom: 8
     }
   });
-
-  testInstance.destroy();
 });
 
 test('ResetViewWidget#multiple views', async () => {
   const onReset = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: [
       new OrthographicView({id: 'left', width: '50%'}),
       new OrthographicView({id: 'right', width: '50%', x: '50%'})
@@ -116,6 +121,4 @@ test('ResetViewWidget#multiple views', async () => {
     }
   });
   expect(onReset).toHaveBeenCalledTimes(3);
-
-  testInstance.destroy();
 });

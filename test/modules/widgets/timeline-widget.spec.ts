@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('TimelineWidget - uncontrolled: initialTime sets starting value', () => {
   const widget = new TimelineWidget({timeRange: [0, 100], initialTime: 25});
@@ -259,7 +266,7 @@ test('TimelineWidget', async () => {
     onPlayingChange,
     onTimeChange
   });
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     widgets: [widget]
   });
 
@@ -273,6 +280,4 @@ test('TimelineWidget', async () => {
 
   testInstance.click('.deck-widget-timeline-pause');
   expect(onPlayingChange).toHaveBeenCalledWith(false);
-
-  testInstance.destroy();
 });

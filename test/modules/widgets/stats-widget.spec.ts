@@ -2,11 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {Stats} from '@probe.gl/stats';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {DEFAULT_FORMATTERS} from '../../../modules/widgets/src/stats-widget';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('StatsWidget - uncontrolled: initialExpanded sets starting state', () => {
   const widget = new StatsWidget({initialExpanded: true});
@@ -45,7 +52,7 @@ test('StatsWidget - uncontrolled: toggleExpanded updates internal state and call
 });
 
 test('StatsWidget', async () => {
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     widgets: [new StatsWidget({id: 'stats', expanded: false})]
   });
 
@@ -61,8 +68,6 @@ test('StatsWidget', async () => {
   const contentDiv = testInstance.findElements('.deck-widget-stats-content')[0] as HTMLDivElement;
   expect(contentDiv).toBeTruthy();
   expect(contentDiv.innerHTML).toContain('setPropsTime');
-
-  testInstance.destroy();
 });
 
 test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
@@ -93,7 +98,7 @@ test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
     }
   });
 
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     widgets: [widget]
   });
 
@@ -107,6 +112,4 @@ test('StatsWidget#custom Stats uses DEFAULT_FORMATTERS', async () => {
   expect(statsContainer.innerHTML).toContain('Upload Time: 12.34ms');
   expect(statsContainer.innerHTML).toContain('Frame Rate: 60fps');
   expect(statsContainer.innerHTML).toContain('GPU Memory: 4.2 MB');
-
-  testInstance.destroy();
 });

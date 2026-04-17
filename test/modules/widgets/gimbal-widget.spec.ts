@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {OrbitView, type OrbitViewState} from '@deck.gl/core';
 import {GimbalWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('GimbalWidget', async () => {
   let viewState: OrbitViewState = {
@@ -15,7 +22,7 @@ test('GimbalWidget', async () => {
     rotationX: 45
   };
   const onReset = vi.fn();
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: new OrbitView({id: 'orbit'}),
     initialViewState: viewState,
     onViewStateChange: (evt: any) => {
@@ -39,14 +46,12 @@ test('GimbalWidget', async () => {
   });
   expect(viewState.rotationOrbit).toBe(0);
   expect(viewState.rotationX).toBe(0);
-
-  testInstance.destroy();
 });
 
 test('GimbalWidget#resetOrbitView calls onReset and sets view state', async () => {
   const onReset = vi.fn();
   const widget = new GimbalWidget({onReset});
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     views: new OrbitView({id: 'orbit'}),
     initialViewState: {
       target: [0, 0, 0],
@@ -61,6 +66,4 @@ test('GimbalWidget#resetOrbitView calls onReset and sets view state', async () =
 
   widget.resetOrbitView();
   expect(onReset).toHaveBeenCalledWith({viewId: 'OrbitView', rotationOrbit: 0, rotationX: 0});
-
-  testInstance.destroy();
 });

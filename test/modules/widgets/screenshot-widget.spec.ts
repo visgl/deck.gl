@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {ScreenshotWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('ScreenshotWidget', async () => {
   const widget = new ScreenshotWidget({filename: 'test.png'});
@@ -17,7 +24,7 @@ test('ScreenshotWidget', async () => {
     dataUrl = _dataUrl;
     fileName = _fileName;
   });
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -40,6 +47,4 @@ test('ScreenshotWidget', async () => {
   expect(spy).toHaveBeenCalledOnce();
   expect(dataUrl).toContain('data:');
   expect(fileName).toBe('test.png');
-
-  testInstance.destroy();
 });

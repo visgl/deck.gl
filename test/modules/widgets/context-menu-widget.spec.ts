@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {ContextMenuWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('ContextMenuWidget', async () => {
   const onMenuItemSelected = vi.fn();
@@ -15,7 +22,7 @@ test('ContextMenuWidget', async () => {
     ],
     onMenuItemSelected
   });
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     widgets: [widget]
   });
 
@@ -70,6 +77,4 @@ test('ContextMenuWidget', async () => {
     })
   );
   expect(testInstance.findElements('.deck-widget-dropdown-item')).toHaveLength(0);
-
-  testInstance.destroy();
 });

@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {MapView, OrbitView} from '@deck.gl/core';
 import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 const mapsLayoutH: SplitterWidgetProps['viewLayout'] = {
   orientation: 'horizontal',
@@ -156,7 +163,7 @@ test('SplitterWidget - parse viewLayout', () => {
 
 test('SplitterWidget - uncontrolled', async () => {
   const widget = new SplitterWidget<MapView[]>({viewLayout: mapsLayoutH});
-  const testInstance = new WidgetTester<MapView[]>({
+  testInstance = new WidgetTester<MapView[]>({
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 1},
       right: {longitude: -122, latitude: 38, zoom: 8}
@@ -179,8 +186,6 @@ test('SplitterWidget - uncontrolled', async () => {
   views = testInstance.getProps().views ?? [];
   expect(views[0].props.width).toBe('25%');
   expect(views[1].props.width).toBe('75%');
-
-  testInstance.destroy();
 });
 
 test('SplitterWidget - controlled', async () => {
@@ -192,7 +197,7 @@ test('SplitterWidget - controlled', async () => {
       testInstance.setProps({views: newViews});
     }
   });
-  const testInstance = new WidgetTester<MapView[]>({
+  testInstance = new WidgetTester<MapView[]>({
     views: [],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 1},
@@ -218,6 +223,4 @@ test('SplitterWidget - controlled', async () => {
   expect(onViewsChange).lastCalledWith(views);
   expect(views[0].props.width).toBe('25%');
   expect(views[1].props.width).toBe('75%');
-
-  testInstance.destroy();
 });

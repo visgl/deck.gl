@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {afterEach, test, expect, vi} from 'vitest';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {LoadingWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+
+let testInstance: WidgetTester<any> | undefined;
+
+afterEach(() => {
+  testInstance?.destroy();
+  testInstance = undefined;
+});
 
 test('LoadingWidget', async () => {
   let resolveDataLoader: (result: any[]) => void = () => {};
@@ -15,7 +22,7 @@ test('LoadingWidget', async () => {
   const layer = new ScatterplotLayer({
     data: dataLoader
   });
-  const testInstance = new WidgetTester({
+  testInstance = new WidgetTester({
     layers: [layer],
     widgets: [new LoadingWidget()]
   });
@@ -30,8 +37,6 @@ test('LoadingWidget', async () => {
   // Spinner is hidden
   spinner = testInstance.findElements('.deck-widget-spinner')[0];
   expect(spinner).toBeFalsy();
-
-  testInstance.destroy();
 });
 
 test('LoadingWidget - onRedraw calls onLoadingChange when loading state changes', () => {
