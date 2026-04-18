@@ -238,16 +238,15 @@ function deepCompareDeckObjects(a, b) {
 
 test('React#extractJSXLayers', () => {
   for (const testCase of TEST_CASES) {
-    console.log(testCase.title);
     const result = extractJSXLayers(testCase.input);
     expect(result.children, 'extracts React children').toEqual(testCase.output.children);
     expect(
       deepCompareDeckObjects(result.views, testCase.output.views),
-      'extracts views'
+      `${testCase.title}: extracts views`
     ).toBeTruthy();
     expect(
       deepCompareDeckObjects(result.layers, testCase.output.layers),
-      'extracts layers'
+      `${testCase.title}: extracts layers`
     ).toBeTruthy();
   }
 });
