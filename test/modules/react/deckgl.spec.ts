@@ -4,30 +4,39 @@
 
 /* eslint-disable no-unused-vars */
 import {test, expect, vi} from 'vitest';
-import {createElement, createRef, act, type RefObject} from 'react';
+import {
+  createElement,
+  createRef,
+  forwardRef,
+  useEffect,
+  useState,
+  act,
+  type Ref,
+  type RefObject
+} from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {Layer, Widget} from '@deck.gl/core';
+import {Layer, Widget, FlyToInterpolator, type DeckProps, type MapViewState} from '@deck.gl/core';
 import DeckGL, {type DeckGLRef} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
-
-import {gl} from '@deck.gl/test-utils/vitest';
 
 // Required by React 19
 // @ts-expect-error undefined global flag
 self.IS_REACT_ACT_ENVIRONMENT = true;
 
-const TEST_VIEW_STATE = {
-  latitude: 37.7515,
-  longitude: -122.4269,
-  zoom: 11.5,
-  bearing: -45,
-  pitch: 45
+const TEST_VIEW_STATE: MapViewState = {
+  latitude: 37.78,
+  longitude: -122.45,
+  zoom: 12
 };
 
-// If testing under node, provide a headless context
-/* global document */
-const getDeckProps = () => (globalThis.__JSDOM__ ? {gl} : {});
+const TEST_VIEW_STATE_2: MapViewState = {
+  latitude: 0,
+  longitude: 0,
+  zoom: 1,
+  transitionDuration: 300,
+  transitionInterpolator: new FlyToInterpolator()
+};
 
 function waitUntilReady(ref: RefObject<DeckGLRef | null>): Promise<boolean> {
   return vi.waitUntil(() => {
@@ -48,8 +57,7 @@ test('DeckGL#mount/unmount', async () => {
         initialViewState: TEST_VIEW_STATE,
         ref,
         width: 100,
-        height: 100,
-        ...getDeckProps()
+        height: 100
       })
     );
   });
@@ -83,8 +91,7 @@ test('DeckGL#render', async () => {
           ref,
           initialViewState: TEST_VIEW_STATE,
           width: 100,
-          height: 100,
-          ...getDeckProps()
+          height: 100
         },
         createElement('div', {className: 'child'}, 'Child')
       )
@@ -132,7 +139,6 @@ test('DeckGL#props omitted are reset', async () => {
         ref,
         width: 100,
         height: 100,
-        ...getDeckProps(),
         layers: LAYERS,
         widgets: WIDGETS
       })
@@ -150,8 +156,7 @@ test('DeckGL#props omitted are reset', async () => {
     // Render deck a second time without setting widget or layer props.
     root.render(
       createElement(DeckGL, {
-        ref,
-        ...getDeckProps()
+        ref
       })
     );
   });
@@ -171,5 +176,112 @@ test('DeckGL#props omitted are reset', async () => {
   act(() => {
     root.render(null);
   });
+  container.remove();
+});
+
+test('DeckGL#uncontrolled view state', async () => {
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  const onViewStateChange = vi.fn();
+  const onTransitionEnd = vi.fn();
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        controller: true,
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100
+      })
+    );
+  });
+  await waitUntilReady(ref);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        controller: true,
+        initialViewState: {...TEST_VIEW_STATE_2, onTransitionEnd},
+        onViewStateChange,
+        ref,
+        width: 100,
+        height: 100
+      })
+    );
+  });
+  await vi.waitFor(() => {
+    expect(onTransitionEnd).toHaveBeenCalled();
+  });
+
+  expect(onViewStateChange.mock.lastCall?.[0]?.viewState.longitude).toBeCloseTo(0);
+  expect(onViewStateChange.mock.lastCall?.[0]?.viewState.latitude).toBeCloseTo(0);
+  expect(onViewStateChange.mock.calls.length).toBeGreaterThan(5);
+
+  act(() => {
+    root.render(null);
+  });
+
+  container.remove();
+});
+
+test('DeckGL#uncontrolled view state', async () => {
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  const onViewStateChange = vi.fn();
+  const onTransitionEnd = vi.fn();
+
+  function ControlledDeckWithRef(props: DeckProps, ref: Ref<DeckGLRef>) {
+    const [viewState, setViewState] = useState<MapViewState>(TEST_VIEW_STATE);
+
+    useEffect(() => {
+      setViewState(props.viewState ?? TEST_VIEW_STATE);
+    }, [props.viewState]);
+
+    return createElement(DeckGL, {
+      ...props,
+      controller: true,
+      viewState,
+      onViewStateChange: e => {
+        onViewStateChange(e);
+        setViewState(e.viewState);
+      },
+      ref,
+      width: 100,
+      height: 100
+    });
+  }
+  const ControlledDeck = forwardRef(ControlledDeckWithRef);
+
+  act(() => {
+    root.render(createElement(ControlledDeck, {ref}));
+  });
+  await waitUntilReady(ref);
+
+  act(() => {
+    root.render(
+      createElement(ControlledDeck, {
+        ref,
+        viewState: {...TEST_VIEW_STATE_2, onTransitionEnd}
+      })
+    );
+  });
+
+  await vi.waitFor(() => {
+    expect(onTransitionEnd).toHaveBeenCalled();
+  });
+
+  expect(onViewStateChange.mock.lastCall?.[0]?.viewState.longitude).toBeCloseTo(0);
+  expect(onViewStateChange.mock.lastCall?.[0]?.viewState.latitude).toBeCloseTo(0);
+  expect(onViewStateChange.mock.calls.length).toBeGreaterThan(5);
+
+  act(() => {
+    root.render(null);
+  });
+
   container.remove();
 });
