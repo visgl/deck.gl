@@ -237,12 +237,19 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
     const [mesh, texture] = data;
 
+    // GlobeViewport.projectFlat is identity: getTiledTerrainData builds bounds
+    // in lng/lat degrees rather than Mercator world units. Render with LNGLAT
+    // so SimpleMeshLayer projects each vertex onto the sphere. Falls back to
+    // CARTESIAN on MapView where bounds are Mercator-projected.
+    const {viewport} = this.context;
+    const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
+
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
       mesh,
       texture,
       _instanced: false,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: isGlobe ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],
       getColor: color,
       wireframe,
