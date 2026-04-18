@@ -11,6 +11,9 @@
   <a href='https://coveralls.io/github/visgl/deck.gl?branch=master'>
     <img src='https://img.shields.io/coveralls/visgl/deck.gl.svg?style=flat-square' alt='Coverage Status' />
   </a>
+  <a href="https://gurubase.io/g/deck-gl">
+    <img src="https://img.shields.io/badge/Gurubase-Ask%20deck.gl%20Guru-006BFF" alt="Gurubase" />
+  </a>
 </p>
 
 <h1 align="center">deck.gl | <a href="https://deck.gl">Website</a></h1>
