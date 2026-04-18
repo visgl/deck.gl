@@ -46,7 +46,8 @@ const JSON_CONVERTER_CONFIGURATION = {
     StatsWidget: deckExports._StatsWidget,
     ScaleWidget: deckExports._ScaleWidget,
     GeocoderWidget: deckExports._GeocoderWidget,
-    SplitterWidget: deckExports._SplitterWidget
+    SplitterWidget: deckExports._SplitterWidget,
+    TimelineWidget: deckExports._TimelineWidget
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
