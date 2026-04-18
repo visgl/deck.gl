@@ -42,15 +42,11 @@ function extractElements(library = {}, filter) {
 const JSON_CONVERTER_CONFIGURATION = {
   classes: {
     ...extractElements(deckExports, classesFilter),
-    // Add experimental widgets (exported with _ prefix)
-    FpsWidget: deckExports._FpsWidget,
+    // Register widgets exported with _ prefix under their canonical names
     StatsWidget: deckExports._StatsWidget,
     ScaleWidget: deckExports._ScaleWidget,
     GeocoderWidget: deckExports._GeocoderWidget,
-    SplitterWidget: deckExports._SplitterWidget,
-    InfoWidget: deckExports._InfoWidget,
-    ThemeWidget: deckExports._ThemeWidget,
-    LoadingWidget: deckExports._LoadingWidget
+    SplitterWidget: deckExports._SplitterWidget
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
