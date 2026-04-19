@@ -66,16 +66,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   workerUrl: '',
   // Same as SimpleMeshLayer wireframe
   wireframe: false,
-  // Matte terrain material: high ambient + modest diffuse, zero specular. The
-  // default `true` enables PBR with specular highlights, which on terrain
-  // meshes catches on skirt edges and elevation discontinuities as bright
-  // star-shaped glints. A matte surface reads as a fluid landscape instead.
-  material: {
-    ambient: 0.7,
-    diffuse: 0.4,
-    shininess: 1,
-    specularColor: [0, 0, 0]
-  },
+  material: true,
 
   loaders: [TerrainWorkerLoader, ImageLoader]
 };
