@@ -3,7 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {Device, Framebuffer} from '@luma.gl/core';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
+import {
+  joinLayerBounds,
+  getRenderBounds,
+  makeViewport,
+  getMercatorReferenceViewport,
+  lngLatToMercatorCommon,
+  Bounds
+} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
 import type {Viewport, Layer} from '@deck.gl/core';
@@ -72,10 +79,14 @@ export class HeightMapBuilder {
       );
 
     if (layersChanged) {
-      // Recalculate cached bounds
+      // Recalculate cached bounds.
+      // Use a Mercator reference viewport so layer bounds live in ABSOLUTE
+      // Mercator common space — same rationale as terrain-cover.ts. On
+      // GlobeView, `viewport.projectPosition` would return 3D sphere cartesian
+      // coords that can't be compared against screen-space render bounds.
       this.layers = layers;
       this.layersBounds = layers.map(layer => layer.getBounds());
-      this.layersBoundsCommon = joinLayerBounds(layers, viewport);
+      this.layersBoundsCommon = joinLayerBounds(layers, getMercatorReferenceViewport(viewport));
     }
 
     const viewportChanged = !this.lastViewport || !viewport.equals(this.lastViewport);
@@ -83,7 +94,16 @@ export class HeightMapBuilder {
     if (!this.layersBoundsCommon) {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
-      const bounds = getRenderBounds(this.layersBoundsCommon, viewport);
+      // getRenderBounds intersects layer bounds with viewport bounds. On globe,
+      // viewport bounds project to sphere cartesian and won't intersect the
+      // Mercator layer bounds meaningfully — use the full layer bounds instead.
+      const isGlobe = Boolean(
+        (viewport as {resolution?: number}).resolution &&
+          (viewport as {resolution?: number}).resolution! > 0
+      );
+      const bounds = isGlobe
+        ? this.layersBoundsCommon
+        : getRenderBounds(this.layersBoundsCommon, viewport);
       if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
         this.renderViewport = null;
         return false;
@@ -96,6 +116,17 @@ export class HeightMapBuilder {
       const pixelWidth = (bounds[2] - bounds[0]) * scale;
       const pixelHeight = (bounds[3] - bounds[1]) * scale;
 
+      // Center for the render viewport must be expressed in Mercator common so
+      // makeViewport (which unprojects through a WebMercatorViewport for
+      // geospatial inputs) gets a valid lng/lat back. `viewport.center` on
+      // GlobeView is 3D sphere cartesian and would unproject bogusly.
+      const centerMerc = viewport.isGeospatial
+        ? lngLatToMercatorCommon([
+            (viewport as {longitude?: number}).longitude ?? 0,
+            (viewport as {latitude?: number}).latitude ?? 0
+          ])
+        : [viewport.center[0], viewport.center[1]];
+
       this.renderViewport =
         pixelWidth > 0 || pixelHeight > 0
           ? makeViewport({
@@ -104,10 +135,10 @@ export class HeightMapBuilder {
               // However the viewport must have the same center and zoom as the screen viewport
               // So that projection uniforms used for calculating z are the same
               bounds: [
-                viewport.center[0] - 1,
-                viewport.center[1] - 1,
-                viewport.center[0] + 1,
-                viewport.center[1] + 1
+                centerMerc[0] - 1,
+                centerMerc[1] - 1,
+                centerMerc[0] + 1,
+                centerMerc[1] + 1
               ],
               zoom: viewport.zoom,
               width: Math.min(pixelWidth, MAP_MAX_SIZE),

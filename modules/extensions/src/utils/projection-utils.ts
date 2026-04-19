@@ -8,6 +8,36 @@ import type {Layer, Viewport} from '@deck.gl/core';
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
 
+/**
+ * Shared reference Mercator viewport used to convert between Mercator common
+ * space and lng/lat from non-Mercator geospatial viewports (e.g. GlobeView).
+ * The width/height are irrelevant for unprojection; only the projection math
+ * is consulted.
+ */
+const MERCATOR_REFERENCE_VIEWPORT = new WebMercatorViewport({
+  width: 1,
+  height: 1,
+  longitude: 0,
+  latitude: 0,
+  zoom: 0
+});
+
+/** Project a lng/lat to absolute Web Mercator common (projection-independent). */
+export function lngLatToMercatorCommon(lngLat: number[]): [number, number] {
+  const [x, y] = MERCATOR_REFERENCE_VIEWPORT.projectPosition(lngLat);
+  return [x, y];
+}
+
+/**
+ * For geospatial viewports, returns a reference WebMercatorViewport for use
+ * with `layer.projectPosition({viewport})` so bounds are computed in Mercator
+ * common space regardless of whether the live viewport is Globe or Mercator.
+ * For non-geospatial viewports, returns the input unchanged.
+ */
+export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
+  return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
+}
+
 /*
  * Compute the union of bounds from multiple layers
  * Returns bounds in CARTESIAN coordinates
@@ -63,11 +93,21 @@ export function makeViewport(opts: {
     return null;
   }
 
-  const centerWorld = viewport.unprojectPosition([
-    (bounds[0] + bounds[2]) / 2,
-    (bounds[1] + bounds[3]) / 2,
-    0
-  ]);
+  // Terrain cover bounds are expressed in absolute Mercator common so the FBO
+  // can be shared across MapView/GlobeView. Unprojecting through the live
+  // viewport would be wrong on GlobeView (3D sphere coords); go through the
+  // fixed Mercator reference instead.
+  const centerWorld = isGeospatial
+    ? MERCATOR_REFERENCE_VIEWPORT.unprojectPosition([
+        (bounds[0] + bounds[2]) / 2,
+        (bounds[1] + bounds[3]) / 2,
+        0
+      ])
+    : viewport.unprojectPosition([
+        (bounds[0] + bounds[2]) / 2,
+        (bounds[1] + bounds[3]) / 2,
+        0
+      ]);
 
   let {width, height, zoom} = opts;
   if (zoom === undefined) {

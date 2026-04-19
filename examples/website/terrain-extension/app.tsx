@@ -5,6 +5,7 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer, IconLayer, TextLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -25,7 +26,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -0.6194,
   zoom: 10,
   pitch: 55,
-  maxZoom: 13.5,
+  maxZoom: 23.5,
   bearing: 0,
   maxPitch: 89
 };
@@ -84,6 +85,8 @@ export default function App({
   initialViewState?: MapViewState;
 }) {
   const [routes, setRoutes] = useState<FeatureCollection<LineString, RouteProperties>>();
+  const [useGlobe, setUseGlobe] = useState(false);
+  const [viewState, setViewState] = useState<MapViewState>(initialViewState);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -108,11 +111,11 @@ export default function App({
       id: 'terrain',
       minZoom: 0,
       strategy: 'no-overlap',
+      // Grid tesselator so the same mesh renders on MapView and GlobeView.
+      tesselator: 'grid',
       elevationDecoder: ELEVATION_DECODER,
       elevationData: TERRAIN_IMAGE,
       texture: SURFACE_IMAGE,
-      wireframe: false,
-      color: [255, 255, 255],
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer<RouteProperties>({
@@ -132,7 +135,8 @@ export default function App({
       getPosition: d => d.coordinates,
       getIcon: d => (d.type === 'start' ? 'green' : 'checker'),
       getSize: 32,
-      extensions: [new TerrainExtension()]
+      extensions: [new TerrainExtension()],
+      terrainDrawMode: 'offset'
     }),
     new TextLayer<Stage>({
       id: 'stage-label',
@@ -151,14 +155,37 @@ export default function App({
     })
   ];
 
+  const view = useGlobe ? new GlobeView() : new MapView();
+
   return (
-    <DeckGL
-      initialViewState={initialViewState}
-      controller={true}
-      layers={layers}
-      pickingRadius={5}
-      getTooltip={getTooltip}
-    />
+    <>
+      <DeckGL
+        views={view}
+        viewState={viewState}
+        onViewStateChange={e => setViewState(e.viewState as MapViewState)}
+        controller={true}
+        layers={layers}
+        pickingRadius={5}
+        getTooltip={getTooltip}
+      />
+      <button
+        onClick={() => setUseGlobe(v => !v)}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          zIndex: 10,
+          padding: '6px 10px',
+          font: '12px ui-monospace, monospace',
+          background: 'rgba(0,0,0,0.65)',
+          color: '#fff',
+          border: '1px solid #888',
+          cursor: 'pointer'
+        }}
+      >
+        {useGlobe ? 'MapView' : 'GlobeView'}
+      </button>
+    </>
   );
 }
 
