@@ -125,7 +125,7 @@ export function makeGridTerrainMesh(
   // any zoom — imperceptible under lighting while still providing a tiny
   // downstep that hides neighbor-tile seams.
   const metersPerDegree = 111_000;
-  const midLatRad = ((north + south) * 0.5) * DEG2RAD;
+  const midLatRad = (north + south) * 0.5 * DEG2RAD;
   const tileMetersX = (east - west) * metersPerDegree * Math.cos(midLatRad);
   const gridStepMeters = tileMetersX / (N - 1);
   const effectiveSkirtHeight = Math.min(skirtHeight, gridStepMeters * 0.01);

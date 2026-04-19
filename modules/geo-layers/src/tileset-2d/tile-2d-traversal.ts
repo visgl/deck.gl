@@ -166,8 +166,7 @@ class OSMNode {
     // at [170, 175] picks 170 (far, ~345°) instead of 175 (near, ~10° via
     // wrap) and wrongly culls a visible tile.
     const tileCenterLng = (west + east) / 2;
-    const wrappedCamLng =
-      tileCenterLng + (((camLng - tileCenterLng + 540) % 360) - 180);
+    const wrappedCamLng = tileCenterLng + (((camLng - tileCenterLng + 540) % 360) - 180);
 
     const closestLng = Math.max(west, Math.min(wrappedCamLng, east));
     const closestLat = Math.max(south, Math.min(camLat, north));
