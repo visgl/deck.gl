@@ -14,10 +14,18 @@ export type GlobeViewState = {
   latitude: number;
   /** Zoom level */
   zoom: number;
+  /** Bearing angle in degrees. Default `0` (north up). */
+  bearing?: number;
+  /** Pitch (tilt) angle in degrees. `0` looks straight down at the earth. Default `0`. */
+  pitch?: number;
   /** Min zoom, default `0` */
   minZoom?: number;
   /** Max zoom, default `20` */
   maxZoom?: number;
+  /** Min pitch in degrees, default `0` */
+  minPitch?: number;
+  /** Max pitch in degrees, default `60` */
+  maxPitch?: number;
   /** The near plane position */
   nearZ?: number;
   /** The far plane position */

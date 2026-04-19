@@ -44,6 +44,10 @@ export type GlobeViewportOptions = {
   longitude?: number;
   /** Latitude in degrees */
   latitude?: number;
+  /** Bearing angle in degrees. Default `0` (north up). */
+  bearing?: number;
+  /** Pitch (tilt) angle in degrees. `0` looks straight down at the earth. Default `0`. */
+  pitch?: number;
   /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
   altitude?: number;
   /* Meter offsets of the viewport center from lng, lat, elevation */
@@ -71,12 +75,16 @@ export default class GlobeViewport extends Viewport {
 
   longitude: number;
   latitude: number;
+  bearing: number;
+  pitch: number;
   fovy: number;
   resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
       longitude = 0,
+      bearing = 0,
+      pitch = 0,
       zoom = 0,
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
@@ -100,14 +108,33 @@ export default class GlobeViewport extends Viewport {
     // The goal is that globe and web mercator projection results converge at high zoom
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
     const scale = Math.pow(2, zoom - zoomAdjust(latitude));
+
+    // Adjust far plane for pitch — tilted camera can see further across the globe
+    const pitchRadians = pitch * DEGREES_TO_RADIANS;
     const nearZ = opts.nearZ ?? nearZMultiplier;
-    const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
+    const farZ =
+      opts.farZ ??
+      (altitude + (GLOBE_RADIUS * 2 * scale) / height / Math.max(Math.cos(pitchRadians), 0.1)) *
+        farZMultiplier;
 
     // Calculate view matrix
-    const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
-    viewMatrix.rotateX(latitude * DEGREES_TO_RADIANS);
-    viewMatrix.rotateZ(-longitude * DEGREES_TO_RADIANS);
-    viewMatrix.scale(scale / height);
+    // The Viewport base class subtracts `center` (the target's common-space position)
+    // before applying this matrix, placing the target at the origin. Since rotations
+    // preserve the origin, the target always projects to screen center regardless of
+    // pitch/bearing. The lookAt places the camera along -Y looking toward origin.
+    // After the globe rotation (Rx(lat) * Rz(-lng)), the surface normal at the target
+    // aligns with -Y, East with +X, and North with +Z.
+    const viewMatrix = new Matrix4()
+      .lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]})
+      // Pitch: tilt the camera away from straight-down
+      .rotateX(-pitchRadians)
+      // Bearing: rotate around the surface normal (-Y axis).
+      // Negative sign matches the WebMercator convention (bearing > 0 = clockwise from North).
+      .rotateY(-bearing * DEGREES_TO_RADIANS)
+      // Globe orientation: position the target's surface at the top
+      .rotateX(latitude * DEGREES_TO_RADIANS)
+      .rotateZ(-longitude * DEGREES_TO_RADIANS)
+      .scale(scale / height);
 
     super({
       ...opts,
@@ -131,6 +158,8 @@ export default class GlobeViewport extends Viewport {
     this.scale = scale;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.bearing = bearing;
+    this.pitch = pitch;
     this.fovy = fovy;
     this.resolution = resolution;
   }
@@ -188,10 +217,19 @@ export default class GlobeViewport extends Viewport {
       const sSqr = (4 * l0Sqr * l1Sqr - (lSqr - l0Sqr - l1Sqr) ** 2) / 16;
       const dSqr = (4 * sSqr) / lSqr;
       const r0 = Math.sqrt(l0Sqr - dSqr);
-      const dr = Math.sqrt(Math.max(0, lt * lt - dSqr));
-      const t = (r0 - dr) / Math.sqrt(lSqr);
+      const discriminant = lt * lt - dSqr;
 
-      coord = vec3.lerp([], coord0, coord1, t);
+      if (discriminant < 0) {
+        // Ray misses the sphere — project the closest-approach point onto the sphere surface
+        const tClosest = r0 / Math.sqrt(lSqr);
+        const closest = vec3.lerp([], coord0, coord1, tClosest);
+        const len = vec3.len(closest);
+        coord = len > 0 ? vec3.scale([], closest, lt / len) : [0, 0, lt];
+      } else {
+        const dr = Math.sqrt(discriminant);
+        const t = (r0 - dr) / Math.sqrt(lSqr);
+        coord = vec3.lerp([], coord0, coord1, t);
+      }
     }
     const [X, Y, Z] = this.unprojectPosition(coord);
 
@@ -232,27 +270,21 @@ export default class GlobeViewport extends Viewport {
   }
 
   /**
-   * Pan the globe using delta-based movement
-   * @param coords - the geographic coordinates where the pan started
-   * @param pixel - the current screen position
-   * @param startPixel - the screen position where the pan started
-   * @returns updated viewport options with new longitude/latitude
+   * Pan the globe so that a geographic position appears at a given screen pixel.
+   * Shifts center by (coords - unproject(pixel)) — i.e. keeps the grabbed lng/lat
+   * under the cursor. Used for drag-pan and zoom-toward-cursor.
    */
-  panByPosition(
-    [startLng, startLat, startZoom]: number[],
-    pixel: number[],
-    startPixel: number[]
-  ): GlobeViewportOptions {
-    // Scale rotation speed inversely with zoom, to approximate constant panning speed
-    const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
-    const rotationSpeed = 0.25 / scale;
-
-    const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
-    let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
-    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
-    const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
-    out.zoom += zoomAdjust(out.latitude);
-    return out;
+  panByPosition(coords: number[], pixel: number[]): GlobeViewportOptions {
+    const currentAtPixel = this.unproject(pixel);
+    if (!currentAtPixel) {
+      return {longitude: this.longitude, latitude: this.latitude};
+    }
+    const longitude = this.longitude + (coords[0] - currentAtPixel[0]);
+    const latitude = Math.max(
+      Math.min(this.latitude + (coords[1] - currentAtPixel[1]), MAX_LATITUDE),
+      -MAX_LATITUDE
+    );
+    return {longitude, latitude};
   }
 }
 

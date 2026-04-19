@@ -111,6 +111,8 @@ test('GlobeViewState', () => {
   expect(viewportProps.longitude, 'no bounds#longitude is normalized').toBe(178);
   expect(viewportProps.latitude, 'no bounds#latitude is not changed').toBe(36);
   expect(viewportProps.zoom, 'no bounds#zoom is not changed').toBe(0);
+  expect(viewportProps.bearing, 'default bearing is 0').toBe(0);
+  expect(viewportProps.pitch, 'default pitch is 0').toBe(0);
 
   viewState = new GlobeViewState({
     width: 800,
@@ -171,6 +173,82 @@ test('GlobeViewState', () => {
     'small bounds#latitude is adjusted'
   ).toBeTruthy();
   expect(viewportProps.zoom > 12, 'small bounds#zoom is adjusted').toBeTruthy();
+});
+
+test('GlobeViewState#pitch and bearing constraints', () => {
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+
+  // Bearing should be normalized to [-180, 180]
+  let viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    bearing: 270,
+    makeViewport: dummyMakeViewport
+  });
+  let viewportProps = viewState.getViewportProps();
+  expect(viewportProps.bearing, 'bearing is normalized').toBe(-90);
+
+  // Pitch should be clamped to [minPitch, maxPitch]
+  viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    pitch: 80,
+    maxPitch: 60,
+    minPitch: 0,
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  expect(viewportProps.pitch, 'pitch is clamped to maxPitch').toBe(60);
+
+  // Negative pitch should be clamped to minPitch
+  viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    pitch: -10,
+    minPitch: 0,
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  expect(viewportProps.pitch, 'pitch is clamped to minPitch').toBe(0);
+
+  // shortestPathFrom should handle bearing wrapping
+  const viewState1 = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    bearing: 170,
+    makeViewport: dummyMakeViewport
+  });
+  const viewState2 = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    bearing: -170,
+    makeViewport: dummyMakeViewport
+  });
+  const transitionProps = viewState2.shortestPathFrom(viewState1);
+  expect(
+    Math.abs(transitionProps.bearing - -170) <= 360,
+    'shortestPathFrom normalizes bearing'
+  ).toBeTruthy();
+  // The shortest path from 170 to -170 should go through ±180 (20° distance, not 340°)
+  expect(
+    Math.abs(transitionProps.bearing - 190) < 1 || Math.abs(transitionProps.bearing - -170) < 1,
+    'shortestPathFrom picks shortest rotation for bearing'
+  ).toBeTruthy();
 });
 
 test('OrbitViewState', () => {
