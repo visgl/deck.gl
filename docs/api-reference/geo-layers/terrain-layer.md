@@ -8,6 +8,8 @@ The `TerrainLayer` reconstructs mesh surfaces from height map images, e.g. [Mapz
 
 When `elevationData` is supplied with a URL template, i.e. a string containing `'{x}'` and `'{y}'` (or `'{-y}'` for TMS tiles), it loads terrain tiles on demand using a `TileLayer` and renders a mesh for each tile. If `elevationData` is an absolute URL, a single mesh is used, and the `bounds` prop is required to position it into the world space.
 
+The layer supports both `MapView` and `GlobeView`. For `GlobeView`, use `tesselator: 'grid'` — meshes are emitted with lng/lat vertex positions so the same tile mesh renders correctly on both projections without re-tesselation when toggling between them.
+
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -169,9 +171,32 @@ Image URL to use as the surface texture. Same schema as `elevationData`.
 
 #### `meshMaxError` (number, optional) {#meshmaxerror}
 
-Martini error tolerance in meters, smaller number results in more detailed mesh..
+Martini error tolerance in meters, smaller number results in more detailed mesh. Only applies when `tesselator` is `'auto'`.
 
 - Default: `4.0`
+
+#### `tesselator` ('auto' | 'grid', optional) {#tesselator}
+
+Algorithm used to turn a terrain-RGB tile into a mesh.
+
+- `'auto'` — error-driven refinement (Martini for square pow-2 tiles, Delatin otherwise) via `@loaders.gl/terrain`. Runs in a web worker. Produces adaptive meshes tuned by `meshMaxError`, baked into the active viewport's projection frame.
+- `'grid'` — fixed-resolution lng/lat grid. The mesh is emitted with lng/lat/elev vertex positions, so a single cached mesh renders correctly on both `MapView` and `GlobeView`; switching projections does not invalidate cached tiles. Rows are uniform in Mercator-y, matching the heightmap pixel layout, which eliminates polar sampling warp. Runs on the main thread (no worker).
+
+Use `'grid'` when rendering on `GlobeView`, when switching projections, or when you want to avoid worker loading. Use `'auto'` when you need adaptive detail and are rendering on `MapView` only.
+
+- Default: `'auto'`
+
+#### `gridSize` (number, optional) {#gridsize}
+
+Vertices per side when `tesselator` is `'grid'`. Each tile emits `gridSize × gridSize` vertices and `2 × (gridSize − 1)²` triangles.
+
+- `33` — ~2k tris/tile, faceted on 256px tiles.
+- `65` — ~8k tris/tile, smooth on terrain-RGB 256px tiles (default).
+- `129` — ~32k tris/tile, high fidelity at the cost of vertex memory.
+
+Ignored when `tesselator` is not `'grid'`.
+
+- Default: `65`
 
 #### `elevationDecoder` (object, optional) {#elevationdecoder}
 
@@ -220,7 +245,7 @@ Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
-Must be supplied when using non-tiled elevation data.
+Must be supplied when using non-tiled elevation data. For tiled data, tile bounds are derived from the tile index.
 
 - Default: `null`
 
