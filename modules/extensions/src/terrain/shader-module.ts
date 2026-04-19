@@ -67,10 +67,7 @@ uniform sampler2D terrain_map;
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
-  // eslint-disable-next-line prefer-template
-  vs:
-    uniformBlock +
-    /* glsl */ `
+  vs: `${uniformBlock}
 out vec3 commonPos;
 // Fragment position in ABSOLUTE Mercator common space, regardless of the live
 // viewport's projection mode. Computed here (not in FS) because the project
@@ -79,8 +76,7 @@ out vec3 commonPos;
 // are fine enough that varying-interpolation error is negligible.
 out vec2 terrainMercPos;
 `,
-  // eslint-disable-next-line prefer-template
-  fs: uniformBlock + /* glsl */ 'in vec3 commonPos;\nin vec2 terrainMercPos;',
+  fs: `${uniformBlock}in vec3 commonPos;\nin vec2 terrainMercPos;`,
   inject: {
     'vs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_SKIP) {

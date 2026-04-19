@@ -170,7 +170,7 @@ export class TerrainCover {
       // cartesian coords, which would corrupt the intersection. Fall back to
       // full layer bounds on non-Mercator geospatial viewports — resolution
       // is reduced but output stays correct.
-      const isGlobe = Boolean(viewport.resolution && viewport.resolution! > 0);
+      const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
       const newBounds = isGlobe
         ? this.targetBoundsCommon
         : getRenderBounds(this.targetBoundsCommon, viewport);
