@@ -38,8 +38,8 @@ new Deck({
 Supports all [Controller options](./controller.md#options) with the following default behavior:
 
 - `dragPan`: default `'pan'` (drag to pan)
-- `dragRotate`: not effective, this view does not currently support rotation
-- `touchRotate`: not effective, this view does not currently support rotation
+- `dragRotate`: default `true` (right-click drag to rotate pitch/bearing)
+- `touchRotate`: default `true` (two-finger rotate to change pitch/bearing)
 - `keyboard`: arrow keys to pan, +/- to zoom
 - `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 

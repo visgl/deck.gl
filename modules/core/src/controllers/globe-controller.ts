@@ -3,10 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core';
-import Controller, {ControllerProps} from './controller';
+import Controller from './controller';
 
 import {MapState, MapStateProps} from './map-controller';
-import type {MapStateInternal} from './map-controller';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
@@ -27,66 +26,53 @@ function pixelsToDegrees(pixels: number, zoom: number = 0): number {
   return radians * RADIANS_TO_DEGREES;
 }
 
-type GlobeStateInternal = MapStateInternal & {
-  startPanPos?: [number, number];
-};
-
 class GlobeState extends MapState {
   constructor(
-    options: MapStateProps &
-      GlobeStateInternal & {
-        makeViewport: (props: Record<string, any>) => any;
-      }
-  ) {
-    const {startPanPos, ...mapStateOptions} = options;
-    mapStateOptions.normalize = false; // disable MapState default normalization
-    super(mapStateOptions);
-
-    if (startPanPos !== undefined) {
-      (this as any)._state.startPanPos = startPanPos;
+    options: MapStateProps & {
+      makeViewport: (props: Record<string, any>) => any;
     }
+  ) {
+    // Disable MapState's default web-mercator bounds; globe covers the whole earth.
+    // Pan (panStart/pan/panEnd) is inherited from MapState so the grabbed lng/lat
+    // stays under the cursor — matching MapView. The old globe-specific delta-pan
+    // produced the wrong on-screen speed and yanked the center at zoom > 12 (where
+    // WebMercatorViewport takes over rendering but ignored the delta third-arg).
+    super({...options, normalize: false});
   }
 
-  panStart({pos}: {pos: [number, number]}): GlobeState {
-    const {latitude, longitude, zoom} = this.getViewportProps();
+  zoom({
+    pos,
+    startPos,
+    scale
+  }: {
+    pos: [number, number];
+    startPos?: [number, number];
+    scale: number;
+  }): MapState {
+    let {startZoom, startZoomLngLat} = this.getState();
+
+    if (!startZoomLngLat) {
+      startZoom = this.getViewportProps().zoom;
+      startZoomLngLat = this._unproject(startPos) || this._unproject(pos);
+    }
+
+    const zoom = this._constrainZoom((startZoom as number) + Math.log2(scale));
+
+    if (!startZoomLngLat) {
+      // Cursor is off the globe — fall back to center zoom
+      return this._getUpdatedState({zoom});
+    }
+
+    const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
     return this._getUpdatedState({
-      startPanLngLat: [longitude, latitude],
-      startPanPos: pos,
-      startZoom: zoom
-    }) as GlobeState;
-  }
-
-  pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): GlobeState {
-    const state = this.getState() as GlobeStateInternal;
-    const startPanLngLat = state.startPanLngLat || this._unproject(startPos);
-    if (!startPanLngLat) return this;
-    const startZoom = state.startZoom ?? this.getViewportProps().zoom;
-    const startPanPos = state.startPanPos || startPos;
-
-    const coords = [startPanLngLat[0], startPanLngLat[1], startZoom];
-    const viewport = this.makeViewport(this.getViewportProps());
-    const newProps = viewport.panByPosition(coords, pos, startPanPos);
-    return this._getUpdatedState(newProps) as GlobeState;
-  }
-
-  panEnd(): GlobeState {
-    return this._getUpdatedState({
-      startPanLngLat: null,
-      startPanPos: null,
-      startZoom: null
-    }) as GlobeState;
-  }
-
-  zoom({scale}: {scale: number}): MapState {
-    // In Globe view zoom does not take into account the mouse position
-    const startZoom = this.getState().startZoom || this.getViewportProps().zoom;
-    const zoom = startZoom + Math.log2(scale);
-    return this._getUpdatedState({zoom});
+      zoom,
+      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
+    });
   }
 
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
     // Ensure zoom is within specified range
-    const {longitude, latitude, maxBounds} = props;
+    const {longitude, latitude, maxBounds, maxPitch, minPitch} = props;
 
     props.zoom = this._constrainZoom(props.zoom, props);
 
@@ -94,6 +80,15 @@ class GlobeState extends MapState {
       props.longitude = mod(longitude + 180, 360) - 180;
     }
     props.latitude = clamp(latitude, -MAX_LATITUDE, MAX_LATITUDE);
+
+    // Normalize bearing to [-180, 180]
+    if (props.bearing < -180 || props.bearing > 180) {
+      props.bearing = mod(props.bearing + 180, 360) - 180;
+    }
+
+    // Clamp pitch to [minPitch, maxPitch]
+    props.pitch = clamp(props.pitch, minPitch, maxPitch);
+
     if (maxBounds) {
       props.longitude = clamp(props.longitude, maxBounds[0][0], maxBounds[1][0]);
       props.latitude = clamp(props.latitude, maxBounds[0][1], maxBounds[1][1]);
@@ -175,16 +170,14 @@ export default class GlobeController extends Controller<MapState> {
 
   transition = {
     transitionDuration: 300,
-    transitionInterpolator: new LinearInterpolator(['longitude', 'latitude', 'zoom'])
+    transitionInterpolator: new LinearInterpolator([
+      'longitude',
+      'latitude',
+      'zoom',
+      'bearing',
+      'pitch'
+    ])
   };
 
   dragMode: 'pan' | 'rotate' = 'pan';
-
-  setProps(props: ControllerProps) {
-    super.setProps(props);
-
-    // TODO - support pitching?
-    this.dragRotate = false;
-    this.touchRotate = false;
-  }
 }
