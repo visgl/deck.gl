@@ -134,12 +134,7 @@ export class HeightMapBuilder {
               // vertices will not use the standard project_to_clipspace in the DRAW_TO_HEIGHT_MAP shader
               // However the viewport must have the same center and zoom as the screen viewport
               // So that projection uniforms used for calculating z are the same
-              bounds: [
-                centerMerc[0] - 1,
-                centerMerc[1] - 1,
-                centerMerc[0] + 1,
-                centerMerc[1] + 1
-              ],
+              bounds: [centerMerc[0] - 1, centerMerc[1] - 1, centerMerc[0] + 1, centerMerc[1] + 1],
               zoom: viewport.zoom,
               width: Math.min(pixelWidth, MAP_MAX_SIZE),
               height: Math.min(pixelHeight, MAP_MAX_SIZE),

@@ -103,11 +103,7 @@ export function makeViewport(opts: {
         (bounds[1] + bounds[3]) / 2,
         0
       ])
-    : viewport.unprojectPosition([
-        (bounds[0] + bounds[2]) / 2,
-        (bounds[1] + bounds[3]) / 2,
-        0
-      ]);
+    : viewport.unprojectPosition([(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, 0]);
 
   let {width, height, zoom} = opts;
   if (zoom === undefined) {
