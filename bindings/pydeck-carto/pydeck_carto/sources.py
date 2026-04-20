@@ -375,7 +375,7 @@ def quadbin_table_source(**kwargs: Unpack[QuadbinTableSourceOptions]):
     """
     return pdk.types.Function(
         "quadbinTableSource",
-        **{**aggregation_options(**kwargs), **table_options(**kwargs)}
+        **{**aggregation_options(**kwargs), **table_options(**kwargs)},
     ).serialize()
 
 
@@ -405,7 +405,7 @@ def quadbin_query_source(**kwargs: Unpack[QuadbinQuerySourceOptions]):
     """
     return pdk.types.Function(
         "quadbinQuerySource",
-        **{**aggregation_options(**kwargs), **query_options(**kwargs)}
+        **{**aggregation_options(**kwargs), **query_options(**kwargs)},
     ).serialize()
 
 

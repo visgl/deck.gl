@@ -17,7 +17,6 @@ layers = [
         data=world,
         get_fill_color=[0, 0, 0],
     ),
-
     # # Alternative way using PolygonLayer, should the above not work
     # pdk.Layer(
     #     "PolygonLayer",
@@ -25,8 +24,6 @@ layers = [
     #     get_polygon="geometry.coordinates",
     #     get_fill_color=[0, 0, 0],
     # ),
-
-
     # Overlay country names at their centroids.
     pdk.Layer(
         "TextLayer",
@@ -39,4 +36,6 @@ layers = [
     ),
 ]
 
-pdk.Deck(layers, map_provider=None).to_html("geopandas_integration.html", css_background_color="cornflowerblue", open_browser=True)
+pdk.Deck(layers, map_provider=None).to_html(
+    "geopandas_integration.html", css_background_color="cornflowerblue", open_browser=True
+)

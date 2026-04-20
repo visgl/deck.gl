@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {PathStyleExtension} from '@deck.gl/extensions';
-import {PathLayer, PolygonLayer} from '@deck.gl/layers';
+import {
+  PathLayer,
+  PolygonLayer,
+  ScatterplotLayer,
+  _TextBackgroundLayer as TextBackgroundLayer
+} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
@@ -112,4 +117,102 @@ test('PathStyleExtension#PolygonLayer', () => {
   ];
 
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#ScatterplotLayer', () => {
+  const testCases = [
+    {
+      props: {
+        id: 'scatterplot-extension-test',
+        data: FIXTURES.points.slice(0, 3),
+        getPosition: d => d.COORDINATES,
+        getRadius: 10,
+        stroked: true,
+        filled: true,
+        getDashArray: d => [3, 2],
+        extensions: [new PathStyleExtension({dash: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = getLayerUniforms(layer);
+        expect(uniforms.dashGapPickable, 'has dashGapPickable uniform').toBeFalsy();
+        const attributes = layer.getAttributeManager().getAttributes();
+        expect(attributes.instanceDashArrays, 'instanceDashArrays attribute exists').toBeTruthy();
+        expect(
+          attributes.instanceDashArrays.value.slice(0, 4),
+          'instanceDashArrays attribute is populated'
+        ).toEqual([3, 2, 3, 2]);
+      }
+    },
+    {
+      updateProps: {
+        dashGapPickable: true,
+        getDashArray: d => [5, 1],
+        updateTriggers: {
+          getDashArray: 1
+        }
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = getLayerUniforms(layer);
+        expect(uniforms.dashGapPickable, 'dashGapPickable is true').toBeTruthy();
+        const attributes = layer.getAttributeManager().getAttributes();
+        expect(
+          attributes.instanceDashArrays.value.slice(0, 4),
+          'instanceDashArrays attribute updated'
+        ).toEqual([5, 1, 5, 1]);
+      }
+    }
+  ];
+
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#TextBackgroundLayer', () => {
+  const TEXT_BG_DATA = [
+    {position: [0, 0], bounds: [-50, -25, 100, 50], dashArray: [4, 2]},
+    {position: [1, 1], bounds: [-30, -15, 60, 30], dashArray: [4, 2]}
+  ];
+
+  const testCases = [
+    {
+      props: {
+        id: 'text-bg-extension-test',
+        data: TEXT_BG_DATA,
+        getPosition: d => d.position,
+        getBoundingRect: d => d.bounds,
+        getLineWidth: 2,
+        getDashArray: d => d.dashArray,
+        extensions: [new PathStyleExtension({dash: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = getLayerUniforms(layer);
+        expect(uniforms.dashGapPickable, 'has dashGapPickable uniform').toBeFalsy();
+        const attributes = layer.getAttributeManager().getAttributes();
+        expect(attributes.instanceDashArrays, 'instanceDashArrays attribute exists').toBeTruthy();
+        expect(
+          attributes.instanceDashArrays.value.slice(0, 4),
+          'instanceDashArrays attribute is populated'
+        ).toEqual([4, 2, 4, 2]);
+      }
+    },
+    {
+      updateProps: {
+        dashGapPickable: true,
+        getDashArray: d => [2, 3],
+        updateTriggers: {
+          getDashArray: 1
+        }
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = getLayerUniforms(layer);
+        expect(uniforms.dashGapPickable, 'dashGapPickable is true').toBeTruthy();
+        const attributes = layer.getAttributeManager().getAttributes();
+        expect(
+          attributes.instanceDashArrays.value.slice(0, 4),
+          'instanceDashArrays attribute updated'
+        ).toEqual([2, 3, 2, 3]);
+      }
+    }
+  ];
+
+  testLayer({Layer: TextBackgroundLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

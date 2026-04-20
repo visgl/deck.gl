@@ -5,7 +5,6 @@ ScenegraphLayer
 Visualization featuring a custom scenegraph animation
 """
 
-
 import pandas as pd
 
 from pydeck import Layer, Deck

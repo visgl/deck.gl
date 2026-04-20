@@ -8,7 +8,6 @@ an interactive map of San Francisco.
 
 import pydeck as pdk
 
-
 # Map of San Francisco from 1906
 IMG_URL = "https://i.imgur.com/W95ked7.jpg"
 

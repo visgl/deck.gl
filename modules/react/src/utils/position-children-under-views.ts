@@ -46,8 +46,8 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
     let viewChildren = child;
 
     if (isComponent(child) && inheritsFrom(child.type, View)) {
-      viewId = child.props.id || defaultViewId;
-      viewChildren = child.props.children;
+      viewId = (child.props as any).id || defaultViewId;
+      viewChildren = (child.props as any).children;
     }
 
     const viewport = viewManager.getViewport(viewId) as Viewport;

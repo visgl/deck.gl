@@ -102,7 +102,10 @@ def test_h3_query_source():
 
 
 def test_h3_tileset_source():
-    assert h3_tileset_source(table_name="project.database.table", **base_options,) == {
+    assert h3_tileset_source(
+        table_name="project.database.table",
+        **base_options,
+    ) == {
         "@@function": "h3TilesetSource",
         "tableName": "project.database.table",
         **base_options_serialized,
