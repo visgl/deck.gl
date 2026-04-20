@@ -101,7 +101,15 @@ export default class GlobeViewport extends Viewport {
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
     const scale = Math.pow(2, zoom - zoomAdjust(latitude));
     const nearZ = opts.nearZ ?? nearZMultiplier;
-    const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
+    // Far plane = distance from camera to horizon (beyond that, earth's
+    // curvature occludes everything). Using the full globe-diameter formula
+    // would push far past anything drawable and wreck depth-buffer precision
+    // at close zoom, causing z-fighting on 3D features like Tile3DLayer
+    // meshes. Multiply by 2 to keep headroom for tall features (mountains,
+    // buildings) peeking above the horizon.
+    const globeRadiusView = (GLOBE_RADIUS * scale) / height;
+    const horizonDistance = Math.sqrt(altitude * altitude + 2 * altitude * globeRadiusView);
+    const farZ = opts.farZ ?? horizonDistance * 2 * farZMultiplier;
 
     // Calculate view matrix
     const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
