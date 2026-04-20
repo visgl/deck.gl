@@ -208,6 +208,29 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         position_world.w
       );
     }
+    if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
+      // position_world is meters in the ENU tangent frame at coordinateOrigin.
+      // Attach the tangent plane to the sphere so each tile lands at its
+      // geographic location oriented with the surface, rather than floating
+      // as a flat patch in globe common space.
+      float lambda = radians(project.coordinateOrigin.x);
+      float phi = radians(project.coordinateOrigin.y);
+      float cosPhi = cos(phi);
+      float sinPhi = sin(phi);
+      float cosLambda = cos(lambda);
+      float sinLambda = sin(lambda);
+      vec3 east = vec3(cosLambda, sinLambda, 0.0);
+      vec3 north = vec3(-sinLambda * sinPhi, cosLambda * sinPhi, cosPhi);
+      vec3 up = vec3(sinLambda * cosPhi, -cosLambda * cosPhi, sinPhi);
+      float D = (project.coordinateOrigin.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+      float metersToCommon = GLOBE_RADIUS / EARTH_RADIUS;
+      vec3 offsetCommon = (
+        east * position_world.x +
+        north * position_world.y +
+        up * position_world.z
+      ) * metersToCommon;
+      return vec4(up * D + offsetCommon, position_world.w);
+    }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
