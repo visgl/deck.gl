@@ -16,7 +16,7 @@ import {
 import {Deck} from '@deck.gl/core';
 
 import type {DeckProps, MapViewState} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
+import type {Device, Framebuffer} from '@luma.gl/core';
 const HIDE_ALL_LAYERS = () => false;
 const GL_STATE: GLParameters = {
   depthMask: true,
@@ -328,7 +328,7 @@ export default class GoogleMapsOverlay {
       // treats it as a proper Framebuffer resource.
       if (device instanceof WebGLDevice) {
         const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
-        let _framebuffer = null;
+        let _framebuffer: Framebuffer | null = null;
         if (externalFbo) {
           if (this._externalFramebuffer?.handle !== externalFbo) {
             this._externalFramebuffer?.wrapper.destroy();
