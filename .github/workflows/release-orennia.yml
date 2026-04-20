@@ -1,0 +1,97 @@
+name: release-orennia
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish packages (false = dry run)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  check_branch:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.permitted.outputs.result }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Fetch remote branches
+        run: |
+          git fetch origin --depth=1
+
+      - name: Check if on permitted branch
+        id: permitted
+        run: |
+          result=
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            result=true
+          elif git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/master$'; then
+            result=true
+          elif git branch -a --contains $GITHUB_SHA | grep -q 'remotes/origin/.*-release$'; then
+            result=true
+          fi
+          echo "result=${result}" >> "$GITHUB_OUTPUT"
+
+  release:
+    runs-on: ubuntu-22.04
+    needs: check_branch
+    permissions:
+      contents: write
+      id-token: write
+
+    if: needs.check_branch.outputs.should_build
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Run tests from transpiled code
+        run: yarn test-fast
+
+      - name: Configure DEV AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.DEV_AWS_ACCOUNT_ID }}:role/dev-github-oidc-role
+          role-session-name: deckgl-publish-dev-${{ github.run_id }}
+          aws-region: ${{ vars.DEV_AWS_REGION }}
+
+      - name: Login to CodeArtifact npm
+        run: |
+          aws codeartifact login \
+            --tool npm \
+            --domain "${{ vars.DEV_CODEARTIFACT_DOMAIN }}" \
+            --domain-owner "${{ vars.DEV_AWS_ACCOUNT_ID }}" \
+            --repository "${{ vars.DEV_CODEARTIFACT_REPOSITORY }}" \
+            --region "${{ vars.DEV_AWS_REGION }}"
+
+      - name: Verify npm registry points to CodeArtifact
+        run: |
+          REGISTRY="$(npm config get registry)"
+          echo "npm registry: ${REGISTRY}"
+          echo "${REGISTRY}" | grep -q "codeartifact.${{ vars.DEV_AWS_REGION }}.amazonaws.com/npm/${{ vars.DEV_CODEARTIFACT_REPOSITORY }}/"
+
+      - name: Publish to internal npm registry
+        if: github.event_name == 'push' || github.event.inputs.publish == 'true'
+        run: npx ocular-publish from-git
