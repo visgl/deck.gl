@@ -7,7 +7,6 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 const uniformBlock = `\
 layout(std140) uniform textBackgroundUniforms {
   bool billboard;
-  bool markerMode;
   float sizeScale;
   float sizeMinPixels;
   float sizeMaxPixels;
@@ -20,7 +19,6 @@ layout(std140) uniform textBackgroundUniforms {
 
 export type TextBackgroundProps = {
   billboard: boolean;
-  markerMode: boolean;
   sizeScale: number;
   sizeMinPixels: number;
   sizeMaxPixels: number;
@@ -36,7 +34,6 @@ export const textBackgroundUniforms = {
   fs: uniformBlock,
   uniformTypes: {
     billboard: 'f32',
-    markerMode: 'f32',
     sizeScale: 'f32',
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',

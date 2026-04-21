@@ -57,20 +57,13 @@ void main(void) {
   );
   vec2 collisionPixelOffset = rotate_by_angle(instanceCollisionOffsets * sizePixels, instanceAngles);
 
-  dimensions = textBackground.markerMode
-    ? vec2(1.0)
-    : instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
+  dimensions = instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
 
-  vec2 pixelOffset;
-  if (textBackground.markerMode) {
-    pixelOffset = collisionPixelOffset + instancePixelOffsets + positions - vec2(0.5);
-  } else {
-    pixelOffset =
-      (positions * instanceRects.zw + instanceRects.xy) * sizePixels +
-      mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
-    pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
-    pixelOffset += instancePixelOffsets;
-  }
+  vec2 pixelOffset =
+    (positions * instanceRects.zw + instanceRects.xy) * sizePixels +
+    mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
+  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
+  pixelOffset += instancePixelOffsets;
   pixelOffset.y *= -1.0;
 
   // apply clipping
@@ -79,11 +72,11 @@ void main(void) {
   if (text.flipY) {
     xy.y = -xy.y - wh.y;
   }
-  if (!textBackground.markerMode && instanceClipRect.z >= 0.0) {
+  if (instanceClipRect.z >= 0.0) {
     dimensions.x = wh.x;
     pixelOffset.x = xy.x + uv.x * wh.x + mix(-textBackground.padding.x, textBackground.padding.z, uv.x);
   }
-  if (!textBackground.markerMode && instanceClipRect.w >= 0.0) {
+  if (instanceClipRect.w >= 0.0) {
     dimensions.y = wh.y;
     pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
   }

@@ -821,7 +821,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getClipRect: [0, 0, -1, -1],
             billboard,
             collisionDrawMode: 'map-only',
-            markerMode: false,
             sizeScale,
             sizeUnits,
             sizeMinPixels,

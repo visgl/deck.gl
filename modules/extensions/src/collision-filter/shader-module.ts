@@ -75,7 +75,6 @@ const inject = {
   'vs:#main-start': /* glsl */ `
   geometryCollisionUseTexCoordsOverride = false;
   geometryCollisionTexCoordsOverride = vec2(0.0);
-  geometryCollisionFadeOverride = -1.0;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   collisionPickingColor = picking_normalizeColor(geometry.pickingColor);
@@ -90,9 +89,7 @@ const inject = {
     vec2 collision_texCoords = geometryCollisionUseTexCoordsOverride
       ? geometryCollisionTexCoordsOverride
       : collision_getCoords(collision_common_position);
-    collision_fade = geometryCollisionFadeOverride >= 0.0
-      ? geometryCollisionFadeOverride
-      : collision_isVisible(collision_texCoords, geometry.pickingColor);
+    collision_fade = collision_isVisible(collision_texCoords, geometry.pickingColor);
     if (collision_fade < 0.0001) {
       // Position outside clip space bounds to discard
       position = vec4(0.0, 0.0, 2.0, 1.0);
