@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {Texture} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleProps} from './shader-module';
@@ -22,6 +23,8 @@ export class TerrainEffect implements Effect {
   private isPicking: boolean = false;
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
+  /** An empty texture as placeholder */
+  private dummyHeightMap?: Texture;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
   private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
@@ -30,7 +33,7 @@ export class TerrainEffect implements Effect {
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
   setup({device, deck}: EffectContext) {
-    terrainModule.dummyHeightMap = device.createTexture({
+    this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
       data: new Uint8Array([0, 0, 0, 0])
@@ -94,7 +97,16 @@ export class TerrainEffect implements Effect {
   getShaderModuleProps(
     layer: Layer,
     otherShaderModuleProps: Record<string, any>
-  ): {terrain: TerrainModuleProps} {
+  ): {terrain: Partial<TerrainModuleProps>} {
+    // Mask layers need the terrain_map binding satisfied but shouldn't use terrain features
+    if (layer.props.operation.includes('mask')) {
+      return {
+        terrain: {
+          dummyHeightMap: this.dummyHeightMap!
+        }
+      };
+    }
+
     const {terrainDrawMode} = layer.state;
     const terrainCover = this.isDrapingEnabled ? (this.terrainCovers.get(layer.id) ?? null) : null;
 
@@ -109,6 +121,7 @@ export class TerrainEffect implements Effect {
         isPicking: this.isPicking,
         heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
         heightMapBounds: this.heightMap?.bounds,
+        dummyHeightMap: this.dummyHeightMap!,
         terrainCover,
         useTerrainHeightMap: terrainDrawMode === 'offset',
         terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
@@ -117,9 +130,9 @@ export class TerrainEffect implements Effect {
   }
 
   cleanup({deck}: EffectContext): void {
-    if (terrainModule.dummyHeightMap) {
-      terrainModule.dummyHeightMap.delete();
-      terrainModule.dummyHeightMap = null;
+    if (this.dummyHeightMap) {
+      this.dummyHeightMap.delete();
+      this.dummyHeightMap = undefined;
     }
 
     if (this.heightMap) {
@@ -152,6 +165,7 @@ export class TerrainEffect implements Effect {
       shaderModuleProps: {
         terrain: {
           heightMapBounds: this.heightMap.bounds,
+          dummyHeightMap: this.dummyHeightMap,
           drawToTerrainHeightMap: true
         },
         project: {
@@ -212,6 +226,7 @@ export class TerrainEffect implements Effect {
           layers: drapeLayers,
           shaderModuleProps: {
             terrain: {
+              dummyHeightMap: this.dummyHeightMap,
               terrainSkipRender: false
             },
             project: {

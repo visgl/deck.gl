@@ -17,6 +17,7 @@ export type TerrainModuleProps = {
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
+  dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
@@ -118,9 +119,9 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
   },
   // eslint-disable-next-line complexity
   getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
-    const dummyHeightMap = terrainModule.dummyHeightMap;
-    if (!dummyHeightMap) {
-      // TerrainEffect has not been set up yet
+    if (!opts.dummyHeightMap) {
+      // TerrainEffect has not provided props (e.g. not set up yet, or this pass
+      // doesn't include the terrain effect in its effects list)
       return {};
     }
 
@@ -129,6 +130,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         drawToTerrainHeightMap,
         heightMap,
         heightMapBounds,
+        dummyHeightMap,
         terrainCover,
         useTerrainHeightMap,
         terrainSkipRender
@@ -161,11 +163,9 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           sampler = coverTexture;
           mode = mode === TERRAIN_MODE.SKIP ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
-        } else {
-          if (opts.isPicking && !terrainSkipRender) {
-            // terrain+draw layer without cover FBO: render own picking colors
-            mode = TERRAIN_MODE.NONE;
-          }
+        } else if (opts.isPicking && !terrainSkipRender) {
+          // terrain+draw layer without cover FBO: render own picking colors
+          mode = TERRAIN_MODE.NONE;
         }
       }
 
@@ -184,20 +184,17 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
           : [0, 0, 0, 0]
       };
     }
-    // No terrain-specific props provided (e.g. mask pass or other non-terrain render pass).
+    // No terrain-specific props provided but dummyHeightMap is available
+    // (e.g. non-terrain render pass where the effect still provides props).
     // Provide the dummy texture to satisfy the terrain_map binding.
     return {
       mode: TERRAIN_MODE.NONE,
-      terrain_map: dummyHeightMap,
+      terrain_map: opts.dummyHeightMap,
       bounds: [0, 0, 0, 0]
     };
   },
   uniformTypes: {
     mode: 'f32',
     bounds: 'vec4<f32>'
-  },
-  /** Dummy texture created by TerrainEffect.setup, used as default terrain_map binding */
-  dummyHeightMap: null as Texture | null
-} as ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings> & {
-  dummyHeightMap: Texture | null;
-};
+  }
+} as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
