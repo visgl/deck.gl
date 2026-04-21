@@ -284,7 +284,9 @@ export default class GlobeViewport extends Viewport {
       Math.min(this.latitude + (coords[1] - currentAtPixel[1]), MAX_LATITUDE),
       -MAX_LATITUDE
     );
-    return {longitude, latitude};
+    // Adjust zoom for latitude change to maintain consistent visual scale
+    const zoom = this.zoom + zoomAdjust(latitude) - zoomAdjust(this.latitude);
+    return {longitude, latitude, zoom};
   }
 }
 
