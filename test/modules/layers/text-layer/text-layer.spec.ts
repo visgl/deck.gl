@@ -349,9 +349,10 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
         expect(subLayers[2].props.getSize, 'marker uses text size for collision offset').toBe(
           subLayers[1].props.getSize
         );
-        expect(subLayers[2].props.sizeScale, 'marker inherits text scale for collision offset').toBe(
-          subLayers[1].props.sizeScale
-        );
+        expect(
+          subLayers[2].props.sizeScale,
+          'marker inherits text scale for collision offset'
+        ).toBe(subLayers[1].props.sizeScale);
         expect(subLayers[2].props.sizeUnits, 'marker inherits text size units').toBe(
           subLayers[1].props.sizeUnits
         );
@@ -445,7 +446,9 @@ test('TextLayer - collision proxy rect stays in rendered text-size units', () =>
           rectHeight,
           'proxy rect height is normalized to glyph height rather than raw atlas units'
         ).toBeLessThan(2);
-        expect(rectWidth, 'proxy rect width remains in rendered text-size units').toBeGreaterThan(1);
+        expect(rectWidth, 'proxy rect width remains in rendered text-size units').toBeGreaterThan(
+          1
+        );
         expect(
           rectWidth,
           'proxy rect width remains normalized instead of expanding to paragraph-sized pixels'
@@ -491,9 +494,10 @@ test('TextLayer - collision proxy rect stays in rendered text-size units', () =>
           rectY,
           'bottom-aligned proxy rect sits above the center-aligned proxy rect'
         ).toBeLessThan(centerRect![1]);
-        expect(rectY, 'bottom-aligned proxy rect sits above the top-aligned proxy rect').toBeLessThan(
-          topRect![1]
-        );
+        expect(
+          rectY,
+          'bottom-aligned proxy rect sits above the top-aligned proxy rect'
+        ).toBeLessThan(topRect![1]);
         expect(
           Math.abs(rectHeight - topRect![3]),
           'proxy rect height remains stable across baseline changes'

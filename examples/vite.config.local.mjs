@@ -27,7 +27,7 @@ export default defineConfig(async () => {
         aliasScopedPackages('@math.gl'),
         aliasScopedPackages('@probe.gl'),
         aliasScopedPackages('@loaders.gl'),
-        {find: '@arcgis/core', replacement: join(rootDir, './node_modules/@arcgis/core')},
+        {find: '@arcgis/core', replacement: join(rootDir, './node_modules/@arcgis/core')}
       ]
     },
     define: {
