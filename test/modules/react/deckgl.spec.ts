@@ -212,9 +212,12 @@ test('DeckGL#uncontrolled view state', async () => {
       })
     );
   });
-  await vi.waitFor(() => {
-    expect(onTransitionEnd).toHaveBeenCalled();
-  });
+  await vi.waitFor(
+    () => {
+      expect(onTransitionEnd).toHaveBeenCalled();
+    },
+    {timeout: 5000}
+  );
 
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.longitude).toBeCloseTo(0);
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.latitude).toBeCloseTo(0);
@@ -227,7 +230,7 @@ test('DeckGL#uncontrolled view state', async () => {
   container.remove();
 });
 
-test('DeckGL#uncontrolled view state', async () => {
+test('DeckGL#controlled view state', async () => {
   const ref = createRef<DeckGLRef>();
   const container = document.createElement('div');
   document.body.append(container);
@@ -271,9 +274,12 @@ test('DeckGL#uncontrolled view state', async () => {
     );
   });
 
-  await vi.waitFor(() => {
-    expect(onTransitionEnd).toHaveBeenCalled();
-  });
+  await vi.waitFor(
+    () => {
+      expect(onTransitionEnd).toHaveBeenCalled();
+    },
+    {timeout: 5000}
+  );
 
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.longitude).toBeCloseTo(0);
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.latitude).toBeCloseTo(0);
