@@ -42,7 +42,7 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.3.0-alpha.1",
-    "@luma.gl/core": "~9.3.2",
+    "@luma.gl/core": "~9.3.3",
     "@math.gl/web-mercator": "^4.1.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
