@@ -346,6 +346,15 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
         expect(subLayers[2].props.collisionDrawMode, 'marker only writes to collision map').toBe(
           'map-only'
         );
+        expect(subLayers[2].props.getSize, 'marker uses text size for collision offset').toBe(
+          subLayers[1].props.getSize
+        );
+        expect(subLayers[2].props.sizeScale, 'marker inherits text scale for collision offset').toBe(
+          subLayers[1].props.sizeScale
+        );
+        expect(subLayers[2].props.sizeUnits, 'marker inherits text size units').toBe(
+          subLayers[1].props.sizeUnits
+        );
         expect(
           subLayers.every(layer =>
             layer.props.extensions?.some(
@@ -399,4 +408,134 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
   ];
 
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision proxy rect stays in rendered text-size units', () => {
+  const data = [{position: [-122.4, 37.8], text: 'collision'}];
+  let topRect: number[] | undefined;
+  let centerRect: number[] | undefined;
+
+  const testCases = [
+    {
+      props: {
+        data,
+        getText: d => d.text,
+        getPosition: d => d.position,
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'top',
+        extensions: [new CollisionFilterExtension()],
+        collisionEnabled: true
+      },
+      onAfterUpdate: ({subLayers}) => {
+        const collisionMarker = subLayers.find(layer => layer.id.includes('collision-marker'));
+        expect(collisionMarker, 'collision marker sublayer is created').toBeTruthy();
+        const {instanceRects} = collisionMarker!.getAttributeManager().getAttributes();
+        const [rectX, rectY, rectWidth, rectHeight] = Array.from(instanceRects.value.slice(0, 4));
+        topRect = [rectX, rectY, rectWidth, rectHeight];
+
+        expect(
+          Math.abs(rectX),
+          'horizontal collision proxy rect stays normalized to rendered text size'
+        ).toBeLessThan(3);
+        expect(
+          rectY,
+          'top-aligned proxy rect sits below the anchor because it tracks glyph bounds'
+        ).toBeGreaterThan(0);
+        expect(
+          rectHeight,
+          'proxy rect height is normalized to glyph height rather than raw atlas units'
+        ).toBeLessThan(2);
+        expect(rectWidth, 'proxy rect width remains in rendered text-size units').toBeGreaterThan(1);
+        expect(
+          rectWidth,
+          'proxy rect width remains normalized instead of expanding to paragraph-sized pixels'
+        ).toBeLessThan(20);
+      }
+    },
+    {
+      updateProps: {
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        const collisionMarker = subLayers.find(layer => layer.id.includes('collision-marker'));
+        expect(collisionMarker, 'collision marker sublayer is created').toBeTruthy();
+        const {instanceRects} = collisionMarker!.getAttributeManager().getAttributes();
+        const [, rectY, , rectHeight] = Array.from(instanceRects.value.slice(0, 4));
+        centerRect = Array.from(instanceRects.value.slice(0, 4));
+
+        expect(rectY, 'center-aligned proxy rect extends above the anchor').toBeLessThan(0);
+        expect(
+          rectY + rectHeight,
+          'center-aligned proxy rect still extends below the anchor'
+        ).toBeGreaterThan(0);
+        expect(
+          Math.abs(rectHeight - topRect![3]),
+          'changing baseline repositions the proxy rect without materially changing glyph height'
+        ).toBeLessThan(0.15);
+      }
+    },
+    {
+      updateProps: {
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'bottom'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        const collisionMarker = subLayers.find(layer => layer.id.includes('collision-marker'));
+        expect(collisionMarker, 'collision marker sublayer is created').toBeTruthy();
+        const {instanceRects} = collisionMarker!.getAttributeManager().getAttributes();
+        const [, rectY, , rectHeight] = Array.from(instanceRects.value.slice(0, 4));
+
+        expect(rectY, 'bottom-aligned proxy rect sits above the anchor').toBeLessThan(0);
+        expect(
+          rectY,
+          'bottom-aligned proxy rect sits above the center-aligned proxy rect'
+        ).toBeLessThan(centerRect![1]);
+        expect(rectY, 'bottom-aligned proxy rect sits above the top-aligned proxy rect').toBeLessThan(
+          topRect![1]
+        );
+        expect(
+          Math.abs(rectHeight - topRect![3]),
+          'proxy rect height remains stable across baseline changes'
+        ).toBeLessThan(0.15);
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision picking colors expand to every glyph', () => {
+  const data = [{position: [-122.4, 37.8], text: 'ab'}];
+
+  testLayer({
+    Layer: TextLayer,
+    testCases: [
+      {
+        props: {
+          data,
+          getText: d => d.text,
+          getPosition: d => d.position,
+          extensions: [new CollisionFilterExtension()],
+          collisionEnabled: true
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const charactersLayer = subLayers.find(layer => layer.id.includes('characters'));
+          expect(charactersLayer, 'characters sublayer is created').toBeTruthy();
+          const {instancePickingColors} = charactersLayer!.getAttributeManager().getAttributes();
+          const pickingColors = Array.from(instancePickingColors.value.slice(0, 8));
+
+          expect(
+            pickingColors.slice(0, 4),
+            'first glyph stores the object picking color for collision matching'
+          ).toEqual([1, 0, 0, 0]);
+          expect(
+            pickingColors.slice(4, 8),
+            'second glyph reuses the same object picking color'
+          ).toEqual([1, 0, 0, 0]);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
 });

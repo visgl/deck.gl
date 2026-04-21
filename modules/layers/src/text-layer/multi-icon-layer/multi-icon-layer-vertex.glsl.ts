@@ -71,9 +71,7 @@ void main(void) {
     icon.sizeMinPixels, icon.sizeMaxPixels
   );
 
-  // Choose correct constraint based on the 'sizeBasis' value (0.0 = width, 1.0 = height)
-  float iconConstraint = icon.sizeBasis == 0.0 ? iconSize.x : iconSize.y;
-  float instanceScale = iconConstraint == 0.0 ? 0.0 : sizePixels / iconConstraint;
+  float instanceScale = sizePixels / text.fontSize;
   vec2 collisionPixelOffset = rotate_by_angle(instanceCollisionOffsets * sizePixels, instanceAngles);
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
