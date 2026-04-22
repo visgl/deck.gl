@@ -23,10 +23,7 @@ export default function createDeckRenderer(DeckProps, RenderNode) {
     constructor(view: SceneView, props: DeckProps) {
       this.view = view;
       this.deck = new DeckProps(props);
-      this.initializeRenderNode();
-    }
 
-    private initializeRenderNode() {
       // Guard against concurrent initialization attempts (e.g. if render fires
       // multiple times before the async init completes).
       let isInitializing = false;
