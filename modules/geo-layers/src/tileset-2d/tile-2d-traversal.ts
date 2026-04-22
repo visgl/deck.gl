@@ -91,14 +91,6 @@ class OSMNode {
       return false;
     }
 
-    // Globe-only: reject tiles on the far hemisphere of the sphere. The frustum
-    // test above accepts any tile whose bounding volume intersects the view
-    // frustum, including back-side tiles occluded by the near hemisphere. Without
-    // this, low-zoom traversal fans out across the entire globe.
-    if (project && this.beyondHorizon(viewport.cameraPosition, project, elevationBounds[1])) {
-      return false;
-    }
-
     // Avoid loading overlapping tiles - if a descendant is requested, do not request the ancester
     if (!this.childVisible) {
       let {z} = this;
@@ -135,46 +127,6 @@ class OSMNode {
       }
     }
     return result;
-  }
-
-  // A point P on the sphere is visible from camera C iff dot(P, C) > |P|².
-  // Rather than sampling discrete refPoints (which can all miss the visibility
-  // cone when the cone is small), pick the tile point closest to the camera's
-  // radial direction — the tile's clamp to camera lng/lat. If even that
-  // closest point is beyond the horizon, no part of the tile is visible.
-  beyondHorizon(
-    cameraPosition: number[],
-    project: (xyz: number[]) => number[],
-    elevation: number
-  ): boolean {
-    const cx = cameraPosition[0];
-    const cy = cameraPosition[1];
-    const cz = cameraPosition[2];
-    const cMag = Math.sqrt(cx * cx + cy * cy + cz * cz);
-
-    // Match GlobeViewport.unprojectPosition: lng = atan2(x, -y), lat = asin(z/D).
-    const camLng = (Math.atan2(cx, -cy) * 180) / Math.PI;
-    const camLat = (Math.asin(cz / cMag) * 180) / Math.PI;
-
-    // OSM tile bounds in lng/lat.
-    const [west, north] = osmTile2lngLat(this.x, this.y, this.z);
-    const [east, south] = osmTile2lngLat(this.x + 1, this.y + 1, this.z);
-
-    // Shift camLng into the tile's local frame so clamping uses ANGULAR
-    // distance on the sphere, not Euclidean distance in degrees. Without this,
-    // a camera near the antimeridian (e.g. lng=-175) clamping against a tile
-    // at [170, 175] picks 170 (far, ~345°) instead of 175 (near, ~10° via
-    // wrap) and wrongly culls a visible tile.
-    const tileCenterLng = (west + east) / 2;
-    const wrappedCamLng = tileCenterLng + (((camLng - tileCenterLng + 540) % 360) - 180);
-
-    const closestLng = Math.max(west, Math.min(wrappedCamLng, east));
-    const closestLat = Math.max(south, Math.min(camLat, north));
-
-    const closest = project([closestLng, closestLat, elevation]);
-    const dot = closest[0] * cx + closest[1] * cy + closest[2] * cz;
-    const magSq = closest[0] * closest[0] + closest[1] * closest[1] + closest[2] * closest[2];
-    return dot <= magSq;
   }
 
   insideBounds([minX, minY, maxX, maxY]: Bounds): boolean {
