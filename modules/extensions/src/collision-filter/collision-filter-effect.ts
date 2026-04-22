@@ -8,7 +8,6 @@ import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Effect, EffectContext, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollisionFilterPass from './collision-filter-pass';
 import {MaskPreRenderStats} from '../mask/mask-effect';
-// import {debugFBO} from '../utils/debug';
 
 import type {CollisionFilterExtensionProps} from './collision-filter-extension';
 import type {CollisionModuleProps} from './shader-module';
@@ -100,8 +99,6 @@ export default class CollisionFilterEffect implements Effect {
         viewportChanged
       });
     }
-
-    // debugFBO(this.collisionFBOs[Object.keys(channels)[0]], {minimap: true});
   }
 
   private _render(
@@ -151,7 +148,7 @@ export default class CollisionFilterEffect implements Effect {
       this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
         pass: 'collision-filter',
         isPicking: true,
-        layers: renderInfo.layers,
+        layers: renderInfo.layers.filter(layer => layer.props.collisionDrawMode !== 'sample-only'),
         effects,
         layerFilter,
         viewports: viewport ? [viewport] : [],

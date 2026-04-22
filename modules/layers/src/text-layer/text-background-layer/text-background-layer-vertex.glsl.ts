@@ -58,7 +58,6 @@ void main(void) {
   vec2 collisionPixelOffset = rotate_by_angle(instanceCollisionOffsets * sizePixels, instanceAngles);
 
   dimensions = instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
-
   vec2 pixelOffset =
     (positions * instanceRects.zw + instanceRects.xy) * sizePixels +
     mix(-textBackground.padding.xy, textBackground.padding.zw, positions);

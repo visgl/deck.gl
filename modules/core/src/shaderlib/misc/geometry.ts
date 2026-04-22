@@ -27,6 +27,7 @@ var<private> geometry_: VertexGeometry = VertexGeometry(
 
 var<private> geometryCollisionUseTexCoordsOverride_: bool = false;
 var<private> geometryCollisionTexCoordsOverride_: vec2<f32> = vec2<f32>(0.0, 0.0);
+var<private> geometryCollisionFadeOverride_: f32 = -1.0;
 
 struct FragmentGeometry {
   uv: vec2<f32>,
@@ -62,6 +63,7 @@ struct VertexGeometry {
 
 bool geometryCollisionUseTexCoordsOverride = false;
 vec2 geometryCollisionTexCoordsOverride = vec2(0.0);
+float geometryCollisionFadeOverride = -1.0;
 `;
 
 const fs = /* glsl */ `\

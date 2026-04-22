@@ -83,8 +83,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     attributeManager!.addInstanced({
       instancePickingColors: {
         type: 'uint8',
-        size: 4,
-        update: (attribute, rows) => this.calculateMultiIconPickingColors(attribute, rows)
+        size: 3,
+        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       },
       instanceClipRect: {
         size: 4,
@@ -103,13 +103,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const {props, oldProps, changeFlags} = params;
     const {outlineColor} = props;
 
-    if (
-      changeFlags.updateTriggersChanged &&
-      (changeFlags.updateTriggersChanged.getIcon ||
-        changeFlags.updateTriggersChanged.getIconOffsets)
-    ) {
+    if (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getIconOffsets) {
       this.getAttributeManager()!.invalidate('instanceIconDefs');
-      this.getAttributeManager()!.invalidate('instancePickingColors');
     }
     if (outlineColor !== oldProps.outlineColor) {
       const normalizedOutlineColor = [
@@ -196,31 +191,6 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
           i += attribute.size;
           j++;
         }
-      }
-    }
-  }
-
-  protected calculateMultiIconPickingColors(
-    attribute: Attribute,
-    {startRow, endRow}: {startRow: number; endRow: number}
-  ) {
-    const {data, getIcon} = this.props;
-    let i = attribute.getVertexOffset(startRow);
-    const output = attribute.value as Uint8ClampedArray;
-    const pickingColor: [number, number, number] = [0, 0, 0];
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-
-    for (const object of iterable) {
-      objectInfo.index++;
-      const text = getIcon(object, objectInfo) as string;
-      const numCharacters = Array.from(text || '').length;
-      this.encodePickingColor(objectInfo.index, pickingColor);
-
-      for (let j = 0; j < numCharacters; j++) {
-        output[i++] = pickingColor[0];
-        output[i++] = pickingColor[1];
-        output[i++] = pickingColor[2];
-        output[i++] = 0;
       }
     }
   }

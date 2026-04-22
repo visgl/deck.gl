@@ -39,7 +39,7 @@ export type CollisionFilterExtensionProps<DataT = any> = {
    * Internal-only: whether this layer writes to the collision map, samples it, or both.
    * `undefined` follows the default behavior of writing to and sampling from the map.
    */
-  collisionDrawMode?: 'map+sample' | 'map-only';
+  collisionDrawMode?: 'map+sample' | 'map-only' | 'sample-only';
 };
 
 /** Allows layers to hide overlapping objects. */
