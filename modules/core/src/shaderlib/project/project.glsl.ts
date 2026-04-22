@@ -72,7 +72,7 @@ float project_size() {
     // Adjust by 1 / cos(latitude)
     // If geometry.position (vertex in common space) is populated, use it
     // Otherwise use geometry.worldPosition (anchor in world space)
-    
+
     if (geometry.position.w == 0.0) {
       return project_size_at_latitude(geometry.worldPosition.y);
     }
@@ -80,7 +80,7 @@ float project_size() {
     // latitude from common y: 2.0 * (atan(exp(y / TILE_SIZE * 2.0 * PI - PI)) - PI / 4.0)
     // Taylor series of 1 / cos(latitude)
     // Max error < 0.003
-  
+
     float y = geometry.position.y / TILE_SIZE * 2.0 - 1.0;
     float y2 = y * y;
     float y4 = y2 * y2;

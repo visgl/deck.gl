@@ -362,10 +362,7 @@ function calculateViewportUniforms({
   // For GLOBE + METER_OFFSETS, precompute the globe-space position of
   // coordinateOrigin into commonOrigin. The shader derives the ENU frame from
   // this direction via project_get_orientation_matrix, avoiding per-vertex trig.
-  if (
-    viewport.projectionMode === PROJECTION_MODE.GLOBE &&
-    coordinateSystem === 'meter-offsets'
-  ) {
+  if (viewport.projectionMode === PROJECTION_MODE.GLOBE && coordinateSystem === 'meter-offsets') {
     const EARTH_RADIUS = 6370972;
     const GLOBE_RADIUS = 256;
     const lambda = (coordinateOrigin[0] * Math.PI) / 180;
