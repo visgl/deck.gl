@@ -26,12 +26,10 @@ function renderLayers() {
   ];
 }
 
-loadArcGISModules([
-  'esri/Map',
-  'esri/views/MapView',
-  'esri/views/SceneView',
-  'esri/views/3d/webgl/RenderNode'
-]).then(({DeckLayer, DeckRenderer, modules}) => {
+loadArcGISModules(
+  ['esri/Map', 'esri/views/MapView', 'esri/views/SceneView', 'esri/views/3d/webgl/RenderNode'],
+  {url: 'https://js.arcgis.com/4.32/'}
+).then(({DeckLayer, DeckRenderer, modules}) => {
   const [ArcGISMap, MapView, SceneView, RenderNode] = modules;
 
   const layer = new DeckLayer({});
@@ -72,7 +70,8 @@ loadArcGISModules([
 
   const renderer = new DeckRenderer(sceneView, {});
 
-  sceneView.map.add(renderer);
+  // DeckRenderer is an ArcGIS RenderNode; it registers itself with the
+  // SceneView via the view property and does not need to be added as a layer.
 
   /* global setInterval */
   setInterval(() => {

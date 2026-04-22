@@ -1,0 +1,17 @@
+diff --git a/node_modules/@luma.gl/webgl/dist/adapter/resources/webgl-render-pass.js b/node_modules/@luma.gl/webgl/dist/adapter/resources/webgl-render-pass.js
+index 28532a5..f28a7ef 100644
+--- a/node_modules/@luma.gl/webgl/dist/adapter/resources/webgl-render-pass.js
++++ b/node_modules/@luma.gl/webgl/dist/adapter/resources/webgl-render-pass.js
+@@ -41,7 +41,11 @@ export class WEBGLRenderPass extends RenderPass {
+         // Specify mapping of draw buffer locations to color attachments
+         // Default framebuffers can only be set to GL.BACK or GL.NONE
+         if (!isDefaultFramebuffer) {
+-            const drawBuffers = webglFramebuffer.colorAttachments.map((_, i) => 36064 + i);
++            // colorAttachments may be absent when a raw native WebGLFramebuffer is passed
++            // (e.g. obtained via gl.getParameter(GL.FRAMEBUFFER_BINDING) in a foreign GL context).
++            // Fall back to a single COLOR_ATTACHMENT0 draw buffer in that case.
++            const colorAttachmentCount = webglFramebuffer.colorAttachments?.length ?? 1;
++            const drawBuffers = Array.from({length: colorAttachmentCount}, (_, i) => 36064 + i);
+             this.device.gl.drawBuffers(drawBuffers);
+         }
+         else {

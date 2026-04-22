@@ -6,7 +6,7 @@
  * Projection utils
  * TODO: move to Viewport class?
  */
-import {getOffsetOrigin} from './viewport-uniforms';
+import {getOffsetOrigin, normalizeCoordinateSystem} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
 import {vec3, vec4} from '@math.gl/core';
@@ -55,6 +55,12 @@ function normalizeParameters(opts: {
   const {viewport, modelMatrix, coordinateOrigin} = opts;
   let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
 
+  // Accept legacy numeric coordinateSystem values from older loaders.gl versions.
+  coordinateSystem = normalizeCoordinateSystem(coordinateSystem);
+  if (fromCoordinateSystem !== undefined) {
+    fromCoordinateSystem = normalizeCoordinateSystem(fromCoordinateSystem);
+  }
+
   if (coordinateSystem === 'default') {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
@@ -100,6 +106,9 @@ export function getWorldPosition(
   if (modelMatrix) {
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
   }
+
+  // Accept legacy numeric coordinateSystem values from older loaders.gl versions.
+  coordinateSystem = normalizeCoordinateSystem(coordinateSystem);
 
   switch (coordinateSystem) {
     case 'default':
