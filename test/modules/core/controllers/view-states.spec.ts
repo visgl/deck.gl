@@ -8,6 +8,7 @@ import {
   OrbitController,
   FirstPersonController,
   _GlobeController as GlobeController,
+  _GlobeViewport as GlobeViewport,
   OrbitViewport,
   OrthographicController,
   Viewport
@@ -249,6 +250,36 @@ test('GlobeViewState#pitch and bearing constraints', () => {
     Math.abs(transitionProps.bearing - 190) < 1 || Math.abs(transitionProps.bearing - -170) < 1,
     'shortestPathFrom picks shortest rotation for bearing'
   ).toBeTruthy();
+});
+
+test('GlobeViewState#pan starts outside globe with delta spin', () => {
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+  const makeViewport = (props: any) => new GlobeViewport(props);
+  const startPos: [number, number] = [0, 0];
+  const pos: [number, number] = [100, 0];
+  const startProps = {
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    makeViewport
+  };
+  const viewport = makeViewport(startProps);
+
+  expect(viewport.isPointOnGlobe(startPos), 'test starts off globe').toBe(false);
+  expect(viewport.isPointOnGlobe([startProps.width / 2, startProps.height / 2])).toBe(true);
+
+  const viewState = new GlobeViewState(startProps);
+  const pannedState = viewState.panStart({pos: startPos}).pan({pos});
+  const viewportProps = pannedState.getViewportProps();
+  const rotationSpeed = 0.25 / Math.pow(2, startProps.zoom - Math.log2(Math.PI));
+
+  expect(viewportProps.longitude, 'off-globe pan uses delta longitude').toBeCloseTo(
+    rotationSpeed * (startPos[0] - pos[0])
+  );
+  expect(viewportProps.latitude, 'horizontal off-globe pan keeps latitude').toBe(0);
+  expect(viewportProps.zoom, 'off-globe pan preserves zoom at the equator').toBe(0);
 });
 
 test('OrbitViewState', () => {

@@ -168,6 +168,21 @@ test('GlobeViewport#project, unproject', () => {
   config.EPSILON = oldEpsilon;
 });
 
+test('GlobeViewport#isPointOnGlobe', () => {
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 0,
+    longitude: 0,
+    zoom: 0
+  });
+
+  expect(viewport.isPointOnGlobe([viewport.width / 2, viewport.height / 2])).toBe(true);
+  expect(viewport.isPointOnGlobe([0, 0])).toBe(false);
+  expect(viewport.unproject([0, 0]), 'unproject falls back to a surface point').toBeTruthy();
+  expect(viewport.unproject([0, 0], {fallback: false}), 'fallback can be disabled').toBeNull();
+});
+
 test('GlobeViewport#getBounds', () => {
   for (const testCase of TEST_VIEWPORTS) {
     const bounds = new GlobeViewport(testCase).getBounds();

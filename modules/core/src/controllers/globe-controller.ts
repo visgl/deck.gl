@@ -6,9 +6,11 @@ import {clamp} from '@math.gl/core';
 import Controller from './controller';
 
 import {MapState, MapStateProps} from './map-controller';
+import type {MapStateInternal} from './map-controller';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
+import type GlobeViewport from '../viewports/globe-viewport';
 
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
@@ -26,18 +28,88 @@ function pixelsToDegrees(pixels: number, zoom: number = 0): number {
   return radians * RADIANS_TO_DEGREES;
 }
 
+type GlobeStateInternal = MapStateInternal & {
+  startPanPos?: [number, number];
+  startPanOnGlobe?: boolean;
+};
+
+function unprojectOnGlobe(
+  viewport: GlobeViewport,
+  pos?: [number, number]
+): [number, number] | undefined {
+  const lngLat = pos && viewport.unproject(pos, {fallback: false});
+  return lngLat ? [lngLat[0], lngLat[1]] : undefined;
+}
+
 class GlobeState extends MapState {
   constructor(
-    options: MapStateProps & {
-      makeViewport: (props: Record<string, any>) => any;
-    }
+    options: MapStateProps &
+      GlobeStateInternal & {
+        makeViewport: (props: Record<string, any>) => any;
+      }
   ) {
+    const {startPanPos, startPanOnGlobe, ...mapStateOptions} = options;
     // Disable MapState's default web-mercator bounds; globe covers the whole earth.
-    // Pan (panStart/pan/panEnd) is inherited from MapState so the grabbed lng/lat
-    // stays under the cursor — matching MapView. The old globe-specific delta-pan
-    // produced the wrong on-screen speed and yanked the center at zoom > 12 (where
-    // WebMercatorViewport takes over rendering but ignored the delta third-arg).
-    super({...options, normalize: false});
+    super({...mapStateOptions, normalize: false});
+
+    if (startPanPos !== undefined) {
+      (this as any)._state.startPanPos = startPanPos;
+    }
+    if (startPanOnGlobe !== undefined) {
+      (this as any)._state.startPanOnGlobe = startPanOnGlobe;
+    }
+  }
+
+  panStart({pos}: {pos: [number, number]}): GlobeState {
+    const {longitude, latitude, zoom} = this.getViewportProps();
+    const viewport = this.makeViewport(this.getViewportProps()) as GlobeViewport;
+    const startPanLngLat = unprojectOnGlobe(viewport, pos);
+
+    return this._getUpdatedState({
+      startPanLngLat: startPanLngLat || [longitude, latitude],
+      startPanPos: pos,
+      startPanOnGlobe: Boolean(startPanLngLat),
+      startZoom: zoom
+    }) as GlobeState;
+  }
+
+  pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): GlobeState {
+    const state = this.getState() as GlobeStateInternal;
+    const viewport = this.makeViewport(this.getViewportProps()) as GlobeViewport;
+    const startPanOnGlobe =
+      state.startPanOnGlobe ?? (startPos ? viewport.isPointOnGlobe(startPos) : true);
+
+    if (startPanOnGlobe) {
+      const startPanLngLat = state.startPanLngLat || unprojectOnGlobe(viewport, startPos);
+      if (!startPanLngLat) {
+        return this;
+      }
+      return this._getUpdatedState(viewport.panByLngLat(startPanLngLat, pos)) as GlobeState;
+    }
+
+    const startPanPos = state.startPanPos || startPos;
+    if (!startPanPos) {
+      return this;
+    }
+
+    const {longitude, latitude, zoom} = this.getViewportProps();
+    const startPanLngLat = state.startPanLngLat || [longitude, latitude];
+    const startZoom = state.startZoom ?? zoom;
+    const newProps = viewport.panByPosition(
+      [startPanLngLat[0], startPanLngLat[1], startZoom],
+      pos,
+      startPanPos
+    );
+    return this._getUpdatedState(newProps) as GlobeState;
+  }
+
+  panEnd(): GlobeState {
+    return this._getUpdatedState({
+      startPanLngLat: null,
+      startPanPos: null,
+      startPanOnGlobe: null,
+      startZoom: null
+    }) as GlobeState;
   }
 
   zoom({
@@ -50,10 +122,11 @@ class GlobeState extends MapState {
     scale: number;
   }): MapState {
     let {startZoom, startZoomLngLat} = this.getState();
+    const viewport = this.makeViewport(this.getViewportProps()) as GlobeViewport;
 
     if (!startZoomLngLat) {
       startZoom = this.getViewportProps().zoom;
-      startZoomLngLat = this._unproject(startPos) || this._unproject(pos);
+      startZoomLngLat = unprojectOnGlobe(viewport, startPos) || unprojectOnGlobe(viewport, pos);
     }
 
     const zoom = this._constrainZoom((startZoom as number) + Math.log2(scale));
@@ -63,10 +136,10 @@ class GlobeState extends MapState {
       return this._getUpdatedState({zoom});
     }
 
-    const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
+    const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom}) as GlobeViewport;
     return this._getUpdatedState({
       zoom,
-      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
+      ...zoomedViewport.panByLngLat(startZoomLngLat, pos)
     });
   }
 
