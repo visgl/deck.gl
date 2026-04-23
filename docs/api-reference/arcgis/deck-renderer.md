@@ -38,7 +38,9 @@ const renderer = new DeckRenderer(sceneView, {
   ]
 });
 
-sceneView.map.add(renderer);
+// DeckRenderer is a SceneView RenderNode. Constructing it attaches it to the
+// view; it should not be added to the map as a layer.
+renderer;
 ```
 
 
@@ -48,7 +50,7 @@ sceneView.map.add(renderer);
 new DeckRenderer(sceneView, props)
 ```
 
-- `sceneView` ([SceneView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-SceneView.html)) - the view to use this renderer with. `viewingMode` must be set to `'local'`.
+- `sceneView` ([SceneView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-SceneView.html)) - the view to use this renderer with. `viewingMode` must be set to `'local'`. `DeckRenderer` manages its internal deck.gl view state from the live `SceneView` camera and self-registers as a RenderNode; do not add it to `map.layers`.
 - `props` (object) - forwarded to a `Deck` instance. The following [Deck](../core/deck.md) props are supported:
 
 - `layers`
