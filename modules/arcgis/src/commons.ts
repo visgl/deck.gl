@@ -163,6 +163,8 @@ export function render(
     altitude?: number;
     pitch: number;
     bearing: number;
+    views?: unknown;
+    viewState?: unknown;
   }
 ) {
   const {model, deck, fbo} = resources;
@@ -170,7 +172,7 @@ export function render(
   if (device instanceof WebGLDevice) {
     // @ts-ignore device.getParametersWebGL should return `any` not `void`?
     const rawScreenFbo: WebGLFramebuffer | null = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
-    const {width, height, ...viewState} = viewport;
+    const {width, height, views, viewState, ...defaultViewState} = viewport;
 
     /* global window */
     const dpr = window.devicePixelRatio;
@@ -209,7 +211,15 @@ export function render(
     // pixels would double-apply DPR and project layer geometry off-screen.
     // Without width/height, deck's viewport aspect diverges from ArcGIS's,
     // causing the overlay to drift off the ground plane under tilt/rotation.
-    deck.setProps({width, height, viewState});
+    const deckProps: any = {
+      width,
+      height,
+      viewState: viewState || defaultViewState
+    };
+    if (views) {
+      deckProps.views = views;
+    }
+    deck.setProps(deckProps);
     // redraw deck immediately into deckFbo
     deck.redraw('arcgis');
 

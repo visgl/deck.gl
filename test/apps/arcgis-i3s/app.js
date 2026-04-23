@@ -50,4 +50,5 @@ loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/webgl/Rend
 
   // Debug hook
   window.__sceneView = sceneView;
+  window.__deckRenderer = renderer;
 });

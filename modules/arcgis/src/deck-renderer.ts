@@ -7,10 +7,93 @@ import {initializeResources, render, finalizeResources, RenderResources} from '.
 
 import SceneView from '@arcgis/core/views/SceneView';
 import type {DeckProps} from '@deck.gl/core';
+import MapView from '../../core/src/views/map-view';
 
 // Web Mercator scale at zoom 0 for 256 px tiles; deck.gl uses 512 px tiles,
 // so the final zoom is shifted by -1.
 const ARCGIS_WEB_MERCATOR_SCALE_AT_ZOOM_0 = 591657550.5;
+const DECK_GROUND_MPP_AT_ZOOM_0 = 78271.484;
+const METERS_PER_DEG_LAT = 111320;
+const ARCGIS_DIAGONAL_FOV_RADIANS = (55 * Math.PI) / 180;
+const ALTITUDE_BLEND_START_TILT = 65;
+const ALTITUDE_BLEND_END_TILT = 80;
+
+function getDistanceMeters(a, b) {
+  const midLatRad = (((a.latitude + b.latitude) / 2) * Math.PI) / 180;
+  const dLatM = (a.latitude - b.latitude) * METERS_PER_DEG_LAT;
+  const dLngM = (a.longitude - b.longitude) * METERS_PER_DEG_LAT * Math.cos(midLatRad);
+
+  return Math.sqrt(dLatM * dLatM + dLngM * dLngM);
+}
+
+function getZoom(
+  view: SceneView,
+  longitude: number,
+  latitude: number,
+  width: number,
+  height: number
+) {
+  const focalPoint = view.toMap({x: width / 2, y: height / 2} as any);
+  const focalPointRight = view.toMap({x: width / 2 + 1, y: height / 2} as any);
+
+  if (focalPoint && focalPointRight) {
+    const horizontalMetersPerPixel = getDistanceMeters(focalPoint, focalPointRight);
+
+    if (horizontalMetersPerPixel > 0) {
+      const latitudeRad = (latitude * Math.PI) / 180;
+      return Math.log2(
+        (DECK_GROUND_MPP_AT_ZOOM_0 * Math.cos(latitudeRad)) / horizontalMetersPerPixel
+      );
+    }
+  }
+
+  return Math.log2(ARCGIS_WEB_MERCATOR_SCALE_AT_ZOOM_0 / view.scale) - 1;
+}
+
+function smoothstep(edge0: number, edge1: number, value: number) {
+  const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+function getFovMatchedAltitude(width: number, height: number) {
+  const aspect = width / height;
+  const verticalTan = Math.tan(ARCGIS_DIAGONAL_FOV_RADIANS / 2) / Math.sqrt(1 + aspect * aspect);
+
+  return 0.5 / verticalTan;
+}
+
+function getAltitude(tilt: number, slantAltitude: number, width: number, height: number) {
+  const fovAltitude = getFovMatchedAltitude(width, height);
+  const blend = smoothstep(ALTITUDE_BLEND_START_TILT, ALTITUDE_BLEND_END_TILT, tilt);
+
+  return slantAltitude * (1 - blend) + fovAltitude * blend;
+}
+
+function getArcGISMatrixViewState(
+  view: SceneView,
+  longitude: number,
+  latitude: number,
+  zoom: number,
+  resolution: number,
+  altitude: number
+) {
+  return {
+    views: new MapView({id: 'arcgis-scene'}),
+    viewState: {
+      'arcgis-scene': {
+        id: 'arcgis-scene',
+        longitude,
+        latitude,
+        zoom,
+        pitch: view.camera.tilt,
+        bearing: view.camera.heading,
+        altitude,
+        position: [0, 0, 0],
+        resolution
+      }
+    }
+  };
+}
 
 export default function createDeckRenderer(DeckProps, RenderNode) {
   class DeckRenderer {
@@ -64,7 +147,7 @@ export default function createDeckRenderer(DeckProps, RenderNode) {
                     finalizeResources(resources);
                     return;
                   }
-                  self.deck.on('change', props => resources.deck.setProps(props));
+                  self.deck.on('change', deckProps => resources.deck.setProps(deckProps));
                   resources.deck.setProps(self.deck.toJSON());
                   self.resources = resources;
                   renderNode.requestRender();
@@ -89,6 +172,7 @@ export default function createDeckRenderer(DeckProps, RenderNode) {
           // Use gl drawing buffer rather than view.size, which can include
           // non-GL chrome pixels.
           const gl = renderNode.gl as WebGL2RenderingContext;
+
           const dpr = window.devicePixelRatio || 1;
           const width = gl.drawingBufferWidth / dpr;
           const height = gl.drawingBufferHeight / dpr;
@@ -108,8 +192,6 @@ export default function createDeckRenderer(DeckProps, RenderNode) {
           // *projected* Mercator mpp instead of ground mpp, and caused
           // the deck layer to render ~26% smaller than the basemap at SF
           // latitudes.
-          const zoom = Math.log2(ARCGIS_WEB_MERCATOR_SCALE_AT_ZOOM_0 / self.view.scale) - 1;
-
           // deck.gl's `altitude` is the camera distance above the focal
           // plane, measured in viewport-height units. In deck.gl,
           // `altitude` couples camera distance with projection FOV:
@@ -135,7 +217,6 @@ export default function createDeckRenderer(DeckProps, RenderNode) {
           // Horizontal ground distance from camera to focal point (meters).
           // Use a flat-earth approximation; viewingMode='local' in the
           // SceneView makes this exact.
-          const METERS_PER_DEG_LAT = 111320;
           const midLatRad = (((latitude + cameraPos.latitude) / 2) * Math.PI) / 180;
           const dLatM = (cameraPos.latitude - latitude) * METERS_PER_DEG_LAT;
           const dLngM =
@@ -143,22 +224,47 @@ export default function createDeckRenderer(DeckProps, RenderNode) {
           const horizM = Math.sqrt(dLatM * dLatM + dLngM * dLngM);
           const slantM = Math.sqrt(horizM * horizM + cameraPos.z * cameraPos.z);
 
+          const zoom = getZoom(self.view, longitude, latitude, width, height);
+
           // Viewport height in meters at the focal plane. ArcGIS's
           // `view.resolution` is meters-per-pixel at the focal point.
           const viewportHeightM = height * self.view.resolution;
-          const altitude = slantM / viewportHeightM;
+          const slantAltitude = slantM / viewportHeightM;
+          const altitude = getAltitude(self.view.camera.tilt, slantAltitude, width, height);
+          const arcgisMatrixView = getArcGISMatrixViewState(
+            self.view,
+            longitude,
+            latitude,
+            zoom,
+            self.view.resolution,
+            altitude
+          );
 
           try {
-            render(self.resources, {
-              width,
-              height,
-              latitude,
-              longitude,
-              altitude,
-              zoom,
-              bearing: self.view.camera.heading,
-              pitch: self.view.camera.tilt
-            });
+            if (arcgisMatrixView) {
+              render(self.resources, {
+                width,
+                height,
+                latitude,
+                longitude,
+                altitude,
+                zoom,
+                bearing: self.view.camera.heading,
+                pitch: self.view.camera.tilt,
+                ...arcgisMatrixView
+              });
+            } else {
+              render(self.resources, {
+                width,
+                height,
+                latitude,
+                longitude,
+                altitude,
+                zoom,
+                bearing: self.view.camera.heading,
+                pitch: self.view.camera.tilt
+              });
+            }
           } catch (e) {
             // eslint-disable-next-line no-console
             console.error('DeckRenderer: render error', e);
