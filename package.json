@@ -61,7 +61,7 @@
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
     "jscodeshift": "^17.3.0",
-    "jsdom": "^20.0.0",
+    "jsdom": "^29.0.2",
     "pixelmatch": "^7.1.0",
     "playwright": "^1.58.0",
     "pngjs": "^7.0.0",
