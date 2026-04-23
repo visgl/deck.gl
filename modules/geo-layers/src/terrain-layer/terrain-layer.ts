@@ -237,12 +237,24 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
     const [mesh, texture] = data;
 
+    const {viewport} = this.context;
+    const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
+    const bounds = (mesh as {header?: {boundingBox?: [number[], number[]]}}).header?.boundingBox;
+    const hasLngLatBounds = Boolean(
+      bounds &&
+        Math.abs(bounds[0][0]) <= 180 &&
+        Math.abs(bounds[1][0]) <= 180 &&
+        Math.abs(bounds[0][1]) <= 90 &&
+        Math.abs(bounds[1][1]) <= 90
+    );
+
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
       mesh,
       texture,
       _instanced: false,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem:
+        isGlobe && hasLngLatBounds ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],
       getColor: color,
       wireframe,
@@ -299,6 +311,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     } = this.props;
 
     if (this.state.isTiled) {
+      const projectionMode = this.context.viewport.projectionMode;
+
       return new TileLayer<MeshAndTexture>(
         this.getSubLayerProps({
           id: 'tiles'
@@ -311,7 +325,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
               elevationData: urlTemplateToUpdateTrigger(elevationData),
               texture: urlTemplateToUpdateTrigger(texture),
               meshMaxError,
-              elevationDecoder
+              elevationDecoder,
+              projectionMode
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),

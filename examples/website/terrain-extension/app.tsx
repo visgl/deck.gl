@@ -111,11 +111,10 @@ export default function App({
       id: 'terrain',
       minZoom: 0,
       strategy: 'no-overlap',
-      // Grid tesselator so the same mesh renders on MapView and GlobeView.
-      tesselator: 'grid',
       elevationDecoder: ELEVATION_DECODER,
       elevationData: TERRAIN_IMAGE,
       texture: SURFACE_IMAGE,
+      material: false,
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer<RouteProperties>({

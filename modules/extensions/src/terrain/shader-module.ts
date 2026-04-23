@@ -69,12 +69,21 @@ export const terrainModule = {
   dependencies: [project],
   vs: `${uniformBlock}
 out vec3 commonPos;
-// Fragment position in ABSOLUTE Mercator common space, regardless of the live
-// viewport's projection mode. Computed here (not in FS) because the project
-// module's helpers (project_mercator_, PROJECTION_MODE_*) are only declared
-// in the vertex shader. Mercator is log-nonlinear in lat, but terrain meshes
-// are fine enough that varying-interpolation error is negligible.
+// Texture position in ABSOLUTE Mercator common space, regardless of the live
+// viewport projection. Terrain cover FBOs are still rendered by a
+// WebMercatorViewport, so this matches the offscreen render target rather than
+// choosing a display projection.
 out vec2 terrainMercPos;
+
+vec2 terrain_globe_to_mercator(vec3 commonPosition) {
+  float D = length(commonPosition);
+  float sinLat = clamp(commonPosition.z / D, -0.999998, 0.999998);
+  float lng = atan(commonPosition.x, -commonPosition.y);
+  return vec2(
+    lng + PI,
+    PI + 0.5 * log((1.0 + sinLat) / (1.0 - sinLat))
+  ) * WORLD_SCALE;
+}
 `,
   fs: `${uniformBlock}in vec3 commonPos;\nin vec2 terrainMercPos;`,
   inject: {
@@ -87,14 +96,10 @@ if (terrain.mode == TERRAIN_MODE_SKIP) {
     'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
 commonPos = geometry.position.xyz;
 if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-  // Unproject globe cartesian (see project_globe_) back to lng/lat, then
-  // forward-project through project_mercator_. Elevation scales the sphere
-  // radius uniformly, so angular components recover cleanly.
-  vec3 cp = commonPos;
-  float D = length(cp);
-  float lat = degrees(asin(clamp(cp.z / D, -1.0, 1.0)));
-  float lng = degrees(atan(cp.x, -cp.y));
-  terrainMercPos = project_mercator_(vec2(lng, lat));
+  // Convert globe cartesian (see project_globe_) directly to Mercator world
+  // coordinates. This is equivalent to project_mercator_(lngLat), but avoids
+  // degree conversion and a second trig round trip.
+  terrainMercPos = terrain_globe_to_mercator(commonPos);
 } else {
   // Web Mercator modes: commonPos.xy is mercator-common minus commonOrigin.
   terrainMercPos = commonPos.xy + project.commonOrigin.xy;

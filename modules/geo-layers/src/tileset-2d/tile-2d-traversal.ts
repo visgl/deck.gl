@@ -91,6 +91,13 @@ class OSMNode {
       return false;
     }
 
+    // Globe-only: reject tiles on the far hemisphere of the sphere. The frustum
+    // test above accepts tiles whose bounding volume intersects the view
+    // frustum but are still occluded by the near hemisphere.
+    if (project && this.beyondHorizon(viewport.cameraPosition, project, elevationBounds[1])) {
+      return false;
+    }
+
     // Avoid loading overlapping tiles - if a descendant is requested, do not request the ancester
     if (!this.childVisible) {
       let {z} = this;
@@ -127,6 +134,33 @@ class OSMNode {
       }
     }
     return result;
+  }
+
+  beyondHorizon(
+    cameraPosition: number[],
+    project: (xyz: number[]) => number[],
+    elevation: number
+  ): boolean {
+    const cx = cameraPosition[0];
+    const cy = cameraPosition[1];
+    const cz = cameraPosition[2];
+    const cMag = Math.sqrt(cx * cx + cy * cy + cz * cz);
+
+    const camLng = (Math.atan2(cx, -cy) * 180) / Math.PI;
+    const camLat = (Math.asin(cz / cMag) * 180) / Math.PI;
+
+    const [west, north] = osmTile2lngLat(this.x, this.y, this.z);
+    const [east, south] = osmTile2lngLat(this.x + 1, this.y + 1, this.z);
+
+    const tileCenterLng = (west + east) / 2;
+    const wrappedCamLng = tileCenterLng + (((camLng - tileCenterLng + 540) % 360) - 180);
+    const closestLng = Math.max(west, Math.min(wrappedCamLng, east));
+    const closestLat = Math.max(south, Math.min(camLat, north));
+
+    const closest = project([closestLng, closestLat, elevation]);
+    const dot = closest[0] * cx + closest[1] * cy + closest[2] * cz;
+    const magSq = closest[0] * closest[0] + closest[1] * closest[1] + closest[2] * closest[2];
+    return dot <= magSq;
   }
 
   insideBounds([minX, minY, maxX, maxY]: Bounds): boolean {
