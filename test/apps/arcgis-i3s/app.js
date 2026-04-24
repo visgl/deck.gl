@@ -32,7 +32,8 @@ loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/webgl/Rend
     viewingMode: 'local'
   });
 
-  const renderer = new DeckRenderer(sceneView, {
+  const renderer = new DeckRenderer({
+    view: sceneView,
     layers: [
       new Tile3DLayer({
         id: 'tile-3d-layer',
@@ -42,13 +43,4 @@ loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/webgl/Rend
       })
     ]
   });
-
-  // DeckRenderer is an ArcGIS RenderNode; it self-registers with the
-  // SceneView via the view property and does not need to be added as a layer.
-  // eslint-disable-next-line no-unused-expressions
-  renderer;
-
-  // Debug hook
-  window.__sceneView = sceneView;
-  window.__deckRenderer = renderer;
 });

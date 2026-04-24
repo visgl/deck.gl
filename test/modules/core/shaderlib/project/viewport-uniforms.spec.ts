@@ -154,21 +154,32 @@ test('project#getUniforms', () => {
   ).toBeTruthy();
 });
 
-test('project#getUniforms rejects legacy numeric coordinate systems', () => {
-  expect(
-    () => project.getUniforms({viewport: TEST_VIEWPORTS.map, coordinateSystem: -1 as never}),
-    'Legacy DEFAULT is rejected'
-  ).toThrow(/Invalid coordinateSystem/);
+test('project#getUniforms normalizes legacy numeric coordinate systems', () => {
+  const numericDefault = project.getUniforms({
+    viewport: TEST_VIEWPORTS.map,
+    coordinateSystem: -1 as never
+  });
+  const stringDefault = project.getUniforms({
+    viewport: TEST_VIEWPORTS.map,
+    coordinateSystem: COORDINATE_SYSTEM.DEFAULT
+  });
 
-  expect(
-    () =>
-      project.getUniforms({
-        viewport: TEST_VIEWPORTS.mapHighZoom,
-        coordinateSystem: 2 as never,
-        coordinateOrigin: Object.freeze([-122.4, 37.7])
-      }),
-    'Legacy offsets are rejected'
-  ).toThrow(/Invalid coordinateSystem/);
+  expect(numericDefault, 'Legacy DEFAULT normalizes to current DEFAULT').toEqual(stringDefault);
+
+  const numericOffsets = project.getUniforms({
+    viewport: TEST_VIEWPORTS.mapHighZoom,
+    coordinateSystem: 2 as never,
+    coordinateOrigin: Object.freeze([-122.4, 37.7])
+  });
+  const stringOffsets = project.getUniforms({
+    viewport: TEST_VIEWPORTS.mapHighZoom,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: Object.freeze([-122.4, 37.7])
+  });
+
+  expect(numericOffsets, 'Legacy offsets normalize to current meter-offsets behavior').toEqual(
+    stringOffsets
+  );
 });
 
 test('project#getUniforms normalizes IDENTITY to CARTESIAN', () => {

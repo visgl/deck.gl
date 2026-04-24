@@ -149,17 +149,25 @@ test('project#projectPosition', () => {
   }
 });
 
-test('project#projectPosition rejects legacy numeric coordinate systems', () => {
+test('project#projectPosition normalizes legacy numeric coordinate systems', () => {
+  const numericResult = projectPosition([-122.46, 37.8, 1000], {
+    viewport: TEST_VIEWPORT,
+    coordinateSystem: 2 as never,
+    coordinateOrigin: TEST_COORDINATE_ORIGIN,
+    fromCoordinateSystem: 1 as never
+  });
+
+  const stringResult = projectPosition([-122.46, 37.8, 1000], {
+    viewport: TEST_VIEWPORT,
+    coordinateSystem: 'meter-offsets',
+    coordinateOrigin: TEST_COORDINATE_ORIGIN,
+    fromCoordinateSystem: 'lnglat'
+  });
+
   expect(
-    () =>
-      projectPosition([-122.46, 37.8, 1000], {
-        viewport: TEST_VIEWPORT,
-        coordinateSystem: 2 as never,
-        coordinateOrigin: TEST_COORDINATE_ORIGIN,
-        fromCoordinateSystem: 1 as never
-      }),
-    'Legacy numeric coordinate systems are rejected'
-  ).toThrow(/Invalid coordinateSystem/);
+    equals(numericResult, stringResult),
+    'Legacy numeric coordinate systems normalize to string equivalents'
+  ).toBeTruthy();
 
   const identityResult = projectPosition([0, 0, 0], {
     viewport: TEST_VIEWPORT,

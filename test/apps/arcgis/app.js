@@ -68,10 +68,7 @@ loadArcGISModules(
     viewingMode: 'local'
   });
 
-  const renderer = new DeckRenderer(sceneView, {});
-
-  // DeckRenderer is an ArcGIS RenderNode; it registers itself with the
-  // SceneView via the view property and does not need to be added as a layer.
+  const renderer = new DeckRenderer({view: sceneView});
 
   /* global setInterval */
   setInterval(() => {
