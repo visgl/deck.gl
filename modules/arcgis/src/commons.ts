@@ -19,7 +19,6 @@ export type RenderResources = {
   texture: Texture;
   model: Model;
   fbo: Framebuffer;
-  _externalFramebuffer?: {handle: WebGLFramebuffer; wrapper: Framebuffer};
 };
 
 async function createDeckInstance(gl: WebGL2RenderingContext): Promise<{
@@ -179,22 +178,6 @@ export function render(
     const pixelWidth = Math.round(width * dpr);
     const pixelHeight = Math.round(height * dpr);
 
-    // Wrap the external framebuffer handle so luma.gl treats it as a proper Framebuffer resource.
-    const externalFbo = rawScreenFbo;
-    let screenFbo: Framebuffer | null = null;
-    if (externalFbo) {
-      if (resources._externalFramebuffer?.handle !== externalFbo) {
-        resources._externalFramebuffer?.wrapper.destroy();
-        const wrapper = device.createFramebuffer({
-          handle: externalFbo,
-          width: pixelWidth,
-          height: pixelHeight
-        });
-        resources._externalFramebuffer = {handle: externalFbo, wrapper};
-      }
-      screenFbo = resources._externalFramebuffer!.wrapper;
-    }
-
     fbo.resize({width: pixelWidth, height: pixelHeight});
 
     // luma's Framebuffer.resize() clones and destroys the color attachment texture when
@@ -271,5 +254,4 @@ export function finalizeResources(resources: RenderResources) {
   resources.model.destroy();
   resources.fbo.destroy();
   resources.texture.destroy();
-  resources._externalFramebuffer?.wrapper.destroy();
 }
