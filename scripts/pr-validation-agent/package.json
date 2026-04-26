@@ -1,0 +1,14 @@
+{
+  "name": "pr-validation-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generates and validates deck.gl examples for PR review",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "playwright": "^1.50.0"
+  }
+}

@@ -1,0 +1,28 @@
+name: PR Validation Cleanup
+
+# Notifies when a validated PR closes so reviewers know artifacts will expire.
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  cleanup:
+    name: Notify artifact expiry
+    # Only bother if the PR was actually validated
+    if: contains(github.event.pull_request.labels.*.name, 'ai-validate')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post closure note
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: '🤖 PR closed — validation artifacts will expire after 30 days.'
+            });
