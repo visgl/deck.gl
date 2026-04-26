@@ -216,7 +216,7 @@ type _GeoJsonLayer3DProps<FeaturePropertiesT> = {
    *
    * @default 1
    */
-  elevationScale?: boolean;
+  elevationScale?: number;
 
   /**
    * Material settings for lighting effect. Applies to extruded polgons.
