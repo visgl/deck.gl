@@ -1,21 +1,54 @@
 name: PR Validation Cleanup
 
-# Notifies when a validated PR closes so reviewers know artifacts will expire.
 on:
   pull_request_target:
     types: [closed]
 
 permissions:
+  contents: write
   pull-requests: write
 
 jobs:
   cleanup:
-    name: Notify artifact expiry
-    # Only bother if the PR was actually validated
+    name: Remove screenshots and notify
     if: contains(github.event.pull_request.labels.*.name, 'ai-validate')
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
+      # Delete this PR's screenshot directory from the pr-examples branch.
+      # Uses a worktree so we stay on the base branch for everything else.
+      - name: Remove PR screenshots from pr-examples branch
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if ! git ls-remote --heads origin pr-examples | grep -q pr-examples; then
+            echo "pr-examples branch does not exist — nothing to clean up"
+            exit 0
+          fi
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          git fetch origin pr-examples --depth=1
+          git worktree add /tmp/pr-examples-wt pr-examples
+
+          if [ ! -d "/tmp/pr-examples-wt/pr-${PR_NUMBER}" ]; then
+            echo "No screenshots for PR #${PR_NUMBER} — nothing to clean up"
+            exit 0
+          fi
+
+          cd /tmp/pr-examples-wt
+          git rm -rf "pr-${PR_NUMBER}/"
+          git commit -m "cleanup: remove PR #${PR_NUMBER} screenshots [skip ci]"
+
+          for attempt in 1 2 3; do
+            git push origin pr-examples && break
+            git fetch origin pr-examples
+            git rebase origin/pr-examples
+          done
+
       - name: Post closure note
         uses: actions/github-script@v7
         with:
@@ -24,5 +57,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: '🤖 PR closed — validation artifacts will expire after 30 days.'
+              body: '🤖 PR closed — screenshots removed from `pr-examples` branch. Artifacts expire after 30 days.'
             });

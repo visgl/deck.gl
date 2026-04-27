@@ -7,20 +7,17 @@ on:
     types: [labeled]
 
 permissions:
-  contents: read
+  contents: write     # needed to push screenshots to the pr-examples branch
   pull-requests: write
 
 jobs:
   validate:
     name: Generate & Validate Examples
-    # Only run when the specific label is added (not any label)
     if: github.event.label.name == 'ai-validate'
     runs-on: ubuntu-latest
 
     steps:
       # Gate: confirm the person who added the label has write access.
-      # This prevents external contributors from triggering costly AI runs
-      # by adding labels (which normally requires triage access, but this is belt-and-suspenders).
       - name: Check actor write permission
         uses: actions/github-script@v7
         with:
@@ -38,8 +35,6 @@ jobs:
             }
             core.info(`@${context.actor} authorized with '${data.permission}' permission.`);
 
-      # Post a placeholder comment immediately so reviewers know the agent is running.
-      # We'll update this comment with results at the end.
       - name: Post "running" status comment
         id: start-comment
         uses: actions/github-script@v7
@@ -87,9 +82,50 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: node index.mjs
 
-      # Upload generated HTML examples as downloadable artifacts.
-      # Retention is 30 days — enough to outlive any review cycle.
-      - name: Upload generated examples
+      # Push screenshots to the pr-examples branch so they have public URLs
+      # that can be embedded as <img> tags in the PR comment.
+      # Uses a git worktree so the main checkout (base branch) is undisturbed.
+      - name: Publish screenshots to pr-examples branch
+        if: always()
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          SCREENSHOTS="scripts/pr-validation-agent/output/screenshots"
+
+          if [ ! -d "$SCREENSHOTS" ] || [ -z "$(ls -A "$SCREENSHOTS" 2>/dev/null)" ]; then
+            echo "No screenshots to publish — skipping"
+            exit 0
+          fi
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          WORKTREE="/tmp/pr-examples-wt"
+
+          if git ls-remote --heads origin pr-examples | grep -q pr-examples; then
+            git fetch origin pr-examples --depth=1
+            git worktree add "$WORKTREE" pr-examples
+          else
+            # First run — create the branch as an orphan (no history from main)
+            git worktree add --orphan "$WORKTREE" pr-examples
+          fi
+
+          mkdir -p "$WORKTREE/pr-${PR_NUMBER}/screenshots"
+          cp "$SCREENSHOTS"/*.png "$WORKTREE/pr-${PR_NUMBER}/screenshots/"
+
+          cd "$WORKTREE"
+          git add "pr-${PR_NUMBER}/screenshots/"
+          git commit -m "screenshots: PR #${PR_NUMBER} [skip ci]" --allow-empty
+
+          # Retry push up to 3 times to handle concurrent PR validations
+          for attempt in 1 2 3; do
+            git push origin pr-examples && break
+            echo "Push attempt $attempt failed — rebasing and retrying"
+            git fetch origin pr-examples
+            git rebase origin/pr-examples
+          done
+
+      - name: Upload generated examples as artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
