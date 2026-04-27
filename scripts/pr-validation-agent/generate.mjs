@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {buildCodePenPrefill, buildCodeSandboxUrl, injectCodePenButton} from './codepen.mjs';
 
 const client = new Anthropic();
 const __dir = dirname(fileURLToPath(import.meta.url));
@@ -97,7 +98,15 @@ export async function generateExamples({analysis}) {
 
   for (const ex of examples) {
     ex.filename = `${ex.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.html`;
-    await writeFile(join(outputDir, ex.filename), ex.html, 'utf8');
+
+    // Direct link for the PR comment — CodeSandbox accepts LZ-encoded GET params
+    ex.codeSandboxUrl = buildCodeSandboxUrl(ex.html);
+
+    // Inject "Open in CodePen" button into the artifact HTML.
+    // ex.html stays clean (used in the PR comment code block).
+    const prefill = buildCodePenPrefill(ex.html, `deck.gl — ${ex.name}`);
+    const htmlWithButton = injectCodePenButton(ex.html, prefill);
+    await writeFile(join(outputDir, ex.filename), htmlWithButton, 'utf8');
   }
 
   return examples;

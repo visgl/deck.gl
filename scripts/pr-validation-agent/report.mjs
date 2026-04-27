@@ -67,6 +67,12 @@ function buildBody({analysis, examples, validationResults, skipped, fatalError, 
     lines.push(ex.description);
     lines.push('');
 
+    // Interactive links — CodeSandbox is a direct GET link; CodePen is in the downloaded HTML.
+    if (ex.codeSandboxUrl) {
+      lines.push(`[▶️ Open in CodeSandbox](${ex.codeSandboxUrl}) &nbsp;·&nbsp; ✏️ Open in CodePen — button is inside the downloaded HTML`);
+      lines.push('');
+    }
+
     if (!res.passed) {
       if (!res.hasCanvas) {
         lines.push('> ⚠️ No `<canvas>` found — DeckGL may not have initialized.');
@@ -94,8 +100,8 @@ function buildBody({analysis, examples, validationResults, skipped, fatalError, 
   lines.push('');
 
   if (runUrl) {
-    lines.push(`📦 **Download all examples** as a zip from the [workflow artifacts](${runUrl}) (30-day retention).`);
-    lines.push('Unzip and open any \`.html\` file directly in your browser — no build step needed.');
+    lines.push(`📦 **[Download examples zip](${runUrl})** from workflow artifacts (30-day retention).`);
+    lines.push('Each downloaded `.html` file includes an **✏️ Open in CodePen** button for interactive editing.');
   }
 
   lines.push('');
