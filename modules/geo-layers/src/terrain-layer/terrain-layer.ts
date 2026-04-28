@@ -119,28 +119,6 @@ type MeshWithBoundingBox = MeshAttributes & {
   };
 };
 
-function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: boolean): Bounds {
-  const xOverlap = Math.abs(bounds[2] - bounds[0]) * (TILE_OVERLAP_PIXELS / tileSize);
-  const yOverlap = Math.abs(bounds[3] - bounds[1]) * (TILE_OVERLAP_PIXELS / tileSize);
-
-  if (clampLngLat) {
-    return [
-      Math.max(bounds[0] - xOverlap, -MAX_LONGITUDE),
-      Math.max(bounds[1] - yOverlap, -MAX_LATITUDE),
-      Math.min(bounds[2] + xOverlap, MAX_LONGITUDE),
-      Math.min(bounds[3] + yOverlap, MAX_LATITUDE)
-    ];
-  }
-
-  return [bounds[0] - xOverlap, bounds[1] - yOverlap, bounds[2] + xOverlap, bounds[3] + yOverlap];
-}
-
-function getEffectiveMeshMaxError(meshMaxError: number): number {
-  return Number.isFinite(meshMaxError) && meshMaxError > 0
-    ? meshMaxError
-    : MIN_TERRAIN_MESH_MAX_ERROR;
-}
-
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps = _TerrainLayerProps &
   TileLayerProps<MeshAndTexture> &
