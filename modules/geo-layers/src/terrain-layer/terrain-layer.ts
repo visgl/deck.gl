@@ -73,6 +73,35 @@ function urlTemplateToUpdateTrigger(template: URLTemplate): string {
   return template || '';
 }
 
+function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: boolean): Bounds {
+  const xPad = ((bounds[2] - bounds[0]) / tileSize) * TILE_OVERLAP_PIXELS;
+  const yPad = ((bounds[3] - bounds[1]) / tileSize) * TILE_OVERLAP_PIXELS;
+  const overlappedBounds: Bounds = [
+    bounds[0] - xPad,
+    bounds[1] - yPad,
+    bounds[2] + xPad,
+    bounds[3] + yPad
+  ];
+
+  if (!clampLngLat) {
+    return overlappedBounds;
+  }
+
+  return [
+    Math.max(overlappedBounds[0], -MAX_LONGITUDE),
+    Math.max(overlappedBounds[1], -MAX_LATITUDE),
+    Math.min(overlappedBounds[2], MAX_LONGITUDE),
+    Math.min(overlappedBounds[3], MAX_LATITUDE)
+  ];
+}
+
+function getEffectiveMeshMaxError(meshMaxError: number): number {
+  if (!Number.isFinite(meshMaxError) || meshMaxError <= 0) {
+    return MIN_TERRAIN_MESH_MAX_ERROR;
+  }
+  return Math.max(meshMaxError, MIN_TERRAIN_MESH_MAX_ERROR);
+}
+
 type ElevationDecoder = {rScaler: number; gScaler: number; bScaler: number; offset: number};
 type TerrainLoadProps = {
   bounds: Bounds;
