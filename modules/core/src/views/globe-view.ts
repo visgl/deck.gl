@@ -4,7 +4,6 @@
 
 import View, {CommonViewState, CommonViewProps} from './view';
 import GlobeViewport from '../viewports/globe-viewport';
-import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import GlobeController from '../controllers/globe-controller';
 import type {Parameters} from '@luma.gl/core';
 
@@ -61,8 +60,8 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
     });
   }
 
-  getViewportType(viewState: GlobeViewState) {
-    return viewState.zoom > 12 ? WebMercatorViewport : GlobeViewport;
+  getViewportType() {
+    return GlobeViewport;
   }
 
   get ControllerType() {
