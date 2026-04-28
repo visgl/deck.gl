@@ -83,6 +83,12 @@ type TerrainLoadProps = {
 };
 
 type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
+type MeshBoundingBox = [min: number[], max: number[]];
+type MeshWithBoundingBox = MeshAttributes & {
+  header?: {
+    boundingBox?: MeshBoundingBox;
+  };
+};
 
 function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: boolean): Bounds {
   const xOverlap = Math.abs(bounds[2] - bounds[0]) * (TILE_OVERLAP_PIXELS / tileSize);
@@ -274,10 +280,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
     const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
+    const boundingBox = (mesh as MeshWithBoundingBox | null)?.header?.boundingBox;
     const hasLngLatBounds =
-      mesh &&
-      'header' in mesh &&
-      (mesh.header as MeshAttributes['header'])?.boundingBox.every(
+      boundingBox &&
+      boundingBox.every(
         ([x, y]) =>
           x >= -MAX_LONGITUDE && x <= MAX_LONGITUDE && y >= -MAX_LATITUDE && y <= MAX_LATITUDE
       );
