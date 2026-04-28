@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.4
+
+### Views
+
+- Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026

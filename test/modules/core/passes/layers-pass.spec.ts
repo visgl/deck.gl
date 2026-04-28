@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 
-import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
+import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -13,6 +13,12 @@ import {GL} from '@luma.gl/webgl/constants';
 
 class TestLayer extends Layer {
   initializeState() {}
+}
+
+class RecordingLayer extends TestLayer {
+  draw({parameters}) {
+    (this.props as any).onDraw({viewport: this.context.viewport.id, parameters});
+  }
 }
 
 class TestCompositeLayer extends CompositeLayer {
@@ -266,6 +272,78 @@ test('LayersPass#shouldDrawLayer', () => {
     'Total # of layers'
   ).toBeTruthy();
   expect(renderStats.visibleCount, '# of rendered layers').toBe(1); // test-primitive-visible
+});
+
+test('LayersPass#viewParameters', () => {
+  const drawCalls = [];
+  const layers = [
+    new RecordingLayer({
+      id: 'test',
+      parameters: {
+        depthWriteEnabled: true,
+        blend: false
+      },
+      onDraw: drawCall => drawCalls.push(drawCall)
+    })
+  ];
+
+  const layerManager = new LayerManager(device, {
+    deck: {
+      props: {
+        parameters: {
+          blend: true,
+          depthWriteEnabled: false,
+          depthCompare: 'less',
+          blendColorSrcFactor: 'src-alpha'
+        }
+      }
+    } as any
+  });
+  const layersPass = new DrawLayersPass(device);
+  layerManager.setLayers(layers);
+
+  const views = {
+    A: new MapView({
+      id: 'A',
+      parameters: {
+        depthCompare: 'always',
+        cullMode: 'back'
+      }
+    }),
+    B: new MapView({
+      id: 'B',
+      parameters: {
+        depthCompare: 'greater',
+        cullMode: 'none'
+      }
+    })
+  };
+
+  layersPass.render({
+    viewports: [new Viewport({id: 'A'}), new Viewport({id: 'B'})],
+    views,
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  expect(drawCalls, 'layer drawn once in each view').toHaveLength(2);
+  expect(drawCalls[0].viewport, 'first viewport id').toBe('A');
+  expect(drawCalls[0].parameters, 'view parameters are merged for view A').toMatchObject({
+    blend: false,
+    depthWriteEnabled: true,
+    depthCompare: 'always',
+    blendColorSrcFactor: 'src-alpha',
+    cullMode: 'back'
+  });
+  expect(drawCalls[1].viewport, 'second viewport id').toBe('B');
+  expect(drawCalls[1].parameters, 'view parameters are merged for view B').toMatchObject({
+    blend: false,
+    depthWriteEnabled: true,
+    depthCompare: 'greater',
+    blendColorSrcFactor: 'src-alpha',
+    cullMode: 'none'
+  });
 });
 
 test('LayersPass#GLViewport', () => {
