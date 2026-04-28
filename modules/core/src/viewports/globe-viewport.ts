@@ -54,7 +54,7 @@ export type GlobeViewportOptions = {
   orthographic?: boolean;
   /** Camera fovy in degrees. If provided, overrides `altitude` */
   fovy?: number;
-  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.5` */
+  /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default `0.01` */
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1` */
   farZMultiplier?: number;
@@ -78,9 +78,9 @@ export default class GlobeViewport extends Viewport {
     const {
       longitude = 0,
       zoom = 0,
-      // Matches Maplibre defaults
-      // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
-      nearZMultiplier = 0.5,
+      // Keep the near plane close enough for terrain flythroughs.
+      // Higher values clip nearby elevated mesh peaks when the camera is low.
+      nearZMultiplier = 0.01,
       farZMultiplier = 1,
       resolution = 10
     } = opts;
