@@ -29,6 +29,10 @@ import type {
 import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
 
 const DUMMY_DATA = [1];
+const TILE_OVERLAP_PIXELS = 1;
+const MIN_TERRAIN_MESH_MAX_ERROR = 1;
+const MAX_LATITUDE = 90;
+const MAX_LONGITUDE = 180;
 
 const defaultProps: DefaultProps<TerrainLayerProps> = {
   ...TileLayer.defaultProps,
@@ -79,6 +83,28 @@ type TerrainLoadProps = {
 };
 
 type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
+
+function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: boolean): Bounds {
+  const xOverlap = Math.abs(bounds[2] - bounds[0]) * (TILE_OVERLAP_PIXELS / tileSize);
+  const yOverlap = Math.abs(bounds[3] - bounds[1]) * (TILE_OVERLAP_PIXELS / tileSize);
+
+  if (clampLngLat) {
+    return [
+      Math.max(bounds[0] - xOverlap, -MAX_LONGITUDE),
+      Math.max(bounds[1] - yOverlap, -MAX_LATITUDE),
+      Math.min(bounds[2] + xOverlap, MAX_LONGITUDE),
+      Math.min(bounds[3] + yOverlap, MAX_LATITUDE)
+    ];
+  }
+
+  return [bounds[0] - xOverlap, bounds[1] - yOverlap, bounds[2] + xOverlap, bounds[3] + yOverlap];
+}
+
+function getEffectiveMeshMaxError(meshMaxError: number): number {
+  return Number.isFinite(meshMaxError) && meshMaxError > 0
+    ? meshMaxError
+    : MIN_TERRAIN_MESH_MAX_ERROR;
+}
 
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps = _TerrainLayerProps &
@@ -169,14 +195,15 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     if (!elevationData) {
       return null;
     }
+    const effectiveMeshMaxError = getEffectiveMeshMaxError(meshMaxError);
     let loadOptions = this.getLoadOptions();
     loadOptions = {
       ...loadOptions,
       terrain: {
-        skirtHeight: this.state.isTiled ? meshMaxError * 2 : 0,
+        skirtHeight: this.state.isTiled ? effectiveMeshMaxError * 2 : 0,
         ...loadOptions?.terrain,
         bounds,
-        meshMaxError,
+        meshMaxError: effectiveMeshMaxError,
         elevationDecoder
       }
     };
@@ -203,10 +230,15 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       topRight = [bbox.right, bbox.top];
     }
     const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
+    const overlappedBounds = getOverlappedBounds(
+      bounds,
+      this.props.tileSize,
+      Boolean(viewport.resolution && viewport.resolution > 0)
+    );
 
     const terrain = this.loadTerrain({
       elevationData: dataUrl,
-      bounds,
+      bounds: overlappedBounds,
       elevationDecoder,
       meshMaxError,
       signal
@@ -242,7 +274,15 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
     const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
-    const coordinateSystem = isGlobe ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN;
+    const hasLngLatBounds =
+      mesh &&
+      'header' in mesh &&
+      (mesh.header as MeshAttributes['header'])?.boundingBox.every(
+        ([x, y]) =>
+          x >= -MAX_LONGITUDE && x <= MAX_LONGITUDE && y >= -MAX_LATITUDE && y <= MAX_LATITUDE
+      );
+    const coordinateSystem =
+      isGlobe && hasLngLatBounds ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN;
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,
