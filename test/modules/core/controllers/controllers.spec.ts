@@ -35,6 +35,39 @@ test('MapController#inertia', async () => {
   });
 });
 
+test('MapController clamps noisy pinch zoom-out frames', () => {
+  const controller = createTestController({
+    view: new MapView({controller: true}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  const makePinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    type,
+    offsetCenter: {x: 50, y: 50},
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  });
+
+  controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 0.01, 16) as any);
+  controller.handleEvent(makePinchEvent('pinchend', 0.001, 17) as any);
+
+  expect(
+    controller.props.zoom,
+    'a noisy pinch-out should not jump more than the smoothed move plus capped inertia'
+  ).toBeGreaterThanOrEqual(9.47);
+});
+
 test('GlobeController', async () => {
   await testController(
     GlobeView,
