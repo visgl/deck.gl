@@ -80,8 +80,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
   }
 
   resetViewState(viewState?: ViewStateMap<ViewsT>) {
-    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
-    for (const viewId of viewIds) {
+    for (const viewId of this.viewIds) {
       const nextViewState = {
         ...(viewState?.[viewId] ?? viewState)
         // only works for geospatial?

@@ -148,11 +148,11 @@ function evaluateViews(root: ManagedViewLayout): View[] {
 }
 
 /** Properties for the SplitterWidget */
-export type SplitterWidgetProps = WidgetProps & {
+export type SplitterWidgetProps<ViewsT extends View[] = View[]> = WidgetProps & {
   /** Stacking views descriptor */
   viewLayout: ViewLayout;
   /** Callback invoked when the splitter is dragged with the new split value */
-  onChange?: (views: View[]) => void;
+  onChange?: (views: ViewsT) => void;
   /** Callback invoked when dragging starts */
   onDragStart?: () => void;
   /** Callback invoked when dragging ends */
@@ -164,7 +164,10 @@ export type SplitterWidgetProps = WidgetProps & {
  * across the deck.gl canvas. It positions itself based on the split percentage
  * of the first view and provides callbacks when dragged.
  */
-export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
+export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
+  SplitterWidgetProps<ViewsT>,
+  ViewsT
+> {
   static defaultProps: Required<SplitterWidgetProps> = {
     ...Widget.defaultProps,
     id: 'splitter-widget',
@@ -178,17 +181,17 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
   placement = 'fill' as const;
   viewLayouts!: ManagedViewLayout[];
   /** evaluated from the current viewLayouts */
-  views!: View[];
+  views!: ViewsT;
   /** views set in the last update */
-  lastViews?: View[];
+  lastViews?: ViewsT;
   needsUpdate = true;
 
-  constructor(props: SplitterWidgetProps) {
+  constructor(props: SplitterWidgetProps<ViewsT>) {
     super(props);
     this.viewLayouts = parseViewLayout(this.props.viewLayout);
   }
 
-  setProps(props: Partial<SplitterWidgetProps>) {
+  setProps(props: Partial<SplitterWidgetProps<ViewsT>>) {
     if (props.viewLayout && !deepEqual(props.viewLayout, this.props.viewLayout, -1)) {
       this.viewLayouts = parseViewLayout(props.viewLayout);
       this.views = undefined!;
@@ -207,9 +210,9 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
   updateHTML() {
     if (!this.views) {
       // viewLayouts has changed, re-evaluate
-      this.views = evaluateViews(this.viewLayouts[0]);
+      this.views = evaluateViews(this.viewLayouts[0]) as ViewsT;
       // we send a copy to the callback so that externally set views can be differentiated from internal
-      this.props.onChange(this.views.slice());
+      this.props.onChange(this.views.slice() as ViewsT);
     }
     // This method is called inside deck.setProps > widgetManager.setProps > widget.setProps
     // Calling deck.setProps immediately would cause infinite loop
@@ -237,9 +240,9 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
   private onChange(newSplit: number, layout: ManagedViewLayout) {
     layout.split = newSplit;
     // layout has updated, re-evaluate
-    this.views = evaluateViews(this.viewLayouts[0]);
+    this.views = evaluateViews(this.viewLayouts[0]) as ViewsT;
     // we send a copy to the callback so that externally set views can be differentiated from internal
-    this.props.onChange(this.views.slice());
+    this.props.onChange(this.views.slice() as ViewsT);
     this.doUpdate();
   }
 

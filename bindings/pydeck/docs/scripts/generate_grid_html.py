@@ -1,11 +1,11 @@
 """Generates HTML grid landing page for gallery examples"""
+
 import os
 import glob
 
 from const import EXAMPLE_GLOB, HTML_DIR
 from templates import HTML_TEMPLATE
 from utils import to_presentation_name, to_snake_case_string
-
 
 here = os.path.dirname(os.path.abspath(__file__))
 gallery_examples = sorted([to_snake_case_string(file_name=gallery_example) for gallery_example in EXAMPLE_GLOB])

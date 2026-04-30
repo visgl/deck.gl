@@ -6,10 +6,16 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.9 Releases
 ------------
 
-0.9.2 - Jan XX 2025
+0.9.2 - Apr 16 2026
 ^^^^^^^^^^^^^^^^^^^
-- Update to deck.gl v9.1
+- Update to deck.gl v9.2 (#9895)
 - Add support for deck.gl widgets (#9342)
+- Support custom widgets via custom_libraries (#9745)
+- Support Maplibre including Globe projection (#9896)
+- Set default map style if not provided (#9419)
+- Add show_error flag to display error in cell output (#9430)
+- Fix pandas 3.x compatibility (#9988)
+- Migrate dev setup, CI, and ReadTheDocs to uv (#10186)
 
 0.9.1 - May 10 2024
 ^^^^^^^^^^^^^^^^^^^

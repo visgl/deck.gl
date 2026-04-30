@@ -50,7 +50,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {_ScreenshotWidget as ScreenshotWidget} from '@deck.gl/react';
+import DeckGL, {ScreenshotWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {

@@ -126,6 +126,13 @@ The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
+#### `zoomAxis` (string, optional)
+
+* Default: `'all'`
+
+Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
+Only effective if the current view is an [OrthographicView](../core/orthographic-view.md).
+
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
 * Default: `'Zoom In'`
@@ -157,6 +164,8 @@ Callback when zoom buttons are clicked. Called for each viewport that will be zo
 - `viewId`: The view being zoomed
 - `delta`: Zoom direction (+1 for zoom in, -1 for zoom out)
 - `zoom`: The new zoom level
+- `zoomX`: The new zoom level on X axis, if used with an `OrthographicView`.
+- `zoomY`: The new zoom level on Y axis, if used with an `OrthographicView`.
 
 ## Styles
 

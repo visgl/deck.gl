@@ -10,7 +10,6 @@ https://sketchfab.com/3d-models/choshi-otaki-falls-oirase-valley-aomori-ea1ef9e7
 import pydeck
 import pandas as pd
 
-
 DATA_URL = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/small_waterfall.csv"
 df = pd.read_csv(DATA_URL)
 
