@@ -21,7 +21,6 @@ const NO_TRANSITION_PROPS = {
 const DEFAULT_INERTIA = 300;
 const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
 const MAX_PINCH_ZOOM_DELTA_PER_EVENT = 0.18;
-const MAX_PINCH_INERTIA_ZOOM_DELTA = 0.35;
 
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
@@ -655,9 +654,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     const newControllerState = this.controllerState.zoomStart({pos}).rotateStart({pos});
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     pinchEventWorkaround._startPinchRotation = event.rotation;
-    pinchEventWorkaround._lastPinchEvent = event;
     pinchEventWorkaround._smoothedPinchScaleLog = 0;
-    pinchEventWorkaround._lastPinchScaleLog = 0;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
@@ -679,7 +676,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       const previousScaleLog = pinchEventWorkaround._smoothedPinchScaleLog ?? 0;
       const smoothedScaleLog =
         previousScaleLog + clampPinchZoomDelta(rawScaleLog - previousScaleLog);
-      pinchEventWorkaround._lastPinchScaleLog = previousScaleLog;
       pinchEventWorkaround._smoothedPinchScaleLog = smoothedScaleLog;
       newControllerState = newControllerState.zoom({pos, scale: Math.pow(2, smoothedScaleLog)});
     }
@@ -696,7 +692,6 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       isZooming: this.touchZoom,
       isRotating: this.touchRotate
     });
-    pinchEventWorkaround._lastPinchEvent = event;
     return true;
   }
 
@@ -704,51 +699,15 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.isDragging()) {
       return false;
     }
-    const {inertia} = this;
-    const {_lastPinchEvent} = pinchEventWorkaround;
-    if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
-      const pos = this.getCenter(event);
-      let newControllerState = this.controllerState.rotateEnd();
-      const z = pinchEventWorkaround._smoothedPinchScaleLog ?? Math.log2(event.scale);
-      const lastZ = pinchEventWorkaround._lastPinchScaleLog ?? Math.log2(_lastPinchEvent.scale);
-      const deltaTime = Math.max(16, event.deltaTime - _lastPinchEvent.deltaTime);
-      const velocityZ =
-        (z - lastZ) / deltaTime;
-      const inertiaZoomDelta = Math.max(
-        -MAX_PINCH_INERTIA_ZOOM_DELTA,
-        Math.min(MAX_PINCH_INERTIA_ZOOM_DELTA, (velocityZ * inertia) / 2)
-      );
-      const endScale = Math.pow(2, z + inertiaZoomDelta);
-      newControllerState = newControllerState.zoom({pos, scale: endScale}).zoomEnd();
-
-      this.updateViewport(
-        newControllerState,
-        {
-          ...this._getTransitionProps({around: pos}),
-          transitionDuration: inertia,
-          transitionEasing: INERTIA_EASING
-        },
-        {
-          isDragging: false,
-          isPanning: this.touchZoom,
-          isZooming: this.touchZoom,
-          isRotating: false
-        }
-      );
-      this.blockEvents(inertia);
-    } else {
-      const newControllerState = this.controllerState.zoomEnd().rotateEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isPanning: false,
-        isZooming: false,
-        isRotating: false
-      });
-    }
+    const newControllerState = this.controllerState.zoomEnd().rotateEnd();
+    this.updateViewport(newControllerState, null, {
+      isDragging: false,
+      isPanning: false,
+      isZooming: false,
+      isRotating: false
+    });
     pinchEventWorkaround._startPinchRotation = null;
-    pinchEventWorkaround._lastPinchEvent = null;
     pinchEventWorkaround._smoothedPinchScaleLog = null;
-    pinchEventWorkaround._lastPinchScaleLog = null;
     return true;
   }
 
