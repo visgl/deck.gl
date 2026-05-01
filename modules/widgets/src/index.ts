@@ -15,6 +15,11 @@ export {GeocoderWidget as _GeocoderWidget} from './geocoder-widget';
 // View widgets
 export {FullscreenWidget} from './fullscreen-widget';
 export {SplitterWidget as _SplitterWidget} from './splitter-widget';
+export {
+  buildViewsFromViewLayout,
+  type CompiledDeckViews
+} from './view-layout/build-views-from-view-layout';
+export type {ViewLayout} from './view-layout/view-layout';
 
 // Information widgets
 export {InfoWidget} from './info-widget';

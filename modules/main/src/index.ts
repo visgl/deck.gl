@@ -151,6 +151,7 @@ export {
   // View widgets
   FullscreenWidget,
   _SplitterWidget,
+  buildViewsFromViewLayout,
   // Information widgets
   InfoWidget,
   PopupWidget,
@@ -244,6 +245,8 @@ export type {
   StatsWidgetProps,
   ContextMenuWidgetProps,
   SplitterWidgetProps,
+  CompiledDeckViews,
+  ViewLayout,
   TimelineWidgetProps,
   SelectorWidgetProps,
   GimbalWidgetProps,
