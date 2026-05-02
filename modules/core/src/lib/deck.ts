@@ -143,7 +143,8 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * result into one `PresentationContext` per canvas entry. String entries are resolved as
    * DOM element ids. Views without an explicit `canvasId` render into the first configured canvas.
    *
-   * This prop is not compatible with `gl`.
+   * This prop is not compatible with `gl`. Deck diffs this array on `setProps` and creates,
+   * reuses, or destroys presentation targets as the configured canvases change.
    */
   canvases?: (string | HTMLCanvasElement)[];
 

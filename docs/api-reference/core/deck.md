@@ -54,6 +54,8 @@ Presentation canvases to use for multi-canvas rendering.
 
 When this prop is defined, Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
 
+Unlike the other initialization settings in this section, `canvases` is maintained when updated with `setProps()`. Deck diffs the array and creates, reuses, or destroys presentation targets as needed.
+
 Notes:
 
 * This prop is not compatible with `gl`.
