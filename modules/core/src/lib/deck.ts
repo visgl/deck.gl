@@ -1193,15 +1193,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.canvas = this._canvasManager.canvas;
   }
 
+  /** Return per-canvas CSS pixel sizes used to resolve view layouts. */
   private _getCanvasMetrics(): Record<string, {width: number; height: number}> {
     return this._isMultiCanvasMode()
       ? this._canvasManager.getMetrics(this.width, this.height)
       : {[this._getDefaultCanvasId()]: {width: this.width, height: this.height}};
   }
+  /** Resolve the presentation canvas id that produced a deck-managed DOM event. */
   private _getCanvasIdFromEvent(event?: {rootElement?: HTMLElement | null} | null): string | undefined {
     return this._canvasManager.getCanvasIdFromEvent(event?.rootElement);
   }
 
+  /** Look up the presentation target for a canvas id in multi-canvas mode. */
   private _getCanvasTarget(canvasId?: string): CanvasTarget | null {
     if (!this._isMultiCanvasMode()) {
       return null;
@@ -1209,6 +1212,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this._canvasManager.getTarget(canvasId);
   }
 
+  /** Resize the offscreen default canvas context to match a presentation target. */
   private _resizeForCanvasTarget(canvasId?: string): void {
     const target = this._getCanvasTarget(canvasId);
     if (!target || !this.device?.canvasContext) {
@@ -1759,6 +1763,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
           viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
         );
         if (!canvasViewports.length) {
+          this._clearCanvasTarget(canvasId, `screen-${canvasId}`);
           continue;
         }
 
@@ -1794,6 +1799,29 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+  }
+
+  /** Clear and present a canvas that currently has no mapped viewports. */
+  private _clearCanvasTarget(canvasId: string, renderPassId: string): void {
+    const target = this._canvasTargets[canvasId];
+    if (!target || !this.device?.canvasContext) {
+      return;
+    }
+
+    this._resizeForCanvasTarget(canvasId);
+    const framebuffer = target.presentationContext.getCurrentFramebuffer();
+    const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+    const renderPass = this.device.beginRenderPass({
+      id: renderPassId,
+      framebuffer,
+      parameters: {viewport: [0, 0, width, height]},
+      clearColor: [0, 0, 0, 0],
+      clearDepth: 1,
+      clearStencil: 0
+    });
+    renderPass.end();
+    this.device.submit();
+    target.presentationContext.present();
   }
 
   // Callbacks

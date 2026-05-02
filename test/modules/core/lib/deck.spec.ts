@@ -630,6 +630,73 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
   deck.finalize();
 });
 
+webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
+  const canvasA = document.createElement('canvas');
+  canvasA.id = 'deck-test-orphan-canvas-a';
+  canvasA.width = 64;
+  canvasA.height = 64;
+  document.body.appendChild(canvasA);
+
+  const canvasB = document.createElement('canvas');
+  canvasB.id = 'deck-test-orphan-canvas-b';
+  canvasB.width = 64;
+  canvasB.height = 64;
+  document.body.appendChild(canvasB);
+
+  const deck = new Deck({
+    width: 64,
+    height: 64,
+    canvases: [canvasA, canvasB],
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 1},
+      right: {longitude: 10, latitude: 10, zoom: 1}
+    },
+    views: [
+      new MapView({id: 'left', canvasId: 'deck-test-orphan-canvas-a'}),
+      new MapView({id: 'right', canvasId: 'deck-test-orphan-canvas-b'})
+    ],
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  // @ts-expect-error testing private state
+  const targetA = deck._canvasTargets['deck-test-orphan-canvas-a'];
+  // @ts-expect-error testing private state
+  const targetB = deck._canvasTargets['deck-test-orphan-canvas-b'];
+  const presentCalls = {a: 0, b: 0};
+  const renderCalls: string[][] = [];
+  const originalPresentA = targetA.presentationContext.present.bind(targetA.presentationContext);
+  const originalPresentB = targetB.presentationContext.present.bind(targetB.presentationContext);
+  const originalRenderLayers = deck.deckRenderer.renderLayers.bind(deck.deckRenderer);
+
+  targetA.presentationContext.present = () => {
+    presentCalls.a++;
+    originalPresentA();
+  };
+  targetB.presentationContext.present = () => {
+    presentCalls.b++;
+    originalPresentB();
+  };
+  // @ts-expect-error test override
+  deck.deckRenderer.renderLayers = opts => {
+    renderCalls.push(opts.viewports.map(viewport => viewport.id));
+    originalRenderLayers(opts);
+  };
+
+  deck.setProps({
+    views: [new MapView({id: 'left', canvasId: 'deck-test-orphan-canvas-a'})]
+  });
+  await waitForRender(deck);
+
+  expect(renderCalls).toEqual([['left']]);
+  expect(presentCalls).toEqual({a: 1, b: 1});
+
+  deck.finalize();
+  canvasA.remove();
+  canvasB.remove();
+});
+
 test('Deck#async picking', async () => {
   const deck = new Deck({
     device,

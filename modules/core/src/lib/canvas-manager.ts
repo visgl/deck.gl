@@ -79,6 +79,10 @@ export default class CanvasManager {
     this._eventRootToCanvasId = new WeakMap();
   }
 
+  /**
+   * Diff the configured presentation canvases against the current registry and create, reuse,
+   * or destroy canvas targets as needed.
+   */
   sync(props: {
     device: Device;
     canvases?: (string | HTMLCanvasElement)[];
