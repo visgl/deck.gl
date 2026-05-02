@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
+Release date: In development
+
 ### Views
 
 - Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.
@@ -11,6 +13,17 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 ### Performance
 
 - Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, instead using shader builtins `instance_index` / `gl_InstanceID`, reducing memory usage and initialization times.
+
+### Multi-canvas rendering
+
+deck.gl can now render a single `Deck` or `DeckGL` instance into multiple HTML canvases.
+
+- New [`Deck.canvases`](./api-reference/core/deck.md#canvases) and [`DeckGL.canvases`](./api-reference/react/deckgl.md#canvases) props create one presentation target per canvas while keeping one shared layer stack and one shared offscreen device context.
+- Views can opt into a specific target with [`View.canvasId`](./api-reference/core/view.md#canvasid). Controllers, picking, and layout resolution are all scoped to that canvas.
+- In React, `View` children such as `react-map-gl` maps automatically render into the correct canvas host, so basemaps stay view-bound without a separate canvas API.
+- Unused canvases are now explicitly cleared when views move or are removed, avoiding stale frames during dynamic layouts.
+
+There is a new multi-canvas cities example in the repository that shows four independently navigable city maps with shared scatterplot interactions and a toggle between `react-map-gl` basemaps and `BasemapLayer` overlays: [test/apps/multi-canvas-cities](https://github.com/visgl/deck.gl/tree/master/test/apps/multi-canvas-cities).
 
 ## deck.gl v9.3
 
