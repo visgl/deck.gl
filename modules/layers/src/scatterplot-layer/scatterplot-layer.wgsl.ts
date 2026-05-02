@@ -28,6 +28,7 @@ struct ConstantAttributeUniforms {
  instanceFillColors: vec4<f32>,
  instanceLineColors: vec4<f32>,
  instancePickingColors: vec3<f32>,
+ instancePixelOffset: vec2<f32>,
 
  instancePositionsConstant: i32,
  instancePositions64LowConstant: i32,
@@ -35,7 +36,8 @@ struct ConstantAttributeUniforms {
  instanceLineWidthsConstant: i32,
  instanceFillColorsConstant: i32,
  instanceLineColorsConstant: i32,
- instancePickingColorsConstant: i32
+ instancePickingColorsConstant: i32,
+ instancePixelOffsetConstant: i32
 };
 
 @group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
@@ -47,7 +49,8 @@ struct ConstantAttributes {
   instanceLineWidths: f32,
   instanceFillColors: vec4<f32>,
   instanceLineColors: vec4<f32>,
-  instancePickingColors: vec3<f32>
+  instancePickingColors: vec3<f32>,
+  instancePixelOffset: vec2<f32>
 };
 
 const constants = ConstantAttributes(
@@ -57,7 +60,8 @@ const constants = ConstantAttributes(
   0.0,
   vec4<f32>(0.0, 0.0, 0.0, 1.0),
   vec4<f32>(0.0, 0.0, 0.0, 1.0),
-  vec3<f32>(0.0)
+  vec3<f32>(0.0),
+  vec2<f32>(0.0)
 );
 
 struct Attributes {
@@ -71,6 +75,7 @@ struct Attributes {
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
   @location(7) instancePickingColors: vec3<f32>,
+  @location(8) instancePixelOffset: vec2<f32>
 };
 
 struct Varyings {
@@ -127,13 +132,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   if (scatterplot.billboard != 0) {
     varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0)); // TODO , geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
-    let offset = attributes.positions; // * edgePadding * varyings.outerRadiusPixels;
+    var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
+    offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
-    varyings.position.x = clipPixels.x;
-    varyings.position.y = clipPixels.y;
+    varyings.position = vec4<f32>(varyings.position.x + clipPixels.x, varyings.position.y + clipPixels.y, varyings.position.z, varyings.position.w);
   } else {
-    let offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
+    var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
+    offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
     varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset); // TODO , geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
