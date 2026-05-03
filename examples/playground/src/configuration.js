@@ -4,7 +4,15 @@
 
 // This configuration object determines which deck.gl classes are accessible in Playground
 
-import {MapView, FirstPersonView, OrbitView, OrthographicView, View, Layer} from '@deck.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  MapView,
+  FirstPersonView,
+  OrbitView,
+  OrthographicView,
+  View,
+  Layer
+} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
@@ -22,6 +30,15 @@ import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
 // Note: deck already registers JSONLoader...
 registerLoaders([CSVLoader, DracoWorkerLoader]);
+
+/**
+ * Creates a layer filter that renders layers whose id starts with the active viewport id.
+ *
+ * @returns deck.gl `layerFilter` callback for view-scoped layer ids.
+ */
+function layerIdStartsWithViewportId() {
+  return ({layer, viewport}) => layer.id.startsWith(`${viewport.id}-`);
+}
 
 export default {
   // Classes that should be instantiatable by JSON converter
@@ -41,12 +58,19 @@ export default {
   ),
 
   // Functions that should be executed by JSON converter
-  functions: {...CARTO_SOURCES, colorBins, colorCategories, colorContinuous},
+  functions: {
+    ...CARTO_SOURCES,
+    colorBins,
+    colorCategories,
+    colorContinuous,
+    layerIdStartsWithViewportId
+  },
 
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    GL: GLConstants
+    GL: GLConstants,
+    COORDINATE_SYSTEM
   },
 
   // Constants that should be resolved with the provided values by JSON converter

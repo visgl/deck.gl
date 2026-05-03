@@ -104,6 +104,44 @@ compiled = buildViewsFromViewLayout({
 });
 ```
 
+## Playground JSON
+
+The deck.gl website playground supports a playground-local `viewLayout` field. JSON layout nodes use `layout` as the discriminator to avoid confusing layout nodes with `@@type` class instantiation. Converted deck.gl `View` instances remain the leaf nodes.
+
+```json
+{
+  "viewLayout": {
+    "layout": "column",
+    "children": [
+      {"@@type": "OrthographicView", "id": "header", "height": 64},
+      {
+        "layout": "row",
+        "initialSplit": 0.22,
+        "children": [
+          {"@@type": "OrthographicView", "id": "sidebar"},
+          {
+            "layout": "overlay",
+            "children": [
+              {"@@type": "OrthographicView", "id": "main"},
+              {
+                "@@type": "OrthographicView",
+                "id": "minimap",
+                "x": "calc(100% - 196px)",
+                "y": "calc(100% - 136px)",
+                "width": 180,
+                "height": 120
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+This JSON shape is playground-specific. The TypeScript API still uses `ViewLayout` objects with `type: 'row' | 'column' | 'overlay' | 'spacer'`.
+
 ## Types
 
 ### `ViewLayout`

@@ -251,3 +251,31 @@ test('SplitterWidget - controlled', async () => {
   expect(views[0].props.width).toBe('25%');
   expect(views[1].props.width).toBe('75%');
 });
+
+test('SplitterWidget - externally managed split', async () => {
+  const onSplitChange = vi.fn();
+  const widget = new SplitterWidget({
+    id: 'sidebar-main-splitter',
+    split: {
+      id: 'sidebar-main',
+      orientation: 'horizontal',
+      x: 0,
+      y: 10,
+      width: 100,
+      height: 90,
+      split: 0.25,
+      minSplit: 0.1,
+      maxSplit: 0.5
+    },
+    onSplitChange
+  });
+  expect(widget.id).toBe('sidebar-main-splitter');
+  expect(widget.viewLayouts).toHaveLength(0);
+
+  testInstance = new WidgetTester({
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  expect(testInstance.findElements('.deck-widget-splitter-handle--horizontal')).toHaveLength(1);
+});
