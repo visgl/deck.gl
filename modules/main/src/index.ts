@@ -245,6 +245,7 @@ export type {
   StatsWidgetProps,
   ContextMenuWidgetProps,
   SplitterWidgetProps,
+  SplitterWidgetViewLayout,
   CompiledDeckViews,
   ViewLayout,
   TimelineWidgetProps,

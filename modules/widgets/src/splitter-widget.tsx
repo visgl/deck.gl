@@ -12,12 +12,12 @@ import {
   type View
 } from '@deck.gl/core';
 
-export type ViewLayout = {
+export type SplitterWidgetViewLayout = {
   /** Stacking orientation of the sub views */
   orientation: 'vertical' | 'horizontal';
   /** Initial instances that describe the sub views.
    * x, y, width and height of the views' props will be overwritten by the SplitterWidget as split changes. */
-  views: [view1: View | ViewLayout, view2: View | ViewLayout];
+  views: [view1: View | SplitterWidgetViewLayout, view2: View | SplitterWidgetViewLayout];
   /** The ratio of view1's share over the whole available height (vertical) or width (horizontal). Between 0-1.
    * @default 0.5
    */
@@ -50,10 +50,11 @@ type ManagedViewLayout = {
   height: number;
 };
 
-function parseViewLayout(root: ViewLayout): ManagedViewLayout[] {
+function parseViewLayout(root: SplitterWidgetViewLayout): ManagedViewLayout[] {
   const layoutsById: ManagedViewLayout[] = [];
-  const isViewLayout = (v: View | ViewLayout): v is ViewLayout => 'views' in v;
-  function createManagedViewLayout(l: ViewLayout): ManagedViewLayout {
+  const isViewLayout = (v: View | SplitterWidgetViewLayout): v is SplitterWidgetViewLayout =>
+    'views' in v;
+  function createManagedViewLayout(l: SplitterWidgetViewLayout): ManagedViewLayout {
     const id = layoutsById.length;
     const minSplit = l.minSplit ?? 0.05;
     const maxSplit = l.maxSplit ?? 0.95;
@@ -150,7 +151,7 @@ function evaluateViews(root: ManagedViewLayout): View[] {
 /** Properties for the SplitterWidget */
 export type SplitterWidgetProps<ViewsT extends View[] = View[]> = WidgetProps & {
   /** Stacking views descriptor */
-  viewLayout: ViewLayout;
+  viewLayout: SplitterWidgetViewLayout;
   /** Callback invoked when the splitter is dragged with the new split value */
   onChange?: (views: ViewsT) => void;
   /** Callback invoked when dragging starts */
