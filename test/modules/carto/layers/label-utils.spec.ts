@@ -3,7 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {createPointsFromLines, createPointsFromPolygons} from '@deck.gl/carto/layers/label-utils';
+import {
+  createPointsFromLines,
+  createPointsFromPolygons,
+  FEATURE_BBOX_PROP
+} from '@deck.gl/carto/layers/label-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 
 test('createPointsFromLines', () => {
@@ -473,4 +477,109 @@ test('createPointsFromLines - mixed uniqueIdProperty', () => {
     {name: 'line1', group: 'A'},
     {name: 'line3'}
   ]);
+});
+
+// Helper to create polygon data with optional feature bounding box property
+function createPolygonWithBbox(
+  positions: number[],
+  triangles: number[],
+  bbox?: [number, number, number, number]
+) {
+  const numVertices = positions.length / 2;
+  const properties: Record<string, unknown>[] = [{name: 'polygon1'}];
+  if (bbox) {
+    properties[0][FEATURE_BBOX_PROP] = bbox.join(',');
+  }
+  return {
+    type: 'Polygon' as const,
+    positions: {value: new Float32Array(positions), size: 2 as const},
+    polygonIndices: {value: new Uint32Array([0, numVertices]), size: 1 as const},
+    primitivePolygonIndices: {value: new Uint32Array([numVertices]), size: 1 as const},
+    triangles: {value: new Uint32Array(triangles), size: 1 as const},
+    featureIds: {value: new Uint32Array(numVertices).fill(0), size: 1 as const},
+    globalFeatureIds: {value: new Uint32Array(numVertices).fill(100), size: 1 as const},
+    numericProps: {},
+    properties,
+    fields: []
+  };
+}
+
+test('createPointsFromPolygons - uses feature bbox when provided', () => {
+  // Polygon clipped to tile [0,1] but full geometry bbox spans [-1, -1, 2, 2]
+  const polygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [-1, -1, 2, 2]
+  );
+
+  const tileBbox = {west: -1, south: -1, east: 2, north: 2};
+  const geoBbox = tileBbox;
+
+  const result = createPointsFromPolygons(polygons, tileBbox, {extruded: false}, geoBbox);
+
+  expect(result.positions.value.length, 'creates one label point').toBe(2);
+  // Center of bbox [-1,-1,2,2] = [0.5, 0.5]
+  expect(Array.from(result.positions.value), 'correct bbox center position').toEqual([0.5, 0.5]);
+  expect(result.properties[0].name, 'correct properties').toBe('polygon1');
+});
+
+test('createPointsFromPolygons - bbox with MVT coordinate conversion', () => {
+  // Simulate MVT tile: positions in [0,1] space, bbox in world coords
+  const polygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [-10, 40, -9, 41]
+  );
+
+  const mvtBbox = {west: 0, east: 1, south: 0, north: 1};
+  const geoBbox = {west: -10, south: 40, east: -9, north: 41};
+
+  const result = createPointsFromPolygons(polygons, mvtBbox, {extruded: false}, geoBbox);
+
+  expect(result.positions.value.length, 'creates one label point').toBe(2);
+  // Center of bbox in world = [-9.5, 40.5], converted to [0,1] tile space = [0.5, 0.5]
+  expect(result.positions.value[0], 'correct x in tile coords').toBeCloseTo(0.5);
+  expect(result.positions.value[1], 'correct y in tile coords').toBeCloseTo(0.5);
+});
+
+test('createPointsFromPolygons - bbox center outside tile is filtered', () => {
+  // Feature bbox center is at [5, 5], outside tile [-1,-1,2,2]
+  const polygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [4, 4, 6, 6]
+  );
+
+  const tileBbox = {west: -1, south: -1, east: 2, north: 2};
+  const result = createPointsFromPolygons(polygons, tileBbox, {extruded: false}, tileBbox);
+
+  expect(result.positions.value.length, 'no label for out-of-bounds bbox center').toBe(0);
+});
+
+test('createPointsFromPolygons - tiny bbox feature is filtered', () => {
+  // Feature bbox area is tiny relative to tile
+  const polygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [0, 0, 0.001, 0.001]
+  );
+
+  const tileBbox = {west: -1, south: -1, east: 2, north: 2};
+  const result = createPointsFromPolygons(polygons, tileBbox, {extruded: false}, tileBbox);
+
+  expect(result.positions.value.length, 'no label for tiny feature').toBe(0);
+});
+
+test('createPointsFromPolygons - falls back without bbox props', () => {
+  // No bbox props - should use existing centroid logic
+  const polygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3]
+  );
+
+  const tileBbox = {west: -1, south: -1, east: 2, north: 2};
+  const result = createPointsFromPolygons(polygons, tileBbox, {extruded: false}, tileBbox);
+
+  expect(result.positions.value.length, 'creates label from geometry').toBe(2);
+  expect(Array.from(result.positions.value), 'centroid from positions').toEqual([0.5, 0.5]);
 });
