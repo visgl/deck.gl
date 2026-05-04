@@ -271,15 +271,15 @@ export default class MVTLayer<
     props.autoHighlight = false;
 
     if (!this.context.viewport.resolution) {
-      if (this.context.viewport.isGeospatial) {
-        props.modelMatrix = modelMatrix;
-        props.coordinateOrigin = [xOffset, yOffset, 0];
-      } else {
+      if (props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
         const bbox = props.tile.bbox as NonGeoBoundingBox;
         props.modelMatrix = new Matrix4()
           .translate([bbox.left, bbox.top, 0])
           .scale([bbox.right - bbox.left, bbox.bottom - bbox.top, 1])
           .multiplyLeft(props.modelMatrix || Matrix4.IDENTITY);
+      } else {
+        props.modelMatrix = modelMatrix;
+        props.coordinateOrigin = [xOffset, yOffset, 0];
       }
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
       props.extensions = [...(props.extensions || []), new ClipExtension()];
