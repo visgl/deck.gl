@@ -30,6 +30,24 @@ import source from './point-cloud-layer.wgsl';
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 const DEFAULT_NORMAL = [0, 0, 1] as const;
 
+type LoadersGLAttribute = {
+  size: number;
+  value: ArrayBufferView;
+  type?: number;
+};
+
+export type LoadersGLPointCloudData = {
+  header: {
+    vertexCount: number;
+  };
+  attributes: {
+    POSITION?: LoadersGLAttribute;
+    NORMAL?: LoadersGLAttribute;
+    COLOR_0?: LoadersGLAttribute;
+    [key: string]: LoadersGLAttribute | undefined;
+  };
+};
+
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
@@ -70,7 +88,7 @@ export type PointCloudLayerProps<DataT = unknown> = _PointCloudLayerProps<DataT>
 
 /** Properties added by PointCloudLayer. */
 type _PointCloudLayerProps<DataT> = {
-  data: LayerDataSource<DataT>;
+  data: LayerDataSource<DataT> | LoadersGLPointCloudData;
   /**
    * The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`.
    * @default 'pixels'
