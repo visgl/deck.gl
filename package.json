@@ -18,7 +18,7 @@
     "modules/*"
   ],
   "scripts": {
-    "postinstall": "patch-package && npx playwright install chromium",
+    "postinstall": "npx playwright install chromium",
     "bootstrap": "yarn && ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "npm run clean && ocular-build && lerna run build",
@@ -62,7 +62,6 @@
     "@vitest/coverage-v8": "^4.0.18",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
-    "patch-package": "^8.0.1",
     "pixelmatch": "^7.1.0",
     "playwright": "^1.58.0",
     "pngjs": "^7.0.0",
