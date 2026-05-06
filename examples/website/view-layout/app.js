@@ -47,13 +47,18 @@ const VIEW_LAYOUT = {
       height: 64
     }),
     {
-      type: 'row',
+      orientation: 'horizontal',
       splitId: SIDEBAR_MAIN_SPLIT_ID,
       initialSplit: 0.22,
       minSplit: 0.12,
       maxSplit: 0.45,
-      children: [
-        new OrthographicView({id: 'sidebar', controller: false}),
+      views: [
+        new OrthographicView({
+          id: 'sidebar',
+          controller: false,
+          minPixels: 180,
+          maxPixels: 420
+        }),
         {
           type: 'overlay',
           children: [

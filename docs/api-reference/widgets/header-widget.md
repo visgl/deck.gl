@@ -38,8 +38,8 @@ Inherits the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 - `draggable` (`boolean`, optional) - whether the header bar moves the view. Default `false`.
 - `resizable` (`boolean`, optional) - whether to render a resize handle. Default `false`.
 - `resizeHandlePosition` (`'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'`, optional) - resize handle corner. Default `'bottom-right'`.
-- `containerRect` (`ViewLayoutRect`, required) - parent rectangle used to constrain drag and resize.
-- `viewRect` (`ViewLayoutRect`, required) - current resolved rectangle for the attached view.
+- `containerRect` (`{x, y, width, height}`, required) - parent rectangle used to constrain drag and resize.
+- `viewRect` (`{x, y, width, height}`, required) - current resolved rectangle for the attached view.
 - `margin` (`number`, optional) - minimum margin inside `containerRect`. Default `16`.
 - `minWidth`, `minHeight`, `maxWidth`, `maxHeight` (`number`, optional) - resize limits in pixels.
 - `onBoundsChange` (`Function`, required) - callback receiving updated `{x, y, width, height}` bounds.

@@ -73,6 +73,18 @@ const DEFAULT_MIN_WIDTH = 120;
 const DEFAULT_MIN_HEIGHT = 80;
 const DEFAULT_MAX_WIDTH = 360;
 const DEFAULT_MAX_HEIGHT = 260;
+const RESIZE_ICON_MARGINS: Record<ResizeHandlePosition, string> = {
+  'top-left': '2px 0 0 2px',
+  'top-right': '2px 2px 0 0',
+  'bottom-left': '0 0 2px 2px',
+  'bottom-right': '0 2px 2px 0'
+};
+const RESIZE_ICON_TRANSFORMS: Record<ResizeHandlePosition, string> = {
+  'top-left': 'rotate(180deg)',
+  'top-right': 'rotate(-90deg)',
+  'bottom-left': 'rotate(90deg)',
+  'bottom-right': 'none'
+};
 const RESIZE_HANDLE_PLACEMENTS: Record<ResizeHandlePosition, Partial<CSSStyleDeclaration>> = {
   'top-left': {
     top: '0',
@@ -518,8 +530,8 @@ function createResizeIcon(position: ResizeHandlePosition): SVGSVGElement {
   svg.setAttribute('stroke', 'currentColor');
   svg.setAttribute('stroke-linecap', 'round');
   svg.setAttribute('stroke-width', '1.35');
-  svg.style.margin = getResizeIconMargin(position);
-  svg.style.transform = getResizeIconTransform(position);
+  svg.style.margin = RESIZE_ICON_MARGINS[position];
+  svg.style.transform = RESIZE_ICON_TRANSFORMS[position];
 
   [
     {d: 'M11 1L4 8', opacity: '0.8'},
@@ -533,34 +545,4 @@ function createResizeIcon(position: ResizeHandlePosition): SVGSVGElement {
   });
 
   return svg;
-}
-
-function getResizeIconMargin(position: ResizeHandlePosition): string {
-  switch (position) {
-    case 'top-left':
-      return '2px 0 0 2px';
-    case 'top-right':
-      return '2px 2px 0 0';
-    case 'bottom-left':
-      return '0 0 2px 2px';
-    case 'bottom-right':
-      return '0 2px 2px 0';
-    default:
-      return '0';
-  }
-}
-
-function getResizeIconTransform(position: ResizeHandlePosition): string {
-  switch (position) {
-    case 'top-left':
-      return 'rotate(180deg)';
-    case 'top-right':
-      return 'rotate(-90deg)';
-    case 'bottom-left':
-      return 'rotate(90deg)';
-    case 'bottom-right':
-      return 'none';
-    default:
-      return 'none';
-  }
 }

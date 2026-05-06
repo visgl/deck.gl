@@ -25,7 +25,9 @@
           {
             "@@type": "OrthographicView",
             "id": "sidebar",
-            "controller": false
+            "controller": false,
+            "minPixels": 180,
+            "maxPixels": 420
           },
           {
             "layout": "overlay",

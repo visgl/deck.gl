@@ -5,11 +5,4 @@ yarn
 yarn start
 ```
 
-For more information about the view layout helpers, check out the [documentation](../../../docs/api-reference/widgets/view-layout.md).
-
-## Widgets
-
-The example uses two experimental widgets exported from `@deck.gl/widgets`.
-
-- [`LabelWidget`](./label-widget.md) renders passive view labels and borders.
-- [`HeaderWidget`](./header-widget.md) renders a named header that can drag and resize a view.
+For more information, see the docs for [view layouts](../../../docs/api-reference/widgets/view-layout.md), [LabelWidget](../../../docs/api-reference/widgets/label-widget.md), and [HeaderWidget](../../../docs/api-reference/widgets/header-widget.md).
