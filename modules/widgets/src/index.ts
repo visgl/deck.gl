@@ -62,6 +62,7 @@ export type {ContentBounds, ScrollbarWidgetProps, ScrollbarDecoration} from './s
 
 export {LightTheme, DarkTheme, LightGlassTheme, DarkGlassTheme} from './themes';
 export type {DeckWidgetTheme} from './themes';
+export {updateWidgetTooltip} from './lib/widget-tooltip';
 
 // Experimental preact components
 export {ButtonGroup as _ButtonGroup, type ButtonGroupProps} from './lib/components/button-group';

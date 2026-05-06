@@ -41,6 +41,8 @@ Release date: TBD
 
 A new experimental `ViewLayout` system with a helper function `buildViewsFromViewLayout()` allows advanced nested and relative view layouts to be specified using a declarative layout tree.
 
+The new `updateWidgetTooltip` helper lets custom widgets opt into themed text tooltips.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026

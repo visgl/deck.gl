@@ -42,6 +42,7 @@ This module contains the following widgets:
 - [ScreenshotWidget](./screenshot-widget.md)
 - [StatsWidget](./stats-widget.md)
 - [ThemeWidget](./theme-widget.md)
+- [Widget Tooltip](./widget-tooltip.md)
 
 ## Installation
 
@@ -132,6 +133,8 @@ new Deck({
 ### Using with Multiple Views
 
 Widgets with UI (e.g. a button or panel) can be positioned relative to the deck.gl view they are controlling, via the `viewId` and `placement` props. See [WidgetProps](../core/widget.md#widgetprops).
+
+Custom widgets can opt into [themed text tooltips](./widget-tooltip.md) by calling `updateWidgetTooltip` from `@deck.gl/widgets` in `onAfterRenderHTML()`.
 
 The `viewId` controls which HTML container will mount to, and the `placement` prop will position it relative to the container it is in, like so:
 

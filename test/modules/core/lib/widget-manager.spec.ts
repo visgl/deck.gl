@@ -54,6 +54,27 @@ const mockDeckInstance = {
   height: 400
 };
 
+test('Widget#onAfterRenderHTML prop runs after protected hook', () => {
+  const calls: string[] = [];
+  class AfterRenderWidget extends TestWidget {
+    override onRenderHTML(): void {
+      calls.push('render');
+    }
+
+    protected override onAfterRenderHTML(): void {
+      calls.push('hook');
+    }
+  }
+
+  const widget = new AfterRenderWidget({
+    onAfterRenderHTML: () => calls.push('prop')
+  });
+  widget.rootElement = document.createElement('div');
+  widget.updateHTML();
+
+  expect(calls).toEqual(['render', 'hook', 'prop']);
+});
+
 test('WidgetManager#setProps', () => {
   const container = document.createElement('div');
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
