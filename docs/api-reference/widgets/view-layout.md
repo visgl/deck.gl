@@ -66,6 +66,8 @@ The layout tree is a discriminated union of plain objects:
 
 Raw deck.gl `View` instances are leaf nodes in `children`. Put layout-only `width`, `height`, `x`, and `y` props directly on the `View` when a leaf needs fixed sizing or overlay positioning.
 
+For split layouts, `ViewLayout` also accepts the `SplitterWidgetViewLayout`-style aliases `orientation: 'horizontal' | 'vertical'` and `views`. A horizontal orientation is equivalent to `type: 'row'`; a vertical orientation is equivalent to `type: 'column'`.
+
 `buildViewsFromViewLayout` compiles a layout tree into:
 
 - `views`: concrete deck.gl views with numeric `x`, `y`, `width`, and `height`.

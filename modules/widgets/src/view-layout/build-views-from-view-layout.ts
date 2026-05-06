@@ -4,12 +4,19 @@
 
 import {View} from '@deck.gl/core';
 
-import {assertViewLayout, isViewLayout} from './view-layout';
+import {
+  assertViewLayout,
+  getViewLayoutChildren,
+  getViewLayoutType,
+  isViewLayout
+} from './view-layout';
 
 import type {
   ViewLayoutChild,
   ColumnViewLayout,
   OverlayViewLayout,
+  ViewLayoutWithChildren,
+  SplitViewLayout,
   ViewLayoutInsets,
   ViewLayout,
   ViewLayoutLength,
@@ -166,22 +173,35 @@ function compileLayoutItem(args: {
 }): void {
   const {item} = args;
 
-  switch (item.type) {
+  const type = getViewLayoutType(item);
+  switch (type) {
     case 'row':
-      compileStackLayout({...args, item, orientation: 'row', children: item.children});
+      compileStackLayout({
+        ...args,
+        item: item as RowViewLayout | ColumnViewLayout | SplitViewLayout,
+        orientation: 'row',
+        children: getViewLayoutChildren(item as ViewLayoutWithChildren)
+      });
       return;
     case 'column':
-      compileStackLayout({...args, item, orientation: 'column', children: item.children});
+      compileStackLayout({
+        ...args,
+        item: item as RowViewLayout | ColumnViewLayout | SplitViewLayout,
+        orientation: 'column',
+        children: getViewLayoutChildren(item as ViewLayoutWithChildren)
+      });
       return;
     case 'overlay':
-      compileOverlayLayout({...args, item, children: item.children});
+      compileOverlayLayout({
+        ...args,
+        item: item as OverlayViewLayout,
+        children: getViewLayoutChildren(item as ViewLayoutWithChildren)
+      });
       return;
     case 'spacer':
       return;
-    default: {
-      const exhaustiveCheck: never = item;
-      throw new Error(`Unsupported view layout item: ${String(exhaustiveCheck)}`);
-    }
+    default:
+      throw new Error(`Unsupported view layout item: ${String(type)}`);
   }
 }
 
@@ -191,7 +211,7 @@ function compileLayoutItem(args: {
  * @param args - Stack orientation, children, and compilation accumulators.
  */
 function compileStackLayout(args: {
-  item: RowViewLayout | ColumnViewLayout;
+  item: RowViewLayout | ColumnViewLayout | SplitViewLayout;
   rect: ViewLayoutRect;
   rootRect: ViewLayoutRect;
   orientation: 'row' | 'column';
@@ -349,7 +369,7 @@ function compileLayoutChild(args: {
 function getStackChildAxisLengths(args: {
   children: Array<Exclude<ViewLayoutChild, null | false | undefined>>;
   containerAxisLength: number;
-  item: RowViewLayout | ColumnViewLayout;
+  item: RowViewLayout | ColumnViewLayout | SplitViewLayout;
   orientation: 'row' | 'column';
   splitValues: ViewLayoutSplitValues;
 }): Array<number | undefined> {
@@ -366,7 +386,7 @@ function getStackChildAxisLengths(args: {
 }
 
 function getStackSplitConfig(
-  item: RowViewLayout | ColumnViewLayout,
+  item: RowViewLayout | ColumnViewLayout | SplitViewLayout,
   splitValues: ViewLayoutSplitValues
 ): {splitId: string; split: number; minSplit: number; maxSplit: number} | null {
   if (!item.splitId) {

@@ -216,4 +216,28 @@ describe('buildViewsFromViewLayout', () => {
       maxSplit: 0.5
     });
   });
+
+  it('supports SplitterWidgetViewLayout-style orientation and views aliases', () => {
+    const layout = {
+      orientation: 'horizontal',
+      splitId: 'sidebar-main',
+      initialSplit: 0.25,
+      views: [new OrthographicView({id: 'sidebar'}), new OrthographicView({id: 'main'})]
+    } satisfies ViewLayout;
+
+    const compiled = buildViewsFromViewLayout({
+      layout,
+      width: 400,
+      height: 200,
+      splitValues: {'sidebar-main': 0.4}
+    });
+
+    expect(compiled.rectsById.sidebar).toEqual({x: 0, y: 0, width: 160, height: 200});
+    expect(compiled.rectsById.main).toEqual({x: 160, y: 0, width: 240, height: 200});
+    expect(compiled.splittersById['sidebar-main']).toMatchObject({
+      id: 'sidebar-main',
+      orientation: 'horizontal',
+      split: 0.4
+    });
+  });
 });

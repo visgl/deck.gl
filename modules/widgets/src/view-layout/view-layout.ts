@@ -5,7 +5,12 @@
 import {View} from '@deck.gl/core';
 
 /** Discriminated plain-object layout tree accepted by the view layout compiler. */
-export type ViewLayout = ColumnViewLayout | RowViewLayout | OverlayViewLayout | SpacerViewLayout;
+export type ViewLayout =
+  | ColumnViewLayout
+  | RowViewLayout
+  | SplitViewLayout
+  | OverlayViewLayout
+  | SpacerViewLayout;
 
 /** CSS-like length accepted by the view layout builder. */
 export type ViewLayoutLength = number | string;
@@ -65,6 +70,21 @@ export type ColumnViewLayout = ViewLayoutBaseProps &
     children: readonly ViewLayoutChild[];
   };
 
+/** Split layout container using the same orientation/views shape as SplitterWidgetViewLayout. */
+export type SplitViewLayout = ViewLayoutBaseProps &
+  ViewLayoutSplitProps & {
+    /** Split axis. Horizontal splits width; vertical splits height. */
+    orientation: 'horizontal' | 'vertical';
+    /** Ordered child items or raw deck views. */
+    views: readonly ViewLayoutChild[];
+  };
+
+export type ViewLayoutWithChildren =
+  | ColumnViewLayout
+  | RowViewLayout
+  | SplitViewLayout
+  | OverlayViewLayout;
+
 /** One overlay container that gives each child the same parent bounds. */
 export type OverlayViewLayout = ViewLayoutBaseProps & {
   /** Discriminator for overlay layout. */
@@ -80,6 +100,7 @@ export type SpacerViewLayout = ViewLayoutBaseProps & {
 };
 
 const VIEW_LAYOUT_TYPES = new Set(['row', 'column', 'overlay', 'spacer']);
+const VIEW_LAYOUT_ORIENTATIONS = new Set(['horizontal', 'vertical']);
 
 /** Returns true when a child is a plain view layout object instead of a deck.gl View. */
 export function isViewLayout(child: ViewLayoutChild): child is ViewLayout {
@@ -87,9 +108,22 @@ export function isViewLayout(child: ViewLayoutChild): child is ViewLayout {
     child &&
       typeof child === 'object' &&
       !(child instanceof View) &&
-      'type' in child &&
-      VIEW_LAYOUT_TYPES.has(String(child.type))
+      (('type' in child && VIEW_LAYOUT_TYPES.has(String(child.type))) ||
+        ('orientation' in child && VIEW_LAYOUT_ORIENTATIONS.has(String(child.orientation))))
   );
+}
+
+/** Resolves the canonical layout type for either the type/children or orientation/views syntax. */
+export function getViewLayoutType(item: ViewLayout): 'row' | 'column' | 'overlay' | 'spacer' {
+  if ('orientation' in item) {
+    return item.orientation === 'horizontal' ? 'row' : 'column';
+  }
+  return item.type;
+}
+
+/** Resolves child entries for either the type/children or orientation/views syntax. */
+export function getViewLayoutChildren(item: ViewLayoutWithChildren): readonly ViewLayoutChild[] {
+  return 'views' in item ? item.views : item.children;
 }
 
 /**
@@ -102,31 +136,35 @@ export function assertViewLayout(item: ViewLayout): void {
     throw new Error('ViewLayout must be an object.');
   }
 
-  switch (item.type) {
+  const type = getViewLayoutType(item);
+  switch (type) {
     case 'row':
     case 'column':
-    case 'overlay':
-      if (!Array.isArray(item.children)) {
-        throw new Error(`ViewLayout "${item.type}" requires a children array.`);
+    case 'overlay': {
+      const children = getViewLayoutChildren(item as ViewLayoutWithChildren);
+      if (!Array.isArray(children)) {
+        throw new Error('ViewLayout requires a children or views array.');
       }
       if (isSplitLayoutItem(item) && item.splitId) {
-        if (item.children.filter(Boolean).length !== 2) {
-          throw new Error(`ViewLayout "${item.type}" with splitId requires two children.`);
+        if (children.filter(Boolean).length !== 2) {
+          throw new Error('ViewLayout with splitId requires two children.');
         }
       }
-      item.children.forEach(assertViewLayoutChild);
+      children.forEach(assertViewLayoutChild);
       break;
+    }
     case 'spacer':
       break;
-    default: {
-      const exhaustiveCheck: never = item;
-      throw new Error(`Unsupported view layout item: ${String(exhaustiveCheck)}`);
-    }
+    default:
+      throw new Error(`Unsupported view layout item: ${String(type)}`);
   }
 }
 
-function isSplitLayoutItem(item: ViewLayout): item is RowViewLayout | ColumnViewLayout {
-  return item.type === 'row' || item.type === 'column';
+function isSplitLayoutItem(
+  item: ViewLayout
+): item is RowViewLayout | ColumnViewLayout | SplitViewLayout {
+  const type = getViewLayoutType(item);
+  return type === 'row' || type === 'column';
 }
 
 function assertViewLayoutChild(child: ViewLayoutChild): void {
