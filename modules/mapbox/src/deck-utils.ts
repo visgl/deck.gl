@@ -112,9 +112,6 @@ export function getDefaultParameters(map: Map, interleaved: boolean): Parameters
         blendAlphaOperation: 'add'
       }
     : {};
-  if (getProjection(map) === 'globe') {
-    result.cullMode = 'back';
-  }
   return result;
 }
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {defineConfig, configDefaults} from 'vitest/config';
+import {defineConfig, configDefaults, TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
@@ -85,7 +85,7 @@ const browserAliases = {
 };
 
 // Shared coverage configuration
-const coverageConfig = {
+const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
@@ -139,6 +139,7 @@ export default defineConfig({
   test: {
     // Globally exclude tape-based tests from all vitest projects
     exclude: [...configDefaults.exclude, '**/*.tape.spec.ts'],
+    coverage: coverageConfig,
     projects: [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation
@@ -153,8 +154,8 @@ export default defineConfig({
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [1]}
-        }
+          sequence: {groupOrder: 1}
+        },
       },
 
       // Scripts project - codemod and build tool tests
@@ -168,7 +169,7 @@ export default defineConfig({
           globals: false,
           testTimeout: 30000,
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [0]}
+          sequence: {groupOrder: 0}
         }
       },
 
@@ -204,9 +205,8 @@ export default defineConfig({
             screenshotFailures: false,
             commands: browserCommands
           },
-          coverage: coverageConfig,
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [2]}
+          sequence: {groupOrder: 2}
         }
       },
 
@@ -238,7 +238,7 @@ export default defineConfig({
             commands: browserCommands
           },
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [3]}
+          sequence: {groupOrder: 3}
         }
       },
 
@@ -275,7 +275,7 @@ export default defineConfig({
             commands: browserCommands
           },
           // Unique sequence order for running multiple projects together
-          sequence: {groupOrder: [4]}
+          sequence: {groupOrder: 4}
         }
       }
     ]

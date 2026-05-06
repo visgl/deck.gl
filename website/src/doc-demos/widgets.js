@@ -376,7 +376,6 @@ export function ScrollbarWidgetDemo() {
       new ScrollbarWidget({
         placement: 'bottom-right',
         viewId: 'ortho',
-        contentBounds,
         orientation: 'horizontal',
         captureWheel: true
       })

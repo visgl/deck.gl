@@ -183,7 +183,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
   /** An array of Widget instances to be added to the parent element. */
-  widgets?: Widget[];
+  widgets?: Widget<any, ViewsT>[];
 
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
