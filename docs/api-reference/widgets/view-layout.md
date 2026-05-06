@@ -53,7 +53,9 @@ export function App({width, height, layers}) {
 
 The returned `compiled.rectsById` map contains the same resolved rectangles keyed by view id. Use it when you need to position DOM overlays next to deck views, debug the generated layout, or scope non-layer UI to a view rectangle.
 
-The returned `compiled.splittersById` map contains splitter metadata for rows and columns that declare a `splitId`. Applications that store split values can pass them back into `buildViewsFromViewLayout` via `splitValues`.
+The returned `compiled.splittersById` map contains splitter metadata for rows and columns that declare a `splitId`. For two-child splits, the splitter id is exactly `splitId`. For three or more children, the compiler creates one splitter between each adjacent pair using generated ids such as `splitId-0`, `splitId-1`, and so on. Applications that store split values can pass them back into `buildViewsFromViewLayout` via `splitValues`.
+
+Layout items may also define `minPixels` and `maxPixels` to constrain their size in the parent stack axis. The compiler combines those pixel constraints with percentage-based `width` or `height` values, and with `minSplit` and `maxSplit` when returning splitter metadata.
 
 Use `viewPropsById` when an application needs to control layout-only bounds for a view without rebuilding the static layout tree. Override values use the same length syntax as authored view props.
 

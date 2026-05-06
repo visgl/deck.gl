@@ -77,7 +77,7 @@ export type ViewLayoutSplitter = {
   width: number;
   /** Height as a percentage of the deck canvas. */
   height: number;
-  /** Ratio of the first child over the split axis. */
+  /** Ratio of the split boundary over the split axis. */
   split: number;
   /** Minimum split ratio. */
   minSplit: number;
@@ -97,7 +97,24 @@ type LayoutAwareViewProps = {
   width?: ViewLayoutLength;
   /** Height expression resolved against the current parent bounds. */
   height?: ViewLayoutLength;
+  /** Minimum size in pixels along the parent stack axis. */
+  minPixels?: number;
+  /** Maximum size in pixels along the parent stack axis. */
+  maxPixels?: number;
 } & Record<string, unknown>;
+
+type StackChildAxisConstraints = {
+  explicitLength?: number;
+  minPixels: number;
+  maxPixels: number;
+};
+
+type StackSplitConfig = {
+  splitId: string;
+  split: number;
+  minSplit: number;
+  maxSplit: number;
+};
 
 /**
  * Compiles one `ViewLayout` tree into concrete deck.gl views and resolved rectangles.
@@ -231,23 +248,16 @@ function compileStackLayout(args: {
 
   const containerAxisLength =
     args.orientation === 'row' ? containerRect.width : containerRect.height;
-  const explicitLengths = getStackChildAxisLengths({
+  const stackAxisConfig = getStackAxisConfig({
     children,
     containerAxisLength,
     item: args.item,
     orientation: args.orientation,
     splitValues: args.splitValues
   });
-  const fixedLength = explicitLengths.reduce<number>((sum, length) => sum + (length ?? 0), 0);
-  const flexibleChildCount = explicitLengths.filter(length => length === undefined).length;
-  const flexibleLength =
-    flexibleChildCount > 0
-      ? Math.max(containerAxisLength - fixedLength, 0) / flexibleChildCount
-      : 0;
 
   let cursor = args.orientation === 'row' ? containerRect.x : containerRect.y;
-  const splitConfig = getStackSplitConfig(args.item, args.splitValues);
-  if (splitConfig !== null) {
+  for (const splitConfig of stackAxisConfig.splitConfigs) {
     args.splittersById[splitConfig.splitId] = {
       id: splitConfig.splitId,
       orientation: args.orientation === 'row' ? 'horizontal' : 'vertical',
@@ -262,7 +272,7 @@ function compileStackLayout(args: {
   }
 
   children.forEach((child, index) => {
-    const childAxisLength = explicitLengths[index] ?? flexibleLength;
+    const childAxisLength = stackAxisConfig.childAxisLengths[index];
     const childRect =
       args.orientation === 'row'
         ? {
@@ -366,39 +376,192 @@ function compileLayoutChild(args: {
   });
 }
 
-function getStackChildAxisLengths(args: {
+function getStackAxisConfig(args: {
   children: Array<Exclude<ViewLayoutChild, null | false | undefined>>;
   containerAxisLength: number;
   item: RowViewLayout | ColumnViewLayout | SplitViewLayout;
   orientation: 'row' | 'column';
   splitValues: ViewLayoutSplitValues;
-}): Array<number | undefined> {
-  const splitConfig = getStackSplitConfig(args.item, args.splitValues);
-  if (splitConfig !== null) {
-    return [
-      args.containerAxisLength * splitConfig.split,
-      args.containerAxisLength * (1 - splitConfig.split)
-    ];
-  }
-  return args.children.map(child =>
-    resolveStackChildAxisLength(child, args.orientation, args.containerAxisLength)
+}): {childAxisLengths: number[]; splitConfigs: StackSplitConfig[]} {
+  const constraints = args.children.map(child =>
+    getStackChildAxisConstraints(child, args.orientation, args.containerAxisLength)
   );
+  if (args.item.splitId) {
+    return getSplitStackAxisConfig({...args, constraints});
+  }
+  return {
+    childAxisLengths: getConstrainedStackChildAxisLengths(args.containerAxisLength, constraints),
+    splitConfigs: []
+  };
 }
 
-function getStackSplitConfig(
-  item: RowViewLayout | ColumnViewLayout | SplitViewLayout,
-  splitValues: ViewLayoutSplitValues
-): {splitId: string; split: number; minSplit: number; maxSplit: number} | null {
-  if (!item.splitId) {
-    return null;
+function getSplitStackAxisConfig(args: {
+  children: Array<Exclude<ViewLayoutChild, null | false | undefined>>;
+  containerAxisLength: number;
+  item: RowViewLayout | ColumnViewLayout | SplitViewLayout;
+  orientation: 'row' | 'column';
+  splitValues: ViewLayoutSplitValues;
+  constraints: StackChildAxisConstraints[];
+}): {childAxisLengths: number[]; splitConfigs: StackSplitConfig[]} {
+  const axisLength = Math.max(args.containerAxisLength, 1);
+  const boundaries = getDefaultSplitBoundaries(args);
+  const splitConfigs: StackSplitConfig[] = [];
+
+  for (let index = 0; index < boundaries.length; index++) {
+    const splitId = getSplitId(args.item.splitId!, args.children.length, index);
+    const desiredSplit =
+      args.splitValues[splitId] ??
+      (args.children.length === 2 ? args.item.initialSplit : undefined) ??
+      boundaries[index];
+    const {minSplit, maxSplit} = getSplitBoundaryLimits({
+      index,
+      boundaries,
+      constraints: args.constraints,
+      axisLength,
+      item: args.item
+    });
+    const split = Math.min(Math.max(desiredSplit, minSplit), maxSplit);
+    boundaries[index] = split;
+    splitConfigs.push({splitId, split, minSplit, maxSplit});
   }
-  const minSplit = item.minSplit ?? 0.05;
-  const maxSplit = item.maxSplit ?? 0.95;
-  const split = Math.min(
-    Math.max(splitValues[item.splitId] ?? item.initialSplit ?? 0.5, minSplit),
-    maxSplit
+
+  return {
+    childAxisLengths: getStackAxisLengthsFromBoundaries(args.containerAxisLength, boundaries),
+    splitConfigs
+  };
+}
+
+function getDefaultSplitBoundaries(args: {
+  children: Array<Exclude<ViewLayoutChild, null | false | undefined>>;
+  containerAxisLength: number;
+  constraints: StackChildAxisConstraints[];
+}): number[] {
+  const childAxisLengths = getConstrainedStackChildAxisLengths(
+    args.containerAxisLength,
+    args.constraints
   );
-  return {splitId: item.splitId, split, minSplit, maxSplit};
+  const totalLength = childAxisLengths.reduce((sum, length) => sum + length, 0);
+  if (totalLength <= 0) {
+    return args.children.slice(1).map((_, index) => (index + 1) / args.children.length);
+  }
+
+  let cursor = 0;
+  return childAxisLengths.slice(0, -1).map(length => {
+    cursor += length;
+    return cursor / totalLength;
+  });
+}
+
+function getSplitBoundaryLimits(args: {
+  index: number;
+  boundaries: number[];
+  constraints: StackChildAxisConstraints[];
+  axisLength: number;
+  item: RowViewLayout | ColumnViewLayout | SplitViewLayout;
+}): {minSplit: number; maxSplit: number} {
+  const previousSplit = args.index === 0 ? 0 : args.boundaries[args.index - 1];
+  const nextSplit = args.index === args.boundaries.length - 1 ? 1 : args.boundaries[args.index + 1];
+  const leftConstraints = args.constraints[args.index];
+  const rightConstraints = args.constraints[args.index + 1];
+  const leftMaxSplit = Number.isFinite(leftConstraints.maxPixels)
+    ? previousSplit + leftConstraints.maxPixels / args.axisLength
+    : 1;
+  const rightMaxSplit = Number.isFinite(rightConstraints.maxPixels)
+    ? nextSplit - rightConstraints.maxPixels / args.axisLength
+    : 0;
+  const minSplit = Math.max(
+    args.item.minSplit ?? 0.05,
+    previousSplit + leftConstraints.minPixels / args.axisLength,
+    rightMaxSplit
+  );
+  const maxSplit = Math.max(
+    minSplit,
+    Math.min(
+      args.item.maxSplit ?? 0.95,
+      nextSplit - rightConstraints.minPixels / args.axisLength,
+      leftMaxSplit
+    )
+  );
+  return {minSplit, maxSplit};
+}
+
+function getSplitId(splitId: string, childCount: number, index: number): string {
+  return childCount === 2 ? splitId : `${splitId}-${index}`;
+}
+
+function getStackAxisLengthsFromBoundaries(
+  containerAxisLength: number,
+  boundaries: number[]
+): number[] {
+  let previousBoundary = 0;
+  const childAxisLengths = boundaries.map(boundary => {
+    const length = containerAxisLength * (boundary - previousBoundary);
+    previousBoundary = boundary;
+    return length;
+  });
+  childAxisLengths.push(containerAxisLength * (1 - previousBoundary));
+  return childAxisLengths;
+}
+
+function getConstrainedStackChildAxisLengths(
+  containerAxisLength: number,
+  constraints: StackChildAxisConstraints[]
+): number[] {
+  const {childAxisLengths, flexibleChildIndexes, fixedLength} =
+    getInitialStackChildAxisLengths(constraints);
+  let remainingLength = Math.max(containerAxisLength - fixedLength, 0);
+  let unsettledIndexes = flexibleChildIndexes;
+
+  while (unsettledIndexes.length > 0) {
+    const sharedLength = remainingLength / unsettledIndexes.length;
+    const nextIndexes: number[] = [];
+    let didClamp = false;
+
+    for (const index of unsettledIndexes) {
+      const {minPixels, maxPixels} = constraints[index];
+      if (sharedLength < minPixels) {
+        childAxisLengths[index] = minPixels;
+        remainingLength -= minPixels;
+        didClamp = true;
+      } else if (sharedLength > maxPixels) {
+        childAxisLengths[index] = maxPixels;
+        remainingLength -= maxPixels;
+        didClamp = true;
+      } else {
+        nextIndexes.push(index);
+      }
+    }
+
+    if (!didClamp) {
+      for (const index of unsettledIndexes) {
+        childAxisLengths[index] = sharedLength;
+      }
+      break;
+    }
+    unsettledIndexes = nextIndexes;
+  }
+
+  return childAxisLengths.map(length => length ?? 0);
+}
+
+function getInitialStackChildAxisLengths(constraints: StackChildAxisConstraints[]): {
+  childAxisLengths: Array<number | undefined>;
+  flexibleChildIndexes: number[];
+  fixedLength: number;
+} {
+  const childAxisLengths = constraints.map(({explicitLength}) => explicitLength);
+  const flexibleChildIndexes: number[] = [];
+  let fixedLength = 0;
+
+  childAxisLengths.forEach((length, index) => {
+    if (length === undefined) {
+      flexibleChildIndexes.push(index);
+    } else {
+      fixedLength += length;
+    }
+  });
+
+  return {childAxisLengths, flexibleChildIndexes, fixedLength};
 }
 
 /**
@@ -439,23 +602,29 @@ function compileResolvedView(args: {
 }
 
 /**
- * Resolves one stack child length in the active stack axis, if it declares one.
+ * Resolves one stack child's sizing constraints in the active stack axis.
  *
  * @param child - Stack child to inspect.
  * @param orientation - Active stack orientation.
  * @param parentAxisLength - Parent length in the active stack axis.
- * @returns Numeric child length, or `undefined` when the child should share remaining space.
+ * @returns Explicit length and pixel constraints in the active stack axis.
  */
-function resolveStackChildAxisLength(
+function getStackChildAxisConstraints(
   child: Exclude<ViewLayoutChild, null | false | undefined>,
   orientation: 'row' | 'column',
   parentAxisLength: number
-): number | undefined {
+): StackChildAxisConstraints {
   const axisValue = getAxisLengthValue(child, orientation);
+  const minPixels = getPixelConstraintValue(child, 'minPixels') ?? 0;
+  const maxPixels = getPixelConstraintValue(child, 'maxPixels') ?? Number.POSITIVE_INFINITY;
   if (axisValue === undefined) {
-    return undefined;
+    return {minPixels, maxPixels};
   }
-  return resolveLength(axisValue, parentAxisLength);
+  const explicitLength = Math.min(
+    Math.max(resolveLength(axisValue, parentAxisLength), minPixels),
+    maxPixels
+  );
+  return {explicitLength, minPixels, maxPixels};
 }
 
 /**
@@ -511,6 +680,16 @@ function getAxisLengthValue(
   }
   const props = child.props as LayoutAwareViewProps;
   return orientation === 'row' ? props.width : props.height;
+}
+
+function getPixelConstraintValue(
+  child: Exclude<ViewLayoutChild, null | false | undefined>,
+  propName: 'minPixels' | 'maxPixels'
+): number | undefined {
+  const value = isViewLayout(child)
+    ? child[propName]
+    : (child.props as LayoutAwareViewProps)[propName];
+  return typeof value === 'number' ? value : undefined;
 }
 
 /**

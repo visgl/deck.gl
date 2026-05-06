@@ -217,6 +217,140 @@ describe('buildViewsFromViewLayout', () => {
     });
   });
 
+  it('constrains split layouts with minPixels and maxPixels', () => {
+    const layout = {
+      type: 'row',
+      splitId: 'sidebar-main',
+      initialSplit: 0.25,
+      minSplit: 0.1,
+      maxSplit: 0.8,
+      children: [
+        {
+          type: 'overlay',
+          minPixels: 120,
+          maxPixels: 200,
+          children: [new OrthographicView({id: 'sidebar'})]
+        },
+        new OrthographicView({id: 'main'})
+      ]
+    } satisfies ViewLayout;
+
+    const compiled = buildViewsFromViewLayout({
+      layout,
+      width: 400,
+      height: 200,
+      splitValues: {'sidebar-main': 0.9}
+    });
+
+    expect(compiled.rectsById.sidebar).toEqual({x: 0, y: 0, width: 200, height: 200});
+    expect(compiled.rectsById.main).toEqual({x: 200, y: 0, width: 200, height: 200});
+    expect(compiled.splittersById['sidebar-main']).toMatchObject({
+      split: 0.5,
+      minSplit: 0.3,
+      maxSplit: 0.5
+    });
+  });
+
+  it('clamps split layouts to minPixels when controlled values are too small', () => {
+    const layout = {
+      orientation: 'vertical',
+      splitId: 'header-body',
+      views: [
+        {
+          type: 'overlay',
+          minPixels: 96,
+          children: [new OrthographicView({id: 'header'})]
+        },
+        new OrthographicView({id: 'body'})
+      ]
+    } satisfies ViewLayout;
+
+    const compiled = buildViewsFromViewLayout({
+      layout,
+      width: 400,
+      height: 240,
+      splitValues: {'header-body': 0.1}
+    });
+
+    expect(compiled.rectsById.header).toEqual({x: 0, y: 0, width: 400, height: 96});
+    expect(compiled.rectsById.body).toEqual({x: 0, y: 96, width: 400, height: 144});
+    expect(compiled.splittersById['header-body']).toMatchObject({
+      orientation: 'vertical',
+      split: 0.4,
+      minSplit: 0.4,
+      maxSplit: 0.95
+    });
+  });
+
+  it('combines percentage sizing with item minPixels and maxPixels', () => {
+    const layout = {
+      type: 'row',
+      children: [
+        {
+          type: 'overlay',
+          width: '50%',
+          minPixels: 240,
+          children: [new OrthographicView({id: 'left'})]
+        },
+        new OrthographicView({id: 'right'})
+      ]
+    } satisfies ViewLayout;
+
+    const compiled = buildViewsFromViewLayout({
+      layout,
+      width: 400,
+      height: 200
+    });
+
+    expect(compiled.rectsById.left).toEqual({x: 0, y: 0, width: 240, height: 200});
+    expect(compiled.rectsById.right).toEqual({x: 240, y: 0, width: 160, height: 200});
+  });
+
+  it('supports generated split ids between multiple children', () => {
+    const layout = {
+      type: 'row',
+      splitId: 'panes',
+      children: [
+        {
+          type: 'overlay',
+          minPixels: 100,
+          maxPixels: 250,
+          children: [new OrthographicView({id: 'left'})]
+        },
+        {
+          type: 'overlay',
+          minPixels: 80,
+          children: [new OrthographicView({id: 'middle'})]
+        },
+        {
+          type: 'overlay',
+          minPixels: 120,
+          children: [new OrthographicView({id: 'right'})]
+        }
+      ]
+    } satisfies ViewLayout;
+
+    const compiled = buildViewsFromViewLayout({
+      layout,
+      width: 600,
+      height: 200,
+      splitValues: {'panes-0': 0.25, 'panes-1': 0.75}
+    });
+
+    expect(compiled.rectsById.left).toEqual({x: 0, y: 0, width: 150, height: 200});
+    expect(compiled.rectsById.middle).toEqual({x: 150, y: 0, width: 300, height: 200});
+    expect(compiled.rectsById.right).toEqual({x: 450, y: 0, width: 150, height: 200});
+    expect(compiled.splittersById['panes-0']).toMatchObject({
+      id: 'panes-0',
+      split: 0.25
+    });
+    expect(compiled.splittersById['panes-1']).toMatchObject({
+      id: 'panes-1',
+      split: 0.75
+    });
+    expect(compiled.splittersById.panes).toBeUndefined();
+  });
+
   it('supports SplitterWidgetViewLayout-style orientation and views aliases', () => {
     const layout = {
       orientation: 'horizontal',

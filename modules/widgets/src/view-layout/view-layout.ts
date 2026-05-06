@@ -36,15 +36,19 @@ export type ViewLayoutBaseProps = {
   width?: ViewLayoutLength;
   /** Optional height expression resolved against the current parent bounds. */
   height?: ViewLayoutLength;
+  /** Minimum size in pixels along the parent stack axis. */
+  minPixels?: number;
+  /** Maximum size in pixels along the parent stack axis. */
+  maxPixels?: number;
   /** Optional insets applied after parent layout allocation. */
   inset?: ViewLayoutInsets;
 };
 
-/** Optional split metadata for a row or column with exactly two children. */
+/** Optional split metadata for a row or column with two or more children. */
 export type ViewLayoutSplitProps = {
-  /** Stable id for a user-adjustable split between the two children. */
+  /** Stable id for user-adjustable splits between child items. */
   splitId?: string;
-  /** Initial ratio of the first child's share over the stack axis. */
+  /** Initial ratio of the first child's share over the stack axis for two-child splits. */
   initialSplit?: number;
   /** Minimum split ratio. */
   minSplit?: number;
@@ -146,8 +150,8 @@ export function assertViewLayout(item: ViewLayout): void {
         throw new Error('ViewLayout requires a children or views array.');
       }
       if (isSplitLayoutItem(item) && item.splitId) {
-        if (children.filter(Boolean).length !== 2) {
-          throw new Error('ViewLayout with splitId requires two children.');
+        if (children.filter(Boolean).length < 2) {
+          throw new Error('ViewLayout with splitId requires at least two children.');
         }
       }
       children.forEach(assertViewLayoutChild);
