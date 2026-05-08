@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+const shaderWGSL = /* wgsl */ `\
 // Main shaders
 
 struct ScatterplotUniforms {
@@ -70,7 +70,8 @@ struct Attributes {
   @location(4) instanceLineWidths: f32,
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instancePixelOffset: vec2<f32>
+  @location(7) instancePixelOffset: vec2<f32>,
+  PICKING_COLOR_ATTRIBUTE
 };
 
 struct Varyings {
@@ -120,7 +121,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // position on the containing square in [-1, 1] space
   varyings.unitPosition = edgePadding * attributes.positions.xy;
   geometry.uv = varyings.unitPosition;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = PICKING_COLOR_VALUE;
 
   varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
 
@@ -222,3 +223,19 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // return vec4<f32>(0, 0, 1, 1);
 }
 `;
+
+export function getShaderWGSL(useInstancePickingColors: boolean): string {
+  return shaderWGSL
+    .replace(
+      'PICKING_COLOR_ATTRIBUTE',
+      useInstancePickingColors ? '@location(8) instancePickingColors: vec4<f32>,' : ''
+    )
+    .replace(
+      'PICKING_COLOR_VALUE',
+      useInstancePickingColors
+        ? 'attributes.instancePickingColors.rgb'
+        : 'picking_getPickingColorFromIndex(attributes.instanceIndex)'
+    );
+}
+
+export default shaderWGSL;

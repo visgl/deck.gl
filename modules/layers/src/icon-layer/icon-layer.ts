@@ -9,7 +9,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
-import {shaderWGSL as source} from './icon-layer.wgsl';
+import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 
 import type {
@@ -146,7 +146,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: getShaderWGSL(useInstancePickingColors),
       defines: useInstancePickingColors ? {USE_INSTANCE_PICKING_COLORS: true} : {},
       modules: [project32, color, picking, iconUniforms]
     });

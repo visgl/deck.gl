@@ -8,7 +8,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
-import source from './scatterplot-layer.wgsl';
+import {getShaderWGSL} from './scatterplot-layer.wgsl';
 
 import type {
   LayerProps,
@@ -182,7 +182,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: getShaderWGSL(useInstancePickingColors),
       defines: useInstancePickingColors ? {USE_INSTANCE_PICKING_COLORS: true} : {},
       modules: [project32, color, picking, scatterplotUniforms]
     });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export const shaderWGSL = /* wgsl */ `\
+const shaderWGSL = /* wgsl */ `\
 struct IconUniforms {
   sizeScale: f32,
   iconsTextureDim: vec2<f32>,
@@ -39,6 +39,7 @@ struct Attributes {
   @location(7) instanceColorModes: f32,
   @location(8) instanceOffsets: vec2<f32>,
   @location(9) instancePixelOffset: vec2<f32>,
+  PICKING_COLOR_ATTRIBUTE
 };
 
 struct Varyings {
@@ -56,7 +57,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
   // write geometry fields used by filters + FS
   geometry.worldPosition = inp.instancePositions;
   geometry.uv = inp.positions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(inp.instanceIndex);
+  geometry.pickingColor = PICKING_COLOR_VALUE;
 
   var outp: Varyings;
   outp.uv = inp.positions;
@@ -153,3 +154,19 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   return fragColor;
 }
 `;
+
+export function getShaderWGSL(useInstancePickingColors: boolean): string {
+  return shaderWGSL
+    .replace(
+      'PICKING_COLOR_ATTRIBUTE',
+      useInstancePickingColors ? '@location(10) instancePickingColors: vec4<f32>,' : ''
+    )
+    .replace(
+      'PICKING_COLOR_VALUE',
+      useInstancePickingColors
+        ? 'inp.instancePickingColors.rgb'
+        : 'picking_getPickingColorFromIndex(inp.instanceIndex)'
+    );
+}
+
+export {shaderWGSL};
