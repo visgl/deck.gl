@@ -5,7 +5,7 @@
 import {picking} from '@luma.gl/shadertools';
 import log from '../../utils/log';
 
-export const PICKING_MAX_DISABLED_INDICES = 12;
+export const PICKING_MAX_DISABLED_INDICES = 10;
 
 export function disablePickingIndex(disabledPickingIndices: number[], objectIndex: number): void {
   if (disabledPickingIndices.length === PICKING_MAX_DISABLED_INDICES) {

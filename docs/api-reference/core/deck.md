@@ -773,7 +773,7 @@ Parameters:
 * `y` (number) - y position in pixels
 * `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
-* `depth` - Specifies the max number of objects to return. Default `10`. Layers without explicit picking color buffers can exclude up to 12 previously picked objects per layer during deep picking, so `depth` values above 13 may return duplicate results for these layers.
+* `depth` - Specifies the max number of objects to return. Default `10`. The default depth is fully supported for layers without explicit picking color buffers; higher custom depths may return duplicate results for these layers.
 * `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
 
 Returns:
@@ -783,7 +783,7 @@ Returns:
 Notes:
 
 * Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
-* Layers that provide explicit picking color buffers support buffer mutation between picking passes and are not subject to the 12 disabled-index limit.
+* Layers that provide explicit picking color buffers support buffer mutation between picking passes and are not subject to the default-depth limit.
 
 
 #### `pickObjects` {#pickobjects}

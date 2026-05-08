@@ -4,7 +4,7 @@
 
 #### pickMultipleObjects pick depth limits
 
-`pickMultipleObjects` can now exclude up to 12 previously picked objects per layer between deep-picking passes for layers that do not have explicit `instancePickingColors` attributes. The default picking `depth` remains 10, and layers with explicit picking color buffers keep their previous buffer-mutation behavior.
+The default picking `depth` remains 10. For layers that do not have explicit `instancePickingColors` attributes, deck.gl now supports this default-depth deep-picking path by tracking previously picked objects in shader uniforms instead of mutating a picking color buffer. Layers with explicit picking color buffers keep their previous buffer-mutation behavior.
 
 ### `instancePickingColors` attribute is no longer automatically generated
 
