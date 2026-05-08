@@ -149,6 +149,10 @@ By always using the following shader functions for handling projections and scal
 
 If your layer is instanced (`data` prop is an array and each element is rendered as one primitive), then you may take advantage of the default implementation of the [layer picking methods](../../api-reference/core/layer.md#layer-picking-methods).
 
-By default, instanced layer shaders can derive picking colors from the built-in instance id. Add an explicit picking color attribute only when the logical picking id within the current layer is different from the rendered instance id. For example, binary GeoJSON or MVT point sublayers may render local point instances while picking should return a global feature index. `PathLayer` is another example: one path is tessellated into multiple rendered segment or joint instances, so its generated geometry needs explicit picking colors that map back to the source path index instead of each rendered segment's instance id.
+By default, instanced layer shaders can derive picking colors from the built-in instance id. Add an explicit picking color attribute only when the logical picking id within the current layer is different from the rendered instance id. For example:
+
+* Binary GeoJSON or MVT point sublayers may render local point instances while picking should return a global feature index.
+
+* `PathLayer` tessellates one path into multiple rendered segment or joint instances, so its generated geometry needs explicit picking colors that map back to the source path index instead of each rendered segment's instance id.
 
 For custom picking, read about [Implementing Custom Picking](./picking.md#implementing-custom-picking).
