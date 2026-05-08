@@ -3,8 +3,19 @@
 // Copyright (c) vis.gl contributors
 
 import {picking} from '@luma.gl/shadertools';
+import log from '../../utils/log';
 
-const PICKING_MAX_DISABLED_INDICES = 12;
+export const PICKING_MAX_DISABLED_INDICES = 12;
+
+export function disablePickingIndex(disabledPickingIndices: number[], objectIndex: number): void {
+  if (disabledPickingIndices.length === PICKING_MAX_DISABLED_INDICES) {
+    log.warn(
+      `pickMultipleObjects can only exclude ${PICKING_MAX_DISABLED_INDICES} previously picked objects for layers without picking color buffers`
+    )();
+  } else {
+    disabledPickingIndices.push(objectIndex);
+  }
+}
 
 const pickingUniformsGLSL = /* glsl */ `\
   float disabledPickingIndexCount;

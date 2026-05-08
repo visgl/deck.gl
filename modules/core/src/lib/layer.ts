@@ -17,6 +17,7 @@ import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
+import {disablePickingIndex} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
@@ -46,7 +47,6 @@ const TRACE_FINALIZE = 'layer.finalize';
 const TRACE_MATCHED = 'layer.matched';
 
 const MAX_PICKING_COLOR_CACHE_SIZE = 2 ** 24 - 1;
-const MAX_DISABLED_PICKING_INDICES = 12;
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -836,12 +836,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
     if (!colors) {
-      if (this.internalState?.disabledPickingIndices.length === MAX_DISABLED_PICKING_INDICES) {
-        log.warn(
-          `pickMultipleObjects can only exclude ${MAX_DISABLED_PICKING_INDICES} previously picked objects for layers without picking color buffers`
-        )();
-      } else {
-        this.internalState?.disabledPickingIndices.push(objectIndex);
+      if (this.internalState) {
+        disablePickingIndex(this.internalState.disabledPickingIndices, objectIndex);
       }
       return;
     }
