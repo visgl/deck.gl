@@ -176,15 +176,27 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
+    const useInstancePickingColors = Boolean(
+      (this.props.data as any)?.attributes?.instancePickingColors
+    );
     return super.getShaders({
       vs,
       fs,
       source,
+      defines: useInstancePickingColors ? {USE_INSTANCE_PICKING_COLORS: true} : {},
       modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 
   initializeState() {
+    const attributes: Record<string, any> = {};
+    if ((this.props.data as any)?.attributes?.instancePickingColors) {
+      attributes.instancePickingColors = {
+        size: 4,
+        type: 'uint8',
+        noAlloc: true
+      };
+    }
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
@@ -223,7 +235,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
-      }
+      },
+      ...attributes
     });
   }
 

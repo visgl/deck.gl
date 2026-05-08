@@ -27,6 +27,7 @@ fn rotate_by_angle(vertex: vec2<f32>, angle_deg: f32) -> vec2<f32> {
 }
 
 struct Attributes {
+  @builtin(instance_index) instanceIndex : u32,
   @location(0) positions: vec2<f32>,
 
   @location(1) instancePositions: vec3<f32>,
@@ -34,11 +35,10 @@ struct Attributes {
   @location(3) instanceSizes: f32,
   @location(4) instanceAngles: f32,
   @location(5) instanceColors: vec4<f32>,
-  @location(6) instancePickingColors: vec3<f32>,
-  @location(7) instanceIconFrames: vec4<f32>,
-  @location(8) instanceColorModes: f32,
-  @location(9) instanceOffsets: vec2<f32>,
-  @location(10) instancePixelOffset: vec2<f32>,
+  @location(6) instanceIconFrames: vec4<f32>,
+  @location(7) instanceColorModes: f32,
+  @location(8) instanceOffsets: vec2<f32>,
+  @location(9) instancePixelOffset: vec2<f32>,
 };
 
 struct Varyings {
@@ -56,7 +56,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
   // write geometry fields used by filters + FS
   geometry.worldPosition = inp.instancePositions;
   geometry.uv = inp.positions;
-  geometry.pickingColor = inp.instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(inp.instanceIndex);
 
   var outp: Varyings;
   outp.uv = inp.positions;
@@ -103,7 +103,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
   // DECKGL_FILTER_COLOR(outp.vColor, geometry);
 
   outp.vColorMode = inp.instanceColorModes;
-  outp.pickingColor = inp.instancePickingColors;
+  outp.pickingColor = geometry.pickingColor;
 
   return outp;
 }

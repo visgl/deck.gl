@@ -149,6 +149,6 @@ By always using the following shader functions for handling projections and scal
 
 If your layer is instanced (`data` prop is an array and each element is rendered as one primitive), then you may take advantage of the default implementation of the [layer picking methods](../../api-reference/core/layer.md#layer-picking-methods).
 
-By default, each layer creates an `instancePickingColors` attribute and automatically calculates it using the length of the `data` array.
+By default, instanced layer shaders can derive picking colors from the built-in instance id. Add an explicit picking color attribute only when the logical picking id is different from the rendered instance id.
 
 For custom picking, read about [Implementing Custom Picking](./picking.md#implementing-custom-picking).
