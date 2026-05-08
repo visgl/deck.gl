@@ -4,7 +4,7 @@
 
 #### `pickMultipleObjects()` pick depth limits
 
-Applications that call `pickMultipleObjects()` with a custom `depth` above the default may see changed results on layers that use built-in shader instance ids instead of explicit picking color buffers. The default picking `depth` remains 10 and is fully supported. Layers with explicit picking color buffers keep their previous buffer-mutation behavior.
+For layers that use built-in shader instance ids instead of explicit picking color buffers, `pickMultipleObjects()` now only guarantees the default `depth` of 10 unique objects per layer. Applications that call `pickMultipleObjects()` with a custom `depth` above the default may receive duplicate results for these layers. Layers with explicit picking color buffers keep their previous buffer-mutation behavior.
 
 ### `instancePickingColors` attribute is no longer automatically generated
 
