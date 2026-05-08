@@ -838,7 +838,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (!colors) {
       if (this.internalState?.disabledPickingIndices.length === MAX_DISABLED_PICKING_INDICES) {
         log.warn(
-          `pickMultipleObjects depth is limited to ${MAX_DISABLED_PICKING_INDICES} for layers without picking color buffers`
+          `pickMultipleObjects can only exclude ${MAX_DISABLED_PICKING_INDICES} previously picked objects for layers without picking color buffers`
         )();
       } else {
         this.internalState?.disabledPickingIndices.push(objectIndex);

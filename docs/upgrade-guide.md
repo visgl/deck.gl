@@ -11,6 +11,8 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 - In such cases, use the new picking shader helper functions to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL.
 - However, if the logical picking id is different from the rendered instance id, layers can still continue to register and populate an explicit picking color attribute as before.
 
+Applications that call `pickMultipleObjects` with `depth` above 13 on a single layer may also be affected. Layers without explicit picking color buffers can now exclude up to 12 previously picked objects per layer between deep-picking passes. The default `depth` remains 10, and layers with explicit picking color buffers keep their previous buffer-mutation behavior.
+
 ## Upgrading to v9.3
 
 Upgraded dependencies to [luma.gl v9.3](https://luma.gl/docs/upgrade-guide) and [loaders.gl v4.4](https://loaders.gl/docs/upgrade-guide). Your app may be affected if it contains custom layers.
