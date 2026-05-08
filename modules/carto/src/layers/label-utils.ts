@@ -18,19 +18,26 @@ function parseFeatureBbox(value: unknown): [number, number, number, number] | nu
   return parts.map(Number) as [number, number, number, number];
 }
 
+function latToMercatorY(lat: number): number {
+  return Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+}
+
+/** Convert a WGS84 point to MVT tile-space, where y=0 is north, y=1 is south, linear in Mercator */
 function worldToTile(
   point: [number, number],
   geoBbox: TileBBox,
   tileBbox: TileBBox
 ): [number, number] {
-  return [
-    tileBbox.west +
-      ((point[0] - geoBbox.west) / (geoBbox.east - geoBbox.west)) *
-        (tileBbox.east - tileBbox.west),
-    tileBbox.south +
-      ((point[1] - geoBbox.south) / (geoBbox.north - geoBbox.south)) *
-        (tileBbox.north - tileBbox.south)
-  ];
+  const xFrac = (point[0] - geoBbox.west) / (geoBbox.east - geoBbox.west);
+  const x = tileBbox.west + xFrac * (tileBbox.east - tileBbox.west);
+
+  const mercY = latToMercatorY(point[1]);
+  const mercNorth = latToMercatorY(geoBbox.north);
+  const mercSouth = latToMercatorY(geoBbox.south);
+  const yFrac = (mercNorth - mercY) / (mercNorth - mercSouth);
+  const y = tileBbox.south + yFrac * (tileBbox.north - tileBbox.south);
+
+  return [x, y];
 }
 
 export function createPointsFromLines(
@@ -101,9 +108,7 @@ export function createPointsFromPolygons(
   // When feature bounding boxes are provided, use geoBbox for area filtering
   // as the bbox values are in world coordinates
   const useBbox = Boolean(
-    geoBbox &&
-      polygons.properties.length > 0 &&
-      FEATURE_BBOX_PROP in polygons.properties[0]
+    geoBbox && polygons.properties.length > 0 && FEATURE_BBOX_PROP in polygons.properties[0]
   );
   const boundsBbox = useBbox ? geoBbox! : tileBbox;
   const {west, south, east, north} = boundsBbox;
@@ -119,6 +124,9 @@ export function createPointsFromPolygons(
     polygons.numericProps
   );
 
+  // MVT: tile space is Mercator-projected, need worldToTile conversion
+  const isMVT = useBbox && geoBbox !== tileBbox;
+
   // Process each polygon
   let pointIndex = 0;
   let triangleIndex = 0;
@@ -133,16 +141,14 @@ export function createPointsFromPolygons(
       // Use server-provided feature bounding box (in world coordinates)
       const featureId = polygons.featureIds.value[startIndex];
       const bbox = parseFeatureBbox(polygons.properties[featureId][FEATURE_BBOX_PROP]);
+
       if (bbox) {
         const [bboxWest, bboxSouth, bboxEast, bboxNorth] = bbox;
         const bboxArea = (bboxEast - bboxWest) * (bboxNorth - bboxSouth);
         if (bboxArea >= minPolygonArea) {
-          const center: [number, number] = [
-            (bboxWest + bboxEast) / 2,
-            (bboxSouth + bboxNorth) / 2
-          ];
+          const center: [number, number] = [(bboxWest + bboxEast) / 2, (bboxSouth + bboxNorth) / 2];
           if (isPointInBounds(center, geoBbox!)) {
-            labelPoint = worldToTile(center, geoBbox!, tileBbox);
+            labelPoint = isMVT ? worldToTile(center, geoBbox!, tileBbox) : center;
           }
         }
       }
