@@ -409,8 +409,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         _cachePipelines: true,
         ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
-          // Attached contexts still emit resize through luma's CanvasContext.
-          // Deck only mirrors that state into viewport dimensions and redraw flags.
+          // autoResize is disabled for attached contexts — sync the drawing buffer manually.
+          const {width, height} = canvasContext.canvas;
+          canvasContext.setDrawingBufferSize(width, height);
           this._onCanvasContextResize(canvasContext);
           userOnResize?.(canvasContext, info);
         }
