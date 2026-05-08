@@ -537,9 +537,53 @@ test('createPointsFromPolygons - bbox with MVT coordinate conversion', () => {
   const result = createPointsFromPolygons(polygons, mvtBbox, {extruded: false}, geoBbox);
 
   expect(result.positions.value.length, 'creates one label point').toBe(2);
-  // Center of bbox in world = [-9.5, 40.5], converted to [0,1] tile space = [0.5, 0.5]
+  // Center of bbox in world = [-9.5, 40.5], converted to [0,1] tile space
   expect(result.positions.value[0], 'correct x in tile coords').toBeCloseTo(0.5);
-  expect(result.positions.value[1], 'correct y in tile coords').toBeCloseTo(0.5);
+  // y ~0.5 (slight Mercator offset for 1° span at lat 40)
+  expect(result.positions.value[1], 'correct y in tile coords').toBeCloseTo(0.5, 1);
+});
+
+test('createPointsFromPolygons - MVT y-axis: y=0 is north, y=1 is south', () => {
+  const mvtBbox = {west: 0, east: 1, south: 0, north: 1};
+  const geoBbox = {west: -120, south: 30, east: -110, north: 50};
+
+  // Feature near the NORTH edge of the tile
+  const northPolygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [-116, 48, -114, 50]
+  );
+  const northResult = createPointsFromPolygons(northPolygons, mvtBbox, {extruded: false}, geoBbox);
+  expect(northResult.positions.value.length, 'creates label').toBe(2);
+  expect(northResult.positions.value[1], 'north feature has small y').toBeLessThan(0.15);
+
+  // Feature near the SOUTH edge of the tile
+  const southPolygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [-116, 30, -114, 32]
+  );
+  const southResult = createPointsFromPolygons(southPolygons, mvtBbox, {extruded: false}, geoBbox);
+  expect(southResult.positions.value.length, 'creates label').toBe(2);
+  expect(southResult.positions.value[1], 'south feature has large y').toBeGreaterThan(0.85);
+});
+
+test('createPointsFromPolygons - MVT worldToTile uses Mercator projection', () => {
+  // Use a tile spanning a large latitude range where Mercator distortion is significant
+  const mvtBbox = {west: 0, east: 1, south: 0, north: 1};
+  const geoBbox = {west: 0, south: 0, east: 10, north: 60};
+
+  // Geographic midpoint lat=30, but Mercator midpoint is ~26.6° due to polar stretching
+  // So the geographic midpoint should map to y < 0.5 (closer to north/0)
+  const midPolygons = createPolygonWithBbox(
+    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 2, 0, 2, 3],
+    [4, 29, 6, 31] // center at [5, 30]
+  );
+  const result = createPointsFromPolygons(midPolygons, mvtBbox, {extruded: false}, geoBbox);
+  expect(result.positions.value.length, 'creates label').toBe(2);
+  // With Mercator, lat 30 is south of the Mercator midpoint (~26.6°) so y > 0.5
+  expect(result.positions.value[1], 'Mercator shifts y away from 0.5').toBeGreaterThan(0.55);
 });
 
 test('createPointsFromPolygons - bbox center outside tile is filtered', () => {
