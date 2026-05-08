@@ -616,10 +616,7 @@ test('createPointsFromPolygons - tiny bbox feature is filtered', () => {
 
 test('createPointsFromPolygons - falls back without bbox props', () => {
   // No bbox props - should use existing centroid logic
-  const polygons = createPolygonWithBbox(
-    [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
-    [0, 1, 2, 0, 2, 3]
-  );
+  const polygons = createPolygonWithBbox([0, 0, 1, 0, 1, 1, 0, 1, 0, 0], [0, 1, 2, 0, 2, 3]);
 
   const tileBbox = {west: -1, south: -1, east: 2, north: 2};
   const result = createPointsFromPolygons(polygons, tileBbox, {extruded: false}, tileBbox);

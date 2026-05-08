@@ -137,43 +137,39 @@ export function createPointsFromPolygons(
 
     let labelPoint: [number, number] | null = null;
 
+    // Determine preferred label position and area filter
+    let preferredPoint: [number, number] | null = null;
     if (useBbox) {
-      // Use server-provided feature bounding box (in world coordinates)
       const featureId = polygons.featureIds.value[startIndex];
       const bbox = parseFeatureBbox(polygons.properties[featureId][FEATURE_BBOX_PROP]);
-
       if (bbox) {
         const [bboxWest, bboxSouth, bboxEast, bboxNorth] = bbox;
         const bboxArea = (bboxEast - bboxWest) * (bboxNorth - bboxSouth);
         if (bboxArea >= minPolygonArea) {
           const center: [number, number] = [(bboxWest + bboxEast) / 2, (bboxSouth + bboxNorth) / 2];
           if (isPointInBounds(center, geoBbox!)) {
-            labelPoint = isMVT ? worldToTile(center, geoBbox!, tileBbox) : center;
+            preferredPoint = isMVT ? worldToTile(center, geoBbox!, tileBbox) : center;
           }
         }
       }
     } else {
-      // Fall back to computing label position from polygon geometry
       if (getPolygonArea(polygons, i) < minPolygonArea) {
         continue;
       }
+      preferredPoint = getPolygonCentroid(polygons, i);
+    }
 
-      const centroid = getPolygonCentroid(polygons, i);
+    if (preferredPoint) {
+      // Check if preferred point is inside the polygon, tracking largest triangle as fallback
       let maxArea = -1;
       let largestTriangleCenter: [number, number] = [0, 0];
-      let centroidIsInside = false;
+      let isInside = false;
 
-      // Scan triangles until we find ones that don't belong to this polygon
       while (triangleIndex < polygons.triangles.value.length) {
         const i1 = polygons.triangles.value[triangleIndex];
+        if (i1 >= endIndex) break;
 
-        // If we've moved past the current polygon's triangles, break
-        if (i1 >= endIndex) {
-          break;
-        }
-
-        // If we've already found a triangle containing the centroid, skip the rest
-        if (centroidIsInside) {
+        if (isInside) {
           triangleIndex += 3;
           continue;
         }
@@ -193,8 +189,8 @@ export function createPointsFromPolygons(
           i3 * polygons.positions.size + polygons.positions.size
         );
 
-        if (isPointInTriangle(centroid, v1, v2, v3)) {
-          centroidIsInside = true;
+        if (isPointInTriangle(preferredPoint, v1, v2, v3)) {
+          isInside = true;
         } else {
           const area = getTriangleArea(v1, v2, v3);
           if (area > maxArea) {
@@ -206,7 +202,7 @@ export function createPointsFromPolygons(
         triangleIndex += 3;
       }
 
-      const candidate = centroidIsInside ? centroid : largestTriangleCenter;
+      const candidate = isInside ? preferredPoint : largestTriangleCenter;
       if (isPointInBounds(candidate, tileBbox)) {
         labelPoint = candidate;
       }
