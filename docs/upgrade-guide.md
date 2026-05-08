@@ -1,5 +1,13 @@
 # Upgrade Guide
 
+## Upgrading to v9.4
+
+### Custom layers
+
+Most applications do not need to change. Built-in layers and most custom instanced layers can derive picking colors from the shader instance id.
+
+Custom layer shaders may need an update if they explicitly read an `instancePickingColors` attribute that was not registered by the layer. The default `instancePickingColors` attribute is no longer automatically added to every instanced layer. For one rendered instance per object, use the picking shader helpers to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL. If the logical picking id is different from the rendered instance id, register and populate an explicit picking color attribute instead.
+
 ## Upgrading to v9.3
 
 Upgraded dependencies to [luma.gl v9.3](https://luma.gl/docs/upgrade-guide) and [loaders.gl v4.4](https://loaders.gl/docs/upgrade-guide). Your app may be affected if it contains custom layers.
