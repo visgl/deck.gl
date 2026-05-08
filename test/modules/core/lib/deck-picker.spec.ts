@@ -47,6 +47,42 @@ test('DeckPicker#getPickingRect', () => {
   }
 });
 
+test('DeckPicker#_resizeBuffer uses drawing buffer size', () => {
+  const deckPicker = new DeckPicker(device);
+  const canvasContext = device.getDefaultCanvasContext();
+  const originalGetDrawingBufferSize = canvasContext.getDrawingBufferSize.bind(canvasContext);
+  const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
+  const drawingBufferSize: [number, number] = [37, 41];
+
+  try {
+    canvasContext.getCSSSize = () => [10, 11];
+    canvasContext.getDrawingBufferSize = () => drawingBufferSize;
+
+    deckPicker._resizeBuffer(canvasContext);
+
+    expect(deckPicker.pickingFBO?.width, 'pickingFBO width follows drawing buffer').toBe(
+      drawingBufferSize[0]
+    );
+    expect(deckPicker.pickingFBO?.height, 'pickingFBO height follows drawing buffer').toBe(
+      drawingBufferSize[1]
+    );
+    expect(
+      deckPicker.depthFBO,
+      'depthFBO is generated when float texture is renderable'
+    ).toBeTruthy();
+    expect(deckPicker.depthFBO?.width, 'depthFBO width follows drawing buffer').toBe(
+      drawingBufferSize[0]
+    );
+    expect(deckPicker.depthFBO?.height, 'depthFBO height follows drawing buffer').toBe(
+      drawingBufferSize[1]
+    );
+  } finally {
+    canvasContext.getDrawingBufferSize = originalGetDrawingBufferSize;
+    canvasContext.getCSSSize = originalGetCSSSize;
+    deckPicker.finalize();
+  }
+});
+
 /* eslint-disable max-statements */
 test('DeckPicker#pick empty', () => {
   const deckPicker = new DeckPicker(device);
