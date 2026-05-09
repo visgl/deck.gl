@@ -48,16 +48,15 @@ export type Updater = (
 
 /**
  * Attribute configuration used by {@link AttributeManager}.
- *
- * `bufferGroup` is consumed by the internal `GroupedAttributeManager` to place
- * multiple attributes into one shared GPU buffer.
  */
+export type BufferLayoutPriority = 'high' | 'medium' | 'low';
+
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
-  /** Identifier of a shared packed-buffer group used by `GroupedAttributeManager`. */
-  bufferGroup?: string;
+  /** Hint used by `GroupedAttributeManager` when assigning attributes to vertex buffers. */
+  bufferLayoutPriority?: BufferLayoutPriority;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
@@ -540,13 +539,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   }
 
   /** Returns the source byte stride this attribute contributes to a packed group. */
-  getPackedBufferStride(): number {
+  getPackedBufferStride(fp64Component: 'high' | 'low' | null = null): number {
+    if (this.doublePrecision && fp64Component) {
+      return this.size * 4;
+    }
     return getStride(this.getAccessor());
-  }
-
-  /** Returns the padded byte length reserved for this attribute inside a packed group. */
-  getPackedBufferByteLength(byteStride: number): number {
-    return byteStride * (this.numInstances + 2);
   }
 
   /**
@@ -556,7 +553,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   getPackedBufferLayout(
     byteStride: number,
     baseOffset: number,
-    deviceType: Device['type']
+    deviceType: Device['type'],
+    fp64Component: 'high' | 'low' | null = null
   ): {
     attributes: BufferAttributeLayout[];
     attributeOffsets: Record<string, number>;
@@ -566,22 +564,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const attributes: BufferAttributeLayout[] = [];
     const attributeOffsets: Record<string, number> = {};
     const attributeNames: string[] = [];
-    const stride = getStride(accessor);
+    const stride = this.getPackedBufferStride(fp64Component);
     const attributeOffset =
       baseOffset + (accessor.vertexOffset || 0) * stride + (accessor.offset || 0);
+    const attributeName = fp64Component === 'low' ? `${this.id}64Low` : this.id;
+    const packedAccessor = this.doublePrecision
+      ? {...accessor, type: 'float32' as const, bytesPerElement: 4, stride}
+      : accessor;
     const layout = getBufferAttributeLayout(
-      this.id,
-      {...accessor, stride: byteStride, offset: attributeOffset},
+      attributeName,
+      {...packedAccessor, stride: byteStride, offset: attributeOffset},
       deviceType
     );
+    attributeOffsets[attributeName] = attributeOffset;
+    attributeNames.push(attributeName);
 
     if (layout) {
       attributes.push(layout);
-      attributeOffsets[this.id] = attributeOffset;
-      attributeNames.push(this.id);
     }
 
-    if (this.settings.shaderAttributes) {
+    if (!fp64Component && this.settings.shaderAttributes) {
       for (const [name, def] of Object.entries(this.settings.shaderAttributes)) {
         const shaderOffset =
           attributeOffset +
@@ -603,48 +605,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return {attributes, attributeOffsets, attributeNames};
   }
 
-  /** Materializes this attribute's packed byte slice for upload into a shared buffer. */
-  getPackedBufferData(byteStride: number): Uint8Array {
-    const accessor = this.getAccessor();
-    const sourceStride = getStride(accessor);
-    const isConstant = this.constant || this.isConstant;
-    const instanceCount = Math.max(this.numInstances, isConstant ? 1 : 0);
-    const byteLength = byteStride * instanceCount;
-    const target = new Uint8Array(byteLength);
-    const sourceOffset = (accessor.vertexOffset || 0) * sourceStride + (accessor.offset || 0);
-
-    if (isConstant) {
-      const value = this.value as TypedArray;
-      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-      for (let i = 0; i < instanceCount; i++) {
-        target.set(bytes, i * byteStride);
-      }
-      return target;
-    }
-
-    const value = this.value as TypedArray | null;
-    if (!value) {
-      return target;
-    }
-    const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-
-    for (let i = 0; i < this.numInstances; i++) {
-      const srcStart = sourceOffset + i * sourceStride;
-      target.set(bytes.subarray(srcStart, srcStart + sourceStride), i * byteStride);
-    }
-
-    return target;
-  }
-
-  /** Writes this attribute's packed byte slice into a destination shared buffer. */
-  writePackedBuffer(buffer: Buffer, byteStride: number, byteOffset: number): void {
-    buffer.write(this.getPackedBufferData(byteStride), byteOffset);
-  }
-
   /** Generate WebGPU-style buffer layout descriptor from this attribute */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
-    modelInfo?: {isInstanced?: boolean}
+    modelInfo?: {isInstanced?: boolean; reservedVertexBufferCount?: number}
   ): BufferLayout {
     // Clear change flag
     this.state.layoutChanged = false;

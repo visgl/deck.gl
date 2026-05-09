@@ -111,12 +111,6 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Base map overlays | ❌ | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
 | Base map interleaving | ❌ | No current base map integration path supports WebGPU interleaving. |
 
-## Internal Attribute Packing
-
-WebGPU has a relatively small limit on the number of vertex buffer bindings used by a pipeline. deck.gl currently handles some of this pressure with internal layer-specific packing work, for example in parts of `TextLayer`.
-
-This is currently an internal implementation detail rather than a general custom-layer API. Public `AttributeManager` docs describe the baseline behavior.
-
 ## Background
 
 While the visible WebGPU surface is still limited, much of the groundwork has already happened in luma.gl, the GPU framework powering deck.gl. deck.gl is following that work by porting its shader modules, layers, and render features incrementally.

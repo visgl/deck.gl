@@ -88,13 +88,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     });
   }
 
-  protected _useGroupedAttributeManager(): boolean {
-    return this.context.device.type === 'webgpu';
-  }
-
   initializeState() {
-    // Pack background styling attributes into one shared buffer while keeping
-    // anchor positions separate, since they may use fp64 emulation.
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
@@ -106,38 +100,32 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceSizes: {
         size: 1,
         transition: true,
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getSize',
         defaultValue: 1
       },
       instanceAngles: {
         size: 1,
         transition: true,
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getAngle'
       },
       instanceRects: {
         size: 4,
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getBoundingRect'
       },
       instanceClipRect: {
         size: 4,
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getClipRect',
         defaultValue: [0, 0, -1, -1]
       },
       instancePixelOffsets: {
         size: 2,
         transition: true,
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getPixelOffset'
       },
       instanceFillColors: {
         size: 4,
         transition: true,
         type: 'unorm8',
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -145,18 +133,16 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 4,
         transition: true,
         type: 'unorm8',
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineWidths: {
         size: 1,
         transition: true,
-        bufferGroup: 'text-background-instance-data',
         accessor: 'getLineWidth',
         defaultValue: 1
       }
-    } as any);
+    });
   }
 
   updateState(params: UpdateParameters<this>) {

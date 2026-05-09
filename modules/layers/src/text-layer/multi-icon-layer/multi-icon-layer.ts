@@ -72,10 +72,6 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     return {...shaders, modules: [...shaders.modules, textUniforms, sdfUniforms], vs, fs};
   }
 
-  protected _useGroupedAttributeManager(): boolean {
-    return this.context.device.type === 'webgpu';
-  }
-
   initializeState() {
     super.initializeState();
 
@@ -83,49 +79,18 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const instanceIconDefs = attributeManager!.attributes.instanceIconDefs;
     // eslint-disable-next-line @typescript-eslint/unbound-method
     instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
-    // Pack non-fp64 per-glyph attributes into one shared buffer. Positions stay separate
-    // because they may require fp64 emulation and are not currently shareable.
     attributeManager!.addInstanced({
-      instanceSizes: {
-        size: 1,
-        transition: true,
-        bufferGroup: 'text-glyph-instance-data',
-        accessor: 'getSize',
-        defaultValue: 1
-      },
-      instanceColors: {
-        size: this.props.colorFormat.length,
-        type: 'unorm8',
-        transition: true,
-        bufferGroup: 'text-glyph-instance-data',
-        accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255]
-      },
-      instanceAngles: {
-        size: 1,
-        transition: true,
-        bufferGroup: 'text-glyph-instance-data',
-        accessor: 'getAngle'
-      },
-      instancePixelOffset: {
-        size: 2,
-        transition: true,
-        bufferGroup: 'text-glyph-instance-data',
-        accessor: 'getPixelOffset'
-      },
       instancePickingColors: {
         type: 'uint8',
         size: 4,
-        bufferGroup: 'text-glyph-instance-data',
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       },
       instanceClipRect: {
         size: 4,
-        bufferGroup: 'text-glyph-instance-data',
         accessor: 'getContentBox',
         defaultValue: [0, 0, -1, -1]
       }
-    } as any);
+    });
   }
 
   updateState(params: UpdateParameters<this>) {

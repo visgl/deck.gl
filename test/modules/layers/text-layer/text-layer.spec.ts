@@ -5,7 +5,6 @@
 import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
-import GroupedAttributeManager from '@deck.gl/core/lib/attribute/grouped-attribute-manager';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
@@ -163,32 +162,6 @@ test('TextLayer - special texts', () => {
           layer.state.characterSet.has('\u{F0005}'),
           'characterSet is auto populated'
         ).toBeTruthy();
-      }
-    }
-  ];
-
-  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
-});
-
-test('TextLayer - WebGPU grouped attribute manager opt-in', () => {
-  const testCases = [
-    {
-      props: {
-        data: FIXTURES.points.slice(0, 2),
-        background: true,
-        getText: d => d.ADDRESS,
-        getPosition: d => d.COORDINATES
-      },
-      onAfterUpdate: ({subLayer}) => {
-        const webgpuDevice = Object.defineProperty(Object.create(subLayer.context.device), 'type', {
-          value: 'webgpu'
-        });
-        subLayer.context.device = webgpuDevice;
-
-        const groupedManager = (subLayer as any)._getAttributeManager();
-        if (subLayer.id.endsWith('characters') || subLayer.id.endsWith('background')) {
-          expect(groupedManager).toBeInstanceOf(GroupedAttributeManager);
-        }
       }
     }
   ];

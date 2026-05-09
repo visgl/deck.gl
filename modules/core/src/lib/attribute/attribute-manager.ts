@@ -301,6 +301,8 @@ export default class AttributeManager {
     modelInfo?: {
       /** Whether the model is instanced */
       isInstanced?: boolean;
+      /** Vertex buffers already consumed by model geometry. */
+      reservedVertexBufferCount?: number;
     }
   ): BufferLayout[] {
     return Object.values(this.getAttributes()).map(attribute =>

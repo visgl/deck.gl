@@ -762,13 +762,20 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     },
     bufferLayoutChanged = false
   ) {
-    if (!Object.keys(changedAttributes).length) {
+    const attributeManager = this.getAttributeManager();
+    const hasGroupedAttributeBindings =
+      attributeManager instanceof GroupedAttributeManager && attributeManager.hasPackedBufferGroups();
+
+    if (
+      !Object.keys(changedAttributes).length &&
+      !bufferLayoutChanged &&
+      !hasGroupedAttributeBindings
+    ) {
       return;
     }
 
-    const attributeManager = this.getAttributeManager();
     if (attributeManager instanceof GroupedAttributeManager) {
-      const hasPackedBufferGroups = attributeManager.hasPackedBufferGroups();
+      const hasPackedBufferGroups = hasGroupedAttributeBindings;
 
       if (bufferLayoutChanged || hasPackedBufferGroups) {
         model.setBufferLayout(attributeManager.getBufferLayouts(model));
@@ -777,7 +784,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // @ts-ignore luma.gl type issue
       const excludeAttributes = model.userData?.excludeAttributes || {};
-      const publishedAttributes = attributeManager.getPublishedAttributes(changedAttributes);
+      const publishedAttributes = attributeManager.getPublishedAttributes(changedAttributes, model);
       const attributeBuffers: Record<string, Buffer> = {};
       const constantAttributes: Record<string, TypedArray> = {};
 

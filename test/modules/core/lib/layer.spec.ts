@@ -98,8 +98,8 @@ class PackedConstantLayer extends Layer {
 
   initializeState() {
     this.getAttributeManager()?.addInstanced({
-      instanceSizes: {size: 1, accessor: 'getSize', bufferGroup: 'group-a'},
-      instanceAngles: {size: 1, accessor: 'getAngle', bufferGroup: 'group-a'}
+      instanceSizes: {size: 1, accessor: 'getSize'},
+      instanceAngles: {size: 1, accessor: 'getAngle'}
     });
   }
 }
@@ -120,8 +120,8 @@ class PackedIndexedLayer extends Layer {
       indices: {size: 1, isIndexed: true, accessor: 'getIndex'}
     });
     this.getAttributeManager()?.addInstanced({
-      instanceSizes: {size: 1, accessor: 'getSize', bufferGroup: 'group-a'},
-      instanceAngles: {size: 1, accessor: 'getAngle', bufferGroup: 'group-a'}
+      instanceSizes: {size: 1, accessor: 'getSize'},
+      instanceAngles: {size: 1, accessor: 'getAngle'}
     });
   }
 }
@@ -344,8 +344,8 @@ test('Layer#_setModelAttributes binds grouped webgl constants through setConstan
   expect(model.setBufferLayout, 'group layouts are refreshed before binding').toHaveBeenCalledTimes(
     1
   );
-  expect(model.setAttributes, 'shared group buffer is still bound').toHaveBeenCalledWith(
-    expect.objectContaining({['group-a']: expect.anything()})
+  expect(model.setAttributes, 'accessor-driven attribute buffer is still bound').toHaveBeenCalledWith(
+    expect.objectContaining({instanceAngles: expect.anything()})
   );
   const constantAttributes = model.setConstantAttributes.mock.calls[0][0];
   expect(
@@ -377,7 +377,7 @@ test('Layer#_setModelAttributes binds unified publication results including inde
   const getPublishedAttributesSpy = vi
     .spyOn(Object.getPrototypeOf(attributeManager), 'getPublishedAttributes')
     .mockReturnValue({
-      buffers: {'group-a': {} as any},
+      buffers: {instanceAngles: {} as any},
       constants: {instanceSizes: new Float32Array([3])},
       indexBuffers: [indexBuffer]
     });
@@ -395,8 +395,8 @@ test('Layer#_setModelAttributes binds unified publication results including inde
 
   expect(
     model.setAttributes,
-    'group buffer is bound through the shared publication result'
-  ).toHaveBeenCalledWith(expect.objectContaining({['group-a']: expect.anything()}));
+    'attribute buffer is bound through the shared publication result'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
   expect(
     model.setConstantAttributes,
     'grouped constants still bind as constants'
@@ -406,6 +406,47 @@ test('Layer#_setModelAttributes binds unified publication results including inde
     'index buffer is emitted from the same publication result'
   ).toHaveBeenCalledWith(indexBuffer);
   getPublishedAttributesSpy.mockRestore();
+});
+
+test('Layer#_setModelAttributes binds grouped buffers even when changed attributes are empty', () => {
+  const layer = new PackedConstantLayer({
+    id: 'packed-constant-layer',
+    data: [
+      {angle: 10},
+      {angle: 20}
+    ],
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  attributeManager.update({
+    numInstances: 2,
+    data: layer.props.data,
+    props: layer.props,
+    transitions: {}
+  });
+
+  const model = {
+    userData: {},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, {}, false);
+
+  expect(
+    model.setBufferLayout,
+    'grouped layouts are rebound even without changed attrs'
+  ).toHaveBeenCalledTimes(1);
+  expect(
+    model.setAttributes,
+    'grouped buffers are rebound even without changed attrs'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
 });
 
 test('Layer#_setModelAttributes skips index buffers for models that exclude indices', () => {
@@ -427,7 +468,7 @@ test('Layer#_setModelAttributes skips index buffers for models that exclude indi
   const getPublishedAttributesSpy = vi
     .spyOn(Object.getPrototypeOf(attributeManager), 'getPublishedAttributes')
     .mockReturnValue({
-      buffers: {'group-a': {} as any},
+      buffers: {instanceAngles: {} as any},
       constants: {},
       indexBuffers: [indexBuffer]
     });

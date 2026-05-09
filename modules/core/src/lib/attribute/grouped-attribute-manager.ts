@@ -5,18 +5,15 @@
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
 import AttributeManager from './attribute-manager';
+import AttributeBufferPlanner, {
+  AttributeAllocationGroup
+} from './attribute-buffer-planner';
 
 import {Buffer} from '@luma.gl/core';
 import type {Device, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 import type {NumericArray, TypedArray} from '../../types/types';
-
-/** A logical attribute group that may publish as one shared vertex buffer. */
-type AttributeGroup = {
-  id: string;
-  attributes: Attribute[];
-};
 
 /** Published outputs emitted by `GroupedAttributeManager` for model binding. */
 export type GroupedPublishedAttributes = {
@@ -39,8 +36,11 @@ type PackedBufferGroupLayout = {
 /** Shared GPU buffer state for a packed attribute group. */
 type PackedBufferGroupState = {
   buffer: Buffer;
+  data: Uint8Array;
   layout: PackedBufferGroupLayout;
 };
+
+type ModelInfo = {isInstanced?: boolean; reservedVertexBufferCount?: number};
 
 export default class GroupedAttributeManager extends AttributeManager {
   private packedBuffers: Record<string, PackedBufferGroupState>;
@@ -92,7 +92,6 @@ export default class GroupedAttributeManager extends AttributeManager {
     context: any;
   }) {
     let updated = false;
-    const sharedPackedGroupIds = this._getSharedPackedGroupIds();
 
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
@@ -101,9 +100,12 @@ export default class GroupedAttributeManager extends AttributeManager {
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
       const accessorName = attribute.settings.accessor;
-      const generateAttributeBuffer =
-        !sharedPackedGroupIds.has(this._getAttributeGroupId(attribute)) ||
-        Boolean(attribute.settings.transition);
+      const usesPlannedBuffer = AttributeBufferPlanner.shouldSkipAttributeBuffer(
+        attribute,
+        undefined,
+        name => this.attributeTransitionManager.hasAttribute(name)
+      );
+      const generateAttributeBuffer = !usesPlannedBuffer;
       const generateConstantBuffer =
         generateAttributeBuffer &&
         (this.generateConstantAttributes || Boolean(attribute.settings.transition));
@@ -155,78 +157,59 @@ export default class GroupedAttributeManager extends AttributeManager {
     });
   }
 
-  override getBufferLayouts(modelInfo?: {isInstanced?: boolean}): BufferLayout[] {
-    const groups = this._getAttributeGroups(Object.values(this.getAttributes()));
+  override getBufferLayouts(modelInfo?: ModelInfo): BufferLayout[] {
+    const plan = this._getAttributeAllocationPlan(Object.values(this.getAttributes()), modelInfo);
     const layouts: BufferLayout[] = [];
 
-    for (const group of Object.values(groups)) {
-      if (group.attributes[0].settings.isIndexed) {
-        layouts.push(group.attributes[0].getBufferLayout(modelInfo));
-      } else if (this._canPackAttributes(group.attributes)) {
-        layouts.push(this._getPackedBufferGroupLayout(group, modelInfo).layout);
+    for (const group of plan.groups) {
+      if (group.kind === 'standalone') {
+        layouts.push(group.attributes[0].attribute.getBufferLayout(modelInfo));
       } else {
-        for (const attribute of group.attributes) {
-          layouts.push(attribute.getBufferLayout(modelInfo));
-        }
+        layouts.push(this._getPackedBufferGroupLayout(group, modelInfo).layout);
       }
     }
 
     return layouts;
   }
 
-  /** Returns whether any active group currently publishes as a shared packed buffer. */
+  /** Returns whether any active group currently publishes as a planner-owned buffer. */
   hasPackedBufferGroups(): boolean {
-    return this._getSharedPackedGroupIds().size > 0;
+    const plan = this._getAttributeAllocationPlan(Object.values(this.getAttributes()));
+    return plan.groups.some(group => group.kind !== 'standalone');
   }
 
   /** Publishes changed groups as vertex buffers, constants, and index buffers. */
-  getPublishedAttributes(changedAttributes: {[id: string]: Attribute}): GroupedPublishedAttributes {
-    const groups = this._getAttributeGroups(Object.values(this.getAttributes()));
+  getPublishedAttributes(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: ModelInfo
+  ): GroupedPublishedAttributes {
+    const plan = this._getAttributeAllocationPlan(Object.values(this.getAttributes()), modelInfo);
     const touchedGroupIds = new Set<string>();
     const buffers: Record<string, Buffer> = {};
     const constants: Record<string, TypedArray> = {};
     const indexBuffers: Buffer[] = [];
 
     for (const attribute of Object.values(changedAttributes)) {
-      touchedGroupIds.add(this._getAttributeGroupId(attribute));
+      for (const mapping of plan.mappingsByAttributeId[attribute.id] || []) {
+        touchedGroupIds.add(mapping.bufferName);
+      }
     }
 
-    for (const groupId of touchedGroupIds) {
-      const group = groups[groupId];
-      if (group.attributes[0].settings.isIndexed) {
-        const published = group.attributes[0].getPublishedValues();
+    for (const group of plan.groups) {
+      if (!touchedGroupIds.has(group.id)) {
+        continue;
+      }
+
+      if (group.kind === 'standalone') {
+        const published = group.attributes[0].attribute.getPublishedValues();
+        Object.assign(buffers, published.buffers);
+        Object.assign(constants, published.constants);
         if (published.indexBuffer) {
           indexBuffers.push(published.indexBuffer);
         }
-      } else if (
-        group.attributes.length === 1 &&
-        (group.attributes[0].constant || group.attributes[0].isConstant) &&
-        !this.generateConstantAttributes
-      ) {
-        Object.assign(constants, group.attributes[0].getPublishedValues().constants);
-      } else if (
-        group.attributes.length === 1 &&
-        !(group.attributes[0].constant || group.attributes[0].isConstant)
-      ) {
-        const published = group.attributes[0].getPublishedValues(group.id);
-        Object.assign(buffers, published.buffers);
-        Object.assign(constants, published.constants);
-      } else if (this._canPackAttributes(group.attributes)) {
-        const layout = this._getPackedBufferGroupLayout(group);
-        buffers[group.id] = this._updatePackedBufferGroup(group, layout, changedAttributes);
-        if (!this.generateConstantAttributes) {
-          for (const attribute of group.attributes) {
-            if (attribute.constant || attribute.isConstant) {
-              Object.assign(constants, attribute.getPublishedValues().constants);
-            }
-          }
-        }
       } else {
-        for (const attribute of group.attributes) {
-          const published = attribute.getPublishedValues();
-          Object.assign(buffers, published.buffers);
-          Object.assign(constants, published.constants);
-        }
+        const layout = this._getPackedBufferGroupLayout(group, modelInfo);
+        buffers[group.id] = this._updatePackedBufferGroup(group, layout, changedAttributes);
       }
     }
 
@@ -234,8 +217,11 @@ export default class GroupedAttributeManager extends AttributeManager {
   }
 
   /** Backwards-compatible helper for callers that only need published vertex buffers. */
-  getPackedBufferAttributes(changedAttributes: {[id: string]: Attribute}): Record<string, Buffer> {
-    return this.getPublishedAttributes(changedAttributes).buffers;
+  getPackedBufferAttributes(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: ModelInfo
+  ): Record<string, Buffer> {
+    return this.getPublishedAttributes(changedAttributes, modelInfo).buffers;
   }
 
   /** Updates one attribute while controlling whether it should materialize its own GPU buffer. */
@@ -268,93 +254,62 @@ export default class GroupedAttributeManager extends AttributeManager {
     }
   }
 
-  /** Returns the ids of groups that can skip standalone attribute buffers during update. */
-  private _getSharedPackedGroupIds(): Set<string> {
-    const groups = this._getAttributeGroups(Object.values(this.attributes));
-    const groupIds = new Set<string>();
+  private _getAttributeAllocationPlan(attributes: Attribute[], modelInfo?: ModelInfo) {
+    const reservedVertexBufferCount =
+      modelInfo?.reservedVertexBufferCount ??
+      ((modelInfo as {_gpuGeometry?: {bufferLayout?: BufferLayout[]}} | undefined)?._gpuGeometry
+        ?.bufferLayout?.length ||
+        0);
 
-    for (const group of Object.values(groups)) {
-      const stepMode = group.attributes[0].getBufferLayout().stepMode as 'vertex' | 'instance';
-      if (
-        group.attributes.length > 1 &&
-        group.attributes.every(attribute => attribute.supportsPackedBuffer(stepMode))
-      ) {
-        groupIds.add(group.id);
-      }
-    }
-
-    return groupIds;
-  }
-
-  /** Returns the logical publication group id for an attribute. */
-  private _getAttributeGroupId(attribute: Attribute): string {
-    if (
-      attribute.settings.isIndexed ||
-      this.attributeTransitionManager.hasAttribute(attribute.id)
-    ) {
-      return attribute.id;
-    }
-    return attribute.settings.bufferGroup || attribute.id;
-  }
-
-  /** Builds stable, lexically ordered publication groups from a set of attributes. */
-  private _getAttributeGroups(attributes: Attribute[]): Record<string, AttributeGroup> {
-    const groups: Record<string, AttributeGroup> = {};
-
-    for (const attribute of attributes) {
-      const groupId = this._getAttributeGroupId(attribute);
-      if (!groups[groupId]) {
-        groups[groupId] = {id: groupId, attributes: []};
-      }
-      groups[groupId].attributes.push(attribute);
-    }
-
-    for (const group of Object.values(groups)) {
-      group.attributes.sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    return groups;
-  }
-
-  /** Returns whether all members in a group can publish through one packed buffer. */
-  private _canPackAttributes(attributes: Attribute[]): boolean {
-    if (!attributes.length) {
-      return false;
-    }
-    const stepMode = attributes[0].getBufferLayout().stepMode as 'vertex' | 'instance';
-    return attributes.every(
-      attribute => attribute.canBePacked() && attribute.supportsPackedBuffer(stepMode)
-    );
+    return AttributeBufferPlanner.getAllocationPlan({
+      device: this.device,
+      attributes,
+      modelInfo: modelInfo && {...modelInfo, reservedVertexBufferCount},
+      generateConstantAttributes: this.generateConstantAttributes,
+      isTransitionAttribute: name => this.attributeTransitionManager.hasAttribute(name)
+    });
   }
 
   /** Builds the shared buffer layout metadata for one packed attribute group. */
   private _getPackedBufferGroupLayout(
-    group: AttributeGroup,
-    modelInfo?: {isInstanced?: boolean}
+    group: AttributeAllocationGroup,
+    modelInfo?: ModelInfo
   ): PackedBufferGroupLayout {
-    const byteStride = Math.max(
-      ...group.attributes.map(attribute => attribute.getPackedBufferStride())
+    const byteStride = group.attributes.reduce(
+      (stride, {attribute, fp64Component}) =>
+        stride + attribute.getPackedBufferStride(fp64Component ?? null),
+      0
     );
-    const stepMode = group.attributes[0].getBufferLayout(modelInfo).stepMode as
-      | 'vertex'
-      | 'instance';
+    const rowCount =
+      group.rowCount ?? Math.max(1, ...group.attributes.map(({attribute}) => attribute.numInstances));
+    const stepMode =
+      group.kind === 'constants'
+        ? 'vertex'
+        : (group.attributes[0].attribute.getBufferLayout(modelInfo).stepMode as
+            | 'vertex'
+            | 'instance');
     const attributes: BufferAttributeLayout[] = [];
     const attributeOffsets: Record<string, number> = {};
     const attributeNames: string[] = [];
     let byteOffset = 0;
 
-    for (const attribute of group.attributes) {
-      const layout = attribute.getPackedBufferLayout(byteStride, byteOffset, this.device.type);
+    for (const {attribute, fp64Component} of group.attributes) {
+      const layout = attribute.getPackedBufferLayout(
+        byteStride,
+        byteOffset,
+        this.device.type,
+        fp64Component ?? null
+      );
       attributes.push(...layout.attributes);
       Object.assign(attributeOffsets, layout.attributeOffsets);
       attributeNames.push(...layout.attributeNames);
-      byteOffset += attribute.getPackedBufferByteLength(byteStride);
+      byteOffset += attribute.getPackedBufferStride(fp64Component ?? null);
     }
 
     return {
       id: group.id,
       byteStride,
-      byteLength: byteOffset,
+      byteLength: byteStride * (rowCount + 2),
       stepMode,
       attributeOffsets,
       attributeNames,
@@ -364,13 +319,14 @@ export default class GroupedAttributeManager extends AttributeManager {
 
   /** Allocates or updates the shared GPU buffer for one packed attribute group. */
   private _updatePackedBufferGroup(
-    group: AttributeGroup,
+    group: AttributeAllocationGroup,
     layout: PackedBufferGroupLayout,
     changedAttributes: {[id: string]: Attribute}
   ): Buffer {
     let state: PackedBufferGroupState | undefined = this.packedBuffers[group.id];
     let buffer = state?.buffer;
     const layoutChanged = !state || !this._packedBufferGroupLayoutEquals(state.layout, layout);
+    let rewriteAll = layoutChanged;
 
     if (!buffer || buffer.byteLength < layout.byteLength) {
       buffer?.delete();
@@ -380,19 +336,25 @@ export default class GroupedAttributeManager extends AttributeManager {
         byteLength: layout.byteLength
       });
       state = undefined;
+      rewriteAll = true;
     }
 
-    for (const attribute of group.attributes) {
-      if (!layoutChanged && state && !changedAttributes[attribute.id]) {
+    const data = rewriteAll ? new Uint8Array(layout.byteLength) : state!.data;
+    for (const {attribute, fp64Component} of group.attributes) {
+      if (!rewriteAll && state && !changedAttributes[attribute.id]) {
         continue;
       }
-      if ((attribute.constant || attribute.isConstant) && !this.generateConstantAttributes) {
-        continue;
-      }
-      attribute.writePackedBuffer(buffer, layout.byteStride, layout.attributeOffsets[attribute.id]);
+      const attributeName = fp64Component === 'low' ? `${attribute.id}64Low` : attribute.id;
+      attribute.writeToPackedBuffer(data, {
+        byteStride: layout.byteStride,
+        byteOffset: layout.attributeOffsets[attributeName],
+        rowCount: group.rowCount ?? attribute.numInstances,
+        fp64Component: fp64Component ?? null
+      });
     }
 
-    this.packedBuffers[group.id] = {buffer, layout};
+    buffer.write(data, 0);
+    this.packedBuffers[group.id] = {buffer, data, layout};
     return buffer;
   }
 

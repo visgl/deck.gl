@@ -115,6 +115,13 @@ export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
   defaultType: TypedArrayConstructor;
 };
 
+export type PackedBufferWriteOptions = {
+  byteStride: number;
+  byteOffset: number;
+  rowCount: number;
+  fp64Component?: 'high' | 'low' | null;
+};
+
 type DataColumnInternalState<Options, State> = State & {
   externalBuffer: Buffer | null;
   bufferAccessor: DataColumnSettings<Options>;
@@ -316,6 +323,57 @@ export default class DataColumn<Options, State> {
 
   getAccessor(): DataColumnSettings<Options> {
     return this.state.bufferAccessor;
+  }
+
+  writeToPackedBuffer(
+    target: Uint8Array,
+    {byteStride, byteOffset, rowCount, fp64Component = null}: PackedBufferWriteOptions
+  ): void {
+    const value = this.value as TypedArray | null;
+    if (!value) {
+      return;
+    }
+
+    if (this.doublePrecision && fp64Component) {
+      const row = new Float32Array(this.size);
+      const rowBytes = new Uint8Array(row.buffer);
+      const source = value as Float32Array | Float64Array;
+      const isConstant = this.state.constant;
+
+      for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+        const sourceIndex = (isConstant ? 0 : rowIndex) * this.size;
+        for (let componentIndex = 0; componentIndex < this.size; componentIndex++) {
+          row[componentIndex] =
+            fp64Component === 'low' ? 0 : source[sourceIndex + componentIndex] || 0;
+        }
+        target.set(rowBytes, rowIndex * byteStride + byteOffset);
+      }
+      return;
+    }
+
+    const accessor = this.getAccessor();
+    const sourceStride = getStride(accessor);
+    const sourceOffset = accessor.offset || 0;
+    const source = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+    const isConstant = this.state.constant;
+
+    if (isConstant) {
+      const rowBytes = source.subarray(0, Math.min(sourceStride, source.byteLength));
+      for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+        const targetStart = rowIndex * byteStride + byteOffset;
+        target.fill(0, targetStart, targetStart + sourceStride);
+        target.set(rowBytes, targetStart);
+      }
+      return;
+    }
+
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+      const sourceStart = sourceOffset + rowIndex * sourceStride;
+      const rowBytes = source.subarray(sourceStart, sourceStart + sourceStride);
+      const targetStart = rowIndex * byteStride + byteOffset;
+      target.fill(0, targetStart, targetStart + sourceStride);
+      target.set(rowBytes, targetStart);
+    }
   }
 
   // Returns [min: Array(size), max: Array(size)]

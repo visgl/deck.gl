@@ -29,6 +29,7 @@ The application provided update functions describe how attributes should be upda
 
 Note that the attribute manager intentionally does not do advanced change detection, but instead makes it easy to build such detection by offering the ability to "invalidate" each attribute separately.
 
+
 ### Accessors, Shallow Comparisons and updateTriggers
 
 The layer will expect each object to provide a number of "attributes" that it can use to set the GL buffers. By default, the layer will look for these attributes to be available as fields directly on the objects during iteration over the supplied data set. To gain more control of attribute access and/or to do on-the-fly calculation of attributes.
@@ -47,6 +48,7 @@ While most apps rely on their layers to automatically generate appropriate GPU b
 While this allows for ultimate performance and control of updates, as well as potential sharing of buffers between layers, the application will need to generate attributes in exactly the format that the layer shaders expect, creating a strong coupling between the application and the layer.
 
 **Note:** The application can provide some buffers and let others be managed by the layer. As an example management of the `instancePickingColors` buffer is normally left to the layer.
+
 
 ## More information
 

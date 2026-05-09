@@ -194,7 +194,7 @@ test('Attribute#setConstantValue', () => {
   ).toBeTruthy();
 });
 
-test('Attribute#packed buffer helpers - layout and byte length', () => {
+test('Attribute#packed buffer helpers - layout', () => {
   const attribute = new Attribute(device, {
     id: 'instancePositions',
     size: 2,
@@ -220,9 +220,6 @@ test('Attribute#packed buffer helpers - layout and byte length', () => {
 
   expect(attribute.canBePacked(), 'regular float attribute is packable').toBeTruthy();
   expect(attribute.getPackedBufferStride(), 'packed stride defaults to accessor stride').toBe(8);
-  expect(attribute.getPackedBufferByteLength(16), 'packed byte length includes padding rows').toBe(
-    80
-  );
 
   const layout = attribute.getPackedBufferLayout(16, 32, device.type);
   expect(layout.attributeNames).toEqual(['instancePositions', 'instancePositions64Low']);
@@ -230,44 +227,6 @@ test('Attribute#packed buffer helpers - layout and byte length', () => {
   expect(layout.attributeOffsets.instancePositions64Low).toBe(40);
 
   attribute.delete();
-});
-
-test('Attribute#packed buffer helpers - packed bytes', () => {
-  let attribute = new Attribute(device, {
-    id: 'instanceSizes',
-    size: 1,
-    accessor: 'getSize'
-  });
-
-  attribute.numInstances = 2;
-  attribute.allocate(2);
-  attribute.updateBuffer({
-    numInstances: 2,
-    data: [{size: 1}, {size: 2}],
-    props: {
-      getSize: (x: {size: number}) => x.size
-    }
-  });
-
-  let buffer = device.createBuffer({byteLength: 16, usage: Buffer.VERTEX | Buffer.COPY_DST});
-  attribute.writePackedBuffer(buffer, 8, 0);
-  let bytes = buffer.readSyncWebGL(0, 16);
-  expect(Array.from(new Float32Array(bytes.buffer))).toEqual([1, 0, 2, 0]);
-  buffer.delete();
-  attribute.delete();
-
-  attribute = new Attribute(device, {
-    id: 'instanceSizes',
-    size: 1,
-    accessor: 'getSize'
-  });
-  attribute.setConstantValue(this, [3]);
-
-  buffer = device.createBuffer({byteLength: 8, usage: Buffer.VERTEX | Buffer.COPY_DST});
-  attribute.writePackedBuffer(buffer, 8, 0);
-  bytes = buffer.readSyncWebGL(0, 8);
-  expect(Array.from(new Float32Array(bytes.buffer))).toEqual([3, 0]);
-  buffer.delete();
 });
 
 test('Attribute#getPublishedValues', () => {
