@@ -26,16 +26,14 @@ import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms'
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
 import source from './point-cloud-layer.wgsl';
-import type {MeshAttributes} from '@loaders.gl/schema';
+import type {Mesh} from '@loaders.gl/schema';
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 const DEFAULT_NORMAL = [0, 0, 1] as const;
 
-export type LoadersGLPointCloudData = {
-  header: {
-    vertexCount: number;
-  };
-  attributes: MeshAttributes;
+export type LoadersGLPointCloudData = Partial<Mesh> & {
+  header: {vertexCount: number};
+  attributes: Mesh['attributes'];
 };
 
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
