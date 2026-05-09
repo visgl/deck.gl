@@ -339,7 +339,10 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _getModels() {
     const shaders = this.getShaders();
-    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
+    const bufferLayout = this.getAttributeManager()!.getBufferLayouts({
+      isInstanced: true,
+      reservedVertexBufferCount: 1
+    });
 
     const fillModel = new Model(this.context.device, {
       ...shaders,

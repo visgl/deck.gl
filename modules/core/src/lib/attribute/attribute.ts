@@ -15,7 +15,8 @@ import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
-import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/core';
+import type {Device, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -45,10 +46,17 @@ export type Updater = (
   }
 ) => void;
 
+/**
+ * Attribute configuration used by {@link AttributeManager}.
+ */
+export type BufferLayoutPriority = 'high' | 'medium' | 'low';
+
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
+  /** Hint used by `AttributeManager` when assigning attributes to vertex buffers. */
+  bufferLayoutPriority?: BufferLayoutPriority;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
@@ -173,7 +181,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     this.state.needsRedraw = this.state.needsRedraw || reason;
   }
 
-  allocate(numInstances: number): boolean {
+  /**
+   * Allocates CPU storage for this attribute and optionally its standalone GPU buffer.
+   *
+   * `generateBuffer: false` is used by the table-buffer path when an attribute's
+   * CPU value will be copied into a planner-owned packed buffer instead.
+   */
+  allocate(numInstances: number, generateBuffer: boolean = true): boolean {
     const {state, settings} = this;
 
     if (settings.noAlloc) {
@@ -182,23 +196,31 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     if (settings.update) {
-      super.allocate(numInstances, state.updateRanges !== range.FULL);
+      super.allocate(numInstances, state.updateRanges !== range.FULL, generateBuffer);
       return true;
     }
 
     return false;
   }
 
+  /**
+   * Runs the updater and uploads changed data.
+   *
+   * When `generateBuffer` is false, the CPU typed array is updated but no
+   * standalone GPU buffer is created or written.
+   */
   updateBuffer({
     numInstances,
     data,
     props,
-    context
+    context,
+    generateBuffer = true
   }: {
     numInstances: number;
     data: any;
     props: any;
     context: any;
+    generateBuffer?: boolean;
   }): boolean {
     if (!this.needsUpdate()) {
       return false;
@@ -218,20 +240,18 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       if (!this.value) {
         // no value was assigned during update
       } else if (
+        !generateBuffer ||
         this.constant ||
         !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
-        if (this.constant) {
-          // Route constant updater output through the same path used by constant accessors
-          // so WebGPU can materialize a real buffer while WebGL keeps a constant attribute.
-          this.setConstantValue(context, this.value);
-        } else {
-          this.setData({
+        this.setData(
+          {
             value: this.value,
             constant: this.constant
-          });
-        }
+          },
+          generateBuffer
+        );
         // Setting attribute.constant in updater is a legacy approach that interferes with allocation in the next cycle
         // Respect it here but reset after use
         this.constant = false;
@@ -258,9 +278,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return updated;
   }
 
-  // Use generic value
-  // Returns true if successful
-  setConstantValue(context: any, value?: any): boolean {
+  /**
+   * Sets a constant accessor value.
+   *
+   * If `generateBuffer` is omitted, this preserves the legacy behavior: WebGL
+   * keeps a constant attribute and WebGPU schedules buffer regeneration. If it
+   * is supplied, the caller explicitly controls whether to materialize a GPU
+   * buffer for planner-managed paths.
+   */
+  setConstantValue(context: any, value?: any, generateBuffer?: boolean): boolean {
     if (value === undefined || typeof value === 'function') {
       return false;
     }
@@ -268,10 +294,29 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
 
+    if (generateBuffer !== undefined) {
+      if (!generateBuffer) {
+        const hasChanged = this.setData({constant: true, value: transformedValue}, false);
+        this.constant = false;
+        this.clearNeedsUpdate();
+
+        if (hasChanged) {
+          this.setNeedsRedraw();
+        }
+
+        return hasChanged;
+      }
+
+      return this.setConstantBufferValue(transformedValue, this.numInstances, generateBuffer);
+    }
+
     if (this.device.type === 'webgpu') {
-      // WebGPU has no equivalent of WebGL constant vertex attributes, so we expand the
-      // constant into a full per-instance buffer before passing it to luma.gl.
-      return this.setConstantBufferValue(transformedValue, this.numInstances);
+      const normalizedValue = this._normalizeValue(transformedValue, [], 0);
+      // Ensure the next update cycle regenerates the emulated constant buffer.
+      if (!this._areValuesEqual(normalizedValue, this.value)) {
+        this.setNeedsUpdate('WebGPU constant updated');
+      }
+      return false;
     }
 
     // WebGL can bind the normalized/transformed value directly as a constant attribute.
@@ -284,7 +329,14 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return true;
   }
 
-  setConstantBufferValue(value: any, numInstances: number): boolean {
+  /**
+   * Expands one constant value into a repeated CPU column and optionally uploads it.
+   */
+  setConstantBufferValue(
+    value: any,
+    numInstances: number,
+    generateBuffer: boolean = true
+  ): boolean {
     const ArrayType = this.settings.defaultType;
     const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
     if (this._hasConstantBufferValue(constantValue, numInstances)) {
@@ -300,7 +352,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       repeatedValue.set(constantValue, i);
     }
 
-    const hasChanged = this.setData({value: repeatedValue});
+    const hasChanged = this.setData({value: repeatedValue}, generateBuffer);
     this.constant = false;
     this.clearNeedsUpdate();
 
@@ -356,12 +408,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return true;
   }
 
-  // Binary value is a typed array packed from mapping the source data with the accessor
-  // If the returned value from the accessor is the same as the attribute value, set it directly
-  // Otherwise use the auto updater for transform/normalization
+  /**
+   * Applies a binary column supplied through `data.attributes`.
+   *
+   * If the binary layout already matches the attribute, it can be used directly.
+   * Otherwise this records a binary accessor and falls through to the updater so
+   * transform/normalization logic remains centralized.
+   */
   setBinaryValue(
     buffer?: TypedArray | Buffer | BinaryAttribute,
-    startIndices: NumericArray | null = null
+    startIndices: NumericArray | null = null,
+    generateBuffer: boolean = true
   ): boolean {
     const {state, settings} = this;
 
@@ -405,7 +462,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     this.clearNeedsUpdate();
-    this.setData(buffer);
+    this.setData(buffer, generateBuffer);
     return true;
   }
 
@@ -437,7 +494,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Generate WebGPU-style buffer layout descriptor from this attribute */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
-    modelInfo?: {isInstanced?: boolean}
+    modelInfo?: {isInstanced?: boolean; reservedVertexBufferCount?: number}
   ): BufferLayout {
     // Clear change flag
     this.state.layoutChanged = false;

@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
-import {PolygonLayer} from 'deck.gl';
+import {PolygonLayer, SolidPolygonLayer} from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -34,4 +34,23 @@ test('PolygonLayer', () => {
   });
 
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('SolidPolygonLayer top model is non-instanced', () => {
+  testLayer({
+    Layer: SolidPolygonLayer,
+    testCases: [
+      {
+        props: {
+          data: FIXTURES.polygons.slice(0, 3),
+          getPolygon: f => f,
+          getFillColor: (_f, {index}) => [index, 0, 0]
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.topModel?.isInstanced, 'top model uses row geometry mode').toBe(false);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
 });

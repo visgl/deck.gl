@@ -260,7 +260,10 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts({
+        isInstanced: false,
+        reservedVertexBufferCount: 1
+      }),
       topology: 'triangle-list',
       isInstanced: false
     });

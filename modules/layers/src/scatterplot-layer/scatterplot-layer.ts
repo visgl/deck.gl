@@ -277,7 +277,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts({
+        isInstanced: true,
+        reservedVertexBufferCount: 1
+      }),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

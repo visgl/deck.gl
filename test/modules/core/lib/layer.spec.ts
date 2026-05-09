@@ -91,6 +91,40 @@ class SubLayer3 extends Layer {
 
 SubLayer3.layerName = 'SubLayer2';
 
+class PackedConstantLayer extends Layer {
+  initializeState() {
+    this.getAttributeManager()?.addInstanced({
+      instanceSizes: {size: 1, accessor: 'getSize'},
+      instanceAngles: {size: 1, accessor: 'getAngle'}
+    });
+  }
+}
+
+PackedConstantLayer.layerName = 'PackedConstantLayer';
+PackedConstantLayer.defaultProps = {
+  getSize: {type: 'accessor', value: 1},
+  getAngle: {type: 'accessor', value: (x: {angle: number}) => x.angle}
+};
+
+class PackedIndexedLayer extends Layer {
+  initializeState() {
+    this.getAttributeManager()?.add({
+      indices: {size: 1, isIndexed: true, accessor: 'getIndex'}
+    });
+    this.getAttributeManager()?.addInstanced({
+      instanceSizes: {size: 1, accessor: 'getSize'},
+      instanceAngles: {size: 1, accessor: 'getAngle'}
+    });
+  }
+}
+
+PackedIndexedLayer.layerName = 'PackedIndexedLayer';
+PackedIndexedLayer.defaultProps = {
+  getIndex: {type: 'accessor', value: (x: {index: number}) => x.index},
+  getSize: {type: 'accessor', value: 1},
+  getAngle: {type: 'accessor', value: (x: {angle: number}) => x.angle}
+};
+
 class Extension extends LayerExtension {}
 Extension.extensionName = 'LayerExtension';
 Extension.defaultProps = {
@@ -268,6 +302,223 @@ test('Layer#diffProps#extensions', () => {
   expect(layer.getChangeFlags().somethingChanged, 'extension accessor change ignored').toBeFalsy();
 
   layer.finalizeState();
+});
+
+test('Layer#_setModelAttributes binds grouped webgl constants through setConstantAttributes', () => {
+  const layer = new PackedConstantLayer({
+    id: 'packed-constant-layer',
+    data: [{angle: 10}, {angle: 20}],
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  attributeManager.update({
+    numInstances: 2,
+    data: layer.props.data,
+    props: layer.props,
+    transitions: {}
+  });
+
+  const changedAttributes = attributeManager.getAttributes();
+  const model = {
+    userData: {},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, changedAttributes, true);
+
+  expect(model.setBufferLayout, 'group layouts are refreshed before binding').toHaveBeenCalledTimes(
+    1
+  );
+  expect(
+    model.setAttributes,
+    'accessor-driven attribute buffer is still bound'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
+  const constantAttributes = model.setConstantAttributes.mock.calls[0][0];
+  expect(
+    Array.from(constantAttributes.instanceSizes),
+    'constant group members bind as constants'
+  ).toEqual([3]);
+  expect(
+    constantAttributes.instanceAngles,
+    'accessor-driven group members stay buffer-backed'
+  ).toBeUndefined();
+});
+
+test('Layer#_setModelAttributes binds unified model binding results including index buffers', () => {
+  const layer = new PackedIndexedLayer({
+    id: 'packed-indexed-layer',
+    data: [
+      {index: 0, angle: 10},
+      {index: 1, angle: 20}
+    ],
+    getIndex: (x: {index: number}) => x.index,
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  const indexBuffer = {} as any;
+  const getModelBindingsSpy = vi
+    .spyOn(Object.getPrototypeOf(attributeManager), 'getModelBindingPlan')
+    .mockReturnValue({
+      buffers: {instanceAngles: {} as any},
+      constants: {instanceSizes: new Float32Array([3])},
+      indexBuffers: [indexBuffer],
+      bufferLayouts: []
+    });
+
+  const changedAttributes = attributeManager.getAttributes();
+  const model = {
+    userData: {},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, changedAttributes, true);
+
+  expect(
+    model.setAttributes,
+    'attribute buffer is bound through the shared model binding result'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
+  expect(
+    model.setConstantAttributes,
+    'grouped constants still bind as constants'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceSizes: expect.any(Float32Array)}));
+  expect(
+    model.setIndexBuffer,
+    'index buffer is emitted from the same model binding result'
+  ).toHaveBeenCalledWith(indexBuffer);
+  getModelBindingsSpy.mockRestore();
+});
+
+test('Layer#_setModelAttributes skips grouped binding when nothing changed', () => {
+  const layer = new PackedConstantLayer({
+    id: 'packed-constant-layer',
+    data: [{angle: 10}, {angle: 20}],
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  attributeManager.update({
+    numInstances: 2,
+    data: layer.props.data,
+    props: layer.props,
+    transitions: {}
+  });
+
+  const model = {
+    userData: {},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  const getModelBindingsSpy = vi.spyOn(
+    Object.getPrototypeOf(attributeManager),
+    'getModelBindingPlan'
+  );
+
+  (layer as any)._setModelAttributes(model, {}, false);
+
+  expect(
+    getModelBindingsSpy,
+    'no-op updates do not run the grouped planner'
+  ).not.toHaveBeenCalled();
+  expect(model.setBufferLayout, 'no-op updates do not refresh layouts').not.toHaveBeenCalled();
+  expect(model.setAttributes, 'no-op updates do not rebind buffers').not.toHaveBeenCalled();
+  getModelBindingsSpy.mockRestore();
+});
+
+test('Layer#_setModelAttributes binds grouped buffers when the model changed', () => {
+  const layer = new PackedConstantLayer({
+    id: 'packed-constant-layer',
+    data: [{angle: 10}, {angle: 20}],
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  attributeManager.update({
+    numInstances: 2,
+    data: layer.props.data,
+    props: layer.props,
+    transitions: {}
+  });
+
+  const model = {
+    userData: {},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, {}, false, true);
+
+  expect(
+    model.setBufferLayout,
+    'new models already have their constructor layout'
+  ).not.toHaveBeenCalled();
+  expect(
+    model.setAttributes,
+    'existing grouped buffers are bound to the new model'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
+});
+
+test('Layer#_setModelAttributes skips index buffers for models that exclude indices', () => {
+  const layer = new PackedIndexedLayer({
+    id: 'packed-indexed-layer',
+    data: [
+      {index: 0, angle: 10},
+      {index: 1, angle: 20}
+    ],
+    getIndex: (x: {index: number}) => x.index,
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  const indexBuffer = {} as any;
+  const getModelBindingsSpy = vi
+    .spyOn(Object.getPrototypeOf(attributeManager), 'getModelBindings')
+    .mockReturnValue({
+      buffers: {instanceAngles: {} as any},
+      constants: {},
+      indexBuffers: [indexBuffer]
+    });
+
+  const changedAttributes = attributeManager.getAttributes();
+  const model = {
+    userData: {excludeAttributes: {indices: true}},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, changedAttributes, true);
+
+  expect(model.setIndexBuffer, 'excluded index buffers are not rebound').not.toHaveBeenCalled();
+  getModelBindingsSpy.mockRestore();
 });
 
 test('Layer#use64bitPositions', () => {

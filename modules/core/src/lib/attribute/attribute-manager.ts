@@ -4,6 +4,11 @@
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
+import type {TableBufferPlannerModelInfo} from './table-buffer-planner';
+import AttributeManagerTableBuffers, {
+  type AttributeModelBindings,
+  type AttributeModelBindingPlan
+} from './attribute-manager-table-utils';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
@@ -56,6 +61,7 @@ export default class AttributeManager {
 
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
+  private tableBuffers: AttributeManagerTableBuffers;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
@@ -63,11 +69,13 @@ export default class AttributeManager {
     {
       id = 'attribute-manager',
       stats,
-      timeline
+      timeline,
+      generateConstantAttributes
     }: {
       id?: string;
       stats?: Stats;
       timeline?: Timeline;
+      generateConstantAttributes?: boolean;
     } = {}
   ) {
     this.id = id;
@@ -85,12 +93,20 @@ export default class AttributeManager {
       id: `${id}-transitions`,
       timeline
     });
+    this.tableBuffers = new AttributeManagerTableBuffers(this, {
+      generateConstantAttributes:
+        device.type === 'webgpu' ? true : (generateConstantAttributes ?? false),
+      isTransitionAttribute: name => this.attributeTransitionManager.hasAttribute(name)
+    });
 
-    // For debugging sanity, prevent uninitialized members
-    Object.seal(this);
+    // For debugging sanity, prevent uninitialized members on the base class.
+    if (new.target === AttributeManager) {
+      Object.seal(this);
+    }
   }
 
   finalize() {
+    this.tableBuffers.finalize();
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].delete();
     }
@@ -180,6 +196,7 @@ export default class AttributeManager {
   }) {
     // keep track of whether some attributes are updated
     let updated = false;
+    this.tableBuffers.updateRowGeometryAttributes(data, numInstances, startIndices);
 
     debug(TRACE_UPDATE_START, this);
     if (this.stats) {
@@ -192,6 +209,9 @@ export default class AttributeManager {
       attribute.startIndices = startIndices;
       attribute.numInstances = numInstances;
 
+      const {generateAttributeBuffer, generateConstantBuffer} =
+        this.tableBuffers.getAttributeUpdateOptions(attribute);
+
       if (props[attributeName]) {
         log.removed(`props.${attributeName}`, `data.attributes.${attributeName}`)();
       }
@@ -201,14 +221,15 @@ export default class AttributeManager {
       } else if (
         attribute.setBinaryValue(
           typeof accessorName === 'string' ? buffers[accessorName] : undefined,
-          data.startIndices
+          data.startIndices,
+          generateAttributeBuffer
         )
       ) {
         // Step 2: try set packed value from external typed array
       } else if (
         typeof accessorName === 'string' &&
         !buffers[accessorName] &&
-        attribute.setConstantValue(context, props[accessorName])
+        attribute.setConstantValue(context, props[accessorName], generateConstantBuffer)
       ) {
         // Step 3: try set constant value from props
         // Note: if buffers[accessorName] is supplied, ignore props[accessorName]
@@ -221,7 +242,9 @@ export default class AttributeManager {
           numInstances,
           data,
           props,
-          context
+          context,
+          generateAttributeBuffer,
+          generateConstantBuffer
         });
       }
 
@@ -296,14 +319,26 @@ export default class AttributeManager {
   /** Generate WebGPU-style buffer layout descriptors from all attributes */
   getBufferLayouts(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
-    modelInfo?: {
-      /** Whether the model is instanced */
-      isInstanced?: boolean;
-    }
+    modelInfo?: TableBufferPlannerModelInfo
   ): BufferLayout[] {
-    return Object.values(this.getAttributes()).map(attribute =>
-      attribute.getBufferLayout(modelInfo)
-    );
+    return this.tableBuffers.getBufferLayouts(modelInfo);
+  }
+
+  /** Resolves changed groups into vertex buffers, constants, and index buffers for a model. */
+  getModelBindings(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: TableBufferPlannerModelInfo
+  ): AttributeModelBindings {
+    return this.tableBuffers.getModelBindings(changedAttributes, modelInfo);
+  }
+
+  /** Resolves model bindings and layout information from one planner pass. */
+  getModelBindingPlan(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: TableBufferPlannerModelInfo,
+    options?: {includeAllAttributes?: boolean}
+  ): AttributeModelBindingPlan {
+    return this.tableBuffers.getModelBindingPlan(changedAttributes, modelInfo, options);
   }
 
   // PRIVATE METHODS
@@ -373,24 +408,31 @@ export default class AttributeManager {
     data: any;
     props: any;
     context: any;
+    generateAttributeBuffer?: boolean;
+    generateConstantBuffer?: boolean;
   }) {
-    const {attribute, numInstances} = opts;
+    const {
+      attribute,
+      numInstances,
+      generateAttributeBuffer = true,
+      generateConstantBuffer = true
+    } = opts;
     debug(TRACE_ATTRIBUTE_UPDATE_START, attribute);
 
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
       // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
-      attribute.setConstantValue(opts.context, attribute.value);
+      attribute.setConstantValue(opts.context, attribute.value, generateConstantBuffer);
       return;
     }
 
-    if (attribute.allocate(numInstances)) {
+    if (attribute.allocate(numInstances, generateAttributeBuffer)) {
       debug(TRACE_ATTRIBUTE_ALLOCATE, attribute, numInstances);
     }
 
     // Calls update on any buffers that need update
-    const updated = attribute.updateBuffer(opts);
+    const updated = attribute.updateBuffer({...opts, generateBuffer: generateAttributeBuffer});
     if (updated) {
       this.needsRedraw = true;
       debug(TRACE_ATTRIBUTE_UPDATE_END, attribute, numInstances);

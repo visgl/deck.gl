@@ -70,6 +70,7 @@
           "developer-guide/custom-layers/primitive-layers",
           "developer-guide/custom-layers/prop-types",
           "developer-guide/custom-layers/attribute-management",
+          "developer-guide/custom-layers/table-buffer-planning",
           "developer-guide/custom-layers/writing-shaders"
         ]
       }

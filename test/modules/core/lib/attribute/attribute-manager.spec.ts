@@ -25,7 +25,6 @@ test('AttributeManager imports', () => {
 
 test('AttributeManager constructor', () => {
   const attributeManager = new AttributeManager(device);
-
   expect(attributeManager, 'AttributeManager construction successful').toBeTruthy();
 });
 
@@ -75,7 +74,6 @@ test('AttributeManager.update', () => {
 
   // Second update without invalidation, should not update
   attribute.value[1] = 2;
-
   attributeManager.update({
     numInstances: 1,
     data: [{}]
@@ -317,7 +315,6 @@ test('AttributeManager.update - external logical buffers', () => {
 
   let attribute = attributeManager.getAttributes()['positions'];
   expect(attribute.value, 'positions attribute has value').toEqual([1, 1, 2, 2]);
-
   expect(attribute.getVertexOffset(0), 'getVertexOffset returns correct result').toBe(0);
   expect(attribute.getVertexOffset(1), 'getVertexOffset returns correct result').toBe(2);
   expect(attribute.getVertexOffset(2), 'getVertexOffset returns correct result').toBe(4);
@@ -362,7 +359,6 @@ test('AttributeManager.update - external logical buffers - variable width', () =
 
   let attribute = attributeManager.getAttributes()['positions'];
   expect(attribute.value.slice(0, 6), 'positions attribute has value').toEqual([1, 1, 1, 1, 2, 2]);
-
   expect(attribute.getVertexOffset(0), 'getVertexOffset returns correct result').toBe(0);
   expect(attribute.getVertexOffset(1), 'getVertexOffset returns correct result').toBe(4);
   expect(attribute.getVertexOffset(2), 'getVertexOffset returns correct result').toBe(6);
@@ -422,7 +418,24 @@ test('AttributeManager.getBufferLayouts', () => {
       stepMode: 'vertex'
     },
     {
-      name: 'colors',
+      name: 'positions',
+      byteStride: 24,
+      attributes: [
+        {
+          attribute: 'positions',
+          format: 'float32x3',
+          byteOffset: 0
+        },
+        {
+          attribute: 'positions64Low',
+          format: 'float32x3',
+          byteOffset: 12
+        }
+      ],
+      stepMode: 'instance'
+    },
+    {
+      name: 'interleaved-shared-geometry-columns',
       byteStride: 4,
       attributes: [
         {
@@ -444,32 +457,19 @@ test('AttributeManager.getBufferLayouts', () => {
         }
       ],
       stepMode: 'instance'
-    },
-    {
-      name: 'positions',
-      byteStride: 24,
-      attributes: [
-        {
-          attribute: 'positions',
-          format: 'float32x3',
-          byteOffset: 0
-        },
-        {
-          attribute: 'positions64Low',
-          format: 'float32x3',
-          byteOffset: 12
-        }
-      ],
-      stepMode: 'instance'
     }
   ]);
 
   expect(
-    attributeManager.getBufferLayouts({isInstanced: false})[3].stepMode,
+    attributeManager
+      .getBufferLayouts({isInstanced: false})
+      .find(layout => layout.name === 'positions')?.stepMode,
     'dynamic attribute.stepMode in nonInstancedModel'
   ).toBe('vertex');
   expect(
-    attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
+    attributeManager
+      .getBufferLayouts({isInstanced: true})
+      .find(layout => layout.name === 'positions')?.stepMode,
     'dynamic attribute.stepMode in instancedModel'
   ).toBe('instance');
 });

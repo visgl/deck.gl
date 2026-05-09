@@ -348,7 +348,13 @@ export default class DataColumn<Options, State> {
     return result;
   }
 
-  // returns true if success
+  /**
+   * Assigns this column's current value, external buffer, or constant value.
+   *
+   * `createBuffer: false` keeps CPU-side value/accessor state up to date while
+   * clearing any standalone GPU buffer. The table-buffer adapter uses this when
+   * it will publish the data through planner-owned packed buffers.
+   */
   // eslint-disable-next-line max-statements
   setData(
     data:
@@ -360,7 +366,8 @@ export default class DataColumn<Options, State> {
           buffer?: Buffer;
           /** Set to `true` if supplying float values to a unorm attribute */
           normalized?: boolean;
-        } & Partial<BufferAccessor>)
+        } & Partial<BufferAccessor>),
+    createBuffer: boolean = true
   ): boolean {
     const {state} = this;
 
@@ -413,6 +420,10 @@ export default class DataColumn<Options, State> {
       state.externalBuffer = null;
       state.constant = true;
       this.value = ArrayBuffer.isView(value) ? value : new Float32Array(value);
+      if (!createBuffer && this._buffer) {
+        this._buffer.destroy();
+        this._buffer = null;
+      }
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;
@@ -443,12 +454,19 @@ export default class DataColumn<Options, State> {
 
       // A small over allocation is used as safety margin
       // Shader attributes may try to access this buffer with bigger offsets
-      const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
-      if (!buffer || buffer.byteLength < requiredBufferSize) {
-        buffer = this._createBuffer(requiredBufferSize);
-      }
+      if (!createBuffer) {
+        if (this._buffer) {
+          this._buffer.destroy();
+          this._buffer = null;
+        }
+      } else {
+        const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
+        if (!buffer || buffer.byteLength < requiredBufferSize) {
+          buffer = this._createBuffer(requiredBufferSize);
+        }
 
-      buffer.write(value, byteOffset);
+        buffer.write(value, byteOffset);
+      }
     }
 
     this.setAccessor(accessor);
@@ -478,7 +496,10 @@ export default class DataColumn<Options, State> {
     );
   }
 
-  allocate(numInstances: number, copy: boolean = false): boolean {
+  /**
+   * Allocates this column's CPU typed array and optionally its standalone GPU buffer.
+   */
+  allocate(numInstances: number, copy: boolean = false, createBuffer: boolean = true): boolean {
     const {state} = this;
     const oldValue = state.allocatedValue;
 
@@ -494,7 +515,12 @@ export default class DataColumn<Options, State> {
     const {byteOffset} = this;
     let {buffer} = this;
 
-    if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
+    if (!createBuffer) {
+      if (buffer) {
+        buffer.destroy();
+        this._buffer = null;
+      }
+    } else if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
       buffer = this._createBuffer(value.byteLength + byteOffset);
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer

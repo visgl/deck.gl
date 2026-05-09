@@ -784,10 +784,8 @@ test('pickingTest#unproject3D', async () => {
       })
     ]
   });
-
   let pickInfo = deck.pickObject({x: 250, y: 275, unproject3D: true});
   expect(pickInfo?.object, 'object is picked').toBe(VIEW_STATE);
-  console.log(`pickInfo.coordinate: ${pickInfo?.coordinate}`);
   expect(
     equals(pickInfo?.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 0.0001),
     'unprojects to 3D coordinate'
