@@ -5,7 +5,6 @@ GeoJsonLayer
 Property values in Vancouver, Canada, adapted from the deck.gl example pages.
 """
 
-
 import math
 
 import pandas as pd

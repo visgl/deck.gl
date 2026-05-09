@@ -45,13 +45,13 @@ import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
 import {Deck, OrbitView, type OrbitViewState} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 
-new Deck({
+new Deck<OrbitView[]>({
   initialViewState: {
     front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
     perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
   },
   widgets: [
-    new SplitterWidget({
+    new SplitterWidget<OrbitView[]>({
       viewLayout: {
         orientation: 'horizontal',
         views: [
@@ -85,10 +85,49 @@ function App() {
         viewLayout={{
           orientation: 'horizontal',
           views: [
-          new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
-          new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
+            new OrbitView({id: 'front', orbitAxis: 'Z', orthographic: true, controller: true}),
+            new OrbitView({id: 'perspective', orbitAxis: 'Z', controller: true})
           ]
         }}
+      />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {MapView, type MapViewState, type View} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [views, setViews] = useState<View[]>([]);
+  const [viewState, setViewState] = useState<Record<string, MapViewState>>({
+    left: {longitude: -122.4, latitude: 37.8, zoom: 11},
+    right: {longitude: -73.97, latitude: 40.77, zoom: 11}
+  });
+
+  return (
+    <DeckGL
+      views={views}
+      viewState={viewState}
+      onViewStateChange={({viewId, viewState: vs}) => {
+        setViewState(prev => ({...prev, [viewId]: vs as MapViewState}));
+      }}
+    >
+      <SplitterWidget
+        viewLayout={{
+          orientation: 'horizontal',
+          views: [
+            new MapView({id: 'left', controller: true}),
+            new MapView({id: 'right', controller: true})
+          ]
+        }}
+        onChange={setViews}
       />
     </DeckGL>
   );
@@ -102,7 +141,7 @@ function App() {
 
 ```ts
 import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
-new SplitterWidget({} satisfies SplitterWidgetProps);
+new SplitterWidget<ViewType[]>({} satisfies SplitterWidgetProps);
 ```
 
 ## Types

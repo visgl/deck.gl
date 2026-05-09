@@ -9,7 +9,7 @@ struct pickingUniforms {
   isActive: f32,
   isAttribute: f32,
   isHighlightActive: f32,
-  useFloatColors: f32,
+  useByteColors: f32,
   highlightedObjectColor: vec3<f32>,
   highlightColor: vec4<f32>,
 };
@@ -17,11 +17,11 @@ struct pickingUniforms {
 @group(0) @binding(auto) var<uniform> picking: pickingUniforms;
 
 fn picking_normalizeColor(color: vec3<f32>) -> vec3<f32> {
-  return select(color / 255.0, color, picking.useFloatColors > 0.5);
+  return select(color, color / 255.0, picking.useByteColors > 0.5);
 }
 
 fn picking_normalizeColor4(color: vec4<f32>) -> vec4<f32> {
-  return select(color / 255.0, color, picking.useFloatColors > 0.5);
+  return select(color, color / 255.0, picking.useByteColors > 0.5);
 }
 
 fn picking_isColorZero(color: vec3<f32>) -> bool {
@@ -36,7 +36,7 @@ fn picking_isColorValid(color: vec3<f32>) -> bool {
 export default {
   ...picking,
   source: sourceWGSL,
-  defaultUniforms: {...picking.defaultUniforms, useFloatColors: false},
+  defaultUniforms: {...picking.defaultUniforms, useByteColors: true},
   inject: {
     'vs:DECKGL_FILTER_GL_POSITION': `
     // for picking depth values

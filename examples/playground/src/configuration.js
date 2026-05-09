@@ -13,7 +13,6 @@ import {CARTO_LAYERS, colorBins, colorCategories, colorContinuous} from '@deck.g
 import {CARTO_SOURCES} from '@carto/api-client';
 import * as Widgets from '@deck.gl/widgets';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {GL as GLConstants} from '@luma.gl/webgl/constants';
 
 import {registerLoaders} from '@loaders.gl/core';
@@ -47,7 +46,6 @@ export default {
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    COORDINATE_SYSTEM,
     GL: GLConstants
   },
 

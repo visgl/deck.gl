@@ -52,7 +52,7 @@ function wrapInView(node: React.ReactNode | DeckGLRenderCallback): React.ReactNo
   }
   if (isComponent(node)) {
     if (node.type === React.Fragment) {
-      return wrapInView(node.props.children);
+      return wrapInView((node.props as any).children);
     }
     if (inheritsFrom(node.type, View)) {
       return node;
@@ -92,7 +92,11 @@ export default function extractJSXLayers<ViewsT extends ViewOrViews>({
       }
 
       // empty id => default view
-      if (inheritsFrom(ElementType, View) && ElementType !== View && reactElement.props.id) {
+      if (
+        inheritsFrom(ElementType, View) &&
+        ElementType !== View &&
+        (reactElement.props as any).id
+      ) {
         // @ts-ignore Cannot instantiate an abstract class (View)
         const view = new ElementType(reactElement.props);
         jsxViews[view.id] = view;

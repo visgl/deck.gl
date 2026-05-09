@@ -6,7 +6,6 @@
 
 // deck.gl ES6 components
 import {
-  COORDINATE_SYSTEM,
   MapView,
   FirstPersonView,
   OrbitView,
@@ -208,8 +207,8 @@ export default class App extends PureComponent {
     const modelMatrix = new Matrix4().translate([0, 0, 5 * index * separation]);
 
     switch (coordinateSystem) {
-      case COORDINATE_SYSTEM.METER_OFFSETS:
-      case COORDINATE_SYSTEM.CARTESIAN:
+      case 'meter-offsets':
+      case 'cartesian':
         const {
           settings: {rotationZ, rotationX}
         } = this.state;

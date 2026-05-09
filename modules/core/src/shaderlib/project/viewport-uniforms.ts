@@ -6,7 +6,7 @@
 
 import {mat4, Matrix4Like, vec4} from '@math.gl/core';
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
+import {PROJECTION_MODE} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
 
@@ -23,6 +23,23 @@ const VECTOR_TO_POINT_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
 const IDENTITY_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2: Vec3 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
+
+/** Coordinate system constants */
+const COORDINATE_SYSTEM_NUMBERS = {
+  default: -1,
+  cartesian: 0,
+  lnglat: 1,
+  'meter-offsets': 2,
+  'lnglat-offsets': 3
+} as const satisfies Record<CoordinateSystem, -1 | 0 | 1 | 2 | 3>;
+
+export function getShaderCoordinateSystem(coordinateSystem: CoordinateSystem) {
+  const shaderCoordinateSystem = COORDINATE_SYSTEM_NUMBERS[coordinateSystem];
+  if (shaderCoordinateSystem === undefined) {
+    throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
+  }
+  return shaderCoordinateSystem;
+}
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
@@ -43,10 +60,7 @@ export function getOffsetOrigin(
   let geospatialOrigin: Vec3 | null;
   let offsetMode = true;
 
-  if (
-    coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-    coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS
-  ) {
+  if (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets') {
     geospatialOrigin = coordinateOrigin;
   } else {
     geospatialOrigin = viewport.isGeospatial
@@ -57,21 +71,18 @@ export function getOffsetOrigin(
 
   switch (viewport.projectionMode) {
     case PROJECTION_MODE.WEB_MERCATOR:
-      if (
-        coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
-        coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
-      ) {
+      if (coordinateSystem === 'lnglat' || coordinateSystem === 'cartesian') {
         geospatialOrigin = [0, 0, 0];
         offsetMode = false;
       }
       break;
 
     case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
-      if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (coordinateSystem === 'lnglat') {
         // viewport center in world space
         // @ts-expect-error when using LNGLAT coordinates, we expect the viewport to be geospatial, in which case geospatialOrigin is defined
         shaderCoordinateOrigin = geospatialOrigin;
-      } else if (coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
+      } else if (coordinateSystem === 'cartesian') {
         // viewport center in common space
         shaderCoordinateOrigin = [
           Math.fround(viewport.center[0]),
@@ -223,14 +234,12 @@ export function getUniformsFromViewport({
   devicePixelRatio = 1,
   modelMatrix = null,
   // Match Layer.defaultProps
-  coordinateSystem = COORDINATE_SYSTEM.DEFAULT,
+  coordinateSystem = 'default',
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
-  if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-    coordinateSystem = viewport.isGeospatial
-      ? COORDINATE_SYSTEM.LNGLAT
-      : COORDINATE_SYSTEM.CARTESIAN;
+  if (coordinateSystem === 'default') {
+    coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
 
   const uniforms = getMemoizedViewportUniforms({
@@ -283,7 +292,7 @@ function calculateViewportUniforms({
 
   const uniforms: ProjectUniforms = {
     // Projection mode values
-    coordinateSystem,
+    coordinateSystem: getShaderCoordinateSystem(coordinateSystem),
     projectionMode: viewport.projectionMode,
     coordinateOrigin: shaderCoordinateOrigin,
     commonOrigin: originCommon.slice(0, 3) as Vec3,
@@ -324,13 +333,13 @@ function calculateViewportUniforms({
       unitsPerDegree2: Vec3;
     };
     switch (coordinateSystem) {
-      case COORDINATE_SYSTEM.METER_OFFSETS:
+      case 'meter-offsets':
         uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
         uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
         break;
 
-      case COORDINATE_SYSTEM.LNGLAT:
-      case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      case 'lnglat':
+      case 'lnglat-offsets':
         // @ts-expect-error _pseudoMeters only exists on WebMercatorView
         if (!viewport._pseudoMeters) {
           uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
@@ -340,7 +349,7 @@ function calculateViewportUniforms({
         break;
 
       // a.k.a "preprojected" positions
-      case COORDINATE_SYSTEM.CARTESIAN:
+      case 'cartesian':
         uniforms.commonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
         uniforms.commonUnitsPerWorldUnit2 = [0, 0, distanceScalesAtOrigin.unitsPerMeter2[2]];
         break;

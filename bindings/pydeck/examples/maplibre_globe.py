@@ -9,6 +9,7 @@ This example demonstrates using MapLibre's globe projection with deck.gl layers 
 map_provider='maplibre' and map_projection='globe'. The globe view uses MapLibre's
 MapboxOverlay with interleaved rendering for optimal performance.
 """
+
 import pydeck as pdk
 import pandas as pd
 

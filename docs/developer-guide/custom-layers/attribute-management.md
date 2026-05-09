@@ -49,6 +49,8 @@ While this allows for ultimate performance and control of updates, as well as po
 
 **Note:** The application can provide some buffers and let others be managed by the layer. As an example management of the `instancePickingColors` buffer is normally left to the layer.
 
+For details on the WebGPU grouped buffer planner, see [Table Buffer Planning](./table-buffer-planning.md).
+
 
 ## More information
 

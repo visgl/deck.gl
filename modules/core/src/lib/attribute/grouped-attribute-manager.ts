@@ -5,9 +5,9 @@
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
 import AttributeManager from './attribute-manager';
-import AttributeBufferPlanner, {
+import TableBufferPlanner, {
   AttributeAllocationGroup
-} from './attribute-buffer-planner';
+} from './table-buffer-planner';
 
 import {Buffer} from '@luma.gl/core';
 import type {Device, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
@@ -41,9 +41,16 @@ type PackedBufferGroupState = {
 };
 
 type ModelInfo = {isInstanced?: boolean; reservedVertexBufferCount?: number};
+type RowGeometryAttributes = {
+  rowIndex: Attribute;
+  pickingColors: Attribute;
+};
+
+function noop(): void {}
 
 export default class GroupedAttributeManager extends AttributeManager {
   private packedBuffers: Record<string, PackedBufferGroupState>;
+  private rowGeometryAttributes: RowGeometryAttributes;
   /** Controls whether constant attributes are materialized into GPU buffers. */
   readonly generateConstantAttributes: boolean;
 
@@ -63,12 +70,33 @@ export default class GroupedAttributeManager extends AttributeManager {
     this.generateConstantAttributes =
       device.type === 'webgpu' ? true : (generateConstantAttributes ?? false);
     this.packedBuffers = {};
+    this.rowGeometryAttributes = {
+      rowIndex: new Attribute(device, {
+        id: 'rowIndex',
+        size: 1,
+        type: 'uint32',
+        stepMode: 'vertex',
+        bufferLayoutPriority: 'low',
+        update: noop
+      }),
+      pickingColors: new Attribute(device, {
+        id: 'pickingColors',
+        size: 4,
+        type: 'uint8',
+        stepMode: 'vertex',
+        bufferLayoutPriority: 'low',
+        update: noop
+      })
+    };
     Object.seal(this);
   }
 
   override finalize() {
     for (const state of Object.values(this.packedBuffers)) {
       state.buffer.delete();
+    }
+    for (const attribute of Object.values(this.rowGeometryAttributes)) {
+      attribute.delete();
     }
     super.finalize();
   }
@@ -92,6 +120,7 @@ export default class GroupedAttributeManager extends AttributeManager {
     context: any;
   }) {
     let updated = false;
+    this._updateRowGeometryAttributes(data, numInstances, startIndices);
 
     if (this.stats) {
       this.stats.get('Update Attributes').timeStart();
@@ -100,7 +129,7 @@ export default class GroupedAttributeManager extends AttributeManager {
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
       const accessorName = attribute.settings.accessor;
-      const usesPlannedBuffer = AttributeBufferPlanner.shouldSkipAttributeBuffer(
+      const usesPlannedBuffer = TableBufferPlanner.shouldSkipAttributeBuffer(
         attribute,
         undefined,
         name => this.attributeTransitionManager.hasAttribute(name)
@@ -158,11 +187,11 @@ export default class GroupedAttributeManager extends AttributeManager {
   }
 
   override getBufferLayouts(modelInfo?: ModelInfo): BufferLayout[] {
-    const plan = this._getAttributeAllocationPlan(Object.values(this.getAttributes()), modelInfo);
+    const plan = this._getAttributeAllocationPlan(this._getPlanningAttributes(modelInfo), modelInfo);
     const layouts: BufferLayout[] = [];
 
     for (const group of plan.groups) {
-      if (group.kind === 'standalone') {
+      if (group.kind === 'unmanaged-attribute-column') {
         layouts.push(group.attributes[0].attribute.getBufferLayout(modelInfo));
       } else {
         layouts.push(this._getPackedBufferGroupLayout(group, modelInfo).layout);
@@ -173,9 +202,9 @@ export default class GroupedAttributeManager extends AttributeManager {
   }
 
   /** Returns whether any active group currently publishes as a planner-owned buffer. */
-  hasPackedBufferGroups(): boolean {
-    const plan = this._getAttributeAllocationPlan(Object.values(this.getAttributes()));
-    return plan.groups.some(group => group.kind !== 'standalone');
+  hasPackedBufferGroups(modelInfo?: ModelInfo): boolean {
+    const plan = this._getAttributeAllocationPlan(this._getPlanningAttributes(modelInfo), modelInfo);
+    return plan.groups.some(group => group.kind !== 'unmanaged-attribute-column');
   }
 
   /** Publishes changed groups as vertex buffers, constants, and index buffers. */
@@ -183,7 +212,8 @@ export default class GroupedAttributeManager extends AttributeManager {
     changedAttributes: {[id: string]: Attribute},
     modelInfo?: ModelInfo
   ): GroupedPublishedAttributes {
-    const plan = this._getAttributeAllocationPlan(Object.values(this.getAttributes()), modelInfo);
+    changedAttributes = this._getChangedAttributesWithGenerated(changedAttributes, modelInfo);
+    const plan = this._getAttributeAllocationPlan(this._getPlanningAttributes(modelInfo), modelInfo);
     const touchedGroupIds = new Set<string>();
     const buffers: Record<string, Buffer> = {};
     const constants: Record<string, TypedArray> = {};
@@ -200,7 +230,7 @@ export default class GroupedAttributeManager extends AttributeManager {
         continue;
       }
 
-      if (group.kind === 'standalone') {
+      if (group.kind === 'unmanaged-attribute-column') {
         const published = group.attributes[0].attribute.getPublishedValues();
         Object.assign(buffers, published.buffers);
         Object.assign(constants, published.constants);
@@ -261,13 +291,84 @@ export default class GroupedAttributeManager extends AttributeManager {
         ?.bufferLayout?.length ||
         0);
 
-    return AttributeBufferPlanner.getAllocationPlan({
+    return TableBufferPlanner.getAllocationPlan({
       device: this.device,
       attributes,
       modelInfo: modelInfo && {...modelInfo, reservedVertexBufferCount},
       generateConstantAttributes: this.generateConstantAttributes,
       isTransitionAttribute: name => this.attributeTransitionManager.hasAttribute(name)
     });
+  }
+
+  private _getPlanningAttributes(modelInfo?: ModelInfo): Attribute[] {
+    const attributes = Object.values(this.getAttributes());
+
+    if (!this._isRowGeometryMode(modelInfo)) {
+      return attributes;
+    }
+
+    if (!this.attributes.rowIndex) {
+      attributes.push(this.rowGeometryAttributes.rowIndex);
+    }
+    if (!this.attributes.pickingColors) {
+      attributes.push(this.rowGeometryAttributes.pickingColors);
+    }
+
+    return attributes;
+  }
+
+  private _getChangedAttributesWithGenerated(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: ModelInfo
+  ): {[id: string]: Attribute} {
+    if (!this._isRowGeometryMode(modelInfo)) {
+      return changedAttributes;
+    }
+
+    const attributes = {...changedAttributes};
+    if (!this.attributes.rowIndex) {
+      attributes.rowIndex = this.rowGeometryAttributes.rowIndex;
+    }
+    if (!this.attributes.pickingColors) {
+      attributes.pickingColors = this.rowGeometryAttributes.pickingColors;
+    }
+    return attributes;
+  }
+
+  private _isRowGeometryMode(modelInfo?: ModelInfo): boolean {
+    return modelInfo?.isInstanced === false;
+  }
+
+  private _updateRowGeometryAttributes(
+    data: any,
+    numInstances: number,
+    startIndices: NumericArray | null
+  ): void {
+    const rowStarts = startIndices || data?.startIndices || null;
+    const rowIndex = new Uint32Array(Math.max(numInstances, 1));
+    const pickingColors = new Uint8ClampedArray(Math.max(numInstances, 1) * 4);
+    const rowCount = rowStarts ? Math.max(0, rowStarts.length - 1) : numInstances;
+
+    for (let row = 0; row < rowCount; row++) {
+      const start = rowStarts ? rowStarts[row] : row;
+      const end = rowStarts
+        ? row + 1 < rowStarts.length
+          ? rowStarts[row + 1]
+          : numInstances
+        : row + 1;
+      const objectIndex = getSourceIndex(data, row);
+      const pickingColorIndex = objectIndex ?? row;
+
+      for (let vertex = start; vertex < end; vertex++) {
+        rowIndex[vertex] = row;
+        encodePickingColor(pickingColorIndex, pickingColors, vertex * 4);
+      }
+    }
+
+    this.rowGeometryAttributes.rowIndex.numInstances = numInstances;
+    this.rowGeometryAttributes.pickingColors.numInstances = numInstances;
+    this.rowGeometryAttributes.rowIndex.setData({value: rowIndex}, false);
+    this.rowGeometryAttributes.pickingColors.setData({value: pickingColors}, false);
   }
 
   /** Builds the shared buffer layout metadata for one packed attribute group. */
@@ -283,11 +384,8 @@ export default class GroupedAttributeManager extends AttributeManager {
     const rowCount =
       group.rowCount ?? Math.max(1, ...group.attributes.map(({attribute}) => attribute.numInstances));
     const stepMode =
-      group.kind === 'constants'
-        ? 'vertex'
-        : (group.attributes[0].attribute.getBufferLayout(modelInfo).stepMode as
-            | 'vertex'
-            | 'instance');
+      group.stepMode ??
+      (group.attributes[0].attribute.getBufferLayout(modelInfo).stepMode as 'vertex' | 'instance');
     const attributes: BufferAttributeLayout[] = [];
     const attributeOffsets: Record<string, number> = {};
     const attributeNames: string[] = [];
@@ -384,4 +482,17 @@ export default class GroupedAttributeManager extends AttributeManager {
 
     return true;
   }
+}
+
+function encodePickingColor(index: number, target: Uint8ClampedArray, offset: number): void {
+  const colorIndex = index + 1;
+  target[offset + 0] = colorIndex & 255;
+  target[offset + 1] = (colorIndex >> 8) & 255;
+  target[offset + 2] = (colorIndex >> 16) & 255;
+  target[offset + 3] = 0;
+}
+
+function getSourceIndex(data: any, row: number): number | null {
+  const object = Array.isArray(data) ? data[row] : data?.[row];
+  return Number.isFinite(object?.__source?.index) ? object.__source.index : null;
 }

@@ -16,7 +16,7 @@ import {
 import {Deck} from '@deck.gl/core';
 
 import type {DeckProps, MapViewState} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
+import type {Device, Framebuffer} from '@luma.gl/core';
 const HIDE_ALL_LAYERS = () => false;
 const GL_STATE: GLParameters = {
   depthMask: true,
@@ -55,6 +55,10 @@ export default class GoogleMapsOverlay {
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
   private _positioningOverlay: google.maps.OverlayView | null = null;
+  private _externalFramebuffer: {
+    handle: WebGLFramebuffer;
+    wrapper: import('@luma.gl/core').Framebuffer;
+  } | null = null;
 
   constructor(props: GoogleMapsOverlayProps) {
     this.setProps({...defaultProps, ...props});
@@ -320,9 +324,23 @@ export default class GoogleMapsOverlay {
       const device: Device = deck.device;
 
       // As an optimization, some renders are to an separate framebuffer
-      // which we need to pass onto deck
+      // which we need to pass onto deck. Wrap external handle so luma.gl
+      // treats it as a proper Framebuffer resource.
       if (device instanceof WebGLDevice) {
-        const _framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+        const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+        let _framebuffer: Framebuffer | null = null;
+        if (externalFbo) {
+          if (this._externalFramebuffer?.handle !== externalFbo) {
+            this._externalFramebuffer?.wrapper.destroy();
+            const wrapper = device.createFramebuffer({
+              handle: externalFbo,
+              width: gl.canvas.width,
+              height: gl.canvas.height
+            });
+            this._externalFramebuffer = {handle: externalFbo, wrapper};
+          }
+          _framebuffer = this._externalFramebuffer!.wrapper;
+        }
         deck.setProps({_framebuffer});
       }
 

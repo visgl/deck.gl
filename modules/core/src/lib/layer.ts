@@ -5,7 +5,6 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
-import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import GroupedAttributeManager from './attribute/grouped-attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -139,7 +138,7 @@ const defaultProps: DefaultProps<LayerProps> = {
   onDrag: {type: 'function', value: null, optional: true},
   onDragEnd: {type: 'function', value: null, optional: true},
 
-  coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+  coordinateSystem: 'default',
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
   modelMatrix: {type: 'array', value: null, compare: true, optional: true},
   wrapLongitude: false,
@@ -359,9 +358,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
-      coordinateSystem === COORDINATE_SYSTEM.DEFAULT ||
-      coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
-      coordinateSystem === COORDINATE_SYSTEM.CARTESIAN
+      coordinateSystem === 'default' ||
+      coordinateSystem === 'lnglat' ||
+      coordinateSystem === 'cartesian'
     );
   }
 
@@ -764,7 +763,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   ) {
     const attributeManager = this.getAttributeManager();
     const hasGroupedAttributeBindings =
-      attributeManager instanceof GroupedAttributeManager && attributeManager.hasPackedBufferGroups();
+      attributeManager instanceof GroupedAttributeManager &&
+      attributeManager.hasPackedBufferGroups(model);
 
     if (
       !Object.keys(changedAttributes).length &&
@@ -914,7 +914,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /* (Internal) Called by layer manager when a new layer is found */
   _initialize() {
     assert(!this.internalState); // finalized layer cannot be reused
-    assert(Number.isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
 
     debug(TRACE_INITIALIZE, this);
 
@@ -1290,7 +1289,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Create new attribute manager */
   protected _useGroupedAttributeManager(): boolean {
-    return false;
+    return true;
   }
 
   protected _getAttributeManager(): AttributeManager | GroupedAttributeManager | null {

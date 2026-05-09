@@ -10,7 +10,7 @@ The base `Layer` class (which is inherited by all layers) supports a `parameters
 ```js
 const layer = new ScatterplotLayer({
   ...,
-  parameters: {depthTest: false}
+  parameters: {depthCompare: 'always'}
 });
 ```
 
@@ -24,7 +24,7 @@ If you are not using 3D extrusions, the easiest way to get rid of z fighting is 
 new ...Layer({
   ...,
   parameters: {
-    depthTest: false
+    depthCompare: 'always'
   }
 });
 ```

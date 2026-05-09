@@ -9,7 +9,6 @@ from ..settings import settings as pydeck_settings
 from pydeck.types import Image, Function
 from pydeck.exceptions import BinaryTransportException
 
-
 TYPE_IDENTIFIER = "@@type"
 FUNCTION_IDENTIFIER = "@@="
 QUOTE_CHARS = {"'", '"', "`"}

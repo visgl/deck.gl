@@ -69,7 +69,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import {DeckGL, _ResetViewWidget as ResetViewWidget} from '@deck.gl/react';
+import {DeckGL, ResetViewWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {
@@ -121,6 +121,19 @@ Tooltip message displayed while hovering a mouse over the widget.
 * Default: `deck.props.initialViewState`
 
 The initial view state to reset the view to.
+
+#### `onReset` (Function, optional) {#onreset}
+
+```ts
+(params: {viewId: string; viewState: Record<string, unknown>}) => void
+```
+
+* Default: `() => {}`
+
+Callback when the reset view button is clicked.
+
+- `viewId`: The view being reset
+- `viewState`: The view state being reset to
 
 ## Styles
 

@@ -44,8 +44,8 @@ function getDimensionsFromUrl(): Partial<Dimensions> {
     result.interleaved = params.get('interleaved') !== 'false';
   }
 
-  if (params.has('batched')) {
-    result.batched = params.get('batched') !== 'false';
+  if (params.has('maskDemo')) {
+    result.maskDemo = params.get('maskDemo') === 'true';
   }
 
   if (params.has('globe')) {
@@ -77,9 +77,9 @@ function setUrlFromDimensions(dimensions: Dimensions) {
   params.set('basemap', dimensions.basemap);
   params.set('framework', dimensions.framework);
   params.set('interleaved', String(dimensions.interleaved));
-  params.set('batched', String(dimensions.batched));
   params.set('globe', String(dimensions.globe));
   params.set('multiView', String(dimensions.multiView));
+  params.set('maskDemo', String(dimensions.maskDemo));
   params.set('stressTest', dimensions.stressTest);
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', newUrl);
@@ -226,18 +226,6 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
           </label>
         </div>
 
-        {/* Batched Toggle */}
-        <div className="section">
-          <label>
-            <input
-              type="checkbox"
-              checked={dimensions.batched}
-              onChange={() => updateDimension('batched', !dimensions.batched)}
-            />
-            Batched Rendering
-          </label>
-        </div>
-
         {/* Globe Toggle */}
         <div className="section">
           <label>
@@ -259,6 +247,18 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
               onChange={() => updateDimension('multiView', !dimensions.multiView)}
             />
             Multi-View
+          </label>
+        </div>
+
+        {/* Mask Extension Demo */}
+        <div className="section">
+          <label>
+            <input
+              type="checkbox"
+              checked={dimensions.maskDemo}
+              onChange={() => updateDimension('maskDemo', !dimensions.maskDemo)}
+            />
+            Mask Extension Demo
           </label>
         </div>
 
@@ -335,7 +335,7 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
               ratios.
             </p>
             <p>
-              <b>Test Stress:</b> Enable stress test layers and compare FPS with batched on/off.
+              <b>Test Stress:</b> Enable stress test layers and compare FPS across configurations.
             </p>
           </div>
         </div>

@@ -77,6 +77,34 @@ function App() {
 ```
 
   </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import type {MapViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [viewState, setViewState] = useState<MapViewState>({
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  });
+
+  const onViewStateChange = useCallback(({viewState: vs}) => {
+    setViewState(vs as MapViewState);
+  }, []);
+
+  return (
+    <DeckGL viewState={viewState} onViewStateChange={onViewStateChange} controller>
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
 </Tabs>
 
 ## Constructor
@@ -98,6 +126,13 @@ The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
+#### `zoomAxis` (string, optional)
+
+* Default: `'all'`
+
+Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
+Only effective if the current view is an [OrthographicView](../core/orthographic-view.md).
+
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
 * Default: `'Zoom In'`
@@ -115,6 +150,22 @@ Tooltip message displayed while hovering a mouse over the zoom out button.
 * Default: `200`
 
 Zoom transition duration in milliseconds.
+
+#### `onZoom` (Function, optional) {#onzoom}
+
+```ts
+(params: {viewId: string; delta: number; zoom: number}) => void
+```
+
+* Default: `() => {}`
+
+Callback when zoom buttons are clicked. Called for each viewport that will be zoomed.
+
+- `viewId`: The view being zoomed
+- `delta`: Zoom direction (+1 for zoom in, -1 for zoom out)
+- `zoom`: The new zoom level
+- `zoomX`: The new zoom level on X axis, if used with an `OrthographicView`.
+- `zoomY`: The new zoom level on Y axis, if used with an `OrthographicView`.
 
 ## Styles
 

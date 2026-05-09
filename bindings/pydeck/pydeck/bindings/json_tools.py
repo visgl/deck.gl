@@ -1,6 +1,7 @@
 """
 Support serializing objects into JSON
 """
+
 import json
 
 from pydeck.types.base import PydeckType

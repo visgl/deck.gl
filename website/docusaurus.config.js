@@ -24,7 +24,7 @@ const config = {
       onBrokenMarkdownLinks: 'warn'
     }
   },
-  favicon: '/favicon.ico',
+  favicon: '/favicon.png',
   organizationName: 'visgl', // Usually your GitHub org/user name.
   projectName: 'deck.gl', // Usually your repo name.
   trailingSlash: false,

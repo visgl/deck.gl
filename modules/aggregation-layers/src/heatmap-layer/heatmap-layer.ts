@@ -18,7 +18,6 @@ import {
   AttributeManager,
   ChangeFlags,
   Color,
-  COORDINATE_SYSTEM,
   Layer,
   LayerContext,
   LayersList,
@@ -280,7 +279,7 @@ export default class HeatmapLayer<
       {
         // position buffer is filled with world coordinates generated from viewport.unproject
         // i.e. LNGLAT if geospatial, CARTESIAN otherwise
-        coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+        coordinateSystem: 'default',
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -528,7 +527,7 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (this.props.coordinateSystem === 'lnglat') {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -663,8 +662,7 @@ export default class HeatmapLayer<
 
     const offsetMode =
       useLayerCoordinateSystem &&
-      (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-        coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS);
+      (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
     const offsetOriginCommon = offsetMode
       ? viewport.projectPosition(this.props.coordinateOrigin)
       : [0, 0];
