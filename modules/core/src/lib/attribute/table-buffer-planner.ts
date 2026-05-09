@@ -2,67 +2,151 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import Attribute, {BufferLayoutPriority} from './attribute';
+import log from '../../utils/log';
 
 import type {Device} from '@luma.gl/core';
 
+export type TableColumnPriority = 'high' | 'medium' | 'low';
+
+/** Describes the physical GPU allocation shape chosen for a table column or group of columns. */
 export type AllocationGroupKind =
+  /** Interleaved vertex-rate columns that describe a reusable geometry shared by all table rows. */
   | 'interleaved-shared-geometry-columns'
+  /** Position columns, including multiple named position columns and fp64 high components. */
   | 'position-attribute-columns'
+  /** Interleaved small buffer for constant columns and fp64 low position components. */
   | 'interleaved-constant-attribute-columns'
+  /** One vertex-buffer binding dedicated to one attribute column. */
   | 'separate-attribute-column'
+  /** One interleaved vertex-buffer binding shared by lower-priority attribute columns. */
   | 'interleaved-attribute-columns'
+  /** One storage-buffer binding dedicated to one original table column. */
   | 'separate-storage-column'
+  /** One storage-buffer binding containing multiple whole-column slices at aligned offsets. */
   | 'stacked-storage-columns'
+  /** A column that keeps its existing external allocation/publication path. */
   | 'unmanaged-attribute-column';
 
+/** Planner modes describing how source table rows map to draw-time geometry. */
 export type TableBufferPlannerMode =
+  /** Each source table row draws one instance of reusable shared geometry. */
   | 'table-with-shared-geometry'
-  | 'table-with-inline-row-geometry';
+  /** Each source table row expands into its own inline generated vertices. */
+  | 'table-with-row-geometries';
 
-export type AttributeAllocationGroup = {
+/** One allocation group emitted by the planner. */
+export type TableBufferGroup = {
+  /** Stable buffer/group id used by downstream model-binding code. */
   id: string;
+  /** Physical allocation shape for this group. */
   kind: AllocationGroupKind;
-  attributes: PlannedAttribute[];
+  /** Vertex attribute columns or fp64 component views assigned to this group. */
+  columns: PlannedColumn[];
+  /** Number of rows to materialize for small generated buffers, such as constants. */
   rowCount?: number;
+  /** Vertex input step mode for groups whose row count is planner-owned. */
   stepMode?: 'vertex' | 'instance';
+  /** Byte length for storage-buffer groups. */
   byteLength?: number;
+  /** Per-column byte offsets for storage-buffer groups. */
   byteOffsets?: Record<string, number>;
 };
 
-export type PlannedAttribute = {
-  attribute: Attribute;
+/** A source table column available to the planner. */
+export type TableColumnDescriptor = {
+  /** Stable column id, usually the deck.gl shader attribute id. */
+  id: string;
+  /** Byte stride contributed by this column to an interleaved vertex attribute buffer. */
+  byteStride: number;
+  /** Byte length of the original column when represented as storage data. */
+  byteLength: number;
+  /** Number of rows currently materialized for this column. */
+  rowCount: number;
+  /** Vertex input step mode this column would publish to a model. */
+  stepMode: 'vertex' | 'instance';
+  /** Whether this is a geometry-defining position column. */
+  isPosition?: boolean;
+  /** Whether this column is currently a constant value. */
+  isConstant?: boolean;
+  /** Whether this column is an index buffer. */
+  isIndexed?: boolean;
+  /** Whether this column is currently controlled by transitions. */
+  isTransition?: boolean;
+  /** Whether the column is backed only by an external GPU buffer and has no CPU value to pack. */
+  isExternalBufferOnly?: boolean;
+  /** Whether this is an fp64 source column. Non-position fp64 columns are unmanaged. */
+  isDoublePrecision?: boolean;
+  /** Whether this column should avoid standalone GPU buffers. */
+  noAlloc?: boolean;
+  /** Whether `noAlloc` may be ignored because the column is generated and CPU-backed. */
+  allowNoAllocManaged?: boolean;
+  /** Whether this column can be copied into planner-owned packed buffers. */
+  supportsPackedBuffer?: boolean;
+  /** Whether this generated row-geometry column must stay as a vertex attribute. */
+  isGeneratedRowGeometry?: boolean;
+  /** Priority for receiving a separate vertex-buffer binding. */
+  priority?: TableColumnPriority;
+};
+
+/** A column view assigned to a group. Double-precision positions may produce two views. */
+export type PlannedColumn = {
+  /** Source table column id. */
+  id: string;
+  /** Selects the fp64 high or low component view for position columns. */
   fp64Component?: 'high' | 'low';
 };
 
-export type AttributeAllocationPlan = {
-  groups: AttributeAllocationGroup[];
-  groupsByAttributeId: Record<string, AttributeAllocationGroup[]>;
-  mappingsByAttributeId: Record<string, AttributeBufferMapping[]>;
-  packedAttributeIds: Set<string>;
-  storageAttributeIds: Set<string>;
+/** Complete planner output consumed by downstream model-binding code. */
+export type TableBufferPlan = {
+  /** Ordered allocation groups to publish to a Model. */
+  groups: TableBufferGroup[];
+  /** Reverse lookup from source column id to all groups containing that column. */
+  groupsByColumnId: Record<string, TableBufferGroup[]>;
+  /** Reverse lookup from source column id to shader/model binding names and offsets. */
+  mappingsByColumnId: Record<string, TableBufferMapping[]>;
+  /** Columns represented by planner-owned vertex buffers. */
+  packedColumnIds: Set<string>;
+  /** Columns represented by storage-buffer groups. */
+  storageColumnIds: Set<string>;
 };
 
-export type AttributeBufferMapping = {
-  attribute: Attribute;
+/** Model-binding mapping for one planned vertex attribute or fp64 component view. */
+export type TableBufferMapping = {
+  /** Source table column id. */
+  columnId: string;
+  /** Shader-visible attribute name, e.g. `instanceSourcePositions64Low`. */
   attributeName: string;
+  /** Buffer/group id that contains this attribute view. */
   bufferName: string;
+  /** Physical allocation shape of the containing group. */
   groupKind: AllocationGroupKind;
+  /** fp64 component represented by this mapping, if any. */
   fp64Component?: 'high' | 'low';
+  /** Byte offset within a storage-buffer group. */
   byteOffset?: number;
 };
 
+/** Inputs to the table buffer planner. */
 type PlannerProps = {
+  /** Optional label used in probe logging, normally the layer id. */
+  id?: string;
+  /** Device whose vertex/storage binding limits constrain the plan. */
   device: Device;
-  attributes: Attribute[];
+  /** Candidate table columns. */
+  columns: TableColumnDescriptor[];
+  /** Model geometry mode and reserved vertex-buffer slots. */
   modelInfo?: {isInstanced?: boolean; reservedVertexBufferCount?: number};
+  /** Optional explicit planner mode. Defaults from `modelInfo.isInstanced`. */
   mode?: TableBufferPlannerMode;
+  /** Enables planner-only storage-buffer allocation for row-geometry table columns. */
   useStorageBuffers?: boolean;
+  /** Whether constant columns should be materialized into small planner-owned buffers. */
   generateConstantAttributes: boolean;
+  /** Returns whether a column is currently controlled by transitions. */
   isTransitionAttribute: (attributeName: string) => boolean;
 };
 
-const PRIORITY_RANK: Record<BufferLayoutPriority, number> = {
+const PRIORITY_RANK: Record<TableColumnPriority, number> = {
   high: 0,
   medium: 1,
   low: 2
@@ -70,211 +154,237 @@ const PRIORITY_RANK: Record<BufferLayoutPriority, number> = {
 const POSITIONS_GROUP_ID = 'position-attribute-columns';
 const STORAGE_OVERFLOW_COLUMN_ALIGNMENT = 256;
 
+/** Builds a table-first GPU buffer allocation plan from abstract column descriptors. */
 export default class TableBufferPlanner {
+  /** Classifies columns, assigns groups, validates device limits, and returns model mappings. */
   static getAllocationPlan({
+    id = 'table-buffer-planner',
     device,
-    attributes,
+    columns,
     modelInfo,
     mode = getPlannerMode(modelInfo),
     useStorageBuffers = false,
     generateConstantAttributes,
     isTransitionAttribute
-  }: PlannerProps): AttributeAllocationPlan {
-    const sortedAttributes = [...attributes].sort((a, b) => a.id.localeCompare(b.id));
-    const groups: AttributeAllocationGroup[] = [];
-    const geometryAttributes: PlannedAttribute[] = [];
-    const constantAttributes: PlannedAttribute[] = [];
-    const positionAttributes: PlannedAttribute[] = [];
-    const dataAttributes: PlannedAttribute[] = [];
+  }: PlannerProps): TableBufferPlan {
+    const sortedColumns = [...columns].sort((a, b) => a.id.localeCompare(b.id));
+    const columnsById = Object.fromEntries(sortedColumns.map(column => [column.id, column]));
+    const groups: TableBufferGroup[] = [];
+    const geometryColumns: PlannedColumn[] = [];
+    const constantColumns: PlannedColumn[] = [];
+    const positionColumns: PlannedColumn[] = [];
+    const dataColumns: PlannedColumn[] = [];
     const reservedVertexBufferCount = modelInfo?.reservedVertexBufferCount || 0;
 
-    for (const attribute of sortedAttributes) {
-      const stepMode = getAttributeStepMode(attribute, modelInfo);
-
+    for (const column of sortedColumns) {
       if (
-        attribute.settings.isIndexed ||
-        isTransitionAttribute(attribute.id) ||
-        ((attribute.constant || attribute.isConstant) && !generateConstantAttributes) ||
-        !canUsePlannedBuffer(attribute) ||
-        (!attribute.supportsPackedBuffer(stepMode, modelInfo) && !isPositionAttribute(attribute))
+        column.isIndexed ||
+        column.isTransition ||
+        isTransitionAttribute(column.id) ||
+        column.isExternalBufferOnly ||
+        (column.isConstant && !generateConstantAttributes) ||
+        !canUsePlannedBuffer(column) ||
+        (!column.supportsPackedBuffer && !column.isPosition)
       ) {
         groups.push({
-          id: attribute.id,
+          id: column.id,
           kind: 'unmanaged-attribute-column',
-          attributes: [{attribute}]
+          columns: [{id: column.id}]
         });
-      } else if (mode === 'table-with-inline-row-geometry') {
-        if (isPositionAttribute(attribute)) {
-          positionAttributes.push({
-            attribute,
-            fp64Component: attribute.doublePrecision ? 'high' : undefined
+      } else if (mode === 'table-with-row-geometries') {
+        if (column.isPosition) {
+          positionColumns.push({
+            id: column.id,
+            fp64Component: column.isDoublePrecision ? 'high' : undefined
           });
-          if (attribute.doublePrecision && generateConstantAttributes) {
-            constantAttributes.push({attribute, fp64Component: 'low'});
+          if (column.isDoublePrecision && generateConstantAttributes) {
+            constantColumns.push({id: column.id, fp64Component: 'low'});
           }
-        } else if ((attribute.constant || attribute.isConstant) && generateConstantAttributes) {
-          constantAttributes.push({attribute});
+        } else if (column.isConstant && generateConstantAttributes) {
+          constantColumns.push({id: column.id});
         } else {
-          dataAttributes.push({attribute});
+          dataColumns.push({id: column.id});
         }
-      } else if (stepMode === 'vertex') {
-        geometryAttributes.push({attribute});
-      } else if (isPositionAttribute(attribute)) {
-        positionAttributes.push({
-          attribute,
-          fp64Component: attribute.doublePrecision ? 'high' : undefined
+      } else if (column.stepMode === 'vertex') {
+        geometryColumns.push({id: column.id});
+      } else if (column.isPosition) {
+        positionColumns.push({
+          id: column.id,
+          fp64Component: column.isDoublePrecision ? 'high' : undefined
         });
-        if (attribute.doublePrecision && generateConstantAttributes) {
-          constantAttributes.push({attribute, fp64Component: 'low'});
+        if (column.isDoublePrecision && generateConstantAttributes) {
+          constantColumns.push({id: column.id, fp64Component: 'low'});
         }
-      } else if ((attribute.constant || attribute.isConstant) && generateConstantAttributes) {
-        constantAttributes.push({attribute});
+      } else if (column.isConstant && generateConstantAttributes) {
+        constantColumns.push({id: column.id});
       } else {
-        dataAttributes.push({attribute});
+        dataColumns.push({id: column.id});
       }
     }
 
-    if (geometryAttributes.length) {
+    if (geometryColumns.length) {
       groups.push({
         id: 'interleaved-shared-geometry-columns',
         kind: 'interleaved-shared-geometry-columns',
-        attributes: geometryAttributes
+        columns: geometryColumns
       });
     }
-    if (constantAttributes.length) {
+    if (constantColumns.length) {
       groups.push({
         id: 'interleaved-constant-attribute-columns',
         kind: 'interleaved-constant-attribute-columns',
-        attributes: constantAttributes,
+        columns: constantColumns,
         rowCount:
-          mode === 'table-with-inline-row-geometry'
+          mode === 'table-with-row-geometries'
             ? 1
-            : getPackedRowCount([...geometryAttributes, ...positionAttributes]),
-        stepMode: mode === 'table-with-inline-row-geometry' ? 'instance' : 'vertex'
+            : getPackedRowCount([...geometryColumns, ...positionColumns], columnsById),
+        stepMode: mode === 'table-with-row-geometries' ? 'instance' : 'vertex'
       });
     }
-    if (positionAttributes.length) {
+    if (positionColumns.length) {
       groups.push({
         id: POSITIONS_GROUP_ID,
         kind: 'position-attribute-columns',
-        attributes: positionAttributes
+        columns: positionColumns
       });
     }
 
-    const {storageGroups, vertexAttributes} = allocateStorageAttributes({
+    const {storageGroups, vertexColumns} = allocateStorageAttributes({
       device,
       mode,
       useStorageBuffers,
-      attributes: dataAttributes
+      columns: dataColumns,
+      columnsById
     });
     groups.push(...storageGroups);
     groups.push(
-      ...allocateDataAttributes(device, groups, vertexAttributes, reservedVertexBufferCount)
+      ...allocateDataAttributes(
+        device,
+        groups,
+        vertexColumns,
+        columnsById,
+        reservedVertexBufferCount
+      )
     );
-    validatePlan(device, groups, reservedVertexBufferCount);
+    validatePlan(device, groups, columnsById, reservedVertexBufferCount);
 
-    const groupsByAttributeId: Record<string, AttributeAllocationGroup[]> = {};
-    const mappingsByAttributeId: Record<string, AttributeBufferMapping[]> = {};
-    const packedAttributeIds = new Set<string>();
-    const storageAttributeIds = new Set<string>();
+    const groupsByColumnId: Record<string, TableBufferGroup[]> = {};
+    const mappingsByColumnId: Record<string, TableBufferMapping[]> = {};
+    const packedColumnIds = new Set<string>();
+    const storageColumnIds = new Set<string>();
     for (const group of groups) {
-      for (const {attribute, fp64Component} of group.attributes) {
-        groupsByAttributeId[attribute.id] = groupsByAttributeId[attribute.id] || [];
-        groupsByAttributeId[attribute.id].push(group);
-        mappingsByAttributeId[attribute.id] = mappingsByAttributeId[attribute.id] || [];
-        const byteOffset = getStorageBufferByteOffset(group, attribute.id);
-        mappingsByAttributeId[attribute.id].push({
-          attribute,
-          attributeName: fp64Component === 'low' ? `${attribute.id}64Low` : attribute.id,
+      for (const {id: columnId, fp64Component} of group.columns) {
+        groupsByColumnId[columnId] = groupsByColumnId[columnId] || [];
+        groupsByColumnId[columnId].push(group);
+        mappingsByColumnId[columnId] = mappingsByColumnId[columnId] || [];
+        const byteOffset = getStorageBufferByteOffset(group, columnId);
+        mappingsByColumnId[columnId].push({
+          columnId,
+          attributeName: fp64Component === 'low' ? `${columnId}64Low` : columnId,
           bufferName: group.id,
           groupKind: group.kind,
           fp64Component,
           ...(byteOffset === undefined ? {} : {byteOffset})
         });
         if (group.kind === 'separate-storage-column' || group.kind === 'stacked-storage-columns') {
-          storageAttributeIds.add(attribute.id);
+          storageColumnIds.add(columnId);
         } else if (group.kind !== 'unmanaged-attribute-column') {
-          packedAttributeIds.add(attribute.id);
+          packedColumnIds.add(columnId);
         }
       }
     }
 
-    return {
+    const allocationPlan = {
       groups,
-      groupsByAttributeId,
-      mappingsByAttributeId,
-      packedAttributeIds,
-      storageAttributeIds
+      groupsByColumnId,
+      mappingsByColumnId,
+      packedColumnIds,
+      storageColumnIds
     };
+
+    log.probe(1, `TableBufferPlanner.getAllocationPlan(${id})`, getLoggablePlan(allocationPlan))();
+
+    return allocationPlan;
   }
 
-  static shouldSkipAttributeBuffer(
-    attribute: Attribute,
-    modelInfo: {isInstanced?: boolean} | undefined,
+  /**
+   * Returns true when a column should compute CPU values but skip creating
+   * its own standalone GPU buffer because the grouped manager will publish it.
+   */
+  static shouldSkipColumnBuffer(
+    column: TableColumnDescriptor,
+    _modelInfo: {isInstanced?: boolean} | undefined,
     isTransitionAttribute: (attributeName: string) => boolean
   ): boolean {
-    const stepMode = getAttributeStepMode(attribute, modelInfo);
     return (
-      !attribute.settings.isIndexed &&
-      (!attribute.doublePrecision || isPositionAttribute(attribute)) &&
-      !attribute.settings.noAlloc &&
-      !attribute.settings.transition &&
-      !isTransitionAttribute(attribute.id) &&
-      (stepMode === 'vertex' || stepMode === 'instance')
+      !column.isIndexed &&
+      (!column.isDoublePrecision || Boolean(column.isPosition)) &&
+      !column.isExternalBufferOnly &&
+      (!column.noAlloc || Boolean(column.allowNoAllocManaged)) &&
+      !column.isTransition &&
+      !isTransitionAttribute(column.id) &&
+      (column.stepMode === 'vertex' || column.stepMode === 'instance')
     );
   }
 }
 
+/**
+ * Optionally moves row-geometry data columns into storage-buffer groups.
+ * Columns that cannot be represented as storage buffers fall back to vertex attributes.
+ */
 function allocateStorageAttributes({
   device,
   mode,
   useStorageBuffers,
-  attributes
+  columns,
+  columnsById
 }: {
   device: Device;
   mode: TableBufferPlannerMode;
   useStorageBuffers: boolean;
-  attributes: PlannedAttribute[];
-}): {storageGroups: AttributeAllocationGroup[]; vertexAttributes: PlannedAttribute[]} {
-  if (!shouldUseStorageBuffers(device, mode, useStorageBuffers) || !attributes.length) {
-    return {storageGroups: [], vertexAttributes: attributes};
+  columns: PlannedColumn[];
+  columnsById: Record<string, TableColumnDescriptor>;
+}): {storageGroups: TableBufferGroup[]; vertexColumns: PlannedColumn[]} {
+  if (!shouldUseStorageBuffers(device, mode, useStorageBuffers) || !columns.length) {
+    return {storageGroups: [], vertexColumns: columns};
   }
 
   const maxStorageBuffers = Math.max(0, device.limits.maxStorageBuffersPerShaderStage || 0);
-  const storageGroups: AttributeAllocationGroup[] = [];
-  const vertexAttributes: PlannedAttribute[] = [];
-  const storageAttributes: PlannedAttribute[] = [];
+  const storageGroups: TableBufferGroup[] = [];
+  const vertexColumns: PlannedColumn[] = [];
+  const storageColumns: PlannedColumn[] = [];
 
-  for (const attribute of sortDataAttributes(attributes)) {
-    const byteLength = getStorageBufferByteLength(attribute.attribute);
+  for (const column of sortDataAttributes(columns, columnsById)) {
+    const descriptor = columnsById[column.id];
+    const byteLength = descriptor.byteLength;
     if (
       byteLength <= device.limits.maxStorageBufferBindingSize &&
-      !isGeneratedRowGeometryAttribute(attribute.attribute)
+      !descriptor.isGeneratedRowGeometry
     ) {
-      storageAttributes.push(attribute);
+      storageColumns.push(column);
     } else {
-      vertexAttributes.push(attribute);
+      vertexColumns.push(column);
     }
   }
 
   const dedicatedCount =
-    maxStorageBuffers >= storageAttributes.length
-      ? storageAttributes.length
+    maxStorageBuffers >= storageColumns.length
+      ? storageColumns.length
       : Math.max(0, maxStorageBuffers - 1);
 
-  for (const attribute of storageAttributes.slice(0, dedicatedCount)) {
+  for (const column of storageColumns.slice(0, dedicatedCount)) {
     storageGroups.push({
-      id: attribute.attribute.id,
+      id: column.id,
       kind: 'separate-storage-column',
-      attributes: [attribute],
-      byteLength: getStorageBufferByteLength(attribute.attribute),
-      byteOffsets: {[attribute.attribute.id]: 0}
+      columns: [column],
+      byteLength: columnsById[column.id].byteLength,
+      byteOffsets: {[column.id]: 0}
     });
   }
 
-  const overflowAttributes = storageAttributes.slice(dedicatedCount);
-  if (overflowAttributes.length) {
-    const layout = getStorageOverflowLayout(overflowAttributes);
+  const overflowColumns = storageColumns.slice(dedicatedCount);
+  if (overflowColumns.length) {
+    const layout = getStorageOverflowLayout(overflowColumns, columnsById);
     if (
       storageGroups.length < maxStorageBuffers &&
       layout.byteLength <= device.limits.maxStorageBufferBindingSize
@@ -282,65 +392,72 @@ function allocateStorageAttributes({
       storageGroups.push({
         id: 'stacked-storage-columns',
         kind: 'stacked-storage-columns',
-        attributes: overflowAttributes,
+        columns: overflowColumns,
         byteLength: layout.byteLength,
         byteOffsets: layout.byteOffsets
       });
     } else {
-      vertexAttributes.push(...overflowAttributes);
+      vertexColumns.push(...overflowColumns);
     }
   }
 
-  return {storageGroups, vertexAttributes};
+  return {storageGroups, vertexColumns};
 }
 
+/**
+ * Assigns ordinary data columns to dedicated vertex buffers while slots remain,
+ * then packs the rest into one interleaved overflow attribute buffer.
+ */
 function allocateDataAttributes(
   device: Device,
-  fixedGroups: AttributeAllocationGroup[],
-  attributes: PlannedAttribute[],
+  fixedGroups: TableBufferGroup[],
+  columns: PlannedColumn[],
+  columnsById: Record<string, TableColumnDescriptor>,
   reservedVertexBufferCount: number
-): AttributeAllocationGroup[] {
-  if (!attributes.length) {
+): TableBufferGroup[] {
+  if (!columns.length) {
     return [];
   }
 
-  const sortedAttributes = sortDataAttributes(attributes);
+  const sortedColumns = sortDataAttributes(columns, columnsById);
 
-  const fixedVertexBufferCount = countVertexBufferGroups(fixedGroups);
+  const fixedVertexBufferCount = countVertexBufferGroups(fixedGroups, columnsById);
   const availableSlots =
     device.limits.maxVertexBuffers - reservedVertexBufferCount - fixedVertexBufferCount;
   const dedicatedCount =
-    availableSlots >= sortedAttributes.length
-      ? sortedAttributes.length
+    availableSlots >= sortedColumns.length
+      ? sortedColumns.length
       : Math.max(0, availableSlots - 1);
-  const groups: AttributeAllocationGroup[] = [];
+  const groups: TableBufferGroup[] = [];
 
-  for (const attribute of sortedAttributes.slice(0, dedicatedCount)) {
+  for (const column of sortedColumns.slice(0, dedicatedCount)) {
     groups.push({
-      id: attribute.attribute.id,
+      id: column.id,
       kind: 'separate-attribute-column',
-      attributes: [attribute]
+      columns: [column]
     });
   }
 
-  const overflowAttributes = sortedAttributes.slice(dedicatedCount);
-  if (overflowAttributes.length) {
+  const overflowColumns = sortedColumns.slice(dedicatedCount);
+  if (overflowColumns.length) {
     groups.push({
       id: 'interleaved-attribute-columns',
       kind: 'interleaved-attribute-columns',
-      attributes: overflowAttributes
+      columns: overflowColumns
     });
   }
 
   return groups;
 }
 
+/** Verifies vertex-buffer counts, storage-buffer counts/sizes, and vertex array stride limits. */
 function validatePlan(
   device: Device,
-  groups: AttributeAllocationGroup[],
+  groups: TableBufferGroup[],
+  columnsById: Record<string, TableColumnDescriptor>,
   reservedVertexBufferCount: number
 ): void {
-  const vertexBufferCount = reservedVertexBufferCount + countVertexBufferGroups(groups);
+  const vertexBufferCount = reservedVertexBufferCount + countVertexBufferGroups(groups, columnsById);
   if (vertexBufferCount > device.limits.maxVertexBuffers) {
     throw new Error(
       `Attribute buffer allocation requires ${vertexBufferCount} vertex buffers, ` +
@@ -360,7 +477,7 @@ function validatePlan(
 
   for (const group of storageBufferGroups) {
     const byteLength =
-      group.byteLength || getStorageBufferByteLength(group.attributes[0].attribute);
+      group.byteLength || columnsById[group.columns[0].id].byteLength;
     if (byteLength > device.limits.maxStorageBufferBindingSize) {
       throw new Error(
         `Attribute storage buffer group "${group.id}" requires byteLength ${byteLength}, ` +
@@ -374,11 +491,11 @@ function validatePlan(
       group.kind === 'unmanaged-attribute-column' ||
       group.kind === 'separate-storage-column' ||
       group.kind === 'stacked-storage-columns' ||
-      group.attributes[0]?.attribute.settings.isIndexed
+      columnsById[group.columns[0]?.id]?.isIndexed
     ) {
       continue;
     }
-    const byteStride = getGroupByteStride(group);
+    const byteStride = getGroupByteStride(group, columnsById);
     if (byteStride > device.limits.maxVertexBufferArrayStride) {
       throw new Error(
         `Attribute buffer group "${group.id}" requires byteStride ${byteStride}, ` +
@@ -388,129 +505,134 @@ function validatePlan(
   }
 }
 
-function countVertexBufferGroups(groups: AttributeAllocationGroup[]): number {
+/** Counts groups that consume vertex-buffer bindings, excluding storage and index groups. */
+function countVertexBufferGroups(
+  groups: TableBufferGroup[],
+  columnsById: Record<string, TableColumnDescriptor>
+): number {
   return groups.filter(
     group =>
       group.kind !== 'separate-storage-column' &&
       group.kind !== 'stacked-storage-columns' &&
-      !group.attributes[0]?.attribute.settings.isIndexed
+      !columnsById[group.columns[0]?.id]?.isIndexed
   ).length;
 }
 
-function sortDataAttributes(attributes: PlannedAttribute[]): PlannedAttribute[] {
-  return [...attributes].sort((a, b) => {
-    const priorityDiff = getPriorityRank(a.attribute) - getPriorityRank(b.attribute);
-    return priorityDiff || a.attribute.id.localeCompare(b.attribute.id);
+/** Sorts data columns by layout priority and then by id for deterministic plans. */
+function sortDataAttributes(
+  columns: PlannedColumn[],
+  columnsById: Record<string, TableColumnDescriptor>
+): PlannedColumn[] {
+  return [...columns].sort((a, b) => {
+    const priorityDiff = getPriorityRank(columnsById[a.id]) - getPriorityRank(columnsById[b.id]);
+    return priorityDiff || a.id.localeCompare(b.id);
   });
 }
 
-function getPriorityRank(attribute: Attribute): number {
-  return PRIORITY_RANK[getBufferLayoutPriority(attribute)];
+/** Converts a layout priority into a sortable rank. */
+function getPriorityRank(column: TableColumnDescriptor): number {
+  return PRIORITY_RANK[column.priority || 'medium'];
 }
 
-function getBufferLayoutPriority(attribute: Attribute): BufferLayoutPriority {
-  if (attribute.settings.bufferLayoutPriority) {
-    return attribute.settings.bufferLayoutPriority;
-  }
-  if (isGeneratedLowPriorityAttribute(attribute)) {
-    return 'low';
-  }
-  if (isPositionAttribute(attribute) || isColorAttribute(attribute)) {
-    return 'high';
-  }
-  return 'medium';
-}
-
-function getAttributeStepMode(
-  attribute: Attribute,
-  modelInfo?: {isInstanced?: boolean}
-): 'vertex' | 'instance' {
-  return attribute.getBufferLayout(modelInfo).stepMode as 'vertex' | 'instance';
-}
-
+/** Selects the default planner mode from model instancing metadata. */
 function getPlannerMode(modelInfo?: {isInstanced?: boolean}): TableBufferPlannerMode {
   return modelInfo?.isInstanced === false
-    ? 'table-with-inline-row-geometry'
+    ? 'table-with-row-geometries'
     : 'table-with-shared-geometry';
 }
 
-function getPackedRowCount(attributes: PlannedAttribute[]): number {
-  return Math.max(1, ...attributes.map(({attribute}) => attribute.numInstances));
+/** Computes the materialized row count for shared geometry/constant packed groups. */
+function getPackedRowCount(
+  columns: PlannedColumn[],
+  columnsById: Record<string, TableColumnDescriptor>
+): number {
+  return Math.max(1, ...columns.map(({id}) => columnsById[id].rowCount));
 }
 
-function canUsePlannedBuffer(attribute: Attribute): boolean {
-  return (
-    !attribute.settings.noAlloc && (!attribute.doublePrecision || isPositionAttribute(attribute))
-  );
+/** Returns whether a column can be represented by a planner-owned group. */
+function canUsePlannedBuffer(column: TableColumnDescriptor): boolean {
+  if (column.isDoublePrecision && !column.isPosition) {
+    return false;
+  }
+  return !column.noAlloc || Boolean(column.allowNoAllocManaged);
 }
 
+/** Returns whether optional storage-buffer planning is enabled for this device/mode. */
 function shouldUseStorageBuffers(
   device: Device,
   mode: TableBufferPlannerMode,
   useStorageBuffers: boolean
 ): boolean {
   return (
-    useStorageBuffers && device.type === 'webgpu' && mode === 'table-with-inline-row-geometry'
+    useStorageBuffers && device.type === 'webgpu' && mode === 'table-with-row-geometries'
   );
 }
 
-function getStorageBufferByteLength(attribute: Attribute): number {
-  if (ArrayBuffer.isView(attribute.value)) {
-    return attribute.value.byteLength;
-  }
-  return Math.max(1, attribute.numInstances) * attribute.getPackedBufferStride(null);
-}
-
-function getStorageOverflowLayout(attributes: PlannedAttribute[]): {
+/** Builds 256-byte-aligned whole-column slices for the stacked storage overflow buffer. */
+function getStorageOverflowLayout(
+  columns: PlannedColumn[],
+  columnsById: Record<string, TableColumnDescriptor>
+): {
   byteLength: number;
   byteOffsets: Record<string, number>;
 } {
   let byteLength = 0;
   const byteOffsets: Record<string, number> = {};
 
-  for (const {attribute} of attributes) {
+  for (const {id} of columns) {
     byteLength = alignTo(byteLength, STORAGE_OVERFLOW_COLUMN_ALIGNMENT);
-    byteOffsets[attribute.id] = byteLength;
-    byteLength += getStorageBufferByteLength(attribute);
+    byteOffsets[id] = byteLength;
+    byteLength += columnsById[id].byteLength;
   }
 
   return {byteLength: alignTo(byteLength, STORAGE_OVERFLOW_COLUMN_ALIGNMENT), byteOffsets};
 }
 
+/** Returns a column's byte offset inside a storage-buffer group. */
 function getStorageBufferByteOffset(
-  group: AttributeAllocationGroup,
-  attributeId: string
+  group: TableBufferGroup,
+  columnId: string
 ): number | undefined {
   if (group.kind !== 'separate-storage-column' && group.kind !== 'stacked-storage-columns') {
     return undefined;
   }
-  return group.byteOffsets?.[attributeId] ?? 0;
+  return group.byteOffsets?.[columnId] ?? 0;
 }
 
+/** Rounds `value` up to the next multiple of `alignment`. */
 function alignTo(value: number, alignment: number): number {
   return Math.ceil(value / alignment) * alignment;
 }
 
-function getGroupByteStride(group: AttributeAllocationGroup): number {
-  return group.attributes.reduce(
-    (byteStride, {attribute, fp64Component}) =>
-      byteStride + attribute.getPackedBufferStride(fp64Component ?? null),
+/** Computes byte stride for an interleaved vertex attribute group. */
+function getGroupByteStride(
+  group: TableBufferGroup,
+  columnsById: Record<string, TableColumnDescriptor>
+): number {
+  return group.columns.reduce(
+    (byteStride, {id}) => byteStride + columnsById[id].byteStride,
     0
   );
 }
 
-function isPositionAttribute(attribute: Attribute): boolean {
-  return attribute.id === 'positions' || attribute.id === 'instancePositions';
-}
-
-function isColorAttribute(attribute: Attribute): boolean {
-  return /Colors?$/.test(attribute.id);
-}
-
-function isGeneratedLowPriorityAttribute(attribute: Attribute): boolean {
-  return attribute.id === 'pickingColors' || attribute.id === 'instancePickingColors';
-}
-
-function isGeneratedRowGeometryAttribute(attribute: Attribute): boolean {
-  return attribute.id === 'rowIndex' || attribute.id === 'pickingColors';
+/** Returns a console-friendly snapshot that does not expose Sets or manager-owned objects. */
+function getLoggablePlan(plan: TableBufferPlan): {
+  groups: TableBufferGroup[];
+  groupsByColumnId: Record<string, string[]>;
+  mappingsByColumnId: Record<string, TableBufferMapping[]>;
+  packedColumnIds: string[];
+  storageColumnIds: string[];
+} {
+  return {
+    groups: plan.groups,
+    groupsByColumnId: Object.fromEntries(
+      Object.entries(plan.groupsByColumnId).map(([id, groups]) => [
+        id,
+        groups.map(group => group.id)
+      ])
+    ),
+    mappingsByColumnId: plan.mappingsByColumnId,
+    packedColumnIds: [...plan.packedColumnIds],
+    storageColumnIds: [...plan.storageColumnIds]
+  };
 }

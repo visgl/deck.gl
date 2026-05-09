@@ -643,7 +643,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Send updated attributes to the WebGL model */
-  protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
+  protected updateAttributes(changedAttributes: {[id: string]: Attribute}, forceUpdate = false) {
     // If some buffer layout changed
     let bufferLayoutChanged = false;
     for (const id in changedAttributes) {
@@ -653,12 +653,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged, forceUpdate);
     }
   }
 
   /** Recalculate any attributes if needed */
-  protected _updateAttributes(): void {
+  protected _updateAttributes(forceUpdate = false): void {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
@@ -681,7 +681,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     });
 
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-    this.updateAttributes(changedAttributes);
+    this.updateAttributes(changedAttributes, forceUpdate);
   }
 
   /** Update attribute transitions. This is called in drawLayer, no model updates required. */
@@ -759,41 +759,37 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     changedAttributes: {
       [id: string]: Attribute;
     },
-    bufferLayoutChanged = false
+    bufferLayoutChanged = false,
+    forceUpdate = false
   ) {
     const attributeManager = this.getAttributeManager();
-    const hasGroupedAttributeBindings =
-      attributeManager instanceof GroupedAttributeManager &&
-      attributeManager.hasPackedBufferGroups(model);
 
-    if (
-      !Object.keys(changedAttributes).length &&
-      !bufferLayoutChanged &&
-      !hasGroupedAttributeBindings
-    ) {
+    if (!Object.keys(changedAttributes).length && !bufferLayoutChanged && !forceUpdate) {
       return;
     }
 
     if (attributeManager instanceof GroupedAttributeManager) {
-      const hasPackedBufferGroups = hasGroupedAttributeBindings;
+      const modelBindings = attributeManager.getModelBindingPlan(
+        changedAttributes,
+        model,
+        {includeAllAttributes: bufferLayoutChanged || forceUpdate}
+      );
 
-      if (bufferLayoutChanged || hasPackedBufferGroups) {
-        model.setBufferLayout(attributeManager.getBufferLayouts(model));
-        changedAttributes = attributeManager.getAttributes();
+      if (bufferLayoutChanged) {
+        model.setBufferLayout(modelBindings.bufferLayouts);
       }
 
       // @ts-ignore luma.gl type issue
       const excludeAttributes = model.userData?.excludeAttributes || {};
-      const publishedAttributes = attributeManager.getPublishedAttributes(changedAttributes, model);
       const attributeBuffers: Record<string, Buffer> = {};
       const constantAttributes: Record<string, TypedArray> = {};
 
-      for (const [name, buffer] of Object.entries(publishedAttributes.buffers)) {
+      for (const [name, buffer] of Object.entries(modelBindings.buffers)) {
         if (!excludeAttributes[name]) {
           attributeBuffers[name] = buffer;
         }
       }
-      for (const [name, value] of Object.entries(publishedAttributes.constants)) {
+      for (const [name, value] of Object.entries(modelBindings.constants)) {
         if (!excludeAttributes[name]) {
           constantAttributes[name] = value;
         }
@@ -802,7 +798,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       model.setAttributes(attributeBuffers);
       model.setConstantAttributes(constantAttributes);
       if (!excludeAttributes.indices) {
-        for (const buffer of publishedAttributes.indexBuffers) {
+        for (const buffer of modelBindings.indexBuffers) {
           model.setIndexBuffer(buffer);
         }
       }
@@ -812,6 +808,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (bufferLayoutChanged) {
       const manager = attributeManager!;
       model.setBufferLayout(manager.getBufferLayouts(model));
+    }
+    if (bufferLayoutChanged || forceUpdate) {
+      const manager = attributeManager!;
       changedAttributes = manager.getAttributes();
     }
 
@@ -888,7 +887,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const end = colors.getVertexOffset(objectIndex + 1);
 
     // Fill the sub buffer with 0s, 1 byte per element
-    colors.buffer.write(new Uint8Array(end - start), start);
+    const buffer = colors.getBuffer();
+    if (buffer) {
+      buffer.write(new Uint8Array(end - start), start);
+    } else if (ArrayBuffer.isView(colors.value)) {
+      colors.value = colors.value.slice() as TypedArray;
+      (colors.value as TypedArray).fill(0, start, end);
+      for (const model of this.getModels()) {
+        this._setModelAttributes(model, {[colors.id]: colors});
+      }
+    }
   }
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
@@ -907,7 +915,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     ) {
       colors.value = pickingColorCache.subarray(0, (colors.value as Uint8ClampedArray).length);
     }
-    colors.updateSubBuffer({startOffset: 0});
+    const buffer = colors.getBuffer();
+    if (buffer) {
+      colors.updateSubBuffer({startOffset: 0});
+    } else {
+      for (const model of this.getModels()) {
+        this._setModelAttributes(model, {[colors.id]: colors});
+      }
+    }
   }
 
   /* eslint-disable max-statements */
@@ -1050,9 +1065,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       this.setNeedsRedraw();
       // Check if attributes need recalculation
-      this._updateAttributes();
-
       const modelChanged = this.getModels()[0] !== oldModels[0];
+      // Check if attributes need recalculation. If updateState created a new model,
+      // existing attributes still need to be bound to that model.
+      this._updateAttributes(modelChanged);
+
       this._postUpdate(updateParams, modelChanged);
       // End subclass lifecycle methods
     } finally {

@@ -116,9 +116,13 @@ export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
 };
 
 export type PackedBufferWriteOptions = {
+  /** Byte distance between consecutive rows in the target interleaved buffer. */
   byteStride: number;
+  /** Byte offset where this column starts within each target row. */
   byteOffset: number;
+  /** Number of target rows to write. */
   rowCount: number;
+  /** Optional fp64 component view. The current WebGPU low component path writes zeros. */
   fp64Component?: 'high' | 'low' | null;
 };
 
@@ -325,6 +329,11 @@ export default class DataColumn<Options, State> {
     return this.state.bufferAccessor;
   }
 
+  /**
+   * Writes this column's CPU-side value into one slice of a shared interleaved
+   * target buffer. This keeps constants, accessor stride/offset, normalization,
+   * and fp64 component semantics owned by DataColumn instead of the planner.
+   */
   writeToPackedBuffer(
     target: Uint8Array,
     {byteStride, byteOffset, rowCount, fp64Component = null}: PackedBufferWriteOptions

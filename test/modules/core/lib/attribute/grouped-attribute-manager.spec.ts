@@ -3,7 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import GroupedAttributeManager from '@deck.gl/core/lib/attribute/grouped-attribute-manager';
-import TableBufferPlanner from '@deck.gl/core/lib/attribute/table-buffer-planner';
+import TableBufferPlanner, {
+  type TableColumnDescriptor
+} from '@deck.gl/core/lib/attribute/table-buffer-planner';
 import {test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -36,6 +38,47 @@ function createDevice({
   Object.defineProperty(testDevice, 'type', {value: type});
   Object.defineProperty(testDevice, 'limits', {value: limits});
   return testDevice;
+}
+
+function getColumnDescriptors(
+  attributeManager: GroupedAttributeManager,
+  modelInfo?: {isInstanced?: boolean}
+): TableColumnDescriptor[] {
+  return Object.values(attributeManager.getAttributes()).map((attribute: any) => {
+    const stepMode = attribute.getBufferLayout(modelInfo).stepMode as 'vertex' | 'instance';
+    const isGeneratedPickingColor =
+      attribute.id === 'pickingColors' || attribute.id === 'instancePickingColors';
+    const isPosition = attribute.id === 'positions' || /Positions$/.test(attribute.id);
+    const isColor = /Colors?$/.test(attribute.id);
+    const isExternalGpuBufferOnly =
+      Boolean(attribute.getBuffer && attribute.getBuffer()) && !ArrayBuffer.isView(attribute.value);
+
+    return {
+      id: attribute.id,
+      byteStride: attribute.getPackedBufferStride(null),
+      byteLength: ArrayBuffer.isView(attribute.value)
+        ? attribute.value.byteLength
+        : Math.max(1, attribute.numInstances) * attribute.getPackedBufferStride(null),
+      rowCount: attribute.numInstances,
+      stepMode,
+      isPosition,
+      isConstant: attribute.constant || attribute.isConstant,
+      isIndexed: attribute.settings.isIndexed,
+      isTransition: Boolean(attribute.settings.transition),
+      isExternalBufferOnly: isExternalGpuBufferOnly,
+      isDoublePrecision: attribute.doublePrecision,
+      noAlloc: attribute.settings.noAlloc,
+      allowNoAllocManaged:
+        isGeneratedPickingColor &&
+        typeof attribute.settings.update === 'function' &&
+        !isExternalGpuBufferOnly,
+      supportsPackedBuffer: attribute.supportsPackedBuffer(stepMode, modelInfo),
+      isGeneratedRowGeometry: attribute.id === 'rowIndex' || attribute.id === 'pickingColors',
+      priority:
+        attribute.settings.bufferLayoutPriority ||
+        (isGeneratedPickingColor ? 'low' : isPosition || isColor ? 'high' : 'medium')
+    };
+  });
 }
 
 test('GroupedAttributeManager imports', () => {
@@ -78,7 +121,7 @@ test('GroupedAttributeManager.getBufferLayouts - builds semantic allocation grou
   expect(layouts[1].stepMode).toBe('vertex');
 });
 
-test('GroupedAttributeManager.getBufferLayouts - table-with-inline-row-geometry packs constants with instance step mode', async () => {
+test('GroupedAttributeManager.getBufferLayouts - table-with-row-geometries packs constants with instance step mode', async () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
@@ -111,10 +154,10 @@ test('GroupedAttributeManager.getBufferLayouts - table-with-inline-row-geometry 
   expect(layouts[0].byteStride).toBe(8);
   expect(layouts[0].attributes.map(attribute => attribute.attribute)).toEqual(['angles', 'sizes']);
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: false
   });
-  const packedBytes = await published.buffers['interleaved-constant-attribute-columns'].readAsync(
+  const packedBytes = await modelBindings.buffers['interleaved-constant-attribute-columns'].readAsync(
     0,
     8
   );
@@ -124,7 +167,7 @@ test('GroupedAttributeManager.getBufferLayouts - table-with-inline-row-geometry 
   ]);
 });
 
-test('TableBufferPlanner.getAllocationPlan - table-with-inline-row-geometry can opt data columns into storage buffers', () => {
+test('TableBufferPlanner.getAllocationPlan - table-with-row-geometries can opt data columns into storage buffers', () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
@@ -151,7 +194,7 @@ test('TableBufferPlanner.getAllocationPlan - table-with-inline-row-geometry can 
       maxStorageBuffersPerShaderStage: 4,
       maxStorageBufferBindingSize: 1024
     }),
-    attributes: Object.values(attributeManager.getAttributes()),
+    columns: getColumnDescriptors(attributeManager, {isInstanced: false}),
     modelInfo: {isInstanced: false},
     useStorageBuffers: true,
     generateConstantAttributes: true,
@@ -164,11 +207,11 @@ test('TableBufferPlanner.getAllocationPlan - table-with-inline-row-geometry can 
       .map(group => group.id)
       .sort()
   ).toEqual(['elevations', 'fillColors']);
-  expect(plan.storageAttributeIds).toEqual(new Set(['elevations', 'fillColors']));
-  expect(plan.packedAttributeIds.has('fillColors')).toBe(false);
+  expect(plan.storageColumnIds).toEqual(new Set(['elevations', 'fillColors']));
+  expect(plan.packedColumnIds.has('fillColors')).toBe(false);
 });
 
-test('TableBufferPlanner.getAllocationPlan - storage buffers are WebGPU table-with-inline-row-geometry only', () => {
+test('TableBufferPlanner.getAllocationPlan - storage buffers are WebGPU table-with-row-geometries only', () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
@@ -190,7 +233,7 @@ test('TableBufferPlanner.getAllocationPlan - storage buffers are WebGPU table-wi
 
   const webglPlan = TableBufferPlanner.getAllocationPlan({
     device: createDevice({type: 'webgl'}),
-    attributes: Object.values(attributeManager.getAttributes()),
+    columns: getColumnDescriptors(attributeManager, {isInstanced: false}),
     modelInfo: {isInstanced: false},
     useStorageBuffers: true,
     generateConstantAttributes: true,
@@ -198,7 +241,7 @@ test('TableBufferPlanner.getAllocationPlan - storage buffers are WebGPU table-wi
   });
   const sharedGeometryPlan = TableBufferPlanner.getAllocationPlan({
     device: createDevice(),
-    attributes: Object.values(attributeManager.getAttributes()),
+    columns: getColumnDescriptors(attributeManager, {isInstanced: true}),
     modelInfo: {isInstanced: true},
     useStorageBuffers: true,
     generateConstantAttributes: true,
@@ -238,7 +281,7 @@ test('TableBufferPlanner.getAllocationPlan - storage buffer limits fall back to 
       maxStorageBuffersPerShaderStage: 1,
       maxStorageBufferBindingSize: 1024
     }),
-    attributes: Object.values(attributeManager.getAttributes()),
+    columns: getColumnDescriptors(attributeManager, {isInstanced: false}),
     modelInfo: {isInstanced: false},
     useStorageBuffers: true,
     generateConstantAttributes: true,
@@ -249,7 +292,7 @@ test('TableBufferPlanner.getAllocationPlan - storage buffer limits fall back to 
       maxStorageBuffersPerShaderStage: 4,
       maxStorageBufferBindingSize: 4
     }),
-    attributes: Object.values(attributeManager.getAttributes()),
+    columns: getColumnDescriptors(attributeManager, {isInstanced: false}),
     modelInfo: {isInstanced: false},
     useStorageBuffers: true,
     generateConstantAttributes: true,
@@ -262,16 +305,16 @@ test('TableBufferPlanner.getAllocationPlan - storage buffer limits fall back to 
         group =>
           group.kind === 'separate-storage-column' || group.kind === 'stacked-storage-columns'
       )
-      .map(group => [group.id, group.kind, group.attributes.map(({attribute}) => attribute.id)])
+      .map(group => [group.id, group.kind, group.columns.map(({id}) => id)])
   ).toEqual([
     ['stacked-storage-columns', 'stacked-storage-columns', ['fillColors', 'elevations']]
   ]);
   expect(
     countLimitedPlan.groups.find(group => group.kind === 'stacked-storage-columns')?.byteOffsets
   ).toEqual({fillColors: 0, elevations: 256});
-  expect(countLimitedPlan.mappingsByAttributeId.fillColors[0].byteOffset).toBe(0);
-  expect(countLimitedPlan.mappingsByAttributeId.elevations[0].byteOffset).toBe(256);
-  expect(countLimitedPlan.storageAttributeIds).toEqual(new Set(['fillColors', 'elevations']));
+  expect(countLimitedPlan.mappingsByColumnId.fillColors[0].byteOffset).toBe(0);
+  expect(countLimitedPlan.mappingsByColumnId.elevations[0].byteOffset).toBe(256);
+  expect(countLimitedPlan.storageColumnIds).toEqual(new Set(['fillColors', 'elevations']));
   expect(
     sizeLimitedPlan.groups.some(
       group =>
@@ -280,7 +323,7 @@ test('TableBufferPlanner.getAllocationPlan - storage buffer limits fall back to 
   ).toBe(false);
 });
 
-test('GroupedAttributeManager.getPublishedAttributes - table-with-inline-row-geometry generates rowIndex and pickingColors', async () => {
+test('GroupedAttributeManager.getModelBindings - table-with-row-geometries generates rowIndex and pickingColors', async () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'}
@@ -296,11 +339,11 @@ test('GroupedAttributeManager.getPublishedAttributes - table-with-inline-row-geo
     transitions: {}
   });
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: false
   });
-  const rowIndexBytes = await published.buffers.rowIndex.readAsync(0, 20);
-  const pickingColorBytes = await published.buffers.pickingColors.readAsync(0, 20);
+  const rowIndexBytes = await modelBindings.buffers.rowIndex.readAsync(0, 20);
+  const pickingColorBytes = await modelBindings.buffers.pickingColors.readAsync(0, 20);
 
   expect(Array.from(new Uint32Array(rowIndexBytes.buffer, rowIndexBytes.byteOffset, 5))).toEqual([
     0, 0, 1, 1, 1
@@ -310,7 +353,7 @@ test('GroupedAttributeManager.getPublishedAttributes - table-with-inline-row-geo
   ).toEqual([1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0]);
 });
 
-test('GroupedAttributeManager.getPublishedAttributes - table-with-inline-row-geometry pickingColors use source index', async () => {
+test('GroupedAttributeManager.getModelBindings - table-with-row-geometries pickingColors use source index', async () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'}
@@ -326,17 +369,17 @@ test('GroupedAttributeManager.getPublishedAttributes - table-with-inline-row-geo
     transitions: {}
   });
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: false
   });
-  const pickingColorBytes = await published.buffers.pickingColors.readAsync(0, 12);
+  const pickingColorBytes = await modelBindings.buffers.pickingColors.readAsync(0, 12);
 
   expect(
     Array.from(new Uint8Array(pickingColorBytes.buffer, pickingColorBytes.byteOffset, 12))
   ).toEqual([8, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0]);
 });
 
-test('GroupedAttributeManager.getBufferLayouts - table-with-inline-row-geometry does not duplicate layer pickingColors', () => {
+test('GroupedAttributeManager.getBufferLayouts - table-with-row-geometries does not duplicate layer pickingColors', () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
@@ -361,7 +404,7 @@ test('GroupedAttributeManager.getBufferLayouts - table-with-inline-row-geometry 
   expect(attributeNames).toContain('rowIndex');
 });
 
-test('GroupedAttributeManager.getPublishedAttributes - publishes constants and index buffers', () => {
+test('GroupedAttributeManager.getModelBindings - binds constants and index buffers', () => {
   const attributeManager = new GroupedAttributeManager(createDevice({type: 'webgl'}));
   attributeManager.add({
     indices: {size: 1, isIndexed: true, accessor: 'getIndex'}
@@ -385,14 +428,14 @@ test('GroupedAttributeManager.getPublishedAttributes - publishes constants and i
     transitions: {}
   });
 
-  const publishedAttributes = attributeManager.getPublishedAttributes(
+  const modelBindings = attributeManager.getModelBindings(
     attributeManager.getAttributes(),
     {isInstanced: true}
   );
 
-  expect(publishedAttributes.buffers.instanceAngles).toBeTruthy();
-  expect(Array.from(publishedAttributes.constants.instanceSizes)).toEqual([3]);
-  expect(publishedAttributes.indexBuffers).toHaveLength(1);
+  expect(modelBindings.buffers.instanceAngles).toBeTruthy();
+  expect(Array.from(modelBindings.constants.instanceSizes)).toEqual([3]);
+  expect(modelBindings.indexBuffers).toHaveLength(1);
 });
 
 test('GroupedAttributeManager.getBufferLayouts - active transitions stay unmanaged', () => {
@@ -422,7 +465,7 @@ test('GroupedAttributeManager.getBufferLayouts - active transitions stay unmanag
   );
 });
 
-test('GroupedAttributeManager.getPackedBufferAttributes - preserves overflow buffers across partial rewrites', async () => {
+test('GroupedAttributeManager.getModelBindings - preserves overflow buffers across partial rewrites', async () => {
   const attributeManager = new GroupedAttributeManager(createDevice({maxVertexBuffers: 1}));
   attributeManager.addInstanced({
     instanceSizes: {
@@ -450,10 +493,10 @@ test('GroupedAttributeManager.getPackedBufferAttributes - preserves overflow buf
     transitions: {}
   });
 
-  const initialBuffer = attributeManager.getPackedBufferAttributes(
+  const initialBuffer = attributeManager.getModelBindings(
     attributeManager.getAttributes(),
     {isInstanced: true}
-  )['interleaved-attribute-columns'];
+  ).buffers['interleaved-attribute-columns'];
   let packedBytes = await initialBuffer.readAsync(0, 16);
   expect(Array.from(new Float32Array(packedBytes.buffer, packedBytes.byteOffset, 4))).toEqual([
     10, 1, 20, 2
@@ -474,12 +517,12 @@ test('GroupedAttributeManager.getPackedBufferAttributes - preserves overflow buf
   });
 
   const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-  const updatedBuffer = attributeManager.getPackedBufferAttributes(
+  const updatedBuffer = attributeManager.getModelBindings(
     {
       instanceAngles: changedAttributes.instanceAngles
     },
     {isInstanced: true}
-  )['interleaved-attribute-columns'];
+  ).buffers['interleaved-attribute-columns'];
 
   expect(updatedBuffer).toBe(initialBuffer);
   packedBytes = await updatedBuffer.readAsync(0, 16);
@@ -515,15 +558,15 @@ test('GroupedAttributeManager.update - planned attributes skip unmanaged buffers
   expect(attributes.instanceSizes.isConstant).toBeTruthy();
   expect(attributes.instancePositions.getBuffer()).toBeNull();
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: true
   });
-  expect(published.buffers['interleaved-constant-attribute-columns']).toBeTruthy();
-  expect(published.buffers['position-attribute-columns']).toBeTruthy();
-  expect(published.buffers.instanceAngles).toBeTruthy();
+  expect(modelBindings.buffers['interleaved-constant-attribute-columns']).toBeTruthy();
+  expect(modelBindings.buffers['position-attribute-columns']).toBeTruthy();
+  expect(modelBindings.buffers.instanceAngles).toBeTruthy();
 });
 
-test('GroupedAttributeManager.getBufferLayouts - fp64 positions publish high and low columns separately', () => {
+test('GroupedAttributeManager.getBufferLayouts - fp64 positions bind high and low columns separately', () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.addInstanced({
     instancePositions: {
@@ -555,11 +598,55 @@ test('GroupedAttributeManager.getBufferLayouts - fp64 positions publish high and
     'instancePositions'
   ]);
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: true
   });
-  expect(published.buffers['interleaved-constant-attribute-columns']).toBeTruthy();
-  expect(published.buffers['position-attribute-columns']).toBeTruthy();
+  expect(modelBindings.buffers['interleaved-constant-attribute-columns']).toBeTruthy();
+  expect(modelBindings.buffers['position-attribute-columns']).toBeTruthy();
+});
+
+test('GroupedAttributeManager.getBufferLayouts - named fp64 position columns are planned', () => {
+  const attributeManager = new GroupedAttributeManager(createDevice());
+  attributeManager.addInstanced({
+    instanceSourcePositions: {
+      size: 3,
+      type: 'float64',
+      accessor: 'getSourcePosition'
+    },
+    instanceTargetPositions: {
+      size: 3,
+      type: 'float64',
+      accessor: 'getTargetPosition'
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {source: [0.1, 0.2, 0.3], target: [1.1, 1.2, 1.3]},
+      {source: [2.1, 2.2, 2.3], target: [3.1, 3.2, 3.3]}
+    ],
+    props: {
+      getSourcePosition: (x: {source: number[]}) => x.source,
+      getTargetPosition: (x: {target: number[]}) => x.target
+    },
+    transitions: {}
+  });
+
+  const layouts = attributeManager.getBufferLayouts({isInstanced: true});
+
+  expect(layouts.map(layout => layout.name)).toEqual([
+    'interleaved-constant-attribute-columns',
+    'position-attribute-columns'
+  ]);
+  expect(layouts[0].attributes.map(attribute => attribute.attribute)).toEqual([
+    'instanceSourcePositions64Low',
+    'instanceTargetPositions64Low'
+  ]);
+  expect(layouts[1].attributes.map(attribute => attribute.attribute)).toEqual([
+    'instanceSourcePositions',
+    'instanceTargetPositions'
+  ]);
 });
 
 test('GroupedAttributeManager.getBufferLayouts - priority controls separate vs interleaved columns', () => {
@@ -584,6 +671,152 @@ test('GroupedAttributeManager.getBufferLayouts - priority controls separate vs i
   expect(attributeManager.getBufferLayouts({isInstanced: true}).map(layout => layout.name)).toEqual(
     ['instanceColors', 'interleaved-attribute-columns']
   );
+});
+
+test('GroupedAttributeManager.getBufferLayouts - generated noAlloc picking colors are planned', () => {
+  const attributeManager = new GroupedAttributeManager(createDevice({maxVertexBuffers: 2}));
+  attributeManager.addInstanced({
+    instancePositions: {size: 3, accessor: 'getPosition'},
+    instanceAngles: {size: 1, accessor: 'getAngle'},
+    instancePickingColors: {
+      size: 4,
+      type: 'uint8',
+      noAlloc: true,
+      update: (attribute: any, {numInstances}: {numInstances: number}) => {
+        const value = new Uint8Array(numInstances * 4);
+        for (let index = 0; index < numInstances; index++) {
+          value[index * 4] = index + 1;
+        }
+        attribute.value = value;
+      }
+    }
+  });
+
+  attributeManager.update({
+    numInstances: 2,
+    data: [
+      {position: [0, 0, 0], angle: 10},
+      {position: [1, 1, 1], angle: 20}
+    ],
+    props: {
+      getPosition: (x: {position: number[]}) => x.position,
+      getAngle: (x: {angle: number}) => x.angle
+    },
+    transitions: {}
+  });
+
+  const attributes = attributeManager.getAttributes();
+  const plan = TableBufferPlanner.getAllocationPlan({
+    device: createDevice({maxVertexBuffers: 2}),
+    columns: getColumnDescriptors(attributeManager, {isInstanced: true}),
+    modelInfo: {isInstanced: true},
+    generateConstantAttributes: true,
+    isTransitionAttribute: () => false
+  });
+
+  expect(attributes.instancePickingColors.getBuffer()).toBeNull();
+  expect(plan.groupsByColumnId.instancePickingColors[0].kind).toBe(
+    'interleaved-attribute-columns'
+  );
+  expect(plan.groups.some(group => group.kind === 'unmanaged-attribute-column')).toBe(false);
+  expect(attributeManager.getBufferLayouts({isInstanced: true}).map(layout => layout.name)).toEqual(
+    ['position-attribute-columns', 'interleaved-attribute-columns']
+  );
+});
+
+test('GroupedAttributeManager.getBufferLayouts - external GPU picking colors stay unmanaged', () => {
+  const testDevice = createDevice({maxVertexBuffers: 2});
+  const externalBuffer = testDevice.createBuffer({byteLength: 8});
+  const attributeManager = new GroupedAttributeManager(testDevice);
+  attributeManager.addInstanced({
+    instancePickingColors: {
+      size: 4,
+      type: 'uint8',
+      noAlloc: true,
+      update: (attribute: any, {numInstances}: {numInstances: number}) => {
+        attribute.value = new Uint8Array(numInstances * 4);
+      }
+    }
+  });
+
+  try {
+    attributeManager.update({
+      numInstances: 2,
+      data: [{}, {}],
+      buffers: {
+        instancePickingColors: externalBuffer
+      },
+      props: {},
+      transitions: {}
+    });
+
+    const plan = TableBufferPlanner.getAllocationPlan({
+      device: testDevice,
+      columns: getColumnDescriptors(attributeManager, {isInstanced: true}),
+      modelInfo: {isInstanced: true},
+      generateConstantAttributes: true,
+      isTransitionAttribute: () => false
+    });
+
+    expect(plan.groupsByColumnId.instancePickingColors[0].kind).toBe(
+      'unmanaged-attribute-column'
+    );
+    expect(attributeManager.getBufferLayouts({isInstanced: true}).map(layout => layout.name)).toEqual(
+      ['instancePickingColors']
+    );
+  } finally {
+    externalBuffer.delete();
+  }
+});
+
+test('GroupedAttributeManager.getBufferLayouts - external GPU-only data columns stay unmanaged', () => {
+  const testDevice = createDevice({maxVertexBuffers: 2});
+  const externalBuffer = testDevice.createBuffer({byteLength: 8});
+  const attributeManager = new GroupedAttributeManager(testDevice);
+  attributeManager.addInstanced({
+    instanceValues: {
+      size: 1,
+      type: 'float32',
+      accessor: 'getValue'
+    }
+  });
+
+  try {
+    attributeManager.update({
+      numInstances: 2,
+      data: [{}, {}],
+      buffers: {
+        instanceValues: externalBuffer
+      },
+      props: {},
+      transitions: {}
+    });
+
+    const plan = TableBufferPlanner.getAllocationPlan({
+      device: testDevice,
+      columns: getColumnDescriptors(attributeManager, {isInstanced: true}),
+      modelInfo: {isInstanced: true},
+      generateConstantAttributes: true,
+      isTransitionAttribute: () => false
+    });
+
+    expect(plan.groupsByColumnId.instanceValues[0].kind).toBe('unmanaged-attribute-column');
+    expect(attributeManager.getBufferLayouts({isInstanced: true}).map(layout => layout.name)).toEqual(
+      ['instanceValues']
+    );
+
+    const modelBindings = attributeManager.getModelBindingPlan(
+      {},
+      {isInstanced: true},
+      {includeAllAttributes: true}
+    );
+    expect(modelBindings.buffers.instanceValues).toBe(externalBuffer);
+
+    const unchangedBindings = attributeManager.getModelBindings({}, {isInstanced: true});
+    expect(unchangedBindings.buffers.instanceValues).toBeUndefined();
+  } finally {
+    externalBuffer.delete();
+  }
 });
 
 test('GroupedAttributeManager.getBufferLayouts - reserves slots for model geometry', () => {
@@ -650,14 +883,14 @@ test('GroupedAttributeManager.getBufferLayouts - reserves slots for model geomet
     }
   }
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: true,
     reservedVertexBufferCount: 1
   });
-  expect(Object.keys(published.buffers).sort()).toEqual(layouts.map(layout => layout.name).sort());
+  expect(Object.keys(modelBindings.buffers).sort()).toEqual(layouts.map(layout => layout.name).sort());
 });
 
-test('GroupedAttributeManager.getPublishedAttributes - packs IconLayer shader attributes by row', async () => {
+test('GroupedAttributeManager.getModelBindings - packs IconLayer shader attributes by row', async () => {
   const attributeManager = new GroupedAttributeManager(createDevice({maxVertexBuffers: 8}));
   attributeManager.addInstanced({
     instanceIconDefs: {
@@ -688,18 +921,18 @@ test('GroupedAttributeManager.getPublishedAttributes - packs IconLayer shader at
     transitions: {}
   });
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: true,
     reservedVertexBufferCount: 1
   });
-  const packedBytes = await published.buffers.instanceIconDefs.readAsync(0, 56);
+  const packedBytes = await modelBindings.buffers.instanceIconDefs.readAsync(0, 56);
 
   expect(Array.from(new Float32Array(packedBytes.buffer, packedBytes.byteOffset, 14))).toEqual([
     1, 2, 3, 4, 5, 6, 7, 100, 101, 102, 103, 104, 105, 106
   ]);
 });
 
-test('GroupedAttributeManager.getPublishedAttributes - packs fp64 position high rows', async () => {
+test('GroupedAttributeManager.getModelBindings - packs fp64 position high rows', async () => {
   const attributeManager = new GroupedAttributeManager(createDevice());
   attributeManager.addInstanced({
     instancePositions: {
@@ -719,10 +952,10 @@ test('GroupedAttributeManager.getPublishedAttributes - packs fp64 position high 
     transitions: {}
   });
 
-  const published = attributeManager.getPublishedAttributes(attributeManager.getAttributes(), {
+  const modelBindings = attributeManager.getModelBindings(attributeManager.getAttributes(), {
     isInstanced: true
   });
-  const packedBytes = await published.buffers['position-attribute-columns'].readAsync(0, 24);
+  const packedBytes = await modelBindings.buffers['position-attribute-columns'].readAsync(0, 24);
 
   expect(Array.from(new Float32Array(packedBytes.buffer, packedBytes.byteOffset, 6))).toEqual([
     -35,

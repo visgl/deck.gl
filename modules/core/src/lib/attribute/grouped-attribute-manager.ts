@@ -6,7 +6,9 @@
 import Attribute from './attribute';
 import AttributeManager from './attribute-manager';
 import TableBufferPlanner, {
-  AttributeAllocationGroup
+  TableBufferGroup,
+  TableBufferPlan,
+  TableColumnDescriptor
 } from './table-buffer-planner';
 
 import {Buffer} from '@luma.gl/core';
@@ -15,11 +17,16 @@ import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 import type {NumericArray, TypedArray} from '../../types/types';
 
-/** Published outputs emitted by `GroupedAttributeManager` for model binding. */
-export type GroupedPublishedAttributes = {
+/** Attribute outputs emitted by `GroupedAttributeManager` for model binding. */
+export type GroupedModelBindings = {
   buffers: Record<string, Buffer>;
   constants: Record<string, TypedArray>;
   indexBuffers: Buffer[];
+};
+
+/** Model bindings plus layout information, computed from one planner pass. */
+export type GroupedModelBindingPlan = GroupedModelBindings & {
+  bufferLayouts: BufferLayout[];
 };
 
 /** Cached packed buffer layout metadata for a shared attribute group. */
@@ -129,8 +136,8 @@ export default class GroupedAttributeManager extends AttributeManager {
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
       const accessorName = attribute.settings.accessor;
-      const usesPlannedBuffer = TableBufferPlanner.shouldSkipAttributeBuffer(
-        attribute,
+      const usesPlannedBuffer = TableBufferPlanner.shouldSkipColumnBuffer(
+        this._getColumnDescriptor(attribute),
         undefined,
         name => this.attributeTransitionManager.hasAttribute(name)
       );
@@ -187,40 +194,53 @@ export default class GroupedAttributeManager extends AttributeManager {
   }
 
   override getBufferLayouts(modelInfo?: ModelInfo): BufferLayout[] {
-    const plan = this._getAttributeAllocationPlan(this._getPlanningAttributes(modelInfo), modelInfo);
-    const layouts: BufferLayout[] = [];
-
-    for (const group of plan.groups) {
-      if (group.kind === 'unmanaged-attribute-column') {
-        layouts.push(group.attributes[0].attribute.getBufferLayout(modelInfo));
-      } else {
-        layouts.push(this._getPackedBufferGroupLayout(group, modelInfo).layout);
-      }
-    }
-
-    return layouts;
+    const plan = this._getTableBufferPlan(this._getPlanningAttributes(modelInfo), modelInfo);
+    return this._getBufferLayoutsFromPlan(plan, modelInfo);
   }
 
-  /** Returns whether any active group currently publishes as a planner-owned buffer. */
-  hasPackedBufferGroups(modelInfo?: ModelInfo): boolean {
-    const plan = this._getAttributeAllocationPlan(this._getPlanningAttributes(modelInfo), modelInfo);
-    return plan.groups.some(group => group.kind !== 'unmanaged-attribute-column');
-  }
-
-  /** Publishes changed groups as vertex buffers, constants, and index buffers. */
-  getPublishedAttributes(
+  /** Resolves changed groups into vertex buffers, constants, and index buffers for a model. */
+  getModelBindings(
     changedAttributes: {[id: string]: Attribute},
     modelInfo?: ModelInfo
-  ): GroupedPublishedAttributes {
+  ): GroupedModelBindings {
     changedAttributes = this._getChangedAttributesWithGenerated(changedAttributes, modelInfo);
-    const plan = this._getAttributeAllocationPlan(this._getPlanningAttributes(modelInfo), modelInfo);
+    const plan = this._getTableBufferPlan(this._getPlanningAttributes(modelInfo), modelInfo);
+    return this._getModelBindingsFromPlan(changedAttributes, plan, modelInfo);
+  }
+
+  /** Resolves model bindings and layout information from one planner pass. */
+  getModelBindingPlan(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: ModelInfo,
+    options?: {includeAllAttributes?: boolean}
+  ): GroupedModelBindingPlan {
+    const plan = this._getTableBufferPlan(this._getPlanningAttributes(modelInfo), modelInfo);
+
+    if (options?.includeAllAttributes) {
+      changedAttributes = this.getAttributes();
+    }
+    changedAttributes = this._getChangedAttributesWithGenerated(changedAttributes, modelInfo);
+
+    const modelBindings = this._getModelBindingsFromPlan(changedAttributes, plan, modelInfo);
+
+    return {
+      ...modelBindings,
+      bufferLayouts: this._getBufferLayoutsFromPlan(plan, modelInfo)
+    };
+  }
+
+  private _getModelBindingsFromPlan(
+    changedAttributes: {[id: string]: Attribute},
+    plan: TableBufferPlan,
+    modelInfo?: ModelInfo
+  ): GroupedModelBindings {
     const touchedGroupIds = new Set<string>();
     const buffers: Record<string, Buffer> = {};
     const constants: Record<string, TypedArray> = {};
     const indexBuffers: Buffer[] = [];
 
     for (const attribute of Object.values(changedAttributes)) {
-      for (const mapping of plan.mappingsByAttributeId[attribute.id] || []) {
+      for (const mapping of plan.mappingsByColumnId[attribute.id] || []) {
         touchedGroupIds.add(mapping.bufferName);
       }
     }
@@ -231,11 +251,12 @@ export default class GroupedAttributeManager extends AttributeManager {
       }
 
       if (group.kind === 'unmanaged-attribute-column') {
-        const published = group.attributes[0].attribute.getPublishedValues();
-        Object.assign(buffers, published.buffers);
-        Object.assign(constants, published.constants);
-        if (published.indexBuffer) {
-          indexBuffers.push(published.indexBuffer);
+        const attribute = this._getAttribute(group.columns[0].id);
+        const attributeValues = attribute.getPublishedValues();
+        Object.assign(buffers, attributeValues.buffers);
+        Object.assign(constants, attributeValues.constants);
+        if (attributeValues.indexBuffer) {
+          indexBuffers.push(attributeValues.indexBuffer);
         }
       } else {
         const layout = this._getPackedBufferGroupLayout(group, modelInfo);
@@ -244,14 +265,6 @@ export default class GroupedAttributeManager extends AttributeManager {
     }
 
     return {buffers, constants, indexBuffers};
-  }
-
-  /** Backwards-compatible helper for callers that only need published vertex buffers. */
-  getPackedBufferAttributes(
-    changedAttributes: {[id: string]: Attribute},
-    modelInfo?: ModelInfo
-  ): Record<string, Buffer> {
-    return this.getPublishedAttributes(changedAttributes, modelInfo).buffers;
   }
 
   /** Updates one attribute while controlling whether it should materialize its own GPU buffer. */
@@ -284,20 +297,40 @@ export default class GroupedAttributeManager extends AttributeManager {
     }
   }
 
-  private _getAttributeAllocationPlan(attributes: Attribute[], modelInfo?: ModelInfo) {
+  private _getTableBufferPlan(attributes: Attribute[], modelInfo?: ModelInfo) {
     const reservedVertexBufferCount =
       modelInfo?.reservedVertexBufferCount ??
       ((modelInfo as {_gpuGeometry?: {bufferLayout?: BufferLayout[]}} | undefined)?._gpuGeometry
         ?.bufferLayout?.length ||
         0);
 
+    const columns = attributes.map(attribute => this._getColumnDescriptor(attribute, modelInfo));
+
     return TableBufferPlanner.getAllocationPlan({
+      id: this.id,
       device: this.device,
-      attributes,
+      columns,
       modelInfo: modelInfo && {...modelInfo, reservedVertexBufferCount},
       generateConstantAttributes: this.generateConstantAttributes,
       isTransitionAttribute: name => this.attributeTransitionManager.hasAttribute(name)
     });
+  }
+
+  private _getBufferLayoutsFromPlan(
+    plan: TableBufferPlan,
+    modelInfo?: ModelInfo
+  ): BufferLayout[] {
+    const layouts: BufferLayout[] = [];
+
+    for (const group of plan.groups) {
+      if (group.kind === 'unmanaged-attribute-column') {
+        layouts.push(this._getAttribute(group.columns[0].id).getBufferLayout(modelInfo));
+      } else {
+        layouts.push(this._getPackedBufferGroupLayout(group, modelInfo).layout);
+      }
+    }
+
+    return layouts;
   }
 
   private _getPlanningAttributes(modelInfo?: ModelInfo): Attribute[] {
@@ -339,6 +372,40 @@ export default class GroupedAttributeManager extends AttributeManager {
     return modelInfo?.isInstanced === false;
   }
 
+  private _getAttribute(id: string): Attribute {
+    return this.attributes[id] || this.rowGeometryAttributes[id as keyof RowGeometryAttributes];
+  }
+
+  private _getColumnDescriptor(attribute: Attribute, modelInfo?: ModelInfo): TableColumnDescriptor {
+    const stepMode = attribute.getBufferLayout(modelInfo).stepMode as 'vertex' | 'instance';
+
+    return {
+      id: attribute.id,
+      byteStride: attribute.getPackedBufferStride(null),
+      byteLength: this._getStorageBufferByteLength(attribute),
+      rowCount: attribute.numInstances,
+      stepMode,
+      isPosition: isPositionAttribute(attribute.id),
+      isConstant: attribute.constant || attribute.isConstant,
+      isIndexed: attribute.settings.isIndexed,
+      isTransition: Boolean(attribute.settings.transition),
+      isExternalBufferOnly: isExternalGpuBufferOnlyAttribute(attribute),
+      isDoublePrecision: attribute.doublePrecision,
+      noAlloc: attribute.settings.noAlloc,
+      allowNoAllocManaged: canUseNoAllocPlannedBuffer(attribute),
+      supportsPackedBuffer: attribute.supportsPackedBuffer(stepMode, modelInfo),
+      isGeneratedRowGeometry: attribute.id === 'rowIndex' || attribute.id === 'pickingColors',
+      priority: getColumnPriority(attribute)
+    };
+  }
+
+  private _getStorageBufferByteLength(attribute: Attribute): number {
+    if (ArrayBuffer.isView(attribute.value)) {
+      return attribute.value.byteLength;
+    }
+    return Math.max(1, attribute.numInstances) * attribute.getPackedBufferStride(null);
+  }
+
   private _updateRowGeometryAttributes(
     data: any,
     numInstances: number,
@@ -373,25 +440,28 @@ export default class GroupedAttributeManager extends AttributeManager {
 
   /** Builds the shared buffer layout metadata for one packed attribute group. */
   private _getPackedBufferGroupLayout(
-    group: AttributeAllocationGroup,
+    group: TableBufferGroup,
     modelInfo?: ModelInfo
   ): PackedBufferGroupLayout {
-    const byteStride = group.attributes.reduce(
-      (stride, {attribute, fp64Component}) =>
-        stride + attribute.getPackedBufferStride(fp64Component ?? null),
+    const byteStride = group.columns.reduce(
+      (stride, {id, fp64Component}) =>
+        stride + this._getAttribute(id).getPackedBufferStride(fp64Component ?? null),
       0
     );
     const rowCount =
-      group.rowCount ?? Math.max(1, ...group.attributes.map(({attribute}) => attribute.numInstances));
+      group.rowCount ?? Math.max(1, ...group.columns.map(({id}) => this._getAttribute(id).numInstances));
     const stepMode =
       group.stepMode ??
-      (group.attributes[0].attribute.getBufferLayout(modelInfo).stepMode as 'vertex' | 'instance');
+      (this._getAttribute(group.columns[0].id).getBufferLayout(modelInfo).stepMode as
+        | 'vertex'
+        | 'instance');
     const attributes: BufferAttributeLayout[] = [];
     const attributeOffsets: Record<string, number> = {};
     const attributeNames: string[] = [];
     let byteOffset = 0;
 
-    for (const {attribute, fp64Component} of group.attributes) {
+    for (const {id, fp64Component} of group.columns) {
+      const attribute = this._getAttribute(id);
       const layout = attribute.getPackedBufferLayout(
         byteStride,
         byteOffset,
@@ -417,7 +487,7 @@ export default class GroupedAttributeManager extends AttributeManager {
 
   /** Allocates or updates the shared GPU buffer for one packed attribute group. */
   private _updatePackedBufferGroup(
-    group: AttributeAllocationGroup,
+    group: TableBufferGroup,
     layout: PackedBufferGroupLayout,
     changedAttributes: {[id: string]: Attribute}
   ): Buffer {
@@ -438,11 +508,12 @@ export default class GroupedAttributeManager extends AttributeManager {
     }
 
     const data = rewriteAll ? new Uint8Array(layout.byteLength) : state!.data;
-    for (const {attribute, fp64Component} of group.attributes) {
-      if (!rewriteAll && state && !changedAttributes[attribute.id]) {
+    for (const {id, fp64Component} of group.columns) {
+      const attribute = this._getAttribute(id);
+      if (!rewriteAll && state && !changedAttributes[id]) {
         continue;
       }
-      const attributeName = fp64Component === 'low' ? `${attribute.id}64Low` : attribute.id;
+      const attributeName = fp64Component === 'low' ? `${id}64Low` : id;
       attribute.writeToPackedBuffer(data, {
         byteStride: layout.byteStride,
         byteOffset: layout.attributeOffsets[attributeName],
@@ -495,4 +566,41 @@ function encodePickingColor(index: number, target: Uint8ClampedArray, offset: nu
 function getSourceIndex(data: any, row: number): number | null {
   const object = Array.isArray(data) ? data[row] : data?.[row];
   return Number.isFinite(object?.__source?.index) ? object.__source.index : null;
+}
+
+function isPositionAttribute(id: string): boolean {
+  return id === 'positions' || /Positions$/.test(id);
+}
+
+function isColorAttribute(id: string): boolean {
+  return /Colors?$/.test(id);
+}
+
+function isGeneratedPickingColorAttribute(id: string): boolean {
+  return id === 'pickingColors' || id === 'instancePickingColors';
+}
+
+function isExternalGpuBufferOnlyAttribute(attribute: Attribute): boolean {
+  return Boolean((attribute as unknown as {state?: {externalBuffer?: Buffer | null}}).state?.externalBuffer);
+}
+
+function canUseNoAllocPlannedBuffer(attribute: Attribute): boolean {
+  return (
+    isGeneratedPickingColorAttribute(attribute.id) &&
+    typeof attribute.settings.update === 'function' &&
+    !isExternalGpuBufferOnlyAttribute(attribute)
+  );
+}
+
+function getColumnPriority(attribute: Attribute): 'high' | 'medium' | 'low' {
+  if (attribute.settings.bufferLayoutPriority) {
+    return attribute.settings.bufferLayoutPriority;
+  }
+  if (isGeneratedPickingColorAttribute(attribute.id)) {
+    return 'low';
+  }
+  if (isPositionAttribute(attribute.id) || isColorAttribute(attribute.id)) {
+    return 'high';
+  }
+  return 'medium';
 }

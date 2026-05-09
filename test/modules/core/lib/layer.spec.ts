@@ -358,7 +358,7 @@ test('Layer#_setModelAttributes binds grouped webgl constants through setConstan
   ).toBeUndefined();
 });
 
-test('Layer#_setModelAttributes binds unified publication results including index buffers', () => {
+test('Layer#_setModelAttributes binds unified model binding results including index buffers', () => {
   const layer = new PackedIndexedLayer({
     id: 'packed-indexed-layer',
     data: [
@@ -374,12 +374,13 @@ test('Layer#_setModelAttributes binds unified publication results including inde
 
   const attributeManager = layer.getAttributeManager()!;
   const indexBuffer = {} as any;
-  const getPublishedAttributesSpy = vi
-    .spyOn(Object.getPrototypeOf(attributeManager), 'getPublishedAttributes')
+  const getModelBindingsSpy = vi
+    .spyOn(Object.getPrototypeOf(attributeManager), 'getModelBindingPlan')
     .mockReturnValue({
       buffers: {instanceAngles: {} as any},
       constants: {instanceSizes: new Float32Array([3])},
-      indexBuffers: [indexBuffer]
+      indexBuffers: [indexBuffer],
+      bufferLayouts: []
     });
 
   const changedAttributes = attributeManager.getAttributes();
@@ -395,7 +396,7 @@ test('Layer#_setModelAttributes binds unified publication results including inde
 
   expect(
     model.setAttributes,
-    'attribute buffer is bound through the shared publication result'
+    'attribute buffer is bound through the shared model binding result'
   ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
   expect(
     model.setConstantAttributes,
@@ -403,12 +404,12 @@ test('Layer#_setModelAttributes binds unified publication results including inde
   ).toHaveBeenCalledWith(expect.objectContaining({instanceSizes: expect.any(Float32Array)}));
   expect(
     model.setIndexBuffer,
-    'index buffer is emitted from the same publication result'
+    'index buffer is emitted from the same model binding result'
   ).toHaveBeenCalledWith(indexBuffer);
-  getPublishedAttributesSpy.mockRestore();
+  getModelBindingsSpy.mockRestore();
 });
 
-test('Layer#_setModelAttributes binds grouped buffers even when changed attributes are empty', () => {
+test('Layer#_setModelAttributes skips grouped binding when nothing changed', () => {
   const layer = new PackedConstantLayer({
     id: 'packed-constant-layer',
     data: [
@@ -437,15 +438,51 @@ test('Layer#_setModelAttributes binds grouped buffers even when changed attribut
     setIndexBuffer: vi.fn()
   };
 
+  const getModelBindingsSpy = vi.spyOn(Object.getPrototypeOf(attributeManager), 'getModelBindingPlan');
+
   (layer as any)._setModelAttributes(model, {}, false);
 
-  expect(
-    model.setBufferLayout,
-    'grouped layouts are rebound even without changed attrs'
-  ).toHaveBeenCalledTimes(1);
+  expect(getModelBindingsSpy, 'no-op updates do not run the grouped planner').not.toHaveBeenCalled();
+  expect(model.setBufferLayout, 'no-op updates do not refresh layouts').not.toHaveBeenCalled();
+  expect(model.setAttributes, 'no-op updates do not rebind buffers').not.toHaveBeenCalled();
+  getModelBindingsSpy.mockRestore();
+});
+
+test('Layer#_setModelAttributes binds grouped buffers when the model changed', () => {
+  const layer = new PackedConstantLayer({
+    id: 'packed-constant-layer',
+    data: [
+      {angle: 10},
+      {angle: 20}
+    ],
+    getSize: 3,
+    getAngle: (x: {angle: number}) => x.angle
+  });
+
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+
+  const attributeManager = layer.getAttributeManager()!;
+  attributeManager.update({
+    numInstances: 2,
+    data: layer.props.data,
+    props: layer.props,
+    transitions: {}
+  });
+
+  const model = {
+    userData: {},
+    setBufferLayout: vi.fn(),
+    setAttributes: vi.fn(),
+    setConstantAttributes: vi.fn(),
+    setIndexBuffer: vi.fn()
+  };
+
+  (layer as any)._setModelAttributes(model, {}, false, true);
+
+  expect(model.setBufferLayout, 'new models already have their constructor layout').not.toHaveBeenCalled();
   expect(
     model.setAttributes,
-    'grouped buffers are rebound even without changed attrs'
+    'existing grouped buffers are bound to the new model'
   ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
 });
 
@@ -465,8 +502,8 @@ test('Layer#_setModelAttributes skips index buffers for models that exclude indi
 
   const attributeManager = layer.getAttributeManager()!;
   const indexBuffer = {} as any;
-  const getPublishedAttributesSpy = vi
-    .spyOn(Object.getPrototypeOf(attributeManager), 'getPublishedAttributes')
+  const getModelBindingsSpy = vi
+    .spyOn(Object.getPrototypeOf(attributeManager), 'getModelBindings')
     .mockReturnValue({
       buffers: {instanceAngles: {} as any},
       constants: {},
@@ -485,7 +522,7 @@ test('Layer#_setModelAttributes skips index buffers for models that exclude indi
   (layer as any)._setModelAttributes(model, changedAttributes, true);
 
   expect(model.setIndexBuffer, 'excluded index buffers are not rebound').not.toHaveBeenCalled();
-  getPublishedAttributesSpy.mockRestore();
+  getModelBindingsSpy.mockRestore();
 });
 
 test('Layer#use64bitPositions', () => {

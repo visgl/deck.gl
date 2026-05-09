@@ -387,6 +387,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         id: `${id}-top`,
         topology: 'triangle-list',
         bufferLayout,
+        isInstanced: false,
         isIndexed: true,
         userData: {
           excludeAttributes: {instanceVertexValid: true}
@@ -394,7 +395,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       });
     }
     if (extruded) {
-      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({
+        isInstanced: true,
+        reservedVertexBufferCount: 1
+      });
 
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
