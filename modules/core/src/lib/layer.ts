@@ -767,11 +767,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
-    const modelBindings = attributeManager!.getModelBindingPlan(
-      changedAttributes,
-      model,
-      {includeAllAttributes: bufferLayoutChanged || forceUpdate}
-    );
+    const modelBindings = attributeManager!.getModelBindingPlan(changedAttributes, model, {
+      includeAllAttributes: bufferLayoutChanged || forceUpdate
+    });
 
     if (bufferLayoutChanged) {
       model.setBufferLayout(modelBindings.bufferLayouts);

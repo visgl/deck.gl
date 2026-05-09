@@ -13,10 +13,10 @@ import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
-import {bufferLayoutEqual, getBufferAttributeLayout, getStride} from './gl-utils';
+import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
 import {Buffer} from '@luma.gl/core';
-import type {Device, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
+import type {Device, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -161,23 +161,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return normalizeTransitionSettings(userSettings, layerSettings);
   }
 
-  /** Returns every shader-visible attribute name produced by this logical attribute. */
-  getValueNames(): string[] {
-    const names = [this.id];
-    const shaderAttributeDefs = this.settings.shaderAttributes;
-
-    if (shaderAttributeDefs) {
-      names.push(...Object.keys(shaderAttributeDefs));
-    }
-
-    if (this.doublePrecision) {
-      const extraNames = names.map(name => `${name}64Low`);
-      names.push(...extraNames);
-    }
-
-    return names;
-  }
-
   setNeedsUpdate(reason: string = this.id, dataRange?: {startRow?: number; endRow?: number}): void {
     this.state.needsUpdate = this.state.needsUpdate || reason;
     this.setNeedsRedraw(reason);
@@ -198,6 +181,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     this.state.needsRedraw = this.state.needsRedraw || reason;
   }
 
+  /**
+   * Allocates CPU storage for this attribute and optionally its standalone GPU buffer.
+   *
+   * `generateBuffer: false` is used by the table-buffer path when an attribute's
+   * CPU value will be copied into a planner-owned packed buffer instead.
+   */
   allocate(numInstances: number, generateBuffer: boolean = true): boolean {
     const {state, settings} = this;
 
@@ -214,6 +203,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return false;
   }
 
+  /**
+   * Runs the updater and uploads changed data.
+   *
+   * When `generateBuffer` is false, the CPU typed array is updated but no
+   * standalone GPU buffer is created or written.
+   */
   updateBuffer({
     numInstances,
     data,
@@ -283,8 +278,14 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return updated;
   }
 
-  // Use generic value
-  // Returns true if successful
+  /**
+   * Sets a constant accessor value.
+   *
+   * If `generateBuffer` is omitted, this preserves the legacy behavior: WebGL
+   * keeps a constant attribute and WebGPU schedules buffer regeneration. If it
+   * is supplied, the caller explicitly controls whether to materialize a GPU
+   * buffer for planner-managed paths.
+   */
   setConstantValue(context: any, value?: any, generateBuffer?: boolean): boolean {
     if (value === undefined || typeof value === 'function') {
       return false;
@@ -328,6 +329,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return true;
   }
 
+  /**
+   * Expands one constant value into a repeated CPU column and optionally uploads it.
+   */
   setConstantBufferValue(
     value: any,
     numInstances: number,
@@ -404,9 +408,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return true;
   }
 
-  // Binary value is a typed array packed from mapping the source data with the accessor
-  // If the returned value from the accessor is the same as the attribute value, set it directly
-  // Otherwise use the auto updater for transform/normalization
+  /**
+   * Applies a binary column supplied through `data.attributes`.
+   *
+   * If the binary layout already matches the attribute, it can be used directly.
+   * Otherwise this records a binary accessor and falls through to the updater so
+   * transform/normalization logic remains centralized.
+   */
   setBinaryValue(
     buffer?: TypedArray | Buffer | BinaryAttribute,
     startIndices: NumericArray | null = null,
@@ -481,125 +489,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       );
     }
     return result;
-  }
-
-  /**
-   * Classifies the current attribute output into regular vertex buffers, constants,
-   * or a dedicated index buffer.
-   */
-  getPublishedValues(bufferName?: string): {
-    buffers: Record<string, Buffer>;
-    constants: Record<string, TypedArray>;
-    indexBuffer: Buffer | null;
-  } {
-    const buffers: Record<string, Buffer> = {};
-    const constants: Record<string, TypedArray> = {};
-    let indexBuffer: Buffer | null = null;
-
-    for (const [name, value] of Object.entries(this.getValue())) {
-      if (value instanceof Buffer) {
-        if (this.settings.isIndexed) {
-          indexBuffer = value;
-        } else {
-          buffers[bufferName || name] = value;
-        }
-      } else if (value) {
-        constants[name] = value;
-      }
-    }
-
-    return {buffers, constants, indexBuffer};
-  }
-
-  /**
-   * Returns whether this attribute can participate in a packed shared buffer for
-   * the given vertex step mode, ignoring whether data has been allocated yet.
-   */
-  supportsPackedBuffer(
-    stepMode: 'vertex' | 'instance',
-    modelInfo?: {isInstanced?: boolean; reservedVertexBufferCount?: number}
-  ): boolean {
-    return (
-      !this.doublePrecision &&
-      !this.settings.isIndexed &&
-      this.getBufferLayout(modelInfo).stepMode === stepMode
-    );
-  }
-
-  /**
-   * Returns whether this attribute can be packed into a shared buffer using its
-   * current CPU-side typed array contents.
-   */
-  canBePacked(): boolean {
-    const stepMode = this.getBufferLayout().stepMode as 'vertex' | 'instance';
-    return ArrayBuffer.isView(this.value) && this.supportsPackedBuffer(stepMode);
-  }
-
-  /** Returns the source byte stride this attribute contributes to a packed group. */
-  getPackedBufferStride(fp64Component: 'high' | 'low' | null = null): number {
-    if (this.doublePrecision && fp64Component) {
-      return this.size * 4;
-    }
-    return getStride(this.getAccessor());
-  }
-
-  /**
-   * Builds the packed buffer layout entries for this attribute and any shader
-   * attribute views at the supplied byte offset.
-   */
-  getPackedBufferLayout(
-    byteStride: number,
-    baseOffset: number,
-    deviceType: Device['type'],
-    fp64Component: 'high' | 'low' | null = null
-  ): {
-    attributes: BufferAttributeLayout[];
-    attributeOffsets: Record<string, number>;
-    attributeNames: string[];
-  } {
-    const accessor = this.getAccessor();
-    const attributes: BufferAttributeLayout[] = [];
-    const attributeOffsets: Record<string, number> = {};
-    const attributeNames: string[] = [];
-    const stride = this.getPackedBufferStride(fp64Component);
-    const attributeOffset =
-      baseOffset + (accessor.vertexOffset || 0) * stride + (accessor.offset || 0);
-    const attributeName = fp64Component === 'low' ? `${this.id}64Low` : this.id;
-    const packedAccessor = this.doublePrecision
-      ? {...accessor, type: 'float32' as const, bytesPerElement: 4, stride}
-      : accessor;
-    const layout = getBufferAttributeLayout(
-      attributeName,
-      {...packedAccessor, stride: byteStride, offset: attributeOffset},
-      deviceType
-    );
-    attributeOffsets[attributeName] = attributeOffset;
-    attributeNames.push(attributeName);
-
-    if (layout) {
-      attributes.push(layout);
-    }
-
-    if (!fp64Component && this.settings.shaderAttributes) {
-      for (const [name, def] of Object.entries(this.settings.shaderAttributes)) {
-        const shaderOffset =
-          attributeOffset +
-          (def.vertexOffset || 0) * byteStride +
-          (def.elementOffset || 0) * accessor.bytesPerElement;
-        const shaderLayout = getBufferAttributeLayout(
-          name,
-          {...accessor, ...def, stride: byteStride, offset: shaderOffset},
-          deviceType
-        );
-        if (shaderLayout) {
-          attributes.push(shaderLayout);
-          attributeOffsets[name] = shaderOffset;
-          attributeNames.push(name);
-        }
-      }
-    }
-
-    return {attributes, attributeOffsets, attributeNames};
   }
 
   /** Generate WebGPU-style buffer layout descriptor from this attribute */

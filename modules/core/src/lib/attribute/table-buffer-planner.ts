@@ -434,9 +434,7 @@ function allocateDataAttributes(
   const availableSlots =
     device.limits.maxVertexBuffers - reservedVertexBufferCount - fixedVertexBufferCount;
   const dedicatedCount =
-    availableSlots >= sortedColumns.length
-      ? sortedColumns.length
-      : Math.max(0, availableSlots - 1);
+    availableSlots >= sortedColumns.length ? sortedColumns.length : Math.max(0, availableSlots - 1);
   const groups: TableBufferGroup[] = [];
 
   for (const column of sortedColumns.slice(0, dedicatedCount)) {
@@ -466,7 +464,8 @@ function validatePlan(
   columnsById: Record<string, TableColumnDescriptor>,
   reservedVertexBufferCount: number
 ): void {
-  const vertexBufferCount = reservedVertexBufferCount + countVertexBufferGroups(groups, columnsById);
+  const vertexBufferCount =
+    reservedVertexBufferCount + countVertexBufferGroups(groups, columnsById);
   if (vertexBufferCount > device.limits.maxVertexBuffers) {
     throw new Error(
       `Attribute buffer allocation requires ${vertexBufferCount} vertex buffers, ` +
@@ -485,8 +484,7 @@ function validatePlan(
   }
 
   for (const group of storageBufferGroups) {
-    const byteLength =
-      group.byteLength || columnsById[group.columns[0].id].byteLength;
+    const byteLength = group.byteLength || columnsById[group.columns[0].id].byteLength;
     if (byteLength > device.limits.maxStorageBufferBindingSize) {
       throw new Error(
         `Attribute storage buffer group "${group.id}" requires byteLength ${byteLength}, ` +
@@ -572,9 +570,7 @@ function shouldUseStorageBuffers(
   mode: TableBufferPlannerMode,
   useStorageBuffers: boolean
 ): boolean {
-  return (
-    useStorageBuffers && device.type === 'webgpu' && mode === 'table-with-row-geometries'
-  );
+  return useStorageBuffers && device.type === 'webgpu' && mode === 'table-with-row-geometries';
 }
 
 /** Builds 256-byte-aligned whole-column slices for the stacked storage overflow buffer. */
@@ -598,10 +594,7 @@ function getStorageOverflowLayout(
 }
 
 /** Returns a column's byte offset inside a storage-buffer group. */
-function getStorageBufferByteOffset(
-  group: TableBufferGroup,
-  columnId: string
-): number | undefined {
+function getStorageBufferByteOffset(group: TableBufferGroup, columnId: string): number | undefined {
   if (group.kind !== 'separate-storage-column' && group.kind !== 'stacked-storage-columns') {
     return undefined;
   }
@@ -618,10 +611,7 @@ function getGroupByteStride(
   group: TableBufferGroup,
   columnsById: Record<string, TableColumnDescriptor>
 ): number {
-  return group.columns.reduce(
-    (byteStride, {id}) => byteStride + columnsById[id].byteStride,
-    0
-  );
+  return group.columns.reduce((byteStride, {id}) => byteStride + columnsById[id].byteStride, 0);
 }
 
 /** Returns a console-friendly snapshot that does not expose Sets or manager-owned objects. */

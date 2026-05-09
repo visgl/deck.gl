@@ -336,9 +336,10 @@ test('Layer#_setModelAttributes binds grouped webgl constants through setConstan
   expect(model.setBufferLayout, 'group layouts are refreshed before binding').toHaveBeenCalledTimes(
     1
   );
-  expect(model.setAttributes, 'accessor-driven attribute buffer is still bound').toHaveBeenCalledWith(
-    expect.objectContaining({instanceAngles: expect.anything()})
-  );
+  expect(
+    model.setAttributes,
+    'accessor-driven attribute buffer is still bound'
+  ).toHaveBeenCalledWith(expect.objectContaining({instanceAngles: expect.anything()}));
   const constantAttributes = model.setConstantAttributes.mock.calls[0][0];
   expect(
     Array.from(constantAttributes.instanceSizes),
@@ -404,10 +405,7 @@ test('Layer#_setModelAttributes binds unified model binding results including in
 test('Layer#_setModelAttributes skips grouped binding when nothing changed', () => {
   const layer = new PackedConstantLayer({
     id: 'packed-constant-layer',
-    data: [
-      {angle: 10},
-      {angle: 20}
-    ],
+    data: [{angle: 10}, {angle: 20}],
     getSize: 3,
     getAngle: (x: {angle: number}) => x.angle
   });
@@ -430,11 +428,17 @@ test('Layer#_setModelAttributes skips grouped binding when nothing changed', () 
     setIndexBuffer: vi.fn()
   };
 
-  const getModelBindingsSpy = vi.spyOn(Object.getPrototypeOf(attributeManager), 'getModelBindingPlan');
+  const getModelBindingsSpy = vi.spyOn(
+    Object.getPrototypeOf(attributeManager),
+    'getModelBindingPlan'
+  );
 
   (layer as any)._setModelAttributes(model, {}, false);
 
-  expect(getModelBindingsSpy, 'no-op updates do not run the grouped planner').not.toHaveBeenCalled();
+  expect(
+    getModelBindingsSpy,
+    'no-op updates do not run the grouped planner'
+  ).not.toHaveBeenCalled();
   expect(model.setBufferLayout, 'no-op updates do not refresh layouts').not.toHaveBeenCalled();
   expect(model.setAttributes, 'no-op updates do not rebind buffers').not.toHaveBeenCalled();
   getModelBindingsSpy.mockRestore();
@@ -443,10 +447,7 @@ test('Layer#_setModelAttributes skips grouped binding when nothing changed', () 
 test('Layer#_setModelAttributes binds grouped buffers when the model changed', () => {
   const layer = new PackedConstantLayer({
     id: 'packed-constant-layer',
-    data: [
-      {angle: 10},
-      {angle: 20}
-    ],
+    data: [{angle: 10}, {angle: 20}],
     getSize: 3,
     getAngle: (x: {angle: number}) => x.angle
   });
@@ -471,7 +472,10 @@ test('Layer#_setModelAttributes binds grouped buffers when the model changed', (
 
   (layer as any)._setModelAttributes(model, {}, false, true);
 
-  expect(model.setBufferLayout, 'new models already have their constructor layout').not.toHaveBeenCalled();
+  expect(
+    model.setBufferLayout,
+    'new models already have their constructor layout'
+  ).not.toHaveBeenCalled();
   expect(
     model.setAttributes,
     'existing grouped buffers are bound to the new model'

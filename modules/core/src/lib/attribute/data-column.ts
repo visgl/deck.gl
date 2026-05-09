@@ -115,17 +115,6 @@ export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
   defaultType: TypedArrayConstructor;
 };
 
-export type PackedBufferWriteOptions = {
-  /** Byte distance between consecutive rows in the target interleaved buffer. */
-  byteStride: number;
-  /** Byte offset where this column starts within each target row. */
-  byteOffset: number;
-  /** Number of target rows to write. */
-  rowCount: number;
-  /** Optional fp64 component view. The current WebGPU low component path writes zeros. */
-  fp64Component?: 'high' | 'low' | null;
-};
-
 type DataColumnInternalState<Options, State> = State & {
   externalBuffer: Buffer | null;
   bufferAccessor: DataColumnSettings<Options>;
@@ -329,62 +318,6 @@ export default class DataColumn<Options, State> {
     return this.state.bufferAccessor;
   }
 
-  /**
-   * Writes this column's CPU-side value into one slice of a shared interleaved
-   * target buffer. This keeps constants, accessor stride/offset, normalization,
-   * and fp64 component semantics owned by DataColumn instead of the planner.
-   */
-  writeToPackedBuffer(
-    target: Uint8Array,
-    {byteStride, byteOffset, rowCount, fp64Component = null}: PackedBufferWriteOptions
-  ): void {
-    const value = this.value as TypedArray | null;
-    if (!value) {
-      return;
-    }
-
-    if (this.doublePrecision && fp64Component) {
-      const row = new Float32Array(this.size);
-      const rowBytes = new Uint8Array(row.buffer);
-      const source = value as Float32Array | Float64Array;
-      const isConstant = this.state.constant;
-
-      for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-        const sourceIndex = (isConstant ? 0 : rowIndex) * this.size;
-        for (let componentIndex = 0; componentIndex < this.size; componentIndex++) {
-          row[componentIndex] =
-            fp64Component === 'low' ? 0 : source[sourceIndex + componentIndex] || 0;
-        }
-        target.set(rowBytes, rowIndex * byteStride + byteOffset);
-      }
-      return;
-    }
-
-    const accessor = this.getAccessor();
-    const sourceStride = getStride(accessor);
-    const sourceOffset = accessor.offset || 0;
-    const source = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-    const isConstant = this.state.constant;
-
-    if (isConstant) {
-      const rowBytes = source.subarray(0, Math.min(sourceStride, source.byteLength));
-      for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-        const targetStart = rowIndex * byteStride + byteOffset;
-        target.fill(0, targetStart, targetStart + sourceStride);
-        target.set(rowBytes, targetStart);
-      }
-      return;
-    }
-
-    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-      const sourceStart = sourceOffset + rowIndex * sourceStride;
-      const rowBytes = source.subarray(sourceStart, sourceStart + sourceStride);
-      const targetStart = rowIndex * byteStride + byteOffset;
-      target.fill(0, targetStart, targetStart + sourceStride);
-      target.set(rowBytes, targetStart);
-    }
-  }
-
   // Returns [min: Array(size), max: Array(size)]
   /* eslint-disable max-depth */
   getBounds(): [number[], number[]] | null {
@@ -415,7 +348,13 @@ export default class DataColumn<Options, State> {
     return result;
   }
 
-  // returns true if success
+  /**
+   * Assigns this column's current value, external buffer, or constant value.
+   *
+   * `createBuffer: false` keeps CPU-side value/accessor state up to date while
+   * clearing any standalone GPU buffer. The table-buffer adapter uses this when
+   * it will publish the data through planner-owned packed buffers.
+   */
   // eslint-disable-next-line max-statements
   setData(
     data:
@@ -557,6 +496,9 @@ export default class DataColumn<Options, State> {
     );
   }
 
+  /**
+   * Allocates this column's CPU typed array and optionally its standalone GPU buffer.
+   */
   allocate(numInstances: number, copy: boolean = false, createBuffer: boolean = true): boolean {
     const {state} = this;
     const oldValue = state.allocatedValue;
