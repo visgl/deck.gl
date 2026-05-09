@@ -55,7 +55,7 @@ export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
-  /** Hint used by `GroupedAttributeManager` when assigning attributes to vertex buffers. */
+  /** Hint used by `AttributeManager` when assigning attributes to vertex buffers. */
   bufferLayoutPriority?: BufferLayoutPriority;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];

@@ -1,4 +1,4 @@
-# Table Buffer Planner
+# TableBufferPlanner
 
 > The attribute manager uses an internal planner to translate binary table columns into GPU buffers.
 
@@ -35,7 +35,91 @@ The planner mode determines:
 
 `table-with-row-geometries` is selected when `modelInfo.isInstanced === false`. Each table row owns or generates a variable number of geometry vertices, such as a polygon or path. Table columns that conceptually have one value per table row may need to be available at every generated vertex for that table row.
 
-## Row Lookup Columns
+## Usage
+
+`TableBufferPlanner` works from abstract table column descriptors. It does not know about `Attribute`, `DataColumn`, accessors, typed array normalization, or GPU buffer uploads. Callers describe the columns they want to render, then use the returned plan to allocate buffers, build model layouts, and decide which columns need planner-owned packing.
+
+For a layer with shared instanced geometry, describe the reusable geometry as vertex-rate columns and table data as instance-rate columns:
+
+```ts
+const plan = TableBufferPlanner.getAllocationPlan({
+  id: 'scatterplot',
+  device,
+  modelInfo: {isInstanced: true},
+  generateConstantAttributes: device.type === 'webgpu',
+  isTransitionAttribute: name => transitionManager.hasAttribute(name),
+  columns: [
+    {
+      id: 'positions',
+      byteStride: 8,
+      byteLength: 8 * 4,
+      rowCount: 4,
+      stepMode: 'vertex'
+    },
+    {
+      id: 'instancePositions',
+      byteStride: 12,
+      byteLength: 12 * objectCount,
+      rowCount: objectCount,
+      stepMode: 'instance',
+      isPosition: true,
+      supportsPackedBuffer: true,
+      priority: 'high'
+    },
+    {
+      id: 'instanceFillColors',
+      byteStride: 4,
+      byteLength: 4 * objectCount,
+      rowCount: objectCount,
+      stepMode: 'instance',
+      supportsPackedBuffer: true
+    }
+  ]
+});
+```
+
+The returned `plan.groups` are the GPU allocation groups to publish to the model. `plan.mappingsByColumnId` tells the caller which buffer group and shader-visible attribute name each source column maps to. `plan.packedColumnIds` tells the attribute manager which columns should compute CPU values but skip creating their own standalone GPU buffers.
+
+For row geometries, set `modelInfo.isInstanced: false`. Table data columns that vary once per source row may be expanded as vertex attributes today, or marked as planner-only storage buffer groups when `useStorageBuffers` is enabled:
+
+```ts
+const plan = TableBufferPlanner.getAllocationPlan({
+  id: 'polygons-fill',
+  device,
+  modelInfo: {isInstanced: false},
+  useStorageBuffers: device.type === 'webgpu',
+  generateConstantAttributes: device.type === 'webgpu',
+  isTransitionAttribute: () => false,
+  columns: [
+    {
+      id: 'positions',
+      byteStride: 12,
+      byteLength: 12 * vertexCount,
+      rowCount: vertexCount,
+      stepMode: 'vertex',
+      isPosition: true,
+      supportsPackedBuffer: true
+    },
+    {
+      id: 'fillColors',
+      byteStride: 4,
+      byteLength: 4 * polygonCount,
+      rowCount: polygonCount,
+      stepMode: 'vertex',
+      supportsPackedBuffer: true,
+      priority: 'high'
+    }
+  ]
+});
+```
+
+When storage planning is enabled and the device limits allow it, `plan.storageColumnIds` identifies table columns assigned to `separate-storage-column` or `stacked-storage-columns` groups. Storage groups are currently planner output only; model binding code still needs a storage-buffer implementation before using them for rendering.
+
+## TableBufferPlan
+
+`TableBufferPlan` is the planner output consumed by the attribute manager and model-binding code. It contains ordered allocation groups, per-column reverse lookups, model binding mappings, and sets that identify columns represented by planner-owned vertex buffers or storage-buffer groups.
+
+### Row Lookup Columns
 
 In `table-with-row-geometries`, the planner can add generated columns that reconnect generated vertices to source table rows:
 
@@ -44,7 +128,7 @@ In `table-with-row-geometries`, the planner can add generated columns that recon
 
 These generated columns are vertex-rate data columns. They are never packed into the one-row constants buffer and are not eligible for storage-buffer planning.
 
-## Column Classes
+### Column Classes
 
 The planner first classifies every attribute as a table column with one of these roles:
 
@@ -52,13 +136,24 @@ The planner first classifies every attribute as a table column with one of these
 * `interleaved-constant-attribute-columns`: columns whose value is the same for all logical rows. WebGPU does not support constant attributes directly, so constants are represented by a small real buffer with the opposite step mode from primary data.
 * `data`: ordinary table columns that vary by row.
 * `generated`: planner-owned helper columns such as `rowIndex` and generated `pickingColors`.
-* `unmanaged-attribute-column`: columns that the grouped manager cannot safely own or pack.
+* `unmanaged-attribute-column`: columns that the attribute manager cannot safely own or pack.
 
-Double-precision positions publish their high component in the position group. When the shader also expects a low component, the planner publishes a zero-filled low column through the constants group for the current WebGPU path. Multiple double-precision position columns each produce their own `64Low` constant column in the same interleaved constants group.
+Attributes remain unmanaged when packing would change behavior or when the attribute manager cannot own the CPU data. This includes indexed attributes, transition attributes, external GPU-buffer-only attributes, most `noAlloc` attributes, and unsupported double-precision non-position attributes. Generated CPU-backed picking colors are the `noAlloc` exception: they may be planner-managed to avoid consuming an unmanaged vertex-buffer slot.
 
-Attributes remain unmanaged when packing would change behavior or when the grouped manager cannot own the CPU data. This includes indexed attributes, transition attributes, external GPU-buffer-only attributes, most `noAlloc` attributes, and unsupported double-precision non-position attributes. Generated CPU-backed picking colors are the `noAlloc` exception: they may be planner-managed to avoid consuming an unmanaged vertex-buffer slot.
+### Position Columns
 
-## Buffer Groups
+Position columns describe geometry and are treated specially because they affect vertex interpretation and precision. A column is considered a position column when `isPosition` is set by the caller. deck.gl's `AttributeManager` currently sets this for `positions` and `*Positions` attributes, which covers common columns such as `instancePositions`, `instanceSourcePositions`, and `instanceTargetPositions`.
+
+For fp32 positions, the planner maps the source column directly to a position attribute column. The shader-visible attribute name is the source column id, and no extra low-part mapping is generated.
+
+For fp64 positions, the source column may produce two shader-visible attribute mappings: the high component, named by the source column id, and the low component, named `${id}64Low`. The physical placement of the low component is not fixed:
+
+* When the position column stays unmanaged, or when constant-buffer emulation is not enabled, the primary position buffer may publish both high and low component attributes together.
+* When the planner owns the position column and constant buffers are enabled, the primary `position-attribute-columns` group publishes the high component, while `interleaved-constant-attribute-columns` may publish the low component as a small constant low-part column.
+
+Callers should therefore read `plan.mappingsByColumnId` instead of assuming that `${id}64Low` is colocated with the primary position buffer. Multiple fp64 position columns can each produce their own low-part mapping.
+
+### Buffer Groups
 
 The planner emits buffer groups from the classified columns.
 
@@ -77,9 +172,9 @@ For `table-with-shared-geometry`, ordinary table columns are instance-rate. The 
 
 For `table-with-row-geometries`, generated vertices are the primary vertex stream. Positions and generated row lookup columns are vertex-rate. Ordinary constants use a single-entry instance-rate `interleaved-constant-attribute-columns` buffer, so constant values are not expanded across every generated vertex.
 
-## Optional Storage Buffers
+### Optional Storage Buffers
 
-`useStorageBuffers?: boolean` lets the planner mark eligible inline row-geometry data columns as storage buffers on WebGPU. This is currently a planner-only allocation mode; grouped attribute population and model binding do not consume it yet.
+`useStorageBuffers?: boolean` lets the planner mark eligible inline row-geometry data columns as storage buffers on WebGPU. This is currently a planner-only allocation mode; attribute population and model binding do not consume it yet.
 
 Storage-buffer planning exists to keep GPU storage identical to CPU storage for binary table columns. Instead of expanding one row value across every generated vertex for that row, the column can remain a contiguous source table column. A shader can use the vertex-rate `rowIndex` attribute to index the storage column and recover the source row value.
 
@@ -103,13 +198,13 @@ Each storage-eligible column gets a `separate-storage-column` group while storag
 
 The first implementation does not use dynamic storage buffer offsets, but the overflow layout already keeps column boundaries conservatively aligned.
 
-## Buffer Updates
+### Buffer Updates
 
-Packed groups use a shared interleaved `Uint8Array` owned by the grouped attribute manager. The manager allocates the group and tracks byte stride, byte offsets, and GPU buffer state. Each `Attribute` writes only its own column into that shared array. On layout changes, resizes, or new groups, the manager repacks the whole group. Otherwise it rewrites only the changed attributes in the group, then uploads the packed buffer once.
+Packed groups use a shared interleaved `Uint8Array` owned by the attribute manager. The manager allocates the group and tracks byte stride, byte offsets, and GPU buffer state. Each `Attribute` writes only its own column into that shared array. On layout changes, resizes, or new groups, the manager repacks the whole group. Otherwise it rewrites only the changed attributes in the group, then uploads the packed buffer once.
 
-Storage-buffer groups are planner output only for now. They describe future columnar bindings; current grouped attribute population does not upload or bind them as storage buffers.
+Storage-buffer groups are planner output only for now. They describe future columnar bindings; current attribute population does not upload or bind them as storage buffers.
 
-## WebGPU Constraints
+### WebGPU Constraints
 
 The planner exists largely because WebGPU is stricter than WebGL:
 

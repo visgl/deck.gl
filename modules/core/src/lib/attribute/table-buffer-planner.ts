@@ -34,6 +34,14 @@ export type TableBufferPlannerMode =
   /** Each source table row expands into its own inline generated vertices. */
   | 'table-with-row-geometries';
 
+/** Model geometry hints used by the planner. */
+export type TableBufferPlannerModelInfo = {
+  /** Whether the model draws one shared geometry instance per table row. */
+  isInstanced?: boolean;
+  /** Vertex-buffer slots already consumed by model geometry. */
+  reservedVertexBufferCount?: number;
+};
+
 /** One allocation group emitted by the planner. */
 export type TableBufferGroup = {
   /** Stable buffer/group id used by downstream model-binding code. */
@@ -135,7 +143,7 @@ type PlannerProps = {
   /** Candidate table columns. */
   columns: TableColumnDescriptor[];
   /** Model geometry mode and reserved vertex-buffer slots. */
-  modelInfo?: {isInstanced?: boolean; reservedVertexBufferCount?: number};
+  modelInfo?: TableBufferPlannerModelInfo;
   /** Optional explicit planner mode. Defaults from `modelInfo.isInstanced`. */
   mode?: TableBufferPlannerMode;
   /** Enables planner-only storage-buffer allocation for row-geometry table columns. */
@@ -183,6 +191,7 @@ export default class TableBufferPlanner {
         isTransitionAttribute(column.id) ||
         column.isExternalBufferOnly ||
         (column.isConstant && !generateConstantAttributes) ||
+        (column.isPosition && column.isDoublePrecision && !generateConstantAttributes) ||
         !canUsePlannedBuffer(column) ||
         (!column.supportsPackedBuffer && !column.isPosition)
       ) {
@@ -309,11 +318,11 @@ export default class TableBufferPlanner {
 
   /**
    * Returns true when a column should compute CPU values but skip creating
-   * its own standalone GPU buffer because the grouped manager will publish it.
+   * its own standalone GPU buffer because the attribute manager will publish it.
    */
   static shouldSkipColumnBuffer(
     column: TableColumnDescriptor,
-    _modelInfo: {isInstanced?: boolean} | undefined,
+    _modelInfo: TableBufferPlannerModelInfo | undefined,
     isTransitionAttribute: (attributeName: string) => boolean
   ): boolean {
     return (
@@ -535,7 +544,7 @@ function getPriorityRank(column: TableColumnDescriptor): number {
 }
 
 /** Selects the default planner mode from model instancing metadata. */
-function getPlannerMode(modelInfo?: {isInstanced?: boolean}): TableBufferPlannerMode {
+function getPlannerMode(modelInfo?: TableBufferPlannerModelInfo): TableBufferPlannerMode {
   return modelInfo?.isInstanced === false
     ? 'table-with-row-geometries'
     : 'table-with-shared-geometry';

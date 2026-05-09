@@ -418,7 +418,24 @@ test('AttributeManager.getBufferLayouts', () => {
       stepMode: 'vertex'
     },
     {
-      name: 'colors',
+      name: 'positions',
+      byteStride: 24,
+      attributes: [
+        {
+          attribute: 'positions',
+          format: 'float32x3',
+          byteOffset: 0
+        },
+        {
+          attribute: 'positions64Low',
+          format: 'float32x3',
+          byteOffset: 12
+        }
+      ],
+      stepMode: 'instance'
+    },
+    {
+      name: 'interleaved-shared-geometry-columns',
       byteStride: 4,
       attributes: [
         {
@@ -440,32 +457,19 @@ test('AttributeManager.getBufferLayouts', () => {
         }
       ],
       stepMode: 'instance'
-    },
-    {
-      name: 'positions',
-      byteStride: 24,
-      attributes: [
-        {
-          attribute: 'positions',
-          format: 'float32x3',
-          byteOffset: 0
-        },
-        {
-          attribute: 'positions64Low',
-          format: 'float32x3',
-          byteOffset: 12
-        }
-      ],
-      stepMode: 'instance'
     }
   ]);
 
   expect(
-    attributeManager.getBufferLayouts({isInstanced: false})[3].stepMode,
+    attributeManager
+      .getBufferLayouts({isInstanced: false})
+      .find(layout => layout.name === 'positions')?.stepMode,
     'dynamic attribute.stepMode in nonInstancedModel'
   ).toBe('vertex');
   expect(
-    attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
+    attributeManager
+      .getBufferLayouts({isInstanced: true})
+      .find(layout => layout.name === 'positions')?.stepMode,
     'dynamic attribute.stepMode in instancedModel'
   ).toBe('instance');
 });

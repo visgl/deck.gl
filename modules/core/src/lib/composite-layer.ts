@@ -7,7 +7,6 @@ import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 
 import type AttributeManager from './attribute/attribute-manager';
-import type GroupedAttributeManager from './attribute/grouped-attribute-manager';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
@@ -245,7 +244,7 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
   }
 
   /** Override base Layer method */
-  protected _getAttributeManager(): AttributeManager | GroupedAttributeManager | null {
+  protected _getAttributeManager(): AttributeManager | null {
     return null;
   }
 

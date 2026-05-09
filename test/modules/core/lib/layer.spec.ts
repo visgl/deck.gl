@@ -92,10 +92,6 @@ class SubLayer3 extends Layer {
 SubLayer3.layerName = 'SubLayer2';
 
 class PackedConstantLayer extends Layer {
-  protected _useGroupedAttributeManager(): boolean {
-    return true;
-  }
-
   initializeState() {
     this.getAttributeManager()?.addInstanced({
       instanceSizes: {size: 1, accessor: 'getSize'},
@@ -111,10 +107,6 @@ PackedConstantLayer.defaultProps = {
 };
 
 class PackedIndexedLayer extends Layer {
-  protected _useGroupedAttributeManager(): boolean {
-    return true;
-  }
-
   initializeState() {
     this.getAttributeManager()?.add({
       indices: {size: 1, isIndexed: true, accessor: 'getIndex'}
