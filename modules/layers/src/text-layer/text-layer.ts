@@ -69,6 +69,12 @@ type CollisionMarkerProps<DataT> = Pick<TextLayerProps<DataT>, 'billboard'> & {
   extensions?: LayerProps['extensions'];
 };
 
+type CollisionTestProps = {
+  collisionTestProps?: {
+    sizeScale?: unknown;
+  };
+};
+
 function usesAnchoredCollisionSampling<DataT>(props: CollisionMarkerProps<DataT>): boolean {
   const {getTextAnchor, getAlignmentBaseline} = props as TextLayerProps<DataT>;
   return (
@@ -595,7 +601,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   ) => {
     const [x, y] = this.getGlyphCollisionOffset(object, objectInfo);
     const collisionSizeScale = Number(
-      (this.props.collisionTestProps as {sizeScale?: unknown})?.sizeScale
+      (this.props as CollisionTestProps).collisionTestProps?.sizeScale
     );
     const sizeScale = Number(this.props.sizeScale);
     const scale =
@@ -680,10 +686,10 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       contentCutoffPixels,
       contentAlignHorizontal,
       contentAlignVertical,
-      collisionTestProps,
       transitions,
       updateTriggers
     } = this.props;
+    const collisionTestProps = (this.props as CollisionTestProps).collisionTestProps || {};
     const collisionMarkerEnabled = needsCollisionMarker(this.props);
     const collisionOffsetAccessor =
       collisionMarkerEnabled && usesAnchoredCollisionSampling(this.props)
