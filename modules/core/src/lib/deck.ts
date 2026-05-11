@@ -418,9 +418,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         _cachePipelines: true,
         ...this.props.deviceProps,
         onResize: (canvasContext, info) => {
-          // Attached contexts still emit resize through luma's CanvasContext.
-          // Deck only mirrors that state into viewport dimensions and redraw flags.
-          this._onCanvasContextResize(canvasContext);
+          // Attached contexts use luma CanvasContext for resize observation, but luma does not
+          // auto-resize drawing-buffer state for externally managed WebGL canvases.
+          this._onCanvasContextResize(canvasContext, {syncDrawingBuffer: true});
           userOnResize?.(canvasContext, info);
         }
       });
@@ -1083,7 +1083,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /**
    * Sync Deck viewport dimensions from the active canvas context.
-   * luma.gl owns resize observation, DPR tracking and drawing buffer sizing.
+   * luma.gl owns resize observation, DPR tracking and drawing buffer sizing for Deck-created
+   * canvases. Attached WebGL contexts still need Deck to mirror external drawing-buffer changes.
    */
   private _updateCanvasSize(canvasContext: CanvasContext | null = this._canvasContext): void {
     const {canvas} = this;
@@ -1105,7 +1106,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
-  private _onCanvasContextResize(canvasContext: CanvasContext): void {
+  private _onCanvasContextResize(
+    canvasContext: CanvasContext,
+    opts: {syncDrawingBuffer?: boolean} = {}
+  ): void {
+    if (opts.syncDrawingBuffer) {
+      const {width, height} = canvasContext.canvas;
+      canvasContext.setDrawingBufferSize(width, height);
+    }
     // luma owns resize detection; Deck reacts by invalidating redraw and updating view state.
     this._needsRedraw = 'Canvas resized';
     this._updateCanvasSize(canvasContext);

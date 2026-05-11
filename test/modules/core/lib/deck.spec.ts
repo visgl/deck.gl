@@ -171,6 +171,54 @@ test('Deck#canvas context resize drives Deck dimensions', async () => {
   }
 });
 
+webglTest('Deck#attached gl resize syncs canvas context drawing buffer', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const gl = canvas.getContext('webgl2');
+  expect(gl, 'WebGL2 context is created').toBeTruthy();
+
+  let userOnResizeCalls = 0;
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    deviceProps: {
+      onResize: () => userOnResizeCalls++
+    }
+  });
+
+  await waitForRender(deck);
+
+  const canvasContext = deck.device!.getDefaultCanvasContext();
+  const originalSetDrawingBufferSize =
+    canvasContext.setDrawingBufferSize.bind(canvasContext);
+  const calls: Array<[number, number]> = [];
+
+  try {
+    canvasContext.setDrawingBufferSize = (width: number, height: number) => {
+      calls.push([width, height]);
+      originalSetDrawingBufferSize(width, height);
+    };
+    canvas.width = 37;
+    canvas.height = 41;
+
+    deck.device!.props.onResize?.(canvasContext, {oldPixelSize: [1, 1]});
+
+    expect(calls, 'attached gl resize updates drawing buffer').toEqual([[37, 41]]);
+    expect(canvasContext.getDrawingBufferSize(), 'drawing buffer tracks external canvas').toEqual([
+      37,
+      41
+    ]);
+    expect(userOnResizeCalls, 'user onResize is preserved').toBe(1);
+  } finally {
+    canvasContext.setDrawingBufferSize = originalSetDrawingBufferSize;
+    deck.finalize();
+  }
+});
+
 test('Deck#useDevicePixels forwards to canvas context', async () => {
   const deck = new Deck({
     device,
