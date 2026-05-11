@@ -33,8 +33,8 @@ export default function evaluateChildren(
   return children;
 }
 
-export function isComponent(child: React.ReactNode): child is React.ReactElement {
-  return (child && typeof child === 'object' && 'type' in child) || false;
+export function isComponent(child: React.ReactNode): child is React.ReactElement<any> {
+  return React.isValidElement(child);
 }
 
 function isReactMap(child: React.ReactElement): boolean {
