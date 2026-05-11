@@ -69,35 +69,40 @@ type CollisionMarkerProps<DataT> = Pick<TextLayerProps<DataT>, 'billboard'> & {
   extensions?: LayerProps['extensions'];
 };
 
-function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
-  const {
-    billboard,
-    getPixelOffset,
-    getTextAnchor,
-    getAlignmentBaseline,
-    contentAlignHorizontal,
-    contentAlignVertical
-  } = props as TextLayerProps<DataT>;
-  if (!billboard || !hasCollisionFilterExtension(props.extensions)) {
-    return false;
-  }
-
-  const usesAnchoredAlignment =
+function usesAnchoredCollisionSampling<DataT>(props: CollisionMarkerProps<DataT>): boolean {
+  const {getTextAnchor, getAlignmentBaseline} = props as TextLayerProps<DataT>;
+  return (
     typeof getTextAnchor === 'function' ||
     typeof getAlignmentBaseline === 'function' ||
     getTextAnchor !== 'middle' ||
-    getAlignmentBaseline !== 'center';
+    getAlignmentBaseline !== 'center'
+  );
+}
+
+function usesCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>): boolean {
+  const {getPixelOffset, contentAlignHorizontal, contentAlignVertical} =
+    props as TextLayerProps<DataT>;
+
   const usesPixelOffset =
     typeof getPixelOffset === 'function' ||
     (getPixelOffset?.[0] ?? 0) !== 0 ||
     (getPixelOffset?.[1] ?? 0) !== 0;
 
   return (
-    usesAnchoredAlignment ||
+    usesAnchoredCollisionSampling(props) ||
     usesPixelOffset ||
     contentAlignHorizontal !== 'none' ||
     contentAlignVertical !== 'none'
   );
+}
+
+function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
+  const {billboard} = props as TextLayerProps<DataT>;
+  if (!billboard || !hasCollisionFilterExtension(props.extensions)) {
+    return false;
+  }
+
+  return usesCollisionMarker(props);
 }
 
 type _TextLayerProps<DataT> = {
@@ -581,6 +586,25 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [x + width / 2, y + height / 2];
   };
 
+  /** Returns the center of the glyph bounds as scaled in the collision map.
+   * Used when collisionTestProps enlarge the hidden proxy geometry around a non-center anchor.
+   */
+  private getScaledGlyphCollisionOffset: AccessorFunction<DataT, [number, number]> = (
+    object,
+    objectInfo
+  ) => {
+    const [x, y] = this.getGlyphCollisionOffset(object, objectInfo);
+    const collisionSizeScale = Number(
+      (this.props.collisionTestProps as {sizeScale?: unknown})?.sizeScale
+    );
+    const sizeScale = Number(this.props.sizeScale);
+    const scale =
+      Number.isFinite(collisionSizeScale) && Number.isFinite(sizeScale) && sizeScale !== 0
+        ? collisionSizeScale / sizeScale
+        : 1;
+    return [x * scale, y * scale];
+  };
+
   /** Returns the x, y offsets of each character in a text string, in texture size.
    * Used to layout characters in the vertex shader.
    */
@@ -656,13 +680,15 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       contentCutoffPixels,
       contentAlignHorizontal,
       contentAlignVertical,
+      collisionTestProps,
       transitions,
       updateTriggers
     } = this.props;
     const collisionMarkerEnabled = needsCollisionMarker(this.props);
-    const collisionOffsetAccessor = collisionMarkerEnabled
-      ? this.getGlyphCollisionOffset
-      : this.getCollisionOffset;
+    const collisionOffsetAccessor =
+      collisionMarkerEnabled && usesAnchoredCollisionSampling(this.props)
+        ? this.getScaledGlyphCollisionOffset
+        : this.getCollisionOffset;
 
     const CharactersLayerClass: _ConstructorOf<Layer> = this.getSubLayerClass(
       'characters',
@@ -822,39 +848,47 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }
       ),
       collisionMarkerEnabled &&
-        new BackgroundLayerClass(
+        new CharactersLayerClass(
           {
-            // Keep the visible text/background on the normal collision path and add a hidden
-            // proxy rect in the collision pass that tracks the glyph bounds.
-            getFillColor: [0, 0, 0, 0],
-            getLineColor: [0, 0, 0, 0],
-            getLineWidth: 0,
-            borderRadius: 0,
-            padding: [0, 0, 0, 0],
+            sdf: fontSettings.sdf,
+            smoothing: Number.isFinite(fontSettings.smoothing)
+              ? fontSettings.smoothing
+              : DEFAULT_FONT_SETTINGS.smoothing,
+            outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
+            outlineColor,
+            iconAtlas: atlas,
+            iconMapping: mapping,
+
             getPosition,
+            getColor: [0, 0, 0, 0],
             getSize,
             getAngle,
             getPixelOffset,
-            getCollisionOffset: this.getGlyphCollisionOffset,
-            getClipRect: [0, 0, -1, -1],
+            getCollisionOffset: collisionOffsetAccessor,
+            getContentBox,
             billboard,
             collisionDrawMode: 'map-only',
             sizeScale,
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,
+            fontSize,
+            contentCutoffPixels,
+            contentAlignHorizontal,
+            contentAlignVertical,
             pickable: false,
             transitions: transitions && {
               getPosition: transitions.getPosition,
               getAngle: transitions.getAngle,
               getSize: transitions.getSize,
-              getPixelOffset: transitions.getPixelOffset
+              getPixelOffset: transitions.getPixelOffset,
+              getContentBox: transitions.getContentBox
             }
           },
           this.getSubLayerProps({
             id: 'collision-marker',
             extensions: getCollisionFilterExtensions(this.props.extensions),
-            collisionTestProps: {},
+            collisionTestProps,
             updateTriggers: {
               getPosition: updateTriggers.getPosition,
               getAngle: updateTriggers.getAngle,
@@ -862,6 +896,12 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getPixelOffset: updateTriggers.getPixelOffset,
               getCollisionOffset: {
                 getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              },
+              getContentBox: updateTriggers.getContentBox,
+              getIconOffsets: {
                 getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
                 getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
                 styleVersion
@@ -877,11 +917,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           {
             data,
             _dataDiff,
+            startIndices,
+            numInstances,
             autoHighlight: false,
             extensions: getCollisionFilterExtensions(this.props.extensions),
-            collisionTestProps: {},
+            collisionTestProps,
             collisionDrawMode: 'map-only',
-            getBoundingRect: this.getCollisionRect
+            getIconOffsets: this.getIconOffsets,
+            getIcon: getText
           }
         )
     ];

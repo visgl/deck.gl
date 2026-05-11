@@ -326,7 +326,10 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
         getPosition: d => d.position,
         getPixelOffset: [40, 18],
         extensions: [new CollisionFilterExtension()],
-        collisionEnabled: true
+        collisionEnabled: true,
+        collisionTestProps: {
+          sizeScale: 2
+        }
       },
       onAfterUpdate: ({subLayers}) => {
         expect(
@@ -376,6 +379,10 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
           ),
           'collision extension is forwarded to both sublayers'
         ).toBeTruthy();
+        expect(
+          subLayers[2].props.collisionTestProps,
+          'marker inherits collisionTestProps used to enlarge the collision map footprint'
+        ).toEqual({sizeScale: 2});
       }
     },
     {
