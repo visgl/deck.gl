@@ -193,8 +193,7 @@ webglTest('Deck#attached gl resize syncs canvas context drawing buffer', async (
   await waitForRender(deck);
 
   const canvasContext = deck.device!.getDefaultCanvasContext();
-  const originalSetDrawingBufferSize =
-    canvasContext.setDrawingBufferSize.bind(canvasContext);
+  const originalSetDrawingBufferSize = canvasContext.setDrawingBufferSize.bind(canvasContext);
   const calls: Array<[number, number]> = [];
 
   try {
@@ -209,8 +208,7 @@ webglTest('Deck#attached gl resize syncs canvas context drawing buffer', async (
 
     expect(calls, 'attached gl resize updates drawing buffer').toEqual([[37, 41]]);
     expect(canvasContext.getDrawingBufferSize(), 'drawing buffer tracks external canvas').toEqual([
-      37,
-      41
+      37, 41
     ]);
     expect(userOnResizeCalls, 'user onResize is preserved').toBe(1);
   } finally {
