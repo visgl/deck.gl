@@ -91,9 +91,7 @@ class OSMNode {
       return false;
     }
 
-    // Globe-only: reject tiles on the far hemisphere of the sphere. The frustum
-    // test above accepts tiles whose bounding volume intersects the view
-    // frustum but are still occluded by the near hemisphere.
+    // Globe: reject tiles occluded by the near hemisphere
     if (project && this.beyondHorizon(viewport.cameraPosition, project, elevationBounds[1])) {
       return false;
     }

@@ -91,10 +91,7 @@ export class HeightMapBuilder {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
       // On GlobeView, viewport bounds are sphere cartesian — skip intersection
-      const isGlobe = Boolean(
-        (viewport as {resolution?: number}).resolution &&
-          (viewport as {resolution?: number}).resolution! > 0
-      );
+      const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
       const bounds = isGlobe
         ? this.layersBoundsCommon
         : getRenderBounds(this.layersBoundsCommon, viewport);
@@ -112,10 +109,7 @@ export class HeightMapBuilder {
 
       // Use Mercator center — viewport.center on GlobeView is sphere cartesian
       const centerMerc = viewport.isGeospatial
-        ? lngLatToMercatorCommon([
-            (viewport as {longitude?: number}).longitude ?? 0,
-            (viewport as {latitude?: number}).latitude ?? 0
-          ])
+        ? lngLatToMercatorCommon([viewport.longitude ?? 0, viewport.latitude ?? 0])
         : [viewport.center[0], viewport.center[1]];
 
       this.renderViewport =

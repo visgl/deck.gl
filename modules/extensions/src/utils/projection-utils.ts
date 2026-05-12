@@ -8,12 +8,7 @@ import type {Layer, Viewport} from '@deck.gl/core';
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
 
-/**
- * Shared reference Mercator viewport used to convert between Mercator common
- * space and lng/lat from non-Mercator geospatial viewports (e.g. GlobeView).
- * The width/height are irrelevant for unprojection; only the projection math
- * is consulted.
- */
+/** Fixed Mercator viewport for projection-independent coordinate conversion */
 const MERCATOR_REFERENCE_VIEWPORT = new WebMercatorViewport({
   width: 1,
   height: 1,
@@ -22,18 +17,13 @@ const MERCATOR_REFERENCE_VIEWPORT = new WebMercatorViewport({
   zoom: 0
 });
 
-/** Project a lng/lat to absolute Web Mercator common (projection-independent). */
+/** Project lng/lat to absolute Mercator common space. */
 export function lngLatToMercatorCommon(lngLat: number[]): [number, number] {
   const [x, y] = MERCATOR_REFERENCE_VIEWPORT.projectPosition(lngLat);
   return [x, y];
 }
 
-/**
- * For geospatial viewports, returns a reference WebMercatorViewport for use
- * with `layer.projectPosition({viewport})` so bounds are computed in Mercator
- * common space regardless of whether the live viewport is Globe or Mercator.
- * For non-geospatial viewports, returns the input unchanged.
- */
+/** Returns a Mercator viewport for bounds computation, bypassing GlobeView. */
 export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
   return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
 }
@@ -93,10 +83,7 @@ export function makeViewport(opts: {
     return null;
   }
 
-  // Terrain cover bounds are expressed in absolute Mercator common so the FBO
-  // can be shared across MapView/GlobeView. Unprojecting through the live
-  // viewport would be wrong on GlobeView (3D sphere coords); go through the
-  // fixed Mercator reference instead.
+  // Unproject through Mercator reference (GlobeView would give sphere coords)
   const centerWorld = isGeospatial
     ? MERCATOR_REFERENCE_VIEWPORT.unprojectPosition([
         (bounds[0] + bounds[2]) / 2,
