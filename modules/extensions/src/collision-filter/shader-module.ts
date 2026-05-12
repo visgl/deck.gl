@@ -41,21 +41,22 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
   // This reduces the flicker present when objects are shown/hidden
   const int N = 2;
   float accumulator = 0.0;
-  vec2 step = vec2(1.0 / project.viewportSize);
+  vec2 sampleStep = 1.0 / vec2(textureSize(collision_texture, 0));
 
   const float floatN = float(N);
-  vec2 delta = -floatN * step;
+  vec2 delta = -floatN * sampleStep;
   for(int i = -N; i <= N; i++) {
-    delta.x = -step.x * floatN;
+    delta.x = -sampleStep.x * floatN;
     for(int j = -N; j <= N; j++) {
       accumulator += collision_match(texCoords + delta, pickingColor);
-      delta.x += step.x;
+      delta.x += sampleStep.x;
     }
-    delta.y += step.y;
+    delta.y += sampleStep.y;
   }
 
   float W = 2.0 * floatN + 1.0;
-  return pow(accumulator / (W * W), 2.2);
+  float coverage = accumulator / (W * W);
+  return step(0.24, coverage);
 }
 `;
 
