@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeView as GlobeView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
@@ -47,6 +47,85 @@ test('TerrainLayer', async () => {
     testCases: testCasesNonTiled,
     onError: err => expect(err).toBeFalsy()
   });
+});
+
+test('TerrainLayer#separate elevation and texture zooms', async () => {
+  const urls: string[] = [];
+  const layer = new TerrainLayer({
+    id: 'terrain',
+    elevationData: 'terrain/{z}/{x}/{y}.png',
+    texture: 'texture/{z}/{x}/{y}.png',
+    maxZoom: 12,
+    meshMaxZoom: 11,
+    fetch: url => {
+      urls.push(url);
+      return Promise.resolve(null);
+    }
+  });
+  layer.context = {
+    viewport: new WebMercatorViewport({
+      width: 512,
+      height: 512,
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    })
+  };
+
+  layer.state = {isTiled: true};
+  const tileLayer = layer.renderLayers() as TileLayer;
+  expect(tileLayer.props.maxZoom, 'TileLayer maxZoom uses meshMaxZoom').toBe(11);
+
+  await layer.getTiledTerrainData({
+    index: {x: 1, y: 2, z: 11},
+    id: '1-2-11',
+    bbox: {west: 0, south: 0, east: 1, north: 1},
+    zoom: 11
+  });
+
+  expect(urls, 'loads elevation at mesh zoom and texture at maxZoom by default').toEqual([
+    'terrain/11/1/2.png',
+    'texture/12/2/4.png',
+    'texture/12/3/4.png',
+    'texture/12/2/5.png',
+    'texture/12/3/5.png'
+  ]);
+});
+
+test('TerrainLayer#limits stitched texture tile fanout', async () => {
+  const urls: string[] = [];
+  const layer = new TerrainLayer({
+    id: 'terrain',
+    elevationData: 'terrain/{z}/{x}/{y}.png',
+    texture: 'texture/{z}/{x}/{y}.png',
+    meshMaxZoom: 13,
+    textureMaxZoom: 21,
+    fetch: url => {
+      urls.push(url);
+      return Promise.resolve(null);
+    }
+  });
+  layer.context = {
+    viewport: new WebMercatorViewport({
+      width: 512,
+      height: 512,
+      longitude: 0,
+      latitude: 0,
+      zoom: 21
+    })
+  };
+  layer.state = {isTiled: true};
+
+  await layer.getTiledTerrainData({
+    index: {x: 1, y: 2, z: 13},
+    id: '1-2-13',
+    bbox: {west: 0, south: 0, east: 1, north: 1},
+    zoom: 13
+  });
+
+  expect(urls[0], 'loads elevation at mesh zoom').toBe('terrain/13/1/2.png');
+  expect(urls.slice(1), 'limits texture stitching to 4x4 children').toHaveLength(16);
+  expect(urls[1], 'texture child zoom is capped relative to mesh zoom').toBe('texture/15/4/8.png');
 });
 
 test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions', async () => {
