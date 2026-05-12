@@ -65,7 +65,15 @@ test('View#equals', () => {
     zoom: 11,
     position: [0, 1]
   });
-  const mapView4 = new View({
+  const mapView4 = new MapView({
+    id: 'default-view',
+    latitude: 0,
+    longitude: 0,
+    zoom: 11,
+    position: [0, 0],
+    parameters: {depthCompare: 'always'}
+  });
+  const baseView = new View({
     id: 'default-view',
     latitude: 0,
     longitude: 0,
@@ -75,7 +83,8 @@ test('View#equals', () => {
 
   expect(mapView1.equals(mapView2), 'Identical view props').toBeTruthy();
   expect(mapView1.equals(mapView3), 'Different view props').toBeFalsy();
-  expect(mapView1.equals(mapView4), 'Different type').toBeFalsy();
+  expect(mapView1.equals(mapView4), 'Different parameters').toBeFalsy();
+  expect(mapView1.equals(baseView), 'Different type').toBeFalsy();
 });
 
 test('MapView', () => {
@@ -142,6 +151,18 @@ test('GlobeView', () => {
     'Viewport has correct size'
   ).toBeTruthy();
   expect(viewport.zoom, 'Viewport has correct parameters').toBe(12);
+});
+
+test('GlobeView#parameters', () => {
+  const defaultView = new GlobeView();
+  const customView = new GlobeView({parameters: {cullMode: 'none'}});
+
+  expect(defaultView.props.parameters, 'GlobeView has default culling').toMatchObject({
+    cullMode: 'back'
+  });
+  expect(customView.props.parameters, 'GlobeView culling can be overridden').toMatchObject({
+    cullMode: 'none'
+  });
 });
 
 test('OrbitView', () => {

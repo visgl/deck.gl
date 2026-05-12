@@ -193,7 +193,8 @@ export type LayerProps = {
    */
   colorFormat?: 'RGBA' | 'RGB';
   /**
-   * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
+   * Override the GPU parameters used to draw this layer.
+   * See the luma.gl [GPU Parameters](https://luma.gl/docs/api-reference/core/parameters) documentation for supported parameters and values.
    */
   parameters?: Parameters;
   /**
