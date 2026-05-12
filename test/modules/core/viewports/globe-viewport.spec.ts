@@ -180,7 +180,6 @@ test('GlobeViewport#isPointOnGlobe', () => {
   expect(viewport.isPointOnGlobe([viewport.width / 2, viewport.height / 2])).toBe(true);
   expect(viewport.isPointOnGlobe([0, 0])).toBe(false);
   expect(viewport.unproject([0, 0]), 'unproject falls back to a surface point').toBeTruthy();
-  expect(viewport.unproject([0, 0], {fallback: false}), 'fallback can be disabled').toBeNull();
 });
 
 test('GlobeViewport#getBounds', () => {

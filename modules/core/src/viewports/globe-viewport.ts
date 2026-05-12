@@ -191,19 +191,10 @@ export default class GlobeViewport extends Viewport {
     ];
   }
 
-  unproject(xyz: number[], options?: {topLeft?: boolean; targetZ?: number}): number[];
   unproject(
     xyz: number[],
-    options: {topLeft?: boolean; targetZ?: number; fallback: false}
-  ): number[] | null;
-  unproject(
-    xyz: number[],
-    {
-      topLeft = true,
-      targetZ,
-      fallback = true
-    }: {topLeft?: boolean; targetZ?: number; fallback?: boolean} = {}
-  ): number[] | null {
+    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+  ): number[] {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
@@ -222,21 +213,9 @@ export default class GlobeViewport extends Viewport {
         targetZ
       );
 
-      if (discriminant < 0) {
-        if (!fallback) {
-          return null;
-        }
-        // Ray misses the sphere — project the closest-approach point onto the sphere surface
-        const tClosest = r0 / Math.sqrt(lSqr);
-        const closest = vec3.lerp([], coord0, coord1, tClosest);
-        const len = vec3.len(closest);
-        const lt = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
-        coord = len > 0 ? vec3.scale([], closest, lt / len) : [0, 0, lt];
-      } else {
-        const dr = Math.sqrt(discriminant);
-        const t = (r0 - dr) / Math.sqrt(lSqr);
-        coord = vec3.lerp([], coord0, coord1, t);
-      }
+      const dr = Math.sqrt(Math.max(0, discriminant));
+      const t = (r0 - dr) / Math.sqrt(lSqr);
+      coord = vec3.lerp([], coord0, coord1, t);
     }
     const [X, Y, Z] = this.unprojectPosition(coord);
 
@@ -313,10 +292,10 @@ export default class GlobeViewport extends Viewport {
    * Used for on-globe drag-pan and zoom-toward-cursor.
    */
   panByLngLat(coords: number[], pixel: number[]): GlobeViewportOptions {
-    const currentAtPixel = this.unproject(pixel, {fallback: false});
-    if (!currentAtPixel) {
+    if (!this.isPointOnGlobe(pixel)) {
       return {longitude: this.longitude, latitude: this.latitude};
     }
+    const currentAtPixel = this.unproject(pixel);
     const longitude = this.longitude + (coords[0] - currentAtPixel[0]);
     const latitude = Math.max(
       Math.min(this.latitude + (coords[1] - currentAtPixel[1]), MAX_LATITUDE),

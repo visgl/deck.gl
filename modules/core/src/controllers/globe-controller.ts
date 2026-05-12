@@ -37,7 +37,7 @@ function unprojectOnGlobe(
   viewport: GlobeViewport,
   pos?: [number, number]
 ): [number, number] | undefined {
-  const lngLat = pos && viewport.unproject(pos, {fallback: false});
+  const lngLat = pos && viewport.isPointOnGlobe(pos) && viewport.unproject(pos);
   return lngLat ? [lngLat[0], lngLat[1]] : undefined;
 }
 
