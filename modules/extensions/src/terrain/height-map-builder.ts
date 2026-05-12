@@ -79,11 +79,7 @@ export class HeightMapBuilder {
       );
 
     if (layersChanged) {
-      // Recalculate cached bounds.
-      // Use a Mercator reference viewport so layer bounds live in ABSOLUTE
-      // Mercator common space — same rationale as terrain-cover.ts. On
-      // GlobeView, `viewport.projectPosition` would return 3D sphere cartesian
-      // coords that can't be compared against screen-space render bounds.
+      // Recalculate cached bounds in absolute Mercator common space
       this.layers = layers;
       this.layersBounds = layers.map(layer => layer.getBounds());
       this.layersBoundsCommon = joinLayerBounds(layers, getMercatorReferenceViewport(viewport));
@@ -94,9 +90,7 @@ export class HeightMapBuilder {
     if (!this.layersBoundsCommon) {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
-      // getRenderBounds intersects layer bounds with viewport bounds. On globe,
-      // viewport bounds project to sphere cartesian and won't intersect the
-      // Mercator layer bounds meaningfully — use the full layer bounds instead.
+      // On GlobeView, viewport bounds are sphere cartesian — skip intersection
       const isGlobe = Boolean(
         (viewport as {resolution?: number}).resolution &&
           (viewport as {resolution?: number}).resolution! > 0
@@ -116,10 +110,7 @@ export class HeightMapBuilder {
       const pixelWidth = (bounds[2] - bounds[0]) * scale;
       const pixelHeight = (bounds[3] - bounds[1]) * scale;
 
-      // Center for the render viewport must be expressed in Mercator common so
-      // makeViewport (which unprojects through a WebMercatorViewport for
-      // geospatial inputs) gets a valid lng/lat back. `viewport.center` on
-      // GlobeView is 3D sphere cartesian and would unproject bogusly.
+      // Use Mercator center — viewport.center on GlobeView is sphere cartesian
       const centerMerc = viewport.isGeospatial
         ? lngLatToMercatorCommon([
             (viewport as {longitude?: number}).longitude ?? 0,

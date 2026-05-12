@@ -120,11 +120,7 @@ export class TerrainCover {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
 
-    // Bounds are computed in ABSOLUTE Mercator common space — NOT the live
-    // viewport's common space. The terrain cover FBO is rendered via a
-    // WebMercatorViewport regardless of the screen viewport, so UVs must also
-    // live in Mercator. This is what lets the same cover texture be sampled
-    // from MapView and GlobeView.
+    // Bounds in absolute Mercator common space (matches terrain cover FBO viewport)
     if (this.tile && 'boundingBox' in this.tile) {
       if (!this.targetBounds) {
         shouldRedraw = true;
@@ -143,10 +139,6 @@ export class TerrainCover {
       // console.log('bounds changed', this.bounds, '>>', newBounds);
       shouldRedraw = true;
       this.targetBounds = targetLayer.getBounds();
-      // Non-tile terrain layer: project layer bounds through the Mercator
-      // reference so the cover is projection-invariant. joinLayerBounds uses
-      // layer.projectPosition() internally, which honors the layer's
-      // coordinateSystem (LNGLAT / CARTESIAN / METER_OFFSETS).
       this.targetBoundsCommon = joinLayerBounds(
         [targetLayer],
         getMercatorReferenceViewport(viewport)
@@ -165,11 +157,7 @@ export class TerrainCover {
     } else {
       const oldZoom = this.renderViewport?.zoom;
       shouldRedraw = shouldRedraw || newZoom !== oldZoom;
-      // getRenderBounds intersects layer bounds (Mercator) with viewport bounds
-      // derived via viewport.projectPosition. On GlobeView that yields sphere
-      // cartesian coords, which would corrupt the intersection. Fall back to
-      // full layer bounds on non-Mercator geospatial viewports — resolution
-      // is reduced but output stays correct.
+      // On GlobeView, viewport bounds are sphere cartesian — skip intersection
       const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
       const newBounds = isGlobe
         ? this.targetBoundsCommon

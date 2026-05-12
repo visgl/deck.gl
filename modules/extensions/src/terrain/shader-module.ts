@@ -69,10 +69,7 @@ export const terrainModule = {
   dependencies: [project],
   vs: `${uniformBlock}
 out vec3 commonPos;
-// Texture position in ABSOLUTE Mercator common space, regardless of the live
-// viewport projection. Terrain cover FBOs are still rendered by a
-// WebMercatorViewport, so this matches the offscreen render target rather than
-// choosing a display projection.
+// Position in absolute Mercator common space (matches terrain cover FBO viewport)
 out vec2 terrainMercPos;
 
 vec2 terrain_globe_to_mercator(vec3 globePosition) {
@@ -94,26 +91,17 @@ if (terrain.mode == TERRAIN_MODE_SKIP) {
     'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
 commonPos = geometry.position.xyz;
 if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-  // Convert globe cartesian (see project_globe_) directly to Mercator world
-  // coordinates. This is equivalent to project_mercator_(lngLat), but avoids
-  // degree conversion and a second trig round trip.
   terrainMercPos = terrain_globe_to_mercator(commonPos);
 } else {
-  // Web Mercator modes: commonPos.xy is mercator-common minus commonOrigin.
   terrainMercPos = commonPos.xy + project.commonOrigin.xy;
 }
 if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  // Height-map bounds are in ABSOLUTE Mercator common (so the FBO is reusable
-  // across MapView / GlobeView). Use the mercator xy computed above.
   vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
   commonPos.z += project.commonOrigin.z;
 }
 if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
-  // worldPosition.xy is lng/lat for geospatial instance-position layers
-  // (IconLayer, TextLayer, etc.) — project directly through mercator so the
-  // UV matches the absolute-mercator bounds used by WRITE_HEIGHT_MAP, on
-  // both MapView and GlobeView.
+  // Project through mercator so UV matches the absolute-mercator height map bounds
   vec2 anchorMerc = project_mercator_(geometry.worldPosition.xy);
   vec2 texCoords = (anchorMerc - terrain.bounds.xy) / terrain.bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
@@ -155,10 +143,6 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      // All modes now pack bounds in absolute Mercator common; shader samples
-      // against absolute xy computed per-fragment, so we no longer need the
-      // project module's commonOrigin here.
-
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
       let sampler: Texture | undefined = dummyHeightMap as Texture;
@@ -192,9 +176,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         }
       }
 
-      // All bounds live in ABSOLUTE Mercator common space so the FBOs can be
-      // shared across MapView and GlobeView (see terrain-cover.ts and
-      // height-map-builder.ts). No commonOrigin subtract.
+      // Bounds are in absolute Mercator common space
       /* eslint-disable camelcase */
       return {
         mode,
