@@ -437,6 +437,40 @@ export class Tileset2D {
 
   private _getCullBounds = memoize(getCullBounds);
 
+  private _getRequestPriority(tile: Tile2DHeader): number {
+    if (tile.isSelected) {
+      return this._getTileDistanceToViewportCenter(tile);
+    }
+    if (tile.isVisible) {
+      return 1e6 + this._getTileDistanceToViewportCenter(tile);
+    }
+    return -1;
+  }
+
+  private _getTileDistanceToViewportCenter(tile: Tile2DHeader): number {
+    const {width, height} = this._viewport || {};
+    if (!this._viewport || !width || !height) {
+      return 0;
+    }
+
+    const {bbox} = tile;
+    const center = 'west' in bbox
+      ? ([(bbox.west + bbox.east) / 2, (bbox.south + bbox.north) / 2] as [number, number])
+      : ([(bbox.left + bbox.right) / 2, (bbox.top + bbox.bottom) / 2] as [number, number]);
+
+    try {
+      const [x, y] = this._viewport.project(center);
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        const dx = x - width / 2;
+        const dy = y - height / 2;
+        return dx * dx + dy * dy;
+      }
+    } catch {
+      // Some viewport/tile combinations are not projectable. Keep them valid but lowest priority.
+    }
+    return Number.MAX_SAFE_INTEGER;
+  }
+
   private _pruneRequests(): void {
     const {maxRequests = 0} = this.opts;
 
@@ -542,6 +576,7 @@ export class Tileset2D {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       tile.loadData({
         getData: this.opts.getTileData,
+        getPriority: this._getRequestPriority.bind(this),
         requestScheduler: this._requestScheduler,
         onLoad: this.onTileLoad,
         onError: this.opts.onTileError
