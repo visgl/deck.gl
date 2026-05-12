@@ -5,7 +5,7 @@
 /* eslint-disable camelcase */
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project, ProjectProps} from '@deck.gl/core';
+import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
@@ -69,7 +69,7 @@ export const terrainModule = {
   dependencies: [project],
   vs: `${uniformBlock}
 out vec3 commonPos;
-// Position in absolute Mercator common space (matches terrain cover FBO viewport)
+// In globe mode, absolute Mercator position for terrain FBO UV lookups
 out vec2 terrainMercPos;
 
 vec2 terrain_globe_to_mercator(vec3 globePosition) {
@@ -93,7 +93,7 @@ commonPos = geometry.position.xyz;
 if (project.projectionMode == PROJECTION_MODE_GLOBE) {
   terrainMercPos = terrain_globe_to_mercator(commonPos);
 } else {
-  terrainMercPos = commonPos.xy + project.commonOrigin.xy;
+  terrainMercPos = commonPos.xy;
 }
 if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
@@ -101,9 +101,10 @@ if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   commonPos.z += project.commonOrigin.z;
 }
 if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
-  // Project through mercator so UV matches the absolute-mercator height map bounds
-  vec2 anchorMerc = project_mercator_(geometry.worldPosition.xy);
-  vec2 texCoords = (anchorMerc - terrain.bounds.xy) / terrain.bounds.zw;
+  vec3 anchor = geometry.worldPosition;
+  anchor.z = 0.0;
+  vec3 anchorCommon = project_position(anchor);
+  vec2 texCoords = (anchorCommon.xy - terrain.bounds.xy) / terrain.bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     geometry.position.z += terrainZ;
@@ -143,6 +144,9 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
+      const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
+      const {commonOrigin} = projectUniforms;
+
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
       let sampler: Texture | undefined = dummyHeightMap as Texture;
@@ -176,14 +180,18 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         }
       }
 
-      // Bounds are in absolute Mercator common space
       /* eslint-disable camelcase */
       return {
         mode,
         terrain_map: sampler,
-        // Pack bounds as [minX, minY, width, height]
+        // Convert bounds to common space, as [minX, minY, width, height]
         bounds: bounds
-          ? [bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1]]
+          ? [
+              bounds[0] - commonOrigin[0],
+              bounds[1] - commonOrigin[1],
+              bounds[2] - bounds[0],
+              bounds[3] - bounds[1]
+            ]
           : [0, 0, 0, 0]
       };
     }
