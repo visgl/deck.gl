@@ -181,6 +181,7 @@ export default class LayersPass extends Pass {
       isPicking = false,
       layerFilter,
       cullRect,
+      views,
       effects,
       shaderModuleProps
     }: LayersPassRenderOptions,
@@ -228,6 +229,7 @@ export default class LayersPass extends Pass {
         layerParam.layerParameters = {
           ...defaultParams,
           ...layer.context.deck?.props.parameters,
+          ...views?.[viewport.id]?.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
