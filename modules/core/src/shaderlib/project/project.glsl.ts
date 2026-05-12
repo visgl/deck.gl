@@ -209,11 +209,6 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       );
     }
     if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
-      // position_world is meters in the ENU tangent frame at coordinateOrigin.
-      // commonOrigin (precomputed CPU-side) is the globe-space position of
-      // that origin; project_get_orientation_matrix derives the ENU frame from
-      // that direction so the tangent plane attaches to the sphere and tiles
-      // land at their geographic location oriented with the surface.
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
       float metersToCommon = GLOBE_RADIUS / EARTH_RADIUS;
       vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * metersToCommon;
