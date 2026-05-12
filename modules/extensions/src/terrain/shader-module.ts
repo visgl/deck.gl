@@ -75,14 +75,12 @@ out vec3 commonPos;
 // choosing a display projection.
 out vec2 terrainMercPos;
 
-vec2 terrain_globe_to_mercator(vec3 commonPosition) {
-  float D = length(commonPosition);
-  float sinLat = clamp(commonPosition.z / D, -0.999998, 0.999998);
-  float lng = atan(commonPosition.x, -commonPosition.y);
-  return vec2(
-    lng + PI,
-    PI + 0.5 * log((1.0 + sinLat) / (1.0 - sinLat))
-  ) * WORLD_SCALE;
+vec2 terrain_globe_to_mercator(vec3 globePosition) {
+  float D = length(globePosition);
+  float sinLat = clamp(globePosition.z / D, -0.999998, 0.999998);
+  float x = atan(globePosition.x, -globePosition.y);
+  float y = atanh(sinLat);
+  return (vec2(x, y) + PI) * WORLD_SCALE;
 }
 `,
   fs: `${uniformBlock}in vec3 commonPos;\nin vec2 terrainMercPos;`,
