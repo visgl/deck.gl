@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
+import {
+  WebMercatorViewport,
+  OrthographicView,
+  Viewport,
+  _GlobeView as GlobeView
+} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 
 const testViewState = {
@@ -427,6 +432,7 @@ test('Tileset2D#traversal', async () => {
 
 test('Tileset2D#isTileVisible', async () => {
   const cullRect = {x: 50, y: 48, width: 100, height: 1};
+  const fullViewportCullRect = {x: 0, y: 0, width: 400, height: 400};
 
   const testCases = [
     {
@@ -496,6 +502,32 @@ test('Tileset2D#isTileVisible', async () => {
         {id: '7-3-3', cullRect, result: true},
         {id: '7-4-3', cullRect, result: true}
       ]
+    },
+    {
+      title: 'globe culling near north pole',
+      viewport: new GlobeView().makeViewport({
+        width: 400,
+        height: 400,
+        viewState: {
+          longitude: 0,
+          latitude: 89,
+          zoom: 2
+        }
+      }),
+      checks: [{id: '0-0-2', cullRect: fullViewportCullRect, result: true}]
+    },
+    {
+      title: 'globe culling near south pole',
+      viewport: new GlobeView().makeViewport({
+        width: 400,
+        height: 400,
+        viewState: {
+          longitude: 0,
+          latitude: -89,
+          zoom: 2
+        }
+      }),
+      checks: [{id: '0-3-2', cullRect: fullViewportCullRect, result: true}]
     }
   ];
 

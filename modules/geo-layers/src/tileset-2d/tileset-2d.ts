@@ -305,7 +305,7 @@ export class Tileset2D {
       return false;
     }
 
-    if (cullRect && this._viewport) {
+    if (cullRect && this._viewport && !this._viewport.resolution) {
       const boundsArr = this._getCullBounds({
         viewport: this._viewport,
         z: this._zRange,
