@@ -16,7 +16,7 @@ import {
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import type {MeshAttributes} from '@loaders.gl/schema';
+import type {Mesh} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
@@ -33,6 +33,8 @@ const TILE_OVERLAP_PIXELS = 1;
 const MIN_TERRAIN_MESH_MAX_ERROR = 1;
 const MAX_LATITUDE = 90;
 const MAX_LONGITUDE = 180;
+const DEGREES_TO_RADIANS = Math.PI / 180;
+const RADIANS_TO_DEGREES = 180 / Math.PI;
 
 const defaultProps: DefaultProps<TerrainLayerProps> = {
   ...TileLayer.defaultProps,
@@ -111,9 +113,9 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
+type MeshAndTexture = [Mesh | null, TextureSource | null];
 type MeshBoundingBox = [min: number[], max: number[]];
-type MeshWithBoundingBox = MeshAttributes & {
+type MeshWithBoundingBox = Mesh & {
   header?: {
     boundingBox?: MeshBoundingBox;
   };
@@ -165,7 +167,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   state!: {
     isTiled?: boolean;
-    terrain?: MeshAttributes;
+    terrain?: Mesh;
     zRange?: ZRange | null;
   };
 
@@ -204,7 +206,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     elevationDecoder,
     meshMaxError,
     signal
-  }: TerrainLoadProps): Promise<MeshAttributes> | null {
+  }: TerrainLoadProps): Promise<Mesh> | null {
     if (!elevationData) {
       return null;
     }
@@ -249,13 +251,16 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       Boolean(viewport.resolution && viewport.resolution > 0)
     );
 
-    const terrain = this.loadTerrain({
-      elevationData: dataUrl,
-      bounds: overlappedBounds,
-      elevationDecoder,
-      meshMaxError,
-      signal
-    });
+    const terrain =
+      this.loadTerrain({
+        elevationData: dataUrl,
+        bounds: overlappedBounds,
+        elevationDecoder,
+        meshMaxError,
+        signal
+      })?.then(mesh =>
+        viewport.resolution && mesh ? remapMeshToWebMercatorTile(mesh, overlappedBounds) : mesh
+      ) ?? Promise.resolve(null);
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
         fetch(textureUrl, {propName: 'texture', layer: this, loaders: [], signal}).catch(_ => null)
@@ -319,11 +324,9 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const {zRange} = this.state;
     const ranges = tiles
       .map(tile => tile.content)
-      .filter(Boolean)
-      .map(arr => {
-        // @ts-ignore
-        const bounds = arr[0].header.boundingBox;
-        return bounds.map(bound => bound[2]);
+      .flatMap(arr => {
+        const bounds = arr?.[0]?.header?.boundingBox;
+        return bounds ? [bounds.map(bound => bound[2])] : [];
       });
     if (ranges.length === 0) {
       return;
@@ -417,3 +420,45 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
 const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
+
+function remapMeshToWebMercatorTile(mesh: Mesh, bounds: Bounds): Mesh {
+  const positionAttribute = mesh.attributes.POSITION;
+  const texCoordAttribute = mesh.attributes.TEXCOORD_0;
+  const positions = positionAttribute?.value;
+  const texCoords = texCoordAttribute?.value;
+  if (!positions || !texCoords) {
+    return mesh;
+  }
+
+  const [, south, , north] = bounds;
+  const northY = lngLatToMercatorY(north);
+  const southY = lngLatToMercatorY(south);
+  const remappedPositions = new Float32Array(positions);
+
+  for (let i = 0; i < texCoords.length / 2; i++) {
+    const v = texCoords[i * 2 + 1];
+    const mercatorY = northY + (southY - northY) * v;
+    remappedPositions[i * 3 + 1] = mercatorYToLat(mercatorY);
+  }
+
+  return {
+    ...mesh,
+    attributes: {
+      ...mesh.attributes,
+      POSITION: {
+        ...positionAttribute,
+        value: remappedPositions
+      }
+    }
+  };
+}
+
+function lngLatToMercatorY(latitude: number): number {
+  const clampedLatitude = Math.max(-85.051129, Math.min(85.051129, latitude));
+  const sin = Math.sin(clampedLatitude * DEGREES_TO_RADIANS);
+  return 0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI);
+}
+
+function mercatorYToLat(y: number): number {
+  return Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * RADIANS_TO_DEGREES;
+}
