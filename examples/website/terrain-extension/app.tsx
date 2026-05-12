@@ -68,6 +68,7 @@ type Stage = {
   coordinates: [number, number];
   type: 'start' | 'finish';
 };
+type ViewType = 'MapView' | 'GlobeView';
 
 function getTooltip({object}: PickingInfo<Route>) {
   if (!object) return null;
@@ -80,12 +81,13 @@ function getTooltip({object}: PickingInfo<Route>) {
 }
 
 export default function App({
-  initialViewState = INITIAL_VIEW_STATE
+  initialViewState = INITIAL_VIEW_STATE,
+  view = 'MapView'
 }: {
   initialViewState?: MapViewState;
+  view?: ViewType;
 }) {
   const [routes, setRoutes] = useState<FeatureCollection<LineString, RouteProperties>>();
-  const [useGlobe, setUseGlobe] = useState(false);
   const [viewState, setViewState] = useState<MapViewState>(initialViewState);
 
   useEffect(() => {
@@ -154,37 +156,18 @@ export default function App({
     })
   ];
 
-  const view = useGlobe ? new GlobeView() : new MapView();
+  const deckView = useMemo(() => (view === 'GlobeView' ? new GlobeView() : new MapView()), [view]);
 
   return (
-    <>
-      <DeckGL
-        views={view}
-        viewState={viewState}
-        onViewStateChange={e => setViewState(e.viewState as MapViewState)}
-        controller={true}
-        layers={layers}
-        pickingRadius={5}
-        getTooltip={getTooltip}
-      />
-      <button
-        onClick={() => setUseGlobe(v => !v)}
-        style={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          zIndex: 10,
-          padding: '6px 10px',
-          font: '12px ui-monospace, monospace',
-          background: 'rgba(0,0,0,0.65)',
-          color: '#fff',
-          border: '1px solid #888',
-          cursor: 'pointer'
-        }}
-      >
-        {useGlobe ? 'MapView' : 'GlobeView'}
-      </button>
-    </>
+    <DeckGL
+      views={deckView}
+      viewState={viewState}
+      onViewStateChange={e => setViewState(e.viewState as MapViewState)}
+      controller={true}
+      layers={layers}
+      pickingRadius={5}
+      getTooltip={getTooltip}
+    />
   );
 }
 
