@@ -109,7 +109,10 @@ export class HeightMapBuilder {
 
       // Use Mercator center — viewport.center on GlobeView is sphere cartesian
       const centerMerc = viewport.isGeospatial
-        ? lngLatToMercatorCommon([viewport.longitude ?? 0, viewport.latitude ?? 0])
+        ? lngLatToMercatorCommon([
+            (viewport as {longitude?: number}).longitude ?? 0,
+            (viewport as {latitude?: number}).latitude ?? 0
+          ])
         : [viewport.center[0], viewport.center[1]];
 
       this.renderViewport =
