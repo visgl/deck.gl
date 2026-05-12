@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 
-const getPriority = tile => (tile.isSelected ? 1 : -1);
+const getPriority = tile => (tile.isSelected || tile.isPrefetch ? 1 : -1);
 
 test('Tile2DHeader', async () => {
   let onTileLoadCalled = false;

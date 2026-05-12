@@ -55,6 +55,41 @@ test('Tileset2D#update', () => {
   expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
+test('Tileset2D#prefetch parent tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    prefetchZoomDelta: 1,
+    prefetchTileRadius: 0,
+    onTileLoad: () => {}
+  });
+  tileset.update(testViewport);
+
+  expect(tileset._cache.get('1171-1566-12').isSelected, 'selected tile is selected').toBeTruthy();
+  expect(tileset._cache.get('585-783-11').isPrefetch, 'parent tile is prefetched').toBeTruthy();
+  expect(tileset._cache.get('585-783-11').isVisible, 'prefetch tile is hidden').toBeFalsy();
+});
+
+test('Tileset2D#prefetch parent tile ring', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    prefetchZoomDelta: 1,
+    prefetchTileRadius: 1,
+    onTileLoad: () => {}
+  });
+  tileset.update(testViewport);
+
+  const prefetchTileIds = Array.from(tileset._cache.values())
+    .filter(tile => tile.isPrefetch)
+    .map(tile => tile.id)
+    .sort();
+  expect(prefetchTileIds, 'prefetches the lower-zoom ring around selected tiles').toEqual([
+    '585-782-11',
+    '585-783-11',
+    '586-782-11',
+    '586-783-11'
+  ]);
+});
+
 test('Tileset2D#updateOnModelMatrix', () => {
   const tileset = new Tileset2D({
     getTileData,

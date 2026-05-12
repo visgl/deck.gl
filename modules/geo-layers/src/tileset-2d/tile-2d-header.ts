@@ -19,6 +19,7 @@ export class Tile2DHeader<DataT = any> {
   index: TileIndex;
   isVisible: boolean;
   isSelected: boolean;
+  isPrefetch: boolean;
   parent: Tile2DHeader | null;
   children: Tile2DHeader[] | null;
   content: DataT | null;
@@ -42,6 +43,7 @@ export class Tile2DHeader<DataT = any> {
     this.index = index;
     this.isVisible = false;
     this.isSelected = false;
+    this.isPrefetch = false;
     this.parent = null;
     this.children = [];
 

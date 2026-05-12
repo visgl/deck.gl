@@ -52,7 +52,9 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   debounceTime: 0,
   zoomOffset: 0,
   visibleMinZoom: null,
-  visibleMaxZoom: null
+  visibleMaxZoom: null,
+  prefetchZoomDelta: 0,
+  prefetchTileRadius: 0
 };
 
 /** All props supported by the TileLayer */
@@ -167,6 +169,20 @@ type _TileLayerProps<DataT> = {
    * @default null
    */
   visibleMaxZoom?: number | null;
+
+  /**
+   * Number of lower zoom levels to preload around selected tiles.
+   *
+   * @default 0
+   */
+  prefetchZoomDelta?: number;
+
+  /**
+   * Number of selected-zoom tile rings to include when prefetching lower zoom tiles.
+   *
+   * @default 0
+   */
+  prefetchTileRadius?: number;
 };
 
 export type TileLayerPickingInfo<
@@ -268,7 +284,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       debounceTime,
       zoomOffset,
       visibleMinZoom,
-      visibleMaxZoom
+      visibleMaxZoom,
+      prefetchZoomDelta,
+      prefetchTileRadius
     } = this.props;
 
     return {
@@ -284,6 +302,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       zoomOffset,
       visibleMinZoom,
       visibleMaxZoom,
+      prefetchZoomDelta,
+      prefetchTileRadius,
 
       getTileData: this.getTileData.bind(this),
       onTileLoad: this._onTileLoad.bind(this),

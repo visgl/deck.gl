@@ -85,6 +85,10 @@ export type Tileset2DProps<DataT = any> = {
   visibleMinZoom?: number | null;
   /** The maximum zoom level at which tiles are visible. @default null */
   visibleMaxZoom?: number | null;
+  /** Number of lower zoom levels to preload around selected tiles. @default 0 */
+  prefetchZoomDelta?: number;
+  /** Number of selected-zoom tile rings to include when prefetching lower zoom tiles. @default 0 */
+  prefetchTileRadius?: number;
   /** Called when a tile successfully loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
   /** Called when a tile is cleared from cache. */
@@ -114,6 +118,8 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   zoomOffset: 0,
   visibleMinZoom: null,
   visibleMaxZoom: null,
+  prefetchZoomDelta: 0,
+  prefetchTileRadius: 0,
 
   // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
   // onViewportLoad: ((tiles: Tile2DHeader<DataT>[]) => void) | null,
@@ -137,6 +143,7 @@ export class Tileset2D {
   private _viewport: Viewport | null;
   private _zRange: ZRange | null;
   private _selectedTiles: Tile2DHeader[] | null;
+  private _prefetchTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
   private _modelMatrixInverse: Matrix4;
@@ -178,6 +185,7 @@ export class Tileset2D {
     this._viewport = null;
     this._zRange = null;
     this._selectedTiles = null;
+    this._prefetchTiles = null;
     this._frameNumber = 0;
 
     this._modelMatrix = new Matrix4();
@@ -223,6 +231,7 @@ export class Tileset2D {
     this._cache.clear();
     this._tiles = [];
     this._selectedTiles = null;
+    this._prefetchTiles = null;
   }
 
   reloadAll(): void {
@@ -269,6 +278,9 @@ export class Tileset2D {
         modelMatrixInverse: this._modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
+      this._prefetchTiles = this._getPrefetchTileIndices(tileIndices).map(index =>
+        this._getTile(index, true)
+      );
 
       if (this._dirty) {
         // Some new tiles are added
@@ -277,6 +289,7 @@ export class Tileset2D {
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
       this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
+      this._prefetchTiles = this._prefetchTiles!.map(tile => this._getTile(tile.index, true));
     }
 
     // Update tile states
@@ -410,11 +423,17 @@ export class Tileset2D {
       visibilities[i++] = tile.isVisible;
       tile.isSelected = false;
       tile.isVisible = false;
+      tile.isPrefetch = false;
     }
     // @ts-expect-error called only when _selectedTiles is already defined
     for (const tile of this._selectedTiles) {
       tile.isSelected = true;
       tile.isVisible = true;
+    }
+    for (const tile of this._prefetchTiles || []) {
+      if (!tile.isSelected) {
+        tile.isPrefetch = true;
+      }
     }
 
     // Strategy-specific state logic
@@ -444,6 +463,9 @@ export class Tileset2D {
     if (tile.isVisible) {
       return 1e6 + this._getTileDistanceToViewportCenter(tile);
     }
+    if (tile.isPrefetch) {
+      return 2e6 + this._getTileDistanceToViewportCenter(tile);
+    }
     return -1;
   }
 
@@ -469,6 +491,53 @@ export class Tileset2D {
       // Some viewport/tile combinations are not projectable. Keep them valid but lowest priority.
     }
     return Number.MAX_SAFE_INTEGER;
+  }
+
+  private _getPrefetchTileIndices(tileIndices: TileIndex[]): TileIndex[] {
+    const {prefetchZoomDelta, prefetchTileRadius} = this.opts;
+    const zoomDelta = Math.floor(prefetchZoomDelta);
+    const radius = Math.max(0, Math.floor(prefetchTileRadius));
+
+    if (!zoomDelta || tileIndices.length === 0) {
+      return [];
+    }
+
+    const ids = new Set(tileIndices.map(index => this.getTileId(index)));
+    const indices: TileIndex[] = [];
+
+    for (const tileIndex of tileIndices) {
+      const tileZoom = this.getTileZoom(tileIndex);
+      const targetZoom = Math.max(this._minZoom ?? 0, tileZoom - zoomDelta);
+      const parentDelta = tileZoom - targetZoom;
+      if (parentDelta <= 0) {
+        continue;
+      }
+
+      const scale = 2 ** parentDelta;
+      const worldSize = 2 ** tileZoom;
+      for (let xOffset = -radius; xOffset <= radius; xOffset++) {
+        for (let yOffset = -radius; yOffset <= radius; yOffset++) {
+          const x = tileIndex.x + xOffset;
+          const y = tileIndex.y + yOffset;
+          if (y < 0 || y >= worldSize) {
+            continue;
+          }
+
+          const wrappedX = ((x % worldSize) + worldSize) % worldSize;
+          const prefetchIndex = {
+            x: Math.floor(wrappedX / scale),
+            y: Math.floor(y / scale),
+            z: targetZoom
+          };
+          const id = this.getTileId(prefetchIndex);
+          if (!ids.has(id)) {
+            ids.add(id);
+            indices.push(prefetchIndex);
+          }
+        }
+      }
+    }
+    return indices;
   }
 
   private _pruneRequests(): void {
