@@ -55,9 +55,9 @@ const STRATEGIES = {
   [STRATEGY_NEVER]: () => {}
 };
 
-export type Tileset2DProps<DataT = any> = {
+export type Tileset2DProps<DataT = any, TileIndexT = TileIndex> = {
   /** `getTileData` is called to retrieve the data of each tile. */
-  getTileData: (props: TileLoadProps) => Promise<DataT> | DataT;
+  getTileData: (props: TileLoadProps<TileIndexT>) => Promise<DataT> | DataT;
 
   /** The bounding box of the layer's data. */
   extent?: number[] | null;
@@ -86,11 +86,11 @@ export type Tileset2DProps<DataT = any> = {
   /** The maximum zoom level at which tiles are visible. @default null */
   visibleMaxZoom?: number | null;
   /** Called when a tile successfully loads. */
-  onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
+  onTileLoad?: (tile: Tile2DHeader<DataT, TileIndexT>) => void;
   /** Called when a tile is cleared from cache. */
-  onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
+  onTileUnload?: (tile: Tile2DHeader<DataT, TileIndexT>) => void;
   /** Called when a tile failed to load. */
-  onTileError?: (err: any, tile: Tile2DHeader<DataT>) => void;
+  onTileError?: (err: any, tile: Tile2DHeader<DataT, TileIndexT>) => void;
 
   // onTileLoad: (tile: Tile2DHeader) => void;
   // onTileUnload: (tile: Tile2DHeader) => void;
@@ -126,17 +126,17 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
  * Manages loading and purging of tile data. This class caches recently visited tiles
  * and only creates new tiles if they are present.
  */
-export class Tileset2D {
-  protected opts: Required<Tileset2DProps>;
+export class Tileset2D<TileIndexT = TileIndex> {
+  protected opts: Required<Tileset2DProps<any, TileIndexT>>;
   private _requestScheduler: RequestScheduler;
-  private _cache: Map<string, Tile2DHeader>;
+  private _cache: Map<string, Tile2DHeader<any, TileIndexT>>;
   private _dirty: boolean;
-  private _tiles: Tile2DHeader[];
+  private _tiles: Tile2DHeader<any, TileIndexT>[];
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
   private _zRange: ZRange | null;
-  private _selectedTiles: Tile2DHeader[] | null;
+  private _selectedTiles: Tile2DHeader<any, TileIndexT>[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
   private _modelMatrixInverse: Matrix4;
@@ -144,7 +144,7 @@ export class Tileset2D {
   private _maxZoom?: number;
   private _minZoom?: number;
 
-  private onTileLoad: (tile: Tile2DHeader) => void;
+  private onTileLoad: (tile: Tile2DHeader<any, TileIndexT>) => void;
 
   /**
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
@@ -189,7 +189,7 @@ export class Tileset2D {
     return this._tiles;
   }
 
-  get selectedTiles(): Tile2DHeader[] | null {
+  get selectedTiles(): Tile2DHeader<any, TileIndexT>[] | null {
     return this._selectedTiles;
   }
 
@@ -201,7 +201,7 @@ export class Tileset2D {
     return this._selectedTiles !== null && this._selectedTiles.some(tile => tile.needsReload);
   }
 
-  setOptions(opts: Tileset2DProps): void {
+  setOptions(opts: Tileset2DProps<any, TileIndexT>): void {
     Object.assign(this.opts, opts);
     if (Number.isFinite(opts.maxZoom)) {
       this._maxZoom = Math.floor(opts.maxZoom as number);
@@ -227,7 +227,7 @@ export class Tileset2D {
 
   reloadAll(): void {
     for (const id of this._cache.keys()) {
-      const tile = this._cache.get(id) as Tile2DHeader;
+      const tile = this._cache.get(id)!;
       if (!this._selectedTiles || !this._selectedTiles.includes(tile)) {
         this._cache.delete(id);
       } else {
@@ -297,7 +297,7 @@ export class Tileset2D {
 
   // eslint-disable-next-line complexity
   isTileVisible(
-    tile: Tile2DHeader,
+    tile: Tile2DHeader<any, TileIndexT>,
     cullRect?: {x: number; y: number; width: number; height: number},
     modelMatrix?: Matrix4 | null
   ): boolean {
@@ -357,7 +357,7 @@ export class Tileset2D {
     modelMatrix?: Matrix4;
     modelMatrixInverse?: Matrix4;
     zoomOffset?: number;
-  }): TileIndex[] {
+  }): TileIndexT[] {
     const {tileSize, extent, zoomOffset, visibleMinZoom, visibleMaxZoom} = this.opts;
     return getTileIndices({
       viewport,
@@ -440,7 +440,7 @@ export class Tileset2D {
   private _pruneRequests(): void {
     const {maxRequests = 0} = this.opts;
 
-    const abortCandidates: Tile2DHeader[] = [];
+    const abortCandidates: Tile2DHeader<any, TileIndexT>[] = [];
     let ongoingRequestCount = 0;
     for (const tile of this._cache.values()) {
       // Keep track of all the ongoing requests
@@ -521,15 +521,18 @@ export class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  private _getTile(index: TileIndex, create: true): Tile2DHeader;
-  private _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
-  private _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
+  private _getTile(index: TileIndexT, create: true): Tile2DHeader<any, TileIndexT>;
+  private _getTile(index: TileIndexT, create?: false): Tile2DHeader<any, TileIndexT> | undefined;
+  private _getTile(
+    index: TileIndexT,
+    create?: boolean
+  ): Tile2DHeader<any, TileIndexT> | undefined {
     const id = this.getTileId(index);
     let tile = this._cache.get(id);
     let needsReload = false;
 
     if (!tile && create) {
-      tile = new Tile2DHeader(index);
+      tile = new Tile2DHeader<any, TileIndexT>(index);
       Object.assign(tile, this.getTileMetadata(tile.index));
       Object.assign(tile, {id, zoom: this.getTileZoom(tile.index)});
       needsReload = true;
@@ -551,7 +554,9 @@ export class Tileset2D {
     return tile;
   }
 
-  _getNearestAncestor(tile: Tile2DHeader): Tile2DHeader | null {
+  _getNearestAncestor(
+    tile: Tile2DHeader<any, TileIndexT>
+  ): Tile2DHeader<any, TileIndexT> | null {
     const {_minZoom = 0} = this;
 
     let index = tile.index;
