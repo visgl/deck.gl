@@ -30,17 +30,25 @@ subdirectories may add local guidance.
 
 When asked to "get ready for merge", do a full merge-readiness pass:
 
-- Add or update TSDoc for every new or changed public class, function, method, property, and type.
-- Update docs when behavior, public API, examples, or migration guidance changed.
-- Keep upgrade guides focused on breaking changes and deprecations; put new-feature notes in the
-  appropriate docs or release notes.
-- Run `yarn` in the repo root so workspace metadata and `yarn.lock` are up to date.
-- Run `yarn build`.
-- Run `yarn lint`.
-- Run the relevant tests, typically one or more of `yarn test`, `yarn test-headless`,
-  `yarn test-render`, `yarn test-browser`, and `yarn test-website`.
+- Audit the public API surface touched by the change. Add or update TSDoc for every new or changed
+  public class, function, method, property, and type.
+- Do a documentation pass when behavior, public API, examples, or migration guidance changed.
+  Include relevant module docs, examples, sidebars, `docs/whats-new.md`, and upgrade or migration
+  guide content.
+- Keep upgrade guides focused on breaking changes, removals, and deprecations. Put new-feature
+  notes in the appropriate module docs or release notes instead.
+- Run `yarn` in the repo root so workspace metadata and `yarn.lock` are up to date, especially
+  after any `package.json` change.
+- Run `yarn build` as the repo-wide type, declaration, and package build gate.
+- Run `yarn lint` for the final lint and formatting gate, then review the resulting diff.
+- Run the relevant tests for the changed packages, examples, integrations, and docs/website wiring.
+  Typical commands are `yarn test`, `yarn test-headless`, `yarn test-render`, `yarn test-browser`,
+  and `yarn test-website`.
+- For website or docs changes, run the website check from the repo root with `yarn test-website`.
 - Prepare a copyable Markdown PR description based on the branch diff compared to `master`. Start
   with the PR goals, then list the actual changes and validation.
+- In the final handoff, call out which merge-readiness gates passed, which were not run, and any
+  remaining risk or unrelated pre-existing failures.
 
 ## Code Style
 
