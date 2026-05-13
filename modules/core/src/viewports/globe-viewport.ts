@@ -6,7 +6,6 @@ import {Matrix4} from '@math.gl/core';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import {vec3, vec4} from '@math.gl/core';
 
@@ -14,6 +13,8 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
+export {MAX_LATITUDE};
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -44,6 +45,10 @@ export type GlobeViewportOptions = {
   longitude?: number;
   /** Latitude in degrees */
   latitude?: number;
+  /** Bearing in degrees. Default `0` */
+  bearing?: number;
+  /** Pitch in degrees. Default `0` */
+  pitch?: number;
   /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
   altitude?: number;
   /* Meter offsets of the viewport center from lng, lat, elevation */
@@ -71,12 +76,16 @@ export default class GlobeViewport extends Viewport {
 
   longitude: number;
   latitude: number;
+  bearing: number;
+  pitch: number;
   fovy: number;
   resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
       longitude = 0,
+      bearing = 0,
+      pitch = 0,
       zoom = 0,
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
@@ -87,8 +96,8 @@ export default class GlobeViewport extends Viewport {
 
     let {latitude = 0, height, altitude = 1.5, fovy} = opts;
 
-    // Clamp to web mercator limit to prevent bad inputs
-    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+    // Clamp to valid range
+    latitude = Math.max(Math.min(latitude, 90), -90);
 
     height = height || 1;
     if (fovy) {
@@ -99,15 +108,34 @@ export default class GlobeViewport extends Viewport {
     // Exagerate distance by latitude to match the Web Mercator distortion
     // The goal is that globe and web mercator projection results converge at high zoom
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
-    const scale = Math.pow(2, zoom - zoomAdjust(latitude));
+    // Cap latitude for scale calculation to avoid the singularity at the poles
+    // where cos(90°)=0 → scale→∞. GlobeController applies the same cap when
+    // compensating zoom during pan (MAX_LATITUDE).
+    const scaleLatitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+    const scale = Math.pow(2, zoom - zoomAdjust(scaleLatitude));
+    // Adjust far plane for pitch — tilted camera can see further across the globe
+    const pitchRadians = pitch * DEGREES_TO_RADIANS;
     const nearZ = opts.nearZ ?? nearZMultiplier;
-    const farZ = opts.farZ ?? (altitude + (GLOBE_RADIUS * 2 * scale) / height) * farZMultiplier;
+    const farZ =
+      opts.farZ ??
+      (altitude + (GLOBE_RADIUS * 2 * scale) / height / Math.max(Math.cos(pitchRadians), 0.1)) *
+        farZMultiplier;
 
     // Calculate view matrix
-    const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
-    viewMatrix.rotateX(latitude * DEGREES_TO_RADIANS);
-    viewMatrix.rotateZ(-longitude * DEGREES_TO_RADIANS);
-    viewMatrix.scale(scale / height);
+    // The lookAt places the camera along -Y looking toward origin.
+    // After the globe rotation (Rx(lat) * Rz(-lng)), the surface normal at the target
+    // aligns with -Y, East with +X, and North with +Z.
+    const viewMatrix = new Matrix4()
+      .lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]})
+      // Pitch: tilt the camera away from straight-down
+      .rotateX(-pitchRadians)
+      // Bearing: rotate around the surface normal.
+      // Negative sign matches the WebMercator convention (bearing > 0 = clockwise from North).
+      .rotateY(-bearing * DEGREES_TO_RADIANS)
+      // Globe orientation: position the target's surface at the top
+      .rotateX(latitude * DEGREES_TO_RADIANS)
+      .rotateZ(-longitude * DEGREES_TO_RADIANS)
+      .scale(scale / height);
 
     super({
       ...opts,
@@ -131,6 +159,8 @@ export default class GlobeViewport extends Viewport {
     this.scale = scale;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.bearing = bearing;
+    this.pitch = pitch;
     this.fovy = fovy;
     this.resolution = resolution;
   }
@@ -249,14 +279,17 @@ export default class GlobeViewport extends Viewport {
 
     const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
     let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
-    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+    latitude = Math.max(Math.min(latitude, 90), -90);
     const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
     out.zoom += zoomAdjust(out.latitude);
     return out;
   }
 }
 
-export function zoomAdjust(latitude: number): number {
+export function zoomAdjust(latitude: number, clampToPoles?: boolean): number {
+  if (clampToPoles) {
+    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+  }
   const scaleAdjust = Math.PI * Math.cos((latitude * Math.PI) / 180);
   return Math.log2(scaleAdjust);
 }
