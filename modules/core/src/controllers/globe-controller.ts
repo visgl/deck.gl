@@ -148,6 +148,14 @@ class GlobeState extends MapState {
     return this._getUpdatedState({zoom});
   }
 
+  _panFromCenter(offset: [number, number]): GlobeState {
+    const {width, height} = this.getViewportProps();
+    const center: [number, number] = [width / 2, height / 2];
+    return this.panStart({pos: center})
+      .pan({pos: [center[0] + offset[0], center[1] + offset[1]]})
+      .panEnd();
+  }
+
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
     const {longitude, latitude, maxBounds} = props;
 
