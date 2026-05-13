@@ -6,6 +6,7 @@ import {test, expect} from 'vitest';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {device} from '@deck.gl/test-utils/vitest';
 import {sleep} from './async-iterator-test-utils';
 
@@ -50,6 +51,10 @@ async function waitForRender(deck: Deck): Promise<void> {
 }
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
+
+function createIsolatedDevice(): WebGLDevice {
+  return new WebGLDevice({createCanvasContext: {width: 1, height: 1}});
+}
 
 test('Deck#constructor', async () => {
   const callbacks = {
@@ -135,9 +140,10 @@ test('Deck#abort', async () => {
 });
 
 test('Deck#canvas context resize drives Deck dimensions', async () => {
+  const testDevice = createIsolatedDevice();
   const resizeEvents: Array<{width: number; height: number}> = [];
   const deck = new Deck({
-    device,
+    device: testDevice,
     width: 1,
     height: 1,
     viewState: {longitude: 0, latitude: 0, zoom: 0},
@@ -147,7 +153,7 @@ test('Deck#canvas context resize drives Deck dimensions', async () => {
 
   await waitForRender(deck);
 
-  const canvasContext = device.getDefaultCanvasContext();
+  const canvasContext = testDevice.getDefaultCanvasContext();
   const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
   const nextSize: [number, number] = [17, 19];
 
@@ -168,6 +174,7 @@ test('Deck#canvas context resize drives Deck dimensions', async () => {
   } finally {
     canvasContext.getCSSSize = originalGetCSSSize;
     deck.finalize();
+    testDevice.destroy();
   }
 });
 
@@ -218,8 +225,9 @@ webglTest('Deck#attached gl resize syncs canvas context drawing buffer', async (
 });
 
 test('Deck#useDevicePixels forwards to canvas context', async () => {
+  const testDevice = createIsolatedDevice();
   const deck = new Deck({
-    device,
+    device: testDevice,
     width: 1,
     height: 1,
     viewState: {longitude: 0, latitude: 0, zoom: 0},
@@ -228,7 +236,7 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
 
   await waitForRender(deck);
 
-  const canvasContext = device.getDefaultCanvasContext();
+  const canvasContext = testDevice.getDefaultCanvasContext();
   const initialUseDevicePixels = canvasContext.props.useDevicePixels;
 
   try {
@@ -244,13 +252,15 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
   } finally {
     canvasContext.setProps({useDevicePixels: initialUseDevicePixels});
     deck.finalize();
+    testDevice.destroy();
   }
 });
 
 test('Deck#render frame syncs provided device canvas context size', async () => {
+  const testDevice = createIsolatedDevice();
   const resizeEvents: Array<{width: number; height: number}> = [];
   const deck = new Deck({
-    device,
+    device: testDevice,
     width: 1,
     height: 1,
     viewState: {longitude: 0, latitude: 0, zoom: 0},
@@ -260,7 +270,7 @@ test('Deck#render frame syncs provided device canvas context size', async () => 
 
   await waitForRender(deck);
 
-  const canvasContext = device.getDefaultCanvasContext();
+  const canvasContext = testDevice.getDefaultCanvasContext();
   const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
   const nextSize: [number, number] = [23, 29];
 
@@ -281,6 +291,7 @@ test('Deck#render frame syncs provided device canvas context size', async () => 
   } finally {
     canvasContext.getCSSSize = originalGetCSSSize;
     deck.finalize();
+    testDevice.destroy();
   }
 });
 
