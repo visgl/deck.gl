@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.3-or] - May 14 2026
+
+- Port fix(text-layer): support collision filtering with getPixelOffset, getTextAnchor, and getAlignmentBaseline from 9.2-release
+
 #### deck.gl [v9.3.2] - Apr 30 2026
 
 - Fix GeoJsonLayer TypeScript types: elevationScale as number, update deprecated depthTest parameter (#10261)
