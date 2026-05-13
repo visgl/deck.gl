@@ -99,7 +99,7 @@ export type Tileset2DProps<DataT = any, TileIndexT = TileIndex> = {
   // sonViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
 };
 
-export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileData'> = {
+export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps<any, any>>, 'getTileData'> = {
   extent: null,
   tileSize: 512,
 
@@ -150,7 +150,7 @@ export class Tileset2D<TileIndexT = TileIndex> {
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
    * Cache size defaults to 5 * number of tiles in the current viewport
    */
-  constructor(opts: Tileset2DProps) {
+  constructor(opts: Tileset2DProps<any, TileIndexT>) {
     this.opts = {...DEFAULT_TILESET2D_PROPS, ...opts};
     this.setOptions(this.opts);
 
