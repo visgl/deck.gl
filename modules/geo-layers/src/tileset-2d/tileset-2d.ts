@@ -40,12 +40,12 @@ export const STRATEGY_NEVER = 'never';
 export const STRATEGY_REPLACE = 'no-overlap';
 export const STRATEGY_DEFAULT = 'best-available';
 
-export type RefinementStrategyFunction = (tiles: Tile2DHeader[]) => void;
-export type RefinementStrategy =
+export type RefinementStrategyFunction<TileIndexT = TileIndex> = (tiles: Tile2DHeader<any, TileIndexT>[]) => void;
+export type RefinementStrategy<TileIndexT = TileIndex> =
   | 'never'
   | 'no-overlap'
   | 'best-available'
-  | RefinementStrategyFunction;
+  | RefinementStrategyFunction<TileIndexT>;
 
 const DEFAULT_CACHE_SCALE = 5;
 
@@ -72,7 +72,7 @@ export type Tileset2DProps<DataT = any, TileIndexT = TileIndex> = {
   /** The maximum memory used for caching tiles. @default null */
   maxCacheByteSize?: number | null;
   /** How the tile layer refines the visibility of tiles. @default 'best-available' */
-  refinementStrategy?: RefinementStrategy;
+  refinementStrategy?: RefinementStrategy<TileIndexT>;
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
@@ -577,7 +577,7 @@ export class Tileset2D<TileIndexT = TileIndex> {
 // For all the selected && pending tiles:
 // - pick the closest ancestor as placeholder
 // - if no ancestor is visible, pick the closest children as placeholder
-function updateTileStateDefault(allTiles: Tile2DHeader[]) {
+function updateTileStateDefault<TileIndexT = TileIndex>(allTiles: Tile2DHeader<any, TileIndexT>[]) {
   for (const tile of allTiles) {
     tile.state = 0;
   }
@@ -592,7 +592,7 @@ function updateTileStateDefault(allTiles: Tile2DHeader[]) {
 }
 
 // Until a selected tile and all its selected siblings are loaded, use the closest ancestor as placeholder
-function updateTileStateReplace(allTiles: Tile2DHeader[]) {
+function updateTileStateReplace<TileIndexT = TileIndex>(allTiles: Tile2DHeader<any, TileIndexT>[]) {
   for (const tile of allTiles) {
     tile.state = 0;
   }
@@ -618,8 +618,8 @@ function updateTileStateReplace(allTiles: Tile2DHeader[]) {
 }
 
 // Walk up the tree until we find one ancestor that is loaded. Returns true if successful.
-function getPlaceholderInAncestors(startTile: Tile2DHeader) {
-  let tile: Tile2DHeader | null = startTile;
+function getPlaceholderInAncestors<TileIndexT = TileIndex>(startTile: Tile2DHeader<any, TileIndexT>) {
+  let tile: Tile2DHeader<any, TileIndexT> | null = startTile;
   while (tile) {
     if (tile.isLoaded || tile.content) {
       tile.state! |= TILE_STATE_VISIBLE;
