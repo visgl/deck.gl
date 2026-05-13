@@ -10,6 +10,7 @@ import {
   COORDINATE_SYSTEM
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {geojson, geojsonLarge, geojsonHole} from 'deck.gl-test/data';
 import antarctica from 'deck.gl-test/data/antarctica.geo.json';
 import daynight from 'deck.gl-test/data/daynight.geo.json';
@@ -44,6 +45,26 @@ const lightingEffect = new LightingEffect({
 });
 
 const lines = geojson.features.filter(f => f.geometry.type === 'LineString');
+const collisionTextGeojson = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      properties: {name: 'Alpha', priority: 3},
+      geometry: {type: 'Point', coordinates: [-100, 40]}
+    },
+    {
+      type: 'Feature',
+      properties: {name: 'Bravo', priority: 2},
+      geometry: {type: 'Point', coordinates: [-100, 40]}
+    },
+    {
+      type: 'Feature',
+      properties: {name: 'Charlie', priority: 1},
+      geometry: {type: 'Point', coordinates: [-100, 40]}
+    }
+  ]
+};
 
 // Tests that contain text render differently depending on the OS,
 // currently only do comparisons on Mac
@@ -143,6 +164,36 @@ const macOnlyTests = [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-text-font-settings.png'
+  },
+  {
+    name: 'geojson-text-collision-pixel-offset',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-text-collision',
+        data: collisionTextGeojson,
+        pointType: 'text',
+        textBackground: true,
+        getText: d => d.properties.name,
+        getTextPixelOffset: [80, 24],
+        getTextColor: [0, 0, 0],
+        getTextBackgroundColor: [255, 255, 200, 255],
+        getTextBorderColor: [220, 90, 0, 255],
+        getTextBorderWidth: 1,
+        getCollisionPriority: d => d.properties.priority,
+        extensions: [new CollisionFilterExtension()]
+      })
+    ],
+    imageDiffOptions: {
+      threshold: 0.96
+    },
+    goldenImage: './test/render/golden-images/geojson-text-collision-pixel-offset.png'
   }
 ];
 const optionalTests = OS === 'Mac' ? macOnlyTests : [];

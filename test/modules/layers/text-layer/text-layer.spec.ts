@@ -5,6 +5,7 @@
 import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
@@ -260,4 +261,206 @@ test('TextLayer - fontAtlasCacheLimit', () => {
     }
   });
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - layout updates when anchor or baseline changes', () => {
+  let initialOffsets;
+  let baselineOffsets;
+
+  const testCases = [
+    {
+      props: {
+        data: [{position: [-122.4, 37.8], text: 'collision'}],
+        getText: d => d.text,
+        getPosition: d => d.position,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instanceIconDefs} = subLayer.getAttributeManager().getAttributes();
+        initialOffsets = Array.from(instanceIconDefs.value.slice(0, 2));
+      }
+    },
+    {
+      updateProps: {
+        getAlignmentBaseline: 'top'
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instanceIconDefs} = subLayer.getAttributeManager().getAttributes();
+        baselineOffsets = Array.from(instanceIconDefs.value.slice(0, 2));
+        expect(
+          baselineOffsets,
+          'character offsets update when alignment baseline changes'
+        ).not.toEqual(initialOffsets);
+      }
+    },
+    {
+      updateProps: {
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instanceIconDefs} = subLayer.getAttributeManager().getAttributes();
+        const anchorOffsets = Array.from(instanceIconDefs.value.slice(0, 2));
+        expect(anchorOffsets, 'character offsets update when text anchor changes').not.toEqual(
+          initialOffsets
+        );
+        expect(
+          anchorOffsets,
+          'anchor change produces a distinct text layout from baseline change'
+        ).not.toEqual(baselineOffsets);
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
+  const testCases = [
+    {
+      props: {
+        data: [{position: [-122.4, 37.8], text: 'collision'}],
+        background: true,
+        getText: d => d.text,
+        getPosition: d => d.position,
+        getPixelOffset: [40, 18],
+        extensions: [new CollisionFilterExtension()],
+        collisionEnabled: true,
+        collisionTestProps: {
+          sizeScale: 2
+        }
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(
+          subLayers.length,
+          'renders background, character and collision marker sublayers'
+        ).toBe(3);
+        expect(subLayers[0].props.getPixelOffset, 'background inherits pixel offset').toEqual([
+          40, 18
+        ]);
+        expect(subLayers[1].props.getPixelOffset, 'characters inherit pixel offset').toEqual([
+          40, 18
+        ]);
+        expect(
+          subLayers[0].props.collisionDrawMode,
+          'background only samples collisions when marker layer is active'
+        ).toBe('sample-only');
+        expect(
+          subLayers[1].props.collisionDrawMode,
+          'characters only sample collisions when marker layer is active'
+        ).toBe('sample-only');
+        expect(
+          subLayers[2].id.includes('collision-marker'),
+          'marker layer is created'
+        ).toBeTruthy();
+        expect(subLayers[2].props.collisionDrawMode, 'marker only writes to collision map').toBe(
+          'map-only'
+        );
+        expect(subLayers[2].props.getSize, 'marker uses text size for collision offset').toBe(
+          subLayers[1].props.getSize
+        );
+        expect(
+          subLayers[2].props.getCollisionOffset,
+          'marker uses the same collision sample point as characters'
+        ).toBe(subLayers[1].props.getCollisionOffset);
+        expect(
+          subLayers[2].props.sizeScale,
+          'marker inherits text scale for collision offset'
+        ).toBe(subLayers[1].props.sizeScale);
+        expect(subLayers[2].props.sizeUnits, 'marker inherits text size units').toBe(
+          subLayers[1].props.sizeUnits
+        );
+        expect(
+          subLayers.every(layer =>
+            layer.props.extensions?.some(
+              extension => extension.constructor.extensionName === 'CollisionFilterExtension'
+            )
+          ),
+          'collision extension is forwarded to both sublayers'
+        ).toBeTruthy();
+        expect(
+          subLayers[2].props.collisionTestProps,
+          'marker inherits collisionTestProps used to enlarge the collision map footprint'
+        ).toEqual({sizeScale: 2});
+      }
+    },
+    {
+      updateProps: {
+        getPixelOffset: [0, 0],
+        getTextAnchor: 'start'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(subLayers.length, 'non-default text anchor still renders marker layer').toBe(3);
+        expect(
+          subLayers[2].id.includes('collision-marker'),
+          'marker layer is created for text anchor'
+        ).toBeTruthy();
+      }
+    },
+    {
+      updateProps: {
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'top'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(subLayers.length, 'non-default alignment baseline still renders marker layer').toBe(
+          3
+        );
+        expect(
+          subLayers[2].id.includes('collision-marker'),
+          'marker layer is created for alignment baseline'
+        ).toBeTruthy();
+      }
+    },
+    {
+      updateProps: {
+        getAlignmentBaseline: 'center'
+      },
+      onAfterUpdate: ({subLayers}) => {
+        expect(subLayers.length, 'default anchor and baseline do not render marker layer').toBe(2);
+        expect(
+          subLayers.some(layer => layer.id.includes('collision-marker')),
+          'marker layer is omitted for default anchor and baseline'
+        ).toBeFalsy();
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision picking colors expand to every glyph', () => {
+  const data = [{position: [-122.4, 37.8], text: 'ab'}];
+
+  testLayer({
+    Layer: TextLayer,
+    testCases: [
+      {
+        props: {
+          data,
+          getText: d => d.text,
+          getPosition: d => d.position,
+          extensions: [new CollisionFilterExtension()],
+          collisionEnabled: true
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const charactersLayer = subLayers.find(layer => layer.id.includes('characters'));
+          expect(charactersLayer, 'characters sublayer is created').toBeTruthy();
+          const {instancePickingColors} = charactersLayer!.getAttributeManager().getAttributes();
+          const pickingColors = Array.from(instancePickingColors.value.slice(0, 6));
+
+          expect(
+            pickingColors.slice(0, 3),
+            'first glyph stores the object picking color for collision matching'
+          ).toEqual([1, 0, 0]);
+          expect(
+            pickingColors.slice(3, 6),
+            'second glyph reuses the same object picking color'
+          ).toEqual([1, 0, 0]);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
 });

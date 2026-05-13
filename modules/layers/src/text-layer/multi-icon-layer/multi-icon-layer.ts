@@ -23,10 +23,10 @@ import type {
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
-const EMPTY_ARRAY = [];
 
 type _MultiIconLayerProps<DataT> = {
   getIconOffsets?: AccessorFunction<DataT, number[]>;
+  getCollisionOffset?: Accessor<DataT, Readonly<[number, number]>>;
   getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
 
   fontSize?: number;
@@ -45,6 +45,7 @@ export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
 
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
   getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
+  getCollisionOffset: {type: 'accessor', value: [0, 0]},
   getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
   fontSize: 1,
   alphaCutoff: 0.001,
@@ -82,13 +83,17 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     attributeManager!.addInstanced({
       instancePickingColors: {
         type: 'uint8',
-        size: 4,
+        size: 3,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       },
       instanceClipRect: {
         size: 4,
         accessor: 'getContentBox',
         defaultValue: [0, 0, -1, -1]
+      },
+      instanceCollisionOffsets: {
+        size: 2,
+        accessor: 'getCollisionOffset'
       }
     });
   }
@@ -98,11 +103,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const {props, oldProps, changeFlags} = params;
     const {outlineColor} = props;
 
-    if (
-      changeFlags.updateTriggersChanged &&
-      (changeFlags.updateTriggersChanged.getIcon ||
-        changeFlags.updateTriggersChanged.getIconOffsets)
-    ) {
+    if (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getIconOffsets) {
       this.getAttributeManager()!.invalidate('instanceIconDefs');
     }
     if (outlineColor !== oldProps.outlineColor) {

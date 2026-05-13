@@ -25,8 +25,9 @@ export default defineConfig(async () => {
         {find: 'mjolnir.js', replacement: join(rootDir, './node_modules/mjolnir.js')},
         aliasScopedPackages('@luma.gl'),
         aliasScopedPackages('@math.gl'),
-        {find: '@arcgis/core', replacement: join(rootDir, './node_modules/@arcgis/core')},
-        {find: '@loaders.gl/core', replacement: join(rootDir, './node_modules/@loaders.gl/core')}
+        aliasScopedPackages('@probe.gl'),
+        aliasScopedPackages('@loaders.gl'),
+        {find: '@arcgis/core', replacement: join(rootDir, './node_modules/@arcgis/core')}
       ]
     },
     define: {

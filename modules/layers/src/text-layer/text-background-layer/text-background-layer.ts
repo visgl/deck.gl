@@ -38,6 +38,7 @@ type _TextBackgroundLayerProps<DataT> = {
   getSize?: Accessor<DataT, number>;
   getAngle?: Accessor<DataT, number>;
   getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  getCollisionOffset?: Accessor<DataT, Readonly<[number, number]>>;
   getBoundingRect?: Accessor<DataT, Readonly<[number, number, number, number]>>;
   getClipRect?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
   getFillColor?: Accessor<DataT, Color>;
@@ -63,6 +64,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getCollisionOffset: {type: 'accessor', value: [0, 0]},
   getBoundingRect: {type: 'accessor', value: [0, 0, 0, 0]},
   getClipRect: {type: 'accessor', value: [0, 0, -1, -1]},
   getFillColor: {type: 'accessor', value: [0, 0, 0, 255]},
@@ -121,6 +123,10 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
+      },
+      instanceCollisionOffsets: {
+        size: 2,
+        accessor: 'getCollisionOffset'
       },
       instanceFillColors: {
         size: 4,

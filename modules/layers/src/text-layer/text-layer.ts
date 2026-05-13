@@ -15,6 +15,8 @@ import type {ContentAlignModes} from './text-uniforms';
 
 import type {FontSettings, FontRenderer} from './font-atlas-manager';
 import type {
+  _ConstructorOf,
+  Layer,
   LayerProps,
   LayerDataSource,
   Accessor,
@@ -44,6 +46,70 @@ const ALIGNMENT_BASELINE = {
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
+
+function hasCollisionFilterExtension(extensions: LayerProps['extensions'] = []): boolean {
+  return extensions.some(extension => {
+    const extensionName =
+      (extension as {extensionName?: string}).extensionName ??
+      (extension.constructor as {extensionName?: string}).extensionName;
+    return extensionName === 'CollisionFilterExtension';
+  });
+}
+
+function getCollisionFilterExtensions(extensions: LayerProps['extensions'] = []) {
+  return extensions.filter(extension => {
+    const extensionName =
+      (extension as {extensionName?: string}).extensionName ??
+      (extension.constructor as {extensionName?: string}).extensionName;
+    return extensionName === 'CollisionFilterExtension';
+  });
+}
+
+type CollisionMarkerProps<DataT> = Pick<TextLayerProps<DataT>, 'billboard'> & {
+  extensions?: LayerProps['extensions'];
+};
+
+type CollisionTestProps = {
+  collisionTestProps?: {
+    sizeScale?: unknown;
+  };
+};
+
+function usesAnchoredCollisionSampling<DataT>(props: CollisionMarkerProps<DataT>): boolean {
+  const {getTextAnchor, getAlignmentBaseline} = props as TextLayerProps<DataT>;
+  return (
+    typeof getTextAnchor === 'function' ||
+    typeof getAlignmentBaseline === 'function' ||
+    getTextAnchor !== 'middle' ||
+    getAlignmentBaseline !== 'center'
+  );
+}
+
+function usesCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>): boolean {
+  const {getPixelOffset, contentAlignHorizontal, contentAlignVertical} =
+    props as TextLayerProps<DataT>;
+
+  const usesPixelOffset =
+    typeof getPixelOffset === 'function' ||
+    (getPixelOffset?.[0] ?? 0) !== 0 ||
+    (getPixelOffset?.[1] ?? 0) !== 0;
+
+  return (
+    usesAnchoredCollisionSampling(props) ||
+    usesPixelOffset ||
+    contentAlignHorizontal !== 'none' ||
+    contentAlignVertical !== 'none'
+  );
+}
+
+function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
+  const {billboard} = props as TextLayerProps<DataT>;
+  if (!billboard || !hasCollisionFilterExtension(props.extensions)) {
+    return false;
+  }
+
+  return usesCollisionMarker(props);
+}
 
 type _TextLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -447,9 +513,12 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     object,
     objectInfo
   ) => {
-    const {
+    let {
       size: [width, height]
     } = this.transformParagraph(object, objectInfo);
+    const {fontSize} = this.state.fontAtlasManager.props;
+    width /= fontSize;
+    height /= fontSize;
 
     const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
@@ -466,6 +535,82 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
   };
 
+  /** Returns the glyph bounds of each text string, relative to rendered text size.
+   * Used to align collision sampling and proxy geometry with the actual glyphs rather than the full line box.
+   */
+  private getCollisionRect: AccessorFunction<DataT, [number, number, number, number]> = (
+    object,
+    objectInfo
+  ) => {
+    const {mapping} = this.state.fontAtlasManager;
+    const {fontSize} = this.state.fontAtlasManager.props;
+    const text = Array.from(this.state.getText!(object, objectInfo) || '');
+    const offsets = this.getIconOffsets(object, objectInfo);
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < text.length; i++) {
+      const frame = mapping?.[text[i]];
+      if (!frame || frame.width <= 0 || frame.height <= 0) {
+        continue;
+      }
+
+      const offsetX = offsets[i * 2];
+      const offsetY = offsets[i * 2 + 1];
+      minX = Math.min(minX, offsetX - frame.anchorX);
+      maxX = Math.max(maxX, offsetX + frame.width - frame.anchorX);
+      minY = Math.min(minY, offsetY - frame.anchorY);
+      maxY = Math.max(maxY, offsetY + frame.height - frame.anchorY);
+    }
+
+    if (!Number.isFinite(minX) || !Number.isFinite(minY)) {
+      return [0, 0, 0, 0];
+    }
+
+    return [minX / fontSize, minY / fontSize, (maxX - minX) / fontSize, (maxY - minY) / fontSize];
+  };
+
+  /** Returns the center of each text block relative to the anchor position.
+   * This is the original collision sample point for normal text rendering.
+   */
+  private getCollisionOffset: AccessorFunction<DataT, [number, number]> = (object, objectInfo) => {
+    const [x, y, width, height] = this.getBoundingRect(object, objectInfo);
+    return [x + width / 2, y + height / 2];
+  };
+
+  /** Returns the center of the glyph bounds relative to the anchor position.
+   * Used by the hidden proxy rect path for anchored/pixel-offset billboard text.
+   */
+  private getGlyphCollisionOffset: AccessorFunction<DataT, [number, number]> = (
+    object,
+    objectInfo
+  ) => {
+    const [x, y, width, height] = this.getCollisionRect(object, objectInfo);
+    return [x + width / 2, y + height / 2];
+  };
+
+  /** Returns the center of the glyph bounds as scaled in the collision map.
+   * Used when collisionTestProps enlarge the hidden proxy geometry around a non-center anchor.
+   */
+  private getScaledGlyphCollisionOffset: AccessorFunction<DataT, [number, number]> = (
+    object,
+    objectInfo
+  ) => {
+    const [x, y] = this.getGlyphCollisionOffset(object, objectInfo);
+    const collisionSizeScale = Number(
+      (this.props as CollisionTestProps).collisionTestProps?.sizeScale
+    );
+    const sizeScale = Number(this.props.sizeScale);
+    const scale =
+      Number.isFinite(collisionSizeScale) && Number.isFinite(sizeScale) && sizeScale !== 0
+        ? collisionSizeScale / sizeScale
+        : 1;
+    return [x * scale, y * scale];
+  };
+
   /** Returns the x, y offsets of each character in a text string, in texture size.
    * Used to layout characters in the vertex shader.
    */
@@ -476,7 +621,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       x,
       y,
       rowWidth,
-      size: [, height]
+      size: [width, height]
     } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
@@ -496,7 +641,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     for (let i = 0; i < numCharacters; i++) {
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
-      offsets[index++] = ((anchorX - 1) * rowWidth[i]) / 2 + x[i];
+      const rowOffset = ((1 - anchorX) * (width - rowWidth[i])) / 2;
+      offsets[index++] = ((anchorX - 1) * width) / 2 + rowOffset + x[i];
       offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
     }
     return offsets;
@@ -514,10 +660,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {
       data,
       _dataDiff,
+      getText: textAccessor,
       getPosition,
       getColor,
       getSize,
       getAngle,
+      getTextAnchor,
+      getAlignmentBaseline,
       getPixelOffset,
       getBackgroundColor,
       getBorderColor,
@@ -540,8 +689,17 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       transitions,
       updateTriggers
     } = this.props;
+    const collisionTestProps = (this.props as CollisionTestProps).collisionTestProps || {};
+    const collisionMarkerEnabled = needsCollisionMarker(this.props);
+    const collisionOffsetAccessor =
+      collisionMarkerEnabled && usesAnchoredCollisionSampling(this.props)
+        ? this.getScaledGlyphCollisionOffset
+        : this.getCollisionOffset;
 
-    const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
+    const CharactersLayerClass: _ConstructorOf<Layer> = this.getSubLayerClass(
+      'characters',
+      MultiIconLayer as unknown as _ConstructorOf<Layer>
+    );
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
     const {fontSize} = this.state.fontAtlasManager.props;
 
@@ -561,8 +719,10 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getSize,
             getAngle,
             getPixelOffset,
+            getCollisionOffset: collisionOffsetAccessor,
             getClipRect: getContentBox,
             billboard,
+            collisionDrawMode: collisionMarkerEnabled ? 'sample-only' : undefined,
             sizeScale,
             sizeUnits,
             sizeMinPixels,
@@ -589,10 +749,16 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getLineColor: updateTriggers.getBorderColor,
               getLineWidth: updateTriggers.getBorderWidth,
               getPixelOffset: updateTriggers.getPixelOffset,
+              getCollisionOffset: {
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              },
               getBoundingRect: {
-                getText: updateTriggers.getText,
-                getTextAnchor: updateTriggers.getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
                 styleVersion
               }
             }
@@ -626,9 +792,11 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getSize,
           getAngle,
           getPixelOffset,
+          getCollisionOffset: collisionOffsetAccessor,
           getContentBox,
 
           billboard,
+          collisionDrawMode: collisionMarkerEnabled ? 'sample-only' : undefined,
           sizeScale,
           sizeUnits,
           sizeMinPixels,
@@ -656,10 +824,22 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
+            getCollisionOffset: {
+              getText: updateTriggers.getText ?? textAccessor,
+              getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+              styleVersion
+            },
             getContentBox: updateTriggers.getContentBox,
             getIconOffsets: {
-              getTextAnchor: updateTriggers.getTextAnchor,
-              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+              getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+              styleVersion
+            },
+            getBoundingRect: {
+              getText: updateTriggers.getText ?? textAccessor,
+              getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+              getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
               styleVersion
             }
           }
@@ -672,7 +852,87 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getIconOffsets: this.getIconOffsets,
           getIcon: getText
         }
-      )
+      ),
+      collisionMarkerEnabled &&
+        new CharactersLayerClass(
+          {
+            sdf: fontSettings.sdf,
+            smoothing: Number.isFinite(fontSettings.smoothing)
+              ? fontSettings.smoothing
+              : DEFAULT_FONT_SETTINGS.smoothing,
+            outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
+            outlineColor,
+            iconAtlas: atlas,
+            iconMapping: mapping,
+
+            getPosition,
+            getColor: [0, 0, 0, 0],
+            getSize,
+            getAngle,
+            getPixelOffset,
+            getCollisionOffset: collisionOffsetAccessor,
+            getContentBox,
+            billboard,
+            collisionDrawMode: 'map-only',
+            sizeScale,
+            sizeUnits,
+            sizeMinPixels,
+            sizeMaxPixels,
+            fontSize,
+            contentCutoffPixels,
+            contentAlignHorizontal,
+            contentAlignVertical,
+            pickable: false,
+            transitions: transitions && {
+              getPosition: transitions.getPosition,
+              getAngle: transitions.getAngle,
+              getSize: transitions.getSize,
+              getPixelOffset: transitions.getPixelOffset,
+              getContentBox: transitions.getContentBox
+            }
+          },
+          this.getSubLayerProps({
+            id: 'collision-marker',
+            extensions: getCollisionFilterExtensions(this.props.extensions),
+            collisionTestProps,
+            updateTriggers: {
+              getPosition: updateTriggers.getPosition,
+              getAngle: updateTriggers.getAngle,
+              getSize: updateTriggers.getSize,
+              getPixelOffset: updateTriggers.getPixelOffset,
+              getCollisionOffset: {
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              },
+              getContentBox: updateTriggers.getContentBox,
+              getIconOffsets: {
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              },
+              getBoundingRect: {
+                getText: updateTriggers.getText ?? textAccessor,
+                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                styleVersion
+              }
+            }
+          }),
+          {
+            data,
+            _dataDiff,
+            startIndices,
+            numInstances,
+            autoHighlight: false,
+            extensions: getCollisionFilterExtensions(this.props.extensions),
+            collisionTestProps,
+            collisionDrawMode: 'map-only',
+            getIconOffsets: this.getIconOffsets,
+            getIcon: getText
+          }
+        )
     ];
   }
 

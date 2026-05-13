@@ -3,7 +3,7 @@
   "description": "Use deck.gl as a custom ArcGIS API for JavaScript layer",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.2",
+  "version": "9.3.3-or",
   "publishConfig": {
     "access": "public"
   },
@@ -40,7 +40,7 @@
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
-    "@deck.gl/core": "~9.3.0",
+    "@deck.gl/core": "~9.3.3-or",
     "@luma.gl/core": "~9.3.3",
     "@luma.gl/engine": "~9.3.3",
     "@luma.gl/webgl": "~9.3.3"
