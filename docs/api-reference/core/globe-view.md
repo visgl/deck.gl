@@ -54,6 +54,16 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
+#### `parameters` (object, optional) {#parameters}
+
+`GlobeView` enables back-face culling by default with `parameters: {cullMode: 'back'}`. To override this behavior, supply the desired GPU parameters to the constructor:
+
+```js
+new GlobeView({
+  parameters: {cullMode: 'none'}
+});
+```
+
 
 ## View State
 

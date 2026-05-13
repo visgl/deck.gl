@@ -8,6 +8,38 @@ type TileBBox = GeoBoundingBox;
 type Properties = BinaryPointFeature['properties'];
 type LineInfo = {index: number; length: number};
 
+/** Property name for server-provided feature bounding box (comma-separated west,south,east,north in world coordinates) */
+export const FEATURE_BBOX_PROP = '_carto_bbox';
+
+function parseFeatureBbox(value: unknown): [number, number, number, number] | null {
+  if (typeof value !== 'string') return null;
+  const parts = value.split(',');
+  if (parts.length !== 4) return null;
+  return parts.map(Number) as [number, number, number, number];
+}
+
+function latToMercatorY(lat: number): number {
+  return Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+}
+
+/** Convert a WGS84 point to MVT tile-space, where y=0 is north, y=1 is south, linear in Mercator */
+function worldToTile(
+  point: [number, number],
+  geoBbox: TileBBox,
+  tileBbox: TileBBox
+): [number, number] {
+  const xFrac = (point[0] - geoBbox.west) / (geoBbox.east - geoBbox.west);
+  const x = tileBbox.west + xFrac * (tileBbox.east - tileBbox.west);
+
+  const mercY = latToMercatorY(point[1]);
+  const mercNorth = latToMercatorY(geoBbox.north);
+  const mercSouth = latToMercatorY(geoBbox.south);
+  const yFrac = (mercNorth - mercY) / (mercNorth - mercSouth);
+  const y = tileBbox.south + yFrac * (tileBbox.north - tileBbox.south);
+
+  return [x, y];
+}
+
 export function createPointsFromLines(
   lines: BinaryLineFeature,
   uniqueIdProperty?: string
@@ -70,9 +102,16 @@ export function createPointsFromLines(
 export function createPointsFromPolygons(
   polygons: Required<BinaryPolygonFeature>,
   tileBbox: TileBBox,
-  props: any
+  props: any,
+  geoBbox?: TileBBox
 ): BinaryPointFeature {
-  const {west, south, east, north} = tileBbox;
+  // When feature bounding boxes are provided, use geoBbox for area filtering
+  // as the bbox values are in world coordinates
+  const useBbox = Boolean(
+    geoBbox && polygons.properties.length > 0 && FEATURE_BBOX_PROP in polygons.properties[0]
+  );
+  const boundsBbox = useBbox ? geoBbox! : tileBbox;
+  const {west, south, east, north} = boundsBbox;
   const tileArea = (east - west) * (north - south);
   const minPolygonArea = tileArea * 0.0001; // 0.01% threshold
 
@@ -85,6 +124,9 @@ export function createPointsFromPolygons(
     polygons.numericProps
   );
 
+  // MVT: tile space is Mercator-projected, need worldToTile conversion
+  const isMVT = useBbox && geoBbox !== tileBbox;
+
   // Process each polygon
   let pointIndex = 0;
   let triangleIndex = 0;
@@ -93,61 +135,80 @@ export function createPointsFromPolygons(
     const startIndex = polygons.polygonIndices.value[i];
     const endIndex = polygons.polygonIndices.value[i + 1];
 
-    // Skip small polygons
-    if (getPolygonArea(polygons, i) < minPolygonArea) {
-      continue;
-    }
+    let labelPoint: [number, number] | null = null;
 
-    const centroid = getPolygonCentroid(polygons, i);
-    let maxArea = -1;
-    let largestTriangleCenter: [number, number] = [0, 0];
-    let centroidIsInside = false;
-
-    // Scan triangles until we find ones that don't belong to this polygon
-    while (triangleIndex < polygons.triangles.value.length) {
-      const i1 = polygons.triangles.value[triangleIndex];
-
-      // If we've moved past the current polygon's triangles, break
-      if (i1 >= endIndex) {
-        break;
-      }
-
-      // If we've already found a triangle containing the centroid, skip the rest
-      if (centroidIsInside) {
-        triangleIndex += 3;
-        continue;
-      }
-
-      const i2 = polygons.triangles.value[triangleIndex + 1];
-      const i3 = polygons.triangles.value[triangleIndex + 2];
-      const v1 = polygons.positions.value.subarray(
-        i1 * polygons.positions.size,
-        i1 * polygons.positions.size + polygons.positions.size
-      );
-      const v2 = polygons.positions.value.subarray(
-        i2 * polygons.positions.size,
-        i2 * polygons.positions.size + polygons.positions.size
-      );
-      const v3 = polygons.positions.value.subarray(
-        i3 * polygons.positions.size,
-        i3 * polygons.positions.size + polygons.positions.size
-      );
-
-      if (isPointInTriangle(centroid, v1, v2, v3)) {
-        centroidIsInside = true;
-      } else {
-        const area = getTriangleArea(v1, v2, v3);
-        if (area > maxArea) {
-          maxArea = area;
-          largestTriangleCenter = [(v1[0] + v2[0] + v3[0]) / 3, (v1[1] + v2[1] + v3[1]) / 3];
+    // Determine preferred label position and area filter
+    let preferredPoint: [number, number] | null = null;
+    if (useBbox) {
+      const featureId = polygons.featureIds.value[startIndex];
+      const bbox = parseFeatureBbox(polygons.properties[featureId][FEATURE_BBOX_PROP]);
+      if (bbox) {
+        const [bboxWest, bboxSouth, bboxEast, bboxNorth] = bbox;
+        const bboxArea = (bboxEast - bboxWest) * (bboxNorth - bboxSouth);
+        if (bboxArea >= minPolygonArea) {
+          const center: [number, number] = [(bboxWest + bboxEast) / 2, (bboxSouth + bboxNorth) / 2];
+          if (isPointInBounds(center, geoBbox!)) {
+            preferredPoint = isMVT ? worldToTile(center, geoBbox!, tileBbox) : center;
+          }
         }
       }
-
-      triangleIndex += 3;
+    } else {
+      if (getPolygonArea(polygons, i) < minPolygonArea) {
+        continue;
+      }
+      preferredPoint = getPolygonCentroid(polygons, i);
     }
 
-    const labelPoint = centroidIsInside ? centroid : largestTriangleCenter;
-    if (isPointInBounds(labelPoint, tileBbox)) {
+    if (preferredPoint) {
+      // Check if preferred point is inside the polygon, tracking largest triangle as fallback
+      let maxArea = -1;
+      let largestTriangleCenter: [number, number] = [0, 0];
+      let isInside = false;
+
+      while (triangleIndex < polygons.triangles.value.length) {
+        const i1 = polygons.triangles.value[triangleIndex];
+        if (i1 >= endIndex) break;
+
+        if (isInside) {
+          triangleIndex += 3;
+          continue;
+        }
+
+        const i2 = polygons.triangles.value[triangleIndex + 1];
+        const i3 = polygons.triangles.value[triangleIndex + 2];
+        const v1 = polygons.positions.value.subarray(
+          i1 * polygons.positions.size,
+          i1 * polygons.positions.size + polygons.positions.size
+        );
+        const v2 = polygons.positions.value.subarray(
+          i2 * polygons.positions.size,
+          i2 * polygons.positions.size + polygons.positions.size
+        );
+        const v3 = polygons.positions.value.subarray(
+          i3 * polygons.positions.size,
+          i3 * polygons.positions.size + polygons.positions.size
+        );
+
+        if (isPointInTriangle(preferredPoint, v1, v2, v3)) {
+          isInside = true;
+        } else {
+          const area = getTriangleArea(v1, v2, v3);
+          if (area > maxArea) {
+            maxArea = area;
+            largestTriangleCenter = [(v1[0] + v2[0] + v3[0]) / 3, (v1[1] + v2[1] + v3[1]) / 3];
+          }
+        }
+
+        triangleIndex += 3;
+      }
+
+      const candidate = isInside ? preferredPoint : largestTriangleCenter;
+      if (isPointInBounds(candidate, tileBbox)) {
+        labelPoint = candidate;
+      }
+    }
+
+    if (labelPoint) {
       positions.push(...labelPoint);
       const featureId = polygons.featureIds.value[startIndex];
       if (extruded) {
