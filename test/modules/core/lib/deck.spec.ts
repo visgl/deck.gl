@@ -7,6 +7,7 @@ import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
+import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -35,6 +36,20 @@ function createPointPickResult(props = {}) {
     result: [createPickingInfo(props)],
     emptyInfo: createPickingInfo()
   };
+}
+
+function createMockCanvasContext(props: Partial<CanvasContext> = {}): CanvasContext {
+  const canvasContext = device.getDefaultCanvasContext();
+  return {
+    canvas: canvasContext.canvas,
+    getCSSSize: canvasContext.getCSSSize.bind(canvasContext),
+    getDrawingBufferSize: canvasContext.getDrawingBufferSize.bind(canvasContext),
+    cssToDeviceRatio: canvasContext.cssToDeviceRatio.bind(canvasContext),
+    cssToDevicePixels: canvasContext.cssToDevicePixels.bind(canvasContext),
+    setProps: () => {},
+    props: canvasContext.props as CanvasContextProps,
+    ...props
+  } as CanvasContext;
 }
 
 async function waitForRender(deck: Deck): Promise<void> {
@@ -147,12 +162,10 @@ test('Deck#canvas context resize drives Deck dimensions', async () => {
 
   await waitForRender(deck);
 
-  const canvasContext = device.getDefaultCanvasContext();
-  const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
   const nextSize: [number, number] = [17, 19];
+  const canvasContext = createMockCanvasContext({getCSSSize: () => nextSize});
 
   try {
-    canvasContext.getCSSSize = () => nextSize;
     resizeEvents.length = 0;
 
     // Call the internal resize hook directly so the test verifies Deck's reaction to luma state.
@@ -166,7 +179,6 @@ test('Deck#canvas context resize drives Deck dimensions', async () => {
     ]);
     expect(deck.needsRedraw(), 'resize invalidates redraw').toBeTruthy();
   } finally {
-    canvasContext.getCSSSize = originalGetCSSSize;
     deck.finalize();
   }
 });
@@ -228,21 +240,25 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
 
   await waitForRender(deck);
 
-  const canvasContext = device.getDefaultCanvasContext();
-  const initialUseDevicePixels = canvasContext.props.useDevicePixels;
+  let useDevicePixels: boolean | number | undefined;
+  const canvasContext = createMockCanvasContext({
+    setProps: (props: CanvasContextProps) => {
+      useDevicePixels = props.useDevicePixels;
+    }
+  });
 
   try {
+    // @ts-expect-error testing private canvas context setter
+    deck._setCanvasContext(canvasContext);
+
     // Deck.setProps should only forward the preference into luma's canvas context.
     deck.setProps({useDevicePixels: false});
-    expect(canvasContext.props.useDevicePixels, 'canvas context useDevicePixels updated').toBe(
-      false
-    );
+    expect(useDevicePixels, 'canvas context useDevicePixels updated').toBe(false);
 
     // Numeric overrides should flow through unchanged so luma can size the drawing buffer.
     deck.setProps({useDevicePixels: 2});
-    expect(canvasContext.props.useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
+    expect(useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
   } finally {
-    canvasContext.setProps({useDevicePixels: initialUseDevicePixels});
     deck.finalize();
   }
 });
@@ -260,12 +276,12 @@ test('Deck#render frame syncs provided device canvas context size', async () => 
 
   await waitForRender(deck);
 
-  const canvasContext = device.getDefaultCanvasContext();
-  const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
   const nextSize: [number, number] = [23, 29];
+  const canvasContext = createMockCanvasContext({getCSSSize: () => nextSize});
 
   try {
-    canvasContext.getCSSSize = () => nextSize;
+    // @ts-expect-error testing private external canvas context field
+    deck._externalCanvasContext = canvasContext;
     resizeEvents.length = 0;
 
     // Provided Device instances do not route luma's onResize callback through Deck.
@@ -279,7 +295,6 @@ test('Deck#render frame syncs provided device canvas context size', async () => 
       {width: nextSize[0], height: nextSize[1]}
     ]);
   } finally {
-    canvasContext.getCSSSize = originalGetCSSSize;
     deck.finalize();
   }
 });
