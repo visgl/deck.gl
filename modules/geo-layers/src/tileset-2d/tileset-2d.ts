@@ -40,7 +40,9 @@ export const STRATEGY_NEVER = 'never';
 export const STRATEGY_REPLACE = 'no-overlap';
 export const STRATEGY_DEFAULT = 'best-available';
 
-export type RefinementStrategyFunction<TileIndexT = TileIndex> = (tiles: Tile2DHeader<any, TileIndexT>[]) => void;
+export type RefinementStrategyFunction<TileIndexT = TileIndex> = (
+  tiles: Tile2DHeader<any, TileIndexT>[]
+) => void;
 export type RefinementStrategy<TileIndexT = TileIndex> =
   | 'never'
   | 'no-overlap'
@@ -538,10 +540,7 @@ export class Tileset2D<TileIndexT = TileIndex> {
 
   private _getTile(index: TileIndexT, create: true): Tile2DHeader<any, TileIndexT>;
   private _getTile(index: TileIndexT, create?: false): Tile2DHeader<any, TileIndexT> | undefined;
-  private _getTile(
-    index: TileIndexT,
-    create?: boolean
-  ): Tile2DHeader<any, TileIndexT> | undefined {
+  private _getTile(index: TileIndexT, create?: boolean): Tile2DHeader<any, TileIndexT> | undefined {
     const id = this.getTileId(index);
     let tile = this._cache.get(id);
     let needsReload = false;
@@ -569,9 +568,7 @@ export class Tileset2D<TileIndexT = TileIndex> {
     return tile;
   }
 
-  _getNearestAncestor(
-    tile: Tile2DHeader<any, TileIndexT>
-  ): Tile2DHeader<any, TileIndexT> | null {
+  _getNearestAncestor(tile: Tile2DHeader<any, TileIndexT>): Tile2DHeader<any, TileIndexT> | null {
     const {_minZoom = 0} = this;
 
     let index = tile.index;
@@ -633,7 +630,9 @@ function updateTileStateReplace<TileIndexT = TileIndex>(allTiles: Tile2DHeader<a
 }
 
 // Walk up the tree until we find one ancestor that is loaded. Returns true if successful.
-function getPlaceholderInAncestors<TileIndexT = TileIndex>(startTile: Tile2DHeader<any, TileIndexT>) {
+function getPlaceholderInAncestors<TileIndexT = TileIndex>(
+  startTile: Tile2DHeader<any, TileIndexT>
+) {
   let tile: Tile2DHeader<any, TileIndexT> | null = startTile;
   while (tile) {
     if (tile.isLoaded || tile.content) {
