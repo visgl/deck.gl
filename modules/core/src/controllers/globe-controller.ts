@@ -23,8 +23,6 @@ import type {MjolnirGestureEvent} from 'mjolnir.js';
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 
-// -- Pixel / degree helpers used by applyConstraints --------------------
-
 function degreesToPixels(angle: number, zoom: number = 0): number {
   const radians = Math.min(180, angle) * DEGREES_TO_RADIANS;
   const size = GLOBE_RADIUS * 2 * Math.sin(radians / 2);
@@ -36,8 +34,6 @@ function pixelsToDegrees(pixels: number, zoom: number = 0): number {
   const radians = Math.asin(Math.min(1, size / GLOBE_RADIUS / 2)) * 2;
   return radians * RADIANS_TO_DEGREES;
 }
-
-// -- GlobeState ---------------------------------------------------------
 
 type GlobeStateInternal = MapStateInternal & {
   startPanPos?: [number, number];
@@ -239,8 +235,6 @@ class GlobeState extends MapState {
     return clamp(zoom, minZoom + zoomAdjustment, maxZoom + zoomAdjustment);
   }
 }
-
-// -- GlobeController ----------------------------------------------------
 
 export default class GlobeController extends Controller<MapState> {
   ControllerState = GlobeState;

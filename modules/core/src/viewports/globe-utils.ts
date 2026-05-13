@@ -154,8 +154,6 @@ export class Globe {
   }
 }
 
-// -- Inertia ---------------------------------------------------------------
-
 // Exponential decay easing — models viscous friction on a spinning sphere.
 const INERTIA_DECAY = 5;
 const INERTIA_NORM = 1 / (1 - Math.exp(-INERTIA_DECAY));
