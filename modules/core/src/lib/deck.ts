@@ -384,6 +384,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfoPromise: Promise<PickingInfo> | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
+    const initialProps = props;
     // @ts-ignore views
     this.props = {...defaultProps, ...props};
     props = this.props;
@@ -433,7 +434,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
-    this.setProps(props);
+    this.setProps(initialProps);
 
     // UNSAFE/experimental prop: only set at initialization to avoid performance hit
     if (props._typedArrayManagerProps) {
