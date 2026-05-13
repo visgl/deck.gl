@@ -41,7 +41,7 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
   // This reduces the flicker present when objects are shown/hidden
   const int N = 2;
   float accumulator = 0.0;
-  vec2 sampleStep = 1.0 / vec2(textureSize(collision_texture, 0));
+  vec2 sampleStep = vec2(1.0 / project.viewportSize);
 
   const float floatN = float(N);
   vec2 delta = -floatN * sampleStep;
@@ -56,7 +56,33 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 
   float W = 2.0 * floatN + 1.0;
   float coverage = accumulator / (W * W);
-  return step(0.24, coverage);
+  return pow(coverage, 2.2);
+}
+
+float collision_isStableVisible(vec2 texCoords, vec3 pickingColor) {
+  if (!collision.enabled) {
+    return 1.0;
+  }
+
+  const int N = 2;
+  float accumulator = 0.0;
+  vec2 sampleStep = vec2(1.0 / project.viewportSize);
+
+  const float floatN = float(N);
+  vec2 delta = -floatN * sampleStep;
+  for(int i = -N; i <= N; i++) {
+    delta.x = -sampleStep.x * floatN;
+    for(int j = -N; j <= N; j++) {
+      accumulator += collision_match(texCoords + delta, pickingColor);
+      delta.x += sampleStep.x;
+    }
+    delta.y += sampleStep.y;
+  }
+
+  float W = 2.0 * floatN + 1.0;
+  float coverage = accumulator / (W * W);
+  float fade = pow(coverage, 2.2);
+  return coverage >= 0.24 ? 1.0 : fade;
 }
 `;
 
@@ -75,6 +101,7 @@ const inject = {
 `,
   'vs:#main-start': /* glsl */ `
   geometryCollisionUseTexCoordsOverride = false;
+  geometryCollisionUseStableFade = false;
   geometryCollisionTexCoordsOverride = vec2(0.0);
   geometryCollisionFadeOverride = -1.0;
 `,
@@ -93,7 +120,9 @@ const inject = {
       : collision_getCoords(collision_common_position);
     collision_fade = geometryCollisionFadeOverride >= 0.0
       ? geometryCollisionFadeOverride
-      : collision_isVisible(collision_texCoords, geometry.pickingColor);
+      : geometryCollisionUseStableFade
+        ? collision_isStableVisible(collision_texCoords, geometry.pickingColor)
+        : collision_isVisible(collision_texCoords, geometry.pickingColor);
     if (collision_fade < 0.0001) {
       // Position outside clip space bounds to discard
       position = vec4(0.0, 0.0, 2.0, 1.0);

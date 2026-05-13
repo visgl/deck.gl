@@ -128,6 +128,7 @@ void main(void) {
       instancePixelOffset + collisionPixelOffset + vec2(scrollPixels.x, -scrollPixels.y)
     );
     geometryCollisionUseTexCoordsOverride = true;
+    geometryCollisionUseStableFade = true;
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);
