@@ -7,6 +7,7 @@ import {LayerManager, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import DeckPicker from '@deck.gl/core/lib/deck-picker';
 import {device} from '@deck.gl/test-utils/vitest';
+import type {CanvasContext} from '@luma.gl/core';
 
 const DEVICE_RECT_TEST_CASES = [
   {
@@ -49,15 +50,13 @@ test('DeckPicker#getPickingRect', () => {
 
 test('DeckPicker#_resizeBuffer uses drawing buffer size', () => {
   const deckPicker = new DeckPicker(device);
-  const canvasContext = device.getDefaultCanvasContext();
-  const originalGetDrawingBufferSize = canvasContext.getDrawingBufferSize.bind(canvasContext);
-  const originalGetCSSSize = canvasContext.getCSSSize.bind(canvasContext);
   const drawingBufferSize: [number, number] = [37, 41];
+  const canvasContext = {
+    getCSSSize: () => [10, 11],
+    getDrawingBufferSize: () => drawingBufferSize
+  } as CanvasContext;
 
   try {
-    canvasContext.getCSSSize = () => [10, 11];
-    canvasContext.getDrawingBufferSize = () => drawingBufferSize;
-
     deckPicker._resizeBuffer(canvasContext);
 
     expect(deckPicker.pickingFBO?.width, 'pickingFBO width follows drawing buffer').toBe(
@@ -77,8 +76,6 @@ test('DeckPicker#_resizeBuffer uses drawing buffer size', () => {
       drawingBufferSize[1]
     );
   } finally {
-    canvasContext.getDrawingBufferSize = originalGetDrawingBufferSize;
-    canvasContext.getCSSSize = originalGetCSSSize;
     deckPicker.finalize();
   }
 });
