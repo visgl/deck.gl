@@ -1423,7 +1423,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
-    this.setProps(this.props);
+    this.setProps({});
 
     // Seed the initial Deck width/height from the current canvas context before onLoad fires.
     this._updateCanvasSize(this._canvasContext);
