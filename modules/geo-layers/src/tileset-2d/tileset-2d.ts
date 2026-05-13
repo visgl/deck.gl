@@ -359,6 +359,8 @@ export class Tileset2D<TileIndexT = TileIndex> {
     zoomOffset?: number;
   }): TileIndexT[] {
     const {tileSize, extent, zoomOffset, visibleMinZoom, visibleMaxZoom} = this.opts;
+    // Base implementation assumes TileIndexT = TileIndex; subclasses with custom
+    // index types must override.
     return getTileIndices({
       viewport,
       maxZoom,
@@ -371,7 +373,7 @@ export class Tileset2D<TileIndexT = TileIndex> {
       zoomOffset,
       visibleMinZoom,
       visibleMaxZoom
-    });
+    }) as unknown as TileIndexT[];
   }
 
   /** Returns unique string key for a tile index.
