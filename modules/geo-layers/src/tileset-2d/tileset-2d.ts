@@ -374,28 +374,41 @@ export class Tileset2D<TileIndexT = TileIndex> {
     });
   }
 
-  /** Returns unique string key for a tile index */
-  getTileId(index: TileIndex) {
-    return `${index.x}-${index.y}-${index.z}`;
+  /** Returns unique string key for a tile index.
+   *
+   * Must be overridden if TileIndexT is not the same as TileIndex.
+   */
+  getTileId(index: TileIndexT): string {
+    const {x, y, z} = index as unknown as TileIndex;
+    return `${x}-${y}-${z}`;
   }
 
-  /** Returns a zoom level for a tile index */
-  getTileZoom(index: TileIndex) {
-    return index.z;
+  /** Returns a zoom level for a tile index.
+   *
+   * Must be overridden if TileIndexT is not the same as TileIndex.
+   */
+  getTileZoom(index: TileIndexT): number {
+    return (index as unknown as TileIndex).z;
   }
 
-  /** Returns additional metadata to add to tile, bbox by default */
-  getTileMetadata(index: TileIndex): Record<string, any> {
+  /** Returns additional metadata to add to tile, bbox by default.
+   *
+   * Must be overridden if TileIndexT is not the same as TileIndex and does not
+   * correspond to a web mercator tile index.
+   */
+  getTileMetadata(index: TileIndexT): Record<string, any> {
     const {tileSize} = this.opts;
-    return {bbox: tileToBoundingBox(this._viewport!, index.x, index.y, index.z, tileSize)};
+    const {x, y, z} = index as unknown as TileIndex;
+    return {bbox: tileToBoundingBox(this._viewport!, x, y, z, tileSize)};
   }
 
-  /** Returns index of the parent tile */
-  getParentIndex(index: TileIndex) {
-    const x = Math.floor(index.x / 2);
-    const y = Math.floor(index.y / 2);
-    const z = index.z - 1;
-    return {x, y, z};
+  /** Returns index of the parent tile.
+   *
+   * Must be overridden if TileIndexT is not the same as TileIndex.
+   */
+  getParentIndex(index: TileIndexT): TileIndexT {
+    const {x, y, z} = index as unknown as TileIndex;
+    return {x: Math.floor(x / 2), y: Math.floor(y / 2), z: z - 1} as unknown as TileIndexT;
   }
 
   // Returns true if any tile's visibility changed
