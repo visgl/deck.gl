@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.2] - Apr 30 2026
+
+- Fix GeoJsonLayer TypeScript types: elevationScale as number, update deprecated depthTest parameter (#10261)
+- fix(google-maps, arcgis): Wrap external FB handle (#10253)
+- fix(react): Align React widget names with pure js (#10239)
+
 #### deck.gl [v9.3.1] - Apr 17 2026
 
 - feat(widgets): ScrollbarWidget falls back to controller.maxBounds (#10236)

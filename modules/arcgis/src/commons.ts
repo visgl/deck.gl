@@ -19,6 +19,7 @@ export type RenderResources = {
   texture: Texture;
   model: Model;
   fbo: Framebuffer;
+  _externalFramebuffer?: {handle: WebGLFramebuffer; wrapper: Framebuffer};
 };
 
 async function createDeckInstance(gl: WebGL2RenderingContext): Promise<{
@@ -153,14 +154,28 @@ export function render(
   const {model, deck, fbo} = resources;
   const device = model.device;
   if (device instanceof WebGLDevice) {
-    // @ts-ignore device.getParametersWebGL should return `any` not `void`?
-    const screenFbo: Framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
     const {width, height, ...viewState} = viewport;
 
     /* global window */
     const dpr = window.devicePixelRatio;
     const pixelWidth = Math.round(width * dpr);
     const pixelHeight = Math.round(height * dpr);
+
+    // Wrap the external framebuffer handle so luma.gl treats it as a proper Framebuffer resource.
+    const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+    let screenFbo: Framebuffer | null = null;
+    if (externalFbo) {
+      if (resources._externalFramebuffer?.handle !== externalFbo) {
+        resources._externalFramebuffer?.wrapper.destroy();
+        const wrapper = device.createFramebuffer({
+          handle: externalFbo,
+          width: pixelWidth,
+          height: pixelHeight
+        });
+        resources._externalFramebuffer = {handle: externalFbo, wrapper};
+      }
+      screenFbo = resources._externalFramebuffer!.wrapper;
+    }
 
     fbo.resize({width: pixelWidth, height: pixelHeight});
 
@@ -189,4 +204,5 @@ export function finalizeResources(resources: RenderResources) {
   resources.model.destroy();
   resources.fbo.destroy();
   resources.texture.destroy();
+  resources._externalFramebuffer?.wrapper.destroy();
 }
