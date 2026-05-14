@@ -15,14 +15,12 @@ struct ConstantAttributes {
   instanceNormals: vec3<f32>,
   instanceColors: vec4<f32>,
   instancePositions: vec3<f32>,
-  instancePositions64Low: vec3<f32>,
-  instancePickingColors: vec3<f32>
+  instancePositions64Low: vec3<f32>
 };
 
 const constants = ConstantAttributes(
   vec3<f32>(1.0, 0.0, 0.0),
   vec4<f32>(0.0, 0.0, 0.0, 1.0),
-  vec3<f32>(0.0),
   vec3<f32>(0.0),
   vec3<f32>(0.0)
 );
@@ -34,8 +32,7 @@ struct Attributes {
   @location(1) instancePositions: vec3<f32>,
   @location(2) instancePositions64Low: vec3<f32>,
   @location(3) instanceNormals: vec3<f32>,
-  @location(4) instanceColors: vec4<f32>,
-  @location(5) instancePickingColors: vec3<f32>
+  @location(4) instanceColors: vec4<f32>
 };
 
 struct Varyings {
@@ -62,7 +59,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // position on the containing square in [-1, 1] space
   varyings.unitPosition = attributes.positions.xy;
   geometry.uv = varyings.unitPosition;
-  geometry.pickingColor = attributes.instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
 
   // Find the center of the point and add the current vertex
   let offset = vec3<f32>(
@@ -84,7 +81,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // Apply opacity to instance color, or return instance picking color
   varyings.vColor = vec4(lightColor, attributes.instanceColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(vColor, geometry);
-  varyings.pickingColor = attributes.instancePickingColors;
+  varyings.pickingColor = geometry.pickingColor;
 
   return varyings;
 }

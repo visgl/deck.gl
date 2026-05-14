@@ -4,6 +4,8 @@
 
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
+import {ResetViewWidget as _ResetViewWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -16,7 +18,8 @@ const WORLD_MAP = './map.jpg';
 const INITIAL_VIEW_STATE = {
   latitude: 51.47,
   longitude: 0.45,
-  zoom: 0
+  minZoom: 1,
+  zoom: 1
 };
 
 const GRATICULES = getGraticules(30);
@@ -24,7 +27,7 @@ const GRATICULES = getGraticules(30);
 export const deck = new Deck({
   views: new GlobeView(),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {minZoom: -2},
+  controller: {inertia: 500},
   parameters: {
     cull: true
   },
@@ -118,3 +121,42 @@ function getGraticules(resolution) {
 // For automated test cases
 /* global document */
 document.body.style.margin = '0px';
+
+// Debug overlay
+const overlay = document.createElement('div');
+Object.assign(overlay.style, {
+  position: 'fixed',
+  top: '10px',
+  left: '10px',
+  background: 'rgba(0,0,0,0.7)',
+  color: '#fff',
+  padding: '8px 12px',
+  fontFamily: 'monospace',
+  fontSize: '13px',
+  borderRadius: '4px',
+  zIndex: '1000',
+  pointerEvents: 'none',
+  lineHeight: '1.6',
+  whiteSpace: 'pre'
+});
+document.body.appendChild(overlay);
+
+function updateOverlay(vs) {
+  const {longitude = 0, latitude = 0, zoom = 0, bearing = 0, pitch = 0} = vs;
+  overlay.textContent =
+    `lat: ${latitude.toFixed(2)}  lng: ${longitude.toFixed(2)}\n` +
+    `zoom: ${zoom.toFixed(2)}  bearing: ${bearing.toFixed(2)}  pitch: ${pitch.toFixed(2)}`;
+}
+updateOverlay(INITIAL_VIEW_STATE);
+
+deck.setProps({
+  widgets: [
+    new _ResetViewWidget({
+      placement: 'top-right',
+      initialViewState: {...INITIAL_VIEW_STATE, transitionDuration: 300}
+    })
+  ],
+  onViewStateChange: ({viewState}) => {
+    updateOverlay(viewState);
+  }
+});

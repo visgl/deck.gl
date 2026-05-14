@@ -183,8 +183,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const attributeManager = this.getAttributeManager()!;
     const noAlloc = true;
 
-    attributeManager.remove(['instancePickingColors']);
-
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {

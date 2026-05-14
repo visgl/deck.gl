@@ -13,8 +13,6 @@ in float instanceElevations;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 
-in vec3 instancePickingColors;
-
 // Result
 out vec4 vColor;
 #ifdef FLAT_SHADING
@@ -67,7 +65,7 @@ void main(void) {
     }
   }
 
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   // Cell coordinates centered on origin
   vec2 base = positions.xy * scale * strokeOffsetRatio * column.coverage * shouldRender;

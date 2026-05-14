@@ -41,6 +41,11 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
    */
   hasPickingBuffer?: boolean;
   /**
+   * Object indices temporarily excluded from builtin instance-index picking.
+   * Used by pickMultipleObjects between picking passes.
+   */
+  disabledPickingIndices: number[];
+  /**
    * Dirty flags of the layer's props and state
    */
   changeFlags!: ChangeFlags;
@@ -65,6 +70,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     this.needsUpdate = true;
     this.subLayers = null;
     this.usesPickingColorCache = false;
+    this.disabledPickingIndices = [];
   }
 
   get layer(): LayerT | null {
