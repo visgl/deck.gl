@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">View Class | deck.gl</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://deck.gl/docs/api-reference/core/view"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="View Class | deck.gl"><meta data-rh="true" name="description" content="For detailed explanations and code examples about deck.gl&#x27;s views system, visit the Views and Projections article."><meta data-rh="true" property="og:description" content="For detailed explanations and code examples about deck.gl&#x27;s views system, visit the Views and Projections article."><link data-rh="true" rel="icon" href="/favicon.png"><link data-rh="true" rel="canonical" href="https://deck.gl/docs/api-reference/core/view"><link data-rh="true" rel="alternate" href="https://deck.gl/docs/api-reference/core/view" hreflang="en"><link data-rh="true" rel="alternate" href="https://deck.gl/docs/api-reference/core/view" hreflang="x-default"><link data-rh="true" rel="preconnect" href="https://8EVYAVB4KT-dsn.algolia.net" crossorigin="anonymous"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"View Class","item":"https://deck.gl/docs/api-reference/core/view"}]}</script><link rel="stylesheet" href="/assets/css/styles.10abb66d.css">
-<script src="/assets/js/runtime~main.2676de6f.js" defer="defer"></script>
-<script src="/assets/js/main.e68847aa.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.eae8e453.js" defer="defer"></script>
+<script src="/assets/js/main.5e3be261.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -82,6 +82,9 @@
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="clearstencil"><code>clearStencil</code> (number | false, optional)<a href="#clearstencil" class="hash-link" aria-label="Direct link to clearstencil" title="Direct link to clearstencil" translate="no">​</a></h4>
 <p>Specifies the stencil buffer value to clear the viewport with, as number between <code>0</code> and <code>255</code>. If <code>clearStencil</code> is <code>false</code>, the depth buffer will not be cleared. If <code>clear</code> is set to <code>false</code>, this property will be ignored.</p>
 <p>Default <code>0</code> (clear).</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameters"><code>parameters</code> (object, optional)<a href="#parameters" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h4>
+<p>Override the GPU parameters used to draw layers in this view. See the luma.gl <a href="https://luma.gl/docs/api-reference/core/parameters" target="_blank" rel="noopener noreferrer" class="">GPU parameters</a> documentation for supported parameters and values.</p>
+<p>View parameters override the <code>Deck.parameters</code> defaults for layers rendered in this view. Layer <code>parameters</code> still take precedence over both.</p>
 <p><strong>Examples:</strong></p>
 <ul>
 <li class="">Clearing to a solid color: <code>new View({clear: true, clearColor: [80, 120, 200, 255]})</code></li>
