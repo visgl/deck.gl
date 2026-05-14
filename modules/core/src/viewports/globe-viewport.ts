@@ -14,7 +14,6 @@ const RADIANS_TO_DEGREES = 180 / Math.PI;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
-export {MAX_LATITUDE};
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
