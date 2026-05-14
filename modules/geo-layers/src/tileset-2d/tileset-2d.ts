@@ -438,16 +438,18 @@ export class Tileset2D {
   private _getCullBounds = memoize(getCullBounds);
 
   private _getRequestPriority(tile: Tile2DHeader): number {
+    // RequestScheduler loads lower priority values first.
+    const distance = this._getTileDistanceSquared(tile);
     if (tile.isSelected) {
-      return this._getTileDistanceToViewportCenter(tile);
+      return distance;
     }
     if (tile.isVisible) {
-      return 1e6 + this._getTileDistanceToViewportCenter(tile);
+      return 1e6 + distance;
     }
     return -1;
   }
 
-  private _getTileDistanceToViewportCenter(tile: Tile2DHeader): number {
+  private _getTileDistanceSquared(tile: Tile2DHeader): number {
     const {width, height} = this._viewport || {};
     if (!this._viewport || !width || !height) {
       return 0;
