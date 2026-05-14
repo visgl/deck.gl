@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.3] - May 14 2026
+
+- fix(extensions): MaskExtension compatible with TerrainExtension (#10187)
+- feat(carto): Clipped polygon labels (#10278)
+- feat(core): ViewProps.parameters (#10262)
+- feat(layers): add getPixelOffset prop to ScatterplotLayer (#10178)
+
 #### deck.gl [v9.3.2] - Apr 30 2026
 
 - Fix GeoJsonLayer TypeScript types: elevationScale as number, update deprecated depthTest parameter (#10261)
