@@ -63,7 +63,8 @@ ${defines}
 
 struct FragmentGeometry {
   vec2 uv;
-} geometry;
+};
+FragmentGeometry geometry;
 
 float smoothedge(float edge, float x) {
   return smoothstep(edge - SMOOTH_EDGE_RADIUS, edge + SMOOTH_EDGE_RADIUS, x);
