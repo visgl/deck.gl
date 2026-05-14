@@ -80,10 +80,11 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     // eslint-disable-next-line @typescript-eslint/unbound-method
     instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
     attributeManager!.addInstanced({
-      instancePickingColors: {
-        type: 'uint8',
-        size: 4,
-        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
+      /** Source text row for each generated character instance. */
+      rowIndexes: {
+        type: 'uint32',
+        size: 1,
+        accessor: (object, {index}) => index
       },
       instanceClipRect: {
         size: 4,
