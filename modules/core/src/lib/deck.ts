@@ -50,6 +50,19 @@ import {CreateDeviceProps} from '@luma.gl/core';
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
+const CANVAS_TOUCH_STYLES = [
+  ['-webkit-user-select', 'none'],
+  ['-webkit-user-drag', 'none'],
+  ['-webkit-touch-callout', 'none'],
+  ['-webkit-tap-highlight-color', 'rgba(0,0,0,0)']
+] as const;
+
+function applyCanvasTouchStyles(canvas: HTMLCanvasElement): void {
+  for (const [property, value] of CANVAS_TOUCH_STYLES) {
+    canvas.style.setProperty(property, value);
+  }
+}
+
 const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 
 export type DeckMetrics = {
@@ -1029,6 +1042,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       parent.appendChild(canvas);
     }
 
+    applyCanvasTouchStyles(canvas);
     Object.assign(canvas.style, props.style);
 
     return canvas;
