@@ -107,6 +107,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2, gl
   return (
     <div>
       <DeckGL
+        key={globeView ? 'globe' : 'map'}
         style={{backgroundColor: '#061714'}}
         views={view}
         viewState={viewState}
