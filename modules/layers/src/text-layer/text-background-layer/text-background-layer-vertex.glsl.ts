@@ -18,7 +18,6 @@ in vec2 instancePixelOffsets;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
-in vec3 instancePickingColors;
 
 out vec4 vFillColor;
 out vec4 vLineColor;
@@ -37,7 +36,7 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
   uv = positions;
   vLineWidth = instanceLineWidths;
 
