@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {COORDINATE_SYSTEM, WebMercatorViewport, _GlobeView as GlobeView} from '@deck.gl/core';
+import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 
@@ -204,6 +204,89 @@ test('TileLayer#MapView:repeat', async () => {
     Layer: TileLayer,
     viewport: testViewport,
     testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TileLayer#GlobeView:BitmapLayer image coordinate system', async () => {
+  const testViewport = new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+
+  const renderSubLayers = props => {
+    const {west, south, east, north} = props.tile.bbox;
+    return new BitmapLayer(props, {
+      id: `${props.id}-bitmap`,
+      image: '/test/data/icon-atlas.png',
+      bounds: [west, south, east, north]
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases: [
+      {
+        title: 'defaults BitmapLayer image coordinates to Web Mercator',
+        props: {
+          getTileData: () => ({}),
+          renderSubLayers
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe(COORDINATE_SYSTEM.CARTESIAN);
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TileLayer#GlobeView:preserves explicit BitmapLayer image coordinate system', async () => {
+  const testViewport = new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+
+  const renderSubLayersWithExplicitImageCoordinateSystem = props => {
+    const {west, south, east, north} = props.tile.bbox;
+    return new BitmapLayer(props, {
+      id: `${props.id}-bitmap`,
+      image: '/test/data/icon-atlas.png',
+      bounds: [west, south, east, north],
+      _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases: [
+      {
+        title: 'preserves explicit BitmapLayer image coordinate system',
+        props: {
+          getTileData: () => ({}),
+          renderSubLayers: renderSubLayersWithExplicitImageCoordinateSystem
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe(COORDINATE_SYSTEM.LNGLAT);
+          }
+        }
+      }
+    ],
     onError: err => expect(err).toBeFalsy()
   });
 });
