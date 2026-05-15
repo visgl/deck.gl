@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
@@ -48,9 +48,10 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
+export default function App({data = TILESET_URL, distance = 0, opacity = 0.2, globeView = false}) {
   const [credits, setCredits] = useState('');
-  const [useGlobe, setUseGlobe] = useState(false);
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
 
   const onTraversalComplete = selectedTiles => {
     const uniqueCredits = new Set();
@@ -94,40 +95,25 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
 
   const view = useMemo(
     () =>
-      useGlobe
+      globeView
         ? new GlobeView({id: 'view', controller: true})
         : new MapView({
             id: 'view',
             controller: {type: TerrainController, touchRotate: true, inertia: 500}
           }),
-    [useGlobe]
+    [globeView]
   );
 
   return (
     <div>
       <DeckGL
-        key={useGlobe ? 'globe' : 'map'}
         style={{backgroundColor: '#061714'}}
         views={view}
-        initialViewState={INITIAL_VIEW_STATE}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
         layers={layers}
         getTooltip={getTooltip}
       />
-      <button
-        onClick={() => setUseGlobe(v => !v)}
-        style={{
-          position: 'absolute',
-          top: '8px',
-          left: '8px',
-          padding: '6px 10px',
-          fontFamily: 'sans-serif',
-          fontSize: '12px',
-          border: 'none',
-          cursor: 'pointer'
-        }}
-      >
-        {useGlobe ? 'Map' : 'Globe'}
-      </button>
       <div
         style={{position: 'absolute', left: '8px', bottom: '4px', color: 'white', fontSize: '10px'}}
       >

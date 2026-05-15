@@ -2,22 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
 
 import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
 import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
-import type {GlobeViewState, MapViewState} from '@deck.gl/core';
+import type {MapViewState} from '@deck.gl/core';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-const INITIAL_VIEW_STATE: GlobeViewState & MapViewState = {
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 46.24,
   longitude: -122.18,
-  // GlobeView falls back to WebMercatorViewport above zoom 12.
-  zoom: 5.6,
+  zoom: 11.5,
   bearing: 140,
   pitch: 60,
   maxPitch: 89
@@ -38,14 +37,17 @@ const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
 export default function App({
   texture = SURFACE_IMAGE,
   wireframe = false,
+  globeView = false,
   initialViewState = INITIAL_VIEW_STATE
 }: {
   texture?: string;
   wireframe?: boolean;
-  initialViewState?: GlobeViewState & MapViewState;
+  globeView?: boolean;
+  initialViewState?: MapViewState;
 }) {
-  const [viewMode, setViewMode] = useState<'globe' | 'map'>('globe');
-  const isGlobe = viewMode === 'globe';
+  const [viewState, setViewState] = useState(initialViewState);
+  const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
+
   const layer = new TerrainLayer({
     id: 'terrain',
     minZoom: 0,
@@ -60,40 +62,21 @@ export default function App({
   });
 
   return (
-    <>
-      <DeckGL
-        views={isGlobe ? new GlobeView() : new MapView()}
-        initialViewState={initialViewState}
-        controller={true}
-        parameters={{cull: true}}
-        layers={[layer]}
-        getTooltip={info => {
-          if (info.picked && info.coordinate && info.coordinate.length === 3) {
-            const elevation = info.coordinate[2];
-            return `Elevation: ${elevation.toFixed(0)} m`;
-          }
-          return null;
-        }}
-      />
-      <div style={{position: 'absolute', top: 16, left: 16, display: 'flex'}}>
-        {(['globe', 'map'] as const).map(mode => (
-          <button
-            key={mode}
-            type="button"
-            onClick={() => setViewMode(mode)}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #fff',
-              background: viewMode === mode ? '#fff' : '#000',
-              color: viewMode === mode ? '#000' : '#fff',
-              cursor: 'pointer'
-            }}
-          >
-            {mode === 'globe' ? 'Globe' : 'Map'}
-          </button>
-        ))}
-      </div>
-    </>
+    <DeckGL
+      views={globeView ? new GlobeView() : new MapView()}
+      viewState={viewState}
+      onViewStateChange={onViewStateChange}
+      controller={true}
+      parameters={{cull: true}}
+      layers={[layer]}
+      getTooltip={info => {
+        if (info.picked && info.coordinate && info.coordinate.length === 3) {
+          const elevation = info.coordinate[2];
+          return `Elevation: ${elevation.toFixed(0)} m`;
+        }
+        return null;
+      }}
+    />
   );
 }
 
