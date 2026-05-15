@@ -455,6 +455,15 @@ export default class LayersPass extends Pass {
       }
     }
 
+    // Ensure all default shader modules have an entry so their getUniforms is called.
+    // Without this, default modules added by effects (e.g. terrain) may not get their
+    // bindings set when rendered in passes that don't include those effects (e.g. mask pass).
+    for (const module of layer.context.defaultShaderModules) {
+      if (!(module.name in shaderModuleProps)) {
+        shaderModuleProps[module.name] = {};
+      }
+    }
+
     return mergeModuleParameters(
       shaderModuleProps,
       this.getShaderModuleProps(layer, effects, shaderModuleProps),

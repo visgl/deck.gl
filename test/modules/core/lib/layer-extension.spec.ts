@@ -94,7 +94,7 @@ test('LayerExtension', () => {
           expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(0);
 
           const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-          expect(instancePickingColors.state.constant, 'picking buffer is disabled').toBeTruthy();
+          expect(instancePickingColors, 'default picking buffer is not registered').toBeUndefined();
         }
       },
       {
@@ -117,7 +117,7 @@ test('LayerExtension', () => {
           expect(MockExtension.finalizeCalled, 'finalizeState not called').toBe(0);
 
           const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-          expect(instancePickingColors.state.constant, 'picking buffer is enabled').toBeFalsy();
+          expect(instancePickingColors, 'extension does not force picking buffer').toBeUndefined();
         }
       },
       {

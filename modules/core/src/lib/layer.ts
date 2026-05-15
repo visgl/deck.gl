@@ -17,6 +17,7 @@ import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
+import {disablePickingIndex} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
@@ -835,6 +836,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
     if (!colors) {
+      if (this.internalState) {
+        disablePickingIndex(this.internalState.disabledPickingIndices, objectIndex);
+      }
       return;
     }
 
@@ -851,6 +855,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
     if (!colors) {
+      if (this.internalState) {
+        this.internalState.disabledPickingIndices.length = 0;
+      }
       return;
     }
     // The picking color cache may have been freed and then reallocated. This ensures we read from the currently allocated cache.
@@ -872,22 +879,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     debug(TRACE_INITIALIZE, this);
 
     const attributeManager = this._getAttributeManager();
-
-    if (attributeManager) {
-      // All instanced layers get instancePickingColors attribute by default
-      // Their shaders can use it to render a picking scene
-      // TODO - this slightly slows down non instanced layers
-      attributeManager.addInstanced({
-        instancePickingColors: {
-          type: 'uint8',
-          size: 4,
-          noAlloc: true,
-          // Updaters are always called with `this` pointing to the layer
-          // eslint-disable-next-line @typescript-eslint/unbound-method
-          update: this.calculateInstancePickingColors
-        }
-      });
-    }
 
     this.internalState = new LayerState<this>({
       attributeManager,
