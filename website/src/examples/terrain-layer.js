@@ -62,6 +62,7 @@ class TerrainDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/terrain`;
 
   static parameters = {
+    globeView: {displayName: 'Globe View', type: 'checkbox', value: false},
     location: {
       displayName: 'Location',
       type: 'select',
@@ -105,7 +106,7 @@ class TerrainDemo extends Component {
 
   render() {
     const {params, data, ...otherProps} = this.props;
-    const {location, surface, wireframe} = params;
+    const {location, surface, wireframe, globeView} = params;
 
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
@@ -118,6 +119,7 @@ class TerrainDemo extends Component {
           initialViewState={initialViewState}
           texture={SURFACE_IMAGES[surface.value]}
           wireframe={wireframe.value}
+          globeView={globeView.value}
         />
       </div>
     );
