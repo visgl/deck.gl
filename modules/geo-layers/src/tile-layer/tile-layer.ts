@@ -12,6 +12,7 @@ import {
   GetPickingInfoParams,
   DefaultProps,
   FilterContext,
+  COORDINATE_SYSTEM,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -54,6 +55,8 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   visibleMinZoom: null,
   visibleMaxZoom: null
 };
+
+const BITMAP_LAYER_NAME = 'BitmapLayer';
 
 /** All props supported by the TileLayer */
 export type TileLayerProps<DataT = unknown> = CompositeLayerProps & _TileLayerProps<DataT>;
@@ -421,12 +424,14 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           _offset: 0,
           tile
         });
-        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
-          layer.clone({
+        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer => {
+          const globeBitmapProps = this._getGlobeBitmapLayerProps(layer);
+          return layer.clone({
             tile,
+            ...globeBitmapProps,
             ...subLayerProps
-          })
-        );
+          });
+        });
       } else if (
         subLayerProps &&
         tile.layers[0] &&
@@ -438,6 +443,22 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
       return tile.layers;
     });
+  }
+
+  private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
+    if (
+      !this.context.viewport.resolution ||
+      (layer.constructor as typeof Layer).layerName !== BITMAP_LAYER_NAME ||
+      (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
+    ) {
+      return null;
+    }
+
+    return {
+      // XYZ/slippy tile imagery is Web Mercator encoded. In GlobeView, BitmapLayer
+      // positions the mesh in lng/lat, so the image needs Mercator-to-lnglat UV conversion.
+      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    };
   }
 
   filterSubLayer({layer, cullRect}: FilterContext) {
