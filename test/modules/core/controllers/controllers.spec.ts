@@ -35,6 +35,84 @@ test('MapController#inertia', async () => {
   });
 });
 
+test('MapController does not apply pinch zoom inertia after quick lift', () => {
+  const makePinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    type,
+    offsetCenter: {x: 50, y: 50},
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  });
+
+  for (const {moveScale, endScale} of [
+    {moveScale: 0.01, endScale: 0.001},
+    {moveScale: 100, endScale: 1000}
+  ]) {
+    const controller = createTestController({
+      view: new MapView({controller: true}),
+      initialViewState: {
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 10,
+        pitch: 30,
+        bearing: -45,
+        inertia: 300
+      }
+    });
+
+    controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+    controller.handleEvent(makePinchEvent('pinchmove', moveScale, 16) as any);
+    const zoomAfterMove = controller.props.zoom;
+
+    controller.handleEvent(makePinchEvent('pinchend', endScale, 17) as any);
+
+    expect(
+      controller.props.zoom,
+      'quick two-finger lift should end at the last live pinch zoom'
+    ).toBeCloseTo(zoomAfterMove);
+  }
+});
+
+test('MapController supports double-tap drag zoom when double click zoom is disabled', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {touchZoom: true, doubleClickZoom: false}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  const makePointerEvent = (type: string, y: number, timeStamp: number) => ({
+    type,
+    offsetCenter: {x: 50, y},
+    timeStamp,
+    srcEvent: {
+      pointerId: 1,
+      pointerType: 'touch',
+      timeStamp,
+      preventDefault() {}
+    },
+    stopPropagation() {}
+  });
+
+  controller.handleEvent(makePointerEvent('pointerdown', 50, 0) as any);
+  controller.handleEvent(makePointerEvent('pointerup', 50, 50) as any);
+  controller.handleEvent(makePointerEvent('pointerdown', 50, 120) as any);
+  controller.handleEvent(makePointerEvent('pointermove', 20, 150) as any);
+  const zoomAfterMove = controller.props.zoom;
+
+  controller.handleEvent(makePointerEvent('pointerup', 20, 180) as any);
+
+  expect(zoomAfterMove, 'dragging up after double tap zooms in').toBeGreaterThan(10);
+  expect(controller.props.zoom, 'release should not change zoom').toBeCloseTo(zoomAfterMove);
+});
+
 test('GlobeController', async () => {
   await testController(
     GlobeView,
