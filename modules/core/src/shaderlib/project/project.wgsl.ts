@@ -138,8 +138,8 @@ fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
 fn project_get_orientation_matrix(up: vec3<f32>) -> mat3x3<f32> {
   let uz = normalize(up);
   let ux = select(
-    vec3<f32>(1.0, 0.0, 0.0),
     normalize(vec3<f32>(uz.y, -uz.x, 0.0)),
+    vec3<f32>(1.0, 0.0, 0.0),
     abs(uz.z) == 1.0
   );
   let uy = cross(uz, ux);

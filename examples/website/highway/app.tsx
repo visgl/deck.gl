@@ -10,9 +10,10 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
+import {Device} from '@luma.gl/core';
 
 import {Feature, LineString, MultiLineString} from 'geojson';
-import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Color, PickingInfo, MapViewState, Widget} from '@deck.gl/core';
 
 // Source data GeoJSON
 const DATA_URL = {
@@ -130,18 +131,23 @@ function renderTooltip({
 }
 
 export default function App({
+  device,
   roads = DATA_URL.ROADS,
   year,
   accidents,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  widgets
 }: {
+  device?: Device;
   roads?: string | Road[];
   accidents?: Accident[];
   year?: number;
   mapStyle?: string;
+  widgets?: Widget[];
 }) {
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
   const {incidents, fatalities} = useMemo(() => aggregateAccidents(accidents), [accidents]);
+  const isWebGPU = device?.type === 'webgpu';
 
   const layers = [
     new GeoJsonLayer<RoadProperties>({
@@ -183,10 +189,22 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
+      widgets={widgets}
       pickingRadius={5}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
+      parameters={{
+        blendColorOperation: 'add',
+        // WebGPU shaders output premultiplied color, so use `one` here to match
+        // the legacy WebGL visual intensity instead of multiplying alpha twice.
+        blendColorSrcFactor: isWebGPU ? 'one' : 'src-alpha',
+        blendColorDstFactor: 'one',
+        blendAlphaOperation: 'add',
+        blendAlphaSrcFactor: 'one-minus-dst-alpha',
+        blendAlphaDstFactor: 'one'
+      }}
     >
       <Map reuseMaps mapStyle={mapStyle} />
 
