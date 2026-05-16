@@ -168,6 +168,22 @@ test('GlobeViewport#project, unproject', () => {
   config.EPSILON = oldEpsilon;
 });
 
+test('GlobeViewport#isPointOnGlobe', () => {
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
+
+  expect(
+    viewport.isPointOnGlobe([viewport.width / 2, viewport.height / 2]),
+    'screen center intersects the globe'
+  ).toBe(true);
+  expect(viewport.isPointOnGlobe([0, 0]), 'corner misses the globe').toBe(false);
+});
+
 test('GlobeViewport#getBounds', () => {
   for (const testCase of TEST_VIEWPORTS) {
     const bounds = new GlobeViewport(testCase).getBounds();

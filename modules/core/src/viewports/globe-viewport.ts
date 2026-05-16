@@ -13,6 +13,8 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
+const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
+const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 function getDistanceScales() {
@@ -191,6 +193,64 @@ export default class GlobeViewport extends Viewport {
     ];
   }
 
+  private _getRayToGlobe(
+    xy: number[],
+    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+  ): {
+    coord0: number[];
+    coord1: number[];
+    radius: number;
+    rayLengthSquared: number;
+    coord0LengthSquared: number;
+    distanceToCenterSquared: number;
+  } {
+    const [x, y] = xy;
+    const y2 = topLeft ? y : this.height - y;
+    const {pixelUnprojectionMatrix} = this;
+
+    const coord0 = transformVector(pixelUnprojectionMatrix, [x, y2, -1, 1]);
+    const coord1 = transformVector(pixelUnprojectionMatrix, [x, y2, 1, 1]);
+
+    const radius = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
+    const rayLengthSquared = vec3.sqrLen(vec3.sub([], coord0, coord1));
+    const coord0LengthSquared = vec3.sqrLen(coord0);
+    const coord1LengthSquared = vec3.sqrLen(coord1);
+    const triangleAreaSquared =
+      (4 * coord0LengthSquared * coord1LengthSquared -
+        (rayLengthSquared - coord0LengthSquared - coord1LengthSquared) ** 2) /
+      16;
+    const distanceToCenterSquared = (4 * triangleAreaSquared) / rayLengthSquared;
+
+    return {
+      coord0,
+      coord1,
+      radius,
+      rayLengthSquared,
+      coord0LengthSquared,
+      distanceToCenterSquared
+    };
+  }
+
+  private _getRayDistanceToGlobeCenterRatio(
+    xy: number[],
+    options?: {topLeft?: boolean; targetZ?: number}
+  ): number {
+    const {distanceToCenterSquared, radius} = this._getRayToGlobe(xy, options);
+
+    return Math.sqrt(Math.max(0, distanceToCenterSquared)) / radius;
+  }
+
+  isPointOnGlobe(
+    xy: number[],
+    {
+      topLeft = true,
+      targetZ,
+      maxDistanceRatio = 1
+    }: {topLeft?: boolean; targetZ?: number; maxDistanceRatio?: number} = {}
+  ): boolean {
+    return this._getRayDistanceToGlobeCenterRatio(xy, {topLeft, targetZ}) <= maxDistanceRatio;
+  }
+
   unproject(
     xyz: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
@@ -207,18 +267,17 @@ export default class GlobeViewport extends Viewport {
     } else {
       // since we don't know the correct projected z value for the point,
       // unproject two points to get a line and then find the point on that line that intersects with the sphere
-      const coord0 = transformVector(pixelUnprojectionMatrix, [x, y2, -1, 1]);
-      const coord1 = transformVector(pixelUnprojectionMatrix, [x, y2, 1, 1]);
-
-      const lt = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
-      const lSqr = vec3.sqrLen(vec3.sub([], coord0, coord1));
-      const l0Sqr = vec3.sqrLen(coord0);
-      const l1Sqr = vec3.sqrLen(coord1);
-      const sSqr = (4 * l0Sqr * l1Sqr - (lSqr - l0Sqr - l1Sqr) ** 2) / 16;
-      const dSqr = (4 * sSqr) / lSqr;
-      const r0 = Math.sqrt(l0Sqr - dSqr);
-      const dr = Math.sqrt(Math.max(0, lt * lt - dSqr));
-      const t = (r0 - dr) / Math.sqrt(lSqr);
+      const {
+        coord0,
+        coord1,
+        radius,
+        rayLengthSquared,
+        coord0LengthSquared,
+        distanceToCenterSquared
+      } = this._getRayToGlobe(xyz, {topLeft, targetZ});
+      const r0 = Math.sqrt(coord0LengthSquared - distanceToCenterSquared);
+      const dr = Math.sqrt(Math.max(0, radius * radius - distanceToCenterSquared));
+      const t = (r0 - dr) / Math.sqrt(rayLengthSquared);
 
       coord = vec3.lerp([], coord0, coord1, t);
     }
@@ -282,6 +341,35 @@ export default class GlobeViewport extends Viewport {
     const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
     out.zoom += zoomAdjust(out.latitude);
     return out;
+  }
+
+  /**
+   * Pan the globe so that a known geographic point remains under a screen pixel.
+   * Used for cursor/touch-anchored zoom when the pointer is on the globe surface.
+   */
+  panByGlobeAnchor(anchorLngLat: number[], pixel: number[]): GlobeViewportOptions {
+    const distanceRatio = this._getRayDistanceToGlobeCenterRatio(pixel);
+    if (distanceRatio > 1) {
+      return {longitude: this.longitude, latitude: this.latitude};
+    }
+
+    const currentAtPixel = this.unproject(pixel);
+    const edgeProgress = Math.max(
+      0,
+      Math.min(
+        1,
+        (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
+          (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+      )
+    );
+    const anchorStrength = 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
+    const longitude = this.longitude + (anchorLngLat[0] - currentAtPixel[0]) * anchorStrength;
+    const latitude = Math.max(
+      Math.min(this.latitude + (anchorLngLat[1] - currentAtPixel[1]) * anchorStrength, 90),
+      -90
+    );
+
+    return {longitude, latitude};
   }
 }
 
