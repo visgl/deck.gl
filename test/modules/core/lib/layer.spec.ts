@@ -469,7 +469,7 @@ test('Layer#uniformTransitions', () => {
   testLayer({Layer: TestLayer, timeline, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('Layer#calculateInstancePickingColors', () => {
+test('Layer#builtin instance picking does not allocate instancePickingColors', () => {
   const testCases = [
     {
       props: {
@@ -477,13 +477,7 @@ test('Layer#calculateInstancePickingColors', () => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        expect(
-          instancePickingColors.state.constant,
-          'instancePickingColors is set to constant'
-        ).toBeTruthy();
-        expect(instancePickingColors.value, 'instancePickingColors is set to constant').toEqual([
-          0, 0, 0, 0
-        ]);
+        expect(instancePickingColors, 'instancePickingColors is not registered').toBeUndefined();
       }
     },
     {
@@ -492,28 +486,7 @@ test('Layer#calculateInstancePickingColors', () => {
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        expect(
-          instancePickingColors.state.constant,
-          'instancePickingColors is enabled'
-        ).toBeFalsy();
-        expect(
-          instancePickingColors.value.subarray(0, 8),
-          'instancePickingColors is populated'
-        ).toEqual([1, 0, 0, 0, 2, 0, 0, 0]);
-      }
-    },
-    {
-      updateProps: {
-        data: new Array(3).fill(0),
-        // If a layer has been pickable once, picking colors attribute is always populated
-        pickable: false
-      },
-      onAfterUpdate: ({layer}) => {
-        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        expect(
-          instancePickingColors.value.subarray(0, 12),
-          'instancePickingColors is populated'
-        ).toEqual([1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0]);
+        expect(instancePickingColors, 'instancePickingColors remains absent').toBeUndefined();
       }
     },
     {
@@ -522,28 +495,15 @@ test('Layer#calculateInstancePickingColors', () => {
       },
       onBeforeUpdate: ({layer}) => {
         layer.disablePickingIndex(1);
+        expect(layer.internalState.disabledPickingIndices, 'disabled index is tracked').toEqual([
+          1
+        ]);
         layer.restorePickingColors();
       },
       onAfterUpdate: ({layer}) => {
-        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        expect(
-          instancePickingColors.value.subarray(0, 12),
-          'instancePickingColors is populated'
-        ).toEqual([1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0]);
-      }
-    },
-    {
-      updateProps: {
-        data: new Array(2 ** 24 + 100).fill(0),
-        pickable: true
-      },
-      onAfterUpdate: ({layer}) => {
-        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
-        const {length} = instancePickingColors.value;
-        expect(
-          length,
-          `no over allocation for instancePickingColors buffer after 2**24 elements`
-        ).toEqual((2 ** 24 + 100) * 4);
+        expect(layer.internalState.disabledPickingIndices, 'disabled indices are restored').toEqual(
+          []
+        );
       }
     }
   ];
