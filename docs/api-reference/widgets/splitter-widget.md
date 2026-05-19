@@ -8,7 +8,7 @@ import TabItem from '@theme/TabItem';
 
 <SplitterWidgetDemo />
 
-This widget lets the user to stack multiple views across the deck.gl canvas, and resize them by draggable splitter handles. This widget will only work if the `views` prop of Deck is unset.
+This widget lets the user to stack multiple views across the deck.gl canvas, and resize them by draggable splitter handles. With the `viewLayout` prop, this widget will only work if the `views` prop of Deck is unset. With the `split` prop, applications can render a controlled splitter for views generated elsewhere, such as by [`buildViewsFromViewLayout`](./view-layout.md).
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
@@ -153,9 +153,9 @@ new SplitterWidget<ViewType[]>({} satisfies SplitterWidgetProps);
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### `viewLayout` (SplitterWidgetViewLayout, required) {#viewlayout}
+#### `viewLayout` (SplitterWidgetViewLayout, optional) {#viewlayout}
 
-Layout descriptor of how views are arranged on the canvas. Contains the following fields:
+Layout descriptor of how views are arranged on the canvas. Use this mode when `SplitterWidget` should generate and update Deck views. Contains the following fields:
 
 - `views` ([View](../core/view.md)[]) - two view instances used to compose this layout. `x`, `y`, `width` and `height` of the views' props at render time will be resolved according to the following settings as well as user input.
 - `orientation` (string, required) - the stacking orientation of the views. one of `'vertical'`, `'horizontal'`.
@@ -166,6 +166,19 @@ Layout descriptor of how views are arranged on the canvas. Contains the followin
 
 You may also replace one or both items in `views` with a nested `SplitterWidgetViewLayout` object, composing more than two views into a complex layout.
 
+#### `split` (object, optional) {#split}
+
+Externally managed splitter metadata, such as one entry from `buildViewsFromViewLayout(...).splittersById`. Use this mode when Deck views are already generated and passed through the Deck `views` prop.
+
+#### `onSplitChange` (Function, optional) {#onsplitchange}
+
+```ts
+(newSplit: number, splitId: string) => void
+```
+
+* Default: `() => {}`
+
+Callback invoked during dragging when using the externally managed `split` prop. Store `newSplit` by `splitId`, then pass the updated values back to `buildViewsFromViewLayout` through `splitValues`.
 
 #### `onChange` (Function, optional) {#onchange}
 

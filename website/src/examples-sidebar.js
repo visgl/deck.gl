@@ -54,7 +54,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Views',
-      items: ['multi-view', 'globe-view', 'plot', 'orthographic-view']
+      items: ['multi-view', 'view-layout', 'globe-view', 'plot', 'orthographic-view']
     },
     {
       type: 'category',

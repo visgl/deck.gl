@@ -20,6 +20,8 @@ This module contains the following widgets:
 ### View Widgets
 
 - [FullscreenWidget](./fullscreen-widget.md)
+- [HeaderWidget](./header-widget.md)
+- [LabelWidget](./label-widget.md)
 - [SplitterWidget](./splitter-widget.md)
 - [View Layout](./view-layout.md)
 

@@ -16,6 +16,7 @@ import tile3DNY from './3d-tiles-new-york.json';
 import carto from './carto.json';
 import usMap from './us-map.json';
 import dotText from './dot-text.json';
+import viewLayout from './view-layout.json';
 
 export default {
   // WEBSITE EXAMPLES AS JSON PAYLOADS
@@ -26,6 +27,7 @@ export default {
   'website/Scatterplot (ScatterplotLayer)': scatterplot,
   'website/Screen Grid (ScreenGridLayer)': screenGrid,
   'website/TagMap (TextLayer)': tagmap,
+  'website/View Layout': viewLayout,
   'website/3D Tiles (Tile3DLayer, Royal)': tile3DRoyal,
   'website/3D Tiles (Tile3DLayer, St Helens)': tile3DStHelens,
   'website/3D Tiles (Tile3DLayer, Cairo/vricon)': tile3DCairo,
