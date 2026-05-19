@@ -16,8 +16,6 @@ in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in float instanceStrokeWidths;
 
-in vec3 instancePickingColors;
-
 // Result
 out vec4 vColor;
 #ifdef FLAT_SHADING
@@ -56,7 +54,7 @@ void main(void) {
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = column.radius * column.coverage * shouldRender;
 
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);

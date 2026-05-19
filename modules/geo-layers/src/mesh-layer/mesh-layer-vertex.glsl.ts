@@ -15,7 +15,6 @@ in vec3 featureIdsPickingColors;
 
 // Instance attributes
 in vec4 instanceColors;
-in vec3 instancePickingColors;
 in vec3 instanceModelMatrixCol0;
 in vec3 instanceModelMatrixCol1;
 in vec3 instanceModelMatrixCol2;
@@ -43,7 +42,7 @@ void main(void) {
   if (mesh.pickFeatureIds) {
     geometry.pickingColor = featureIdsPickingColors;
   } else {
-    geometry.pickingColor = instancePickingColors;
+    geometry.pickingColor = picking_getPickingColorFromInstanceID();
   }
 
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
