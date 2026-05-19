@@ -41,7 +41,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-function getLayers(filterRange = [2, 9]) {
+export function getLayers(filterRange = [2, 9]) {
   return [
     new WMSLayer({
       data: 'https://ows.terrestris.de/osm/service',
@@ -79,7 +79,7 @@ function getLayers(filterRange = [2, 9]) {
     new ArcLayer({
       id: 'arcs',
       data: AIR_PORTS,
-      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+      dataTransform: (d: any) => d.features.filter(f => f.properties.scalerank < 4),
       // Styles
       getSourcePosition: f => [-0.4531566, 51.4709959], // London
       getTargetPosition: f => f.geometry.coordinates,
@@ -91,7 +91,7 @@ function getLayers(filterRange = [2, 9]) {
 }
 
 const deck = new Deck({
-  parent: document.getElementById('app'),
+  parent: document.getElementById('map') as HTMLDivElement,
   views: new MapView({repeat: true}),
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
@@ -135,11 +135,10 @@ const deck = new Deck({
       closeOnClickOutside: true
     }),
     new _TimelineWidget({
-      placement: 'bottom-left',
+      _container: document.getElementById('controls') as HTMLDivElement,
       timeRange: [2, 9],
       step: 1,
-      initialTime: 0,
-      playInterval: 1000,
+      playInterval: 500,
       // eslint-disable-next-line no-console, no-undef
       onTimeChange: time =>
         deck.setProps({
@@ -199,7 +198,6 @@ function getTooltip(info: PickingInfo, widget: InfoWidget) {
       text = `${info.object.properties.name} (${info.object.properties.abbrev})`;
       break;
     case 'click':
-    case 'static':
       text = `\
 ${info.object.properties.name} (${info.object.properties.abbrev})
 ${info.object.properties.type}
