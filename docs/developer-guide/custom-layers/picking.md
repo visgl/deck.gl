@@ -49,7 +49,17 @@ When other gestures (click, drag, etc.) are detected, deck.gl does not repeat pi
 special support is provided for the built-in "picking color" based picking
 system, which most layers use.
 
-To take full control of picking, a layer need to take the following steps:
+The following sections describe common ways to implement custom picking.
+
+### Default Instanced Picking
+
+Instanced layer shaders can derive picking colors from the built-in instance id when each rendered instance maps to one picked object. In GLSL, use `picking_setPickingColorFromInstanceID()` or assign `geometry.pickingColor = picking_getPickingColorFromInstanceID()`. In WGSL, add `@builtin(instance_index)` to the vertex inputs and use `picking_getPickingColorFromIndex(instanceIndex)`.
+
+Add an explicit picking color attribute only when the logical picking id within the current layer is different from the rendered instance id. For example:
+
+* Binary GeoJSON or MVT point sublayers may render local point instances while picking should return a global feature index.
+
+* `PathLayer` tessellates one path into multiple rendered segment or joint instances, so its generated geometry needs explicit picking colors that map back to the source path index instead of each rendered segment's instance id.
 
 ### Creating A Picking Color Attribute
 

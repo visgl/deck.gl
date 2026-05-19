@@ -63,14 +63,14 @@ struct Varyings {
 
 @vertex
 fn vertexMain(
+  @builtin(instance_index) instanceIndex: u32,
   @location(0) positions: vec3<f32>,
   @location(1) instanceSourcePositions: vec3<f32>,
   @location(2) instanceTargetPositions: vec3<f32>,
   @location(3) instanceSourcePositions64Low: vec3<f32>,
   @location(4) instanceTargetPositions64Low: vec3<f32>,
   @location(5) instanceColors: vec4<f32>,
-  @location(6) instancePickingColors: vec3<f32>,
-  @location(7) instanceWidths: f32
+  @location(6) instanceWidths: f32
 ) -> Varyings {
   geometry.worldPosition = instanceSourcePositions;
   geometry.worldPositionAlt = instanceTargetPositions;
@@ -117,7 +117,7 @@ fn vertexMain(
   geometry.position = source_commonspace + segmentIndex * (target_commonspace - source_commonspace);
   let uv: vec2<f32> = positions.xy;
   geometry.uv = uv;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
 
   // Determine width in pixels.
   let widthPixels: f32 = clamp(
@@ -144,7 +144,7 @@ fn vertexMain(
   output.gl_Position = finalPosition;
   output.vColor = vColor;
   output.uv = uv;
-  output.pickingColor = instancePickingColors;
+  output.pickingColor = geometry.pickingColor;
   return output;
 }
 

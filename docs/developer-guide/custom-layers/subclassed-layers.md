@@ -206,7 +206,6 @@ attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePositions;
 attribute vec3 instancePositions64Low;
-attribute vec3 instancePickingColors;
 
 /* New attribute */
 attribute flat instanceRadiusPixels;
@@ -228,7 +227,7 @@ void main(void) {
 
   vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
 
-  picking_setPickingColor(instancePickingColors);
+  picking_setPickingColorFromInstanceID();
 }
 `;
 ```

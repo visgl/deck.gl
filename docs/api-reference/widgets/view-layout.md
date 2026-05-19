@@ -100,7 +100,7 @@ Layout items may also define `minPixels` and `maxPixels` to constrain their size
 
 Use `viewPropsById` when an application needs to control layout-only bounds for a view without rebuilding the static layout tree. Override values use the same length syntax as authored view props.
 
-The layout tree accepts plain objects:
+The layout tree is a discriminated union of plain objects:
 
 - `row`: lays out children left to right.
 - `column`: lays out children top to bottom.
