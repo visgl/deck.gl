@@ -47,7 +47,7 @@ While most apps rely on their layers to automatically generate appropriate GPU b
 
 While this allows for ultimate performance and control of updates, as well as potential sharing of buffers between layers, the application will need to generate attributes in exactly the format that the layer shaders expect, creating a strong coupling between the application and the layer.
 
-**Note:** The application can provide some buffers and let others be managed by the layer. Explicit picking color buffers are only needed when the logical picking id differs from the rendered instance id.
+**Note:** The application can provide some buffers and let others be managed by the layer. Explicit picking index buffers are only needed when the logical picking id differs from the rendered instance id.
 
 
 ## More information

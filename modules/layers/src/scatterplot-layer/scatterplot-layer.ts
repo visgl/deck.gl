@@ -176,27 +176,27 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
-    const useInstancePickingColors = Boolean(
-      (this.props.data as any)?.attributes?.instancePickingColors
-    );
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(useInstancePickingColors),
-      defines: useInstancePickingColors ? {USE_INSTANCE_PICKING_COLORS: true} : {},
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
       modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 
   initializeState() {
-    const attributes: Record<string, any> = {};
-    if ((this.props.data as any)?.attributes?.instancePickingColors) {
-      attributes.instancePickingColors = {
-        size: 4,
-        type: 'uint8',
-        noAlloc: true
-      };
-    }
+    const attributes: Record<string, any> = (this.props.data as any)?.attributes?.rowIndexes
+      ? {
+          /** Caller-provided logical picking index per point instance. */
+          rowIndexes: {
+            size: 1,
+            type: 'uint32',
+            noAlloc: true
+          }
+        }
+      : {};
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,

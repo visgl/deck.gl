@@ -55,49 +55,44 @@ The following sections describe common ways to implement custom picking.
 
 Instanced layer shaders can derive picking colors from the built-in instance id when each rendered instance maps to one picked object. In GLSL, use `picking_setPickingColorFromInstanceID()` or assign `geometry.pickingColor = picking_getPickingColorFromInstanceID()`. In WGSL, add `@builtin(instance_index)` to the vertex inputs and use `picking_getPickingColorFromIndex(instanceIndex)`.
 
-Add an explicit picking color attribute only when the logical picking id within the current layer is different from the rendered instance id. For example:
+Add an explicit picking index attribute only when the logical picking id within the current layer is different from the rendered instance id. For example:
 
 * Binary GeoJSON or MVT point sublayers may render local point instances while picking should return a global feature index.
 
-* `PathLayer` tessellates one path into multiple rendered segment or joint instances, so its generated geometry needs explicit picking colors that map back to the source path index instead of each rendered segment's instance id.
+* `PathLayer` tessellates one path into multiple rendered segment or joint instances, so its generated geometry needs explicit picking indexes that map back to the source path index instead of each rendered segment's instance id.
 
-### Creating A Picking Color Attribute
+### Creating A Picking Index Attribute
 
-Add an attribute for each vertex using the layer's [AttributeManager](../../api-reference/core/attribute-manager.md):
+Add an attribute for each vertex or instance using the layer's [AttributeManager](../../api-reference/core/attribute-manager.md). Use the `rowIndexes` attribute name to let deck.gl handle deep-picking buffer mutation.
 
 ```js
-import {GL} from '@luma.gl/webgl/constants';
-
 class MyLayer extends Layer {
   initializeState() {
     this.state.attributeManager.add({
-      customPickingColors: {
-        size: 3,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculatePickingColors
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
+        update: this.calculatePickingIndexes
       }
     });
   }
 }
 ```
 
-Populate the attribute by providing a different picking color for every object that you need to differentiate. The default implementation of [`layer.encodePickingColor()`](../../api-reference/core/layer.md#encodepickingcolor) and [`layer.decodePickingColor()`](../../api-reference/core/layer.md#decodepickingcolor) is likely sufficient, but you may need to implement your own pair.
+Populate the attribute by providing the logical object index for every rendered vertex or instance that you need to differentiate.
 
 ```js
 class MyLayer extends Layer {
 
   ...
 
-  calculatePickingColors(attribute) {
+  calculatePickingIndexes(attribute) {
       const {data} = this.props;
       const {value} = attribute;
 
       let i = 0;
       for (const object of data) {
-        const pickingColor = this.encodePickingColor(i);
-        value[i * 3] = pickingColor[0];
-        value[i * 3 + 1] = pickingColor[1];
-        value[i * 3 + 2] = pickingColor[2];
+        value[i] = i;
         i++;
       }
   }
@@ -129,15 +124,15 @@ All core layers (including composite layers) support picking using luma.gl's `pi
 
 #### Vertex Shader
 
-Vertex shader should set current picking color using `picking_setPickingColor` method provided by picking shader module.
+Vertex shader should set current picking color using helpers provided by the picking shader module.
 
 ```glsl
-attribute vec3 customPickingColors;
+in float rowIndexes;
 
 void main(void) {
   ...
 
-  picking_setPickingColor(customPickingColors);
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
 }
 ```
 

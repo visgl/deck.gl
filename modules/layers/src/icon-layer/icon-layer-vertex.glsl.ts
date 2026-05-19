@@ -13,8 +13,8 @@ in vec3 instancePositions64Low;
 in float instanceSizes;
 in float instanceAngles;
 in vec4 instanceColors;
-#ifdef USE_INSTANCE_PICKING_COLORS
-in vec3 instancePickingColors;
+#ifdef USE_ROW_INDEXES
+in float rowIndexes;
 #endif
 in vec4 instanceIconFrames;
 in float instanceColorModes;
@@ -37,8 +37,8 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
-#ifdef USE_INSTANCE_PICKING_COLORS
-  geometry.pickingColor = instancePickingColors;
+#ifdef USE_ROW_INDEXES
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
 #else
   geometry.pickingColor = picking_getPickingColorFromInstanceID();
 #endif
