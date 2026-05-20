@@ -140,14 +140,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    const useInstancePickingColors = Boolean(
-      (this.props.data as any)?.attributes?.instancePickingColors
-    );
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(useInstancePickingColors),
-      defines: useInstancePickingColors ? {USE_INSTANCE_PICKING_COLORS: true} : {},
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
       modules: [project32, color, picking, iconUniforms]
     });
   }
@@ -213,11 +211,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transition: true,
         accessor: 'getPixelOffset'
       },
-      ...((this.props.data as any)?.attributes?.instancePickingColors
+      ...((this.props.data as any)?.attributes?.rowIndexes
         ? {
-            instancePickingColors: {
-              size: 4,
-              type: 'uint8',
+            /** Caller-provided logical picking index per icon instance. */
+            rowIndexes: {
+              size: 1,
+              type: 'uint32',
               noAlloc: true
             }
           }

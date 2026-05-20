@@ -13,7 +13,7 @@ in vec3 instancePositions64Low;
 in float instanceSizes;
 in float instanceAngles;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
+in float rowIndexes;
 in vec4 instanceIconFrames;
 in float instanceColorModes;
 in vec2 instanceOffsets;
@@ -52,7 +52,7 @@ float getPixelOffsetFromAlignment(float anchor, float extent, float clipStart, f
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
   uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;

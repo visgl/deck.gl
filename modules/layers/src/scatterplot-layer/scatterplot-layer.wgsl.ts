@@ -224,16 +224,13 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 }
 `;
 
-export function getShaderWGSL(useInstancePickingColors: boolean): string {
+export function getShaderWGSL(useRowIndexes: boolean): string {
   return shaderWGSL
-    .replace(
-      'PICKING_COLOR_ATTRIBUTE',
-      useInstancePickingColors ? '@location(8) instancePickingColors: vec4<f32>,' : ''
-    )
+    .replace('PICKING_COLOR_ATTRIBUTE', useRowIndexes ? '@location(8) rowIndexes: u32,' : '')
     .replace(
       'PICKING_COLOR_VALUE',
-      useInstancePickingColors
-        ? 'attributes.instancePickingColors.rgb'
+      useRowIndexes
+        ? 'picking_getPickingColorFromIndex(attributes.rowIndexes)'
         : 'picking_getPickingColorFromIndex(attributes.instanceIndex)'
     );
 }
