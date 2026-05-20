@@ -5,15 +5,14 @@ Note that this example demonstrates using deck.gl as an ArcGIS addon. This appro
 
 ### Usage
 
-Copy the content of this folder to your project. 
+From the deck.gl repository root, install workspace dependencies and run this example from its directory.
 
 ```bash
-# install dependencies
-npm install
-# or
-yarn
-# bundle and serve the app with vite
-npm start
+# From the deck.gl repository root
+yarn install
+
+# From this example directory
+yarn start
 ```
 
 ### Data Source

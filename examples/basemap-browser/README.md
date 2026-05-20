@@ -38,8 +38,10 @@ src/
 ## Usage
 
 ```bash
-# From the examples/basemap-browser directory
-yarn
+# From the deck.gl repository root
+yarn install
+
+cd examples/basemap-browser
 yarn start-local
 ```
 

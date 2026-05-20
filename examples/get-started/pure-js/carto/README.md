@@ -1,8 +1,12 @@
 Pure js demo for CARTO layers
 
 ### Usage
-Copy the content of this folder to your project. Run
-```js
-yarn
+From the deck.gl repository root, install workspace dependencies and run this example from its directory.
+
+```bash
+# From the deck.gl repository root
+yarn install
+
+# From this example directory
 yarn start
 ```

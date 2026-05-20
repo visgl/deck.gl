@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-examples-google-maps-3d",
+  "name": "deckgl-examples-google-maps-3d-tiles",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "d3-scale": "^4.0.0",
-    "deck.gl": "^9.0.0"
+    "deck.gl": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

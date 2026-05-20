@@ -1,10 +1,14 @@
 This is a minimal standalone version of the BezierCurveLayer example on [deck.gl](http://deck.gl) website.
 
 ### Usage
-Copy the content of this folder to your project. Run
-```
-npm install
-npm start
+From the deck.gl repository root, install workspace dependencies and run this example from its directory.
+
+```bash
+# From the deck.gl repository root
+yarn install
+
+# From this example directory
+yarn start
 ```
 
 ### Data format

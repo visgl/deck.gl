@@ -8,14 +8,13 @@ To run this example, you need a [Apple Maps token](https://developer.apple.com/d
 
 You need to then set the `data-token` property in `index.html` to this token.
 
-To install dependencies:
+Install dependencies once from the deck.gl repository root:
 
 ```bash
-npm install
-# or
-yarn
+# From the deck.gl repository root
+yarn install
 ```
 
 Commands:
-* `npm start` is the development target, to serve the app and hot reload.
-* `npm run build` is the production target, to create the final bundle and write to disk.
+* `yarn start` is the development target, to serve the app and hot reload.
+* `yarn build` is the production target, to create the final bundle and write to disk.

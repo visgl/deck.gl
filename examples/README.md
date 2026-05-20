@@ -1,9 +1,9 @@
 # deck.gl Examples
 
-All deck.gl examples are set up to be "stand-alone", which means that
-you can copy the example folder to your own environment, run `yarn` or `npm install`
-and `npm start` and within minutes have a running, minimal app that you can
-start modifying and experimenting with.
+Package-managed deck.gl examples are installed as Yarn workspaces from the
+repository root. You can still copy an example folder to your own project, but
+replace any `workspace:*` deck.gl dependencies with published version ranges
+before installing it outside this monorepo.
 
 ## Examples Catalog
 
@@ -50,15 +50,27 @@ These are examples that use experimental deck.gl features, or implement features
 
 ## Installing and Running
 
-Most example apps can be run by installing the dependencies with either `yarn` or with `npm install`, then `npm run start`. Refer to the README in each example directory for app-specific instructions.
+Install dependencies once from the deck.gl repository root:
+
+```bash
+yarn install
+```
+
+Then run an example from its own directory:
+
+```bash
+cd examples/get-started/pure-js/basic
+yarn start
+```
+
+Refer to the README in each example directory for app-specific instructions.
 
 
 ### Running Examples Against deck.gl Source Code
 
-Most examples are set up so that they can be run either
-against the local source code (enabling debugging of deck.gl itself,
-with hot reloading) or against an installed version of deck.gl
-(enables testing that things work with the published version).
+Examples that support local-source development have a `start-local` script in
+their `package.json`:
 
-Examples that support this mode have a `start-local` script in their
-`package.json`.
+```bash
+yarn start-local
+```

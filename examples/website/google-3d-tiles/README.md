@@ -12,10 +12,9 @@ export GoogleMapsAPIKey=<google_maps_api_key>
 Or set the `GOOGLE_MAPS_API_KEY` variable in `app.js`.
 
 ```bash
-# install dependencies
-npm install
-# or
-yarn
-# bundle and serve the app with vite
-npm start
+# From the deck.gl repository root
+yarn install
+
+# From this example directory
+yarn start
 ```

@@ -27,6 +27,15 @@ showcases/**/yarn.lock
 test/**/yarn.lock
 yarn-error.log
 package-lock.json
+.pnp.*
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+*/**/.yarn/*
 
 .claude/
 .vscode/

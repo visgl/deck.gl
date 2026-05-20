@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.0.0",
-    "@deck.gl/layers": "^9.0.0",
-    "@deck.gl/mapbox": "^9.0.0",
+    "@deck.gl/core": "workspace:*",
+    "@deck.gl/layers": "workspace:*",
+    "@deck.gl/mapbox": "workspace:*",
     "mapbox-gl": "^3.0.0"
   },
   "devDependencies": {

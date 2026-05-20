@@ -13,14 +13,13 @@ export GoogleMapsMapId=<google_maps_map_id>
 
 Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAP_ID` variables in `app.js`.
 
-To install dependencies:
+Install dependencies once from the deck.gl repository root:
 
 ```bash
-npm install
-# or
-yarn
+# From the deck.gl repository root
+yarn install
 ```
 
 Commands:
-* `npm start` is the development target, to serve the app and hot reload.
-* `npm run build` is the production target, to create the final bundle and write to disk.
+* `yarn start` is the development target, to serve the app and hot reload.
+* `yarn build` is the production target, to create the final bundle and write to disk.

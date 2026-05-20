@@ -3,7 +3,7 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. 
+From the deck.gl repository root, install workspace dependencies and run this example from its directory.
 
 To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:	
 
@@ -14,12 +14,11 @@ export MapboxAccessToken=<mapbox_access_token>
 Or set `MAPBOX_TOKEN` directly in `app.tsx`.
 
 ```bash
-# install dependencies
-npm install
-# or
-yarn
-# bundle and serve the app with vite
-npm start
+# From the deck.gl repository root
+yarn install
+
+# From this example directory
+yarn start
 ```
 
 ### Data format

@@ -6,7 +6,7 @@ Note that this example demonstrates using deck.gl [as a Mapbox addon](https://me
 
 ### Usage
 
-Copy the content of this folder to your project. 
+From the deck.gl repository root, install workspace dependencies and run this example from its directory.
 
 To run this example, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
 
@@ -19,12 +19,11 @@ Or set `MAPBOX_TOKEN` directly in `app.js`.
 Other options can be found at [using with Mapbox GL](../../../docs/developer-guide/base-maps/using-with-mapbox.md).
 
 ```bash
-# install dependencies
-npm install
-# or
-yarn
-# bundle and serve the app with vite
-npm start
+# From the deck.gl repository root
+yarn install
+
+# From this example directory
+yarn start
 ```
 
 
