@@ -48,13 +48,25 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
 
-      - name: Enable Corepack
-        run: corepack enable yarn
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+          yarn -v
+
+      - name: Cache Yarn 4 artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
 
       - name: Install dependencies
-        run: yarn
+        run: |
+          yarn install --immutable
+          yarn bootstrap
 
       - name: Build packages
         run: yarn build
