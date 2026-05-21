@@ -49,13 +49,15 @@ jobs:
           path: |
             ~/.yarn/berry/cache
             .yarn/install-state.gz
-          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+            website/.yarn/cache
+            website/.yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json', 'website/yarn.lock', 'website/.yarnrc.yml', 'website/package.json') }}
 
       - name: Install dependencies
         run: |
           yarn install --immutable
           yarn bootstrap
-          (cd website && yarn)
+          (cd website && yarn install --immutable)
 
       - name: Build website
         env:

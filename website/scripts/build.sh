@@ -34,7 +34,6 @@ BABEL_ENV=es5 npx babel ./static/workers --out-dir ./$OUTPUT_DIR/workers
 # build gallery (scripting) examples
 (
   cd ../examples/gallery
-  yarn
   yarn build
 )
 mkdir $OUTPUT_DIR/gallery
