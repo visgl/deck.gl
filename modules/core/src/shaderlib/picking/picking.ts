@@ -6,11 +6,12 @@ import {picking} from '@luma.gl/shadertools';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;
+export const PICKING_INVALID_INDEX = 16777215;
 
 export function disablePickingIndex(disabledPickingIndices: number[], objectIndex: number): void {
   if (disabledPickingIndices.length === PICKING_MAX_DISABLED_INDICES) {
     log.warn(
-      `pickMultipleObjects can only exclude ${PICKING_MAX_DISABLED_INDICES} previously picked objects for layers without picking color buffers`
+      `pickMultipleObjects can only exclude ${PICKING_MAX_DISABLED_INDICES} previously picked objects for layers without picking buffers`
     )();
   } else {
     disabledPickingIndices.push(objectIndex);
@@ -42,7 +43,7 @@ function packDisabledPickingIndices(disabledPickingIndices: number[], startIndex
 
 const pickingHelpersGLSL = /* glsl */ `\
 vec3 picking_getPickingColorFromIndex(float objectIndex) {
-  if (objectIndex < 0.0 || objectIndex > 16777214.0) {
+  if (objectIndex < 0.0 || objectIndex >= ${PICKING_INVALID_INDEX}.0) {
     return vec3(0.0);
   }
 
@@ -65,6 +66,10 @@ vec3 picking_getPickingColorFromIndex(float objectIndex) {
     mod(floor(encodedIndex / 256.0), 256.0),
     mod(floor(encodedIndex / 65536.0), 256.0)
   );
+}
+
+vec3 picking_getPickingColorFromIndex(uint objectIndex) {
+  return picking_getPickingColorFromIndex(float(objectIndex));
 }
 
 vec3 picking_getPickingColorFromInstanceID() {
@@ -109,7 +114,7 @@ fn picking_isColorValid(color: vec3<f32>) -> bool {
 }
 
 fn picking_getPickingColorFromIndex(objectIndex: u32) -> vec3<f32> {
-  if (objectIndex > 16777214u) {
+  if (objectIndex >= ${PICKING_INVALID_INDEX}u) {
     return vec3<f32>(0.0);
   }
 

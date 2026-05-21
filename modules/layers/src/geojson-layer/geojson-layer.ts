@@ -367,7 +367,7 @@ export default class GeoJsonLayer<
 
   private _updateStateBinary({props, changeFlags}): void {
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
+    const layerProps = createLayerPropsFromBinary(props.data);
     this.setState({layerProps});
   }
 
@@ -535,13 +535,13 @@ export default class GeoJsonLayer<
         let pointsLayerProps = layerProps.points;
 
         if (type === 'text' && binary) {
-          // Picking colors are per-point but for text per-character are required
+          // Picking indexes are per-point but for text per-character are required
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           // @ts-expect-error TODO - type binary data
 
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
+          const {rowIndexes, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
             // @ts-expect-error TODO - type binary data
