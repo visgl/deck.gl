@@ -50,16 +50,15 @@ Run the website:
 ```bash
 yarn build
 cd website
-yarn install
+yarn
 yarn start
 ```
 
 Run the layer browser application:
 
 ```bash
-cd deck.gl
-yarn install
 cd examples/layer-browser
+yarn
 yarn start-local
 ```
 
@@ -72,7 +71,7 @@ If you consider opening a PR, here is some documentation to get you started:
 
 Each example can be run so that it is built against the deck.gl source code in this repo instead of building against the installed version of deck.gl. This enables using the examples to debug the main deck.gl library source.
 
-To do so, run `yarn install` once from the repository root, then use the `yarn start-local` command present in each example's directory. See [vite.config.local.mjs](https://github.com/visgl/deck.gl/blob/master/examples/vite.config.local.mjs) for details.
+To do so use the `yarn start-local` command present in each example's directory. See [vite.config.local.mjs](https://github.com/visgl/deck.gl/blob/master/examples/vite.config.local.mjs) for details.
 
 ### Working with other vis.gl dependencies
 

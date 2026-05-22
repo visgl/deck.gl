@@ -50,9 +50,7 @@ These are examples that use experimental deck.gl features, or implement features
 
 ## Installing and Running
 
-Most example apps can be run by installing the dependencies with either `yarn` or with `npm install`, then `npm run start`. When working from a deck.gl repository checkout, run `yarn install` once from the repository root before starting examples.
-
-Refer to the README in each example directory for app-specific instructions.
+Most example apps can be run by installing the dependencies with either `yarn` or with `npm install`, then `npm run start`. Refer to the README in each example directory for app-specific instructions.
 
 
 ### Running Examples Against deck.gl Source Code
