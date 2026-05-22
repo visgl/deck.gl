@@ -2,13 +2,14 @@
 
 ## Usage
 
-Install dependencies once from the deck.gl repository root:
+To install dependencies:
 
 ```bash
-# From the deck.gl repository root
-yarn install
+npm install
+# or
+yarn
 ```
 
 Commands:
-* `yarn start` is the development target, to serve the app and hot reload.
-* `yarn build` is the production target, to create the final bundle and write to disk.
+* `npm start` is the development target, to serve the app and hot reload.
+* `npm run build` is the production target, to create the final bundle and write to disk.

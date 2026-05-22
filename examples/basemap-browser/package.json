@@ -8,12 +8,12 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@deck.gl/core": "workspace:*",
-    "@deck.gl/extensions": "workspace:*",
-    "@deck.gl/geo-layers": "workspace:*",
-    "@deck.gl/google-maps": "workspace:*",
-    "@deck.gl/layers": "workspace:*",
-    "@deck.gl/mapbox": "workspace:*",
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/google-maps": "^9.2.0",
+    "@deck.gl/extensions": "^9.2.0",
+    "@deck.gl/geo-layers": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "@deck.gl/mapbox": "^9.2.0",
     "@vis.gl/react-google-maps": "^1.7.1",
     "mapbox-gl": "^3.8.0",
     "maplibre-gl": "^5.0.0",

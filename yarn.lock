@@ -599,7 +599,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/arcgis@npm:9.3.0-beta.2, @deck.gl/arcgis@workspace:*, @deck.gl/arcgis@workspace:modules/arcgis":
+"@deck.gl/arcgis@npm:9.3.0-beta.2, @deck.gl/arcgis@workspace:modules/arcgis":
   version: 0.0.0-use.local
   resolution: "@deck.gl/arcgis@workspace:modules/arcgis"
   dependencies:
@@ -652,7 +652,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/core@npm:9.3.0-beta.2, @deck.gl/core@workspace:*, @deck.gl/core@workspace:modules/core":
+"@deck.gl/core@npm:9.3.0-beta.2, @deck.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@deck.gl/core@workspace:modules/core"
   dependencies:
@@ -675,7 +675,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/extensions@npm:9.3.0-beta.2, @deck.gl/extensions@workspace:*, @deck.gl/extensions@workspace:modules/extensions":
+"@deck.gl/extensions@npm:9.3.0-beta.2, @deck.gl/extensions@workspace:modules/extensions":
   version: 0.0.0-use.local
   resolution: "@deck.gl/extensions@workspace:modules/extensions"
   dependencies:
@@ -689,7 +689,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/geo-layers@npm:9.3.0-beta.2, @deck.gl/geo-layers@workspace:*, @deck.gl/geo-layers@workspace:modules/geo-layers":
+"@deck.gl/geo-layers@npm:9.3.0-beta.2, @deck.gl/geo-layers@workspace:modules/geo-layers":
   version: 0.0.0-use.local
   resolution: "@deck.gl/geo-layers@workspace:modules/geo-layers"
   dependencies:
@@ -721,7 +721,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/google-maps@npm:9.3.0-beta.2, @deck.gl/google-maps@workspace:*, @deck.gl/google-maps@workspace:modules/google-maps":
+"@deck.gl/google-maps@npm:9.3.0-beta.2, @deck.gl/google-maps@workspace:modules/google-maps":
   version: 0.0.0-use.local
   resolution: "@deck.gl/google-maps@workspace:modules/google-maps"
   dependencies:
@@ -770,7 +770,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/layers@npm:9.3.0-beta.2, @deck.gl/layers@workspace:*, @deck.gl/layers@workspace:modules/layers":
+"@deck.gl/layers@npm:9.3.0-beta.2, @deck.gl/layers@workspace:modules/layers":
   version: 0.0.0-use.local
   resolution: "@deck.gl/layers@workspace:modules/layers"
   dependencies:
@@ -790,7 +790,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/mapbox@npm:9.3.0-beta.2, @deck.gl/mapbox@workspace:*, @deck.gl/mapbox@workspace:modules/mapbox":
+"@deck.gl/mapbox@npm:9.3.0-beta.2, @deck.gl/mapbox@workspace:modules/mapbox":
   version: 0.0.0-use.local
   resolution: "@deck.gl/mapbox@workspace:modules/mapbox"
   dependencies:
@@ -853,7 +853,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@deck.gl/widgets@npm:9.3.0-beta.2, @deck.gl/widgets@workspace:*, @deck.gl/widgets@workspace:modules/widgets":
+"@deck.gl/widgets@npm:9.3.0-beta.2, @deck.gl/widgets@workspace:modules/widgets":
   version: 0.0.0-use.local
   resolution: "@deck.gl/widgets@workspace:modules/widgets"
   dependencies:
@@ -11832,26 +11832,16 @@ __metadata:
     "@probe.gl/test-utils": "npm:^4.1.1"
     "@types/jscodeshift": "npm:^17.3.0"
     "@types/pngjs": "npm:^6.0.5"
-    "@typescript-eslint/eslint-plugin": "npm:7.18.0"
-    "@typescript-eslint/parser": "npm:7.18.0"
     "@vis.gl/dev-tools": "npm:1.0.2"
     "@vis.gl/ts-plugins": "npm:1.0.2"
     "@vitest/browser-playwright": "npm:^4.0.18"
     "@vitest/coverage-v8": "npm:^4.0.18"
-    eslint: "npm:8.57.0"
-    eslint-config-prettier: "npm:8.10.0"
-    eslint-plugin-import: "npm:2.29.1"
-    eslint-plugin-jsx-a11y: "npm:6.9.0"
-    eslint-plugin-markdown: "npm:2.2.1"
-    eslint-plugin-react: "npm:7.35.0"
-    eslint-plugin-react-hooks: "npm:4.6.2"
     jscodeshift: "npm:^17.3.0"
     jsdom: "npm:^20.0.0"
     pixelmatch: "npm:^7.1.0"
     playwright: "npm:^1.58.0"
     pngjs: "npm:^7.0.0"
     pre-commit: "npm:^1.2.2"
-    prettier: "npm:3.4.2"
     puppeteer: "npm:^24.26.1"
     s2-geometry: "npm:^1.2.10"
     sharp: "npm:^0.34.5"
@@ -11861,7 +11851,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"deck.gl@workspace:*, deck.gl@workspace:modules/main":
+"deck.gl@npm:9.3.0-beta.2, deck.gl@workspace:modules/main":
   version: 0.0.0-use.local
   resolution: "deck.gl@workspace:modules/main"
   dependencies:
@@ -11899,8 +11889,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-apple-maps@workspace:examples/get-started/pure-js/apple-maps"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
@@ -11909,8 +11899,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-basic@workspace:examples/get-started/pure-js/basic"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
@@ -11919,7 +11909,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-carto@workspace:examples/get-started/pure-js/carto"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -11930,9 +11920,9 @@ __metadata:
   resolution: "deckgl-example-pure-js-esri-arcgis@workspace:examples/get-started/pure-js/arcgis"
   dependencies:
     "@arcgis/core": "npm:^4.28.0"
-    "@deck.gl/arcgis": "workspace:*"
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/arcgis": "npm:^9.0.0"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
@@ -11941,8 +11931,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-globe@workspace:examples/get-started/pure-js/globe"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
@@ -11951,9 +11941,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-google-maps@workspace:examples/get-started/pure-js/google-maps"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/google-maps": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/google-maps": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     "@googlemaps/js-api-loader": "npm:^1.16.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -11963,8 +11953,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-harp.gl@workspace:examples/get-started/pure-js/harp.gl"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     "@here/harp-datasource-protocol": "npm:^0.14.0"
     "@here/harp-geoutils": "npm:^0.14.0"
     "@here/harp-mapview": "npm:^0.14.0"
@@ -11981,8 +11971,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-leaflet@workspace:examples/get-started/pure-js/leaflet"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     deck.gl-leaflet: "npm:^1.1.1"
     leaflet: "npm:^1.7.1"
     vite: "npm:^7.3.1"
@@ -11993,9 +11983,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-mapbox@workspace:examples/get-started/pure-js/mapbox"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
-    "@deck.gl/mapbox": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/mapbox": "npm:^9.0.0"
     mapbox-gl: "npm:^3.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12005,9 +11995,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-maplibre-globe@workspace:examples/get-started/pure-js/maplibre-globe"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
-    "@deck.gl/mapbox": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/mapbox": "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12017,9 +12007,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-maplibre@workspace:examples/get-started/pure-js/maplibre"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
-    "@deck.gl/mapbox": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/mapbox": "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12029,8 +12019,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-openlayers@workspace:examples/get-started/pure-js/openlayers"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     ol: "npm:^7.1.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12040,9 +12030,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-pure-js-widgets@workspace:examples/get-started/pure-js/widgets"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
-    "@deck.gl/widgets": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/widgets": "npm:^9.0.0"
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
@@ -12052,9 +12042,9 @@ __metadata:
   resolution: "deckgl-example-react-arcgis@workspace:examples/get-started/react/arcgis"
   dependencies:
     "@arcgis/core": "npm:^4.25.0"
-    "@deck.gl/arcgis": "workspace:*"
+    "@deck.gl/arcgis": "npm:^9.0.0"
     "@esri/react-arcgis": "npm:^5.2.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     vite: "npm:^7.3.1"
@@ -12065,7 +12055,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-basic@workspace:examples/get-started/react/basic"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     vite: "npm:^7.3.1"
@@ -12077,7 +12067,7 @@ __metadata:
   resolution: "deckgl-example-react-google-maps@workspace:examples/get-started/react/google-maps"
   dependencies:
     "@vis.gl/react-google-maps": "npm:^0.7.1"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     vite: "npm:^7.3.1"
@@ -12088,7 +12078,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-map-gl-mapbox@workspace:examples/get-started/react/mapbox"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     mapbox-gl: "npm:^3.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12101,7 +12091,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-map-gl-maplibre@workspace:examples/get-started/react/maplibre"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12116,7 +12106,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12131,7 +12121,7 @@ __metadata:
     "@loaders.gl/csv": "npm:^4.4.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12148,7 +12138,7 @@ __metadata:
     "@loaders.gl/3d-tiles": "npm:^4.4.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12166,7 +12156,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12181,7 +12171,7 @@ __metadata:
   resolution: "deckgl-examples-arcgis-i3s@workspace:examples/website/i3s"
   dependencies:
     "@loaders.gl/i3s": "npm:^4.4.1"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
@@ -12193,12 +12183,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-basemap-browser@workspace:examples/basemap-browser"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/extensions": "workspace:*"
-    "@deck.gl/geo-layers": "workspace:*"
-    "@deck.gl/google-maps": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
-    "@deck.gl/mapbox": "workspace:*"
+    "@deck.gl/core": "npm:^9.2.0"
+    "@deck.gl/extensions": "npm:^9.2.0"
+    "@deck.gl/geo-layers": "npm:^9.2.0"
+    "@deck.gl/google-maps": "npm:^9.2.0"
+    "@deck.gl/layers": "npm:^9.2.0"
+    "@deck.gl/mapbox": "npm:^9.2.0"
     "@types/react": "npm:^18.2.0"
     "@types/react-dom": "npm:^18.2.0"
     "@types/stats.js": "npm:^0.17.4"
@@ -12218,7 +12208,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-bezier@workspace:examples/experimental/bezier"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12234,7 +12224,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12248,7 +12238,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-carto-sql@workspace:examples/website/carto-sql"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12265,7 +12255,7 @@ __metadata:
     "@turf/turf": "npm:^7.0.0"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12281,7 +12271,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12300,7 +12290,7 @@ __metadata:
     "@material-ui/icons": "npm:^4.9.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12327,7 +12317,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12344,7 +12334,7 @@ __metadata:
     "@loaders.gl/csv": "npm:^4.4.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12363,7 +12353,7 @@ __metadata:
     "@material-ui/icons": "npm:^4.9.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12376,7 +12366,7 @@ __metadata:
   resolution: "deckgl-examples-google-maps-3d-tiles@workspace:examples/website/google-3d-tiles"
   dependencies:
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     typescript: "npm:^4.6.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12389,7 +12379,7 @@ __metadata:
     "@googlemaps/js-api-loader": "npm:^1.16.0"
     "@turf/rhumb-bearing": "npm:^6.5.0"
     "@turf/rhumb-distance": "npm:^6.5.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     typescript: "npm:^4.6.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12399,7 +12389,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-h3-grid@workspace:examples/experimental/h3-grid"
   dependencies:
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12415,7 +12405,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12434,7 +12424,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12450,7 +12440,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12467,7 +12457,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12479,8 +12469,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-interleaved-buffer@workspace:examples/experimental/interleaved-buffer"
   dependencies:
-    "@deck.gl/core": "workspace:*"
-    "@deck.gl/layers": "workspace:*"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     typescript: "npm:^4.6.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12517,7 +12507,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12533,7 +12523,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12547,7 +12537,7 @@ __metadata:
   dependencies:
     "@loaders.gl/csv": "npm:^4.4.1"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     mapbox-gl: "npm:^3.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12566,7 +12556,7 @@ __metadata:
     "@material-ui/icons": "npm:^4.9.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12585,7 +12575,7 @@ __metadata:
     "@material-ui/icons": "npm:^4.9.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12601,7 +12591,7 @@ __metadata:
   dependencies:
     "@loaders.gl/obj": "npm:^4.4.1"
     "@math.gl/core": "npm:^4.1.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12619,7 +12609,7 @@ __metadata:
     "@types/react-dom": "npm:^18.0.0"
     d3-array: "npm:^3.2.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12637,7 +12627,7 @@ __metadata:
     "@loaders.gl/draco": "npm:^4.4.1"
     "@loaders.gl/gltf": "npm:^4.4.1"
     "@monaco-editor/react": "npm:^4.4.6"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     monaco-editor: "npm:^0.39.0"
     react: "npm:^18.0.0"
@@ -12657,7 +12647,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12672,7 +12662,7 @@ __metadata:
     "@loaders.gl/las": "npm:^4.4.1"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.2.0-alpha.2"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12691,7 +12681,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12707,7 +12697,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.2.0-alpha.2"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12723,7 +12713,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12739,7 +12729,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12758,7 +12748,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3-scale: "npm:^4.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
@@ -12774,7 +12764,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12788,7 +12778,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
@@ -12801,7 +12791,7 @@ __metadata:
   resolution: "deckgl-examples-tfjs@workspace:examples/experimental/tfjs"
   dependencies:
     "@tensorflow/tfjs": "npm:^4.2.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     typescript: "npm:^4.6.0"
     vite: "npm:^7.3.1"
   languageName: unknown
@@ -12815,7 +12805,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     d3: "npm:^7.9.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
@@ -12830,7 +12820,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
     popmotion: "npm:^11.0.0"
     react: "npm:^18.0.0"
@@ -14079,7 +14069,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:8.10.0, eslint-config-prettier@npm:^8.0.0":
+"eslint-config-prettier@npm:^8.0.0":
   version: 8.10.0
   resolution: "eslint-config-prettier@npm:8.10.0"
   peerDependencies:
@@ -14113,7 +14103,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import@npm:2.29.1, eslint-plugin-import@npm:^2.28.0":
+"eslint-plugin-import@npm:^2.28.0":
   version: 2.29.1
   resolution: "eslint-plugin-import@npm:2.29.1"
   dependencies:
@@ -14140,7 +14130,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jsx-a11y@npm:6.9.0, eslint-plugin-jsx-a11y@npm:^6.1.2":
+"eslint-plugin-jsx-a11y@npm:^6.1.2":
   version: 6.9.0
   resolution: "eslint-plugin-jsx-a11y@npm:6.9.0"
   dependencies:
@@ -14166,7 +14156,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-markdown@npm:2.2.1, eslint-plugin-markdown@npm:^2.2.0":
+"eslint-plugin-markdown@npm:^2.2.0":
   version: 2.2.1
   resolution: "eslint-plugin-markdown@npm:2.2.1"
   dependencies:
@@ -14177,7 +14167,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-hooks@npm:4.6.2, eslint-plugin-react-hooks@npm:^4.0.0":
+"eslint-plugin-react-hooks@npm:^4.0.0":
   version: 4.6.2
   resolution: "eslint-plugin-react-hooks@npm:4.6.2"
   peerDependencies:
@@ -14186,7 +14176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react@npm:7.35.0, eslint-plugin-react@npm:^7.22.0":
+"eslint-plugin-react@npm:^7.22.0":
   version: 7.35.0
   resolution: "eslint-plugin-react@npm:7.35.0"
   dependencies:
@@ -14241,7 +14231,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:8.57.0, eslint@npm:^8.52.0":
+"eslint@npm:^8.52.0":
   version: 8.57.0
   resolution: "eslint@npm:8.57.0"
   dependencies:
@@ -21351,7 +21341,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.4.2, prettier@npm:^3.2.0":
+"prettier@npm:^3.2.0":
   version: 3.4.2
   resolution: "prettier@npm:3.4.2"
   bin:
@@ -26272,7 +26262,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
-    deck.gl: "workspace:*"
+    deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"

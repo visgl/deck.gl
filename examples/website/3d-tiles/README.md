@@ -3,16 +3,17 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-From the deck.gl repository root, install workspace dependencies and run this example from its directory.
+Copy the content of this folder to your project. 
 
 To download the Cesium 3D tileset, you need a Cesium ion access token, and set it to `ION_TOKEN` in `app.jsx`.
 
 ```bash
-# From the deck.gl repository root
-yarn install
-
-# From this example directory
-yarn start
+# install dependencies
+npm install
+# or
+yarn
+# bundle and serve the app with vite
+npm start
 ```
 
 ### Data format

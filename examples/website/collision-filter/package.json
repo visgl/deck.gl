@@ -12,10 +12,10 @@
     "@turf/turf": "^7.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "deck.gl": "workspace:*",
-    "maplibre-gl": "^5.0.0",
+    "deck.gl": "^9.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "maplibre-gl": "^5.0.0",
     "react-map-gl": "^8.0.0"
   },
   "devDependencies": {

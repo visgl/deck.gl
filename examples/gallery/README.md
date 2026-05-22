@@ -11,11 +11,10 @@ In the web browser, open any .html file from the `src` directory. Examples with 
 Run local dev server:
 
 ```bash
-# From the deck.gl repository root
-yarn install
-
-cd examples/gallery
-export MapboxAccessToken=<mapbox-access-token> && yarn start
+# install dependencies
+yarn
+# start server
+export MapboxAccessToken=<mapbox-access-token> && npm start
 ```
 
 And open `http://localhost:3000` in the browser.
@@ -34,9 +33,10 @@ To add a new example:
 To test all examples with the local version, run:
 
 ```bash
-# From examples/gallery
-yarn workspace deck.gl prepublishOnly
-yarn start-local
+# rebuild bundle
+cd ../../modules/main && npm run prepublishOnly && cd -
+# start server
+npm run start-local
 ```
 
 To test all examples with a specific release:
@@ -48,7 +48,7 @@ node build-tools/serve --version=6.0.0-alpha.0
 ## Publish
 
 ```bash
-yarn build
+npm run build
 ```
 
 Copy contents of the `dist` directory to `showcases/gallery` in the gh-pages branch.

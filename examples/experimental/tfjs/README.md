@@ -2,14 +2,15 @@ This project demonstrates how WebGL resources can be shared between Tensorflow.j
 
 ### Usage
 
-From the deck.gl repository root, install workspace dependencies and run this example from its directory.
+Copy the content of this folder to your project. 
 
 ```bash
-# From the deck.gl repository root
-yarn install
-
-# From this example directory
-yarn start
+# install dependencies
+npm install
+# or
+yarn
+# bundle and serve the app with vite
+npm start
 ```
 
 The script src in `index.html` can be changed to one of the following:

@@ -19,9 +19,9 @@ The [deck.gl](https://www.npmjs.com/package/deck.gl) module includes all deck.gl
 
 ## Running the Examples
 
-The deck.gl repository contains an [examples folder](https://github.com/visgl/deck.gl/tree/master/examples) with a selection of small examples that could be good starting points for your application.
+The deck.gl repository contains an [examples folder](https://github.com/visgl/deck.gl/tree/master/examples) with a selection of small, standalone examples that could be good starting points for your application.
 
-Package-managed examples in this repository are installed as Yarn workspaces from the repository root. If you copy an example into a separate project, replace any `workspace:*` deck.gl dependencies with published version ranges before installing it outside this monorepo.
+You should be able to copy these folders to your preferred locations, and get them running simply as follows:
 
 Clone the deck.gl repo, if you haven't already
 
@@ -35,33 +35,43 @@ For most consistent results, it is recommended that you check out the latest rel
 git checkout 8.0-release
 ```
 
-Install dependencies once from the deck.gl repository root:
+Change directory to the example you are interested in, e.g.
 
 ```bash
-cd deck.gl
-yarn install
+cd deck.gl/examples/get-started/pure-js/basic
 ```
 
-Change directory to the example you are interested in and start it:
+Then install dependencies using the installer of your choice:
 
 ```bash
-cd examples/get-started/pure-js/basic
-yarn start
+npm install
+# or
+yarn
+```
+
+and then running using:
+
+```bash
+npm start
 ```
 
 If the example uses a mapbox base map you need a [Mapbox access token](./using-with-map.md)
 
 ```bash
-export MapboxAccessToken={Your Token Here} && yarn start
+export MapboxAccessToken={Your Token Here} && npm start
 ```
+
+When working from a deck.gl repository checkout, run `yarn install` once at the repository root. Package-managed examples are part of the root Yarn workspace and can then be run from their own directories with `yarn start`.
 
 If you want to build the example against the latest deck.gl source code in the cloned repo (rather than the published version of deck.gl listed in the examples `package.json`)
 
 ```bash
-yarn start-local
+npm run start-local
 ```
 
-> The examples on the `master` branch are updated to use features from the latest, unreleased version of deck.gl. If some example doesn't work using `yarn start` it can be worth trying `yarn start-local`.
+> The examples on the `master` branch are updated to use features from the latest, unreleased version of deck.gl. If some example doesn't work using `npm start` it can be worth trying `npm run start-local`.
+
+> While all examples support `npm run start-local`, there are some caveats when running against local source. Most importantly, you must make sure to run `yarn install` in the deck.gl root folder before running `npm run start-local` in an example folder.
 
 
 ## Selectively Install Dependencies

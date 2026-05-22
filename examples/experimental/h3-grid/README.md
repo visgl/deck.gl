@@ -1,14 +1,10 @@
 This is an example that visualizes the [H3 Geospatial Index System](https://uber.github.io/h3/#/documentation/core-library/overview).
 
 ### Usage
-From the deck.gl repository root, install workspace dependencies and run this example from its directory.
-
-```bash
-# From the deck.gl repository root
-yarn install
-
-# From this example directory
-yarn start
+Copy the content of this folder to your project. Run
+```
+npm install
+npm start
 ```
 
 ### Basemap

@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "workspace:*",
-    "@deck.gl/google-maps": "workspace:*",
-    "@deck.gl/layers": "workspace:*",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/google-maps": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
     "@googlemaps/js-api-loader": "^1.16.0"
   },
   "devDependencies": {

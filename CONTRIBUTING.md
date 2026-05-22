@@ -50,7 +50,7 @@ Run the website:
 ```bash
 yarn build
 cd website
-yarn
+yarn install
 yarn start
 ```
 
