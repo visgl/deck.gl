@@ -2,20 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, vec3, vec4} from '@math.gl/core';
+import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
-import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
-
-import {vec3, vec4} from '@math.gl/core';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
+// Where along the screen-pixel-to-globe-center distance ratio the anchored
+// zoom starts losing strength. Below this ratio the anchor pins exactly; from
+// here to the limb (ratio = 1) the anchor blends toward MIN_STRENGTH so a
+// near-edge pixel doesn't snap the camera across the globe.
 const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
 const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -193,6 +194,12 @@ export default class GlobeViewport extends Viewport {
     ];
   }
 
+  /**
+   * Builds the screen-pixel → globe-center ray and the intermediate ray/sphere
+   * math reused by `unproject` (intersection point) and the public hit-test
+   * helpers (`isPointOnGlobe`, `panByGlobeAnchor`). One function so the same
+   * pixelUnprojectionMatrix work isn't duplicated.
+   */
   private _getRayToGlobe(
     xy: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
