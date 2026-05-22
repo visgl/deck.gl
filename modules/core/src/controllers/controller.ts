@@ -20,6 +20,13 @@ const NO_TRANSITION_PROPS = {
 
 const DEFAULT_INERTIA = 300;
 const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
+// One-finger double-tap-drag-to-zoom gesture (matches Google Maps).
+// Empirical values chosen to feel snappy but reject accidental triggers.
+const DOUBLE_TAP_DRAG_INTERVAL = 500;
+const DOUBLE_TAP_DRAG_MAX_TAP_DURATION = 350;
+const DOUBLE_TAP_DRAG_MAX_TAP_DISTANCE = 28;
+const DOUBLE_TAP_DRAG_START_THRESHOLD = 1;
+const DOUBLE_TAP_DRAG_PIXELS_PER_ZOOM = 120;
 
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
@@ -27,6 +34,7 @@ const EVENT_TYPES = {
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
   MULTI_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
   DOUBLE_CLICK: ['dblclick'],
+  DOUBLE_TAP_DRAG: ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'],
   KEYBOARD: ['keydown']
 } as const;
 
@@ -112,6 +120,24 @@ export type ViewStateChangeParameters<ViewStateT = any> = {
 
 const pinchEventWorkaround: any = {};
 
+type OneFingerTapState = {
+  pos: [number, number];
+  time: number;
+  pointerId?: number;
+};
+
+type OneFingerZoomState = {
+  startPos: [number, number];
+  pointerId?: number;
+  active: boolean;
+};
+
+function getDistance(a: [number, number], b: [number, number]): number {
+  const dx = a[0] - b[0];
+  const dy = a[1] - b[1];
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
 export default abstract class Controller<ControllerState extends IViewState<ControllerState>> {
   abstract get ControllerState(): ConstructorOf<ControllerState>;
   abstract get transition(): TransitionProps;
@@ -135,6 +161,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
   private _panMove: boolean = false;
+  private _tapStart: OneFingerTapState | null = null;
+  private _lastTap: OneFingerTapState | null = null;
+  private _oneFingerZoom: OneFingerZoomState | null = null;
+  private _suppressDoubleClickUntil: number = 0;
 
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
@@ -209,10 +239,19 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
     switch (event.type) {
       case 'panstart':
+        if (this._oneFingerZoom) {
+          return false;
+        }
         return eventStartBlocked ? false : this._onPanStart(event);
       case 'panmove':
+        if (this._oneFingerZoom) {
+          return false;
+        }
         return this._onPan(event);
       case 'panend':
+        if (this._oneFingerZoom) {
+          return false;
+        }
         return this._onPanEnd(event);
       case 'pinchstart':
         return eventStartBlocked ? false : this._onPinchStart(event);
@@ -228,6 +267,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         return this._onMultiPanEnd(event);
       case 'dblclick':
         return this._onDoubleClick(event);
+      case 'pointerdown':
+        return this._onPointerDown(event);
+      case 'pointermove':
+        return this._onPointerMove(event);
+      case 'pointerup':
+      case 'pointercancel':
+        return this._onPointerUp(event);
       case 'wheel':
         return this._onWheel(event as MjolnirWheelEvent);
       case 'keydown':
@@ -328,6 +374,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
     this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK, isInteractive && doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP_DRAG, isInteractive && touchZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
     // Interaction toggles
@@ -641,6 +688,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   // Default handler for the `pinchstart` event.
   protected _onPinchStart(event: MjolnirGestureEvent): boolean {
+    this._resetOneFingerZoom();
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -735,6 +783,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.doubleClickZoom) {
       return false;
     }
+    if (Date.now() < this._suppressDoubleClickUntil) {
+      return false;
+    }
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -749,6 +800,147 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     });
     this.blockEvents(100);
     return true;
+  }
+
+  protected _onPointerDown(event: MjolnirEvent): boolean {
+    if (!this.touchZoom || !this._isPrimaryPointer(event)) {
+      this._resetOneFingerZoom();
+      return false;
+    }
+
+    const pos = this.getCenter(event as MjolnirGestureEvent);
+    if (!this.isPointInBounds(pos, event)) {
+      this._resetOneFingerZoom();
+      return false;
+    }
+
+    const time = this._getEventTime(event);
+    const pointerId = (event.srcEvent as PointerEvent).pointerId;
+    if (
+      this._lastTap &&
+      time - this._lastTap.time <= DOUBLE_TAP_DRAG_INTERVAL &&
+      getDistance(pos, this._lastTap.pos) <= DOUBLE_TAP_DRAG_MAX_TAP_DISTANCE
+    ) {
+      this._tapStart = null;
+      this._lastTap = null;
+      this._oneFingerZoom = {startPos: pos, pointerId, active: false};
+      event.srcEvent.preventDefault();
+      event.stopPropagation();
+      return true;
+    }
+
+    this._tapStart = {pos, time, pointerId};
+    this._lastTap = null;
+    if ((event.srcEvent as PointerEvent).pointerType === 'touch') {
+      event.srcEvent.preventDefault();
+    }
+    return false;
+  }
+
+  protected _onPointerMove(event: MjolnirEvent): boolean {
+    const oneFingerZoom = this._oneFingerZoom;
+    if (!oneFingerZoom || !this._isSamePointer(event, oneFingerZoom.pointerId)) {
+      return false;
+    }
+
+    const pos = this.getCenter(event as MjolnirGestureEvent);
+    const dy = oneFingerZoom.startPos[1] - pos[1];
+    if (!oneFingerZoom.active && Math.abs(dy) < DOUBLE_TAP_DRAG_START_THRESHOLD) {
+      event.srcEvent.preventDefault();
+      event.stopPropagation();
+      return true;
+    }
+
+    const scale = Math.pow(2, dy / DOUBLE_TAP_DRAG_PIXELS_PER_ZOOM);
+    const startPos = oneFingerZoom.startPos;
+    let newControllerState = this.controllerState;
+    if (!oneFingerZoom.active) {
+      oneFingerZoom.active = true;
+      newControllerState = newControllerState.zoomStart({pos: startPos});
+    }
+    newControllerState = newControllerState.zoom({pos: startPos, scale});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isPanning: true,
+      isZooming: true
+    });
+
+    event.srcEvent.preventDefault();
+    event.stopPropagation();
+    return true;
+  }
+
+  protected _onPointerUp(event: MjolnirEvent): boolean {
+    const oneFingerZoom = this._oneFingerZoom;
+    if (oneFingerZoom && this._isSamePointer(event, oneFingerZoom.pointerId)) {
+      this._oneFingerZoom = null;
+      if (oneFingerZoom.active) {
+        const newControllerState = this.controllerState.zoomEnd();
+        this.updateViewport(newControllerState, null, {
+          isDragging: false,
+          isPanning: false,
+          isZooming: false
+        });
+        this._suppressDoubleClickUntil = Date.now() + 100;
+        this.blockEvents(100);
+        event.srcEvent.preventDefault();
+        event.stopPropagation();
+        return true;
+      }
+      return false;
+    }
+
+    if (event.type === 'pointercancel') {
+      this._resetOneFingerZoom();
+      return false;
+    }
+
+    const tapStart = this._tapStart;
+    if (!tapStart || !this._isSamePointer(event, tapStart.pointerId)) {
+      return false;
+    }
+
+    const pos = this.getCenter(event as MjolnirGestureEvent);
+    const time = this._getEventTime(event);
+    if (
+      time - tapStart.time <= DOUBLE_TAP_DRAG_MAX_TAP_DURATION &&
+      getDistance(pos, tapStart.pos) <= DOUBLE_TAP_DRAG_MAX_TAP_DISTANCE
+    ) {
+      this._lastTap = {pos, time, pointerId: tapStart.pointerId};
+    } else {
+      this._lastTap = null;
+    }
+    this._tapStart = null;
+    if ((event.srcEvent as PointerEvent).pointerType === 'touch') {
+      event.srcEvent.preventDefault();
+    }
+    return false;
+  }
+
+  private _resetOneFingerZoom(): void {
+    this._tapStart = null;
+    this._lastTap = null;
+    this._oneFingerZoom = null;
+  }
+
+  private _getEventTime(event: MjolnirEvent): number {
+    return (event as any).timeStamp || event.srcEvent.timeStamp || Date.now();
+  }
+
+  private _isPrimaryPointer(event: MjolnirEvent): boolean {
+    const pointers = (event as any).pointers;
+    if (pointers && pointers.length > 1) {
+      return false;
+    }
+    const srcEvent = event.srcEvent as PointerEvent;
+    if (srcEvent.pointerType === 'mouse') {
+      return (event as any).leftButton !== false;
+    }
+    return true;
+  }
+
+  private _isSamePointer(event: MjolnirEvent, pointerId?: number): boolean {
+    return pointerId === undefined || (event.srcEvent as PointerEvent).pointerId === pointerId;
   }
 
   // Default handler for the `keydown` event

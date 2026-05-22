@@ -14,6 +14,19 @@ import {Timeline} from '@luma.gl/engine';
 
 import testController, {createTestController} from './test-controller';
 
+const makePointerEvent = (type: string, y: number, timeStamp: number, pointerId: number = 1) => ({
+  type,
+  offsetCenter: {x: 50, y},
+  timeStamp,
+  srcEvent: {
+    pointerId,
+    pointerType: 'touch',
+    timeStamp,
+    preventDefault() {}
+  },
+  stopPropagation() {}
+});
+
 test('MapController', async () => {
   await testController(MapView, {
     longitude: -122.45,
@@ -33,6 +46,31 @@ test('MapController#inertia', async () => {
     bearing: -45,
     inertia: true
   });
+});
+
+test('MapController supports double-tap drag zoom when double click zoom is disabled', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {touchZoom: true, doubleClickZoom: false}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  controller.handleEvent(makePointerEvent('pointerdown', 50, 0) as any);
+  controller.handleEvent(makePointerEvent('pointerup', 50, 50) as any);
+  controller.handleEvent(makePointerEvent('pointerdown', 50, 120) as any);
+  controller.handleEvent(makePointerEvent('pointermove', 20, 150) as any);
+  const zoomAfterMove = controller.props.zoom;
+
+  controller.handleEvent(makePointerEvent('pointerup', 20, 180) as any);
+
+  expect(zoomAfterMove, 'dragging up after double tap zooms in').toBeGreaterThan(10);
+  expect(controller.props.zoom, 'release should not change zoom').toBeCloseTo(zoomAfterMove);
 });
 
 test('GlobeController', async () => {
