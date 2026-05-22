@@ -35,6 +35,45 @@ test('MapController#inertia', async () => {
   });
 });
 
+test('MapController clamps a noisy final pinch frame instead of jumping', () => {
+  // Simulate a normal pinch ending with one sensor-noise spike. Without the
+  // per-event log-scale clamp the spike would propagate straight into the zoom.
+  const makePinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    type,
+    offsetCenter: {x: 50, y: 50},
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  });
+
+  const controller = createTestController({
+    view: new MapView({controller: true}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45
+    }
+  });
+
+  controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 1.05, 16) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 1.1, 32) as any);
+  const zoomBeforeSpike = controller.props.zoom as number;
+  // 100x scale on a single frame is the kind of spike a noisy lift produces.
+  controller.handleEvent(makePinchEvent('pinchmove', 100, 48) as any);
+
+  const delta = (controller.props.zoom as number) - zoomBeforeSpike;
+  // The per-event log2 delta cap is 0.18.
+  expect(
+    delta,
+    'noisy final pinch frame is clamped to the per-event log-scale cap'
+  ).toBeLessThanOrEqual(0.18 + 1e-6);
+});
+
 test('GlobeController', async () => {
   await testController(
     GlobeView,
