@@ -11891,7 +11891,7 @@ __metadata:
   dependencies:
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11901,7 +11901,7 @@ __metadata:
   dependencies:
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11911,7 +11911,7 @@ __metadata:
   dependencies:
     deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11923,7 +11923,7 @@ __metadata:
     "@deck.gl/arcgis": "npm:^9.0.0"
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11933,7 +11933,7 @@ __metadata:
   dependencies:
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11945,7 +11945,7 @@ __metadata:
     "@deck.gl/google-maps": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
     "@googlemaps/js-api-loader": "npm:^1.16.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11975,7 +11975,7 @@ __metadata:
     "@deck.gl/layers": "npm:^9.0.0"
     deck.gl-leaflet: "npm:^1.1.1"
     leaflet: "npm:^1.7.1"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11987,7 +11987,7 @@ __metadata:
     "@deck.gl/layers": "npm:^9.0.0"
     "@deck.gl/mapbox": "npm:^9.0.0"
     mapbox-gl: "npm:^3.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -11999,7 +11999,7 @@ __metadata:
     "@deck.gl/layers": "npm:^9.0.0"
     "@deck.gl/mapbox": "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12011,7 +12011,7 @@ __metadata:
     "@deck.gl/layers": "npm:^9.0.0"
     "@deck.gl/mapbox": "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12022,7 +12022,7 @@ __metadata:
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
     ol: "npm:^7.1.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12033,7 +12033,7 @@ __metadata:
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
     "@deck.gl/widgets": "npm:^9.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12047,7 +12047,7 @@ __metadata:
     deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12058,7 +12058,7 @@ __metadata:
     deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12070,7 +12070,7 @@ __metadata:
     deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12083,7 +12083,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12096,7 +12096,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12110,7 +12110,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12127,7 +12127,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12144,7 +12144,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12162,7 +12162,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12175,7 +12175,7 @@ __metadata:
     maplibre-gl: "npm:^5.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12200,7 +12200,7 @@ __metadata:
     react-map-gl: "npm:^8.0.0"
     stats.js: "npm:^0.17.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12212,7 +12212,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12230,7 +12230,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12244,7 +12244,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12261,7 +12261,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12277,7 +12277,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12296,7 +12296,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12323,7 +12323,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12340,7 +12340,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12357,7 +12357,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12368,7 +12368,7 @@ __metadata:
     d3-scale: "npm:^4.0.0"
     deck.gl: "npm:^9.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12381,7 +12381,7 @@ __metadata:
     "@turf/rhumb-distance": "npm:^6.5.0"
     deck.gl: "npm:^9.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12395,7 +12395,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12411,7 +12411,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12430,7 +12430,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12447,7 +12447,7 @@ __metadata:
     react-map-gl: "npm:^8.0.0"
     supercluster: "npm:^8.0.1"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12461,7 +12461,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12472,7 +12472,7 @@ __metadata:
     "@deck.gl/core": "npm:^9.0.0"
     "@deck.gl/layers": "npm:^9.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12497,7 +12497,7 @@ __metadata:
     react-map-gl: "npm:^8.0.0"
     react-stats-zavatta: "npm:^0.0.6"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12513,7 +12513,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12527,7 +12527,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12543,7 +12543,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12562,7 +12562,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12581,7 +12581,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12595,7 +12595,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12613,7 +12613,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12635,7 +12635,7 @@ __metadata:
     react-map-gl: "npm:^8.0.0"
     react-virtualized-auto-sizer: "npm:^1.0.2"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12651,7 +12651,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12666,7 +12666,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12687,7 +12687,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12703,7 +12703,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12719,7 +12719,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12735,7 +12735,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12754,7 +12754,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12768,7 +12768,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12782,7 +12782,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12793,7 +12793,7 @@ __metadata:
     "@tensorflow/tfjs": "npm:^4.2.0"
     deck.gl: "npm:^9.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12810,7 +12810,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -12827,7 +12827,7 @@ __metadata:
     react-dom: "npm:^18.0.0"
     react-map-gl: "npm:^8.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -26266,7 +26266,7 @@ __metadata:
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
     typescript: "npm:^4.6.0"
-    vite: "npm:^7.3.3"
+    vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
