@@ -5,7 +5,6 @@
 import TransitionInterpolator from './transition-interpolator';
 import {lerp} from '@math.gl/core';
 
-import log from '../utils/log';
 import type Viewport from '../viewports/viewport';
 import GlobeViewport from '../viewports/globe-viewport';
 
@@ -15,6 +14,7 @@ const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
 type PropsWithAnchor = {
   around?: number[];
   aroundPosition?: number[];
+  aroundLngLat?: number[];
   [key: string]: any;
 };
 
@@ -78,11 +78,22 @@ export default class LinearInterpolator extends TransitionInterpolator {
     const {makeViewport, around} = this.opts;
 
     if (makeViewport && around) {
-      const TestViewport = makeViewport(startProps);
-      if (TestViewport instanceof GlobeViewport) {
-        log.warn('around not supported in GlobeView')();
+      const startViewport = makeViewport(startProps);
+      if (startViewport instanceof GlobeViewport) {
+        // GlobeViewport uses spherical anchoring: unproject the screen point
+        // to a lng/lat on the globe and feed that to panByGlobeAnchor each
+        // frame. If the click is off-globe, fall through to a plain LERP.
+        if (startViewport.isPointOnGlobe(around)) {
+          const aroundLngLat = startViewport.unproject(around);
+          result.start.around = around;
+          Object.assign(result.end, {
+            around,
+            aroundLngLat,
+            width: endProps.width,
+            height: endProps.height
+          });
+        }
       } else {
-        const startViewport = makeViewport(startProps);
         const endViewport = makeViewport(endProps);
         const aroundPosition = startViewport.unproject(around);
         result.start.around = around;
@@ -108,17 +119,26 @@ export default class LinearInterpolator extends TransitionInterpolator {
       propsInTransition[key] = lerp(startProps[key] || 0, endProps[key] || 0, t);
     }
 
-    if (endProps.aroundPosition && this.opts.makeViewport) {
+    if (this.opts.makeViewport && (endProps.aroundPosition || endProps.aroundLngLat)) {
       // Linear transition should be performed in common space
       const viewport = this.opts.makeViewport({...endProps, ...propsInTransition});
-      Object.assign(
-        propsInTransition,
-        viewport.panByPosition(
-          endProps.aroundPosition,
-          // anchor point in current screen coordinates
-          lerp(startProps.around as number[], endProps.around as number[], t) as number[]
-        )
-      );
+      const anchorScreen = lerp(
+        startProps.around as number[],
+        endProps.around as number[],
+        t
+      ) as number[];
+
+      if (viewport instanceof GlobeViewport && endProps.aroundLngLat) {
+        Object.assign(
+          propsInTransition,
+          viewport.panByGlobeAnchor(endProps.aroundLngLat, anchorScreen)
+        );
+      } else if (endProps.aroundPosition) {
+        Object.assign(
+          propsInTransition,
+          viewport.panByPosition(endProps.aroundPosition, anchorScreen)
+        );
+      }
     }
     return propsInTransition;
   }
