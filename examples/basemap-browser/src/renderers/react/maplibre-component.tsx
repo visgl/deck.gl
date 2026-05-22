@@ -30,6 +30,7 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
     multiView,
     views,
     layerFilter,
+    useDevicePixels,
     onViewStateChange
   } = config;
 
@@ -90,6 +91,7 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
           <MapLibreDeckOverlay
             layers={layers}
             interleaved={interleaved}
+            useDevicePixels={useDevicePixels}
             views={multiView ? views : undefined}
             layerFilter={multiView ? layerFilter : undefined}
             initialViewState={multiView ? initialViewState : undefined}

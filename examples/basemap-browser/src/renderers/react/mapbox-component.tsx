@@ -33,6 +33,7 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
     multiView,
     views,
     layerFilter,
+    useDevicePixels,
     onViewStateChange
   } = config;
 
@@ -59,6 +60,7 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
         <MapboxDeckOverlay
           layers={layers}
           interleaved={interleaved}
+          useDevicePixels={useDevicePixels}
           views={multiView ? views : undefined}
           layerFilter={multiView ? layerFilter : undefined}
           initialViewState={multiView ? initialViewState : undefined}

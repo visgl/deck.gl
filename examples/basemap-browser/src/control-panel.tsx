@@ -262,6 +262,20 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
           </label>
         </div>
 
+        {/* useDevicePixels override */}
+        <div className="section">
+          <label>
+            <input
+              type="checkbox"
+              checked={dimensions.useDevicePixels !== true}
+              onChange={() =>
+                updateDimension('useDevicePixels', dimensions.useDevicePixels === true ? 1.5 : true)
+              }
+            />
+            useDevicePixels: {String(dimensions.useDevicePixels)}
+          </label>
+        </div>
+
         {/* Stress Test Selection */}
         <div className="section">
           <div className="label">Stress Test:</div>

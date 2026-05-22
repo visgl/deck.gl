@@ -17,6 +17,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
     multiView,
     views,
     layerFilter,
+    useDevicePixels,
     onViewStateChange
   } = config;
 
@@ -34,7 +35,8 @@ export function mount(container: HTMLElement, config: Config): () => void {
 
   const overlayConfig: any = {
     interleaved,
-    layers
+    layers,
+    useDevicePixels
   };
 
   if (multiView && views) {
