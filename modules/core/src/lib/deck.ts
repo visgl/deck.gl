@@ -1318,14 +1318,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       touchAction: this.props.touchAction,
       recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
         // Resolve recognizer settings
-        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requireFailure] =
           RECOGNIZERS[eventName];
         const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
         const options = {...defaultOptions, ...optionsOverride, event: eventName};
         return {
           recognizer: new RecognizerConstructor(options),
           recognizeWith,
-          requestFailure
+          requireFailure
         };
       }),
       events: {
