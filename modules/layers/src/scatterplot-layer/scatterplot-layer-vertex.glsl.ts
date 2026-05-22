@@ -14,7 +14,9 @@ in float instanceRadius;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
-in vec3 instancePickingColors;
+#ifdef USE_ROW_INDEXES
+in float rowIndexes;
+#endif
 in vec2 instancePixelOffset;
 
 out vec4 vFillColor;
@@ -47,7 +49,11 @@ void main(void) {
   // position on the containing square in [-1, 1] space
   unitPosition = edgePadding * positions.xy;
   geometry.uv = unitPosition;
-  geometry.pickingColor = instancePickingColors;
+#ifdef USE_ROW_INDEXES
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
+#else
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+#endif
 
   innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / outerRadiusPixels;
   

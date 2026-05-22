@@ -135,7 +135,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   initializeState() {
     const attributeManager = this.getAttributeManager()!;
 
-    attributeManager.remove(['instancePickingColors']);
     const noAlloc = true;
 
     attributeManager.add({
