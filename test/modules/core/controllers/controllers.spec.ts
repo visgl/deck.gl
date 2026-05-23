@@ -35,6 +35,49 @@ test('MapController#inertia', async () => {
   });
 });
 
+test('MapController skips pinch zoom inertia on touch lift', () => {
+  // Touch pinches lift with a noisy final frame that can produce a large
+  // synthetic velocity. The end zoom should equal the last live pinch zoom,
+  // not the inertia-projected zoom.
+  const makePinchEvent = (
+    type: string,
+    scale: number,
+    deltaTime: number,
+    pointerType: 'touch' | 'mouse' = 'touch'
+  ) => ({
+    type,
+    offsetCenter: {x: 50, y: 50},
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {preventDefault() {}, pointerType},
+    stopPropagation() {}
+  });
+
+  const controller = createTestController({
+    view: new MapView({controller: true}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 1.1, 16) as any);
+  const zoomAfterMove = controller.props.zoom as number;
+  // 100x scale spike on the lift frame — pre-fix would fling the zoom way past.
+  controller.handleEvent(makePinchEvent('pinchend', 100, 17) as any);
+
+  expect(
+    controller.props.zoom,
+    'touch pinch end stays at the last live zoom (no inertia projection)'
+  ).toBeCloseTo(zoomAfterMove);
+});
+
 test('GlobeController', async () => {
   await testController(
     GlobeView,

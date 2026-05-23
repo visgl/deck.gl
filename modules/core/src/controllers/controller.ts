@@ -692,7 +692,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
     const {inertia} = this;
     const {_lastPinchEvent} = pinchEventWorkaround;
-    if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
+    // Skip pinch zoom inertia on touch: the final-lift frame is almost always
+    // noisy, and any forward projection reads as the camera "flinging" past
+    // the gesture. Trackpad / mouse pinches are unaffected.
+    const isTouchPinch = (event.srcEvent as PointerEvent)?.pointerType === 'touch';
+    if (
+      this.touchZoom &&
+      inertia &&
+      !isTouchPinch &&
+      _lastPinchEvent &&
+      event.scale !== _lastPinchEvent.scale
+    ) {
       const pos = this.getCenter(event);
       let newControllerState = this.controllerState.rotateEnd();
       const z = Math.log2(event.scale);
