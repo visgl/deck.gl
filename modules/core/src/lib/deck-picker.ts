@@ -1042,9 +1042,7 @@ export default class DeckPicker {
     const terrainLayers = pickableLayers.filter(l => l.props.operation.includes('terrain'));
     const terrainDrawMode = pickedLayer?.state?.terrainDrawMode;
     if (pickedLayer && terrainDrawMode === 'offset') {
-      // Terrain layers must be included so TerrainEffect.preRender doesn't early-exit,
-      // allowing the heightmap to be bound and the offset layer to render at its correct
-      // elevation (terrain_z + data_z).
+      // For offset layers, include terrain layers alongside
       return [pickedLayer, ...terrainLayers];
     }
     if (pickedLayer && terrainDrawMode !== 'drape') {
