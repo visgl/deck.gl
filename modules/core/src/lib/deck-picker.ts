@@ -1027,7 +1027,10 @@ export default class DeckPicker {
 
   /**
    * Determine which layers to use for the depth (pickZ) pass.
-   * - If a non-draped layer was picked, use just that layer.
+   * - If a non-terrain-dependent layer was picked, use just that layer.
+   * - If an offset layer was picked, include terrain layers alongside it so
+   *   TerrainEffect.preRender can bind the heightmap and the layer renders at
+   *   its correct elevation (terrain_z + data_z).
    * - If a draped layer was picked (geometry is at z=0) or no layer was picked
    *   (e.g. no-FBO tiles at extreme zoom), fall back to terrain layers.
    */
@@ -1036,12 +1039,19 @@ export default class DeckPicker {
       return [];
     }
     const {pickedLayer} = pickInfo;
-    const isDraped = pickedLayer?.state?.terrainDrawMode === 'drape';
-    if (pickedLayer && !isDraped) {
+    const terrainLayers = pickableLayers.filter(l => l.props.operation.includes('terrain'));
+    const terrainDrawMode = pickedLayer?.state?.terrainDrawMode;
+    if (pickedLayer && terrainDrawMode === 'offset') {
+      // Terrain layers must be included so TerrainEffect.preRender doesn't early-exit,
+      // allowing the heightmap to be bound and the offset layer to render at its correct
+      // elevation (terrain_z + data_z).
+      return [pickedLayer, ...terrainLayers];
+    }
+    if (pickedLayer && terrainDrawMode !== 'drape') {
       return [pickedLayer];
     }
     // For draped layers or when no layer was picked, use terrain layers for depth
-    return pickableLayers.filter(l => l.props.operation.includes('terrain'));
+    return terrainLayers;
   }
 
   /**
