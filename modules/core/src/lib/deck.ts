@@ -21,7 +21,14 @@ import {webgl2Adapter} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/webgl/constants';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import type {CanvasContextProps, Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
+import type {
+  CanvasContextProps,
+  Device,
+  DeviceProps,
+  Framebuffer,
+  Parameters,
+  QuerySet
+} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -344,6 +351,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     gpuMemory: 0
   };
   private _metricsCounter: number = 0;
+  /** Timestamp query set used to measure deck's screen render GPU time. */
+  private _gpuTimerQuerySet: QuerySet | null = null;
+  /** In-flight GPU timer readback. Prevents reusing the query set before its result is consumed. */
+  private _gpuTimerReadPromise: Promise<void> | null = null;
   private _hoverPickSequence: number = 0;
   private _pointerDownPickSequence: number = 0;
 
@@ -437,6 +448,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.animationLoop?.stop();
     this.animationLoop?.destroy();
     this.animationLoop = null;
+    this._resetGpuTimer();
     this._hoverPickSequence++;
     this._pointerDownPickSequence++;
     this._lastPointerDownInfo = null;
@@ -1416,18 +1428,111 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       effects: this.effectManager!.getEffects(),
       ...renderOptions
     };
-    this.deckRenderer?.renderLayers(opts);
 
-    if (opts.pass === 'screen') {
-      // This method could be called when drawing to picking buffer, texture etc.
-      // Only when drawing to screen, update all widgets (UI components)
-      this.widgetManager!.onRedraw({
-        viewports: opts.viewports,
-        layers: opts.layers
-      });
+    const commandEncoder = device.commandEncoder as typeof device.commandEncoder & {
+      writeTimestamp?: (querySet: QuerySet, queryIndex: number) => void;
+    };
+    let gpuTimerQuerySet: QuerySet | null = null;
+
+    if (
+      opts.pass === 'screen' &&
+      !this._gpuTimerReadPromise &&
+      typeof commandEncoder.writeTimestamp === 'function'
+    ) {
+      gpuTimerQuerySet = this._getGpuTimerQuerySet(device);
+      try {
+        if (gpuTimerQuerySet) {
+          commandEncoder.writeTimestamp(gpuTimerQuerySet, 0);
+        }
+      } catch {
+        gpuTimerQuerySet = null;
+      }
+    }
+
+    try {
+      this.deckRenderer?.renderLayers(opts);
+
+      if (opts.pass === 'screen') {
+        // This method could be called when drawing to picking buffer, texture etc.
+        // Only when drawing to screen, update all widgets (UI components)
+        this.widgetManager!.onRedraw({
+          viewports: opts.viewports,
+          layers: opts.layers
+        });
+      }
+    } finally {
+      if (gpuTimerQuerySet) {
+        try {
+          commandEncoder.writeTimestamp?.(gpuTimerQuerySet, 1);
+          device.submit();
+          this._readGpuTimer(gpuTimerQuerySet);
+        } catch {
+          // GPU timing is best-effort debug telemetry. Ignore write or submit failures.
+        }
+      }
     }
 
     this.props.onAfterRender({device, gl});
+  }
+
+  /**
+   * Returns the lazily-created timestamp query set used for deck GPU frame timing.
+   * Returns `null` when the current device does not support timestamp queries.
+   */
+  private _getGpuTimerQuerySet(device: Device): QuerySet | null {
+    if (!device.features.has('timestamp-query')) {
+      return null;
+    }
+
+    if (!this._gpuTimerQuerySet || this._gpuTimerQuerySet.destroyed) {
+      try {
+        this._gpuTimerQuerySet = device.createQuerySet({
+          id: 'deck-gpu-frame-timing-query-set',
+          type: 'timestamp',
+          count: 2
+        });
+      } catch {
+        this._gpuTimerQuerySet = null;
+      }
+    }
+
+    return this._gpuTimerQuerySet;
+  }
+
+  /**
+   * Reads a completed timestamp pair and records the elapsed GPU duration in deck metrics.
+   * Failures are ignored because timestamp queries are optional debug telemetry.
+   */
+  private _readGpuTimer(querySet: QuerySet): void {
+    const readPromise = querySet
+      .readTimestampDuration(0, 1)
+      .then(durationMs => {
+        if (this._gpuTimerQuerySet !== querySet) {
+          return;
+        }
+        if (Number.isFinite(durationMs)) {
+          const gpuTimeStat = this.stats.get('GPU Time');
+          gpuTimeStat.addTime(Math.max(0, durationMs));
+          this.metrics.gpuTime = gpuTimeStat.time;
+          this.metrics.gpuTimePerFrame = gpuTimeStat.getAverageTime();
+        }
+      })
+      .catch(() => {
+        // GPU timing is best-effort debug telemetry. Ignore unavailable or disjoint results.
+      })
+      .finally(() => {
+        if (this._gpuTimerReadPromise === readPromise) {
+          this._gpuTimerReadPromise = null;
+        }
+      });
+    this._gpuTimerReadPromise = readPromise;
+  }
+
+  /** Destroys GPU timer resources and clears pending readback state. */
+  private _resetGpuTimer(): void {
+    this._gpuTimerQuerySet?.destroy();
+    this._gpuTimerQuerySet = null;
+    this._gpuTimerReadPromise = null;
   }
 
   // Callbacks
@@ -1591,7 +1696,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Get individual stats from luma.gl so reset works
     const animationLoopStats = this.animationLoop!.stats;
-    stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
     stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
   }
 
