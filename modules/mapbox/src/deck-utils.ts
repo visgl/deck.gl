@@ -51,8 +51,9 @@ export function getDeckInstance({
   };
   deckProps.views ||= getDefaultView(map);
 
-  // deck is using the WebGLContext created by mapbox,
-  // block deck from setting the canvas size, and use the map's viewState to drive deck.
+  // deck is using the WebGLContext created by mapbox.
+  // The map and its attached luma canvas context own canvas sizing and DPR state here.
+  // Deck only follows view state and avoids trying to size the shared canvas itself.
   Object.assign(deckProps, {
     width: null,
     height: null,
