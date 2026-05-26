@@ -735,7 +735,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2531) internalState is always defined when this method is called
     this.internalState.usesPickingColorCache = true;
 
-    if (cacheSize < numInstances) {
+    const isPickingColorCacheInvalid = numInstances > 0 && pickingColorCache[0] === 0;
+    if (cacheSize < numInstances || isPickingColorCacheInvalid) {
       if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
         log.warn(
           'Layer has too many data objects. Picking might not be able to distinguish all objects.'
@@ -751,7 +752,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = Math.floor(pickingColorCache.length / 4);
       const pickingColor: [number, number, number] = [0, 0, 0];
-      for (let i = cacheSize; i < newCacheSize; i++) {
+      const startIndex = isPickingColorCacheInvalid ? 0 : cacheSize;
+      for (let i = startIndex; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 4 + 0] = pickingColor[0];
         pickingColorCache[i * 4 + 1] = pickingColor[1];
