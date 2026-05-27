@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>useDevicePixels test (CDN - deck.gl 9.2)</title>
+  <script src="https://unpkg.com/deck.gl@9.2/dist.min.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body { font-family: monospace; margin: 20px; background: #1a1a2e; color: #eee; }
+    h2 span { font-size: 12px; background: #2196f3; color: white; padding: 2px 8px; border-radius: 4px; }
+    #controls { margin-bottom: 16px; }
+    .test-row { display: flex; gap: 24px; margin-bottom: 24px; }
+    .test-col { flex: 1; }
+    .test-col h3 { margin: 0 0 8px; }
+    .map { width: 100%; height: 300px; position: relative; border: 1px solid #444; }
+    .info { margin-top: 8px; line-height: 1.6; font-size: 12px; }
+    button { margin: 4px; padding: 6px 12px; cursor: pointer; }
+    button.active { background: #4caf50; color: white; }
+    .pass { color: #4caf50; } .fail { color: #f44336; }
+  </style>
+</head>
+<body>
+  <h2>useDevicePixels test <span>CDN deck.gl 9.2</span></h2>
+  <p>Side-by-side: standalone Deck vs MapboxOverlay interleaved. Uses published deck.gl 9.1 UMD bundle.</p>
+
+  <div id="controls">
+    <button id="btn-true" class="active" onclick="setUDP(true)">useDevicePixels: true</button>
+    <button id="btn-1.5" onclick="setUDP(1.5)">useDevicePixels: 1.5</button>
+    <button id="btn-1" onclick="setUDP(1)">useDevicePixels: 1</button>
+    <button id="btn-false" onclick="setUDP(false)">useDevicePixels: false</button>
+  </div>
+
+  <div class="test-row">
+    <div class="test-col">
+      <h3>Standalone Deck (internal device)</h3>
+      <div id="map-standalone" class="map"></div>
+      <div id="info-standalone" class="info">Loading...</div>
+    </div>
+    <div class="test-col">
+      <h3>MapboxOverlay interleaved (attached gl)</h3>
+      <div id="map-interleaved" class="map"></div>
+      <div id="info-interleaved" class="info">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    const {Deck, MapView} = globalThis.deck;
+    const {MapboxOverlay} = globalThis.deck;
+    const {ScatterplotLayer} = globalThis.deck;
+
+    const DATA = Array.from({length: 200}, (_, i) => ({
+      position: [-0.1 + Math.random() * 0.6, 51.3 + Math.random() * 0.3],
+      radius: 2000 + Math.random() * 5000
+    }));
+
+    function makeLayers() {
+      return [
+        new ScatterplotLayer({
+          id: 'scatter',
+          data: DATA,
+          getPosition: d => d.position,
+          getRadius: d => d.radius,
+          getFillColor: [255, 140, 0, 180],
+          stroked: true,
+          getLineColor: [255, 255, 255, 200],
+          lineWidthMinPixels: 1
+        })
+      ];
+    }
+
+    let currentUDP = true;
+
+    // --- Standalone Deck ---
+    const deck = new Deck({
+      parent: document.getElementById('map-standalone'),
+      width: '100%',
+      height: '100%',
+      initialViewState: { longitude: 0.1, latitude: 51.5, zoom: 7 },
+      controller: true,
+      useDevicePixels: currentUDP,
+      layers: makeLayers()
+    });
+
+    // --- Interleaved (MapLibre + MapboxOverlay) ---
+    const map = new maplibregl.Map({
+      container: 'map-interleaved',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      center: [0.1, 51.5],
+      zoom: 7
+    });
+
+    const overlay = new MapboxOverlay({
+      interleaved: true,
+      useDevicePixels: currentUDP,
+      layers: makeLayers()
+    });
+
+    map.on('load', () => {
+      map.addControl(overlay);
+    });
+
+    // --- Controls ---
+    window.setUDP = function(value) {
+      currentUDP = value;
+      deck.setProps({ useDevicePixels: value });
+      overlay.setProps({ useDevicePixels: value, layers: makeLayers() });
+      document.querySelectorAll('#controls button').forEach(b => b.classList.remove('active'));
+      document.getElementById(
+        value === true ? 'btn-true' : value === false ? 'btn-false' : 'btn-' + value
+      ).classList.add('active');
+      setTimeout(updateInfo, 300);
+    };
+
+    function getCanvasInfo(container) {
+      const canvas = container.querySelector('canvas');
+      if (!canvas) return null;
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      return {
+        cssW: canvas.clientWidth,
+        cssH: canvas.clientHeight,
+        bufW: gl ? gl.drawingBufferWidth : canvas.width,
+        bufH: gl ? gl.drawingBufferHeight : canvas.height
+      };
+    }
+
+    function renderInfo(elId, info) {
+      const el = document.getElementById(elId);
+      if (!info) { el.textContent = 'No canvas found'; return; }
+
+      const dpr = window.devicePixelRatio;
+      const actualRatio = (info.bufW / info.cssW).toFixed(3);
+
+      let expectedRatio;
+      if (currentUDP === true) expectedRatio = dpr;
+      else if (currentUDP === false) expectedRatio = 1;
+      else expectedRatio = currentUDP;
+
+      const tolerance = 0.05;
+      const match = Math.abs(actualRatio - expectedRatio) < tolerance;
+
+      el.innerHTML =
+        '<div><b>DPR:</b> ' + dpr + ' | <b>useDevicePixels:</b> ' + JSON.stringify(currentUDP) + '</div>' +
+        '<div><b>CSS:</b> ' + info.cssW + 'x' + info.cssH + ' | <b>Buffer:</b> ' + info.bufW + 'x' + info.bufH + '</div>' +
+        '<div><b>Actual ratio:</b> ' + actualRatio + ' | <b>Expected:</b> ' + expectedRatio.toFixed(3) + '</div>' +
+        '<div class="' + (match ? 'pass' : 'fail') + '"><b>' + (match ? 'PASS' : 'FAIL') + '</b> ' +
+        (match ? '' : '- buffer ratio does not match useDevicePixels setting') + '</div>';
+    }
+
+    function updateInfo() {
+      renderInfo('info-standalone', getCanvasInfo(document.getElementById('map-standalone')));
+      renderInfo('info-interleaved', getCanvasInfo(document.getElementById('map-interleaved')));
+    }
+
+    setInterval(updateInfo, 500);
+  </script>
+</body>
+</html>

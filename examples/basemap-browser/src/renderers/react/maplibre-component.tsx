@@ -59,9 +59,16 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapLibreMap
-        key={`maplibre-${interleaved}-${globe}-${multiView}`}
+        key={`maplibre-${interleaved}-${globe}-${multiView}-${useDevicePixels}`}
         mapStyle={mapStyle}
         initialViewState={mapInitialViewState}
+        pixelRatio={
+          typeof useDevicePixels === 'number'
+            ? useDevicePixels
+            : useDevicePixels === false
+              ? 1
+              : undefined
+        }
         onLoad={e => {
           if (globe && isMountedRef.current) {
             // Set projection before rendering overlay (critical for globe + interleaved mode)

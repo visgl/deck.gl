@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>useDevicePixels test - MapLibre pixelRatio vs Deck useDevicePixels</title>
+  <script src="https://unpkg.com/deck.gl@9.3/dist.min.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body { font-family: monospace; margin: 20px; background: #1a1a2e; color: #eee; }
+    h2 span { font-size: 12px; background: #2196f3; color: white; padding: 2px 8px; border-radius: 4px; }
+    #controls { margin-bottom: 16px; }
+    .test-row { display: flex; gap: 24px; margin-bottom: 24px; }
+    .test-col { flex: 1; }
+    .test-col h3 { margin: 0 0 8px; font-size: 14px; }
+    .map { width: 100%; height: 300px; position: relative; border: 1px solid #444; }
+    .info { margin-top: 8px; line-height: 1.6; font-size: 12px; }
+    button { margin: 4px; padding: 6px 12px; cursor: pointer; }
+    button.active { background: #4caf50; color: white; }
+    .pass { color: #4caf50; } .fail { color: #f44336; }
+    .section-label { color: #aaa; margin-bottom: 4px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h2>MapLibre pixelRatio vs Deck useDevicePixels <span>deck.gl 9.3</span></h2>
+  <p>Left: MapLibre's <code>pixelRatio</code> controls the canvas buffer. Right: Deck's <code>useDevicePixels</code> on standalone.<br>
+  This tests whether the interleaved buffer is controlled by MapLibre's pixelRatio (not Deck's useDevicePixels).</p>
+
+  <div id="controls">
+    <button id="btn-native" class="active" onclick="setRatio('native')">Native DPR</button>
+    <button id="btn-1.5" onclick="setRatio(1.5)">Ratio: 1.5</button>
+    <button id="btn-1" onclick="setRatio(1)">Ratio: 1</button>
+    <button id="btn-0.5" onclick="setRatio(0.5)">Ratio: 0.5</button>
+  </div>
+
+  <div class="test-row">
+    <div class="test-col">
+      <h3>MapboxOverlay interleaved<br><span class="section-label">Uses MapLibre pixelRatio (recreates map)</span></h3>
+      <div id="map-interleaved" class="map"></div>
+      <div id="info-interleaved" class="info">Loading...</div>
+    </div>
+    <div class="test-col">
+      <h3>Standalone Deck<br><span class="section-label">Uses Deck useDevicePixels</span></h3>
+      <div id="map-standalone" class="map"></div>
+      <div id="info-standalone" class="info">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    const {Deck} = globalThis.deck;
+    const {MapboxOverlay} = globalThis.deck;
+    const {ScatterplotLayer} = globalThis.deck;
+
+    const DATA = Array.from({length: 200}, (_, i) => ({
+      position: [-0.1 + Math.random() * 0.6, 51.3 + Math.random() * 0.3],
+      radius: 2000 + Math.random() * 5000
+    }));
+
+    function makeLayers() {
+      return [
+        new ScatterplotLayer({
+          id: 'scatter',
+          data: DATA,
+          getPosition: d => d.position,
+          getRadius: d => d.radius,
+          getFillColor: [255, 140, 0, 180],
+          stroked: true,
+          getLineColor: [255, 255, 255, 200],
+          lineWidthMinPixels: 1
+        })
+      ];
+    }
+
+    let currentRatio = 'native';
+
+    // --- Standalone Deck ---
+    const deck = new Deck({
+      parent: document.getElementById('map-standalone'),
+      width: '100%',
+      height: '100%',
+      initialViewState: { longitude: 0.1, latitude: 51.5, zoom: 7 },
+      controller: true,
+      useDevicePixels: true,
+      layers: makeLayers()
+    });
+
+    // --- Interleaved (MapLibre + MapboxOverlay) ---
+    let map = null;
+    let overlay = null;
+
+    function createInterleavedMap(pixelRatio) {
+      const container = document.getElementById('map-interleaved');
+      if (map) {
+        map.remove();
+        container.innerHTML = '';
+      }
+
+      const mapOpts = {
+        container: container,
+        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        center: [0.1, 51.5],
+        zoom: 7
+      };
+
+      if (pixelRatio !== 'native') {
+        mapOpts.pixelRatio = pixelRatio;
+      }
+
+      map = new maplibregl.Map(mapOpts);
+
+      overlay = new MapboxOverlay({
+        interleaved: true,
+        layers: makeLayers()
+      });
+
+      map.on('load', () => {
+        map.addControl(overlay);
+        setTimeout(updateInfo, 300);
+      });
+    }
+
+    createInterleavedMap('native');
+
+    // --- Controls ---
+    window.setRatio = function(value) {
+      currentRatio = value;
+
+      // Standalone Deck: use useDevicePixels
+      const udp = value === 'native' ? true : value;
+      deck.setProps({ useDevicePixels: udp });
+
+      // Interleaved: recreate map with MapLibre's pixelRatio
+      createInterleavedMap(value);
+
+      document.querySelectorAll('#controls button').forEach(b => b.classList.remove('active'));
+      document.getElementById(
+        value === 'native' ? 'btn-native' : 'btn-' + value
+      ).classList.add('active');
+      setTimeout(updateInfo, 500);
+    };
+
+    function getCanvasInfo(container) {
+      const canvas = container.querySelector('canvas');
+      if (!canvas) return null;
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      return {
+        cssW: canvas.clientWidth,
+        cssH: canvas.clientHeight,
+        bufW: gl ? gl.drawingBufferWidth : canvas.width,
+        bufH: gl ? gl.drawingBufferHeight : canvas.height
+      };
+    }
+
+    function renderInfo(elId, info, expectedRatio) {
+      const el = document.getElementById(elId);
+      if (!info) { el.textContent = 'No canvas found'; return; }
+
+      const dpr = window.devicePixelRatio;
+      const actualRatio = (info.bufW / info.cssW).toFixed(3);
+
+      const tolerance = 0.05;
+      const match = Math.abs(actualRatio - expectedRatio) < tolerance;
+
+      el.innerHTML =
+        '<div><b>DPR:</b> ' + dpr + ' | <b>Requested ratio:</b> ' + (currentRatio === 'native' ? 'native (' + dpr + ')' : currentRatio) + '</div>' +
+        '<div><b>CSS:</b> ' + info.cssW + 'x' + info.cssH + ' | <b>Buffer:</b> ' + info.bufW + 'x' + info.bufH + '</div>' +
+        '<div><b>Actual ratio:</b> ' + actualRatio + ' | <b>Expected:</b> ' + expectedRatio.toFixed(3) + '</div>' +
+        '<div class="' + (match ? 'pass' : 'fail') + '"><b>' + (match ? 'PASS' : 'FAIL') + '</b> ' +
+        (match ? '' : '- buffer ratio does not match requested setting') + '</div>';
+    }
+
+    function updateInfo() {
+      const dpr = window.devicePixelRatio;
+      const expectedRatio = currentRatio === 'native' ? dpr : currentRatio;
+      renderInfo('info-standalone', getCanvasInfo(document.getElementById('map-standalone')), expectedRatio);
+      renderInfo('info-interleaved', getCanvasInfo(document.getElementById('map-interleaved')), expectedRatio);
+    }
+
+    setInterval(updateInfo, 500);
+  </script>
+</body>
+</html>

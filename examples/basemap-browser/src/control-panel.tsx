@@ -262,7 +262,7 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
           </label>
         </div>
 
-        {/* useDevicePixels override */}
+        {/* Pixel Ratio Override */}
         <div className="section">
           <label>
             <input
@@ -272,7 +272,7 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
                 updateDimension('useDevicePixels', dimensions.useDevicePixels === true ? 1.5 : true)
               }
             />
-            useDevicePixels: {String(dimensions.useDevicePixels)}
+            Override Pixel Ratio (1.5)
           </label>
         </div>
 
