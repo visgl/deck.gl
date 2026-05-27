@@ -68,6 +68,20 @@ function getDimensionsFromUrl(): Partial<Dimensions> {
     result.stressTest = stressTest;
   }
 
+  if (params.has('useDevicePixels')) {
+    const udp = params.get('useDevicePixels');
+    if (udp === 'true') {
+      result.useDevicePixels = true;
+    } else if (udp === 'false') {
+      result.useDevicePixels = false;
+    } else {
+      const num = Number(udp);
+      if (Number.isFinite(num) && num > 0) {
+        result.useDevicePixels = num;
+      }
+    }
+  }
+
   return result;
 }
 
@@ -81,6 +95,7 @@ function setUrlFromDimensions(dimensions: Dimensions) {
   params.set('multiView', String(dimensions.multiView));
   params.set('maskDemo', String(dimensions.maskDemo));
   params.set('stressTest', dimensions.stressTest);
+  params.set('useDevicePixels', String(dimensions.useDevicePixels));
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', newUrl);
 }
