@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
 
 import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
+import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {MapViewState} from '@deck.gl/core';
 
 // Set your mapbox token here
@@ -36,17 +37,22 @@ const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
 export default function App({
   texture = SURFACE_IMAGE,
   wireframe = false,
+  globeView = false,
   initialViewState = INITIAL_VIEW_STATE
 }: {
   texture?: string;
   wireframe?: boolean;
+  globeView?: boolean;
   initialViewState?: MapViewState;
 }) {
+  const [viewState, setViewState] = useState(initialViewState);
+  const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
+
   const layer = new TerrainLayer({
     id: 'terrain',
     minZoom: 0,
-    maxZoom: 23,
-    strategy: 'no-overlap',
+    maxZoom: 14,
+    refinementStrategy: 'best-available',
     elevationDecoder: ELEVATION_DECODER,
     elevationData: TERRAIN_IMAGE,
     texture,
@@ -57,8 +63,11 @@ export default function App({
 
   return (
     <DeckGL
-      initialViewState={initialViewState}
+      views={globeView ? new GlobeView() : new MapView()}
+      viewState={viewState}
+      onViewStateChange={onViewStateChange}
       controller={true}
+      parameters={{cull: true}}
       layers={[layer]}
       getTooltip={info => {
         if (info.picked && info.coordinate && info.coordinate.length === 3) {

@@ -188,6 +188,33 @@ test('SplitterWidget - uncontrolled', async () => {
   expect(views[1].props.width).toBe('75%');
 });
 
+test('SplitterWidget - uncontrolled nested layout', async () => {
+  const widget = new SplitterWidget<OrbitView[]>({viewLayout: orbitLayout2x2});
+  testInstance = new WidgetTester<OrbitView[]>({
+    initialViewState: {
+      top: {target: [0, 0, 0], zoom: 1},
+      front: {target: [0, 0, 0], zoom: 1},
+      left: {target: [0, 0, 0], zoom: 1},
+      perspective: {target: [0, 0, 0], zoom: 1}
+    },
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  const views = testInstance.getProps().views ?? [];
+  expect(views).toHaveLength(4);
+  expect(views.map(view => view.id)).toEqual(['top', 'front', 'left', 'perspective']);
+  expect(views.map(view => view.props.x)).toEqual(['0%', '0%', '50%', '50%']);
+  expect(views.map(view => view.props.y)).toEqual(['0%', '30%', '0%', '60%']);
+  expect(views.map(view => view.props.width)).toEqual(['50%', '50%', '50%', '50%']);
+  expect(views.map(view => view.props.height)).toEqual(['30%', '70%', '60%', '40%']);
+  expect(widget.viewLayouts.map(layout => layout.splitId)).toEqual([
+    'splitter-0',
+    'splitter-1',
+    'splitter-2'
+  ]);
+});
+
 test('SplitterWidget - controlled', async () => {
   const onViewsChange = vi.fn();
   const widget = new SplitterWidget<MapView[]>({
