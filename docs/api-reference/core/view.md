@@ -107,6 +107,12 @@ Specifies the stencil buffer value to clear the viewport with, as number between
 
 Default `0` (clear).
 
+#### `parameters` (object, optional) {#parameters}
+
+Override the GPU parameters used to draw layers in this view. See the luma.gl [GPU parameters](https://luma.gl/docs/api-reference/core/parameters) documentation for supported parameters and values.
+
+View parameters override the `Deck.parameters` defaults for layers rendered in this view. Layer `parameters` still take precedence over both.
+
 **Examples:**
 
 *   Clearing to a solid color: `new View({clear: true, clearColor: [80, 120, 200, 255]})`

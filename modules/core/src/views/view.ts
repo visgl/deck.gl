@@ -11,6 +11,7 @@ import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
 import type {Padding} from '../viewports/viewport';
 import type {ConstructorOf} from '../types/types';
+import type {Parameters} from '@luma.gl/core';
 
 export type CommonViewState = TransitionProps;
 
@@ -40,6 +41,8 @@ export type CommonViewProps<ViewState> = {
   clearDepth?: number | false;
   /** Stencil buffer Value to clear the viewport with, between 0 - 255. Default `0` (clear). */
   clearStencil?: number | false;
+  /** Override the GPU parameters used to draw layers in this view. */
+  parameters?: Parameters;
   /** State of the view */
   viewState?:
     | string

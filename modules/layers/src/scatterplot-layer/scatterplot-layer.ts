@@ -117,6 +117,11 @@ type _ScatterplotLayerProps<DataT> = {
    */
   getLineWidth?: Accessor<DataT, number>;
   /**
+   * Pixel offset accessor, [x, y] in pixels.
+   * @default [0, 0]
+   */
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  /**
    * @deprecated Use `getLineWidth` instead
    */
   strokeWidth?: number;
@@ -151,6 +156,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
 
   // deprecated
   strokeWidth: {deprecatedFor: 'getLineWidth'},
@@ -212,6 +218,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         accessor: 'getLineWidth',
         defaultValue: 1
+      },
+      instancePixelOffset: {
+        size: 2,
+        transition: true,
+        accessor: 'getPixelOffset'
       }
     });
   }

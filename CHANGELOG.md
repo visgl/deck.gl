@@ -24,6 +24,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 #### deck.gl [v9.3.3-or] - May 14 2026
 
 - Port fix(text-layer): support collision filtering with getPixelOffset, getTextAnchor, and getAlignmentBaseline from 9.2-release
+- fix(extensions): MaskExtension compatible with TerrainExtension (#10187)
+- feat(carto): Clipped polygon labels (#10278)
+- feat(core): ViewProps.parameters (#10262)
+- feat(layers): add getPixelOffset prop to ScatterplotLayer (#10178)
 
 #### deck.gl [v9.3.2] - Apr 30 2026
 

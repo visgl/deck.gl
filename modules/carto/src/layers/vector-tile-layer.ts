@@ -217,7 +217,8 @@ export default class VectorTileLayer<
         labelData.points = createPointsFromPolygons(
           props.data.polygons,
           this.state.mvt ? MVT_BBOX : tileBbox,
-          props
+          props,
+          tileBbox
         );
       }
 

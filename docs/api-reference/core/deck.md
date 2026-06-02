@@ -179,7 +179,8 @@ new Deck({
 
 Notes:
 
-- Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
+- GPU `parameters` supplied to a view override the global `parameters` for layers rendered in that view.
+- GPU `parameters` supplied to individual layers override both view and global `parameters` when that layer is rendered.
 
 #### `layers` (LayersList) {#layers}
 

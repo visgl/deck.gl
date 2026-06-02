@@ -38,6 +38,7 @@ export class TerrainEffect implements Effect {
       height: 1,
       data: new Uint8Array([0, 0, 0, 0])
     });
+
     this.terrainPass = new TerrainPass(device, {id: 'terrain'});
     this.terrainPickingPass = new TerrainPickingPass(device, {id: 'terrain-picking'});
 
@@ -83,13 +84,29 @@ export class TerrainEffect implements Effect {
     }
 
     const drapeLayers = layers.filter(l => l.state.terrainDrawMode === 'drape');
-    this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
+    // Filter out the terrain effect itself to avoid feedback loops when rendering terrain covers
+    // (the terrain cover FBO would be both read and written to). Other effects like MaskEffect
+    // need to be passed through so they can apply to draped layers.
+    const nonTerrainEffects = opts.effects?.filter(e => e !== this);
+    this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, {
+      ...opts,
+      effects: nonTerrainEffects
+    });
   }
 
   getShaderModuleProps(
     layer: Layer,
     otherShaderModuleProps: Record<string, any>
-  ): {terrain: TerrainModuleProps} {
+  ): {terrain: Partial<TerrainModuleProps>} {
+    // Mask layers need the terrain_map binding satisfied but shouldn't use terrain features
+    if (layer.props.operation.includes('mask')) {
+      return {
+        terrain: {
+          dummyHeightMap: this.dummyHeightMap!
+        }
+      };
+    }
+
     const {terrainDrawMode} = layer.state;
     const terrainCover = this.isDrapingEnabled ? (this.terrainCovers.get(layer.id) ?? null) : null;
 

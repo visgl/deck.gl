@@ -6,6 +6,11 @@ import View, {CommonViewState, CommonViewProps} from './view';
 import GlobeViewport from '../viewports/globe-viewport';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import GlobeController from '../controllers/globe-controller';
+import type {Parameters} from '@luma.gl/core';
+
+const GLOBE_VIEW_DEFAULT_PARAMETERS: Parameters = {
+  cullMode: 'back'
+};
 
 export type GlobeViewState = {
   /** Longitude of the map center */
@@ -39,7 +44,13 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
   static displayName = 'GlobeView';
 
   constructor(props: GlobeViewProps = {}) {
-    super(props);
+    super({
+      ...props,
+      parameters: {
+        ...GLOBE_VIEW_DEFAULT_PARAMETERS,
+        ...props.parameters
+      }
+    });
   }
 
   getViewportType(viewState: GlobeViewState) {
