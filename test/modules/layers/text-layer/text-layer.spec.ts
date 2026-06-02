@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 
-import {TextLayer} from '@deck.gl/layers';
+import {TextLayer, _TextBackgroundLayer as TextBackgroundLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
@@ -354,6 +354,10 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
           subLayers[2].id.includes('collision-marker'),
           'marker layer is created'
         ).toBeTruthy();
+        expect(
+          subLayers[2] instanceof TextBackgroundLayer,
+          'marker layer uses a background proxy'
+        ).toBeTruthy();
         expect(subLayers[2].props.collisionDrawMode, 'marker only writes to collision map').toBe(
           'map-only'
         );
@@ -418,16 +422,61 @@ test('TextLayer - collision filter forwards pixel offset to sublayers', () => {
         getAlignmentBaseline: 'center'
       },
       onAfterUpdate: ({subLayers}) => {
-        expect(subLayers.length, 'default anchor and baseline do not render marker layer').toBe(2);
+        expect(subLayers.length, 'default anchor and baseline still render marker layer').toBe(3);
         expect(
           subLayers.some(layer => layer.id.includes('collision-marker')),
-          'marker layer is omitted for default anchor and baseline'
-        ).toBeFalsy();
+          'marker layer is retained for default anchor and baseline'
+        ).toBeTruthy();
       }
     }
   ];
 
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision marker covers centered numeric labels', () => {
+  const data = [{position: [-122.4, 37.8], text: '1296.3 MW'}];
+
+  testLayer({
+    Layer: TextLayer,
+    testCases: [
+      {
+        props: {
+          data,
+          getText: d => d.text,
+          getPosition: d => d.position,
+          extensions: [new CollisionFilterExtension()],
+          collisionEnabled: true,
+          collisionTestProps: {
+            sizeScale: 2
+          }
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(subLayers.length, 'renders characters and collision marker').toBe(2);
+          expect(
+            subLayers[0].props.collisionDrawMode,
+            'characters only sample the collision proxy'
+          ).toBe('sample-only');
+          expect(
+            subLayers[1] instanceof TextBackgroundLayer,
+            'marker layer uses a background proxy'
+          ).toBeTruthy();
+          expect(
+            subLayers[1].id.includes('collision-marker'),
+            'marker layer is created'
+          ).toBeTruthy();
+          expect(subLayers[1].props.collisionDrawMode, 'marker only writes to collision map').toBe(
+            'map-only'
+          );
+          const [, , width, height] = subLayers[1].props.getBoundingRect(data[0], {index: 0});
+          expect(width, 'marker uses a non-empty glyph-bounds width').toBeGreaterThan(0);
+          expect(height, 'marker uses a non-empty glyph-bounds height').toBeGreaterThan(0);
+          expect(subLayers[1].props.collisionTestProps).toEqual({sizeScale: 2});
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('TextLayer - collision picking colors expand to every glyph', () => {

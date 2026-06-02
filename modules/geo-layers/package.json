@@ -3,7 +3,7 @@
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.3-or",
+  "version": "9.3.4-or",
   "publishConfig": {
     "access": "public"
   },
@@ -57,10 +57,10 @@
     "long": "^3.2.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.3-or",
-    "@deck.gl/extensions": "~9.3.3-or",
-    "@deck.gl/layers": "~9.3.3-or",
-    "@deck.gl/mesh-layers": "~9.3.3-or",
+    "@deck.gl/core": "~9.3.4-or",
+    "@deck.gl/extensions": "~9.3.4-or",
+    "@deck.gl/layers": "~9.3.4-or",
+    "@deck.gl/mesh-layers": "~9.3.4-or",
     "@loaders.gl/core": "^4.4.1",
     "@luma.gl/core": "~9.3.3",
     "@luma.gl/engine": "~9.3.3"

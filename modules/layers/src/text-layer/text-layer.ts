@@ -75,40 +75,13 @@ type CollisionTestProps = {
   };
 };
 
-function usesAnchoredCollisionSampling<DataT>(props: CollisionMarkerProps<DataT>): boolean {
-  const {getTextAnchor, getAlignmentBaseline} = props as TextLayerProps<DataT>;
-  return (
-    typeof getTextAnchor === 'function' ||
-    typeof getAlignmentBaseline === 'function' ||
-    getTextAnchor !== 'middle' ||
-    getAlignmentBaseline !== 'center'
-  );
-}
-
-function usesCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>): boolean {
-  const {getPixelOffset, contentAlignHorizontal, contentAlignVertical} =
-    props as TextLayerProps<DataT>;
-
-  const usesPixelOffset =
-    typeof getPixelOffset === 'function' ||
-    (getPixelOffset?.[0] ?? 0) !== 0 ||
-    (getPixelOffset?.[1] ?? 0) !== 0;
-
-  return (
-    usesAnchoredCollisionSampling(props) ||
-    usesPixelOffset ||
-    contentAlignHorizontal !== 'none' ||
-    contentAlignVertical !== 'none'
-  );
-}
-
 function needsCollisionMarker<DataT>(props: CollisionMarkerProps<DataT>) {
   const {billboard} = props as TextLayerProps<DataT>;
   if (!billboard || !hasCollisionFilterExtension(props.extensions)) {
     return false;
   }
 
-  return usesCollisionMarker(props);
+  return true;
 }
 
 type _TextLayerProps<DataT> = {
@@ -691,10 +664,9 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
     const collisionTestProps = (this.props as CollisionTestProps).collisionTestProps || {};
     const collisionMarkerEnabled = needsCollisionMarker(this.props);
-    const collisionOffsetAccessor =
-      collisionMarkerEnabled && usesAnchoredCollisionSampling(this.props)
-        ? this.getScaledGlyphCollisionOffset
-        : this.getCollisionOffset;
+    const collisionOffsetAccessor = collisionMarkerEnabled
+      ? this.getScaledGlyphCollisionOffset
+      : this.getCollisionOffset;
 
     const CharactersLayerClass: _ConstructorOf<Layer> = this.getSubLayerClass(
       'characters',
@@ -853,86 +825,70 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getIcon: getText
         }
       ),
-      collisionMarkerEnabled &&
-        new CharactersLayerClass(
-          {
-            sdf: fontSettings.sdf,
-            smoothing: Number.isFinite(fontSettings.smoothing)
-              ? fontSettings.smoothing
-              : DEFAULT_FONT_SETTINGS.smoothing,
-            outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
-            outlineColor,
-            iconAtlas: atlas,
-            iconMapping: mapping,
-
-            getPosition,
-            getColor: [0, 0, 0, 0],
-            getSize,
-            getAngle,
-            getPixelOffset,
-            getCollisionOffset: collisionOffsetAccessor,
-            getContentBox,
-            billboard,
-            collisionDrawMode: 'map-only',
-            sizeScale,
-            sizeUnits,
-            sizeMinPixels,
-            sizeMaxPixels,
-            fontSize,
-            contentCutoffPixels,
-            contentAlignHorizontal,
-            contentAlignVertical,
-            pickable: false,
-            transitions: transitions && {
-              getPosition: transitions.getPosition,
-              getAngle: transitions.getAngle,
-              getSize: transitions.getSize,
-              getPixelOffset: transitions.getPixelOffset,
-              getContentBox: transitions.getContentBox
-            }
-          },
-          this.getSubLayerProps({
-            id: 'collision-marker',
-            extensions: getCollisionFilterExtensions(this.props.extensions),
-            collisionTestProps,
-            updateTriggers: {
-              getPosition: updateTriggers.getPosition,
-              getAngle: updateTriggers.getAngle,
-              getSize: updateTriggers.getSize,
-              getPixelOffset: updateTriggers.getPixelOffset,
-              getCollisionOffset: {
-                getText: updateTriggers.getText ?? textAccessor,
-                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
-                styleVersion
-              },
-              getContentBox: updateTriggers.getContentBox,
-              getIconOffsets: {
-                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
-                styleVersion
-              },
-              getBoundingRect: {
-                getText: updateTriggers.getText ?? textAccessor,
-                getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
-                styleVersion
+      collisionMarkerEnabled
+        ? new BackgroundLayerClass(
+            {
+              getPosition,
+              getSize,
+              getAngle,
+              getPixelOffset,
+              getCollisionOffset: collisionOffsetAccessor,
+              getContentBox,
+              getFillColor: [0, 0, 0, 0],
+              getLineColor: [0, 0, 0, 0],
+              getLineWidth: 0,
+              borderRadius: 0,
+              padding: [0, 0],
+              billboard,
+              collisionDrawMode: 'map-only',
+              sizeScale,
+              sizeUnits,
+              sizeMinPixels,
+              sizeMaxPixels,
+              fontSize,
+              pickable: false,
+              transitions: transitions && {
+                getPosition: transitions.getPosition,
+                getAngle: transitions.getAngle,
+                getSize: transitions.getSize,
+                getPixelOffset: transitions.getPixelOffset
               }
+            },
+            this.getSubLayerProps({
+              id: 'collision-marker',
+              extensions: getCollisionFilterExtensions(this.props.extensions),
+              collisionTestProps,
+              updateTriggers: {
+                getPosition: updateTriggers.getPosition,
+                getAngle: updateTriggers.getAngle,
+                getSize: updateTriggers.getSize,
+                getPixelOffset: updateTriggers.getPixelOffset,
+                getCollisionOffset: {
+                  getText: updateTriggers.getText ?? textAccessor,
+                  getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                  getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                  styleVersion
+                },
+                getContentBox: updateTriggers.getContentBox,
+                getBoundingRect: {
+                  getText: updateTriggers.getText ?? textAccessor,
+                  getTextAnchor: updateTriggers.getTextAnchor ?? getTextAnchor,
+                  getAlignmentBaseline: updateTriggers.getAlignmentBaseline ?? getAlignmentBaseline,
+                  styleVersion
+                }
+              }
+            }),
+            {
+              data,
+              _dataDiff,
+              autoHighlight: false,
+              extensions: getCollisionFilterExtensions(this.props.extensions),
+              collisionTestProps,
+              collisionDrawMode: 'map-only',
+              getBoundingRect: this.getCollisionRect
             }
-          }),
-          {
-            data,
-            _dataDiff,
-            startIndices,
-            numInstances,
-            autoHighlight: false,
-            extensions: getCollisionFilterExtensions(this.props.extensions),
-            collisionTestProps,
-            collisionDrawMode: 'map-only',
-            getIconOffsets: this.getIconOffsets,
-            getIcon: getText
-          }
-        )
+          )
+        : null
     ];
   }
 

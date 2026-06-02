@@ -3,7 +3,7 @@
   "description": "deck.gl layers that aggregate the input data into alternative representations",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.3-or",
+  "version": "9.3.4-or",
   "publishConfig": {
     "access": "public"
   },
@@ -44,8 +44,8 @@
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.3-or",
-    "@deck.gl/layers": "~9.3.3-or",
+    "@deck.gl/core": "~9.3.4-or",
+    "@deck.gl/layers": "~9.3.4-or",
     "@luma.gl/core": "~9.3.2",
     "@luma.gl/engine": "~9.3.2"
   },

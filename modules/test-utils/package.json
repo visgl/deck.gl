@@ -3,7 +3,7 @@
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.3-or",
+  "version": "9.3.4-or",
   "publishConfig": {
     "access": "public"
   },
@@ -41,7 +41,7 @@
     "@luma.gl/webgl": "^9.3.3"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.3-or",
+    "@deck.gl/core": "~9.3.4-or",
     "@luma.gl/core": "~9.3.3",
     "@luma.gl/engine": "~9.3.3",
     "@probe.gl/test-utils": "^4.1.1",
