@@ -17,6 +17,7 @@ import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
+import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
@@ -57,6 +58,18 @@ const areViewportsEqual = memoize(
 );
 
 let pickingColorCache = new Uint8ClampedArray(0);
+
+function getPickingAttribute(attributes: Record<string, Attribute>): Attribute | undefined {
+  return attributes.rowIndexes || attributes.pickingColors || attributes.instancePickingColors;
+}
+
+function getPickingIndexAttribute(attributes: Record<string, Attribute>): Attribute | undefined {
+  return attributes.rowIndexes;
+}
+
+function getPickingColorAttribute(attributes: Record<string, Attribute>): Attribute | undefined {
+  return attributes.pickingColors || attributes.instancePickingColors;
+}
 
 const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
@@ -497,16 +510,17 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Only generate picking buffer if needed
       if (hasPickingBuffer !== needsPickingBuffer) {
         this.internalState!.hasPickingBuffer = needsPickingBuffer;
-        const {pickingColors, instancePickingColors} = attributeManager.attributes;
-        const pickingColorsAttribute = pickingColors || instancePickingColors;
-        if (pickingColorsAttribute) {
-          if (needsPickingBuffer && pickingColorsAttribute.constant) {
-            pickingColorsAttribute.constant = false;
-            attributeManager.invalidate(pickingColorsAttribute.id);
+        const pickingAttribute = getPickingAttribute(attributeManager.attributes);
+        if (pickingAttribute) {
+          if (needsPickingBuffer && pickingAttribute.constant) {
+            pickingAttribute.constant = false;
+            attributeManager.invalidate(pickingAttribute.id);
           }
-          if (!pickingColorsAttribute.value && !needsPickingBuffer) {
-            pickingColorsAttribute.constant = true;
-            pickingColorsAttribute.value = [0, 0, 0];
+          if (!pickingAttribute.value && !needsPickingBuffer) {
+            pickingAttribute.constant = true;
+            pickingAttribute.value = getPickingIndexAttribute(attributeManager.attributes)
+              ? [PICKING_INVALID_INDEX]
+              : [0, 0, 0];
           }
         }
       }
@@ -721,7 +735,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2531) internalState is always defined when this method is called
     this.internalState.usesPickingColorCache = true;
 
-    if (cacheSize < numInstances) {
+    const isPickingColorCacheInvalid = numInstances > 0 && pickingColorCache[0] === 0;
+    if (cacheSize < numInstances || isPickingColorCacheInvalid) {
       if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
         log.warn(
           'Layer has too many data objects. Picking might not be able to distinguish all objects.'
@@ -737,7 +752,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
       const newCacheSize = Math.floor(pickingColorCache.length / 4);
       const pickingColor: [number, number, number] = [0, 0, 0];
-      for (let i = cacheSize; i < newCacheSize; i++) {
+      const startIndex = isPickingColorCacheInvalid ? 0 : cacheSize;
+      for (let i = startIndex; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
         pickingColorCache[i * 4 + 0] = pickingColor[0];
         pickingColorCache[i * 4 + 1] = pickingColor[1];
@@ -807,8 +823,23 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
-    const colors = pickingColors || instancePickingColors;
+    const attributes = this.getAttributeManager().attributes;
+    const indexes = getPickingIndexAttribute(attributes);
+    const colors = getPickingColorAttribute(attributes);
+
+    const externalIndexAttribute =
+      indexes && data.attributes && (data.attributes[indexes.id] as BinaryAttribute);
+    if (externalIndexAttribute && externalIndexAttribute.value) {
+      const values = externalIndexAttribute.value;
+      for (let index = 0; index < data.length; index++) {
+        const i = indexes.getVertexOffset(index);
+        if (values[i] === objectIndex) {
+          this._disablePickingIndex(index);
+        }
+      }
+      return;
+    }
+
     const externalColorAttribute =
       colors && data.attributes && (data.attributes[colors.id] as BinaryAttribute);
     if (externalColorAttribute && externalColorAttribute.value) {
@@ -832,9 +863,22 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // TODO - simplify subclassing interface
   protected _disablePickingIndex(objectIndex: number): void {
     // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
-    const colors = pickingColors || instancePickingColors;
+    const attributes = this.getAttributeManager().attributes;
+    const indexes = getPickingIndexAttribute(attributes);
+    if (indexes) {
+      const start = indexes.getVertexOffset(objectIndex);
+      const end = indexes.getVertexOffset(objectIndex + 1);
+      const invalidIndexes = new Uint32Array(end - start);
+      invalidIndexes.fill(PICKING_INVALID_INDEX);
+      indexes.buffer.write(invalidIndexes, start * invalidIndexes.BYTES_PER_ELEMENT);
+      return;
+    }
+
+    const colors = getPickingColorAttribute(attributes);
     if (!colors) {
+      if (this.internalState) {
+        disablePickingIndex(this.internalState.disabledPickingIndices, objectIndex);
+      }
       return;
     }
 
@@ -848,20 +892,25 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** (Internal) Re-enable all picking indices after multi-depth picking */
   restorePickingColors(): void {
     // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
-    const colors = pickingColors || instancePickingColors;
-    if (!colors) {
+    const attributes = this.getAttributeManager().attributes;
+    const pickingAttribute = getPickingAttribute(attributes);
+    if (!pickingAttribute) {
+      if (this.internalState) {
+        this.internalState.disabledPickingIndices.length = 0;
+      }
       return;
     }
+    const colors = getPickingColorAttribute(attributes);
     // The picking color cache may have been freed and then reallocated. This ensures we read from the currently allocated cache.
     if (
       // @ts-ignore (TS2531) this method is only called internally with internalState defined
       this.internalState.usesPickingColorCache &&
+      colors &&
       (colors.value as Uint8ClampedArray).buffer !== pickingColorCache.buffer
     ) {
       colors.value = pickingColorCache.subarray(0, (colors.value as Uint8ClampedArray).length);
     }
-    colors.updateSubBuffer({startOffset: 0});
+    pickingAttribute.updateSubBuffer({startOffset: 0});
   }
 
   /* eslint-disable max-statements */
@@ -872,22 +921,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     debug(TRACE_INITIALIZE, this);
 
     const attributeManager = this._getAttributeManager();
-
-    if (attributeManager) {
-      // All instanced layers get instancePickingColors attribute by default
-      // Their shaders can use it to render a picking scene
-      // TODO - this slightly slows down non instanced layers
-      attributeManager.addInstanced({
-        instancePickingColors: {
-          type: 'uint8',
-          size: 4,
-          noAlloc: true,
-          // Updaters are always called with `this` pointing to the layer
-          // eslint-disable-next-line @typescript-eslint/unbound-method
-          update: this.calculateInstancePickingColors
-        }
-      });
-    }
 
     this.internalState = new LayerState<this>({
       attributeManager,
