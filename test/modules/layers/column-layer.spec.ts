@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {ColumnLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 
 // Regression test for #9463 / #10021: with binary data the fill model must
 // never acquire the wireframe index buffer, even after a buffer-layout rebuild
 // (which happens on binary-data transitions and HMR).
-test('ColumnLayer - fill model never acquires wireframe indices', t => {
+test('ColumnLayer - fill model never acquires wireframe indices', () => {
   testLayer({
     Layer: ColumnLayer,
     testCases: [
@@ -35,26 +35,27 @@ test('ColumnLayer - fill model never acquires wireframe indices', t => {
           const fillModel = layer.state.fillModel!;
           const wireframeModel = layer.state.wireframeModel!;
 
-          t.ok(wireframeModel.vertexArray.indexBuffer, 'wireframe model keeps geometry indices');
-          t.notOk(
+          expect(
+            wireframeModel.vertexArray.indexBuffer,
+            'wireframe model keeps geometry indices'
+          ).toBeTruthy();
+          expect(
             fillModel.vertexArray.indexBuffer,
             'fill model has no wireframe indices after initial update'
-          );
+          ).toBeFalsy();
 
           // Simulate the vertex-array rebuild that caused the original leak
           // (Layer._setModelAttributes -> Model.setBufferLayout when attribute
           // buffer layouts change, e.g. binary-data transitions / HMR).
           fillModel.setBufferLayout(fillModel.bufferLayout);
 
-          t.notOk(
+          expect(
             fillModel.vertexArray.indexBuffer,
             'fill model still has no wireframe indices after buffer-layout rebuild'
-          );
+          ).toBeFalsy();
         }
       }
     ],
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   });
-
-  t.end();
 });
