@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-example-pure-js-basic",
+  "name": "deckgl-example-pure-js-widgets",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -14,6 +14,6 @@
     "@deck.gl/widgets": "^9.0.0"
   },
   "devDependencies": {
-    "vite": "^7.3.1"
+    "vite": "^7.3.3"
   }
 }

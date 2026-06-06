@@ -49,8 +49,8 @@
     "@loaders.gl/mvt": "^4.4.1",
     "@loaders.gl/schema": "^4.4.1",
     "@loaders.gl/tiles": "^4.4.1",
-    "@luma.gl/core": "^9.3.2",
-    "@luma.gl/shadertools": "^9.3.2",
+    "@luma.gl/core": "^9.3.3",
+    "@luma.gl/shadertools": "^9.3.3",
     "@math.gl/web-mercator": "^4.1.0",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^3.1.3",
@@ -67,13 +67,13 @@
     "quadbin": "^0.4.0"
   },
   "peerDependencies": {
-    "@deck.gl/aggregation-layers": "~9.3.0-alpha.1",
-    "@deck.gl/core": "~9.3.0-alpha.1",
-    "@deck.gl/extensions": "~9.3.0-alpha.1",
-    "@deck.gl/geo-layers": "~9.3.0-alpha.1",
-    "@deck.gl/layers": "~9.3.0-alpha.1",
+    "@deck.gl/aggregation-layers": "~9.3.0-beta.2",
+    "@deck.gl/core": "~9.3.0-beta.2",
+    "@deck.gl/extensions": "~9.3.0-beta.2",
+    "@deck.gl/geo-layers": "~9.3.0-beta.2",
+    "@deck.gl/layers": "~9.3.0-beta.2",
     "@loaders.gl/core": "^4.4.1",
-    "@luma.gl/core": "~9.3.2"
+    "@luma.gl/core": "~9.3.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

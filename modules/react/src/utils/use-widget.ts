@@ -23,7 +23,7 @@ export function useWidget<
     return () => {
       // Remove widget from context when it is unmounted
       const index = widgets?.indexOf(widget);
-      if (index && index !== -1) {
+      if (index !== undefined && index !== -1) {
         widgets?.splice(index, 1);
         deck?.setProps({widgets});
       }
