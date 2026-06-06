@@ -8,6 +8,11 @@ import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {_GlobeView as GlobeView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
+import {
+  MAX_LATITUDE as MAX_WEB_MERCATOR_LATITUDE,
+  lngLatToWorld,
+  worldToLngLat
+} from '@math.gl/web-mercator';
 
 test('TerrainLayer', async () => {
   const testCases = generateLayerTests({
@@ -50,15 +55,27 @@ test('TerrainLayer', async () => {
 });
 
 test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions', async () => {
+  const sourcePositions = new Float32Array([0, 80, 0, 0.5, 40, 0, 1, 0, 0]);
+  const tileSize = 512;
+  const bbox = {west: 0, south: 0, east: 1, north: 80};
+  const yPad = ((bbox.north - bbox.south) / tileSize) * 1;
+  const overlappedSouth = bbox.south - yPad;
+  const overlappedNorth = bbox.north + yPad;
+  const expectedMiddleLatitude = worldToLngLat([
+    0,
+    (lngLatToMercatorWorldY(overlappedNorth) + lngLatToMercatorWorldY(overlappedSouth)) / 2
+  ])[1];
+
   const sourceMesh = {
     attributes: {
-      POSITION: {value: new Float32Array([0, 80, 0, 0.5, 40, 0, 1, 0, 0]), size: 3},
+      POSITION: {value: sourcePositions, size: 3},
       TEXCOORD_0: {value: new Float32Array([0, 0, 0.5, 0.5, 1, 1]), size: 2}
     }
   };
   const layer = new TerrainLayer({
     id: 'terrain-globe-mercator',
     elevationData: 'terrain/{z}/{x}/{y}.png',
+    tileSize,
     fetch: () => Promise.resolve(sourceMesh)
   });
   layer.context = {
@@ -77,15 +94,34 @@ test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions'
   const [mesh] = await layer.getTiledTerrainData({
     index: {x: 0, y: 0, z: 1},
     id: '0-0-1',
-    bbox: {west: 0, south: 0, east: 1, north: 80},
+    bbox,
     zoom: 1
   });
-  const positions = mesh.attributes.POSITION.value;
+  const positions = mesh!.attributes.POSITION.value;
 
-  expect(positions[1], 'top row latitude is preserved').toBeGreaterThan(80);
-  expect(
-    positions[4],
-    'middle row uses Mercator latitude instead of linear latitude'
-  ).toBeGreaterThan(40);
-  expect(positions[7], 'bottom row latitude is preserved').toBeLessThan(0);
+  expect(positions, 'remap copies the loader positions').not.toBe(sourcePositions);
+  expect(sourcePositions[1], 'source top row is unchanged').toBe(80);
+  expect(sourcePositions[4], 'source middle row is unchanged').toBe(40);
+  expect(sourcePositions[7], 'source bottom row is unchanged').toBe(0);
+
+  expect(positions[1], 'top row latitude follows the overlapped tile north').toBeCloseTo(
+    overlappedNorth,
+    5
+  );
+  expect(positions[4], 'middle row uses Mercator latitude instead of linear latitude').toBeCloseTo(
+    expectedMiddleLatitude,
+    5
+  );
+  expect(positions[7], 'bottom row latitude follows the overlapped tile south').toBeCloseTo(
+    overlappedSouth,
+    5
+  );
 });
+
+function lngLatToMercatorWorldY(latitude: number): number {
+  const clampedLatitude = Math.max(
+    -MAX_WEB_MERCATOR_LATITUDE,
+    Math.min(MAX_WEB_MERCATOR_LATITUDE, latitude)
+  );
+  return lngLatToWorld([0, clampedLatitude])[1];
+}
