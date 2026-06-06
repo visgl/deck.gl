@@ -111,7 +111,7 @@ test('GlobeController', async () => {
 });
 
 test('GlobeController supports pointer anchored zoom option', () => {
-  const makeController = (controller: true | {zoomAround: 'pointer'}) =>
+  const makeController = (controller: true | {zoomAround: 'center' | 'pointer'}) =>
     createTestController({
       view: new GlobeView({controller}),
       initialViewState: {
@@ -139,6 +139,32 @@ test('GlobeController supports pointer anchored zoom option', () => {
   expect(pointerZoomController.props.longitude, 'pointer zoom adjusts longitude').not.toBeCloseTo(
     0
   );
+});
+
+test('GlobeController applies updated zoomAround option', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'center'}}),
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    }
+  });
+
+  const wheelEvent = {
+    type: 'wheel',
+    offsetCenter: {x: 75, y: 50},
+    delta: -10,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  };
+
+  controller.handleEvent(wheelEvent as any);
+  expect(controller.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+
+  controller.setProps({...controller.props, zoomAround: 'pointer'});
+  controller.handleEvent(wheelEvent as any);
+  expect(controller.props.longitude, 'updated pointer zoom adjusts longitude').not.toBeCloseTo(0);
 });
 
 test('OrbitController', async () => {

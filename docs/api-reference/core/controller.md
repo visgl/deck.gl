@@ -24,6 +24,7 @@ The base Controller class supports the following options:
     * `rotateSpeedX` (number) - speed of rotation using shift + left/right arrow keys, in degrees. Default `15`.
     * `rotateSpeedY` (number) - speed of rotation using shift + up/down arrow keys, in degrees. Default `10`.
 * `dragMode` (string) - drag behavior without pressing function keys, one of `pan` and `rotate`.
+* `zoomAround` (`'center' | 'pointer'`) - zoom anchor mode when supported by the controller. Default depends on the controller.
 * `inertia` (boolean | number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
 * `maxBounds` (`[min: number[], max: number[]]`) - constrain camera to the specified bounding box. Different type of views may handle this constraint differently.
 
