@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-example-pure-js-maplibre",
+  "name": "deckgl-example-pure-js-maplibre-globe",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -15,6 +15,6 @@
     "maplibre-gl": "^5.0.0"
   },
   "devDependencies": {
-    "vite": "^7.3.1"
+    "vite": "^7.3.3"
   }
 }
