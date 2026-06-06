@@ -131,6 +131,37 @@ test('Deck#constructor', async () => {
   console.log('Deck constructor did not throw');
 });
 
+test('Deck#auto-created canvas disables touch selection callouts', () => {
+  const parent = document.createElement('div');
+  const deck = Object.create(Deck.prototype) as {
+    _createCanvas: (props: {
+      parent?: HTMLElement;
+      id?: string;
+      width?: number;
+      height?: number;
+      canvas?: HTMLCanvasElement | string | null;
+      style?: Partial<CSSStyleDeclaration> | null;
+    }) => HTMLCanvasElement;
+  };
+
+  const canvas = deck._createCanvas({
+    parent,
+    id: 'deck-canvas-style-test',
+    width: 1,
+    height: 1,
+    canvas: null,
+    style: null
+  });
+  expect(canvas.style.userSelect, 'auto-created canvas is not selectable').toBe('none');
+
+  const styledCanvas = document.createElement('canvas');
+  deck._createCanvas({
+    canvas: styledCanvas,
+    style: {userSelect: 'text'}
+  });
+  expect(styledCanvas.style.userSelect, 'user canvas style can override defaults').toBe('text');
+});
+
 test('Deck#abort', async () => {
   const deck = new Deck({
     device,
