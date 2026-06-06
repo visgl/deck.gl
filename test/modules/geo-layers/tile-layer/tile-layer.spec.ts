@@ -249,6 +249,51 @@ test('TileLayer#GlobeView:BitmapLayer image coordinate system', async () => {
   });
 });
 
+test('TileLayer#GlobeView:custom BitmapLayer image coordinate system', async () => {
+  class CustomBitmapLayer extends BitmapLayer {
+    static layerName = 'CustomBitmapLayer';
+  }
+
+  const testViewport = new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+
+  const renderSubLayers = props => {
+    const {west, south, east, north} = props.tile.bbox;
+    return new CustomBitmapLayer(props, {
+      id: `${props.id}-custom-bitmap`,
+      image: '/test/data/icon-atlas.png',
+      bounds: [west, south, east, north]
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases: [
+      {
+        title: 'defaults custom BitmapLayer image coordinates to Web Mercator',
+        props: {
+          getTileData: () => ({}),
+          renderSubLayers
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe(COORDINATE_SYSTEM.CARTESIAN);
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
 test('TileLayer#GlobeView:preserves explicit BitmapLayer image coordinate system', async () => {
   const testViewport = new GlobeView().makeViewport({
     width: 100,

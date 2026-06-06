@@ -13,9 +13,10 @@ import {
   DefaultProps,
   FilterContext,
   COORDINATE_SYSTEM,
-  _flatten as flatten
+  _flatten as flatten,
+  _GlobeViewport
 } from '@deck.gl/core';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
 import type {TileLoadProps, ZRange} from '../tileset-2d/index';
@@ -55,8 +56,6 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   visibleMinZoom: null,
   visibleMaxZoom: null
 };
-
-const BITMAP_LAYER_NAME = 'BitmapLayer';
 
 /** All props supported by the TileLayer */
 export type TileLayerProps<DataT = unknown> = CompositeLayerProps & _TileLayerProps<DataT>;
@@ -447,8 +446,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
     if (
-      !this.context.viewport.resolution ||
-      (layer.constructor as typeof Layer).layerName !== BITMAP_LAYER_NAME ||
+      !(this.context.viewport instanceof _GlobeViewport) ||
+      !(layer instanceof BitmapLayer) ||
       (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
     ) {
       return null;
