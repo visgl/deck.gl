@@ -153,6 +153,8 @@ function getDate(data: DailyFlights[], t: number) {
 }
 
 export async function renderToDOM(container: HTMLDivElement) {
+  addCanvasInteractionGuards(container);
+
   const root = createRoot(container);
   root.render(<App />);
 
@@ -184,5 +186,24 @@ export async function renderToDOM(container: HTMLDivElement) {
     }
     data.push({flights, date});
     root.render(<App data={data} />);
+  }
+}
+
+function addCanvasInteractionGuards(container: HTMLDivElement): void {
+  const preventCanvasBrowserUI = (event: Event) => {
+    if (event.target instanceof HTMLCanvasElement) {
+      event.preventDefault();
+    }
+  };
+  const listenerOptions = {passive: false};
+
+  for (const type of [
+    'contextmenu',
+    'selectstart',
+    'gesturestart',
+    'gesturechange',
+    'gestureend'
+  ]) {
+    container.addEventListener(type, preventCanvasBrowserUI, listenerOptions);
   }
 }
