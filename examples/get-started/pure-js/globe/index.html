@@ -1,13 +1,71 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>deck.gl Example</title>
-  <style>
-    body {margin: 0; width: 100vw; height: 100vh; overflow: hidden;}
-  </style>
-</head>
-<body>
-</body>
-<script type="module" src="app.js"></script>
+  <head>
+    <meta charset="utf-8" />
+    <title>deck.gl Example</title>
+    <style>
+      body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #111;
+      }
+      .zoom-control {
+        position: absolute;
+        z-index: 1;
+        top: 24px;
+        right: 24px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 6px;
+        background: rgba(8, 14, 24, 0.78);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+        color: #fff;
+        font-family: Helvetica, Arial, sans-serif;
+      }
+      .zoom-control-label {
+        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .zoom-button-group {
+        display: flex;
+      }
+      .zoom-button-group button {
+        min-width: 70px;
+        padding: 8px 10px;
+        border: 1px solid rgba(122, 136, 255, 0.64);
+        background: rgba(12, 18, 34, 0.72);
+        color: rgba(205, 213, 255, 0.9);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .zoom-button-group button:first-child {
+        border-radius: 4px 0 0 4px;
+      }
+      .zoom-button-group button:last-child {
+        margin-left: -1px;
+        border-radius: 0 4px 4px 0;
+      }
+      .zoom-button-group button[aria-pressed='true'] {
+        background: #5262df;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="zoom-control">
+      <div class="zoom-control-label">Zoom anchor</div>
+      <div class="zoom-button-group" role="group" aria-label="Zoom anchor">
+        <button type="button" data-zoom-around="center" aria-pressed="true">Center</button>
+        <button type="button" data-zoom-around="pointer" aria-pressed="false">Pointer</button>
+      </div>
+    </div>
+  </body>
+  <script type="module" src="app.js"></script>
 </html>

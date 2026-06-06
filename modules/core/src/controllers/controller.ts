@@ -244,8 +244,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   get controllerState(): ControllerState {
     this._controllerState = this._controllerState || new this.ControllerState({
       makeViewport: this.makeViewport,
-      ...this.props,
-      ...this.state
+      ...this.state,
+      ...this.props
     });
     return this._controllerState;
   }
