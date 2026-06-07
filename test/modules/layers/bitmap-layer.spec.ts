@@ -21,7 +21,14 @@ test('BitmapLayer#constructor', () => {
     testCases: [
       {
         title: 'Empty layer',
-        props: {id: 'empty'}
+        props: {id: 'empty'},
+        onAfterUpdate({layer}) {
+          const modules = layer
+            .getModels()[0]
+            .shaderInputs.getModules()
+            .map(module => module.name);
+          expect(modules, 'uses lighting material shader module').toContain('phongMaterial');
+        }
       },
       {
         title: 'Null layer',

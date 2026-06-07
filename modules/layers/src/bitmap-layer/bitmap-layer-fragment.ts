@@ -40,6 +40,8 @@ uniform sampler2D bitmapTexture;
 
 in vec2 vTexCoord;
 in vec2 vTexPos;
+in vec3 cameraPosition;
+in vec4 position_commonspace;
 
 out vec4 fragColor;
 
@@ -110,10 +112,21 @@ void main(void) {
   }
   vec4 bitmapColor = texture(bitmapTexture, uv);
 
-  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * layer.opacity);
+  vec3 bitmapColorRgb = color_tint(color_desaturate(bitmapColor.rgb));
+  fragColor = apply_opacity(bitmapColorRgb, bitmapColor.a * layer.opacity);
 
   geometry.uv = uv;
   DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  if (!bool(picking.isActive)) {
+    vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
+    fragColor.rgb = lighting_getLightColor(
+      fragColor.rgb,
+      cameraPosition,
+      position_commonspace.xyz,
+      normal
+    );
+  }
 
   if (bool(picking.isActive) && !bool(picking.isAttribute)) {
     // Since instance information is not used, we can use picking color for pixel index

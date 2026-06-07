@@ -12,6 +12,8 @@ in vec3 positions64Low;
 
 out vec2 vTexCoord;
 out vec2 vTexPos;
+out vec3 cameraPosition;
+out vec4 position_commonspace;
 
 const vec3 pickingColor = vec3(1.0, 0.0, 0.0);
 
@@ -21,6 +23,8 @@ void main(void) {
   geometry.pickingColor = pickingColor;
 
   gl_Position = project_position_to_clipspace(positions, positions64Low, vec3(0.0), geometry.position);
+  position_commonspace = geometry.position;
+  cameraPosition = project.cameraPosition;
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vTexCoord = texCoords;
