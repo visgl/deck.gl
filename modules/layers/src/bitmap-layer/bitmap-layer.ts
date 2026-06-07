@@ -14,7 +14,9 @@ import {
   Color,
   TextureSource,
   Position,
-  DefaultProps
+  DefaultProps,
+  Material,
+  phongMaterial
 } from '@deck.gl/core';
 import {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
@@ -37,6 +39,8 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   // Instead we need to manually dim/blend rgb values with a background color.
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
   tintColor: {type: 'color', value: [255, 255, 255]},
+
+  material: true,
 
   textureParameters: {type: 'object', ignore: true, value: null}
 };
@@ -92,6 +96,14 @@ type _BitmapLayerProps = {
    */
   tintColor?: Color;
 
+  /**
+   * Material settings for lighting effect.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
+   */
+  material?: Material;
+
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
   textureParameters?: SamplerProps | null;
 };
@@ -129,7 +141,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
+    return super.getShaders({vs, fs, modules: [project32, phongMaterial, picking, bitmapUniforms]});
   }
 
   initializeState() {

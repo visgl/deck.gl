@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -21,7 +21,14 @@ test('BitmapLayer#constructor', () => {
     testCases: [
       {
         title: 'Empty layer',
-        props: {id: 'empty'}
+        props: {id: 'empty'},
+        onAfterUpdate({layer}) {
+          const modules = layer
+            .getModels()[0]
+            .shaderInputs.getModules()
+            .map(module => module.name);
+          expect(modules, 'uses lighting material shader module').toContain('phongMaterial');
+        }
       },
       {
         title: 'Null layer',
@@ -178,6 +185,53 @@ test('createMesh', () => {
   const result3 = createMesh(bounds, 1);
   expect(result3.vertexCount, 'returns 4 quads').toBe(6 * 4);
   expect(result3.positions.length, 'returns 9 vertices').toBe(3 * 9);
+});
+
+test('BitmapLayer#draw', () => {
+  testLayer({
+    Layer: BitmapLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        title: 'sets bitmap uniforms and draws',
+        props: {
+          id: 'image',
+          image: {
+            width: 8,
+            height: 8,
+            data: new Uint8Array(8 * 8 * 4).fill(200)
+          },
+          bounds: [0, 0, 1, 1],
+          desaturate: 0.5,
+          tintColor: [128, 64, 255],
+          transparentColor: [1, 2, 3, 4]
+        },
+        onAfterUpdate({layer}) {
+          const model = layer.state.model!;
+          const setProps = vi.spyOn(model.shaderInputs, 'setProps');
+          const draw = vi.spyOn(model, 'draw').mockImplementation(() => {});
+
+          layer.draw({shaderModuleProps: {picking: {isActive: false}}} as any);
+
+          expect(setProps).toHaveBeenCalledWith({
+            bitmap: {
+              bitmapTexture: layer.props.image,
+              bounds: [0, 0, 0, 0],
+              coordinateConversion: 0,
+              desaturate: 0.5,
+              tintColor: [128 / 255, 64 / 255, 1],
+              transparentColor: [1 / 255, 2 / 255, 3 / 255, 4 / 255]
+            }
+          });
+          expect(draw).toHaveBeenCalledWith(layer.context.renderPass);
+
+          layer.disablePickingIndex();
+          layer.draw({shaderModuleProps: {picking: {isActive: true}}} as any);
+          expect(draw).toHaveBeenCalledTimes(1);
+        }
+      }
+    ]
+  });
 });
 
 test('BitmapLayer#picking', async () => {
