@@ -7,6 +7,7 @@ import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
+import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -35,6 +36,20 @@ function createPointPickResult(props = {}) {
     result: [createPickingInfo(props)],
     emptyInfo: createPickingInfo()
   };
+}
+
+function createMockCanvasContext(props: Partial<CanvasContext> = {}): CanvasContext {
+  const canvasContext = device.getDefaultCanvasContext();
+  return {
+    canvas: canvasContext.canvas,
+    getCSSSize: canvasContext.getCSSSize.bind(canvasContext),
+    getDrawingBufferSize: canvasContext.getDrawingBufferSize.bind(canvasContext),
+    cssToDeviceRatio: canvasContext.cssToDeviceRatio.bind(canvasContext),
+    cssToDevicePixels: canvasContext.cssToDevicePixels.bind(canvasContext),
+    setProps: () => {},
+    props: canvasContext.props as CanvasContextProps,
+    ...props
+  } as CanvasContext;
 }
 
 async function waitForRender(deck: Deck): Promise<void> {
@@ -166,6 +181,180 @@ test('Deck#abort', async () => {
   await sleep(50);
 
   console.log('Deck initialization aborted');
+});
+
+test('Deck#canvas context resize drives Deck dimensions', async () => {
+  const resizeEvents: Array<{
+    dimensions: {width: number; height: number};
+    canvasContext?: CanvasContext;
+  }> = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    onResize: (dimensions, canvasContext) => resizeEvents.push({dimensions, canvasContext})
+  });
+
+  await waitForRender(deck);
+
+  const nextSize: [number, number] = [17, 19];
+  const canvasContext = createMockCanvasContext({getCSSSize: () => nextSize});
+
+  try {
+    resizeEvents.length = 0;
+
+    // Call the internal resize hook directly so the test verifies Deck's reaction to luma state.
+    // @ts-expect-error testing private resize hook
+    deck._onCanvasContextResize(canvasContext);
+
+    expect(deck.width, 'Deck width comes from canvas context CSS size').toBe(nextSize[0]);
+    expect(deck.height, 'Deck height comes from canvas context CSS size').toBe(nextSize[1]);
+    expect(resizeEvents[0]?.dimensions, 'Deck onResize fires from canvas context resize').toEqual({
+      width: nextSize[0],
+      height: nextSize[1]
+    });
+    expect(resizeEvents[0]?.canvasContext, 'Deck onResize receives canvas context').toBe(
+      canvasContext
+    );
+    expect(deck.needsRedraw(), 'resize invalidates redraw').toBeTruthy();
+  } finally {
+    deck.finalize();
+  }
+});
+
+webglTest('Deck#attached gl resize syncs canvas context drawing buffer', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const gl = canvas.getContext('webgl2');
+  expect(gl, 'WebGL2 context is created').toBeTruthy();
+
+  const resizeEvents: Array<{
+    dimensions: {width: number; height: number};
+    canvasContext?: CanvasContext;
+  }> = [];
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    onResize: (dimensions, canvasContext) => resizeEvents.push({dimensions, canvasContext})
+  });
+
+  await waitForRender(deck);
+
+  const canvasContext = deck.device!.getDefaultCanvasContext();
+  const originalSetDrawingBufferSize = canvasContext.setDrawingBufferSize.bind(canvasContext);
+  const calls: Array<[number, number]> = [];
+
+  try {
+    canvasContext.setDrawingBufferSize = (width: number, height: number) => {
+      calls.push([width, height]);
+      originalSetDrawingBufferSize(width, height);
+    };
+    canvas.width = 37;
+    canvas.height = 41;
+    resizeEvents.length = 0;
+
+    deck.device!.props.onResize?.(canvasContext, {oldPixelSize: [1, 1]});
+
+    expect(calls, 'attached gl resize updates drawing buffer').toEqual([[37, 41]]);
+    expect(canvasContext.getDrawingBufferSize(), 'drawing buffer tracks external canvas').toEqual([
+      37, 41
+    ]);
+    expect(resizeEvents, 'Deck onResize only fires when CSS size changes').toEqual([]);
+    expect(deck.needsRedraw(), 'drawing buffer resize invalidates redraw').toBeTruthy();
+  } finally {
+    canvasContext.setDrawingBufferSize = originalSetDrawingBufferSize;
+    deck.finalize();
+  }
+});
+
+test('Deck#useDevicePixels forwards to canvas context', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  let useDevicePixels: boolean | number | undefined;
+  const canvasContext = createMockCanvasContext({
+    setProps: (props: CanvasContextProps) => {
+      useDevicePixels = props.useDevicePixels;
+    }
+  });
+
+  try {
+    // @ts-expect-error testing private canvas context setter
+    deck._setCanvasContext(canvasContext);
+
+    // Deck.setProps should only forward the preference into luma's canvas context.
+    deck.setProps({useDevicePixels: false});
+    expect(useDevicePixels, 'canvas context useDevicePixels updated').toBe(false);
+
+    // Numeric overrides should flow through unchanged so luma can size the drawing buffer.
+    deck.setProps({useDevicePixels: 2});
+    expect(useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
+  } finally {
+    deck.finalize();
+  }
+});
+
+test('Deck#provided device resize callback drives Deck dimensions', async () => {
+  const originalOnResize = device.props.onResize;
+  let lowerLevelOnResizeCalls = 0;
+  device.props.onResize = () => lowerLevelOnResizeCalls++;
+
+  const resizeEvents: Array<{
+    dimensions: {width: number; height: number};
+    canvasContext?: CanvasContext;
+  }> = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    onResize: (dimensions, canvasContext) => resizeEvents.push({dimensions, canvasContext})
+  });
+
+  await waitForRender(deck);
+
+  const nextSize: [number, number] = [23, 29];
+  const canvasContext = createMockCanvasContext({getCSSSize: () => nextSize});
+
+  try {
+    // @ts-expect-error testing private canvas context setter
+    deck._setCanvasContext(canvasContext);
+    resizeEvents.length = 0;
+    lowerLevelOnResizeCalls = 0;
+
+    deck.device!.props.onResize?.(canvasContext, {oldPixelSize: [1, 1]});
+
+    expect(deck.width, 'Deck width is refreshed from provided device resize').toBe(nextSize[0]);
+    expect(deck.height, 'Deck height is refreshed from provided device resize').toBe(nextSize[1]);
+    expect(resizeEvents[0]?.dimensions, 'Deck onResize fires from provided device resize').toEqual({
+      width: nextSize[0],
+      height: nextSize[1]
+    });
+    expect(resizeEvents[0]?.canvasContext, 'Deck onResize receives canvas context').toBe(
+      canvasContext
+    );
+    expect(
+      lowerLevelOnResizeCalls,
+      'Deck owns the lower-level luma onResize callback while active'
+    ).toBe(0);
+  } finally {
+    deck.finalize();
+    device.props.onResize = originalOnResize;
+  }
 });
 
 test('Deck#no views', async () => {
