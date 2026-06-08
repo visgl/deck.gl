@@ -12,9 +12,11 @@ import {
   GetPickingInfoParams,
   DefaultProps,
   FilterContext,
+  COORDINATE_SYSTEM,
+  _GlobeViewport,
   _flatten as flatten
 } from '@deck.gl/core';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
 import type {TileLoadProps, ZRange} from '../tileset-2d/index';
@@ -27,6 +29,10 @@ import {
 } from '../tileset-2d/index';
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 import {Matrix4} from '@math.gl/core';
+
+function isDefaultImageCoordinateSystem(value: unknown): boolean {
+  return value === 'default' || value === COORDINATE_SYSTEM.DEFAULT;
+}
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -421,12 +427,14 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           _offset: 0,
           tile
         });
-        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
-          layer.clone({
+        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer => {
+          const globeBitmapProps = this._getGlobeBitmapLayerProps(layer);
+          return layer.clone({
             tile,
+            ...globeBitmapProps,
             ...subLayerProps
-          })
-        );
+          });
+        });
       } else if (
         subLayerProps &&
         tile.layers[0] &&
@@ -438,6 +446,24 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
       return tile.layers;
     });
+  }
+
+  private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
+    if (
+      !(this.context.viewport instanceof _GlobeViewport) ||
+      !(layer instanceof BitmapLayer) ||
+      !isDefaultImageCoordinateSystem(
+        (layer.props as Record<string, unknown>)._imageCoordinateSystem
+      )
+    ) {
+      return null;
+    }
+
+    return {
+      // XYZ/slippy tile imagery is Web Mercator encoded. In GlobeView, BitmapLayer
+      // positions the mesh in lng/lat, so the image needs Mercator-to-lnglat UV conversion.
+      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    };
   }
 
   filterSubLayer({layer, cullRect}: FilterContext) {

@@ -3,13 +3,63 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {COORDINATE_SYSTEM, WebMercatorViewport, _GlobeView as GlobeView} from '@deck.gl/core';
+import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 const DUMMY_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
+
+function getGlobeViewport() {
+  return new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+}
+
+function getBitmapRenderSubLayers(BitmapLayerClass = BitmapLayer, bitmapProps = {}) {
+  return props => {
+    const {west, south, east, north} = props.tile.bbox;
+    return new BitmapLayerClass(props, {
+      id: `${props.id}-bitmap`,
+      image: '/test/data/icon-atlas.png',
+      bounds: [west, south, east, north],
+      ...bitmapProps
+    });
+  };
+}
+
+async function expectGlobeBitmapImageCoordinateSystem({
+  title,
+  renderSubLayers,
+  expectedImageCoordinateSystem
+}) {
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: getGlobeViewport(),
+    testCases: [
+      {
+        title,
+        props: {
+          getTileData: () => ({}),
+          renderSubLayers
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe(expectedImageCoordinateSystem);
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+}
 
 test('TileLayer', async () => {
   const testCases = generateLayerTests({
@@ -205,6 +255,46 @@ test('TileLayer#MapView:repeat', async () => {
     viewport: testViewport,
     testCases,
     onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TileLayer#GlobeView:BitmapLayer image coordinate system', async () => {
+  await expectGlobeBitmapImageCoordinateSystem({
+    title: 'defaults BitmapLayer image coordinates to Web Mercator',
+    renderSubLayers: getBitmapRenderSubLayers(),
+    expectedImageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  });
+});
+
+test('TileLayer#GlobeView:custom BitmapLayer image coordinate system', async () => {
+  class CustomBitmapLayer extends BitmapLayer {
+    static layerName = 'CustomBitmapLayer';
+  }
+
+  await expectGlobeBitmapImageCoordinateSystem({
+    title: 'defaults custom BitmapLayer image coordinates to Web Mercator',
+    renderSubLayers: getBitmapRenderSubLayers(CustomBitmapLayer),
+    expectedImageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  });
+});
+
+test('TileLayer#GlobeView:enum-default BitmapLayer image coordinate system', async () => {
+  await expectGlobeBitmapImageCoordinateSystem({
+    title: 'treats enum default image coordinates as Web Mercator',
+    renderSubLayers: getBitmapRenderSubLayers(BitmapLayer, {
+      _imageCoordinateSystem: COORDINATE_SYSTEM.DEFAULT
+    }),
+    expectedImageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  });
+});
+
+test('TileLayer#GlobeView:preserves explicit BitmapLayer image coordinate system', async () => {
+  await expectGlobeBitmapImageCoordinateSystem({
+    title: 'preserves explicit BitmapLayer image coordinate system',
+    renderSubLayers: getBitmapRenderSubLayers(BitmapLayer, {
+      _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+    }),
+    expectedImageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
   });
 });
 
