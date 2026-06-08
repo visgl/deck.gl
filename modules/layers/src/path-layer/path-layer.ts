@@ -197,11 +197,11 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transition: ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR
       },
-      instancePickingColors: {
-        size: 4,
-        type: 'uint8',
-        accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
+      /** Source path row for each generated segment/joint instance. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
+        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
       }
     });
     /* eslint-enable max-len */

@@ -11,11 +11,10 @@ in vec3 normals;
 in vec3 colors;
 in vec2 texCoords;
 in vec4 uvRegions;
-in vec3 featureIdsPickingColors;
+in float rowIndexes;
 
 // Instance attributes
 in vec4 instanceColors;
-in vec3 instancePickingColors;
 in vec3 instanceModelMatrixCol0;
 in vec3 instanceModelMatrixCol1;
 in vec3 instanceModelMatrixCol2;
@@ -41,9 +40,9 @@ void main(void) {
   geometry.uv = uv;
 
   if (mesh.pickFeatureIds) {
-    geometry.pickingColor = featureIdsPickingColors;
+    geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
   } else {
-    geometry.pickingColor = instancePickingColors;
+    geometry.pickingColor = picking_getPickingColorFromInstanceID();
   }
 
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
