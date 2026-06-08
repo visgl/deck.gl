@@ -474,6 +474,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
     }
+
+    if (!this.props.device && !this.props.gl) {
+      this._canvasContext?.destroy();
+    }
     this._canvasContext = null;
   }
 
