@@ -40,7 +40,7 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
   tintColor: {type: 'color', value: [255, 255, 255]},
 
-  material: true,
+  material: false,
 
   textureParameters: {type: 'object', ignore: true, value: null}
 };
@@ -99,7 +99,7 @@ type _BitmapLayerProps = {
   /**
    * Material settings for lighting effect.
    *
-   * @default true
+   * @default false
    * @see https://deck.gl/docs/developer-guide/using-lighting
    */
   material?: Material;
