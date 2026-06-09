@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global fetch, DOMParser */
+/* global fetch, DOMParser, setTimeout */
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
@@ -24,6 +24,11 @@ const INITIAL_VIEW_STATE: OrthographicViewState = {
 
 const ROOT_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/image-tiles/moon.image';
+const PLACEHOLDER_IMAGE =
+  'data:image/svg+xml;charset=utf-8,' +
+  '%3Csvg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"%3E' +
+  '%3Crect width="8" height="8" fill="%23242a2e"/%3E' +
+  '%3Cpath d="M0 8 8 0" stroke="%23404a50" stroke-width="1"/%3E%3C/svg%3E';
 
 function getTooltip({tile, bitmap}: TileLayerPickingInfo<ImageBitmap, BitmapLayerPickingInfo>) {
   if (tile && bitmap) {
@@ -35,11 +40,19 @@ function getTooltip({tile, bitmap}: TileLayerPickingInfo<ImageBitmap, BitmapLaye
   return null;
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default function App({
   autoHighlight = true,
+  showPlaceholders = true,
+  loadDelay = 0,
   onTilesLoad
 }: {
   autoHighlight?: boolean;
+  showPlaceholders?: boolean;
+  loadDelay?: number;
   onTilesLoad?: () => void;
 }) {
   const [dimensions, setDimensions] = useState<{width: number; height: number; tileSize: number}>();
@@ -85,14 +98,37 @@ export default function App({
       minZoom: -7,
       maxZoom: 0,
       extent: [0, 0, dimensions.width, dimensions.height],
-      getTileData: ({index}) => {
+      getTileData: async ({index}) => {
         const {x, y, z} = index;
+        if (loadDelay > 0) {
+          await sleep(loadDelay);
+        }
         return load(
           `${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`
         ) as Promise<ImageBitmap>;
       },
       onViewportLoad: onTilesLoad,
 
+      renderPlaceholder: showPlaceholders
+        ? props => {
+            const {width, height} = dimensions;
+            const {bounds} = props;
+            const otherProps = {...props} as Partial<typeof props>;
+            delete otherProps.data;
+            delete otherProps.bounds;
+            return new BitmapLayer(otherProps, {
+              image: PLACEHOLDER_IMAGE,
+              bounds: [
+                clamp(bounds[0], 0, width),
+                clamp(bounds[1], 0, height),
+                clamp(bounds[2], 0, width),
+                clamp(bounds[3], 0, height)
+              ],
+              pickable: false,
+              opacity: 0.5
+            });
+          }
+        : undefined,
       renderSubLayers: props => {
         const [[left, bottom], [right, top]] = props.tile.boundingBox;
         const {width, height} = dimensions;

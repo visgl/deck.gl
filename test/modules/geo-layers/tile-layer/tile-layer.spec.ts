@@ -244,6 +244,204 @@ test('TileLayer#error tiles do not block isLoaded', async () => {
   expect(tileErrorCalled, 'onTileError is called for failed tiles').toBe(2);
 });
 
+test('TileLayer#renderPlaceholder', async () => {
+  let placeholderCalls = 0;
+  let renderSubLayersCalls = 0;
+  let observedPending = false;
+  let observedLoaded = false;
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 60,
+      zoom: 2
+    }),
+    testCases: [
+      {
+        title: 'renders placeholders while selected tiles load',
+        props: {
+          getTileData: () => sleep(20).then(() => []),
+          renderPlaceholder: props => {
+            placeholderCalls++;
+            expect(props.data, 'placeholder data is null').toBe(null);
+            expect(props.bounds.length, 'placeholder bounds are provided').toBe(4);
+            return new ScatterplotLayer(props, {
+              id: `${props.id}-placeholder`,
+              data: []
+            });
+          },
+          renderSubLayers: props => {
+            renderSubLayersCalls++;
+            return new ScatterplotLayer(props, {
+              id: `${props.id}-content`,
+              data: props.data
+            });
+          }
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) {
+            observedPending = true;
+            expect(layer.isLoaded, 'placeholder does not make layer loaded').toBe(false);
+            expect(subLayers.length, 'Rendered placeholder sublayers').toBe(2);
+            expect(
+              subLayers.every(l => l.props._isTilePlaceholder),
+              'All pending sublayers are placeholders'
+            ).toBeTruthy();
+            expect(
+              subLayers.every(l => layer.filterSubLayer({layer: l})),
+              'Placeholder sublayers are visible while selected tiles load'
+            ).toBeTruthy();
+          } else {
+            observedLoaded = true;
+            expect(subLayers.length, 'Rendered content sublayers').toBe(2);
+            expect(
+              subLayers.every(l => !l.props._isTilePlaceholder),
+              'Placeholder sublayers were replaced by content sublayers'
+            ).toBeTruthy();
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  expect(observedPending, 'observed pending placeholder state').toBeTruthy();
+  expect(observedLoaded, 'observed loaded content state').toBeTruthy();
+  expect(placeholderCalls, 'renderPlaceholder was called').toBeGreaterThan(0);
+  expect(renderSubLayersCalls, 'renderSubLayers was called after load').toBeGreaterThan(0);
+});
+
+test('TileLayer#renderPlaceholder does not replace cached refinement content', async () => {
+  let placeholderCalls = 0;
+  const renderSubLayers = props => {
+    return new ScatterplotLayer(props, {
+      id: `${props.id}-content`,
+      data: props.data
+    });
+  };
+  const renderPlaceholder = props => {
+    placeholderCalls++;
+    return new ScatterplotLayer(props, {
+      id: `${props.id}-placeholder`,
+      data: []
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 60,
+      zoom: 1
+    }),
+    testCases: [
+      {
+        title: 'load parent tile',
+        props: {
+          getTileData: ({index}) => (index.z <= 1 ? [] : sleep(20).then(() => [])),
+          renderSubLayers,
+          renderPlaceholder
+        },
+        onAfterUpdate: ({layer}) => {
+          if (layer.isLoaded) {
+            placeholderCalls = 0;
+          }
+        }
+      },
+      {
+        title: 'show cached parent while children load',
+        viewport: new WebMercatorViewport({
+          width: 100,
+          height: 100,
+          longitude: 0,
+          latitude: 60,
+          zoom: 2
+        }),
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) {
+            expect(placeholderCalls, 'renderPlaceholder is not called over cached content').toBe(0);
+            expect(
+              subLayers.every(l => !l.props._isTilePlaceholder),
+              'Only cached content sublayers are rendered while children load'
+            ).toBeTruthy();
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TileLayer#renderPlaceholder replaces cached refinement content with no-overlap', async () => {
+  let placeholderCalls = 0;
+  const renderSubLayers = props => {
+    return new ScatterplotLayer(props, {
+      id: `${props.id}-content`,
+      data: props.data
+    });
+  };
+  const renderPlaceholder = props => {
+    placeholderCalls++;
+    return new ScatterplotLayer(props, {
+      id: `${props.id}-placeholder`,
+      data: []
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 60,
+      zoom: 1
+    }),
+    testCases: [
+      {
+        title: 'load parent tile',
+        props: {
+          refinementStrategy: 'no-overlap',
+          getTileData: ({index}) => (index.z <= 1 ? [] : sleep(20).then(() => [])),
+          renderSubLayers,
+          renderPlaceholder
+        },
+        onAfterUpdate: ({layer}) => {
+          if (layer.isLoaded) {
+            placeholderCalls = 0;
+          }
+        }
+      },
+      {
+        title: 'show placeholders while children load',
+        viewport: new WebMercatorViewport({
+          width: 100,
+          height: 100,
+          longitude: 0,
+          latitude: 60,
+          zoom: 2
+        }),
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) {
+            const visibleSubLayers = subLayers.filter(l => layer.filterSubLayer({layer: l}));
+            expect(placeholderCalls, 'renderPlaceholder is called').toBeGreaterThan(0);
+            expect(
+              visibleSubLayers.every(l => l.props._isTilePlaceholder),
+              'Only placeholder sublayers are visible while selected children load'
+            ).toBeTruthy();
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
 test('TileLayer#AbortRequestsOnUpdateTrigger', async () => {
   const testViewport = new WebMercatorViewport({
     width: 1200,

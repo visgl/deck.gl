@@ -355,7 +355,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy
+      refinementStrategy,
+      renderPlaceholder
     } = this.props;
 
     if (this.state.isTiled) {
@@ -366,6 +367,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         {
           getTileData: this.getTiledTerrainData.bind(this),
           renderSubLayers: this.renderSubLayers.bind(this),
+          renderPlaceholder,
           updateTriggers: {
             getTileData: {
               elevationData: urlTemplateToUpdateTrigger(elevationData),

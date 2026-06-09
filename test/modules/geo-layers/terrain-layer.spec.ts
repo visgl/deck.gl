@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {generateLayerTests, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
@@ -44,6 +44,30 @@ test('TerrainLayer', async () => {
   await testLayerAsync({
     Layer: TerrainLayer,
     testCases: testCasesNonTiled,
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TerrainLayer#renderPlaceholder', () => {
+  const renderPlaceholder = () => null;
+
+  testLayer({
+    Layer: TerrainLayer,
+    testCases: [
+      {
+        title: 'forwards renderPlaceholder to tiled TileLayer',
+        props: {
+          elevationData: 'https://example.com/terrain/{z}/{x}/{y}.png',
+          renderPlaceholder
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(subLayers[0] instanceof TileLayer, 'rendered TileLayer').toBeTruthy();
+          expect(subLayers[0].props.renderPlaceholder, 'forwarded renderPlaceholder callback').toBe(
+            renderPlaceholder
+          );
+        }
+      }
+    ],
     onError: err => expect(err).toBeFalsy()
   });
 });

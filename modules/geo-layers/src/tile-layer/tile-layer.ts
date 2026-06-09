@@ -17,7 +17,7 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, ZRange} from '../tileset-2d/index';
+import type {Bounds, TileBoundingBox, TileLoadProps, ZRange} from '../tileset-2d/index';
 import {
   Tileset2D,
   Tile2DHeader,
@@ -28,11 +28,14 @@ import {
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 import {Matrix4} from '@math.gl/core';
 
+const TILE_PLACEHOLDER_LAYER_PROP = '_isTilePlaceholder';
+
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
   dataComparator: urlType.equal,
   renderSubLayers: {type: 'function', value: (props: any) => new GeoJsonLayer(props)},
+  renderPlaceholder: {type: 'function', optional: true, value: null},
   getTileData: {type: 'function', optional: true, value: null},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null},
@@ -58,6 +61,33 @@ const defaultProps: DefaultProps<TileLayerProps> = {
 /** All props supported by the TileLayer */
 export type TileLayerProps<DataT = unknown> = CompositeLayerProps & _TileLayerProps<DataT>;
 
+/** Properties passed to `TileLayer`'s `renderSubLayers` callback. */
+export type TileLayerRenderSubLayersProps<DataT = unknown> = TileLayerProps<DataT> & {
+  /** A unique id for this sublayer. */
+  id: string;
+  /** Tile data resolved from `getTileData`. */
+  data: DataT;
+  /** The tile whose data is being rendered. */
+  tile: Tile2DHeader<DataT>;
+  _offset: number;
+};
+
+/** Properties passed to `TileLayer`'s `renderPlaceholder` callback. */
+export type TileLayerRenderPlaceholderProps<DataT = unknown> = Omit<
+  TileLayerProps<DataT>,
+  'data'
+> & {
+  /** A unique id for this placeholder sublayer. */
+  id: string;
+  /** Placeholder tiles do not have loaded data yet. */
+  data: null;
+  /** Bounds of the tile in `[left, bottom, right, top]` order. */
+  bounds: Bounds;
+  /** The tile whose loading footprint is being rendered. */
+  tile: Tile2DHeader<DataT>;
+  _offset: number;
+};
+
 /** Props added by the TileLayer */
 type _TileLayerProps<DataT> = {
   data: URLTemplate;
@@ -68,14 +98,16 @@ type _TileLayerProps<DataT> = {
   /**
    * Renders one or an array of Layer instances.
    */
-  renderSubLayers?: (
-    props: TileLayerProps<DataT> & {
-      id: string;
-      data: DataT;
-      _offset: number;
-      tile: Tile2DHeader<DataT>;
-    }
-  ) => Layer | null | LayersList;
+  renderSubLayers?: (props: TileLayerRenderSubLayersProps<DataT>) => Layer | null | LayersList;
+  /**
+   * Renders one or an array of Layer instances for a selected tile whose data is still loading.
+   *
+   * This callback is only used when no cached ancestor or child tile is already visible for the
+   * same area.
+   */
+  renderPlaceholder?:
+    | ((props: TileLayerRenderPlaceholderProps<DataT>) => Layer | null | LayersList)
+    | null;
   /**
    * If supplied, `getTileData` is called to retrieve the data of each tile.
    */
@@ -359,15 +391,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return null;
   }
 
-  renderSubLayers(
-    props: TileLayer['props'] & {
-      id: string;
-      data: DataT;
-      _offset: number;
-      tile: Tile2DHeader<DataT>;
-    }
-  ): Layer | null | LayersList {
+  renderSubLayers(props: TileLayerRenderSubLayersProps<DataT>): Layer | null | LayersList {
     return this.props.renderSubLayers(props);
+  }
+
+  renderPlaceholder(props: TileLayerRenderPlaceholderProps<DataT>): Layer | null | LayersList {
+    return this.props.renderPlaceholder?.(props) || null;
   }
 
   getSubLayerPropsByTile(tile: Tile2DHeader): Partial<LayerProps> | null {
@@ -392,23 +421,38 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   renderLayers(): Layer | null | LayersList {
-    const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
-    const zoom = this.context.viewport.zoom;
-    const hidden =
-      (visibleMinZoom != null && zoom < visibleMinZoom) ||
-      (visibleMaxZoom != null && zoom > visibleMaxZoom) ||
-      (minZoom != null && !extent && zoom < minZoom);
-    if (hidden) {
+    if (this._isLayerHidden()) {
       // Clear cached sublayer references so they are recreated when visible again
       for (const tile of this.state.tileset!.tiles) {
         tile.layers = null;
       }
       return [];
     }
-    return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
+    return this.state.tileset!.tiles.map((tile: Tile2DHeader<DataT>) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
-      if (!tile.isLoaded && !tile.content) {
+      if (this._isPlaceholderCandidate(tile)) {
+        if (!tile.layers) {
+          const layers = this.renderPlaceholder({
+            ...this.props,
+            ...this.getSubLayerProps({
+              id: tile.id,
+              updateTriggers: this.props.updateTriggers
+            }),
+            data: null,
+            bounds: getTileBounds(tile.bbox),
+            _offset: 0,
+            tile
+          });
+          tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
+            layer.clone({
+              [TILE_PLACEHOLDER_LAYER_PROP]: true,
+              tile,
+              ...subLayerProps
+            })
+          );
+        }
+      } else if (!tile.isLoaded && !tile.content) {
         // nothing to show
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
@@ -441,7 +485,19 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   filterSubLayer({layer, cullRect}: FilterContext) {
-    const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
+    const layerProps = (
+      layer as Layer<{
+        tile: Tile2DHeader<DataT>;
+        [TILE_PLACEHOLDER_LAYER_PROP]?: boolean;
+      }>
+    ).props;
+    const {tile} = layerProps;
+    if (layerProps[TILE_PLACEHOLDER_LAYER_PROP]) {
+      return this._isPlaceholderCandidate(tile);
+    }
+    if (this._isRefinementTileHiddenByPlaceholder(tile)) {
+      return false;
+    }
     const {modelMatrix} = this.props;
     return this.state.tileset!.isTileVisible(
       tile,
@@ -449,4 +505,93 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       modelMatrix ? new Matrix4(modelMatrix) : null
     );
   }
+
+  private _isLayerHidden(): boolean {
+    const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
+    const zoom = this.context.viewport.zoom;
+    return (
+      (visibleMinZoom !== null && visibleMinZoom !== undefined && zoom < visibleMinZoom) ||
+      (visibleMaxZoom !== null && visibleMaxZoom !== undefined && zoom > visibleMaxZoom) ||
+      (minZoom !== null && minZoom !== undefined && !extent && zoom < minZoom)
+    );
+  }
+
+  private _isPlaceholderCandidate(tile: Tile2DHeader<DataT>): boolean {
+    return Boolean(
+      this.props.renderPlaceholder &&
+        tile.isSelected &&
+        !tile.isLoaded &&
+        !tile.content &&
+        (this._shouldPreferPlaceholderOverRefinement() || !this._hasVisibleContent(tile))
+    );
+  }
+
+  private _shouldPreferPlaceholderOverRefinement(): boolean {
+    return Boolean(this.props.renderPlaceholder && this.props.refinementStrategy === 'no-overlap');
+  }
+
+  private _isRefinementTileHiddenByPlaceholder(tile: Tile2DHeader<DataT>): boolean {
+    if (
+      !this._shouldPreferPlaceholderOverRefinement() ||
+      tile.isSelected ||
+      !tile.isVisible ||
+      (!tile.isLoaded && !tile.content)
+    ) {
+      return false;
+    }
+
+    const selectedTiles = this.state.tileset!.selectedTiles || [];
+    return selectedTiles.some(
+      selectedTile =>
+        this._isPlaceholderCandidate(selectedTile) &&
+        this._isTileAncestorOrDescendant(tile, selectedTile)
+    );
+  }
+
+  private _isTileAncestorOrDescendant(
+    tile: Tile2DHeader<DataT>,
+    selectedTile: Tile2DHeader<DataT>
+  ): boolean {
+    return this._isTileAncestor(tile, selectedTile) || this._isTileAncestor(selectedTile, tile);
+  }
+
+  private _isTileAncestor(ancestorTile: Tile2DHeader<DataT>, tile: Tile2DHeader<DataT>): boolean {
+    let parent = tile.parent;
+    while (parent) {
+      if (parent === ancestorTile) {
+        return true;
+      }
+      parent = parent.parent;
+    }
+    return false;
+  }
+
+  private _hasVisibleContent(tile: Tile2DHeader<DataT>): boolean {
+    let parent = tile.parent;
+    while (parent) {
+      if (parent.isVisible && (parent.isLoaded || parent.content)) {
+        return true;
+      }
+      parent = parent.parent;
+    }
+
+    const childQueue = tile.children ? [...tile.children] : [];
+    while (childQueue.length > 0) {
+      const child = childQueue.shift()!;
+      if (child.isVisible && (child.isLoaded || child.content)) {
+        return true;
+      }
+      if (child.children) {
+        childQueue.push(...child.children);
+      }
+    }
+    return false;
+  }
+}
+
+function getTileBounds(bbox: TileBoundingBox): Bounds {
+  if ('west' in bbox) {
+    return [bbox.west, bbox.south, bbox.east, bbox.north];
+  }
+  return [bbox.left, bbox.bottom, bbox.right, bbox.top];
 }

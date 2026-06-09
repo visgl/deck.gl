@@ -302,6 +302,10 @@ If not supplied, the `maxCacheByteSize` is set to `Infinity`.
 
 How the tile layer refines the visibility of tiles. When zooming in and out, if the layer only shows tiles from the current zoom level, then the user may observe undesirable flashing while new data is loading. By setting `refinementStrategy` the layer can attempt to maintain visual continuity by displaying cached data from a different zoom level before data is available.
 
+`refinementStrategy` only reuses loaded tile content that is already in the cache. To render
+synthetic content while a selected tile has no loaded content and no cached ancestor or child is
+visible, use [`renderPlaceholder`](#renderplaceholder).
+
 This prop accepts one of the following:
 
 * `'best-available'`: If a tile in the current viewport is waiting for its data to load, use cached content from the closest zoom level to fill the empty space. This approach minimizes the visual flashing due to missing content.
@@ -357,6 +361,44 @@ Note that the following sub layer props are overridden by `TileLayer` internally
 
 - `visible` (toggled based on tile visibility)
 - `highlightedObjectIndex` (set based on the parent layer's highlight state)
+
+#### `renderPlaceholder` (Function, optional) {#renderplaceholder}
+
+Renders one or an array of Layer instances for a selected tile while its data is loading.
+
+This prop is disabled by default. When supplied, it is called for selected tiles that have no loaded
+content and no generated sublayers. With the default `refinementStrategy: 'best-available'`, cached
+ancestor or child content still takes priority, so placeholders only fill cold-start or cache-miss
+gaps. With `refinementStrategy: 'no-overlap'`, placeholders are shown instead of cached refinement
+content for selected loading tiles.
+
+The callback receives all the `TileLayer` props and the following props:
+
+* `id` (string): A unique id for this placeholder sublayer
+* `data` (null): Placeholder tiles do not have loaded tile data
+* `bounds` (number[4]): Bounds of the tile in `[left, bottom, right, top]` order
+* `tile` ([Tile](#tile))
+
+- Default: `null`
+
+For raster tiles, return a `BitmapLayer` that spans `props.bounds`. Set `pickable: false` if
+placeholder layers should not participate in picking.
+
+```ts
+renderPlaceholder: props => {
+  const {data, bounds, ...otherProps} = props;
+
+  return new BitmapLayer(otherProps, {
+    image: 'data:image/png;base64,...',
+    bounds,
+    pickable: false,
+    opacity: 0.35
+  });
+}
+```
+
+Placeholder sublayers do not make the tile or layer loaded. `isLoaded`, `onViewportLoad`, tile cache
+behavior, and tile error handling continue to depend on the real tile request.
 
 #### `zRange` (number[2], optional) {#zrange}
 

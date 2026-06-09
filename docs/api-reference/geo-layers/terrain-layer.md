@@ -145,7 +145,10 @@ new deck.TerrainLayer({});
 
 ## Properties
 
-When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. Forwards `wireframe` property to [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md).
+When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. Tiled terrain
+forwards `renderPlaceholder` to its internal `TileLayer`; this can be used to render loading
+footprints before terrain meshes are available. Forwards `wireframe` property to
+[SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md).
 
 
 
