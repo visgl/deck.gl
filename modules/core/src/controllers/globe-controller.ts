@@ -9,7 +9,11 @@ import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import GlobeViewport, {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
+import GlobeViewport, {
+  zoomAdjust,
+  GLOBE_RADIUS,
+  GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO
+} from '../viewports/globe-viewport';
 import {
   Globe,
   type CameraFrame,
@@ -171,8 +175,8 @@ class GlobeState extends MapState {
     const state = this.getState();
     const {startZoom} = state;
     let {startZoomLngLat} = state;
-    const hasZoomStart = startZoom !== undefined;
-    const startZoomValue = (startZoom as number) ?? this.getViewportProps().zoom;
+    const hasZoomStart = startZoom !== null && startZoom !== undefined;
+    const startZoomValue = hasZoomStart ? startZoom : this.getViewportProps().zoom;
     const zoom = this._constrainZoom(startZoomValue + Math.log2(scale));
 
     if (!this._shouldZoomAroundPointer()) {
@@ -302,7 +306,7 @@ class GlobeState extends MapState {
     }
 
     const viewport = this.makeViewport(this.getViewportProps()) as GlobeViewport;
-    if (!viewport.isPointOnGlobe(pos)) {
+    if (!viewport.isPointOnGlobe(pos, {maxDistanceRatio: GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO})) {
       return undefined;
     }
 

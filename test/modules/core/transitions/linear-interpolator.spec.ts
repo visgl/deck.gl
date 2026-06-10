@@ -105,13 +105,22 @@ test('LinearInterpolator anchors transitions on GlobeViewport', () => {
 
   expect(end.aroundLngLat, 'unprojects the anchor to a lng/lat on the globe').toBeDefined();
   expect(end.aroundPosition, 'does not fall back to the planar anchor path').toBeUndefined();
-  expect(end.around, 'records the anchor screen point').toEqual(around);
+  expect(start.around, 'records the start anchor screen point').toEqual(around);
+  expect(end.around, 'records the anchor screen point in the end viewport').toBeDefined();
 
   const propsAtHalf = interpolator.interpolateProps(start, end, 0.5);
   expect(
     propsAtHalf.longitude,
     'longitude shifts during the transition to keep the anchor pinned'
   ).not.toBeCloseTo(0);
+
+  const propsAtEnd = interpolator.interpolateProps(start, end, 1);
+  expect(propsAtEnd.longitude, 'transition ends at the requested longitude').toBeCloseTo(
+    endProps.longitude
+  );
+  expect(propsAtEnd.latitude, 'transition ends at the requested latitude').toBeCloseTo(
+    endProps.latitude
+  );
 });
 
 test('LinearInterpolator falls back to a plain LERP when the GlobeView anchor is off-globe', () => {
