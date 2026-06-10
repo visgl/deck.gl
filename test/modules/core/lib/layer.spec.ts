@@ -118,6 +118,11 @@ test('Layer#clone', () => {
   expect(newLayer.props.data, 'cloned layer has correct data').toEqual([0, 1]);
 });
 
+test('Layer#getTileLoadingState returns null on the base class', () => {
+  const layer = new SubLayer({id: 'plain-layer', data: [0, 1]});
+  expect(layer.getTileLoadingState(), 'non-tile layers report null tile loading state').toBeNull();
+});
+
 test('Layer#constructor(multi prop objects)', () => {
   for (const tc of LAYER_CONSTRUCT_MULTIPROP_TEST_CASES) {
     const layer = new Layer(...tc.props);

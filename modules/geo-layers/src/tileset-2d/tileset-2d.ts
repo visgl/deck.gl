@@ -197,6 +197,37 @@ export class Tileset2D {
     return this._selectedTiles !== null && this._selectedTiles.every(tile => tile.isLoaded);
   }
 
+  /**
+   * Returns counts of tiles in the current viewport selection by load state, plus an `isComplete`
+   * flag that is true when all selected tiles have settled (no pending loads). Returns `null`
+   * when no selection has been computed yet (e.g. before the first `update()` call).
+   */
+  getLoadingState(): {
+    pending: number;
+    loaded: number;
+    failed: number;
+    total: number;
+    isComplete: boolean;
+  } | null {
+    if (this._selectedTiles === null) {
+      return null;
+    }
+    let pending = 0;
+    let loaded = 0;
+    let failed = 0;
+    for (const tile of this._selectedTiles) {
+      if (tile.isFailed) {
+        failed++;
+      } else if (tile.isLoaded) {
+        loaded++;
+      } else {
+        pending++;
+      }
+    }
+    const total = this._selectedTiles.length;
+    return {pending, loaded, failed, total, isComplete: pending === 0};
+  }
+
   get needsReload(): boolean {
     return this._selectedTiles !== null && this._selectedTiles.some(tile => tile.needsReload);
   }

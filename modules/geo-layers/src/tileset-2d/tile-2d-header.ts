@@ -35,6 +35,7 @@ export class Tile2DHeader<DataT = any> {
   private _isLoaded: boolean;
   private _isCancelled: boolean;
   private _needsReload: boolean;
+  private _error: unknown;
   private _bbox!: TileBoundingBox;
 
   constructor(index: TileIndex) {
@@ -52,6 +53,17 @@ export class Tile2DHeader<DataT = any> {
     this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;
+    this._error = null;
+  }
+
+  /** The error reported by `getTileData`, or `null` if the request succeeded or has not completed. */
+  get error(): unknown {
+    return this._error;
+  }
+
+  /** True if the most recent load attempt for this tile failed (i.e. `getTileData` rejected). */
+  get isFailed(): boolean {
+    return this._error !== null && this._error !== undefined;
   }
 
   /** @deprecated use `boundingBox` instead */
@@ -164,8 +176,10 @@ export class Tile2DHeader<DataT = any> {
     this._isCancelled = false;
 
     if (error) {
+      this._error = error;
       onError(error, this);
     } else {
+      this._error = null;
       onLoad(this);
     }
   }
@@ -174,6 +188,7 @@ export class Tile2DHeader<DataT = any> {
     this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;
+    this._error = null;
     this._loaderId++;
     this._loader = this._loadData(opts);
     return this._loader;

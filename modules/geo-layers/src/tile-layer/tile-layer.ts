@@ -222,6 +222,15 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     );
   }
 
+  /**
+   * Returns counts of tiles in the current viewport selection by load state, plus an
+   * `isComplete` flag that is true when no tiles are pending. Returns `null` if the tileset
+   * has not yet computed a selection (e.g. before the first viewport update).
+   */
+  getTileLoadingState() {
+    return this.state?.tileset?.getLoadingState() ?? null;
+  }
+
   shouldUpdateState({changeFlags}): boolean {
     return changeFlags.somethingChanged;
   }

@@ -361,6 +361,62 @@ test('TileLayer#debounceTime', async () => {
   });
 });
 
+test('TileLayer#getTileLoadingState', async () => {
+  const testViewport = new WebMercatorViewport({
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1
+  });
+
+  let resolveData: (value: unknown[]) => void = () => {};
+  const dataReady = new Promise<unknown[]>(resolve => {
+    resolveData = resolve;
+  });
+
+  const testCases = [
+    {
+      title: 'before initialize: state is null',
+      props: {
+        getTileData: () => dataReady
+      },
+      onBeforeUpdate: ({layer}) => {
+        expect(layer.getTileLoadingState(), 'null prior to viewport selection').toBeNull();
+      }
+    },
+    {
+      title: 'after viewport: pending tiles tracked',
+      props: {
+        getTileData: () => dataReady
+      },
+      onAfterUpdate: ({layer}) => {
+        const state = layer.getTileLoadingState();
+        expect(state, 'state is reported once viewport is selected').not.toBeNull();
+        if (!state) return;
+        expect(state.total, 'one or more tiles selected').toBeGreaterThan(0);
+        expect(state.pending, 'tiles pending').toBe(state.total);
+        expect(state.loaded, 'no tiles loaded').toBe(0);
+        expect(state.failed, 'no tiles failed').toBe(0);
+        expect(state.isComplete, 'not complete while pending').toBe(false);
+      }
+    }
+  ];
+
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => {
+      throw err;
+    }
+  });
+
+  // Resolve the deferred data and let the request scheduler drain
+  resolveData([]);
+  await sleep(50);
+});
+
 function sleep(ms) {
   return new Promise(resolve => {
     /* global setTimeout */

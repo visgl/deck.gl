@@ -782,3 +782,13 @@ test('MVTLayer#GeoJsonLayer.defaultProps', () => {
 
   testLayer({Layer: TestMVTLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+test('MVTLayer#getTileLoadingState inherits from TileLayer', () => {
+  // Before initialization the method exists and returns null because no tileset selection yet.
+  const layer = new MVTLayer({
+    id: 'mvt-loading-state',
+    data: 'https://example.com/{z}/{x}/{y}.mvt'
+  });
+  expect(typeof layer.getTileLoadingState, 'method exists on MVTLayer').toBe('function');
+  expect(layer.getTileLoadingState(), 'returns null before initialization').toBeNull();
+});

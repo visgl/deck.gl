@@ -611,6 +611,54 @@ test('Tileset2D#isTileVisibleWithModelMatrix', async () => {
   }
 });
 
+test('Tileset2D#getLoadingState reports null before update', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => Promise.resolve(null)
+  });
+  expect(tileset.getLoadingState(), 'no selection yet, returns null').toBeNull();
+});
+
+test('Tileset2D#getLoadingState transitions pending -> loaded', async () => {
+  const tileset = new Tileset2D({
+    getTileData: () => Promise.resolve('content'),
+    onTileLoad: () => {}
+  });
+  tileset.update(testViewport);
+
+  const pendingState = tileset.getLoadingState();
+  expect(pendingState, 'returns state immediately after update').not.toBeNull();
+  expect(pendingState!.total, 'one tile selected').toBeGreaterThan(0);
+  expect(pendingState!.pending, 'tile is pending before sleep').toBe(pendingState!.total);
+  expect(pendingState!.loaded, 'no tiles loaded yet').toBe(0);
+  expect(pendingState!.failed, 'no failures before sleep').toBe(0);
+  expect(pendingState!.isComplete, 'not complete while pending').toBe(false);
+
+  await sleep(100);
+
+  const loadedState = tileset.getLoadingState();
+  expect(loadedState!.pending, 'no tiles pending after load').toBe(0);
+  expect(loadedState!.loaded, 'all tiles loaded').toBe(loadedState!.total);
+  expect(loadedState!.failed, 'no failures').toBe(0);
+  expect(loadedState!.isComplete, 'complete').toBe(true);
+});
+
+test('Tileset2D#getLoadingState counts failed tiles', async () => {
+  const tileset = new Tileset2D({
+    getTileData: () => Promise.reject(new Error('network error')),
+    onTileLoad: () => {},
+    onTileError: () => {}
+  });
+  tileset.update(testViewport);
+
+  await sleep(100);
+
+  const state = tileset.getLoadingState();
+  expect(state!.failed, 'failed tiles counted').toBe(state!.total);
+  expect(state!.loaded, 'no tiles in loaded bucket').toBe(0);
+  expect(state!.pending, 'no pending tiles').toBe(0);
+  expect(state!.isComplete, 'complete (no pending) even on failure').toBe(true);
+});
+
 function validateVisibility(strategy, selectedTiles, tiles) {
   /* eslint-disable default-case */
   switch (strategy) {

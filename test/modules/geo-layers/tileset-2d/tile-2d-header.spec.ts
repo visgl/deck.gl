@@ -130,3 +130,38 @@ test('Tile2DHeader#reload', async () => {
   tile.loadData({...opts, getData: () => getTileData('d2', 0)});
   expect(await tile.data, 'loaded the result of the last request').toBe('d2');
 });
+
+test('Tile2DHeader#error and isFailed track load failures', async () => {
+  const requestScheduler = new RequestScheduler({throttleRequests: false});
+  const opts = {
+    requestScheduler,
+    onLoad: () => {},
+    onError: () => {}
+  };
+
+  // Successful load: no error, isFailed false
+  const okTile = new Tile2DHeader({});
+  await okTile.loadData({...opts, getData: () => 'ok'});
+  expect(okTile.isLoaded, 'ok tile is loaded').toBe(true);
+  expect(okTile.isFailed, 'ok tile is not failed').toBe(false);
+  expect(okTile.error, 'ok tile has no error').toBeNull();
+
+  // Failed load: error is recorded, isFailed true, but isLoaded still true (terminal state)
+  const failingError = new Error('boom');
+  const failTile = new Tile2DHeader({});
+  await failTile.loadData({
+    ...opts,
+    getData: () => {
+      throw failingError;
+    }
+  });
+  expect(failTile.isLoaded, 'failed tile reaches terminal isLoaded state').toBe(true);
+  expect(failTile.isFailed, 'failed tile reports isFailed').toBe(true);
+  expect(failTile.error, 'failed tile exposes the thrown error').toBe(failingError);
+
+  // Reloading a failed tile clears the error before the new attempt resolves
+  await failTile.loadData({...opts, getData: () => 'recovered'});
+  expect(failTile.isFailed, 'reload clears failed flag').toBe(false);
+  expect(failTile.error, 'reload clears error').toBeNull();
+  expect(failTile.content, 'reload populates content').toBe('recovered');
+});

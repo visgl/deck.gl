@@ -428,6 +428,25 @@ Properties:
 - `isSelected` (boolean) - if the tile is expected to show up in the current viewport
 - `isVisible` (boolean) - if the tile should be rendered
 - `isLoaded` (boolean) - if the content of the tile has been loaded
+- `isFailed` (boolean) - if the most recent load attempt for this tile failed (i.e. `getTileData` rejected). Reset to `false` once the tile reloads successfully.
+- `error` (any | null) - the error reported by `getTileData`, or `null` if the request succeeded or has not completed.
+
+## TileLayer.getTileLoadingState
+
+Returns counts of tiles in the current viewport selection by load state, plus an `isComplete` flag that is true when no tiles are pending. Returns `null` if the tileset has not yet computed a viewport selection (e.g. before the first render).
+
+```ts
+const state = tileLayer.getTileLoadingState();
+// state: {
+//   pending: number,    // tiles being fetched/decoded
+//   loaded: number,     // tiles successfully loaded
+//   failed: number,     // tiles whose load attempt failed
+//   total: number,      // total tiles in the current viewport selection
+//   isComplete: boolean // pending === 0
+// } | null
+```
+
+This is useful for headless capture / video export and progress UIs that need a per-layer view of tile pipeline state. The base `Layer` class returns `null` for non-tile layers; `TileLayer` and its subclasses (including `MVTLayer`) override this to return real counts.
 
 ## Tileset2D
 

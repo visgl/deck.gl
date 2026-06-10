@@ -325,6 +325,30 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.internalState ? !this.internalState.isAsyncPropLoading() : false;
   }
 
+  /**
+   * Returns the current tile loading state for tile-based layers, or `null` for non-tile layers.
+   *
+   * Subclasses that load data in tiles (e.g. `TileLayer`, `MVTLayer`) override this method to
+   * report counts of pending, loaded, and failed tiles in the current viewport selection.
+   *
+   * Returns `null` for non-tile layers and for tile layers whose tileset has not yet computed
+   * a viewport selection (e.g. before the first render).
+   */
+  getTileLoadingState(): {
+    /** Number of tiles currently being fetched or decoded */
+    pending: number;
+    /** Number of tiles successfully loaded */
+    loaded: number;
+    /** Number of tiles whose load attempts failed */
+    failed: number;
+    /** Total tiles in the current viewport selection */
+    total: number;
+    /** True when no tiles are pending */
+    isComplete: boolean;
+  } | null {
+    return null;
+  }
+
   /** Returns true if using shader-based WGS84 longitude wrapping */
   get wrapLongitude(): boolean {
     return this.props.wrapLongitude;
