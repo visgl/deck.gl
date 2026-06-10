@@ -4,7 +4,7 @@
 
 import {LayerData, LayerProps} from '@deck.gl/core';
 import {PolygonLayerProps, ScatterplotLayerProps} from '..';
-import {calculatePickingColors} from './geojson-binary';
+import {calculatePickingIndexes} from './geojson-binary';
 import type {ExtendedBinaryFeatureCollection} from './geojson-binary';
 import {SeparatedGeometries} from './geojson';
 
@@ -60,8 +60,7 @@ export function createLayerPropsFromFeatures(
 }
 
 export function createLayerPropsFromBinary(
-  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
-  encodePickingColor: (id: number, result: number[]) => void
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>
 ): SubLayersProps {
   // The binary data format is documented here
   // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
@@ -70,16 +69,18 @@ export function createLayerPropsFromBinary(
   const layerProps = createEmptyLayerProps();
   const {points, lines, polygons} = geojsonBinary;
 
-  const customPickingColors = calculatePickingColors(geojsonBinary, encodePickingColor);
+  const customPickingIndexes = calculatePickingIndexes(geojsonBinary);
 
   layerProps.points.data = {
     length: points.positions.value.length / points.positions.size,
     attributes: {
       ...points.attributes,
       getPosition: points.positions,
-      instancePickingColors: {
-        size: 4,
-        value: customPickingColors.points!
+      /** Global feature id for the rendered point geometry. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
+        value: customPickingIndexes.points!
       }
     },
     properties: points.properties,
@@ -93,9 +94,11 @@ export function createLayerPropsFromBinary(
     attributes: {
       ...lines.attributes,
       getPath: lines.positions,
-      instancePickingColors: {
-        size: 4,
-        value: customPickingColors.lines!
+      /** Global feature id for the rendered path geometry. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
+        value: customPickingIndexes.lines!
       }
     },
     properties: lines.properties,
@@ -120,9 +123,11 @@ export function createLayerPropsFromBinary(
         size: 1,
         value: new Uint16Array(vertexValid)
       },
-      pickingColors: {
-        size: 4,
-        value: customPickingColors.polygons!
+      /** Global feature id for the rendered polygon geometry. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
+        value: customPickingIndexes.polygons!
       }
     },
     properties: polygons.properties,
@@ -140,9 +145,11 @@ export function createLayerPropsFromBinary(
     attributes: {
       ...polygons.attributes,
       getPath: polygons.positions,
-      instancePickingColors: {
-        size: 4,
-        value: customPickingColors.polygons!
+      /** Global feature id for the rendered polygon outline geometry. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
+        value: customPickingIndexes.polygons!
       }
     },
     properties: polygons.properties,

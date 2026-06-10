@@ -37,7 +37,8 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
    */
   usesPickingColorCache: boolean;
   /**
-   * If the layer has picking buffer (pickingColors or instancePickingColors)
+   * If the layer has a picking buffer
+   * (rowIndexes, pickingColors or instancePickingColors)
    */
   hasPickingBuffer?: boolean;
   /**
