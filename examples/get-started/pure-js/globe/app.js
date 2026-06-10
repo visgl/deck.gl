@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
+/* global document, localStorage */
 
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {SolidPolygonLayer, GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
@@ -19,7 +19,22 @@ const INITIAL_VIEW_STATE = {
   zoom: 0
 };
 
-let zoomAround = 'center';
+const ZOOM_AROUND_STORAGE_KEY = 'deckgl-example-globe-zoom-around';
+
+function isZoomAroundMode(value) {
+  return value === 'center' || value === 'pointer';
+}
+
+function getInitialZoomAround() {
+  try {
+    const storedZoomAround = localStorage.getItem(ZOOM_AROUND_STORAGE_KEY);
+    return isZoomAroundMode(storedZoomAround) ? storedZoomAround : 'center';
+  } catch {
+    return 'center';
+  }
+}
+
+let zoomAround = getInitialZoomAround();
 
 const deckgl = new Deck({
   views: new GlobeView(),
@@ -82,8 +97,20 @@ const deckgl = new Deck({
 });
 
 function setZoomAround(nextZoomAround) {
+  if (!isZoomAroundMode(nextZoomAround)) {
+    return;
+  }
   zoomAround = nextZoomAround;
   deckgl.setProps({controller: {zoomAround}});
+  try {
+    localStorage.setItem(ZOOM_AROUND_STORAGE_KEY, zoomAround);
+  } catch {
+    // Ignore storage failures in sandboxed examples.
+  }
+  syncZoomButtons();
+}
+
+function syncZoomButtons() {
   for (const button of zoomButtons) {
     button.setAttribute('aria-pressed', String(button.dataset.zoomAround === zoomAround));
   }
@@ -93,3 +120,4 @@ const zoomButtons = document.querySelectorAll('[data-zoom-around]');
 for (const button of zoomButtons) {
   button.addEventListener('click', () => setZoomAround(button.dataset.zoomAround));
 }
+syncZoomButtons();

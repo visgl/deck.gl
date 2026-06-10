@@ -167,6 +167,48 @@ test('GlobeController applies updated zoomAround option', () => {
   expect(controller.props.longitude, 'updated pointer zoom adjusts longitude').not.toBeCloseTo(0);
 });
 
+test('GlobeController keeps pointer anchored zoom after constrained pan', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 800,
+      height: 600,
+      longitude: 30,
+      latitude: 20,
+      zoom: 1
+    }
+  });
+
+  const makeGestureEvent = (type: string, x: number, y: number) => ({
+    type,
+    offsetCenter: {x, y},
+    delta: -10,
+    deltaX: 0,
+    deltaY: 0,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  });
+
+  controller.handleEvent(makeGestureEvent('panstart', 400, 300) as any);
+  controller.handleEvent(makeGestureEvent('panmove', 400, 0) as any);
+  controller.handleEvent(makeGestureEvent('panend', 400, 0) as any);
+
+  const longitudeAfterPan = controller.props.longitude;
+  const latitudeAfterPan = controller.props.latitude;
+  expect(latitudeAfterPan, 'pan reached the constrained latitude').toBeLessThan(-80);
+
+  controller.handleEvent(makeGestureEvent('wheel', 500, 300) as any);
+
+  expect(
+    controller.props.longitude,
+    'pointer zoom after constrained pan still adjusts longitude'
+  ).not.toBeCloseTo(longitudeAfterPan);
+  expect(
+    controller.props.latitude,
+    'pointer zoom after constrained pan still adjusts latitude'
+  ).not.toBeCloseTo(latitudeAfterPan);
+});
+
 test('OrbitController', async () => {
   await testController(OrbitView, {
     orbitAxis: 'Y',
