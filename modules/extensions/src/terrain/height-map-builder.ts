@@ -13,6 +13,7 @@ import {
 } from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
+import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import type {Viewport, Layer} from '@deck.gl/core';
 
 const MAP_MAX_SIZE = 2048;
@@ -91,10 +92,10 @@ export class HeightMapBuilder {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
       // On GlobeView, viewport bounds are sphere cartesian — skip intersection
-      const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
-      const bounds = isGlobe
-        ? this.layersBoundsCommon
-        : getRenderBounds(this.layersBoundsCommon, viewport);
+      const bounds =
+        viewport instanceof GlobeViewport
+          ? this.layersBoundsCommon
+          : getRenderBounds(this.layersBoundsCommon, viewport);
       if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
         this.renderViewport = null;
         return false;

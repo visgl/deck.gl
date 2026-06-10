@@ -223,7 +223,7 @@ export function getOSMTileIndices(
   bounds?: Bounds
 ): TileIndex[] {
   const project: ((xyz: number[]) => number[]) | null =
-    viewport instanceof _GlobeViewport && viewport.resolution
+    viewport instanceof _GlobeViewport
       ? // eslint-disable-next-line @typescript-eslint/unbound-method
         viewport.projectPosition
       : null;

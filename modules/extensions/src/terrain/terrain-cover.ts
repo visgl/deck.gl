@@ -4,6 +4,7 @@
 
 import {Framebuffer} from '@luma.gl/core';
 
+import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
@@ -158,10 +159,10 @@ export class TerrainCover {
       const oldZoom = this.renderViewport?.zoom;
       shouldRedraw = shouldRedraw || newZoom !== oldZoom;
       // On GlobeView, viewport bounds are sphere cartesian — skip intersection
-      const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
-      const newBounds = isGlobe
-        ? this.targetBoundsCommon
-        : getRenderBounds(this.targetBoundsCommon, viewport);
+      const newBounds =
+        viewport instanceof GlobeViewport
+          ? this.targetBoundsCommon
+          : getRenderBounds(this.targetBoundsCommon, viewport);
       const oldBounds = this.bounds;
       shouldRedraw = shouldRedraw || !oldBounds || newBounds.some((x, i) => x !== oldBounds[i]);
       this.bounds = newBounds;
