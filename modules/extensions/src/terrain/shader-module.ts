@@ -113,6 +113,9 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+      // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
+      // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
+      terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
       geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
     } else {
       geometry.position.z += terrainZ;
