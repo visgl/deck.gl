@@ -59,16 +59,6 @@ function noop() {}
 
 const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 
-const DEFAULT_CANVAS_STYLE = {
-  userSelect: 'none'
-} as const;
-
-const DEFAULT_CANVAS_CSS_PROPERTIES = {
-  '-webkit-user-select': 'none',
-  '-webkit-touch-callout': 'none',
-  '-webkit-tap-highlight-color': 'transparent'
-} as const;
-
 export type DeckMetrics = {
   fps: number;
   setPropsTime: number;
@@ -1051,10 +1041,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       parent.appendChild(canvas);
     }
 
-    for (const [key, value] of Object.entries(DEFAULT_CANVAS_CSS_PROPERTIES)) {
-      canvas.style.setProperty(key, value);
-    }
-    Object.assign(canvas.style, DEFAULT_CANVAS_STYLE, props.style);
+    Object.assign(canvas.style, props.style);
 
     return canvas;
   }
