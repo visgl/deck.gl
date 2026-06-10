@@ -628,6 +628,122 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
+  /**
+   * Wait until all pending updates have settled and a frame has been rendered.
+   *
+   * Resolves when:
+   * - All layers report `isLoaded === true` (no pending async props/resources)
+   * - The layer manager has no pending updates (`needsUpdate() === false`)
+   * - No redraw is queued (`needsRedraw() === false`)
+   * - An `onAfterRender` cycle has completed since the call started
+   *
+   * This is intended for use cases such as headless capture / video export where
+   * a caller needs to know that the next read of the canvas will reflect a
+   * fully-settled scene.
+   *
+   * @param options.timeout      Maximum wait time in ms before rejecting. Default 5000.
+   * @param options.checkLayers  If false, skip the per-layer `isLoaded` check. Default true.
+   * @param options.checkAttributes If false, skip the layer-manager `needsUpdate` check. Default true.
+   * @returns Resolves with a status object describing the final state and elapsed time.
+   *          Rejects with an Error if the deadline is reached before settle.
+   */
+  async waitForFrameReady(options?: {
+    timeout?: number;
+    checkLayers?: boolean;
+    checkAttributes?: boolean;
+  }): Promise<{
+    layersReady: boolean;
+    attributesReady: boolean;
+    duration: number;
+  }> {
+    const {timeout = 5000, checkLayers = true, checkAttributes = true} = options || {};
+
+    if (!this.layerManager) {
+      throw new Error('Deck.waitForFrameReady: Deck is not initialized');
+    }
+
+    const start = Date.now();
+    const deadline = start + timeout;
+
+    const layersAreReady = (): boolean => {
+      if (!checkLayers) return true;
+      const layers = this.layerManager!.getLayers();
+      for (const layer of layers) {
+        if (!layer.isLoaded) return false;
+      }
+      return true;
+    };
+
+    const attributesAreReady = (): boolean => {
+      if (!checkAttributes) return true;
+      return this.layerManager!.needsUpdate() === false;
+    };
+
+    const sceneIsSettled = (): boolean => {
+      if (!layersAreReady()) return false;
+      if (!attributesAreReady()) return false;
+      if (this.needsRedraw({clearRedrawFlags: false})) return false;
+      return true;
+    };
+
+    // If the scene is already settled, resolve immediately - no need to wait for a frame.
+    if (sceneIsSettled()) {
+      return {
+        layersReady: layersAreReady(),
+        attributesReady: attributesAreReady(),
+        duration: Date.now() - start
+      };
+    }
+
+    // Capture the user-installed onAfterRender once; we'll wrap it with a chained
+    // handler that signals each completed frame, and restore it before returning.
+    const userOnAfterRender = this.props.onAfterRender;
+    const signalState: {pending: (() => void) | null} = {pending: null};
+    this.setProps({
+      onAfterRender: (ctx: {device: Device; gl: WebGL2RenderingContext}) => {
+        userOnAfterRender?.(ctx);
+        const signal = signalState.pending;
+        signalState.pending = null;
+        signal?.();
+      }
+    });
+
+    const waitOneFrame = (remaining: number): Promise<void> =>
+      new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          signalState.pending = null;
+          reject(new Error(`Deck.waitForFrameReady: timed out after ${timeout}ms`));
+        }, remaining);
+        signalState.pending = () => {
+          clearTimeout(timer);
+          resolve();
+        };
+      });
+
+    try {
+      for (;;) {
+        if (Date.now() > deadline) {
+          throw new Error(
+            `Deck.waitForFrameReady: timed out after ${timeout}ms (` +
+              `layersReady=${layersAreReady()}, attributesReady=${attributesAreReady()})`
+          );
+        }
+
+        await waitOneFrame(Math.max(0, deadline - Date.now()));
+
+        if (sceneIsSettled()) {
+          return {
+            layersReady: layersAreReady(),
+            attributesReady: attributesAreReady(),
+            duration: Date.now() - start
+          };
+        }
+      }
+    } finally {
+      this.setProps({onAfterRender: userOnAfterRender});
+    }
+  }
+
   /** Flag indicating that the Deck instance has initialized its resources and it's safe to call public methods. */
   get isInitialized(): boolean {
     return this.viewManager !== null;

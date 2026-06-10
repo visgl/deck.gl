@@ -887,6 +887,218 @@ test('Deck#getView with multiple views', async () => {
   });
 });
 
+test('Deck#waitForFrameReady resolves after a render with no pending updates', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [
+      new ScatterplotLayer({
+        id: 'sync-layer',
+        data: [{position: [0, 0]}],
+        getPosition: d => d.position,
+        getRadius: 1,
+        getFillColor: [255, 0, 0]
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+
+    const result = await deck.waitForFrameReady({timeout: 2000});
+    expect(result.layersReady, 'layers report ready').toBe(true);
+    expect(result.attributesReady, 'attributes report ready').toBe(true);
+    expect(typeof result.duration, 'duration is a number').toBe('number');
+    expect(result.duration >= 0, 'duration is non-negative').toBe(true);
+  } finally {
+    deck.finalize();
+  }
+});
+
+test('Deck#waitForFrameReady waits for an async layer prop to settle', async () => {
+  const deferred = createDeferred<{position: number[]}[]>();
+
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [
+      new ScatterplotLayer({
+        id: 'async-layer',
+        data: deferred.promise,
+        getPosition: d => d.position,
+        getRadius: 1,
+        getFillColor: [0, 255, 0]
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+
+    const waiter = deck.waitForFrameReady({timeout: 5000});
+
+    let waiterResolved = false;
+    waiter.then(() => {
+      waiterResolved = true;
+    });
+
+    await sleep(50);
+    expect(waiterResolved, 'waiter is still pending while data unresolved').toBe(false);
+
+    deferred.resolve([{position: [0, 0]}]);
+
+    const result = await waiter;
+    expect(result.layersReady, 'layers report ready after data resolves').toBe(true);
+    expect(result.attributesReady, 'attributes report ready after data resolves').toBe(true);
+  } finally {
+    deck.finalize();
+  }
+});
+
+test('Deck#waitForFrameReady rejects when timeout elapses with pending data', async () => {
+  const deferred = createDeferred<{position: number[]}[]>();
+
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [
+      new ScatterplotLayer({
+        id: 'never-loaded',
+        data: deferred.promise,
+        getPosition: d => d.position
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+
+    let caught: Error | null = null;
+    try {
+      await deck.waitForFrameReady({timeout: 100});
+    } catch (err) {
+      caught = err as Error;
+    }
+    expect(caught, 'waitForFrameReady rejects on timeout').toBeTruthy();
+    expect(caught?.message.includes('timed out'), 'error mentions timeout').toBe(true);
+  } finally {
+    deferred.resolve([]);
+    deck.finalize();
+  }
+});
+
+test('Deck#waitForFrameReady checkLayers=false skips per-layer readiness', async () => {
+  const deferred = createDeferred<{position: number[]}[]>();
+
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [
+      new ScatterplotLayer({
+        id: 'pending-layer',
+        data: deferred.promise,
+        getPosition: d => d.position
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+    const result = await deck.waitForFrameReady({timeout: 2000, checkLayers: false});
+    expect(result.attributesReady, 'attributes are ready').toBe(true);
+  } finally {
+    deferred.resolve([]);
+    deck.finalize();
+  }
+});
+
+test('Deck#waitForFrameReady throws if Deck is not initialized', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: []
+  });
+  deck.finalize();
+
+  let caught: Error | null = null;
+  try {
+    await deck.waitForFrameReady();
+  } catch (err) {
+    caught = err as Error;
+  }
+  expect(caught, 'rejects when not initialized').toBeTruthy();
+  expect(caught?.message.includes('not initialized'), 'message mentions initialization').toBe(true);
+});
+
+test('Deck#waitForFrameReady preserves user-provided onAfterRender', async () => {
+  let userCallCount = 0;
+  const deferred = createDeferred<{position: number[]}[]>();
+  const userOnAfterRender = () => {
+    userCallCount++;
+  };
+
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [
+      new ScatterplotLayer({
+        id: 'restore-layer',
+        data: deferred.promise,
+        getPosition: d => d.position
+      })
+    ],
+    onAfterRender: userOnAfterRender
+  });
+
+  try {
+    // Use a one-shot resolve via direct setProps so we don't pollute the user's handler.
+    await new Promise<void>(resolve => {
+      deck.setProps({
+        onAfterRender: ctx => {
+          userOnAfterRender();
+          deck.setProps({onAfterRender: userOnAfterRender});
+          resolve();
+        }
+      });
+    });
+
+    // Confirm starting state: deck's onAfterRender is the user's function.
+    expect(deck.props.onAfterRender, 'precondition: user handler installed').toBe(
+      userOnAfterRender
+    );
+
+    // Start the wait - data is pending, so it will install our chained handler.
+    const waiter = deck.waitForFrameReady({timeout: 2000});
+    const beforeData = userCallCount;
+
+    deferred.resolve([{position: [0, 0]}]);
+    await waiter;
+
+    // While resolving, at least one frame fired and the chained handler should have
+    // invoked the user callback.
+    expect(userCallCount > beforeData, 'user onAfterRender invoked during wait').toBe(true);
+
+    // After the wait, the user's original handler should still be in place.
+    expect(deck.props.onAfterRender, 'user onAfterRender restored after wait').toBe(
+      userOnAfterRender
+    );
+  } finally {
+    deck.finalize();
+  }
+});
+
 test('Deck#props omitted are unchanged', async () => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',
