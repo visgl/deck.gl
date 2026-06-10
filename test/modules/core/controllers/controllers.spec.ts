@@ -48,9 +48,11 @@ test('MapController#inertia', async () => {
   });
 });
 
-test('MapController supports double-tap drag zoom when double click zoom is disabled', () => {
+test('MapController supports double-click drag zoom when double click and touch zoom are disabled', () => {
   const controller = createTestController({
-    view: new MapView({controller: {touchZoom: true, doubleClickZoom: false}}),
+    view: new MapView({
+      controller: {doubleClickZoom: false, doubleClickDragZoom: true, touchZoom: false}
+    }),
     initialViewState: {
       longitude: -122.45,
       latitude: 37.78,
@@ -69,8 +71,30 @@ test('MapController supports double-tap drag zoom when double click zoom is disa
 
   controller.handleEvent(makePointerEvent('pointerup', 20, 180) as any);
 
-  expect(zoomAfterMove, 'dragging up after double tap zooms in').toBeGreaterThan(10);
+  expect(zoomAfterMove, 'dragging up after double click zooms in').toBeGreaterThan(10);
   expect(controller.props.zoom, 'release should not change zoom').toBeCloseTo(zoomAfterMove);
+});
+
+test('MapController disables double-click drag zoom', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {doubleClickDragZoom: false}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  controller.handleEvent(makePointerEvent('pointerdown', 50, 0) as any);
+  controller.handleEvent(makePointerEvent('pointerup', 50, 50) as any);
+  controller.handleEvent(makePointerEvent('pointerdown', 50, 120) as any);
+  controller.handleEvent(makePointerEvent('pointermove', 20, 150) as any);
+  controller.handleEvent(makePointerEvent('pointerup', 20, 180) as any);
+
+  expect(controller.props.zoom, 'double-click drag zoom stays disabled').toBe(10);
 });
 
 test('GlobeController', async () => {

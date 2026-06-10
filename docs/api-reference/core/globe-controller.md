@@ -44,36 +44,6 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
 - `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 
-## Mobile Browser Touch UI
-
-For full-screen mobile globe experiences, use CSS guards on the Deck canvas/root element so repeated touch gestures do not trigger browser selection, tap highlight, or WebKit touch callouts:
-
-```css
-#deck-root,
-#deck-root canvas {
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-}
-```
-
-Some iOS embeds may still surface native callout UI during long-press or rapid double-tap gestures. In those cases, prevent the browser-native UI events that originate from the canvas without stopping pointer event propagation. The controller still needs deck.gl's pointer events to receive the gesture sequence.
-
-```js
-const root = document.getElementById('deck-root');
-const preventCanvasBrowserUI = event => {
-  if (event.target instanceof HTMLCanvasElement) {
-    event.preventDefault();
-  }
-};
-
-for (const type of ['contextmenu', 'selectstart', 'gesturestart', 'gesturechange', 'gestureend']) {
-  root.addEventListener(type, preventCanvasBrowserUI, {passive: false});
-}
-```
-
 ## Custom GlobeController
 
 You can further customize the `GlobeController`'s behavior by extending the class:
