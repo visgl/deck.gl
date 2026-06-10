@@ -179,8 +179,7 @@ export default function App({
       getPosition: d => d.coordinates,
       getIcon: d => (d.type === 'start' ? 'green' : 'checker'),
       getSize: 32,
-      extensions: [new TerrainExtension()],
-      terrainDrawMode: 'offset'
+      extensions: [new TerrainExtension()]
     }),
     new TextLayer<Stage>({
       id: 'stage-label',
