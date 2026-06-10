@@ -10,6 +10,7 @@ import type {Layer} from '@deck.gl/core';
 export type TileLoadDataProps<DataT = any> = {
   requestScheduler: RequestScheduler;
   getData: (props: TileLoadProps) => Promise<DataT>;
+  getPriority: (tile: Tile2DHeader<DataT>) => number;
   onLoad: (tile: Tile2DHeader<DataT>) => void;
   onError: (error: any, tile: Tile2DHeader<DataT>) => void;
 };
@@ -18,6 +19,7 @@ export class Tile2DHeader<DataT = any> {
   index: TileIndex;
   isVisible: boolean;
   isSelected: boolean;
+  isPrefetch: boolean;
   parent: Tile2DHeader | null;
   children: Tile2DHeader[] | null;
   content: DataT | null;
@@ -41,6 +43,7 @@ export class Tile2DHeader<DataT = any> {
     this.index = index;
     this.isVisible = false;
     this.isSelected = false;
+    this.isPrefetch = false;
     this.parent = null;
     this.children = [];
 
@@ -106,6 +109,7 @@ export class Tile2DHeader<DataT = any> {
   /* eslint-disable max-statements */
   private async _loadData({
     getData,
+    getPriority,
     requestScheduler,
     onLoad,
     onError
@@ -116,10 +120,8 @@ export class Tile2DHeader<DataT = any> {
     this._abortController = new AbortController();
     const {signal} = this._abortController;
 
-    // @ts-expect-error (2345) Argument of type '(tile: any) => 1 | -1' is not assignable ...
-    const requestToken = await requestScheduler.scheduleRequest(this, tile => {
-      return tile.isSelected ? 1 : -1;
-    });
+    // @ts-expect-error (2345) loaders.gl's RequestScheduler callback type is too narrow.
+    const requestToken = await requestScheduler.scheduleRequest(this, getPriority);
 
     if (!requestToken) {
       this._isCancelled = true;

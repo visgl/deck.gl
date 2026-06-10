@@ -355,7 +355,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy
+      refinementStrategy,
+      lodStrategy
     } = this.props;
 
     if (this.state.isTiled) {
@@ -387,7 +388,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           onTileError,
           maxCacheSize,
           maxCacheByteSize,
-          refinementStrategy
+          refinementStrategy,
+          lodStrategy
         }
       );
     }

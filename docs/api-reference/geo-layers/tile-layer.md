@@ -317,6 +317,19 @@ Apps may define a custom `refinementStrategy` by supplying its own callback func
 
 When called, the function receives an array of [Tile](#tile) instances representing every tile that is currently in the cache. It is an opportunity to manipulate `tile.isVisible` before sub layers are rendered. `isVisible` is initially set to the value of `isSelected` (equivalent to `refinementStrategy: 'never'`).
 
+#### `lodStrategy` (string, optional) {#lodstrategy}
+
+Controls whether the layer prefetches lower-resolution tiles to provide instant coverage during viewport transitions (panning, zooming, or camera flights).
+
+* `'none'`: Only request tiles at the current zoom level. No additional lower-resolution coverage tiles are fetched.
+* `'coverage'`: In addition to the current zoom tiles, prefetch ancestor tiles at progressively lower zoom levels. These low-resolution tiles load quickly and act as fallback coverage while higher-resolution tiles are still loading, reducing blank areas during navigation.
+
+Use `'coverage'` when your application involves frequent camera movement (e.g. animated transitions, user exploration) and visual continuity matters more than minimizing network requests. Use `'none'` when bandwidth is constrained, tiles are expensive to fetch, or the viewport is mostly static.
+
+Note: The `'coverage'` strategy is designed for geospatial views (e.g. `MapView`) where tiles follow a power-of-2 hierarchy. It is not recommended for non-geospatial views (e.g. `FirstPersonView`, `OrthographicView`) where viewport movement patterns differ and ancestor tiles may not provide meaningful coverage.
+
+- Default: `'none'`
+
 #### `maxRequests` (number, optional) {#maxrequests}
 
 The maximum number of concurrent `getTileData` calls.
