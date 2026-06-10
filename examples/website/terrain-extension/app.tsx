@@ -70,41 +70,6 @@ type Stage = {
 };
 type ViewType = 'MapView' | 'GlobeView';
 
-const VIEW_OPTIONS: ViewType[] = ['MapView', 'GlobeView'];
-
-const VIEW_CONTROL_STYLE: React.CSSProperties = {
-  position: 'absolute',
-  top: 12,
-  left: 12,
-  zIndex: 1,
-  display: 'flex',
-  overflow: 'hidden',
-  border: '1px solid rgba(255, 255, 255, 0.24)',
-  borderRadius: 6,
-  background: 'rgba(17, 17, 17, 0.72)',
-  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.32)'
-};
-
-const VIEW_BUTTON_STYLE: React.CSSProperties = {
-  height: 34,
-  minWidth: 86,
-  padding: '0 12px',
-  border: 0,
-  borderRight: '1px solid rgba(255, 255, 255, 0.18)',
-  color: '#f8fafc',
-  background: 'transparent',
-  font: '600 13px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  cursor: 'pointer'
-};
-
-function getViewButtonStyle(isSelected: boolean, isLast: boolean): React.CSSProperties {
-  return {
-    ...VIEW_BUTTON_STYLE,
-    borderRight: isLast ? 0 : VIEW_BUTTON_STYLE.borderRight,
-    background: isSelected ? 'rgba(255, 255, 255, 0.22)' : VIEW_BUTTON_STYLE.background
-  };
-}
-
 function getTooltip({object}: PickingInfo<Route>) {
   if (!object) return null;
 
@@ -117,17 +82,13 @@ function getTooltip({object}: PickingInfo<Route>) {
 
 export default function App({
   initialViewState = INITIAL_VIEW_STATE,
-  view: viewProp,
-  showViewToggle = viewProp === undefined
+  view = 'MapView'
 }: {
   initialViewState?: MapViewState;
   view?: ViewType;
-  showViewToggle?: boolean;
 }) {
   const [routes, setRoutes] = useState<FeatureCollection<LineString, RouteProperties>>();
   const [viewState, setViewState] = useState<MapViewState>(initialViewState);
-  const [selectedView, setSelectedView] = useState<ViewType>('MapView');
-  const view = viewProp ?? selectedView;
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -168,7 +129,7 @@ export default function App({
       extensions: [new TerrainExtension()]
     }),
     new IconLayer<Stage>({
-      id: `stage-icon-${view.toLowerCase()}`,
+      id: 'stage-icon',
       data: stages,
       iconAtlas: `${DATA_URL_BASE}/flag-icons.png`,
       iconMapping: `${DATA_URL_BASE}/flag-icons.json`,
@@ -202,32 +163,15 @@ export default function App({
   const deckView = useMemo(() => (view === 'GlobeView' ? new GlobeView() : new MapView()), [view]);
 
   return (
-    <>
-      <DeckGL
-        views={deckView}
-        viewState={viewState}
-        onViewStateChange={e => setViewState(e.viewState as MapViewState)}
-        controller={true}
-        layers={layers}
-        pickingRadius={5}
-        getTooltip={getTooltip}
-      />
-      {showViewToggle && (
-        <div style={VIEW_CONTROL_STYLE} aria-label="View">
-          {VIEW_OPTIONS.map((option, index) => (
-            <button
-              key={option}
-              type="button"
-              style={getViewButtonStyle(view === option, index === VIEW_OPTIONS.length - 1)}
-              aria-pressed={view === option}
-              onClick={() => setSelectedView(option)}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      )}
-    </>
+    <DeckGL
+      views={deckView}
+      viewState={viewState}
+      onViewStateChange={e => setViewState(e.viewState as MapViewState)}
+      controller={true}
+      layers={layers}
+      pickingRadius={5}
+      getTooltip={getTooltip}
+    />
   );
 }
 
