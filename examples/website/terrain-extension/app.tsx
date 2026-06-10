@@ -82,7 +82,7 @@ function getTooltip({object}: PickingInfo<Route>) {
 
 export default function App({
   initialViewState = INITIAL_VIEW_STATE,
-  view = 'MapView'
+  view = 'GlobeView'
 }: {
   initialViewState?: MapViewState;
   view?: ViewType;
@@ -117,6 +117,7 @@ export default function App({
       elevationData: TERRAIN_IMAGE,
       texture: SURFACE_IMAGE,
       material: false,
+      maxRequests: 12,
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer<RouteProperties>({
