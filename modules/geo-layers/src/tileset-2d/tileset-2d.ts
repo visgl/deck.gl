@@ -10,7 +10,7 @@ import {Matrix4, equals, NumericArray} from '@math.gl/core';
 import {Tile2DHeader} from './tile-2d-header';
 
 import {getTileIndices, tileToBoundingBox, getCullBounds, transformBox} from './utils';
-import {Bounds, TileIndex, ZRange} from './types';
+import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
 
@@ -48,6 +48,12 @@ export type RefinementStrategy =
   | RefinementStrategyFunction;
 
 const DEFAULT_CACHE_SCALE = 5;
+const SELECTED_TILE_PRIORITY = 0;
+const VISIBLE_TILE_PRIORITY = 1e8;
+const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
+
+/** Returns the request priority for a tile. Lower non-negative values load first. */
+export type TilePriorityFunction<DataT = any> = (tile: Tile2DHeader<DataT>) => number;
 
 const STRATEGIES = {
   [STRATEGY_DEFAULT]: updateTileStateDefault,
@@ -73,6 +79,13 @@ export type Tileset2DProps<DataT = any> = {
   maxCacheByteSize?: number | null;
   /** How the tile layer refines the visibility of tiles. @default 'best-available' */
   refinementStrategy?: RefinementStrategy;
+  /**
+   * Returns the request priority for queued tiles. Lower non-negative values load first;
+   * values below 0 cancel the queued request. If not supplied, tiles closer to the viewport
+   * center are requested first.
+   * @default null
+   */
+  getPriority?: TilePriorityFunction<DataT> | null;
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
@@ -108,6 +121,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: 'best-available',
+  getPriority: null,
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
@@ -437,6 +451,105 @@ export class Tileset2D {
 
   private _getCullBounds = memoize(getCullBounds);
 
+  private _getRequestPriority(tile: Tile2DHeader): number {
+    if (!tile.isSelected && !tile.isVisible) {
+      return -1;
+    }
+    if (this.opts.getPriority) {
+      return this.opts.getPriority(tile);
+    }
+
+    // RequestScheduler loads lower priority values first.
+    const distance = this._getTileDistancePriority(tile);
+    if (tile.isSelected) {
+      return SELECTED_TILE_PRIORITY + distance;
+    }
+    return VISIBLE_TILE_PRIORITY + distance;
+  }
+
+  private _getTileDistancePriority(tile: Tile2DHeader): number {
+    const {width, height} = this._viewport || {};
+    if (!this._viewport || !width || !height) {
+      return 0;
+    }
+
+    try {
+      const points = this._getTileScreenCorners(tile.bbox);
+      const center: [number, number] = [width / 2, height / 2];
+      if (points.length === 4) {
+        if (this._isPointInPolygon(center, points)) {
+          return 0;
+        }
+        const distance = points.reduce((minDistance, point, i) => {
+          const nextPoint = points[(i + 1) % points.length];
+          return Math.min(
+            minDistance,
+            this._getPointToSegmentDistanceSquared(center, point, nextPoint)
+          );
+        }, Number.MAX_SAFE_INTEGER);
+        return Math.min(distance, MAX_TILE_DISTANCE_PRIORITY);
+      }
+    } catch {
+      // Some viewport/tile combinations are not projectable. Keep them valid but last in tier.
+    }
+    return MAX_TILE_DISTANCE_PRIORITY;
+  }
+
+  private _getTileScreenCorners(bbox: TileBoundingBox): [number, number][] {
+    const coordinates: [number, number][] =
+      'west' in bbox
+        ? [
+            [bbox.west, bbox.south],
+            [bbox.east, bbox.south],
+            [bbox.east, bbox.north],
+            [bbox.west, bbox.north]
+          ]
+        : [
+            [bbox.left, bbox.top],
+            [bbox.right, bbox.top],
+            [bbox.right, bbox.bottom],
+            [bbox.left, bbox.bottom]
+          ];
+
+    return coordinates
+      .map(coordinate => this._viewport!.project(coordinate))
+      .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y)) as [number, number][];
+  }
+
+  private _isPointInPolygon(point: [number, number], polygon: [number, number][]): boolean {
+    let inside = false;
+    const [x, y] = point;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const [xi, yi] = polygon[i];
+      const [xj, yj] = polygon[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  private _getPointToSegmentDistanceSquared(
+    point: [number, number],
+    segmentStart: [number, number],
+    segmentEnd: [number, number]
+  ): number {
+    const [x, y] = point;
+    const [x1, y1] = segmentStart;
+    const [x2, y2] = segmentEnd;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lengthSquared = dx * dx + dy * dy;
+    const t = lengthSquared
+      ? Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lengthSquared))
+      : 0;
+    const segmentX = x1 + t * dx;
+    const segmentY = y1 + t * dy;
+    const distanceX = x - segmentX;
+    const distanceY = y - segmentY;
+    return distanceX * distanceX + distanceY * distanceY;
+  }
+
   private _pruneRequests(): void {
     const {maxRequests = 0} = this.opts;
 
@@ -542,6 +655,7 @@ export class Tileset2D {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       tile.loadData({
         getData: this.opts.getTileData,
+        getPriority: this._getRequestPriority.bind(this),
         requestScheduler: this._requestScheduler,
         onLoad: this.onTileLoad,
         onError: this.opts.onTileError

@@ -227,6 +227,16 @@ getTileData: ({url, signal}) => {
 }
 ```
 
+#### `getPriority` (Function, optional) {#getpriority}
+
+- Default: `null`
+
+If supplied, `getPriority` is called for each relevant queued tile request and its return value controls the order in which queued requests are started. Lower non-negative values load first. Values below `0` cancel the queued request.
+
+If not supplied, selected tiles are requested before visible placeholder tiles, and tiles that cover the viewport center are requested before tiles farther from the center. This keeps the area the user is looking at from waiting behind edge tiles during view changes.
+
+This prop only affects request ordering while request throttling is active (`maxRequests > 0`). It receives a [Tile](#tile) instance.
+
 #### `TilesetClass` (class, optional) {#tilesetclass}
 
 - Default: `Tileset2D`

@@ -55,6 +55,140 @@ test('Tileset2D#update', () => {
   expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
+test('Tileset2D#getRequestPriority ranks tiles by viewport coverage', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => [x, y]
+    }
+  });
+
+  const selectedAtCenterEdge = {
+    bbox: {left: 0, top: 0, right: 50, bottom: 100},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const selectedNearCenter = {
+    bbox: {left: 60, top: 45, right: 70, bottom: 55},
+    index: {x: 1, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const visibleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 8},
+    isSelected: false,
+    isVisible: true
+  };
+
+  expect((tileset as any)._getRequestPriority(selectedAtCenterEdge)).toBeLessThan(
+    (tileset as any)._getRequestPriority(selectedNearCenter)
+  );
+  expect((tileset as any)._getRequestPriority(selectedNearCenter)).toBeLessThan(
+    (tileset as any)._getRequestPriority(visibleAtCenter)
+  );
+
+  tileset.finalize();
+});
+
+test('Tileset2D#getRequestPriority keeps unprojectable tiles within priority tiers', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => (x < 0 || y < 0 ? [Number.NaN, Number.NaN] : [x, y])
+    }
+  });
+
+  const selectedUnprojectable = {
+    bbox: {left: -20, top: -20, right: -10, bottom: -10},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const visibleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 1, y: 0, z: 10},
+    isSelected: false,
+    isVisible: true
+  };
+  const visibleUnprojectable = {
+    bbox: {left: -20, top: -20, right: -10, bottom: -10},
+    index: {x: 2, y: 0, z: 10},
+    isSelected: false,
+    isVisible: true
+  };
+  const staleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 3, y: 0, z: 10},
+    isSelected: false,
+    isVisible: false
+  };
+
+  expect((tileset as any)._getRequestPriority(selectedUnprojectable)).toBeLessThan(
+    (tileset as any)._getRequestPriority(visibleAtCenter)
+  );
+  expect((tileset as any)._getRequestPriority(visibleAtCenter)).toBeLessThan(
+    (tileset as any)._getRequestPriority(visibleUnprojectable)
+  );
+  expect((tileset as any)._getRequestPriority(staleAtCenter)).toBeLessThan(0);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#getRequestPriority uses custom priority for relevant tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    getPriority: tile => (tile.id === 'edge' ? 0 : 10),
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => [x, y]
+    }
+  });
+
+  const selectedAtCenter = {
+    id: 'center',
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const selectedAtEdge = {
+    id: 'edge',
+    bbox: {left: 70, top: 70, right: 80, bottom: 80},
+    index: {x: 1, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const staleAtEdge = {
+    id: 'edge',
+    bbox: {left: 70, top: 70, right: 80, bottom: 80},
+    index: {x: 2, y: 0, z: 10},
+    isSelected: false,
+    isVisible: false
+  };
+
+  expect((tileset as any)._getRequestPriority(selectedAtEdge)).toBe(0);
+  expect((tileset as any)._getRequestPriority(selectedAtCenter)).toBe(10);
+  expect((tileset as any)._getRequestPriority(staleAtEdge)).toBeLessThan(0);
+
+  tileset.finalize();
+});
+
 test('Tileset2D#updateOnModelMatrix', () => {
   const tileset = new Tileset2D({
     getTileData,
