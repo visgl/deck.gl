@@ -153,6 +153,8 @@ function getDate(data: DailyFlights[], t: number) {
 }
 
 export async function renderToDOM(container: HTMLDivElement) {
+  // See https://deck.gl/docs/developer-guide/tips-and-tricks#optimization-for-mobile
+  // for browser UI guards that keep mobile controller gestures focused on the canvas.
   addCanvasInteractionGuards(container);
 
   const root = createRoot(container);
