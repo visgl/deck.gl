@@ -108,6 +108,15 @@ export default class MapboxOverlay implements IControl {
     this._deck = new Deck<any>({
       ...this._props,
       parent: container,
+      deviceProps: {
+        ...this._props.deviceProps,
+        createCanvasContext: {
+          ...(typeof this._props.deviceProps?.createCanvasContext === 'object'
+            ? this._props.deviceProps.createCanvasContext
+            : undefined),
+          pixelSizeSource: 'css-dpr'
+        }
+      },
       parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
       views: this._getViews(map),
       viewState: getViewState(map)
