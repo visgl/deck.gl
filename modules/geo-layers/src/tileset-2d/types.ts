@@ -13,8 +13,8 @@ export type TileBoundingBox = NonGeoBoundingBox | GeoBoundingBox;
 
 export type TileIndex = {x: number; y: number; z: number};
 
-export type TileLoadProps = {
-  index: TileIndex;
+export type TileLoadProps<TileIndexT = TileIndex> = {
+  index: TileIndexT;
   id: string;
   bbox: TileBoundingBox;
   url?: string | null;

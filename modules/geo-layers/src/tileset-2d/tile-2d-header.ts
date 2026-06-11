@@ -7,19 +7,19 @@ import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
 import type {Layer} from '@deck.gl/core';
 
-export type TileLoadDataProps<DataT = any> = {
+export type TileLoadDataProps<DataT = any, TileIndexT = TileIndex> = {
   requestScheduler: RequestScheduler;
-  getData: (props: TileLoadProps) => Promise<DataT>;
-  onLoad: (tile: Tile2DHeader<DataT>) => void;
-  onError: (error: any, tile: Tile2DHeader<DataT>) => void;
+  getData: (props: TileLoadProps<TileIndexT>) => Promise<DataT>;
+  onLoad: (tile: Tile2DHeader<DataT, TileIndexT>) => void;
+  onError: (error: any, tile: Tile2DHeader<DataT, TileIndexT>) => void;
 };
 
-export class Tile2DHeader<DataT = any> {
-  index: TileIndex;
+export class Tile2DHeader<DataT = any, TileIndexT = TileIndex> {
+  index: TileIndexT;
   isVisible: boolean;
   isSelected: boolean;
-  parent: Tile2DHeader | null;
-  children: Tile2DHeader[] | null;
+  parent: Tile2DHeader<DataT, TileIndexT> | null;
+  children: Tile2DHeader<DataT, TileIndexT>[] | null;
   content: DataT | null;
   state?: number;
   layers?: Layer[] | null;
@@ -37,7 +37,7 @@ export class Tile2DHeader<DataT = any> {
   private _needsReload: boolean;
   private _bbox!: TileBoundingBox;
 
-  constructor(index: TileIndex) {
+  constructor(index: TileIndexT) {
     this.index = index;
     this.isVisible = false;
     this.isSelected = false;
@@ -109,7 +109,7 @@ export class Tile2DHeader<DataT = any> {
     requestScheduler,
     onLoad,
     onError
-  }: TileLoadDataProps<DataT>): Promise<void> {
+  }: TileLoadDataProps<DataT, TileIndexT>): Promise<void> {
     const {index, id, bbox, userData, zoom} = this;
     const loaderId = this._loaderId;
 
@@ -170,7 +170,7 @@ export class Tile2DHeader<DataT = any> {
     }
   }
 
-  loadData(opts: TileLoadDataProps): Promise<void> {
+  loadData(opts: TileLoadDataProps<DataT, TileIndexT>): Promise<void> {
     this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;

@@ -119,13 +119,13 @@ export function getHexagonResolution(
   return Math.max(0, Math.floor(hexagonScaleFactor + latitudeScaleFactor - BIAS));
 }
 
-export default class H3Tileset2D extends Tileset2D {
+export default class H3Tileset2D extends Tileset2D<H3TileIndex> {
   /**
    * Returns all tile indices in the current viewport. If the current zoom level is smaller
    * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
    * return tiles that are on maxZoom.
    */
-  // @ts-expect-error Tileset2D should be generic over TileIndex
+  // @ts-expect-error viewport is untyped; latitude/longitude are only on WebMercator/Globe viewports
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     if (viewport.latitude === undefined) return [];
     const [west, south, east, north] = viewport.getBounds();
@@ -152,22 +152,18 @@ export default class H3Tileset2D extends Tileset2D {
     return indices.map(i => ({i}));
   }
 
-  // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileId({i}: H3TileIndex): string {
     return i;
   }
 
-  // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileMetadata({i}: H3TileIndex) {
     return {bbox: tileToBoundingBox(i)};
   }
 
-  // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileZoom({i}: H3TileIndex): number {
     return getResolution(i);
   }
 
-  // @ts-expect-error Tileset2D should be generic over TileIndex
   getParentIndex(index: H3TileIndex): H3TileIndex {
     const resolution = getResolution(index.i);
     const i = cellToParent(index.i, resolution - 1);
