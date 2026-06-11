@@ -55,7 +55,7 @@ test('Tileset2D#update', () => {
   expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
-test('Tileset2D#getRequestPriority ranks tiles by viewport coverage', () => {
+test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () => {
   const tileset = new Tileset2D({
     getTileData,
     onTileLoad: () => {}
