@@ -10,26 +10,61 @@ import App from 'website-examples/map-tile/app';
 import {makeExample} from '../components';
 
 class MapTileDemo extends Component {
-  static title = 'Raster Map Tiles';
+  static title = 'Globe Terrain Tiles';
 
   static code = `${GITHUB_TREE}/examples/website/map-tile`;
 
   static parameters = {
-    minZoom: {displayName: 'Min Zoom', type: 'range', value: 3, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
-    maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
-    visibleMinZoom: {displayName: 'Visible Min Zoom', type: 'range', value: 1, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
-    visibleMaxZoom: {displayName: 'Visible Max Zoom', type: 'range', value: 12, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
-    showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
-    useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
+    minZoom: {
+      displayName: 'Min Zoom',
+      type: 'range',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 6,
+      accentColor: '#0275ff'
+    },
+    maxZoom: {
+      displayName: 'Max Zoom',
+      type: 'range',
+      value: 6,
+      step: 1,
+      min: 0,
+      max: 6,
+      accentColor: '#0275ff'
+    },
+    visibleMinZoom: {
+      displayName: 'Visible Min Zoom',
+      type: 'range',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 6,
+      accentColor: '#1a2b4a'
+    },
+    visibleMaxZoom: {
+      displayName: 'Visible Max Zoom',
+      type: 'range',
+      value: 6,
+      step: 1,
+      min: 0,
+      max: 6,
+      accentColor: '#1a2b4a'
+    },
+    showBorder: {displayName: 'Show terrain wireframe', type: 'checkbox', value: false}
   };
 
   static renderInfo(meta) {
     return (
       <div>
         <p>
-          OpenStreetMap data source:
-          <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a> and
-          <a href="https://wiki.openstreetmap.org/wiki/Tile_servers"> Tile Servers </a>
+          Terrain elevation source:
+          <a href="https://registry.opendata.aws/terrain-tiles/"> AWS Open Data </a>
+          and satellite texture source:
+          <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9">
+            {' '}
+            ArcGIS World Imagery
+          </a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">
@@ -65,7 +100,6 @@ class MapTileDemo extends Component {
         maxZoom={params.maxZoom.value}
         visibleMinZoom={params.visibleMinZoom.value}
         visibleMaxZoom={params.visibleMaxZoom.value}
-        useExtent={params.useExtent.value}
         onTilesLoad={this._onTilesLoad}
         onZoomChange={this._onZoomChange}
       />

@@ -1,9 +1,9 @@
-This is a standalone version of the [OpenStreetMap](https://www.openstreetmap.org/) example using TileLayer and BitmapLayer
-on [deck.gl](http://deck.gl) website.
+This is a standalone version of the GlobeView terrain tile example using TerrainLayer
+on the [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. 
+Copy the content of this folder to your project.
 
 ```bash
 # install dependencies
@@ -14,9 +14,12 @@ yarn
 npm start
 ```
 
-### Data Source
+### Data Sources
 
-The sample tiles are loaded from [OpenStreetMap](https://www.openstreetmap.org).
+The sample elevation tiles are loaded from the
+[AWS Open Data Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) dataset.
+The satellite texture is loaded from
+[ArcGIS World Imagery](https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9).
 
 To use your own data, check out
-the [documentation of TileLayer](../../../docs/api-reference/geo-layers/tile-layer.md).
+the [documentation of TerrainLayer](../../../docs/api-reference/geo-layers/terrain-layer.md).

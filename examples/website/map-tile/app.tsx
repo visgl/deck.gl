@@ -2,65 +2,57 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global setTimeout */
+/* global fetch, setTimeout */
 import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {DeckGL} from '@deck.gl/react';
-import {COORDINATE_SYSTEM, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
-import {TileLayer} from '@deck.gl/geo-layers';
-import {BitmapLayer, PathLayer} from '@deck.gl/layers';
-import {load} from '@loaders.gl/core';
+import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {TerrainLayer} from '@deck.gl/geo-layers';
+import {GeoJsonLayer} from '@deck.gl/layers';
 import ZoomRangeWidget from './zoom-range-widget';
 
-import type {GlobeViewState, Position, MapViewState, TextureSource} from '@deck.gl/core';
-import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {GlobeViewState, PickingInfo, Position} from '@deck.gl/core';
+import type {TerrainLayerProps, TileLayerRenderPlaceholderProps} from '@deck.gl/geo-layers';
 
-const INITIAL_VIEW_STATE: MapViewState = {
-  latitude: 47.65,
-  longitude: 7,
-  zoom: 4.5,
-  maxZoom: 20,
-  maxPitch: 89,
-  bearing: 0
+const INITIAL_VIEW_STATE: GlobeViewState = {
+  latitude: 34,
+  longitude: -105,
+  zoom: 2.2,
+  maxZoom: 7
 };
 
-const INITIAL_GLOBE_VIEW_STATE: GlobeViewState = {
-  latitude: 47.65,
-  longitude: 7,
-  zoom: 2.25,
-  maxZoom: 20
+const ELEVATION_DATA = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+const SURFACE_IMAGE =
+  'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+// https://github.com/tilezen/joerd/blob/master/docs/formats.md
+const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
+  rScaler: 256,
+  gScaler: 1,
+  bScaler: 1 / 256,
+  offset: -32768
 };
 
-// Approximate bounding box of France [west, south, east, north]
-const FRANCE_EXTENT = [-5.14, 41.33, 9.56, 51.09];
-const PLACEHOLDER_GRID_CELLS = 16;
-const PLACEHOLDER_GRID_SEGMENTS = 24;
-const PLACEHOLDER_BACKGROUND_IMAGE: TextureSource = {
-  width: 1,
-  height: 1,
-  data: new Uint8Array([238, 241, 239, 255])
+const PLACEHOLDER_FILL_COLOR: [number, number, number, number] = [236, 240, 239, 255];
+const PLACEHOLDER_LINE_COLOR: [number, number, number, number] = [88, 103, 106, 255];
+const PLACEHOLDER_GRID_ZOOM = 3;
+const PLACEHOLDER_ELEVATION = -12000;
+
+type TileBounds = [west: number, south: number, east: number, north: number];
+
+type PlaceholderFeature = {
+  type: 'Feature';
+  properties: Record<string, never>;
+  geometry: {
+    type: 'Polygon';
+    coordinates: Position[][];
+  };
 };
 
-const COPYRIGHT_LICENSE_STYLE: React.CSSProperties = {
-  position: 'absolute',
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'hsla(0,0%,100%,.5)',
-  padding: '0 5px',
-  font: '12px/20px Helvetica Neue,Arial,Helvetica,sans-serif'
-};
-
-const LINK_STYLE: React.CSSProperties = {
-  textDecoration: 'none',
-  color: 'rgba(0,0,0,.75)',
-  cursor: 'grab'
-};
-
-function getTooltip({tile}: TileLayerPickingInfo) {
-  if (tile) {
-    const {x, y, z} = tile.index;
-    return `tile: x: ${x}, y: ${y}, z: ${z}`;
+function getTooltip(info: PickingInfo) {
+  if (info.picked && info.coordinate && info.coordinate.length === 3) {
+    return `Elevation: ${info.coordinate[2].toFixed(0)} m`;
   }
   return null;
 }
@@ -69,57 +61,112 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function getPlaceholderGridPaths(bounds: [number, number, number, number]): Position[][] {
-  const [west, south, east, north] = bounds;
-  const paths: Position[][] = [];
-
-  for (let index = 0; index <= PLACEHOLDER_GRID_CELLS; index++) {
-    const gridPosition = index / PLACEHOLDER_GRID_CELLS;
-    const longitude = west + (east - west) * gridPosition;
-    const latitude = south + (north - south) * gridPosition;
-    const verticalPath: Position[] = [];
-    const horizontalPath: Position[] = [];
-
-    for (let segment = 0; segment <= PLACEHOLDER_GRID_SEGMENTS; segment++) {
-      const linePosition = segment / PLACEHOLDER_GRID_SEGMENTS;
-      verticalPath.push([longitude, south + (north - south) * linePosition]);
-      horizontalPath.push([west + (east - west) * linePosition, latitude]);
-    }
-
-    paths.push(verticalPath, horizontalPath);
-  }
-
-  return paths;
+function getTileLongitude(x: number, z: number): number {
+  return (x / Math.pow(2, z)) * 360 - 180;
 }
 
+function getTileLatitude(y: number, z: number): number {
+  const y2 = Math.PI - (2 * Math.PI * y) / Math.pow(2, z);
+  return (Math.atan(Math.sinh(y2)) * 180) / Math.PI;
+}
+
+function getTileBounds({x, y, z}: {x: number; y: number; z: number}): TileBounds {
+  const lastRow = Math.pow(2, z) - 1;
+  return [
+    getTileLongitude(x, z),
+    y === lastRow ? -90 : getTileLatitude(y + 1, z),
+    getTileLongitude(x + 1, z),
+    y === 0 ? 90 : getTileLatitude(y, z)
+  ];
+}
+
+function getTileBoundsFromArray(
+  [west, south, east, north]: TileBounds,
+  index: {y: number; z: number}
+): TileBounds {
+  const lastRow = Math.pow(2, index.z) - 1;
+  return [west, index.y === lastRow ? -90 : south, east, index.y === 0 ? 90 : north];
+}
+
+function getPlaceholderFeature([west, south, east, north]: TileBounds): PlaceholderFeature {
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [west, north],
+          [east, north],
+          [east, south],
+          [west, south],
+          [west, north]
+        ].map(([longitude, latitude]) => [longitude, latitude, PLACEHOLDER_ELEVATION])
+      ]
+    }
+  };
+}
+
+function getPlaceholderGridFeatures(): PlaceholderFeature[] {
+  const tileCount = Math.pow(2, PLACEHOLDER_GRID_ZOOM);
+  const features: PlaceholderFeature[] = [];
+
+  for (let y = 0; y < tileCount; y++) {
+    for (let x = 0; x < tileCount; x++) {
+      features.push(getPlaceholderFeature(getTileBounds({x, y, z: PLACEHOLDER_GRID_ZOOM})));
+    }
+  }
+  return features;
+}
+
+const PLACEHOLDER_GRID_FEATURES = getPlaceholderGridFeatures();
+
+function getPlaceholderLayer(id: string, data: PlaceholderFeature | PlaceholderFeature[]) {
+  return new GeoJsonLayer<PlaceholderFeature['properties']>({
+    id,
+    data,
+    filled: true,
+    stroked: true,
+    getFillColor: PLACEHOLDER_FILL_COLOR,
+    getLineColor: PLACEHOLDER_LINE_COLOR,
+    lineWidthUnits: 'pixels',
+    getLineWidth: 1,
+    pickable: false
+  });
+}
+
+const renderTerrainPlaceholder: NonNullable<TerrainLayerProps['renderPlaceholder']> = (
+  props: TileLayerRenderPlaceholderProps
+) => {
+  return getPlaceholderLayer(
+    `${props.id}-placeholder`,
+    getPlaceholderFeature(getTileBoundsFromArray(props.bounds as TileBounds, props.tile.index))
+  );
+};
+
 export default function App({
-  showBorder = false,
-  globeView = false,
   showPlaceholders = true,
   loadDelay = 0,
   onTilesLoad,
   onZoomChange,
-  minZoom = globeView ? 0 : 4,
-  maxZoom = globeView ? 19 : 7,
+  minZoom = 0,
+  maxZoom = 6,
   visibleMinZoom,
-  visibleMaxZoom = globeView ? undefined : 7,
-  useExtent = false
+  visibleMaxZoom,
+  showBorder = false
 }: {
-  showBorder?: boolean;
-  globeView?: boolean;
   showPlaceholders?: boolean;
   loadDelay?: number;
-  onTilesLoad?: () => void;
+  onTilesLoad?: TerrainLayerProps['onViewportLoad'];
   onZoomChange?: (zoom: number) => void;
   minZoom?: number;
   maxZoom?: number;
   visibleMinZoom?: number;
   visibleMaxZoom?: number;
+  showBorder?: boolean;
   useExtent?: boolean;
 }) {
-  const [zoom, setZoom] = useState(
-    globeView ? INITIAL_GLOBE_VIEW_STATE.zoom : INITIAL_VIEW_STATE.zoom
-  );
+  const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(
     ({viewState}) => {
       setZoom(viewState.zoom);
@@ -127,108 +174,52 @@ export default function App({
     },
     [onZoomChange]
   );
-
-  const tileLayer = new TileLayer<ImageBitmap>({
-    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    data: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-
-    // Since these OSM tiles support HTTP/2, we can make many concurrent requests
-    // and we aren't limited by the browser to a certain number per domain.
-    maxRequests: 20,
-    getTileData:
-      loadDelay > 0
-        ? async ({url}) => {
+  const loadOptions =
+    loadDelay > 0
+      ? {
+          fetch: async (
+            url: Parameters<typeof fetch>[0],
+            options?: Parameters<typeof fetch>[1]
+          ) => {
             await sleep(loadDelay);
-            return load(url as string) as Promise<ImageBitmap>;
+            return fetch(url, options);
           }
-        : undefined,
+        }
+      : undefined;
 
-    pickable: true,
-    onViewportLoad: onTilesLoad,
-    autoHighlight: showBorder,
-    highlightColor: [60, 60, 60, 40],
-    // https://wiki.openstreetmap.org/wiki/Zoom_levels
+  const terrainLayer = new TerrainLayer({
+    id: 'terrain',
     minZoom,
     maxZoom,
-    tileSize: 512,
-    refinementStrategy: 'no-overlap',
     visibleMinZoom,
     visibleMaxZoom,
-    extent: useExtent ? FRANCE_EXTENT : undefined,
-    renderPlaceholder: showPlaceholders
-      ? props => {
-          const {id, bounds} = props;
-          const otherProps = {...props} as Partial<typeof props>;
-          delete otherProps.data;
-          delete otherProps.id;
-          delete otherProps.bounds;
-
-          return [
-            new BitmapLayer(
-              {...otherProps, id: `${id}-fill`},
-              {
-                image: PLACEHOLDER_BACKGROUND_IMAGE,
-                bounds,
-                _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-                pickable: false,
-                opacity: 0.92
-              }
-            ),
-            new PathLayer<Position[]>(
-              {...otherProps, id: `${id}-grid`},
-              {
-                data: getPlaceholderGridPaths(bounds),
-                getPath: d => d,
-                getColor: [72, 86, 88, 190],
-                getWidth: 1,
-                widthUnits: 'pixels',
-                widthMinPixels: 1,
-                widthMaxPixels: 1,
-                pickable: false,
-                parameters: {
-                  depthTest: false
-                }
-              }
-            )
-          ];
-        }
-      : undefined,
-    renderSubLayers: props => {
-      const [[west, south], [east, north]] = props.tile.boundingBox;
-      const {data, ...otherProps} = props;
-
-      return [
-        new BitmapLayer(otherProps, {
-          image: data,
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-          bounds: [west, south, east, north]
-        }),
-        showBorder &&
-          new PathLayer<Position[]>({
-            id: `${props.id}-border`,
-            data: [
-              [
-                [west, north],
-                [west, south],
-                [east, south],
-                [east, north],
-                [west, north]
-              ]
-            ],
-            getPath: d => d,
-            getColor: [255, 0, 0],
-            widthMinPixels: 4
-          })
-      ];
-    }
+    tileSize: 512,
+    maxRequests: 12,
+    refinementStrategy: 'no-overlap',
+    elevationData: ELEVATION_DATA,
+    texture: SURFACE_IMAGE,
+    elevationDecoder: ELEVATION_DECODER,
+    meshMaxError: 12,
+    wireframe: showBorder,
+    color: [255, 255, 255],
+    pickable: '3d',
+    loadOptions,
+    onViewportLoad: onTilesLoad,
+    renderPlaceholder: showPlaceholders ? renderTerrainPlaceholder : undefined
   });
+
+  const layers = [
+    showPlaceholders && getPlaceholderLayer('placeholder-grid', PLACEHOLDER_GRID_FEATURES),
+    terrainLayer
+  ];
 
   return (
     <DeckGL
-      layers={[tileLayer]}
-      views={globeView ? new GlobeView() : new MapView({repeat: true})}
-      initialViewState={globeView ? INITIAL_GLOBE_VIEW_STATE : INITIAL_VIEW_STATE}
+      layers={layers}
+      views={new GlobeView()}
+      initialViewState={INITIAL_VIEW_STATE}
       controller={true}
+      parameters={{cull: true}}
       getTooltip={getTooltip}
       onViewStateChange={onViewStateChange}
     >
@@ -239,16 +230,10 @@ export default function App({
         visibleMinZoom={visibleMinZoom}
         visibleMaxZoom={visibleMaxZoom}
       />
-      <div style={COPYRIGHT_LICENSE_STYLE}>
-        {'© '}
-        <a style={LINK_STYLE} href="http://www.openstreetmap.org/copyright" target="blank">
-          OpenStreetMap contributors
-        </a>
-      </div>
     </DeckGL>
   );
 }
 
 export function renderToDOM(container: HTMLDivElement) {
-  createRoot(container).render(<App globeView={true} loadDelay={750} />);
+  createRoot(container).render(<App loadDelay={750} />);
 }
