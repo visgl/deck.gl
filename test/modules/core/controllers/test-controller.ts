@@ -44,6 +44,7 @@ const BASE_PROPS = {
   dragPan: true,
   dragRotate: true,
   doubleClickZoom: true,
+  doubleClickDragZoom: true,
   touchZoom: true,
   touchRotate: true,
   keyboard: true

@@ -12,7 +12,8 @@ import {
   log,
   Material,
   TextureSource,
-  UpdateParameters
+  UpdateParameters,
+  _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -246,7 +247,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const overlappedBounds = getOverlappedBounds(
       bounds,
       this.props.tileSize,
-      Boolean(viewport.resolution && viewport.resolution > 0)
+      viewport instanceof GlobeViewport
     );
 
     const terrain = this.loadTerrain({
@@ -286,7 +287,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
-    const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
+    const isGlobe = viewport instanceof GlobeViewport;
     const boundingBox = (mesh as MeshWithBoundingBox | null)?.header?.boundingBox;
     const hasLngLatBounds =
       boundingBox &&
