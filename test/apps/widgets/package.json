@@ -1,0 +1,25 @@
+{
+  "name": "deckgl-example-widgets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.3.0",
+    "@deck.gl/layers": "^9.3.0",
+    "@deck.gl/mapbox": "^9.3.0",
+    "@deck.gl/widgets": "^9.3.0",
+    "maplibre-gl": "^5.1.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-map-gl": "^8.0.4"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
