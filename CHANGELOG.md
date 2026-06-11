@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.4] - Jun 11 2026
+
+- chore(core) Adopt luma CanvasContext (#10228)
+- fix(core): use correct mjolnir requireFailure key for recognizers (#10323)
+- fix(ColumnLayer): closed shapes with binary data and transition props (#10094)
+
 #### deck.gl [v9.3.3] - May 14 2026
 
 - fix(extensions): MaskExtension compatible with TerrainExtension (#10187)
