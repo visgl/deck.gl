@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 
-const getPriority = tile => (tile.isSelected ? 1 : -1);
+const getRequestPriority = tile => (tile.isSelected ? 1 : -1);
 
 test('Tile2DHeader', async () => {
   let onTileLoadCalled = false;
@@ -16,7 +16,7 @@ test('Tile2DHeader', async () => {
   let tile2d = new Tile2DHeader({});
   await tile2d.loadData({
     requestScheduler,
-    getPriority,
+    getRequestPriority,
     getData: () => 'loaded data',
     onLoad: () => (onTileLoadCalled = true),
     onError: () => (onTileErrorCalled = true)
@@ -29,7 +29,7 @@ test('Tile2DHeader', async () => {
   tile2d = new Tile2DHeader({});
   await tile2d.loadData({
     requestScheduler,
-    getPriority,
+    getRequestPriority,
     getData: () => {
       throw new Error('getTileData error');
     },
@@ -48,7 +48,7 @@ test('Tile2DHeader#Cancel request if not selected', async () => {
   const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
   const opts = {
     requestScheduler,
-    getPriority,
+    getRequestPriority,
     getData: () => tileRequestCount++,
     onLoad: () => onTileLoadCalled++,
     onError: () => onTileErrorCalled++
@@ -76,7 +76,7 @@ test('Tile2DHeader#request priority', async () => {
   const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
   const opts = {
     requestScheduler,
-    getPriority: tile => (tile.id === 'preferred' ? 0 : 10),
+    getRequestPriority: tile => (tile.id === 'preferred' ? 0 : 10),
     getData: ({id}) => {
       requestOrder.push(id);
       return id;
@@ -107,7 +107,7 @@ test('Tile2DHeader#abort', async () => {
 
   const opts = {
     requestScheduler,
-    getPriority,
+    getRequestPriority,
     getData: () => null,
     onLoad: () => (onTileLoadCalled = true),
     onError: () => (onTileErrorCalled = true)
@@ -139,7 +139,7 @@ test('Tile2DHeader#reload', async () => {
   let onTileErrorCalled = 0;
   const opts = {
     requestScheduler,
-    getPriority,
+    getRequestPriority,
     onLoad: () => onTileLoadCalled++,
     onError: () => onTileErrorCalled++
   };

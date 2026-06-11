@@ -52,9 +52,6 @@ const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
 const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
 
-/** Returns the request priority for a tile. Lower non-negative values load first. */
-export type TilePriorityFunction<DataT = any> = (tile: Tile2DHeader<DataT>) => number;
-
 const STRATEGIES = {
   [STRATEGY_DEFAULT]: updateTileStateDefault,
   [STRATEGY_REPLACE]: updateTileStateReplace,
@@ -79,13 +76,6 @@ export type Tileset2DProps<DataT = any> = {
   maxCacheByteSize?: number | null;
   /** How the tile layer refines the visibility of tiles. @default 'best-available' */
   refinementStrategy?: RefinementStrategy;
-  /**
-   * Returns the request priority for queued tiles. Lower non-negative values load first;
-   * values below 0 cancel the queued request. If not supplied, tiles closer to the viewport
-   * center are requested first.
-   * @default null
-   */
-  getPriority?: TilePriorityFunction<DataT> | null;
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
@@ -121,7 +111,6 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: 'best-available',
-  getPriority: null,
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
@@ -455,9 +444,6 @@ export class Tileset2D {
     if (!tile.isSelected && !tile.isVisible) {
       return -1;
     }
-    if (this.opts.getPriority) {
-      return this.opts.getPriority(tile);
-    }
 
     // RequestScheduler loads lower priority values first.
     const distance = this._getTileDistancePriority(tile);
@@ -655,7 +641,7 @@ export class Tileset2D {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       tile.loadData({
         getData: this.opts.getTileData,
-        getPriority: this._getRequestPriority.bind(this),
+        getRequestPriority: this._getRequestPriority.bind(this),
         requestScheduler: this._requestScheduler,
         onLoad: this.onTileLoad,
         onError: this.opts.onTileError

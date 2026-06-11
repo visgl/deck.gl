@@ -17,7 +17,7 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, TilePriorityFunction, ZRange} from '../tileset-2d/index';
+import type {TileLoadProps, ZRange} from '../tileset-2d/index';
 import {
   Tileset2D,
   Tile2DHeader,
@@ -34,7 +34,6 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   dataComparator: urlType.equal,
   renderSubLayers: {type: 'function', value: (props: any) => new GeoJsonLayer(props)},
   getTileData: {type: 'function', optional: true, value: null},
-  getPriority: {type: 'function', optional: true, value: null},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null},
   onTileLoad: {type: 'function', value: tile => {}},
@@ -81,15 +80,6 @@ type _TileLayerProps<DataT> = {
    * If supplied, `getTileData` is called to retrieve the data of each tile.
    */
   getTileData?: ((props: TileLoadProps) => Promise<DataT> | DataT) | null;
-
-  /**
-   * Returns the request priority for queued tiles. Lower non-negative values load first;
-   * values below 0 cancel the queued request. If not supplied, tiles closer to the viewport
-   * center are requested first.
-   *
-   * @default null
-   */
-  getPriority?: TilePriorityFunction<DataT> | null;
 
   /** Called when all tiles in the current viewport are loaded. */
   onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
@@ -271,7 +261,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxCacheSize,
       maxCacheByteSize,
       refinementStrategy,
-      getPriority,
       extent,
       maxZoom,
       minZoom,
@@ -289,7 +278,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       minZoom,
       tileSize,
       refinementStrategy,
-      getPriority,
       extent,
       maxRequests,
       debounceTime,

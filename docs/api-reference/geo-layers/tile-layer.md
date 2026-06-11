@@ -227,16 +227,6 @@ getTileData: ({url, signal}) => {
 }
 ```
 
-#### `getPriority` (Function, optional) {#getpriority}
-
-- Default: `null`
-
-If supplied, `getPriority` is called for each relevant queued tile request and its return value controls the order in which queued requests are started. Lower non-negative values load first. Values below `0` cancel the queued request.
-
-If not supplied, selected tiles are requested before visible placeholder tiles, and tiles that cover the viewport center are requested before tiles farther from the center. This keeps the area the user is looking at from waiting behind edge tiles during view changes.
-
-This prop only affects request ordering while request throttling is active (`maxRequests > 0`). It receives a [Tile](#tile) instance.
-
 #### `TilesetClass` (class, optional) {#tilesetclass}
 
 - Default: `Tileset2D`
@@ -334,6 +324,8 @@ The maximum number of concurrent `getTileData` calls.
 If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimited number of times concurrently regardless of how long that tile is or was visible.
 
 If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Requests may never be called if the tile wasn't visible long enough to be scheduled and started. Requests may also be aborted (through the `signal` passed to `getTileData`) if there are more than `maxRequests` ongoing requests and some of those are for tiles that are no longer visible.
+
+When requests are queued, selected tiles are scheduled before visible placeholder tiles. Within each group, tiles closer to the viewport center are scheduled first.
 
 If `getTileData` makes `fetch` requests against an HTTP 1 web server, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6 per domain. If you use the `data` prop and specify multiple domains, you can increase this limit. For example, with Chrome and 3 domains specified, you can set `maxRequests=18`.
 
