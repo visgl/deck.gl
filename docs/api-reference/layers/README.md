@@ -48,6 +48,8 @@ The [Geo Layers](https://www.npmjs.com/package/@deck.gl/geo-layers) collects lay
   - [MVTLayer](../geo-layers/mvt-layer.md)
   - [QuadkeyLayer](../geo-layers/quadkey-layer.md)
   - [S2Layer](../geo-layers/s2-layer.md)
+  - [SharedTile2DLayer](../geo-layers/shared-tile-2d-layer.md) (experimental)
+  - [SharedTileset2D](../geo-layers/shared-tileset-2d.md) (experimental)
   - [TerrainLayer](../geo-layers/terrain-layer.md)
   - [TileLayer](../geo-layers/tile-layer.md)
   - [Tile3DLayer](../geo-layers/tile-3d-layer.md)
