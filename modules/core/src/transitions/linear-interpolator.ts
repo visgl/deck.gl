@@ -138,6 +138,11 @@ export default class LinearInterpolator extends TransitionInterpolator {
           propsInTransition,
           viewport.panByGlobeAnchor(endProps.aroundLngLat, anchorScreen)
         );
+      } else if (endProps.aroundLngLat) {
+        Object.assign(
+          propsInTransition,
+          viewport.panByPosition(endProps.aroundLngLat, anchorScreen)
+        );
       } else if (endProps.aroundPosition) {
         Object.assign(
           propsInTransition,
