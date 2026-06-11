@@ -325,6 +325,19 @@ new PathLayer({
 })
 ```
 
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, paths may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure paths are visible from both sides, set:
+
+```js
+new PathLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
+```
+
 ## Source
 
 [modules/layers/src/path-layer](https://github.com/visgl/deck.gl/tree/9.3-release/modules/layers/src/path-layer)
