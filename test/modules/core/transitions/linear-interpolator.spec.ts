@@ -5,6 +5,7 @@
 import {test, expect} from 'vitest';
 import LinearInterpolator from '@deck.gl/core/transitions/linear-interpolator';
 import GlobeViewport from '@deck.gl/core/viewports/globe-viewport';
+import WebMercatorViewport from '@deck.gl/core/viewports/web-mercator-viewport';
 
 const TEST_CASES = [
   {
@@ -119,6 +120,39 @@ test('LinearInterpolator anchors transitions on GlobeViewport', () => {
     endProps.longitude
   );
   expect(propsAtEnd.latitude, 'transition ends at the requested latitude').toBeCloseTo(
+    endProps.latitude
+  );
+});
+
+test('LinearInterpolator keeps globe anchor when transition crosses to WebMercatorViewport', () => {
+  const makeViewport = (props: Record<string, any>) =>
+    props.zoom > 12 ? new WebMercatorViewport(props) : new GlobeViewport(props);
+  const startProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 11.9};
+  const endProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 12.5};
+  const around: [number, number] = [500, 250];
+
+  const interpolator = new LinearInterpolator({
+    transitionProps: {compare: ['longitude', 'latitude', 'zoom'], required: ['zoom']},
+    around,
+    makeViewport
+  });
+
+  const {start, end} = interpolator.initializeProps(startProps, endProps);
+
+  expect(end.aroundLngLat, 'records the spherical anchor from the globe start').toBeDefined();
+  expect(end.aroundPosition, 'does not switch to a separate planar anchor').toBeUndefined();
+
+  const propsAtHalf = interpolator.interpolateProps(start, end, 0.5);
+  expect(
+    Math.abs(propsAtHalf.longitude),
+    'WebMercator fallback keeps adjusting longitude around the anchor'
+  ).toBeGreaterThan(1e-5);
+
+  const propsAtEnd = interpolator.interpolateProps(start, end, 1);
+  expect(propsAtEnd.longitude, 'transition still ends at requested longitude').toBeCloseTo(
+    endProps.longitude
+  );
+  expect(propsAtEnd.latitude, 'transition still ends at requested latitude').toBeCloseTo(
     endProps.latitude
   );
 });
