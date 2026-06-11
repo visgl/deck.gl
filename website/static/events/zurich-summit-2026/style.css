@@ -2668,6 +2668,41 @@ header {
     margin: 1em 5% 5% 0;
 }
 
+.header_ribbon {
+    display: flex;
+    position: fixed;
+    top: 0px;
+    z-index: 999;
+    height: fit-content;
+    width: 100%;
+    color: white;
+    font-family: UberMove, Helvetica, Arial, sans-serif;
+    height: 3vh;
+    width: 100%;
+    padding: 0.4vh 0.4vh 0.4vh 0.4vh;
+    background-color: rgba(0,0,0, 0.8);
+    align-content: center;
+}
+.header_ribbon img {
+    width: 32px;
+    height: 32px;
+}
+.header_ribbon a {
+    color: white;
+    font-weight: normal;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+.header_text {
+    padding-left: 1vh;
+    height:100%;
+    width: 100%;
+    vertical-align: middle;
+    align-content: center;
+    font-size: 1em;
+    font-weight: 400;
+}
+
 h1 {
     font-size: 4em;
     line-height: 1.2;
@@ -2678,6 +2713,12 @@ h1 b {
 }
 
 @media (max-width:800px) {
+    .header_ribbon {
+        height: 5vh;
+    }
+    .header_text {
+        font-size: 1.4em;
+    }
     .header .container {
         padding-left: 10%;
     }
@@ -2711,6 +2752,9 @@ h1 b {
     header .container {
         margin-left: calc(1em - 3.5vw);
     }
+    .header_ribbon {
+        height: 5.5vh;
+    }
 }
 
 @media (max-width:360px) {
@@ -2719,5 +2763,8 @@ h1 b {
     }
     header .container {
         margin-left: calc(1em - 6.25vw);
+    }
+    .header_ribbon {
+        height: 5vh;
     }
 }

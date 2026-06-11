@@ -21,7 +21,14 @@ import {webgl2Adapter} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/webgl/constants';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import type {CanvasContextProps, Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
+import type {
+  CanvasContext,
+  CanvasContextProps,
+  Device,
+  DeviceProps,
+  Framebuffer,
+  Parameters
+} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -183,14 +190,14 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
   /** An array of Widget instances to be added to the parent element. */
-  widgets?: Widget[];
+  widgets?: Widget<any, ViewsT>[];
 
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
   /** @deprecated Called once the WebGL context has been initiated. */
   onWebGLInitialized?: (gl: WebGL2RenderingContext) => void;
   /** Called when the canvas resizes. */
-  onResize?: (dimensions: {width: number; height: number}) => void;
+  onResize?: (dimensions: {width: number; height: number}, canvasContext?: CanvasContext) => void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onViewStateChange?: <ViewStateT extends AnyViewStateOf<ViewsT>>(
     params: ViewStateChangeParameters<ViewStateT>
@@ -313,6 +320,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected widgetManager: WidgetManager | null = null;
   protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
+  private _canvasContext: CanvasContext | null = null;
+  private _deviceResizeHandler: {
+    device: Device;
+    onResize: NonNullable<DeviceProps['onResize']>;
+    syncDrawingBuffer: boolean;
+  } | null = null;
 
   /** Internal view state if no callback is supplied */
   protected viewState: ViewStateObject<ViewsT> | null;
@@ -372,6 +385,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfoPromise: Promise<PickingInfo> | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
+    const initialProps = props;
     // @ts-ignore views
     this.props = {...defaultProps, ...props};
     props = this.props;
@@ -386,6 +400,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // See if we already have a device
     if (props.device) {
       this.device = props.device;
+      this._setDeviceCanvasContext(props.device);
     }
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
@@ -395,23 +410,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
-      // Preserve user's callbacks and add resize handling
-      const userOnResize = this.props.deviceProps?.onResize;
-
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
         _cachePipelines: true,
-        ...this.props.deviceProps,
-        onResize: (canvasContext, info) => {
-          // Sync drawing buffer dimensions with externally-managed canvas
-          const {width, height} = canvasContext.canvas;
-          canvasContext.setDrawingBufferSize(width, height);
-
-          this._needsRedraw = 'Canvas resized';
-          userOnResize?.(canvasContext, info);
-        }
+        ...this.props.deviceProps
       });
     }
 
@@ -422,7 +426,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
-    this.setProps(props);
+    this.setProps(initialProps);
 
     // UNSAFE/experimental prop: only set at initialization to avoid performance hit
     if (props._typedArrayManagerProps) {
@@ -434,6 +438,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Stop rendering and dispose all resources */
   finalize() {
+    this._restoreDeviceResizeHandler();
+
     this.animationLoop?.stop();
     this.animationLoop?.destroy();
     this.animationLoop = null;
@@ -468,6 +474,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
     }
+    this._canvasContext = null;
   }
 
   /** Partially update props */
@@ -511,8 +518,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
 
     if (props.device && props.device.id !== this.device?.id) {
+      const canvasContext = props.device.getDefaultCanvasContext();
       this.animationLoop?.stop();
-      if (this.canvas !== props.device.canvasContext?.canvas) {
+      if (this.canvas !== canvasContext.canvas) {
         // remove old canvas if new one being used and de-register events
         // TODO (ck): We might not own this canvas depending it's source, so removing it from the
         // DOM here might be a bit unexpected but it should be ok for most users.
@@ -523,6 +531,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         this.canvas = null;
       }
 
+      this._setDeviceCanvasContext(props.device);
+
       log.log(`recreating animation loop for new device! id=${props.device.id}`)();
 
       this.animationLoop = this._createAnimationLoop(props.device, props);
@@ -532,8 +542,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Update the animation loop
     this.animationLoop?.setProps(resolvedProps);
 
-    if (props.useDevicePixels !== undefined && this.device?.canvasContext?.setProps) {
-      this.device.canvasContext.setProps({useDevicePixels: props.useDevicePixels});
+    if (props.useDevicePixels !== undefined && this._canvasContext?.setProps) {
+      this._canvasContext.setProps({useDevicePixels: props.useDevicePixels});
     }
 
     // If initialized, update sub manager props
@@ -954,7 +964,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       viewports: this.getViewports(opts),
       onViewportActive: this.layerManager!.activateViewport,
       effects: this.effectManager!.getEffects(),
-      ...opts
+      ...opts,
+      canvasContext: this._canvasContext || undefined
     });
 
     stats.get(statKey).timeEnd();
@@ -995,7 +1006,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       viewports: this.getViewports(opts),
       onViewportActive: this.layerManager!.activateViewport,
       effects: this.effectManager!.getEffects(),
-      ...opts
+      ...opts,
+      canvasContext: this._canvasContext || undefined
     });
 
     stats.get(statKey).timeEnd();
@@ -1034,6 +1046,51 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return canvas;
   }
 
+  private _setCanvasContext(canvasContext: CanvasContext): void {
+    this._canvasContext = canvasContext;
+
+    if ('style' in canvasContext.canvas) {
+      this.canvas = canvasContext.canvas;
+    }
+  }
+
+  private _setDeviceCanvasContext(device: Device, opts: {syncDrawingBuffer?: boolean} = {}): void {
+    const canvasContext = device.getDefaultCanvasContext();
+    this._setCanvasContext(canvasContext);
+    this._setDeviceResizeHandler(device, opts);
+  }
+
+  private _setDeviceResizeHandler(device: Device, opts: {syncDrawingBuffer?: boolean} = {}): void {
+    const syncDrawingBuffer = Boolean(opts.syncDrawingBuffer);
+    if (this._deviceResizeHandler?.device === device) {
+      this._deviceResizeHandler.syncDrawingBuffer = syncDrawingBuffer;
+      return;
+    }
+
+    this._restoreDeviceResizeHandler();
+
+    const onResize: NonNullable<DeviceProps['onResize']> = canvasContext => {
+      if (canvasContext === this._canvasContext && this._canvasContext) {
+        // Deck owns resize handling for the active render CanvasContext. Applications should use
+        // DeckProps.onResize instead of the lower-level luma device callback while Deck is active.
+        this._onCanvasContextResize(this._canvasContext, {
+          syncDrawingBuffer: this._deviceResizeHandler?.syncDrawingBuffer
+        });
+      }
+    };
+
+    device.props.onResize = onResize;
+    this._deviceResizeHandler = {device, onResize, syncDrawingBuffer};
+  }
+
+  private _restoreDeviceResizeHandler(): void {
+    const resizeHandler = this._deviceResizeHandler;
+    if (resizeHandler && resizeHandler.device.props?.onResize === resizeHandler.onResize) {
+      resizeHandler.device.props.onResize = noop;
+    }
+    this._deviceResizeHandler = null;
+  }
+
   /** Updates canvas width and/or height, if provided as props */
   private _setCanvasSize(props: Required<DeckProps<ViewsT>>): void {
     if (!this.canvas) {
@@ -1054,15 +1111,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
-  /** If canvas size has changed, reads out the new size and update */
-  private _updateCanvasSize(): void {
+  /**
+   * Sync Deck viewport dimensions from the active canvas context.
+   * luma.gl owns resize observation, DPR tracking and drawing buffer sizing for Deck-created
+   * canvases. Attached WebGL contexts still need Deck to mirror external drawing-buffer changes.
+   */
+  private _updateCanvasSize(canvasContext: CanvasContext | null = this._canvasContext): void {
     const {canvas} = this;
-    if (!canvas) {
-      return;
-    }
-    // Fallback to width/height when clientWidth/clientHeight are undefined (OffscreenCanvas).
-    const newWidth = canvas.clientWidth ?? canvas.width;
-    const newHeight = canvas.clientHeight ?? canvas.height;
+    const [newWidth, newHeight] = canvasContext
+      ? // The canvas context owns the authoritative CSS size after resize/DPR observation.
+        canvasContext.getCSSSize()
+      : // Fallback to width/height when there is no default canvas context available yet.
+        [canvas?.clientWidth ?? canvas?.width ?? 0, canvas?.clientHeight ?? canvas?.height ?? 0];
+
     if (newWidth !== this.width || newHeight !== this.height) {
       // @ts-expect-error private assign to read-only property
       this.width = newWidth;
@@ -1071,8 +1132,21 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.viewManager?.setProps({width: newWidth, height: newHeight});
       // Make sure that any new layer gets initialized with the current viewport
       this.layerManager?.activateViewport(this.getViewports()[0]);
-      this.props.onResize({width: newWidth, height: newHeight});
+      this.props.onResize({width: newWidth, height: newHeight}, canvasContext || undefined);
     }
+  }
+
+  private _onCanvasContextResize(
+    canvasContext: CanvasContext,
+    opts: {syncDrawingBuffer?: boolean} = {}
+  ): void {
+    if (opts.syncDrawingBuffer) {
+      const {width, height} = canvasContext.canvas;
+      canvasContext.setDrawingBufferSize(width, height);
+    }
+    // luma owns resize detection; Deck reacts by invalidating redraw and updating view state.
+    this._needsRedraw = 'Canvas resized';
+    this._updateCanvasSize(canvasContext);
   }
 
   private _createAnimationLoop(
@@ -1128,9 +1202,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
-    // Preserve user's onResize callback
-    const userOnResize = this.props.deviceProps?.onResize;
-
     // Create the "best" device supported from the registered adapters
     return luma.createDevice({
       // luma by default throws if a device is already attached
@@ -1147,13 +1218,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         canvas: this._createCanvas(props),
         useDevicePixels: this.props.useDevicePixels,
         autoResize: true
-      },
-      onResize: (canvasContext, info) => {
-        // Set redraw flag when luma.gl's CanvasContext detects a resize
-        // This restores pre-9.2 behavior where resize automatically triggered redraws
-        this._needsRedraw = 'Canvas resized';
-        // Call user's onResize if provided
-        userOnResize?.(canvasContext, info);
       }
     });
   }
@@ -1275,20 +1339,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
 
-    // if external context...
-    if (!this.canvas) {
-      this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+    this._setDeviceCanvasContext(device, {
+      syncDrawingBuffer: Boolean(this.props.gl && this.props.device !== device)
+    });
 
-      // external canvas may not be in DOM
-      if (!this.canvas.isConnected && this.props.parent) {
-        this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
-      }
-      // TODO v9
-      // ts-expect-error - Currently luma.gl v9 does not expose these options
-      // All WebGLDevice contexts are instrumented, but it seems the device
-      // should have a method to start state tracking even if not enabled?
-      // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
+    // external canvas may not be in DOM
+    if (this.canvas && !this.canvas.isConnected && this.props.parent) {
+      this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
     }
+    // TODO v9
+    // ts-expect-error - Currently luma.gl v9 does not expose these options
+    // All WebGLDevice contexts are instrumented, but it seems the device
+    // should have a method to start state tracking even if not enabled?
+    // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
 
     if (this.device.type === 'webgl') {
       this.device.setParametersWebGL({
@@ -1318,14 +1381,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       touchAction: this.props.touchAction,
       recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
         // Resolve recognizer settings
-        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requireFailure] =
           RECOGNIZERS[eventName];
         const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
         const options = {...defaultOptions, ...optionsOverride, event: eventName};
         return {
           recognizer: new RecognizerConstructor(options),
           recognizeWith,
-          requestFailure
+          requireFailure
         };
       }),
       events: {
@@ -1381,9 +1444,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
     this.widgetManager.addDefault(new TooltipWidget());
 
-    this.setProps(this.props);
+    this.setProps({});
 
-    this._updateCanvasSize();
+    // Seed the initial Deck width/height from the current canvas context before onLoad fires.
+    this._updateCanvasSize(this._canvasContext);
     this.props.onLoad();
   }
 
@@ -1446,8 +1510,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         this.props._onMetrics(this.metrics);
       }
     }
-
-    this._updateCanvasSize();
 
     this._updateCursor();
 

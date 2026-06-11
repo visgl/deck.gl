@@ -12,7 +12,6 @@ in vec3 instanceSourcePositions;
 in vec3 instanceSourcePositions64Low;
 in vec3 instanceTargetPositions;
 in vec3 instanceTargetPositions64Low;
-in vec3 instancePickingColors;
 in float instanceWidths;
 in float instanceHeights;
 in float instanceTilts;
@@ -131,7 +130,7 @@ void main(void) {
 
   uv = vec2(segmentRatio, segmentSide);
   geometry.uv = uv;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   vec4 curr;
   vec4 next;

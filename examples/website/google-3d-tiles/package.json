@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-examples-google-maps-3d",
+  "name": "deckgl-examples-google-maps-3d-tiles",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -14,6 +14,6 @@
   },
   "devDependencies": {
     "typescript": "^4.6.0",
-    "vite": "^7.3.1"
+    "vite": "^7.3.3"
   }
 }

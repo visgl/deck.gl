@@ -9,7 +9,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
-import {shaderWGSL as source} from './icon-layer.wgsl';
+import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 
 import type {
@@ -140,7 +140,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, source, modules: [project32, color, picking, iconUniforms]});
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
+    return super.getShaders({
+      vs,
+      fs,
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
+      modules: [project32, color, picking, iconUniforms]
+    });
   }
 
   initializeState() {
@@ -203,7 +210,17 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
-      }
+      },
+      ...((this.props.data as any)?.attributes?.rowIndexes
+        ? {
+            /** Caller-provided logical picking index per icon instance. */
+            rowIndexes: {
+              size: 1,
+              type: 'uint32',
+              noAlloc: true
+            }
+          }
+        : {})
     });
     /* eslint-enable max-len */
   }

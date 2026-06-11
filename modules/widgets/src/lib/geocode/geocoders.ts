@@ -152,11 +152,15 @@ function parseCoordinates(input) {
   const first = parseCoordinatePart(parts[0]);
   const second = parseCoordinatePart(parts[1]);
   if (first === null || second === null) return null;
+  if (Math.abs(first) > 90 && Math.abs(second) > 90) {
+    return null;
+  }
   // Use a heuristic:
   // If one number exceeds 90 in absolute value, it's likely a longitude.
-  if (Math.abs(first) > 90 && Math.abs(second) <= 90) {
+  if (Math.abs(first) > 90) {
     return {longitude: first, latitude: second};
-  } else if (Math.abs(second) > 90 && Math.abs(first) <= 90) {
+  }
+  if (Math.abs(second) > 90) {
     return {longitude: second, latitude: first};
   }
   // If both are <= 90, assume order: latitude, longitude.
@@ -184,7 +188,7 @@ function parseCoordinatePart(s: string): number | null {
 /** Convert a DMS string (e.g. "37°48'00\"N") to decimal degrees. */
 function dmsToDecimal(s: string): number {
   // A simple regex to extract degrees, minutes, seconds and direction.
-  const regex = /(\d+)[°d]\s*(\d+)?['′m]?\s*(\d+(?:\.\d+)?)?[\"″s]?\s*([NSEW])?/i;
+  const regex = /(-?\d+)[°d]\s*(\d+)?['′m]?\s*(\d+(?:\.\d+)?)?[\"″s]?\s*([NSEW])?/i;
   const match = s.match(regex);
   if (!match) return NaN;
   const degrees = parseFloat(match[1]) || 0;

@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {LifecycleTester} from '../utils';
 
@@ -61,6 +61,37 @@ test('HeightMapBuilder#diffing', async () => {
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
     'Height map needs update (viewport changed)'
   ).toBeTruthy();
+
+  heightMap.delete();
+  lifecycle.finalize();
+});
+
+test('HeightMapBuilder#diffing#globe', async () => {
+  const lifecycle = new LifecycleTester();
+  const viewport = new GlobeViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0
+  });
+  const terrainLayer = new ScatterplotLayer({
+    data: [
+      [-90, -40.97989806962013],
+      [0, 0]
+    ],
+    getPosition: d => d
+  });
+
+  await lifecycle.update({viewport, layers: [terrainLayer]});
+
+  const heightMap = new HeightMapBuilder(terrainLayer.context.device);
+  expect(
+    heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
+    'Height map needs update'
+  ).toBeTruthy();
+  expect(heightMap.bounds, 'Mercator bounds').toEqual([128, 192, 256, 256]);
+  expect(heightMap.renderViewport instanceof WebMercatorViewport, 'Render viewport').toBeTruthy();
 
   heightMap.delete();
   lifecycle.finalize();

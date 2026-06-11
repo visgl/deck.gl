@@ -121,10 +121,17 @@ make publish-test-pypi
 2) In a fresh virtualenv, install pydeck from test.pypi:
 
 ```bash
-uv pip install -i https://test.pypi.org/simple/ pydeck=={{version}}
+uv venv /tmp/test-pydeck --python 3.13
+source /tmp/test-pydeck/bin/activate
+uv pip install --index-strategy unsafe-best-match \
+  -i https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  pydeck=={{version}}
 ```
 
-where `{{version}}` is your semantic version.
+where `{{version}}` is your semantic version. The `--extra-index-url` is needed because
+pydeck's dependencies (jinja2, etc.) are on real PyPI. The `--index-strategy unsafe-best-match`
+tells uv to check TestPyPI for pydeck even though older versions exist on PyPI.
 
 3) Verify that pydeck works from test.pypi in the same environments as above.
 

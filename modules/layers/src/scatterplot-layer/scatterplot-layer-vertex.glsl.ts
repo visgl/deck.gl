@@ -14,7 +14,10 @@ in float instanceRadius;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
-in vec3 instancePickingColors;
+#ifdef USE_ROW_INDEXES
+in float rowIndexes;
+#endif
+in vec2 instancePixelOffset;
 
 out vec4 vFillColor;
 out vec4 vLineColor;
@@ -46,7 +49,11 @@ void main(void) {
   // position on the containing square in [-1, 1] space
   unitPosition = edgePadding * positions.xy;
   geometry.uv = unitPosition;
-  geometry.pickingColor = instancePickingColors;
+#ifdef USE_ROW_INDEXES
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
+#else
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+#endif
 
   innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / outerRadiusPixels;
   
@@ -54,10 +61,12 @@ void main(void) {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = edgePadding * positions * outerRadiusPixels;
+    offset.xy += instancePixelOffset;
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
   } else {
     vec3 offset = edgePadding * positions * project_pixel_size(outerRadiusPixels);
+    offset.xy += project_pixel_size(instancePixelOffset);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
