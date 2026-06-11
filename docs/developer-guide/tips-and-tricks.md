@@ -59,6 +59,36 @@ If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element
 
 ## Optimization for Mobile
 
+### Mobile Browser Touch UI
+
+For mobile experiences using a deck.gl [Controller](../api-reference/core/controller.md), use CSS guards on the Deck canvas/root element so repeated touch gestures do not trigger browser selection, tap highlight, or WebKit touch callouts:
+
+```css
+#deck-root,
+#deck-root canvas {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+```
+
+Some iOS embeds may still surface native callout UI during long-press or rapid double-tap gestures. In those cases, prevent the browser-native UI events that originate from the canvas without stopping pointer event propagation. The controller still needs deck.gl's pointer events to receive the gesture sequence.
+
+```js
+const root = document.getElementById('deck-root');
+const preventCanvasBrowserUI = event => {
+  if (event.target instanceof HTMLCanvasElement) {
+    event.preventDefault();
+  }
+};
+
+for (const type of ['contextmenu', 'selectstart', 'gesturestart', 'gesturechange', 'gestureend']) {
+  root.addEventListener(type, preventCanvasBrowserUI, {passive: false});
+}
+```
+
 ### Experimental Memory Usage Controls
 
 The `Deck` class supports the following experimental props to aggressively reduce memory usage on memory-restricted devices:
