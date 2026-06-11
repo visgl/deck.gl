@@ -6,7 +6,11 @@ import {test, expect} from 'vitest';
 import {TerrainCover} from '@deck.gl/extensions/terrain/terrain-cover';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
-import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
+import {
+  WebMercatorViewport,
+  OrthographicViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TileLayer} from '@deck.gl/geo-layers';
@@ -120,6 +124,46 @@ test('TerrainCover#viewport diffing#geo#tiled', async () => {
     zoom: 5
   });
   expect(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update').toBeFalsy();
+
+  tc.delete();
+  lifecycle.finalize();
+});
+
+test('TerrainCover#viewport diffing#globe', async () => {
+  const lifecycle = new LifecycleTester();
+  let viewport = new GlobeViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0
+  });
+  const targetLayer = new ScatterplotLayer({
+    data: [
+      [-90, -40.97989806962013],
+      [0, 0]
+    ],
+    getPosition: d => d
+  });
+
+  await lifecycle.update({viewport, layers: [targetLayer]});
+
+  const tc = new TerrainCover(targetLayer);
+  expect(tc.shouldUpdate({targetLayer, viewport}), 'Should require update').toBeTruthy();
+  expect(tc.bounds, 'Mercator bounds').toEqual([128, 192, 256, 256]);
+  expect(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport').toBeTruthy();
+
+  viewport = new GlobeViewport({
+    width: 400,
+    height: 300,
+    longitude: -80,
+    latitude: 0,
+    zoom: 0
+  });
+  expect(
+    tc.shouldUpdate({targetLayer, viewport}),
+    'Should not need update - globe pan'
+  ).toBeFalsy();
 
   tc.delete();
   lifecycle.finalize();

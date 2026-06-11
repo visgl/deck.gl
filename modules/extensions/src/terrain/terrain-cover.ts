@@ -4,10 +4,18 @@
 
 import {Framebuffer} from '@luma.gl/core';
 
+import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
-import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../utils/projection-utils';
+import {
+  getMercatorReferenceViewport,
+  joinLayerBounds,
+  lngLatToMercatorCommon,
+  makeViewport,
+  getRenderBounds,
+  Bounds
+} from '../utils/projection-utils';
 
 type TileHeader = {
   boundingBox: [min: number[], max: number[]];
@@ -113,13 +121,14 @@ export class TerrainCover {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
 
+    // Bounds in absolute Mercator common space (matches terrain cover FBO viewport)
     if (this.tile && 'boundingBox' in this.tile) {
       if (!this.targetBounds) {
         shouldRedraw = true;
         this.targetBounds = this.tile.boundingBox;
 
-        const bottomLeftCommon = viewport.projectPosition(this.targetBounds[0]);
-        const topRightCommon = viewport.projectPosition(this.targetBounds[1]);
+        const bottomLeftCommon = lngLatToMercatorCommon(this.targetBounds[0]);
+        const topRightCommon = lngLatToMercatorCommon(this.targetBounds[1]);
         this.targetBoundsCommon = [
           bottomLeftCommon[0],
           bottomLeftCommon[1],
@@ -131,7 +140,10 @@ export class TerrainCover {
       // console.log('bounds changed', this.bounds, '>>', newBounds);
       shouldRedraw = true;
       this.targetBounds = targetLayer.getBounds();
-      this.targetBoundsCommon = joinLayerBounds([targetLayer], viewport);
+      this.targetBoundsCommon = joinLayerBounds(
+        [targetLayer],
+        getMercatorReferenceViewport(viewport)
+      );
     }
 
     if (!this.targetBoundsCommon) {
@@ -146,7 +158,11 @@ export class TerrainCover {
     } else {
       const oldZoom = this.renderViewport?.zoom;
       shouldRedraw = shouldRedraw || newZoom !== oldZoom;
-      const newBounds = getRenderBounds(this.targetBoundsCommon, viewport);
+      // On GlobeView, viewport bounds are sphere cartesian — skip intersection
+      const newBounds =
+        viewport instanceof GlobeViewport
+          ? this.targetBoundsCommon
+          : getRenderBounds(this.targetBoundsCommon, viewport);
       const oldBounds = this.bounds;
       shouldRedraw = shouldRedraw || !oldBounds || newBounds.some((x, i) => x !== oldBounds[i]);
       this.bounds = newBounds;
