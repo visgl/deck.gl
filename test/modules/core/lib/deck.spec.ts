@@ -131,6 +131,40 @@ test('Deck#constructor', async () => {
   console.log('Deck constructor did not throw');
 });
 
+test('Deck wires mjolnir requireFailure between recognizers', async () => {
+  // Regression guard: deck.gl previously emitted `requestFailure` instead of
+  // `requireFailure`, which mjolnir silently dropped — so pinch/pan/click no
+  // longer waited for their blocking recognizer to fail.
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      layers: [],
+      controller: true,
+      onLoad: () => {
+        try {
+          const recognizers = (deck as any).eventManager?.manager?.recognizers ?? [];
+          const requiredFailures = (event: string): string[] =>
+            (recognizers.find(r => r.options.event === event)?.requireFail ?? []).map(
+              (r: any) => r.options.event
+            );
+
+          expect(requiredFailures('pinch'), 'pinch waits for multipan').toContain('multipan');
+          expect(requiredFailures('pan'), 'pan waits for multipan').toContain('multipan');
+          expect(requiredFailures('click'), 'click waits for dblclick').toContain('dblclick');
+
+          deck.finalize();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
 test('Deck#abort', async () => {
   const deck = new Deck({
     device,
