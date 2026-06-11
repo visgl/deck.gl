@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Deck | deck.gl</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://deck.gl/docs/api-reference/core/deck"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Deck | deck.gl"><meta data-rh="true" name="description" content="Deck is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events."><meta data-rh="true" property="og:description" content="Deck is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events."><link data-rh="true" rel="icon" href="/favicon.png"><link data-rh="true" rel="canonical" href="https://deck.gl/docs/api-reference/core/deck"><link data-rh="true" rel="alternate" href="https://deck.gl/docs/api-reference/core/deck" hreflang="en"><link data-rh="true" rel="alternate" href="https://deck.gl/docs/api-reference/core/deck" hreflang="x-default"><link data-rh="true" rel="preconnect" href="https://8EVYAVB4KT-dsn.algolia.net" crossorigin="anonymous"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Deck","item":"https://deck.gl/docs/api-reference/core/deck"}]}</script><link rel="stylesheet" href="/assets/css/styles.10abb66d.css">
-<script src="/assets/js/runtime~main.eae8e453.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.c5cf9bd9.js" defer="defer"></script>
 <script src="/assets/js/main.5e3be261.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -28,6 +28,7 @@
 <p>The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="device"><code>device</code> (<a href="https://luma.gl/docs/api-reference/core/device" target="_blank" rel="noopener noreferrer" class="">Device</a>)<a href="#device" class="hash-link" aria-label="Direct link to device" title="Direct link to device" translate="no">​</a></h4>
 <p>luma.gl Device used to manage the application&#x27;s connection with the GPU. Will be auto-created if not supplied.</p>
+<p>When a <code>Device</code> is supplied, Deck does not destroy it when finalized. While the <code>Deck</code> instance is active, Deck owns the <code>device.props.onResize</code> callback for the active render canvas context; use <code>DeckProps.onResize</code> to observe Deck canvas resizes.</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="deviceprops"><code>deviceProps</code> (<a href="https://luma.gl/docs/api-reference/core/device#deviceprops" target="_blank" rel="noopener noreferrer" class="">DeviceProps</a> | <a href="https://luma.gl/docs/api-reference/webgl/#webgldeviceprops" target="_blank" rel="noopener noreferrer" class="">WebGLDeviceProps</a>)<a href="#deviceprops" class="hash-link" aria-label="Direct link to deviceprops" title="Direct link to deviceprops" translate="no">​</a></h4>
 <p>Options used for creating a new luma.gl GPU <a href="https://luma.gl/docs/api-reference/core/device" target="_blank" rel="noopener noreferrer" class="">Device</a>.</p>
 <p>Note that when using WebGL, <code>props.deviceProps.webgl</code> can be used to specify <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes" target="_blank" rel="noopener noreferrer" class="">WebGL context attributes</a>.</p>
@@ -359,6 +360,7 @@
 <li class=""><code>height</code> (number) - the new height of the deck canvas, in client pixels</li>
 </ul>
 </li>
+<li class=""><code>canvasContext</code> (<a href="https://luma.gl/docs/api-reference/core/canvas-context" target="_blank" rel="noopener noreferrer" class="">CanvasContext</a>, optional) - the luma.gl canvas context that reported the resize</li>
 </ul>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="onbeforerender"><code>onBeforeRender</code> (Function)<a href="#onbeforerender" class="hash-link" aria-label="Direct link to onbeforerender" title="Direct link to onbeforerender" translate="no">​</a></h4>
 <p>Called just before the canvas rerenders.</p>
