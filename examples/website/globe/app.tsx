@@ -118,7 +118,8 @@ export default function App({data}: {data?: DailyFlights[]}) {
           getWidth: 1,
           timeRange,
           getSourceColor: [255, 0, 128],
-          getTargetColor: [0, 128, 255]
+          getTargetColor: [0, 128, 255],
+          parameters: {cullMode: 'none'}
         })
     );
 
