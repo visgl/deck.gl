@@ -56,6 +56,8 @@ test('TerrainLayer', async () => {
 
 test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions', async () => {
   const sourcePositions = new Float32Array([0, 80, 0, 0.5, 40, 0, 1, 0, 0]);
+  const sourceTexCoords = new Float32Array([0, 0, 0.5, 0.5, 1, 1]);
+  const sourceTexture = {id: 'source-texture'};
   const tileSize = 512;
   const bbox = {west: 0, south: 0, east: 1, north: 80};
   const yPad = ((bbox.north - bbox.south) / tileSize) * 1;
@@ -69,14 +71,16 @@ test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions'
   const sourceMesh = {
     attributes: {
       POSITION: {value: sourcePositions, size: 3},
-      TEXCOORD_0: {value: new Float32Array([0, 0, 0.5, 0.5, 1, 1]), size: 2}
+      TEXCOORD_0: {value: sourceTexCoords, size: 2}
     }
   };
   const layer = new TerrainLayer({
     id: 'terrain-globe-mercator',
     elevationData: 'terrain/{z}/{x}/{y}.png',
+    texture: 'texture/{z}/{x}/{y}.png',
     tileSize,
-    fetch: () => Promise.resolve(sourceMesh)
+    fetch: (_url, context) =>
+      Promise.resolve(context.propName === 'texture' ? sourceTexture : sourceMesh)
   });
   layer.context = {
     viewport: new GlobeView().makeViewport({
@@ -91,7 +95,7 @@ test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions'
   };
   layer.state = {isTiled: true};
 
-  const [mesh] = await layer.getTiledTerrainData({
+  const [mesh, texture] = await layer.getTiledTerrainData({
     index: {x: 0, y: 0, z: 1},
     id: '0-0-1',
     bbox,
@@ -100,6 +104,10 @@ test('TerrainLayer#globe remaps WebMercator tile rows to lng/lat mesh positions'
   const positions = mesh!.attributes.POSITION.value;
 
   expect(positions, 'remap copies the loader positions').not.toBe(sourcePositions);
+  expect(mesh!.attributes.TEXCOORD_0.value, 'remap preserves source texture coordinates').toBe(
+    sourceTexCoords
+  );
+  expect(texture, 'terrain surface texture is passed through').toBe(sourceTexture);
   expect(sourcePositions[1], 'source top row is unchanged').toBe(80);
   expect(sourcePositions[4], 'source middle row is unchanged').toBe(40);
   expect(sourcePositions[7], 'source bottom row is unchanged').toBe(0);

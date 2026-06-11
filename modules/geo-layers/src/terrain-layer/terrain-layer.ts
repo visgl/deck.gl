@@ -114,7 +114,7 @@ type TerrainLoadProps = {
   elevationData: string | null;
   elevationDecoder: ElevationDecoder;
   meshMaxError: number;
-  remapToWebMercatorTile?: boolean;
+  shouldRemapTerrainMeshToWebMercatorTile?: boolean;
   signal?: AbortSignal;
 };
 
@@ -210,7 +210,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     bounds,
     elevationDecoder,
     meshMaxError,
-    remapToWebMercatorTile,
+    shouldRemapTerrainMeshToWebMercatorTile,
     signal
   }: TerrainLoadProps): Promise<Mesh> | null {
     if (!elevationData) {
@@ -236,8 +236,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       signal
     });
 
-    return remapToWebMercatorTile
-      ? terrain.then(mesh => (mesh ? remapMeshToWebMercatorTile(mesh, bounds) : mesh))
+    return shouldRemapTerrainMeshToWebMercatorTile
+      ? terrain.then(mesh => (mesh ? remapTerrainMeshToWebMercatorTile(mesh, bounds) : mesh))
       : terrain;
   }
 
@@ -269,7 +269,9 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         bounds: overlappedBounds,
         elevationDecoder,
         meshMaxError,
-        remapToWebMercatorTile: isGlobe,
+        // The terrain surface keeps its original texture and UVs; only mesh row positions are
+        // remapped from WebMercator tile spacing to lng/lat for GlobeView.
+        shouldRemapTerrainMeshToWebMercatorTile: isGlobe,
         signal
       }) ?? Promise.resolve(null);
     const surface = textureUrl
@@ -432,7 +434,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
 
-function remapMeshToWebMercatorTile(mesh: Mesh, bounds: Bounds): Mesh {
+function remapTerrainMeshToWebMercatorTile(mesh: Mesh, bounds: Bounds): Mesh {
   const positionAttribute = mesh.attributes.POSITION;
   const texCoordAttribute = mesh.attributes.TEXCOORD_0;
   const positions = positionAttribute?.value;

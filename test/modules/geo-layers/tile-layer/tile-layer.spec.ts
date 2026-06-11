@@ -294,6 +294,46 @@ test('TileLayer#GlobeView:custom BitmapLayer image coordinate system', async () 
   });
 });
 
+test('TileLayer#GlobeView:leaves non-Bitmap sublayers unchanged', async () => {
+  const testViewport = new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+
+  const renderSubLayers = props => {
+    return new ScatterplotLayer(props, {
+      id: `${props.id}-points`,
+      getPosition: d => d.position
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases: [
+      {
+        title: 'does not add image coordinates to non-Bitmap sublayers',
+        props: {
+          getTileData: () => [{position: [0, 0]}],
+          renderSubLayers
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0] instanceof ScatterplotLayer).toBeTruthy();
+            expect(subLayers[0].props._imageCoordinateSystem).toBeUndefined();
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
 test('TileLayer#GlobeView:preserves explicit BitmapLayer image coordinate system', async () => {
   const testViewport = new GlobeView().makeViewport({
     width: 100,

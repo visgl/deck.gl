@@ -445,6 +445,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
+    // BitmapLayer and subclasses draw tile imagery over lng/lat bounds. XYZ imagery is encoded
+    // in WebMercator, so default GlobeView bitmap sublayers need UV reprojection; other layer
+    // types do not share this image-coordinate contract and are left unchanged.
     if (
       !(this.context.viewport instanceof _GlobeViewport) ||
       !(layer instanceof BitmapLayer) ||
