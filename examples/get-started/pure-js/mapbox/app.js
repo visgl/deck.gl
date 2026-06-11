@@ -4,7 +4,7 @@
 
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl'; // eslint-disable-line import/default
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
