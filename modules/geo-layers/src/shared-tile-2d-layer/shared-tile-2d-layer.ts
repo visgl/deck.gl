@@ -26,9 +26,9 @@ import {
   STRATEGY_DEFAULT,
   type SharedRefinementStrategy,
   type SharedTileset2DProps
-} from '../shared-tileset-2d';
-import type {TileLoadProps, ZRange} from '../tileset-2d';
-import {getURLFromTemplate, type URLTemplate, urlType} from '../tileset-2d';
+} from '../shared-tileset-2d/index';
+import type {TileLoadProps, ZRange} from '../tileset-2d/index';
+import {getURLFromTemplate, type URLTemplate, urlType} from '../tileset-2d/index';
 import {sharedTile2DDeckAdapter} from './deck-tileset-adapter';
 import {SharedTile2DView} from './shared-tile-2d-view';
 

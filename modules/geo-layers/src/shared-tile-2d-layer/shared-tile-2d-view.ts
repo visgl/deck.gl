@@ -11,7 +11,7 @@ import {
   STRATEGY_REPLACE,
   SharedTile2DHeader,
   type SharedTileset2D
-} from '../shared-tileset-2d';
+} from '../shared-tileset-2d/index';
 import {memoize} from '../tileset-2d/memoize';
 import type {ZRange} from '../tileset-2d/types';
 import {getCullBounds, transformBox} from '../tileset-2d/utils';
