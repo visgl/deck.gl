@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import assert from '../utils/assert';
+import {DEFAULT_CANVAS_ID} from './view-manager';
 
 import type {Device, PresentationContext} from '@luma.gl/core';
 import type {EventManager} from 'mjolnir.js';
@@ -48,7 +49,7 @@ export default class CanvasManager {
 
   /** The default canvas id used for views and picks that do not specify one. */
   get defaultCanvasId(): string {
-    return this._order[0] || 'default-canvas';
+    return this._order[0] || DEFAULT_CANVAS_ID;
   }
 
   /** The default presentation canvas, if any. */

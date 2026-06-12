@@ -142,10 +142,10 @@ test('TooltipWidget#onViewportChange', () => {
 
 test('TooltipWidget#onHover offsets for multi-canvas', () => {
   const container = document.createElement('div');
-  container.getBoundingClientRect = () => ({left: 10, top: 20} as DOMRect);
+  container.getBoundingClientRect = () => ({left: 10, top: 20}) as DOMRect;
 
   const canvas = document.createElement('canvas');
-  canvas.getBoundingClientRect = () => ({left: 110, top: 220} as DOMRect);
+  canvas.getBoundingClientRect = () => ({left: 110, top: 220}) as DOMRect;
 
   const deck = {
     props: {getTooltip: () => 'Test tooltip'},
