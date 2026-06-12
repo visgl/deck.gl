@@ -3,13 +3,16 @@
 // Copyright (c) vis.gl contributors
 
 import {OrthographicViewport, WebMercatorViewport} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {
+  _SharedTile2DHeader as SharedTile2DHeader,
   _SharedTile2DLayer as SharedTile2DLayer,
   _SharedTileset2D as SharedTileset2D,
   sharedTile2DDeckAdapter,
   type SharedTileset2DAdapter
 } from '@deck.gl/geo-layers';
-import type {TileSource} from '@loaders.gl/loader-utils';
+import {RequestScheduler, type TileSource} from '@loaders.gl/loader-utils';
+import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {describe, expect, it} from 'vitest';
 
 import {SharedTile2DView} from '../../../modules/geo-layers/src/shared-tile-2d-layer/shared-tile-2d-view';
@@ -24,7 +27,13 @@ const mockTilesetAdapter: SharedTileset2DAdapter<string> = {
   })
 };
 
-type TestTileData = Array<{tileId: string}> & {byteLength?: number};
+type TestTileData = Array<{tileId: string; position: [number, number]}> & {byteLength?: number};
+
+function createTestTileData(tileId: string): TestTileData {
+  const result = [{tileId, position: [0, 0]}] as TestTileData;
+  result.byteLength = 16;
+  return result;
+}
 
 function createMockTileSource(
   overrides: Partial<TileSource> & {
@@ -43,11 +52,7 @@ function createMockTileSource(
         ]
       }),
     getTile: () => Promise.resolve(null),
-    getTileData: ({id}) => {
-      const result = [{tileId: id}] as TestTileData;
-      result.byteLength = 16;
-      return Promise.resolve(result);
-    },
+    getTileData: ({id}) => Promise.resolve(createTestTileData(id)),
     ...overrides
   };
 }
@@ -99,6 +104,114 @@ describe('SharedTile2DLayer', () => {
     expect(requestedUrl).toBe('https://example.com/2/3/5.json');
   });
 
+  it('runs the deck layer lifecycle with TileLayer-style rendering and refetches', async () => {
+    let tileDataLoadCount = 0;
+    let tileLoadCount = 0;
+    let viewportLoadCount = 0;
+    let autoHighlightCount = 0;
+
+    const viewport = new WebMercatorViewport({
+      id: 'main',
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 60,
+      zoom: 2
+    });
+    const renderSubLayers = props =>
+      new ScatterplotLayer(props, {
+        id: `${props.id}-points`,
+        data: props.data
+      });
+
+    await testLayerAsync({
+      Layer: SharedTile2DLayer,
+      viewport,
+      testCases: [
+        {
+          title: 'initial load',
+          props: {
+            data: 'https://example.com/{z}/{x}/{y}.json',
+            getTileData: ({id}) => {
+              tileDataLoadCount++;
+              return createTestTileData(id);
+            },
+            onTileLoad: () => {
+              tileLoadCount++;
+            },
+            onViewportLoad: () => {
+              viewportLoadCount++;
+            },
+            renderSubLayers
+          },
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (!layer.isLoaded) {
+              return;
+            }
+            expect(tileDataLoadCount).toBe(2);
+            expect(tileLoadCount).toBe(2);
+            expect(viewportLoadCount).toBeGreaterThan(0);
+            expect(subLayers).toHaveLength(2);
+            expect(subLayers.every(subLayer => layer.filterSubLayer({layer: subLayer}))).toBe(true);
+
+            const sourceLayer = subLayers[0];
+            sourceLayer.updateAutoHighlight = () => {
+              autoHighlightCount++;
+            };
+            const pickedInfo = layer.getPickingInfo({
+              info: {picked: true},
+              sourceLayer
+            } as any);
+            expect(pickedInfo.tile).toBe(sourceLayer.props.tile);
+            expect(pickedInfo.sourceTile).toBe(sourceLayer.props.tile);
+            expect(pickedInfo.sourceTileSubLayer).toBe(sourceLayer);
+            (layer as any)._updateAutoHighlight(pickedInfo);
+            expect(autoHighlightCount).toBe(1);
+
+            const unpickedInfo = layer.getPickingInfo({
+              info: {picked: false},
+              sourceLayer
+            } as any);
+            expect(unpickedInfo.tile).toBeUndefined();
+          }
+        },
+        {
+          title: 'reuse loaded sublayers',
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (layer.isLoaded) {
+              expect(subLayers).toHaveLength(2);
+              expect(tileDataLoadCount).toBe(2);
+            }
+          }
+        },
+        {
+          title: 'invalidate rendered sublayers',
+          updateProps: {opacity: 0.5},
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (layer.isLoaded) {
+              expect(subLayers).toHaveLength(2);
+              expect(tileDataLoadCount).toBe(2);
+            }
+          }
+        },
+        {
+          title: 'refetch loaded tiles',
+          updateProps: {updateTriggers: {getTileData: 1}},
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (layer.isLoaded) {
+              expect(subLayers).toHaveLength(2);
+              expect(tileDataLoadCount).toBe(4);
+              expect(tileLoadCount).toBe(4);
+            }
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+
   it('adopts TileSource metadata with explicit overrides winning', async () => {
     const tileset = SharedTileset2D.fromTileSource(createMockTileSource(), {minZoom: 2});
     await waitFor(() => tileset.maxZoom === 4, 'expected TileSource metadata to resolve');
@@ -139,6 +252,25 @@ describe('SharedTile2DLayer', () => {
     expect(tileset.minZoom).toBe(2);
     expect(tileset.maxZoom).toBe(8);
     expect((tileset as any).opts.extent).toEqual([0, 0, 1, 1]);
+    tileset.finalize();
+  });
+
+  it('normalizes TileSource metadata errors for subscribers', async () => {
+    let metadataError: Error | null = null;
+    const tileset = SharedTileset2D.fromTileSource(
+      createMockTileSource({getMetadata: () => Promise.reject('metadata failure')})
+    );
+    const unsubscribe = tileset.subscribe({
+      onError: error => {
+        metadataError = error;
+      }
+    });
+
+    await waitFor(() => metadataError !== null, 'expected TileSource metadata error');
+    expect(metadataError).toBeInstanceOf(Error);
+    expect(metadataError?.message).toBe('TileSource metadata error: metadata failure');
+
+    unsubscribe();
     tileset.finalize();
   });
 
@@ -265,6 +397,53 @@ describe('SharedTile2DLayer', () => {
     ).toThrow('SharedTileset2D requires an adapter before tile traversal can be used.');
 
     tileset.finalize();
+  });
+
+  it('covers shared tile header loading, reload, and abort branches', async () => {
+    const tile = new SharedTile2DHeader<TestTileData>({x: 0, y: 0, z: 0});
+    tile.id = '0-0-0';
+    tile.zoom = 0;
+    tile.bbox = {left: 0, top: 1, right: 2, bottom: 3};
+    tile.bbox = {west: 0, south: 0, east: 1, north: 1};
+    expect(tile.boundingBox).toEqual([
+      [0, 1],
+      [2, 3]
+    ]);
+
+    const requestScheduler = new RequestScheduler({throttleRequests: false});
+    const firstLoad = createDeferred<TestTileData | null>();
+    const firstLoadPromise = tile.loadData({
+      requestScheduler,
+      getData: () => firstLoad.promise,
+      onLoad: () => {},
+      onError: () => {}
+    });
+    expect(tile.data).toBeInstanceOf(Promise);
+    tile.setNeedsReload();
+    firstLoad.resolve(null);
+    await firstLoadPromise;
+    expect(tile.isLoaded).toBe(false);
+    expect(tile.needsReload).toBe(true);
+
+    const tileData = createTestTileData(tile.id);
+    await tile.loadData({
+      requestScheduler,
+      getData: () => tileData,
+      onLoad: () => {},
+      onError: () => {}
+    });
+    expect(tile.data).toBe(tileData);
+    expect(tile.byteLength).toBe(16);
+    expect(tile.isLoaded).toBe(true);
+    tile.abort();
+    expect(tile.isLoaded).toBe(true);
+
+    const geoTile = new SharedTile2DHeader<TestTileData>({x: 1, y: 1, z: 1});
+    geoTile.bbox = {west: -1, south: -2, east: 3, north: 4};
+    expect(geoTile.boundingBox).toEqual([
+      [-1, -2],
+      [3, 4]
+    ]);
   });
 
   it('does not finalize an external shared tileset when the layer finalizes', async () => {
