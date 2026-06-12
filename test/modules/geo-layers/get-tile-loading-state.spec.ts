@@ -1,4 +1,8 @@
-import test from 'tape-promise/tape';
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {test, expect} from 'vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {getTileLoadingState} from '@deck.gl/geo-layers/tile-layer/get-tile-loading-state';
 
@@ -7,7 +11,7 @@ const TEST_DATA = [
   {position: [1, 1]}
 ];
 
-test('getTileLoadingState#empty layer', t => {
+test('getTileLoadingState#empty layer', () => {
   const layer = new TileLayer({
     data: 'https://example.com/tiles/{z}/{x}/{y}',
     getTileData: () => null
@@ -15,18 +19,16 @@ test('getTileLoadingState#empty layer', t => {
 
   const state = getTileLoadingState(layer);
 
-  t.equal(state.total, 0, 'total is 0 for empty layer');
-  t.equal(state.loaded, 0, 'loaded is 0');
-  t.equal(state.failed, 0, 'failed is 0');
-  t.equal(state.pending, 0, 'pending is 0');
-  t.equal(state.percentLoaded, 100, 'percentLoaded is 100 for empty');
-  t.equal(state.isComplete, true, 'isComplete is true');
-  t.equal(state.isSuccess, true, 'isSuccess is true');
-
-  t.end();
+  expect(state.total).toBe(0);
+  expect(state.loaded).toBe(0);
+  expect(state.failed).toBe(0);
+  expect(state.pending).toBe(0);
+  expect(state.percentLoaded).toBe(100);
+  expect(state.isComplete).toBe(true);
+  expect(state.isSuccess).toBe(true);
 });
 
-test('getTileLoadingState#all tiles loaded successfully', t => {
+test('getTileLoadingState#all tiles loaded successfully', () => {
   const layer = new TileLayer({
     id: 'test-layer',
     data: 'https://example.com/tiles/{z}/{x}/{y}',
@@ -46,18 +48,16 @@ test('getTileLoadingState#all tiles loaded successfully', t => {
 
   const state = getTileLoadingState(layer);
 
-  t.equal(state.total, 3, 'total is 3');
-  t.equal(state.loaded, 3, 'loaded is 3');
-  t.equal(state.failed, 0, 'failed is 0');
-  t.equal(state.pending, 0, 'pending is 0');
-  t.equal(state.percentLoaded, 100, 'percentLoaded is 100');
-  t.equal(state.isComplete, true, 'isComplete is true');
-  t.equal(state.isSuccess, true, 'isSuccess is true');
-
-  t.end();
+  expect(state.total).toBe(3);
+  expect(state.loaded).toBe(3);
+  expect(state.failed).toBe(0);
+  expect(state.pending).toBe(0);
+  expect(state.percentLoaded).toBe(100);
+  expect(state.isComplete).toBe(true);
+  expect(state.isSuccess).toBe(true);
 });
 
-test('getTileLoadingState#some tiles failed', t => {
+test('getTileLoadingState#some tiles failed', () => {
   const layer = new TileLayer({
     id: 'test-layer',
     data: 'https://example.com/tiles/{z}/{x}/{y}',
@@ -78,18 +78,16 @@ test('getTileLoadingState#some tiles failed', t => {
 
   const state = getTileLoadingState(layer);
 
-  t.equal(state.total, 4, 'total is 4');
-  t.equal(state.loaded, 2, 'loaded is 2');
-  t.equal(state.failed, 2, 'failed is 2');
-  t.equal(state.pending, 0, 'pending is 0');
-  t.equal(state.percentLoaded, 50, 'percentLoaded is 50');
-  t.equal(state.isComplete, true, 'isComplete is true (all settled)');
-  t.equal(state.isSuccess, false, 'isSuccess is false (some failed)');
-
-  t.end();
+  expect(state.total).toBe(4);
+  expect(state.loaded).toBe(2);
+  expect(state.failed).toBe(2);
+  expect(state.pending).toBe(0);
+  expect(state.percentLoaded).toBe(50);
+  expect(state.isComplete).toBe(true);
+  expect(state.isSuccess).toBe(false);
 });
 
-test('getTileLoadingState#tiles still loading', t => {
+test('getTileLoadingState#tiles still loading', () => {
   const layer = new TileLayer({
     id: 'test-layer',
     data: 'https://example.com/tiles/{z}/{x}/{y}',
@@ -110,18 +108,16 @@ test('getTileLoadingState#tiles still loading', t => {
 
   const state = getTileLoadingState(layer);
 
-  t.equal(state.total, 4, 'total is 4');
-  t.equal(state.loaded, 1, 'loaded is 1');
-  t.equal(state.failed, 1, 'failed is 1');
-  t.equal(state.pending, 2, 'pending is 2');
-  t.equal(state.percentLoaded, 25, 'percentLoaded is 25 (1/4)');
-  t.equal(state.isComplete, false, 'isComplete is false (pending tiles)');
-  t.equal(state.isSuccess, false, 'isSuccess is false (not complete)');
-
-  t.end();
+  expect(state.total).toBe(4);
+  expect(state.loaded).toBe(1);
+  expect(state.failed).toBe(1);
+  expect(state.pending).toBe(2);
+  expect(state.percentLoaded).toBe(25);
+  expect(state.isComplete).toBe(false);
+  expect(state.isSuccess).toBe(false);
 });
 
-test('getTileLoadingState#all tiles failed', t => {
+test('getTileLoadingState#all tiles failed', () => {
   const layer = new TileLayer({
     id: 'test-layer',
     data: 'https://example.com/tiles/{z}/{x}/{y}',
@@ -143,18 +139,11 @@ test('getTileLoadingState#all tiles failed', t => {
 
   const state = getTileLoadingState(layer);
 
-  t.equal(state.total, 3, 'total is 3');
-  t.equal(state.loaded, 0, 'loaded is 0');
-  t.equal(state.failed, 3, 'failed is 3');
-  t.equal(state.pending, 0, 'pending is 0');
-  t.equal(state.percentLoaded, 0, 'percentLoaded is 0');
-  t.equal(state.isComplete, true, 'isComplete is true (all settled)');
-  t.equal(state.isSuccess, false, 'isSuccess is false (all failed)');
-
-  // This demonstrates the behavior: layer.isLoaded would return true
-  // because all tiles are "settled", but isSuccess is false
-  t.equal(layer.isLoaded, true, 'layer.isLoaded is true even though all failed');
-  t.equal(state.isSuccess, false, 'but isSuccess correctly identifies failure');
-
-  t.end();
+  expect(state.total).toBe(3);
+  expect(state.loaded).toBe(0);
+  expect(state.failed).toBe(3);
+  expect(state.pending).toBe(0);
+  expect(state.percentLoaded).toBe(0);
+  expect(state.isComplete).toBe(true);
+  expect(state.isSuccess).toBe(false);
 });

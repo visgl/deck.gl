@@ -1,3 +1,7 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {TileLayer} from './tile-layer';
 import type {Tile2DHeader} from '../tileset-2d/tile-2d-header';
 
