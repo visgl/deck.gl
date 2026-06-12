@@ -607,42 +607,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return redraw;
   }
 
-  /**
-   * Check if there are any active transitions (viewport or layer uniform transitions).
-   * Useful for determining when the scene is "settled" for frame capture.
-   *
-   * @returns true if any viewport or layer uniform transitions are active
-   *
-   * @example
-   * ```typescript
-   * // Wait for all transitions to complete before capturing
-   * function waitForSettled(deck: Deck): Promise<void> {
-   *   return new Promise(resolve => {
-   *     function check() {
-   *       if (!deck.hasActiveTransitions()) {
-   *         resolve();
-   *       } else {
-   *         requestAnimationFrame(check);
-   *       }
-   *     }
-   *     check();
-   *   });
-   * }
-   * ```
-   */
+  /** Returns true if any viewport or layer uniform transitions are currently active. */
   hasActiveTransitions(): boolean {
     if (!this.layerManager || !this.viewManager) {
       return false;
     }
-
-    // Check for viewport transitions
-    const viewports = this.viewManager.getViewports();
-    const hasViewportTransition = viewports.some(vp => (vp as any).isTransitioning);
-
-    // Check for layer uniform transitions
-    const layers = this.layerManager.getLayers();
-    const hasLayerTransition = layers.some(layer => layer.hasUniformTransition?.());
-
+    const hasViewportTransition = Object.values(this.viewManager.controllers).some(
+      controller => controller && (controller as any).transitionManager?.transition?.inProgress
+    );
+    const hasLayerTransition = this.layerManager
+      .getLayers()
+      .some(layer => layer.hasUniformTransition());
     return hasViewportTransition || hasLayerTransition;
   }
 
