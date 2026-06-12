@@ -28,6 +28,8 @@ export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
 export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';
 export type {S2LayerProps} from './s2-layer/s2-layer';
 export type {TileLayerProps, TileLayerPickingInfo} from './tile-layer/tile-layer';
+export type {TileLoadingState} from './tile-layer/get-tile-loading-state';
+export {getTileLoadingState} from './tile-layer/get-tile-loading-state';
 export type {TripsLayerProps} from './trips-layer/trips-layer';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
