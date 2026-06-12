@@ -206,8 +206,14 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Called just before the canvas rerenders. */
   onBeforeRender?: (context: {device: Device; gl: WebGL2RenderingContext}) => void;
-  /** Called right after the canvas rerenders. */
-  onAfterRender?: (context: {device: Device; gl: WebGL2RenderingContext}) => void;
+  /** Called right after the canvas rerenders.
+   * @param context.pass - The render pass type: 'screen' for main render, 'picking' for mouse picking, 'shadow' for shadow maps, etc.
+   */
+  onAfterRender?: (context: {
+    device: Device;
+    gl: WebGL2RenderingContext;
+    pass: string;
+  }) => void;
   /** Called once after gl context and all Deck components are created. */
   onLoad?: () => void;
   /** Called if deck.gl encounters an error.
@@ -599,6 +605,45 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       effectManagerNeedsRedraw ||
       deckRendererNeedsRedraw;
     return redraw;
+  }
+
+  /**
+   * Check if there are any active transitions (viewport or layer uniform transitions).
+   * Useful for determining when the scene is "settled" for frame capture.
+   *
+   * @returns true if any viewport or layer uniform transitions are active
+   *
+   * @example
+   * ```typescript
+   * // Wait for all transitions to complete before capturing
+   * function waitForSettled(deck: Deck): Promise<void> {
+   *   return new Promise(resolve => {
+   *     function check() {
+   *       if (!deck.hasActiveTransitions()) {
+   *         resolve();
+   *       } else {
+   *         requestAnimationFrame(check);
+   *       }
+   *     }
+   *     check();
+   *   });
+   * }
+   * ```
+   */
+  hasActiveTransitions(): boolean {
+    if (!this.layerManager || !this.viewManager) {
+      return false;
+    }
+
+    // Check for viewport transitions
+    const viewports = this.viewManager.getViewports();
+    const hasViewportTransition = viewports.some(vp => (vp as any).isTransitioning);
+
+    // Check for layer uniform transitions
+    const layers = this.layerManager.getLayers();
+    const hasLayerTransition = layers.some(layer => layer.hasUniformTransition?.());
+
+    return hasViewportTransition || hasLayerTransition;
   }
 
   /**
@@ -1491,7 +1536,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       });
     }
 
-    this.props.onAfterRender({device, gl});
+    this.props.onAfterRender({device, gl, pass: opts.pass});
   }
 
   // Callbacks
