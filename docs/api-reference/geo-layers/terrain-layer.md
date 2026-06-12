@@ -151,13 +151,50 @@ When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. F
 
 ### Data Options
 
-#### `elevationData` (string | string[], required) {#elevationdata}
+#### `elevationData` (string | string[], optional) {#elevationdata}
 
 Image URL that encodes height data.
+
+Required unless `_terrainTileset` is supplied.
 
 - If the value is a valid URL, this layer will render a single mesh.
 - If the value is a string, and contains substrings `{x}` and `{y}`, it is considered a URL template. This layer will render a `TileLayer` of meshes. `{x}` `{y}` and `{z}` will be replaced with a tile's actual index when it is requested.
 - If the value is an array: multiple URL templates. See `TileLayer`'s `data` prop documentation for use cases.
+
+#### `_terrainTileset` (`_SharedTileset2D<_TerrainTileData>`, experimental) {#terraintileset}
+
+Caller-owned shared terrain tile cache for tiled mode. When supplied, `TerrainLayer` renders the shared payload through `_SharedTile2DLayer` instead of creating its own `TileLayer`.
+
+Use `_TerrainSource` to load projection-independent terrain payloads into `_SharedTileset2D`, then pass the same tileset to each `TerrainLayer` that should reuse those payloads:
+
+```ts
+import {
+  TerrainLayer,
+  _SharedTileset2D as SharedTileset2D,
+  _TerrainSource as TerrainSource,
+  sharedTile2DDeckAdapter
+} from '@deck.gl/geo-layers';
+
+const terrainSource = new TerrainSource({
+  elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
+  texture: 'https://example.com/texture/{z}/{x}/{y}.png',
+  meshMaxError: 4
+});
+const terrainTileset = SharedTileset2D.fromTileSource(terrainSource, {
+  adapter: sharedTile2DDeckAdapter,
+  minZoom: 0,
+  maxZoom: 14
+});
+
+const layers = [
+  new TerrainLayer({id: 'terrain-a', _terrainTileset: terrainTileset}),
+  new TerrainLayer({id: 'terrain-b', _terrainTileset: terrainTileset, wireframe: true})
+];
+```
+
+The shared source owns elevation, texture, decoder, mesh, loader, and load option props. The shared tileset owns tile traversal and cache options. Individual `TerrainLayer` instances keep render props such as `color`, `wireframe`, `material`, and `operation`. The owner should call `terrainTileset.finalize()` when the cache is no longer needed.
+
+The base tile payload is projection-independent. Each terrain layer asks the shared payload for the mesh variant needed by its active view; MapView and GlobeView variants are cached on the shared tile data and reused by later terrain layers using the same projection.
 
 
 #### `texture` (string | null, optional) {#texture}
@@ -260,7 +297,7 @@ Forwarded to `SimpleMeshLayer`'s `material` prop.
 
 The `TerrainLayer` renders the following sublayers:
 
-* `tiles` - a [TileLayer](./tile-layer.md). Only rendered if `elevationData` is a URL template.
+* `tiles` - a [TileLayer](./tile-layer.md) when `elevationData` is a URL template, or an experimental [_SharedTile2DLayer](./shared-tile-2d-layer.md) when `_terrainTileset` is supplied.
 * `mesh` - a [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md) rendering the terrain mesh.
 
 

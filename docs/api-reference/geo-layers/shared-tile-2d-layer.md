@@ -1,6 +1,6 @@
 # SharedTile2DLayer (Experimental)
 
-`_SharedTile2DLayer` is an experimental composite layer for rendering 2D tiled data when multiple layer instances or viewports should reuse one tile-content cache. It is a parallel API to [`TileLayer`](./tile-layer.md), not a replacement for `TileLayer`, `MVTLayer`, or `TerrainLayer`.
+`_SharedTile2DLayer` is an experimental composite layer for rendering 2D tiled data when multiple layer instances or viewports should reuse one tile-content cache. It is a parallel API to [`TileLayer`](./tile-layer.md), not a replacement for `TileLayer` or `MVTLayer`. `TerrainLayer` can consume the same shared cache machinery through its experimental `_terrainTileset` prop.
 
 Use `_SharedTile2DLayer` when the same tiled payload should feed multiple views, such as a main map and minimap. The layer keeps selection and visibility state per viewport, while [`_SharedTileset2D`](./shared-tileset-2d.md) owns loading, request scheduling, cache eviction, stats, and TileSource metadata.
 

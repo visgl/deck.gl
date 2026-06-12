@@ -8,11 +8,13 @@ import {
   CompositeLayerProps,
   DefaultProps,
   Layer,
+  LayerProps,
   LayersList,
   log,
   Material,
   TextureSource,
   UpdateParameters,
+  type Viewport,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -28,17 +30,28 @@ import type {
   ZRange
 } from '../tileset-2d/index';
 import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
+import SharedTile2DLayer from '../shared-tile-2d-layer/shared-tile-2d-layer';
+import {SharedTile2DHeader, type SharedTileset2D} from '../shared-tileset-2d/index';
+import {
+  getEffectiveMeshMaxError,
+  getTerrainRenderMesh,
+  isTerrainTileData,
+  type ElevationDecoder,
+  type TerrainMesh,
+  type TerrainTileData
+} from './terrain-source';
 
 const DUMMY_DATA = [1];
 const TILE_OVERLAP_PIXELS = 1;
-const MIN_TERRAIN_MESH_MAX_ERROR = 1;
 const MAX_LATITUDE = 90;
 const MAX_LONGITUDE = 180;
 
 const defaultProps: DefaultProps<TerrainLayerProps> = {
   ...TileLayer.defaultProps,
   // Image url that encodes height data
-  elevationData: urlType,
+  elevationData: {...urlType, optional: true},
+  // Caller-owned shared terrain payload cache for tiled mode.
+  _terrainTileset: {type: 'object', value: null, optional: true},
   // Image url to use as texture
   texture: {...urlType, optional: true},
   // Martini error tolerance in meters, smaller number -> more detailed mesh
@@ -96,14 +109,6 @@ function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: bool
   ];
 }
 
-function getEffectiveMeshMaxError(meshMaxError: number): number {
-  if (!Number.isFinite(meshMaxError) || meshMaxError <= 0) {
-    return MIN_TERRAIN_MESH_MAX_ERROR;
-  }
-  return Math.max(meshMaxError, MIN_TERRAIN_MESH_MAX_ERROR);
-}
-
-type ElevationDecoder = {rScaler: number; gScaler: number; bScaler: number; offset: number};
 type TerrainLoadProps = {
   bounds: Bounds;
   elevationData: string | null;
@@ -112,9 +117,16 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
+type TerrainMeshData = TerrainMesh | MeshAttributes;
+type MeshAndTexture = [TerrainMeshData | null, TextureSource | null];
+type TerrainTileHeader = Tile2DHeader<MeshAndTexture> | SharedTile2DHeader<TerrainTileData>;
+type TerrainSubLayerProps = LayerProps & {
+  id: string;
+  data: MeshAndTexture | TerrainTileData;
+  tile: TerrainTileHeader;
+};
 type MeshBoundingBox = [min: number[], max: number[]];
-type MeshWithBoundingBox = MeshAttributes & {
+type MeshWithBoundingBox = TerrainMeshData & {
   header?: {
     boundingBox?: MeshBoundingBox;
   };
@@ -128,7 +140,10 @@ export type TerrainLayerProps = _TerrainLayerProps &
 /** Props added by the TerrainLayer */
 type _TerrainLayerProps = {
   /** Image url that encodes height data. **/
-  elevationData: URLTemplate;
+  elevationData?: URLTemplate;
+
+  /** Experimental caller-owned shared terrain tileset used by tiled mode. */
+  _terrainTileset?: SharedTileset2D<TerrainTileData, Viewport> | null;
 
   /** Image url to use as texture. **/
   texture?: URLTemplate;
@@ -172,10 +187,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   updateState({props, oldProps}: UpdateParameters<this>): void {
     const elevationDataChanged = props.elevationData !== oldProps.elevationData;
-    if (elevationDataChanged) {
+    const terrainTilesetChanged = props._terrainTileset !== oldProps._terrainTileset;
+    if (elevationDataChanged || terrainTilesetChanged) {
       const {elevationData} = props;
-      const isTiled =
-        elevationData && (Array.isArray(elevationData) || isTileSetURL(elevationData));
+      const isTiled = isTiledTerrainData(elevationData, props._terrainTileset);
       this.setState({isTiled});
     }
 
@@ -205,7 +220,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     elevationDecoder,
     meshMaxError,
     signal
-  }: TerrainLoadProps): Promise<MeshAttributes> | null {
+  }: TerrainLoadProps): Promise<TerrainMeshData> | null {
     if (!elevationData) {
       return null;
     }
@@ -227,28 +242,11 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   getTiledTerrainData(tile: TileLoadProps): Promise<MeshAndTexture> {
     const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
-    const {viewport} = this.context;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = texture && getURLFromTemplate(texture, tile);
 
     const {signal} = tile;
-    let bottomLeft = [0, 0] as [number, number];
-    let topRight = [0, 0] as [number, number];
-    if (viewport.isGeospatial) {
-      const bbox = tile.bbox as GeoBoundingBox;
-      bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
-      topRight = viewport.projectFlat([bbox.east, bbox.north]);
-    } else {
-      const bbox = tile.bbox as Exclude<TileBoundingBox, GeoBoundingBox>;
-      bottomLeft = [bbox.left, bbox.bottom];
-      topRight = [bbox.right, bbox.top];
-    }
-    const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-    const overlappedBounds = getOverlappedBounds(
-      bounds,
-      this.props.tileSize,
-      viewport instanceof GlobeViewport
-    );
+    const overlappedBounds = this.getTiledTerrainBounds(tile, this.props.tileSize);
 
     const terrain = this.loadTerrain({
       elevationData: dataUrl,
@@ -265,13 +263,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     return Promise.all([terrain, surface]);
   }
 
-  renderSubLayers(
-    props: TileLayerProps<MeshAndTexture> & {
-      id: string;
-      data: MeshAndTexture;
-      tile: Tile2DHeader<MeshAndTexture>;
-    }
-  ) {
+  renderSubLayers(props: TerrainSubLayerProps) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
 
     const {color, wireframe, material} = this.props;
@@ -281,7 +273,9 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       return null;
     }
 
-    const [mesh, texture] = data;
+    const [mesh, texture] = isTerrainTileData(data)
+      ? this.getSharedTerrainTileData(data, props.tile)
+      : data;
 
     const {viewport} = this.context;
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
@@ -312,20 +306,23 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
   }
 
   // Update zRange of viewport
-  onViewportLoad(tiles?: Tile2DHeader<MeshAndTexture>[]): void {
+  onViewportLoad(tiles?: TerrainTileHeader[]): void {
     if (!tiles) {
       return;
     }
 
     const {zRange} = this.state;
     const ranges = tiles
-      .map(tile => tile.content)
+      .map(tile => getTerrainContentMesh(tile.content))
       .filter(Boolean)
-      .map(arr => {
-        // @ts-ignore
-        const bounds = arr[0].header.boundingBox;
+      .map(mesh => {
+        const bounds = (mesh as MeshWithBoundingBox).header?.boundingBox;
+        if (!bounds) {
+          return null;
+        }
         return bounds.map(bound => bound[2]);
-      });
+      })
+      .filter(Boolean) as number[][];
     if (ranges.length === 0) {
       return;
     }
@@ -356,10 +353,36 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy
+      refinementStrategy,
+      _terrainTileset
     } = this.props;
 
     if (this.state.isTiled) {
+      if (_terrainTileset) {
+        return new SharedTile2DLayer<TerrainTileData>(
+          this.getSubLayerProps({
+            id: 'tiles'
+          }),
+          {
+            data: _terrainTileset,
+            renderSubLayers: this.renderSubLayers.bind(this) as any,
+            updateTriggers: {
+              renderSubLayers: {
+                color,
+                wireframe,
+                material,
+                projectionMode: this.context.viewport.projectionMode
+              }
+            },
+            onViewportLoad: this.onViewportLoad.bind(this) as any,
+            zRange: this.state.zRange || null,
+            onTileLoad: onTileLoad as any,
+            onTileUnload: onTileUnload as any,
+            onTileError: onTileError as any
+          }
+        );
+      }
+
       return new TileLayer<MeshAndTexture>(
         this.getSubLayerProps({
           id: 'tiles'
@@ -414,7 +437,64 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       }
     );
   }
+
+  private getSharedTerrainTileData(data: TerrainTileData, tile: TerrainTileHeader): MeshAndTexture {
+    const {mesh, isNew} = getTerrainRenderMesh(
+      data,
+      getTerrainProjectionKey(this.context.viewport),
+      this.getTiledTerrainBounds(tile, this.props._terrainTileset?.tileSize ?? this.props.tileSize)
+    );
+
+    if (isNew && this.props._terrainTileset && tile instanceof SharedTile2DHeader) {
+      this.props._terrainTileset.notifyTileContentChanged(tile);
+    }
+
+    return [mesh, data.texture];
+  }
+
+  private getTiledTerrainBounds(tile: TileLoadProps | TerrainTileHeader, tileSize: number): Bounds {
+    const {viewport} = this.context;
+    let bottomLeft = [0, 0] as [number, number];
+    let topRight = [0, 0] as [number, number];
+    if (viewport.isGeospatial) {
+      const bbox = tile.bbox as GeoBoundingBox;
+      bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
+      topRight = viewport.projectFlat([bbox.east, bbox.north]);
+    } else {
+      const bbox = tile.bbox as Exclude<TileBoundingBox, GeoBoundingBox>;
+      bottomLeft = [bbox.left, bbox.bottom];
+      topRight = [bbox.right, bbox.top];
+    }
+    const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
+    return getOverlappedBounds(bounds, tileSize, viewport instanceof GlobeViewport);
+  }
 }
 
 const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
+
+function isTiledTerrainData(
+  elevationData: URLTemplate,
+  terrainTileset: SharedTileset2D<TerrainTileData, Viewport> | null
+): boolean {
+  return Boolean(
+    terrainTileset ||
+      (elevationData && (Array.isArray(elevationData) || isTileSetURL(elevationData)))
+  );
+}
+
+function getTerrainContentMesh(
+  content: MeshAndTexture | TerrainTileData | null
+): TerrainMeshData | null {
+  if (!content) {
+    return null;
+  }
+  return isTerrainTileData(content) ? content.mesh : content[0];
+}
+
+function getTerrainProjectionKey(viewport: Viewport): string {
+  if (viewport instanceof GlobeViewport) {
+    return 'globe';
+  }
+  return viewport.isGeospatial ? 'web-mercator' : 'cartesian';
+}
