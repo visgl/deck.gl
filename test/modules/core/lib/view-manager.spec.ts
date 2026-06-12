@@ -318,6 +318,15 @@ test('ViewManager#multi-canvas layout', () => {
     viewManager.getViewport('left')
   ]);
 
+  const viewports = viewManager.getViewports();
+  viewManager.setProps({
+    canvasMetrics: {
+      'left-canvas': {width: 200, height: 100},
+      'right-canvas': {width: 120, height: 180}
+    }
+  });
+  expect(viewManager.getViewports()).toBe(viewports);
+
   viewManager.finalize();
   leftEventManager.destroy();
   rightEventManager.destroy();

@@ -221,7 +221,9 @@ export default class ViewManager<ViewsT extends View[]> {
   /** Return the presentation canvas id assigned to a view. */
   getCanvasId(viewOrViewId: string | View): string | undefined {
     const view = typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
-    return view ? this._viewEventManagers[view.id]?.canvasId || this._resolveCanvasId(view) : undefined;
+    return view
+      ? this._viewEventManagers[view.id]?.canvasId || this._resolveCanvasId(view)
+      : undefined;
   }
 
   /**
@@ -343,7 +345,7 @@ export default class ViewManager<ViewsT extends View[]> {
   }
 
   private _setCanvasMetrics(canvasMetrics: Record<string, {width: number; height: number}>): void {
-    if (!deepEqual(canvasMetrics, this._canvasMetrics, 1)) {
+    if (!deepEqual(canvasMetrics, this._canvasMetrics, 2)) {
       this._canvasMetrics = canvasMetrics;
       this.setNeedsUpdate('canvasMetrics changed');
     }

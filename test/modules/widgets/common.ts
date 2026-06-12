@@ -50,7 +50,9 @@ export class WidgetTester<ViewsT extends ViewOrViews = null> {
   idle(): Promise<void> {
     return new Promise<void>(res => {
       const timer = setInterval(() => {
-        if (!this.deck?.needsRedraw({clearRedrawFlags: false})) {
+        // @ts-expect-error testing protected state
+        const layerManagerNeedsUpdate = this.deck?.layerManager?.needsUpdate();
+        if (!this.deck?.needsRedraw({clearRedrawFlags: false}) && !layerManagerNeedsUpdate) {
           res();
           clearInterval(timer);
         }

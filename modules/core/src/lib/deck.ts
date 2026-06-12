@@ -1905,7 +1905,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       }
     }
 
-    this._updateCanvasSize();
+    if (this._isMultiCanvasMode()) {
+      this._updateCanvasMetrics();
+    }
 
     this._updateCursor();
 

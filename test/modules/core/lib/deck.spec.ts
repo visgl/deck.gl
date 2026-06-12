@@ -500,6 +500,14 @@ webglTest('Deck#multi-canvas presentation', async () => {
     'right'
   ]);
 
+  // @ts-expect-error testing private state
+  const eventManagers = deck.eventManagers;
+  const viewports = deck.getViewports();
+  deck.setProps({canvases: [canvasA, canvasB]});
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers).toBe(eventManagers);
+  expect(deck.getViewports()).toBe(viewports);
+
   deck.finalize();
   canvasA.remove();
   canvasB.remove();
