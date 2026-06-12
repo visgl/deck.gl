@@ -15,8 +15,7 @@ import {
   TileLayer,
   TripsLayer,
   TerrainLayer,
-  GeohashLayer,
-  getTileLoadingState
+  GeohashLayer
 } from '@deck.gl/geo-layers';
 
 test('Top-level imports', () => {
@@ -31,7 +30,6 @@ test('Top-level imports', () => {
   expect(TripsLayer, 'TripsLayer symbol imported').toBeTruthy();
   expect(TerrainLayer, 'TerrainLayer symbol imported').toBeTruthy();
   expect(GeohashLayer, 'GeohashLayer symbol imported').toBeTruthy();
-  expect(getTileLoadingState, 'getTileLoadingState symbol imported').toBeTruthy();
 });
 
 import './a5-layer.spec';

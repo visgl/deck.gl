@@ -473,6 +473,28 @@ const quadkeyTileLayer = new TileLayer({
 });
 ```
 
+## Methods
+
+### `getTileLoadingState()` {#gettileloadingstate}
+
+Returns granular loading counts for the tiles in the current viewport. Unlike `layer.isLoaded`, which is `true` once all tile requests settle (including failures), this method distinguishes between tiles that loaded successfully, failed, and are still pending.
+
+Returns a `TileLoadingState` object:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `total` | `number` | Total tiles in the current viewport |
+| `loaded` | `number` | Tiles that loaded successfully (have content) |
+| `failed` | `number` | Tiles that settled with no content (404, error, etc.) |
+| `pending` | `number` | Tiles still in flight |
+
+```ts
+import type {TileLoadingState} from '@deck.gl/geo-layers';
+
+const state: TileLoadingState = tileLayer.getTileLoadingState();
+console.log(`${state.loaded}/${state.total} tiles loaded, ${state.failed} failed`);
+```
+
 ## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
