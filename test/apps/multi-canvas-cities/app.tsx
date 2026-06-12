@@ -23,7 +23,12 @@ const CITY_PANELS = [
     landmarks: [
       {id: 'times-square', cityId: 'new-york', name: 'Times Square', position: [-73.9851, 40.758]},
       {id: 'central-park', cityId: 'new-york', name: 'Central Park', position: [-73.9712, 40.7831]},
-      {id: 'brooklyn-bridge', cityId: 'new-york', name: 'Brooklyn Bridge', position: [-73.9969, 40.7061]}
+      {
+        id: 'brooklyn-bridge',
+        cityId: 'new-york',
+        name: 'Brooklyn Bridge',
+        position: [-73.9969, 40.7061]
+      }
     ]
   },
   {
@@ -142,8 +147,8 @@ function App() {
           Four live city views, one Deck instance
         </h1>
         <p style={{margin: 0, maxWidth: 760, fontSize: 16, lineHeight: 1.5, opacity: 0.86}}>
-          Each panel has its own basemap, its own controller, and its own presentation canvas. Hover a landmark in
-          any city and the signal carries through the rest of the page.
+          Each panel has its own basemap, its own controller, and its own presentation canvas. Hover
+          a landmark in any city and the signal carries through the rest of the page.
         </p>
       </div>
 
@@ -162,7 +167,8 @@ function App() {
         <div>
           {hoveredLandmark ? (
             <strong>
-              {hoveredLandmark.name} in {CITY_PANELS.find(city => city.id === hoveredLandmark.cityId)?.title}
+              {hoveredLandmark.name} in{' '}
+              {CITY_PANELS.find(city => city.id === hoveredLandmark.cityId)?.title}
             </strong>
           ) : (
             <strong>Hover any highlighted landmark</strong>
@@ -203,7 +209,9 @@ function App() {
               }
             : null;
         }}
-        layerFilter={({layer, viewport}) => Boolean(viewport && layer.id.startsWith(`${viewport.id}-`))}
+        layerFilter={({layer, viewport}) =>
+          Boolean(viewport && layer.id.startsWith(`${viewport.id}-`))
+        }
         style={{
           position: 'relative',
           display: 'grid',
