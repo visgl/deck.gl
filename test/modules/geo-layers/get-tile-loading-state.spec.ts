@@ -5,10 +5,7 @@
 import {test, expect} from 'vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 
-const TEST_DATA = [
-  {position: [0, 0]},
-  {position: [1, 1]}
-];
+const TEST_DATA = [{position: [0, 0]}, {position: [1, 1]}];
 
 test('TileLayer#getTileLoadingState - empty layer', () => {
   const layer = new TileLayer({
