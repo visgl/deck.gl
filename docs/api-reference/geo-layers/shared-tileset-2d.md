@@ -35,7 +35,7 @@ import type {
 } from '@deck.gl/geo-layers';
 
 new SharedTileset2D<TileDataT, ViewStateT>(props: SharedTileset2DProps<TileDataT, ViewStateT>);
-SharedTileset2D.fromTileSource<TileDataT>(tileSource, props);
+SharedTileset2D.fromTileSource<TileDataT, ViewStateT>(tileSource, props);
 ```
 
 Provide either `getTileData` or `tileSource`. A shared tileset also needs an adapter before traversal is used. `_SharedTile2DLayer` installs `sharedTile2DDeckAdapter` automatically for deck.gl viewport traversal; applications constructing the tileset directly should usually pass that adapter themselves.
@@ -50,10 +50,11 @@ An external `_SharedTileset2D` can be passed to one or more `_SharedTile2DLayer`
 
 ## Runtime API
 
-- `tiles`, `selectedTiles`, `visibleTiles`, `loadingTiles`, and `cacheByteSize` expose current shared cache state.
+- `tiles`, `selectedTiles`, `visibleTiles`, `loadingTiles`, `cacheByteSize`, and `tileSize` expose current shared cache state.
 - `stats` is a `@probe.gl/stats` `Stats` object with tile cache, visibility, loading, eviction, and consumer counters.
 - `setOptions()` updates effective tileset options. Pass `{replace: true}` as the second argument to replace prior caller options instead of merging them.
 - `reloadAll()` marks selected tiles stale and drops unselected cached tiles.
+- `notifyTileContentChanged(tile)` recomputes cache bytes after a retained payload mutates in place, for example when `TerrainLayer` adds a shared projection mesh variant.
 - `subscribe()` listens for tile load, tile error, tile unload, metadata/config update, metadata error, and stats change events.
 - `finalize()` aborts in-flight requests and clears the shared cache.
 

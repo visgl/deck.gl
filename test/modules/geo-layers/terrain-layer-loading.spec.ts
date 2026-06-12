@@ -3,8 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {COORDINATE_SYSTEM, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
-import {TerrainLayer} from '@deck.gl/geo-layers';
+import {COORDINATE_SYSTEM, MapView, _GlobeView as GlobeView, type Viewport} from '@deck.gl/core';
+import {
+  TerrainLayer,
+  _SharedTile2DLayer as SharedTile2DLayer,
+  _SharedTileset2D as SharedTileset2D,
+  _TerrainSource as TerrainSource,
+  sharedTile2DDeckAdapter
+} from '@deck.gl/geo-layers';
+import type {_TerrainTileData as TerrainTileData} from '@deck.gl/geo-layers';
 import {testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
 
@@ -53,6 +60,24 @@ function createTestMesh() {
 
 function createTestTexture() {
   return new ImageData(1, 1);
+}
+
+function createNormalizedTestTerrainMesh() {
+  return {
+    header: {
+      vertexCount: 3,
+      boundingBox: [
+        [0, 0, 0],
+        [1, 1, 2]
+      ]
+    },
+    mode: 4,
+    indices: {value: new Uint32Array([0, 1, 2]), size: 1},
+    attributes: {
+      POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 1, 0, 1, 2]), size: 3},
+      TEXCOORD_0: {value: new Float32Array([0, 0, 1, 0, 0, 1]), size: 2}
+    }
+  };
 }
 
 test('TerrainLayer#isLoaded waits for elevation and texture in single-terrain mode', async () => {
@@ -153,4 +178,91 @@ test('TerrainLayer renders tiled Martini meshes in lng/lat coordinates on GlobeV
     COORDINATE_SYSTEM.LNGLAT
   );
   handle?.finalize();
+});
+
+test('TerrainLayer shares terrain source payloads and projection meshes through _SharedTileset2D', async () => {
+  const fetchCalls: string[] = [];
+  let sourceTerrainBounds: number[] | undefined;
+  const source = new TerrainSource({
+    elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
+    fetch: (_url, {loadOptions, propName}) => {
+      fetchCalls.push(propName);
+      sourceTerrainBounds = loadOptions?.terrain?.bounds;
+      return Promise.resolve(createNormalizedTestTerrainMesh());
+    }
+  });
+  const terrainTileset = SharedTileset2D.fromTileSource<TerrainTileData, Viewport>(source, {
+    adapter: sharedTile2DDeckAdapter,
+    minZoom: 0,
+    maxZoom: 0
+  });
+  const handles: Array<{finalize: () => void} | undefined> = [];
+
+  try {
+    const mapLayer = new TerrainLayer({
+      id: 'shared-terrain-map-a',
+      _terrainTileset: terrainTileset,
+      color: [255, 0, 0]
+    });
+    handles.push(
+      await testInitializeLayerAsync({
+        layer: mapLayer,
+        viewport: TEST_VIEWPORT,
+        finalize: false
+      })
+    );
+
+    const mapTileLayer = mapLayer.getSubLayers()[0];
+    expect(mapTileLayer).toBeInstanceOf(SharedTile2DLayer);
+    const mapMeshLayer = mapTileLayer.getSubLayers()[0];
+    const tileData = terrainTileset.tiles[0].content!;
+    const mapMesh = mapMeshLayer.props.mesh;
+
+    expect(fetchCalls).toEqual(['elevationData']);
+    expect(sourceTerrainBounds).toEqual([0, 0, 1, 1]);
+    expect(tileData.renderMeshes.size).toBe(1);
+    expect(terrainTileset.cacheByteSize).toBe(tileData.byteLength);
+
+    const secondMapLayer = new TerrainLayer({
+      id: 'shared-terrain-map-b',
+      _terrainTileset: terrainTileset,
+      color: [0, 255, 0]
+    });
+    handles.push(
+      await testInitializeLayerAsync({
+        layer: secondMapLayer,
+        viewport: TEST_VIEWPORT,
+        finalize: false
+      })
+    );
+
+    const secondMapMeshLayer = secondMapLayer.getSubLayers()[0].getSubLayers()[0];
+    expect(fetchCalls).toEqual(['elevationData']);
+    expect(secondMapMeshLayer.props.mesh).toBe(mapMesh);
+    expect(secondMapMeshLayer.props.getColor).toEqual([0, 255, 0]);
+
+    const globeLayer = new TerrainLayer({
+      id: 'shared-terrain-globe',
+      _terrainTileset: terrainTileset
+    });
+    handles.push(
+      await testInitializeLayerAsync({
+        layer: globeLayer,
+        viewport: TEST_GLOBE_VIEWPORT,
+        finalize: false
+      })
+    );
+
+    const globeMeshLayer = globeLayer.getSubLayers()[0].getSubLayers()[0];
+    expect(fetchCalls).toEqual(['elevationData']);
+    expect(globeMeshLayer.props.mesh).not.toBe(mapMesh);
+    expect(globeMeshLayer.props.coordinateSystem).toBe(COORDINATE_SYSTEM.LNGLAT);
+    expect(tileData.renderMeshes.size).toBe(2);
+    expect(terrainTileset.cacheByteSize).toBe(tileData.byteLength);
+  } finally {
+    for (const handle of handles) {
+      handle?.finalize();
+    }
+    terrainTileset.finalize();
+  }
 });

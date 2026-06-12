@@ -15,6 +15,7 @@ import {
   _SharedTile2DHeader as SharedTile2DHeader,
   _SharedTile2DLayer as SharedTile2DLayer,
   _SharedTileset2D as SharedTileset2D,
+  _TerrainSource as TerrainSource,
   TileLayer,
   TripsLayer,
   TerrainLayer,
@@ -32,6 +33,7 @@ test('Top-level imports', () => {
   expect(SharedTile2DLayer, 'SharedTile2DLayer symbol imported').toBeTruthy();
   expect(SharedTileset2D, 'SharedTileset2D symbol imported').toBeTruthy();
   expect(SharedTile2DHeader, 'SharedTile2DHeader symbol imported').toBeTruthy();
+  expect(TerrainSource, 'TerrainSource symbol imported').toBeTruthy();
   expect(WMSLayer, 'WMSLayer symbol imported').toBeTruthy();
   expect(TripsLayer, 'TripsLayer symbol imported').toBeTruthy();
   expect(TerrainLayer, 'TerrainLayer symbol imported').toBeTruthy();

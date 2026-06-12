@@ -174,11 +174,11 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
   }
 
   /** Convenience factory for wrapping a loaders.gl `TileSource`. */
-  static fromTileSource<DataT = any>(
+  static fromTileSource<DataT = any, ViewStateT = unknown>(
     tileSource: TileSource,
-    opts: Omit<SharedTileset2DProps<DataT>, 'tileSource' | 'getTileData'> = {}
-  ): SharedTileset2D<DataT> {
-    return new SharedTileset2D<DataT>({...opts, tileSource});
+    opts: Omit<SharedTileset2DProps<DataT, ViewStateT>, 'tileSource' | 'getTileData'> = {}
+  ): SharedTileset2D<DataT, ViewStateT> {
+    return new SharedTileset2D<DataT, ViewStateT>({...opts, tileSource});
   }
 
   /** All tiles currently present in the shared cache. */
@@ -218,6 +218,11 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
   /** Minimum resolved zoom level after applying metadata and explicit options. */
   get minZoom(): number | undefined {
     return this._minZoom;
+  }
+
+  /** Pixel dimension used by the shared tile index and tile payloads. */
+  get tileSize(): number {
+    return this.opts.tileSize;
   }
 
   /** Active refinement strategy for placeholder handling. */
@@ -325,6 +330,17 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     this._cacheByteSize = this._getCacheByteSize();
     this._dirty = true;
     this.prepareTiles();
+    this._updateStats();
+  }
+
+  /** Recomputes retained bytes after a cached tile payload mutates in place. */
+  notifyTileContentChanged(tile: SharedTile2DHeader<DataT>): void {
+    if (this._cache.get(tile.id) !== tile) {
+      return;
+    }
+    this._cacheByteSize = this._getCacheByteSize();
+    this._resizeCache();
+    this._notifyUpdate();
     this._updateStats();
   }
 
