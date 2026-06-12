@@ -31,6 +31,7 @@ export default class CanvasManager {
   private _createEventManager: (root: HTMLElement) => EventManager;
   private _targets: Record<string, CanvasTarget> = {};
   private _order: string[] = [];
+  private _eventManagers: Record<string, EventManager> = {};
   private _eventRootToCanvasId = new WeakMap<HTMLElement, string>();
 
   constructor(props: {createEventManager: (root: HTMLElement) => EventManager}) {
@@ -64,9 +65,7 @@ export default class CanvasManager {
 
   /** Event managers keyed by canvas id. */
   get eventManagers(): Record<string, EventManager> {
-    return Object.fromEntries(
-      Object.entries(this._targets).map(([id, target]) => [id, target.eventManager])
-    );
+    return this._eventManagers;
   }
 
   /** Destroy all presentation contexts and event managers. */
@@ -77,6 +76,7 @@ export default class CanvasManager {
     }
     this._targets = {};
     this._order = [];
+    this._eventManagers = {};
     this._eventRootToCanvasId = new WeakMap();
   }
 
@@ -132,6 +132,12 @@ export default class CanvasManager {
 
     this._targets = nextTargets;
     this._order = nextOrder;
+    const nextEventManagers = Object.fromEntries(
+      Object.entries(nextTargets).map(([id, target]) => [id, target.eventManager])
+    );
+    if (!this._haveSameEventManagers(nextEventManagers)) {
+      this._eventManagers = nextEventManagers;
+    }
   }
 
   /** Resolve the presentation canvas id that produced a DOM event. */
@@ -185,5 +191,14 @@ export default class CanvasManager {
   private _getCanvasEventRoot(canvas: HTMLCanvasElement): HTMLElement {
     const eventRoot = canvas.parentElement;
     return eventRoot?.dataset.deckCanvasRoot === 'true' ? eventRoot : canvas;
+  }
+
+  private _haveSameEventManagers(eventManagers: Record<string, EventManager>): boolean {
+    const eventManagerIds = Object.keys(eventManagers);
+    const previousEventManagerIds = Object.keys(this._eventManagers);
+    return (
+      eventManagerIds.length === previousEventManagerIds.length &&
+      eventManagerIds.every(id => eventManagers[id] === this._eventManagers[id])
+    );
   }
 }
