@@ -214,6 +214,19 @@ Returns an array of timestamps, one for each navigation point in the geometry re
 Because timestamps are stored as 32-bit floating numbers, raw unix epoch time can not be used. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
 
 
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, trails may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure trails are visible from both sides, set:
+
+```js
+new TripsLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
+```
+
 # Source
 
 [modules/geo-layers/src/trips-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/trips-layer)

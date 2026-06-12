@@ -261,6 +261,19 @@ Multiplier of layer height. `0` will make the layer flat.
 Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
 In degrees, can be positive or negative (`-90 to +90`).
 
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, arcs may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure arcs are visible from both sides, set:
+
+```js
+new ArcLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
+```
+
 ## Source
 
 [modules/layers/src/arc-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/arc-layer)
