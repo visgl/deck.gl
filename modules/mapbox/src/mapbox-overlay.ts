@@ -114,7 +114,6 @@ export default class MapboxOverlay implements IControl {
           ...(typeof this._props.deviceProps?.createCanvasContext === 'object'
             ? this._props.deviceProps.createCanvasContext
             : undefined),
-          // @ts-expect-error pixelSizeSource available in luma.gl >9.3.3 (visgl/luma.gl#2588)
           pixelSizeSource: 'css-dpr'
         }
       },
