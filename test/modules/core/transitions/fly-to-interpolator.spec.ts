@@ -4,7 +4,9 @@
 
 import {test, expect} from 'vitest';
 import FlyToInterpolator from '@deck.gl/core/transitions/fly-to-interpolator';
+import GlobeViewport, {zoomAdjust} from '@deck.gl/core/viewports/globe-viewport';
 import {toLowPrecision} from '@deck.gl/test-utils/vitest';
+import {flyToViewport} from '@math.gl/web-mercator';
 
 const START_PROPS = {
   width: 800,
@@ -147,6 +149,73 @@ test('ViewportFlyToInterpolator#interpolateProps', () => {
       ).toEqual(testCase.transition[time]);
     });
   });
+});
+
+test('ViewportFlyToInterpolator follows great-circle path for GlobeViewport', () => {
+  const interpolator = new FlyToInterpolator({
+    makeViewport: props => new GlobeViewport(props)
+  });
+  const midpoint = interpolator.interpolateProps(
+    {
+      width: 1000,
+      height: 800,
+      longitude: 179,
+      latitude: 0,
+      zoom: 4,
+      bearing: 0,
+      pitch: 0
+    },
+    {
+      width: 1000,
+      height: 800,
+      longitude: -179,
+      latitude: 0,
+      zoom: 4,
+      bearing: 0,
+      pitch: 0
+    },
+    0.5
+  );
+
+  expect(
+    Math.abs(Math.abs(midpoint.longitude) - 180),
+    'antimeridian flight should not travel back through Greenwich'
+  ).toBeLessThan(1e-6);
+  expect(midpoint.latitude).toBeCloseTo(0);
+});
+
+test('ViewportFlyToInterpolator preserves GlobeViewport scale', () => {
+  const interpolator = new FlyToInterpolator({
+    makeViewport: props => new GlobeViewport(props)
+  });
+  const start = {
+    width: 1000,
+    height: 800,
+    longitude: 0,
+    latitude: 0,
+    zoom: 4,
+    bearing: 0,
+    pitch: 0
+  };
+  const end = {
+    width: 1000,
+    height: 800,
+    longitude: 25,
+    latitude: 60,
+    zoom: 6,
+    bearing: 30,
+    pitch: 50
+  };
+  const midpoint = interpolator.interpolateProps(start, end, 0.5);
+  const flyTo = flyToViewport(start, end, 0.5, {speed: 1.2, curve: 1.414});
+  const expectedScaleZoom = flyTo.zoom - zoomAdjust(flyTo.latitude, true);
+
+  expect(
+    midpoint.zoom - zoomAdjust(midpoint.latitude, true),
+    'zoom follows the FlyTo curve while staying continuous in globe scale space'
+  ).toBeCloseTo(expectedScaleZoom);
+  expect(midpoint.bearing).toBeCloseTo(15);
+  expect(midpoint.pitch).toBeCloseTo(25);
 });
 
 test('ViewportFlyToInterpolator#getDuration', () => {

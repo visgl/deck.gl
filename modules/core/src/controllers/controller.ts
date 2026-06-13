@@ -5,6 +5,7 @@
 /* eslint-disable max-statements, complexity */
 import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
+import FlyToInterpolator from '../transitions/fly-to-interpolator';
 import {IViewState} from './view-state';
 import {ConstructorOf} from '../types/types';
 import {deepEqual} from '../utils/deep-equal';
@@ -1033,15 +1034,27 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     // Enables Transitions on double-click/tap and key-down events.
-    return opts
-      ? {
+    if (opts) {
+      return {
         ...transition,
         transitionInterpolator: new LinearInterpolator({
           ...opts,
           ...(transition.transitionInterpolator as LinearInterpolator).opts,
           makeViewport: this.controllerState.makeViewport
         })
-      }
-      : transition;
+      };
+    }
+
+    if (transition.transitionInterpolator instanceof FlyToInterpolator) {
+      return {
+        ...transition,
+        transitionInterpolator: new FlyToInterpolator({
+          ...transition.transitionInterpolator.opts,
+          makeViewport: this.controllerState.makeViewport
+        })
+      };
+    }
+
+    return transition;
   }
 }
