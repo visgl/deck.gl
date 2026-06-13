@@ -141,7 +141,7 @@ class Root extends PureComponent {
       ],
       getRadius: p => 2,
       getColor: p => [255, 0, 128, 196],
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       // there's a bug that the radius calculated with project_scale
       radiusMinPixels: 2
     });
@@ -172,7 +172,7 @@ class Root extends PureComponent {
         p.radius * Math.cos(p.theta * DEGREE_TO_RADIAN) * size,
         p.radius * Math.sin(p.theta * DEGREE_TO_RADIAN) * size
       ],
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       cellSize: 20,
       contours: this._getContours(bandsOn),
       gpuAggregation: true

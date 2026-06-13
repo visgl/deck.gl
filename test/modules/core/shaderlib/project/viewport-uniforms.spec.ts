@@ -171,19 +171,6 @@ test('project#getUniforms rejects legacy numeric coordinate systems', () => {
   ).toThrow(/Invalid coordinateSystem/);
 });
 
-test('project#getUniforms normalizes IDENTITY to CARTESIAN', () => {
-  const cartesian = project.getUniforms({
-    viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
-  });
-  const identity = project.getUniforms({
-    viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY
-  });
-
-  expect(identity, 'IDENTITY matches CARTESIAN').toEqual(cartesian);
-});
-
 test('project64#getUniforms', () => {
   const viewport = TEST_VIEWPORTS.map;
   const uniforms = project.getUniforms({viewport});

@@ -6,7 +6,7 @@ import {CompositeLayer, IconLayer, LineLayer, ScatterplotLayer, COORDINATE_SYSTE
 
 const defaultProps = {
   offset: {x: 0, y: 0},
-  coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
 
   getLinkPosition: link => ({
     sourcePosition: [link.source.x, link.source.y],

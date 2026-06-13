@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import log from '../utils/log';
 import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
@@ -51,16 +50,6 @@ export const COORDINATE_SYSTEM = {
    */
   CARTESIAN: 'cartesian'
 } as const;
-
-// Deprecated
-/* eslint-disable accessor-pairs */
-Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
-  get: () => {
-    log.deprecated('COORDINATE_SYSTEM.IDENTITY', 'COORDINATE_SYSTEM.CARTESIAN')();
-    return COORDINATE_SYSTEM.CARTESIAN;
-  }
-});
-/* eslint-enable accessor-pairs */
 
 /**
  * How coordinates are transformed from the world space into the common space.
