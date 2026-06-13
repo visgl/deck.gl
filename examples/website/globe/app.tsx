@@ -71,6 +71,7 @@ type DailyFlights = {
 
 export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
+  const [zoomAround, setZoomAround] = useState<'center' | 'pointer'>('center');
 
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
 
@@ -127,10 +128,23 @@ export default function App({data}: {data?: DailyFlights[]}) {
       <DeckGL
         views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
+        controller={{zoomAround}}
         effects={[lightingEffect]}
         layers={[backgroundLayers, dataLayers]}
       />
+      <div style={{position: 'absolute', top: 20, right: 20, zIndex: 1}}>
+        <label style={{color: '#fff', fontFamily: 'sans-serif', fontSize: 12}}>
+          Zoom anchor:{' '}
+          <select
+            value={zoomAround}
+            onChange={e => setZoomAround(e.target.value as 'center' | 'pointer')}
+            style={{fontSize: 12}}
+          >
+            <option value="center">Center</option>
+            <option value="pointer">Pointer</option>
+          </select>
+        </label>
+      </div>
       {data && (
         <RangeInput
           min={0}
