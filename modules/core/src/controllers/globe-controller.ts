@@ -175,7 +175,7 @@ class GlobeState extends MapState {
   }): MapState {
     const state = this.getState();
     const {startZoom} = state;
-    let {startZoomLngLat} = state;
+    const initialStartZoomLngLat = state.startZoomLngLat;
     const hasZoomStart = startZoom !== null && startZoom !== undefined;
     const startZoomValue = hasZoomStart ? startZoom : this.getViewportProps().zoom;
     const zoom = this._constrainZoom(startZoomValue + Math.log2(scale));
@@ -184,9 +184,10 @@ class GlobeState extends MapState {
       return this._getUpdatedState({zoom});
     }
 
-    if (!startZoomLngLat && !hasZoomStart) {
-      startZoomLngLat = this._unprojectZoomAnchor(startPos) || this._unprojectZoomAnchor(pos);
-    }
+    const startZoomLngLat =
+      initialStartZoomLngLat ??
+      this._unprojectZoomAnchor(startPos) ??
+      this._unprojectZoomAnchor(pos);
 
     if (!startZoomLngLat) {
       return this._getUpdatedState({zoom});
@@ -195,6 +196,7 @@ class GlobeState extends MapState {
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
     return this._getUpdatedState({
       zoom,
+      ...(hasZoomStart && !initialStartZoomLngLat ? {startZoomLngLat} : {}),
       ...this._panByZoomAnchor(zoomedViewport, startZoomLngLat, pos)
     });
   }
