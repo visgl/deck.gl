@@ -70,7 +70,7 @@ class GlobeState extends MapState {
     if (startPanCameraFrame !== undefined) s.startPanCameraFrame = startPanCameraFrame;
     if (startPanAngularRate !== undefined) s.startPanAngularRate = startPanAngularRate;
     if (startPanLockBearing !== undefined) s.startPanLockBearing = startPanLockBearing;
-    if (zoomAround !== undefined) s.zoomAround = zoomAround;
+    s.zoomAround = zoomAround || 'center';
   }
 
   panStart({pos}: {pos: [number, number]}): GlobeState {
