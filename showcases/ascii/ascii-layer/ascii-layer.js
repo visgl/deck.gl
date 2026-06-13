@@ -110,7 +110,7 @@ export default class AsciiLayer extends CompositeLayer {
 
     return new IconLayer({
       id: 'text',
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       data: grid,
       opacity: 1,
       iconAtlas,

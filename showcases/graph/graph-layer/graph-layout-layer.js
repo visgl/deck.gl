@@ -13,7 +13,7 @@ const defaultProps = {
   data: null,
   opacity: 1.0,
   layout: LayoutD3,
-  coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
   nodeIconAccessors: {}
 };
 

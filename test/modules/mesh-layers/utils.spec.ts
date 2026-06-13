@@ -16,8 +16,8 @@ test('shouldComposeModelMatrix', () => {
     'Should not composeModelMatrix for lnglat.'
   ).toBeFalsy();
   expect(
-    shouldComposeModelMatrix({}, COORDINATE_SYSTEM.IDENTITY),
-    'Should composeModelMatrix for identity.'
+    shouldComposeModelMatrix({}, COORDINATE_SYSTEM.CARTESIAN),
+    'Should composeModelMatrix for cartesian.'
   ).toBeTruthy();
   expect(
     shouldComposeModelMatrix({}, COORDINATE_SYSTEM.METER_OFFSETS),
