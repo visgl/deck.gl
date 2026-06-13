@@ -44,8 +44,9 @@ module.exports = function (
       // Load existing source maps
       _config.module.rules.push({
         test: /\/dist\/.+\.js$/,
-        enforce: "pre",
-        use: ["source-map-loader"],
+        exclude: /node_modules/,
+        enforce: 'pre',
+        use: ['source-map-loader']
       });
 
       const devtool = debug ? 'source-map' : false;

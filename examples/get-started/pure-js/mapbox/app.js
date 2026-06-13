@@ -4,6 +4,7 @@
 
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+// eslint-disable-next-line import/default
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 

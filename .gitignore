@@ -27,6 +27,8 @@ showcases/**/yarn.lock
 test/**/yarn.lock
 yarn-error.log
 package-lock.json
+.yarn/
+*/**/.yarn/
 
 .claude/
 .vscode/

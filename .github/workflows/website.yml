@@ -36,15 +36,15 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
 
       - name: Enable Corepack
-        run: corepack enable yarn
+        run: corepack enable
 
       - name: Install dependencies
         run: |
+          yarn install --immutable
           yarn bootstrap
-          (cd website && yarn)
+          (cd website && yarn install --immutable)
 
       - name: Build website
         env:

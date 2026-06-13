@@ -18,10 +18,10 @@ import Long from 'long';
  * Given an S2 token this function convert the token to 64 bit id
    https://github.com/google/s2-geometry-library-java/blob/c04b68bf3197a9c34082327eeb3aec7ab7c85da1/src/com/google/common/geometry/S2CellId.java#L439
  * */
-function getIdFromToken(token: string): number {
+function getIdFromToken(token: string): string {
   // pad token with zeros to make the length 16
   const paddedToken = token.padEnd(16, '0');
-  return Long.fromString(paddedToken, 16);
+  return Long.fromString(paddedToken, 16).toString();
 }
 
 const MAX_RESOLUTION = 100;
