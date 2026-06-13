@@ -6,7 +6,7 @@ import TransitionInterpolator from './transition-interpolator';
 import {lerp} from '@math.gl/core';
 
 import type Viewport from '../viewports/viewport';
-import GlobeViewport from '../viewports/globe-viewport';
+import GlobeViewport, {GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO} from '../viewports/globe-viewport';
 
 const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
@@ -83,11 +83,16 @@ export default class LinearInterpolator extends TransitionInterpolator {
         // GlobeViewport uses spherical anchoring: unproject the screen point
         // to a lng/lat on the globe and feed that to panByGlobeAnchor each
         // frame. If the click is off-globe, fall through to a plain LERP.
-        if (startViewport.isPointOnGlobe(around)) {
+        if (
+          startViewport.isPointOnGlobe(around, {
+            maxDistanceRatio: GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO
+          })
+        ) {
+          const endViewport = makeViewport(endProps);
           const aroundLngLat = startViewport.unproject(around);
           result.start.around = around;
           Object.assign(result.end, {
-            around,
+            around: endViewport.project(aroundLngLat),
             aroundLngLat,
             width: endProps.width,
             height: endProps.height
@@ -132,6 +137,11 @@ export default class LinearInterpolator extends TransitionInterpolator {
         Object.assign(
           propsInTransition,
           viewport.panByGlobeAnchor(endProps.aroundLngLat, anchorScreen)
+        );
+      } else if (endProps.aroundLngLat) {
+        Object.assign(
+          propsInTransition,
+          viewport.panByPosition(endProps.aroundLngLat, anchorScreen)
         );
       } else if (endProps.aroundPosition) {
         Object.assign(

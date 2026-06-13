@@ -3,7 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import GlobeViewport, {
+  GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO
+} from '@deck.gl/core/viewports/globe-viewport';
 import {equals, config} from '@math.gl/core';
 
 const TEST_VIEWPORTS = [
@@ -182,6 +184,41 @@ test('GlobeViewport#isPointOnGlobe', () => {
     'screen center intersects the globe'
   ).toBe(true);
   expect(viewport.isPointOnGlobe([0, 0]), 'corner misses the globe').toBe(false);
+});
+
+test('GlobeViewport#isPointOnGlobe supports a zoom anchor grace band', () => {
+  const viewport = new GlobeViewport({
+    width: 1280,
+    height: 720,
+    latitude: 20,
+    longitude: 30,
+    zoom: 0
+  });
+  const pixelNearLimb = [725, 360];
+
+  expect(
+    viewport.isPointOnGlobe(pixelNearLimb),
+    'pixel just outside the rendered globe misses the exact globe'
+  ).toBe(false);
+  expect(
+    viewport.isPointOnGlobe(pixelNearLimb, {
+      maxDistanceRatio: GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO
+    }),
+    'pixel just outside the rendered globe is accepted as a zoom anchor'
+  ).toBe(true);
+
+  const anchor = viewport.unproject(pixelNearLimb);
+  const zoomedViewport = new GlobeViewport({
+    width: 1280,
+    height: 720,
+    latitude: 20,
+    longitude: 30,
+    zoom: 1
+  });
+  const anchoredProps = zoomedViewport.panByGlobeAnchor(anchor, pixelNearLimb);
+  expect(anchoredProps.longitude, 'near-limb anchor adjusts longitude').not.toBeCloseTo(
+    zoomedViewport.longitude
+  );
 });
 
 test('GlobeViewport#getBounds', () => {

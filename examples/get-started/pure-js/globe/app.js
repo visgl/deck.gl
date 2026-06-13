@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
-
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {SolidPolygonLayer, GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
@@ -19,12 +17,10 @@ const INITIAL_VIEW_STATE = {
   zoom: 0
 };
 
-let zoomAround = 'center';
-
-const deckgl = new Deck({
+new Deck({
   views: new GlobeView(),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {zoomAround},
+  controller: true,
   layers: [
     // A GeoJSON polygon that covers the entire earth
     // See /docs/api-reference/globe-view.md#remarks
@@ -80,16 +76,3 @@ const deckgl = new Deck({
     })
   ]
 });
-
-function setZoomAround(nextZoomAround) {
-  zoomAround = nextZoomAround;
-  deckgl.setProps({controller: {zoomAround}});
-  for (const button of zoomButtons) {
-    button.setAttribute('aria-pressed', String(button.dataset.zoomAround === zoomAround));
-  }
-}
-
-const zoomButtons = document.querySelectorAll('[data-zoom-around]');
-for (const button of zoomButtons) {
-  button.addEventListener('click', () => setZoomAround(button.dataset.zoomAround));
-}

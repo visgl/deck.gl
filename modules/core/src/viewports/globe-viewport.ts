@@ -17,6 +17,9 @@ export const GLOBE_RADIUS = 256;
 // near-edge pixel doesn't snap the camera across the globe.
 const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
 const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
+// Allow a small grace band outside the rendered sphere so pointer zoom does not
+// immediately fall back to center anchoring when the cursor grazes the limb.
+export const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -356,7 +359,7 @@ export default class GlobeViewport extends Viewport {
    */
   panByGlobeAnchor(anchorLngLat: number[], pixel: number[]): GlobeViewportOptions {
     const distanceRatio = this._getRayDistanceToGlobeCenterRatio(pixel);
-    if (distanceRatio > 1) {
+    if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
       return {longitude: this.longitude, latitude: this.latitude};
     }
 
