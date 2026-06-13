@@ -75,7 +75,8 @@ const deckgl = new Deck({
       getTargetPosition: f => f.geometry.coordinates,
       getSourceColor: [0, 128, 200],
       getTargetColor: [200, 0, 80],
-      getWidth: 1
+      getWidth: 1,
+      parameters: {cullMode: 'none'}
     })
   ]
 });

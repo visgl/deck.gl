@@ -4,7 +4,7 @@
 
 #### `pickMultipleObjects()` pick depth limits
 
-For layers that use built-in shader instance ids instead of explicit picking color buffers, `pickMultipleObjects()` now only guarantees the default `depth` of 10 unique objects per layer. Applications that call `pickMultipleObjects()` with a custom `depth` above the default may receive duplicate results for these layers. Layers with explicit picking color buffers keep their previous buffer-mutation behavior.
+For layers that use built-in shader instance ids instead of explicit picking index buffers, `pickMultipleObjects()` now only guarantees the default `depth` of 10 unique objects per layer. Applications that call `pickMultipleObjects()` with a custom `depth` above the default may receive duplicate results for these layers. Layers with explicit picking index buffers keep their previous buffer-mutation behavior.
 
 ### `instancePickingColors` attribute is no longer automatically generated
 
@@ -13,7 +13,7 @@ Most built-in and custom instanced layers now derive picking colors from built-i
 In rare cases, custom WebGL layer shaders may need an update if they explicitly read the `instancePickingColors` attribute.
 
 - In such cases, use the new picking shader helper functions to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL.
-- However, if the logical picking id is different from the rendered instance id, layers can still continue to register and populate an explicit picking color attribute as before.
+- However, if the logical picking id is different from the rendered instance id, layers can register and populate an explicit `rowIndexes` attribute.
 
 ## Upgrading to v9.3
 

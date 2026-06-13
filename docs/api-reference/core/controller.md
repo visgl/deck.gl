@@ -15,7 +15,8 @@ The base Controller class supports the following options:
 * `dragPan` (boolean) - enable panning with pointer drag. Default `true`
 * `dragRotate` (boolean) - enable rotating with pointer drag. Default `true`
 * `doubleClickZoom` (boolean) - enable zooming with double click. Default `true`
-* `touchZoom` (boolean) - enable zooming with multi-touch. Default `true`
+* `doubleClickDragZoom` (boolean) - enable zooming by double clicking/tapping and dragging. Default `true`
+* `touchZoom` (boolean) - enable zooming with multi-touch pinch. Default `true`
 * `touchRotate` (boolean) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
 * `keyboard` (boolean | object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
     * `zoomSpeed` (number) - speed of zoom using +/- keys. Default `2`.
@@ -26,6 +27,8 @@ The base Controller class supports the following options:
 * `zoomAround` (`'center' | 'pointer'`) - zoom anchor mode when supported by the controller. Default depends on the controller.
 * `inertia` (boolean | number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
 * `maxBounds` (`[min: number[], max: number[]]`) - constrain camera to the specified bounding box. Different type of views may handle this constraint differently.
+
+> **Mobile users:** See [Optimization for Mobile](../../developer-guide/tips-and-tricks.md#optimization-for-mobile) for CSS and browser event guards that help prevent native selection, tap highlight, and touch callout UI during repeated touch gestures.
 
 ## Methods
 
@@ -117,6 +120,7 @@ Note that the following events are always toggled on/off by user options:
 * `touchZoom` - `['pinch']`
 * `touchRotate` - `['pinch', 'multipan']`
 * `doubleClickZoom` - `['dblclick']`
+* `doubleClickDragZoom` - `['pointerdown', 'pointermove', 'pointerup', 'pointercancel']`
 * `keyboard` - `['keydown']`
 
 
