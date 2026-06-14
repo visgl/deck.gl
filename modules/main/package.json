@@ -52,7 +52,7 @@
     "@deck.gl/mesh-layers": "9.3.4",
     "@deck.gl/react": "9.3.4",
     "@deck.gl/widgets": "9.3.4",
-    "@loaders.gl/core": "^4.4.1",
+    "@loaders.gl/core": "^4.4.3",
     "@luma.gl/core": "^9.3.3",
     "@luma.gl/engine": "^9.3.3"
   },
