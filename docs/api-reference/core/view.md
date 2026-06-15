@@ -29,7 +29,7 @@ A unique id of the view. In a multi-view use case, this is important for matchin
 
 #### `canvasId` (string, optional) {#canvasid}
 
-When [`Deck.canvases`](./deck.md#canvases) is supplied, selects which presentation canvas renders this view. If omitted, the view renders into the first configured canvas.
+When [`Deck.canvas`](./deck.md#canvas) is supplied as an array, selects which presentation canvas renders this view. If omitted, the view renders into the first configured canvas.
 
 #### `x` (string | number, optional) {#x}
 

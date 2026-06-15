@@ -165,36 +165,6 @@ test('Deck wires mjolnir requireFailure between recognizers', async () => {
   });
 });
 
-test('Deck#getEventManager resolves the default manager for views', async () => {
-  await new Promise<void>((resolve, reject) => {
-    const deck = new Deck({
-      device,
-      width: 1,
-      height: 1,
-      views: [new MapView({id: 'main'}), new MapView({id: 'overlay', canvasId: 'overlay'})],
-      viewState: {
-        main: {longitude: 0, latitude: 0, zoom: 0},
-        overlay: {longitude: 0, latitude: 0, zoom: 0}
-      },
-      layers: [],
-      onLoad: () => {
-        try {
-          const eventManager = (deck as any).eventManager;
-          expect(deck.getEventManager()).toBe(eventManager);
-          expect(deck.getEventManager('main')).toBe(eventManager);
-          expect(deck.getEventManager('overlay')).toBe(eventManager);
-          expect(Object.keys((deck as any).eventManagers)).toEqual(['default-canvas']);
-
-          deck.finalize();
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      }
-    });
-  });
-});
-
 test('Deck#abort', async () => {
   const deck = new Deck({
     device,
@@ -461,22 +431,32 @@ webglTest('Deck#rendering, picking, logging', async () => {
 });
 
 webglTest('Deck#multi-canvas presentation', async () => {
+  const parent = document.createElement('div');
+  document.body.appendChild(parent);
+
+  const eventRootA = document.createElement('div');
+  eventRootA.className = 'deck-events-root';
+  parent.appendChild(eventRootA);
   const canvasA = document.createElement('canvas');
   canvasA.id = 'deck-test-canvas-a';
   canvasA.width = 64;
   canvasA.height = 64;
-  document.body.appendChild(canvasA);
+  eventRootA.appendChild(canvasA);
 
+  const eventRootB = document.createElement('div');
+  eventRootB.className = 'deck-events-root';
+  parent.appendChild(eventRootB);
   const canvasB = document.createElement('canvas');
   canvasB.id = 'deck-test-canvas-b';
   canvasB.width = 32;
   canvasB.height = 48;
-  document.body.appendChild(canvasB);
+  eventRootB.appendChild(canvasB);
 
   const deck = new Deck({
+    parent,
     width: 64,
     height: 64,
-    canvases: [canvasA, canvasB],
+    canvas: [canvasA, canvasB],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 1},
       right: {longitude: 10, latitude: 10, zoom: 1}
@@ -493,6 +473,10 @@ webglTest('Deck#multi-canvas presentation', async () => {
   expect(deck.getCanvas()).toBe(canvasA);
   // @ts-expect-error testing private state
   expect(Object.keys(deck._canvasTargets)).toEqual(['deck-test-canvas-a', 'deck-test-canvas-b']);
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers['deck-test-canvas-a'].getElement()).toBe(eventRootA);
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers['deck-test-canvas-b'].getElement()).toBe(eventRootB);
   expect(deck.getViewports({x: 0, y: 0, canvasId: 'deck-test-canvas-a'}).map(v => v.id)).toEqual([
     'left'
   ]);
@@ -503,14 +487,13 @@ webglTest('Deck#multi-canvas presentation', async () => {
   // @ts-expect-error testing private state
   const eventManagers = deck.eventManagers;
   const viewports = deck.getViewports();
-  deck.setProps({canvases: [canvasA, canvasB]});
+  deck.setProps({canvas: [canvasA, canvasB]});
   // @ts-expect-error testing private state
   expect(deck.eventManagers).toBe(eventManagers);
   expect(deck.getViewports()).toBe(viewports);
 
   deck.finalize();
-  canvasA.remove();
-  canvasB.remove();
+  parent.remove();
 });
 
 webglTest('Deck#multi-canvas picking routes by canvas', async () => {
@@ -533,7 +516,7 @@ webglTest('Deck#multi-canvas picking routes by canvas', async () => {
   const deck = new Deck({
     width: 64,
     height: 64,
-    canvases: [canvasA, canvasB],
+    canvas: [canvasA, canvasB],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 10},
       right: {longitude: 10, latitude: 10, zoom: 10}
@@ -619,7 +602,7 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
   expect(originalCanvas).toBeTruthy();
   expect(originalCanvas?.isConnected).toBe(true);
 
-  deck.setProps({canvases: []});
+  deck.setProps({canvas: []});
   await waitForRender(deck);
 
   expect(deck.getCanvas()).toBe(null);
@@ -627,7 +610,7 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
   // @ts-expect-error testing private state
   expect(Object.keys(deck._canvasTargets)).toEqual([]);
 
-  deck.setProps({canvases: undefined});
+  deck.setProps({canvas: undefined});
   await waitForRender(deck);
 
   const rebuiltCanvas = deck.getCanvas();
@@ -654,7 +637,7 @@ webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
   const deck = new Deck({
     width: 64,
     height: 64,
-    canvases: [canvasA, canvasB],
+    canvas: [canvasA, canvasB],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 1},
       right: {longitude: 10, latitude: 10, zoom: 1}

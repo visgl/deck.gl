@@ -21,7 +21,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
-- feat(core,react,docs,test): add multi-canvas rendering with view-bound presentation targets
+- feat(core,docs,test): add multi-canvas rendering with view-bound presentation targets
 - fix(core): clear and present canvases that no longer have mapped viewports
 
 ## deck.gl v9.3

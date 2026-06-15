@@ -29,13 +29,18 @@ export type CanvasTarget = {
  */
 export default class CanvasManager {
   private _createEventManager: (root: HTMLElement) => EventManager;
+  private _getEventRoot: (canvas: HTMLCanvasElement) => HTMLElement;
   private _targets: Record<string, CanvasTarget> = {};
   private _order: string[] = [];
   private _eventManagers: Record<string, EventManager> = {};
   private _eventRootToCanvasId = new WeakMap<HTMLElement, string>();
 
-  constructor(props: {createEventManager: (root: HTMLElement) => EventManager}) {
+  constructor(props: {
+    createEventManager: (root: HTMLElement) => EventManager;
+    getEventRoot: (canvas: HTMLCanvasElement) => HTMLElement;
+  }) {
     this._createEventManager = props.createEventManager;
+    this._getEventRoot = props.getEventRoot;
   }
 
   /** The active canvas target registry keyed by canvas id. */
@@ -94,7 +99,7 @@ export default class CanvasManager {
     const nextOrder: string[] = [];
 
     for (const {id, canvas} of normalizedCanvases) {
-      const eventRoot = this._getCanvasEventRoot(canvas);
+      const eventRoot = this._getEventRoot(canvas);
       let target = this._targets[id];
       if (!target || target.canvas !== canvas || target.eventRoot !== eventRoot) {
         target?.eventManager.destroy();
@@ -186,11 +191,6 @@ export default class CanvasManager {
 
       return {id, canvas};
     });
-  }
-
-  private _getCanvasEventRoot(canvas: HTMLCanvasElement): HTMLElement {
-    const eventRoot = canvas.parentElement;
-    return eventRoot?.dataset.deckCanvasRoot === 'true' ? eventRoot : canvas;
   }
 
   private _haveSameEventManagers(eventManagers: Record<string, EventManager>): boolean {

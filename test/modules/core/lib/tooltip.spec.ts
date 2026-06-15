@@ -149,7 +149,6 @@ test('TooltipWidget#onHover offsets for multi-canvas', () => {
 
   const deck = {
     props: {getTooltip: () => 'Test tooltip'},
-    _isMultiCanvasMode: () => true,
     viewManager: {getCanvasId: () => 'right-canvas'},
     _canvasTargets: {'right-canvas': {canvas}}
   };

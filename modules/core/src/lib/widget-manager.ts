@@ -125,21 +125,27 @@ export class WidgetManager {
     }
   }
 
-  /** Resolve tooltip coordinates relative to the shared widget root. */
-  getTooltipPosition(info: PickingInfo): {x: number; y: number} {
-    const {x, y, viewport} = info;
+  /** Resolve the rendered canvas bounds relative to the shared widget root. */
+  getCanvasBounds(viewport?: Viewport | null): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } {
     const parentRect = this.parentElement?.getBoundingClientRect();
     const deck = this.deck as any;
     const canvasId = viewport && deck.viewManager?.getCanvasId(viewport.id);
     const canvas = (canvasId && deck._canvasTargets?.[canvasId]?.canvas) || deck.getCanvas?.();
     if (!parentRect || !canvas) {
-      return {x, y};
+      return {x: 0, y: 0, width: this.deck.width, height: this.deck.height};
     }
 
     const rect = canvas.getBoundingClientRect();
     return {
-      x: x + rect.left - parentRect.left,
-      y: y + rect.top - parentRect.top
+      x: rect.left - parentRect.left,
+      y: rect.top - parentRect.top,
+      width: rect.width || canvas.clientWidth || canvas.width,
+      height: rect.height || canvas.clientHeight || canvas.height
     };
   }
 
@@ -271,23 +277,41 @@ export class WidgetManager {
   }
 
   private _updateContainers() {
-    const canvasWidth = this.parentElement?.clientWidth || this.deck.width;
-    const canvasHeight = this.parentElement?.clientHeight || this.deck.height;
     for (const id in this.containers) {
       const viewport = this.lastViewports[id] || null;
       const visible = id === ROOT_CONTAINER_ID || viewport;
 
       const container = this.containers[id];
       if (visible) {
+        const bounds = this._getContainerBounds(viewport);
         container.style.display = 'block';
         // Align the container with the view
-        container.style.left = `${viewport ? viewport.x : 0}px`;
-        container.style.top = `${viewport ? viewport.y : 0}px`;
-        container.style.width = `${viewport ? viewport.width : canvasWidth}px`;
-        container.style.height = `${viewport ? viewport.height : canvasHeight}px`;
+        container.style.left = `${bounds.x}px`;
+        container.style.top = `${bounds.y}px`;
+        container.style.width = `${bounds.width}px`;
+        container.style.height = `${bounds.height}px`;
       } else {
         container.style.display = 'none';
       }
     }
+  }
+
+  private _getContainerBounds(viewport: Viewport | null) {
+    if (!viewport) {
+      return {
+        x: 0,
+        y: 0,
+        width: this.parentElement?.clientWidth || this.deck.width,
+        height: this.parentElement?.clientHeight || this.deck.height
+      };
+    }
+
+    const canvasBounds = this.getCanvasBounds(viewport);
+    return {
+      x: canvasBounds.x + viewport.x,
+      y: canvasBounds.y + viewport.y,
+      width: viewport.width,
+      height: viewport.height
+    };
   }
 }
