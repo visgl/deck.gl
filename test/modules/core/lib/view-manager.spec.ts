@@ -245,7 +245,18 @@ test('ViewManager#routes controllers by canvas event manager', () => {
   expect((viewManager.controllers.left as any).eventManager).toBe(leftEventManager);
   expect((viewManager.controllers.right as any).eventManager).toBe(rightEventManager);
 
+  const originalLeftController = viewManager.controllers.left;
   const originalRightController = viewManager.controllers.right;
+  viewManager.setProps({
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': rightEventManager
+    }
+  });
+
+  expect(viewManager.controllers.left).toBe(originalLeftController);
+  expect(viewManager.controllers.right).toBe(originalRightController);
+
   viewManager.setProps({
     eventManagers: {
       'left-canvas': leftEventManager,

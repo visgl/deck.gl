@@ -40,6 +40,11 @@ export type ViewStateObject<ViewsT extends ViewOrViews> =
 /** Canvas id used by views that do not declare a presentation canvas. */
 export const DEFAULT_CANVAS_ID = 'default-canvas';
 
+type ViewEventManager = {
+  canvasId: string;
+  eventManager: EventManager;
+};
+
 /** ViewManager props directly supplied by the user */
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
   views: ViewsT;
@@ -68,8 +73,7 @@ export default class ViewManager<ViewsT extends View[]> {
   private _needsUpdate: string | false;
   private _eventManager: EventManager;
   private _eventManagers: Record<string, EventManager>;
-  private _previousEventManagers: Record<string, EventManager> | null;
-  private _viewCanvasIds: {[viewId: string]: string};
+  private _viewEventManagers: {[viewId: string]: ViewEventManager};
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
@@ -99,8 +103,7 @@ export default class ViewManager<ViewsT extends View[]> {
 
     this._eventManager = props.eventManager;
     this._eventManagers = props.eventManagers || {};
-    this._previousEventManagers = null;
-    this._viewCanvasIds = {};
+    this._viewEventManagers = {};
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
       onInteractionStateChange: props.onInteractionStateChange
@@ -202,7 +205,9 @@ export default class ViewManager<ViewsT extends View[]> {
   /** Return the presentation canvas id assigned to a view. */
   getCanvasId(viewOrViewId: string | View): string | undefined {
     const view = typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
-    return view ? view.props.canvasId || DEFAULT_CANVAS_ID : undefined;
+    return view
+      ? this._viewEventManagers[view.id]?.canvasId || view.props.canvasId || DEFAULT_CANVAS_ID
+      : undefined;
   }
 
   /**
@@ -320,64 +325,45 @@ export default class ViewManager<ViewsT extends View[]> {
   }
 
   private _setEventManagers(eventManagers: Record<string, EventManager>): void {
-    if (this._eventManagers === eventManagers) {
-      return;
+    if (this._eventManagers !== eventManagers) {
+      this._eventManagers = eventManagers;
+      this.setNeedsUpdate('eventManagers changed');
     }
-
-    const eventManagerIds = Object.keys(eventManagers);
-    const previousEventManagerIds = Object.keys(this._eventManagers);
-    if (
-      deepEqual(eventManagerIds, previousEventManagerIds, 1) &&
-      eventManagerIds.every(id => eventManagers[id] === this._eventManagers[id])
-    ) {
-      return;
-    }
-
-    this._previousEventManagers ||= this._eventManagers;
-    this._eventManagers = eventManagers;
-    this.setNeedsUpdate('eventManagers changed');
   }
 
-  private _getEventManager(canvasId: string): EventManager {
-    return this._eventManagers[canvasId] || this._eventManager;
+  private _getViewEventManager(view: View): ViewEventManager {
+    const canvasId = this.getCanvasId(view) || DEFAULT_CANVAS_ID;
+    return {
+      canvasId,
+      eventManager: this._eventManagers[canvasId] || this._eventManager
+    };
   }
 
   private _startViewportRebuild(): {
     oldControllers: {[viewId: string]: Controller<any> | null};
-    oldEventManagers: Record<string, EventManager>;
-    oldViewCanvasIds: {[viewId: string]: string};
+    oldViewEventManagers: {[viewId: string]: ViewEventManager};
   } {
     const oldControllers = this.controllers;
-    const oldEventManagers = this._previousEventManagers || this._eventManagers;
-    const oldViewCanvasIds = this._viewCanvasIds;
+    const oldViewEventManagers = this._viewEventManagers;
     this._viewports = [];
     this.controllers = {};
-    this._viewCanvasIds = {};
-    this._previousEventManagers = null;
-    return {oldControllers, oldEventManagers, oldViewCanvasIds};
-  }
-
-  private _registerCanvasId(view: View): void {
-    this._viewCanvasIds[view.id] = this.getCanvasId(view) || DEFAULT_CANVAS_ID;
+    this._viewEventManagers = {};
+    return {oldControllers, oldViewEventManagers};
   }
 
   private _getReusableController(
-    view: View,
     controller: Controller<any> | null | undefined,
-    oldCanvasId: string | undefined,
-    oldEventManagers: Record<string, EventManager>
+    oldViewEventManager: ViewEventManager | undefined,
+    viewEventManager: ViewEventManager
   ): Controller<any> | null | undefined {
-    if (!controller) {
-      return controller;
-    }
-
-    const canvasId = this.getCanvasId(view) || DEFAULT_CANVAS_ID;
-    const oldEventManager = (oldCanvasId && oldEventManagers[oldCanvasId]) || this._eventManager;
-    if (oldCanvasId !== canvasId || oldEventManager !== this._getEventManager(canvasId)) {
+    if (
+      controller &&
+      (oldViewEventManager?.canvasId !== viewEventManager.canvasId ||
+        oldViewEventManager?.eventManager !== viewEventManager.eventManager)
+    ) {
       controller.finalize();
       return null;
     }
-
     return controller;
   }
 
@@ -386,11 +372,10 @@ export default class ViewManager<ViewsT extends View[]> {
     props: {id: string; type: ConstructorOf<Controller<any>>}
   ): Controller<any> {
     const Controller = props.type;
-    const canvasId = this.getCanvasId(view) || DEFAULT_CANVAS_ID;
 
     const controller = new Controller({
       timeline: this.timeline,
-      eventManager: this._getEventManager(canvasId),
+      eventManager: this._getViewEventManager(view).eventManager,
       // Set an internal callback that calls the prop callback if provided
       onViewStateChange: this._eventCallbacks.onViewStateChange,
       onStateChange: this._eventCallbacks.onInteractionStateChange,
@@ -441,21 +426,21 @@ export default class ViewManager<ViewsT extends View[]> {
   private _rebuildViewports(): void {
     const {views} = this;
 
-    const {oldControllers, oldEventManagers, oldViewCanvasIds} = this._startViewportRebuild();
+    const {oldControllers, oldViewEventManagers} = this._startViewportRebuild();
 
     let invalidateControllers = false;
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
-      this._registerCanvasId(view);
+      const viewEventManager = this._getViewEventManager(view);
+      this._viewEventManagers[view.id] = viewEventManager;
       const viewState = this.getViewState(view);
       const viewport = view.makeViewport({viewState, width: this.width, height: this.height});
 
       let oldController = this._getReusableController(
-        view,
         oldControllers[view.id],
-        oldViewCanvasIds[view.id],
-        oldEventManagers
+        oldViewEventManagers[view.id],
+        viewEventManager
       );
       const hasController = Boolean(view.controller);
       if (hasController && !oldController) {
