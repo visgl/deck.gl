@@ -16,14 +16,13 @@ Release date: In development
 
 ### Multi-canvas rendering
 
-deck.gl can now render a single `Deck` or `DeckGL` instance into multiple HTML canvases.
+deck.gl can now render a single `Deck` instance into multiple HTML canvases.
 
-- New [`Deck.canvases`](./api-reference/core/deck.md#canvases) and [`DeckGL.canvases`](./api-reference/react/deckgl.md#canvases) props create one presentation target per canvas while keeping one shared layer stack and one shared offscreen device context.
+- [`Deck.canvas`](./api-reference/core/deck.md#canvas) now accepts an array, creating one presentation target per canvas while keeping one shared layer stack and one shared offscreen device context.
 - Views can opt into a specific target with [`View.canvasId`](./api-reference/core/view.md#canvasid). Controllers, picking, and layout resolution are all scoped to that canvas.
-- In React, `View` children such as `react-map-gl` maps automatically render into the correct canvas host, so basemaps stay view-bound without a separate canvas API.
 - Unused canvases are now explicitly cleared when views move or are removed, avoiding stale frames during dynamic layouts.
 
-There is a new multi-canvas cities example in the repository that shows four independently navigable city maps with shared scatterplot interactions and a toggle between `react-map-gl` basemaps and `BasemapLayer` overlays: [test/apps/multi-canvas-cities](https://github.com/visgl/deck.gl/tree/master/test/apps/multi-canvas-cities).
+There is a new standalone TypeScript multi-canvas cities example in the repository that shows four independently navigable city maps with shared scatterplot interactions and view-bound widgets: [test/apps/multi-canvas-cities](https://github.com/visgl/deck.gl/tree/master/test/apps/multi-canvas-cities).
 
 ## deck.gl v9.3
 

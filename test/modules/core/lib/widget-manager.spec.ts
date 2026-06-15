@@ -220,12 +220,12 @@ test('WidgetManager#onRedraw#without viewId', () => {
   widgetManager.finalize();
 });
 
-test('WidgetManager#onRedraw#without viewId in multi-canvas uses parent size', () => {
+test('WidgetManager#onRedraw#without viewId uses parent size', () => {
   const parentElement = document.createElement('div');
   Object.defineProperty(parentElement, 'clientWidth', {value: 1200});
   Object.defineProperty(parentElement, 'clientHeight', {value: 800});
   const widgetManager = new WidgetManager({
-    deck: {...mockDeckInstance, _isMultiCanvasMode: () => true},
+    deck: mockDeckInstance,
     parentElement
   });
 
@@ -236,6 +236,47 @@ test('WidgetManager#onRedraw#without viewId in multi-canvas uses parent size', (
   const container = widgetManager.containers['root'];
   expect(container.style.width, 'root container width uses parent size').toBe('1200px');
   expect(container.style.height, 'root container height uses parent size').toBe('800px');
+
+  widgetManager.finalize();
+});
+
+test('WidgetManager#onRedraw#viewId uses presentation canvas offset', () => {
+  const parentElement = document.createElement('div');
+  parentElement.getBoundingClientRect = () => ({left: 10, top: 20}) as DOMRect;
+  const canvas = document.createElement('canvas');
+  canvas.getBoundingClientRect = () => ({left: 310, top: 220, width: 400, height: 300}) as DOMRect;
+  const widgetManager = new WidgetManager({
+    deck: {
+      ...mockDeckInstance,
+      viewManager: {getCanvasId: () => 'right-canvas'},
+      _canvasTargets: {'right-canvas': {canvas}}
+    },
+    parentElement
+  });
+
+  const widget = new TestWidget({id: 'A', viewId: 'minimap'});
+  widgetManager.addDefault(widget);
+  widgetManager.onRedraw({
+    viewports: [
+      new WebMercatorViewport({
+        id: 'minimap',
+        x: 7,
+        y: 8,
+        width: 100,
+        height: 80,
+        longitude: 0,
+        latitude: 0,
+        zoom: 0
+      })
+    ],
+    layers: []
+  });
+
+  const container = widgetManager.containers['minimap'];
+  expect(container.style.left, 'view container includes canvas x offset').toBe('307px');
+  expect(container.style.top, 'view container includes canvas y offset').toBe('208px');
+  expect(container.style.width, 'view container width uses viewport width').toBe('100px');
+  expect(container.style.height, 'view container height uses viewport height').toBe('80px');
 
   widgetManager.finalize();
 });

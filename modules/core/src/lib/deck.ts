@@ -132,22 +132,13 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    */
   parent?: HTMLDivElement | null;
 
-  /** The canvas to render into.
-   * Can be either a HTMLCanvasElement or the element id.
-   * Will be auto-created if not supplied.
+  /** The canvas or canvases to render into.
+   * A single canvas can be either an `HTMLCanvasElement` or the element id, and will be
+   * auto-created if not supplied. When an array is supplied, Deck renders into an offscreen
+   * default context and presents the result into one canvas per entry. Views without an explicit
+   * `canvasId` render into the first configured canvas.
    */
-  canvas?: HTMLCanvasElement | string | null;
-  /**
-   * Presentation canvases to use for multi-canvas rendering.
-   *
-   * When this prop is defined, Deck renders into an offscreen default context and presents the
-   * result into one `PresentationContext` per canvas entry. String entries are resolved as
-   * DOM element ids. Views without an explicit `canvasId` render into the first configured canvas.
-   *
-   * This prop is not compatible with `gl`. Deck diffs this array on `setProps` and creates,
-   * reuses, or destroys presentation targets as the configured canvases change.
-   */
-  canvases?: (string | HTMLCanvasElement)[];
+  canvas?: HTMLCanvasElement | string | (HTMLCanvasElement | string)[] | null;
 
   /** Use an existing luma.gl GPU device. @note If not supplied, a new device will be created using props.deviceProps */
   device?: Device | null;
@@ -202,7 +193,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
   /** An array of Widget instances to be added to the parent element. */
-  widgets?: Widget[];
+  widgets?: Widget<any, ViewsT>[];
 
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
@@ -270,7 +261,6 @@ const defaultProps: DeckProps = {
   deviceProps: {} as DeviceProps,
   gl: null,
   canvas: null,
-  canvases: undefined,
   layers: [],
   effects: [],
   views: null,
@@ -376,7 +366,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   private _needsRedraw: false | string = 'Initial render';
   private _canvasManager = new CanvasManager({
-    createEventManager: root => this._createEventManager(root)
+    createEventManager: root => this._createEventManager(root),
+    getEventRoot: canvas => this._getEventRoot(canvas)
   });
   private _ownedCanvas: HTMLCanvasElement | null = null;
   private _pickRequest: {
@@ -493,7 +484,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
-    const previousCanvases = this.props.canvases;
+    const previousCanvas = this.props.canvas;
 
     if ('onLayerHover' in props) {
       log.removed('onLayerHover', 'onHover')();
@@ -519,7 +510,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.device &&
       !this.props.device &&
       !this.props.gl &&
-      this._isMultiCanvasProp(previousCanvases) !== this._isMultiCanvasMode()
+      this._isMultiCanvasProp(previousCanvas) !== this._isMultiCanvasMode()
     ) {
       this._rebuildDeckOwnedDevice();
       this.stats.get('setProps Time').timeEnd();
@@ -703,16 +694,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    */
   getCanvas(): HTMLCanvasElement | null {
     return this.canvas;
-  }
-
-  /** Get the event manager associated with a view or the default Deck canvas. */
-  getEventManager(viewId?: string): EventManager | null {
-    if (!viewId || !this.viewManager) {
-      return this.eventManager;
-    }
-
-    const canvasId = this.viewManager.getCanvasId(viewId) || DEFAULT_CANVAS_ID;
-    return this.eventManagers[canvasId] || this.eventManager;
   }
 
   /** Query the object rendered on top at a given point */
@@ -1119,13 +1100,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   private _isMultiCanvasProp(
-    canvases: DeckProps<ViewsT>['canvases'] | Required<DeckProps<ViewsT>>['canvases']
-  ): boolean {
-    return canvases !== undefined;
+    canvas: DeckProps<ViewsT>['canvas'] | Required<DeckProps<ViewsT>>['canvas']
+  ): canvas is (string | HTMLCanvasElement)[] {
+    return Array.isArray(canvas);
   }
 
   private _isMultiCanvasMode(): boolean {
-    return this._isMultiCanvasProp(this.props.canvases);
+    return this._isMultiCanvasProp(this.props.canvas);
   }
 
   private _getDefaultCanvasId(): string {
@@ -1133,21 +1114,25 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   private _validateCanvasConfiguration(props: DeckProps<ViewsT>): void {
-    if (!this._isMultiCanvasProp(props.canvases)) {
+    if (!this._isMultiCanvasProp(props.canvas)) {
       return;
     }
 
     if (props.gl) {
       throw new Error(
-        '`canvases` is not supported with `gl`. Provide neither and let Deck create the device.'
+        'Array-valued `canvas` is not supported with `gl`. Do not supply `gl`; let Deck create the device.'
       );
     }
 
     if (props.device?.canvasContext && !props.device.getDefaultCanvasContext().offscreenCanvas) {
       throw new Error(
-        '`canvases` requires an offscreen-backed default canvas context when using an external device.'
+        'Array-valued `canvas` requires an offscreen-backed default canvas context when using an external device.'
       );
     }
+  }
+
+  private _getPresentationCanvases(): (string | HTMLCanvasElement)[] {
+    return this._isMultiCanvasProp(this.props.canvas) ? this.props.canvas : [];
   }
 
   private _createEventManager(root: HTMLElement): EventManager {
@@ -1178,6 +1163,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return eventManager;
   }
 
+  private _getEventRoot(canvas: HTMLCanvasElement): HTMLElement {
+    return (
+      canvas.closest<HTMLElement>('.deck-events-root') ||
+      this.props.parent?.querySelector<HTMLElement>('.deck-events-root') ||
+      canvas
+    );
+  }
+
   private _destroyCanvasTargets(): void {
     this._canvasManager.finalize();
     this.eventManagers = {};
@@ -1194,7 +1187,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this._canvasManager.sync({
       device: this.device,
-      canvases: this.props.canvases,
+      canvases: this._getPresentationCanvases(),
       useDevicePixels: this.props.useDevicePixels
     });
     this.eventManagers = this._canvasManager.eventManagers;
@@ -1331,7 +1324,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (this._isMultiCanvasMode()) {
       const OffscreenCanvasConstructor = globalThis.OffscreenCanvas;
       if (!OffscreenCanvasConstructor) {
-        throw new Error('`canvases` requires OffscreenCanvas support.');
+        throw new Error('Array-valued `canvas` requires OffscreenCanvas support.');
       }
       const width =
         typeof props.width === 'number' && Number.isFinite(props.width) ? props.width : 1;
@@ -1346,6 +1339,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Resolve props.canvas to element */
   private _createCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement {
     let canvas = props.canvas;
+
+    if (Array.isArray(canvas)) {
+      throw new Error('Array-valued `canvas` cannot create a single device canvas.');
+    }
 
     // TODO EventManager should accept element id
     if (typeof canvas === 'string') {
@@ -1500,7 +1497,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return new AnimationLoop({
       device: deviceOrPromise,
       // TODO v9
-      autoResizeDrawingBuffer: !gl && !this._isMultiCanvasProp(props.canvases), // do not auto resize external or multi-canvas contexts
+      autoResizeDrawingBuffer: !gl && !this._isMultiCanvasProp(props.canvas), // do not auto resize external or multi-canvas contexts
       autoResizeViewport: false,
       // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
@@ -1725,8 +1722,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.animationLoop.attachTimeline(timeline);
 
     if (!this._isMultiCanvasMode()) {
-      const eventRoot =
-        this.props.parent?.querySelector<HTMLDivElement>('.deck-events-root') || this.canvas;
+      const eventRoot = this.canvas && this._getEventRoot(this.canvas);
       assert(eventRoot);
       this.eventManager = this._createEventManager(eventRoot);
       this.eventManagers = {[DEFAULT_CANVAS_ID]: this.eventManager};
@@ -1769,6 +1765,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     const widgetParent =
       this.props.parent?.querySelector<HTMLDivElement>('.deck-widgets-root') ||
+      (this._isMultiCanvasMode() ? this.props.parent || this.canvas?.parentElement : null) ||
       this.canvas?.parentElement;
 
     this.widgetManager = new WidgetManager({
