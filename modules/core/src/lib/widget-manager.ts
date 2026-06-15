@@ -132,21 +132,7 @@ export class WidgetManager {
     width: number;
     height: number;
   } {
-    const parentRect = this.parentElement?.getBoundingClientRect();
-    const deck = this.deck as any;
-    const canvasId = viewport && deck.viewManager?.getCanvasId(viewport.id);
-    const canvas = (canvasId && deck._canvasTargets?.[canvasId]?.canvas) || deck.getCanvas?.();
-    if (!parentRect || !canvas) {
-      return {x: 0, y: 0, width: this.deck.width, height: this.deck.height};
-    }
-
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: rect.left - parentRect.left,
-      y: rect.top - parentRect.top,
-      width: rect.width || canvas.clientWidth || canvas.width,
-      height: rect.height || canvas.clientHeight || canvas.height
-    };
+    return this.deck.getCanvasBounds(viewport, this.parentElement);
   }
 
   onEvent(info: PickingInfo, event: MjolnirGestureEvent) {

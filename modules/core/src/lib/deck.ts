@@ -28,7 +28,8 @@ import type {
   Device,
   DeviceProps,
   Framebuffer,
-  Parameters
+  Parameters,
+  PresentationContext
 } from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
@@ -696,6 +697,37 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this.canvas;
   }
 
+  /**
+   * Resolve the rendered canvas bounds relative to a widget root.
+   * @internal
+   */
+  getCanvasBounds(
+    viewport?: Viewport | null,
+    parentElement?: HTMLElement | null
+  ): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } {
+    const canvasId = viewport ? this.viewManager?.getCanvasId(viewport.id) : undefined;
+    const canvasContext = this._getCanvasContext(canvasId);
+    const [width, height] = canvasContext?.getCSSSize() || [this.width, this.height];
+    const parentRect = parentElement?.getBoundingClientRect();
+    if (!canvasContext || !parentRect) {
+      return {x: 0, y: 0, width, height};
+    }
+
+    canvasContext.updatePosition();
+    const [x, y] = canvasContext.getPosition();
+    return {
+      x: x - parentRect.left,
+      y: y - parentRect.top,
+      width,
+      height
+    };
+  }
+
   /** Query the object rendered on top at a given point */
   async pickObjectAsync(opts: {
     /** x position in pixels */
@@ -1016,8 +1048,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const canvasId = this._isMultiCanvasMode()
       ? opts.canvasId || this._getDefaultCanvasId()
       : opts.canvasId;
-    const devicePixelRatio =
-      this._getCanvasTarget(canvasId)?.presentationContext.cssToDeviceRatio();
+    const canvasContext = this._getCanvasContext(canvasId) || undefined;
 
     stats.get('Pick Count').incrementCount();
     stats.get(statKey).timeStart();
@@ -1035,9 +1066,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       effects: this.effectManager!.getEffects(),
       ...opts,
       canvasId,
-      devicePixelRatio,
-      shaderModuleProps: devicePixelRatio ? {project: {devicePixelRatio}} : undefined,
-      canvasContext: this._isMultiCanvasMode() ? undefined : this._canvasContext || undefined
+      canvasContext
     });
 
     stats.get(statKey).timeEnd();
@@ -1070,8 +1099,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const canvasId = this._isMultiCanvasMode()
       ? opts.canvasId || this._getDefaultCanvasId()
       : opts.canvasId;
-    const devicePixelRatio =
-      this._getCanvasTarget(canvasId)?.presentationContext.cssToDeviceRatio();
+    const canvasContext = this._getCanvasContext(canvasId) || undefined;
 
     stats.get('Pick Count').incrementCount();
     stats.get(statKey).timeStart();
@@ -1089,9 +1117,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       effects: this.effectManager!.getEffects(),
       ...opts,
       canvasId,
-      devicePixelRatio,
-      shaderModuleProps: devicePixelRatio ? {project: {devicePixelRatio}} : undefined,
-      canvasContext: this._isMultiCanvasMode() ? undefined : this._canvasContext || undefined
+      canvasContext
     });
 
     stats.get(statKey).timeEnd();
@@ -1225,6 +1251,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         this._onCanvasContextResize(this._canvasContext, {
           syncDrawingBuffer: this._deviceResizeHandler?.syncDrawingBuffer
         });
+      } else if (this._isMultiCanvasMode()) {
+        this._updateCanvasMetrics();
       }
     };
 
@@ -1259,6 +1287,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return null;
     }
     return this._canvasManager.getTarget(canvasId);
+  }
+
+  /** Look up the canvas context used for a canvas id. */
+  private _getCanvasContext(canvasId?: string): CanvasContext | PresentationContext | null {
+    return this._getCanvasTarget(canvasId)?.presentationContext || this._canvasContext;
   }
 
   /** Resize the offscreen default canvas context to match a presentation target. */
@@ -1444,40 +1477,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   private _updateCanvasMetrics(): void {
-    const defaultCanvasId = this._getDefaultCanvasId();
-    let resized = false;
-
-    for (const target of Object.values(this._canvasTargets)) {
-      const width = target.canvas.clientWidth || target.canvas.width;
-      const height = target.canvas.clientHeight || target.canvas.height;
-      if (width !== target.width || height !== target.height) {
-        target.width = width;
-        target.height = height;
-        resized = true;
-      }
-    }
-
-    const defaultTarget = this._canvasTargets[defaultCanvasId];
-    const newWidth = defaultTarget?.width || 0;
-    const newHeight = defaultTarget?.height || 0;
+    const canvasMetrics = this._getCanvasMetrics();
+    const {width: newWidth = 0, height: newHeight = 0} =
+      canvasMetrics[this._getDefaultCanvasId()] || {};
     if (newWidth !== this.width || newHeight !== this.height) {
       // @ts-expect-error private assign to read-only property
       this.width = newWidth;
       // @ts-expect-error private assign to read-only property
       this.height = newHeight;
-      resized = true;
       this.props.onResize({width: newWidth, height: newHeight});
     }
 
-    if (resized) {
-      this._needsRedraw = 'Canvas resized';
-      this.viewManager?.setProps({
-        width: this.width,
-        height: this.height,
-        canvasMetrics: this._getCanvasMetrics()
-      });
-      this.layerManager?.activateViewport(this.getViewports()[0]);
-    }
+    this._needsRedraw = 'Canvas resized';
+    this.viewManager?.setProps({
+      width: this.width,
+      height: this.height,
+      canvasMetrics
+    });
+    this.layerManager?.activateViewport(this.getViewports()[0]);
   }
 
   private _createAnimationLoop(
@@ -1833,13 +1850,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         const framebuffer = target.presentationContext.getCurrentFramebuffer();
         this.deckRenderer?.renderLayers({
           ...opts,
-          shaderModuleProps: {
-            ...opts.shaderModuleProps,
-            project: {
-              ...opts.shaderModuleProps?.project,
-              devicePixelRatio: target.presentationContext.cssToDeviceRatio()
-            }
-          },
+          canvasContext: target.presentationContext,
           renderPassId: `screen-${canvasId}`,
           target: framebuffer,
           viewports: canvasViewports
@@ -1865,13 +1876,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Clear and present a canvas that currently has no mapped viewports. */
   private _clearCanvasTarget(canvasId: string, renderPassId: string): void {
     const target = this._canvasTargets[canvasId];
-    if (!target || !this.device?.canvasContext) {
+    if (!target || !this.device) {
       return;
     }
 
     this._resizeForCanvasTarget(canvasId);
     const framebuffer = target.presentationContext.getCurrentFramebuffer();
-    const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+    const [width, height] = target.presentationContext.getDrawingBufferSize();
     const renderPass = this.device.beginRenderPass({
       id: renderPassId,
       framebuffer,
@@ -1900,10 +1911,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (this.props._onMetrics) {
         this.props._onMetrics(this.metrics);
       }
-    }
-
-    if (this._isMultiCanvasMode()) {
-      this._updateCanvasMetrics();
     }
 
     this._updateCursor();
