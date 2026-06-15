@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>pydeck Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
+  <style>
+    body {margin: 0; font-family: sans-serif; overflow: hidden;}
+    #app {width: 100vw; height: 100vh; display: flex; flex-direction: row; align-items: stretch;}
+    #left-pane {
+      flex: 0 0 auto;
+      width: 40vw;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid #ccc;
+      background: #f7f7f7;
+    }
+    #toolbar button {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      line-height: 1;
+      padding: 6px 12px;
+      border: 1px solid #999;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+    #toolbar button:disabled {
+      opacity: 0.65;
+      cursor: progress;
+    }
+    #editor {flex: 0 1 100%;}
+    #dropzone {
+      flex: 1 1 200px;
+      min-height: fit-content;
+      border-top: 1px solid #ccc;
+      background: #f7f7f7;
+      padding: 12px;
+      font-size: 13px;
+    }
+    #dropzone .files-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+      max-height: 160px;
+      overflow: auto;
+    }
+    #dropzone .file-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      background: #fff;
+    }
+    #dropzone .file-entry.empty {
+      color: #666;
+      font-style: italic;
+    }
+    #dropzone .file-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    #dropzone .file-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    #dropzone .file-info {
+      flex: 0 0 auto;
+      color: #666;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    #dropzone .copy-file-button {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      line-height: 1;
+    }
+    #dropzone .copy-file-button:hover {
+      background: #f3f3f3;
+    }
+    #dropzone .copy-file-button svg {
+      width: 14px;
+      height: 14px;
+    }
+    #dropzone .dropzone-target {
+      cursor: pointer;
+      border: 1px dashed #bbb;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    #dropzone .dropzone-target p {
+      margin: 0;
+    }
+    #dropzone .dropzone-error {
+      color: #a8071a;
+      margin-top: 8px;
+    }
+    #editor .inline-error > div {
+      background: #fff1f0;
+      border: 1px solid #ffccc7;
+      border-radius: 6px;
+      box-sizing: border-box;
+      color: #a8071a;
+      font-family: monospace;
+      font-size: 12px;
+      margin: 10px;
+      padding: 8px;
+      white-space: pre-wrap;
+    }
+    #right-pane {
+      flex: 1 1 100%;
+      position: relative;
+      overflow: hidden;
+      border-left: solid 1px #444;
+    }
+    #right-pane.html-output iframe {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    #right-pane.text-output {
+      overflow: auto;
+      font-family: monospace;
+      background: #222;
+      color: #fff;
+      padding: 24px;
+      white-space: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+<script type="module">
+  import {renderToDOM} from './src/app.tsx';
+  renderToDOM(document.getElementById('app'));
+</script>
+</html>
