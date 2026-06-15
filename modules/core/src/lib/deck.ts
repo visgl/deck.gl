@@ -728,6 +728,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     };
   }
 
+  /**
+   * Get the event manager associated with a view or the default Deck canvas.
+   */
+  getEventManager(viewId?: string): EventManager | null {
+    if (!viewId || !this.viewManager) {
+      return this.eventManager;
+    }
+
+    const canvasId = this.viewManager.getCanvasId(viewId) || DEFAULT_CANVAS_ID;
+    return this.eventManagers[canvasId] || this.eventManager;
+  }
+
   /** Query the object rendered on top at a given point */
   async pickObjectAsync(opts: {
     /** x position in pixels */

@@ -5,7 +5,7 @@ import type {Deck, DeckProps, Viewport, Widget} from '@deck.gl/core';
 export type DeckGLContextValue = {
   viewport: Viewport;
   container: HTMLElement;
-  eventManager: EventManager;
+  eventManager: EventManager | null;
   onViewStateChange: DeckProps['onViewStateChange'];
   deck?: Deck<any>;
   widgets?: Widget[];

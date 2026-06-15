@@ -45,27 +45,41 @@ test('positionChildrenUnderViews#before initialization', () => {
     children: TEST_CHILDREN,
     deck: null
   });
-  expect(children.length, 'Should not fail if deck is not initialized').toBe(0);
+  expect(Object.keys(children).length, 'Should not fail if deck is not initialized').toBe(0);
 
   children = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {}
   });
-  expect(children.length, 'Should not fail if deck is not initialized').toBe(0);
+  expect(Object.keys(children).length, 'Should not fail if deck is not initialized').toBe(0);
 
   children = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {viewManager: {views: []}}
   });
-  expect(children.length, 'Should not fail if deck has no view').toBe(0);
+  expect(Object.keys(children).length, 'Should not fail if deck has no view').toBe(0);
 });
 
 test('positionChildrenUnderViews', () => {
-  const children = positionChildrenUnderViews({
+  const eventManager = {} as any;
+  const getEventManagerCalls: (string | undefined)[] = [];
+  const viewsByCanvasId = positionChildrenUnderViews({
     children: TEST_CHILDREN,
-    deck: {viewManager: dummyViewManager, canvas: document.createElement('canvas')}
+    deck: {
+      viewManager: dummyViewManager,
+      canvas: document.createElement('canvas'),
+      eventManager: {} as any,
+      getEventManager: viewId => {
+        getEventManagerCalls.push(viewId);
+        return eventManager;
+      }
+    }
   });
+  const children = Object.values(viewsByCanvasId).flat();
   expect(children.length, 'Returns wrapped children').toBe(2);
+  expect(getEventManagerCalls).toEqual(['map', 'ortho']);
+  expect(children[0].props.value.eventManager).toBe(eventManager);
+  expect(children[1].props.value.eventManager).toBe(eventManager);
 
   expect(children[0].key, 'Child has deck context').toBe('view-map-context');
   expect(children[0].type, 'view is wrapped in DeckGlContext.Provider').toBe(
@@ -104,14 +118,16 @@ test('positionChildrenUnderViews', () => {
 test('positionChildrenUnderViews#override ContextProvider', () => {
   const context = React.createContext();
 
-  const children = positionChildrenUnderViews({
+  const viewsByCanvasId = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {
       viewManager: dummyViewManager,
-      canvas: {}
+      canvas: {},
+      getEventManager: () => null
     },
     ContextProvider: context.Provider
   });
+  const children = Object.values(viewsByCanvasId).flat();
 
   expect(children.length, 'Returns wrapped children').toBe(2);
 

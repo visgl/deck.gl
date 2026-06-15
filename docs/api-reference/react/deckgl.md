@@ -49,6 +49,14 @@ const App = (data) => (
 
 `DeckGL` accepts all [Deck](../core/deck.md#properties) properties, with these additional semantics:
 
+#### `canvas` ((HTMLCanvasElement | String)[], optional) {#canvas}
+
+Array-valued presentation canvases to use when rendering a single `DeckGL` instance into multiple DOM canvases.
+
+This prop mirrors array-valued [`Deck.canvas`](../core/deck.md#canvas). When supplied, `DeckGL` creates one DOM host per canvas, binds each [`View`](../core/view.md) to a target canvas through `view.props.canvasId`, and renders view children such as `react-map-gl` maps into the matching canvas host automatically.
+
+Like array-valued [`Deck.canvas`](../core/deck.md#canvas), this prop can be updated after mount. `DeckGL` keeps the per-canvas DOM hosts in sync with the current array.
+
 ### React Context
 
 #### `ContextProvider` (React.Component, optional) {#contextprovider}
@@ -148,6 +156,8 @@ The containing view of each element is determined as follows:
 
 - If the element is a direct child of `DeckGL`, it is positioned inside the default (first) view.
 - If the element is nested under a `<View id={id}>` tag, it is positioned inside the view corresponding to the `id` prop. 
+
+In multi-canvas mode, the element is also rendered inside the DOM host for that view's [`canvasId`](../core/view.md#canvasid).
 
 
 #### Render callbacks

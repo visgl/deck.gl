@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import {createElement, useRef, useState, useMemo, useEffect, useImperativeHandle} from 'react';
+import {createPortal} from 'react-dom';
 import {Deck} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
@@ -34,6 +35,8 @@ export type DeckGLProps<ViewsT extends ViewOrViews = null> = Omit<
   DeckProps<ViewsT>,
   'width' | 'height' | 'gl' | 'parent' | 'canvas' | '_customRender'
 > & {
+  /** Presentation canvases to use when rendering a single Deck instance into multiple DOM canvases. */
+  canvas?: (string | HTMLCanvasElement)[];
   Deck?: typeof Deck;
   width?: string | number;
   height?: string | number;
@@ -50,6 +53,106 @@ export type DeckGLRef<ViewsT extends ViewOrViews = null> = {
   pickObjects: Deck['pickObjects'];
   pickMultipleObjects: Deck['pickMultipleObjects'];
 };
+
+type CanvasHost = {
+  id: string;
+  canvas?: HTMLCanvasElement;
+};
+
+/** Normalize the React array-valued `canvas` prop into ids plus optional DOM canvas handles. */
+function getCanvasHosts(canvases?: (string | HTMLCanvasElement)[]): CanvasHost[] {
+  return (canvases || []).map((canvas, index) =>
+    typeof canvas === 'string'
+      ? {id: canvas}
+      : {
+          id: canvas.id || `deckgl-canvas-${index}`,
+          canvas
+        }
+  );
+}
+
+/** Mount an individual multi-canvas host, optionally adopting an existing canvas element. */
+function MultiCanvasHost({
+  host,
+  canvasStyle,
+  children
+}: {
+  host: CanvasHost;
+  canvasStyle: React.CSSProperties;
+  children?: React.ReactNode[];
+}) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const restoreRef = useRef<{parent: ParentNode | null; nextSibling: ChildNode | null} | null>(
+    null
+  );
+
+  useIsomorphicLayoutEffect(() => {
+    if (!host.canvas || !hostRef.current) {
+      return undefined;
+    }
+
+    if (!restoreRef.current) {
+      restoreRef.current = {
+        parent: host.canvas.parentNode,
+        nextSibling: host.canvas.nextSibling
+      };
+    }
+
+    if (host.canvas.parentElement !== hostRef.current) {
+      hostRef.current.insertBefore(host.canvas, hostRef.current.firstChild);
+    }
+
+    return () => {
+      const restore = restoreRef.current;
+      if (restore?.parent) {
+        restore.parent.insertBefore(host.canvas!, restore.nextSibling);
+      }
+      restoreRef.current = null;
+    };
+  }, [host.canvas]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!host.canvas) {
+      return undefined;
+    }
+
+    Object.assign(host.canvas.style, canvasStyle, {
+      position: 'absolute',
+      zIndex: '1',
+      width: '100%',
+      height: '100%'
+    });
+
+    return undefined;
+  }, [host.canvas, canvasStyle]);
+
+  return createElement(
+    'div',
+    {
+      ref: hostRef,
+      id: `${host.id}-host`,
+      className: 'deck-canvas-host deck-events-root',
+      'data-deck-canvas-root': 'true',
+      style: {position: 'relative', width: '100%', height: '100%', overflow: 'hidden'}
+    },
+    ...(host.canvas
+      ? children || []
+      : [
+          createElement('canvas', {
+            key: `canvas-${host.id}`,
+            id: host.id,
+            style: {
+              ...canvasStyle,
+              position: 'absolute',
+              zIndex: 1,
+              width: '100%',
+              height: '100%'
+            }
+          }),
+          ...(children || [])
+        ])
+  );
+}
 
 function getRefHandles<ViewsT extends ViewOrViews>(
   thisRef: DeckInstanceRef<ViewsT>
@@ -126,6 +229,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   // DOM refs
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  const isMultiCanvas = Array.isArray(props.canvas);
+  const canvasHosts = getCanvasHosts(props.canvas);
 
   // extract any deck.gl layers masquerading as react elements from props.children
   const jsxProps = useMemo(
@@ -172,11 +277,14 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       width: '100%',
       height: '100%',
       parent: containerRef.current,
-      canvas: canvasRef.current,
       layers: jsxProps.layers,
       onViewStateChange: handleViewStateChange,
       onInteractionStateChange: handleInteractionStateChange
     };
+
+    if (!isMultiCanvas) {
+      forwardProps.canvas = canvasRef.current;
+    }
 
     if (jsxProps.views) {
       forwardProps.views = jsxProps.views;
@@ -197,7 +305,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     }
 
     return forwardProps;
-  }, [props]);
+  }, [props, isMultiCanvas]);
 
   useEffect(() => {
     const DeckClass = props.Deck || Deck;
@@ -205,7 +313,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     thisRef.deck = createDeckInstance(thisRef, DeckClass, {
       ...deckProps,
       parent: containerRef.current,
-      canvas: canvasRef.current
+      canvas: isMultiCanvas ? props.canvas : canvasRef.current
     });
 
     return () => thisRef.deck?.finalize();
@@ -265,33 +373,61 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       ContextProvider
     });
 
-    const canvas = createElement('canvas', {
-      key: 'canvas',
-      id: id || 'deckgl-overlay',
-      ref: canvasRef,
-      style: canvasStyle
-    });
-
-    const eventRoot = createElement(
-      'div',
-      {
-        key: 'deck-events-root',
-        className: 'deck-events-root',
-        style: {width, height}
-      },
-      [canvas, childrenUnderViews]
-    );
-
     const widgetRoot = createElement('div', {
       key: 'deck-widgets-root',
-      className: 'deck-widgets-root'
+      className: 'deck-widgets-root',
+      style: {
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        overflow: 'hidden'
+      }
     });
+
+    let content: React.ReactNode;
+    if (isMultiCanvas) {
+      content = canvasHosts.map(host =>
+        createElement(MultiCanvasHost, {
+          key: `deck-canvas-host-${host.id}`,
+          host,
+          canvasStyle,
+          children: childrenUnderViews[host.id]
+        })
+      );
+    } else {
+      const canvas = createElement('canvas', {
+        key: 'canvas',
+        id: id || 'deckgl-overlay',
+        ref: canvasRef,
+        style: canvasStyle
+      });
+
+      content = createElement(
+        'div',
+        {
+          key: 'deck-events-root',
+          className: 'deck-events-root',
+          style: {width, height}
+        },
+        [canvas, ...Object.values(childrenUnderViews).flat()]
+      );
+    }
+
+    const portals = isMultiCanvas
+      ? Object.entries(childrenUnderViews)
+          .filter(([canvasId]) => !canvasHosts.find(host => host.id === canvasId))
+          .map(([canvasId, canvasChildren]) => {
+            const targetContainer =
+              thisRef.deck?.getCanvas()?.parentElement || containerRef.current || document.body;
+            return createPortal(canvasChildren, targetContainer, `deck-canvas-portal-${canvasId}`);
+          })
+      : [];
 
     // Render deck.gl as the last child
     thisRef.control = createElement(
       'div',
       {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
-      [eventRoot, widgetRoot]
+      [content, ...portals, widgetRoot]
     );
   }
 

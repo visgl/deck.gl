@@ -49,6 +49,10 @@ The vis.gl community maintains two React libraries that seamlessly work with dec
 - `react-map-gl` - a React wrapper for [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/guides) and [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/). Several integration options are discussed in [using with Mapbox](../developer-guide/base-maps/using-with-mapbox.md).
 - `@vis.gl/react-google-maps` - a React wrapper for [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript). See [using with Google Maps](../developer-guide/base-maps/using-with-google-maps.md).
 
+Starting in v9.4, `DeckGL` can also render into multiple canvases with an array-valued `canvas` prop. When a `Map` is nested under a `<View id="...">`, it is mounted into the DOM host for that view automatically, including when that view targets a specific [`canvasId`](../api-reference/core/view.md#canvasid).
+
+See [Views and Projections](../developer-guide/views.md#rendering-into-multiple-canvases) for a full example.
+
 ## Using JSX Layers, Views, and Widgets
 
 It is possible to use JSX syntax to create deck.gl layers, views, and widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers`, `views`, or `widgets` prop, respectively. There are no performance advantages to this syntax but it can allow for a more consistent, React-like coding style.

@@ -16,7 +16,7 @@ import {
 } from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {Layer, Widget, type WebMercatorViewport, type MapViewState} from '@deck.gl/core';
+import {Layer, MapView, Widget, type WebMercatorViewport, type MapViewState} from '@deck.gl/core';
 import DeckGL, {type DeckGLRef} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
@@ -165,6 +165,44 @@ test('DeckGL#props omitted are reset', async () => {
     layers && Array.isArray(layers) && layers.length,
     'Layers is reset to an empty array'
   ).toBe(0);
+
+  act(() => {
+    root.render(null);
+  });
+  container.remove();
+});
+
+test('DeckGL#multi-canvas event manager uses host root', async () => {
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        ref,
+        width: 200,
+        height: 100,
+        canvas: ['left-canvas', 'right-canvas'],
+        views: [
+          new MapView({id: 'left', canvasId: 'left-canvas', controller: true}),
+          new MapView({id: 'right', canvasId: 'right-canvas', controller: true})
+        ],
+        initialViewState: {
+          left: TEST_VIEW_STATE,
+          right: TEST_VIEW_STATE
+        }
+      })
+    );
+  });
+  await waitUntilReady(ref);
+
+  const {deck} = ref.current!;
+  expect(deck).toBeTruthy();
+  const leftHost = container.querySelector<HTMLElement>('#left-canvas-host');
+  expect(leftHost).toBeTruthy();
+  expect(deck!.getEventManager('left')?.getElement()).toBe(leftHost);
 
   act(() => {
     root.render(null);
