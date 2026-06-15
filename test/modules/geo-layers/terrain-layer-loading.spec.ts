@@ -132,6 +132,27 @@ test('TerrainLayer#isLoaded waits for elevation and texture in tiled mode', asyn
   handle?.finalize();
 });
 
+test('TerrainLayer forwards zoomOffset to TileLayer in tiled mode', async () => {
+  const layer = new TerrainLayer({
+    id: 'terrain-zoom-offset',
+    elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
+    zoomOffset: 1,
+    minZoom: 0,
+    maxZoom: 0,
+    fetch: () => Promise.resolve(createTestMesh())
+  });
+
+  const handle = await testInitializeLayerAsync({
+    layer,
+    viewport: TEST_VIEWPORT,
+    finalize: false
+  });
+
+  const tileLayer = layer.getSubLayers()[0];
+  expect(tileLayer.props.zoomOffset, 'zoomOffset forwarded to TileLayer').toBe(1);
+  handle?.finalize();
+});
+
 test('TerrainLayer renders tiled Martini meshes in lng/lat coordinates on GlobeView', async () => {
   const layer = new TerrainLayer({
     id: 'terrain-tiled-globe',

@@ -38,11 +38,13 @@ export default function App({
   texture = SURFACE_IMAGE,
   wireframe = false,
   globeView = false,
+  zoomOffset = 0,
   initialViewState = INITIAL_VIEW_STATE
 }: {
   texture?: string;
   wireframe?: boolean;
   globeView?: boolean;
+  zoomOffset?: number;
   initialViewState?: MapViewState;
 }) {
   const [viewState, setViewState] = useState(initialViewState);
@@ -57,6 +59,7 @@ export default function App({
     elevationData: TERRAIN_IMAGE,
     texture,
     wireframe,
+    zoomOffset,
     color: [255, 255, 255],
     pickable: '3d'
   });

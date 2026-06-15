@@ -75,7 +75,15 @@ class TerrainDemo extends Component {
       options: Object.keys(SURFACE_IMAGES),
       value: 'Satellite'
     },
-    wireframe: {displayName: 'Wireframe', type: 'checkbox', value: false}
+    wireframe: {displayName: 'Wireframe', type: 'checkbox', value: false},
+    zoomOffset: {
+      displayName: 'Zoom Offset',
+      type: 'range',
+      value: 0,
+      min: -2,
+      max: 2,
+      step: 1
+    }
   };
 
   static mapStyle = MAPBOX_STYLES.BLANK;
@@ -106,7 +114,7 @@ class TerrainDemo extends Component {
 
   render() {
     const {params, data, ...otherProps} = this.props;
-    const {location, surface, wireframe, globeView} = params;
+    const {location, surface, wireframe, globeView, zoomOffset} = params;
 
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
@@ -120,6 +128,7 @@ class TerrainDemo extends Component {
           texture={SURFACE_IMAGES[surface.value]}
           wireframe={wireframe.value}
           globeView={globeView.value}
+          zoomOffset={zoomOffset.value}
         />
       </div>
     );
