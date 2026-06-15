@@ -6,6 +6,7 @@ import {test, expect} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {equals} from '@math.gl/core';
+import {EventManager} from 'mjolnir.js';
 
 test('ViewManager#constructor', () => {
   const viewManager = new ViewManager({
@@ -213,6 +214,65 @@ test('ViewManager#update view props', () => {
   ).toBeTruthy();
 
   viewManager.finalize();
+});
+
+test('ViewManager#routes controllers by canvas event manager', () => {
+  const defaultEventManager = new EventManager(document.createElement('div'));
+  const leftEventManager = new EventManager(document.createElement('div'));
+  const rightEventManager = new EventManager(document.createElement('div'));
+  const replacementRightEventManager = new EventManager(document.createElement('div'));
+  const leftView = new MapView({id: 'left', canvasId: 'left-canvas', controller: true});
+  const rightView = new MapView({id: 'right', canvasId: 'right-canvas', controller: true});
+
+  const viewManager = new ViewManager({
+    views: [leftView, rightView],
+    viewState: {
+      left: {longitude: -122, latitude: 38, zoom: 10},
+      right: {longitude: -74, latitude: 40.7, zoom: 11}
+    },
+    width: 100,
+    height: 100,
+    eventManager: defaultEventManager,
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': rightEventManager
+    }
+  });
+
+  expect(viewManager.getCanvasId('left')).toBe('left-canvas');
+  expect(viewManager.getCanvasId('right')).toBe('right-canvas');
+  expect(viewManager.getCanvasId(new MapView({id: 'default'}))).toBe('default-canvas');
+  expect((viewManager.controllers.left as any).eventManager).toBe(leftEventManager);
+  expect((viewManager.controllers.right as any).eventManager).toBe(rightEventManager);
+
+  const originalRightController = viewManager.controllers.right;
+  viewManager.setProps({
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': replacementRightEventManager
+    }
+  });
+
+  expect(viewManager.controllers.right).not.toBe(originalRightController);
+  expect((viewManager.controllers.left as any).eventManager).toBe(leftEventManager);
+  expect((viewManager.controllers.right as any).eventManager).toBe(replacementRightEventManager);
+
+  const leftController = viewManager.controllers.left;
+  const rightController = viewManager.controllers.right;
+  viewManager.setProps({
+    views: [new MapView({id: 'left', canvasId: 'right-canvas', controller: true}), rightView]
+  });
+
+  expect(viewManager.getCanvasId('left')).toBe('right-canvas');
+  expect(viewManager.controllers.left).not.toBe(leftController);
+  expect((viewManager.controllers.left as any).eventManager).toBe(replacementRightEventManager);
+  expect(viewManager.controllers.right).toBe(rightController);
+
+  viewManager.finalize();
+  defaultEventManager.destroy();
+  leftEventManager.destroy();
+  rightEventManager.destroy();
+  replacementRightEventManager.destroy();
 });
 
 /* eslint-disable max-statements */
